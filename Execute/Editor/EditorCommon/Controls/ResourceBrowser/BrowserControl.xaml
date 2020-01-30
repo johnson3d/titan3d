@@ -1,0 +1,219 @@
+﻿<UserControl x:Class="EditorCommon.Controls.ResourceBrowser.BrowserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:searchBox="clr-namespace:SearchBox"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"		
+             xmlns:local="clr-namespace:EditorCommon.Controls.ResourceBrowser"
+             xmlns:ctrlLib="clr-namespace:EditorCommon.Controls"
+             xmlns:controls="clr-namespace:EditorCommon.Controls"
+             xmlns:btn="clr-namespace:ResourceLibrary.Controls.Button;assembly=ResourceLibrary"
+             xmlns:menu="clr-namespace:ResourceLibrary.Controls.Menu;assembly=ResourceLibrary"
+             xmlns:behavior="clr-namespace:ResourceLibrary.Behavior;assembly=ResourceLibrary"
+             mc:Ignorable="d" x:Name="userControl" Loaded="UserControl_Loaded" Unloaded="UserControl_Unloaded"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/EditorCommon;component/Themes/Generic.xaml" />
+                <ResourceDictionary>
+                    <SolidColorBrush x:Key="DisableFolderNavBrush" Color="#FF939393"/>
+                    <SolidColorBrush x:Key="NormalFolderNavBrush" Color="White" />
+                    <Image x:Key="Folder_OpenIcon" HorizontalAlignment="Left" Height="25" Margin="0" VerticalAlignment="Top" Width="25" Source="/ResourceLibrary;component/Icons/Icons/FolderOpen.png"/>
+                    <Image x:Key="Folder_CloseIcon" HorizontalAlignment="Left" Height="25" Margin="0" VerticalAlignment="Top" Width="25" Source="/ResourceLibrary;component/Icons/Icons/FolderClosed.png"/>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Border Background="{DynamicResource {ComponentResourceKey ResourceId=ControlBackground, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+        <Grid x:Name="MainGrid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.3*"/>
+                <ColumnDefinition Width="3"/>
+                <ColumnDefinition Width="8.7*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <GridSplitter Focusable="False" Visibility="{Binding FolderPanelShow, ElementName=userControl}" Style="{DynamicResource {ComponentResourceKey ResourceId=GridSplitterStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Grid.Column="1" HorizontalAlignment="Stretch" Margin="0" Grid.Row="1" VerticalAlignment="Stretch" Grid.RowSpan="1" Width="3" ShowsPreview="True" Background="#FF606060" />
+            <Grid Grid.ColumnSpan="3" Visibility="{Binding ToolbarVisible,ElementName=userControl}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="287*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <ToolBar Background="#FF424242" x:Name="ToolBar_Main" HorizontalAlignment="Stretch" Margin="1" Style="{DynamicResource {ComponentResourceKey ResourceId=ToolBarStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Height="Auto" >
+                    <btn:IconTextBtn Margin="3" ToolTip="创建资源" SubmenuOpened="IconTextBtn_AddResource_SubmenuOpened" ComboArrawShow="Collapsed" ScrollViewer.VerticalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Background="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=SpecialBtnBG}}" Padding="3,0" >
+                        <btn:IconTextBtn.Header>
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" Margin="1,1,0,0">
+                                    <TextBlock Text="&#xf15b;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="3,0,5,0" Foreground="Black"/>
+                                    <TextBlock Text="Add New" FontSize="13" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" FontWeight="Bold" Foreground="Black"/>
+                                    <TextBlock Text="&#xf0d7;" FontSize="10" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="5,0,3,0" Foreground="Black"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0">
+                                    <TextBlock Text="&#xf15b;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="3,0,5,0"/>
+                                    <TextBlock Text="Add New" FontSize="13" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" FontWeight="Bold"/>
+                                    <TextBlock Text="&#xf0d7;" FontSize="10" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="5,0,3,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </btn:IconTextBtn.Header>
+                        <menu:TextSeparator Text="Content" Style="{DynamicResource {ComponentResourceKey ResourceId=TextMenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                        <MenuItem Header="Add Feature or Content Pack..." menu:MenuAssist.Icon="/ResourceLibrary;component/Icons/Icons/icon_file_saveall_40x.png" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                        <Separator Visibility="Collapsed" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                        <menu:TextSeparator Text="Folder" Visibility="Collapsed" Style="{DynamicResource {ComponentResourceKey ResourceId=TextMenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                        <MenuItem Header="新建文件夹" Visibility="Collapsed" Click="MenuItem_NewFolder_Click" menu:MenuAssist.Icon="/ResourceLibrary;component/Icons/Icons/icon_CurveEditor_Create_40x.png" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                        <Separator Style="{DynamicResource {ComponentResourceKey ResourceId=MenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                        <menu:TextSeparator x:Name="BasicAssetMenuHead" Text="Create Basic Asset" Style="{DynamicResource {ComponentResourceKey ResourceId=TextMenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                        <Separator Style="{DynamicResource {ComponentResourceKey ResourceId=MenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                        <menu:TextSeparator x:Name="AdvancedAssetMenuHead" Text="Create Advanced Asset" Style="{DynamicResource {ComponentResourceKey ResourceId=TextMenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                    </btn:IconTextBtn>
+                    <Button ToolTip="导入" Click="Button_Import_Click" Margin="3">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" Margin="1,1,0,0">
+                                <TextBlock Text="&#xf019;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="3,0,5,0" Foreground="Black"/>
+                                <TextBlock Text="Import" FontSize="13" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="0,0,5,0" FontWeight="Bold" Foreground="Black"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" >
+                                <TextBlock Text="&#xf019;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="3,0,5,0"/>
+                                <TextBlock Text="Import" FontSize="13" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="0,0,5,0" FontWeight="Bold"/>
+                            </StackPanel>
+                        </Grid>
+                    </Button>
+                    <Button ToolTip="全部保存" Click="Button_SaveAll_Click" Margin="3">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" Margin="1,1,0,0">
+                                <TextBlock Text="&#xf0c7;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="3,0,5,0" Foreground="Black"/>
+                                <TextBlock Text="Save All" FontSize="13" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" FontWeight="Bold" Foreground="Black"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xf0c7;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="3,0,5,0"/>
+                                <TextBlock Text="Save All" FontSize="13" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" FontWeight="Bold"/>
+                            </StackPanel>
+                        </Grid>
+                    </Button>
+                    <ToggleButton IsChecked="{Binding SearchSubFolder, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTip="显示当前目录及其子目录的资源" VerticalAlignment="Center">
+                        <Image Width="16" Height="16" Source="/ResourceLibrary;component/Icons/Icons/icon_ContentBrowser_40x.png" />
+                    </ToggleButton>
+                    <!--<searchBox:SearchBox Margin="2" Width="150" SearchText="{Binding FilterString, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Separator/>
+                    <Button ToolTip="复制选中的资源" Click="Button_CopySelected_Click">
+                        <Image Source="/ResourceLibrary;component/Icon/File/copy.png" />
+                    </Button>
+                    <Button ToolTip="保存选中的资源" Click="Button_SaveSelected_Click">
+                        <Image Source="/ResourceLibrary;component/Icon/File/save.png" />
+                    </Button>
+                    <Button ToolTip="删除选中的资源" Click="Button_DeleteSelected_Click">
+                        <Image Source="/ResourceLibrary;component/Icon/File/delete.png" />
+                    </Button>-->
+                </ToolBar>
+                <Rectangle Fill="#FF2E2E2E" Grid.Column="1" Margin="3,1,1,1" RadiusX="2" RadiusY="2" Grid.ColumnSpan="2" />
+                <ToolBar Background="#FF424242" Grid.Column="1" Margin="3,1,1,1" Style="{DynamicResource {ComponentResourceKey ResourceId=ToolBarStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Height="Auto" HorizontalAlignment="Left">
+                    <Button Width="20" Margin="2" Click="Button_FolderPre_Click" IsEnabled="{Binding FolderPreEnable, ElementName=userControl, Mode=TwoWay}" ToolTip="向后导航">
+                        <TextBlock x:Name="Path_FolderPre" Text="&#xf060;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="2"/>
+                    </Button>
+                    <Button Width="20" Margin="2" Click="Button_FolderNext_Click" IsEnabled="{Binding FolderNextEnable, ElementName=userControl, Mode=TwoWay}" ToolTip="向前导航">
+                        <TextBlock x:Name="Path_FolderNext" Text="&#xf061;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="2"/>
+                    </Button>
+                    <Separator Width="5" />
+                    <Button Width="24" Margin="2">
+                        <TextBlock Text="&#xf07c;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="2"/>
+                    </Button>
+                    <StackPanel x:Name="StackPanel_Folders" Margin="2,2,5,2" Orientation="Horizontal" />
+                </ToolBar>
+                <Button Grid.Column="2" Width="24" Height="20" Margin="2" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                    <Image Source="/ResourceLibrary;component/Icons/Icons/padlock_unlocked_16x.png"/>
+                </Button>
+            </Grid>
+            <Grid x:Name="grid" Grid.Row="1" Margin="1" Visibility="{Binding FolderPanelShow, ElementName=userControl}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Rectangle Fill="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=PanelBackground}}" Grid.ColumnSpan="2" RadiusX="2" RadiusY="2" Margin="0,0,0,-4" />
+                <Button Margin="2" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_HideFoldersPanel_Click">
+                    <Image Width="16" Height="16" Source="/ResourceLibrary;component/Icons/ContentBrowser/sourcestoggle_16x_expanded.png" Margin="2"/>
+                </Button>
+                <searchBox:SearchBox Grid.Column="1" Margin="0,2,1,0" TipText="Search Folders" />
+                <TreeView x:Name="TreeView_Folders" VirtualizingPanel.IsVirtualizing="True" Height="Auto" Style="{DynamicResource {ComponentResourceKey ResourceId=TreeViewStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"
+				          TreeViewItem.Expanded="TreeViewItem_Expanded" TreeViewItem.Selected="TreeViewItem_Selected" TreeViewItem.Unselected="TreeViewItem_UnSelected" HorizontalContentAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2" Margin="0" >
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Setter Property="Template" Value="{DynamicResource {ComponentResourceKey ResourceId=TreeViewItemTemplate_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                            <Setter Property="Visibility" Value="{Binding Visibility, Mode=TwoWay}" />
+                            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                            <Setter Property="behavior:TreeViewItemBehavior_BringIntoView.IsBroughtIntoViewWhenSelected" Value="True"/>
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding ChildList}">
+                            <Grid DragEnter="TreeViewItem_DragEnter" DragLeave="TreeViewItem_DragLeave" DragOver="TreeViewItem_DragOver" AllowDrop="True" Drop="TreeViewItem_Drop" MouseDown="TreeViewItem_MouseDown" MouseUp="TreeViewItem_MouseUp" MouseMove="TreeViewItem_MouseMove">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.ContextMenu>
+                                    <ContextMenu x:Name="FolderContextMenu" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=ContextMenu_Default}}">
+                                        <MenuItem Header="新建文件夹" menu:MenuAssist.Icon="/ResourceLibrary;component/Icons/Icons/icon_CurveEditor_Create_40x.png" Click="MenuItem_NewFolder_Click" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=MenuItem_Default}}"/>
+                                        <Separator Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=MenuSeparatorStyle}}"/>
+                                        <menu:TextSeparator Text="Folder Options" Style="{DynamicResource {ComponentResourceKey ResourceId=TextMenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                                        <MenuItem Header="在浏览器中显示" Click="MenuItem_OpenFolder_Click" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=MenuItem_Default}}"/>
+                                        <MenuItem Header="重命名" menu:MenuAssist.Icon="/ResourceLibrary;component/Icons/Icons/Icon_Asset_Rename_16x.png" Click="MenuItem_Rename_Click" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=MenuItem_Default}}"/>
+                                        <MenuItem Header="刷新" Click="MenuItem_Refresh_Click" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=MenuItem_Default}}" />
+                                        <MenuItem Header="刷新缩略图" Click="MenuItem_RefreshSnapshot_Click" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=MenuItem_Default}}" />
+                                        <Separator Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=MenuSeparatorStyle}}"/>
+                                        <menu:TextSeparator Text="Folder Options" Style="{DynamicResource {ComponentResourceKey ResourceId=TextMenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                                        <MenuItem Header="删除" menu:MenuAssist.Icon="/ResourceLibrary;component/Icons/Icons/icon_Edit_Delete_40x.png" Click="MenuItem_DeleteFolder_Click" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=MenuItem_Default}}"/>
+                                        <!--<Separator Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=MenuSeparatorStyle}}"/>
+                                        <Separator Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=MenuSeparatorStyle}}"/>-->
+                                    </ContextMenu>
+                                </Grid.ContextMenu>
+                                <Image x:Name="Image_Icon" Width="16" Height="16" Source="{Binding ImageIcon}"/>
+                                <ctrlLib:CustomTextBlock Grid.Column="1" Text="{Binding PathName}" HighLightString="{Binding HighLightString}" Margin="3,0,0,0" 
+                                                 HighLightBrush="{DynamicResource {ComponentResourceKey ResourceId=FilterStringHightLightBrush, TypeInTargetAssembly={x:Type res:CustomResources}}}"
+                                                 Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=TextBlockStyle_Default}}"/>
+                            </Grid>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </Grid>
+            <Rectangle Fill="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=PanelBackground}}" RadiusX="2" RadiusY="2" Grid.Column="2" Grid.Row="1" Margin="0,1,0,1"/>
+            <local:ContentControl x:Name="ContentCtrl" Grid.Column="2" Grid.Row="1" Margin="0,1,0,1"/>
+            <!--<Grid Margin="0" Grid.Row="2" Grid.ColumnSpan="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" >
+                    <ToggleButton Content="锁定" Margin="2" IsChecked="{Binding Locked, ElementName=userControl}" Style="{DynamicResource {ComponentResourceKey ResourceId=ToggleButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                    <RadioButton ToolTip="列表显示" Margin="5,2,2,2" Style="{DynamicResource {ComponentResourceKey ResourceId=RadioButtonStyle_Toggle, TypeInTargetAssembly={x:Type res:CustomResources}}}" VerticalAlignment="Center" GroupName="ResourceListShowType" Checked="RadioButton_List_Checked">
+                        <Image Source="/ResourceLibrary;component/Icon/View_List.png" Width="24" Height="24"/>
+                    </RadioButton>
+                    <RadioButton ToolTip="平铺显示" Margin="2" Style="{DynamicResource {ComponentResourceKey ResourceId=RadioButtonStyle_Toggle, TypeInTargetAssembly={x:Type res:CustomResources}}}" VerticalAlignment="Center" GroupName="ResourceListShowType" IsChecked="True" Checked="RadioButton_Tile_Checked">
+                        <Image Source="/ResourceLibrary;component/Icon/View_Pic.png" Width="24" Height="24" />
+                    </RadioButton>
+                    <Slider x:Name="Slider_ResourceItemSize" Margin="2" Value="{Binding IconScale, ElementName=userControl}" Maximum="2.5" Minimum="0.8" Value="1" Width="100" SmallChange="0.01" VerticalAlignment="Center" 
+                            Style="{DynamicResource {ComponentResourceKey ResourceId=SliderStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                </StackPanel>
+            </Grid>-->
+            <!--<Grid Grid.RowSpan="3" Grid.ColumnSpan="3" Background="#B2000000" Visibility="{Binding ProcessingVisible, ElementName=userControl}" d:IsHidden="True">
+                <Grid Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" VerticalAlignment="Center" Margin="8,2" Text="{Binding ProcessingInfo, ElementName=userControl}"/>
+                    <ProgressBar Height="10" Grid.RowSpan="2" Grid.Row="1" Value="{Binding ProcessPercent, ElementName=userControl}" Maximum="1" SmallChange="0.001" MinWidth="100" />
+                </Grid>
+            </Grid>-->
+        </Grid>
+    </Border>
+</UserControl>

@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{54ec50e5-b9a8-4c43-b1f4-d37f892113da}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)GLPreHead.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GLSdk.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLBlendState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLCommandList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLComputeShader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLConstantBuffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLDepthStencilState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLDepthStencilView.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLFrameBuffers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLGeometryMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLIndexBuffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLInputLayout.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLPass.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLPixelShader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLRasterizerState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLRenderContext.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLRenderPipeline.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLRenderSystem.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLRenderTargetView.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLSamplerState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLShaderReflector.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLShaderProgram.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLShaderResourceView.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLSwapChain.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLTexture2D.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLUnorderedAccessView.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLVertexBuffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IGLVertexShader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)GLPreHead.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GLSdk.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)glu\glues_error.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLBlendState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLCommandList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLComputeShader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLConstantBuffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLDepthStencilState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLDepthStencilView.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLFrameBuffers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLGeometryMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLIndexBuffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLInputLayout.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLPass.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLPixelShader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLRasterizerState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLRenderContext.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLRenderPipeline.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLRenderSystem.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLRenderTargetView.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLSamplerState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLShaderReflector.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLShaderProgram.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLShaderResourceView.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLSwapChain.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLTexture2D.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLUnorderedAccessView.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLVertexBuffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGLVertexShader.h" />
+  </ItemGroup>
+</Project>

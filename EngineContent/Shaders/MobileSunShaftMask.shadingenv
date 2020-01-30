@@ -1,0 +1,47 @@
+#ifndef _MOBILE_SUNSHAFT_MASK_
+#define _MOBILE_SUNSHAFT_MASK_
+
+#include "Inc/VertexLayout.cginc"
+#include "Inc/Math.cginc"
+#include "Inc/PostEffectCommon.cginc"
+
+#include "dummy.gen"
+
+Texture2D gBaseSceneView;
+SamplerState Samp_gBaseSceneView;
+
+PS_INPUT VS_Main(VS_INPUT input)
+{
+	PS_INPUT output = (PS_INPUT)0;
+
+	output.vPosition = float4(input.vPosition.xyz, 1.0f);
+	output.vUV = input.vUV;
+
+	return output;
+}
+
+struct PS_OUTPUT
+{
+	half2 RT0 : SV_Target0;
+};
+
+PS_OUTPUT PS_Main(PS_INPUT input)
+{
+	PS_OUTPUT output = (PS_OUTPUT)0;
+
+	half4 Color_Depth = (half4)gBaseSceneView.Sample(Samp_gBaseSceneView, input.vUV).rgba;
+	Color_Depth.b = Color_Depth.b / AO_M;
+	
+	half Lum = CalcLuminanceYCbCr(Color_Depth.rgb);
+	half Adepth = (half)gZFar / 40.0h;	
+	half Ml = min(Color_Depth.a * Adepth, 1.0h);
+
+	output.RT0.r = min(exp2((1.0h - Ml) * (-4.0h)) + Lum * 0.5h - 0.0625h, 1.0h);
+	
+	half SunShapeMask = max(max(Color_Depth.a - 0.99h, 0.0h) * Lum - 0.01h * 10.0h, 0.0h) * 100.0h;
+	output.RT0.g = min(SunShapeMask, 1.0h);
+
+	return output;
+}
+
+#endif

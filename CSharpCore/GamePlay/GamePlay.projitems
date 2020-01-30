@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>42ca0dbc-b94d-4efc-b0ee-829cd9ed1678</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.GamePlay</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Actor\GActor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Actor\GActorBits.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Actor\GCenterData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Actor\GPrefab.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Actor\HitProxyManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Actor\McActor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\CameraComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\CameraController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\CameraSpringArm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\ControlStratety\GFollowAndLookAtStrategy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\ControlStratety\GFreeStrategy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\FollowCameraComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\FreeCameraComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\GCamera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\GCameraComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\Modifier\GCameraModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\Modifier\GCameraShake.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\Modifier\GFovModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\ControlStratety\GCameraStrategy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\ControlStratety\GFollowStrategy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\ThirdPersonCameraComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\AI\GBehaviorTreeComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Animation\GAdditiveBlendSpace1DComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Animation\GAdditiveBlendSpace2DComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Animation\GAnimationSelectPoseComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Animation\GAnimationBlendSpace1DComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Animation\GAnimationBlendSpaceComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Animation\GAnimationAdditiveComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Animation\GAnimationComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Animation\GLogicAnimationComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Animation\SkeletonAnimationComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\GCustomMacrossComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\GComponentMacross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\GPointLightComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\GSubSkinComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\GTimerComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Movement\GCharacterMovementComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Movement\GDynamicMovementComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Animation\GLogicMacrossComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\GComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\GDirLightComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\GInstancingComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\GMeshComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Movement\GDynamicsMovementComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Movement\GMovementComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\GMutiMeshComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\GPlacementComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\GPlayerStartComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\GVisualComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Movement\GTPSMovementComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\Movement\MovementSolver.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Component\StateMachine\GStateMachineComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controller\GAIController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controller\GControllerBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controller\GPlayerController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GGameInstance.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GOffScreenViewer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GWorld.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IEntity.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneGraph\GPvsSet.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneGraph\GSceneGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneGraph\GSceneModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneGraph\GSceneNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneGraph\GScenePortal.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneGraph\GPVSOctree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneGraph\McSceneGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ScenePoint\ScenePointGroup.cs" />
+  </ItemGroup>
+</Project>

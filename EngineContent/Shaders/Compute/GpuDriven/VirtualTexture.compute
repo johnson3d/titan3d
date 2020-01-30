@@ -1,0 +1,27 @@
+
+struct VTDesc
+{
+	int2 PhysSize;
+	unsigned short Slot;
+	unsigned short IndexInArray;
+	int2 Offset;
+	int2 Size;
+};
+
+struct VTMaterialDesc
+{
+	unsigned int DiffuseTexId;
+	unsigned int NormalTexId;
+};
+
+StructuredBuffer<VTDesc> VTDescArray;
+StructuredBuffer<VTMaterialDesc> VTMtlDescArray;
+
+float2 GetRealUV(int VTIndex, float uv)
+{
+	VTDesc desc = VTDescArray[VTIndex];
+	float u = ((float)desc.Offset.x + (float)desc.Size.x * uv.x) / (float)Size.x;
+	float v = ((float)desc.Offset.y + (float)desc.Size.y * uv.v) / (float)Size.y;
+	return float2(u, v);
+}
+

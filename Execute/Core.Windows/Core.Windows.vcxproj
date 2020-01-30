@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{C4CC88B4-6D1D-4A3C-8F4C-20C62C29ACF3}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>CoreWindows</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+    <Import Project="..\..\Native\BaseDefines\BaseDefines.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Core\Core.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\RHIRenderer\D3D11\D3D11.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\glew\glew.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\glslang\glslang\glslang.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Graphics\Graphics.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\HLSLcc\HLSLcc.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Math\Math.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\glslang\OGLCompilersDLL\OGLCompilersDLL.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\RHIRenderer\RHIRenderer.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\glslang\OSDependent\OSDependent.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\RHIRenderer\OpenGL\OpenGL.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\glslang\SPIRV\SPIRV.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\RHIRenderer\Vulkan\Vulkan.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Platform\Windows\Windows.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\Image.Shared\Image.Shared.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\FreeType\FreeType.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\iconv\iconv.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Bricks\Particle\Particle.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\Recast\DebugUtils\DebugUtils.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\Recast\Detour\Detour.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\Recast\DetourCrowd\DetourCrowd.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\Recast\DetourTileCache\DetourTileCache.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\Recast\Recast\Recast.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Bricks\RecastBuilder\RecastBuilder.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Bricks\PhysicsCore\PhysicsCore.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Bricks\RecastRuntime\RecastRuntime.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\ConvexDecomposition\ConvexDecomposition.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Bricks\SimplifyGeom\SimplifyGeom.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\EtcLib\EtcLib.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Bricks\TexCompressor\TexCompressor.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Bricks\ImageImport\ImageImport.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Bricks\TextConverter\TextConverter.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Bricks\TextFont\TextFont.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Bricks\Animation\Animation.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\Bricks\TcpClient\TcpClient.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\FBXSDK\FBX\FBX.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\OpenXLSX\OpenXLSX.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\RHIRenderer\VirtualDevice\VirtualDevice.vcxitems" Label="Shared" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)binaries\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Intermediate\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)binaries\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Intermediate\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)binaries\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Intermediate\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)binaries\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Intermediate\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>FBXSDK_SHARED;FT2_BUILD_LIBRARY;AS_DLLMODULE;VFX_EXPORTS;PLATFORM_WIN;GLEW_STATIC;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;_DEBUG;COREWINDOWS_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>..\..\Native\3rd\Image.Shared\zlib-1.2.8;..\..\Native\3rd\VulkanSDK\Include;..\..\Native\3rd\OpenXLSX\openxlsx\implementation\headers;..\..\Native\3rd\OpenXLSX\openxlsx\interfaces\c++\headers;..\..\Native\3rd\OpenXLSX\pugixml;..\..\Native\3rd\OpenXLSX\zippy;..\..\Native\3rd\glew\include;..\..\Native\3rd\HLSLcc;..\..\Native\3rd\HLSLcc\Include;..\..\Native\3rd\HLSLcc\Src\internal_includes;..\..\Native\3rd\HLSLcc\Src\cbstring;..\..\Native\3rd\PhysX-3.4\PhysX_3.4\Include;..\..\Native\3rd\PhysX-3.4\PxShared\include;..\..\Native\3rd\FreeType\include;..\..\Native\3rd\FreeType\include\internal;..\..\Native\3rd\Recast\DebugUtils\Include;..\..\Native\3rd\Recast\Detour\Include;..\..\Native\3rd\Recast\DetourCrowd\Include;..\..\Native\3rd\Recast\DetourTileCache\Include;..\..\Native\3rd\Recast\Recast\Include;..\..\Native\3rd\AssetImportSDK\assimp-master\include;..\..\Native\3rd\oiio\include;..\..\\Native\3rd\oiio\external\dist\windows\ilmbase-2.2.0\include;..\..\Native\3rd\FBXSDK\2019.2\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\Native\3rd\pthread\lib\x64;..\..\Native\3rd\FBXSDK\2019.2\lib\x64\release;..\..\Native\3rd\Image.Shared\TextureConverter\lib;..\..\Native\3rd\VulkanSDK\Lib;..\..\Native\3rd\AssetImportSDK\assimp-master\lib\Debug;..\..\Native\3rd\PhysX-3.4\PxShared\lib\vc15win64;..\..\Native\3rd\PhysX-3.4\PhysX_3.4\Lib\vc15win64;..\..\Native\3rd\ShaderConductor\Lib\Debug;..\..\Native\3rd\oiio\external\dist\windows\ilmbase-2.2.0\lib;..\..\Native\3rd\oiio\external\dist\windows\openexr-2.2.0\lib;..\..\Native\3rd\oiio\lib;..\..\Native\3rd\oiio\external\dist\windows\ffmpeg-4.1-win32-dev\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shlwapi.lib;assimp-vc140-mt.lib;libfbxsdk.lib;PhysX3DEBUG_x64.lib;PhysX3CommonDEBUG_x64.lib;PhysX3CookingDEBUG_x64.lib;PhysX3CharacterKinematicDEBUG_x64.lib;PhysX3VehicleDEBUG.lib;PxFoundationDEBUG_x64.lib;PxPvdSDKDEBUG_x64.lib;PsFastXmlDEBUG_x64.lib;PxTaskDEBUG_x64.lib;PhysX3ExtensionsDEBUG.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>cd $(ProjectDir)..\..\binaries 
+$(ProjectDir)..\..\binaries\PostNativeX64.bat</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>FT2_BUILD_LIBRARY;AS_DLLMODULE;VFX_EXPORTS;PLATFORM_WIN;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;WIN32;_DEBUG;COREWINDOWS_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>..\..\Native\3rd\Image.Shared\zlib-1.2.8;..\..\Native\3rd\VulkanSDK\Include;..\..\Native\3rd\OpenXLSX\openxlsx\implementation\headers;..\..\Native\3rd\OpenXLSX\openxlsx\interfaces\c++\headers;..\..\Native\3rd\OpenXLSX\pugixml;..\..\Native\3rd\OpenXLSX\zippy;..\..\Native\3rd\DxSDK\Include;..\..\Native\3rd\glew\include;..\..\Native\3rd\HLSLcc;..\..\Native\3rd\HLSLcc\Include;..\..\Native\3rd\HLSLcc\Src\internal_includes;..\..\Native\3rd\HLSLcc\Src\cbstring;..\..\Native\3rd\PhysX-3.4\PhysX_3.4\Include;..\..\Native\3rd\PhysX-3.4\PxShared\include;..\..\Native\3rd\FBXSDK\2019.0\include;..\..\Native\3rd\FreeType\include;..\..\Native\3rd\FreeType\include\internal;..\..\Native\3rd\Recast\DebugUtils\Include;..\..\Native\3rd\Recast\Detour\Include;..\..\Native\3rd\Recast\DetourCrowd\Include;..\..\Native\3rd\Recast\DetourTileCache\Include;..\..\Native\3rd\Recast\Recast\Include</AdditionalIncludeDirectories>
+      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\Native\3rd\DxSDK\Lib\x86;..\..\Native\3rd\pthread\lib\x86;..\..\Native\3rd\FBXSDK\2019.0\lib\vs2015\x86\release;..\..\Native\3rd\Image.Shared\TextureConverter\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shlwapi.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>FT2_BUILD_LIBRARY;AS_DLLMODULE;VFX_EXPORTS;PLATFORM_WIN;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;WIN32;NDEBUG;COREWINDOWS_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>..\..\Native\3rd\Image.Shared\zlib-1.2.8;..\..\Native\3rd\VulkanSDK\Include;..\..\Native\3rd\OpenXLSX\openxlsx\implementation\headers;..\..\Native\3rd\OpenXLSX\openxlsx\interfaces\c++\headers;..\..\Native\3rd\OpenXLSX\pugixml;..\..\Native\3rd\OpenXLSX\zippy;..\..\Native\3rd\DxSDK\Include;..\..\Native\3rd\glew\include;..\..\Native\3rd\HLSLcc;..\..\Native\3rd\HLSLcc\Include;..\..\Native\3rd\HLSLcc\Src\internal_includes;..\..\Native\3rd\HLSLcc\Src\cbstring;..\..\Native\3rd\PhysX-3.4\PhysX_3.4\Include;..\..\Native\3rd\PhysX-3.4\PxShared\include;..\..\Native\3rd\FBXSDK\2019.0\include;..\..\Native\3rd\FreeType\include;..\..\Native\3rd\FreeType\include\internal;..\..\Native\3rd\Recast\DebugUtils\Include;..\..\Native\3rd\Recast\Detour\Include;..\..\Native\3rd\Recast\DetourCrowd\Include;..\..\Native\3rd\Recast\DetourTileCache\Include;..\..\Native\3rd\Recast\Recast\Include</AdditionalIncludeDirectories>
+      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\Native\3rd\DxSDK\Lib\x86;..\..\Native\3rd\pthread\lib\x86;..\..\Native\3rd\FBXSDK\2019.0\lib\vs2015\x86\release;..\..\Native\3rd\Image.Shared\TextureConverter\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shlwapi.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>FBXSDK_SHARED;FT2_BUILD_LIBRARY;AS_DLLMODULE;VFX_EXPORTS;PLATFORM_WIN;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS;NDEBUG;COREWINDOWS_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>..\..\Native\3rd\Image.Shared\zlib-1.2.8;..\..\Native\3rd\VulkanSDK\Include;..\..\Native\3rd\OpenXLSX\openxlsx\implementation\headers;..\..\Native\3rd\OpenXLSX\openxlsx\interfaces\c++\headers;..\..\Native\3rd\OpenXLSX\pugixml;..\..\Native\3rd\OpenXLSX\zippy;..\..\Native\3rd\glew\include;..\..\Native\3rd\HLSLcc;..\..\Native\3rd\HLSLcc\Include;..\..\Native\3rd\HLSLcc\Src\internal_includes;..\..\Native\3rd\HLSLcc\Src\cbstring;..\..\Native\3rd\PhysX-3.4\PhysX_3.4\Include;..\..\Native\3rd\PhysX-3.4\PxShared\include;..\..\Native\3rd\FreeType\include;..\..\Native\3rd\FreeType\include\internal;..\..\Native\3rd\Recast\DebugUtils\Include;..\..\Native\3rd\Recast\Detour\Include;..\..\Native\3rd\Recast\DetourCrowd\Include;..\..\Native\3rd\Recast\DetourTileCache\Include;..\..\Native\3rd\Recast\Recast\Include;..\..\Native\3rd\AssetImportSDK\assimp-master\include;..\..\Native\3rd\oiio\include;..\..\\Native\3rd\oiio\external\dist\windows\ilmbase-2.2.0\include;..\..\Native\3rd\FBXSDK\2019.2\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/await %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\Native\3rd\pthread\lib\x64;..\..\Native\3rd\FBXSDK\2019.2\lib\x64\release;..\..\Native\3rd\Image.Shared\TextureConverter\lib;..\..\Native\3rd\VulkanSDK\Lib;..\..\Native\3rd\AssetImportSDK\assimp-master\lib\Release;..\..\Native\3rd\PhysX-3.4\PxShared\lib\vc15win64;..\..\Native\3rd\PhysX-3.4\PhysX_3.4\Lib\vc15win64;..\..\Native\3rd\ShaderConductor\Lib\Release;..\..\Native\3rd\oiio\external\dist\windows\ffmpeg-4.1-win32-dev\lib;..\..\Native\3rd\oiio\lib;..\..\Native\3rd\oiio\external\dist\windows\openexr-2.2.0\lib;..\..\Native\3rd\oiio\external\dist\windows\ilmbase-2.2.0\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shlwapi.lib;assimp-vc140-mt.lib;libfbxsdk.lib;PhysX3_x64.lib;PhysX3Common_x64.lib;PhysX3Cooking_x64.lib;PhysX3Extensions.lib;PhysX3CharacterKinematic_x64.lib;PhysX3Vehicle.lib;PxTask_x64.lib;PsFastXml_x64.lib;PxFoundation_x64.lib;PxPvdSDK_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>cd $(ProjectDir)..\..\binaries
+$(ProjectDir)..\..\binaries\PostNativeX64.bat $(Configuration)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Core.Windows.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

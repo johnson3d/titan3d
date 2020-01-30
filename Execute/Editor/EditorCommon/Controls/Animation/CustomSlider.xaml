@@ -1,0 +1,20 @@
+﻿<UserControl x:Class="EditorCommon.Controls.Animation.CustomSlider"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EditorCommon.Controls.Animation"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             mc:Ignorable="d" 
+             x:Name="userControl"
+             d:DesignHeight="30" d:DesignWidth="800" SizeChanged="UserControl_SizeChanged" Loaded="userControl_Loaded">
+    <Grid>
+        <Canvas x:Name="TicksCanvas" MouseLeftButtonDown="TicksCanvas_MouseLeftButtonDown" MouseLeftButtonUp="TicksCanvas_MouseLeftButtonUp" MouseMove="TicksCanvas_MouseMove" MouseWheel="TicksCanvas_MouseWheel" Background="#02000017" MouseRightButtonDown="TicksCanvas_MouseRightButtonDown">
+            <Canvas.ContextMenu>
+                <ContextMenu x:Name="TickBarContexMenu" Visibility="Hidden" Style="{DynamicResource {ComponentResourceKey ResourceId=ContextMenu_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" />
+            </Canvas.ContextMenu>
+        </Canvas>
+        <Rectangle x:Name="Thumb" Fill="#7FFF0000" Width="{Binding ThumbWidth, ElementName=userControl}" HorizontalAlignment="Left" StrokeThickness="0" MouseLeftButtonDown="Thumb_MouseLeftButtonDown" MouseLeftButtonUp="Thumb_MouseLeftButtonUp" MouseMove="Thumb_MouseMove" MouseWheel="Thumb_MouseWheel" MouseRightButtonDown="Thumb_MouseRightButtonDown"/>
+
+    </Grid>
+</UserControl>

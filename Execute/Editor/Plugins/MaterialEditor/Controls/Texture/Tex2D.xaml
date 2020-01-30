@@ -1,0 +1,76 @@
+﻿<myTypes:BaseNodeControl x:Name="baseNodeControl" x:Class="MaterialEditor.Controls.Texture.Tex2D"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+             xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+			 xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+             mc:Ignorable="d" >
+    <myTypes:BaseNodeControl.Resources>
+        <ResourceDictionary Source="/MaterialEditor;component/Themes/Generic.xaml" />
+    </myTypes:BaseNodeControl.Resources>
+    <Grid>
+        <theme:SystemDropShadowChrome Color="#B2000000">
+            <Border Background="{StaticResource NodeBackground}" CornerRadius="5">
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Border CornerRadius="5,5,0,0" x:Name="Rectangle_Title" Background="{StaticResource Texture}" Grid.ColumnSpan="3"/>
+                    <TextBlock Name="TitleLabel" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,3" Foreground="{StaticResource TextForeground}" IsHitTestVisible="False" Text="Tex2D" Grid.ColumnSpan="3" />
+                    <StackPanel Grid.Row="1"  VerticalAlignment="Center" Margin="0">
+                        <Grid>
+                            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3,8" Foreground="{StaticResource TextForeground}">Tex</TextBlock>
+                            <baseCtrl:LinkInControl Name="TextureLink" Width="15" Height="15" BackBrush="{StaticResource TextureLink}" HorizontalAlignment="Left" Margin="-22,0,0,0" Direction="Left" />
+                        </Grid>
+                        <Grid>
+                            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3,8" Foreground="{StaticResource TextForeground}">UV</TextBlock>
+                            <baseCtrl:LinkInControl Name="UVLink" Width="15" Height="15" BackBrush="{StaticResource ValueLink_float2}" HorizontalAlignment="Left" Margin="-22,0,0,0" Direction="Left" />
+                        </Grid>
+                        <!--<Grid>
+                            <Label HorizontalAlignment="Left" VerticalAlignment="Center">ddx</Label>
+                            <Ellipse Name="DDXLink" Width="10" Height="10" Fill="LightGreen" Stroke="Black" HorizontalAlignment="Left" Margin="-15,0,0,0" />
+                        </Grid>
+                        <Grid>
+                            <Label HorizontalAlignment="Left" VerticalAlignment="Center">ddy</Label>
+                            <Ellipse Name="DDYLink" Width="10" Height="10" Fill="LightGreen" Stroke="Black" HorizontalAlignment="Left" Margin="-15,0,0,0" />
+                        </Grid>-->
+                    </StackPanel>
+                    <Image Grid.Row="1" Height="150" Name="image_Texture" Stretch="Fill" Width="150" Margin="3" Grid.Column="1"></Image>
+                    <Grid Grid.Row="1" Grid.Column="2" VerticalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <baseCtrl:LinkOutControl Name="RGBALink" HorizontalAlignment="Right" VerticalAlignment="Center" Width="15" Height="15" BackBrush="{StaticResource ValueLink_float4}" Margin="0,0,-20,0" Direction="Right" />
+                        <TextBlock Grid.Row="0" HorizontalAlignment="Right" Text="RGBA" VerticalAlignment="Center" Margin="2,5" Foreground="{StaticResource TextForeground}" />
+                        <baseCtrl:LinkOutControl Name="RGBLink" HorizontalAlignment="Right" VerticalAlignment="Center" Width="15" Height="15" BackBrush="{StaticResource ValueLink_float3}" Margin="0,0,-20,0" Grid.Row="1" Direction="Right" />
+                        <TextBlock Grid.Row="1" HorizontalAlignment="Right" Text="RGB" VerticalAlignment="Center" Margin="2,5" Foreground="{StaticResource TextForeground}" />
+                        <baseCtrl:LinkOutControl Name="RLink" HorizontalAlignment="Right" VerticalAlignment="Center" Width="15" Height="15" BackBrush="#FFAA0000" Margin="0,0,-20,0" Grid.Row="2" StrokeBrush="Red" Direction="Right"/>
+                        <TextBlock Grid.Row="2" HorizontalAlignment="Right" Text="R" VerticalAlignment="Center" Margin="2,5" Foreground="{StaticResource TextForeground}" />
+                        <baseCtrl:LinkOutControl Name="GLink" HorizontalAlignment="Right" VerticalAlignment="Center" Width="15" Height="15" BackBrush="#FF00AA00" Margin="0,0,-20,0" Grid.Row="3" StrokeBrush="Lime" Direction="Right"/>
+                        <TextBlock Grid.Row="3" HorizontalAlignment="Right" Text="G" VerticalAlignment="Center" Margin="2,5" Foreground="{StaticResource TextForeground}" />
+                        <baseCtrl:LinkOutControl Name="BLink" HorizontalAlignment="Right" VerticalAlignment="Center" Width="15" Height="15" BackBrush="#FF0000AA" Margin="0,0,-20,0" Grid.Row="4" StrokeBrush="Blue" Direction="Right"/>
+                        <TextBlock Grid.Row="4" HorizontalAlignment="Right" Text="B" VerticalAlignment="Center" Margin="2,5" Foreground="{StaticResource TextForeground}" />
+                        <baseCtrl:LinkOutControl Name="ALink" HorizontalAlignment="Right" VerticalAlignment="Center" Width="15" Height="15" BackBrush="#FFAAAAAA" Margin="0,0,-20,0" Grid.Row="5" StrokeBrush="White" Direction="Right"/>
+                        <TextBlock Grid.Row="5" HorizontalAlignment="Right" Text="A" VerticalAlignment="Center" Margin="2,5" Foreground="{StaticResource TextForeground}" />
+
+                    </Grid>
+
+                </Grid>
+            </Border>
+        </theme:SystemDropShadowChrome>
+        <baseCtrl:CommentControl d:LayoutOverrides="Width, Height" Comment="{Binding Comment, ElementName=baseNodeControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top"/>
+    </Grid>
+</myTypes:BaseNodeControl>

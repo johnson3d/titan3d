@@ -1,0 +1,27 @@
+﻿<myTypes:BaseNodeControl 
+    x:Class="CodeDomNode.Animation.AnimationTimeRemainingControl"
+xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:CodeGenerateSystem.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+     xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+    xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+    xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+    xmlns:ctrls="clr-namespace:EditorCommon.Controls;assembly=EditorCommon"
+    x:Name="userControl"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+    <myTypes:BaseNodeControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CodeGenerateSystem;Component/Themes/Generic.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </myTypes:BaseNodeControl.Resources>
+    <myTypes:BaseNodeControl.Header>
+        <TextBlock x:Name="TitleLabel" Text="{Binding NodeName, ElementName=userControl}" Margin="3" Foreground="White" FontSize="18.667" IsHitTestVisible="False"/>
+    </myTypes:BaseNodeControl.Header>
+    <baseCtrl:LinkOutControl x:Name="ValueOutputHandle" PinType="Normal" LinkType="Single" Margin="8" BackBrush="{DynamicResource Link_ValueBrush}" HorizontalAlignment="Right" />
+</myTypes:BaseNodeControl>

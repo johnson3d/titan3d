@@ -1,0 +1,561 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+                    xmlns:clr="clr-namespace:System;assembly=mscorlib" 
+                    xmlns:clr2="clr-namespace:System.Collections;assembly=mscorlib" 
+                    xmlns:generics="clr-namespace:System.Collections.Generic;assembly=mscorlib"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:local="clr-namespace:WPG"                     
+                    xmlns:data="clr-namespace:WPG.Data" 
+                    xmlns:converters="clr-namespace:WPG.Converters" 
+                    xmlns:Bind="clr-namespace:EditorCommon.Bind"
+                    xmlns:editorControlLib="clr-namespace:EditorCommon"
+                    xmlns:engineNS="clr-namespace:EngineNS;assembly=CoreClient.Windows"
+                    xmlns:gameComponent="clr-namespace:EngineNS.GamePlay.Component;assembly=CoreClient.Windows"
+                    xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2006" 
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:TypeEditors="clr-namespace:WPG.Themes.TypeEditors">
+
+	<!--******************************-->
+	<!--    DataTemplates             -->
+	<!--******************************-->
+
+	<DataTemplate DataType="{x:Type data:PropertyCollection}">
+		<ItemsControl ItemsSource="{Binding Path=Items}" />
+	</DataTemplate>
+
+	<DataTemplate DataType="{x:Type data:PropertyCategory}">
+        <Expander Margin="1" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=CategoryExpanderStyle}}" Header="{Binding Category}" IsExpanded="True">
+			<!-- Grid.IsSharedSizeScope="True"> -->
+			<ItemsControl ItemsSource="{Binding Path=Items}" />
+		</Expander>
+	</DataTemplate>
+
+	<DataTemplate DataType="{x:Type data:ExpandableProperty}">
+        <Expander Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ExpanderStyle}}" Header="{Binding Name}" IsExpanded="{Binding Path=IsExpanded}">
+			<!-- Grid.IsSharedSizeScope="True"> -->
+			<ItemsControl ItemsSource="{Binding Path=Items}" />
+		</Expander>
+	</DataTemplate>
+
+	<local:PropertyTemplateSelector x:Key="propertyTemplateSelector" />
+
+	<!--
+    <DataTemplate DataType="{x:Type data:Property}">
+        <Grid Margin="4" Width="Auto" HorizontalAlignment="Stretch">
+            <Grid.RowDefinitions/>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <SharedSizeGroup="PropertyGridItemName"/>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"  Margin="0,0,8,0" TextAlignment="Right" VerticalAlignment="Center" Text="{Binding Mode=OneTime, Path=Name}" />
+            <ContentControl Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Content="{Binding Mode=OneWay}" ContentTemplateSelector="{StaticResource propertyTemplateSelector}" />
+        </Grid>
+    </DataTemplate>
+    -->
+    <DataTemplate DataType="{x:Type data:Property_HideName}">
+        <DockPanel>
+            <ContentControl Grid.Column="1" VerticalAlignment="Center" Content="{Binding Mode=OneWay}" ContentTemplateSelector="{StaticResource propertyTemplateSelector}" />
+        </DockPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type data:Property_Class}">
+        <TypeEditors:PropertyClassOperator PropertyType="{Binding Path=PropertyType}" ClassValue="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FilterString="{Binding Path=Filter}"/>
+    </DataTemplate>
+    
+    <!--PropertyGrid 外观-->
+	<DataTemplate DataType="{x:Type data:Property}">
+		<DockPanel Margin="4">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="50" SharedSizeGroup="PropertyNameGroup"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="1*" MinWidth="20"/>
+				</Grid.ColumnDefinitions>
+                <TextBlock DockPanel.Dock="Left" Margin="0,0,8,0" TextTrimming="CharacterEllipsis" TextAlignment="Left" VerticalAlignment="Center" Text="{Binding Mode=OneTime, Path=Name}" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=TextBlockStyle}}" >
+					<TextBlock.ToolTip>
+						<ToolTip>
+							<ToolTip.Content>
+								<StackPanel>
+									<StackPanel Orientation="Horizontal">
+										<TextBlock Text="{Binding Mode=OneTime, Path=Name}" Padding="1 0 0 0" />
+										<TextBlock Text=": " Padding="1 0 0 0" />
+										<TextBlock Text="{Binding Mode=OneTime, Path=PropertyType}" FontWeight="Bold" Padding="1 0 0 0" />
+									</StackPanel>
+									<TextBlock Text="{Binding Mode=OneTime, Path=Description}" Padding="1 1 0 0" />
+								</StackPanel>
+							</ToolTip.Content>
+						</ToolTip>
+					</TextBlock.ToolTip>
+				</TextBlock>
+                <GridSplitter Grid.Column="1" Margin="0,-5,2,-5" Style="{DynamicResource {ComponentResourceKey ResourceId=GridSplitterStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                <ContentControl Grid.Column="2" VerticalAlignment="Center" Content="{Binding Mode=OneWay}" ContentTemplateSelector="{StaticResource propertyTemplateSelector}" />
+			</Grid>
+        </DockPanel>
+	</DataTemplate>        
+
+	<!-- CLR & Custom Types Data Templates -->
+	<DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=default}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox IsReadOnly="{Binding Path=IsReadOnly}" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=TextBoxStyle}}">
+			    <TextBox.Text>
+				    <Binding Mode="TwoWay" Path="Value">
+					    <Binding.ValidationRules>
+						    <ExceptionValidationRule />
+					    </Binding.ValidationRules>
+				    </Binding>
+			    </TextBox.Text>
+		    </TextBox>
+            <Bind:BindButton Margin="5,0,0,0"  BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>            
+        </Grid>
+	</DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type generics:List`1[System.Object]}}">
+        <TypeEditors:CollectionEditorControl NumerableType="{Binding Path=PropertyType}" NumerableValue="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=Explicit}" MyProperty="{Binding}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"></TypeEditors:CollectionEditorControl>
+    </DataTemplate>
+    <!--DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr2:IEnumerable}}">
+        <TypeEditors:CollectionEditorControl NumerableType="{Binding Path=PropertyType}" NumerableValue="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=Explicit}" MyProperty="{Binding}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"></TypeEditors:CollectionEditorControl>
+    </-->
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type gameComponent:GPlacementComponent}}">
+        <TypeEditors:Transform PlacementComponent="{Binding Path=Value}" GameActors="{Binding Instance}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"></TypeEditors:Transform>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type Brush}}">
+        <TypeEditors:BrushEditorControl Brush="{Binding Path=Value}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"></TypeEditors:BrushEditorControl>
+    </DataTemplate>
+        
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr:SByte}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <editorControlLib:NumericTypeEditor NumericObject="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" BindProperty="{Binding PGProperty}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr:Int16}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <editorControlLib:NumericTypeEditor NumericObject="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" BindProperty="{Binding PGProperty}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr:Int32}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <editorControlLib:NumericTypeEditor NumericObject="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" BindProperty="{Binding PGProperty}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr:Int64}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <editorControlLib:NumericTypeEditor NumericObject="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" BindProperty="{Binding PGProperty}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr:Byte}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <editorControlLib:NumericTypeEditor NumericObject="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" BindProperty="{Binding PGProperty}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr:UInt16}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <editorControlLib:NumericTypeEditor NumericObject="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" BindProperty="{Binding PGProperty}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr:UInt32}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <editorControlLib:NumericTypeEditor NumericObject="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" BindProperty="{Binding PGProperty}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr:UInt64}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <editorControlLib:NumericTypeEditor NumericObject="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" BindProperty="{Binding PGProperty}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr:Boolean}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <CheckBox IsEnabled="{Binding Path=IsWriteable}" IsThreeState="True" > <!--Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=CheckBoxStyle}}"-->
+                <CheckBox.IsChecked>
+                    <Binding Mode="TwoWay" Path="Value">
+                        <Binding.Converter>
+                            <converters:Boolean2PropertyMultiValueConverter />
+                        </Binding.Converter>
+                    </Binding>
+                </CheckBox.IsChecked>
+            </CheckBox>
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+	<DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr2:IList}}">
+		<!-- Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListBoxStyle}}" -->
+		<ListBox ItemsSource="{Binding Path=Value}" />
+	</DataTemplate>
+
+	<DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr:Enum}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:EnumEditor EnumObject="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=FlagsEnumEditor}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:FlagEnumEditor FlagEnumObject="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr:Single}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <editorControlLib:FloatNumericTypeEditor NumericObject="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" BindProperty="{Binding PGProperty}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type clr:Double}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <!--TextBox IsReadOnly="{Binding Path=IsReadOnly}" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=TextBoxStyle}}">
+			    <TextBox.Text>
+				    <Binding Mode="TwoWay" Path="Value">
+					    <Binding.Converter>
+						    <converters:DoubleTypeConverter />
+					    </Binding.Converter>
+				    </Binding>
+			    </TextBox.Text>
+		    </TextBox-->
+            <editorControlLib:FloatNumericTypeEditor NumericObject="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" BindProperty="{Binding PGProperty}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type generics:List`1[System.String]}}">
+        <TypeEditors:CollectionEditorControl NumerableType="{Binding Path=PropertyType}" NumerableValue="{Binding Path=Value}" MyProperty="{Binding}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type engineNS:Color}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:SystemColorPicker Color="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BindProperty="{Binding PGProperty}" BindInstance="{Binding Instance}"/>
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type engineNS:Color4}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:SystemColorPicker VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BindProperty="{Binding PGProperty}" BindInstance="{Binding Instance}">
+                <TypeEditors:SystemColorPicker.Color>
+                    <Binding Mode="TwoWay" Path="Value" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.Converter>
+                            <converters:Color4ToColor/>
+                        </Binding.Converter>
+                    </Binding>
+                </TypeEditors:SystemColorPicker.Color>
+            </TypeEditors:SystemColorPicker>
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ColorPicker}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:SystemColorPicker Color="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BindProperty="{Binding PGProperty}" BindInstance="{Binding Instance}"/>
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=Color4Picker}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:SystemColorPicker VerticalAlignment="Stretch" HorizontalAlignment="Stretch" BindProperty="{Binding PGProperty}" BindInstance="{Binding Instance}">
+                <TypeEditors:SystemColorPicker.Color>
+                    <Binding Mode="TwoWay" Path="Value" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.Converter>
+                            <converters:Color4ToColor/>
+                        </Binding.Converter>
+                    </Binding>
+                </TypeEditors:SystemColorPicker.Color>
+            </TypeEditors:SystemColorPicker>
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type engineNS:Vector2}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:VectorEditor VectorObject="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+                <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type engineNS:Vector3}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:VectorEditor VectorObject="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type engineNS:Vector4}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:VectorEditor VectorObject="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=VectorEditor}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:VectorEditor VectorObject="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type engineNS:Point}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:SystemDrawingPointEditor Point="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type engineNS:Thickness}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:ThicknessEditor ControlMargin="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+	<DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=IntWithAutoSet}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:IntValueWithAutoEditor IntValue="{Binding Path=Value, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+												IsReadOnly="{Binding Path=IsReadOnly}"
+												BindInstance="{Binding Instance}" 
+												BindProperty="{Binding PGProperty}"
+												Foreground="Black" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <!--DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=Scale9InfoSet}">
+        <TypeEditors:Scale9InfoSetter Scale9Info="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      BindInstance="{Binding Instance}"
+                                      BindProperty="{Binding PGProperty}" />
+    </-->
+
+    <!--DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=FontParamCollection}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:FontParamListEditor Value="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" BindProperty="{Binding PGProperty}" BindInstance="{Binding Instance}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </-->
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=FileEditor}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:FileEditorControl FilePath="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" BindProperty="{Binding PGProperty}" BindInstance="{Binding Instance}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey ResourceId=ValueWithRange, TypeInTargetAssembly={x:Type local:PropertyGrid}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:ValueWithRangeEditor BindProperty="{Binding PGProperty}" BindInstance="{Binding Instance}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
+                <TypeEditors:ValueWithRangeEditor.OutValue>
+                    <Binding Mode="TwoWay" Path="Value" UpdateSourceTrigger="PropertyChanged">
+                        <!--Binding.Converter>
+                            <converters:TypeToDoubleConverter />
+                        </Binding.Converter-->
+                    </Binding>
+                </TypeEditors:ValueWithRangeEditor.OutValue>
+            </TypeEditors:ValueWithRangeEditor>
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=Angle360Setter}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:Angle360EditorControl Angle="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=Angle180Setter}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:Angle180EditorControl Angle="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=RNameEditor}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:RNameControl ResourceName="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" BindProperty="{Binding PGProperty}" BindInstance="{Binding Instance}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SocketSelecter}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:SocketSelectControl  SocketName="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" BindProperty="{Binding PGProperty}" BindInstance="{Binding Instance}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=LAGraphBonePoseSelecter}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:LAGraphBonePoseSelectControl  BoneName="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" BindProperty="{Binding PGProperty}" BindInstance="{Binding Instance}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ClassPropertySelecter}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:ClassPropertySelectControl  PropertyName="{Binding Path=Value,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" BindProperty="{Binding PGProperty}" BindInstance="{Binding Instance}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=InputWithErrorCheck}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:TextBoxWithErrorCheck BindValue="{Binding Path=Value,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" BindProperty="{Binding PGProperty}" BindInstance="{Binding Instance}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId={x:Type sys:Type}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TypeEditors:TypeSelectorControl VarType="{Binding Path=Value,Mode=TwoWay}" IsReadOnly="{Binding Path=IsReadOnly}" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" />
+            <Bind:BindButton Margin="5,0,0,0" BindInstance="{Binding Instance}" BindProperty="{Binding PGProperty}" Grid.Column="1"/>
+        </Grid>
+    </DataTemplate>
+
+</ResourceDictionary>

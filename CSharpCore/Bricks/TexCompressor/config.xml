@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ShareProjectConfig>
+  <References>
+    <PreDefines>
+    </PreDefines>
+  </References>
+  <CppRefrence>
+    <PreDefines>
+    </PreDefines>
+    <Proj Name="3rd/EtcLib/EtcLib.vcxitems"/>
+    <Proj Name="Bricks/TexCompressor/TexCompressor.vcxitems"/>
+  </CppRefrence>
+</ShareProjectConfig>

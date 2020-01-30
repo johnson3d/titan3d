@@ -1,0 +1,28 @@
+﻿<UserControl x:Class="EditorCommon.Controls.ResourceBrowser.WaitingProgress"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="100" >
+    <UserControl.Resources>
+        <Storyboard x:Key="waiting" x:Name="waiting">
+            <DoubleAnimation Storyboard.TargetName="SpinnerRotate" Storyboard.TargetProperty="(RotateTransform.Angle)" From="0" To="359" Duration="0:0:02" RepeatBehavior="Forever" />
+        </Storyboard>
+    </UserControl.Resources>
+	<Grid>
+		<Grid.Effect>
+			<DropShadowEffect/>
+		</Grid.Effect>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="1*"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+        <Image x:Name="image" RenderTransformOrigin="0.5,0.5" Loaded="Image_Loaded_1" Source="/ResourceLibrary;component/Icon/loading.png" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20" >
+	        <Image.RenderTransform>
+	            <RotateTransform x:Name="SpinnerRotate" Angle="0" />
+	        </Image.RenderTransform>
+	    </Image>
+        <TextBlock Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0" FontSize="16" FontWeight="Bold" Grid.Row="1"><Run Text="读取中..."/></TextBlock>
+	</Grid>
+</UserControl>

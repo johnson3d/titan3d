@@ -1,0 +1,37 @@
+﻿<myTypes:BaseNodeControl
+    x:Class="CodeDomNode.MakeList" x:Name="baseNodeControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:CodeDomNode"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+    xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+	xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+    mc:Ignorable="d" BlendBrush="#FF61BD53" >
+    <myTypes:BaseNodeControl.Resources>
+        <ResourceDictionary Source="/CodeGenerateSystem;Component/Themes/Generic.xaml" />
+    </myTypes:BaseNodeControl.Resources>
+    <myTypes:BaseNodeControl.Header>
+        <StackPanel Orientation="Horizontal">
+            <Image Source="/ResourceLibrary;component/Icons/Graph/icon_Blueprint_MakeArray_16x.png" Width="16" Height="16" Margin="0,5,5,5"/>
+            <TextBlock Text="{Binding NodeName, ElementName=baseNodeControl}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18.667" IsHitTestVisible="False" Foreground="{DynamicResource TextForeground}"/>
+        </StackPanel>
+    </myTypes:BaseNodeControl.Header>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="1" HorizontalAlignment="Right" Orientation="Vertical" Margin="8">
+            <baseCtrl:LinkOutControl Name="ArrayOut" NameString="Array" PinType="Array" BackBrush="{Binding ArrayTypeBrush, ElementName=baseNodeControl}" VerticalAlignment="Center" Direction="Right" HorizontalAlignment="Right" />
+            <Button Click="Button_AddPin_Click" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="0,8,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Add pin" Foreground="{DynamicResource TextForeground}" VerticalAlignment="Center"/>
+                    <Image Source="/ResourceLibrary;component/Icons/Icons/PlusSymbol_12x.png" Width="12" Height="12" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+        <StackPanel x:Name="StackPanel_ElementPins" Margin="8,8,0,0"/>
+    </Grid>
+</myTypes:BaseNodeControl>

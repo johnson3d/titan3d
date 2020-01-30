@@ -1,0 +1,42 @@
+#include "Inc/VertexLayout.cginc"
+
+#include "dummy.gen"
+
+PS_INPUT VS_Main( VS_INPUT input )
+{
+	PS_INPUT output = (PS_INPUT)0;
+
+	output.vPosition.xyz = input.vPosition.xyz;
+	output.vUV = input.vUV;
+	output.vColor = input.vColor;
+
+	output.vPosition.w = 1;
+	output.vPosition.z = input.vPosition.z;
+	output.vPosition.x = -1 + input.vPosition.x*2 * gViewportSizeAndRcp.z;
+	output.vPosition.y = 1 - input.vPosition.y*2 * gViewportSizeAndRcp.w;
+
+	return output;
+}
+
+struct PS_OUTPUT
+{
+	float4 RenderTarget0 : SV_Target0;
+};
+
+PS_OUTPUT PS_Main( PS_INPUT input )
+{
+#ifndef DO_PS_MATERIAL
+	#define DO_PS_MATERIAL DoDefaultPSMaterial
+#endif
+
+	MTL_OUTPUT mtl = Default_PSInput2Material(input);
+
+	DO_PS_MATERIAL(input, mtl);
+
+	PS_OUTPUT output = (PS_OUTPUT)0;
+
+	matrix WVPMtx = mul(WorldMatrix, ViewPrjMtx);
+	output.RenderTarget0 = gViewportSizeAndRcp * TimeSin + mul(float4(CameraPosition.xyz, 1), WVPMtx);
+
+	return output;
+}

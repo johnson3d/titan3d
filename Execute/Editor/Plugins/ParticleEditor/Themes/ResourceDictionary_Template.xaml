@@ -1,0 +1,36 @@
+﻿<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:ParticleEditor"
+    xmlns:wpg="clr-namespace:WPG;assembly=EditorCommon"
+    xmlns:Bind="clr-namespace:EditorCommon.Bind;assembly=EditorCommon"
+    xmlns:DataGradient ="clr-namespace:WPG.Themes.TypeEditors.TimerLine;assembly=EditorCommon"
+    xmlns:ColorGradient ="clr-namespace:WPG.Themes.TypeEditors.ColorGradient;assembly=EditorCommon"
+    xmlns:TransformGradient ="clr-namespace:WPG.Themes.TypeEditors.TransformGradient;assembly=EditorCommon">
+    <!-- 应该在此定义资源字典条目。-->
+    <!--[EngineNS.Editor.Editor_PropertyGridDataTemplateAttribute("HorizontalAlignmentSetter")]-->
+    <DataTemplate x:Key="DataGradientSetter">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <DataGradient:TimeLinePanel DataCollect="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="ColorGradientSetter">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <ColorGradient:ColorGradient DataCollect="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="TransformGradientSetter">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <TransformGradient:TransformGradient DataCollect="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

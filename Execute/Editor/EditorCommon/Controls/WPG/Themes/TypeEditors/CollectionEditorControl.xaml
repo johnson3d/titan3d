@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="WPG.Themes.TypeEditors.CollectionEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:WPG="clr-namespace:WPG" mc:Ignorable="d" 
+			 xmlns:converters="clr-namespace:WPG.Converters"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"	
+             d:DesignHeight="300" d:DesignWidth="300" HorizontalContentAlignment="Stretch" Name="myUserCtl">
+    <Grid HorizontalAlignment="Stretch">
+        <Expander Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=ExpanderStyle_Default}}">
+            <Expander.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" HorizontalAlignment="Stretch" Name="txtTypeName" TextTrimming="CharacterEllipsis" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=TextBlockStyle_Default}}">
+                        <TextBlock.Text>
+                            <Binding Path="NumerableType" ElementName="myUserCtl">
+                                <Binding.Converter>
+                                    <converters:TypeToStringConverter />
+                                </Binding.Converter>
+                            </Binding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button HorizontalAlignment="Right" ToolTip="添加对象" Height="18" Width="25" Margin="0,0,1,0" Click="Button_AddItem_Click" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=ButtonStyle_Default}}">
+                            <TextBlock Text="&#xf15b;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                        </Button>
+                        <Button HorizontalAlignment="Right" ToolTip="清除所有对象" Height="18" Width="25" Margin="0,0,1,0" Click="Button_ClearItems_Click" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=ButtonStyle_Default}}">
+                            <Image Source="/ResourceLibrary;component/Icons/Icons/icon_Delete_40x.png" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Expander.Header>
+            <ListBox x:Name="ListBox_Items" Grid.Row="1" Grid.ColumnSpan="2" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=ListBoxStyle_Default}}" />
+        </Expander>
+    </Grid>
+</UserControl>

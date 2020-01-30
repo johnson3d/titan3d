@@ -1,0 +1,28 @@
+﻿<UserControl x:Class="EditorCommon.Bind.ControlPropertyBindControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             mc:Ignorable="d" d:DesignWidth="224.227" Padding="0" Margin="2" >
+    <Grid Margin="0" VerticalAlignment="Top" Background="#FF595959">
+		<!--Grid d:LayoutOverrides="Height">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto"/>
+				<ColumnDefinition Width="0.743*"/>
+			</Grid.ColumnDefinitions>
+            <TextBlock Margin="2" TextWrapping="Wrap" Text="BindControl" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            <ComboBox x:Name="ComboBox_BindControl" Grid.Column="1" Margin="2" IsEditable="True" Foreground="White" SelectionChanged="ComboBox_BindControl_SelectionChanged" Style="{DynamicResource {ComponentResourceKey ResourceId=ComboBoxStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            <TextBlock Margin="2" TextWrapping="Wrap" Text="BindProperty" VerticalAlignment="Center" Grid.Row="1" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            <ComboBox x:Name="ComboBox_BindProperty" Grid.Column="1" Margin="2" IsEditable="True" Grid.Row="1" Foreground="White" SelectionChanged="ComboBox_BindProperty_SelectionChanged" Style="{DynamicResource {ComponentResourceKey ResourceId=ComboBoxStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            <TextBlock Margin="2" TextWrapping="Wrap" Text="BindMode" VerticalAlignment="Center" Grid.Row="2" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            <ComboBox x:Name="ComboBox_BindMode" Grid.Column="1" Margin="2" Grid.Row="2" Foreground="White" VerticalAlignment="Center" SelectionChanged="ComboBox_BindMode_SelectionChanged" Style="{DynamicResource {ComponentResourceKey ResourceId=ComboBoxStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+		            
+		</-->
+	</Grid>
+</UserControl>

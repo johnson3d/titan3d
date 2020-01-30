@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>0a04ec24-c6ac-4638-a228-5cdc13b0a6af</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.FreeTypeFont</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CFTFont.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CFTFontManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CFTShadingEnv.cs" />
+  </ItemGroup>
+</Project>

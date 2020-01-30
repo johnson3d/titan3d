@@ -1,0 +1,64 @@
+﻿<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+	xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+	xmlns:local="clr-namespace:ResourceLibrary">
+	<Style x:Key="ButtonFocusVisual">
+		<Setter Property="Control.Template">
+			<Setter.Value>
+				<ControlTemplate>
+					<Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<!-- 应该在此定义资源字典条目。-->
+	<LinearGradientBrush x:Key="ButtonNormalBackground3" EndPoint="0,1" StartPoint="0,0">
+		<GradientStop Color="#F3F3F3" Offset="0"/>
+		<GradientStop Color="#EBEBEB" Offset="0.5"/>
+		<GradientStop Color="#DDDDDD" Offset="0.5"/>
+		<GradientStop Color="#CDCDCD" Offset="1"/>
+	</LinearGradientBrush>
+	<SolidColorBrush x:Key="ButtonNormalBorder2" Color="#FF707070"/>
+	<Style TargetType="{x:Type Button}" x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=ButtonStyle_Default}">
+		<!--<Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>-->
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Background" Value="#02595959"/>
+        <Setter Property="BorderBrush" Value="{x:Null}"/>
+		<Setter Property="BorderThickness" Value="0"/>
+		<Setter Property="Foreground" Value="White"/>
+		<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		<Setter Property="VerticalContentAlignment" Value="Center"/>
+		<Setter Property="Padding" Value="1"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Button}">
+					<Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" CornerRadius="1">
+                        <Border Margin="0" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter x:Name="PART_Content" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+					</Border>
+					<ControlTemplate.Triggers>
+						<!--<Trigger Property="IsKeyboardFocused" Value="true">
+							<Setter Property="Background" Value="#FF595959"/>
+						</Trigger>-->
+						<Trigger Property="ToggleButton.IsChecked" Value="true">
+                            <Setter Property="Background" Value="#FF717171"/>
+						</Trigger>
+						<Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Foreground" Value="{DynamicResource {ComponentResourceKey ResourceId=DisableForeground, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+						</Trigger>
+						<Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#FF495664"/>
+                            <Setter Property="Foreground" Value="Black" />
+                        </Trigger>
+						<Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="#FF717171"/>
+                            <Setter Property="Margin" TargetName="PART_Content" Value="0,2,0,-2"/>
+                        </Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+    </Style>
+</ResourceDictionary>

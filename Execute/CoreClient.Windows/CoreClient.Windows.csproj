@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3B80B580-B065-4897-86AC-0B62D9E62922}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CoreClient.Windows</RootNamespace>
+    <AssemblyName>CoreClient.Windows</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\binaries\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;PWindow</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <WarningsAsErrors>4014,1717</WarningsAsErrors>
+    <LangVersion>7.3</LangVersion>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\binaries\</OutputPath>
+    <DefineConstants>TRACE;PWindow</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <WarningsAsErrors>4014,1717</WarningsAsErrors>
+    <LangVersion>7.3</LangVersion>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="HPSocketCS">
+      <HintPath>..\..\CSharpCore\3rd\HPSocket\Windows\x64\HPSocketCS.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI, Version=2.3.0.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CSharpCore\Bricks\ExcelTable\NPOI\solution\Lib\NPOI.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\CSharpCore\3rd\ILRuntime\ILRuntime\ILRuntime.csproj">
+      <Project>{79ef2f29-89d1-4097-986c-5e4eefe0fa33}</Project>
+      <Name>ILRuntime</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\CSharpCore\3rd\ILRuntime\Mono.Cecil.20\Mono.Cecil.20.csproj">
+      <Project>{d3785d8b-4d85-4546-8763-47fc848c13e0}</Project>
+      <Name>Mono.Cecil.20</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\CSharpCore\3rd\ILRuntime\Mono.Cecil.Pdb\Mono.Cecil.Pdb.csproj">
+      <Project>{cea7a85f-2523-4ad0-8296-6e8e0a2e6df7}</Project>
+      <Name>Mono.Cecil.Pdb</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="..\..\CSharpCore\Graphics\Graphics.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Core\Core.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\RHI\RHI.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Math\Math.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Platform\Windows\Windows.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\GamePlay\GamePlay.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\Particle\Particle.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\RecastBuilder\RecastBuilder.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\3rd\SuperSocket\SuperSocket.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\RemoteServices\RemoteServices.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\GraphDrawer\GraphDrawer.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\FreeTypeFont\FreeTypeFont.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\HotfixScript\HotfixScript.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\PhysicsCore\PhysicsCore.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\RecastRuntime\RecastRuntime.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\LooseOctree\LooseOctree.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\SimplifyGeom\SimplifyGeom.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\TexCompressor\TexCompressor.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\ImageImport\ImageImport.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\HollowMaker\HollowMaker.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\Animation\Animation.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\UISystem\UISystem.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\EnsureFile\EnsureFile.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\FSM\FSM.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\TcpClient\TcpClient.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\TcpServer\TcpServer.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\DyBone\DyBone.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\Localization\Localization.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\ExcelTable\ExcelTable.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\DataProvider\DataProvider.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\NetCore\NetCore.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\MacrossNode\AI\Behavior\Behavior.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Editor\Editor.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\Editor\MeshProcessor\MeshProcessor.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\NodeGraph\NodeGraph.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\AI\AI.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\Manager\TiledCell\TiledCell.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\Components\PointChain\PointChain.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\SandBox\SandBox.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\Components\Show2D\Image2D.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\Bricks\GpuDriven\GpuDriven.projitems" Label="Shared" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

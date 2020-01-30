@@ -1,0 +1,93 @@
+#ifndef _MOBILE_BLOOM_SET_UP_
+#define _MOBILE_BLOOM_SET_UP_
+
+#include "Inc/VertexLayout.cginc"
+#include "Inc/Math.cginc"
+#include "Inc/PostEffectCommon.cginc"
+
+#include "dummy.gen"
+
+Texture2D gBaseSceneView;
+SamplerState Samp_gBaseSceneView;
+
+
+
+PS_INPUT VS_Main(VS_INPUT input)
+{
+	PS_INPUT output = (PS_INPUT)0;
+
+	output.vPosition = float4(input.vPosition.xyz, 1.0f);
+	output.vUV = input.vUV;
+
+	half start = 1.0h / 14.0h;
+	half scale = 1.0h;
+
+	output.vTangent.xy = input.vUV + CircleSampler(14.0h, start, 0.0h) * scale * gViewportSizeAndRcp.zw;
+	output.vTangent.zw = input.vUV + CircleSampler(14.0h, start, 1.0h) * scale * gViewportSizeAndRcp.zw;
+	output.vLightMap.xy = input.vUV + CircleSampler(14.0h, start, 2.0h) * scale * gViewportSizeAndRcp.zw;
+	output.vLightMap.zw = input.vUV + CircleSampler(14.0h, start, 3.0h) * scale * gViewportSizeAndRcp.zw;
+	output.psCustomUV0.xy = input.vUV + CircleSampler(14.0h, start, 4.0h) * scale * gViewportSizeAndRcp.zw;
+	output.psCustomUV0.zw = input.vUV + CircleSampler(14.0h, start, 5.0h) * scale * gViewportSizeAndRcp.zw;
+	output.psCustomUV1.xy = input.vUV + CircleSampler(14.0h, start, 6.0h) * scale * gViewportSizeAndRcp.zw;
+	output.psCustomUV1.zw = input.vUV + CircleSampler(14.0h, start, 7.0h) * scale * gViewportSizeAndRcp.zw;
+	output.psCustomUV2.xy = input.vUV + CircleSampler(14.0h, start, 8.0h) * scale * gViewportSizeAndRcp.zw;
+	output.psCustomUV2.zw = input.vUV + CircleSampler(14.0h, start, 9.0h) * scale * gViewportSizeAndRcp.zw;
+	output.psCustomUV3.xy = input.vUV + CircleSampler(14.0h, start, 10.0h) * scale * gViewportSizeAndRcp.zw;
+	output.psCustomUV3.zw = input.vUV + CircleSampler(14.0h, start, 11.0h) * scale * gViewportSizeAndRcp.zw;
+	output.psCustomUV4.xy = input.vUV + CircleSampler(14.0h, start, 12.0h) * scale * gViewportSizeAndRcp.zw;
+	output.psCustomUV4.zw = input.vUV + CircleSampler(14.0h, start, 13.0h) * scale * gViewportSizeAndRcp.zw;
+
+
+	return output;
+}
+
+
+
+struct PS_OUTPUT
+{
+	half3 RT0 : SV_Target0;
+};
+
+PS_OUTPUT PS_Main(PS_INPUT input)
+{
+	PS_OUTPUT output = (PS_OUTPUT)0;
+
+	half3 SceneColor = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.vUV.xy).rgb;
+
+	half3 P0 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.vTangent.xy).rgb;
+	half3 P1 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.vTangent.zw).rgb;
+	half3 P2 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.vLightMap.xy).rgb;
+	half3 P3 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.vLightMap.zw).rgb;
+	half3 P4 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.psCustomUV0.xy).rgb;
+	half3 P5 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.psCustomUV0.zw).rgb;
+	half3 P6 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.psCustomUV1.xy).rgb;
+	half3 P7 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.psCustomUV1.zw).rgb;
+	half3 P8 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.psCustomUV2.xy).rgb;
+	half3 P9 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.psCustomUV2.zw).rgb;
+	half3 P10 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.psCustomUV3.xy).rgb;
+	half3 P11 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.psCustomUV3.zw).rgb;
+	half3 P12 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.psCustomUV4.xy).rgb;
+	half3 P13 = (half3)gBaseSceneView.Sample(Samp_gBaseSceneView, input.psCustomUV4.zw).rgb;
+
+
+	half3 Pfinal = SceneColor + P0 + P1 + P2 + P3 + P4 + P5 + P6 + P7 + P8 + P9 + P10 + P11 + P12 + P13;
+	Pfinal = (1.0h / 15.0h) * Pfinal;
+
+
+	output.RT0.rgb = Pfinal;
+	//output.RT0.a = 1.0h;
+
+	/*half BloomThreshold = 0.0h;
+
+	half3 SceneColor = gBaseSceneView.Sample(Samp_gBaseSceneView, input.vUV.xy).rgb;
+
+	half PixelLum = CalcLuminance(SceneColor);
+	half Ibloom = max(0.0h, PixelLum - BloomThreshold);
+	
+	output.RT0.rgb = SceneColor * Ibloom;
+	output.RT0.a = 1.0h;*/
+
+	return output;
+}
+
+#endif

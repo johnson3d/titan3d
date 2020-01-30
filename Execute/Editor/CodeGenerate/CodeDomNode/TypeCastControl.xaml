@@ -1,0 +1,33 @@
+﻿<myTypes:BaseNodeControl x:Class="CodeDomNode.TypeCastControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+			 xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+             xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             x:Name="baseNodeControl" BlendBrush="{DynamicResource LinkNode_ClassControl_Background}"
+             mc:Ignorable="d" >
+    <myTypes:BaseNodeControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CodeGenerateSystem;Component/Themes/Generic.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</myTypes:BaseNodeControl.Resources>
+    <myTypes:BaseNodeControl.Header>
+        <TextBlock Text="强制类型转换" VerticalAlignment="Center" HorizontalAlignment="Center" IsHitTestVisible="False" Foreground="{DynamicResource TextForeground}"/>
+    </myTypes:BaseNodeControl.Header>
+    <Grid >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <baseCtrl:LinkInControl x:Name="ClassLinkHandle_In" BackBrush="{DynamicResource Link_ValueBrush}" Margin="8,0,0,0" HorizontalAlignment="Left" Grid.RowSpan="2" Direction="Left" />
+        <baseCtrl:LinkOutControl x:Name="ClassLinkHandle_Out" BackBrush="{DynamicResource Link_ValueBrush}" Margin="0,0,8,0" HorizontalAlignment="Right" Grid.Column="3" Grid.RowSpan="2" Direction="Right" />
+        <TextBlock x:Name="OutputType" Margin="2" Text="目标类型:" Grid.Column="1" VerticalAlignment="Center" Foreground="{DynamicResource TextForeground}"/>
+        <TextBox Margin="2" TextWrapping="Wrap" Text="{Binding TargetTypeName, ElementName=baseNodeControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="2" VerticalAlignment="Center"  MinWidth="50" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBoxStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+    </Grid>
+</myTypes:BaseNodeControl>

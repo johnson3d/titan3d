@@ -1,0 +1,90 @@
+#ifndef _MOBILE_BLOOM_US_
+#define _MOBILE_BLOOM_US_
+
+#include "Inc/VertexLayout.cginc"
+#include "Inc/Math.cginc"
+#include "Inc/PostEffectCommon.cginc"
+
+#include "dummy.gen"
+
+//warning: Samp_ + tex_name!
+Texture2D gSrcTexUp;
+SamplerState Samp_gSrcTexUp;
+
+Texture2D gSrcTexDown;
+SamplerState Samp_gSrcTexDown;
+
+
+
+PS_INPUT VS_Main(VS_INPUT input)
+{
+	PS_INPUT output = (PS_INPUT)0;
+
+	output.vPosition = float4(input.vPosition.xyz, 1.0f);
+	output.vUV = input.vUV;
+
+	half StartUp = 2.0h / 9.0h;
+	half StartDown = 2.0h / 5.0h;
+	half ScaleU = 1.0h;
+	half ScaleD = 1.0h;
+
+	//up
+	output.vTangent.xy = input.vUV + CircleSampler(9.0h, StartUp, 0.0h) * ScaleU * gViewportSizeAndRcp.xy;
+	output.vTangent.zw = input.vUV + CircleSampler(9.0h, StartUp, 1.0h) * ScaleU * gViewportSizeAndRcp.xy;
+	output.vLightMap.xy = input.vUV + CircleSampler(9.0h, StartUp, 2.0h) * ScaleU * gViewportSizeAndRcp.xy;
+	output.vLightMap.zw = input.vUV + CircleSampler(9.0h, StartUp, 3.0h) * ScaleU * gViewportSizeAndRcp.xy;
+	output.psCustomUV0.xy = input.vUV + CircleSampler(9.0h, StartUp, 4.0h) * ScaleU * gViewportSizeAndRcp.xy;
+	output.psCustomUV0.zw = input.vUV + CircleSampler(9.0h, StartUp, 5.0h) * ScaleU * gViewportSizeAndRcp.xy;
+	output.psCustomUV1.xy = input.vUV + CircleSampler(9.0h, StartUp, 6.0h) * ScaleU * gViewportSizeAndRcp.xy;
+	output.psCustomUV1.zw = input.vUV + CircleSampler(9.0h, StartUp, 7.0h) * ScaleU * gViewportSizeAndRcp.xy;
+	output.psCustomUV2.xy = input.vUV + CircleSampler(9.0h, StartUp, 8.0h) * ScaleU * gViewportSizeAndRcp.xy;
+	
+	//down
+	output.psCustomUV2.zw = input.vUV + CircleSampler(5.0h, StartDown, 0.0h) * ScaleD * gViewportSizeAndRcp.zw;
+	output.psCustomUV3.xy = input.vUV + CircleSampler(5.0h, StartDown, 1.0h) * ScaleD * gViewportSizeAndRcp.zw;
+	output.psCustomUV3.zw = input.vUV + CircleSampler(5.0h, StartDown, 2.0h) * ScaleD * gViewportSizeAndRcp.zw;
+	output.psCustomUV4.xy = input.vUV + CircleSampler(5.0h, StartDown, 3.0h) * ScaleD * gViewportSizeAndRcp.zw;
+	output.psCustomUV4.zw = input.vUV + CircleSampler(5.0h, StartDown, 4.0h) * ScaleD * gViewportSizeAndRcp.zw;
+
+	return output;
+}
+
+
+struct PS_OUTPUT
+{
+	half3 RT0 : SV_Target0;
+};
+
+PS_OUTPUT PS_Main(PS_INPUT input)
+{
+	PS_OUTPUT output = (PS_OUTPUT)0;
+
+	half3 U0 = (half3)gSrcTexUp.Sample(Samp_gSrcTexUp, input.vTangent.xy).rgb;
+	half3 U1 = (half3)gSrcTexUp.Sample(Samp_gSrcTexUp, input.vTangent.zw).rgb;
+	half3 U2 = (half3)gSrcTexUp.Sample(Samp_gSrcTexUp, input.vLightMap.xy).rgb;
+	half3 U3 = (half3)gSrcTexUp.Sample(Samp_gSrcTexUp, input.vLightMap.zw).rgb;
+	half3 U4 = (half3)gSrcTexUp.Sample(Samp_gSrcTexUp, input.psCustomUV0.xy).rgb;
+	half3 U5 = (half3)gSrcTexUp.Sample(Samp_gSrcTexUp, input.psCustomUV0.zw).rgb;
+	half3 U6 = (half3)gSrcTexUp.Sample(Samp_gSrcTexUp, input.psCustomUV1.xy).rgb;
+	half3 U7 = (half3)gSrcTexUp.Sample(Samp_gSrcTexUp, input.psCustomUV1.zw).rgb;
+	half3 U8 = (half3)gSrcTexUp.Sample(Samp_gSrcTexUp, input.psCustomUV2.xy).rgb;
+	half3 Ucenter = (half3)gSrcTexUp.Sample(Samp_gSrcTexUp, input.vUV).rgb;
+
+	half3 Ufinal = (U0 + U1 + U2 + U3 + U4 + U5 + U6 + U7 + U8 + Ucenter) * 0.1h;
+	//Ufinal = (1.0h / 9.0h * 0.85h) * Ufinal + Ucenter * 0.15h;
+
+	half3 Dcenter = (half3)gSrcTexDown.Sample(Samp_gSrcTexDown, input.vUV).rgb;
+	half3 D1 = (half3)gSrcTexDown.Sample(Samp_gSrcTexDown, input.psCustomUV2.zw).rgb;
+	half3 D2 = (half3)gSrcTexDown.Sample(Samp_gSrcTexDown, input.psCustomUV3.xy).rgb;
+	half3 D3 = (half3)gSrcTexDown.Sample(Samp_gSrcTexDown, input.psCustomUV3.zw).rgb;
+	half3 D4 = (half3)gSrcTexDown.Sample(Samp_gSrcTexDown, input.psCustomUV4.xy).rgb;
+	half3 D5 = (half3)gSrcTexDown.Sample(Samp_gSrcTexDown, input.psCustomUV4.zw).rgb;
+
+	half3 Dfinal = D1 + D2 + D3 + D4 + D5;
+	Dfinal = (1.0h / 5.0h * 0.7h) * Dfinal + Dcenter * 0.3h;
+
+	output.RT0.rgb = Ufinal + Dfinal;
+	
+	return output;
+}
+#endif

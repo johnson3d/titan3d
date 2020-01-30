@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="gb2312"?>
+<MaterialEditor.ResourceInfos.MaterialInstanceResourceInfo Description="" ParentMaterialRName="1|ui/m_ui_defaultfont.material" ResourceType="MaterialInstance">
+	<ReferenceRNameList 0="1|ui/m_ui_defaultfont.material" 1="0|texture/uvchecker.txpic">System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</ReferenceRNameList>
+	<RNameHistory>System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</RNameHistory>
+</MaterialEditor.ResourceInfos.MaterialInstanceResourceInfo>
+

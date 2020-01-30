@@ -1,0 +1,42 @@
+﻿<res:WindowBase x:Class="CoreEditor.GraphDebuggerWin"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CoreEditor"
+        xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+        xmlns:wpg="clr-namespace:WPG;assembly=EditorCommon"
+        xmlns:typeEditors="clr-namespace:WPG.Themes.TypeEditors;assembly=EditorCommon"
+        mc:Ignorable="d" WindowStyle="ToolWindow" Style="{DynamicResource {ComponentResourceKey ResourceId=DefaultWindowStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"
+        x:Name="Win" Title="GraphDebugger" SizeToContent="Height" Loaded="WindowBase_Loaded" Width="500" MaxHeight="1024">
+    <!--<res:WindowBase.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CoreEditor;component/Themes/Generic.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </res:WindowBase.Resources>-->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <ToggleButton Margin="4" Content="调试" x:Name="TGB_SE" Checked="ToggleButton_Checked" Unchecked="ToggleButton_Unchecked" />
+        <typeEditors:EnumEditor Margin="4" x:Name="DebugTargetEnum" Grid.Row="1"/>
+        <Grid Grid.Row="2" Margin="4" IsEnabled="{Binding IsChecked, ElementName=TGB_SE}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="&lt;" Click="Button_Sub_Click" Margin="4" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            <Slider x:Name="Slider_Value" Maximum="{Binding MaxValue, ElementName=Win}" Grid.Column="1" VerticalAlignment="Center" ValueChanged="Slider_Value_ValueChanged"/>
+            <TextBox Margin="4" Text="{Binding Value, ElementName=Slider_Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBoxStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" VerticalAlignment="Center" Grid.Column="2"/>
+            <Button Content="&gt;" Click="Button_Add_Click" Grid.Column="3" Margin="4" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+        </Grid>
+        <wpg:PropertyGrid x:Name="PG" Grid.Row="3"/>
+    </Grid>
+</res:WindowBase>

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>4edd13d5-bb8d-4291-a3c9-b373938e2041</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.GpuDriven</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Cluster\GpuCluster.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GpuScene\CGfxMergeInstanceSE.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GpuScene\MeshCollector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GpuScene\SceneDataManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GpuScene\SceneDataSM3.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)RVT\" />
+  </ItemGroup>
+</Project>

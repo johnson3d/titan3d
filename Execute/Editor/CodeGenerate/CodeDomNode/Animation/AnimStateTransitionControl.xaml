@@ -1,0 +1,51 @@
+﻿<myTypes:BaseNodeControl
+    x:Class="CodeDomNode.Animation.AnimStateTransitionControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:CodeGenerateSystem.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+     xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+    xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+    xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+    xmlns:ctrls="clr-namespace:EditorCommon.Controls;assembly=EditorCommon"
+    mc:Ignorable="d"
+    NodeType="AnimStateTransitionNode"
+    x:Name="userControl"
+    d:DesignHeight="125"
+    d:DesignWidth="250" Width="32" Height="32" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top" SizeChanged="userControl_SizeChanged">
+    <myTypes:BaseNodeControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CodeGenerateSystem;Component/Themes/Generic.xaml" />
+                <ResourceDictionary>
+                    <Style x:Key="BGBorderStyle" TargetType="{x:Type Border}">
+                        <Setter Property="BorderBrush" Value="green"/>
+                        <Setter Property="BorderThickness" Value="2"   />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#CCC5C3C5"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="False">
+                                <Setter Property="Background" Value="#CC484848"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </myTypes:BaseNodeControl.Resources>
+    <myTypes:BaseNodeControl.RenderTransform>
+        <TransformGroup>
+            <ScaleTransform/>
+            <SkewTransform/>
+            <RotateTransform/>
+            <TranslateTransform X="-16" Y="-16"/>
+        </TransformGroup>
+    </myTypes:BaseNodeControl.RenderTransform>
+    <Grid>
+        <Border x:Name="BGBorder" Width="32" Height="32" CornerRadius="10" Style="{DynamicResource BGBorderStyle}" BorderBrush="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0">
+            <ctrls:ImageEx x:Name="Transition_img" DrawImageWith9Cells="False" ClipPadding="20,20,20,20" Source="/ResourceLibrary;component/Icons/Animation/StateMachineEditor/Trans_Node_Icon.png" Stretch="Fill" IsHitTestVisible="False" Margin="0"/>
+        </Border>
+    </Grid>
+</myTypes:BaseNodeControl>

@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>f60c874f-d232-405d-96c8-98855f56ec94</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.Particle</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)EmitShape\CGfxParticleEmitterShape.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EmitShape\CGfxParticleEmitterShapeBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EmitShape\CGfxParticleEmitterShapeCone.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EmitShape\CGfxParticleEmitterShapeMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EmitShape\CGfxParticleEmitterShapeSphere.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GParticleComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GParticleSubSystemComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)McParticleEffector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CGfxParticleSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CGfxParticleModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CGfxParticlePose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CGfxParticleSubState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ParticleAABB.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ParticleBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ParticleTag.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TrailData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TriggerEvent.cs" />
+  </ItemGroup>
+</Project>

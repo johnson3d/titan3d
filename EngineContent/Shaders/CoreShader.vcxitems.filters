@@ -1,0 +1,199 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="CBuffer">
+      <UniqueIdentifier>{edfbafa5-6926-4a28-b047-2b0c721f7159}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Material">
+      <UniqueIdentifier>{0baee790-a8b0-4e0f-a45b-0603933ae2c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modifier">
+      <UniqueIdentifier>{2831a5d6-2bae-429d-ac23-1a488a8b233d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ShadingEnv">
+      <UniqueIdentifier>{d57969e9-2ce4-4b17-925f-787b97b5f68a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ShadingEnv\Sys">
+      <UniqueIdentifier>{b207efa2-d866-4d5f-aa01-44bd1c1ea210}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ShadingEnv\Deffered">
+      <UniqueIdentifier>{fbe441dc-fd08-4441-82f5-0b6041ae324b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc">
+      <UniqueIdentifier>{a7f12604-ff72-4008-8f2a-f9b423956161}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Compute">
+      <UniqueIdentifier>{154f9cbe-4468-4126-bf36-0ad5b71c0825}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Compute\GpuDriven">
+      <UniqueIdentifier>{1edc0aa8-5788-4625-9ecb-b63896c146c4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
+      <Filter>Material</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.code">
+      <Filter>Modifier</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.var">
+      <Filter>Modifier</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.code">
+      <Filter>Modifier</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.var">
+      <Filter>Modifier</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Base2D.shadingenv">
+      <Filter>ShadingEnv\Sys</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)DSBase2RT.shadingenv">
+      <Filter>ShadingEnv\Deffered</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)DSDirLighting.shadingenv">
+      <Filter>ShadingEnv\Deffered</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Font.shadingenv">
+      <Filter>ShadingEnv\Sys</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Dummy.shadingenv">
+      <Filter>ShadingEnv\Sys</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Selected.shadingenv">
+      <Filter>ShadingEnv\Sys</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)FSBase.shadingenv">
+      <Filter>ShadingEnv\Sys</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Gizmos.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)HitProxy.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)HitProxyAxis.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileBloomDS.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileBloomSetUp.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileBloomUS.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileCopy.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileOpaque.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileTranslucent.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)Snapshot.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)UFOMobileCopy.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaque.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaqueNPR.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)UFOMobileOutlineNPR.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)UFOMobileTranslucent.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)UFOMobileTranslucentNPR.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)SSM.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileCustomTranslucent.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.code">
+      <Filter>Modifier</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.var">
+      <Filter>Modifier</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileSky.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)SceneCapture.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\NoPixelShader.shadingenv">
+      <Filter>ShadingEnv\Sys</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileCopyEditor.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)PickedBlurH.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)PickedBlurV.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)PickedHollow.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)PickedSetUp.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileBloomBlurH.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileBloomBlurV.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileOpaqueEditor.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileCustomTranslucentEditor.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileSunShaftMask.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileSunShaftBlur.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileAoMask.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileAoBlurH.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)MobileAoBlurV.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\MergeInstance.shadingenv">
+      <Filter>Compute\GpuDriven</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\GpuDrivenDataDef.cginc">
+      <Filter>Compute\GpuDriven</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerCamera.cginc">
+      <Filter>CBuffer</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerFrame.cginc">
+      <Filter>CBuffer</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerInstance.cginc">
+      <Filter>CBuffer</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerMesh.cginc">
+      <Filter>CBuffer</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerShadingEnv.cginc">
+      <Filter>CBuffer</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerViewport.cginc">
+      <Filter>CBuffer</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Common.function">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\CommonDeferredShadingFunc.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\CommonLightFunc.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\FogCommon.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\FXAAMobile.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\LightCommon.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\Math.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\Random.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\GlobalDefine.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\VertexLayout.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\MobileBasePassPS.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\PostEffectCommon.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\ShadowCommon.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\MixUtility.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VertexShaderVTF.cginc">
+      <Filter>Compute\GpuDriven</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
+      <Filter>Compute</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\clearid.compute">
+      <Filter>Compute</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\extractID.compute">
+      <Filter>Compute</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VirtualTexture.compute">
+      <Filter>Compute\GpuDriven</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Cluster.compute">
+      <Filter>Compute\GpuDriven</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="gb2312"?>
+<UIEditor.UIResourceInfo BaseTypeIsMacross="False" BaseTypeSaveName="Client|EngineCore@EngineNS.UISystem.Controls.UserControl" Description="" Id="326ce3a2-e035-4357-b537-7ce7c325d1ec" NotGenerateCode="False" ResourceType="UI" Version="34">
+	<CustomFunctions_Client __TypeStr__="Common|mscorlib@System.Collections.Generic.List`1[[Client|Macross@Macross.ResourceInfos.MacrossResourceInfo+CustomFunctionData]]"/>
+	<CustomFunctions_Server __TypeStr__="Common|mscorlib@System.Collections.Generic.List`1[[Client|Macross@Macross.ResourceInfos.MacrossResourceInfo+CustomFunctionData]]"/>
+	<ReferenceRNameList 0="1|ui/uv_ui_joysticks_background.uvanim" 1="1|ui/uv_ui_joysticks_thumb.uvanim" 2="1|ui/uv_ui_button_normal.uvanim" 3="1|ui/uv_ui_button_pressed.uvanim" 4="1|ui/uv_ui_button_hovered.uvanim" 5="1|ui/uv_ui_button_disable.uvanim" 6="0|font/msyh.ttf" 7="1|ui/uv_ui_default.uvanim">System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</ReferenceRNameList>
+	<RNameHistory>System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</RNameHistory>
+	<UIEventDic>
+		<data Value="OnProcessValue___1a254c81_32b6_478f_a5e4_200d522856a3" Id="945687006" Name="OnProcessValue"/>
+		<data Value="OnClick___d11e4a04_282f_430e_8f86_ed4f50449eb0" Id="1405440519" Name="OnClick"/>
+		<data Value="OnClick___7c4e1452_e8d7_4330_94bd_9400d2d50ae8" Id="1740500430" Name="OnClick"/>
+	</UIEventDic>
+</UIEditor.UIResourceInfo>
+

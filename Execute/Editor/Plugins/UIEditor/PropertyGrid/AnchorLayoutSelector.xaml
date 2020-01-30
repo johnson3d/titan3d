@@ -1,0 +1,63 @@
+﻿<UserControl x:Class="UIEditor.PropertyGrid.AnchorLayoutSelector"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             mc:Ignorable="d" >
+    <Grid>
+        <ToggleButton x:Name="TB_Show" Content="锚点预设" Padding="5,2,5,2" Style="{DynamicResource {ComponentResourceKey ResourceId=ToggleButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+        <Popup IsOpen="{Binding IsChecked, ElementName=TB_Show}" StaysOpen="False">
+            <UniformGrid Rows="4" Columns="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button Tag="LT" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_LT.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="CT" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_CT.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="RT" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_RT.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="T" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_T.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="CL" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_CL.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_Center.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="CR" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_CR.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="CH" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_CH.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="LB" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_LB.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="CB" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_CB.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="RB" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_RB.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="B" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_B.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="L" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_L.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="CV" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_CV.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="R" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_R.png" Width="64" Height="64" />
+                </Button>
+                <Button Tag="Fill" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="Button_Click">
+                    <Image Margin="2" IsHitTestVisible="False" Source="/UIEditor;component/Icons/Anchor/berth_Fill.png" Width="64" Height="64" />
+                </Button>
+            </UniformGrid>
+        </Popup>
+    </Grid>
+</UserControl>

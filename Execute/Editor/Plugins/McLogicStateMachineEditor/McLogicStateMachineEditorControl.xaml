@@ -1,0 +1,127 @@
+﻿<Macross:MacrossControlBase x:Class="McLogicStateMachineEditor.McLogicStateMachineEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:wpg="clr-namespace:WPG;assembly=EditorCommon"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             xmlns:menu="clr-namespace:ResourceLibrary.Controls.Menu;assembly=ResourceLibrary"
+             xmlns:convert="clr-namespace:EditorCommon.Converter;assembly=EditorCommon"
+             xmlns:cmd="clr-namespace:EditorCommon.Command;assembly=EditorCommon"
+             xmlns:vp="clr-namespace:EditorCommon.ViewPort;assembly=EditorCommon"
+             xmlns:dockCtrls="clr-namespace:DockControl.Controls;assembly=EditorCommon"
+             xmlns:btn="clr-namespace:ResourceLibrary.Controls.Button;assembly=ResourceLibrary"
+             xmlns:Controls="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+             xmlns:debugger="clr-namespace:EditorCommon.Controls.Debugger;assembly=EditorCommon"
+             xmlns:Macross="clr-namespace:Macross;assembly=Macross"
+             xmlns:ResourceBrowser="clr-namespace:EditorCommon.Controls.ResourceBrowser;assembly=EditorCommon"
+                            xmlns:mclogicstatemachineeditor="clr-namespace:McLogicStateMachineEditor"
+                            x:Name="userControl"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800" Loaded="UserControl_Loaded">
+    <UserControl.Resources>
+        <ResourceDictionary Source="/McLogicStateMachineEditor;component/Themes/Generic.xaml"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Menu x:Name="Menu_Main" IsMainMenu="False" Margin="0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Disabled"  Style="{DynamicResource {ComponentResourceKey ResourceId=MenuStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" FontSize="11">
+            <MenuItem x:Name="MenuItem_File" Header="File" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                <menu:TextSeparator Text="Load and Save" Style="{DynamicResource {ComponentResourceKey ResourceId=TextMenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Header="Save" Command="ApplicationCommands.Save" menu:MenuAssist.Icon="/ResourceLibrary;component/Icons/Icons/icon_file_save_40x.png" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Header="Save As..." menu:MenuAssist.Icon="/ResourceLibrary;component/Icons/Icons/icon_file_saveas_40x.png" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <Separator Style="{DynamicResource {ComponentResourceKey ResourceId=MenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Header="Open Asset..." menu:MenuAssist.Icon="/ResourceLibrary;component/Icons/Icons/icon_asset_open_16px.png" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Header="Save All" menu:MenuAssist.Icon="/ResourceLibrary;component/Icons/Icons/icon_file_saveall_40x.png" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Header="Choose Files to Save..." Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            </MenuItem>
+            <MenuItem x:Name="MenuItem_Edit" Header="Edit" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                <menu:TextSeparator Text="History" Style="{DynamicResource {ComponentResourceKey ResourceId=TextMenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Header="{Binding Command, RelativeSource={x:Static RelativeSource.Self}, Converter={x:Static convert:CommandConverter_String.Instance}}" CommandParameter="{Binding UndoRedoKey, ElementName=userControl}" Command="{x:Static cmd:CustomCommands.Undo}" menu:MenuAssist.Icon="/ResourceLibrary;component/Icons/Icons/icon_undo_40x.png" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Header="{Binding Command, RelativeSource={x:Static RelativeSource.Self}, Converter={x:Static convert:CommandConverter_String.Instance}}" CommandParameter="{Binding UndoRedoKey, ElementName=userControl}" Command="{x:Static cmd:CustomCommands.Redo}" menu:MenuAssist.Icon="/ResourceLibrary;component/Icons/Icons/icon_redo_40x.png" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Header="Undo History" menu:MenuAssist.Icon="/ResourceLibrary;component/Icons/Icons/icon_tab_UndoHistory_16px.png" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            </MenuItem>
+            <MenuItem Header="Asset" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+
+            </MenuItem>
+            <MenuItem x:Name="MenuItem_Window" Header="Window" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+            </MenuItem>
+            <MenuItem Header="Help" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+        </Menu>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBlock Text="Parent class:" Margin="2,2,5,2" Foreground="#FF6E6E6E"/>
+            <TextBlock Text="{Binding ParentClassName, ElementName=userControl}" Margin="2,2,5,2" Foreground="White"/>
+        </StackPanel>
+        <dockCtrls:DockAbleContainerControl Grid.Row="1">
+            <dockCtrls:DockAbleTabControl>
+                <dockCtrls:DockAbleTabItem Icon="/ResourceLibrary;component/Icons/Icons/icon_tab_Toolbars_40x.png" HeaderVisible="Collapsed">
+                    <dockCtrls:DockAbleTabItem.Header>
+                        <TextBlock Text="Toolbar" TextTrimming="CharacterEllipsis" />
+                    </dockCtrls:DockAbleTabItem.Header>
+                    <ToolBar x:Name="MainToolbar" Style="{DynamicResource {ComponentResourceKey ResourceId=ToolBarStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Height="64">
+                        <btn:IconTextBtn Icon="{Binding CompileStatusIcon, ElementName=userControl}" Text="Compile" MouseLeftButtonDown="Btn_Compile_Click"/>
+                        <btn:IconTextBtn IsComboBox="True">
+                            <RadioButton Content="Debug" Foreground="White" GroupName="CompileConfig" IsChecked="True" Checked="RadioButton_Compile_Debug_Checked"/>
+                            <RadioButton Content="Release" Foreground="White" GroupName="CompileConfig" Checked="RadioButton_Compile_Release_Checked"/>
+                            <Separator/>
+                            <CheckBox Content="只编译打开的Macross" IsChecked="{Binding OnlyCompileOpendMacross, ElementName=userControl}" Foreground="White"/>
+                            <MenuItem Header="Save On Compile" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                                <MenuItem Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                                    <MenuItem.Header>
+                                        <RadioButton Content="Never" GroupName="SOC" Foreground="White"/>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                                <MenuItem Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                                    <MenuItem.Header>
+                                        <RadioButton Content="On Success Only" GroupName="SOC" Foreground="White"/>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                                <MenuItem Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                                    <MenuItem.Header>
+                                        <RadioButton Content="Always" GroupName="SOC" Foreground="White"/>
+                                    </MenuItem.Header>
+                                </MenuItem>
+                            </MenuItem>
+                            <MenuItem Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                                <MenuItem.Header>
+                                    <CheckBox Content="Jump to Error Node" IsChecked="{Binding JumpToErrorNode, ElementName=userControl}" Foreground="White"/>
+                                </MenuItem.Header>
+                            </MenuItem>
+                        </btn:IconTextBtn>
+                        <Separator/>
+                        <btn:IconTextBtn Icon="/ResourceLibrary;component/Icons/Icons/LV_Save.png" Text="Save" MouseLeftButtonDown="Btn_Save_Click"/>
+                        <btn:IconTextBtn Icon="/ResourceLibrary;component/Icons/Icons/icon_toolbar_genericfinder_512px.png" Text="Browse"/>
+                        <Separator/>
+                        <btn:IconTextBtn Icon="/ResourceLibrary;component/Icons/Icons/icon_Blueprint_Find_512px.png" Text="Find"/>
+                        <Separator/>
+                        <btn:IconTextBtn Icon="/ResourceLibrary;component/Icons/Icons/icon_Blueprint_Options_40px.png" Text="Class Settings"/>
+                        <btn:IconTextBtn Icon="/ResourceLibrary;component/Icons/Icons/icon_BlueprintEditor_Defaults_40x.png" Text="默认值" Click="Btn_ClassDefaults_Click"/>
+                        <Separator/>
+                        <debugger:PlayAndDebugToolbar x:Name="DebuggerToolbar" />
+                    </ToolBar>
+                </dockCtrls:DockAbleTabItem>
+            </dockCtrls:DockAbleTabControl>
+        </dockCtrls:DockAbleContainerControl>
+        <GridSplitter Focusable="False" Grid.Row="2" Style="{DynamicResource {ComponentResourceKey ResourceId=GridSplitterStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" HorizontalAlignment="Stretch" IsEnabled="False"/>
+        <dockCtrls:DockAbleContainerControl Grid.Row="3">
+            <dockCtrls:DockAbleTabControl x:Name="LinksTabControl" SelectedIndex="{Binding CCSShowIdx, ElementName=userControl, Mode=TwoWay}">
+                <dockCtrls:DockAbleTabItem Visibility="{Binding ClientVisible, ElementName=userControl}" Icon="/ResourceLibrary;component/Icons/Icons/icon_Blueprint_EventGraph_24x.png">
+                    <dockCtrls:DockAbleTabItem.Header>
+                        <TextBlock Text="Client" TextTrimming="CharacterEllipsis" />
+                    </dockCtrls:DockAbleTabItem.Header>
+                    <mclogicstatemachineeditor:McLogicFSMLinkControl x:Name="Macross_Client" Margin="1" CSType="Client"/>
+                </dockCtrls:DockAbleTabItem>
+                <dockCtrls:DockAbleTabItem Visibility="{Binding ServerVisible, ElementName=userControl}" Icon="/ResourceLibrary;component/Icons/Icons/icon_Blueprint_EventGraph_24x.png">
+                    <dockCtrls:DockAbleTabItem.Header>
+                        <TextBlock Text="Server" TextTrimming="CharacterEllipsis" />
+                    </dockCtrls:DockAbleTabItem.Header>
+                    <mclogicstatemachineeditor:McLogicFSMLinkControl x:Name="Macross_Server" Margin="1" CSType="Server"/>
+                </dockCtrls:DockAbleTabItem>
+            </dockCtrls:DockAbleTabControl>
+        </dockCtrls:DockAbleContainerControl>
+    </Grid>
+</Macross:MacrossControlBase>

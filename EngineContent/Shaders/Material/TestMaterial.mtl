@@ -1,0 +1,12 @@
+
+Texture2D txDiffuse;
+SamplerState samLinear;
+
+void DoVSMaterial(in PS_INPUT input, inout MTL_OUTPUT mtl)
+{
+}
+
+void DoPSMaterial(in PS_INPUT input, inout MTL_OUTPUT mtl)
+{
+	mtl.mAlbedo = txDiffuse.Sample( samLinear, input.vUV ).rgb * vMeshColor.rgb;
+}

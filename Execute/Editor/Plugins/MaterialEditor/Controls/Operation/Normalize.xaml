@@ -1,0 +1,20 @@
+﻿<myTypes:BaseNodeControl x:Name="baseNodeControl" x:Class="MaterialEditor.Controls.Operation.Normalize"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+             xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+			 xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+             mc:Ignorable="d" BlendBrush="#FF63845F" >
+    <myTypes:BaseNodeControl.Resources>
+        <ResourceDictionary Source="/MaterialEditor;component/Themes/Generic.xaml" />
+	</myTypes:BaseNodeControl.Resources>
+    <myTypes:BaseNodeControl.Header>
+        <TextBlock FontStyle="Normal" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{StaticResource TextForeground}" IsHitTestVisible="False">Normalize</TextBlock>
+    </myTypes:BaseNodeControl.Header>
+    <Grid>
+        <baseCtrl:LinkInControl Name="InputLink" NameString="VectorInput" Margin="8,0,31,0" Grid.Row="2" Height="15" BackBrush="{StaticResource LinkDefault}" HorizontalAlignment="Left" Direction="Left" />
+        <baseCtrl:LinkOutControl Name="ResultLink" Margin="0,0,8,0" Grid.Row="1" Grid.Column="1" Width="15" Height="15" BackBrush="{StaticResource LinkDefault}" HorizontalAlignment="Right" Direction="Right" />
+    </Grid>            
+</myTypes:BaseNodeControl>

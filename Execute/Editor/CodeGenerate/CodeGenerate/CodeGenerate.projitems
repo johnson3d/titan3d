@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>2a56e7df-ecb9-4d34-ae44-94654d3b22ee</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>CodeGenerateSystem</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BaseNodeControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeDom\CodeCastExpression.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeDom\CodeLambdaExpression.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeDom\CodeMemberMethod.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeDom\CodeMethodInvokeExpression.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeDom\CodeSwitchCaseStatement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodeDom\CodeTypeDeclaration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommentNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CSharpCodeProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileIntegrity.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FixedStringLookup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GenerateCodeContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IndentedTextWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Link.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LinkControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NodesContainer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Program.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PropertyClassGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RedistVersionInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SR.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UsefulMember.cs" />
+  </ItemGroup>
+</Project>

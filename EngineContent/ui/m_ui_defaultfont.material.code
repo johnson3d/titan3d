@@ -1,0 +1,23 @@
+
+Texture2D ShaderVar_txDiffuse_D3_4A_8F_D7_16_55_B6_0C;
+SamplerState Samp_ShaderVar_txDiffuse_D3_4A_8F_D7_16_55_B6_0C;
+
+void DoVSMaterial_8db1981e_a8d1_4709_8263_a9f7b12c5bb1(in PS_INPUT input, inout MTL_OUTPUT mtl)
+{
+
+
+
+}
+void DoPSMaterial_8db1981e_a8d1_4709_8263_a9f7b12c5bb1(in PS_INPUT input, inout MTL_OUTPUT mtl)
+{
+    float4 ShaderVar_1abab174_f9f6_4f6b_ba68_89cf8d30afbb_D3_4A_8F_D7_16_55_B6_0C = float4(1,1,1,1);
+    float4 ShaderVar_txDiffuse_D3_4A_8F_D7_16_55_B6_0C_2D = float4(0,0,0,0);
+
+
+    mtl.mAlbedo = ShaderVar_1abab174_f9f6_4f6b_ba68_89cf8d30afbb_D3_4A_8F_D7_16_55_B6_0C.xyz;
+    ShaderVar_txDiffuse_D3_4A_8F_D7_16_55_B6_0C_2D = ShaderVar_txDiffuse_D3_4A_8F_D7_16_55_B6_0C.Sample(Samp_ShaderVar_txDiffuse_D3_4A_8F_D7_16_55_B6_0C,input.vUV);
+    mtl.mAlpha = ShaderVar_txDiffuse_D3_4A_8F_D7_16_55_B6_0C_2D.x;
+
+}
+#define DO_VS_MATERIAL DoVSMaterial_8db1981e_a8d1_4709_8263_a9f7b12c5bb1
+#define DO_PS_MATERIAL DoPSMaterial_8db1981e_a8d1_4709_8263_a9f7b12c5bb1

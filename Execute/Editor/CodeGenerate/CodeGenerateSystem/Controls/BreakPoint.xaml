@@ -1,0 +1,15 @@
+﻿<UserControl x:Name="userControl"
+    x:Class="CodeGenerateSystem.Controls.BreakPoint"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:CodeDomNode"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" Width="32" Height="32" ToolTip="点击开启或关闭断点"
+    MouseLeftButtonDown="UserControl_MouseLeftButtonDown" MouseLeftButtonUp="UserControl_MouseLeftButtonUp">
+    <UserControl.Resources>
+        <BitmapImage x:Key="Breakpoint_Valid" UriSource="/ResourceLibrary;component/Icons/Graph/Breakpoint_Valid.png"/>
+        <BitmapImage x:Key="Breakpoint_Disabled" UriSource="/ResourceLibrary;component/Icons/Graph/Breakpoint_Disabled.png"/>
+   </UserControl.Resources>
+   <Image x:Name="PART_BREAKPT" Source="/ResourceLibrary;component/Icons/Graph/Breakpoint_Valid.png"/>
+</UserControl>

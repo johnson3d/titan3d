@@ -1,0 +1,29 @@
+﻿<myTypes:BaseNodeControl x:Name="baseNodeControl" x:Class="MaterialEditor.Controls.MaterialControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+             xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+			 xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+             mc:Ignorable="d" BlendBrush="#FF8D7864" >
+	<myTypes:BaseNodeControl.Resources>
+		<ResourceDictionary Source="/MaterialEditor;component/Themes/Generic.xaml" />
+	</myTypes:BaseNodeControl.Resources>
+    <myTypes:BaseNodeControl.Header>
+        <TextBlock Text="{Binding TitleString, ElementName=baseNodeControl}"/>
+    </myTypes:BaseNodeControl.Header>
+    <Grid>
+		<Grid>
+	        <Grid.RowDefinitions>
+	            <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+	        </Grid.RowDefinitions>
+	        <StackPanel x:Name="SemanticStackPanel" />
+            <Expander x:Name="ProExpander"  Header="Other"  Grid.Row="1" Style="{DynamicResource {ComponentResourceKey ResourceId=ExpanderStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Visibility="Collapsed">
+	            <StackPanel x:Name="UnusedSemanticStackPanel" />
+	        </Expander>
+	    </Grid>
+    </Grid>
+</myTypes:BaseNodeControl>

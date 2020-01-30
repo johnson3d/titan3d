@@ -1,0 +1,160 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:clr="clr-namespace:System;assembly=mscorlib" xmlns:clr2="clr-namespace:System.Collections;assembly=mscorlib" xmlns:local="clr-namespace:WPG" xmlns:data="clr-namespace:WPG.Data" xmlns:converters="clr-namespace:WPG.Converters" xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+
+	<!-- Thumb Style -->
+	<Style x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SimpleThumbStyle}" d:IsControlPart="True" TargetType="{x:Type Thumb}" BasedOn="{x:Null}">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Thumb}">
+					<Grid Margin="0,0,0,0" x:Name="Grid">
+						<Rectangle HorizontalAlignment="Stretch" x:Name="Rectangle" VerticalAlignment="Stretch" Width="8" Height="Auto" RadiusX="3" RadiusY="3" Fill="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledBorderBrush}}" Stroke="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=NormalBorderBrush}}" StrokeThickness="0" />
+					</Grid>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsFocused" Value="True" />
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter Property="Fill" TargetName="Rectangle" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DefaultForegroundBrush}}" />
+						</Trigger>
+						<Trigger Property="IsEnabled" Value="False" />
+						<Trigger Property="IsDragging" Value="True">
+							<Setter Property="Fill" TargetName="Rectangle" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DefaultForegroundBrush}}" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<!-- WPG ScrollRepeatButton Style -->
+	<Style x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SimpleScrollRepeatButtonStyle}" d:IsControlPart="True" TargetType="{x:Type RepeatButton}">
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="BorderBrush" Value="Transparent" />
+		<Setter Property="IsTabStop" Value="false" />
+		<Setter Property="Focusable" Value="false" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type RepeatButton}">
+					<Grid>
+						<Rectangle Fill="{TemplateBinding Background}" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="{TemplateBinding BorderThickness}" />
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<!-- WPG RepeatButton Style -->
+	<Style x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SimpleRepeatButton}" d:IsControlPart="True" TargetType="{x:Type RepeatButton}" BasedOn="{x:Null}">
+		<Setter Property="Background" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=NormalBrush}}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=NormalBorderBrush}}" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type RepeatButton}">
+					<Grid>
+						<Border x:Name="Border" BorderThickness="{TemplateBinding BorderThickness}" />
+						<ContentPresenter HorizontalAlignment="Center" x:Name="ContentPresenter" VerticalAlignment="Center" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
+					</Grid>
+					<ControlTemplate.Triggers>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<!-- WPG ScrollBar Style -->
+	<Style x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarStyle}" TargetType="{x:Type ScrollBar}">
+		<Setter Property="Stylus.IsFlicksEnabled" Value="false" />
+		<Setter Property="Foreground" Value="{StaticResource {x:Static SystemColors.ControlTextBrushKey}}" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type ScrollBar}">
+					<Border Width="14" Height="Auto" Background="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ExpanderBackgroundBrush}}" CornerRadius="5,5,5,5">
+						<Grid x:Name="GridRoot" Width="Auto" Height="Auto">
+							<Grid.RowDefinitions>
+								<RowDefinition MaxHeight="18" />
+								<RowDefinition Height="0.00001*" />
+								<RowDefinition MaxHeight="18" />
+							</Grid.RowDefinitions>
+
+							<RepeatButton x:Name="DecreaseRepeat" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SimpleRepeatButton}}" Command="ScrollBar.LineUpCommand" Background="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledControlBorderBrush}}" BorderBrush="{x:Null}">
+								<Grid>
+									<Path x:Name="DecreaseArrow" StrokeThickness="1" Data="M0,7 L8,7 4,-8.437695E-15 z" Fill="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledBorderBrush}}" Margin="0,-3,0,0" />
+								</Grid>
+							</RepeatButton>
+
+							<!-- Track is a special layout container which sizes the thumb and the repeat button which do jump scrolling either side of it -->
+							<Track Grid.Row="1" x:Name="PART_Track" Orientation="Vertical" IsDirectionReversed="true">
+								<Track.Thumb>
+									<Thumb Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SimpleThumbStyle}}" Background="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=GlyphBrush}}" />
+								</Track.Thumb>
+								<Track.IncreaseRepeatButton>
+									<RepeatButton x:Name="PageUp" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SimpleScrollRepeatButtonStyle}}" Command="ScrollBar.PageDownCommand" />
+								</Track.IncreaseRepeatButton>
+								<Track.DecreaseRepeatButton>
+									<RepeatButton x:Name="PageDown" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SimpleScrollRepeatButtonStyle}}" Command="ScrollBar.PageUpCommand" />
+								</Track.DecreaseRepeatButton>
+							</Track>
+
+							<RepeatButton Grid.Row="2" x:Name="IncreaseRepeat" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SimpleRepeatButton}}" Command="ScrollBar.LineDownCommand" Background="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledControlBorderBrush}}" BorderBrush="{x:Null}">
+								<Grid>
+									<Path x:Name="IncreaseArrow" StrokeThickness="1" Data="M0,0 L4,7 8,0 z" Fill="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledBorderBrush}}" Margin="0,0,0,-3" />
+								</Grid>
+							</RepeatButton>
+						</Grid>
+
+					</Border>
+
+					<!-- This uses a single template for ScrollBar and rotate it to be Horizontal
+					It also changes the commands so that the it does Left and Right instead of Up and Down Commands -->
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter Property="Fill" TargetName="DecreaseArrow" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DefaultForegroundBrush}}" />
+							<Setter Property="Fill" TargetName="IncreaseArrow" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DefaultForegroundBrush}}" />
+						</Trigger>
+						<Trigger Property="Orientation" Value="Horizontal">
+
+							<!-- Rotate the ScrollBar from Vertical to Horizontal -->
+							<Setter Property="LayoutTransform" TargetName="GridRoot">
+								<Setter.Value>
+									<RotateTransform Angle="-90" />
+								</Setter.Value>
+							</Setter>
+
+							<!-- Track is bound to Orientation internally, so we need to rotate it back to Vertical -->
+							<Setter TargetName="PART_Track" Property="Orientation" Value="Vertical" />
+
+							<!-- Change the commands to do Horizontal commands -->
+							<Setter Property="Command" Value="ScrollBar.LineLeftCommand" TargetName="DecreaseRepeat" />
+							<Setter Property="Command" Value="ScrollBar.LineRightCommand" TargetName="IncreaseRepeat" />
+							<Setter Property="Command" Value="ScrollBar.PageLeftCommand" TargetName="PageDown" />
+							<Setter Property="Command" Value="ScrollBar.PageRightCommand" TargetName="PageUp" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<!-- WPG ScrollViewer Style  -->
+	<Style x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollViewerStyle}" TargetType="{x:Type ScrollViewer}">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type ScrollViewer}">
+					<Grid Background="{TemplateBinding Background}">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="Auto" />
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="*" />
+							<RowDefinition Height="Auto" />
+						</Grid.RowDefinitions>
+						<ScrollContentPresenter Grid.Column="0" Grid.Row="0" Margin="{TemplateBinding Padding}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" CanContentScroll="{TemplateBinding CanContentScroll}" />
+
+						<!-- The visibility of the ScrollBars is controlled by the implementation fo the control -->
+						<ScrollBar Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" Grid.Column="0" Grid.Row="1" x:Name="PART_HorizontalScrollBar" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarStyle}}" Orientation="Horizontal" Value="{Binding Path=HorizontalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportWidth}" Minimum="0" Maximum="{TemplateBinding ScrollableWidth}" AutomationProperties.AutomationId="HorizontalScrollBar" />
+						<ScrollBar Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" Grid.Column="1" Grid.Row="0" x:Name="PART_VerticalScrollBar" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarStyle}}" Orientation="Vertical" Value="{Binding Path=VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportHeight}" Minimum="0" Maximum="{TemplateBinding ScrollableHeight}" AutomationProperties.AutomationId="VerticalScrollBar" />
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+</ResourceDictionary>

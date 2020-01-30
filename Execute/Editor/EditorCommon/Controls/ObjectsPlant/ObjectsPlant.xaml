@@ -1,0 +1,33 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             xmlns:local="clr-namespace:EditorCommon.Controls.ObjectsPlant"
+             xmlns:SearchBox="clr-namespace:SearchBox" x:Class="EditorCommon.Controls.ObjectsPlant.ObjectsPlant"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Loaded="UserControl_Loaded">
+    <UserControl.Resources>
+        
+    </UserControl.Resources>
+    <!--<TabControl Style="{DynamicResource {ComponentResourceKey ResourceId=TabControlStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+        <TabItem Style="{DynamicResource {ComponentResourceKey ResourceId=TabItemStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">-->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <SearchBox:SearchBox Height="Auto" Grid.ColumnSpan="2"/>
+                <StackPanel x:Name="StackPanel_Categorys" Grid.Row="1" Background="#FF404040"/>
+                <ScrollViewer Grid.Row="1" Grid.Column="1" Style="{DynamicResource {ComponentResourceKey ResourceId=ScrollViewerStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                    <StackPanel x:Name="StackPanel_PlantItems" Background="{DynamicResource {ComponentResourceKey ResourceId=RadioToggleButton2_CheckedBackground, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                </ScrollViewer>
+            </Grid>
+        <!--</TabItem>
+    </TabControl>-->
+</UserControl>

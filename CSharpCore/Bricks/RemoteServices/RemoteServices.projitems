@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>45f288a1-9077-434f-b331-736245d3543e</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.RemoteServices</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AutoSyncData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ErrorDef.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IArgument.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Net\TcpConnect.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Net\TcpServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RemoteServicesHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RPCProcessor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RPCAwaiter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RPCFactorManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RPCExecuter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IPackageReceiver.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RPCRouter.cs" />
+  </ItemGroup>
+</Project>

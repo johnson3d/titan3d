@@ -1,0 +1,36 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:clr="clr-namespace:System;assembly=mscorlib" xmlns:clr2="clr-namespace:System.Collections;assembly=mscorlib" xmlns:local="clr-namespace:WPG" xmlns:data="clr-namespace:WPG.Data" xmlns:converters="clr-namespace:WPG.Converters" xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+
+	<!-- WPG TextBox Style -->
+	<Style x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=TextBoxStyle}" TargetType="{x:Type TextBox}">
+		<Setter Property="KeyboardNavigation.TabNavigation" Value="None" />
+		<Setter Property="FocusVisualStyle" Value="{x:Null}" />
+		<Setter Property="AllowDrop" Value="true" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type TextBox}">
+					<Grid>
+						<Border x:Name="Border" BorderThickness="1" Padding="0" BorderBrush="Transparent">
+							<!-- The implementation places the Content into the ScrollViewer. It must be named PART_ContentHost for the control to function -->
+							<ScrollViewer Margin="0" x:Name="PART_ContentHost" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollViewerStyle}}" Background="{TemplateBinding Background}" />
+						</Border>
+					</Grid>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsEnabled" Value="False">
+							<Setter Property="Background" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledBackgroundBrush}}" TargetName="Border" />
+							<Setter Property="BorderBrush" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledBackgroundBrush}}" TargetName="Border" />
+							<Setter Property="Foreground" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledForegroundBrush}}" />
+						</Trigger>
+						<Trigger Property="IsMouseOver" Value="true">
+							<Setter Property="BorderBrush" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SolidBorderBrush}}" TargetName="Border" />
+						</Trigger>
+						<Trigger Property="IsFocused" Value="true">
+							<Setter Property="BorderBrush" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SolidBorderBrush}}" TargetName="Border" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+
+</ResourceDictionary>

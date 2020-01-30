@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="EditorCommon.Controls.Debugger.PlayAndDebugToolbar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EditorCommon.Controls.Debugger"
+             xmlns:btn="clr-namespace:ResourceLibrary.Controls.Button;assembly=ResourceLibrary"
+             xmlns:convert="clr-namespace:EditorCommon.Converter"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             mc:Ignorable="d" x:Name="userControl" Loaded="userControl_Loaded" Unloaded="userControl_Unloaded">
+    <UserControl.Resources>
+        <BitmapImage x:Key="PlayInWindow" UriSource="/ResourceLibrary;component/Icons/Icons/icon_playInWindow_40x.png"/>
+        <BitmapImage x:Key="StopPlay" UriSource="/ResourceLibrary;component/Icons/Icons/icon_stop_40x.png"/>
+    </UserControl.Resources>
+    <StackPanel x:Name="StackPanel_Btns" Orientation="Horizontal">
+        <btn:IconTextBtn x:Name="PIEBtn" IsEnabled="{Binding ButtonEnable, ElementName=userControl}" Icon="{StaticResource PlayInWindow}" Text="Play" Click="IconTextBtn_PlayInWindow_Click"/>
+        <btn:IconTextBtn IsEnabled="{Binding ButtonEnable, ElementName=userControl}" Visibility="{Binding IsInPIEMode, ElementName=userControl, Converter={x:Static convert:Bool2Visibility_FalseVisible_TrueCollapsed.Instance}}" Icon="/ResourceLibrary;component/Icons/Icons/Launcher_Run.png" Text="Launch"/>
+
+        <btn:IconTextBtn IsEnabled="{Binding ButtonEnable, ElementName=userControl}" Click="IconTextBtn_Resume_Click" Visibility="{Binding IsBreaking, ElementName=userControl, Converter={x:Static convert:Bool2Visibility_Collapsed.Instance}}" Icon="/ResourceLibrary;component/Icons/Icons/icon_simulate_40x.png" Text="Resume"/>
+        <btn:IconTextBtn IsEnabled="{Binding ButtonEnable, ElementName=userControl}" Visibility="{Binding IsBreaking, ElementName=userControl, Converter={x:Static convert:Bool2Visibility_Collapsed.Instance}}" Icon="/ResourceLibrary;component/Icons/Icons/icon_findnode_40x.png" Text="Find Node"/>
+        <btn:IconTextBtn IsEnabled="{Binding ButtonEnable, ElementName=userControl}" Visibility="{Binding IsBreaking, ElementName=userControl, Converter={x:Static convert:Bool2Visibility_Collapsed.Instance}}" Icon="/ResourceLibrary;component/Icons/Icons/icon_DebugStepIn_40x.png" Text="Step Into"/>
+        <btn:IconTextBtn IsEnabled="{Binding ButtonEnable, ElementName=userControl}" Visibility="{Binding IsBreaking, ElementName=userControl, Converter={x:Static convert:Bool2Visibility_Collapsed.Instance}}" Icon="/ResourceLibrary;component/Icons/Icons/icon_DebugStepOver_40x.png" Text="Step Over"/>
+        <btn:IconTextBtn IsEnabled="{Binding ButtonEnable, ElementName=userControl}" Visibility="{Binding IsBreaking, ElementName=userControl, Converter={x:Static convert:Bool2Visibility_Collapsed.Instance}}" Icon="/ResourceLibrary;component/Icons/Icons/icon_DebugStepOut_40x.png" Text="Step Out"/>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,270 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="openxlsx">
+      <UniqueIdentifier>{a03195e4-cf6f-443f-81b4-6a7dec9eb939}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zippy">
+      <UniqueIdentifier>{357be25e-d835-4884-9b63-fc0bd11f6ff0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pugixml">
+      <UniqueIdentifier>{f0ab2b12-8aae-4dbe-9d6b-c6e32247c21a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zippy\Zippy">
+      <UniqueIdentifier>{454f501e-3310-4e94-9e3f-f3ce0d2d3b9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zippy\Zippy\miniz">
+      <UniqueIdentifier>{65cccd31-363a-43ff-93af-86ca80df277e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="openxlsx\interfaces">
+      <UniqueIdentifier>{ccdef47d-9174-4cc7-a876-3bfb8aabe8ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="openxlsx\implementation">
+      <UniqueIdentifier>{b1285a51-40c4-4a11-a457-56c8971e40f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="openxlsx\interfaces\c++">
+      <UniqueIdentifier>{e9c9e9db-0344-452c-abb9-0887f3755ac8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="openxlsx\interfaces\c++\headers">
+      <UniqueIdentifier>{0877b4fd-60d6-4f84-b351-a68db026d74b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="openxlsx\interfaces\c++\sources">
+      <UniqueIdentifier>{3bf1da93-8770-47fe-a937-0649e3bd83e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="openxlsx\implementation\headers">
+      <UniqueIdentifier>{fd6e7fb1-3328-4455-aae3-2cfc1990cfc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="openxlsx\implementation\sources">
+      <UniqueIdentifier>{92109ae6-0aa6-48f5-91ce-49cc29d71a59}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)pugixml\pugixml.hpp">
+      <Filter>pugixml</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)zippy\Zippy.h">
+      <Filter>zippy</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)zippy\Zippy\ZipArchive.h">
+      <Filter>zippy\Zippy</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)zippy\Zippy\ZipEntry.h">
+      <Filter>zippy\Zippy</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)zippy\Zippy\ZipException.h">
+      <Filter>zippy\Zippy</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)zippy\Zippy\miniz\miniz.h">
+      <Filter>zippy\Zippy\miniz</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLAbstractXMLFile_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLAppProperties_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLCell_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLCellRange_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLCellReference_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLCellType_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLCellValue_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLChartsheet_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLColor_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLColumn_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLContentTypes_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLCoreProperties_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLDocument_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLEnums_impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLRelationships_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLRow_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLSharedStrings_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLSheet_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLTemplate_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLTokenizer_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLWorkbook_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLWorksheet_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\implementation\headers\XLXml_Impl.h">
+      <Filter>openxlsx\implementation\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\OpenXLSX.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\openxlsx_export.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\XLCell.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\XLCellRange.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\XLCellReference.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\XLCellValue.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\XLChartsheet.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\XLColumn.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\XLDefinitions.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\XLDocument.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\XLException.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\XLRow.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\XLSheet.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\XLWorkbook.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\headers\XLWorksheet.h">
+      <Filter>openxlsx\interfaces\c++\headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLAbstractXMLFile_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLAppProperties_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLCell_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLCellRange_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLCellReference_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLCellValue_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLChartsheet_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLColor_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLColumn_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLContentTypes_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLCoreProperties_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLDocument_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLRelationships_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLRow_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLSharedStrings_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLSheet_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLTokenizer_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLWorkbook_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\implementation\sources\XLWorksheet_Impl.cpp">
+      <Filter>openxlsx\implementation\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\sources\XLCell.cpp">
+      <Filter>openxlsx\interfaces\c++\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\sources\XLCellRange.cpp">
+      <Filter>openxlsx\interfaces\c++\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\sources\XLCellReference.cpp">
+      <Filter>openxlsx\interfaces\c++\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\sources\XLCellValue.cpp">
+      <Filter>openxlsx\interfaces\c++\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\sources\XLChartsheet.cpp">
+      <Filter>openxlsx\interfaces\c++\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\sources\XLColumn.cpp">
+      <Filter>openxlsx\interfaces\c++\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\sources\XLDocument.cpp">
+      <Filter>openxlsx\interfaces\c++\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\sources\XLRow.cpp">
+      <Filter>openxlsx\interfaces\c++\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\sources\XLSheet.cpp">
+      <Filter>openxlsx\interfaces\c++\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\sources\XLWorkbook.cpp">
+      <Filter>openxlsx\interfaces\c++\sources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)openxlsx\interfaces\c++\sources\XLWorksheet.cpp">
+      <Filter>openxlsx\interfaces\c++\sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="$(MSBuildThisFileDirectory)config.xml" />
+  </ItemGroup>
+</Project>

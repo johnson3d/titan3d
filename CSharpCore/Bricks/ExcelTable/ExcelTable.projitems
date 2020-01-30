@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>2551c6b4-ff3f-450e-93e3-293d19531ff9</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.ExcelTable</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)DataSet.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExcelBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExcelExporter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExcelImporter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MacrossManual.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)config.xml" />
+  </ItemGroup>
+</Project>

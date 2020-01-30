@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{8d9c555f-ab72-4a7f-af30-455c97cb7b4c}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)FBXAnalyzer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FbxDataConverter.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FBXManager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxAssetCreater.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxAsset_AnimationCreater.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxAsset_File.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxAsset_MeshCreater.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxAsset_SubMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxFileImportOption.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxFBXImporter.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxFBXManager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxAssetImportOption.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)FBXAnalyzer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FbxDataConverter.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FBXManager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxAssetCreater.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxAsset_AnimationCreater.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxAsset_File.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxAsset_MeshCreater.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxAsset_SubMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxFileImportOption.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxFBXImporter.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxFBXManager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxAssetImportOption.cpp" />
+  </ItemGroup>
+</Project>

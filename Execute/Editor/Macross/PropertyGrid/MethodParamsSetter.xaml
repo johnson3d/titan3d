@@ -1,0 +1,44 @@
+﻿<UserControl x:Class="Macross.PropertyGrid.MethodParamsSetter" x:Name="userControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Macross.PropertyGrid"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             xmlns:ctrls="clr-namespace:EditorCommon.Controls;assembly=EditorCommon"
+             mc:Ignorable="d" d:DesignWidth="420.315" d:DesignHeight="156.278" >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+            <Button Height="18" Width="25" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="0,0,3,0" Click="Button_Add_Click">
+                <TextBlock Text="&#xf15b;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            </Button>
+            <Button Height="18" Width="25" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="0,0,3,0" Click="Button_Remove_Click">
+                <Image Source="/ResourceLibrary;component/Icons/Icons/icon_Delete_40x.png" />
+            </Button>
+        </StackPanel>
+        <ListView x:Name="ListBox_Params" ItemsSource="{Binding Params, ElementName=userControl}" Grid.Row="1" Style="{DynamicResource {ComponentResourceKey ResourceId=ListViewStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+            <ListView.View>
+                <GridView ColumnHeaderContainerStyle="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=GridViewColumnHeaderStyle_Default}}">
+                    <GridViewColumn Header="名称">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ctrls:EditableTextBlock Text="{Binding ParamName}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="类型">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <local:TypeSetter VarType="{Binding ParamType, Mode=TwoWay}" BindInstance="{Binding DataContext, RelativeSource={ RelativeSource Mode=Self}}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</UserControl>

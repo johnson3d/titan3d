@@ -1,0 +1,44 @@
+﻿<UserControl x:Class="AutoBuildingEditor.Progress"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AutoBuildingEditor"
+              xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Loaded="Window_Loaded">
+    <Grid Background="#FF383636">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="370"/> 
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ProgressBar x:Name="Progress1" Height="20" Margin="8,5,5,5" Maximum="1" VerticalAlignment="Center"/>
+        <Button x:Name="CancelBtn" Content="Cancel" Click ="CancelBtn_Click"  HorizontalAlignment="Right"  Grid.Row="2" VerticalAlignment="Bottom" Width="95"/>
+        <ScrollViewer VerticalScrollBarVisibility="Visible" Grid.Row="1">
+            <ScrollViewer.Content>
+
+                <ListView x:Name="ProgressInfo" HorizontalAlignment="Left" Height="351" Margin="8,10,0,0" VerticalAlignment="Top" Width="782" AutomationProperties.IsOffscreenBehavior="Offscreen" Style="{DynamicResource {ComponentResourceKey ResourceId=ListViewStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                <ListView.View>
+                        <GridView ColumnHeaderContainerStyle="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=GridViewColumnHeaderStyle_Default}}">
+                            <GridViewColumn Header="加载时间" >
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DataTime}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn >
+                            <GridViewColumn Header="加载资源" Width="300">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Info}" Foreground ="{Binding Color}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </ScrollViewer.Content>
+    </ScrollViewer>
+    </Grid>
+</UserControl>

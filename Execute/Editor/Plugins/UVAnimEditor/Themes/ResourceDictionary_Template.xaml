@@ -1,0 +1,18 @@
+﻿<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:UVAnimEditor.PropertyGrid"
+    xmlns:Bind="clr-namespace:EditorCommon.Bind;assembly=EditorCommon">
+    <!-- 应该在此定义资源字典条目。-->
+    <DataTemplate x:Key="Scale9Setter">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <local:Scale9InfoSetter Scale9Info="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      BindInstance="{Binding Instance}"
+                                      BindProperty="{Binding PGProperty}" />
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

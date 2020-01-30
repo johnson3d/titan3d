@@ -1,0 +1,42 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <LinearGradientBrush x:Key="MaterialControl">
+    	<GradientStop Color="#FFE57F28"/>
+    	<GradientStop Color="#FF543114" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Method">
+    	<GradientStop Color="#FF0061FF"/>
+    	<GradientStop Color="#FF001A45" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="IF">
+    	<GradientStop Color="#FF00E2FF"/>
+    	<GradientStop Color="#FF004C56" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Texture">
+    	<GradientStop Color="#FF00AB49"/>
+    	<GradientStop Color="#FF003B19" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="CubeTexture">
+        <GradientStop Color="#FF01B8B8"/>
+        <GradientStop Color="#FF00363B" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Value">
+    	<GradientStop Color="White"/>
+    	<GradientStop Color="#FFC143FF"/>
+    	<GradientStop Color="#FF4A1962" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="LinkDefault" Color="White"/>
+    <SolidColorBrush x:Key="LinkDefault_Dark" Color="#FF3E3E3E"/>
+    <SolidColorBrush x:Key="ValueLink" Color="#FF00FF00"/>
+    <SolidColorBrush x:Key="ValueLink_float1" Color="#FF1CE81C"/>
+    <SolidColorBrush x:Key="ValueLink_float2" Color="#FF3AD83A"/>
+    <SolidColorBrush x:Key="ValueLink_float3" Color="#FF34A834"/>
+    <SolidColorBrush x:Key="ValueLink_float4" Color="#FF006600"/>
+    <SolidColorBrush x:Key="ValueLink_float3X3" Color="#FFC428DC"/>
+    <SolidColorBrush x:Key="ValueLink_float4X4" Color="#FFC428DC"/>
+    <SolidColorBrush x:Key="ValueLink_int" Color="#FFC143FF"/>
+    <SolidColorBrush x:Key="MethodLink" Color="#FF0061FF" />
+    <SolidColorBrush x:Key="TextureLink" Color="#FF04C5CF" />
+    <SolidColorBrush x:Key="TextForeground" Color="White" />
+    <SolidColorBrush x:Key="NodeBackground" Color="#7F020202" />
+</ResourceDictionary>

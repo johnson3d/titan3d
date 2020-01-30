@@ -1,0 +1,20 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:editorControlLib="clr-namespace:EditorCommon"
+             xmlns:local="clr-namespace:WPG.Themes.TypeEditors" xmlns:ed="http://schemas.microsoft.com/expression/2010/drawing" x:Name="userControl" x:Class="WPG.Themes.TypeEditors.Angle360EditorControl" 
+             mc:Ignorable="d" d:DesignWidth="482.667">
+    <Grid>
+    	<Grid.ColumnDefinitions>
+    		<ColumnDefinition Width="Auto"/>
+    		<ColumnDefinition Width="0.764*"/>
+    	</Grid.ColumnDefinitions>
+    	<Grid Margin="0" Width="50" Height="50">
+    		<Ellipse x:Name="Ellipse_BG" Fill="White" Margin="2" MouseDown="Ellipse_MouseDown" MouseMove="Ellipse_MouseMove" MouseUp="Ellipse_MouseUp"/>
+    		<ed:Arc x:Name="Arc_Angle" ArcThickness="1" EndAngle="-0.001" Fill="#FF7F7F7F" Margin="{Binding Margin, ElementName=Ellipse_BG}" ArcThicknessUnit="Percent" Stretch="None" StartAngle="{Binding Angle, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsHitTestVisible="False"/>
+    	</Grid>
+        <editorControlLib:NumericTypeEditor Grid.Column="1" Margin="2" VerticalAlignment="Center" NumericObject="{Binding Angle, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+    </Grid>
+</UserControl>

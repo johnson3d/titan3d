@@ -1,0 +1,72 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:editorControlLib="clr-namespace:EditorCommon"
+             xmlns:WPG_TypeEditors="clr-namespace:WPG.TypeEditors" xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero" xmlns:local="clr-namespace:WPG.Themes.TypeEditors" x:Name="userControl" x:Class="WPG.Themes.TypeEditors.IntValueWithAutoEditor" 
+             mc:Ignorable="d" >
+	<UserControl.Resources>
+		<SolidColorBrush x:Key="CheckedBackground" Color="#FFBDBDBD" />
+		<SolidColorBrush x:Key="UnCheckedBackground" Color="#FF333333" />
+		<SolidColorBrush x:Key="MouseOverBackground" Color="#FF707070" />
+		<Style x:Key="ButtonFocusVisual">
+			<Setter Property="Control.Template">
+				<Setter.Value>
+					<ControlTemplate>
+						<Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<LinearGradientBrush x:Key="ButtonNormalBackground" EndPoint="0,1" StartPoint="0,0">
+			<GradientStop Color="#F3F3F3" Offset="0"/>
+			<GradientStop Color="#EBEBEB" Offset="0.5"/>
+			<GradientStop Color="#DDDDDD" Offset="0.5"/>
+			<GradientStop Color="#CDCDCD" Offset="1"/>
+		</LinearGradientBrush>
+		<SolidColorBrush x:Key="ButtonNormalBorder" Color="#FF707070"/>
+		<Style x:Key="ToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+			<Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
+			<Setter Property="Background" Value="{StaticResource ButtonNormalBackground}"/>
+			<Setter Property="BorderBrush" Value="{StaticResource ButtonNormalBorder}"/>
+			<Setter Property="BorderThickness" Value="1"/>
+			<Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+			<Setter Property="HorizontalContentAlignment" Value="Center"/>
+			<Setter Property="VerticalContentAlignment" Value="Center"/>
+			<Setter Property="Padding" Value="1"/>
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type ToggleButton}">
+						<Border x:Name="border" BorderBrush="Black" BorderThickness="1" CornerRadius="2" Background="{DynamicResource UnCheckedBackground}">
+							<ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+						</Border>
+						<ControlTemplate.Triggers>
+							<Trigger Property="IsKeyboardFocused" Value="true"/>							
+							<Trigger Property="IsChecked" Value="true">
+								<Setter Property="Background" TargetName="border" Value="{DynamicResource CheckedBackground}"/>
+								<Setter Property="Foreground" Value="Black" />
+							</Trigger>
+							<Trigger Property="IsMouseOver" Value="True">
+								<Setter Property="Background" TargetName="border" Value="{DynamicResource MouseOverBackground}"/>
+							</Trigger>
+							<Trigger Property="IsEnabled" Value="false">
+								<Setter Property="Foreground" Value="#ADADAD"/>
+							</Trigger>
+						</ControlTemplate.Triggers>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+	</UserControl.Resources>
+    <Grid>
+    	<Grid.ColumnDefinitions>
+    		<ColumnDefinition Width="0.686*"/>
+    		<ColumnDefinition Width="Auto"/>
+    	</Grid.ColumnDefinitions>
+
+        <editorControlLib:NumericTypeEditor d:LayoutOverrides="Height" NumericObject="{Binding IntValue, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsReadOnly, ElementName=userControl}"/>
+    	<ToggleButton x:Name="Pro_Auto" Content="Auto" Grid.Column="1" Margin="3,0,0,0" IsChecked="{Binding IsAuto, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Visibility, ElementName=userControl}" Style="{DynamicResource ToggleButtonStyle}" Foreground="White"/>
+            
+    </Grid>
+</UserControl>

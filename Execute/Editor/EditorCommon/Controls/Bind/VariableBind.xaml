@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="EditorCommon.Bind.VariableBind"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:wpgctrls="clr-namespace:WPG.Themes.TypeEditors"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             mc:Ignorable="d" x:Name="userControl" Loaded="UserControl_Loaded"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Margin="5,0,0,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="{Binding UIElementName, ElementName=userControl}" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+        <TextBlock Text="." Grid.Column="1" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+        <TextBlock Text="{Binding VariableName, ElementName=userControl}" Grid.Column="2" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+        <wpgctrls:EnumEditor Grid.Column="3" Visibility="Collapsed" VerticalAlignment="Center" Margin="2" EnumObject="{Binding BindMode, ElementName=userControl, Mode=TwoWay}"/>
+        <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+            <Button Margin="2" Click="Button_FindCustomBind_Click" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                <Image Width="12" Height="12" Source="/ResourceLibrary;component/Icons/Icons/lens_12x.png" Margin="3" />
+            </Button>
+            <Button Margin="2" Click="Button_DelCustomBind_Click" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                <Image Width="12" Height="12" Source="/ResourceLibrary;component/Icons/Icons/icon_delete_16px.png" Margin="3" />
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

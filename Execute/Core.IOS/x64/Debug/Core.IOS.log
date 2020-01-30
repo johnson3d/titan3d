@@ -1,0 +1,1 @@
+﻿E:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\VC\VCTargets\Application Type\iOS\1.0\iOS.Common.targets(197,5): error MSB4044: The "GetRemoteClCompileItems" task was not given a value for the required parameter "RemoteRootDirectory".

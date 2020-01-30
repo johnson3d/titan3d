@@ -1,0 +1,31 @@
+﻿<myTypes:BaseNodeControl x:Class="CodeDomNode.Return"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+			 xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+             xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+             mc:Ignorable="d" x:Name="baseNodeControl" BlendBrush="{DynamicResource Node_Function}">
+    <myTypes:BaseNodeControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CodeGenerateSystem;Component/Themes/Generic.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</myTypes:BaseNodeControl.Resources>
+    <myTypes:BaseNodeControl.Header>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3">
+            <Image Width="16" Height="16" Source="{DynamicResource Icon_Node}"/>
+            <TextBlock Text="{Binding NodeName, ElementName=baseNodeControl}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="3" FontSize="18.667" IsHitTestVisible="False" Foreground="{DynamicResource TextForeground}" />
+        </StackPanel>
+    </myTypes:BaseNodeControl.Header>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="1*" />
+        </Grid.RowDefinitions>
+        <baseCtrl:LinkInControl x:Name="MethodLink" PinType="Exec" Margin="8" BackBrush="{DynamicResource Link_MethodBrush}" VerticalAlignment="Center" Grid.ColumnSpan="2" HorizontalAlignment="Left" Direction="Left"/>
+        <StackPanel x:Name="StackPanel_Values" Grid.Row="1" Orientation="Vertical"/>
+    </Grid>
+</myTypes:BaseNodeControl>

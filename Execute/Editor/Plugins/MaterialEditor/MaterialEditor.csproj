@@ -1,0 +1,260 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{40CA42E7-293E-452E-B2E8-FDA0808625CA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MaterialEditor</RootNamespace>
+    <AssemblyName>MaterialEditor</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\..\binaries\Plugins\MaterialEditor\bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <WarningsAsErrors>4014,1717</WarningsAsErrors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\..\binaries\Plugins\MaterialEditor\bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <WarningsAsErrors>4014,1717</WarningsAsErrors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="PresentationFramework.Aero" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CodeGenerator.cs" />
+    <Compile Include="Controls\BaseNodeControl_ShaderVar.cs" />
+    <Compile Include="Controls\Comment.xaml.cs">
+      <DependentUpon>Comment.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MaterialControl.xaml.cs">
+      <DependentUpon>MaterialControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MaterialStreamRequire.cs" />
+    <Compile Include="Controls\NodeControlConstructionBase.cs" />
+    <Compile Include="Controls\Operation\Abs.xaml.cs">
+      <DependentUpon>Abs.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Operation\Arithmetic.xaml.cs">
+      <DependentUpon>Arithmetic.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Operation\Function.xaml.cs">
+      <DependentUpon>Function.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Operation\IF.xaml.cs">
+      <DependentUpon>IF.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Operation\Normalize.xaml.cs">
+      <DependentUpon>Normalize.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Operation\Slerp.xaml.cs">
+      <DependentUpon>Slerp.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Texture\CubeTexture.xaml.cs">
+      <DependentUpon>CubeTexture.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Texture\DepthTexture.xaml.cs">
+      <DependentUpon>DepthTexture.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Texture\FinalTexture.xaml.cs">
+      <DependentUpon>FinalTexture.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Texture\NormalTextureControl.xaml.cs">
+      <DependentUpon>NormalTextureControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Texture\Tex2D.xaml.cs">
+      <DependentUpon>Tex2D.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Texture\TextureControl.xaml.cs">
+      <DependentUpon>TextureControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Value\ColorControl.xaml.cs">
+      <DependentUpon>ColorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Value\CommonValueControl.xaml.cs">
+      <DependentUpon>CommonValueControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Value\ParticleColor.xaml.cs">
+      <DependentUpon>ParticleColor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Value\ParticleFrame.xaml.cs">
+      <DependentUpon>ParticleFrame.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Value\ParticleLifeRate.xaml.cs">
+      <DependentUpon>ParticleLifeRate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Value\PixelMaterialData.xaml.cs">
+      <DependentUpon>PixelMaterialData.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Value\ShaderAutoData.xaml.cs">
+      <DependentUpon>ShaderAutoData.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MaterialEditorControl.xaml.cs">
+      <DependentUpon>MaterialEditorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MaterialInstanceEditorControl.xaml.cs">
+      <DependentUpon>MaterialInstanceEditorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResourceInfos\MaterialInstanceResourceInfo.cs" />
+    <Compile Include="ResourceInfos\MaterialResourceInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\CoreClient.Windows\CoreClient.Windows.csproj">
+      <Project>{3b80b580-b065-4897-86ac-0b62d9e62922}</Project>
+      <Name>CoreClient.Windows</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\CodeGenerate\CodeGenerateSystem\CodeGenerateSystem.csproj">
+      <Project>{f55dbedd-cd25-4d38-939b-9b8cacab87b3}</Project>
+      <Name>CodeGenerateSystem</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\EditorCommon\EditorCommon.csproj">
+      <Project>{97caeec5-1b8d-4733-896f-40bd29e914d6}</Project>
+      <Name>EditorCommon</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ResourceLibrary\ResourceLibrary.csproj">
+      <Project>{08de6f63-d35a-4bd8-8e97-88ff115f3907}</Project>
+      <Name>ResourceLibrary</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Controls\Comment.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\MaterialControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Operation\Abs.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Operation\Arithmetic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Operation\Function.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Operation\IF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Operation\Normalize.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Operation\Slerp.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Texture\CubeTexture.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Texture\DepthTexture.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Texture\FinalTexture.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Texture\NormalTextureControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Texture\Tex2D.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Texture\TextureControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Value\ColorControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Value\CommonValueControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Value\ParticleColor.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Value\ParticleFrame.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Value\ParticleLifeRate.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Value\PixelMaterialData.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Value\ShaderAutoData.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MaterialEditorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MaterialInstanceEditorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\ResourceDictionary_MaterialEditor_Common.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

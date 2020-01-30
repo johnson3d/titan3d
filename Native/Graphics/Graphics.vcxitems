@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{730406af-9cd0-4cfb-a426-84f093acc35b}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxCamera.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxEngine.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxMaterial.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxPreHead.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxRenderPolicy.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxShadingEnv.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxInstancingModifier.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxMaterialPrimitive.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxMdfQueue.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxMeshPrimitives.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxModifier.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxSkinModifier.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Scene\GfxSceneRenderLayer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Scene\GfxSceneView.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxCamera.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxEngine.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxMaterial.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxPreHead.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxRenderPolicy.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxShadingEnv.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxInstancingModifier.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxMaterialPrimitive.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxMdfQueue.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxMeshPrimitives.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxModifier.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxSkinModifier.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Scene\GfxSceneRenderLayer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Scene\GfxSceneView.cpp" />
+  </ItemGroup>
+</Project>

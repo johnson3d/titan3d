@@ -1,0 +1,41 @@
+﻿<myTypes:BaseNodeControl x:Name="baseNodeControl"
+    x:Class="CodeDomNode.ListRemove"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+    xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+    xmlns:effect="clr-namespace:EditorCommon.Effect;assembly=EditorCommon"
+    mc:Ignorable="d" NodeType="VarNode">
+    <myTypes:BaseNodeControl.Resources>
+        <ResourceDictionary Source="/CodeGenerateSystem;Component/Themes/Generic.xaml" />
+    </myTypes:BaseNodeControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <baseCtrl:LinkInControl Name="MethodPre" PinType="Exec" Margin="8,8,8,4" VerticalAlignment="Center" Direction="Left" HorizontalAlignment="Center" />
+        <baseCtrl:LinkInControl Name="ArrayIn" PinType="Array" Margin="8,4" VerticalAlignment="Center" Direction="Left" HorizontalAlignment="Center" Grid.Row="1" />
+        <StackPanel x:Name="StackPanel_ValueIn" Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal">
+            <baseCtrl:LinkInControl Name="ValueIn" Margin="8,4,8,8" VerticalAlignment="Center" Direction="Left" HorizontalAlignment="Center" />
+        </StackPanel>
+        <TextBlock Text="{Binding NodeName, ElementName=baseNodeControl}" Foreground="{DynamicResource TextForeground}" Grid.Column="1" VerticalAlignment="Center" FontSize="24" Grid.Row="1" IsHitTestVisible="False"/>
+        <Image Grid.Column="1" Source="/ResourceLibrary;component/Icons/Graph/ArrayPin.png" Opacity="0.3" Grid.RowSpan="3" IsHitTestVisible="False">
+            <Image.Effect>
+                <effect:ColorBlendEffect BlendBrush="{Binding BackBrush, ElementName=ArrayIn}"/>
+            </Image.Effect>
+        </Image>
+        <StackPanel Orientation="Vertical" Grid.Column="2" Grid.RowSpan="3" VerticalAlignment="Center">
+            <baseCtrl:LinkOutControl Name="MethodNext" PinType="Exec" Margin="8,8,8,4" VerticalAlignment="Center" Direction="Right" HorizontalAlignment="Center" />
+            <baseCtrl:LinkOutControl Name="ResultOut" Margin="8,4,8,8" VerticalAlignment="Center" Direction="Right" HorizontalAlignment="Center" />
+        </StackPanel>
+    </Grid>
+</myTypes:BaseNodeControl>

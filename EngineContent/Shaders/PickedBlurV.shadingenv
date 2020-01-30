@@ -1,0 +1,53 @@
+#ifndef _PICKED_BLUR_V_
+#define _PICKED_BLUR_V_
+
+#include "Inc/VertexLayout.cginc"
+
+#include "dummy.gen"
+
+
+Texture2D gPickedBlurHTex;
+SamplerState Samp_gPickedBlurH;
+
+//WARNING:don't change vs_main or ps_main's parameters name cause we also use it in c++;It's an appointment;
+PS_INPUT VS_Main(VS_INPUT input)
+{
+	PS_INPUT output = (PS_INPUT)0;
+
+	output.vPosition = float4(input.vPosition.xyz, 1.0f);
+	output.vUV = input.vUV;
+	output.psCustomUV0.xy = input.vUV + float2(0.0f, gViewportSizeAndRcp.w);
+	output.psCustomUV0.zw = input.vUV + float2(0.0f, gViewportSizeAndRcp.w * 2.0f);
+	output.psCustomUV1.xy = input.vUV - float2(0.0f, gViewportSizeAndRcp.w);
+	output.psCustomUV1.zw = input.vUV - float2(0.0f, gViewportSizeAndRcp.w * 2.0f);
+
+	return output;
+}
+
+struct PS_OUTPUT
+{
+	half2 RT0 : SV_Target0;
+};
+
+PS_OUTPUT PS_Main(PS_INPUT input)
+{
+	PS_OUTPUT output = (PS_OUTPUT)0;
+
+	half2 P0 = gPickedBlurHTex.Sample(Samp_gPickedBlurH, input.psCustomUV0.xy).rg;
+	half2 P1 = gPickedBlurHTex.Sample(Samp_gPickedBlurH, input.psCustomUV0.zw).rg;
+	half2 P2 = gPickedBlurHTex.Sample(Samp_gPickedBlurH, input.psCustomUV1.xy).rg;
+	half2 P3 = gPickedBlurHTex.Sample(Samp_gPickedBlurH, input.psCustomUV1.zw).rg;
+	half2 P4 = gPickedBlurHTex.Sample(Samp_gPickedBlurH, input.vUV).rg;
+
+	//half Iblurred = (P0.r + P1.r + P2.r + P3.r + P4.r) * 0.2h;
+	//half DepthExpanded = min(min(min(min(P0.g, P1.g), P2.g), P3.g), P4.g);
+	//output.RT0 = half2(Iblurred, DepthExpanded);
+
+	half IdExpanded = max(max(max(max(P0.r, P1.r), P2.r), P3.r), P4.r);
+	half DepthExpanded = min(min(min(min(P0.g, P1.g), P2.g), P3.g), P4.g);
+	output.RT0 = half2(IdExpanded, DepthExpanded);
+
+	return output;
+}
+
+#endif

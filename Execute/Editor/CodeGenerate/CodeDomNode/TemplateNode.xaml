@@ -1,0 +1,47 @@
+﻿<myTypes:BaseNodeControl x:Name="baseNodeControl"
+    x:Class="CodeDomNode.TemplateNode"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:CodeDomNode"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+    xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+    xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+    xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"    
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CodeGenerateSystem;Component/Themes/Generic.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <theme:SystemDropShadowChrome>
+        <Border Background="{DynamicResource NormalControlBackground}" CornerRadius="5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Rectangle x:Name="RectangleTitle" Fill="{DynamicResource LinkNode_Method_Background}" Margin="-3,0" StrokeThickness="2" Grid.ColumnSpan="3" RadiusX="5" RadiusY="5"/>
+                <TextBlock x:Name="TitleName" Foreground="{DynamicResource TextForeground}" Text="{Binding TitleNameText, ElementName=baseNodeControl}" Grid.ColumnSpan="3" Padding="2" VerticalAlignment="Center" HorizontalAlignment="Center" IsHitTestVisible="False" Margin="30,2" FontSize="18.667" Height="28" />
+
+                <TextBlock Text="类型" Grid.Row="1" Foreground="{DynamicResource TextForeground}" Margin="2,2,2,2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <ComboBox x:Name="ComboBox_Templates" SelectedItem="{Binding ComboBoxTemplateSelectItem, ElementName=baseNodeControl}" Grid.Row="1" Grid.Column="1" Margin="2" Style="{DynamicResource {ComponentResourceKey ResourceId=ComboBoxStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" SelectionChanged="ComboBox_Templates_SelectionChanged"/>
+                <TextBlock Text="{Binding IDText, ElementName=baseNodeControl}" Grid.Row="2" Foreground="{DynamicResource TextForeground}" Margin="2,2,2,2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                <!--<baseCtrl:LinkInControl x:Name="Method_Pre" Margin="0,-20,0,0" Height="13" BackBrush="{DynamicResource Link_MethodBrush}" VerticalAlignment="Top" HorizontalAlignment="Center" Width="12" Direction="Top" Grid.ColumnSpan="2"/>-->
+                <!--<baseCtrl:LinkOutControl x:Name="Method_Next" Margin="0,0,0,-15" Height="13" BackBrush="{DynamicResource Link_MethodBrush}" VerticalAlignment="Bottom" HorizontalAlignment="Center" Width="12" Direction="Bottom" Grid.ColumnSpan="2" Grid.Row="2"/>-->
+                
+                <baseCtrl:LinkInControl x:Name="paramLink" Margin="-20,0,0,0" Height="12" BackBrush="{DynamicResource Link_ValueBrush}" VerticalAlignment="Center" HorizontalAlignment="Left" Width="12" Direction="Left" Grid.Row="2"/>
+                <baseCtrl:LinkOutControl x:Name="returnLink" Margin="0,0,-15,0" Height="12" BackBrush="{DynamicResource Link_ValueBrush}" VerticalAlignment="Center" HorizontalAlignment="Right" Width="12" Direction="Right" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"/>
+            </Grid>
+        </Border>
+    </theme:SystemDropShadowChrome>
+</myTypes:BaseNodeControl>

@@ -1,0 +1,485 @@
+﻿<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:clr="clr-namespace:System;assembly=mscorlib"	
+	xmlns:clr2="clr-namespace:System.Collections;assembly=mscorlib"
+	xmlns:local="clr-namespace:WPG"
+	xmlns:data="clr-namespace:WPG.Data"
+	xmlns:converters="clr-namespace:WPG.Converters"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2006"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	mc:Ignorable="d"    
+    >
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=HeaderBackgroundBrush}" Color="#C2CCDB"/>
+    
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=coldWaterBrush}" Color="#FF5FA7FD"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=hotWaterBrush}" Color="#FFFF7F4F"/>
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=PropertiesBackgroundBrush}" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=PropertiesTextBrush}" Color="#000000"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListBorder}" Color="#828790"/>
+
+    
+    
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=HeaderBorderBrush}" Color="#FF161616"/>
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=HeaderGlassFillBrush}" EndPoint="0.5,0.993" StartPoint="0.5,0.007">
+        <GradientStop Color="#FF0C0C0C" Offset="0"/>
+        <GradientStop Color="#FF101010" Offset="1"/>
+        <GradientStop Color="#33636363" Offset="0.505"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=HeaderHighlighBackgroundBrush}" EndPoint="0.508,0.893" StartPoint="0.508,0.107">
+        <GradientStop Color="#FF000000" Offset="0"/>
+        <GradientStop Color="#FF000000" Offset="1"/>
+        <GradientStop Color="#FF525252" Offset="0.519"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=HeaderHighlighGlassFillBrush}" EndPoint="0.5,0.993" StartPoint="0.5,0.007">
+        <GradientStop Color="#FF0C0C0C" Offset="0"/>
+        <GradientStop Color="#FF101010" Offset="1"/>
+        <GradientStop Color="#33636363" Offset="0.505"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=TabBackgroundBrush}" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FF040404" Offset="0"/>
+        <GradientStop Color="#FF000000" Offset="1"/>
+        <GradientStop Color="#FF393939" Offset="0.518"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=TabBorderBrush}" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FF000000" Offset="0"/>
+        <GradientStop Color="#FF000000" Offset="0.995"/>
+        <GradientStop Color="#FF3F3F3F" Offset="0.504"/>
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=TabForegroundBrush}" Color="#FF000000"/>
+
+    <!-- Property Grid Brushes -->
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ExpanderBackgroundBrush}" Color="#FFFFFF"/>
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ExpanderBorderBrush}" Color="#FF333333"/>
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=PropertiesForegroundBrush}" Color="#000000"/>
+
+    <!-- NormalBrush is used as the Background for SimpleButton, SimpleRepeatButton -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=NormalBrush}" EndPoint="0,1" StartPoint="0,0">
+        <GradientStop Color="#EEE" Offset="0.0"/>
+        <GradientStop Color="#CCC" Offset="1.0"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=NormalBorderBrush}" EndPoint="0,1" StartPoint="0,0">
+        <GradientStop Color="#CCC" Offset="0.0"/>
+        <GradientStop Color="#444" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <!-- LightBrush is used for content areas such as Menu, Tab Control background -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=LightBrush}" EndPoint="0,1" StartPoint="0,0">
+        <GradientStop Color="#FFF" Offset="0.0"/>
+        <GradientStop Color="#EEE" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <!-- MouseOverBrush is used for MouseOver in Button, Radio Button, CheckBox -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=MouseOverBrush}" EndPoint="0,1" StartPoint="0,0">
+        <GradientStop Color="#FFF" Offset="0.0"/>
+        <GradientStop Color="#AAA" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <!-- PressedBrush is used for Pressed in Button, Radio Button, CheckBox -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=PressedBrush}" EndPoint="0,1" StartPoint="0,0">
+        <GradientStop Color="#BBB" Offset="0.0"/>
+        <GradientStop Color="#EEE" Offset="0.1"/>
+        <GradientStop Color="#EEE" Offset="0.9"/>
+        <GradientStop Color="#FFF" Offset="1.0"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=PressedBorderBrush}" EndPoint="0,1" StartPoint="0,0">
+        <GradientStop Color="#444" Offset="0.0"/>
+        <GradientStop Color="#888" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <!-- SelectedBackgroundBrush is used for the Selected item in ListBoxItem, ComboBoxItem-->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SelectedBackgroundBrush}" Color="#DDD"/>
+
+    <!-- Disabled Brushes are used for the Disabled look of each control -->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledForegroundBrush}" Color="#888"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledBackgroundBrush}" Color="#EEE"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledBorderBrush}" Color="#AAA"/>
+
+    <!-- Used for background of ScrollViewer, TreeView, ListBox, Expander, TextBox, Tab Control -->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=WindowBackgroundBrush}" Color="#FFFFFF"/>
+
+    <!-- DefaultedBorderBrush is used to show KeyBoardFocus -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DefaultedBorderBrush}" EndPoint="0,1" StartPoint="0,0">
+        <GradientStop Color="#777" Offset="0.0"/>
+        <GradientStop Color="#000" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SolidBorderBrush}" Color="#888"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=LightBorderBrush}" Color="#AAA"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=LightColorBrush}" Color="#DDD"/>
+
+    <!-- Used for Checkmark, Radio button, TreeViewItem, Expander ToggleButton glyphs -->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=GlyphBrush}" Color="#FF31347C"/>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ContentBorderBrush}" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FF272727" Offset="0"/>
+        <GradientStop Color="#FF525252" Offset="0.995"/>
+        <GradientStop Color="#FF323232" Offset="0.465"/>
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DefaultForegroundBrush}" Color="#FFCCCCCC"/>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ContentBackgroundBrush}" EndPoint="0.5,1.0" StartPoint="0.5,0">
+        <GradientStop Color="#FF232323" Offset="0"/>
+        <GradientStop Color="#FF000000" Offset="1"/>
+        <GradientStop Color="#FF393939" Offset="0.48"/>
+    </LinearGradientBrush>
+
+    <!--******************************************************************-->
+    <!--********************* Dark-Blue Brushes *********************-->
+    <!--******************************************************************-->
+
+    <!--****************-->
+    <!-- Default Colors -->
+    <!--****************-->
+    <!-- Background -->
+    <SolidColorBrush  x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DefaultMainBackgroundBrush}" Color="#FF0F1622"/>
+    <SolidColorBrush  x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DefaultControlBrush}" Color="#FF1F2A43"/>
+    <SolidColorBrush  x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DefaultControlBrightBrush}" Color="#FF293D66"/>
+    <!-- Foreground -->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DefaultControlForegroundBrush}" Color="#FFBFD1FF"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DefaultPathForegroundBrush}" Color="#FF88A0C1"/>
+    <!-- Border -->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DefaultControlBorderBrush}" Color="#FF265184"/>
+    <!-- Glossy -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DefaultControlGlossyBrush}" EndPoint="0.545,2.847" StartPoint="0.545,-0.639">
+        <GradientStop Color="#FFCBCEFF" Offset="0.115"/>
+        <GradientStop Color="#FF2A3756" Offset="0.476"/>
+    </LinearGradientBrush>
+
+    <!--********************-->
+    <!-- Highlighted Colors -->
+    <!--********************-->
+
+    <!-- Background -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=HighlightedControlBrush}" EndPoint="0.505,2.832" StartPoint="0.505,-0.654">
+        <GradientStop Color="#FF2C3B5C" Offset="0"/>
+        <GradientStop Color="#FF1F2A43" Offset="1"/>
+    </LinearGradientBrush>
+    <!-- Border -->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=HighlightedControlBorderBrush}" Color="#FF5F6CC8"/>
+    <!-- Glossy -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=HighlightedControlGlossyBrush}" EndPoint="0.545,2.847" StartPoint="0.545,-0.639">
+        <GradientStop Color="#FFCBCEFF" Offset="0.052"/>
+        <GradientStop Color="#FF2C3B5C" Offset="0.457"/>
+    </LinearGradientBrush>
+
+    <!-- ListViewItem Colors -->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=HighlightedListViewItemBrush}" Color="#FF2462A3"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=HighlightedLessListViewItemBrush}" Color="#FF8590DA"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListViewBrightBackground}" Color="#FF111A2A"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListViewDarkBackground}" Color="#FF0D101A"/>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=VerticalScrollBarBrush}" EndPoint="1,0.5" StartPoint="0,0.5">
+        <GradientStop Color="#FF0F1522" Offset="0"/>
+        <GradientStop Color="#FF182438" Offset="1"/>
+        <GradientStop Color="#FF1A273D" Offset="0.267"/>
+        <GradientStop Color="#FF1D2B44" Offset="0.521"/>
+        <GradientStop Color="#FF1C2940" Offset="0.744"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=HorizentalScrollBarBrush}" EndPoint="0.506,0.994" StartPoint="0.506,0.006">
+        <GradientStop Color="#FF0F1522" Offset="0"/>
+        <GradientStop Color="#FF182438" Offset="1"/>
+        <GradientStop Color="#FF1A273D" Offset="0.267"/>
+        <GradientStop Color="#FF1D2B44" Offset="0.521"/>
+        <GradientStop Color="#FF1C2940" Offset="0.744"/>
+    </LinearGradientBrush>
+
+    <!--****************-->
+    <!-- Focused Colors -->
+    <!--****************-->
+
+    <!-- Border -->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=FocusedControlBorderBrush}" Color="#FF7482E5" />
+    <!-- Glossy -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=FocusedControlGlossyBrush}" EndPoint="0.545,2.847" StartPoint="0.545,-0.639">
+        <GradientStop Color="#FFCBCEFF" Offset="0.115"/>
+        <GradientStop Color="#FF18183F" Offset="0.731"/>
+    </LinearGradientBrush>
+
+    <!--****************-->
+    <!-- Checked Colors -->
+    <!--****************-->
+
+    <!-- Background -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=CheckedControlBrush}" EndPoint="0.505,2.832" StartPoint="0.505,-0.654">
+        <GradientStop Color="#FF3D5CA3" Offset="0"/>
+        <GradientStop Color="#FF3D5CA3" Offset="1"/>
+    </LinearGradientBrush>
+    <!-- Glossy -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=CheckedControlGlossyBrush}" EndPoint="0.545,2.847" StartPoint="0.545,-0.639">
+        <GradientStop Color="#FFCBCEFF" Offset="0.173"/>
+        <GradientStop Color="#FF6E79C5" Offset="1"/>
+        <GradientStop Color="#FF3F499F" Offset="0.51"/>
+    </LinearGradientBrush>
+
+    <!--****************-->
+    <!-- Pressed Colors -->
+    <!--****************-->
+
+    <!-- Background -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=PressedControlBrush}" EndPoint="0.518,0.948" StartPoint="0.514,0.104">
+        <GradientStop Color="#FF14213F" Offset="0"/>
+        <GradientStop Color="#FF36476E" Offset="1"/>
+        <GradientStop Color="#FF0D0F1C" Offset="0.423"/>
+    </LinearGradientBrush>
+    <!-- Glossy -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=PressedControlGlossyBrush}" EndPoint="0.545,2.847" StartPoint="0.545,-0.639">
+        <GradientStop Color="#FFCBCEFF" Offset="0"/>
+        <GradientStop Color="#FF1A1E3B" Offset="0.212"/>
+    </LinearGradientBrush>
+
+    <!--*****************-->
+    <!-- Disabled Colors -->
+    <!--*****************-->
+
+    <!-- Background -->
+    <Brush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledControlBrush}">#FF414655</Brush>
+    <!-- Foreground -->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledControlForegroundBrush}" Color="#FFB4B4B4"/>
+    <!-- Border -->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledControlBorderBrush}" Color="#FF646464"/>
+    <!-- Glossy -->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=DisabledControlGlossyBrush}" EndPoint="0.545,2.847" StartPoint="0.545,-0.639">
+        <GradientStop Color="#FFCBCEFF" Offset="0.115"/>
+        <GradientStop Color="#FF1E1E1E" Offset="0.567"/>
+    </LinearGradientBrush>
+
+    <!--************************-->
+    <!-- Settings Screen Colors -->
+    <!--************************-->
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SettingScreenBackground}" Color="#FF576786"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SettingScreenBorderBrush}" Color="#FF555788"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=SettingPageBorderBrush}" Color="Black"/>
+
+    <!--************************-->
+    <!-- ComboBox Colors -->
+    <!--************************-->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ComboBoxEditBoxBackground}" Color="#FF576786"/>
+
+    <!--************************-->
+    <!-- MainShell Background Colors -->
+    <!--************************-->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=MainShellBackground}" Color="#FF0F0817"/>
+
+    <!--************************-->
+    <!-- ListBox  Colors   -->
+    <!--************************-->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListBoxBackground}" Color="#FF03080D"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=HighlightedListBoxItemBrush}" Color="#FF3399FF"/>
+
+    <!--*********************************-->
+    <!--          Button Brush          -->
+    <!--*********************************-->
+
+    <!-- Content Brush -->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ButtonContentBrush}" Color="#FFBFD1FF"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ButtonContentCheckedBrush}" Color="#FFF0F5FF"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ButtonContentDisabledBrush}" Color="#FF4A4E51"/>
+
+    <!-- Background Brush -->
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ButtonBackgroundBrush}" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FF202C45" Offset="0"/>
+        <GradientStop Color="#FF162034" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ButtonPressedBackgroundBrush}" EndPoint="0.5,1" StartPoint="0.5,0.0">
+        <GradientStop Color="#FF1A3C65" Offset="0"/>
+        <GradientStop Color="#FF1A3C65" Offset="1.0"/>
+        <GradientStop Color="#FF0C1C31" Offset="0.35"/>
+        <GradientStop Color="#FF0C1C31" Offset="0.65"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ButtonCheckedBackgroundBrush}" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FF3398FD" Offset="0"/>
+        <GradientStop Color="#FF1A4E85" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ButtonDisabledBackgroundBrush}" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FF1B2436" Offset="0"/>
+        <GradientStop Color="#FF182131" Offset="1"/>
+    </LinearGradientBrush>
+
+
+    <!-- Border Brush -->
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ButtonBorderBrush}" EndPoint="1.0,1.0" StartPoint="0.0,0.0">
+        <GradientStop Color="#FF9E9E9E" Offset="0"/>
+        <GradientStop Color="#FF415785" Offset="1"/>
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ButtonHighlightedBorderBrush}" Color="#FF3399FF"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ButtonDisabledBorderBrush}" Color="#FF424346"/>
+
+
+
+    <!--*******************************-->
+    <!--        TextBox Brushes        -->
+    <!--*******************************-->
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=TextBoxBorderBrush}" Color="#FF265184"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=TextBoxBackgroundBrush}" Color="#FF0F121D"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=TextBoxMouseOverBorderBrush}" Color="#FF3283D8"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=TextBoxFocusedBorderBrush}" Color="#FF3283D8"/>
+
+    <!--*******************************-->
+    <!--       ComboBox Brushes        -->
+    <!--*******************************-->
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ComboBoxToggleButtonBorderBrush}" Color="#FF265184"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ComboBoxToggleButtonBackgroundBrush}" Color="#FF0F121D"/>
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ComboBoxPopupBackgroundBrush}" Color="#FF0F121D"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ComboBoxPopupBorderBrush}" Color="#FF265184"/>
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ComboBoxArrowForegroundBrush}" Color="#FF818FA7"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ComboBoxArrowDownForegroundBrush}" Color="#FFBFD1FF"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ComboBoxArrowButtonBorderBrush}" Color="#FF3D5791"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ComboBoxArrowButtonDownBorderBrush}" Color="#FF3399FF"/>
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ComboBoxTextForegroundBrush}" Color="#FFBFD1FF"/>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ComboBoxButtonBorderBrush}" EndPoint="0.5,0.0" StartPoint="0.5,1.0">
+        <GradientStop Color="#FF202C45" Offset="0"/>
+        <GradientStop Color="#FF213755" Offset="1"/>
+    </LinearGradientBrush>
+
+    <RadialGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ComboBoxButtonCheckedBackgroundBrush}">
+        <GradientStop Color="#FF161A3A" Offset="0"/>
+        <GradientStop Color="#FF25507B" Offset="1"/>
+    </RadialGradientBrush>
+
+
+    <!--*******************************-->
+    <!--     RadioButton Brushes       -->
+    <!--*******************************-->
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=RadioButtonBackgroundBrush}" Color="#FF0E1019"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=RadioButtonBorderBrush}" Color="#FF21557F"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=RadioButtonSelectedBrush}" Color="#FF3399FE"/>
+
+
+    <!--****************************-->
+    <!--     CheckBox Brushes       -->
+    <!--****************************-->
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=CheckBoxBackgroundBrush}" Color="#FF111927"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=CheckBoxBorderBrush}" Color="#FF27558E"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=CheckBoxCheckedBrush}" Color="#FF3399FE"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=CheckBoxShadeBorderBrush}" Color="#FF141F30"/>
+
+    <!--************************-->
+    <!--   ScrollBar Brushes    -->
+    <!--************************-->
+
+    <!-- Thumb-->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarThumbBackgroundBrush}" EndPoint="0.5,0" StartPoint="0.5,1">
+        <GradientStop Color="#FF202C45" Offset="0"/>
+        <GradientStop Color="#FF213755" Offset="1.0"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarThumbForegroundBrush}" Color="#FF818FA7"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarThumbBorderBrush}" Color="#FF3D5791"/>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarThumbVerticalDraggingBrush}" EndPoint="0.0,0.5" StartPoint="1.0,0.5">
+        <GradientStop Color="#FF25507B" Offset="0"/>
+        <GradientStop Color="#FF25507B" Offset="1"/>
+        <GradientStop Color="#FF16243A" Offset="0.5"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarThumbHorizontalDraggingBrush}" EndPoint="0.5,0.0" StartPoint="0.5,1.0">
+        <GradientStop Color="#FF25507B" Offset="0"/>
+        <GradientStop Color="#FF25507B" Offset="1"/>
+        <GradientStop Color="#FF16243A" Offset="0.5"/>
+    </LinearGradientBrush>
+
+    <!--Repeat Button-->
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarRepeatButtonBackgroundBrush}" EndPoint="0.5,0" StartPoint="0.5,1">
+        <GradientStop Color="#FF202C45" Offset="0"/>
+        <GradientStop Color="#FF213755" Offset="1.0"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarRepeatButtonForegroundBrush}" Color="#FF818FA7"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarRepeatButtonBorderBrush}" Color="#FF3D5791"/>
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarRepeatButtonPressedBrush}" EndPoint="0.5,0.0" StartPoint="0.5,1.0">
+        <GradientStop Color="#FF25507B" Offset="0"/>
+        <GradientStop Color="#FF25507B" Offset="1"/>
+        <GradientStop Color="#FF16243A" Offset="0.5"/>
+    </LinearGradientBrush>
+
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarBorderBrush}" Color="#FF263142"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarMouseOverBorderBrush}" Color="#FF3399FF"/>
+
+
+    <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ScrollBarBackgroundBrush}" EndPoint="1,0.5" StartPoint="0,0.5">
+        <GradientStop Color="#FF0F1522" Offset="0"/>
+        <GradientStop Color="#FF182438" Offset="1"/>
+    </LinearGradientBrush>
+
+
+    <!--************************-->
+    <!--   ListView Brushes    -->
+    <!--************************-->
+
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListViewItemForegroundBrush}" Color="#FF668BC8"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListViewItemSelectedForegroundBrush}" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListViewItemSelectedBackgroundBrush}" Color="#FF2563A5"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListViewBorderBrush}" Color="#FF305886"/>
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListViewHeaderForegroundBrush}" Color="#FF888DAC"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListViewHeaderBackgroundBrush}" Color="#FF223A59"/>
+
+    <!-- Tail Background-->
+    <DrawingBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListViewTailDrawingBrush}"
+                  Stretch="Fill"
+                  AlignmentX="Left"
+                  AlignmentY="Top"
+                  TileMode="Tile"
+                  Viewport="0,0,1,36"
+                  ViewportUnits="Absolute">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="#FF111A2A">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="0,0,20,20"/>
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="#FF0D101A">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="0,20,20,20"/>
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListViewCheckBoxBrushBrush}" Color="#FF3399FF"/>
+
+
+    <!--************************-->
+    <!--    ListBox Brushes     -->
+    <!--************************-->
+
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListBoxItemForegroundBrush}" Color="#FFBFD1FF"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListBoxItemSelectedForegroundBrush}" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListBoxItemSelectedBackgroundBrush}" Color="#FF2563A5"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListBoxBorderBrush}" Color="#FF265184"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:PropertyGrid}, ResourceId=ListBoxBackgroundBrush}" Color="#FF0F121D"/>
+
+
+</ResourceDictionary>
+    

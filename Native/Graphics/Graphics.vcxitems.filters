@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxPreHead.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxRenderPolicy.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxEngine.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxMaterial.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxMesh.cpp">
+      <Filter>Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxMaterialPrimitive.cpp">
+      <Filter>Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxMdfQueue.cpp">
+      <Filter>Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxMeshPrimitives.cpp">
+      <Filter>Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxShadingEnv.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxModifier.cpp">
+      <Filter>Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxSkinModifier.cpp">
+      <Filter>Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxCamera.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Scene\GfxSceneRenderLayer.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Scene\GfxSceneView.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Mesh\GfxInstancingModifier.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxPreHead.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxRenderPolicy.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxEngine.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxMaterial.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxMesh.h">
+      <Filter>Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxMaterialPrimitive.h">
+      <Filter>Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxMdfQueue.h">
+      <Filter>Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxMeshPrimitives.h">
+      <Filter>Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxShadingEnv.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxModifier.h">
+      <Filter>Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxSkinModifier.h">
+      <Filter>Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxCamera.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Scene\GfxSceneRenderLayer.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Scene\GfxSceneView.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Mesh\GfxInstancingModifier.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Mesh">
+      <UniqueIdentifier>{0b2d5a1e-ac3f-4a1d-a2dc-bf652db60d93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{19abb605-0c67-4dc9-84f7-8c16490f46dd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

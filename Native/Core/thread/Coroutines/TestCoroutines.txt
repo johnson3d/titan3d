@@ -1,0 +1,138 @@
+﻿#include "windows.h"
+#include "NativeAwait.h"
+
+struct AAAAA
+{
+	AAAAA()
+	{
+		x = 0;
+	}
+	int x;
+	AAAAA(const AAAAA& r)
+	{
+		x = r.x;
+	}
+	AAAAA(AAAAA&& r)
+	{
+		x = r.x;
+	}
+	AAAAA& operator=(const AAAAA& r)
+	{
+		x = r.x;
+		return *this;
+	}
+	AAAAA& operator=(AAAAA&& r)
+	{
+		x = r.x;
+		return *this;
+	}
+	void FuncForwordTest(AAAAA&& a)
+	{
+
+	}
+};
+
+AAAAA t1;
+FFuture<int> main_impl_void()
+{
+	co_await FEventPoster<void>::PostExec([=](ITaskState* pState)
+		{
+			t1.x = 8;
+		}, 1
+	);
+	if (t1.x == 8)
+	{
+		co_return 3;
+	}
+	co_return 0;
+}
+
+
+FFuture<int> fun1()
+{
+	co_await FEventPoster<void>::PostExec([=](ITaskState* pState)
+		{
+			std::cout << "Run on async thread" << std::endl;
+		}, 1
+	);
+	co_return 1;
+}
+
+FFuture<int> fun2()
+{
+	auto ret = co_await fun1();
+	std::cout << ret << std::endl;
+	co_return ret + 1;
+}
+
+FFuture<int> fun3()
+{
+	auto ret = co_await fun2();
+	std::cout << ret << std::endl;
+	co_return ret + 1;
+}
+
+FFuture<void> TestSemaphore()
+{
+	auto smp = new FSemaphore(1);
+	auto ret = co_await FEventPoster<AAAAA>::PostExec([=](ITaskState* pState)
+		{
+			AAAAA t;
+			t.x = 9;
+
+			smp->ReduceCount();
+			return t;
+		}, 1
+	);
+	if (ret.x == 9)
+	{
+		int xxx = 1;
+	}
+	co_await smp->Await();
+	smp->Release();
+}
+
+FFuture<void> main_impl()
+{
+	co_await main_impl_void();
+
+	co_await TestSemaphore();
+	
+	co_return;
+}
+
+int main()
+{
+	TaskScheduler::GetCurrentInstance()->SetThreadInfo("MainThread", 0);
+	std::thread([]()
+		{
+			TaskScheduler::GetCurrentInstance()->SetThreadInfo("PostThread", 1);
+			while (true)
+			{
+				TaskScheduler::GetCurrentInstance()->DoPost();
+			}
+		}).detach();
+
+	while (TaskScheduler::GetSchedulerByTargetId(1)==nullptr)
+	{
+		Sleep(50);
+	}
+
+	/*{
+		auto t3 = fun3();
+		if (t3.mState->IsPostCompleted() == false)
+		{
+			std::cout << t3.mState->mResult << std::endl;
+		}
+	}*/
+	
+	main_impl();
+
+	while (true)
+	{
+		TaskScheduler::GetCurrentInstance()->DoPost();
+		TaskScheduler::GetCurrentInstance()->DoContinue();
+	}
+	
+	return 0;
+}

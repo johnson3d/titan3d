@@ -1,0 +1,251 @@
+﻿<UserControl x:Class="EditorCommon.Controls.ResourceBrowser.ContentControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EditorCommon.Controls.ResourceBrowser"
+             xmlns:searchBox="clr-namespace:SearchBox"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"	
+             xmlns:controls="clr-namespace:EditorCommon.Controls"
+             xmlns:btn="clr-namespace:ResourceLibrary.Controls.Button;assembly=ResourceLibrary"
+             xmlns:menu="clr-namespace:ResourceLibrary.Controls.Menu;assembly=ResourceLibrary"
+             mc:Ignorable="d" x:Name="userControl"
+             d:DesignHeight="450" d:DesignWidth="800" Loaded="UserControl_Loaded">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/EditorCommon;component/Themes/Generic.xaml" />
+                <ResourceDictionary>
+                    <SolidColorBrush x:Key="SelectedBackground" Color="#FF666666"/>
+                    <SolidColorBrush x:Key="SelectedBorder" Color="#FF666666"/>
+                    <SolidColorBrush x:Key="SelectedForeground" Color="White"/>
+                    <SolidColorBrush x:Key="MouseOverBackground" Color="#55495664"/>
+                    <SolidColorBrush x:Key="MouseOverForeground" Color="Black"/>
+                    <Style x:Key="ListBoxItemStyle_ResourceItem" TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="Background" Value="{StaticResource DefaultBackground}"/>
+                        <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+                        <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+                        <Setter Property="Padding" Value="2,0,0,0"/>
+                        <Setter Property="Margin" Value="1" />
+                        <Setter Property="AllowDrop" Value="True" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                    <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true" CornerRadius="2">
+                                        <ContentPresenter x:Name="contentPresenter" Height="Auto" Width="Auto"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="true">
+                                            <Setter Property="Background" TargetName="Bd" Value="{StaticResource MouseOverBackground}"/>
+                                            <Setter Property="Foreground" Value="{StaticResource MouseOverForeground}"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="true">
+                                            <Setter Property="Background" TargetName="Bd" Value="{StaticResource SelectedBackground}"/>
+                                            <Setter Property="BorderBrush" Value="{StaticResource SelectedBorder}"/>
+                                            <Setter Property="Foreground" Value="{StaticResource SelectedForeground}"/>
+                                        </Trigger>
+                                        <MultiTrigger>
+                                            <MultiTrigger.Conditions>
+                                                <Condition Property="IsSelected" Value="true"/>
+                                                <Condition Property="Selector.IsSelectionActive" Value="false"/>
+                                            </MultiTrigger.Conditions>
+                                            <Setter Property="Background" TargetName="Bd" Value="{StaticResource SelectedBackground}"/>
+                                            <Setter Property="Foreground" Value="{StaticResource SelectedForeground}"/>
+                                        </MultiTrigger>
+                                        <Trigger Property="IsEnabled" Value="false">
+                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <EventSetter Event="UIElement.PreviewMouseDown" Handler="ListBox_ResourceItem_PreviewMouseDown" />
+                        <EventSetter Event="UIElement.MouseMove" Handler="ListBox_ResourceItem_MouseMove" />
+                        <EventSetter Event="UIElement.MouseUp" Handler="ListBox_ResourceItem_MouseUp" />
+                        <EventSetter Event="UIElement.MouseDown" Handler="ListBox_ResourceItem_MouseDown" />
+                        <EventSetter Event="Control.PreviewMouseDoubleClick" Handler="ListBox_ResourceItem_MouseDoubleClick" />
+                        <EventSetter Event="UIElement.DragEnter" Handler="ListBox_ResourceItem_DragEnter" />
+                        <EventSetter Event="UIElement.DragLeave" Handler="ListBox_ResourceItem_DragLeave" />
+                        <EventSetter Event="UIElement.DragOver" Handler="ListBox_ResourceItem_DragOver" />
+                        <EventSetter Event="UIElement.Drop" Handler="ListBox_ResourceItem_Drop" />
+                        <EventSetter Event="UIElement.MouseEnter" Handler="ListBox_ResourceItem_MouseEnter"/>
+                    </Style>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid Grid.IsSharedSizeScope="True" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid x:Name="Grid_ListTitle" Visibility="Collapsed" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="ResourceIcon"/>
+                <ColumnDefinition Width="3"/>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="ResourceType"/>
+                <ColumnDefinition Width="3"/>
+                <ColumnDefinition Width="1*" SharedSizeGroup="ResourceName"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="图标" Margin="5,2" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            </StackPanel>
+            <GridSplitter Focusable="False" Style="{DynamicResource {ComponentResourceKey ResourceId=GridSplitterStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" HorizontalAlignment="Stretch" Grid.Column="1"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" MouseLeftButtonDown="StackPanel_ListType_MouseLeftButtonDown">
+                <TextBlock Text="类型" Margin="5,2,2,2" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" />
+                <Path x:Name="Path_ListType" Data="M18.833333,7.5 L23.437501,7.4788332 21.022394,13.209648 z" Fill="#FFF4F4F5" Margin="3,0" Stretch="Fill" Width="5.604" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5" Stroke="White" Visibility="Hidden">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="TypePathScale" ScaleY="1"/>
+                            <SkewTransform AngleY="0" AngleX="0"/>
+                            <RotateTransform Angle="0"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+            </StackPanel>
+            <GridSplitter Focusable="False" Style="{DynamicResource {ComponentResourceKey ResourceId=GridSplitterStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" HorizontalAlignment="Stretch" Grid.Column="3"/>
+            <StackPanel Orientation="Horizontal" Grid.Column="4" MouseLeftButtonDown="StackPanel_ListName_MouseLeftButtonDown">
+                <TextBlock Text="名称" Margin="5,2,2,2" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" />
+                <Path x:Name="Path_ListName" Data="M18.833333,7.5 L23.437501,7.4788332 21.022394,13.209648 z" Fill="#FFF4F4F5" Margin="3,0" Stretch="Fill" Width="5.604" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5" Stroke="White">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="NamePathScale" ScaleY="1"/>
+                            <SkewTransform AngleY="0" AngleX="0"/>
+                            <RotateTransform Angle="0"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="Button_ShowFoldersPanel" Margin="5,2,2,2" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Visibility="Collapsed">
+                <Image Width="16" Height="16" Source="/ResourceLibrary;component/Icons/ContentBrowser/sourcestoggle_16x_collapsed.png" Margin="2"/>
+            </Button>
+            <!--<Button x:Name="toggleButton" Margin="5" Grid.Column="1" Visibility="{Binding FilterVisible, ElementName=userControl}" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                <Grid>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xf0b0;" FontSize="10" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="3,0,5,0"/>
+                        <TextBlock Text="Filters" />
+                        <Image Margin="1" Width="8" Height="8" VerticalAlignment="Center" Source="/ResourceLibrary;component/Icons/Common/ComboArrow.png"/>
+                    </StackPanel>
+                    <Popup Grid.Column="1" IsOpen="{Binding IsChecked, ElementName=toggleButton}" StaysOpen="False" AllowsTransparency="True" >
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Background="{DynamicResource {ComponentResourceKey ResourceId=ContainerBackground, TypeInTargetAssembly={x:Type res:CustomResources}}}" Opacity="0.8">
+                                <CheckBox IsChecked="{Binding IsCheckedAll,ElementName=userControl}" Content="" Margin="7,4,6,4" d:LayoutOverrides="Width, Height" VerticalAlignment="Center"/>
+                                <TextBlock Text="全选" d:LayoutOverrides="Height" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                            </StackPanel>
+                            <ListBox x:Name="ListBox_FilterItems" Style="{DynamicResource {ComponentResourceKey ResourceId=ListBoxStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Opacity="0.8" Margin="0,-1,0,0">
+                                <ListBox.Effect>
+                                    <DropShadowEffect BlurRadius="4"/>
+                                </ListBox.Effect>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="local:FilterResourceItem">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <CheckBox x:Name="checkBox" IsChecked="{Binding IsChecked, Mode=TwoWay}" Content="" Margin="2" d:LayoutOverrides="Width, Height" VerticalAlignment="Center" />
+                                            <Image x:Name="image" Source="{Binding Icon}" Grid.Column="1" Margin="2" Width="24" Height="24"/>
+                                            <TextBlock x:Name="textBlock" Text="{Binding ResourceTypeName}" Grid.Column="2" Margin="2,2,8,2" TextWrapping="Wrap" d:LayoutOverrides="Height" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                        --><!--ScrollViewer MaxHeight="300" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=ScrollViewerStyle_Default}}">
+                                <StackPanel Background="#33FFFFFF" Height="500" Margin="0">
+                                    <StackPanel.Effect>
+                                        <DropShadowEffect BlurRadius="3" ShadowDepth="3"/>
+                                    </StackPanel.Effect>
+                                    <TextBlock Text="aaa" />
+                                    <TextBlock Text="aaa" />
+                                </StackPanel>
+                            </--><!--
+                    </Popup>
+                </Grid>
+            </Button>-->
+            <searchBox:SearchBox x:Name="SearchBoxCtrl" Grid.Column="2" Margin="0,2,0,0" TipText="Search" SearchText="{Binding FilterString, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <Button Grid.Column="3" Margin="2,2,5,2" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" IsEnabled="False">
+                <TextBlock Text="&#xf0c7;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            </Button>
+            <ListBox x:Name="ListBox_Resources" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+					    ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionMode="Extended" Style="{DynamicResource {ComponentResourceKey ResourceId=ListBoxStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" 
+					    ItemContainerStyle="{DynamicResource ListBoxItemStyle_ResourceItem}" Grid.Row="1" Grid.ColumnSpan="4"
+					    ItemTemplate="{StaticResource ResourceInfoDataTemplate_Wrap}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" SelectionChanged="ListBox_Resources_SelectionChanged" DragEnter="ListBox_Resources_DragEnter" DragOver="ListBox_Resources_DragOver" AllowDrop="True" Drop="ListBox_Resources_Drop" DragLeave="ListBox_Resources_DragLeave" Background="{x:Null}">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <controls:VirtualizingWrapPanel ChildWidth="150" ChildHeight="195" Loaded="VirtualizingWrapPanel_Loaded"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+            </ListBox>
+            <Border Grid.Row="3" Grid.ColumnSpan="4" Background="#FF2E2E2E"/>
+            <TextBlock Text="{Binding SourceCountString, ElementName=userControl}" Margin="8,0,0,0" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="2" Grid.ColumnSpan="3" />
+            <btn:IconTextBtn x:Name="ViewOptionBtn" Grid.Row="2" VerticalAlignment="Center" ComboArrawShow="Collapsed"  HorizontalAlignment="Right" Margin="0,0,4.999,0" Grid.Column="2" Grid.ColumnSpan="2">
+                <btn:IconTextBtn.Header>
+                    <StackPanel IsHitTestVisible="False" Orientation="Horizontal">
+                        <Image Source="/ResourceLibrary;component/Icons/Icons/view_button.png" Width="20" Height="20"/>
+                        <TextBlock Text="View Options" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="2,0" />
+                        <TextBlock Text="&#xf0d7;" FontSize="10" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="0,0,3,0"/>
+                    </StackPanel>
+                </btn:IconTextBtn.Header>
+                <menu:TextSeparator Text="View Type" Style="{DynamicResource {ComponentResourceKey ResourceId=TextMenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                    <MenuItem.Header>
+                        <RadioButton Content="Tiles" GroupName="view type" Foreground="White" />
+                    </MenuItem.Header>
+                </MenuItem>
+                <MenuItem Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                    <MenuItem.Header>
+                        <RadioButton Content="List" GroupName="view type" Foreground="White"/>
+                    </MenuItem.Header>
+                </MenuItem>
+                <MenuItem Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                    <MenuItem.Header>
+                        <RadioButton Content="Columns" GroupName="view type" Foreground="White" />
+                    </MenuItem.Header>
+                </MenuItem>
+                <Separator Style="{DynamicResource {ComponentResourceKey ResourceId=MenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <menu:TextSeparator Text="View" Style="{DynamicResource {ComponentResourceKey ResourceId=TextMenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Header="Show Folders" IsCheckable="True" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Header="Show Empty Folders" IsCheckable="True" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <Separator Style="{DynamicResource {ComponentResourceKey ResourceId=MenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <menu:TextSeparator Text="Content" Style="{DynamicResource {ComponentResourceKey ResourceId=TextMenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Header="Show Engine Content" IsCheckable="True" IsChecked="{Binding ShowEngineContent,ElementName=userControl, Mode=TwoWay}" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Header="Show Editor Content" IsCheckable="True" IsChecked="{Binding ShowEditorContent,ElementName=userControl, Mode=TwoWay}" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <Separator Style="{DynamicResource {ComponentResourceKey ResourceId=MenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <menu:TextSeparator Text="Thumbnails" Style="{DynamicResource {ComponentResourceKey ResourceId=TextMenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Scale" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                    <Slider Grid.Column="1" Margin="0,3" Value="{Binding IconScale, ElementName=userControl}" Maximum="2.5" Minimum="0.4" SmallChange="0.01" VerticalAlignment="Center"/>
+                </Grid>
+                <MenuItem Header="Thumbnail Edit Mode" IsCheckable="True" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+                <MenuItem Header="RealTime Thumbnails" IsChecked="True" IsCheckable="True" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            </btn:IconTextBtn>
+        </Grid>
+    </Grid>
+</UserControl>

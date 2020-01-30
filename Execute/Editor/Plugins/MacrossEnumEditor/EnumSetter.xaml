@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="MacrossEnumEditor.EnumSetter"
+             x:Name="userControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Macross"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             mc:Ignorable="d" 
+             d:DesignHeight="30" d:DesignWidth="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="名字：" Foreground="White" FontSize="16" TextAlignment="Right" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" />
+        <TextBox Grid.Column="1" x:Name="UIName" TextChanged="TextChanged_Name" Text="{Binding EnumName, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBlock Grid.Column="2" Text="数值:" Foreground="White" FontSize="16" TextAlignment="Right" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" />
+        <TextBox Grid.Column="3" x:Name="UIValue" TextChanged="TextChanged_Value" Text="{Binding EnumValue, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBlock Grid.Column="4" Text="描述：" Foreground="White" FontSize="16" TextAlignment="Right" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" />
+        <TextBox Grid.Column="5" x:Name="UINote"  Text="{Binding EnumNote, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        <Button x:Name="UIUp" Click ="Button_Up"  Grid.Column="6" Content="上" FontSize="20" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+        <Button x:Name="UIDown" Click ="Button_Down" Grid.Column="7" FontSize="20" Content="下" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+        <Button x:Name="UIDelete"  Click ="Button_Delete" Grid.Column="8" Content="删" FontSize="20" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+    </Grid>
+</UserControl>

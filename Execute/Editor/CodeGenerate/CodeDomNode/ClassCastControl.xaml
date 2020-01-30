@@ -1,0 +1,39 @@
+﻿<myTypes:BaseNodeControl x:Class="CodeDomNode.ClassCastControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+			 xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+             xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary" 
+             x:Name="baseNodeControl"  mc:Ignorable="d" BlendBrush="#FFA89246">
+    <myTypes:BaseNodeControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CodeGenerateSystem;Component/Themes/Generic.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </myTypes:BaseNodeControl.Resources>
+    <myTypes:BaseNodeControl.Header>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" IsHitTestVisible="False">
+            <TextBlock Text="类型转换为" VerticalAlignment="Center" Foreground="{DynamicResource TextForeground}"/>
+            <TextBlock Text="{Binding NodeName, ElementName=baseNodeControl}" Margin="8" Foreground="{DynamicResource TextForeground}"/>
+        </StackPanel>
+    </myTypes:BaseNodeControl.Header>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <baseCtrl:LinkInControl x:Name="ClassLinkHandle_In" PinType="Exec" Margin="8,8,8,0" HorizontalAlignment="Left" Direction="Left" />
+        <baseCtrl:LinkOutControl x:Name="ClassLinkHandle_Out" NameString="转换成功" PinType="Exec" Margin="8,8,8,0" HorizontalAlignment="Right" Direction="Right" Grid.Column="1" />
+        <baseCtrl:LinkInControl x:Name="TargetPin" NameString="Target" Margin="8,8,8,0" HorizontalAlignment="Left" Direction="Left" Grid.Row="1"/>
+        <baseCtrl:LinkOutControl x:Name="CastFailedPin" NameString="转换失败" PinType="Exec" Margin="8,8,8,0" HorizontalAlignment="Right" Direction="Right" Grid.Column="1" Grid.Row="1"/>
+        <baseCtrl:LinkOutControl x:Name="CastResultPin" NameString="Result" Margin="8" HorizontalAlignment="Right" Direction="Right" Grid.Column="1" Grid.Row="2"/>
+    </Grid>
+</myTypes:BaseNodeControl>

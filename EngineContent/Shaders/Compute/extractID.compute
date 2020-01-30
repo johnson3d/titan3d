@@ -1,0 +1,24 @@
+Texture2D<float4> SrcTexture;
+struct BufType
+{
+	uint count;
+};
+RWStructuredBuffer<BufType> BufferOut : register(u0);
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+	float4 c = SrcTexture[id.xy];
+	uint actorId = c.r * 255 * 255 * 255 * 255 + c.g * 255 * 255 * 255 + c.b * 255 * 255 + c.a * 255;
+	InterlockedAdd(BufferOut[actorId].count, 1);
+	/*
+	if (c.r>0)
+		InterlockedAdd(BufferOut[0].count, 1);
+	if (c.g>0)
+		InterlockedAdd(BufferOut[1].count, 1);
+	if (c.b>0)
+		InterlockedAdd(BufferOut[2].count, 1);
+	if (c.a>0)
+		InterlockedAdd(BufferOut[3].count, 1);
+	*/
+}

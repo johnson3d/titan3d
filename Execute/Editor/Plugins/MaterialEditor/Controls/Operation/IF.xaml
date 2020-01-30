@@ -1,0 +1,39 @@
+﻿<myTypes:BaseNodeControl x:Name="baseNodeControl" x:Class="MaterialEditor.Controls.Operation.IF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+             xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+			 xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+             mc:Ignorable="d" BlendBrush="#FF63845E">
+    <myTypes:BaseNodeControl.Resources>
+        <ResourceDictionary Source="/MaterialEditor;component/Themes/Generic.xaml" />
+    </myTypes:BaseNodeControl.Resources>
+    <myTypes:BaseNodeControl.Header>
+        <TextBlock Name="TitleLabel" FontStyle="Normal" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{StaticResource TextForeground}" IsHitTestVisible="False" >If</TextBlock>
+    </myTypes:BaseNodeControl.Header>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <baseCtrl:LinkOutControl Name="ResultHandle"  Margin="8,0" Width="15" Height="15" BackBrush="{StaticResource LinkDefault}" HorizontalAlignment="Right" VerticalAlignment="Center" Direction="Right" Grid.Column="2" />
+
+        <baseCtrl:LinkInControl Name="ValueA" NameString="A" Margin="8" Height="15" BackBrush="{StaticResource LinkDefault}" HorizontalAlignment="Left" VerticalAlignment="Center" Direction="Left" />
+        <baseCtrl:LinkInControl Name="ValueB" NameString="B" Margin="8" Grid.Row="1" Height="15" BackBrush="{StaticResource LinkDefault_Dark}" HorizontalAlignment="Left" VerticalAlignment="Center" Direction="Left" />
+
+        <baseCtrl:LinkInControl Name="ValueAgtB" NameString="A>B" Margin="8" Grid.Row="2" Height="15" BackBrush="{StaticResource LinkDefault}" HorizontalAlignment="Left" VerticalAlignment="Center" Direction="Left" />
+        <baseCtrl:LinkInControl Name="ValueAeqB" NameString="A==B" Margin="8" Grid.Row="3" Height="15" BackBrush="{StaticResource LinkDefault_Dark}" HorizontalAlignment="Left" VerticalAlignment="Center" Direction="Left" />
+        <baseCtrl:LinkInControl Name="ValueAltB" NameString="A&lt;B" Margin="8" Grid.Row="4" Height="15" BackBrush="{StaticResource LinkDefault}" HorizontalAlignment="Left" VerticalAlignment="Center" Direction="Left" />
+    </Grid>
+</myTypes:BaseNodeControl>

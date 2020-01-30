@@ -1,0 +1,143 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="ValueTypeTitleBackground" Color="#FFCE6C3E" />
+    <SolidColorBrush x:Key="MethodTypeTitleBackground" Color="#FF9B12DE" />
+    <SolidColorBrush x:Key="NormalControlBackground" Color="#FF404040" />
+	<SolidColorBrush x:Key="Link_ValueBrush" Color="#FFF392F3" />
+	<SolidColorBrush x:Key="Link_MethodBrush" Color="White" />
+    <SolidColorBrush x:Key="Link_DelegateBrush" Color="#FFFCD40B" />
+    <SolidColorBrush x:Key="Link_ClassBrush" Color="#FF00A2FF"/>
+    <SolidColorBrush x:Key="TextForeground" Color="White" />
+    <SolidColorBrush x:Key="CommentBackground" Color="#4C268741" />
+    <SolidColorBrush x:Key="Link_BoolBrush" Color="DarkRed" />
+    <SolidColorBrush x:Key="DefaultValueBrush" Color="GreenYellow"/>
+    <SolidColorBrush x:Key="ValueTypeBrush" Color="#FFA0A0A0"/>
+
+    <SolidColorBrush x:Key="Pin_Enum" Color="#FF00695F"/>
+    <SolidColorBrush x:Key="Pin_bool" Color="#FF8E0000"/>
+    <SolidColorBrush x:Key="Pin_Byte" Color="#FF006A60"/>
+    <SolidColorBrush x:Key="Pin_Int" Color="#FF1CDAA7"/>
+    <SolidColorBrush x:Key="Pin_Float" Color="#FF94EB3F"/>
+    <SolidColorBrush x:Key="Pin_String" Color="#FFEB00C4"/>
+    <SolidColorBrush x:Key="Pin_Vector" Color="#FFF0BE1F"/>
+    <SolidColorBrush x:Key="Pin_Rotator" Color="#FF97A9F0"/>
+    <SolidColorBrush x:Key="Pin_Transform" Color="#FFF06C00"/>
+    <SolidColorBrush x:Key="Pin_ClassObject" Color="#FF0399DA"/>
+    <SolidColorBrush x:Key="Pin_Type" Color="#FF5800BA"/>
+    <SolidColorBrush x:Key="Pin_Struct" Color="#FF0056C5"/>
+    <SolidColorBrush x:Key="Pin_Intptr" Color="#FF990084"/>
+    <SolidColorBrush x:Key="Pin_NumbericalValue" Color="#FF96CD22"/>
+
+    <SolidColorBrush x:Key="Node_PostEvent" Color="#FFD11717"/>
+    <SolidColorBrush x:Key="Node_Function" Color="#FF990084"/>
+    <SolidColorBrush x:Key="Node_Event" Color="#FF990084"/>
+
+    <LinearGradientBrush x:Key="LinkNode_Method_Background" EndPoint="1,0.5" StartPoint="0,0.5">
+		<GradientStop Color="#FF8282D8" Offset="0"/>
+		<GradientStop Color="#FF262641" Offset="1"/>
+	</LinearGradientBrush>
+	<LinearGradientBrush x:Key="LinkNode_Operation_Background" EndPoint="1,0.5" StartPoint="0,0.5">
+		<GradientStop Color="#FF8154D4" Offset="0"/>
+		<GradientStop Color="#FF2F1F4D" Offset="1"/>
+	</LinearGradientBrush>
+	<LinearGradientBrush x:Key="LinkNode_MethodControl_Background" EndPoint="1,0.5" StartPoint="0,0.5">
+		<GradientStop Color="#FF3EB2DA" Offset="0"/>
+		<GradientStop Color="#FF06232D" Offset="1"/>
+	</LinearGradientBrush>
+	<LinearGradientBrush x:Key="LinkNode_Value_Background" EndPoint="1,0.5" StartPoint="0,0.5">
+		<GradientStop Color="#FFF392F3" Offset="0"/>
+		<GradientStop Color="#FF3D223D" Offset="1"/>
+	</LinearGradientBrush>
+	<LinearGradientBrush x:Key="LinkNode_Debugger_Background" EndPoint="1,0.5" StartPoint="0,0.5">
+		<GradientStop Color="Red" Offset="0"/>
+		<GradientStop Color="#FF3B0000" Offset="1"/>
+	</LinearGradientBrush>
+	<LinearGradientBrush x:Key="LinkNode_Action_Background" EndPoint="1,0.5" StartPoint="0,0.5">
+		<GradientStop Color="#FFBDB72F" Offset="0"/>
+		<GradientStop Color="#FF2E2D07" Offset="1"/>
+	</LinearGradientBrush>
+	<LinearGradientBrush x:Key="LinkNode_ClassControl_Background" EndPoint="1,0.5" StartPoint="0,0.5">
+        <GradientStop Color="#FFE0A741" Offset="0"/>
+        <GradientStop Color="#FF1F1708" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="LinkNode_CodeControl_Background" EndPoint="1,0.5" StartPoint="0,0.5">
+        <GradientStop Color="#FFBCD454" Offset="0"/>
+        <GradientStop Color="#FF4B4D1F" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="LinkNode_ResourceControl_Background" EndPoint="1,0.5" StartPoint="0,0.5">
+        <GradientStop Color="#FF24F00F" Offset="0"/>
+        <GradientStop Color="#FF0F9327" Offset="1"/>
+    </LinearGradientBrush>
+    <BitmapImage x:Key="VarPin_Disconnected" UriSource="/ResourceLibrary;component/Icons/Graph/Pin_disconnected_VarA.png"/>
+    <BitmapImage x:Key="VarPin_Connected" UriSource="/ResourceLibrary;component/Icons/Graph/Pin_connected_VarA.png"/>
+    <BitmapImage x:Key="ExecPin_Disconnected" UriSource="/ResourceLibrary;component/Icons/Graph/ExecPin_Disconnected.png"/>
+    <BitmapImage x:Key="ExecPin_Connected" UriSource="/ResourceLibrary;component/Icons/Graph/ExecPin_Connected.png"/>
+    <BitmapImage x:Key="ArrayPin_Disconnected" UriSource="/ResourceLibrary;component/Icons/Graph/ArrayPin_disconnected.png"/>
+    <BitmapImage x:Key="ArrayPin_Connected" UriSource="/ResourceLibrary;component/Icons/Graph/ArrayPin.png"/>
+    <BitmapImage x:Key="RefPin_Disconnected" UriSource="/ResourceLibrary;component/Icons/Graph/RefPin_disconnected.png"/>
+    <BitmapImage x:Key="RefPin_Connected" UriSource="/ResourceLibrary;component/Icons/Graph/RefPin_connected.png"/>
+
+    <BitmapImage x:Key="AnimationNode_Result" UriSource="/ResourceLibrary;component/Icons/Graph/Animation/AnimationNode_Result_128x.png"/>
+    <BitmapImage x:Key="PosePin_Connected_10x28" UriSource="/ResourceLibrary;component/Icons/Graph/Animation/PosePin_Connected_10x28.png"/>
+    <BitmapImage x:Key="PosePin_Disconnected_10x28" UriSource="/ResourceLibrary;component/Icons/Graph/Animation/PosePin_Disconnected_10x28.png"/>
+    <BitmapImage x:Key="PosePin_Connected_15x28" UriSource="/ResourceLibrary;component/Icons/Graph/Animation/PosePin_Connected_15x28.png"/>
+    <BitmapImage x:Key="PosePin_Disconnected_15x28" UriSource="/ResourceLibrary;component/Icons/Graph/Animation/PosePin_Disconnected_15x28.png"/>
+    <BitmapImage x:Key="AnimationNode_AimOffsetBlendSpace1D_64x" UriSource="/ResourceLibrary;component/Icons/Icons/AssetIcons/AimOffsetBlendSpace1D_64x.png"/>
+    <BitmapImage x:Key="AnimationNode_AimOffsetBlendSpace_64x" UriSource="/ResourceLibrary;component/Icons/Icons/AssetIcons/AimOffsetBlendSpace_64x.png"/>
+    <BitmapImage x:Key="AnimationNode_BlendSpace1D_64x" UriSource="/ResourceLibrary;component/Icons/Icons/AssetIcons/BlendSpace1D_64x.png"/>
+    <BitmapImage x:Key="AnimationNode_BlendSpace_64x" UriSource="/ResourceLibrary;component/Icons/Icons/AssetIcons/BlendSpace_64x.png"/>
+    <BitmapImage x:Key="AnimationNode_AnimationClip_64x" UriSource="/ResourceLibrary;component/Icons/Icons/AssetIcons/AnimBlueprint_64x.png"/>
+
+
+    <BitmapImage x:Key="BehaviorTreeNode_Action_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Action_64x.png"/>
+    <BitmapImage x:Key="BehaviorTreeNode_ConditionLoop_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/ConditionLoop_64x.png"/>
+    <BitmapImage x:Key="BehaviorTreeNode_Parallel_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Parallel_64x.png"/>
+    <BitmapImage x:Key="BehaviorTreeNode_RandomSelecter_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/RandomSelecter_64x.png"/>
+    <BitmapImage x:Key="BehaviorTreeNode_Root_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Root_64x.png"/>
+    <BitmapImage x:Key="BehaviorTreeNode_Selecter_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Selecter_64x.png"/>
+    <BitmapImage x:Key="BehaviorTreeNode_Sequence_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Sequence_64x.png"/>
+    <BitmapImage x:Key="BehaviorTreeNode_Subtree_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Subtree_64x.png"/>
+    <BitmapImage x:Key="BehaviorTreeNode_Wait_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Wait_64x.png"/>
+    <BitmapImage x:Key="Time_Limit_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Time_Limit_64x.png"/>
+
+    <BitmapImage x:Key="Conditional_Decorator_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Conditional_Decorator_64x.png"/>
+    <BitmapImage x:Key="Cone_Check_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Cone_Check_64x.png"/>
+    <BitmapImage x:Key="Cooldown_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Cooldown_64x.png"/>
+    <BitmapImage x:Key="Does_Path_Exist_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Does_Path_Exist_64x.png"/>
+    <BitmapImage x:Key="EQS_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/EQS_64x.png"/>
+    <BitmapImage x:Key="Force_Success_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Force_Success_64x.png"/>
+    <BitmapImage x:Key="Keep_In_Cone_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Keep_In_Cone_64x.png"/>
+    <BitmapImage x:Key="Loop_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Loop_64x.png"/>
+    <BitmapImage x:Key="Move_Directly_Toward_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Move_Directly_Toward_64x.png"/>
+    <BitmapImage x:Key="Move_To_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Move_To_64x.png"/>
+    <BitmapImage x:Key="Non_Conditional_Decorator_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Non_Conditional_Decorator_64x.png"/>
+    <BitmapImage x:Key="Play_Sound_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Play_Sound_64x.png"/>
+    <BitmapImage x:Key="Service_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Service_64x.png"/>
+    <BitmapImage x:Key="Task_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Task_64x.png"/>
+    <BitmapImage x:Key="Reached_Move_Goal_64x" UriSource="/ResourceLibrary;component/Icons/BehaviorTree/Reached_Move_Goal_64x.png"/>
+
+    <BitmapImage x:Key="StateMachine_64x" UriSource="/ResourceLibrary;component/Icons/Icons/AssetIcons/StateMachine_64x.png"/>
+
+    <SolidColorBrush x:Key="BehaviorTreeNode_RootColor" Color="#FF0088C3"/>
+    <SolidColorBrush x:Key="BehaviorTreeNode_CompositeColor" Color="#FFD08038"/>
+    <SolidColorBrush x:Key="BehaviorTreeNode_CustomActionColor" Color="#FFC561CA"/>
+    <SolidColorBrush x:Key="BehaviorTreeNode_SystemActionColor" Color="#FFC561CA"/>
+    <SolidColorBrush x:Key="BehaviorTreeNode_SubTreeColor" Color="#FF0E589D"/>
+    <SolidColorBrush x:Key="BehaviorTreeNode_ServiceColor" Color="#FF52CA69"/>
+    <SolidColorBrush x:Key="BehaviorTreeNode_DecoratorColor" Color="#FF43CEAE"/>
+    <SolidColorBrush x:Key="BehaviorTreeNode_ContentColor" Color="#FFE9F1EF"/>
+
+    <BitmapImage x:Key="Icon_Graph" UriSource="/ResourceLibrary;component/Icons/Icons/icon_Blueprint_EventGraph_24x.png"/>
+
+    <BitmapImage x:Key="Icon_PostEvent" UriSource="/ResourceLibrary;component/Icons/Graph/PostEvent.png"/>
+    <BitmapImage x:Key="Icon_CustomEvent" UriSource="/ResourceLibrary;component/Icons/Graph/Event_Custom.png"/>
+    <BitmapImage x:Key="Icon_OverrideFunction" UriSource="/ResourceLibrary;component/Icons/Graph/macross_Override  Function.png"/>
+    <BitmapImage x:Key="Icon_Function" UriSource="/ResourceLibrary;component/Icons/Icons/macross_Function.png"/>
+    <BitmapImage x:Key="Icon_Pill" UriSource="/ResourceLibrary;component/Icons/Icons/pill_16x.png"/>
+    <BitmapImage x:Key="Icon_PillArray" UriSource="/ResourceLibrary;component/Icons/Icons/pillarray_16x.png"/>
+    <BitmapImage x:Key="Icon_PillMapKey" UriSource="/ResourceLibrary;component/Icons/Icons/pillmapkey_16x.png"/>
+    <BitmapImage x:Key="Icon_PillSet" UriSource="/ResourceLibrary;component/Icons/Icons/pillset_40x.png"/>
+    <BitmapImage x:Key="Icon_Node" UriSource="/ResourceLibrary;component/Icons/Graph/icon_Blueprint_Node_16x.png"/>
+    <BitmapImage x:Key="Icon_Expand" UriSource="/ResourceLibrary;component/Icons/Graph/icon_Blueprint_BreakStruct_16x.png"/>
+    <BitmapImage x:Key="Icon_Cast" UriSource="/ResourceLibrary;component/Icons/Graph/icon_Blueprint_Cast_16x.png"/>
+</ResourceDictionary>

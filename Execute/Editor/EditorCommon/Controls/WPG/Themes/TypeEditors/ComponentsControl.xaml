@@ -1,0 +1,93 @@
+﻿<UserControl x:Class="WPG.Themes.TypeEditors.ComponentsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             xmlns:ctrlLib="clr-namespace:EditorCommon.Controls"
+             xmlns:btn="clr-namespace:ResourceLibrary.Controls.Button;assembly=ResourceLibrary"
+             xmlns:menu="clr-namespace:ResourceLibrary.Controls.Menu;assembly=ResourceLibrary"
+             xmlns:searchBox="clr-namespace:SearchBox" x:Name="userControl"
+             mc:Ignorable="d" KeyDown="UserControl_KeyDown"
+             d:DesignHeight="244.5" d:DesignWidth="432.5">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <btn:IconTextBtn Margin="3" ToolTip="添加组件" ComboArrawShow="Collapsed" ScrollViewer.VerticalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Background="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=SpecialBtnBG}}" Padding="3,0" Click="AddComponent_Click" >
+            <btn:IconTextBtn.Header>
+                <Grid>
+                    <StackPanel Orientation="Horizontal" Margin="1,1,0,0">
+                        <TextBlock Text="&#xf15b;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="3,0,5,0" Foreground="Black"/>
+                        <TextBlock Text="Add Component" FontSize="13" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" FontWeight="Bold" Foreground="Black"/>
+                        <TextBlock Text="&#xf0d7;" FontSize="10" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="5,0,3,0" Foreground="Black"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0">
+                        <TextBlock Text="&#xf15b;" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="3,0,5,0"/>
+                        <TextBlock Text="Add Component" FontSize="13" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" FontWeight="Bold"/>
+                        <TextBlock Text="&#xf0d7;" FontSize="10" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Icon, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="5,0,3,0"/>
+                    </StackPanel>
+                </Grid>
+            </btn:IconTextBtn.Header>
+            <btn:IconTextBtn.ExtContent>
+                <searchBox:SearchBox x:Name="searchBox" Margin="1,0,0,0" TipText="Search Component" Height="30"/>
+            </btn:IconTextBtn.ExtContent>
+            <menu:TextSeparator Grid.Row="1"  x:Name="BasicAssetMenuHead" Text="Create Component" Style="{DynamicResource {ComponentResourceKey ResourceId=TextMenuSeparatorStyle, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+        </btn:IconTextBtn>
+        <TreeView x:Name="TreeView_Components" AllowDrop="True" VirtualizingPanel.IsVirtualizing="True" DragEnter="TreeView_Components_DragEnter" DragLeave="TreeView_Components_DragLeave" Drop="TreeView_Components_Drop" Style="{DynamicResource {ComponentResourceKey ResourceId=TreeViewStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Grid.Row="1"
+                  ctrlLib:OutlinerTreeViewExtensions.EnableMultiSelect="True" ctrlLib:OutlinerTreeViewExtensions.SelectedItems="{Binding SelectedItemViews, ElementName=userControl}">
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="Template" Value="{DynamicResource {ComponentResourceKey ResourceId=TreeViewItemTemplate_Outliner, TypeInTargetAssembly={x:Type res:CustomResources}}}" />
+                    <Setter Property="Visibility" Value="{Binding Visibility, Mode=TwoWay}" />
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="ctrlLib:OutlinerTreeViewExtensions.IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                    <Setter Property="IsSelected" Value="{Binding TreeViewItemIsSelected, Mode=TwoWay}"/>
+                    <EventSetter Event="Loaded" Handler="TreeViewItem_Loaded"/>
+                    <Style.Triggers>
+                        <Trigger Property="ctrlLib:OutlinerTreeViewExtensions.IsSelected" Value="true">
+                            <Setter Property="Background" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=OutlinerTreeViewItemSelectedBackground}}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=TreeViewItemSelectedForeground}}"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="ctrlLib:OutlinerTreeViewExtensions.IsSelected" Value="true"/>
+                                <Condition Property="IsMouseOver" Value="true"/>
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Background" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=OutlinerTreeViewItemSelectedBackground}}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=TreeViewItemSelectedForeground}}"/>
+                        </MultiTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TreeView.ItemContainerStyle>
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource = "{Binding ChildList}">
+                    <Grid MouseDown="TreeViewItem_MouseDown" MouseRightButtonUp="TreeViewItem_MouseRightButtonUp" MouseMove="TreeViewItem_MouseMove" MouseUp="TreeViewItem_MouseUp" MouseEnter="TreeViewItem_MouseEnter" MouseLeave="TreeViewItem_MouseLeave" Background="{Binding TreeViewItemBackground}" ToolTip="{Binding Description}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="1" x:Name="Path_InsertUp" Height="2"  VerticalAlignment="Top" Grid.ColumnSpan="2" Visibility="{Binding UpInsertLineVisible}" IsHitTestVisible="False" Background="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=OutlinerTreeViewItemInsertSibling}}" CornerRadius="1"/>
+                        <Border Grid.Column="1" x:Name="Path_InsertDown"  Height="2"  VerticalAlignment="Bottom" Grid.ColumnSpan="2" Visibility="{Binding DownInsertLineVisible}" IsHitTestVisible="False" Background="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=OutlinerTreeViewItemInsertSibling}}" CornerRadius="1" />
+                        <Border Grid.Column="1" x:Name="Path_InsertChild" Height="auto" Margin="0,0,0,0" VerticalAlignment="Stretch" Grid.ColumnSpan="2" Visibility="{Binding ChildInsertLineVisible}" IsHitTestVisible="False" Background="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=OutlinerTreeViewItemAddChild}}" CornerRadius="4"/>
+
+                        <Image x:Name="Image_Icon" Grid.Column="1" Width="20" Height="20" Source="{Binding ImageIcon}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,2" OpacityMask="{x:Null}"/>
+                        <ctrlLib:CustomTextBlock Grid.Column="2" Text="{Binding Name}" IsEnabled="{Binding TreeviewItemChecked, Mode=TwoWay}" HighLightString="{Binding HighLightString}" Margin="3,0,0,0"  
+                                                 HighLightBrush="{DynamicResource {ComponentResourceKey ResourceId=FilterStringHightLightBrush, TypeInTargetAssembly={x:Type res:CustomResources}}}"
+                                                 Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Foreground="{Binding TreeViewItemForeground, Mode=TwoWay}" FontSize="12" VerticalAlignment="Center"/>
+                        <Rectangle Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Fill="#01000000" StrokeThickness="0" Grid.ColumnSpan="2" DragEnter="Rectangle_InsertChild_DragEnter" DragLeave="Rectangle_InsertChild_DragLeave" Drop="Rectangle_Drop" AllowDrop="True"/>
+                        <Rectangle Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Stretch" Height="5" Fill="#01000000" StrokeThickness="0" Grid.ColumnSpan="2" DragEnter="Path_InsertUp_DragEnter" DragLeave="Path_InsertUp_DragLeave" Drop="Rectangle_Drop" AllowDrop="True"/>
+                        <Rectangle Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Height="5" Fill="#01000000" StrokeThickness="0" Grid.ColumnSpan="2" DragEnter="Path_InsertDown_DragEnter" DragLeave="Path_InsertDown_DragLeave" Drop="Rectangle_Drop" AllowDrop="True"/>
+                    </Grid>
+                    <HierarchicalDataTemplate.Triggers>
+                        <Trigger Property="Source" SourceName="Image_Icon" Value="{x:Null}">
+                            <Setter Property="Visibility" TargetName="Image_Icon" Value="Collapsed"/>
+                        </Trigger>
+                    </HierarchicalDataTemplate.Triggers>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+    </Grid>
+</UserControl>

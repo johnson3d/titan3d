@@ -1,0 +1,78 @@
+#include "Inc/VertexLayout.cginc"
+#include "Inc/CommonDeferredShadingFunc.cginc"
+
+#include "dummy.gen"
+
+#ifdef MDFQUEUE_FUNCTION
+	MDFQUEUE_FUNCTION
+#endif
+
+PS_INPUT VS_Main( VS_INPUT input )
+{
+	PS_INPUT output = (PS_INPUT)0;
+#if defined(MDF_INSTANCING)
+	output.PointLightIndices = PointLightIndices;
+	output.SpecialData.x = PointLightNum;
+#endif
+
+#ifdef MDFQUEUE_FUNCTION
+	MdfQueueDoModifiers(output, input);
+#endif
+
+#ifndef DO_VSInput_To_PSInput
+	#define DO_VSInput_To_PSInput Default_VSInput2PSInput
+#endif
+
+	DO_VSInput_To_PSInput(output, input);
+	
+	MTL_OUTPUT mtl = (MTL_OUTPUT)0;
+#ifndef DO_VS_MATERIAL
+	#define DO_VS_MATERIAL DoDefaultPSMaterial
+#endif
+
+	//mtl.vUV = output.vUV;
+	DO_VS_MATERIAL(output,mtl);
+	//output.vUV = mtl.vUV;
+
+	matrix WVPMtx = mul(WorldMatrix, ViewPrjMtx);
+	output.vPosition = mul(float4(output.vPosition.xyz, 1), WVPMtx);
+	output.vNormal = normalize( mul(float4(output.vNormal.xyz, 0), WorldMatrix ).xyz);
+
+	return output;
+}
+
+struct PS_OUTPUT
+{
+	float4 RenderTarget0 : SV_Target0;
+	float4 RenderTarget1 : SV_Target1;
+};
+
+PS_OUTPUT PS_Main( PS_INPUT input )
+{
+#ifndef DO_PS_MATERIAL
+	#define DO_PS_MATERIAL DoDefaultPSMaterial
+#endif
+	
+	MTL_OUTPUT mtl = Default_PSInput2Material(input);
+	
+	DO_PS_MATERIAL(input, mtl);
+	
+#ifdef BUMP
+	//这里应该讲vNorml和vBumpNormal做face的变换
+	mtl.vNormal = mtl.vBumpNormal
+#endif
+	
+	Simple_GBufferData GBuffer = (Simple_GBufferData)0;
+	//MRT0
+	GBuffer.MtlColorRaw = mtl.mAlbedo.rgb;
+	GBuffer.Metallicity = mtl.mMetallic;
+	//MRT1;
+	GBuffer.WorldNormal = mtl.mNormal;
+	GBuffer.Roughness = mtl.mRough;
+
+	PS_OUTPUT output = (PS_OUTPUT)0;
+
+	EncodeGBuffer(GBuffer, output.RenderTarget0, output.RenderTarget1);
+
+	return output;
+}

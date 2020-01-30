@@ -1,0 +1,163 @@
+#include "GpuDrivenDataDef.cginc"
+
+struct DrawArgs
+{
+	uint IndexCountPerInstance;
+	uint InstanceCount;
+	uint StartIndexLocation;
+	int BaseVertexLocation;
+	uint StartInstanceLocation;
+};
+
+RWStructuredBuffer<MeshInstanceData> MeshInstanceArray : register(u1);
+RWStructuredBuffer<MeshCluster> ClusterArray : register(u2);
+RWStructuredBuffer<uint> StaticSceneAllFaces : register(u3);
+
+//RWStructuredBuffer<uint> StaticSceneDrawFaces : register(u4);
+RWByteAddressBuffer StaticSceneDrawFaces : register(u4);
+//RWStructuredBuffer<DrawArgs> IndirectDrawArgs : register(u5);
+RWByteAddressBuffer IndirectDrawArgs : register(u5);
+
+bool TestBit(uint2 InBits, int index)
+{
+	[branch]
+	if (EnableGpuCulling == 0)
+		return true;
+
+	if (index < 32)
+	{
+		return (InBits[0] & (1 << index)) != 0;
+	}
+	else
+	{
+		return (InBits[1] & (1 << (index - 32))) != 0;
+	}
+	return true;
+}
+
+bool FrustumCull(MeshCluster cluster)
+{
+	[branch]
+	if (EnableGpuCulling == 0)
+		return false;
+
+	float3 position = cluster.BoundCenter;
+	float3 extent = cluster.BoundExtent;
+	float3 minPos = position - extent;
+	float3 maxPos = position + extent;
+	float outOfRange = dot(GpuDrivenFrustumMinPoint > maxPos, 1) + dot(GpuDrivenFrustumMaxPoint < minPos, 1);
+	if (outOfRange > 0.5)
+		return true;
+
+	/*bool retValue = false;
+	for (uint i = 0; i < 6; ++i)
+	{
+		float4 plane = GpuDrivenCameraPlanes[i];
+		float3 absNormal = abs(plane.xyz);
+		if ((dot(position, plane.xyz) - dot(absNormal, extent)) > -plane.w)
+		{
+			retValue = true;
+			break;
+		}
+	}
+	return retValue;*/
+
+	for (uint i = 0; i < 6; ++i)
+	{
+		float4 plane = GpuDrivenCameraPlanes[i];
+		float3 absNormal = abs(plane.xyz);
+		if ((dot(position, plane.xyz) - dot(absNormal, extent)) > -plane.w)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+[numthreads(1, 1, 1)]
+void CSMain_ClearBatchArgs(uint3 id : SV_DispatchThreadID)
+{
+	//IndirectDrawArgs[0] = 0;
+	IndirectDrawArgs.Store(0, 0);
+}
+
+[numthreads(64, 1, 1)]
+void CSMain_MeshBatch(uint3 id : SV_DispatchThreadID)
+{
+	[branch]
+	if(ClusterNumber<=id.x)
+		return;
+
+	MeshCluster cluster = ClusterArray[id.x];
+
+	float3 GpuDrivenCameraDirection = cluster.BoundCenter - GpuDrivenCameraPosition;
+	float3 cameraDirInBoundSpace = mul(float4(GpuDrivenCameraDirection, 0), MeshInstanceArray[cluster.InstanceId].InvMatrix).xyz;
+
+	if (FrustumCull(cluster)==false)
+	{
+		uint2 visBits = 0;
+
+		if (cameraDirInBoundSpace.x >= 0)
+		{
+			visBits[0] |= cluster.CubeFaces_NX[0];
+			visBits[1] |= cluster.CubeFaces_NX[1];
+		}
+		else
+		{
+			visBits[0] |= cluster.CubeFaces_X[0];
+			visBits[1] |= cluster.CubeFaces_X[1];
+		}
+		if (cameraDirInBoundSpace.y >= 0)
+		{
+			visBits[0] |= cluster.CubeFaces_NY[0];
+			visBits[1] |= cluster.CubeFaces_NY[1];
+		}
+		else
+		{
+			visBits[0] |= cluster.CubeFaces_Y[0];
+			visBits[1] |= cluster.CubeFaces_Y[1];
+		}
+		if (cameraDirInBoundSpace.z >= 0)
+		{
+			visBits[0] |= cluster.CubeFaces_NZ[0];
+			visBits[1] |= cluster.CubeFaces_NZ[1];
+		}
+		else
+		{
+			visBits[0] |= cluster.CubeFaces_Z[0];
+			visBits[1] |= cluster.CubeFaces_Z[1];
+		}
+		uint InstanceStartIndex = MeshBatchVertexStride * cluster.InstanceId;
+		for (uint i = 0; i < cluster.FaceCount; i++)
+		{
+			if (TestBit(visBits, i)==false)
+			{
+				continue;
+			}
+
+			/*if (cluster.CubeFaces_X[0] == 0 && cluster.CubeFaces_X[1] == 0 &&
+				cluster.CubeFaces_Y[0] == 0 && cluster.CubeFaces_Y[1] == 0 &&
+				cluster.CubeFaces_Z[0] == 0 && cluster.CubeFaces_Z[1] == 0 &&
+				cluster.CubeFaces_NX[0] == 0 && cluster.CubeFaces_NX[1] == 0 &&
+				cluster.CubeFaces_NY[0] == 0 && cluster.CubeFaces_NY[1] == 0 &&
+				cluster.CubeFaces_NZ[0] == 0 && cluster.CubeFaces_NZ[1] == 0)
+				continue;*/
+
+			int IndexId = 0;
+			//InterlockedAdd(IndirectDrawArgs[0].IndexCountPerInstance, 3, IndexId);
+			IndirectDrawArgs.InterlockedAdd(0, 3, IndexId);
+			
+			uint srcIndex = (cluster.StartFaceIndex + i) * 3;
+
+			uint3 tri;
+			tri.x = InstanceStartIndex + StaticSceneAllFaces[srcIndex];
+			tri.y = InstanceStartIndex + StaticSceneAllFaces[srcIndex + 1];
+			tri.z = InstanceStartIndex + StaticSceneAllFaces[srcIndex + 2];
+			
+			StaticSceneDrawFaces.Store3(IndexId * 4, tri);
+			/*StaticSceneDrawFaces[IndexId] = tri.x;
+			StaticSceneDrawFaces[IndexId + 1] = tri.y;
+			StaticSceneDrawFaces[IndexId + 2] = tri.z;*/
+		}
+	}
+}

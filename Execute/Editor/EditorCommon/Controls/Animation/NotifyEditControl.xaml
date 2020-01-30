@@ -1,0 +1,28 @@
+﻿<UserControl x:Class="EditorCommon.Controls.Animation.NotifyEditControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EditorCommon.Controls.Animation"
+             mc:Ignorable="d" 
+             x:Name="userControl"
+             d:DesignHeight="30" d:DesignWidth="800" Height="30" Loaded="userControl_Loaded">
+    <UserControl.Resources>
+
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="341*"/>
+            <ColumnDefinition Width="9*"/>
+            <ColumnDefinition Width="50"/>
+            <ColumnDefinition Width="50"/>
+        </Grid.ColumnDefinitions>
+        <Border BorderThickness="1" CornerRadius="5" Background="#FF606060"/>
+
+        <local:AnimationNotifySlider x:Name="AnimSlider" ThumbDragable="False" ThumbWidth="3" Maximum="100" Foreground="Black" Value="0"/>
+        <Button x:Name="AddTrackButton" Grid.Column="2" Content="+" Margin="2,0" Click="AddTrackButton_Click"/>
+        <Button x:Name="RemoveTrackButton" Grid.Column="3" Content="-" Margin="2,0" Click="RemoveTrackButton_Click"/>
+        <TextBlock x:Name="TrackNumTextBlock" TextWrapping="Wrap" Text="1" Grid.Column="1" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+    </Grid>
+</UserControl>

@@ -1,0 +1,50 @@
+﻿<myTypes:BaseNodeControl x:Name="baseNodeControl"
+    x:Class="CodeDomNode.ForLoopNode"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+    xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+    xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+    BlendBrush="{DynamicResource LinkNode_Method_Background}"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+    <myTypes:BaseNodeControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CodeGenerateSystem;Component/Themes/Generic.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </myTypes:BaseNodeControl.Resources>
+    <myTypes:BaseNodeControl.Header>
+        <StackPanel Orientation="Horizontal">
+            <Image Source="/ResourceLibrary;component/Icons/Graph/icon_Blueprint_Loop_16x.png" Width="16" Height="16" Margin="5"/>
+            <TextBlock x:Name="TitleName" Foreground="{DynamicResource TextForeground}" Text="{Binding NodeName, ElementName=baseNodeControl, Mode=TwoWay}" Grid.ColumnSpan="3" Padding="2" VerticalAlignment="Center" HorizontalAlignment="Center" IsHitTestVisible="False" FontSize="18.667" Height="28" Width="76" />
+        </StackPanel>
+    </myTypes:BaseNodeControl.Header>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <baseCtrl:LinkOutControl x:Name="MethodLink_LoopBody" PinType="Exec" NameString="Loop Body" Margin="8,4" BackBrush="{DynamicResource Link_MethodBrush}" VerticalAlignment="Center" HorizontalAlignment="Right" Direction="Right" Grid.Column="1"/>
+        <baseCtrl:LinkInControl x:Name="MethodLink_Pre" NameString="Exec" PinType="Exec" Margin="8" BackBrush="{DynamicResource Link_MethodBrush}" VerticalAlignment="Center" HorizontalAlignment="Left" Direction="Left"/>
+        <StackPanel Margin="8,4" Grid.Row="1" Orientation="Horizontal">
+            <baseCtrl:LinkInControl x:Name="IndexFirst" PinType="Normal" NameString="First Index" BackBrush="{DynamicResource Link_ValueBrush}" HorizontalAlignment="Left" Direction="Left" Margin="0,0,8,0"/>
+            <TextBox Text="{Binding FirstIndex, ElementName=baseNodeControl, Mode=TwoWay}" Visibility="{Binding FirstIndexVisibility, ElementName=baseNodeControl}" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBoxStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Margin="8,4" Orientation="Horizontal">
+            <baseCtrl:LinkInControl x:Name="IndexLast" PinType="Normal" NameString="Last Index" BackBrush="{DynamicResource Link_ValueBrush}" HorizontalAlignment="Left" Direction="Left" Margin="0,0,8,0"/>
+            <TextBox Text="{Binding LastIndex, ElementName=baseNodeControl, Mode=TwoWay}" Visibility="{Binding LastIndexVisibility, ElementName=baseNodeControl}" VerticalAlignment="Center" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBoxStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+        </StackPanel>
+        <baseCtrl:LinkOutControl x:Name="MethodLink_Complete" NameString="Completed" PinType="Exec" Margin="8" BackBrush="{DynamicResource Link_MethodBrush}" VerticalAlignment="Center" HorizontalAlignment="Right" Direction="Right" Grid.Column="1" Grid.Row="2"/>
+        <baseCtrl:LinkOutControl x:Name="IndexPin" Margin="8,4" NameString="Index" BackBrush="{DynamicResource Link_ValueBrush}" VerticalAlignment="Center" HorizontalAlignment="Right" Direction="Right" Grid.Column="1" Grid.Row="1"/>
+    </Grid>
+</myTypes:BaseNodeControl>

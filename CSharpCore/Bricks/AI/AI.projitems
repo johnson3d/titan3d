@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>3302444e-ccbe-468d-865d-4750067ef6d4</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.AI</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Behavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\BehaviorEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\BehaviorTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Blackboard.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Composite\CompositeBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Composite\ParallelBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Composite\RandomSelectBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Composite\SelectBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Composite\SequenceBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Decorator\ConditionDecorator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Decorator\DecoratorBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Decorator\ConditionFuncDecorator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Event\ConditionEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Leaf\Action\ActionBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Leaf\Action\DelayBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Leaf\Action\FinishWithResultBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Leaf\Action\MoveToBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Leaf\Action\PathFollow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Leaf\Condition\ConditionBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Leaf\LeafBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Service\CustomFunctionService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree\Service\ServiceBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\AIMovementBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\Alignment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\Arrive.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\Cohesion.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\CollisionAvoidance.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\Evade.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\Flee.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\KinematicArrive.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\KinematicPathFollowing.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\KinematicSeek.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\KinematicWander.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\Pursuit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\Seek.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\Separation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\VelocityMatching.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SteeringBehaviors\Wander.cs" />
+  </ItemGroup>
+</Project>

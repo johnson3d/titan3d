@@ -1,0 +1,34 @@
+﻿<myTypes:BaseNodeControl x:Class="CodeDomNode.CommonValue"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+			 xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+             xmlns:ipWin="clr-namespace:InputWindow;assembly=EditorCommon" Loaded="baseNodeControl_Loaded"
+             mc:Ignorable="d" x:Name="baseNodeControl" NodeType="VarNode" BlendBrush="{DynamicResource LinkNode_Value_Background}">
+    <myTypes:BaseNodeControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CodeGenerateSystem;Component/Themes/Generic.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</myTypes:BaseNodeControl.Resources>
+	<Grid Name="ValueGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <baseCtrl:LinkOutControl x:Name="ValueLinkHandle" NameString="{Binding NodeName, ElementName=baseNodeControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Margin="0,0,8,0" BackBrush="{DynamicResource Link_ValueBrush}" HorizontalAlignment="Right" Direction="Right"/>
+        <TextBox x:Name="ValueTextBox" MinWidth="60" HorizontalContentAlignment="Center" AllowDrop="False" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBoxStyle_ErrorCheck, TypeInTargetAssembly={x:Type res:CustomResources}}}" Margin="8,3,3,3" VerticalAlignment="Center" >
+            <TextBox.Text>
+                <Binding Path="ValueText" ElementName="baseNodeControl" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" ValidatesOnDataErrors="True">
+                    <Binding.ValidationRules>
+                        <ipWin:RequiredRule />
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+	</Grid>
+</myTypes:BaseNodeControl>

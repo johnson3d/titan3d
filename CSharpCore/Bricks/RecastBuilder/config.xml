@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ShareProjectConfig>
+  <References>
+    <PreDefines>
+    </PreDefines>
+    <Proj Name="../RecastRuntime/RecastRuntime.projitems"/>
+  </References>
+  <CppRefrence>
+    <PreDefines>
+    </PreDefines>
+    <Proj Name="3rd/Recast/DebugUtils.vcxitems"/>
+  </CppRefrence>
+</ShareProjectConfig>

@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{C11F5C7A-10FD-4200-965A-9BFF1363C46D}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\cbstring\bsafe.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\cbstring\bstraux.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\cbstring\bstrlib.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\ControlFlowGraph.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\ControlFlowGraphUtils.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\DataTypeAnalysis.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\Declaration.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\decode.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\HLSLcc.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\HLSLccToolkit.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\HLSLCrossCompilerContext.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\Instruction.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\LoopTransform.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\Operand.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\reflect.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\Shader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\ShaderInfo.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\toGLSL.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\toGLSLDeclaration.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\toGLSLInstruction.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\toGLSLOperand.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\toMetal.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\toMetalDeclaration.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\toMetalInstruction.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\toMetalOperand.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\UseDefineChains.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\growing_array.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\hlslcc.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\hlslcc.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\pstdint.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\ShaderInfo.h" />
+  </ItemGroup>
+</Project>

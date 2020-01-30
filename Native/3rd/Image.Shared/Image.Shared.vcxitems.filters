@@ -1,0 +1,304 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="decoder">
+      <UniqueIdentifier>{d4c067e2-f830-4324-8bf5-4eb37b9afb9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="decoder\libjpeg9a">
+      <UniqueIdentifier>{e983a9b7-837c-4a5a-aea3-9aa5b3f01bc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="decoder\png">
+      <UniqueIdentifier>{cc5337e4-c86a-411b-a435-c3536ebfa96f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="decoder\zlib">
+      <UniqueIdentifier>{fbb2abd8-e677-41f5-963e-248c10f8ea20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="decoder\libwebp">
+      <UniqueIdentifier>{118971fb-b6c5-488c-9699-9051574bdbb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Compressor">
+      <UniqueIdentifier>{36bb787f-91cc-474b-9ab3-9a6547381e93}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)XImageBuffer.cpp">
+      <Filter>decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)XImageDecoder.cpp">
+      <Filter>decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)XImageDecoder_Jpg.cpp">
+      <Filter>decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)XImageDecoder_Png.cpp">
+      <Filter>decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\adler32.c">
+      <Filter>decoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\compress.c">
+      <Filter>decoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\crc32.c">
+      <Filter>decoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\deflate.c">
+      <Filter>decoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\inffast.c">
+      <Filter>decoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\inflate.c">
+      <Filter>decoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\inftrees.c">
+      <Filter>decoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\trees.c">
+      <Filter>decoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)zlib-1.2.8\zutil.c">
+      <Filter>decoder\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jaricom.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jcapimin.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jcapistd.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jcarith.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jccoefct.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jccolor.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jcdctmgr.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jchuff.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jcinit.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jcmainct.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jcmarker.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jcmaster.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jcomapi.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jcparam.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jcprepct.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jcsample.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jctrans.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdapimin.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdapistd.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdarith.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdatadst.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdatasrc.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdcoefct.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdcolor.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jddctmgr.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdhuff.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdinput.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdmainct.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdmarker.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdmaster.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdmerge.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdpostct.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdsample.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jdtrans.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jerror.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jfdctflt.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jfdctfst.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jfdctint.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jidctflt.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jidctfst.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jidctint.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jmemansi.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jmemmgr.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jquant1.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jquant2.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\jutils.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\rdbmp.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\rdcolmap.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\rdgif.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\rdppm.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\rdrle.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\rdswitch.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\rdtarga.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\transupp.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\wrbmp.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\wrgif.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\wrppm.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\wrrle.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)jpeg-9a\wrtarga.c">
+      <Filter>decoder\libjpeg9a</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\png.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngerror.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngget.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngmem.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngpread.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngread.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngrio.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngrtran.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngset.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngtest.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngtrans.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngwio.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngwrite.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngwtran.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngwutil.c">
+      <Filter>decoder\png</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)png\pngrutil.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)XImageBuffer.h">
+      <Filter>decoder</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)XImageDecoder.h">
+      <Filter>decoder</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)XImageDecoder_Jpg.h">
+      <Filter>decoder</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)XImageDecoder_Png.h">
+      <Filter>decoder</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)stb_dxt.h">
+      <Filter>Compressor</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

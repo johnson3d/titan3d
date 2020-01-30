@@ -1,0 +1,68 @@
+#include "../../Inc/MobileBasePassPS.cginc"
+
+#include "GpuDrivenDataDef.cginc"
+
+#ifdef MDFQUEUE_FUNCTION
+MDFQUEUE_FUNCTION
+#endif
+
+#if ENV_USEVTF == 1
+#include "VertexShaderVTF.cginc"
+#else
+StructuredBuffer<MeshInstanceData> MeshInstanceArray: register(t13);
+StructuredBuffer<MeshVertex> AllVertexArray: register(t14);
+//RWStructuredBuffer<uint> DrawFaceArray : register(u3);
+
+MeshVertex GetVertexData(uint index)
+{
+	return AllVertexArray[index];
+}
+
+MeshInstanceData GetInstanceData(uint index)
+{
+	return MeshInstanceArray[index];
+}
+#endif
+
+PS_INPUT VS_Main( uint verteID : SV_VertexID )
+{
+	PS_INPUT output = (PS_INPUT)0;
+	VS_INPUT input = (VS_INPUT)0;
+
+	uint instance = verteID / MeshBatchVertexStride;
+	uint index = verteID % MeshBatchVertexStride;
+
+	MeshInstanceData instData = GetInstanceData(instance);
+	MeshVertex vertexData = GetVertexData(index);
+
+	input.vPosition = mul(float4(vertexData.Position, 1), instData.Matrix).xyz;
+	input.vNormal = normalize(mul(float4(vertexData.Normal, 0), instData.Matrix).xyz);
+	input.vTangent.xyz = normalize(mul(float4(vertexData.Tangent.xyz, 0), instData.Matrix).xyz);
+	//input.vTangent.xyz = normalize(mul(float4(vertexData.Tangent.xyz, 0), instData.Matrix).xyz);
+
+	input.vUV = float2(vertexData.DiffuseU, vertexData.DiffuseV);//instData.VTMaterialId - > Real UV
+
+	Default_VSInput2PSInput(output, input);
+	
+	output.vWorldPos = output.vPosition.xyz;
+	output.vPosition = mul(float4(output.vWorldPos, 1), ViewPrjMtx);
+	
+	output.psCustomUV0.w = output.vPosition.w;
+
+	return output;
+}
+
+PS_OUTPUT PS_Main(PS_INPUT input)
+{
+	/*PS_OUTPUT output = (PS_OUTPUT)0;
+	MTL_OUTPUT mtl = Default_PSInput2Material(input);
+
+#ifndef DO_PS_MATERIAL
+#define DO_PS_MATERIAL DoDefaultPSMaterial
+#endif
+	DO_PS_MATERIAL(input, mtl);
+
+	output.RT0 = half4(mtl.mAlbedo.xyz, mtl.mAlpha);
+	return output;*/
+	return PS_MobileBasePass(input);
+}

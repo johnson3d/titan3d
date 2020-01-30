@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ShareProjectConfig>
+  <References>
+    <PreDefines>
+    </PreDefines>
+    <Proj Name="../../Math/Math.projitems"/>
+    <Proj Name="../../GamePlay/GamePlay.projitems"/>
+    <Proj Name="../../Graphics/Graphics.shproj"/>
+  </References>
+  <CppRefrence>
+    <PreDefines>
+    </PreDefines>
+    <Proj Name="3rd/Recast/Detour.vcxitems"/>
+    <Proj Name="3rd/Recast/DetourCrowd.vcxitems"/>
+    <Proj Name="3rd/Recast/DetourTileCache.vcxitems"/>
+    <Proj Name="3rd/Recast/Recast.vcxitems"/>
+    <Proj Name="Bricks/RecastRuntime.vcxitems"/>
+  </CppRefrence>
+</ShareProjectConfig>

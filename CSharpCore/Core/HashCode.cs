@@ -1,0 +1,341 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Runtime.InteropServices;
+
+namespace EngineNS
+{
+    [StructLayout(LayoutKind.Explicit, Pack = 4)]
+    public struct Hash64 : IComparable<Hash64>
+    {
+        [FieldOffset(0)]
+        public byte Data0;
+        [FieldOffset(1)]
+        public byte Data1;
+        [FieldOffset(2)]
+        public byte Data2;
+        [FieldOffset(3)]
+        public byte Data3;
+        [FieldOffset(4)]
+        public byte Data4;
+        [FieldOffset(5)]
+        public byte Data5;
+        [FieldOffset(6)]
+        public byte Data6;
+        [FieldOffset(7)]
+        public byte Data7;
+        [FieldOffset(0)]
+        public UInt64 AllData;
+        private static int CmpImpl(ref Hash64 lh, ref Hash64 rh)
+        {
+            if (lh.AllData > rh.AllData)
+                return 1;
+            else if (lh.AllData < rh.AllData)
+                return 1;
+            return 0;
+            //unsafe
+            //{
+            //    fixed (Hash64* p1 = &lh)
+            //    fixed (Hash64* p2 = &rh)
+            //    {
+            //        var pb1 = (byte*)p1;
+            //        var pb2 = (byte*)p2;
+            //        for (int i = 0; i < 8; i++)
+            //        {
+            //            if (pb1[i] > pb2[i])
+            //                return 1;
+            //            else if (pb1[i] < pb2[i])
+            //                return -1;
+            //        }
+            //        return 0;
+            //    }   
+            //}
+        }
+        public int CompareTo(Hash64 other)
+        {
+            return CmpImpl(ref this, ref other);
+        }
+        public static Hash64 TryParse(string str)
+        {
+            var segs = str.Split('_');
+            if (segs.Length != 8)
+                return Hash64.Empty;
+            Hash64 result = new Hash64();
+            result.Data0 = System.Convert.ToByte(segs[0], 16);
+            result.Data1 = System.Convert.ToByte(segs[1], 16);
+            result.Data2 = System.Convert.ToByte(segs[2], 16);
+            result.Data3 = System.Convert.ToByte(segs[3], 16);
+            result.Data4 = System.Convert.ToByte(segs[4], 16);
+            result.Data5 = System.Convert.ToByte(segs[5], 16);
+            result.Data6 = System.Convert.ToByte(segs[6], 16);
+            result.Data7 = System.Convert.ToByte(segs[7], 16);
+            return result;
+        }
+        public override string ToString()
+        {
+            return $"{Data0:X2}_{Data1:X2}_{Data2:X2}_{Data3:X2}_{Data4:X2}_{Data5:X2}_{Data6:X2}_{Data7:X2}";
+        }
+        public void PushTo(List<byte> data)
+        {
+            unsafe
+            {
+                fixed (byte* p = &Data0)
+                {
+                    for (int i = 0; i < 8; i++)
+                    {
+                        data.Add(p[i]);
+                    }
+                }
+            }
+        }
+        public static void PushTo(List<byte> data, string str)
+        {
+            unsafe
+            {
+                var btArray = System.Text.Encoding.ASCII.GetBytes(str);
+                for (int i = 0; i < btArray.Length; i++)
+                {
+                    data.Add(btArray[i]);
+                }
+            }
+        }
+        public static void CalcHash64(ref Hash64 hash, string source)
+        {
+            CalcHash64(ref hash, System.Text.Encoding.ASCII.GetBytes(source));
+        }
+        public static void CalcHash64(ref Hash64 hash, byte[] source)
+        {
+            unsafe
+            {
+                fixed (Hash64* p = &hash)
+                fixed(byte* pSource = &source[0])
+                {
+                    SDK_HashHelper_CalcHash64(p, pSource, source.Length);
+                }
+            }
+        }
+        public static Hash64 Empty = new Hash64();
+        public static bool operator == (Hash64 hash1, Hash64 hash2)
+        {
+            return hash1.AllData == hash2.AllData;
+            //return ((hash1.Data0 == hash2.Data0) &&
+            //        (hash1.Data1 == hash2.Data1) &&
+            //        (hash1.Data2 == hash2.Data2) &&
+            //        (hash1.Data3 == hash2.Data3) &&
+            //        (hash1.Data4 == hash2.Data4) &&
+            //        (hash1.Data5 == hash2.Data5) &&
+            //        (hash1.Data6 == hash2.Data6) &&
+            //        (hash1.Data7 == hash2.Data7));
+        }
+        public static bool operator != (Hash64 hash1, Hash64 hash2)
+        {
+            return hash1.AllData != hash2.AllData;
+            //return ((hash1.Data0 != hash2.Data0) ||
+            //        (hash1.Data1 != hash2.Data1) ||
+            //        (hash1.Data2 != hash2.Data2) ||
+            //        (hash1.Data3 != hash2.Data3) ||
+            //        (hash1.Data4 != hash2.Data4) ||
+            //        (hash1.Data5 != hash2.Data5) ||
+            //        (hash1.Data6 != hash2.Data6) ||
+            //        (hash1.Data7 != hash2.Data7));
+        }
+        public override int GetHashCode()
+        {
+            uint hash = 0xAAAAAAAA;
+
+            unsafe
+            {
+                fixed(byte* ptr = &Data0)
+                {
+                    for(int i=0; i<8; i++)
+                    {
+                        if ((i & 1) == 0)
+                        {
+                            hash ^= ((hash << 7) ^ ptr[i] * (hash >> 3));
+                        }
+                        else
+                        {
+                            hash ^= (~((hash << 11) + ptr[i] ^ (hash >> 5)));
+                        }
+                    }
+                }
+            }
+
+            return (int)hash;
+            //return ToString().GetHashCode();
+        }
+        public override bool Equals(object obj)
+        {
+            return this == (Hash64)obj;
+        }
+
+        public static unsafe void CalcHash64(Hash64* hash, byte* key, int len)
+        {
+            unsafe
+            {
+                SDK_HashHelper_CalcHash64(hash, key, len);
+            }
+        }
+
+        public class EqualityComparer : IEqualityComparer<Hash64>
+        {
+            public bool Equals(Hash64 x, Hash64 y)
+            {
+                return x == y;
+            }
+
+            public int GetHashCode(Hash64 obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+        #region SDK
+        public const string ModuleNC = CoreObjectBase.ModuleNC;
+        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        private extern static unsafe void SDK_HashHelper_CalcHash64(Hash64* hash, byte* key, int len);
+        #endregion
+    }
+
+    public class UniHash
+    {
+        public static uint DefaultHash(string str)
+        {
+            return JSHash(str);
+        }
+        public static uint RSHash(string str)
+        {
+            uint b = 378551;
+            uint a = 63689;
+            uint hash = 0;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                hash = hash * a + str[i];
+                a = a * b;
+            }
+
+            return hash;
+        }
+        public static uint JSHash(string str)
+        {
+            uint hash = 1315423911;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                hash ^= ((hash << 5) + str[i] + (hash >> 2));
+            }
+
+            return hash;
+        }
+        public static uint ELFHash(string str)
+        {
+            uint hash = 0;
+            uint x = 0;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                hash = (hash << 4) + str[i];
+
+                if ((x = hash & 0xF0000000) != 0)
+                {
+                    hash ^= (x >> 24);
+                }
+                hash &= ~x;
+            }
+            return hash;
+        }
+        public static uint BKDRHash(string str)
+        {
+            uint seed = 131; // 31 131 1313 13131 131313 etc..   
+            uint hash = 0;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                hash = (hash * seed) + str[i];
+            }
+
+            return hash;
+        }
+        /* End Of BKDR Hash Function */
+        public static uint SDBMHash(string str)
+        {
+            uint hash = 0;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                hash = str[i] + (hash << 6) + (hash << 16) - hash;
+            }
+
+            return hash;
+        }
+        /* End Of SDBM Hash Function */
+        public static uint DJBHash(string str)
+        {
+            uint hash = 5381;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                hash = ((hash << 5) + hash) + str[i];
+            }
+
+            return hash;
+        }
+        /* End Of DJB Hash Function */
+        public static uint DEKHash(string str)
+        {
+            int hash = str.Length;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                hash = ((hash << 5) ^ (hash >> 27)) ^ str[i];
+            }
+
+            return (uint)hash;
+        }
+        /* End Of DEK Hash Function */
+        public static uint BPHash(string str)
+        {
+            uint hash = 0;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                hash = hash << 7 ^ str[i];
+            }
+
+            return hash;
+        }
+        /* End Of BP Hash Function */
+        public static uint FNVHash(string str)
+        {
+            uint fnv_prime = 0x811C9DC5;
+            uint hash = 0;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                hash *= fnv_prime;
+                hash ^= str[i];
+            }
+
+            return hash;
+        }
+        /* End Of FNV Hash Function */
+        public static uint APHash(string str)
+        {
+            uint hash = 0xAAAAAAAA;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                if ((i & 1) == 0)
+                {
+                    hash ^= ((hash << 7) ^ str[i] * (hash >> 3));
+                }
+                else
+                {
+                    hash ^= (~((hash << 11) + str[i] ^ (hash >> 5)));
+                }
+            }
+
+            return hash;
+        }
+    }
+}

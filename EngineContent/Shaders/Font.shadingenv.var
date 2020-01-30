@@ -1,0 +1,2 @@
+float2 TextOffset;// = float2(0,0);
+float2 TextScale;// = float2(1,1);

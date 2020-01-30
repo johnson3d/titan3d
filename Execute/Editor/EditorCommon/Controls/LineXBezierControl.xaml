@@ -1,0 +1,61 @@
+﻿<UserControl x:Class="EditorCommon.Controls.LineXBezierControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" x:Name="userControl" d:DesignWidth="300" d:DesignHeight="200">
+	<UserControl.Resources>
+		<SolidColorBrush x:Key="ControlPointColor" Color="LightGray" />
+		<SolidColorBrush x:Key="BezierPointColor" Color="Lime"/>
+		<SolidColorBrush x:Key="MousePointAtColor" Color="White"/>
+		<SolidColorBrush x:Key="DeletePointAtColor" Color="Red"/>
+	</UserControl.Resources>
+    <Grid>
+        <Canvas x:Name="MainCanvas" Margin="8" SizeChanged="MainCanvas_SizeChanged" Background="#FF959595" Grid.Row="1" MouseMove="MainCanvas_MouseMove" Grid.Column="1">
+    		<Polyline x:Name="Polyline_LineXBezier" Points="0, 100 200, 150" Stroke="#FF88FF00" StrokeThickness="3" MouseMove="BezierPath_MouseMove" MouseEnter="BezierPath_MouseEnter" MouseLeave="BezierPath_MouseLeave" MouseDown="BezierPath_MouseDown" StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeLineJoin="Round">
+    			<Polyline.Effect>
+    				<DropShadowEffect/>
+    			</Polyline.Effect>
+    		</Polyline>
+			<Path x:Name="BezierPath" Stroke="Blue" StrokeThickness="3" MouseMove="BezierPath_MouseMove" MouseEnter="BezierPath_MouseEnter" MouseLeave="BezierPath_MouseLeave" MouseDown="BezierPath_MouseDown" Visibility="Collapsed">
+    			<Path.Effect>
+    				<DropShadowEffect/>
+    			</Path.Effect>
+    			<Path.Data>
+    				<PathGeometry>
+    					<PathFigure x:Name="BezierPathFigure" StartPoint="0,100">
+    						<BezierSegment Point1="130,30" Point2="40,140" Point3="150,100" />
+						</PathFigure>			
+					</PathGeometry>			
+				</Path.Data>
+			</Path>
+			<Path Stroke="LightGray" StrokeThickness="2" StrokeDashArray="5 2" Visibility="{Binding Visibility, ElementName=BezierPath}">
+				<Path.Data>
+					<GeometryGroup x:Name="ControlLineGeoGroup">
+					</GeometryGroup>
+				</Path.Data>
+			</Path>
+			<Ellipse x:Name="Ellipse_MousePoint" Stroke="Yellow" Width="10" Height="10" Canvas.Left="107.333" Canvas.Top="100.667" StrokeThickness="2" RenderTransformOrigin="0.5,0.5" Visibility="Collapsed" >
+				<Ellipse.RenderTransform>
+					<TransformGroup>
+						<ScaleTransform/>
+						<SkewTransform/>
+						<RotateTransform/>
+						<TranslateTransform X="-5" Y="-5"/>
+					</TransformGroup>
+				</Ellipse.RenderTransform>
+			</Ellipse>
+			<Ellipse x:Name="BezierPosTest" Fill="#FFFF6900" Width="10" Height="10" Stroke="Black" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False" Visibility="Collapsed" >
+				<Ellipse.RenderTransform>
+					<TransformGroup>
+						<ScaleTransform/>
+						<SkewTransform/>
+						<RotateTransform/>
+						<TranslateTransform X="-5" Y="-5"/>
+					</TransformGroup>
+				</Ellipse.RenderTransform>
+			</Ellipse>
+		</Canvas>
+            
+    </Grid>
+</UserControl>

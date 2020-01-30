@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="ParticleEditor.ParticleEffect"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             xmlns:wpg="clr-namespace:WPG;assembly=EditorCommon"
+             xmlns:local="clr-namespace:ParticleEditor"
+             mc:Ignorable="d" 
+             d:DesignHeight="180" d:DesignWidth="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="1*"/>
+           
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="Play" x:Name="UIPLay" Click="Button_Click_Play" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            <Button Content="Restart" Click="Button_Click_Restart" Grid.Column="1" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            <Button Content="Stop" Click="Button_Click_Stop" Grid.Column="2" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+        </Grid>
+        <wpg:PropertyGrid x:Name="PG" Grid.Row="1" EnableUndoRedo="True"/>
+    </Grid>
+</UserControl>

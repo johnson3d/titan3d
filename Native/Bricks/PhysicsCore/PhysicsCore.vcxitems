@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{7fdc9cd7-e523-4067-b5ea-0ae6c697a858}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)PhyActor.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)PhyContext.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)PhyController.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)PhyEntity.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)PhyMaterial.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)PhyScene.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)PhyShape.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)PhyActor.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)PhyContext.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)PhyController.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)PhyEntity.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)PhyMaterial.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)PhyScene.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)PhyShape.h" />
+  </ItemGroup>
+</Project>

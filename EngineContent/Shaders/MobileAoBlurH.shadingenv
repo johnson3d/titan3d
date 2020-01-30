@@ -1,0 +1,60 @@
+#ifndef _MOBILE_AO_BLUR_H_
+#define _MOBILE_AO_BLUR_H_
+
+#include "Inc/VertexLayout.cginc"
+#include "Inc/Math.cginc"
+#include "Inc/PostEffectCommon.cginc"
+
+#include "dummy.gen"
+
+Texture2D gAoMask;
+SamplerState Samp_gAoMask;
+
+PS_INPUT VS_Main(VS_INPUT input)
+{
+	PS_INPUT output = (PS_INPUT)0;
+
+	output.vPosition = float4(input.vPosition.xyz, 1.0f);
+	output.vUV = input.vUV;
+
+	output.vTangent.x = input.vUV.x - 2.0f * gViewportSizeAndRcp.z;
+	output.vTangent.y = input.vUV.x - gViewportSizeAndRcp.z;
+	output.vTangent.z = input.vUV.x + gViewportSizeAndRcp.z;
+	output.vTangent.w = input.vUV.x + 2.0f * gViewportSizeAndRcp.z;
+	//output.vLightMap.x = input.vUV.x - 4.0f * gViewportSizeAndRcp.z;
+	output.vLightMap.y = input.vUV.x - 3.0f * gViewportSizeAndRcp.z;
+	output.vLightMap.z = input.vUV.x + 3.0f * gViewportSizeAndRcp.z;
+	//output.vLightMap.w = input.vUV.x + 4.0f * gViewportSizeAndRcp.z;
+
+	return output;
+}
+
+struct PS_OUTPUT
+{
+	half RT0 : SV_Target0;
+};
+
+PS_OUTPUT PS_Main(PS_INPUT input)
+{
+	PS_OUTPUT output = (PS_OUTPUT)0;
+
+	half P0 = (half)gAoMask.Sample(Samp_gAoMask, float2(input.vTangent.x, input.vUV.y)).r;
+	half P1 = (half)gAoMask.Sample(Samp_gAoMask, float2(input.vTangent.y, input.vUV.y)).r;
+	half P2 = (half)gAoMask.Sample(Samp_gAoMask, float2(input.vTangent.z, input.vUV.y)).r;
+	half P3 = (half)gAoMask.Sample(Samp_gAoMask, float2(input.vTangent.w, input.vUV.y)).r;
+	//half P4 = (half)gAoMask.Sample(Samp_gAoMask, float2(input.vLightMap.x, input.vUV.y)).r;
+	half P5 = (half)gAoMask.Sample(Samp_gAoMask, float2(input.vLightMap.y, input.vUV.y)).r;
+	half P6 = (half)gAoMask.Sample(Samp_gAoMask, float2(input.vLightMap.z, input.vUV.y)).r;
+	//half P7 = (half)gAoMask.Sample(Samp_gAoMask, float2(input.vLightMap.w, input.vUV.y)).r;
+
+	half Pcenter = (half)gAoMask.Sample(Samp_gAoMask, input.vUV.xy).r;
+
+	//half Pfinal = (P0 + P1 + P2 + P3 + P4 + P5 + P6 + P7 + Pcenter) / 9.0h;
+	half Pfinal = (P0 + P1 + P2 + P3 + P5 +P6 + Pcenter) / 7.0h;
+
+	output.RT0 = Pfinal;
+
+	return output;
+}
+
+#endif

@@ -1,0 +1,20 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:clr="clr-namespace:System;assembly=mscorlib" xmlns:clr2="clr-namespace:System.Collections;assembly=mscorlib" xmlns:local="clr-namespace:WPG" xmlns:data="clr-namespace:WPG.Data" xmlns:converters="clr-namespace:WPG.Converters" xmlns:d="http://schemas.microsoft.com/expression/blend/2006" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+
+	<ResourceDictionary.MergedDictionaries>
+		<ResourceDictionary Source="/EditorCommon;component/Controls/WPG/Themes/ExpressionBlend/Brushes.xaml" />
+		<ResourceDictionary Source="/EditorCommon;component/Controls/WPG/Themes/ExpressionBlend/TextBox.xaml" />
+		<ResourceDictionary Source="/EditorCommon;component/Controls/WPG/Themes/ExpressionBlend/TextBlock.xaml" />
+		<ResourceDictionary Source="/EditorCommon;component/Controls/WPG/Themes/ExpressionBlend/CheckBox.xaml" />
+		<ResourceDictionary Source="/EditorCommon;component/Controls/WPG/Themes/ExpressionBlend/ListBox.xaml" />
+		<ResourceDictionary Source="/EditorCommon;component/Controls/WPG/Themes/ExpressionBlend/ComboBox.xaml" />
+		<ResourceDictionary Source="/EditorCommon;component/Controls/WPG/Themes/ExpressionBlend/Expander.xaml" />
+		<ResourceDictionary Source="/EditorCommon;component/Controls/WPG/Themes/ExpressionBlend/ScrollViewer.xaml" />
+        <ResourceDictionary Source="/EditorCommon;component/Controls/WPG/Themes/ExpressionBlend/ResourceDictionary_ScrollBar.xaml" />
+		<ResourceDictionary Source="/EditorCommon;component/Controls/WPG/Themes/ExpressionBlend/PropertyGrid.xaml" />
+        <ResourceDictionary Source="/EditorCommon;component/Controls/WPG/Themes/ExpressionBlend/SearchTextBox.xaml" />
+		<ResourceDictionary Source="/EditorCommon;component/Controls/WPG/Themes/TypeEditors/IntegerTypeEditor.xaml" />
+
+        <ResourceDictionary Source="/EditorCommon;component/Controls/WPG/Themes/ExpressionBlend/WPGTemplates.xaml" />
+	</ResourceDictionary.MergedDictionaries>
+
+</ResourceDictionary>

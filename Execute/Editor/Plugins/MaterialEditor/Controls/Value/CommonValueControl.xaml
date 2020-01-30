@@ -1,0 +1,41 @@
+﻿<myTypes:BaseNodeControl_ShaderVar x:Name="baseNodeControl_ShaderVar" x:Class="MaterialEditor.Controls.CommonValueControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:myTypes ="clr-namespace:MaterialEditor.Controls"
+             xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+			 xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+             xmlns:Controls="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+             xmlns:convert="clr-namespace:EditorCommon.Converter;assembly=EditorCommon"
+             xmlns:ctrls="clr-namespace:EditorCommon.Controls;assembly=EditorCommon"
+             mc:Ignorable="d" BlendBrush="#FFFFD100" >
+    <myTypes:BaseNodeControl_ShaderVar.Resources>
+        <ResourceDictionary Source="/MaterialEditor;component/Themes/Generic.xaml" />
+	</myTypes:BaseNodeControl_ShaderVar.Resources>
+    <myTypes:BaseNodeControl_ShaderVar.Header>
+        <Grid HorizontalAlignment="Left">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Image Source="/ResourceLibrary;component/Icons/Graph/icon_IsParam.png" Margin="-10,3,3,0" Width="28" Height="28" Grid.RowSpan="2" Visibility="{Binding IsGenericBind, ElementName=baseNodeControl_ShaderVar, Converter={x:Static convert:Bool2Visibility_Collapsed.Instance}}"/>
+            <ctrls:EditableTextBlock Margin="2,2,2,0" Grid.Column="1" Text="{Binding NodeName, ElementName=baseNodeControl_ShaderVar, Mode=TwoWay}" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{StaticResource TextForeground}" FontWeight="Bold" />
+            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" IsHitTestVisible="False" Text="{Binding Title, ElementName=baseNodeControl_ShaderVar}" Foreground="#FF979797" Grid.Row="1" Grid.Column="1" Margin="2,0,2,2"  />
+        </Grid>
+    </myTypes:BaseNodeControl_ShaderVar.Header>
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <baseCtrl:LinkInControl Name="ValueIn"  Width="15" Height="15" BackBrush="{StaticResource LinkDefault}" HorizontalAlignment="Left" Margin="8,0,0,0" Direction="Left" />
+        <baseCtrl:LinkOutControl Name="ValueOut"  Width="15" Height="15" BackBrush="{StaticResource LinkDefault}" HorizontalAlignment="Right" Margin="0,0,8,0" Direction="Right" />
+        <StackPanel Name="FloatValuesStack" Grid.Row="1" Margin="2" />
+    </Grid>
+</myTypes:BaseNodeControl_ShaderVar>

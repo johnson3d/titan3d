@@ -1,0 +1,43 @@
+﻿<ai:BehaviorTree_BTNodeInnerNode
+    x:Class="CodeDomNode.AI.BehaviorTree_CustomServiceControl"
+ xmlns:local="using:CodeGenerateSystem.Controls"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Name="userControl"
+    NodeType="BehaviorTreeInnerControlNode"
+    xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+     xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+    xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:animation="clr-namespace:CodeDomNode.Animation"
+    xmlns:ai="clr-namespace:CodeDomNode.AI"
+    mc:Ignorable="d"
+    BlendBrush="{DynamicResource LinkNode_Value_Background}">
+    <myTypes:BaseNodeControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CodeGenerateSystem;Component/Themes/Generic.xaml" />
+                <ResourceDictionary Source="../ResourceDictionary_Template.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </myTypes:BaseNodeControl.Resources>
+    <Grid Margin="0,0,0,0.5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Row="0"  Grid.RowSpan="2">
+            <Border x:Name="TypeBG" Background="{DynamicResource BehaviorTreeNode_ServiceColor}" CornerRadius="1,0,0,1" />
+            <Image x:Name="TypeImg" Source="{DynamicResource Service_64x}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="32" Height="32" Margin="4,0"/>
+        </Grid>
+        <Grid Grid.Row="0" Grid.Column="1"  Grid.RowSpan="2">
+            <Border Background="{DynamicResource BehaviorTreeNode_ServiceColor}" CornerRadius="0,1,1,0"/>
+            <TextBlock Text="{Binding NodeName, ElementName=userControl}" Margin="0,0,8,0" Foreground="Black" FontSize="18.667" IsHitTestVisible="False" HorizontalAlignment="Left"  TextWrapping="WrapWithOverflow" VerticalAlignment="Center"/>
+        </Grid>
+    </Grid>
+</ai:BehaviorTree_BTNodeInnerNode>

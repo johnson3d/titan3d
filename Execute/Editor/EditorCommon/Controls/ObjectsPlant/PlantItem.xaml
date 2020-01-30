@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="EditorCommon.Controls.ObjectsPlant.PlantItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             xmlns:local="clr-namespace:EditorCommon.Controls.ObjectsPlant"
+             mc:Ignorable="d" x:Name="userControl" Margin="2">
+    <Grid Background="#01000000" MouseDown="PlantItem_MouseDown" MouseMove="PlantItem_MouseMove" MouseUp="PlantItem_MouseUp" MouseEnter="PlantItem_MouseEnter" MouseLeave="PlantItem_MouseLeave" Margin="4,2">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Image Source="{Binding Icon, ElementName=userControl}" Grid.Column="0" Margin="2" Width="24" Height="24" VerticalAlignment="Center"/>
+        <TextBlock Text="{Binding ItemName, ElementName=userControl}" Margin="2" VerticalAlignment="Center"/>
+    </Grid>
+</UserControl>

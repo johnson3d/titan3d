@@ -1,0 +1,56 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EditorCommon.Controls.Animation"
+             xmlns:menu="clr-namespace:ResourceLibrary.Controls.Menu;assembly=ResourceLibrary"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             xmlns:WPG="clr-namespace:WPG" 
+             x:Class="EditorCommon.Controls.Animation.AnimationBlendSpaceNodeControl"
+             mc:Ignorable="d"  SizeChanged="UserControl_SizeChanged"
+             x:Name="userControl"
+             d:DesignHeight="30" d:DesignWidth="30" RenderTransformOrigin="0,0" Width="16" Height="16" >
+    <UserControl.RenderTransform>
+        <TransformGroup>
+            <ScaleTransform />
+            <SkewTransform/>
+            <RotateTransform/>
+            <TranslateTransform x:Name="UserControlTranslateTransform"/>
+        </TransformGroup>
+    </UserControl.RenderTransform>
+    <Grid>
+        <Rectangle x:Name="Rect"  Margin="0" Stroke="Black" RenderTransformOrigin="0.5,0.5" Fill="White" Width="10" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center" >
+            <Rectangle.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform />
+                    <SkewTransform/>
+                    <RotateTransform Angle="45"/>
+                    <TranslateTransform />
+                </TransformGroup>
+            </Rectangle.RenderTransform>
+        </Rectangle>
+        <TextBlock x:Name="RightName" Margin="16,0,-300,0" TextWrapping="Wrap" Height="16" FontFamily="Times New Roman" VerticalAlignment="Top" TextDecorations="{x:Null}" Foreground="White" Text="RightName" FontSize="14" HorizontalAlignment="Left"/>
+        <TextBlock x:Name="LeftName" Margin="-300,0,16,0" TextWrapping="Wrap" Height="16" FontFamily="Times New Roman" FontSize="14" TextDecorations="{x:Null}" Foreground="White" Text="leftname" VerticalAlignment="Top" HorizontalAlignment="Right" FlowDirection="RightToLeft"/>
+
+        <Border BorderThickness="0" ToolTip="{Binding ContentName, ElementName=userControl}" Background="#02000000" Width="15" Height="15" HorizontalAlignment="Center" VerticalAlignment="Center" LostFocus="Rect_LostFocus" MouseEnter="Rect_MouseEnter" MouseLeave="Rect_MouseLeave" DragEnter="Rect_DragEnter" DragLeave="Rect_DragLeave" DragOver="Rect_DragOver" Drop="Rect_Drop" MouseLeftButtonDown="Rect_MouseLeftButtonDown" MouseMove="Rect_MouseMove" MouseLeftButtonUp="Rect_MouseLeftButtonUp" MouseRightButtonDown="Rect_MouseRightButtonDown">
+        </Border>
+        <Grid.ContextMenu>
+            <ContextMenu Name="ContexMenu" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=ContextMenu_Default}}">
+                <MenuItem menu:MenuAssist.HasOffset="False" menu:MenuAssist.HighlightAble="False" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuItem_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                    <MenuItem.Header>
+                        <Grid Background="#FF333333">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <WPG:PropertyGrid x:Name="ProGrid"/>
+                            <Button x:Name="DeleteButton" Content="Delete" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click="DeleteButton_Click" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+                    </MenuItem.Header>
+                </MenuItem>
+
+            </ContextMenu>
+        </Grid.ContextMenu>
+    </Grid>
+</UserControl>

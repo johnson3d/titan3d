@@ -1,0 +1,39 @@
+﻿<myTypes:BaseNodeControl x:Class="CodeDomNode.MethodListNode"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+			 xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+             xmlns:baseCtrl="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+    		 xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+             mc:Ignorable="d" >
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CodeGenerateSystem;Component/Themes/Generic.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+    <theme:SystemDropShadowChrome>
+        <Border Background="{DynamicResource NormalControlBackground}" CornerRadius="5">
+            <Grid >
+                <Grid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="添加函数节点" Click="MenuItem_Click_AddMethod" ></MenuItem>
+                    </ContextMenu>
+                </Grid.ContextMenu>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Rectangle x:Name="RectangleTitle" Fill="{DynamicResource LinkNode_Method_Background}" Margin="-3,0" RadiusX="5" RadiusY="5"/>
+                <TextBlock x:Name="TitleLabel" Margin="5" Text="执行队列(不再使用)" IsHitTestVisible="False" FontSize="18.667" Foreground="{DynamicResource TextForeground}"/>
+                <StackPanel Grid.Row="1" x:Name="MethodList">
+                    <!--<local:MethodControl  />-->
+                </StackPanel>
+                <baseCtrl:LinkInControl Height="10" Width="10" Margin="0,-15,0,0" x:Name="UpLink" BackBrush="#FF8282D8" VerticalAlignment="Top" Grid.ColumnSpan="2" HorizontalAlignment="Center" Direction="Top" />
+            </Grid>
+        </Border>
+    </theme:SystemDropShadowChrome>
+</myTypes:BaseNodeControl>

@@ -1,0 +1,115 @@
+﻿<UserControl x:Class="WPG.Themes.TypeEditors.TimerLine.TimeLinePanel"
+             x:Name="userControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WPG.Themes.TypeEditors"
+             mc:Ignorable="d" 
+             d:DesignHeight="130" d:DesignWidth="530" Loaded="UserControl_Loaded" SizeChanged="UserControl_SizeChanged" MouseMove="UserControl_MouseMove"  MouseLeftButtonUp="UserControl_MouseLeftButtonUp" KeyDown="UserControl_KeyDown">
+
+    <Grid x:Name="UIGrid">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="32"/>
+            <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
+
+        <Grid >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2"/>
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+
+            <Rectangle Grid.Row="1"  x:Name="UIColorSelect" MouseDown="UIColorSelect_MouseDown" Fill="#00383838">
+
+            </Rectangle>
+            <Rectangle Grid.Row="1" Height="10" Fill="#ff383838" VerticalAlignment="Top">
+
+            </Rectangle>
+            <Grid Grid.Row="1" x:Name="UIColorGrid">
+            </Grid>
+        </Grid>
+        <!--<Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Location" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
+                <TextBox x:Name="UILocation" Grid.Column="1" MinWidth="60" Height="20" Text="0" HorizontalAlignment="Center" FontSize="18" TextChanged="UILocation_TextChanged" VerticalAlignment="Center"/>
+            </Grid>
+        </Grid>-->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50" />
+                    <ColumnDefinition Width="80"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Location" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBox x:Name="UILocation" Grid.Column="1" Width="80" Text="0" TextChanged="UILocation_TextChanged"  VerticalAlignment="Center" HorizontalAlignment="Left" />
+            </Grid>
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="80"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="X" x:Name="UIXText" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3"/>
+                <TextBox x:Name="UIXValue" Text="0" TextChanged="UIXValue_TextChanged" Width="80" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+
+                <TextBlock Text="Y" x:Name="UIYText" Visibility="Collapsed" Foreground="White" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBox x:Name="UIYValue" Visibility="Collapsed" TextChanged="UIYValue_TextChanged" Width="80" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+
+                <TextBlock Text="Z" x:Name="UIZText" Visibility="Collapsed" Foreground="White" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBox x:Name="UIZValue" Visibility="Collapsed" TextChanged="UIZValue_TextChanged" Width="80" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+                <TextBlock Text="W" x:Name="UIWText" Visibility="Collapsed" Foreground="White" Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBox x:Name="UIWValue" Visibility="Collapsed" TextChanged="UIWValue_TextChanged" Width="80" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+            </Grid>
+
+            <Grid Grid.Row="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="80"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="X2" x:Name="UIXText2" Visibility="Collapsed" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3"/>
+                <TextBox x:Name="UIXValue2" Text="0" Visibility="Collapsed" TextChanged="UIXValue_TextChanged" Width="80" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+
+                <TextBlock Text="Y2" x:Name="UIYText2" Visibility="Collapsed" Foreground="White" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBox x:Name="UIYValue2" Visibility="Collapsed" TextChanged="UIYValue_TextChanged" Width="80" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+
+                <TextBlock Text="Z2" x:Name="UIZText2" Visibility="Collapsed" Foreground="White" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBox x:Name="UIZValue2" Visibility="Collapsed" TextChanged="UIZValue_TextChanged" Width="80" Grid.Column="5" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+                <TextBlock Text="W2" x:Name="UIWText2" Visibility="Collapsed" Foreground="White" Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBox x:Name="UIWValue2" Visibility="Collapsed" TextChanged="UIWValue_TextChanged" Width="80" Grid.Column="7" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

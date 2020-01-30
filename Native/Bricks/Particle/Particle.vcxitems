@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{9bb1facc-0017-4155-828d-c0540789a99a}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxParticle.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxParticleEmitterShape.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxParticleModifier.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxParticleSubState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)GfxParticleSystem.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxParticle.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxParticleEmitterShape.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxParticleModifier.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxParticleSubState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)GfxParticleSystem.h" />
+  </ItemGroup>
+</Project>

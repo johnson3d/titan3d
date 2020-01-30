@@ -1,0 +1,24 @@
+﻿<myTypes:BaseNodeControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:myTypes ="clr-namespace:CodeGenerateSystem.Base;assembly=CodeGenerateSystem"
+			 xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+             xmlns:Controls="clr-namespace:CodeGenerateSystem.Controls;assembly=CodeGenerateSystem" x:Name="baseNodeControl" x:Class="MaterialEditor.Controls.Operation.Function"
+             mc:Ignorable="d" BlendBrush="#FF4C738D" >
+    <myTypes:BaseNodeControl.Resources>
+        <ResourceDictionary Source="/MaterialEditor;component/Themes/Generic.xaml" />
+    </myTypes:BaseNodeControl.Resources>
+    <myTypes:BaseNodeControl.Header>
+        <TextBlock Text="{Binding NodeName, ElementName=baseNodeControl}" FontStyle="Normal" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{StaticResource TextForeground}" IsHitTestVisible="False" />
+    </myTypes:BaseNodeControl.Header>
+    <Grid x:Name="Grid_Function">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel x:Name="StackPanel_InValue" Margin="0"/>
+        <StackPanel x:Name="StackPanel_OutValue" Grid.Column="1" Margin="0"/>
+    </Grid>
+</myTypes:BaseNodeControl>

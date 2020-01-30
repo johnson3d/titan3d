@@ -1,0 +1,107 @@
+﻿<base:NodesContainer x:Name="nodesContainer" x:Class="CodeGenerateSystem.Controls.NodesContainerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CodeGenerateSystem.Controls"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             xmlns:base ="clr-namespace:CodeGenerateSystem.Base"
+             mc:Ignorable="d" 
+             d:DesignHeight="458" d:DesignWidth="851">
+    <base:NodesContainer.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CodeGenerateSystem;Component/Themes/Generic.xaml" />
+                <ResourceDictionary>
+                    <Storyboard x:Key="Storyboard_ScaleInfoShow">
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="TextBlock_Scale">
+                            <EasingDoubleKeyFrame KeyTime="0" Value="0.8"/>
+                            <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="0.8"/>
+                            <EasingDoubleKeyFrame KeyTime="0:0:1.1" Value="0.2"/>
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </base:NodesContainer.Resources>
+    <base:NodesContainer.Triggers>
+        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+            <BeginStoryboard Storyboard="{StaticResource Storyboard_ScaleInfoShow}"/>
+        </EventTrigger>
+    </base:NodesContainer.Triggers>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="33"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Canvas x:Name="RectCanvas" MouseDown="RectCanvas_MouseDown" MouseWheel="RectCanvas_MouseWheel" MouseMove="RectCanvas_MouseMove" MouseLeftButtonUp="RectCanvas_MouseLeftButtonUp" MouseLeftButtonDown="RectCanvas_MouseLeftButtonDown" ClipToBounds="True" MouseUp="RectCanvas_MouseUp" Margin="0"
+                AllowDrop="True" DragEnter="RectCanvas_DragEnter" DragLeave="RectCanvas_DragLeave" DragOver="RectCanvas_DragOver" Drop="RectCanvas_Drop" Grid.RowSpan="2"
+                ContextMenuOpening="RightButtonMenu_ContextMenuOpening">
+            <Viewbox x:Name="ViewBoxMain" Stretch="Uniform" RenderTransformOrigin="0.5,0.5">
+                <Viewbox.RenderTransform>
+                    <TransformGroup>
+                        <TranslateTransform x:Name="ViewboxTranslateTransform"/>
+                    </TransformGroup>
+                </Viewbox.RenderTransform>
+                <Canvas x:Name="MainDrawCanvas" Width="1024" Height="768" >
+                    <!--<Canvas.CacheMode>
+                        <BitmapCache EnableClearType="True" RenderAtScale="1" SnapsToDevicePixels="False"/>
+                    </Canvas.CacheMode>-->
+                    <Rectangle x:Name="Rect_Background" Fill="#ff1e1e1e" Canvas.Left="-65500" Canvas.Top="-65500" Width="999999999999999999999" Height="99999999999999999" Panel.ZIndex="-100">
+                        <!--<Rectangle.Fill>
+                            <DrawingBrush TileMode="Tile" Viewbox="0,0,10,10" Viewport="0,0,100,100" ViewportUnits="Absolute" ViewboxUnits="Absolute">
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <GeometryDrawing >
+                                            <GeometryDrawing.Brush>
+                                                <DrawingBrush TileMode="Tile" Viewbox="0,0,1,1" Viewport="0,0,1,1" ViewportUnits="Absolute" ViewboxUnits="Absolute">
+                                                    <DrawingBrush.Drawing>
+                                                        <DrawingGroup>
+                                                            <GeometryDrawing Brush="#FF1d1d1d">
+                                                                <GeometryDrawing.Pen>
+                                                                    <Pen Thickness="0.05" Brush="#FF373737"/>
+                                                                </GeometryDrawing.Pen>
+                                                                <GeometryDrawing.Geometry>
+                                                                    <RectangleGeometry Rect="0,0,20,20"/>
+                                                                </GeometryDrawing.Geometry>
+                                                            </GeometryDrawing>
+                                                        </DrawingGroup>
+                                                    </DrawingBrush.Drawing>
+                                                </DrawingBrush>
+                                            </GeometryDrawing.Brush>
+                                            <GeometryDrawing.Pen>
+                                                <Pen Thickness="0.05" Brush="#FF151515"/>
+                                            </GeometryDrawing.Pen>
+                                            <GeometryDrawing.Geometry>
+                                                <RectangleGeometry Rect="0,0,10,10"/>
+                                            </GeometryDrawing.Geometry>
+                                        </GeometryDrawing>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>-->
+                        <!--</Rectangle.Fill>-->
+                    </Rectangle>
+                    <Rectangle x:Name="SelectedRect" Width="200" Height="100" Stroke="LightGreen" StrokeThickness="2" Visibility="Hidden" Panel.ZIndex="10"/>
+                </Canvas>
+            </Viewbox>
+        </Canvas>
+        <Popup Placement="MousePoint" IsOpen="{Binding IsOpenContextMenu, ElementName=nodesContainer, Mode=TwoWay}" StaysOpen="False">
+            <local:NodeListContextMenu x:Name="ContextMenuNodeList"/>
+        </Popup>
+
+        <Rectangle Fill="#70000000" IsHitTestVisible="False" />
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" IsHitTestVisible="False" Margin="8,0,0,0">
+            <TextBlock Text="{Binding TitleString, ElementName=nodesContainer}" Visibility="{Binding TitleShow, ElementName=nodesContainer}" Foreground="#FF7E7E7E" FontSize="17"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0" >
+            <TextBlock Text="{Binding TypeString, ElementName=nodesContainer}" IsHitTestVisible="False" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="#28FFFFFF" FontSize="15" Margin="0,0,16,0" FontWeight="Bold" />
+            <TextBlock x:Name="TextBlock_Scale" Text="Zoom 100%" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="White" FontSize="15" Margin="0" FontFamily="Lucida Sans Unicode" FontWeight="Bold" IsHitTestVisible="False" Opacity="0.2" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="8,0,0,8" >
+            <Button Margin="3" Content="Show All" Width="70" Height="20" BorderBrush="{x:Null}" Opacity="0.5" Click="Btn_ShowAll_Click" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            <Button Margin="3" ToolTip="截图当前Macross完整连线并保存为图片" Click="Btn_Capture2Img_Click" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}">
+                <Image Source="/ResourceLibrary;component/Icons/Icons/screen_capture.png" Width="16" Height="16" />
+            </Button>
+        </StackPanel>
+    </Grid>
+</base:NodesContainer>

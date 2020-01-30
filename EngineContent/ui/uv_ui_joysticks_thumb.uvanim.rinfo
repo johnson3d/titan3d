@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="gb2312"?>
+<UVAnimEditor.UVAnimResourceInfo Description="" ResourceType="UVAnim">
+	<ReferenceRNameList 0="1|ui/virtualjoystick_thumb.txpic" 1="1|ui/mi_ui_default.instmtl">System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</ReferenceRNameList>
+	<RNameHistory>System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</RNameHistory>
+</UVAnimEditor.UVAnimResourceInfo>
+

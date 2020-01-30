@@ -1,0 +1,119 @@
+﻿<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:ResourceLibrary">
+    <!-- 应该在此定义资源字典条目。-->
+    <!--BitmapImage x:Key="FolderOpenImage" UriSource="../Icon/folder-blue-icon.ico"></BitmapImage>
+    <BitmapImage x:Key="FolderCloseImage" UriSource="../Icon/folder-close-blue-icon.ico"></BitmapImage-->
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=DisableForeground}" Color="#ADADAD"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=WindowBackground}" Color="#FF222222"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=WindowBorder}" Color="#FF595959"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=TabControlBackground}" Color="#FF222222"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=TabControlBorder}" Color="#FF606060"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=TabControlHeaderBackground}" Color="#00000000"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=PanelBackground}" Color="#FF282828"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=GridSplitterBrush}" Color="#FF252525"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=GridSplitterHightlightBrush}" Color="#FF707070"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=ControlBackground}" Color="#FF222222"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=LightBrush}" Color="#FF6A6A6A"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=DarkBrush}" Color="#FF292929"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=ContainerBackground}" Color="#FF333333"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=FilterStringHightLightBrush}" Color="#FF209771"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=SpecialBtnBG}" Color="#FF080808"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=ToggleButtonChecked}" Color="#FF717171"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=TextForeground}" Color="White"/>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=ToolBarBackground}" Color="#FF282828"/>
+    <RadialGradientBrush x:Key="{ComponentResourceKey ResourceId=DragDropAdornerDeniedBorderBrush, TypeInTargetAssembly={x:Type local:CustomResources}}" RadiusX="1" RadiusY="1" >
+        <GradientStop Color="#00000000" Offset="1"/>
+        <GradientStop Color="Red"/>
+        <GradientStop Color="#FCFC0000" Offset="0.348"/>
+    </RadialGradientBrush>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=DragDropAdornerDeniedBackgroundBrush}" Color="#0CFF0000"/>
+    <RadialGradientBrush x:Key="{ComponentResourceKey ResourceId=DragDropAdornerAcceptBorderBrush, TypeInTargetAssembly={x:Type local:CustomResources}}" GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="1" RadiusY="1" >
+        <GradientStop Color="#000080FF" Offset="0.744"/>
+        <GradientStop Color="#FF0080FF"/>
+    </RadialGradientBrush>
+    <SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=DragDropAdornerAcceptBackgroundBrush}" Color="#0C0080ff"/>
+    <DrawingBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=TileBrush}"  TileMode="Tile" Viewbox="0,0,6,6" Viewport="0,0,12,12" ViewportUnits="Absolute" ViewboxUnits="Absolute">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="#FF2D2D2D" Geometry="M 3 3 L 3 6 L 6 6 L 6 3 z"/>
+                <GeometryDrawing Brush="#FF2D2D2D" Geometry="M 0 0 L 0 3 L 3 3 L 3 0 z"/>
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+    <Style x:Key="GridSplitterPreviewStyle">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Rectangle Fill="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=GridSplitterHightlightBrush}}"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=GridSplitterStyle_Default}" TargetType="{x:Type GridSplitter}">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=GridSplitterHightlightBrush}}"/>
+            </Trigger>
+        </Style.Triggers>
+        <Setter Property="Background" Value="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=GridSplitterBrush}}"/>
+        <Setter Property="PreviewStyle" Value="{StaticResource GridSplitterPreviewStyle}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type GridSplitter}">
+                    <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ShowsPreview" Value="True"/>
+    </Style>
+
+    <Style x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:CustomResources}, ResourceId=ToolTipStyle_Default}" TargetType="ToolTip">
+        <Setter Property="BorderBrush" Value="#00000000"/>
+        <Setter Property="Background" Value="#80000000" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HasDropShadow" Value="True"/>
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToolTip">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" 
+                            CornerRadius="3">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="{TemplateBinding Padding}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!--Style TargetType="ToolTip">
+			<Setter Property="OverridesDefaultStyle" Value="True" />
+			<Setter Property="HasDropShadow" Value="True" />
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="ToolTip">
+						<Border Name="Border" BorderThickness="1" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
+							
+						</Border>
+						<ControlTemplate.Triggers>
+							<Trigger Property="HasDropShadow" Value="True">
+								<Setter TargetName="Border" Property="CornerRadius" Value="4" />
+								<Setter TargetName="Border" Property="SnapsToDevicePixels" Value="True" />
+							</Trigger>
+						</ControlTemplate.Triggers>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style-->
+    <!--ControlTemplate x:Key="ToolTipTemplate" TargetType="ToolTip">
+			<Border Name="Border" BorderThickness="1" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
+				
+			</Border>
+			<ControlTemplate.Triggers>
+				<Trigger Property="HasDropShadow" Value="True">
+					<Setter TargetName="Border" Property="CornerRadius" Value="4" />
+					<Setter TargetName="Border" Property="SnapsToDevicePixels" Value="True" />
+				</Trigger>
+			</ControlTemplate.Triggers>
+		</ControlTemplate-->
+</ResourceDictionary>

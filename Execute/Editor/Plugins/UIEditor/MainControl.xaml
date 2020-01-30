@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="UIEditor.MainControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:UIEditor"
+             xmlns:locMac="clr-namespace:UIEditor.UIMacross"
+             mc:Ignorable="d" 
+             d:DesignHeight="1080" d:DesignWidth="1920">
+    <UserControl.Resources>
+        <ResourceDictionary Source="/UIEditor;component/Themes/Generic.xaml"/>
+    </UserControl.Resources>
+    <Grid>
+        <local:DesignPanel x:Name="DesignPanel"/>
+        <locMac:UIMacrossEditorControl x:Name="LogicPanel" Visibility="Collapsed"/>
+    </Grid>
+</UserControl>

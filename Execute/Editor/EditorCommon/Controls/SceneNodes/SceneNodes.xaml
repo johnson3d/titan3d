@@ -1,0 +1,48 @@
+﻿<UserControl x:Class="EditorCommon.Controls.SceneNodes.SceneNodes"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:Controls="clr-namespace:EditorCommon.Controls"
+             xmlns:searchBox="clr-namespace:SearchBox"
+             xmlns:local="clr-namespace:EditorCommon.Controls.SceneNodes"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"		
+             xmlns:btn="clr-namespace:ResourceLibrary.Controls.Button;assembly=ResourceLibrary"
+             xmlns:menu="clr-namespace:ResourceLibrary.Controls.Menu;assembly=ResourceLibrary"
+             xmlns:tree="clr-namespace:EditorCommon.TreeListView"
+             mc:Ignorable="d" x:Name="userControl"
+             d:DesignHeight="450" d:DesignWidth="800" KeyDown="UserControl_KeyDown">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Grid Height="Auto" VerticalAlignment="Stretch" Width="Auto" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="1" Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Click ="Test_Click">
+                <Image Width="16" Height="16" Source="/ResourceLibrary;component/Icons/ContentBrowser/sourcestoggle_16x_expanded.png" Margin="2" />
+            </Button>
+            <searchBox:SearchBox x:Name="SB_SceneNodes" Margin="1,0,0,0" TipText="Search Nodes" SearchText="{Binding FilterString, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </Grid>
+        <tree:TreeList x:Name="TreeViewActors" Grid.Row="2" Margin="2" Style="{DynamicResource {ComponentResourceKey ResourceId=ListViewStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" MouseUp="TreeViewItem_MouseUp" MouseMove="TreeViewItem_MouseMove" SelectionChanged="TreeViewActors_SelectionChanged">
+            <tree:TreeList.View>
+                <GridView ColumnHeaderContainerStyle="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=GridViewColumnHeaderStyle_Default}}">
+                    <GridViewColumn Header="名称">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <tree:RowExpander/>
+                                    <CheckBox x:Name="cansee" IsChecked="{Binding Visible}"  Checked="CheckBox_Checked" Unchecked="checkBox_Unchecked" />
+                                    <Controls:CustomTextBlock Text="{Binding Name}" HighLightString="{Binding HighLightString}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>   
+                 </GridView>
+            </tree:TreeList.View>
+        </tree:TreeList>
+    </Grid>
+</UserControl>

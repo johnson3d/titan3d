@@ -1,0 +1,523 @@
+﻿<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:local="clr-namespace:ResourceLibrary" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:btn="clr-namespace:ResourceLibrary.Controls.Button"
+    xmlns:ctrls="clr-namespace:ResourceLibrary.Controls"
+    mc:Ignorable="d">
+
+    <DrawingBrush x:Key="TileBrush"  TileMode="Tile" Viewbox="0,0,6,6" Viewport="0,0,12,12" ViewportUnits="Absolute" ViewboxUnits="Absolute">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="#FF2D2D2D" Geometry="M 3 3 L 3 6 L 6 6 L 6 3 z"/>
+                <GeometryDrawing Brush="#FF2D2D2D" Geometry="M 0 0 L 0 3 L 3 3 L 3 0 z"/>
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+
+    <ControlTemplate x:Key="{ComponentResourceKey ResourceId=WindowTemplateKey, TypeInTargetAssembly={x:Type local:CustomResources}}" TargetType="{x:Type local:WindowBase}">
+        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="0.955*"/>
+                </Grid.RowDefinitions>
+                <Rectangle x:Name="PART_Title" Margin="0" Fill="#02000000" />
+                <Rectangle x:Name="PART_WorkArea" Fill="#FF282828" Margin="0" Grid.Row="1"/>
+                <Grid x:Name="PART_MainGrid" Background="{StaticResource TileBrush}" Grid.Row="1">
+                    <AdornerDecorator>
+                        <ContentPresenter/>
+                    </AdornerDecorator>
+                </Grid>
+                <StackPanel HorizontalAlignment="Right" Margin="0,0,2,0" Orientation="Horizontal" VerticalAlignment="Top">
+                    <btn:ThreeStateButton x:Name="PART_Button_FillHorizontal" WindowChrome.IsHitTestVisibleInChrome="True" Visibility="Collapsed" Margin="0,0,1,0" Height="18" Foreground="White" ToolTip="横向填充" Width="23" Focusable="False" 
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/Maximize_Around_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/Maximize_Around_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/Maximize_Around_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/Maximize_Around_Pressed.png"
+                            Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+                    <btn:ThreeStateButton x:Name="PART_Button_FillVertical" WindowChrome.IsHitTestVisibleInChrome="True" Visibility="Collapsed" Margin="0,0,1,0" Height="18" Foreground="White" ToolTip="纵向填充" Width="23" Focusable="False" 
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/Maximize_UpAndDown_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/Maximize_UpAndDown_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/Maximize_UpAndDown_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/Maximize_UpAndDown_Pressed.png"
+                            Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+                    <btn:ThreeStateButton x:Name="PART_Button_Minimized" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,1,0" Width="27" Height="18" Foreground="White" ToolTip="最小化" Focusable="False" 
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/WindowButton_Minimize_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/WindowButton_Minimize_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/WindowButton_Minimize_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/WindowButton_Minimize_Pressed.png"                                            
+                                          Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+                    <btn:ThreeStateButton x:Name="PART_Button_Maximized" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,1,0" Width="23" Height="18" Foreground="White" ToolTip="最大化" Focusable="False" 
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/WindowButton_Maximize_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/WindowButton_Maximize_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/WindowButton_Maximize_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/WindowButton_Maximize_Pressed.png"                                            
+                                          Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+                    <btn:ThreeStateButton x:Name="PART_Button_Restore" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,1,0" Width="23" Height="18" Foreground="White" ToolTip="恢复" Focusable="False" Visibility="Collapsed"
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/WindowButton_Restore_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/WindowButton_Restore_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/WindowButton_Restore_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/WindowButton_Restore_Pressed.png"                                            
+                                                          Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}" VerticalAlignment="Top"/>
+                    <btn:ThreeStateButton x:Name="PART_Button_Close" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,1,0" Width="44" Height="18" Foreground="Red" ToolTip="关闭" Focusable="False"                            CurrentSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Pressed.png"      
+                                          Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="1,1,1,1">
+                    <Image Source="{TemplateBinding Icon}" Margin="1" />
+                    <TextBlock HorizontalAlignment="Left" Text="{TemplateBinding Title}" VerticalAlignment="Center" Foreground="Black" Margin="5,0,0,0"/>
+                </StackPanel>
+                <ResizeGrip x:Name="WindowResizeGrip" HorizontalAlignment="Right" IsTabStop="false" Visibility="Collapsed" VerticalAlignment="Bottom"/>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="WinState" Value="Maximized">
+                <Setter Property="Visibility" TargetName="PART_Button_Maximized" Value="Collapsed"/>
+                <Setter Property="Visibility" TargetName="PART_Button_Restore" Value="Visible"/>
+            </Trigger>
+            <Trigger Property="WinState" Value="Normal">
+                <Setter Property="Visibility" TargetName="PART_Button_Maximized" Value="Visible"/>
+                <Setter Property="Visibility" TargetName="PART_Button_Restore" Value="Collapsed"/>
+            </Trigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="ResizeMode" Value="CanResizeWithGrip"/>
+                    <Condition Property="WinState" Value="Normal"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Visibility" TargetName="WindowResizeGrip" Value="Visible"/>
+            </MultiTrigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="{ComponentResourceKey ResourceId=ToolWindowTemplateKey, TypeInTargetAssembly={x:Type local:CustomResources}}" TargetType="{x:Type Window}">
+        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" d:DesignWidth="261.333" d:DesignHeight="203.17">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="0.885*"/>
+                    <RowDefinition Height="5"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="0.916*"/>
+                    <ColumnDefinition Width="5"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.ColumnSpan="1" Grid.RowSpan="1" Grid.Row="1" Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="0.955*"/>
+                    </Grid.RowDefinitions>
+                    <Rectangle x:Name="PART_Title" Margin="0" Fill="#02000000" />
+                    <Rectangle x:Name="PART_WorkArea" Fill="#FF282828" Margin="0" Grid.Row="1"/>
+                    <Grid x:Name="PART_MainGrid" Background="{StaticResource TileBrush}" Grid.Row="1">
+                        <AdornerDecorator>
+                            <ContentPresenter/>
+                        </AdornerDecorator>
+                    </Grid>
+                    <StackPanel HorizontalAlignment="Right" Margin="0,0,8,0" Orientation="Horizontal">
+                        <btn:ThreeStateToggleButton x:Name="PART_Button_TopMost" Margin="1" Height="20" Foreground="White" ToolTip="钉在最上" Width="20" Focusable="False" 
+                                      CurrentSource="/ResourceLibrary;component/Icons/Window/Pushpin_Open_Normal.png"
+                                      NormalSource="/ResourceLibrary;component/Icons/Window/Pushpin_Open_Normal.png"
+                                      HoverSource="/ResourceLibrary;component/Icons/Window/Pushpin_Open_Hovered.png"
+                                      PressedSource="/ResourceLibrary;component/Icons/Window/Pushpin_Open_Pressed.png"
+                                      CheckedNormalSource="/ResourceLibrary;component/Icons/Window/Pushpin_Lock_Normal.png"
+                                      CheckedHoverSource="/ResourceLibrary;component/Icons/Window/Pushpin_Lock_Hovered.png"
+                                      CheckedPressedSource="/ResourceLibrary;component/Icons/Window/Pushpin_Lock_Pressed.png"
+                                      Style="{DynamicResource {ComponentResourceKey ResourceId=ToggleButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}" >
+                            <!--<Grid Width="15" Height="15">
+                                <Path Data="M4.1122449,7.0160891 L3.3694605,6.3343986 2.25,4.125 4,5.125 6.8617534,2.4403835 6.875,0.25 10.625,4 8.4874759,4.0831711 5.7177264,7.1253704 6.5606936,8.6464704 4.75,7.625 z" Fill="#FF74D5D8" HorizontalAlignment="Stretch" Margin="2.534,0.25,0.375,2.75" Stretch="Fill" Stroke="Black" Width="Auto" StrokeThickness="0.5"/>
+                                <Path Data="M0.81976744,13.326923 L4.6860466,9.9423079 3.9399225,9.3076927 z" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="4.75" Margin="0.75,0,0,0.75" Stretch="Fill" Stroke="{x:Null}" VerticalAlignment="Bottom" Width="4.75"/>
+                            </Grid>-->
+                        </btn:ThreeStateToggleButton>
+                        <btn:ThreeStateButton x:Name="PART_Button_Close" WindowChrome.IsHitTestVisibleInChrome="True" Margin="1" Width="44" Height="18" Foreground="Red" ToolTip="关闭" Focusable="False" 
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Pressed.png"  
+                                Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="1,1,1,1">
+                        <Image Source="{TemplateBinding Icon}" Margin="1" />
+                        <TextBlock HorizontalAlignment="Left" Text="{TemplateBinding Title}" VerticalAlignment="Center" Foreground="White" Margin="5,0,0,0"/>
+                    </StackPanel>
+                    <Rectangle VerticalAlignment="Bottom" Height="1" Fill="#FF292929" />
+                </Grid>
+                <Rectangle x:Name="PART_Rect_Top" VerticalAlignment="Stretch" Height="Auto" Grid.ColumnSpan="1" Fill="{TemplateBinding Background}" Grid.Column="1" />
+                <Rectangle x:Name="PART_Rect_Bottom" Grid.ColumnSpan="1" Grid.Row="2" Grid.Column="1" Fill="{TemplateBinding Background}" />
+                <Rectangle x:Name="PART_Rect_Left" Grid.Row="1" Fill="{TemplateBinding Background}" />
+                <Rectangle x:Name="PART_Rect_Right" Grid.Column="3" Grid.Row="1" Fill="{TemplateBinding Background}" />
+                <Rectangle x:Name="PART_Rect_TopLeft" Grid.Column="0" Grid.Row="0" Fill="{TemplateBinding Background}" d:LayoutOverrides="GridBox" />
+                <Rectangle x:Name="PART_Rect_BottomLeft" Grid.Column="0" Grid.Row="2" Fill="{TemplateBinding Background}" d:LayoutOverrides="GridBox" />
+                <Rectangle x:Name="PART_Rect_TopRight" Grid.Column="2" Grid.Row="0" Fill="{TemplateBinding Background}" d:LayoutOverrides="GridBox" />
+                <Rectangle x:Name="PART_Rect_BottomRight" Grid.Column="2" Grid.Row="2" Fill="{TemplateBinding Background}" d:LayoutOverrides="GridBox" />
+            </Grid>
+        </Border>
+    </ControlTemplate>
+
+    <Style x:Key="ButtonFocusVisual">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="{ComponentResourceKey ResourceId=ToggleButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}" TargetType="{x:Type btn:ThreeStateToggleButton}">
+        <!--<Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>-->
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Background" Value="#01000000"/>
+        <Setter Property="BorderBrush" Value="{x:Null}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type btn:ThreeStateToggleButton}">
+                    <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" CornerRadius="2" >
+                        <Image x:Name="Img_Icon" Source="{TemplateBinding CurrentSource}"/>
+                        <!--<ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>-->
+                    </Border>
+                    <!--ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#FF3B3B3B"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="true">
+                            <Setter Property="BorderThickness" Value="1"/>
+                            <Setter Property="BorderBrush" Value="Black"/>
+                            <Setter Property="Background" Value="#FF7A7A7A"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Foreground" Value="{DynamicResource {ComponentResourceKey ResourceId=DisableForeground, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+                        </Trigger>
+                    </-->
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <SolidColorBrush x:Key="WinTitleBG_Active" Color="#FF1F1F1F"/>
+    <SolidColorBrush x:Key="WinTitleBG_Deactive" Color="#FF1f1f1f"/>
+    <Style x:Key="{ComponentResourceKey ResourceId=DefaultWindowStyle, TypeInTargetAssembly={x:Type local:CustomResources}}" TargetType="{x:Type local:WindowBase}">
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Background" Value="{DynamicResource {ComponentResourceKey ResourceId=WindowBackground, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource {ComponentResourceKey ResourceId=WindowBorder, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+        <Setter Property="Icon" Value="/ResourceLibrary;component/Icons/Titan.ico"/>
+        <Setter Property="WindowChrome.WindowChrome">
+            <Setter.Value>
+                <WindowChrome CornerRadius="0" GlassFrameThickness="1" UseAeroCaptionButtons="False" NonClientFrameEdges="None" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:WindowBase}">
+                    <Border x:Name="PART_BD" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" d:DesignWidth="261.333" d:DesignHeight="203.17" CornerRadius="3">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="3"/>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="3"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="3"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.ColumnSpan="1" Grid.RowSpan="1" Grid.Row="1" Grid.Column="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="1*"/>
+                                </Grid.RowDefinitions>
+                                <Rectangle x:Name="PART_WorkArea" Fill="{TemplateBinding Background}" Margin="{Binding Margin, ElementName=PART_MainGrid}" Grid.Row="1"/>
+                                <Rectangle x:Name="PART_Title" Margin="0,0,0,-8" Height="Auto" WindowChrome.IsHitTestVisibleInChrome="True" Fill="{StaticResource WinTitleBG_Deactive}"/>
+                                <StackPanel x:Name="stackPanel_Title" Orientation="Horizontal" Margin="1,1,1,1">
+                                    <Image Source="/ResourceLibrary;component/Icons/WinIcon.png" Width="24" Height="24" Margin="6,6,1,1" />
+                                    <TextBlock HorizontalAlignment="Left" Visibility="Collapsed" Text="{TemplateBinding Title}" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" Margin="5,0,0,0"/>
+                                </StackPanel>
+                                <Grid x:Name="PART_MainGrid" Grid.Row="1" Margin="0,-15,0,0">
+                                    <AdornerDecorator>
+                                        <ContentPresenter/>
+                                    </AdornerDecorator>
+                                </Grid>
+                                <StackPanel x:Name="stackPanel_WinBtns" HorizontalAlignment="Right" Margin="0,0,1,0" Orientation="Horizontal" VerticalAlignment="Top" Panel.ZIndex="1">
+                                    <TextBlock x:Name="PART_RhiType" Margin="0,-3,5,0" VerticalAlignment="Center" Foreground="#FFC1C1C1" FontSize="12" FontWeight="Light" />
+                                    <Image x:Name="PART_Tutorial" Visibility="Collapsed" Source="/ResourceLibrary;component/Icons/Window/Help_Normal.png" Width="23" Height="23" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,1,0,0" />
+                                    <btn:ThreeStateToggleButton x:Name="PART_Button_TopMost" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,1,0" Height="18" Foreground="White" ToolTip="钉在最上" Width="23" Focusable="False" 
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/Pushpin_Open_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/Pushpin_Open_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/Pushpin_Open_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/Pushpin_Open_Pressed.png"
+                                                  CheckedNormalSource="/ResourceLibrary;component/Icons/Window/Pushpin_Lock_Normal.png"
+                                                  CheckedHoverSource="/ResourceLibrary;component/Icons/Window/Pushpin_Lock_Hovered.png"
+                                                  CheckedPressedSource="/ResourceLibrary;component/Icons/Window/Pushpin_Lock_Pressed.png"
+                                                  Style="{DynamicResource {ComponentResourceKey ResourceId=ToggleButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}" VerticalAlignment="Top" />
+                                    <btn:ThreeStateButton x:Name="PART_Button_FillHorizontal" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,1,0" Height="18" Foreground="White" ToolTip="横向填充" Width="23" Focusable="False" 
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/Maximize_Around_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/Maximize_Around_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/Maximize_Around_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/Maximize_Around_Pressed.png"
+                                                  Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}" VerticalAlignment="Top"/>
+                                    <btn:ThreeStateButton x:Name="PART_Button_FillVertical" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,1,0" Height="18" Foreground="White" ToolTip="纵向填充" Width="23" Focusable="False" 
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/Maximize_UpAndDown_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/Maximize_UpAndDown_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/Maximize_UpAndDown_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/Maximize_UpAndDown_Pressed.png"                                            
+                                            Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}" VerticalAlignment="Top"/>
+                                    <btn:ThreeStateButton x:Name="PART_Button_Minimized" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,1,0" Width="27" Height="18" Foreground="White" ToolTip="最小化" Focusable="False" 
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/WindowButton_Minimize_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/WindowButton_Minimize_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/WindowButton_Minimize_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/WindowButton_Minimize_Pressed.png"                                            
+                                                          Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}" VerticalAlignment="Top"/>
+                                    <btn:ThreeStateButton x:Name="PART_Button_Maximized" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,1,0" Width="23" Height="18" Foreground="White" ToolTip="最大化" Focusable="False" 
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/WindowButton_Maximize_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/WindowButton_Maximize_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/WindowButton_Maximize_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/WindowButton_Maximize_Pressed.png"                                            
+                                                          Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}" VerticalAlignment="Top"/>
+
+                                    <btn:ThreeStateButton x:Name="PART_Button_Restore" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,1,0" Width="23" Height="18" Foreground="White" ToolTip="恢复" Focusable="False" Visibility="Collapsed"
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/WindowButton_Restore_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/WindowButton_Restore_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/WindowButton_Restore_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/WindowButton_Restore_Pressed.png"                                            
+                                                          Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}" VerticalAlignment="Top"/>
+
+                                    <btn:ThreeStateButton x:Name="PART_Button_Close" WindowChrome.IsHitTestVisibleInChrome="True" Margin="0,0,1,0" Width="44" Height="18" Foreground="Red" ToolTip="关闭" Focusable="False" 
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Pressed.png"                                            
+                                                          Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}" VerticalAlignment="Top"/>
+                                </StackPanel>
+                                <!--<Rectangle x:Name="PART_Adorner01" VerticalAlignment="Bottom" Height="1" Fill="{DynamicResource {ComponentResourceKey ResourceId=DarkBrush, TypeInTargetAssembly={x:Type local:CustomResources}}}" />
+                                <Rectangle x:Name="PART_Adorner02" VerticalAlignment="Top" Height="1" Fill="{DynamicResource {ComponentResourceKey ResourceId=LightBrush, TypeInTargetAssembly={x:Type local:CustomResources}}}" Grid.Row="1" />-->
+                            </Grid>
+                            <Rectangle x:Name="PART_Rect_Top" VerticalAlignment="Stretch" Height="Auto" Grid.ColumnSpan="1" Fill="#01FFFFFF" Grid.Column="1" />
+                            <Rectangle x:Name="PART_Rect_Bottom" Grid.ColumnSpan="1" Grid.Row="2" Grid.Column="1" Fill="#01FFFFFF" />
+                            <Rectangle x:Name="PART_Rect_Left" Grid.Row="1" Fill="#01FFFFFF" />
+                            <Rectangle x:Name="PART_Rect_Right" Grid.Column="3" Grid.Row="1" Fill="#01FFFFFF" />
+                            <Rectangle x:Name="PART_Rect_TopLeft" Grid.Column="0" Grid.Row="0" Fill="#01FFFFFF" d:LayoutOverrides="GridBox" />
+                            <Rectangle x:Name="PART_Rect_BottomLeft" Grid.Column="0" Grid.Row="2" Fill="#01FFFFFF" d:LayoutOverrides="GridBox" />
+                            <Rectangle x:Name="PART_Rect_TopRight" Grid.Column="2" Grid.Row="0" Fill="#01FFFFFF" d:LayoutOverrides="GridBox" />
+                            <Rectangle x:Name="PART_Rect_BottomRight" Grid.Column="2" Grid.Row="2" Fill="#01FFFFFF" d:LayoutOverrides="GridBox" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="WinState" Value="Maximized">
+                            <Setter Property="Visibility" TargetName="PART_Button_Maximized" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="PART_Button_Restore" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="WinState" Value="Normal">
+                            <Setter Property="Visibility" TargetName="PART_Button_Maximized" Value="Visible"/>
+                            <Setter Property="Visibility" TargetName="PART_Button_Restore" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="ShowTutorialBtn" Value="true">
+                            <Setter Property="Visibility" TargetName="PART_Tutorial" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsActive" Value="true">
+                            <Setter Property="Fill" TargetName="PART_Title" Value="{StaticResource WinTitleBG_Active}"/>
+                        </Trigger>
+                        <Trigger Property="ResizeMode" Value="NoResize">
+                            <Setter Property="Visibility" TargetName="PART_Rect_Top" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="PART_Rect_Bottom" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="PART_Rect_Left" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="PART_Rect_Right" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="PART_Rect_TopLeft" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="PART_Rect_BottomLeft" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="PART_Rect_TopRight" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="PART_Rect_BottomRight" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="ShowTitle" Value="False">
+                            <Setter Property="Visibility" TargetName="PART_Title" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="stackPanel_WinBtns" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="stackPanel_Title" Value="Collapsed"/>
+                            <Setter Property="Margin" TargetName="PART_MainGrid" Value="0"/>
+                            <Setter Property="Margin" TargetName="PART_WorkArea" Value="0"/>
+                            <!--<Setter Property="Visibility" TargetName="PART_Adorner01" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="PART_Adorner02" Value="Collapsed"/>-->
+                        </Trigger>
+                        <Trigger Property="ShowTopMostButton" Value="False">
+                            <Setter Property="Visibility" TargetName="PART_Button_TopMost" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="ShowFillHorizontalButton" Value="False">
+                            <Setter Property="Visibility" TargetName="PART_Button_FillHorizontal" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="ShowFillVerticalButton" Value="False">
+                            <Setter Property="Visibility" TargetName="PART_Button_FillVertical" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="ShowMinimizedButton" Value="False">
+                            <Setter Property="Visibility" TargetName="PART_Button_Minimized" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="ShowMaximizedButton" Value="False">
+                            <Setter Property="Visibility" TargetName="PART_Button_Maximized" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="ShowCloseButton" Value="False">
+                            <Setter Property="Visibility" TargetName="PART_Button_Close" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="WinState" Value="Maximized">
+                            <Setter Property="Margin" TargetName="PART_MainGrid" Value="0,-24,0,0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ShowTitle" Value="True"/>
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="ResizeMode" Value="CanResize"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="AllowsTransparency" Value="False"/>
+        <!--<Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect ShadowDepth="2" BlurRadius="8"/>
+            </Setter.Value>
+        </Setter>-->
+        <Style.Triggers>
+            <Trigger Property="WindowStyle" Value="ToolWindow">
+                <Setter Property="Template" Value="{DynamicResource {ComponentResourceKey ResourceId=ToolWindowTemplateKey, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+            </Trigger>
+            <Trigger Property="ResizeMode" Value="CanResizeWithGrip">
+                <Setter Property="Template" Value="{DynamicResource {ComponentResourceKey ResourceId=WindowTemplateKey, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+            </Trigger>
+            <Trigger Property="IsActive" Value="False">
+                <Setter Property="Foreground" Value="#FF808080"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="{ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}" TargetType="{x:Type btn:ThreeStateButton}">
+        <!--<Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>-->
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="BorderBrush" Value="#FF929292"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type btn:ThreeStateButton}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0,0,2,2">
+                        <Image x:Name="Img_Icon" Source="{TemplateBinding CurrentSource}"/>
+                        <!--<ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>-->
+                    </Border>
+                    <!--<ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#FF3B3B3B"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="#FF7A7A7A"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>-->
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Background" Value="#01000000"/>
+        <!--<Setter Property="Background">
+            <Setter.Value>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF4B4B4B" Offset="0"/>
+                    <GradientStop Color="#FF202020" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>-->
+    </Style>
+
+    <Style x:Key="{ComponentResourceKey ResourceId=ToolWindowStyle, TypeInTargetAssembly={x:Type local:CustomResources}}" TargetType="{x:Type Window}">
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Background" Value="{DynamicResource {ComponentResourceKey ResourceId=WindowBackground, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+        <Setter Property="WindowChrome.WindowChrome">
+            <Setter.Value>
+                <WindowChrome CornerRadius="0" GlassFrameThickness="1" UseAeroCaptionButtons="False" NonClientFrameEdges="None" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Window}">
+                    <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" d:DesignWidth="261.333" d:DesignHeight="203.17">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="5"/>
+                                <RowDefinition Height="0.885*"/>
+                                <RowDefinition Height="5"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="0.916*"/>
+                                <ColumnDefinition Width="5"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.ColumnSpan="1" Grid.RowSpan="1" Grid.Row="1" Grid.Column="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30"/>
+                                    <RowDefinition Height="0.955*"/>
+                                </Grid.RowDefinitions>
+                                <Rectangle x:Name="PART_Title" Margin="0" Fill="#02000000" />
+                                <Rectangle x:Name="PART_WorkArea" Fill="#FF282828" Margin="0" Grid.Row="1"/>
+                                <Grid x:Name="PART_MainGrid" Grid.Row="1">
+                                    <AdornerDecorator>
+                                        <ContentPresenter/>
+                                    </AdornerDecorator>
+                                </Grid>
+                                <StackPanel HorizontalAlignment="Right" Margin="0,0,8,0" Orientation="Horizontal">
+                                    <btn:ThreeStateToggleButton x:Name="PART_Button_TopMost" Margin="1" Height="20" Foreground="White" ToolTip="钉在最上" Width="20" Focusable="False" 
+                                                                CurrentSource="/ResourceLibrary;component/Icons/Window/Pushpin_Open_Normal.png"
+                                                                NormalSource="/ResourceLibrary;component/Icons/Window/Pushpin_Open_Normal.png"
+                                                                HoverSource="/ResourceLibrary;component/Icons/Window/Pushpin_Open_Hovered.png"
+                                                                PressedSource="/ResourceLibrary;component/Icons/Window/Pushpin_Open_Pressed.png"
+                                                                CheckedNormalSource="/ResourceLibrary;component/Icons/Window/Pushpin_Lock_Normal.png"
+                                                                CheckedHoverSource="/ResourceLibrary;component/Icons/Window/Pushpin_Lock_Hovered.png"
+                                                                CheckedPressedSource="/ResourceLibrary;component/Icons/Window/Pushpin_Lock_Pressed.png"
+                                                                Style="{DynamicResource {ComponentResourceKey ResourceId=ToggleButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}" >
+                                        <!--<Grid Width="15" Height="15">
+                                            <Path Data="M4.1122449,7.0160891 L3.3694605,6.3343986 2.25,4.125 4,5.125 6.8617534,2.4403835 6.875,0.25 10.625,4 8.4874759,4.0831711 5.7177264,7.1253704 6.5606936,8.6464704 4.75,7.625 z" Fill="#FF74D5D8" HorizontalAlignment="Stretch" Margin="2.534,0.25,0.375,2.75" Stretch="Fill" Stroke="Black" Width="Auto" StrokeThickness="0.5"/>
+                                            <Path Data="M0.81976744,13.326923 L4.6860466,9.9423079 3.9399225,9.3076927 z" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="4.75" Margin="0.75,0,0,0.75" Stretch="Fill" Stroke="{x:Null}" VerticalAlignment="Bottom" Width="4.75"/>
+                                        </Grid>-->
+                                    </btn:ThreeStateToggleButton>
+                                    <btn:ThreeStateButton x:Name="PART_Button_Close" WindowChrome.IsHitTestVisibleInChrome="True" Margin="1" Width="44" Height="18" Foreground="Red" ToolTip="关闭" Focusable="False" 
+                                                  CurrentSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Normal.png"
+                                                  NormalSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Normal.png"
+                                                  HoverSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Hovered.png"
+                                                  PressedSource="/ResourceLibrary;component/Icons/Window/WindowButton_Close_Pressed.png"  
+                                            Style="{DynamicResource {ComponentResourceKey ResourceId=ButtonStyle_WinBtn, TypeInTargetAssembly={x:Type local:CustomResources}}}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="1,1,1,1">
+                                    <Image Source="{TemplateBinding Icon}" Margin="1" />
+                                    <TextBlock HorizontalAlignment="Left" Text="{TemplateBinding Title}" VerticalAlignment="Center" Foreground="White" Margin="5,0,0,0"/>
+                                </StackPanel>
+                                <Rectangle VerticalAlignment="Bottom" Height="1" Fill="#FF292929" />
+                            </Grid>
+                            <Rectangle x:Name="PART_Rect_Top" VerticalAlignment="Stretch" Height="Auto" Grid.ColumnSpan="1" Fill="{TemplateBinding Background}" Grid.Column="1" />
+                            <Rectangle x:Name="PART_Rect_Bottom" Grid.ColumnSpan="1" Grid.Row="2" Grid.Column="1" Fill="{TemplateBinding Background}" />
+                            <Rectangle x:Name="PART_Rect_Left" Grid.Row="1" Fill="{TemplateBinding Background}" />
+                            <Rectangle x:Name="PART_Rect_Right" Grid.Column="3" Grid.Row="1" Fill="{TemplateBinding Background}" />
+                            <Rectangle x:Name="PART_Rect_TopLeft" Grid.Column="0" Grid.Row="0" Fill="{TemplateBinding Background}" d:LayoutOverrides="GridBox" />
+                            <Rectangle x:Name="PART_Rect_BottomLeft" Grid.Column="0" Grid.Row="2" Fill="{TemplateBinding Background}" d:LayoutOverrides="GridBox" />
+                            <Rectangle x:Name="PART_Rect_TopRight" Grid.Column="2" Grid.Row="0" Fill="{TemplateBinding Background}" d:LayoutOverrides="GridBox" />
+                            <Rectangle x:Name="PART_Rect_BottomRight" Grid.Column="2" Grid.Row="2" Fill="{TemplateBinding Background}" d:LayoutOverrides="GridBox" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="BorderThickness" Value="3"/>
+        <Setter Property="BorderBrush" Value="DarkGray"/>
+        <Setter Property="AllowsTransparency" Value="False"/>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect ShadowDepth="2" BlurRadius="8"/>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsActive" Value="False">
+                <Setter Property="Foreground" Value="#FF808080"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>

@@ -1,0 +1,45 @@
+struct BufType
+{
+	uint count;
+};
+RWStructuredBuffer<BufType> BufferOut : register(u0);
+
+cbuffer CaptureEnv
+{
+	float4  rateWeight;
+};
+struct BufType1
+{
+	uint ratePack;
+};
+RWStructuredBuffer<BufType1> BufferOut1 : register(u1);
+
+[numthreads(1, 1, 1)]
+void CSMain1(uint3 id : SV_DispatchThreadID)
+{
+	if (BufferOut[id.x].count > 0)
+	{
+		uint rate = 0;
+		for (int i = 3; i >= 0; --i)
+		{
+			if (BufferOut[id.x].count >= rateWeight[i])
+			{
+				rate = i;
+				break;
+			}
+		}
+		uint actorId = id.x;
+		uint index = actorId / 16;
+		uint remainder = actorId % 16;
+		InterlockedOr(BufferOut1[index].ratePack, rate << remainder * 2);
+	}
+	
+	BufferOut[id.x].count = 0;
+}
+
+[numthreads(1, 1, 1)]
+void CSMain_Clear(uint3 id : SV_DispatchThreadID)
+{
+	BufferOut1[id.x].ratePack = 0;
+	BufferOut[id.x].count = 0;
+}

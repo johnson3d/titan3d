@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="WPG.Themes.TypeEditors.TransformGradient.SelectElement"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WPG.Themes.TypeEditors.TransformGradient"
+             mc:Ignorable="d" 
+             d:DesignHeight="30" d:DesignWidth="20">
+    <Grid>
+        <Path x:Name="UIElement" Stroke="DarkCyan" StrokeThickness="3" MouseLeftButtonDown="UIElement_MouseDown" MouseLeftButtonUp="UIElement_MouseLeftButtonUp" MouseEnter="UIElement_MouseEnter" MouseLeave="UIElement_MouseLeave">
+            <Path.Fill>
+                <LinearGradientBrush>
+                    <GradientStop Color="White" Offset="1"/>
+                </LinearGradientBrush>
+            </Path.Fill>
+            <Path.Data>
+                <PathGeometry>
+                    <!-- 指明是闭线条并且指定起始位置-->
+                    <PathFigure IsClosed="True" StartPoint="10,0">
+                        <LineSegment Point="0,10" />
+                        <LineSegment Point="0,30" />
+                        <LineSegment Point="20,30" />
+                        <LineSegment Point="20,10" />
+                    </PathFigure>
+                </PathGeometry>
+            </Path.Data>
+        </Path>
+    </Grid>
+</UserControl>

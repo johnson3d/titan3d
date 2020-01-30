@@ -1,0 +1,61 @@
+﻿<UserControl x:Class="WPG.Themes.TypeEditors.TypeSelectorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             xmlns:ctrlLib="clr-namespace:EditorCommon.Controls"
+             xmlns:SearchBox="clr-namespace:SearchBox"
+             mc:Ignorable="d" x:Name="userControl" Loaded="UserControl_Loaded"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <ToggleButton IsChecked="{Binding IsDropDownOpen, ElementName=userControl, Mode=TwoWay}" IsEnabled="{Binding EnableEdit, ElementName=userControl}" Style="{DynamicResource {ComponentResourceKey ResourceId=ComboBoxReadonlyToggleButton, TypeInTargetAssembly={x:Type res:CustomResources}}}" VerticalAlignment="Center">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding CurrentTypeName, ElementName=userControl}" Grid.Column="1" Style="{DynamicResource {ComponentResourceKey ResourceId=TextBlockStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}"/>
+            </Grid>
+        </ToggleButton>
+        <Popup IsOpen="{Binding IsDropDownOpen, ElementName=userControl}" Placement="Bottom">
+            <Border BorderBrush="Black" BorderThickness="1" Background="{DynamicResource {ComponentResourceKey ResourceId=PanelBackground, TypeInTargetAssembly={x:Type res:CustomResources}}}" Width="300" Height="400">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+                    <SearchBox:SearchBox Height="24" SearchText="{Binding SearchText, ElementName=userControl}"/>
+                    <TreeView VirtualizingPanel.IsVirtualizing="True" x:Name="TreeView_Types" Margin="2,0,2,2" Style="{DynamicResource {ComponentResourceKey ResourceId=TreeViewStyle_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" Grid.Row="1" SelectedItemChanged="TreeView_Types_SelectedItemChanged">
+                        <TreeView.ItemContainerStyle>
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <Setter Property="Template" Value="{DynamicResource {ComponentResourceKey ResourceId=TreeViewItemTemplate_Default, TypeInTargetAssembly={x:Type res:CustomResources}}}" />
+                                <Setter Property="Visibility" Value="{Binding Visibility, Mode=TwoWay}" />
+                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                            </Style>
+                        </TreeView.ItemContainerStyle>
+                        <TreeView.ItemTemplate>
+                            <HierarchicalDataTemplate ItemsSource = "{Binding ChildList}">
+                                <Grid Background="#01000000">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image x:Name="Image_Icon" Width="16" Height="16" Source="{Binding TypeIcon}"/>
+                                    <ctrlLib:CustomTextBlock Grid.Column="1" Text="{Binding TypeName}" HighLightString="{Binding HighLightString}" Margin="3,0,0,0" 
+                                                 HighLightBrush="{DynamicResource {ComponentResourceKey ResourceId=FilterStringHightLightBrush, TypeInTargetAssembly={x:Type res:CustomResources}}}"
+                                                 Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly={x:Type res:CustomResources}, ResourceId=TextBlockStyle_Default}}"/>
+                                </Grid>
+                                <HierarchicalDataTemplate.Triggers>
+                                    <Trigger Property="Source" SourceName="Image_Icon" Value="{x:Null}">
+                                        <Setter Property="Visibility" TargetName="Image_Icon" Value="Collapsed"/>
+                                    </Trigger>
+                                </HierarchicalDataTemplate.Triggers>
+                            </HierarchicalDataTemplate>
+                        </TreeView.ItemTemplate>
+                    </TreeView>
+                </Grid>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="gb2312"?>
+<TextureSourceEditor.TextureResourceInfo Description="" Dimensions="256X256" LinkedFile="VirtualJoystick_Background.TGA" OrigionFile="G:\work\TitanEngine\资源\VirtualJoystick_Background.TGA" PixelFormat="IAQBAA8AAAAgAAAAJMPdbwNO/kuxhT13do3JDw==" ResourceType="Texture">
+	<mCurrentDesc __TypeStr__="Common|EditorCommon@EditorCommon.TextureDesc" ETCFormat="UNKNOWN" MipMapLevel="0" sRGB="False"/>
+	<ReferenceRNameList>System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</ReferenceRNameList>
+	<RNameHistory>System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</RNameHistory>
+</TextureSourceEditor.TextureResourceInfo>
+

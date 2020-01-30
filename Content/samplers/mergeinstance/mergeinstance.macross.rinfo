@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="gb2312"?>
+<Macross.ResourceInfos.MacrossResourceInfo BaseTypeIsMacross="False" BaseTypeSaveName="Client|EngineCore@EngineNS.GamePlay.McGameInstance" Description="" Id="076d8376-6cbb-41bb-aaff-a7c57391c835" NotGenerateCode="False" ResourceType="Macross" Version="163">
+	<CustomFunctions_Client __TypeStr__="Common|mscorlib@System.Collections.Generic.List`1[[Client|Macross@Macross.ResourceInfos.MacrossResourceInfo+CustomFunctionData]]">
+		<0 __TypeStr__="Client|Macross@Macross.ResourceInfos.MacrossResourceInfo+CustomFunctionData" Id="66971ad5-13b9-4799-a407-4f4d9dcc717f">
+			<MethodInfo __TypeStr__="Client|Macross@CodeDomNode.CustomMethodInfo" CSType="Client" DisplayName="CreateMergedMeshActors" IsAsync="True" IsDelegateEvent="False" MethodName="CreateMergedMeshActors" OverrideAble="False" Tooltip="">
+				<InParams __TypeStr__="Common|System@System.Collections.ObjectModel.ObservableCollection`1[[Client|Macross@CodeDomNode.CustomMethodInfo+FunctionParam]]">
+					<0 __TypeStr__="Client|Macross@CodeDomNode.CustomMethodInfo+FunctionParam" ParamName="game">
+						<AttributeTypeProxys __TypeStr__="Common|System@System.Collections.ObjectModel.ObservableCollection`1[[Client|Macross@Macross.AttributeType]]"/>
+						<ParamType __TypeStr__="Client|Macross@CodeDomNode.VariableType" ArrayType="Single" CSType="Client" IsMacrossGetter="False" MacrossClassType="null" NotCreateInInitialize="True" Type="Client|EngineCore@EngineNS.GamePlay.GGameInstance" TypeName="GGameInstance" TypeState="ObjectReference"/>
+					</0>
+				</InParams>
+				<OutParams __TypeStr__="Common|System@System.Collections.ObjectModel.ObservableCollection`1[[Client|Macross@CodeDomNode.CustomMethodInfo+FunctionParam]]"/>
+			</MethodInfo>
+		</0>
+		<1 __TypeStr__="Client|Macross@Macross.ResourceInfos.MacrossResourceInfo+CustomFunctionData" Id="7a0945cb-f6c3-4578-828d-27b6baec9bf2">
+			<MethodInfo __TypeStr__="Client|Macross@CodeDomNode.CustomMethodInfo" CSType="Client" DisplayName="NewFunction_0" IsAsync="False" IsDelegateEvent="False" MethodName="NewFunction_0" OverrideAble="False" Tooltip="">
+				<InParams __TypeStr__="Common|System@System.Collections.ObjectModel.ObservableCollection`1[[Client|Macross@CodeDomNode.CustomMethodInfo+FunctionParam]]">
+					<0 __TypeStr__="Client|Macross@CodeDomNode.CustomMethodInfo+FunctionParam" ParamName="InParams_0">
+						<AttributeTypeProxys __TypeStr__="Common|System@System.Collections.ObjectModel.ObservableCollection`1[[Client|Macross@Macross.AttributeType]]"/>
+						<ParamType __TypeStr__="Client|Macross@CodeDomNode.VariableType" ArrayType="Single" CSType="Client" IsMacrossGetter="False" MacrossClassType="null" NotCreateInInitialize="False" Type="Client|MacrossScript@samplers.tpsgame.tpscenterdata" TypeName="tpscenterdata" TypeState="ObjectReference"/>
+					</0>
+				</InParams>
+				<OutParams __TypeStr__="Common|System@System.Collections.ObjectModel.ObservableCollection`1[[Client|Macross@CodeDomNode.CustomMethodInfo+FunctionParam]]"/>
+			</MethodInfo>
+		</1>
+	</CustomFunctions_Client>
+	<CustomFunctions_Server __TypeStr__="Common|mscorlib@System.Collections.Generic.List`1[[Client|Macross@Macross.ResourceInfos.MacrossResourceInfo+CustomFunctionData]]"/>
+	<ReferenceRNameList 0="0|samplers/mergeinstance/mginstmap.map" 1="0|samplers/tpsgame/character/titanrobot/pf_titan.prefab" 2="0|samplers/mergeinstance/cluster/box.vms.cluster" 3="0|samplers/mergeinstance/cluster/sphere.vms.cluster" 4="0|samplers/mergeinstance/ui_main.macross" 5="0|samplers.tpsgame.tpscenterdata.macross" 6="0|editor/basemesh/sphere.gms" 7="0|editor/basemesh/box.gms">System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</ReferenceRNameList>
+	<RNameHistory>System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</RNameHistory>
+</Macross.ResourceInfos.MacrossResourceInfo>
+

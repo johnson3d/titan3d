@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>590ec4d1-b720-42a9-b193-008450d13b14</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>DynBone</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)DynamicBone.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DynamicBoneCollider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DynamicBoneColliderBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DynamicBonePlaneCollider.cs" />
+  </ItemGroup>
+</Project>

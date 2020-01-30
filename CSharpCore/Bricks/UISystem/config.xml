@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ShareProjectConfig>
+  <References>
+    <PreDefines>
+    </PreDefines>
+    <Proj Name="../../Core/Core.projitems"/>
+    <Proj Name="../../Math/Math.projitems"/>
+    <Proj Name="../../RHI/RHI.projitems"/>
+    <Proj Name="../FreeTypeFont/FreeTypeFont.projitems"/>
+  </References>
+  <CppRefrence>
+    <PreDefines>
+    </PreDefines>
+  </CppRefrence>
+</ShareProjectConfig>

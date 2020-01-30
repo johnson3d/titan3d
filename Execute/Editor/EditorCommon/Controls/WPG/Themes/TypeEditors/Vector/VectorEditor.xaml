@@ -1,0 +1,37 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:editorControlLib="clr-namespace:EditorCommon"
+             xmlns:WPG_Themes_TypeEditors="clr-namespace:WPG.Themes.TypeEditors" x:Name="userControl" x:Class="WPG.Themes.TypeEditors.VectorEditor" 
+             mc:Ignorable="d" d:DesignWidth="300">
+	<!--UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="../../Generic.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources-->
+    <Grid>
+    	<Grid.RowDefinitions>
+    		<RowDefinition Height="Auto"/>
+    		<RowDefinition Height="Auto"/>
+    		<RowDefinition Height="Auto"/>
+    		<RowDefinition Height="Auto"/>
+    	</Grid.RowDefinitions>
+    	<Grid.ColumnDefinitions>
+    		<ColumnDefinition Width="Auto"/>
+    		<ColumnDefinition Width="0.744*"/>
+    	</Grid.ColumnDefinitions>
+    	<TextBlock Margin="2" TextWrapping="Wrap" Text="X" d:LayoutOverrides="Width, Height" VerticalAlignment="Center" Foreground="White" HorizontalAlignment="Center"/>
+        <editorControlLib:FloatNumericTypeEditor x:Name="NE_X" Grid.Column="1" Margin="2" VerticalAlignment="Center" NumericObject="{Binding XValue, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+    	<TextBlock Margin="2" TextWrapping="Wrap" Text="Y" VerticalAlignment="Center" d:LayoutOverrides="Width" Grid.Row="1" Foreground="White" HorizontalAlignment="Center"/>
+        <editorControlLib:FloatNumericTypeEditor x:Name="NE_Y" Grid.Column="1" Margin="2" VerticalAlignment="Center" Grid.Row="1" NumericObject="{Binding YValue, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+    	<TextBlock Margin="2" TextWrapping="Wrap" Text="Z" VerticalAlignment="Center" d:LayoutOverrides="Width" Grid.Row="2" Foreground="White" HorizontalAlignment="Center" Visibility="{Binding Visibility, ElementName=NE_Z}"/>
+        <editorControlLib:FloatNumericTypeEditor x:Name="NE_Z" Grid.Column="1" Margin="2" VerticalAlignment="Center" Grid.Row="2" NumericObject="{Binding ZValue, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+    	<TextBlock Margin="2" TextWrapping="Wrap" Text="W" VerticalAlignment="Center" Grid.Row="3" Foreground="White" d:LayoutOverrides="Width" HorizontalAlignment="Center" Visibility="{Binding Visibility, ElementName=NE_W}"/>
+        <editorControlLib:FloatNumericTypeEditor x:Name="NE_W" Grid.Column="1" Margin="2" VerticalAlignment="Center" Grid.Row="3" NumericObject="{Binding WValue, ElementName=userControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            
+    </Grid>
+</UserControl>

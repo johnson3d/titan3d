@@ -1,0 +1,15 @@
+﻿<UserControl x:Name="userControl" x:Class="CodeDomNode.Particle.TitlePanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:btn="clr-namespace:ResourceLibrary.Controls.Button;assembly=ResourceLibrary"
+             xmlns:res="clr-namespace:ResourceLibrary;assembly=ResourceLibrary"
+             xmlns:menu="clr-namespace:ResourceLibrary.Controls.Menu;assembly=ResourceLibrary"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="476" d:DesignWidth="536" PreviewMouseDoubleClick="UIMouseDoubleClick" LostFocus="UILostFocus">
+    <Grid>
+        <TextBlock x:Name="TitleLabel" Text="{Binding NodeName, ElementName=userControl}" Margin="0" Foreground="White" FontSize="18.667" HorizontalAlignment="Center" VerticalAlignment="Center" PreviewMouseLeftButtonDown="UIMouseDoubleClick"/>
+        <TextBox x:Name="TitleBox" Margin="0" Foreground="Black" FontSize="18.667"  HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" LostFocus="UILostFocus" LostMouseCapture="UILostFocus"/>
+    </Grid>
+</UserControl>
