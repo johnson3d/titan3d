@@ -14,14 +14,12 @@ namespace samplers.mergeinstance
             this.SceneData = null;
             this.ListActors = new System.Collections.Generic.List<EngineNS.GamePlay.Actor.GActor>();
             this.MainActor = null;
-            this.NewVar_1 = null;
         }
         public mergeinstance(bool init)
         {
             this.SceneData = null;
             this.ListActors = new System.Collections.Generic.List<EngineNS.GamePlay.Actor.GActor>();
             this.MainActor = null;
-            this.NewVar_1 = null;
         }
         private static DebugContext_mergeinstance mDebuggerContext
         {
@@ -41,7 +39,7 @@ namespace samplers.mergeinstance
         {
             get
             {
-                return 162;
+                return 102;
             }
         }
         private EngineNS.Bricks.GpuDriven.GpuScene.SceneDataManager mSceneData;
@@ -83,19 +81,6 @@ namespace samplers.mergeinstance
                 this.mMainActor = value;
             }
         }
-        private samplers.tpsgame.tpscenterdata mNewVar_1;
-        [EngineNS.Editor.MacrossMemberAttribute(EngineNS.Editor.MacrossMemberAttribute.enMacrossType.Callable)]
-        public samplers.tpsgame.tpscenterdata NewVar_1
-        {
-            get
-            {
-                return this.mNewVar_1;
-            }
-            set
-            {
-                this.mNewVar_1 = value;
-            }
-        }
 // OverrideStart OnGameStart In,EngineNS.GamePlay.GGameInstance
 #pragma warning disable 1998
         [EngineNS.Editor.MacrossMemberAttribute(EngineNS.Editor.MacrossMemberAttribute.enMacrossType.Callable|EngineNS.Editor.MacrossMemberAttribute.enMacrossType.Overrideable)]
@@ -104,7 +89,6 @@ namespace samplers.mergeinstance
             System.Type param_50e553de_eb51_4a64_a758_c2f3e96e6e29_type = typeof(samplers.mergeinstance.ui_main);
             EngineNS.RName param_50e553de_eb51_4a64_a758_c2f3e96e6e29_name = EngineNS.CEngine.Instance.FileManager.GetRName("samplers/mergeinstance/ui_main.macross", EngineNS.RName.enRNameType.Game);
             samplers.mergeinstance.ui_main methodReturnValue_50e553de_eb51_4a64_a758_c2f3e96e6e29 = null;
-            samplers.tpsgame.tpscenterdata param_0255cf1a_fb5d_40fd_a2ec_482529cacd92_InParams_0 = null;
             EngineNS.GamePlay.GGameInstance param_9c785c51_782a_45d8_8187_c84bd0209952_game = null;
             EngineNS.RName param_a1c18c85_8e5e_4569_91af_055cc977cb3f_clusterName = EngineNS.CEngine.Instance.FileManager.GetRName("samplers/mergeinstance/cluster/sphere.vms.cluster", EngineNS.RName.enRNameType.Game);
             EngineNS.GamePlay.Actor.GActor param_a1c18c85_8e5e_4569_91af_055cc977cb3f_actor = null;
@@ -135,7 +119,7 @@ namespace samplers.mergeinstance
             EngineNS.Graphics.CGfxMaterialInstance param_31c01579_1b6b_4c9e_a26f_d2a12f8db9fa_MtlInst = null;
             EngineNS.CRenderContext param_31c01579_1b6b_4c9e_a26f_d2a12f8db9fa_rc = null;
             EngineNS.Bricks.GpuDriven.GpuScene.SceneDataManager createItem_d47e7262_51dc_48a9_b56b_90a7f71f4c6c = new EngineNS.Bricks.GpuDriven.GpuScene.SceneDataManager();
-            samplers.tpsgame.tpscenterdata NewVar_0 = null;
+            EngineNS.GamePlay.Actor.GActor NewVar_0 = null;
             try
             {
                 _mScope.Begin();
@@ -380,7 +364,7 @@ namespace samplers.mergeinstance
                     EngineNS.Editor.Runner.RunnerManager.Instance.Break(breakContext);
                 }
 #endif
-                NewVar_0 = null;
+                NewVar_0 = ((current_da806233_d514_4267_b93c_d2e85412d639) as EngineNS.GamePlay.Actor.GActor);
 #if MacrossDebug
                 mDebuggerContext.ValueInHandle_83422356_fd9b_48cb_b4ca_3657e5f2512b = NewVar_0;
 #endif
@@ -411,7 +395,10 @@ namespace samplers.mergeinstance
 #if MacrossDebug
                     mDebuggerContext.ValueOutHandle_05a19218_8af3_4f1d_84da_3cfddc02506e = this.SceneData;
 #endif
-                    param_83f93c60_16cf_41c5_9a3f_85830393a8c5_actor = ((current_da806233_d514_4267_b93c_d2e85412d639) as EngineNS.GamePlay.Actor.GActor);
+#if MacrossDebug
+                    mDebuggerContext.ValueOutHandle_83422356_fd9b_48cb_b4ca_3657e5f2512b = NewVar_0;
+#endif
+                    param_83f93c60_16cf_41c5_9a3f_85830393a8c5_actor = ((NewVar_0) as EngineNS.GamePlay.Actor.GActor);
 #if MacrossDebug
                     mDebuggerContext.ParamPin_936c9d80_b656_445d_8bec_7e271e9a3450 = param_83f93c60_16cf_41c5_9a3f_85830393a8c5_actor;
                     mDebuggerContext.ParamPin_88ef3469_646d_4fdd_8184_401a8c60490d = param_83f93c60_16cf_41c5_9a3f_85830393a8c5_clusterName;
@@ -435,7 +422,10 @@ namespace samplers.mergeinstance
 #if MacrossDebug
                     mDebuggerContext.ValueOutHandle_05a19218_8af3_4f1d_84da_3cfddc02506e = this.SceneData;
 #endif
-                    param_a1c18c85_8e5e_4569_91af_055cc977cb3f_actor = ((current_da806233_d514_4267_b93c_d2e85412d639) as EngineNS.GamePlay.Actor.GActor);
+#if MacrossDebug
+                    mDebuggerContext.ValueOutHandle_83422356_fd9b_48cb_b4ca_3657e5f2512b = NewVar_0;
+#endif
+                    param_a1c18c85_8e5e_4569_91af_055cc977cb3f_actor = ((NewVar_0) as EngineNS.GamePlay.Actor.GActor);
 #if MacrossDebug
                     mDebuggerContext.ParamPin_828b9a26_60a5_4643_902c_734985c52ce3 = param_a1c18c85_8e5e_4569_91af_055cc977cb3f_actor;
                     mDebuggerContext.ParamPin_6807e3ae_4f7e_4889_aa82_163ab85cf1ee = param_a1c18c85_8e5e_4569_91af_055cc977cb3f_clusterName;
@@ -487,25 +477,6 @@ namespace samplers.mergeinstance
                 }
 #endif
                 this.SceneData.BindDrawGpuScene(param_9c785c51_782a_45d8_8187_c84bd0209952_game);
-#if MacrossDebug
-                mDebuggerContext.ValueOutHandle_b65d0be7_26d4_4655_aa40_ec82f5d2fb75 = this.NewVar_1;
-#endif
-                param_0255cf1a_fb5d_40fd_a2ec_482529cacd92_InParams_0 = ((this.NewVar_1) as samplers.tpsgame.tpscenterdata);
-#if MacrossDebug
-                mDebuggerContext.ParamPin_c8647cbd_dec2_4801_8b84_2a391b5cab88 = param_0255cf1a_fb5d_40fd_a2ec_482529cacd92_InParams_0;
-                if (BreakEnable_0255cf1a_fb5d_40fd_a2ec_482529cacd92)
-                {
-                    EngineNS.Editor.Runner.RunnerManager.BreakContext breakContext = new EngineNS.Editor.Runner.RunnerManager.BreakContext();
-                    breakContext.ThisObject = this;
-                    breakContext.DebuggerId = EngineNS.Rtti.RttiHelper.GuidTryParse("3df25d67-48f9-4dd1-bd6a-efa385295e3c");
-                    breakContext.BreakId = EngineNS.Rtti.RttiHelper.GuidTryParse("0255cf1a-fb5d-40fd-a2ec-482529cacd92");
-                    breakContext.ClassName = "mergeinstance";
-                    breakContext.ValueContext = mDebuggerContext;
-                    EngineNS.Editor.Runner.RunnerManager.Instance.Break(breakContext);
-                    param_0255cf1a_fb5d_40fd_a2ec_482529cacd92_InParams_0 = ((mDebuggerContext.ParamPin_c8647cbd_dec2_4801_8b84_2a391b5cab88) as samplers.tpsgame.tpscenterdata);
-                }
-#endif
-                this.NewFunction_0(param_0255cf1a_fb5d_40fd_a2ec_482529cacd92_InParams_0);
 #if MacrossDebug
                 mDebuggerContext.ValueOutHandle_78836361_0c19_43d9_ae81_17b411876125 = game.UIHost;
 #endif
@@ -574,7 +545,6 @@ namespace samplers.mergeinstance
         public static bool BreakEnable_a1c18c85_8e5e_4569_91af_055cc977cb3f = false;
         public static bool BreakEnable_f4cf9495_2797_4c62_a014_3def88f0fdaa = false;
         public static bool BreakEnable_9c785c51_782a_45d8_8187_c84bd0209952 = false;
-        public static bool BreakEnable_0255cf1a_fb5d_40fd_a2ec_482529cacd92 = false;
         public static bool BreakEnable_50e553de_eb51_4a64_a758_c2f3e96e6e29 = false;
         public static bool BreakEnable_abe157d2_57e6_49f6_a358_837c4077bf96 = false;
 #pragma warning disable 1998
@@ -857,40 +827,6 @@ namespace samplers.mergeinstance
         public static bool BreakEnable_6c1ab948_655c_487c_a816_1e8249b2809a = false;
         public static bool BreakEnable_47048462_97dd_429b_b0f8_6dca6ceb4df9 = false;
         public static bool BreakEnable_2ab2c220_15de_4dd4_b98b_e76cd1611918 = false;
-#pragma warning disable 1998
-        [EngineNS.Editor.MacrossMemberAttribute(EngineNS.Editor.MacrossMemberAttribute.enMacrossType.Callable)]
-        [EngineNS.Editor.Editor_Guid("7a0945cb-f6c3-4578-828d-27b6baec9bf2")]
-        public void NewFunction_0(samplers.tpsgame.tpscenterdata InParams_0)
-        {
-            try
-            {
-                _mScope.Begin();
-#if MacrossDebug
-                mDebuggerContext.ParamPin_9df7c360_fdfa_4db4_b9d8_b90fc2ac0c49 = InParams_0;
-                if (BreakEnable_f78bb1d3_f253_4afc_9e9e_b297820093a1)
-                {
-                    EngineNS.Editor.Runner.RunnerManager.BreakContext breakContext = new EngineNS.Editor.Runner.RunnerManager.BreakContext();
-                    breakContext.ThisObject = this;
-                    breakContext.DebuggerId = EngineNS.Rtti.RttiHelper.GuidTryParse("7a0945cb-f6c3-4578-828d-27b6baec9bf2");
-                    breakContext.BreakId = EngineNS.Rtti.RttiHelper.GuidTryParse("f78bb1d3-f253-4afc-9e9e-b297820093a1");
-                    breakContext.ClassName = "mergeinstance";
-                    breakContext.ValueContext = mDebuggerContext;
-                    EngineNS.Editor.Runner.RunnerManager.Instance.Break(breakContext);
-                    InParams_0 = ((mDebuggerContext.ParamPin_9df7c360_fdfa_4db4_b9d8_b90fc2ac0c49) as samplers.tpsgame.tpscenterdata);
-                }
-#endif
-            }
-            catch (System.Exception ex_f78bb1d3_f253_4afc_9e9e_b297820093a1)
-            {
-                EngineNS.Profiler.Log.WriteException(ex_f78bb1d3_f253_4afc_9e9e_b297820093a1, "Macross异常");
-            }
-            finally
-            {
-                _mScope.End();
-            }
-        }
-#pragma warning restore 1998
-        public static bool BreakEnable_f78bb1d3_f253_4afc_9e9e_b297820093a1 = false;
     }
     public class DebugContext_mergeinstance
     {
@@ -922,18 +858,17 @@ namespace samplers.mergeinstance
         public EngineNS.RName returnLink_7852684b_6294_43a2_906d_a7cf0aed783f;
         public string ParamPin_0c8467c6_5bc9_43b3_a849_b0666264d231;
         public EngineNS.Graphics.Mesh.CGfxMesh returnLink_f204aef2_6c97_4536_8586_f2091eb93c09;
-        public samplers.tpsgame.tpscenterdata ValueInHandle_83422356_fd9b_48cb_b4ca_3657e5f2512b;
+        public EngineNS.GamePlay.Actor.GActor ValueInHandle_83422356_fd9b_48cb_b4ca_3657e5f2512b;
         public EngineNS.RName ValueOutHandle_4c779de7_3298_4ef1_b663_ef95c466dba3;
         public bool resultHandle_a2274167_7262_4435_946b_a37c7dd504ac;
         public bool userControl_a4b93072_16fc_4194_a828_9a76a990dead;
         public EngineNS.Bricks.GpuDriven.GpuScene.SceneDataManager ValueOutHandle_05a19218_8af3_4f1d_84da_3cfddc02506e;
+        public EngineNS.GamePlay.Actor.GActor ValueOutHandle_83422356_fd9b_48cb_b4ca_3657e5f2512b;
         public EngineNS.GamePlay.Actor.GActor ParamPin_936c9d80_b656_445d_8bec_7e271e9a3450;
         public EngineNS.RName ParamPin_88ef3469_646d_4fdd_8184_401a8c60490d;
         public EngineNS.GamePlay.Actor.GActor ParamPin_828b9a26_60a5_4643_902c_734985c52ce3;
         public EngineNS.RName ParamPin_6807e3ae_4f7e_4889_aa82_163ab85cf1ee;
         public EngineNS.GamePlay.GGameInstance ParamPin_e1fe5550_46f7_4ec3_b0b8_a0a86b2981d7;
-        public samplers.tpsgame.tpscenterdata ValueOutHandle_b65d0be7_26d4_4655_aa40_ec82f5d2fb75;
-        public samplers.tpsgame.tpscenterdata ParamPin_c8647cbd_dec2_4801_8b84_2a391b5cab88;
         public EngineNS.UISystem.UIHost ValueOutHandle_78836361_0c19_43d9_ae81_17b411876125;
         public EngineNS.RName ParamPin_53882fea_aafa_4cf3_9fb1_7c238e2cc85a;
         public System.Type ParamPin_77537554_3bcc_4e86_93fd_dc70088d2569;
@@ -964,6 +899,5 @@ namespace samplers.mergeinstance
         public EngineNS.GamePlay.GGameInstance ParamPin_72ae126c_e3b3_4c85_961b_95cf875b239a;
         public EngineNS.GamePlay.Actor.GActor ParamPin_f5ae7b99_f684_4eec_904a_49f932a9d1a0;
         public System.Guid ParamPin_dda0ceb2_ed24_428c_bba9_9e8066d48e35;
-        public samplers.tpsgame.tpscenterdata ParamPin_9df7c360_fdfa_4db4_b9d8_b90fc2ac0c49;
     }
 }
