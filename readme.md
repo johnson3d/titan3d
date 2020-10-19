@@ -8,7 +8,7 @@
 
 **开源协议**
 
-​		暂时决定先采用LGPL协议吧，后面看情况松绑:)
+​	暂时决定先采用LGPL协议吧，后面看情况松绑:)
 
 **安装步骤**
 
@@ -16,10 +16,9 @@
 	https://pan.baidu.com/s/1nK8uyY01y8dwnVj-8mbotg 提取码：6666 
 
 2解压
-	3rd.rar请解压到Native\3rd
-	titan3d.rar请解压到引擎根目录
+	titan3d_extra.rar请解压到引擎根目录
 
-3运行Setup.bat
+3运行Setup.bat(目前这一步不需要了-.-)
 	他将解压拷贝必要的dll到binaries对应的目录
 
 4使用vs2017或者vs2019打开工程
@@ -76,7 +75,7 @@ EditorCMD示例
 
 1. Cook游戏
 
-   cook entry=samplers/mergeinstance/mergeinstance.macross platform=android shadermodel=5+4+3 copyrinfo cookshader recompile genvsproj
+   cook entry=samplers/mergeinstance/mergeinstance.macross platform=android shadermodel=5+4+3 copyrinfo cookshader recompile genvsproj texencoder=PNG+ETC2 pak=D:/OpenSource/titan3d/cooked/android/a.tpak
 
 2. 强制刷新修复rinfo的引用关系记录
 
@@ -92,6 +91,18 @@ EditorCMD示例
 
 4. 打包tpak文件
 
+   pack src=D:/OpenSource/titan3d/cooked/android/a.alist tar=D:/OpenSource/titan3d/cooked/android/a.tpak
+
+   src参数assetslist文件为纯文本，内容是需要打包的资产清单
+
+   一行描述一个资产的源与包内目标路径，每行格式如下：
+
+   D:/OpenSource/titan3d/cooked/android/Assets/content/cenginedesc.cfg Assets/content/cenginedesc.cfg normal
+
+   tar参数是生成的tpak目标包文件路径，打包完成会生成一个.ftab的伴随文件，用于对包内资源进行定位和描述，还会生成一个.vtree文件描述包内虚拟文件树，可以用VrDirectory来加载
+
+5. 
+
 AloneGame示例
 
-1. usecooked=android gpu=Adreno540
+1. usecooked=android gpu=Adreno540 create_debug_layer textureformat=none 纹理格式目前只有none和etc2，不知道哪里出了d点问题，之前好好的etc2模式会让纹理都变黑，还要找原因
