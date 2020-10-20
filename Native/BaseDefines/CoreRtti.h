@@ -151,23 +151,47 @@ public:
 	}
 };
 
-struct RttiEnum
+struct RttiMetaInfo
+{
+	std::vector<std::string>	MetaInfos;
+	bool HasMeta(const char* info)
+	{
+		for (const auto& i : MetaInfos)
+		{
+			if (i == info)
+				return true;
+		}
+		return false;
+	}
+	void AddMeta(const char* info)
+	{
+		for (const auto& i : MetaInfos)
+		{
+			if (i == info)
+				return;
+		}
+		MetaInfos.push_back(info);
+	}
+};
+
+struct RttiEnum : public RttiMetaInfo
 {
 	std::string					Name;
 	std::string					NameSpace;
-	struct MemberDesc
+	struct MemberDesc : public RttiMetaInfo
 	{
 		std::string		Name;
 		int				Value;
 	};
 	std::vector<MemberDesc>		Members;
 
-	void PushMember(const char* name, int value)
+	MemberDesc* PushMember(const char* name, int value)
 	{
 		MemberDesc tmp;
 		tmp.Name = name;
 		tmp.Value = value;
 		Members.push_back(tmp);
+		return &Members[Members.size() - 1];
 	}
 
 	const char* GetName() const {
@@ -299,7 +323,7 @@ inline ArgumentStream& operator >>(ArgumentStream& stream, std::string& v)
 }
 
 struct RttiStruct;
-struct RttiMethodBase
+struct RttiMethodBase : public RttiMetaInfo
 {
 	std::string			Name;
 	RttiStruct*			ThisObject;
@@ -325,7 +349,7 @@ struct RttiMethodBase
 	}
 };
 
-struct RttiConstructor
+struct RttiConstructor : public RttiMetaInfo
 {
 	std::vector<RttiStruct*> mArguments;
 	bool MatchArgument(const std::vector<RttiStruct*>& args) const
@@ -546,7 +570,7 @@ struct VConstructor2 : public RttiConstructor
 	}
 };
 
-struct RttiStruct
+struct RttiStruct : public RttiMetaInfo
 {
 	RttiStruct*					ParentStructType;
 	std::string					Name;
@@ -554,7 +578,7 @@ struct RttiStruct
 	unsigned int				Size;
 	RttiEnum*					EnumDesc;
 	bool						IsEnum;
-	struct MemberDesc
+	struct MemberDesc : public RttiMetaInfo
 	{
 		RttiStruct*			MemberType;
 		unsigned int		Offset;
@@ -707,46 +731,51 @@ struct RttiStruct
 		}
 		return nullptr;
 	}
-	void PushMember(RttiStruct* type, unsigned int offset, unsigned int size, unsigned int arrayElements, const char* name, bool isPointer);
+	MemberDesc* PushMember(RttiStruct* type, unsigned int offset, unsigned int size, unsigned int arrayElements, const char* name, bool isPointer);
 
 	template<typename Result, typename Klass>
-	void PushMethod0(typename VMethod0<Result, Klass>::MethodFun fun, const char* name)
+	RttiMethodBase* PushMethod0(typename VMethod0<Result, Klass>::MethodFun fun, const char* name)
 	{
 		auto desc = new(__FILE__, __LINE__) VMethod1<Result, Klass>(fun, name);
 		
 		Methods.push_back(desc);
+		return desc;
 	}
 
 	template<typename Result, typename Klass, typename T0>
-	void PushMethod1(typename VMethod1<Result, Klass, T0>::MethodFun fun, const char* name, const char* a0)
+	RttiMethodBase* PushMethod1(typename VMethod1<Result, Klass, T0>::MethodFun fun, const char* name, const char* a0)
 	{
 		auto desc = new(__FILE__,__LINE__) VMethod1<Result, Klass, T0>(fun, name, a0);
 
 		Methods.push_back(desc);
+		return desc;
 	}
 
 	template<typename Result, typename Klass, typename T0, typename T1>
-	void PushMethod2(typename VMethod2<Result, Klass, T0, T1>::MethodFun fun, const char* name, const char* a0, const char* a1)
+	RttiMethodBase* PushMethod2(typename VMethod2<Result, Klass, T0, T1>::MethodFun fun, const char* name, const char* a0, const char* a1)
 	{
 		auto desc = new(__FILE__, __LINE__) VMethod2<Result, Klass, T0, T1>(fun, name, a0, a1);
 
 		Methods.push_back(desc);
+		return desc;
 	}
 
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2>
-	void PushMethod3(typename VMethod3<Result, Klass, T0, T1, T2>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2)
+	RttiMethodBase* PushMethod3(typename VMethod3<Result, Klass, T0, T1, T2>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2)
 	{
 		auto desc = new(__FILE__, __LINE__) VMethod3<Result, Klass, T0, T1, T2>(fun, name, a0, a1, a2);
 
 		Methods.push_back(desc);
+		return desc;
 	}
 
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3>
-	void PushMethod4(typename VMethod4<Result, Klass, T0, T1, T2, T3>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3)
+	RttiMethodBase* PushMethod4(typename VMethod4<Result, Klass, T0, T1, T2, T3>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3)
 	{
 		auto desc = new(__FILE__, __LINE__) VMethod4<Result, Klass, T0, T1, T2, T3>(fun, name, a0, a1, a2, a3);
 
 		Methods.push_back(desc);
+		return desc;
 	}
 
 	virtual void Init();
@@ -971,8 +1000,17 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 		*(Type*)pTar = *(Type*)pSrc;\
 	}\
 	virtual void Init() override\
-	{
+	{\
+		RttiStruct::MemberDesc* __current_member = nullptr;\
+		RttiMethodBase* __current_method = nullptr;\
+		RttiConstructor* __current_constructor = nullptr;
+
 #define  __vsizeof(_type, _name) sizeof(((_type*)nullptr)->_name)
+
+#define AddClassMetaInfo(info) { this->AddMeta(info); }
+#define AppendMemberMetaInfo(info) { if(__current_member!=nullptr){__current_member->AddMeta(info);} }
+#define AppendMethodMetaInfo(info) { if(__current_method!=nullptr){__current_method->AddMeta(info);} }
+#define AppendConstructorMetaInfo(info) { if(__current_constructor!=nullptr){__current_constructor->AddMeta(info);} }
 
 #define StructMember(_name) \
 		{\
@@ -980,14 +1018,14 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 			using noPointerType = std::remove_pointer<declType>::type;\
 			using realType = std::remove_extent<noPointerType>::type;\
 			unsigned int size = __vsizeof(ThisStructType, _name);\
-			PushMember(&AuxRttiStruct<realType>::Instance, __voffsetof(ThisStructType, _name), size, size/sizeof(realType),\
+			__current_member = PushMember(&AuxRttiStruct<realType>::Instance, __voffsetof(ThisStructType, _name), size, size/sizeof(realType),\
 					#_name, std::is_pointer<decltype(((ThisStructType*)nullptr)->_name)>::value);\
 		}
 
 #define StructMethod0(name) \
 		{\
 			using TResult = TFunction_traits<decltype(&ThisStructType::name)>::return_type; \
-			PushMethod0<TResult, ThisStructType>(&ThisStructType::name, #name);\
+			__current_method = PushMethod0<TResult, ThisStructType>(&ThisStructType::name, #name);\
 		}
 
 #define StructMethod1(name, a0) \
@@ -997,12 +1035,12 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 			static_assert(TFunction_traits<TFunctionType>::param_count==1);\
 			using TResult = TFunction_traits<TFunctionType>::return_type;\
 			using TA0 = TFunction_traits<TFunctionType>::param_type<0>;\
-			PushMethod1<TResult, ThisStructType, TA0>(funAddress, #name, #a0);\
+			__current_method = PushMethod1<TResult, ThisStructType, TA0>(funAddress, #name, #a0);\
 		}
 
 #define StructMethodEx1(name, TResult, TA0, a0) \
 		{\
-			PushMethod1<TResult, ThisStructType, TA0>(&ThisStructType::name, #name, #a0);\
+			__current_method = PushMethod1<TResult, ThisStructType, TA0>(&ThisStructType::name, #name, #a0);\
 		}
 
 #define StructMethod2(name, a0, a1) \
@@ -1013,12 +1051,12 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 			using TResult = TFunction_traits<TFunctionType>::return_type;\
 			using TA0 = TFunction_traits<TFunctionType>::param_type<0>;\
 			using TA1 = TFunction_traits<TFunctionType>::param_type<1>;\
-			PushMethod2<TResult, ThisStructType, TA0, TA1>(funAddress, #name, #a0, #a1);\
+			__current_method = PushMethod2<TResult, ThisStructType, TA0, TA1>(funAddress, #name, #a0, #a1);\
 		}
 
 #define StructMethodEx2(name, TResult, TA0, a0, TA1, a1) \
 		{\
-			PushMethod2<TResult, ThisStructType, TA0, TA1>(&ThisStructType::name, #name, #a0, #a1);\
+			__current_method = PushMethod2<TResult, ThisStructType, TA0, TA1>(&ThisStructType::name, #name, #a0, #a1);\
 		}
 
 #define StructMethod3(name, a0, a1, a2) \
@@ -1030,12 +1068,12 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 			using TA0 = TFunction_traits<TFunctionType>::param_type<0>;\
 			using TA1 = TFunction_traits<TFunctionType>::param_type<1>;\
 			using TA2 = TFunction_traits<TFunctionType>::param_type<2>;\
-			PushMethod2<TResult, ThisStructType, TA0, TA1>(funAddress, #name, #a0, #a1, #a2);\
+			__current_method = PushMethod2<TResult, ThisStructType, TA0, TA1>(funAddress, #name, #a0, #a1, #a2);\
 		}
 
 #define StructMethodEx3(name, TResult, TA0, a0, TA1, a1, TA2, a2) \
 		{\
-			PushMethod3<TResult, ThisStructType, TA0, TA1, TA2>(&ThisStructType::name, #name, #a0, #a1, #a2);\
+			__current_method = PushMethod3<TResult, ThisStructType, TA0, TA1, TA2>(&ThisStructType::name, #name, #a0, #a1, #a2);\
 		}
 
 #define StructMethod4(name, a0, a1, a2, a3) \
@@ -1048,30 +1086,33 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 			using TA1 = TFunction_traits<TFunctionType>::param_type<1>;\
 			using TA2 = TFunction_traits<TFunctionType>::param_type<2>;\
 			using TA3 = TFunction_traits<TFunctionType>::param_type<3>;\
-			PushMethod4<TResult, ThisStructType, TA0, TA1>(funAddress, #name, #a0, #a1, #a2, #a3);\
+			__current_method = PushMethod4<TResult, ThisStructType, TA0, TA1>(funAddress, #name, #a0, #a1, #a2, #a3);\
 		}
 
 #define StructMethodEx4(name, TResult, TA0, a0, TA1, a1, TA2, a2, TA3, a3) \
 		{\
-			PushMethod4<TResult, ThisStructType, TA0, TA1, TA2, TA3>(&ThisStructType::name, #name, #a0, #a1, #a2, #a3);\
+			__current_method = PushMethod4<TResult, ThisStructType, TA0, TA1, TA2, TA3>(&ThisStructType::name, #name, #a0, #a1, #a2, #a3);\
 		}
 
 #define StructConstructor0() \
 		{\
 			auto desc = new(__FILE__, __LINE__) VConstructor0<ThisStructType>();\
 			Constructors.push_back(desc);\
+			__current_constructor = desc;\
 		}
 
 #define StructConstructor1(_T0) \
 		{\
 			auto desc = new(__FILE__, __LINE__) VConstructor1<ThisStructType, _T0>();\
 			Constructors.push_back(desc);\
+			__current_constructor = desc;\
 		}
 
 #define StructConstructor2(_T0, _T1) \
 		{\
 			auto desc = new(__FILE__, __LINE__) VConstructor2<ThisStructType, _T0, _T1>();\
 			Constructors.push_back(desc);\
+			__current_constructor = desc;\
 		}
 
 #define StructEnd(ParentType) \

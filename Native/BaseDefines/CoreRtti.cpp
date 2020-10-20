@@ -69,7 +69,7 @@ RttiEnum* RttiEnumManager::FindEnum(const char* name)
 	return i->second;
 }
 
-void RttiStruct::PushMember(RttiStruct* type, unsigned int offset, unsigned int size, unsigned int arrayElements, const char* name, bool isPointer)
+RttiStruct::MemberDesc* RttiStruct::PushMember(RttiStruct* type, unsigned int offset, unsigned int size, unsigned int arrayElements, const char* name, bool isPointer)
 {
 	MemberDesc desc;
 	desc.MemberType = type;
@@ -86,6 +86,7 @@ void RttiStruct::PushMember(RttiStruct* type, unsigned int offset, unsigned int 
 	}
 	desc.IsPointer = isPointer;
 	Members.push_back(desc);
+	return &Members[Members.size() - 1];
 }
 
 
@@ -184,7 +185,11 @@ struct Test_ConstantVarDesc
 };
 
 StructBegin(Test_ConstantVarDesc, EngineNS)
+	AddClassMetaInfo("abc");
+
 	StructMember(Offset);
+	AppendMemberMetaInfo("Offset info");
+
 	StructMember(Size);
 	StructMember(Elements);
 	StructMember(Name);
@@ -192,12 +197,16 @@ StructBegin(Test_ConstantVarDesc, EngineNS)
 	StructMember(Test);
 
 	StructMethod1(SetDirty, d);
+	AppendMethodMetaInfo("SetDirty info");
+
 	StructMethod2(SetDirty2, d, c);
 
 	StructMethodEx1(TestSetDirty , void, std::string, d);
 	StructMethodEx2(TestSetDirty, void, std::string, d, int, c);
 
 	StructConstructor0();
+	AppendConstructorMetaInfo("Test_ConstantVarDesc info");
+	
 StructEnd(void)
 
 StructImpl(Test_ConstantVarDesc);
