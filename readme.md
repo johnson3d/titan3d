@@ -46,7 +46,7 @@
 
 **特性列表**
 
-1. 内核C++实现，主框架，编辑器等由C#实现，通过P-Invoke实现托管非托管调用， 通过C++和C#的反射绑定托管非对象数据
+1. 内核C++实现，主框架，编辑器等由C#实现，通过P-Invoke实现托管非托管调用， 通过C++和C#的反射绑定托管与非托管对象数据
 3. 围绕宏图(Macross)构架游戏逻辑
 4. 高度可定制的渲染管线，可全部在C#中实现渲染特性扩展
 5. 支持ShaderGraph的材质编辑器
@@ -105,4 +105,4 @@ EditorCMD示例
 
 AloneGame示例
 
-1. usecooked=android gpu=Adreno540 create_debug_layer textureformat=none 纹理格式目前只有none和etc2，不知道哪里出了d点问题，之前好好的etc2模式会让纹理都变黑，还要找原因
+1. usecooked=android gpu=Adreno540 create_debug_layer textureformat=none 纹理格式目前只有none和etc2，不知道哪里出了点问题，之前好好的etc2模式会让纹理都变黑，还要找原因

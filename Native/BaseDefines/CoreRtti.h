@@ -20,6 +20,46 @@ typedef int	vBOOL;
 
 NS_BEGIN
 
+template <typename R, typename... Args>
+struct TFunction_traits_helper
+{
+	static constexpr auto param_count = sizeof...(Args);
+	using return_type = R;
+
+	template <std::size_t N>
+	using param_type = std::tuple_element_t<N, std::tuple<Args...>>;
+};
+
+template <typename T>
+struct TFunction_traits;
+
+template <typename R, typename... Args>
+struct TFunction_traits<R(*)(Args...)> : public TFunction_traits_helper<R, Args...>
+{
+};
+
+template <typename R, typename... Args>
+struct TFunction_traits<R(&)(Args...)> : public TFunction_traits_helper<R, Args...>
+{
+};
+
+template <typename R, typename... Args>
+struct TFunction_traits<R(Args...)> : public TFunction_traits_helper<R, Args...>
+{
+};
+
+template <typename ClassType, typename R, typename... Args>
+struct TFunction_traits<R(ClassType::*)(Args...)> : public TFunction_traits_helper<R, Args...>
+{
+	using class_type = ClassType;
+};
+
+template <typename ClassType, typename R, typename... Args>
+struct TFunction_traits<R(ClassType::*)(Args...) const> : public TFunction_traits_helper<R, Args...>
+{
+	using class_type = ClassType;
+};
+
 class VIUnknown;
 
 typedef VIUnknown* (*FConstructor)(const char*, int);
@@ -270,6 +310,19 @@ struct RttiMethodBase
 	{
 		
 	}
+	bool MatchArgument(const RttiStruct* returnType, const std::vector<RttiStruct*>& args) const
+	{
+		if (returnType != ResultType)
+			return false;
+		if (args.size() != Arguments.size())
+			return false;
+		for (size_t i = 0; i < args.size(); i++)
+		{
+			if (args[i] != Arguments[i].second)
+				return false;
+		}
+		return true;
+	}
 };
 
 struct RttiConstructor
@@ -317,11 +370,15 @@ private:
 	}
 };
 
+#define Method_Arg_Def(index) \
+	T##index a##index = T##index();\
+	args >> a##index;
+
 template<typename Result, typename BindClass, typename T0>
 struct VMethod1 : public RttiMethodBase
 {
 	typedef Result(BindClass::*MethodFun)(T0);
-	VMethod1(VMethod1::MethodFun fun, const char* name, const char* a0);
+	VMethod1(MethodFun fun, const char* name, const char* a0);
 	MethodFun	FuncPtr;
 
 	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
@@ -334,17 +391,118 @@ private:
 	void InvokeImpl(void* pThis, ArgumentStream& args, ArgumentStream& result) const
 	{
 		args.mReadPosition = 0;
-		T0 a0 = T0();
-		args >> a0;
+		Method_Arg_Def(0);
 		TR ret = (((BindClass*)pThis)->*(FuncPtr))(a0);
 		result << ret;
 	}
 	template<>
 	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
 	{
-		T0 a0 = T0();
-		args >> a0;
+		args.mReadPosition = 0;
+		Method_Arg_Def(0);
 		(((BindClass*)pThis)->*(FuncPtr))(a0);
+	}
+};
+
+template<typename Result, typename BindClass, typename T0, typename T1>
+struct VMethod2 : public RttiMethodBase
+{
+	typedef Result(BindClass::*MethodFun)(T0,T1);
+	VMethod2(MethodFun fun, const char* name, const char* a0, const char* a1);
+	MethodFun	FuncPtr;
+
+	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
+	{
+		InvokeImpl<Result>(pThis, args, result);
+	}
+
+private:
+	template<typename TR>
+	void InvokeImpl(void* pThis, ArgumentStream& args, ArgumentStream& result) const
+	{
+		args.mReadPosition = 0;
+		Method_Arg_Def(0);
+		Method_Arg_Def(1);
+		TR ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1);
+		result << ret;
+	}
+	template<>
+	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
+	{
+		args.mReadPosition = 0;
+		Method_Arg_Def(0);
+		Method_Arg_Def(1);
+		(((BindClass*)pThis)->*(FuncPtr))(a0, a1);
+	}
+};
+
+template<typename Result, typename BindClass, typename T0, typename T1, typename T2>
+struct VMethod3 : public RttiMethodBase
+{
+	typedef Result(BindClass::*MethodFun)(T0, T1, T2);
+	VMethod3(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2);
+	MethodFun	FuncPtr;
+
+	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
+	{
+		InvokeImpl<Result>(pThis, args, result);
+	}
+
+private:
+	template<typename TR>
+	void InvokeImpl(void* pThis, ArgumentStream& args, ArgumentStream& result) const
+	{
+		args.mReadPosition = 0;
+		Method_Arg_Def(0);
+		Method_Arg_Def(1);
+		Method_Arg_Def(2);
+		TR ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2);
+		result << ret;
+	}
+	template<>
+	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
+	{
+		args.mReadPosition = 0;
+		Method_Arg_Def(0);
+		Method_Arg_Def(1);
+		Method_Arg_Def(2);
+		(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2);
+	}
+};
+
+template<typename Result, typename BindClass, typename T0, typename T1, typename T2, typename T3>
+struct VMethod4 : public RttiMethodBase
+{
+	typedef Result(BindClass::*MethodFun)(T0, T1, T2, T3);
+	VMethod4(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3);
+	MethodFun	FuncPtr;
+
+	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
+	{
+		InvokeImpl<Result>(pThis, args, result);
+	}
+
+private:
+	template<typename TR>
+	void InvokeImpl(void* pThis, ArgumentStream& args, ArgumentStream& result) const
+	{
+		args.mReadPosition = 0;
+		Method_Arg_Def(0);
+		Method_Arg_Def(1);
+		Method_Arg_Def(2);
+		Method_Arg_Def(3);
+		TR ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3);
+		result << ret;
+	}
+	template<>
+	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
+	{
+		args.mReadPosition = 0;
+		Method_Arg_Def(0);
+		Method_Arg_Def(1);
+		Method_Arg_Def(2);
+		Method_Arg_Def(3);
+		(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3);
 	}
 };
 
@@ -366,9 +524,25 @@ struct VConstructor1 : public RttiConstructor
 	}
 	virtual void* CreateInstance(ArgumentStream& args) const
 	{	
-		T0 a0 = T0();
-		args >> a0;
+		args.mReadPosition = 0;
+		Method_Arg_Def(0);
 		return new Klass(a0);
+	}
+};
+
+template<typename Klass, typename T0, typename T1>
+struct VConstructor2 : public RttiConstructor
+{
+	VConstructor2()
+	{
+		mArguments.push_back(&AuxRttiStruct<T0>::Instance);
+		mArguments.push_back(&AuxRttiStruct<T1>::Instance);
+	}
+	virtual void* CreateInstance(ArgumentStream& args) const
+	{
+		Method_Arg_Def(0);
+		Method_Arg_Def(1);
+		return new Klass(a0, a1);
 	}
 };
 
@@ -514,6 +688,16 @@ struct RttiStruct
 		}
 		return nullptr;
 	}
+	const RttiMethodBase* FindMethodWithArguments(const char* name, const RttiStruct* returnType, const std::vector<RttiStruct*>& args) const {
+		for (auto i : Methods)
+		{
+			if (i->Name == name && i->MatchArgument(returnType, args))
+			{
+				return i;
+			}
+		}
+		return nullptr;
+	}
 	const RttiConstructor* FindConstructor(const std::vector<RttiStruct*>& args) const
 	{
 		for (auto i : Constructors)
@@ -537,6 +721,30 @@ struct RttiStruct
 	void PushMethod1(typename VMethod1<Result, Klass, T0>::MethodFun fun, const char* name, const char* a0)
 	{
 		auto desc = new(__FILE__,__LINE__) VMethod1<Result, Klass, T0>(fun, name, a0);
+
+		Methods.push_back(desc);
+	}
+
+	template<typename Result, typename Klass, typename T0, typename T1>
+	void PushMethod2(typename VMethod2<Result, Klass, T0, T1>::MethodFun fun, const char* name, const char* a0, const char* a1)
+	{
+		auto desc = new(__FILE__, __LINE__) VMethod2<Result, Klass, T0, T1>(fun, name, a0, a1);
+
+		Methods.push_back(desc);
+	}
+
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2>
+	void PushMethod3(typename VMethod3<Result, Klass, T0, T1, T2>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2)
+	{
+		auto desc = new(__FILE__, __LINE__) VMethod3<Result, Klass, T0, T1, T2>(fun, name, a0, a1, a2);
+
+		Methods.push_back(desc);
+	}
+
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3>
+	void PushMethod4(typename VMethod4<Result, Klass, T0, T1, T2, T3>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3)
+	{
+		auto desc = new(__FILE__, __LINE__) VMethod4<Result, Klass, T0, T1, T2, T3>(fun, name, a0, a1, a2, a3);
 
 		Methods.push_back(desc);
 	}
@@ -776,14 +984,77 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 					#_name, std::is_pointer<decltype(((ThisStructType*)nullptr)->_name)>::value);\
 		}
 
-#define StructMethod0(fun, name) \
-		PushMethod0(fun, #name);
+#define StructMethod0(name) \
+		{\
+			using TResult = TFunction_traits<decltype(&ThisStructType::name)>::return_type; \
+			PushMethod0<TResult, ThisStructType>(&ThisStructType::name, #name);\
+		}
 
-//其实TR作为函数返回值类型，可以通过std::invoke_result萃取出来，不过考虑到c++17的支持度，以及没有完整引入function_traits，
-//我们参数编译期获取也不完整，就让生成反射代码稍微复杂一点吧，反正最后最好是通过工具产生这些宏代码
-#define StructMethod1(fun, name, TR, A0, a0) \
-		PushMethod1<TR, ThisStructType, A0>(fun, #name, #a0);
+#define StructMethod1(name, a0) \
+		{\
+			auto funAddress = &ThisStructType::name;\
+			using TFunctionType = decltype(funAddress);\
+			static_assert(TFunction_traits<TFunctionType>::param_count==1);\
+			using TResult = TFunction_traits<TFunctionType>::return_type;\
+			using TA0 = TFunction_traits<TFunctionType>::param_type<0>;\
+			PushMethod1<TResult, ThisStructType, TA0>(funAddress, #name, #a0);\
+		}
 
+#define StructMethodEx1(name, TResult, TA0, a0) \
+		{\
+			PushMethod1<TResult, ThisStructType, TA0>(&ThisStructType::name, #name, #a0);\
+		}
+
+#define StructMethod2(name, a0, a1) \
+		{\
+			auto funAddress = &ThisStructType::name;\
+			using TFunctionType = decltype(funAddress);\
+			static_assert(TFunction_traits<TFunctionType>::param_count==2);\
+			using TResult = TFunction_traits<TFunctionType>::return_type;\
+			using TA0 = TFunction_traits<TFunctionType>::param_type<0>;\
+			using TA1 = TFunction_traits<TFunctionType>::param_type<1>;\
+			PushMethod2<TResult, ThisStructType, TA0, TA1>(funAddress, #name, #a0, #a1);\
+		}
+
+#define StructMethodEx2(name, TResult, TA0, a0, TA1, a1) \
+		{\
+			PushMethod2<TResult, ThisStructType, TA0, TA1>(&ThisStructType::name, #name, #a0, #a1);\
+		}
+
+#define StructMethod3(name, a0, a1, a2) \
+		{\
+			auto funAddress = &ThisStructType::name;\
+			using TFunctionType = decltype(funAddress);\
+			static_assert(TFunction_traits<TFunctionType>::param_count==3);\
+			using TResult = TFunction_traits<TFunctionType>::return_type;\
+			using TA0 = TFunction_traits<TFunctionType>::param_type<0>;\
+			using TA1 = TFunction_traits<TFunctionType>::param_type<1>;\
+			using TA2 = TFunction_traits<TFunctionType>::param_type<2>;\
+			PushMethod2<TResult, ThisStructType, TA0, TA1>(funAddress, #name, #a0, #a1, #a2);\
+		}
+
+#define StructMethodEx3(name, TResult, TA0, a0, TA1, a1, TA2, a2) \
+		{\
+			PushMethod3<TResult, ThisStructType, TA0, TA1, TA2>(&ThisStructType::name, #name, #a0, #a1, #a2);\
+		}
+
+#define StructMethod4(name, a0, a1, a2, a3) \
+		{\
+			auto funAddress = &ThisStructType::name;\
+			using TFunctionType = decltype(funAddress);\
+			static_assert(TFunction_traits<TFunctionType>::param_count==4);\
+			using TResult = TFunction_traits<TFunctionType>::return_type;\
+			using TA0 = TFunction_traits<TFunctionType>::param_type<0>;\
+			using TA1 = TFunction_traits<TFunctionType>::param_type<1>;\
+			using TA2 = TFunction_traits<TFunctionType>::param_type<2>;\
+			using TA3 = TFunction_traits<TFunctionType>::param_type<3>;\
+			PushMethod4<TResult, ThisStructType, TA0, TA1>(funAddress, #name, #a0, #a1, #a2, #a3);\
+		}
+
+#define StructMethodEx4(name, TResult, TA0, a0, TA1, a1, TA2, a2, TA3, a3) \
+		{\
+			PushMethod4<TResult, ThisStructType, TA0, TA1, TA2, TA3>(&ThisStructType::name, #name, #a0, #a1, #a2, #a3);\
+		}
 
 #define StructConstructor0() \
 		{\
@@ -794,6 +1065,12 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 #define StructConstructor1(_T0) \
 		{\
 			auto desc = new(__FILE__, __LINE__) VConstructor1<ThisStructType, _T0>();\
+			Constructors.push_back(desc);\
+		}
+
+#define StructConstructor2(_T0, _T1) \
+		{\
+			auto desc = new(__FILE__, __LINE__) VConstructor2<ThisStructType, _T0, _T1>();\
 			Constructors.push_back(desc);\
 		}
 
@@ -823,6 +1100,48 @@ VMethod1<Result, Klass, T0>::VMethod1(MethodFun fun, const char* name, const cha
 	ThisObject = &AuxRttiStruct<Klass>::Instance;
 
 	Arguments.push_back(std::make_pair(a0,&AuxRttiStruct<T0>::Instance));
+}
+
+template<typename Result, typename Klass, typename T0, typename T1>
+VMethod2<Result, Klass, T0, T1>::VMethod2(MethodFun fun, const char* name, const char* a0, const char* a1)
+{
+	//static_assert(std::is_same<Result, decltype(fun)>::value);
+	FuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<Result>::Instance;
+	ThisObject = &AuxRttiStruct<Klass>::Instance;
+
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<T0>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<T1>::Instance));
+}
+
+template<typename Result, typename Klass, typename T0, typename T1, typename T2>
+VMethod3<Result, Klass, T0, T1, T2>::VMethod3(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2)
+{
+	//static_assert(std::is_same<Result, decltype(fun)>::value);
+	FuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<Result>::Instance;
+	ThisObject = &AuxRttiStruct<Klass>::Instance;
+
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<T0>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<T1>::Instance));
+	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<T2>::Instance));
+}
+
+template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3>
+VMethod4<Result, Klass, T0, T1, T2, T3>::VMethod4(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3)
+{
+	//static_assert(std::is_same<Result, decltype(fun)>::value);
+	FuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<Result>::Instance;
+	ThisObject = &AuxRttiStruct<Klass>::Instance;
+
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<T0>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<T1>::Instance));
+	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<T2>::Instance));
+	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<T3>::Instance));
 }
 
 NS_END

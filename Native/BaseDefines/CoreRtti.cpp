@@ -166,6 +166,21 @@ struct Test_ConstantVarDesc
 		if (d == "true")
 			Dirty = 1;
 	}
+	void SetDirty2(std::string d, int c)
+	{
+		if (d == "true")
+			Dirty = 1;
+	}
+	void TestSetDirty(std::string d, int c)
+	{
+		if (d == "true")
+			Dirty = 1;
+	}
+	void TestSetDirty(std::string d)
+	{
+		if (d == "true")
+			Dirty = 1;
+	}
 };
 
 StructBegin(Test_ConstantVarDesc, EngineNS)
@@ -176,12 +191,21 @@ StructBegin(Test_ConstantVarDesc, EngineNS)
 	StructMember(TestString);
 	StructMember(Test);
 
-	StructMethod1(&Test_ConstantVarDesc::SetDirty, SetDirty, void, std::string, d);
+	StructMethod1(SetDirty, d);
+	StructMethod2(SetDirty2, d, c);
+
+	StructMethodEx1(TestSetDirty , void, std::string, d);
+	StructMethodEx2(TestSetDirty, void, std::string, d, int, c);
 
 	StructConstructor0();
 StructEnd(void)
 
 StructImpl(Test_ConstantVarDesc);
+
+int FTestFuncTraits(int, int)
+{
+	return 0;
+}
 
 void TestReflection()
 {
@@ -218,7 +242,7 @@ void RttiStructManager::BuildRtti()
 		i.second->Init();
 		AllStructTyps.push_back(i.second);
 	}
-	
+
 	TestReflection();
 }
 
