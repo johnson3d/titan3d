@@ -321,17 +321,17 @@ public:
 
 enum	EStreamingState
 {
-	SS_Unknown,	//δ֪
-	SS_WaitDownload,	//�ȴ�����
-	SS_Downloading,	//��������
-	SS_DLFailed,	//����ʧ��
-	SS_Invalid,	// �Ƿ�
-	SS_Pending,	// ������ȡ
-	SS_Streaming,	// ��ȡ��
-	SS_Valid,	// ����
-	SS_PendingKill,	// ����ɾ��
-	SS_Killing,	// ������
-	SS_Killed			// ɾ�����
+	SS_Unknown,
+	SS_WaitDownload,
+	SS_Downloading,
+	SS_DLFailed,
+	SS_Invalid,
+	SS_Pending,
+	SS_Streaming,
+	SS_Valid,
+	SS_PendingKill,
+	SS_Killing,
+	SS_Killed
 };
 
 EnumBegin(EStreamingState)

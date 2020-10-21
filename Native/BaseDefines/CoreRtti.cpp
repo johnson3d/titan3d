@@ -205,8 +205,7 @@ StructBegin(Test_ConstantVarDesc, EngineNS)
 	StructMethodEx2(TestSetDirty, void, std::string, d, int, c);
 
 	StructConstructor0();
-	AppendConstructorMetaInfo("Test_ConstantVarDesc info");
-	
+	AppendConstructorMetaInfo("Test_ConstantVarDesc info");	
 StructEnd(void)
 
 StructImpl(Test_ConstantVarDesc);
