@@ -1,8 +1,7 @@
 // res_2_memory.h
 //
-// ��Դ���ٵ��ڴ�Ľӿڡ�
 //
-// Author : lanzhengpeng
+// Author : johnson&lzp
 // Modifer :	
 // Create Timer :	 2004-10-24 4:04
 // Modify Timer :	
@@ -17,13 +16,6 @@ typedef const void * VResPtr;
 
 NS_BEGIN
 
-/*!	��Դ���ݷ�����
-*	\author lanzhengpeng, johnson
-*	��ͼ����ʵ���޹صķ�ʽ������Դ�ķ��ʽӿڡ�ʵ�ִ˽ӿ��ߣ������Ǵ��ļ���ӳ��һ�����򣬿������ڴ��һ������Ҳ��������������
-*	�������֣�����ʹ�ô���Դ���ݵ�ʹ���߶���Ψһ�ģ�ֻ��Ҫ֪������������ʼ����С��������
-*	\note
-*	�ڵ���Ptrǰ��ע�⣺Ptr(0, Length())���ܻᵼ�½������ļ�������������ںܴ���ļ����ԣ��⽫���쳣���µġ�
-*/
 const vIID vIID_VRes2Memory = 0xe9ff69794c917a6c;
 struct VRes2Memory : public EngineNS::VIUnknown
 {

@@ -148,7 +148,7 @@ void XNDAttrib::operator delete (void * p, size_t size)
 #endif
 
 XNDAttrib::XNDAttrib(XNDNode* pNode, XNDData* manager)
-	//: AuxLeafIUnknown<XNDAttrib,VIUnknown>(pNode)	// �������﷨��ʾ�˶����Լ��������ã������ɴ˶���ı����߹��������á�
+	//: AuxLeafIUnknown<XNDAttrib,VIUnknown>(pNode)	
 	: Offset(0)
 	, Resource(NULL)
 	, Length(0)

@@ -43,10 +43,6 @@ public:
 	vBOOL GetTweenTimeParam(INT64 uTime,UINT & uFrm1,UINT & uFrm2,FLOAT & fSlerp) const;
 
 	//-----------------------------------------------------------------------
-	// Summary:
-	//		����ؼ�֡��Ϣ���ļ�.
-	// Returns:
-	//		�ɹ����ط���,����,������.
 	//-----------------------------------------------------------------------
 	template<class _iotype>
 	vBOOL Save(_iotype & file) const;

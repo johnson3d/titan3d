@@ -271,7 +271,7 @@ public:
 #if defined(VFX_DEBUG_MEMORY)
 			_small_cookie * p = reinterpret_cast<_small_cookie*>
 				((INT_PTR)tmp->chunk - sizeof(_small_cookie) + sizeof(_small_cookie *));
-			if (tmp->crch != 0xCCCCCCCC)	//ǰЧ��λ�����⣬�ܿ���Խ�������ָ��
+			if (tmp->crch != 0xCCCCCCCC)
 			{
 				if (IsBadReadPtr(p->file, 4) == 0)
 					_vfxTraceA("%s(%Id) : Verify pointer(0x%p) failed!!! Alloc ID : %Id\n"
@@ -280,7 +280,7 @@ public:
 					_vfxTraceA("Unkown position : Verify pointer(0x%p) failed!!! Alloc ID : %Id\n"
 						, p->data, p->id);
 			}
-			if (*(DWORD*)(tmp->obj + orisize) != 0xCCCCCCCC)//��Ч��λ�����⣬�ܿ���Խ�������ָ��
+			if (*(DWORD*)(tmp->obj + orisize) != 0xCCCCCCCC)
 			{
 				if (IsBadReadPtr(p->file, 4) == 0)
 					_vfxTraceA("%s(%Id) : Verify pointer(0x%p) failed! Alloc ID : %Id\n"

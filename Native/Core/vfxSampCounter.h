@@ -218,16 +218,15 @@ public:
 			pSamp->mMaxTimeInCounter = pSamp->mTimeInCurFrame;
 	}
 
-	 void Update();
+	void Update();
 
 	void ClearSamps()
 	{
 		m_Samps.clear();
 	}		
 
-	///�Ҳ������½�Samp
-	 SampResult* FindSamp( LPCSTR name );
-	 SampResult* PureFindSamp(LPCSTR name);
+	SampResult* FindSamp( LPCSTR name );
+	SampResult* PureFindSamp(LPCSTR name);
 };
 
 class v3dAutoSampEx
