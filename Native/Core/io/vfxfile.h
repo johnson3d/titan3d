@@ -3,7 +3,7 @@
 // VictoryCore Code
 // class VFile
 //
-// Author : lanzhengpeng(������)
+// Author : johnson&lzp
 // More author :
 // Create time : 2002-6-13
 // Modify time :

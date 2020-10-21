@@ -3,7 +3,7 @@
 // VictoryCore Code
 // class VMemFile
 //
-// Author : lanzhengpeng(À¼Õ÷Åô)
+// Author : johnson & lzp
 // Modifer :	
 // Create Timer :	2002-6-27  8:59
 // Modify Timer :	2002-12-19  9:34

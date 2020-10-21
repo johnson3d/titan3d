@@ -190,11 +190,11 @@ void vBitset::leftShift(vBitset::size_type num)
 		block_type* pTmp = m_pBits + m_size - 1;
 		for (; pTmp > m_pBits; --pTmp)
 		{
-			*pTmp = (*pTmp << bitNum) | (*(pTmp - 1) >> (BLOCK_BITS - bitNum));	//*pTmp�ĵ�λ����(*(pTmp-1))�ĸ�λ
+			*pTmp = (*pTmp << bitNum) | (*(pTmp - 1) >> (BLOCK_BITS - bitNum));
 		}
 		*pTmp <<= bitNum;
 	}
-	m_pBits[m_size - 1] &= m_mask;		// ���������λ��Ԫ������λ��0
+	m_pBits[m_size - 1] &= m_mask;
 }
 void vBitset::rightShift(vBitset::size_type num)
 {

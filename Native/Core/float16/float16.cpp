@@ -77,7 +77,7 @@ float float16::overflow ()
 
 	for (int i = 0; i < 10; i++)	
 		f *= f;				// this will overflow before
-	// the for­loop terminates
+	// the for loop terminates
 	return f;
 }
 
