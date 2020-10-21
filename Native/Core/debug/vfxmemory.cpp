@@ -144,7 +144,6 @@ namespace VFX_Memory
 		free_list->line = line;
 		free_list->size = size;
 		free_list->id = g_alloc_times++;
-		//ǰУ��
 		//free_list->dccc = c_uMalloc0xCC;
 		/*if (free_list->id == 263246)
 		{
@@ -164,7 +163,6 @@ namespace VFX_Memory
 
 		freePoint.freePoint = free_list->next;
 		
-		//��У��
 		//*(size_t *)((INT_PTR)ret + size) = c_uMalloc0xCC;
 		auto pTailDCCC = (size_t *)((INT_PTR)ret + size);
 		for (int i = 0; i < DCCCNUM; i++)
