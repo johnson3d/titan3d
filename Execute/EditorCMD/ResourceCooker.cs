@@ -74,23 +74,37 @@ namespace EditorCMD
             if (copyRInfo)
             {
                 var attr = xnd.Node.FindAttrib("PNG");
-                if (attr == null)
-                    return false;
-                attr.BeginRead();
-                attr.Read(out pngData, (int)attr.Length);
-                attr.EndRead();
-
-                if(copyRInfo)
+                if (attr != null)
                 {
-                    var sattr = xnd.Node.AddAttrib("PNG");
-                    sattr.BeginWrite();
-                    sattr.Write(pngData, pngData.Length);
-                    sattr.EndWrite();
+                    attr.BeginRead();
+                    attr.Read(out pngData, (int)attr.Length);
+                    attr.EndRead();
+
+                    if (copyRInfo)
+                    {
+                        var sattr = xnd.Node.AddAttrib("PNG");
+                        sattr.BeginWrite();
+                        sattr.Write(pngData, pngData.Length);
+                        sattr.EndWrite();
+                    }
+                }
+                else
+                {
+                    EngineNS.Profiler.Log.WriteLine(EngineNS.Profiler.ELogTag.Warning, "Cook Texture", $"{rn} don't have PNG data");
+
+                    var mipsNode = xnd.Node.FindNode("PngMips");
+                    if (mipsNode != null)
+                    {
+                        var mipAttr = mipsNode.FindAttrib($"Mip_0");
+                        mipAttr.BeginRead();
+                        mipAttr.Read(out pngData, (int)mipAttr.Length);
+                        mipAttr.EndRead();
+                    }
                 }
             }
 
             bool hasCompressData = false;
-            if ((TexCompressFlags & ETexCompressMode.ETC2)!=0 && txDesc.EtcFormat != ETCFormat.UNKNOWN)
+            if (pngData!=null && (TexCompressFlags & ETexCompressMode.ETC2)!=0 && txDesc.EtcFormat != ETCFormat.UNKNOWN)
             {
                 hasCompressData = true;
                 using (var etcBlob = EngineNS.Support.CBlobProxy2.CreateBlobProxy())
