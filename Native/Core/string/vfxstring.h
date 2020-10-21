@@ -3,7 +3,7 @@
 // VictoryCore Code
 // class VString
 //
-// Author : songyijiang(���佮)
+// Author : johnson
 // More author :
 // Create time : 2002-6-13
 // Modify time : 2006-8-15

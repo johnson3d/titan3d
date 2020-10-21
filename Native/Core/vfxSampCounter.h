@@ -99,18 +99,12 @@ struct SampResult
 
 	INT64			mAvgTimePerHit;
 
-	///每隔多少帧统计平均值
 	int				mAvgCounter;
-	///int 当前经过了多少帧
 	int				mCurFrame;
-	///本帧进入统计的次数
 	int				mHitInCurFrame;
-	///平均统计周期内进入次数
 	int				mHitInCounter;
 	int				mMaxHitInCounter;
-	///本帧消耗时间
 	INT64			mTimeInCurFrame;
-	///平均统计周期内消耗时间
 	INT64			mTimeInCounter;
 	INT64			mMaxTimeInCounter;
 };
@@ -231,7 +225,7 @@ public:
 		m_Samps.clear();
 	}		
 
-	///找不到就新建Samp
+	///锟揭诧拷锟斤拷锟斤拷锟铰斤拷Samp
 	 SampResult* FindSamp( LPCSTR name );
 	 SampResult* PureFindSamp(LPCSTR name);
 };

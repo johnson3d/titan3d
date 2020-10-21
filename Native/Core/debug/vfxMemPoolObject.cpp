@@ -174,8 +174,6 @@ namespace VMem
 		VAutoLock(mLocker);
 		if (mCleaning == true)
 		{
-			//��ֹCleaning
-
 			mCleaning = false;
 		}
 		if (mCurChunk == NULL)
@@ -237,7 +235,6 @@ namespace VMem
 		if (mLiveNumber == 0)
 		{
 			VFX_LTRACE(ELTT_Warning, "MemPool [%s] Cleanup that mLiveNumber == 0\r\n", mClassName);
-			//�����������
 			mCleaning = true;
 			Cleanup();
 		}

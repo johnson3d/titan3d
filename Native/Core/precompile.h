@@ -1,6 +1,5 @@
 // precompile.h
 //
-// VictoryCore Ô¤±àÒëÍ·ÎÄ¼ş
 //
 // Author : johnson3d
 // Modifer :	

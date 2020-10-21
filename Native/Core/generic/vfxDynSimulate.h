@@ -12,8 +12,6 @@ namespace DynSimulate
 	struct VInvoker
 	{
 		typedef void ( VDelegateDummy::*FunAdress )();
-		//�˴��ж��������ڵ����⡣����������ü�������ô�ͻ��п����໥ҧס��˭�������ͷŵ�����
-		//�˴�Ҫ���׽������Ҫ����GC���ƣ�Ŀǰ�ٶ�BindObject��������Invoker�������ܲ���ȫ
 		void*		BindObject;
 		FunAdress	Address;
 		VInvoker()

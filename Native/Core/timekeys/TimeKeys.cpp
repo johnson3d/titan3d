@@ -80,7 +80,6 @@ vBOOL TimeKeys::GetTweenTimeParam(INT64 n64Time,UINT & uFrm1,UINT & uFrm2,FLOAT 
 	{
 		uFrm2 = m_uKeyCount-1;
 		uFrm1 = uFrm2-1;
-		// 之前的错误代码:
 		//fSlerp = 0.0f;
 		fSlerp = 1.0f;
 	}

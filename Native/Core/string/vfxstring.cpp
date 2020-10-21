@@ -3,7 +3,7 @@
 // VictoryCore Code
 // class VString
 //
-// Author : johnson(���佮)
+// Author : johnson
 // More author :
 // Create time : 2002-6-13
 // Modify time : 2006-8-15
@@ -350,7 +350,6 @@ VStringA VStringA_Utf82Gbk(LPCSTR utf8)
 ////{
 ////	DWORD iTextLen = (int)wcslen(str) * sizeof(wchar_t) + 1;
 ////
-////	// ��������ռ�����ַ���ȣ�*2�Է�ֹλ������
 ////	char* pElementText = new char[iTextLen];
 ////	memset( ( void* )pElementText, 0, sizeof( char ) * ( iTextLen ) );
 ////

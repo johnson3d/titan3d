@@ -1,7 +1,6 @@
 // vfxcritical.h
 // 
 // VictoryCore Code
-// �̰߳�ȫ
 //
 // Author : johnson
 // More author :

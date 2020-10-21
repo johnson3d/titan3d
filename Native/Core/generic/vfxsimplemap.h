@@ -165,7 +165,6 @@ public:
 	}
 
 public:
-	//��STL
 	//Returns an iterator addressing the first element in the map. 
 	iterator begin()
 		{	return m_pArray;}
@@ -403,7 +402,6 @@ public:
 
 #pragma warning(default : 4291)
 
-	//����VSimpleMap
 //	VSimpleMap<VString,int>		__map;
 //	__map.Add(VString(vT("300")),300);
 //	__map.Add(VString(vT("200")),200);
@@ -419,7 +417,6 @@ public:
 //		std::cout << (const char *)_iter->first << " " << _iter->second << std::endl; 
 
 //
-//	//����VSimpleMap
 //	VSimpleMap<int,int>	_map;
 //	_map.Add(1,100);
 //	_map.Add(2,200);

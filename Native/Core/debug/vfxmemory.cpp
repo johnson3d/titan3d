@@ -7,11 +7,6 @@
 // More author :
 // Create time : 2002-6-13
 // Modify time :
-// �ڴ�����������һ��ȫ�ֱ�������ȫ�ֱ���������ʱ��CRT�����Ѿ���(����)����
-// ���������������в���ʹ��CRT����غ����������������Ҫ�����ڴ���Ϣ����
-// Ҫʹ�õ�C���п��_vsnprintf������
-// ��Э�������������������ﲻ���κ��£�����DLL_PROCESS_DETACHʱ�����ڴ���Ϣ��
-// ��ʵ�ϵ��ڴ����ʹ��󱨸�����໥����Ҳ�������⣬�ʴ������Ҳ��Ҫ����д
 //-----------------------------------------------------------------------------
 
 #include "vfxmemory.h"
@@ -203,7 +198,7 @@ namespace VFX_Memory
 		}
 
 		//size_t * pdccc = reinterpret_cast<size_t*>((INT_PTR)memory + size);
-		//if(*pdccc != c_uMalloc0xCC)//��Ч��λ�����⣬�ܿ���Խ�������ָ��
+		//if(*pdccc != c_uMalloc0xCC)
 		size_t * pdccc = reinterpret_cast<size_t*>((INT_PTR)memory + size);
 		if(TestTailDCCC(pdccc)==false)
 		{
@@ -213,7 +208,7 @@ namespace VFX_Memory
 				__MemoryTrace("%s(%d) : Free Verify pointer(0x%p) failed! Alloc ID : %d\n",pcook->file, (int)pcook->line,memory,pcook->id);
 			else
 				__MemoryTrace("Unkown position : Free Verify pointer(0x%p) failed! Alloc ID : %d\n",memory,pcook->id);
-			return;//��д�����ڴ治�ܻ���ʹ����
+			return;
 		}
 		if (GOnMemFreeCallBack)
 		{
@@ -276,7 +271,6 @@ namespace VFX_Memory
 
 			for(size_t i=0; i<__pool_size; ++i)
 			{
-				//ǰЧ��λ�����⣬�ܿ���Խ�������ָ��
 				//if(pcook->dccc != c_uMalloc0xCC && pcook->id != (size_t)-1)
 				if (pcook->TestDCCC(c_uMalloc0xCC)==false && pcook->id != (size_t)-1)
 				{
@@ -288,7 +282,6 @@ namespace VFX_Memory
 									pcook->data,pcook->id);
 				}
 				size_t * pdccc = reinterpret_cast<size_t*>(((INT_PTR)pcook->data) + pcook->size);
-				//��Ч��λ�����⣬�ܿ���Խ�������ָ��
 				//if(*pdccc != c_uMalloc0xCC && pcook->id != (size_t)-1)
 				if(TestTailDCCC(pdccc)==false && pcook->id != (size_t)-1)
 				{
@@ -383,7 +376,7 @@ namespace VFX_Memory
 			__free((void*)pcook->cookie.debuginfo);
 			pcook->cookie.debuginfo = NULL;
 		}
-		if(pcook->dccc != c_uMalloc0xCC || pcook->cookie.TestDCCC(c_uMalloc0xCC)==false)//ǰЧ��λ�����⣬�ܿ���Խ�������ָ��
+		if(pcook->dccc != c_uMalloc0xCC || pcook->cookie.TestDCCC(c_uMalloc0xCC)==false)
 		{
 			if(file)
 				__MemoryTrace(vT("%s(%d) : Free Verify pointer(0x%p) failed!!!\n"),file, (int)line,memory);
@@ -394,7 +387,7 @@ namespace VFX_Memory
 			return ;
 		}
 		size_t * pdccc = reinterpret_cast<size_t *>((INT_PTR)memory + pcook->cookie.size);
-		if(*pdccc != c_uMalloc0xCC)//��Ч��λ�����⣬�ܿ���Խ�������ָ��
+		if(*pdccc != c_uMalloc0xCC)
 		{
 			if(file)
 				__MemoryTrace(vT("%s(%d) : Free Verify pointer(0x%p) failed!\n"),file, (int)line,memory);
@@ -446,7 +439,7 @@ namespace VFX_Memory
 						, p->cookie.data, (int)p->cookie.size, (int)(p->cookie.size + 1023) / 1024, (int)p->cookie.id);
 				}
 			}
-			if(p->dccc != c_uMalloc0xCC||p->cookie.TestDCCC(c_uMalloc0xCC)==false)//ǰЧ��λ�����⣬�ܿ���Խ�������ָ��
+			if(p->dccc != c_uMalloc0xCC||p->cookie.TestDCCC(c_uMalloc0xCC)==false)
 			{
 				if(IsBadReadPtr(p,p->cookie.size) == 0)
 					__MemoryTrace(vT("%s(%d) : Verify pointer(0x%p) failed!!! Alloc ID : %d\n")
@@ -456,7 +449,7 @@ namespace VFX_Memory
 					,p->cookie.data,(int)p->cookie.id);
 			}
 			size_t * pdccc = reinterpret_cast<size_t *>((INT_PTR)p->cookie.data + p->cookie.size);
-			if(*pdccc != c_uMalloc0xCC)//��Ч��λ�����⣬�ܿ���Խ�������ָ��
+			if(*pdccc != c_uMalloc0xCC)
 			{
 				if(IsBadReadPtr(p,p->cookie.size) == 0)
 					__MemoryTrace(vT("%s(%d) : Verify pointer(0x%p) failed! Alloc ID : %d\n")
@@ -475,7 +468,7 @@ namespace VFX_Memory
 		_large_cookie * p = header.next;
 		while(p)
 		{
-			if(p->dccc != c_uMalloc0xCC||p->cookie.TestDCCC(c_uMalloc0xCC)==false)//ǰЧ��λ�����⣬�ܿ���Խ�������ָ��
+			if(p->dccc != c_uMalloc0xCC||p->cookie.TestDCCC(c_uMalloc0xCC)==false)
 			{
 				if(IsBadReadPtr(p,p->cookie.size) == 0)
 					__MemoryTrace(vT("%s(%d) : Check Verify pointer(0x%p) failed!!! Alloc ID : %d\n")
@@ -485,7 +478,7 @@ namespace VFX_Memory
 					,p->cookie.data,(int)p->cookie.id);
 			}
 			size_t * pdccc = reinterpret_cast<size_t *>((INT_PTR)p->cookie.data + p->cookie.size);
-			if(*pdccc != c_uMalloc0xCC)//��Ч��λ�����⣬�ܿ���Խ�������ָ��
+			if(*pdccc != c_uMalloc0xCC)
 			{
 				if(IsBadReadPtr(p,p->cookie.size) == 0)
 					__MemoryTrace(vT("%s(%d) : Check Verify pointer(0x%p) failed! Alloc ID : %d\n")

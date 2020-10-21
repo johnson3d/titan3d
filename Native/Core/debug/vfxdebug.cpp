@@ -76,7 +76,6 @@ FMessageBoxString _MessageBoxString =nullptr;
 
 extern const char* GetCurrentThreadName();
 
-//����Ī������ģ������ú�����װ��call��������vfxLevelTrace������õ�ʱ��ͻ��쳣�����Ҳ�������call2������
 void Call_WriteLogString(const char* msg, int level, const char* file, int line)
 {
 	if (_WriteLogString)
@@ -394,7 +393,6 @@ namespace __vfxdebug
 //	int nBuf = ::_vsnwprintf(ttmp,1024,lpszFormat,pArgs);
 //	ASSERT(nBuf < sizeof(ttmp));
 //
-//	//VC�Կ��ַ��ĵ�����Ϣ֧�ֲ��� :-(
 //	WideCharToMultiByte( CP_ACP, 0, ttmp, -1, Tmp, 1024, NULL, NULL );
 //#if	 defined(VFX_LOGO_FILE) || defined(VFX_MULT_LOGO_FILE)
 //	if(IsDebuggerPresent())

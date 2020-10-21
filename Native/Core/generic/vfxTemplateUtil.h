@@ -34,7 +34,6 @@ namespace tpl_utility
 		const static bool Result = true;
 	};
 
-	//�ж������Ƿ���const����
 	template< class type >
 	struct IsConst
 	{
@@ -64,7 +63,6 @@ namespace tpl_utility
 		};
 	};
 
-	//�ж������Ƿ�Ϊ����
 	template< class type >
 	struct IsRefer
 	{
@@ -87,7 +85,6 @@ namespace tpl_utility
 		};
 	};
 
-	//��ȡԭʼ����
 	template< typename type >
 	struct TypeTraits
 	{

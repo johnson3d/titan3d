@@ -1,9 +1,8 @@
 // vfxarray.h
 // 
 // VictoryCore Code
-// ��̬����
 //
-// Author : johnson,lanzhengpeng(������)
+// Author : johnson
 // More author :
 // Create time : 2003-2-5   11:09
 // Modify time :

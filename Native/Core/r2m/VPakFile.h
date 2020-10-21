@@ -16,7 +16,7 @@ struct VPakAssetDesc
 	}
 	UINT64			Offset;
 	UINT			Size;
-	UINT			SizeInPak;//Ϊ���ѹ����Ԥ��
+	UINT			SizeInPak;
 	UINT			Flags;
 	std::string		FullPath;
 };
@@ -80,7 +80,6 @@ public:
 		return mSortedAssets[index].FullPath.c_str();
 	}
 
-	//Ҫ��address��MoutPoint���Ǳ�׼���ַ�֮���·��
 	vBOOL GetFullName(const char* address, std::string& outFullName);
 	vBOOL IsAssetExisting(const char* name) const;
 	vBOOL GetAssetDesc(const char* name, VPakAssetDesc* outDesc) const;

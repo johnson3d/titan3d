@@ -1,6 +1,6 @@
 // VFile2Memory.cpp
 //
-// Author : lanzhengpeng,johnson
+// Author : johnson,lanzhengpeng
 // Modifer :	
 // Create Timer :	 2004-10-24 4:23
 // Modify Timer :	
@@ -44,7 +44,7 @@ VResPtr VFile2Memory::Ptr(UINT_PTR offset , UINT_PTR size)
     {
         VFX_LTRACE(ELTT_Error,"%s(%d):F2M(%s) Ptr Refcount is not zero\r\n", __FILE__, __LINE__, mName.c_str());
     }
-	ASSERT(mPtrRef == 0);//�����Ժ���Կ�����һ��mCachedBuffer�б���Ͳ���һ�� Ptr��Free��Ӧ��
+	ASSERT(mPtrRef == 0);
 	
 	++mPtrRef;
 	
@@ -113,7 +113,6 @@ void VFile2Memory::TryReleaseHolder()
 	else
 	{
 		//assert(false);
-		//������ʵ���п��ܷ����ģ� ��Ptr-Free���������ǲŻ����TryReleaseHolder���������ʱ���������һ���̣߳��Ѿ�������Ptr�ˣ���ʵ����û����
 		VFX_LTRACE(ELTT_Resource, "This isn't an error!TryReleaseHolder %s Ref!=0\r\n", mName.c_str());
 	}
 }

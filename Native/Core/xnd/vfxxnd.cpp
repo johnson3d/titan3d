@@ -227,7 +227,6 @@ void XNDAttrib::BeginWrite()
 
 void XNDAttrib::EndWrite()
 {
-	//���ܹر�Stream����Ϊ���Ĵ�����Ҫʹ��Stream������
 	//Stream.Close();
 	mWriting = FALSE;
 }
@@ -1051,7 +1050,6 @@ vBOOL XNDNode::Merge(XNDNode* target , XNDNode* n0 , XNDNode* n1 )
 			XNDAttrib* pAttr = target->GetAttrib(n1->m_Attribs[i]->GetName().c_str());
 			if(pAttr!=NULL)
 			{
-				//������ʱ�ֱ������n0����n1���Ժ�Ӧ����n0��n1��merge
 				continue;
 			}
 			pAttr =  target->AddAttrib(n1->m_Attribs[i]->GetName().c_str());
@@ -1309,7 +1307,7 @@ extern "C"
 			if(attrib->Resource)
 				file = attrib->Resource->Name();
 			VFX_LTRACE(ELTT_Error, "XND(%s)->Attrib(%s): ReadStringW Error!length=%d/%d\r\n", file, attrib->GetName().c_str(), length, (UINT)(attrib->GetLength() - attrib->GetPosition()));
-			return NULL;//������ѽ
+			return NULL;
 		}
 		CHAR* str = new CHAR[length+1];
 		if (length > 0)

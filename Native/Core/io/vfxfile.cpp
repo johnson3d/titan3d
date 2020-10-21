@@ -1,8 +1,6 @@
 // VFile.cpp
 //
-// LZP_Graph
 //
-// �ļ�����
 //
 // Author		: johnson
 // Create Date	: 2000-?-??

@@ -1,5 +1,5 @@
 // ***************************************************************
-//  vfxReflectBase   version:  1.0   ·  date: 04/02/2008
+//  vfxReflectBase   version:  1.0   锟斤拷  date: 04/02/2008
 //  -------------------------------------------------------------
 //  johnson
 //  -------------------------------------------------------------
@@ -291,8 +291,6 @@ namespace Reflection
 				return false;				
 		}
 
-		//可以根据ClassType的类型得到是否ReflectObject，如果是可以启动运行时信息
-		//如果不是至少可以通过IsPointer检查是否是一个指针
 		template<class type>
 		type& GetMember(void* pHostObj , int i) const{
 			return (reinterpret_cast<type*>(reinterpret_cast<UINT_PTR>(pHostObj) + Members[i].Offset))[0];

@@ -1,6 +1,5 @@
 // file_2_memory.h
 //
-// �����ļ����ٵ��ڴ��ʵ��
 //
 // Author : johnson
 // Modifier :	
@@ -19,11 +18,6 @@
 
 NS_BEGIN
 
-/*!	���ļ�ӳ�����Դ���ݷ�����
-*	\author lanzhengpeng, johnson
-*	��ͼ�������ļ������Ҹ�����Դ�����ݣ��������Ҹ����١�
-*	ʵ�֣�ʹ�����ڴ��ļ�ӳ�䡣
-*/
 const vIID vIID_VFile2Memory = 0x149386ee4ccfeb6a;
 class VFile2Memory : public VRes2Memory
 {

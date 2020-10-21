@@ -1,7 +1,6 @@
 // vfxhelper.h
 // 
 // VictoryCore Code
-// ¸¨Öúº¯Êý¿â
 //
 // Author : johnson3d
 // More author :
@@ -19,9 +18,7 @@
 	inline vBOOL _vfxIsDirSep(TCHAR ch){	
 		return (ch == vT('\\') || ch == vT('/')); 
 	}
-
-	//Â·¾¶
-	
+		
 	// index of the most significant bit in the mask
 	inline int HighestBit(UINT32 mask)
 	{

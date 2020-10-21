@@ -2,12 +2,6 @@
 
 #define new VNEW
 
-// 压缩数据
-// in : 输入数据
-// in_length_by_count : 输入数据个数
-// _out : 压缩后的输出数据.
-// ret : 返回压缩的数据长度(Byte)
-// 返回压缩的数据长度
 template <class Type>
 int T_vfxRLE_Ecode(const Type * in, unsigned long in_length_by_count, void * _out)
 {
@@ -72,16 +66,10 @@ int T_vfxRLE_Ecode(const Type * in, unsigned long in_length_by_count, void * _ou
 			*((Type *)out) = *in;
 			out += sizeof(Type);
 		}
-		return (int)(out - (BYTE *)_out);//就算是64bit的指针，应该也不可能压缩超过32bit的数据
+		return (int)(out - (BYTE *)_out);
 	}
 }
 
-// 错误：解压后的数据与原始数据不一致！！！！！
-// 解压一行通道数据
-// _in : 压缩数据
-// in_length_by_bytes : 输入数据长度(Byte)
-// out : 解压缩后的输出数据
-// ret : 返回解压缩的数据个数
 template <class Type>
 int T_vfxRLE_Unecode(const void * _in, int in_length_by_bytes, Type * out)
 {
@@ -133,7 +121,7 @@ int T_vfxRLE_Unecode(const void * _in, int in_length_by_bytes, Type * out)
 				in_length_by_bytes -= 1 + sizeof(Type);
 			}
 		}
-		return (int)(out - backup);//就算是64bit的指针，应该也不可能压缩超过32bit的数据
+		return (int)(out - backup);
 	}
 }
 

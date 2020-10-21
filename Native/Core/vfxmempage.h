@@ -1,10 +1,9 @@
 // vfxmempage.h
 // 
 // VictoryCore Code
-// ÄÚ´æ³Ø
 //
-// Author : 
-// More author : lanzhengpeng(À¼Õ÷Åô)
+// Author : johnson
+// More author : 
 // Create time : 2002-10-11   15:07
 // Modify time :
 //-----------------------------------------------------------------------------
@@ -272,7 +271,7 @@ public:
 #if defined(VFX_DEBUG_MEMORY)
 			_small_cookie * p = reinterpret_cast<_small_cookie*>
 				((INT_PTR)tmp->chunk - sizeof(_small_cookie) + sizeof(_small_cookie *));
-			if (tmp->crch != 0xCCCCCCCC)	//Ç°Ğ§ÑéÎ»ÓĞÎÊÌâ£¬ºÜ¿ÉÄÜÔ½½ç»ò´íÎóµÄÖ¸Õë
+			if (tmp->crch != 0xCCCCCCCC)	//Ç°Ğ§ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½â£¬ï¿½Ü¿ï¿½ï¿½ï¿½Ô½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
 			{
 				if (IsBadReadPtr(p->file, 4) == 0)
 					_vfxTraceA("%s(%Id) : Verify pointer(0x%p) failed!!! Alloc ID : %Id\n"
@@ -281,7 +280,7 @@ public:
 					_vfxTraceA("Unkown position : Verify pointer(0x%p) failed!!! Alloc ID : %Id\n"
 						, p->data, p->id);
 			}
-			if (*(DWORD*)(tmp->obj + orisize) != 0xCCCCCCCC)//ºóĞ§ÑéÎ»ÓĞÎÊÌâ£¬ºÜ¿ÉÄÜÔ½½ç»ò´íÎóµÄÖ¸Õë
+			if (*(DWORD*)(tmp->obj + orisize) != 0xCCCCCCCC)//ï¿½ï¿½Ğ§ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½â£¬ï¿½Ü¿ï¿½ï¿½ï¿½Ô½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
 			{
 				if (IsBadReadPtr(p->file, 4) == 0)
 					_vfxTraceA("%s(%Id) : Verify pointer(0x%p) failed! Alloc ID : %Id\n"
@@ -324,7 +323,6 @@ private:
 #endif
 };
 
-//×¢Òâ£¬Õâ¸öÀàµÄÅÉÉúÀà²»ÄÜ±»ÔÙ´ÎÅÉÉú¡£·ñÔò£¬new ºÍ delete ½«±»»ìÂÒ
 template<class T, UINT PS = 128>
 class VMemPageBase
 {

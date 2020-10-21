@@ -1,7 +1,5 @@
 // precompile.cpp
 //
-// VictoryCore Ô¤±àÒëÎÄ¼ş
-//
 // Author : johnson
 // Modifer :	
 // Create Timer :	 2006-8-7 10:00

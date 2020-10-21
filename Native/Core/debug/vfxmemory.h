@@ -4,9 +4,6 @@
 // memory allocer
 //
 // NOTICE:
-//		我希望vfxmemory.h vfxmemory.cpp是非常独立的两个文件
-// 这两个文件的更改不要影响其他代码，也不依赖别的代码
-// 这也是有内存分配的机制决定的
 // 
 // Author : johnson
 // More author :

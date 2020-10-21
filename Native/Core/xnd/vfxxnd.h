@@ -68,11 +68,6 @@ public:
 	XNDNode* NewNode(XNDNode* pParent);
 };
 
-/*!	XNDÊôĞÔ·ÃÎÊÆ÷£º
-*	\param
-*		¸ºÔğÕæÕı´ÓStreamÖĞ¶ÁÈ¡ĞÅÏ¢£¬»òÕßÏòStreamÖĞĞ´ÈëĞÅÏ¢¡£
-*		ÓÉXND½ÚµãÎ¬»¤£¬ÓÃ»§Ó¦µ÷ÓÃ¶ÔÓ¦½ÚµãµÄAddAttribÀ´´´½¨ÊôĞÔ·ÃÎÊÆ÷¡£
-*/
 const vIID vIID_XNDAttrib = 0x838484794c918324;
 class XNDAttrib : public EngineNS::VIUnknown
 {
@@ -81,7 +76,7 @@ class XNDAttrib : public EngineNS::VIUnknown
 protected:
 	XNDData*		Manager;
 	VStringA		Name;
-	VStringA	    Key;	// ¹Ø¼ü×Ö
+	VStringA	    Key;	
 	UINT_PTR		Offset;
 	UINT_PTR		Length;
 	VMemFile		Stream;
@@ -207,10 +202,10 @@ public:
 };
 
 
-/*!	XND½Úµã£º
+/*!	XNDï¿½Úµã£º
 *	\param
-*		¸ºÔğÕæÕı´ÓStreamÖĞ¶ÁÈ¡ĞÅÏ¢£¬»òÕßÏòStreamÖĞĞ´ÈëĞÅÏ¢¡£
-*		ÓÉXND½ÚµãÎ¬»¤£¬ÓÃ»§Ó¦µ÷ÓÃ¶ÔÓ¦½ÚµãµÄAddAttribÀ´´´½¨ÊôĞÔ·ÃÎÊÆ÷¡£
+*		ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Streamï¿½Ğ¶ï¿½È¡ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Streamï¿½ï¿½Ğ´ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½
+*		ï¿½ï¿½XNDï¿½Úµï¿½Î¬ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½Ó¦ï¿½ï¿½ï¿½Ã¶ï¿½Ó¦ï¿½Úµï¿½ï¿½AddAttribï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 */
 const vIID vIID_XNDNode = 0xedf68bbc4c91830d;
 class XNDNode : public EngineNS::VIUnknown
@@ -245,11 +240,11 @@ public:
 	VRes2Memory*	Resource;
 protected:
 	friend XNDData;
-	/*!	×¢Òâ£¬Õâ¸ö·½·¨Ó¦¸Ã×¨ÓÃÓÚ¿ØÖÆXNDÊ÷¸ù£¬Ê÷Ò¶²»Ó¦Ê¹ÓÃÕâ¸ö·½·¨
+	/*!	×¢ï¿½â£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½×¨ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½XNDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò¶ï¿½ï¿½Ó¦Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	*/
 	 XNDNode(XNDData* manager);
-	/*!	×¢Òâ£¬Õâ¸ö·½·¨Ó¦¸Ã×¨ÓÃÓÚ¿ØÖÆXNDÊ÷Ò¶£¬Ê÷¸ù²»Ó¦Ê¹ÓÃ´Ë·½·¨¡£
-	*	ÌØÊâĞÔ£º¾­´Ë³õÊ¼»¯µÄ¶ÔÏóµÄAddRefºÍReleaseÊµ¼ÊÉÏÊÇ¶Ô¸ùµÄAddRefºÍRelease¡£
+	/*!	×¢ï¿½â£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½×¨ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½XNDï¿½ï¿½Ò¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦Ê¹ï¿½Ã´Ë·ï¿½ï¿½ï¿½ï¿½ï¿½
+	*	ï¿½ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ï¿½ï¿½ï¿½Ë³ï¿½Ê¼ï¿½ï¿½ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½AddRefï¿½ï¿½ReleaseÊµï¿½ï¿½ï¿½ï¿½ï¿½Ç¶Ô¸ï¿½ï¿½ï¿½AddRefï¿½ï¿½Releaseï¿½ï¿½
 	*/
 	 XNDNode(XNDData* manager, XNDNode* pParent);
 public:
@@ -320,9 +315,7 @@ public:
 	 XNDAttrib* AddAttrib(const XNDAttrib* childAttrib);
 	 vBOOL DelAttrib( LPCSTR szName );
 	
-	//Èç¹ûÕÒ²»µ½Attrib£¬¾Í´´½¨Ò»¸ö
 	 XNDAttrib* GetAttribForce( LPCSTR szName );
-	//²éÕÒµ½Ö¸¶¨Attrib
 	 XNDAttrib* GetAttrib( LPCSTR szName );
 	 XNDNode* GetChild( LPCSTR szName );
 
@@ -342,7 +335,6 @@ public:
 	 vBOOL Save( VFile_Base& io );
 	 vBOOL Load( VRes2Memory* pRes );
 
-	//n0ÓÀÔ¶¸²¸Çn1
 	 static vBOOL Merge(XNDNode* target , XNDNode* n0 , XNDNode* n1 );
 protected:
 	 vBOOL SaveHead(VFile_Base& io);

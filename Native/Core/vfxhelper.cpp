@@ -1,7 +1,6 @@
 // vfxhelper.cpp
 // 
 // VictoryCore Code
-// 辅助函数库
 //
 // Author : johnson3d
 // More author :
@@ -46,7 +45,7 @@ extern "C"
 	//	::QueryPerformanceCounter((LARGE_INTEGER *)&(*tick));
 	//}
 	 INT64 HighPrecision_GetTickCount()
-	{//千分之一毫秒
+	{
 #if defined(PLATFORM_WIN)
 		static INT64 freq = 0;
 		if(freq==0)
