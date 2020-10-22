@@ -172,6 +172,10 @@ struct RttiMetaInfo
 		}
 		MetaInfos.push_back(info);
 	}
+	virtual ~RttiMetaInfo()
+	{
+
+	}
 };
 
 struct RttiEnum : public RttiMetaInfo
@@ -542,10 +546,7 @@ struct VConstructor0 : public RttiConstructor
 template<typename Klass, typename T0>
 struct VConstructor1 : public RttiConstructor
 {
-	VConstructor1()
-	{
-		mArguments.push_back(&AuxRttiStruct<T0>::Instance);
-	}
+	VConstructor1();
 	virtual void* CreateInstance(ArgumentStream& args) const
 	{	
 		args.mReadPosition = 0;
@@ -557,11 +558,7 @@ struct VConstructor1 : public RttiConstructor
 template<typename Klass, typename T0, typename T1>
 struct VConstructor2 : public RttiConstructor
 {
-	VConstructor2()
-	{
-		mArguments.push_back(&AuxRttiStruct<T0>::Instance);
-		mArguments.push_back(&AuxRttiStruct<T1>::Instance);
-	}
+	VConstructor2();
 	virtual void* CreateInstance(ArgumentStream& args) const
 	{
 		Method_Arg_Def(0);
@@ -588,38 +585,9 @@ struct RttiStruct : public RttiMetaInfo
 		bool				IsPointer;
 
 		template<typename T>
-		void SetValue(void* pThis, const T* v) const
-		{
-			if (AuxRttiStruct<T>::Instance.IsA(MemberType) == false)
-			{
-				return;
-			}
-			if (IsPointer)
-			{
-				memcpy((BYTE*)pThis + Offset, &v, sizeof(const T*));
-			}
-			else
-			{
-				MemberType->AssignOperator((BYTE*)pThis + Offset, v);
-			}
-		}
+		inline void SetValue(void* pThis, const T* v) const;
 		template<typename T>
-		T* GetValueAddress(void* pThis) const
-		{
-			if (AuxRttiStruct<T>::Instance.IsA(MemberType) == false)
-				return nullptr;
-			BYTE* pAddress = (BYTE*)pThis + Offset;
-			if (IsPointer)
-			{
-				T* result = nullptr;
-				memcpy(result, pAddress, sizeof(void*));
-				return result;
-			}
-			else
-			{
-				return (T*)(pAddress);
-			}
-		}
+		inline T* GetValueAddress(void* pThis) const;
 	};
 	std::vector<MemberDesc>			Members;
 	std::vector<RttiMethodBase*>	Methods;
@@ -630,7 +598,7 @@ struct RttiStruct : public RttiMetaInfo
 		EnumDesc = nullptr;
 		ParentStructType = nullptr;
 	}
-	~RttiStruct()
+	virtual ~RttiStruct()
 	{
 		Cleanup();
 	}
@@ -736,7 +704,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass>
 	RttiMethodBase* PushMethod0(typename VMethod0<Result, Klass>::MethodFun fun, const char* name)
 	{
-		auto desc = new(__FILE__, __LINE__) VMethod1<Result, Klass>(fun, name);
+		auto desc = new(__FILE__, __LINE__) VMethod0<Result, Klass>(fun, name);
 		
 		Methods.push_back(desc);
 		return desc;
@@ -1116,11 +1084,61 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 		}
 
 #define StructEnd(ParentType) \
+		__current_member = nullptr;\
+		__current_method = nullptr; \
+		__current_constructor = nullptr;\
 		ParentStructType = &AuxRttiStruct<ParentType>::Instance;;\
 		RttiStruct::Init();\
 	}\
 };
 #define StructImpl(Type) AuxRttiStruct<Type> AuxRttiStruct<Type>::Instance;
+
+template<typename T>
+void RttiStruct::MemberDesc::SetValue(void* pThis, const T* v) const
+{
+	if (AuxRttiStruct<T>::Instance.IsA(MemberType) == false)
+	{
+		return;
+	}
+	if (IsPointer)
+	{
+		memcpy((BYTE*)pThis + Offset, &v, sizeof(const T*));
+	}
+	else
+	{
+		MemberType->AssignOperator((BYTE*)pThis + Offset, v);
+	}
+}
+template<typename T>
+T* RttiStruct::MemberDesc::GetValueAddress(void* pThis) const
+{
+	if (AuxRttiStruct<T>::Instance.IsA(MemberType) == false)
+		return nullptr;
+	BYTE* pAddress = (BYTE*)pThis + Offset;
+	if (IsPointer)
+	{
+		T* result = nullptr;
+		memcpy(result, pAddress, sizeof(void*));
+		return result;
+	}
+	else
+	{
+		return (T*)(pAddress);
+	}
+}
+
+template<typename Klass, typename T0>
+VConstructor1<Klass, T0>::VConstructor1()
+{
+	mArguments.push_back(&AuxRttiStruct<T0>::Instance);
+}
+
+template<typename Klass, typename T0, typename T1>
+VConstructor2<Klass, T0, T1>::VConstructor2()
+{
+	mArguments.push_back(&AuxRttiStruct<T0>::Instance);
+	mArguments.push_back(&AuxRttiStruct<T1>::Instance);
+}
 
 template<typename Result, typename Klass>
 VMethod0<Result, Klass>::VMethod0(MethodFun fun, const char* name)
@@ -1134,7 +1152,6 @@ VMethod0<Result, Klass>::VMethod0(MethodFun fun, const char* name)
 template<typename Result, typename Klass, typename T0>
 VMethod1<Result, Klass, T0>::VMethod1(MethodFun fun, const char* name, const char* a0)
 {
-	//static_assert(std::is_same<Result, decltype(fun)>::value);
 	FuncPtr = fun;
 	Name = name;
 	ResultType = &AuxRttiStruct<Result>::Instance;
@@ -1146,7 +1163,6 @@ VMethod1<Result, Klass, T0>::VMethod1(MethodFun fun, const char* name, const cha
 template<typename Result, typename Klass, typename T0, typename T1>
 VMethod2<Result, Klass, T0, T1>::VMethod2(MethodFun fun, const char* name, const char* a0, const char* a1)
 {
-	//static_assert(std::is_same<Result, decltype(fun)>::value);
 	FuncPtr = fun;
 	Name = name;
 	ResultType = &AuxRttiStruct<Result>::Instance;
@@ -1159,7 +1175,6 @@ VMethod2<Result, Klass, T0, T1>::VMethod2(MethodFun fun, const char* name, const
 template<typename Result, typename Klass, typename T0, typename T1, typename T2>
 VMethod3<Result, Klass, T0, T1, T2>::VMethod3(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2)
 {
-	//static_assert(std::is_same<Result, decltype(fun)>::value);
 	FuncPtr = fun;
 	Name = name;
 	ResultType = &AuxRttiStruct<Result>::Instance;
@@ -1173,7 +1188,6 @@ VMethod3<Result, Klass, T0, T1, T2>::VMethod3(MethodFun fun, const char* name, c
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3>
 VMethod4<Result, Klass, T0, T1, T2, T3>::VMethod4(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3)
 {
-	//static_assert(std::is_same<Result, decltype(fun)>::value);
 	FuncPtr = fun;
 	Name = name;
 	ResultType = &AuxRttiStruct<Result>::Instance;

@@ -218,6 +218,7 @@ int FTestFuncTraits(int, int)
 void TestReflection()
 {
 	auto rtti = RttiStructManager::GetInstance()->FindStruct("Titan3D::Test_ConstantVarDesc");
+	rtti->HasMeta("abc");
 	auto method = rtti->FindMethod("SetDirty");
 	ArgumentStream args;
 	args << std::string("true");
@@ -225,12 +226,14 @@ void TestReflection()
 	result.Reset();
 
 	auto constructor = rtti->FindConstructor(std::vector<RttiStruct*>());
-	Test_ConstantVarDesc* tmp = (Test_ConstantVarDesc*)constructor->CreateInstance(ArgumentStream());
+	ArgumentStream createArgs;
+	Test_ConstantVarDesc* tmp = (Test_ConstantVarDesc*)constructor->CreateInstance(createArgs);
 	method->Invoke(tmp, args, result);
 
 	const RttiStruct::MemberDesc* pMemberName = rtti->FindMember("Name");
 	std::string tt = *pMemberName->GetValueAddress<std::string>(tmp);
-	pMemberName->SetValue(tmp, &std::string("bbb"));
+	std::string strTemp("bbb");
+	pMemberName->SetValue(tmp, &strTemp);
 
 	rtti->FindMember("TestString")->SetValue(tmp, (std::string*)nullptr);
 

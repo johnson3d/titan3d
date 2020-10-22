@@ -19,7 +19,7 @@
 #include <unistd.h>
 #endif
 
-#ifndef WIN
+#ifndef PLATFORM_WIN
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc++11-extensions"
 #pragma clang diagnostic ignored "-Wc++11-long-long"
@@ -42,7 +42,6 @@ typedef const CHAR *			LPCSTR;
 typedef const wchar_t *			LPCWSTR;
 typedef const TCHAR *			LPCTSTR;
 
-// 有符号数据类型
 typedef short					SHORT;
 typedef int						INT;
 typedef int						LONG;
@@ -52,7 +51,6 @@ typedef int						INT32;
 
 typedef long long				INT64;
 
-// 无符号数据类型
 typedef unsigned short			USHORT;
 typedef unsigned int			UINT;
 typedef unsigned long			ULONG;
@@ -78,7 +76,6 @@ typedef struct {
 	UINT64 b;
 }								uint128;
 
-// 浮点数据类型
 typedef float					FLOAT;
 typedef double					DOUBLE;
 typedef long double				LDOUBLE;
@@ -322,7 +319,7 @@ struct RECT
 #	define Sleep(millisecond) usleep(millisecond * 1000)
 #endif
 
-#ifndef WIN
+#ifndef PLATFORM_WIN
 #pragma clang diagnostic pop
 #endif
 
