@@ -263,22 +263,24 @@ VRes2Memory* F2MManager::GetF2M(LPCSTR file)
 	auto it = mF2Mems.find(file);
 	if (it == mF2Mems.end())
 	{
-		VRes2Memory* f2m = nullptr;
-		for (auto p : mMountPaks)
+		//1.read from OS file system 
+		//2.read from apk on android platform
+		//3.read from mounted tpak
+		VRes2Memory* f2m = _F2M(file, FALSE);
+		if (f2m == nullptr)
 		{
-			std::string fullName;
-			if (p->GetFullName(file, fullName))
+			for (auto p : mMountPaks)
 			{
-				f2m = p->CreateF2M(fullName.c_str());
-				break;
+				std::string fullName;
+				if (p->GetFullName(file, fullName))
+				{
+					f2m = p->CreateF2M(fullName.c_str());
+					break;
+				}
 			}
 		}
 		if (f2m == nullptr)
-		{
-			f2m = _F2M(file, FALSE);
-		}
-		if (f2m == NULL)
-			return NULL;
+			return nullptr;
 		f2m->AddRef();
 
 		VAutoLock(mLocker);

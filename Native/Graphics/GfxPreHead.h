@@ -35,14 +35,6 @@ inline v3dMatrix4_t VGetTypeDefault<v3dMatrix4_t>()
 const std::vector<LayoutElement>& GetEngineVertexLayout();
 int GetEngineVertexBufferStride(EVertexSteamType stream);
 
-enum ECBufferType
-{
-	CBFT_PerInstance,//每个对象每一次渲染改变数据
-	CBFT_PerViewport,//视口公用数据
-	CBFT_PerCamera,//每个视口的摄像机改变数据
-	CBFT_PerFrame,//每一帧改变一次的数据
-};
-
 struct GfxVar
 {
 	EShaderVarType	Type;
