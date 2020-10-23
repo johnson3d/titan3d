@@ -299,6 +299,11 @@ inline Type VGetTypeDefault()
 	return (Type)(0);
 }
 
+inline void VGetTypeDefault()
+{
+
+}
+
 class VDefferedDeleteManager
 {
 	std::queue<VIUnknown*>		ObjectPool;

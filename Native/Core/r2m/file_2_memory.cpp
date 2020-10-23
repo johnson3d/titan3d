@@ -215,12 +215,12 @@ using namespace EngineNS;
 
 extern "C"
 {
-	 CSharpReturnAPI2(VResPtr, , VRes2Memory, Ptr, UINT_PTR, UINT_PTR);
-	 CSharpReturnAPI0(vBOOL, , VRes2Memory, Free);
-	 CSharpReturnAPI0(UINT_PTR, , VRes2Memory, Length);
-	 CSharpReturnAPI0(LPCSTR, , VRes2Memory, Name);
+	Cpp2CS2(EngineNS, VRes2Memory, Ptr);
+	Cpp2CS0(EngineNS, VRes2Memory, Free);
+	Cpp2CS0(EngineNS, VRes2Memory, Length);
+	Cpp2CS0(EngineNS, VRes2Memory, Name);
 
-	 CSharpAPI0(, VRes2Memory, TryReleaseHolder);
+	Cpp2CS0(EngineNS, VRes2Memory, TryReleaseHolder);
 };
 
 #if !defined(PLATFORM_WIN)

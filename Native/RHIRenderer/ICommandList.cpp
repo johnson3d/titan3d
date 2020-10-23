@@ -118,37 +118,36 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(const char*, EngineNS, ICommandList, GetDebugName);
-	CSharpAPI1(EngineNS, ICommandList, SetDebugName, const char*);
-	CSharpAPI0(EngineNS, ICommandList, BeginCommand);
-	CSharpAPI0(EngineNS, ICommandList, EndCommand);
-	CSharpAPI0(EngineNS, ICommandList, ClearMeshDrawPassArray);
-	CSharpReturnAPI0(UINT , EngineNS, ICommandList, GetPassNumber);
-	CSharpReturnAPI0(int, EngineNS, ICommandList, GetDrawCall);
-	CSharpReturnAPI0(int, EngineNS, ICommandList, GetDrawTriangle);
-	CSharpReturnAPI0(UINT, EngineNS, ICommandList, GetCmdCount);
-	CSharpAPI1(EngineNS, ICommandList, SetGraphicsProfiler, GraphicsProfiler*);
-	CSharpAPI1(EngineNS, ICommandList, SetPassBuiltCallBack, FOnPassBuilt);
-	//CSharpAPI1(EngineNS, ICommandList, SetRenderTargets, IFrameBuffers*);
-
+	Cpp2CS0(EngineNS, ICommandList, GetDebugName);
+	Cpp2CS1(EngineNS, ICommandList, SetDebugName);
+	Cpp2CS0(EngineNS, ICommandList, BeginCommand);
+	Cpp2CS0(EngineNS, ICommandList, EndCommand);
+	Cpp2CS0(EngineNS, ICommandList, ClearMeshDrawPassArray);
+	Cpp2CS0(EngineNS, ICommandList, GetPassNumber);
+	Cpp2CS0(EngineNS, ICommandList, GetDrawCall);
+	Cpp2CS0(EngineNS, ICommandList, GetDrawTriangle);
+	Cpp2CS0(EngineNS, ICommandList, GetCmdCount);
+	Cpp2CS1(EngineNS, ICommandList, SetGraphicsProfiler);
+	Cpp2CS1(EngineNS, ICommandList, SetPassBuiltCallBack);
+	
 	//typedef const std::pair<BYTE, DWORD>* ClearColorArg;
 	//CSharpAPI6(EngineNS, ICommandList, ClearMRT, ClearColorArg, int, bool, float, bool, UINT32);
-	CSharpAPI3(EngineNS, ICommandList, Blit2DefaultFrameBuffer, IFrameBuffers*, int, int);
-	CSharpAPI1(EngineNS, ICommandList, PushPass, IPass*);
-	CSharpAPI1(EngineNS, ICommandList, Commit, IRenderContext*);
+	Cpp2CS3(EngineNS, ICommandList, Blit2DefaultFrameBuffer);
+	Cpp2CS1(EngineNS, ICommandList, PushPass);
+	Cpp2CS1(EngineNS, ICommandList, Commit);
 
-	CSharpAPI2(EngineNS, ICommandList, BeginRenderPass, RenderPassDesc*, IFrameBuffers*);
-	CSharpAPI3(EngineNS, ICommandList, BuildRenderPass, vBOOL, int, IPass**);
-	CSharpAPI0(EngineNS, ICommandList, EndRenderPass);
+	Cpp2CS2(EngineNS, ICommandList, BeginRenderPass);
+	Cpp2CS3(EngineNS, ICommandList, BuildRenderPass);
+	Cpp2CS0(EngineNS, ICommandList, EndRenderPass);
 
-	CSharpAPI1(EngineNS, ICommandList, SetComputeShader, IComputeShader*);
-	CSharpAPI2(EngineNS, ICommandList, CSSetShaderResource, UINT32, IShaderResourceView*);
-	CSharpAPI3(EngineNS, ICommandList, CSSetUnorderedAccessView, UINT32, IUnorderedAccessView*, const UINT *);
-	CSharpAPI2(EngineNS, ICommandList, CSSetConstantBuffer, UINT32, IConstantBuffer*);
-	CSharpAPI3(EngineNS, ICommandList, CSDispatch, UINT, UINT, UINT);
-	CSharpReturnAPI3(vBOOL, EngineNS, ICommandList, CreateReadableTexture2D, ITexture2D**, IShaderResourceView*, IFrameBuffers*);
+	Cpp2CS1(EngineNS, ICommandList, SetComputeShader);
+	Cpp2CS2(EngineNS, ICommandList, CSSetShaderResource);
+	Cpp2CS3(EngineNS, ICommandList, CSSetUnorderedAccessView);
+	Cpp2CS2(EngineNS, ICommandList, CSSetConstantBuffer);
+	Cpp2CS3(EngineNS, ICommandList, CSDispatch);
+	Cpp2CS3(EngineNS, ICommandList, CreateReadableTexture2D);
 
-	CSharpAPI1(EngineNS, ICommandList, SetRasterizerState, IRasterizerState*);
-	CSharpAPI1(EngineNS, ICommandList, SetDepthStencilState, IDepthStencilState*);
-	CSharpAPI3(EngineNS, ICommandList, SetBlendState, IBlendState*, float*, UINT);
+	Cpp2CS1(EngineNS, ICommandList, SetRasterizerState);
+	Cpp2CS1(EngineNS, ICommandList, SetDepthStencilState);
+	Cpp2CS3(EngineNS, ICommandList, SetBlendState);
 }

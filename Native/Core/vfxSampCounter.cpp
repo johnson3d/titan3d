@@ -128,18 +128,18 @@ extern "C"
 	{
 		return &v3dSampMgr::Instance;
 	}
-	CSharpReturnAPI1(SampResult*, , v3dSampMgr, FindSamp, LPCSTR);
-	CSharpReturnAPI1(SampResult*, , v3dSampMgr, PureFindSamp, LPCSTR);
-	CSharpAPI0(, v3dSampMgr, Update);
+	Cpp2CS1(, v3dSampMgr, FindSamp);
+	Cpp2CS1(, v3dSampMgr, PureFindSamp);
+	Cpp2CS0(, v3dSampMgr, Update);
 
-	CSharpReturnAPI0(const char*, , SampResult, GetName);
+	Cpp2CS0(, SampResult, GetName);
 
-	CSharpReturnAPI0(vBOOL, , SampResult, GetEnable);
-	CSharpAPI1( , SampResult, SetEnable, bool);
+	Cpp2CS0(, SampResult, GetEnable);
+	Cpp2CS1(, SampResult, SetEnable);
 
-	CSharpReturnAPI0(INT64, , SampResult, GetAvgTime);
-	CSharpReturnAPI0(int, , SampResult, GetAvgHit);
+	Cpp2CS0(, SampResult, GetAvgTime);
+	Cpp2CS0(, SampResult, GetAvgHit);
 
-	CSharpReturnAPI1(INT64, , SampResult, Begin, v3dSampMgr*);
-	CSharpAPI2( , SampResult, End, v3dSampMgr*, INT64);
+	Cpp2CS1(, SampResult, Begin);
+	Cpp2CS2( , SampResult, End);
 };

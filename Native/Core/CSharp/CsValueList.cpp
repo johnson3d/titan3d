@@ -24,7 +24,7 @@ UINT CsValueList::GetCount()
 {
 	ASSERT(mStride != 0);
 	ASSERT(mMemData.GetSize() % mStride == 0);
-	return mMemData.GetSize() / mStride;
+ 	return mMemData.GetSize() / mStride;
 }
 
 void CsValueList::SetCapacity(int capacity)
@@ -228,45 +228,45 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(UINT, EngineNS, CsValueList, GetStride);
-	CSharpAPI1(EngineNS, CsValueList, SetCapacity, int);
-	CSharpAPI1(EngineNS, CsValueList, SetStride, UINT);
-	CSharpReturnAPI0(UINT, EngineNS, CsValueList, GetCount);
-	CSharpAPI1(EngineNS, CsValueList, AddValue, BYTE*);
-	CSharpAPI1(EngineNS, CsValueList, Append, CsValueList*);
-	CSharpAPI1(EngineNS, CsValueList, RemoveAt, UINT);
-	CSharpAPI1(EngineNS, CsValueList, Clear, UINT);
-	CSharpReturnAPI1(BYTE*, EngineNS, CsValueList, GetAddressAt, UINT);
-	CSharpAPI2(EngineNS, CsValueList, SetDatas, BYTE*, int);
+	Cpp2CS0(EngineNS, CsValueList, GetStride);
+	Cpp2CS1(EngineNS, CsValueList, SetCapacity);
+	Cpp2CS1(EngineNS, CsValueList, SetStride);
+	Cpp2CS0(EngineNS, CsValueList, GetCount);
+	Cpp2CS1(EngineNS, CsValueList, AddValue);
+	Cpp2CS1(EngineNS, CsValueList, Append);
+	Cpp2CS1(EngineNS, CsValueList, RemoveAt);
+	Cpp2CS1(EngineNS, CsValueList, Clear);
+	Cpp2CS1(EngineNS, CsValueList, GetAddressAt);
+	Cpp2CS2(EngineNS, CsValueList, SetDatas);
 
-	CSharpReturnAPI0(UINT, EngineNS, CsQueue, GetStride);
-	CSharpAPI1(EngineNS, CsQueue, SetStride, UINT);
-	CSharpReturnAPI0(UINT, EngineNS, CsQueue, GetCount);
-	CSharpAPI1(EngineNS, CsQueue, Enqueue, BYTE*);
-	CSharpAPI0(EngineNS, CsQueue, Dequeue);
-	CSharpReturnAPI1(vBOOL, EngineNS, CsQueue, Peek, BYTE*);
-	CSharpAPI0(EngineNS, CsQueue, Clear);
+	Cpp2CS0(EngineNS, CsQueue, GetStride);
+	Cpp2CS1(EngineNS, CsQueue, SetStride);
+	Cpp2CS0(EngineNS, CsQueue, GetCount);
+	Cpp2CS1(EngineNS, CsQueue, Enqueue);
+	Cpp2CS0(EngineNS, CsQueue, Dequeue);
+	Cpp2CS1(EngineNS, CsQueue, Peek);
+	Cpp2CS0(EngineNS, CsQueue, Clear);
 
 	VFX_API CsStreamWriter* SDK_CsStreamWriter_New()
 	{
 		return new CsStreamWriter();
 	}
 
-	CSharpAPI1(EngineNS, CsStreamWriter, Reserve, UINT);
-	CSharpAPI2(EngineNS, CsStreamWriter, PushData, BYTE*, UINT);
-	CSharpAPI0(EngineNS, CsStreamWriter, Clear);
-	CSharpReturnAPI0(BYTE*, EngineNS, CsStreamWriter, GetPointer);
-	CSharpReturnAPI0(UINT, EngineNS, CsStreamWriter, GetSize);
+	Cpp2CS1(EngineNS, CsStreamWriter, Reserve);
+	Cpp2CS2(EngineNS, CsStreamWriter, PushData);
+	Cpp2CS0(EngineNS, CsStreamWriter, Clear);
+	Cpp2CS0(EngineNS, CsStreamWriter, GetPointer);
+	Cpp2CS0(EngineNS, CsStreamWriter, GetSize);
 
 	VFX_API CsStreamReader* SDK_CsStreamReader_New()
 	{
 		return new CsStreamReader();
 	}
 
-	CSharpAPI2(EngineNS, CsStreamReader, InitData, BYTE*, UINT);
-	CSharpReturnAPI0(BYTE*, EngineNS, CsStreamReader, GetPointer);
-	CSharpReturnAPI0(UINT, EngineNS, CsStreamReader, GetSize);
-	CSharpReturnAPI2(vBOOL, EngineNS, CsStreamReader, Read, BYTE*, UINT);
-	CSharpAPI0(EngineNS, CsStreamReader, ResetReader);
-	CSharpReturnAPI0(UINT, EngineNS, CsStreamReader, GetPosition);
+	Cpp2CS2(EngineNS, CsStreamReader, InitData);
+	Cpp2CS0(EngineNS, CsStreamReader, GetPointer);
+	Cpp2CS0(EngineNS, CsStreamReader, GetSize);
+	Cpp2CS2(EngineNS, CsStreamReader, Read);
+	Cpp2CS0(EngineNS, CsStreamReader, ResetReader);
+	Cpp2CS0(EngineNS, CsStreamReader, GetPosition);
 }
