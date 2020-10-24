@@ -227,16 +227,28 @@ NS_END
 
 using namespace EngineNS;
 
+template <>
+struct Type2TypeConverter<physx::PxControllerCollisionFlags>
+{
+	typedef physx::PxU8	TarType;
+};
+
+template <>
+struct Type2TypeConverter<v3dxVector3>
+{
+	typedef v3dVector3_t	TarType;
+};
+
 extern "C"
 {
-	CSharpReturnAPI5(physx::PxU8, EngineNS, PhyController, Move, v3dxVector3*, float, float, physx::PxFilterData*, physx::PxQueryFlag::Enum);
-	CSharpAPI1(EngineNS, PhyController, SetPosition, v3dxVector3*);
-	CSharpReturnAPI0(v3dVector3_t, EngineNS, PhyController, GetPosition);
-	CSharpAPI1(EngineNS, PhyController, SetFootPosition, v3dxVector3*);
-	CSharpReturnAPI0(v3dVector3_t, EngineNS, PhyController, GetFootPosition);
-	CSharpReturnAPI0(float, EngineNS, PhyController, GetContactOffset);
-	CSharpAPI1(EngineNS, PhyController, SetContactOffset, float);
-	CSharpReturnAPI0(float, EngineNS, PhyController, GetSlopeLimit);
-	CSharpAPI1(EngineNS, PhyController, SetSlopeLimit, float);
-	CSharpAPI1(EngineNS, PhyController, SetQueryFilterData, physx::PxFilterData*);
+	Cpp2CS5(EngineNS, PhyController, Move);
+	Cpp2CS1(EngineNS, PhyController, SetPosition);
+	Cpp2CS0(EngineNS, PhyController, GetPosition);
+	Cpp2CS1(EngineNS, PhyController, SetFootPosition);
+	Cpp2CS0(EngineNS, PhyController, GetFootPosition);
+	Cpp2CS0(EngineNS, PhyController, GetContactOffset);
+	Cpp2CS1(EngineNS, PhyController, SetContactOffset);
+	Cpp2CS0(EngineNS, PhyController, GetSlopeLimit);
+	Cpp2CS1(EngineNS, PhyController, SetSlopeLimit);
+	Cpp2CS1(EngineNS, PhyController, SetQueryFilterData);
 }

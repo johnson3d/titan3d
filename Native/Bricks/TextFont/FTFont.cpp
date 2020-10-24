@@ -725,20 +725,20 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI4(FTFont*, EngineNS, FTFontManager, GetFont, const char*, int, int, int);
-	CSharpReturnAPI0(const char*, EngineNS, FTFont, GetName);
-	CSharpReturnAPI0(int, EngineNS, FTFont, GetFontSize);
-	CSharpAPI5(EngineNS, FTFont, Draw2TextContext, const WCHAR*, int, int, FTTextDrawContext*, bool);
-	CSharpAPI3(EngineNS, FTFont, MeasureString, const WCHAR*, int*, int*);
-	CSharpReturnAPI4(int, EngineNS, FTFont, CheckPointChar, const WCHAR*, int, int, int*);
-	CSharpAPI0(EngineNS, FTFont, UpdateHotWords);
-	CSharpReturnAPI5(int, EngineNS, FTFont, CalculateWrap, const WCHAR*, int*, int, int, int*);
-	CSharpReturnAPI5(int, EngineNS, FTFont, CalculateWrapWithWord, const WCHAR*, int*, int, int, int*);
+	Cpp2CS4(EngineNS, FTFontManager, GetFont);
+	Cpp2CS0(EngineNS, FTFont, GetName);
+	Cpp2CS0(EngineNS, FTFont, GetFontSize);
+	Cpp2CS5(EngineNS, FTFont, Draw2TextContext);
+	Cpp2CS3(EngineNS, FTFont, MeasureString);
+	Cpp2CS4(EngineNS, FTFont, CheckPointChar);
+	Cpp2CS0(EngineNS, FTFont, UpdateHotWords);
+	Cpp2CS5(EngineNS, FTFont, CalculateWrap);
+	Cpp2CS5(EngineNS, FTFont, CalculateWrapWithWord);
 
-	CSharpReturnAPI0(UINT, EngineNS, FTTextDrawContext, GetDrawCall);
-	CSharpReturnAPI3(GfxMeshPrimitives*, EngineNS, FTTextDrawContext, BuildMesh, IRenderContext*, IShaderResourceView**, bool);
-	CSharpReturnAPI1(vBOOL, EngineNS, FTTextDrawContext, IsValidVersion, FTFont*);
-	CSharpAPI1(EngineNS, FTTextDrawContext, RebuildContext, FTFont*);
-	CSharpAPI0(EngineNS, FTTextDrawContext, ResetContext);
-	CSharpAPI4(EngineNS, FTTextDrawContext, SetClip, int, int, int, int);
+	Cpp2CS0(EngineNS, FTTextDrawContext, GetDrawCall);
+	Cpp2CS3(EngineNS, FTTextDrawContext, BuildMesh);
+	Cpp2CS1(EngineNS, FTTextDrawContext, IsValidVersion);
+	Cpp2CS1(EngineNS, FTTextDrawContext, RebuildContext);
+	Cpp2CS0(EngineNS, FTTextDrawContext, ResetContext);
+	Cpp2CS4(EngineNS, FTTextDrawContext, SetClip);
 }

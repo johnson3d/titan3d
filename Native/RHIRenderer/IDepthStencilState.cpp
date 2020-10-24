@@ -22,5 +22,5 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI1(EngineNS, IDepthStencilState, GetDesc, IDepthStencilStateDesc*);
+	Cpp2CS1(EngineNS, IDepthStencilState, GetDesc);
 }

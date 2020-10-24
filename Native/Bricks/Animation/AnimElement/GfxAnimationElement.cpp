@@ -19,23 +19,23 @@ using namespace EngineNS;
 extern "C"
 {
 	/////GfxAnimationElementDesc
-	CSharpAPI1(EngineNS, GfxAnimationElementDesc, SetName, char*);
-	CSharpReturnAPI0(const char*, EngineNS, GfxAnimationElementDesc, GetName);
-	CSharpAPI1(EngineNS, GfxAnimationElementDesc, SetParent, char*);
-	CSharpReturnAPI0(const char*, EngineNS, GfxAnimationElementDesc, GetParent);
-	CSharpAPI1(EngineNS, GfxAnimationElementDesc, SetGrantParent, char*);
-	CSharpReturnAPI0(const char*, EngineNS, GfxAnimationElementDesc, GetGrantParent);
-	CSharpAPI1(EngineNS, GfxAnimationElementDesc, SetPath, char*);
-	CSharpReturnAPI0(const char*, EngineNS, GfxAnimationElementDesc, GetPath);
-	CSharpReturnAPI0(UINT, EngineNS, GfxAnimationElementDesc, GetNameHash);
-	CSharpReturnAPI0(UINT, EngineNS, GfxAnimationElementDesc, GetParentHash);
-	CSharpReturnAPI0(UINT, EngineNS, GfxAnimationElementDesc, GetGrantParentHash);
+	Cpp2CS1(EngineNS, GfxAnimationElementDesc, SetName);
+	Cpp2CS0(EngineNS, GfxAnimationElementDesc, GetName);
+	Cpp2CS1(EngineNS, GfxAnimationElementDesc, SetParent);
+	Cpp2CS0(EngineNS, GfxAnimationElementDesc, GetParent);
+	Cpp2CS1(EngineNS, GfxAnimationElementDesc, SetGrantParent);
+	Cpp2CS0(EngineNS, GfxAnimationElementDesc, GetGrantParent);
+	Cpp2CS1(EngineNS, GfxAnimationElementDesc, SetPath);
+	Cpp2CS0(EngineNS, GfxAnimationElementDesc, GetPath);
+	Cpp2CS0(EngineNS, GfxAnimationElementDesc, GetNameHash);
+	Cpp2CS0(EngineNS, GfxAnimationElementDesc, GetParentHash);
+	Cpp2CS0(EngineNS, GfxAnimationElementDesc, GetGrantParentHash);
 	////////////////////////////////////////////////////////
 	//GfxAnimationElement
-	CSharpAPI1(EngineNS, GfxAnimationElement, SetCurve, GfxICurve*);
-	CSharpAPI1(EngineNS, GfxAnimationElement, SetAnimationElementType, AnimationElementType);
-	CSharpAPI1(EngineNS, GfxAnimationElement, SetAnimationElementDesc, GfxAnimationElementDesc*);
-	CSharpReturnAPI0(GfxICurve*, EngineNS, GfxAnimationElement, GetCurve);
-	CSharpReturnAPI0(AnimationElementType, EngineNS, GfxAnimationElement, GetAnimationElementType);
-	CSharpReturnAPI0(GfxAnimationElementDesc*, EngineNS, GfxAnimationElement, GetAnimationElementDesc);
+	Cpp2CS1(EngineNS, GfxAnimationElement, SetCurve);
+	Cpp2CS1(EngineNS, GfxAnimationElement, SetAnimationElementType);
+	Cpp2CS1(EngineNS, GfxAnimationElement, SetAnimationElementDesc);
+	Cpp2CS0(EngineNS, GfxAnimationElement, GetCurve);
+	Cpp2CS0(EngineNS, GfxAnimationElement, GetAnimationElementType);
+	Cpp2CS0(EngineNS, GfxAnimationElement, GetAnimationElementDesc);
 }

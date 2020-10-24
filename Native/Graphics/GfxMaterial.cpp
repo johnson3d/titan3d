@@ -186,7 +186,7 @@ GfxMaterialInstance::~GfxMaterialInstance()
 //	for (auto i = mVars.begin(); i != mVars.end(); i++)
 //	{
 //		auto cmp = strcmp((*i)->Definition.Name.c_str(), name);
-//		if (cmp == 0)//这里莫名其妙std::string ==就不行了！
+//		if (cmp == 0)
 //		{
 //			return *i;
 //		}
@@ -199,7 +199,7 @@ GfxMaterialInstance::~GfxMaterialInstance()
 //	for (auto i = mSRViews.begin(); i != mSRViews.end(); i++)
 //	{
 //		auto cmp = strcmp((*i)->ShaderName.c_str(), name);
-//		if (cmp == 0)//这里莫名其妙std::string ==就不行了！
+//		if (cmp == 0)
 //		{
 //			return *i;
 //		}
@@ -478,37 +478,5 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI1(vBOOL, EngineNS, GfxMaterial, Init, const char*);
-
-	////CSharpReturnAPI2(vBOOL, EngineNS, GfxMaterialInstance, Init, GfxMaterial*, const char*);
-	////CSharpReturnAPI2(vBOOL, EngineNS, GfxMaterialInstance, SetMaterial, GfxMaterial*, bool);
-	//CSharpAPI1(EngineNS, GfxMaterialInstance, GetRSDesc, IRasterizerStateDesc*);
-	//CSharpAPI1(EngineNS, GfxMaterialInstance, GetDSDesc, IDepthStencilStateDesc*);
-	//CSharpAPI1(EngineNS, GfxMaterialInstance, GetBLDDesc, IBlendStateDesc*);
-	//////CSharpAPI1(EngineNS, GfxMaterialInstance, SetRasterizerState, IRasterizerState*);
-	//////CSharpAPI1(EngineNS, GfxMaterialInstance, SetDepthStencilState, IDepthStencilState*);
-	//////CSharpAPI1(EngineNS, GfxMaterialInstance, SetBlendState, IBlendState*);
-	//CSharpReturnAPI0(IRasterizerState*, EngineNS, GfxMaterialInstance, GetRasterizerState);
-	//CSharpReturnAPI0(IDepthStencilState*, EngineNS, GfxMaterialInstance, GetDepthStencilState);
-	////CSharpReturnAPI0(UINT, EngineNS, GfxMaterialInstance, GetVarNumber);
-	//CSharpReturnAPI1(const char*, EngineNS, GfxMaterialInstance, GetVarName, UINT);
-	//CSharpReturnAPI1(UINT, EngineNS, GfxMaterialInstance, FindVarIndex, const char*);
-	////CSharpReturnAPI4(vBOOL, EngineNS, GfxMaterialInstance, GetVarValue, UINT, UINT, GfxVar*, BYTE*);
-	////CSharpReturnAPI3(vBOOL, EngineNS, GfxMaterialInstance, SetVarValue, UINT, UINT, const BYTE*);
-	////CSharpReturnAPI1(UINT, EngineNS, GfxMaterialInstance, FindSRVIndex, const char*);
-	////CSharpReturnAPI0(UINT, EngineNS, GfxMaterialInstance, GetSRVNumber);
-	////CSharpAPI2(EngineNS, GfxMaterialInstance, SetSRV, UINT, IShaderResourceView*);
-	////CSharpReturnAPI1(IShaderResourceView*, EngineNS, GfxMaterialInstance, GetSRV, UINT);
-	//CSharpReturnAPI1(const char*, EngineNS, GfxMaterialInstance, GetSRVShaderName, UINT);
-	////CSharpReturnAPI1(const char*, EngineNS, GfxMaterialInstance, GetSRVName, UINT);
-	////CSharpAPI2(EngineNS, GfxMaterialInstance, SetSamplerStateDesc, UINT, ISamplerStateDesc*);
-	////CSharpAPI2(EngineNS, GfxMaterialInstance, GetSamplerStateDesc, UINT, ISamplerStateDesc*);
-
-	////CSharpReturnAPI3(vBOOL, EngineNS, GfxMaterialInstance, AddVar, const char*, UINT, UINT);
-	////CSharpReturnAPI1(vBOOL, EngineNS, GfxMaterialInstance, RemoveVar, UINT);
-	////CSharpReturnAPI1(vBOOL, EngineNS, GfxMaterialInstance, AddSRV, const char*);
-	////CSharpReturnAPI1(vBOOL, EngineNS, GfxMaterialInstance, RemoveSRV, UINT);
-
-	////CSharpAPI1(EngineNS, GfxMaterialInstance, Save2Xnd, XNDNode*);
-	////CSharpReturnAPI1(vBOOL, EngineNS, GfxMaterialInstance, LoadXnd, XNDNode*);
+	Cpp2CS1(EngineNS, GfxMaterial, Init);
 }

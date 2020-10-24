@@ -46,7 +46,7 @@ vBOOL TCPClient::Connect(const char* address, int port, int timeout)
 		FD_SET(mSocket, &r);
 		struct timeval timeo = { timeout/1000, 0 };
 		auto ret = select(0, &r, 0, 0, &timeo);
-		if (ret < 0) //需要注意select函数第一个参数在winsock被忽略了，//在linux必须是sock+1;
+		if (ret < 0)
 		{
 			VFX_LTRACE(ELTT_Network, "connect fail");
 			return FALSE;
@@ -67,7 +67,7 @@ vBOOL TCPClient::Connect(const char* address, int port, int timeout)
 	}
 #else
 	int retval;
-	fcntl(mSocket, F_SETFL, fcntl(mSocket, F_GETFL) | O_NONBLOCK); //将fd设置为非阻塞
+	fcntl(mSocket, F_SETFL, fcntl(mSocket, F_GETFL) | O_NONBLOCK);
 	/*auto ret = */connect(mSocket, (struct sockaddr*) & mServerAddr, sizeof(struct sockaddr));
 	/*if (ret == 0)
 	{
@@ -112,18 +112,18 @@ void TCPClient::Disconnect()
 vBOOL TCPClient::WaitData(int* errCode)
 {
 	fd_set readset;
-	FD_ZERO(&readset);            //每次循环都要清空集合，否则不能检测描述符变化
-	FD_SET(mSocket, &readset);     //添加描述符 
+	FD_ZERO(&readset);
+	FD_SET(mSocket, &readset);
 	int maxfd = (int)mSocket + 1;
 	int check_timeval = 1;
-	struct timeval timeout = { check_timeval,0 }; //阻塞式select, 等待1秒，1秒轮询
+	struct timeval timeout = { check_timeval,0 }; 
 
-	*errCode = select(maxfd, &readset, NULL, NULL, &timeout);   // 非阻塞模式
-	if (FD_ISSET(mSocket, &readset))  //测试sock是否可读，即是否网络上有数据
+	*errCode = select(maxfd, &readset, NULL, NULL, &timeout);
+	if (FD_ISSET(mSocket, &readset))
 	{
 		return TRUE;
 	}
-	timeout.tv_sec = check_timeval;    // 必须重新设置，因为超时时间到后会将其置零
+	timeout.tv_sec = check_timeval;
 	return FALSE;
 }
 
@@ -138,10 +138,10 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI3(vBOOL, EngineNS, TCPClient, Connect, const char*, int, int );
-	CSharpAPI0(EngineNS, TCPClient, Disconnect);
+	Cpp2CS3(EngineNS, TCPClient, Connect);
+	Cpp2CS0(EngineNS, TCPClient, Disconnect);
 
-	CSharpReturnAPI2(int, EngineNS, TCPClient, Send, char*, UINT);
-	CSharpReturnAPI1(vBOOL, EngineNS, TCPClient, WaitData, int*);
-	CSharpReturnAPI2(int, EngineNS, TCPClient, RecvData, void*, UINT);
+	Cpp2CS2(EngineNS, TCPClient, Send);
+	Cpp2CS1(EngineNS, TCPClient, WaitData);
+	Cpp2CS2(EngineNS, TCPClient, RecvData);
 }

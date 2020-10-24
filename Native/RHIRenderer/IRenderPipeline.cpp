@@ -59,11 +59,11 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI1(EngineNS, IRenderPipeline, BindRasterizerState, IRasterizerState*);
-	CSharpAPI1(EngineNS, IRenderPipeline, BindDepthStencilState, IDepthStencilState*);
-	CSharpAPI1(EngineNS, IRenderPipeline, BindBlendState, IBlendState*);
+	Cpp2CS1(EngineNS, IRenderPipeline, BindRasterizerState);
+	Cpp2CS1(EngineNS, IRenderPipeline, BindDepthStencilState);
+	Cpp2CS1(EngineNS, IRenderPipeline, BindBlendState);
 
-	CSharpReturnAPI0(IRasterizerState*, EngineNS, IRenderPipeline, GetRasterizerState);
-	CSharpReturnAPI0(IDepthStencilState*, EngineNS, IRenderPipeline, GetDepthStencilState);
-	CSharpReturnAPI0(IBlendState*, EngineNS, IRenderPipeline, GetBindBlendState);
+	Cpp2CS0(EngineNS, IRenderPipeline, GetRasterizerState);
+	Cpp2CS0(EngineNS, IRenderPipeline, GetDepthStencilState);
+	Cpp2CS0(EngineNS, IRenderPipeline, GetBindBlendState);
 }

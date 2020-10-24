@@ -224,20 +224,20 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI2(EngineNS, IVertexArray, BindVertexBuffer, EVertexSteamType, IVertexBuffer*);
-	CSharpReturnAPI1(IVertexBuffer*, EngineNS, IVertexArray, GetVertexBuffer, EVertexSteamType);
-	CSharpAPI1(EngineNS, IVertexArray, SetNumInstances, UINT);
-	CSharpReturnAPI0(UINT, EngineNS, IVertexArray, GetNumInstances);
+	Cpp2CS2(EngineNS, IVertexArray, BindVertexBuffer);
+	Cpp2CS1(EngineNS, IVertexArray, GetVertexBuffer);
+	Cpp2CS1(EngineNS, IVertexArray, SetNumInstances);
+	Cpp2CS0(EngineNS, IVertexArray, GetNumInstances);
 
 	VFX_API IGeometryMesh* SDK_IGeometryMesh_MergeGeoms(IRenderContext* rc, IGeometryMesh** meshArray, v3dxMatrix4* transform, int count, v3dxBox3* aabb)
 	{
 		return IGeometryMesh::MergeGeoms(rc, meshArray, transform, count, aabb);
 	}
-	CSharpReturnAPI0(vBOOL, EngineNS, IGeometryMesh, GetIsDirty);
-	CSharpAPI1(EngineNS, IGeometryMesh, SetIsDirty, vBOOL);
+	Cpp2CS0(EngineNS, IGeometryMesh, GetIsDirty);
+	Cpp2CS1(EngineNS, IGeometryMesh, SetIsDirty);
 
-	CSharpAPI2(EngineNS, IGeometryMesh, BindVertexBuffer, EVertexSteamType, IVertexBuffer*);
-	CSharpAPI1(EngineNS, IGeometryMesh, BindIndexBuffer, IIndexBuffer*);
-	CSharpReturnAPI1(IVertexBuffer*, EngineNS, IGeometryMesh, GetVertexBuffer, EVertexSteamType);
-	CSharpReturnAPI0(IIndexBuffer*, EngineNS, IGeometryMesh, GetIndexBuffer);
+	Cpp2CS2(EngineNS, IGeometryMesh, BindVertexBuffer);
+	Cpp2CS1(EngineNS, IGeometryMesh, BindIndexBuffer);
+	Cpp2CS1(EngineNS, IGeometryMesh, GetVertexBuffer);
+	Cpp2CS0(EngineNS, IGeometryMesh, GetIndexBuffer);
 }

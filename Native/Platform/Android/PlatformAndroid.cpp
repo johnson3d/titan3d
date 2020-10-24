@@ -89,5 +89,5 @@ extern "C"
 	{
 		return (void*)ANativeWindow_fromSurface(jniEnv, (jobject)surface);
 	}
-	CSharpAPI2(EngineNS, PlatformAndroid, InitAndroid, JNIEnv*, jobject);
+	Cpp2CS2(EngineNS, PlatformAndroid, InitAndroid);
 }

@@ -664,9 +664,9 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI3(vBOOL, EngineNS, InputGeom, LoadMesh, IRenderContext*, IGeometryMesh*, float);
-	CSharpAPI4(EngineNS, InputGeom, CSAddOffMeshConnection, v3dxVector3, v3dxVector3, float, int);
-	CSharpAPI4(EngineNS, InputGeom, CreateConvexVolumes, InputGeom::AreaType, IBlobObject*, v3dxVector3, v3dxVector3);
-	CSharpAPI1(EngineNS, InputGeom, DeleteConvexVolumesByArea, InputGeom::AreaType);
-	CSharpAPI0(EngineNS, InputGeom, ClearConvexVolumes);
+	Cpp2CS3(EngineNS, InputGeom, LoadMesh);
+	Cpp2CS4(EngineNS, InputGeom, CSAddOffMeshConnection);
+	Cpp2CS4(EngineNS, InputGeom, CreateConvexVolumes);
+	Cpp2CS1(EngineNS, InputGeom, DeleteConvexVolumesByArea);
+	Cpp2CS0(EngineNS, InputGeom, ClearConvexVolumes);
 }

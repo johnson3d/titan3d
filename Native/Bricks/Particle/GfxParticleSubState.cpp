@@ -49,19 +49,25 @@ NS_END
 
 using namespace EngineNS;
 
+template <>
+struct Type2TypeConverter<v3dxVector3>
+{
+	typedef v3dVector3_t		TarType;
+};
+
 extern "C"
 {
-	CSharpAPI2(EngineNS, GfxParticleSubState, GetNewBorns, GfxParticleState***, int*);
-	CSharpAPI0(EngineNS, GfxParticleSubState, PushNewBorns);
-	CSharpAPI2(EngineNS, GfxParticleSubState, GetParticles, GfxParticleState***, int*);
-	CSharpAPI1(EngineNS, GfxParticleSubState, SetShapeType, GfxParticleEmitterShape*);
-	CSharpReturnAPI0(GfxParticleEmitterShape*, EngineNS, GfxParticleSubState, GetShapeType);
-	CSharpAPI1(EngineNS, GfxParticleSubState, Simulate, float);
+	Cpp2CS2(EngineNS, GfxParticleSubState, GetNewBorns);
+	Cpp2CS0(EngineNS, GfxParticleSubState, PushNewBorns);
+	Cpp2CS2(EngineNS, GfxParticleSubState, GetParticles);
+	Cpp2CS1(EngineNS, GfxParticleSubState, SetShapeType);
+	Cpp2CS0(EngineNS, GfxParticleSubState, GetShapeType);
+	Cpp2CS1(EngineNS, GfxParticleSubState, Simulate);
 
-	CSharpReturnAPI0(v3dVector3_t, EngineNS, GfxParticleSubState, GetPosition);
-	CSharpAPI1(EngineNS, GfxParticleSubState, SetPosition, v3dxVector3);
-	CSharpReturnAPI0(v3dVector3_t, EngineNS, GfxParticleSubState, GetDirection);
-	CSharpAPI1(EngineNS, GfxParticleSubState, SetDirection, v3dxVector3);
+	Cpp2CS0(EngineNS, GfxParticleSubState, GetPosition);
+	Cpp2CS1(EngineNS, GfxParticleSubState, SetPosition);
+	Cpp2CS0(EngineNS, GfxParticleSubState, GetDirection);
+	Cpp2CS1(EngineNS, GfxParticleSubState, SetDirection);
 
 	VFX_API int Inner_TestCall(int a, float b);
 

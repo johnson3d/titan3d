@@ -166,9 +166,9 @@ extern "C"
 	{
 		VDefferedDeleteManager::GetInstance()->Cleanup();
 	}
-	CSharpReturnAPI0(int, , VIUnknown, AddRef);
-	CSharpAPI0(, VIUnknown, Release);
-	CSharpAPI0(, VIUnknown, Cleanup);
+	Cpp2CS0(EngineNS, VIUnknown, AddRef);
+	Cpp2CS0(EngineNS, VIUnknown, Release);
+	Cpp2CS0(EngineNS, VIUnknown, Cleanup);
 	VFX_API void SDK_VIUnknown_GetHash64(VIUnknown* self, Hash64* hash)
 	{
 		if (self == nullptr)
@@ -178,19 +178,19 @@ extern "C"
 		}
 		*hash = self->GetHash64();
 	}
-	CSharpReturnAPI0(IResourceState*, EngineNS, VIUnknown, GetResourceState);
-	CSharpAPI0(EngineNS, VIUnknown, InvalidateResource);
-	CSharpReturnAPI0(vBOOL, EngineNS, VIUnknown, RestoreResource);
+	Cpp2CS0(EngineNS, VIUnknown, GetResourceState);
+	Cpp2CS0(EngineNS, VIUnknown, InvalidateResource);
+	Cpp2CS0(EngineNS, VIUnknown, RestoreResource);
 
-	CSharpReturnAPI0(CoreRtti*, EngineNS, VIUnknown, GetRtti);
-	CSharpReturnAPI0(EStreamingState, EngineNS, IResourceState, GetStreamState);
-	CSharpAPI1(EngineNS, IResourceState, SetStreamState, EStreamingState);
-	CSharpReturnAPI0(unsigned int, EngineNS, IResourceState, GetResourceSize);
-	CSharpAPI1(EngineNS, IResourceState, SetResourceSize, unsigned int);
-	CSharpReturnAPI0(vTimeTick, EngineNS, IResourceState, GetAccessTime);
-	CSharpAPI1(EngineNS, IResourceState, SetAccessTime, vTimeTick);
-	CSharpReturnAPI0(int, EngineNS, IResourceState, GetKeepValid);
-	CSharpAPI1(EngineNS, IResourceState, SetKeepValid, int);
+	Cpp2CS0(EngineNS, VIUnknown, GetRtti);
+	Cpp2CS0(EngineNS, IResourceState, GetStreamState);
+	Cpp2CS1(EngineNS, IResourceState, SetStreamState);
+	Cpp2CS0(EngineNS, IResourceState, GetResourceSize);
+	Cpp2CS1(EngineNS, IResourceState, SetResourceSize);
+	Cpp2CS0(EngineNS, IResourceState, GetAccessTime);
+	Cpp2CS1(EngineNS, IResourceState, SetAccessTime);
+	Cpp2CS0(EngineNS, IResourceState, GetKeepValid);
+	Cpp2CS1(EngineNS, IResourceState, SetKeepValid);
 
 	VFX_API IResourceState* SDK_New_IResourceState()
 	{
@@ -201,5 +201,5 @@ extern "C"
 		delete state;
 	}
 
-	CSharpReturnAPI0(const char*, EngineNS, VStringObject, GetTextString);
+	Cpp2CS0(EngineNS, VStringObject, GetTextString);
 }

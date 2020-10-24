@@ -19,5 +19,5 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI1(EngineNS, IRasterizerState, GetDesc, IRasterizerStateDesc*);
+	Cpp2CS1(EngineNS, IRasterizerState, GetDesc);
 }

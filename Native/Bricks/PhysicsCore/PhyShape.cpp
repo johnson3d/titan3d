@@ -555,20 +555,20 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(EPhysShapeType, EngineNS, PhyShape, GetType);
-	CSharpAPI1(EngineNS, PhyShape, SetType, EPhysShapeType);
-	CSharpAPI1(EngineNS, PhyShape, SetLocalPose, const physx::PxTransform*);
-	CSharpAPI1(EngineNS, PhyShape, GetLocalPose, physx::PxTransform*);
-	CSharpAPI2(EngineNS, PhyShape, SetFlag, EPhysShapeFlag, vBOOL);
-	CSharpAPI1(EngineNS, PhyShape, SetQueryFilterData, physx::PxFilterData*);
-	CSharpReturnAPI2(vBOOL, EngineNS, PhyShape, AddToActor, PhyActor*, const physx::PxTransform*);
-	CSharpAPI0(EngineNS, PhyShape, RemoveFromActor);
-	CSharpReturnAPI3(vBOOL, EngineNS, PhyShape, IfGetBox, float*, float*, float*);
-	CSharpReturnAPI1(vBOOL, EngineNS, PhyShape, IfGetSphere, float*);
-	CSharpReturnAPI2(vBOOL, EngineNS, PhyShape, IfGetCapsule, float*, float*);
-	CSharpReturnAPI2(vBOOL, EngineNS, PhyShape, IfGetScaling, v3dxVector3*, v3dxQuaternion*);
-	CSharpReturnAPI1(GfxMeshPrimitives*, EngineNS, PhyShape, IfGetTriMesh, IRenderContext*);
-	CSharpReturnAPI1(GfxMeshPrimitives*, EngineNS, PhyShape, IfGetConvexMesh, IRenderContext*);
+	Cpp2CS0(EngineNS, PhyShape, GetType);
+	Cpp2CS1(EngineNS, PhyShape, SetType);
+	Cpp2CS1(EngineNS, PhyShape, SetLocalPose);
+	Cpp2CS1(EngineNS, PhyShape, GetLocalPose);
+	Cpp2CS2(EngineNS, PhyShape, SetFlag);
+	Cpp2CS1(EngineNS, PhyShape, SetQueryFilterData);
+	Cpp2CS2(EngineNS, PhyShape, AddToActor);
+	Cpp2CS0(EngineNS, PhyShape, RemoveFromActor);
+	Cpp2CS3(EngineNS, PhyShape, IfGetBox);
+	Cpp2CS1(EngineNS, PhyShape, IfGetSphere);
+	Cpp2CS2(EngineNS, PhyShape, IfGetCapsule);
+	Cpp2CS2(EngineNS, PhyShape, IfGetScaling);
+	Cpp2CS1(EngineNS, PhyShape, IfGetTriMesh);
+	Cpp2CS1(EngineNS, PhyShape, IfGetConvexMesh);
 
-	CSharpReturnAPI1(int, EngineNS, PhyShape, GetTrianglesRemap, int);
+	Cpp2CS1(EngineNS, PhyShape, GetTrianglesRemap);
 }

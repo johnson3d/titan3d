@@ -33,8 +33,8 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI7(EngineNS, IInputLayoutDesc, AddElement, const char*,UINT,EPixelFormat,UINT,UINT,vBOOL,UINT);
-	CSharpAPI1(EngineNS, IInputLayoutDesc, SetShaderDesc, IShaderDesc*);
+	Cpp2CS7(EngineNS, IInputLayoutDesc, AddElement);
+	Cpp2CS1(EngineNS, IInputLayoutDesc, SetShaderDesc);
 
-	CSharpReturnAPI0(UINT, EngineNS, IInputLayout, GetElemNumber);
+	Cpp2CS0(EngineNS, IInputLayout, GetElemNumber);
 }

@@ -18,9 +18,9 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI1(EngineNS, GfxBonePose, GetTransform, GfxBoneTransform*);
-	CSharpAPI1(EngineNS, GfxBonePose, SetTransform, GfxBoneTransform*);
-	CSharpAPI1(EngineNS, GfxBonePose, GetMotionData, GfxMotionState*);
-	CSharpAPI1(EngineNS, GfxBonePose, SetMotionData, GfxMotionState*);
-	CSharpAPI1(EngineNS, GfxBonePose, SetReferenceBone, GfxBone*);
+	Cpp2CS1(EngineNS, GfxBonePose, GetTransform);
+	Cpp2CS1(EngineNS, GfxBonePose, SetTransform);
+	Cpp2CS1(EngineNS, GfxBonePose, GetMotionData);
+	Cpp2CS1(EngineNS, GfxBonePose, SetMotionData);
+	Cpp2CS1(EngineNS, GfxBonePose, SetReferenceBone);
 }

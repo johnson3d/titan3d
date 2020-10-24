@@ -61,8 +61,8 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(int, EngineNS, ImageImport, GetWidth);
-	CSharpReturnAPI0(int, EngineNS, ImageImport, GetHeight);
-	CSharpReturnAPI0(int, EngineNS, ImageImport, GetChannels);
-	CSharpAPI2(EngineNS, ImageImport, LoadTexture, const char*, IBlobObject*);
+	Cpp2CS0(EngineNS, ImageImport, GetWidth);
+	Cpp2CS0(EngineNS, ImageImport, GetHeight);
+	Cpp2CS0(EngineNS, ImageImport, GetChannels);
+	Cpp2CS2(EngineNS, ImageImport, LoadTexture);
 }

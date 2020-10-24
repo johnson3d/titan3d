@@ -99,15 +99,15 @@ int RcNavCrowd::AddAgent(const v3dxVector3* pos, float radius, float height, int
 	ap.pathOptimizationRange = ap.radius * 30.0f;
 	ap.updateFlags |= flags;
 	//if (m_toolParams.m_anticipateTurns)
-	//	ap.updateFlags |= DT_CROWD_ANTICIPATE_TURNS;//预测转弯
+	//	ap.updateFlags |= DT_CROWD_ANTICIPATE_TURNS;
 	//if (m_toolParams.m_optimizeVis)
 	//	ap.updateFlags |= DT_CROWD_OPTIMIZE_VIS;
 	//if (m_toolParams.m_optimizeTopo)
-	//	ap.updateFlags |= DT_CROWD_OPTIMIZE_TOPO;//优化拓扑
+	//	ap.updateFlags |= DT_CROWD_OPTIMIZE_TOPO;
 	//if (m_toolParams.m_obstacleAvoidance)
-	//	ap.updateFlags |= DT_CROWD_OBSTACLE_AVOIDANCE;//避让障碍物
+	//	ap.updateFlags |= DT_CROWD_OBSTACLE_AVOIDANCE;
 	//if (m_toolParams.m_separation)
-	//	ap.updateFlags |= DT_CROWD_SEPARATION;//人群分离
+	//	ap.updateFlags |= DT_CROWD_SEPARATION;
 	ap.obstacleAvoidanceType = (unsigned char)m_obstacleAvoidanceType;
 	ap.separationWeight = m_separationWeight;
 
@@ -230,12 +230,18 @@ NS_END
 
 using namespace EngineNS;
 
+template <>
+struct Type2TypeConverter<v3dxVector3>
+{
+	typedef v3dVector3_t		TarType;
+};
+
 extern "C"
 {
-	CSharpReturnAPI3(bool, EngineNS, RcNavCrowd, Init, RcNavQuery*, RcNavMesh*, float);
-	CSharpReturnAPI6(int, EngineNS, RcNavCrowd, AddAgent, const v3dxVector3*, float, float, int, float, float);
-	CSharpAPI1(EngineNS, RcNavCrowd, RemoveAgent, const int);
-	CSharpAPI2(EngineNS, RcNavCrowd, SetMoveTarget, int, const v3dxVector3*);
-	CSharpAPI1(EngineNS, RcNavCrowd, UpdateTick, const float);
-	CSharpReturnAPI1(v3dVector3_t, EngineNS, RcNavCrowd, GetPosition, const int);
+	Cpp2CS3(EngineNS, RcNavCrowd, Init);
+	Cpp2CS6(EngineNS, RcNavCrowd, AddAgent);
+	Cpp2CS1(EngineNS, RcNavCrowd, RemoveAgent);
+	Cpp2CS2(EngineNS, RcNavCrowd, SetMoveTarget);
+	Cpp2CS1(EngineNS, RcNavCrowd, UpdateTick);
+	Cpp2CS1(EngineNS, RcNavCrowd, GetPosition);
 }

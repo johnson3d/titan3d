@@ -408,35 +408,47 @@ NS_END
 
 using namespace EngineNS;
 
+template <>
+struct Type2TypeConverter<v3dxVector3>
+{
+	typedef v3dVector3_t		TarType;
+};
+
+template <>
+struct Type2TypeConverter<v3dxMatrix4>
+{
+	typedef v3dMatrix4_t		TarType;
+}; 
+
 extern "C"
 {
-	CSharpAPI1(EngineNS, GfxCamera, BindConstBuffer, IConstantBuffer*);
-	CSharpAPI5(EngineNS, GfxCamera, PerspectiveFovLH, float, float, float, float, float);
-	CSharpAPI4(EngineNS, GfxCamera, MakeOrtho, float, float, float, float);
-	CSharpAPI6(EngineNS, GfxCamera, DoOrthoProjectionForShadow, float, float, float, float, float, float);
-	CSharpAPI4(EngineNS, GfxCamera, LookAtLH, const v3dxVector3*, const v3dxVector3*, const v3dxVector3*, vBOOL);
-	CSharpAPI0(EngineNS, GfxCamera, ExecuteLookAtLH);
-	CSharpReturnAPI5(vBOOL, EngineNS, GfxCamera, GetPickRay, v3dxVector3*, float, float, float, float);
-	CSharpAPI2(EngineNS, GfxCamera, UpdateConstBufferData, IRenderContext*, vBOOL);
+	Cpp2CS1(EngineNS, GfxCamera, BindConstBuffer);
+	Cpp2CS5(EngineNS, GfxCamera, PerspectiveFovLH);
+	Cpp2CS4(EngineNS, GfxCamera, MakeOrtho);
+	Cpp2CS6(EngineNS, GfxCamera, DoOrthoProjectionForShadow);
+	Cpp2CS4(EngineNS, GfxCamera, LookAtLH);
+	Cpp2CS0(EngineNS, GfxCamera, ExecuteLookAtLH);
+	Cpp2CS5(EngineNS, GfxCamera, GetPickRay);
+	Cpp2CS2(EngineNS, GfxCamera, UpdateConstBufferData);
 
-	CSharpReturnAPI0(v3dxFrustum*, EngineNS, GfxCamera, GetFrustum);
+	Cpp2CS0(EngineNS, GfxCamera, GetFrustum);
 
-	CSharpReturnAPI0(float, EngineNS, GfxCamera, GetFov);
-	CSharpReturnAPI0(float, EngineNS, GfxCamera, GetZNear);
-	CSharpReturnAPI0(float, EngineNS, GfxCamera, GetZFar);
-	CSharpReturnAPI0(v3dVector3_t, EngineNS, GfxCamera, GetPosition);
-	CSharpReturnAPI0(v3dVector3_t, EngineNS, GfxCamera, GetLookAt);
-	CSharpReturnAPI0(v3dVector3_t, EngineNS, GfxCamera, GetDirection);
-	CSharpReturnAPI0(v3dVector3_t, EngineNS, GfxCamera, GetRight);
-	CSharpReturnAPI0(v3dVector3_t, EngineNS, GfxCamera, GetUp);
-	CSharpReturnAPI0(v3dMatrix4_t, EngineNS, GfxCamera, GetViewMatrix);
-	CSharpReturnAPI0(v3dMatrix4_t, EngineNS, GfxCamera, GetViewInverse);
-	CSharpReturnAPI0(v3dMatrix4_t, EngineNS, GfxCamera, GetProjectionMatrix);
-	CSharpReturnAPI0(v3dMatrix4_t, EngineNS, GfxCamera, GetProjectionInverse);
-	CSharpReturnAPI0(v3dMatrix4_t, EngineNS, GfxCamera, GetViewProjection);
-	CSharpReturnAPI0(v3dMatrix4_t, EngineNS, GfxCamera, GetViewProjectionInverse);
-	CSharpReturnAPI0(v3dMatrix4_t, EngineNS, GfxCamera, GetToViewPortMatrix);
+	Cpp2CS0(EngineNS, GfxCamera, GetFov);
+	Cpp2CS0(EngineNS, GfxCamera, GetZNear);
+	Cpp2CS0(EngineNS, GfxCamera, GetZFar);
+	Cpp2CS0(EngineNS, GfxCamera, GetPosition);
+	Cpp2CS0(EngineNS, GfxCamera, GetLookAt);
+	Cpp2CS0(EngineNS, GfxCamera, GetDirection);
+	Cpp2CS0(EngineNS, GfxCamera, GetRight);
+	Cpp2CS0(EngineNS, GfxCamera, GetUp);
+	Cpp2CS0(EngineNS, GfxCamera, GetViewMatrix);
+	Cpp2CS0(EngineNS, GfxCamera, GetViewInverse);
+	Cpp2CS0(EngineNS, GfxCamera, GetProjectionMatrix);
+	Cpp2CS0(EngineNS, GfxCamera, GetProjectionInverse);
+	Cpp2CS0(EngineNS, GfxCamera, GetViewProjection);
+	Cpp2CS0(EngineNS, GfxCamera, GetViewProjectionInverse);
+	Cpp2CS0(EngineNS, GfxCamera, GetToViewPortMatrix);
 
-	CSharpReturnAPI0(GfxCamera::CameraData*, EngineNS, GfxCamera, GetLogicData);
-	CSharpReturnAPI0(GfxCamera::CameraData*, EngineNS, GfxCamera, GetRenderData);
+	Cpp2CS0(EngineNS, GfxCamera, GetLogicData);
+	Cpp2CS0(EngineNS, GfxCamera, GetRenderData);
 }

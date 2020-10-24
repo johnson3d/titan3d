@@ -70,44 +70,44 @@ extern "C"
 	///////////////////////////////////////////////////////////////////
 	//GfxObjectImportOption
 
-	CSharpAPI1(EngineNS, GfxAssetImportOption, SetName, const char*);
-	CSharpReturnAPI0(const char*, EngineNS, GfxAssetImportOption, GetName);
-	CSharpAPI1(EngineNS, GfxAssetImportOption, SetAbsSavePath, const char*);
-	CSharpReturnAPI0(const char*, EngineNS, GfxAssetImportOption, GetAbsSavePath);
-	CSharpAPI1(EngineNS, GfxAssetImportOption, SetHash, UINT);
-	CSharpReturnAPI0(UINT, EngineNS, GfxAssetImportOption, GetHash);
-	CSharpAPI1(EngineNS, GfxAssetImportOption, SetScale, float);
-	CSharpReturnAPI0(float, EngineNS, GfxAssetImportOption, GetScale);
-	CSharpAPI1(EngineNS, GfxAssetImportOption, SetIsImport, vBOOL);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxAssetImportOption, GetIsImport);
-	CSharpAPI1(EngineNS, GfxAssetImportOption, SetAssetType, ImportAssetType);
-	CSharpReturnAPI0(ImportAssetType, EngineNS, GfxAssetImportOption, GetAssetType);
+	Cpp2CS1(EngineNS, GfxAssetImportOption, SetName);
+	Cpp2CS0(EngineNS, GfxAssetImportOption, GetName);
+	Cpp2CS1(EngineNS, GfxAssetImportOption, SetAbsSavePath);
+	Cpp2CS0(EngineNS, GfxAssetImportOption, GetAbsSavePath);
+	Cpp2CS1(EngineNS, GfxAssetImportOption, SetHash);
+	Cpp2CS0(EngineNS, GfxAssetImportOption, GetHash);
+	Cpp2CS1(EngineNS, GfxAssetImportOption, SetScale);
+	Cpp2CS0(EngineNS, GfxAssetImportOption, GetScale);
+	Cpp2CS1(EngineNS, GfxAssetImportOption, SetIsImport);
+	Cpp2CS0(EngineNS, GfxAssetImportOption, GetIsImport);
+	Cpp2CS1(EngineNS, GfxAssetImportOption, SetAssetType);
+	Cpp2CS0(EngineNS, GfxAssetImportOption, GetAssetType);
 
 
 	///////////////////////////////////////////////////////////////////
 	//GfxMeshImportOption
-	CSharpAPI1(EngineNS, GfxMeshImportOption, SetReCalculateTangent, vBOOL);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxMeshImportOption, GetReCalculateTangent);
-	CSharpAPI1(EngineNS, GfxMeshImportOption, SetAsCollision, vBOOL);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxMeshImportOption, GetAsCollision);
-	CSharpAPI1(EngineNS, GfxMeshImportOption, SetAsLocalSpace, vBOOL);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxMeshImportOption, GetAsLocalSpace);
-	CSharpAPI1(EngineNS, GfxMeshImportOption, SetHaveSkin, vBOOL);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxMeshImportOption, GetHaveSkin);
-	CSharpAPI1(EngineNS, GfxMeshImportOption, SetAsStaticMesh, vBOOL);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxMeshImportOption, GetAsStaticMesh);
-	CSharpAPI1(EngineNS, GfxMeshImportOption, SetRenderAtom, UINT);
-	CSharpReturnAPI0(UINT, EngineNS, GfxMeshImportOption, GetRenderAtom);
-	CSharpAPI1(EngineNS, GfxMeshImportOption, SetTransformVertexToAbsolute, vBOOL);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxMeshImportOption, GetTransformVertexToAbsolute);
+	Cpp2CS1(EngineNS, GfxMeshImportOption, SetReCalculateTangent);
+	Cpp2CS0(EngineNS, GfxMeshImportOption, GetReCalculateTangent);
+	Cpp2CS1(EngineNS, GfxMeshImportOption, SetAsCollision);
+	Cpp2CS0(EngineNS, GfxMeshImportOption, GetAsCollision);
+	Cpp2CS1(EngineNS, GfxMeshImportOption, SetAsLocalSpace);
+	Cpp2CS0(EngineNS, GfxMeshImportOption, GetAsLocalSpace);
+	Cpp2CS1(EngineNS, GfxMeshImportOption, SetHaveSkin);
+	Cpp2CS0(EngineNS, GfxMeshImportOption, GetHaveSkin);
+	Cpp2CS1(EngineNS, GfxMeshImportOption, SetAsStaticMesh);
+	Cpp2CS0(EngineNS, GfxMeshImportOption, GetAsStaticMesh);
+	Cpp2CS1(EngineNS, GfxMeshImportOption, SetRenderAtom);
+	Cpp2CS0(EngineNS, GfxMeshImportOption, GetRenderAtom);
+	Cpp2CS1(EngineNS, GfxMeshImportOption, SetTransformVertexToAbsolute);
+	Cpp2CS0(EngineNS, GfxMeshImportOption, GetTransformVertexToAbsolute);
 
 	///////////////////////////////////////////////////////////////////
 	//GfxAnimationImportOption
-	CSharpAPI1(EngineNS, GfxAnimationImportOption, SetAnimationType, ImportAssetType);
-	CSharpReturnAPI0(ImportAssetType, EngineNS, GfxAnimationImportOption, GetAnimationType);
-	CSharpAPI1(EngineNS, GfxAnimationImportOption, SetDuration, float);
-	CSharpReturnAPI0(float, EngineNS, GfxAnimationImportOption, GetDuration);
-	CSharpAPI1(EngineNS, GfxAnimationImportOption, SetSampleRate, float);
-	CSharpReturnAPI0(float, EngineNS, GfxAnimationImportOption, GetSampleRate);
+	Cpp2CS1(EngineNS, GfxAnimationImportOption, SetAnimationType);
+	Cpp2CS0(EngineNS, GfxAnimationImportOption, GetAnimationType);
+	Cpp2CS1(EngineNS, GfxAnimationImportOption, SetDuration);
+	Cpp2CS0(EngineNS, GfxAnimationImportOption, GetDuration);
+	Cpp2CS1(EngineNS, GfxAnimationImportOption, SetSampleRate);
+	Cpp2CS0(EngineNS, GfxAnimationImportOption, GetSampleRate);
 
 }

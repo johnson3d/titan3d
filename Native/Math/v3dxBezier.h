@@ -21,9 +21,9 @@ public:
 	#pragma pack(push,4)
 	struct sBezierPoint : public VMem::PooledObject<sBezierPoint, 128>
 	{
-		v3dxVector3 vPos;			// 点位置
-		v3dxVector3 vCtrlPos1;		// 控制点1位置(相对于vPos位置)
-		v3dxVector3 vCtrlPos2;		// 控制点2位置(相对于vPos位置)
+		v3dxVector3 vPos;
+		v3dxVector3 vCtrlPos1;
+		v3dxVector3 vCtrlPos2;
 
 		sBezierPoint() :
 			vPos(0,0,0),
@@ -37,7 +37,7 @@ public:
 	#pragma  pack(pop)
 
 protected:
-	std::vector<sBezierPoint*> m_nodeArray;	// 顶点列表
+	std::vector<sBezierPoint*> m_nodeArray;
 	float m_fMaxLength;
 
 	vBOOL	mIs2D;
@@ -53,7 +53,7 @@ public:
 	void InsertNode(int idx, const v3dxVector3* pos, const v3dxVector3* ctrlPos1, const v3dxVector3* ctrlPos2);
 	void DeleteNode(int idx);
 	void ClearNodes();
-	// fTime范围 0 - 1
+	
 	v3dxVector3 GetValue(float fTime);
 	inline void GetValue(float fTime, v3dxVector3* value)
 	{
@@ -101,8 +101,6 @@ public:
 	float GetValueY_2D(float fTime);
 };
 
-
-// 区间数值
 template <typename T>
 class v3dxRange
 {
@@ -161,7 +159,6 @@ typedef v3dxRange<int> v3dxIntRange;
 typedef v3dxRange<float> v3dxScalarRange;
 typedef v3dxRange<unsigned long> v3dxColorRange;
 
-// 复合数值变量
 class v3dVariable : public VIUnknown
 {
 public:
@@ -181,7 +178,6 @@ protected:
 	unsigned char mType;
 };
 
-// 浮点型数值变量
 class v3dScalarVariable : public v3dVariable
 {
 public:
@@ -228,7 +224,6 @@ private:
 	DWORD mChangeToMask;
 };
 
-// 颜色型数值变量
 class v3dColorVariable : public v3dVariable
 {
 public:
@@ -255,7 +250,6 @@ private:
 	};
 };
 
-// float4型数值变量
 class v3dFloat4Variable : public v3dVariable
 {
 public:

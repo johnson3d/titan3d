@@ -173,16 +173,16 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(UINT, EngineNS, GfxSkeleton, GetBoneNumber);
-	CSharpReturnAPI0(GfxSkeleton*, EngineNS, GfxSkeleton, CloneSkeleton);
-	CSharpReturnAPI0(GfxBone*, EngineNS, GfxSkeleton, GetRoot);
-	CSharpReturnAPI1(vBOOL, EngineNS, GfxSkeleton, SetRoot, const char*);
-	CSharpAPI1(EngineNS, GfxSkeleton, SetRootByIndex, UINT);
+	Cpp2CS0(EngineNS, GfxSkeleton, GetBoneNumber);
+	Cpp2CS0(EngineNS, GfxSkeleton, CloneSkeleton);
+	Cpp2CS0(EngineNS, GfxSkeleton, GetRoot);
+	Cpp2CS1(EngineNS, GfxSkeleton, SetRoot);
+	Cpp2CS1(EngineNS, GfxSkeleton, SetRootByIndex);
 	CSharpReturnAPI1(GfxBone*, EngineNS, GfxSkeleton, FindBone, const char*);
-	CSharpReturnAPI1(GfxBone*, EngineNS, GfxSkeleton, FindBoneByNameHash, UINT);
-	CSharpReturnAPI1(GfxBone*, EngineNS, GfxSkeleton, GetBone, UINT);
-	CSharpReturnAPI1(GfxBone*, EngineNS, GfxSkeleton, NewBone, GfxBoneDesc*);
-	CSharpReturnAPI1(UINT, EngineNS, GfxSkeleton, AddBone, GfxBone*);
-	CSharpReturnAPI1(vBOOL, EngineNS, GfxSkeleton, RemoveBone, UINT);
-	CSharpAPI0(EngineNS, GfxSkeleton, GenerateHierarchy);
+	Cpp2CS1(EngineNS, GfxSkeleton, FindBoneByNameHash);
+	Cpp2CS1(EngineNS, GfxSkeleton, GetBone);
+	Cpp2CS1(EngineNS, GfxSkeleton, NewBone);
+	Cpp2CS1(EngineNS, GfxSkeleton, AddBone);
+	Cpp2CS1(EngineNS, GfxSkeleton, RemoveBone);
+	Cpp2CS0(EngineNS, GfxSkeleton, GenerateHierarchy);
 }

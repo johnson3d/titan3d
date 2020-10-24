@@ -197,13 +197,25 @@ NS_END
 
 using namespace EngineNS;
 
+template <>
+struct Type2TypeConverter<v3dxVector3>
+{
+	typedef v3dVector3_t		TarType;
+};
+
+template <>
+struct Type2TypeConverter<v3dxQuaternion>
+{
+	typedef v3dVector4_t		TarType;
+}; 
+
 extern "C"
 {
-	CSharpAPI1(EngineNS, PhyActor, AddToScene, PhyScene*);
-	CSharpReturnAPI0(v3dVector3_t, EngineNS, PhyActor, GetPosition);
-	CSharpReturnAPI0(v3dVector4_t, EngineNS, PhyActor, GetRotation);
+	Cpp2CS1(EngineNS, PhyActor, AddToScene);
+	Cpp2CS0(EngineNS, PhyActor, GetPosition);
+	Cpp2CS0(EngineNS, PhyActor, GetRotation);
 
-	CSharpReturnAPI2(vBOOL, EngineNS, PhyActor, SetPose2Physics, const physx::PxTransform*, vBOOL);
-	CSharpReturnAPI2(vBOOL, EngineNS, PhyActor, SetRigidBodyFlag, UINT, vBOOL);
-	CSharpReturnAPI2(vBOOL, EngineNS, PhyActor, SetActorFlag, UINT, vBOOL);
+	Cpp2CS2(EngineNS, PhyActor, SetPose2Physics);
+	Cpp2CS2(EngineNS, PhyActor, SetRigidBodyFlag);
+	Cpp2CS2(EngineNS, PhyActor, SetActorFlag);
 }

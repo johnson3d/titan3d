@@ -26,7 +26,6 @@ RTTI_IMPL(EngineNS::GfxParticleEmitterShapeMesh, EngineNS::GfxParticleEmitterSha
 //			break;
 //		pParticle->Reset();
 //
-//		// 创建跟随的发射器
 //		for (auto ite = mFollowerDatas.begin(); ite != mFollowerDatas.end(); ite++)
 //		{
 //			//v3dParticleEmitter* pem = new v3dParticleEmitter(*((*ite).followerEmitter));
@@ -78,7 +77,6 @@ RTTI_IMPL(EngineNS::GfxParticleEmitterShapeMesh, EngineNS::GfxParticleEmitterSha
 //
 //		if (mFollowerParticle != NULL)
 //		{
-//			// 计算跟随位置
 //			pParticle->mPose.mPosition += mFollowerParticle->mPose.mPosition;
 //		}
 //
@@ -706,62 +704,62 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetEmitter, GfxParticleSubState *);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetEmitter);
 
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetIsEmitFromShell);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetIsRandomDirection);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetRandomDirAvailableX);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetRandomDirAvailableY);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetRandomDirAvailableZ);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetRandomDirAvailableInvX);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetRandomDirAvailableInvY);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetRandomDirAvailableInvZ);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetRandomPosAvailableX);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetRandomPosAvailableY);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetRandomPosAvailableZ);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetRandomPosAvailableInvX);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetRandomPosAvailableInvY);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShape, GetRandomPosAvailableInvZ);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetIsEmitFromShell);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetIsRandomDirection);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetRandomDirAvailableX);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetRandomDirAvailableY);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetRandomDirAvailableZ);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetRandomDirAvailableInvX);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetRandomDirAvailableInvY);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetRandomDirAvailableInvZ);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetRandomPosAvailableX);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetRandomPosAvailableY);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetRandomPosAvailableZ);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetRandomPosAvailableInvX);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetRandomPosAvailableInvY);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShape, GetRandomPosAvailableInvZ);
 
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetIsEmitFromShell, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetIsRandomDirection, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetRandomDirAvailableX, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetRandomDirAvailableY, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetRandomDirAvailableZ, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetRandomDirAvailableInvX, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetRandomDirAvailableInvY, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetRandomDirAvailableInvZ, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetRandomPosAvailableX, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetRandomPosAvailableY, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetRandomPosAvailableZ, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetRandomPosAvailableInvX, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetRandomPosAvailableInvY, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShape, SetRandomPosAvailableInvZ, vBOOL);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetIsEmitFromShell);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetIsRandomDirection);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetRandomDirAvailableX);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetRandomDirAvailableY);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetRandomDirAvailableZ);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetRandomDirAvailableInvX);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetRandomDirAvailableInvY);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetRandomDirAvailableInvZ);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetRandomPosAvailableX);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetRandomPosAvailableY);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetRandomPosAvailableZ);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetRandomPosAvailableInvX);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetRandomPosAvailableInvY);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShape, SetRandomPosAvailableInvZ);
 
-	CSharpReturnAPI0(float, EngineNS, GfxParticleEmitterShapeBox, GetSizeX);
-	CSharpReturnAPI0(float, EngineNS, GfxParticleEmitterShapeBox, GetSizeY);
-	CSharpReturnAPI0(float, EngineNS, GfxParticleEmitterShapeBox, GetSizeZ);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShapeBox, SetSizeX, float);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShapeBox, SetSizeY, float);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShapeBox, SetSizeZ, float);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShapeBox, GetSizeX);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShapeBox, GetSizeY);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShapeBox, GetSizeZ);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShapeBox, SetSizeX);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShapeBox, SetSizeY);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShapeBox, SetSizeZ);
 
-	CSharpReturnAPI0(float, EngineNS, GfxParticleEmitterShapeCone, GetAngle);
-	CSharpReturnAPI0(float, EngineNS, GfxParticleEmitterShapeCone, GetRadius);
-	CSharpReturnAPI0(float, EngineNS, GfxParticleEmitterShapeCone, GetLength);
-	CSharpReturnAPI0(GfxParticleEmitterShapeCone::enDirectionType, EngineNS, GfxParticleEmitterShapeCone, GetDirType);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShapeCone, SetAngle, float);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShapeCone, SetRadius, float);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShapeCone, SetLength, float);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShapeCone, SetDirType, GfxParticleEmitterShapeCone::enDirectionType);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShapeCone, GetAngle);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShapeCone, GetRadius);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShapeCone, GetLength);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShapeCone, GetDirType);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShapeCone, SetAngle);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShapeCone, SetRadius);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShapeCone, SetLength);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShapeCone, SetDirType);
 
-	CSharpReturnAPI0(float, EngineNS, GfxParticleEmitterShapeSphere, GetRadius);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShapeSphere, GetIsRadialOutDirection);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShapeSphere, GetIsRadialInDirection);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxParticleEmitterShapeSphere, GetIsHemiSphere);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShapeSphere, SetRadius, float);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShapeSphere, SetIsRadialOutDirection, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShapeSphere, SetIsRadialInDirection, vBOOL);
-	CSharpAPI1(EngineNS, GfxParticleEmitterShapeSphere, SetIsHemiSphere, vBOOL);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShapeSphere, GetRadius);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShapeSphere, GetIsRadialOutDirection);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShapeSphere, GetIsRadialInDirection);
+	Cpp2CS0(EngineNS, GfxParticleEmitterShapeSphere, GetIsHemiSphere);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShapeSphere, SetRadius);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShapeSphere, SetIsRadialOutDirection);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShapeSphere, SetIsRadialInDirection);
+	Cpp2CS1(EngineNS, GfxParticleEmitterShapeSphere, SetIsHemiSphere);
 
-	CSharpAPI2(EngineNS, GfxParticleEmitterShapeMesh, SetPoints, v3dxVector3*, int);
+	Cpp2CS2(EngineNS, GfxParticleEmitterShapeMesh, SetPoints);
 }

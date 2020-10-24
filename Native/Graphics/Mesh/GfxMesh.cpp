@@ -171,17 +171,9 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI3(vBOOL, EngineNS, GfxMesh, Init, const char*, GfxMeshPrimitives*, GfxMdfQueue*);
-	////CSharpReturnAPI2(vBOOL, EngineNS, GfxMesh, SetMaterial, UINT, GfxMaterialPrimitive*);
-	CSharpAPI1(EngineNS, GfxMesh, SetMeshPrimitives, GfxMeshPrimitives*);
-	CSharpAPI1(EngineNS, GfxMesh, SetGfxMdfQueue, GfxMdfQueue*);
+	Cpp2CS3(EngineNS, GfxMesh, Init);
+	Cpp2CS1(EngineNS, GfxMesh, SetMeshPrimitives);
+	Cpp2CS1(EngineNS, GfxMesh, SetGfxMdfQueue);
 
-	////CSharpAPI1(EngineNS, GfxMesh, Save2Xnd, XNDNode*);
-	////CSharpReturnAPI1(vBOOL, EngineNS, GfxMesh, LoadXnd, XNDNode*);
-
-	////CSharpAPI1(EngineNS, GfxMesh, SetName, const char*);
-	////CSharpReturnAPI0(const char*, EngineNS, GfxMesh, GetName);
-	////CSharpReturnAPI0(const char*, EngineNS, GfxMesh, GetGeomName);
-	CSharpReturnAPI0(UINT, EngineNS, GfxMesh, GetAtomNumber);
-	////CSharpReturnAPI1(const char*, EngineNS, GfxMesh, GetMaterailName, UINT);
+	Cpp2CS0(EngineNS, GfxMesh, GetAtomNumber);
 }

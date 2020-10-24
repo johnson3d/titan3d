@@ -45,8 +45,8 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI2(EngineNS, IFrameBuffers, BindRenderTargetView, UINT, IRenderTargetView*);
-	CSharpAPI1(EngineNS, IFrameBuffers, BindDepthStencilView, IDepthStencilView*);
-	CSharpReturnAPI1(IRenderTargetView*, EngineNS, IFrameBuffers, GetRenderTargetView, UINT);
-	CSharpReturnAPI0(IDepthStencilView*, EngineNS, IFrameBuffers, GetDepthStencilView);
+	Cpp2CS2(EngineNS, IFrameBuffers, BindRenderTargetView);
+	Cpp2CS1(EngineNS, IFrameBuffers, BindDepthStencilView);
+	Cpp2CS1(EngineNS, IFrameBuffers, GetRenderTargetView);
+	Cpp2CS0(EngineNS, IFrameBuffers, GetDepthStencilView);
 }

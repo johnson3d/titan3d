@@ -39,8 +39,8 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI1(EngineNS, GfxSkeletonPose, AddBonePose, GfxBonePose*);
-	CSharpAPI1(EngineNS, GfxSkeletonPose, SetReferenceSkeleton, GfxSkeleton*);
+	Cpp2CS1(EngineNS, GfxSkeletonPose, AddBonePose);
+	Cpp2CS1(EngineNS, GfxSkeletonPose, SetReferenceSkeleton);
 
 }
 

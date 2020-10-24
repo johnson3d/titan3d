@@ -83,11 +83,11 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(UINT, EngineNS, GfxMdfQueue, GetMdfNumber);
-	CSharpAPI1(EngineNS, GfxMdfQueue, AddModifier, GfxModifier*);
-	CSharpReturnAPI1(UINT, EngineNS, GfxMdfQueue, FindModifier, const char*);
-	CSharpAPI1(EngineNS, GfxMdfQueue, RemoveModifier, UINT);
-	CSharpAPI0(EngineNS, GfxMdfQueue, ClearModifiers);
-	CSharpReturnAPI1(GfxModifier*, EngineNS, GfxMdfQueue, GetModifier, UINT);
-	CSharpAPI3(EngineNS, GfxMdfQueue, TickLogic, IRenderContext*, GfxMesh*, vTimeTick);
+	Cpp2CS0(EngineNS, GfxMdfQueue, GetMdfNumber);
+	Cpp2CS1(EngineNS, GfxMdfQueue, AddModifier);
+	Cpp2CS1(EngineNS, GfxMdfQueue, FindModifier);
+	Cpp2CS1(EngineNS, GfxMdfQueue, RemoveModifier);
+	Cpp2CS0(EngineNS, GfxMdfQueue, ClearModifiers);
+	Cpp2CS1(EngineNS, GfxMdfQueue, GetModifier);
+	Cpp2CS3(EngineNS, GfxMdfQueue, TickLogic);
 }

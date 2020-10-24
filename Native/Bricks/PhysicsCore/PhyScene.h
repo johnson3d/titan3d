@@ -94,7 +94,7 @@ public:
 
 		//typedef physx::PxSimulationFilterShader FPxSimulationFilterShader;
 		//typedef physx::PxFilterFlags(WINAPI*FPxSimulationFilterShader)(//void* self, 
-		typedef USHORT(WINAPI*FPxSimulationFilterShader)(//void* self, 这里不能是physx::PxFilterFlags，因为c#callback不能写出返回构造处理
+		typedef USHORT(WINAPI*FPxSimulationFilterShader)(
 			physx::PxFilterObjectAttributes attributes0, physx::PxFilterData* filterData0,
 			physx::PxFilterObjectAttributes attributes1, physx::PxFilterData* filterData1,
 			physx::PxPairFlags* pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize);

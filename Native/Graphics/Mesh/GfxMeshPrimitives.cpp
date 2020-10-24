@@ -1229,21 +1229,21 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI3(vBOOL, EngineNS, GfxMeshPrimitives, Init, IRenderContext*, const char*, UINT);
-	CSharpReturnAPI4(vBOOL, EngineNS, GfxMeshPrimitives, InitFromGeomtryMesh, IRenderContext*, IGeometryMesh*, UINT, const v3dxBox3*);
-	CSharpAPI2(EngineNS, GfxMeshPrimitives, Save2Xnd, IRenderContext*, XNDNode*);
-	CSharpReturnAPI4(vBOOL, EngineNS, GfxMeshPrimitives, LoadXnd, IRenderContext*, const char*, XNDNode*, bool);
-	CSharpReturnAPI0(IGeometryMesh*, EngineNS, GfxMeshPrimitives, GetGeomtryMesh);
-	CSharpReturnAPI0(GfxMdfQueue*, EngineNS, GfxMeshPrimitives, GetMdfQueue);
-	CSharpReturnAPI0(const char*, EngineNS, GfxMeshPrimitives, GetName);
-	CSharpReturnAPI0(UINT, EngineNS, GfxMeshPrimitives, GetAtomNumber);
+	Cpp2CS3(EngineNS, GfxMeshPrimitives, Init);
+	Cpp2CS4(EngineNS, GfxMeshPrimitives, InitFromGeomtryMesh);
+	Cpp2CS2(EngineNS, GfxMeshPrimitives, Save2Xnd);
+	Cpp2CS4(EngineNS, GfxMeshPrimitives, LoadXnd);
+	Cpp2CS0(EngineNS, GfxMeshPrimitives, GetGeomtryMesh);
+	Cpp2CS0(EngineNS, GfxMeshPrimitives, GetMdfQueue);
+	Cpp2CS0(EngineNS, GfxMeshPrimitives, GetName);
+	Cpp2CS0(EngineNS, GfxMeshPrimitives, GetAtomNumber);
 	CSharpReturnAPI3(vBOOL, EngineNS, GfxMeshPrimitives, GetAtom, UINT, UINT, DrawPrimitiveDesc*);
-	CSharpReturnAPI3(vBOOL, EngineNS, GfxMeshPrimitives, SetAtom, UINT, UINT, DrawPrimitiveDesc*);
-	CSharpAPI2(EngineNS, GfxMeshPrimitives, PushAtomLOD, UINT, DrawPrimitiveDesc*);
-	CSharpReturnAPI1(UINT, EngineNS, GfxMeshPrimitives, GetAtomLOD, UINT);
-	CSharpReturnAPI2(UINT, EngineNS, GfxMeshPrimitives, GetLodLevel, UINT, float);
-	CSharpReturnAPI6(vBOOL, EngineNS, GfxMeshPrimitives, SetGeomtryMeshStream, IRenderContext*, EVertexSteamType, void*, UINT, UINT , UINT);
-	CSharpReturnAPI5(vBOOL, EngineNS, GfxMeshPrimitives, SetGeomtryMeshIndex, IRenderContext*, void*, UINT, EIndexBufferType, UINT);
+	Cpp2CS3(EngineNS, GfxMeshPrimitives, SetAtom);
+	Cpp2CS2(EngineNS, GfxMeshPrimitives, PushAtomLOD);
+	Cpp2CS1(EngineNS, GfxMeshPrimitives, GetAtomLOD);
+	Cpp2CS2(EngineNS, GfxMeshPrimitives, GetLodLevel);
+	Cpp2CS6(EngineNS, GfxMeshPrimitives, SetGeomtryMeshStream);
+	Cpp2CS5(EngineNS, GfxMeshPrimitives, SetGeomtryMeshIndex);
 	struct Box3_t
 	{
 		v3dVector3_t MinBox;
@@ -1258,22 +1258,22 @@ extern "C"
 	{
 		self->SetAABB(*(v3dxBox3*)box);
 	}
-	CSharpReturnAPI3(vBOOL, EngineNS, GfxMeshPrimitives, RefreshResource, IRenderContext*, const char*, XNDNode*);
+	Cpp2CS3(EngineNS, GfxMeshPrimitives, RefreshResource);
 
-	CSharpReturnAPI2(vBOOL, EngineNS, GfxMeshDataProvider, InitFromMesh, IRenderContext*, GfxMeshPrimitives*);
-	CSharpReturnAPI3(vBOOL, EngineNS, GfxMeshDataProvider, Init, DWORD, EIndexBufferType, int);
-	CSharpReturnAPI0(UINT, EngineNS, GfxMeshDataProvider, GetVertexNumber);
-	CSharpReturnAPI0(UINT, EngineNS, GfxMeshDataProvider, GetTriangleNumber);
-	CSharpReturnAPI0(UINT, EngineNS, GfxMeshDataProvider, GetAtomNumber);
-	CSharpReturnAPI1(IBlobObject*, EngineNS, GfxMeshDataProvider, GetStream, EVertexSteamType);
-	CSharpReturnAPI0(IBlobObject*, EngineNS, GfxMeshDataProvider, GetIndices);
+	Cpp2CS2(EngineNS, GfxMeshDataProvider, InitFromMesh);
+	Cpp2CS3(EngineNS, GfxMeshDataProvider, Init);
+	Cpp2CS0(EngineNS, GfxMeshDataProvider, GetVertexNumber);
+	Cpp2CS0(EngineNS, GfxMeshDataProvider, GetTriangleNumber);
+	Cpp2CS0(EngineNS, GfxMeshDataProvider, GetAtomNumber);
+	Cpp2CS1(EngineNS, GfxMeshDataProvider, GetStream);
+	Cpp2CS0(EngineNS, GfxMeshDataProvider, GetIndices);
 	CSharpReturnAPI3(vBOOL, EngineNS, GfxMeshDataProvider, GetAtom, UINT, UINT, DrawPrimitiveDesc*);
-	CSharpReturnAPI3(vBOOL, EngineNS, GfxMeshDataProvider, SetAtom, UINT, UINT, const DrawPrimitiveDesc*);
-	CSharpAPI2(EngineNS, GfxMeshDataProvider, PushAtomLOD, UINT, const DrawPrimitiveDesc*);
-	CSharpReturnAPI1(UINT, EngineNS, GfxMeshDataProvider, GetAtomLOD, UINT);
-	CSharpReturnAPI4(vBOOL, EngineNS, GfxMeshDataProvider, GetTriangle, int, UINT*, UINT*, UINT*);
-	CSharpReturnAPI5(vBOOL, EngineNS, GfxMeshDataProvider, GetAtomTriangle, UINT, UINT, UINT*, UINT*, UINT*);
-	CSharpReturnAPI3(int, EngineNS, GfxMeshDataProvider, IntersectTriangle, const v3dxVector3*, const v3dxVector3*, float*);
-	CSharpReturnAPI2(void*, EngineNS, GfxMeshDataProvider, GetVertexPtr, EVertexSteamType, UINT);
-	CSharpReturnAPI2(vBOOL, EngineNS, GfxMeshDataProvider, ToMesh, IRenderContext*, GfxMeshPrimitives*);
+	Cpp2CS3(EngineNS, GfxMeshDataProvider, SetAtom);
+	Cpp2CS2(EngineNS, GfxMeshDataProvider, PushAtomLOD);
+	Cpp2CS1(EngineNS, GfxMeshDataProvider, GetAtomLOD);
+	Cpp2CS4(EngineNS, GfxMeshDataProvider, GetTriangle);
+	Cpp2CS5(EngineNS, GfxMeshDataProvider, GetAtomTriangle);
+	Cpp2CS3(EngineNS, GfxMeshDataProvider, IntersectTriangle);
+	Cpp2CS2(EngineNS, GfxMeshDataProvider, GetVertexPtr);
+	Cpp2CS2(EngineNS, GfxMeshDataProvider, ToMesh);
 }

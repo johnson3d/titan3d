@@ -17,7 +17,7 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI1(EngineNS, PhyEntity, SetCSharpHandle, void*);
-	CSharpReturnAPI0(void*, EngineNS, PhyEntity, GetCSharpHandle);
-	CSharpReturnAPI0(PhyEntityType, EngineNS, PhyEntity, GetEntityType);
+	Cpp2CS1(EngineNS, PhyEntity, SetCSharpHandle);
+	Cpp2CS0(EngineNS, PhyEntity, GetCSharpHandle);
+	Cpp2CS0(EngineNS, PhyEntity, GetEntityType);
 }

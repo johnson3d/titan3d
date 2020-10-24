@@ -135,13 +135,13 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(const char*, EngineNS, IConstantBuffer, GetName);
-	CSharpReturnAPI0(UINT, EngineNS, IConstantBuffer, GetSize);
-	CSharpReturnAPI2(vBOOL, EngineNS, IConstantBuffer, IsSameVars, IShaderProgram*, UINT);
-	CSharpReturnAPI1(int, EngineNS, IConstantBuffer, FindVar, const char*);
-	CSharpReturnAPI2(vBOOL, EngineNS, IConstantBuffer, GetVarDesc, int, ConstantVarDesc*);
-	CSharpReturnAPI4(vBOOL, EngineNS, IConstantBuffer, SetVarValuePtr, int, void*, int, UINT);
-	CSharpReturnAPI2(void*, EngineNS, IConstantBuffer, GetVarValueAddress, int, UINT);
-	CSharpAPI1(EngineNS, IConstantBuffer, FlushContent, ICommandList*);
-	CSharpReturnAPI1(vBOOL, EngineNS, IConstantBuffer, FlushContent2, IRenderContext*);
+	Cpp2CS0(EngineNS, IConstantBuffer, GetName);
+	Cpp2CS0(EngineNS, IConstantBuffer, GetSize);
+	Cpp2CS2(EngineNS, IConstantBuffer, IsSameVars);
+	Cpp2CS1(EngineNS, IConstantBuffer, FindVar);
+	Cpp2CS2(EngineNS, IConstantBuffer, GetVarDesc);
+	Cpp2CS4(EngineNS, IConstantBuffer, SetVarValuePtr);
+	Cpp2CS2(EngineNS, IConstantBuffer, GetVarValueAddress);
+	Cpp2CS1(EngineNS, IConstantBuffer, FlushContent);
+	Cpp2CS1(EngineNS, IConstantBuffer, FlushContent2);
 }

@@ -25,6 +25,6 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI1(EngineNS, IBlendState, GetDesc, IBlendStateDesc*);
-	CSharpAPI1(EngineNS, IBlendState, SetDesc, IBlendStateDesc*);
+	Cpp2CS1(EngineNS, IBlendState, GetDesc);
+	Cpp2CS1(EngineNS, IBlendState, SetDesc);
 }

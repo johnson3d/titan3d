@@ -118,5 +118,5 @@ NS_END
 using namespace EngineNS;
 extern "C"
 {
-	CSharpAPI2(EngineNS, GfxBoneCurve, EvaluateMotionState, float, GfxMotionState*);
+	Cpp2CS2(EngineNS, GfxBoneCurve, EvaluateMotionState);
 }

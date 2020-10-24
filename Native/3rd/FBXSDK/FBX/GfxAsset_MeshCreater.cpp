@@ -75,7 +75,6 @@ FbxNode* GetSkeletonRootNode(FbxNode* boneNode)
 	return GetSkeletonRootNode(boneNode->GetParent());
 }
 
-//生成没在cluster里的骨骼
 void GfxAsset_MeshCreater::RecursionCalculateBone(FbxNode* boneNode, GfxSkeleton* skeleton, std::vector<BoneCluster> boneClusters)
 {
 	if (boneNode == NULL)
@@ -563,6 +562,6 @@ NS_END
 using namespace EngineNS;
 extern "C"
 {
-	CSharpAPI1(EngineNS, GfxAsset_MeshCreater, SetMeshPrimitives, GfxMeshPrimitives*);
-	CSharpReturnAPI0(GfxSkeleton*, EngineNS, GfxAsset_MeshCreater, GetFullSkeleton);
+	Cpp2CS1(EngineNS, GfxAsset_MeshCreater, SetMeshPrimitives);
+	Cpp2CS0(EngineNS, GfxAsset_MeshCreater, GetFullSkeleton);
 }

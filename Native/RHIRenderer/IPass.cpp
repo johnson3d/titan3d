@@ -494,64 +494,64 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(float, EngineNS, IViewPort, GetTopLeftX);
-	CSharpAPI1(EngineNS, IViewPort, SetTopLeftX, float);
-	CSharpReturnAPI0(float, EngineNS, IViewPort, GetTopLeftY);
-	CSharpAPI1(EngineNS, IViewPort, SetTopLeftY, float);
-	CSharpReturnAPI0(float, EngineNS, IViewPort, GetWidth);
-	CSharpAPI1(EngineNS, IViewPort, SetWidth, float);
-	CSharpReturnAPI0(float, EngineNS, IViewPort, GetHeight);
-	CSharpAPI1(EngineNS, IViewPort, SetHeight, float);
-	CSharpReturnAPI0(float, EngineNS, IViewPort, GetMinDepth);
-	CSharpAPI1(EngineNS, IViewPort, SetMinDepth, float);
-	CSharpReturnAPI0(float, EngineNS, IViewPort, GetMaxDepth);
-	CSharpAPI1(EngineNS, IViewPort, SetMaxDepth, float);
+	Cpp2CS0(EngineNS, IViewPort, GetTopLeftX);
+	Cpp2CS1(EngineNS, IViewPort, SetTopLeftX);
+	Cpp2CS0(EngineNS, IViewPort, GetTopLeftY);
+	Cpp2CS1(EngineNS, IViewPort, SetTopLeftY);
+	Cpp2CS0(EngineNS, IViewPort, GetWidth);
+	Cpp2CS1(EngineNS, IViewPort, SetWidth);
+	Cpp2CS0(EngineNS, IViewPort, GetHeight);
+	Cpp2CS1(EngineNS, IViewPort, SetHeight);
+	Cpp2CS0(EngineNS, IViewPort, GetMinDepth);
+	Cpp2CS1(EngineNS, IViewPort, SetMinDepth);
+	Cpp2CS0(EngineNS, IViewPort, GetMaxDepth);
+	Cpp2CS1(EngineNS, IViewPort, SetMaxDepth);
 
-	CSharpAPI1(EngineNS, IScissorRect, SetRectNumber, UINT);
-	CSharpReturnAPI0(UINT, EngineNS, IScissorRect, GetRectNumber);
-	CSharpAPI5(EngineNS, IScissorRect, SetSCRect, UINT, int, int, int, int);
-	CSharpAPI2(EngineNS, IScissorRect, GetSCRect, UINT, IScissorRect::SRRect*);
+	Cpp2CS1(EngineNS, IScissorRect, SetRectNumber);
+	Cpp2CS0(EngineNS, IScissorRect, GetRectNumber);
+	Cpp2CS5(EngineNS, IScissorRect, SetSCRect);
+	Cpp2CS2(EngineNS, IScissorRect, GetSCRect);
 
-	CSharpAPI2(EngineNS, IShaderResources, VSBindTexture, BYTE, IShaderResourceView*);
-	CSharpAPI2(EngineNS, IShaderResources, PSBindTexture, BYTE, IShaderResourceView*);
-	CSharpReturnAPI1(IShaderResourceView*, EngineNS, IShaderResources, GetBindTextureVS, BYTE);
-	CSharpReturnAPI1(IShaderResourceView*, EngineNS, IShaderResources, GetBindTexturePS, BYTE);
+	Cpp2CS2(EngineNS, IShaderResources, VSBindTexture);
+	Cpp2CS2(EngineNS, IShaderResources, PSBindTexture);
+	Cpp2CS1(EngineNS, IShaderResources, GetBindTextureVS);
+	Cpp2CS1(EngineNS, IShaderResources, GetBindTexturePS);
 
-	CSharpReturnAPI0(UINT, EngineNS, IShaderResources, PSResourceNum);
-	CSharpReturnAPI0(UINT, EngineNS, IShaderResources, VSResourceNum);
+	Cpp2CS0(EngineNS, IShaderResources, PSResourceNum);
+	Cpp2CS0(EngineNS, IShaderResources, VSResourceNum);
 
-	CSharpAPI2(EngineNS, IShaderSamplers, VSBindSampler, BYTE, ISamplerState*);
-	CSharpAPI2(EngineNS, IShaderSamplers, PSBindSampler, BYTE, ISamplerState*);
+	Cpp2CS2(EngineNS, IShaderSamplers, VSBindSampler);
+	Cpp2CS2(EngineNS, IShaderSamplers, PSBindSampler);
 
-	CSharpReturnAPI0(DWORD, EngineNS, IPass, GetUserFlags);
-	CSharpAPI1(EngineNS, IPass, SetUserFlags, DWORD);
+	Cpp2CS0(EngineNS, IPass, GetUserFlags);
+	Cpp2CS1(EngineNS, IPass, SetUserFlags);
 
-	CSharpAPI1(EngineNS, IPass, BindPipeline, IRenderPipeline*);
-	CSharpAPI1(EngineNS, IPass, BindGpuProgram, IShaderProgram*);
-	CSharpAPI3(EngineNS, IPass, BindGeometry, GfxMeshPrimitives*, UINT, float);
-	CSharpReturnAPI0(float, EngineNS, IPass, GetLod);
-	CSharpAPI1(EngineNS, IPass, SetLod, float);
-	CSharpAPI1(EngineNS, IPass, BindShaderResouces, IShaderResources*);
-	CSharpAPI1(EngineNS, IPass, BindShaderSamplers, IShaderSamplers*);
-	CSharpAPI1(EngineNS, IPass, BindViewPort, IViewPort*);
-	CSharpAPI1(EngineNS, IPass, BindScissor, IScissorRect*);
+	Cpp2CS1(EngineNS, IPass, BindPipeline);
+	Cpp2CS1(EngineNS, IPass, BindGpuProgram);
+	Cpp2CS3(EngineNS, IPass, BindGeometry);
+	Cpp2CS0(EngineNS, IPass, GetLod);
+	Cpp2CS1(EngineNS, IPass, SetLod);
+	Cpp2CS1(EngineNS, IPass, BindShaderResouces);
+	Cpp2CS1(EngineNS, IPass, BindShaderSamplers);
+	Cpp2CS1(EngineNS, IPass, BindViewPort);
+	Cpp2CS1(EngineNS, IPass, BindScissor);
 
-	CSharpAPI2(EngineNS, IPass, BindCBufferVS, UINT32, IConstantBuffer*);
-	CSharpAPI2(EngineNS, IPass, BindCBufferPS, UINT32, IConstantBuffer*);
+	Cpp2CS2(EngineNS, IPass, BindCBufferVS);
+	Cpp2CS2(EngineNS, IPass, BindCBufferPS);
 
-	CSharpAPI1(EngineNS, IPass, SetInstanceNumber, int);
-	CSharpAPI2(EngineNS, IPass, SetIndirectDraw, IGpuBuffer*, UINT);
+	Cpp2CS1(EngineNS, IPass, SetInstanceNumber);
+	Cpp2CS2(EngineNS, IPass, SetIndirectDraw);
 
-	CSharpAPI1(EngineNS, IPass, BindAttachVBs, IVertexArray*);
-	CSharpAPI1(EngineNS, IPass, BindAttachIndexBuffer, IIndexBuffer*);
-	CSharpAPI1(EngineNS, IPass, BindAttachSRVs, IShaderResources*);
+	Cpp2CS1(EngineNS, IPass, BindAttachVBs);
+	Cpp2CS1(EngineNS, IPass, BindAttachIndexBuffer);
+	Cpp2CS1(EngineNS, IPass, BindAttachSRVs);
 
-	CSharpReturnAPI0(IRenderPipeline*, EngineNS, IPass, GetPipeline);
-	CSharpReturnAPI0(IShaderProgram*, EngineNS, IPass, GetGpuProgram);
-	CSharpReturnAPI0(IShaderResources*, EngineNS, IPass, GetShaderResurces);
-	CSharpAPI1(EngineNS, IPass, GetDrawPrimitive, DrawPrimitiveDesc*);
-	CSharpReturnAPI1(IConstantBuffer*, EngineNS, IPass, FindCBufferVS, const char*);
-	CSharpReturnAPI1(IConstantBuffer*, EngineNS, IPass, FindCBufferPS, const char*);
+	Cpp2CS0(EngineNS, IPass, GetPipeline);
+	Cpp2CS0(EngineNS, IPass, GetGpuProgram);
+	Cpp2CS0(EngineNS, IPass, GetShaderResurces);
+	Cpp2CS1(EngineNS, IPass, GetDrawPrimitive);
+	Cpp2CS1(EngineNS, IPass, FindCBufferVS);
+	Cpp2CS1(EngineNS, IPass, FindCBufferPS);
 
-	CSharpAPI3(EngineNS, IPass, BindCBuffAll, IShaderProgram*, UINT, IConstantBuffer*)
+	Cpp2CS3(EngineNS, IPass, BindCBuffAll)
 }

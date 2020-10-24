@@ -150,19 +150,15 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI3(vBOOL, EngineNS, GfxSceneView, Init, EngineNS::IRenderContext*, UINT, UINT);
-	CSharpAPI1(EngineNS, GfxSceneView, SetViewport, EngineNS::IViewPort*);
-	//CSharpAPI1(EngineNS, GfxSceneView, ClearPasses, EngineNS::ERenderLayer);
-	CSharpAPI2(EngineNS, GfxSceneView, SendPassToCorrectRenderLayer, EngineNS::ERenderLayer, EngineNS::IPass*);
-	CSharpAPI1(EngineNS, GfxSceneView, SetFrameBuffers, EngineNS::IFrameBuffers*);
-	CSharpAPI1(EngineNS, GfxSceneView, BindConstBuffer, EngineNS::IConstantBuffer*);
-	//CSharpAPI0(EngineNS, GfxSceneView, UpdateConstBufferData);
+	Cpp2CS3(EngineNS, GfxSceneView, Init);
+	Cpp2CS1(EngineNS, GfxSceneView, SetViewport);
+	Cpp2CS2(EngineNS, GfxSceneView, SendPassToCorrectRenderLayer);
+	Cpp2CS1(EngineNS, GfxSceneView, SetFrameBuffers);
+	Cpp2CS1(EngineNS, GfxSceneView, BindConstBuffer);
 	
-	CSharpAPI4(EngineNS, GfxSceneView, ResizeViewport, UINT, UINT, UINT, UINT);
+	Cpp2CS4(EngineNS, GfxSceneView, ResizeViewport);
 
 	typedef const std::pair<BYTE, DWORD>* ClearColorArg;
-	//CSharpAPI7(EngineNS, GfxSceneView, ClearMRT, ICommandList*, ClearColorArg, int, bool, float, bool, UINT);
-	//CSharpAPI1(EngineNS, GfxSceneView, CmdClearMRT, ICommandList*);
-	CSharpReturnAPI0(UINT, EngineNS, GfxSceneView, GetRenderLayerSize);
-	CSharpAPI2(EngineNS, GfxSceneView, PushSpecRenderLayerDataToRHI, ICommandList*, EngineNS::ERenderLayer);
+	Cpp2CS0(EngineNS, GfxSceneView, GetRenderLayerSize);
+	Cpp2CS2(EngineNS, GfxSceneView, PushSpecRenderLayerDataToRHI);
 }

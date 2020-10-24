@@ -39,12 +39,12 @@ extern "C"
 {
 	////CSharpReturnAPI0(const char*, EngineNS, IShaderResourceView, GetName);
 	////CSharpAPI1(EngineNS, IShaderResourceView, SetName, const char*);
-	CSharpAPI1(EngineNS, IShaderResourceView, GetTxDesc, ITxPicDesc*);
-	CSharpReturnAPI0(EPixelFormat, EngineNS, IShaderResourceView, GetTextureFormat);
-	CSharpReturnAPI3(vBOOL, EngineNS, IShaderResourceView, Save2Memory, IRenderContext*, IBlobObject*, int);
-	CSharpReturnAPI5(vBOOL, EngineNS, IShaderResourceView, GetTexture2DData, IRenderContext*, IBlobObject*, int, int, int);
-	CSharpAPI0(EngineNS, IShaderResourceView, RefreshResource);
-	CSharpReturnAPI0(GfxTextureStreaming*, EngineNS, IShaderResourceView, GetTexStreaming);
+	Cpp2CS1(EngineNS, IShaderResourceView, GetTxDesc);
+	Cpp2CS0(EngineNS, IShaderResourceView, GetTextureFormat);
+	Cpp2CS3(EngineNS, IShaderResourceView, Save2Memory);
+	Cpp2CS5(EngineNS, IShaderResourceView, GetTexture2DData);
+	Cpp2CS0(EngineNS, IShaderResourceView, RefreshResource);
+	Cpp2CS0(EngineNS, IShaderResourceView, GetTexStreaming);
 
 	VFX_API vBOOL SDK_ImageEncoder_SaveETC2(const char* file, XNDAttrib* attr, int mipLevel, vBOOL sRGB)
 	{

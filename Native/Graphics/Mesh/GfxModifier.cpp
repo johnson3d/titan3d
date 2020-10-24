@@ -55,13 +55,13 @@ NS_END
 using namespace EngineNS;
 extern "C"
 {
-	CSharpReturnAPI0(const char*, EngineNS, GfxModifier, GetName);
-	CSharpAPI1(EngineNS, GfxModifier, SetName, const char*);
-	CSharpReturnAPI0(const char*, EngineNS, GfxModifier, GetShaderModuleName);
-	CSharpAPI1(EngineNS, GfxModifier, SetShaderModuleName, const char*);
-	CSharpAPI3(EngineNS, GfxModifier, TickLogic, IRenderContext*, GfxMesh*, vTimeTick);
-	CSharpAPI3(EngineNS, GfxModifier, TickSync, IRenderContext*, GfxMesh*, vTimeTick);
-	CSharpAPI1(EngineNS, GfxModifier, Save2Xnd, XNDNode*);
-	CSharpReturnAPI1(vBOOL, EngineNS, GfxModifier, LoadXnd, XNDNode*);
-	CSharpReturnAPI1(GfxModifier*, EngineNS, GfxModifier, CloneModifier, IRenderContext*);
+	Cpp2CS0(EngineNS, GfxModifier, GetName);
+	Cpp2CS1(EngineNS, GfxModifier, SetName);
+	Cpp2CS0(EngineNS, GfxModifier, GetShaderModuleName);
+	Cpp2CS1(EngineNS, GfxModifier, SetShaderModuleName);
+	Cpp2CS3(EngineNS, GfxModifier, TickLogic);
+	Cpp2CS3(EngineNS, GfxModifier, TickSync);
+	Cpp2CS1(EngineNS, GfxModifier, Save2Xnd);
+	Cpp2CS1(EngineNS, GfxModifier, LoadXnd);
+	Cpp2CS1(EngineNS, GfxModifier, CloneModifier);
 }

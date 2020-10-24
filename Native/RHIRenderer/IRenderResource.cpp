@@ -68,13 +68,13 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(UINT, EngineNS, IBlobObject, GetSize);
-	CSharpReturnAPI0(void*, EngineNS, IBlobObject, GetData);
-	CSharpAPI2(EngineNS, IBlobObject, PushData, BYTE*, UINT);
-	CSharpAPI1(EngineNS, IBlobObject, ReSize, UINT);
+	Cpp2CS0(EngineNS, IBlobObject, GetSize);
+	Cpp2CS0(EngineNS, IBlobObject, GetData);
+	Cpp2CS2(EngineNS, IBlobObject, PushData);
+	Cpp2CS1(EngineNS, IBlobObject, ReSize);
 
-	CSharpAPI1(EngineNS, IBlobObject, ReadFromXnd, XNDAttrib*);
-	CSharpAPI1(EngineNS, IBlobObject, Write2Xnd, XNDAttrib*);
+	Cpp2CS1(EngineNS, IBlobObject, ReadFromXnd);
+	Cpp2CS1(EngineNS, IBlobObject, Write2Xnd);
 
 	VFX_API void SDK_RResourceSwapChain_TickSwap(IRenderContext* rc)
 	{

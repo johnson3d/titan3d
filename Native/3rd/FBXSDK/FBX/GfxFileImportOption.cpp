@@ -50,11 +50,11 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(UINT, EngineNS, GfxFileImportOption, GetAssetCount);
-	CSharpReturnAPI1(ImportAssetType, EngineNS, GfxFileImportOption, GetAssetType,UINT);
-	CSharpReturnAPI1(GfxAssetImportOption*, EngineNS, GfxFileImportOption, GetAssetImportOption, UINT);
-	CSharpReturnAPI0(const char*, EngineNS, GfxFileImportOption, GetFileCreater);
-	CSharpReturnAPI0(vBOOL, EngineNS, GfxFileImportOption, GetConvertSceneUnit);
-	CSharpAPI1(EngineNS, GfxFileImportOption, SetConvertSceneUnit,vBOOL);
-	CSharpReturnAPI0(SystemUnit, EngineNS, GfxFileImportOption, GetFileSystemUnit);
+	Cpp2CS0(EngineNS, GfxFileImportOption, GetAssetCount);
+	Cpp2CS1(EngineNS, GfxFileImportOption, GetAssetType);
+	Cpp2CS1(EngineNS, GfxFileImportOption, GetAssetImportOption);
+	Cpp2CS0(EngineNS, GfxFileImportOption, GetFileCreater);
+	Cpp2CS0(EngineNS, GfxFileImportOption, GetConvertSceneUnit);
+	Cpp2CS1(EngineNS, GfxFileImportOption, SetConvertSceneUnit);
+	Cpp2CS0(EngineNS, GfxFileImportOption, GetFileSystemUnit);
 }

@@ -19,9 +19,9 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(ITexture2D*, EngineNS, ISwapChain, GetTexture2D);
-	CSharpAPI0(EngineNS, ISwapChain, OnLost);
-	CSharpReturnAPI1(vBOOL, EngineNS, ISwapChain, OnRestore, const ISwapChainDesc*);
-	CSharpAPI1(EngineNS, ISwapChain, GetDesc, ISwapChainDesc*);
-	CSharpAPI2(EngineNS, ISwapChain, Present, UINT, UINT);
+	Cpp2CS0(EngineNS, ISwapChain, GetTexture2D);
+	Cpp2CS0(EngineNS, ISwapChain, OnLost);
+	Cpp2CS1(EngineNS, ISwapChain, OnRestore);
+	Cpp2CS1(EngineNS, ISwapChain, GetDesc);
+	Cpp2CS2(EngineNS, ISwapChain, Present);
 }

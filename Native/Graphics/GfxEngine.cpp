@@ -76,6 +76,6 @@ extern "C"
 		return new EngineNS::GfxEngine();
 	}
 	
-	CSharpReturnAPI6(vBOOL, EngineNS, GfxEngine, Init, EngineNS::ERHIType, IRenderSystem*, IRenderContext*, const char*, const char*, const char*);
-	CSharpAPI1(EngineNS, GfxEngine, SetEngineTime, vTimeTick);
+	Cpp2CS6(EngineNS, GfxEngine, Init);
+	Cpp2CS1(EngineNS, GfxEngine, SetEngineTime);
 }

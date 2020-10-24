@@ -763,9 +763,15 @@ NS_END
 
 using namespace EngineNS;
 
+template <>
+struct Type2TypeConverter<v3dxVector3>
+{
+	typedef v3dVector3_t		TarType;
+};
+
 extern "C"
 {
-	CSharpAPI1(EngineNS, TileMeshBuilder, SetTileSize, float);
-	CSharpReturnAPI0(float, EngineNS, TileMeshBuilder, GetTileSize);
-	CSharpReturnAPI1(v3dVector3_t, EngineNS, TileMeshBuilder, CorrectPosition, v3dxVector3);
+	Cpp2CS1(EngineNS, TileMeshBuilder, SetTileSize);
+	Cpp2CS0(EngineNS, TileMeshBuilder, GetTileSize);
+	Cpp2CS1(EngineNS, TileMeshBuilder, CorrectPosition);
 }

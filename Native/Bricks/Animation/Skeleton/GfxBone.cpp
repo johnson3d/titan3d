@@ -21,14 +21,14 @@ struct GfxBoneSharedData : VIUnknown {
 	std::string						Name;
 	//UINT							Index;
 	UINT							ParentIndex;
-	//int								BoneNameHashID;		// ¹ÇÍ·Ãû×ÖµÄHASH ID£¬ÓÃÕâ¸öÀ´´úÌæm_BoneName×öÅÐ¶Ï
+	//int								BoneNameHashID;
 	//UINT							IndexInFullSkeleton;
 	//std::vector<UINT>				ChildBones;
 
 	v3dxMatrix4						InitMatrix;
 	v3dxMatrix4						InvInitMatrix;
 
-	// äÖÈ¾¹ÇÍ·µÄÊý¾Ý
+	// ï¿½ï¿½È¾ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	std::vector<v3dxVector3>		Verts;
 	std::vector<SHORT>				Indices;
 	v3dxVector3						BoxDimension;
@@ -121,37 +121,37 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(const char*, EngineNS, GfxBoneDesc, GetName);
-	CSharpAPI1(EngineNS, GfxBoneDesc, SetName, const char*);
-	CSharpReturnAPI0(UINT, EngineNS, GfxBoneDesc, GetNameHash);
-	CSharpReturnAPI0(const char*, EngineNS, GfxBoneDesc, GetParent);
-	CSharpAPI1(EngineNS, GfxBoneDesc, SetParent, const char*);
-	CSharpReturnAPI0(const char*, EngineNS, GfxBoneDesc, GetGrantParent);
-	CSharpAPI1(EngineNS, GfxBoneDesc, SetGrantParent, const char*);
-	CSharpReturnAPI0(UINT, EngineNS, GfxBoneDesc, GetParentHash);
-	CSharpReturnAPI0(float, EngineNS, GfxBoneDesc, GetGrantWeight);
-	CSharpAPI1(EngineNS, GfxBoneDesc, SetGrantWeight, float);
-	CSharpAPI1(EngineNS, GfxBoneDesc, GetBindMatrix, v3dxMatrix4*);
-	CSharpAPI1(EngineNS, GfxBoneDesc, SetBindMatrix, v3dxMatrix4*);
-	CSharpAPI1(EngineNS, GfxBoneDesc, GetBindInvInitMatrix, v3dxMatrix4*);
-	CSharpAPI1(EngineNS, GfxBoneDesc, SetBindInvInitMatrix, v3dxMatrix4*);
-	CSharpAPI1(EngineNS, GfxBoneDesc, GetInvPos, v3dxVector3*);
-	CSharpAPI1(EngineNS, GfxBoneDesc, SetInvPos, v3dxVector3*);
-	CSharpAPI1(EngineNS, GfxBoneDesc, GetInvScale, v3dxVector3*);
-	CSharpAPI1(EngineNS, GfxBoneDesc, SetInvScale, v3dxVector3*);
-	CSharpAPI1(EngineNS, GfxBoneDesc, GetInvQuat, v3dxQuaternion*);
-	CSharpAPI1(EngineNS, GfxBoneDesc, SetInvQuat, v3dxQuaternion*);
-	CSharpReturnAPI0(BoneType, EngineNS, GfxBoneDesc, GetBoneType);
-	CSharpAPI1(EngineNS, GfxBoneDesc, SetBoneType, BoneType);
+	Cpp2CS0(EngineNS, GfxBoneDesc, GetName);
+	Cpp2CS1(EngineNS, GfxBoneDesc, SetName);
+	Cpp2CS0(EngineNS, GfxBoneDesc, GetNameHash);
+	Cpp2CS0(EngineNS, GfxBoneDesc, GetParent);
+	Cpp2CS1(EngineNS, GfxBoneDesc, SetParent);
+	Cpp2CS0(EngineNS, GfxBoneDesc, GetGrantParent);
+	Cpp2CS1(EngineNS, GfxBoneDesc, SetGrantParent);
+	Cpp2CS0(EngineNS, GfxBoneDesc, GetParentHash);
+	Cpp2CS0(EngineNS, GfxBoneDesc, GetGrantWeight);
+	Cpp2CS1(EngineNS, GfxBoneDesc, SetGrantWeight);
+	Cpp2CS1(EngineNS, GfxBoneDesc, GetBindMatrix);
+	Cpp2CS1(EngineNS, GfxBoneDesc, SetBindMatrix);
+	Cpp2CS1(EngineNS, GfxBoneDesc, GetBindInvInitMatrix);
+	Cpp2CS1(EngineNS, GfxBoneDesc, SetBindInvInitMatrix);
+	Cpp2CS1(EngineNS, GfxBoneDesc, GetInvPos);
+	Cpp2CS1(EngineNS, GfxBoneDesc, SetInvPos);
+	Cpp2CS1(EngineNS, GfxBoneDesc, GetInvScale);
+	Cpp2CS1(EngineNS, GfxBoneDesc, SetInvScale);
+	Cpp2CS1(EngineNS, GfxBoneDesc, GetInvQuat);
+	Cpp2CS1(EngineNS, GfxBoneDesc, SetInvQuat);
+	Cpp2CS0(EngineNS, GfxBoneDesc, GetBoneType);
+	Cpp2CS1(EngineNS, GfxBoneDesc, SetBoneType);
 
-	CSharpReturnAPI0(GfxBoneDesc*, EngineNS, GfxBone, GetBoneDesc);
-	CSharpAPI1(EngineNS, GfxBone, SetBoneDesc, GfxBoneDesc*);
+	Cpp2CS0(EngineNS, GfxBone, GetBoneDesc);
+	Cpp2CS1(EngineNS, GfxBone, SetBoneDesc);
 
-	CSharpReturnAPI0(USHORT, EngineNS, GfxBone, GetIndexInTable);
-	CSharpAPI1(EngineNS, GfxBone, SetIndexInTable, USHORT);
-	CSharpReturnAPI0(UINT, EngineNS, GfxBone, GetChildNumber);
-	CSharpReturnAPI1(USHORT, EngineNS, GfxBone, GetChild, UINT);
-	CSharpAPI1(EngineNS, GfxBone, AddChild, UINT);
-	CSharpAPI0(EngineNS, GfxBone, ClearChildren);
+	Cpp2CS0(EngineNS, GfxBone, GetIndexInTable);
+	Cpp2CS1(EngineNS, GfxBone, SetIndexInTable);
+	Cpp2CS0(EngineNS, GfxBone, GetChildNumber);
+	Cpp2CS1(EngineNS, GfxBone, GetChild);
+	Cpp2CS1(EngineNS, GfxBone, AddChild);
+	Cpp2CS0(EngineNS, GfxBone, ClearChildren);
 }
 

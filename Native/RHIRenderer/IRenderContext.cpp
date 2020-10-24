@@ -673,45 +673,44 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(int, EngineNS, IRenderContext, GetShaderModel);
+	Cpp2CS0(EngineNS, IRenderContext, GetShaderModel);
 	VFX_API void SDK_IRenderContext_ChooseShaderModel(int sm)
 	{
 		IRenderContext::mChooseShaderModel = sm;
 	}
-	CSharpReturnAPI0(ICommandList*, EngineNS, IRenderContext, GetImmCommandList);
-	CSharpAPI0(EngineNS, IRenderContext, FlushImmContext);
-	CSharpReturnAPI0(IPass*, EngineNS, IRenderContext, CreatePass);
-	CSharpReturnAPI1(ISwapChain*, EngineNS, IRenderContext, CreateSwapChain, const ISwapChainDesc*);
-	//CSharpAPI1(EngineNS, IRenderContext, BindCurrentSwapChain, EngineNS::ISwapChain*);
-	//CSharpAPI2(EngineNS, IRenderContext, Present, UINT, UINT);
-	CSharpReturnAPI1(IShaderResourceView*, EngineNS, IRenderContext, LoadShaderResourceView, const char*);
-	CSharpReturnAPI1(ITexture2D*, EngineNS, IRenderContext, CreateTexture2D, const EngineNS::ITexture2DDesc*);
-	CSharpReturnAPI1(IRenderTargetView*, EngineNS, IRenderContext, CreateRenderTargetView, const EngineNS::IRenderTargetViewDesc*);
-	CSharpReturnAPI1(IDepthStencilView*, EngineNS, IRenderContext, CreateDepthRenderTargetView, const EngineNS::IDepthStencilViewDesc*);
-	CSharpReturnAPI1(IShaderResourceView*, EngineNS, IRenderContext, CreateShaderResourceView, const IShaderResourceViewDesc*);
-	CSharpReturnAPI2(IGpuBuffer*, EngineNS, IRenderContext, CreateGpuBuffer, const IGpuBufferDesc*, void*);
-	CSharpReturnAPI2(IShaderResourceView*, EngineNS, IRenderContext, CreateShaderResourceViewFromBuffer, IGpuBuffer*, const ISRVDesc*);
-	CSharpReturnAPI2(IUnorderedAccessView*, EngineNS, IRenderContext, CreateUnorderedAccessView, IGpuBuffer*, const IUnorderedAccessViewDesc*);
-	CSharpReturnAPI1(IFrameBuffers*, EngineNS, IRenderContext, CreateFrameBuffers, const IFrameBuffersDesc*);
-	CSharpReturnAPI1(ICommandList*, EngineNS, IRenderContext, CreateCommandList, const ICommandListDesc*);
-	CSharpReturnAPI1(IShaderProgram*, EngineNS, IRenderContext, CreateShaderProgram, const IShaderProgramDesc*);
-	CSharpReturnAPI6(IShaderDesc*, EngineNS, IRenderContext, CompileHLSLFromFile, LPCSTR, LPCSTR, LPCSTR, const IShaderDefinitions*, DWORD, vBOOL);
-	CSharpReturnAPI1(IVertexShader*, EngineNS, IRenderContext, CreateVertexShader, const IShaderDesc*);
-	CSharpReturnAPI1(IPixelShader*, EngineNS, IRenderContext, CreatePixelShader, const IShaderDesc*);
-	CSharpReturnAPI1(IComputeShader*, EngineNS, IRenderContext, CreateComputeShader, const IShaderDesc*);
-	CSharpReturnAPI1(IInputLayout*, EngineNS, IRenderContext, CreateInputLayout, const IInputLayoutDesc*);
-	CSharpReturnAPI1(IRenderPipeline*, EngineNS, IRenderContext, CreateRenderPipeline, const IRenderPipelineDesc*);
-	CSharpReturnAPI0(IGeometryMesh*, EngineNS, IRenderContext, CreateGeometryMesh);
-	CSharpReturnAPI1(IVertexBuffer*, EngineNS, IRenderContext, CreateVertexBuffer, const IVertexBufferDesc*);
-	CSharpReturnAPI1(IIndexBuffer*, EngineNS, IRenderContext, CreateIndexBuffer, const IIndexBufferDesc*);
-	CSharpReturnAPI2(IIndexBuffer*, EngineNS, IRenderContext, CreateIndexBufferFromBuffer, const IIndexBufferDesc*, const IGpuBuffer*);
-	CSharpReturnAPI2(IVertexBuffer*, EngineNS, IRenderContext, CreateVertexBufferFromBuffer, const IVertexBufferDesc*, const IGpuBuffer*);
-	CSharpReturnAPI1(ISamplerState*, EngineNS, IRenderContext, CreateSamplerState, const ISamplerStateDesc*);
-	CSharpReturnAPI1(IRasterizerState*, EngineNS, IRenderContext, CreateRasterizerState, const IRasterizerStateDesc*);
-	CSharpReturnAPI1(IDepthStencilState*, EngineNS, IRenderContext, CreateDepthStencilState, const IDepthStencilStateDesc*);
-	CSharpReturnAPI1(IBlendState*, EngineNS, IRenderContext, CreateBlendState, const IBlendStateDesc*);
+	Cpp2CS0(EngineNS, IRenderContext, GetImmCommandList);
+	Cpp2CS0(EngineNS, IRenderContext, FlushImmContext);
+	Cpp2CS0(EngineNS, IRenderContext, CreatePass);
+	Cpp2CS1(EngineNS, IRenderContext, CreateSwapChain);
+	
+	Cpp2CS1(EngineNS, IRenderContext, LoadShaderResourceView);
+	Cpp2CS1(EngineNS, IRenderContext, CreateTexture2D);
+	Cpp2CS1(EngineNS, IRenderContext, CreateRenderTargetView);
+	Cpp2CS1(EngineNS, IRenderContext, CreateDepthRenderTargetView);
+	Cpp2CS1(EngineNS, IRenderContext, CreateShaderResourceView);
+	Cpp2CS2(EngineNS, IRenderContext, CreateGpuBuffer);
+	Cpp2CS2(EngineNS, IRenderContext, CreateShaderResourceViewFromBuffer);
+	Cpp2CS2(EngineNS, IRenderContext, CreateUnorderedAccessView);
+	Cpp2CS1(EngineNS, IRenderContext, CreateFrameBuffers);
+	Cpp2CS1(EngineNS, IRenderContext, CreateCommandList);
+	Cpp2CS1(EngineNS, IRenderContext, CreateShaderProgram);
+	Cpp2CS6(EngineNS, IRenderContext, CompileHLSLFromFile);
+	Cpp2CS1(EngineNS, IRenderContext, CreateVertexShader);
+	Cpp2CS1(EngineNS, IRenderContext, CreatePixelShader);
+	Cpp2CS1(EngineNS, IRenderContext, CreateComputeShader);
+	Cpp2CS1(EngineNS, IRenderContext, CreateInputLayout);
+	Cpp2CS1(EngineNS, IRenderContext, CreateRenderPipeline);
+	Cpp2CS0(EngineNS, IRenderContext, CreateGeometryMesh);
+	Cpp2CS1(EngineNS, IRenderContext, CreateVertexBuffer);
+	Cpp2CS1(EngineNS, IRenderContext, CreateIndexBuffer);
+	Cpp2CS2(EngineNS, IRenderContext, CreateIndexBufferFromBuffer);
+	Cpp2CS2(EngineNS, IRenderContext, CreateVertexBufferFromBuffer);
+	Cpp2CS1(EngineNS, IRenderContext, CreateSamplerState);
+	Cpp2CS1(EngineNS, IRenderContext, CreateRasterizerState);
+	Cpp2CS1(EngineNS, IRenderContext, CreateDepthStencilState);
+	Cpp2CS1(EngineNS, IRenderContext, CreateBlendState);
 	CSharpReturnAPI2(IConstantBuffer*, EngineNS, IRenderContext, CreateConstantBuffer, IShaderProgram*, int);
-	CSharpReturnAPI2(IConstantBuffer*, EngineNS, IRenderContext, CreateConstantBuffer2, IShaderDesc*, int);
-	CSharpAPI1(EngineNS, IRenderContext, GetRenderContextCaps, IRenderContextCaps*);
-	CSharpAPI1(EngineNS, IRenderContext, UnsafeSetRenderContextCaps, IRenderContextCaps*);
+	Cpp2CS2(EngineNS, IRenderContext, CreateConstantBuffer2);
+	Cpp2CS1(EngineNS, IRenderContext, GetRenderContextCaps);
+	Cpp2CS1(EngineNS, IRenderContext, UnsafeSetRenderContextCaps);
 }

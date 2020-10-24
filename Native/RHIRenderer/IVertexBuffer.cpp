@@ -60,6 +60,6 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI2(EngineNS, IVertexBuffer, GetBufferData, IRenderContext*, IBlobObject*);
-	CSharpAPI3(EngineNS, IVertexBuffer, UpdateGPUBuffData, ICommandList*, void*, UINT);
+	Cpp2CS2(EngineNS, IVertexBuffer, GetBufferData);
+	Cpp2CS3(EngineNS, IVertexBuffer, UpdateGPUBuffData);
 }

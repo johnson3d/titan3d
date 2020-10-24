@@ -434,26 +434,26 @@ NS_END
 using namespace EngineNS;
 extern "C"
 {
-	CSharpAPI0(EngineNS, IShaderDefinitions, ClearDefines);
-	CSharpAPI1(EngineNS, IShaderDefinitions, RemoveDefine, const char*);
-	CSharpAPI2(EngineNS, IShaderDefinitions, AddDefine, const char*, const char*);
-	CSharpAPI1(EngineNS, IShaderDefinitions, MergeDefinitions, IShaderDefinitions*);
-	CSharpAPI1(EngineNS, IShaderDesc, SetGLCode, const char*);
-	CSharpAPI1(EngineNS, IShaderDesc, SetMetalCode, const char*);
-	CSharpReturnAPI0(const char*, EngineNS, IShaderDesc, GetGLCode);
-	CSharpReturnAPI0(const char*, EngineNS, IShaderDesc, GetMetalCode);
-	CSharpAPI1(EngineNS, IShaderDesc, SetShaderType, EShaderType);
-	CSharpReturnAPI0(EShaderType, EngineNS, IShaderDesc, GetShaderType);
-	CSharpAPI2(EngineNS, IShaderDesc, Save2Xnd, XNDNode*, DWORD);
-	CSharpReturnAPI1(vBOOL, EngineNS, IShaderDesc, LoadXnd, XNDNode*);
+	Cpp2CS0(EngineNS, IShaderDefinitions, ClearDefines);
+	Cpp2CS1(EngineNS, IShaderDefinitions, RemoveDefine);
+	Cpp2CS2(EngineNS, IShaderDefinitions, AddDefine);
+	Cpp2CS1(EngineNS, IShaderDefinitions, MergeDefinitions);
+	Cpp2CS1(EngineNS, IShaderDesc, SetGLCode);
+	Cpp2CS1(EngineNS, IShaderDesc, SetMetalCode);
+	Cpp2CS0(EngineNS, IShaderDesc, GetGLCode);
+	Cpp2CS0(EngineNS, IShaderDesc, GetMetalCode);
+	Cpp2CS1(EngineNS, IShaderDesc, SetShaderType);
+	Cpp2CS0(EngineNS, IShaderDesc, GetShaderType);
+	Cpp2CS2(EngineNS, IShaderDesc, Save2Xnd);
+	Cpp2CS1(EngineNS, IShaderDesc, LoadXnd);
 
-	CSharpReturnAPI0(UINT, EngineNS, IShaderDesc, GetCBufferNum);
-	CSharpReturnAPI0(UINT, EngineNS, IShaderDesc, GetSRVNum);
-	CSharpReturnAPI0(UINT, EngineNS, IShaderDesc, GetSamplerNum);
-	CSharpReturnAPI2(vBOOL, EngineNS, IShaderDesc, GetCBufferDesc, UINT, IConstantBufferDesc*);
-	CSharpReturnAPI2(vBOOL, EngineNS, IShaderDesc, GetSRVDesc, UINT, TextureBindInfo*);
-	CSharpReturnAPI2(vBOOL, EngineNS, IShaderDesc, GetSamplerDesc, UINT, SamplerBindInfo*);
-	CSharpReturnAPI1(UINT, EngineNS, IShaderDesc, FindCBufferDesc, const char*);
-	CSharpReturnAPI1(UINT, EngineNS, IShaderDesc, FindSRVDesc, const char*);
-	CSharpReturnAPI1(UINT, EngineNS, IShaderDesc, FindSamplerDesc, const char*);
+	Cpp2CS0(EngineNS, IShaderDesc, GetCBufferNum);
+	Cpp2CS0(EngineNS, IShaderDesc, GetSRVNum);
+	Cpp2CS0(EngineNS, IShaderDesc, GetSamplerNum);
+	Cpp2CS2(EngineNS, IShaderDesc, GetCBufferDesc);
+	Cpp2CS2(EngineNS, IShaderDesc, GetSRVDesc);
+	Cpp2CS2(EngineNS, IShaderDesc, GetSamplerDesc);
+	Cpp2CS1(EngineNS, IShaderDesc, FindCBufferDesc);
+	Cpp2CS1(EngineNS, IShaderDesc, FindSRVDesc);
+	Cpp2CS1(EngineNS, IShaderDesc, FindSamplerDesc);
 }

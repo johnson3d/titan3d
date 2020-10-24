@@ -356,19 +356,25 @@ NS_END
 
 using namespace EngineNS;
 
+template <>
+struct Type2TypeConverter<v3dxVector3>
+{
+	typedef v3dVector3_t		TarType;
+};
+
 extern "C"
 {
-	CSharpReturnAPI1(RcNavQuery*, EngineNS, RcNavMesh, CreateQuery, int);
-	CSharpReturnAPI1(vBOOL, EngineNS, RcNavMesh, LoadXnd, XNDNode*);
-	CSharpAPI1(EngineNS, RcNavMesh, Save2Xnd, XNDNode*);
+	Cpp2CS1(EngineNS, RcNavMesh, CreateQuery);
+	Cpp2CS1(EngineNS, RcNavMesh, LoadXnd);
+	Cpp2CS1(EngineNS, RcNavMesh, Save2Xnd);
 
-	CSharpReturnAPI1(GfxMeshPrimitives*, EngineNS, RcNavMesh, CreateRenderMesh, IRenderContext*);
+	Cpp2CS1(EngineNS, RcNavMesh, CreateRenderMesh);
 
-	CSharpReturnAPI0(int, EngineNS, RcNavMesh, GetTilesWidth);
-	CSharpReturnAPI0(int, EngineNS, RcNavMesh, GetTilesHeight);
-	CSharpReturnAPI0(int, EngineNS, RcNavMesh, GetTilesCount);
-	CSharpReturnAPI2(vBOOL, EngineNS, RcNavMesh, CheckVaildAt, int, int);
-	CSharpReturnAPI2(v3dVector3_t, EngineNS, RcNavMesh, GetPositionAt, int, int);
-	CSharpReturnAPI1(v3dVector3_t, EngineNS, RcNavMesh, GetBoundBoxMinAt, int);
-	CSharpReturnAPI1(v3dVector3_t, EngineNS, RcNavMesh, GetBoundBoxMaxAt, int);
+	Cpp2CS0(EngineNS, RcNavMesh, GetTilesWidth);
+	Cpp2CS0(EngineNS, RcNavMesh, GetTilesHeight);
+	Cpp2CS0(EngineNS, RcNavMesh, GetTilesCount);
+	Cpp2CS2(EngineNS, RcNavMesh, CheckVaildAt);
+	Cpp2CS2(EngineNS, RcNavMesh, GetPositionAt);
+	Cpp2CS1(EngineNS, RcNavMesh, GetBoundBoxMinAt);
+	Cpp2CS1(EngineNS, RcNavMesh, GetBoundBoxMaxAt);
 }

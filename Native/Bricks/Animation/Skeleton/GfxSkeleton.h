@@ -12,9 +12,6 @@ public:
 	GfxSkeleton();
 	~GfxSkeleton();
 
-	UINT GetBoneNumber() {
-		return (UINT)mBones.size();
-	}
 	GfxSkeleton* CloneSkeleton();	
 	virtual void Cleanup() override;
 	inline GfxBone* GetBone(UINT index) const {

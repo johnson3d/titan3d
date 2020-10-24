@@ -18,8 +18,8 @@ NS_END
 using namespace EngineNS;
 extern "C"
 {
-	CSharpReturnAPI2(vBOOL, EngineNS, IGpuBuffer, GetBufferData, IRenderContext*, IBlobObject*);
-	CSharpReturnAPI5(vBOOL, EngineNS, IGpuBuffer, Map, IRenderContext*, UINT, EGpuMAP, UINT, IMappedSubResource*);
-	CSharpAPI2(EngineNS, IGpuBuffer, Unmap, IRenderContext*, UINT);
-	CSharpReturnAPI3(vBOOL, EngineNS, IGpuBuffer, UpdateBufferData, ICommandList*, void*, UINT);
+	Cpp2CS2(EngineNS, IGpuBuffer, GetBufferData);
+	Cpp2CS5(EngineNS, IGpuBuffer, Map);
+	Cpp2CS2(EngineNS, IGpuBuffer, Unmap);
+	Cpp2CS3(EngineNS, IGpuBuffer, UpdateBufferData);
 }

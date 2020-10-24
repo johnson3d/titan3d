@@ -30,9 +30,9 @@ NS_END
 using namespace EngineNS;
 extern "C"
 {
-	CSharpAPI2(EngineNS, GfxICurve, EvaluateNative, float, CurveResult*);
-	CSharpReturnAPI2(vBOOL, EngineNS, GfxICurve, LoadXnd, IRenderContext*, XNDNode*);
-	CSharpAPI1(EngineNS, GfxICurve, Save2Xnd, XNDNode*);
-	CSharpReturnAPI0(CurveType, EngineNS, GfxICurve, GetCurveType);
-	CSharpReturnAPI0(UINT, EngineNS, GfxICurve, GetKeyCount);
+	Cpp2CS2(EngineNS, GfxICurve, EvaluateNative);
+	Cpp2CS2(EngineNS, GfxICurve, LoadXnd);
+	Cpp2CS1(EngineNS, GfxICurve, Save2Xnd);
+	Cpp2CS0(EngineNS, GfxICurve, GetCurveType);
+	Cpp2CS0(EngineNS, GfxICurve, GetKeyCount);
 }

@@ -31,6 +31,6 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI1(EngineNS, GfxMaterialPrimitive, SetMaterial, GfxMaterialInstance*);
-	CSharpReturnAPI0(GfxMaterialInstance*, EngineNS, GfxMaterialPrimitive, GetMaterial);
+	Cpp2CS1(EngineNS, GfxMaterialPrimitive, SetMaterial);
+	Cpp2CS0(EngineNS, GfxMaterialPrimitive, GetMaterial);
 }

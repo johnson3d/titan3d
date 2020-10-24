@@ -294,7 +294,6 @@ vBOOL RcNavQuery::GetHeight(const v3dxVector3* pos, const v3dxVector3* pickext, 
 
 vBOOL RcNavQuery::FindStraightPath(const v3dxVector3* start, const v3dxVector3* end, IBlobObject* blob)
 {
-	//先寻找附近的多边形
 	float startpos[3] = { start->x, start->y, start->z };
 	mNavQuery->findNearestPoly(startpos, mPolyPickExt, &mFilter, &mStartRef, 0);
 	if (mStartRef == 0)
@@ -312,9 +311,9 @@ vBOOL RcNavQuery::FindStraightPath(const v3dxVector3* start, const v3dxVector3* 
 	}
 	
 	mNavQuery->findPath(mStartRef, mEndRef, startpos, endpos, &mFilter, mPolys, &mNPolys, MAX_POLYS);
-	//ClosestPointOnPoly(start, end);//已经把mIterPos拷贝到mNSmoothPath了
+	//ClosestPointOnPoly(start, end);
 
-	AutoRecalcStraightPaths(start, end);//高低起伏很明显的地形 需要测试
+	AutoRecalcStraightPaths(start, end);
 
 	blob->PushData((BYTE*)&mStraightPath[0], mNStraightPath * sizeof(float) * 3);
 	
@@ -353,7 +352,6 @@ void RcNavQuery::AutoRecalcFollowPaths(const dtNavMesh* navmesh)
 		bool endOfPath = (steerPosFlag & DT_STRAIGHTPATH_END) ? true : false;
 		bool offMeshConnection = (steerPosFlag & DT_STRAIGHTPATH_OFFMESH_CONNECTION) ? true : false;
 
-		//TODO  测试用法 最后项目自己算数据
 		// Find movement delta.
 		float delta[3];
 		dtVsub(delta, steerPos, mIterPos);
@@ -475,11 +473,11 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(unsigned short, EngineNS, RcNavQuery, GetIncludeFlags);
-	CSharpAPI1(EngineNS, RcNavQuery, SetIncludeFlags, const unsigned short);
-	CSharpReturnAPI0(unsigned short, EngineNS, RcNavQuery, GetExcludeFlags);
-	CSharpAPI1(EngineNS, RcNavQuery, SetExcludeFlags, const unsigned short);
+	Cpp2CS0(EngineNS, RcNavQuery, GetIncludeFlags);
+	Cpp2CS1(EngineNS, RcNavQuery, SetIncludeFlags);
+	Cpp2CS0(EngineNS, RcNavQuery, GetExcludeFlags);
+	Cpp2CS1(EngineNS, RcNavQuery, SetExcludeFlags);
 
-	CSharpReturnAPI3(vBOOL, EngineNS, RcNavQuery, GetHeight, const v3dxVector3*, const v3dxVector3*, float *);
-	CSharpReturnAPI3(vBOOL, EngineNS, RcNavQuery, FindStraightPath, const v3dxVector3*, const v3dxVector3*, IBlobObject*);
+	Cpp2CS3(EngineNS, RcNavQuery, GetHeight);
+	Cpp2CS3(EngineNS, RcNavQuery, FindStraightPath);
 }

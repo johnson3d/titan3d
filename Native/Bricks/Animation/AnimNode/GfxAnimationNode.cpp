@@ -43,14 +43,14 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI4(vBOOL, EngineNS, GfxAnimationNode, LoadXnd, IRenderContext*, const char*, XNDNode*, bool);
-	CSharpAPI1(EngineNS, GfxAnimationNode, Save2Xnd, XNDNode*);
-	CSharpReturnAPI0(GfxAnimationPose*, EngineNS, GfxAnimationNode, GetAnimationPose);
-	CSharpAPI1(EngineNS, GfxAnimationNode, SetAnimationPose, GfxAnimationPose*);
-	CSharpAPI1(EngineNS, GfxAnimationNode, SetPlayRate, float);
-	CSharpAPI1(EngineNS, GfxAnimationNode, SetCurrentTime, UINT);
-	CSharpReturnAPI0(UINT, EngineNS, GfxAnimationNode, GetDuration);
-	CSharpReturnAPI0(UINT, EngineNS, GfxAnimationNode, GetFrameCount);
-	CSharpReturnAPI0(float, EngineNS, GfxAnimationNode, GetFps);
-	CSharpAPI1(EngineNS, GfxAnimationNode, Update, vTimeTick);
+	Cpp2CS4(EngineNS, GfxAnimationNode, LoadXnd);
+	Cpp2CS1(EngineNS, GfxAnimationNode, Save2Xnd);
+	Cpp2CS0(EngineNS, GfxAnimationNode, GetAnimationPose);
+	Cpp2CS1(EngineNS, GfxAnimationNode, SetAnimationPose);
+	Cpp2CS1(EngineNS, GfxAnimationNode, SetPlayRate);
+	Cpp2CS1(EngineNS, GfxAnimationNode, SetCurrentTime);
+	Cpp2CS0(EngineNS, GfxAnimationNode, GetDuration);
+	Cpp2CS0(EngineNS, GfxAnimationNode, GetFrameCount);
+	Cpp2CS0(EngineNS, GfxAnimationNode, GetFps);
+	Cpp2CS1(EngineNS, GfxAnimationNode, Update);
 }

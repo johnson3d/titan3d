@@ -27,8 +27,8 @@ NS_END
 using namespace EngineNS;
 extern "C"
 {
-	CSharpAPI1(EngineNS, GfxAssetCreater, SetAssetType, ImportAssetType);
-	CSharpAPI1(EngineNS, GfxAssetCreater, SetImportOption, GfxAssetImportOption*);
-	CSharpAPI1(EngineNS, GfxAssetCreater, SetFOnImportMessageHandle, FOnImportMessageHandle);
-	CSharpAPI1(EngineNS, GfxAssetCreater, SetCShaprHandle, void*);
+	Cpp2CS1(EngineNS, GfxAssetCreater, SetAssetType);
+	Cpp2CS1(EngineNS, GfxAssetCreater, SetImportOption);
+	Cpp2CS1(EngineNS, GfxAssetCreater, SetFOnImportMessageHandle);
+	Cpp2CS1(EngineNS, GfxAssetCreater, SetCShaprHandle);
 }

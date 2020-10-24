@@ -37,12 +37,12 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI1(EngineNS, GraphicsProfiler, SetEmptyPixelShader, IPixelShader*);
-	CSharpAPI1(EngineNS, GraphicsProfiler, SetOnePixelFrameBuffers, IFrameBuffers*);
+	Cpp2CS1(EngineNS, GraphicsProfiler, SetEmptyPixelShader);
+	Cpp2CS1(EngineNS, GraphicsProfiler, SetOnePixelFrameBuffers);
 
-	CSharpReturnAPI0(vBOOL, EngineNS, GraphicsProfiler, GetNoPixelWrite);
-	CSharpAPI1(EngineNS, GraphicsProfiler, SetNoPixelWrite, vBOOL);
+	Cpp2CS0(EngineNS, GraphicsProfiler, GetNoPixelWrite);
+	Cpp2CS1(EngineNS, GraphicsProfiler, SetNoPixelWrite);
 
-	CSharpReturnAPI0(vBOOL, EngineNS, GraphicsProfiler, GetNoPixelShader);
-	CSharpAPI1(EngineNS, GraphicsProfiler, SetNoPixelShader, vBOOL);
+	Cpp2CS0(EngineNS, GraphicsProfiler, GetNoPixelShader);
+	Cpp2CS1(EngineNS, GraphicsProfiler, SetNoPixelShader);
 }

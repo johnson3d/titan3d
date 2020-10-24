@@ -97,8 +97,8 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI5(vBOOL, EngineNS, ITexture2D, Map, ICommandList*, int, void**, UINT*, UINT*);
-	CSharpAPI2(EngineNS, ITexture2D, Unmap, ICommandList*, int);
-	CSharpAPI3(EngineNS, ITexture2D, BuildImageBlob, IBlobObject*, void*, UINT);
-	CSharpAPI6(EngineNS, ITexture2D, UpdateMipData, ICommandList*, UINT, void*, UINT, UINT, UINT);
+	Cpp2CS5(EngineNS, ITexture2D, Map);
+	Cpp2CS2(EngineNS, ITexture2D, Unmap);
+	Cpp2CS3(EngineNS, ITexture2D, BuildImageBlob);
+	Cpp2CS6(EngineNS, ITexture2D, UpdateMipData);
 }

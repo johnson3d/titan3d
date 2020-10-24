@@ -38,7 +38,7 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI1(EngineNS, IIndexBuffer, GetDesc, IIndexBufferDesc*);
-	CSharpAPI2(EngineNS, IIndexBuffer, GetBufferData, IRenderContext*, IBlobObject*);
-	CSharpAPI3(EngineNS, IIndexBuffer, UpdateGPUBuffData, ICommandList*, void*, UINT);
+	Cpp2CS1(EngineNS, IIndexBuffer, GetDesc);
+	Cpp2CS2(EngineNS, IIndexBuffer, GetBufferData);
+	Cpp2CS3(EngineNS, IIndexBuffer, UpdateGPUBuffData);
 }

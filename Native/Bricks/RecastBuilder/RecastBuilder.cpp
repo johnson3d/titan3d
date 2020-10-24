@@ -50,42 +50,48 @@ NS_END
 
 using namespace EngineNS;
 
+template <>
+struct Type2TypeConverter<v3dxVector3>
+{
+	typedef v3dVector3_t		TarType;
+};
+
 extern "C"
 {
-	CSharpAPI1(EngineNS, RecastBuilder, SetInputGeom, InputGeom*);
-	CSharpReturnAPI0(RcNavMesh*, EngineNS, RecastBuilder, BuildNavi);
+	Cpp2CS1(EngineNS, RecastBuilder, SetInputGeom);
+	Cpp2CS0(EngineNS, RecastBuilder, BuildNavi);
 
-	CSharpReturnAPI0(float, EngineNS, RecastBuilder, GetCellSize);
-	CSharpAPI1(EngineNS, RecastBuilder, SetCellSize, float);
-	CSharpReturnAPI0(float, EngineNS, RecastBuilder, GetCellHeight);
-	CSharpAPI1(EngineNS, RecastBuilder, SetCellHeight, float);
-	CSharpReturnAPI0(float, EngineNS, RecastBuilder, GetAgentHeight);
-	CSharpAPI1(EngineNS, RecastBuilder, SetAgentHeight, float);
-	CSharpReturnAPI0(float, EngineNS, RecastBuilder, GetAgentRadius);
-	CSharpAPI1(EngineNS, RecastBuilder, SetAgentRadius, float);
-	CSharpReturnAPI0(float, EngineNS, RecastBuilder, GetAgentMaxClimb);
-	CSharpAPI1(EngineNS, RecastBuilder, SetAgentMaxClimb, float);
-	CSharpReturnAPI0(float, EngineNS, RecastBuilder, GetAgentMaxSlope);
-	CSharpAPI1(EngineNS, RecastBuilder, SetAgentMaxSlope, float);
-	CSharpReturnAPI0(float, EngineNS, RecastBuilder, GetRegionMinSize);
-	CSharpAPI1(EngineNS, RecastBuilder, SetRegionMinSize, float);
-	CSharpReturnAPI0(float, EngineNS, RecastBuilder, GetRegionMergeSize);
-	CSharpAPI1(EngineNS, RecastBuilder, SetRegionMergeSize, float);
-	CSharpReturnAPI0(float, EngineNS, RecastBuilder, GetEdgeMaxLen);
-	CSharpAPI1(EngineNS, RecastBuilder, SetEdgeMaxLen, float);
-	CSharpReturnAPI0(float, EngineNS, RecastBuilder, GetEdgeMaxError);
-	CSharpAPI1(EngineNS, RecastBuilder, SetEdgeMaxError, float);
-	CSharpReturnAPI0(float, EngineNS, RecastBuilder, GetVertsPerPoly);
-	CSharpAPI1(EngineNS, RecastBuilder, SetVertsPerPoly, float);
-	CSharpReturnAPI0(float, EngineNS, RecastBuilder, GetDetailSampleDist);
-	CSharpAPI1(EngineNS, RecastBuilder, SetDetailSampleDist, float);
-	CSharpReturnAPI0(float, EngineNS, RecastBuilder, GetDetailSampleMaxError);
-	CSharpAPI1(EngineNS, RecastBuilder, SetDetailSampleMaxError, float);
-	CSharpReturnAPI0(int, EngineNS, RecastBuilder, GetPartitionType);
-	CSharpAPI1(EngineNS, RecastBuilder, SetPartitionType, int);
+	Cpp2CS0(EngineNS, RecastBuilder, GetCellSize);
+	Cpp2CS1(EngineNS, RecastBuilder, SetCellSize);
+	Cpp2CS0(EngineNS, RecastBuilder, GetCellHeight);
+	Cpp2CS1(EngineNS, RecastBuilder, SetCellHeight);
+	Cpp2CS0(EngineNS, RecastBuilder, GetAgentHeight);
+	Cpp2CS1(EngineNS, RecastBuilder, SetAgentHeight);
+	Cpp2CS0(EngineNS, RecastBuilder, GetAgentRadius);
+	Cpp2CS1(EngineNS, RecastBuilder, SetAgentRadius);
+	Cpp2CS0(EngineNS, RecastBuilder, GetAgentMaxClimb);
+	Cpp2CS1(EngineNS, RecastBuilder, SetAgentMaxClimb);
+	Cpp2CS0(EngineNS, RecastBuilder, GetAgentMaxSlope);
+	Cpp2CS1(EngineNS, RecastBuilder, SetAgentMaxSlope);
+	Cpp2CS0(EngineNS, RecastBuilder, GetRegionMinSize);
+	Cpp2CS1(EngineNS, RecastBuilder, SetRegionMinSize);
+	Cpp2CS0(EngineNS, RecastBuilder, GetRegionMergeSize);
+	Cpp2CS1(EngineNS, RecastBuilder, SetRegionMergeSize);
+	Cpp2CS0(EngineNS, RecastBuilder, GetEdgeMaxLen);
+	Cpp2CS1(EngineNS, RecastBuilder, SetEdgeMaxLen);
+	Cpp2CS0(EngineNS, RecastBuilder, GetEdgeMaxError);
+	Cpp2CS1(EngineNS, RecastBuilder, SetEdgeMaxError);
+	Cpp2CS0(EngineNS, RecastBuilder, GetVertsPerPoly);
+	Cpp2CS1(EngineNS, RecastBuilder, SetVertsPerPoly);
+	Cpp2CS0(EngineNS, RecastBuilder, GetDetailSampleDist);
+	Cpp2CS1(EngineNS, RecastBuilder, SetDetailSampleDist);
+	Cpp2CS0(EngineNS, RecastBuilder, GetDetailSampleMaxError);
+	Cpp2CS1(EngineNS, RecastBuilder, SetDetailSampleMaxError);
+	Cpp2CS0(EngineNS, RecastBuilder, GetPartitionType);
+	Cpp2CS1(EngineNS, RecastBuilder, SetPartitionType);
 
-	CSharpReturnAPI0(v3dVector3_t, EngineNS, RecastBuilder, GetMinBox);
-	CSharpAPI1(EngineNS, RecastBuilder, SetMinBox, v3dxVector3);
-	CSharpReturnAPI0(v3dVector3_t, EngineNS, RecastBuilder, GetMaxBox);
-	CSharpAPI1(EngineNS, RecastBuilder, SetMaxBox, v3dxVector3);
+	Cpp2CS0(EngineNS, RecastBuilder, GetMinBox);
+	Cpp2CS1(EngineNS, RecastBuilder, SetMinBox);
+	Cpp2CS0(EngineNS, RecastBuilder, GetMaxBox);
+	Cpp2CS1(EngineNS, RecastBuilder, SetMaxBox);
 }

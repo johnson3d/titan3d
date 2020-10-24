@@ -329,46 +329,45 @@ NS_END
 
 using namespace EngineNS;
 
+template <>
+struct Type2TypeConverter<v3dxVector3>
+{
+	typedef v3dVector3_t		TarType;
+};
+
 extern "C"
 {
-	CSharpAPI1(EngineNS, PhySceneDesc, SetGravity, const v3dxVector3*);
-	CSharpAPI1(EngineNS, PhySceneDesc, GetGravity, v3dxVector3*);
-	CSharpAPI1(EngineNS, PhySceneDesc, SetFlags, physx::PxU32);
-	CSharpReturnAPI0(physx::PxU32, EngineNS, PhySceneDesc, GetFlags);
-	CSharpAPI1(EngineNS, PhySceneDesc, SetContactDataBlocks, physx::PxU32);
-	CSharpReturnAPI0(physx::PxU32, EngineNS, PhySceneDesc, GetContactDataBlocks);
-	CSharpAPI8(EngineNS, PhySceneDesc, SetContactCallBack, void*,
-		PhySceneDesc::ContactReportCallback::FonContact,
-		PhySceneDesc::ContactReportCallback::FonTrigger,
-		PhySceneDesc::ContactReportCallback::FonConstraintBreak,
-		PhySceneDesc::ContactReportCallback::FonWake,
-		PhySceneDesc::ContactReportCallback::FonSleep,
-		PhySceneDesc::ContactReportCallback::FonAdvance,
-		PhySceneDesc::ContactReportCallback::FPxSimulationFilterShader);
+	Cpp2CS1(EngineNS, PhySceneDesc, SetGravity);
+	Cpp2CS1(EngineNS, PhySceneDesc, GetGravity);
+	Cpp2CS1(EngineNS, PhySceneDesc, SetFlags);
+	Cpp2CS0(EngineNS, PhySceneDesc, GetFlags);
+	Cpp2CS1(EngineNS, PhySceneDesc, SetContactDataBlocks);
+	Cpp2CS0(EngineNS, PhySceneDesc, GetContactDataBlocks);
+	Cpp2CS8(EngineNS, PhySceneDesc, SetContactCallBack);
 
-	CSharpAPI5(EngineNS, PhyScene, Simulate, PxReal, physx::PxBaseTask*, void*, PxU32, bool);
-	CSharpAPI2(EngineNS, PhyScene, FetchResults, vBOOL, PxU32*);
-	CSharpAPI0(EngineNS, PhyScene, UpdateActorTransforms);
-	CSharpReturnAPI4(vBOOL, EngineNS, PhyScene, Raycast, const v3dxVector3*, const v3dxVector3*, float, VHitResult*);
-	CSharpReturnAPI5(vBOOL, EngineNS, PhyScene, Sweep, const PhyShape*, const v3dxVector3*, const v3dxVector3*, float, VHitResult*);
-	CSharpReturnAPI4(vBOOL, EngineNS, PhyScene, Overlap, const PhyShape*, const v3dxVector3*, const v3dxQuaternion*, VHitResult*);
-	CSharpReturnAPI5(vBOOL, EngineNS, PhyScene, RaycastWithFilter, const v3dxVector3*, const v3dxVector3*, float, PhyQueryFilterData*, VHitResult*);
-	CSharpReturnAPI6(vBOOL, EngineNS, PhyScene, SweepWithFilter, const PhyShape*, const v3dxVector3*, const v3dxVector3*,  float, PhyQueryFilterData*, VHitResult*);
-	CSharpReturnAPI5(vBOOL, EngineNS, PhyScene, OverlapWithFilter, const PhyShape*, const v3dxVector3*, const v3dxQuaternion*, PhyQueryFilterData*, VHitResult*);
+	Cpp2CS5(EngineNS, PhyScene, Simulate);
+	Cpp2CS2(EngineNS, PhyScene, FetchResults);
+	Cpp2CS0(EngineNS, PhyScene, UpdateActorTransforms);
+	Cpp2CS4(EngineNS, PhyScene, Raycast);
+	Cpp2CS5(EngineNS, PhyScene, Sweep);
+	Cpp2CS4(EngineNS, PhyScene, Overlap);
+	Cpp2CS5(EngineNS, PhyScene, RaycastWithFilter);
+	Cpp2CS6(EngineNS, PhyScene, SweepWithFilter);
+	Cpp2CS5(EngineNS, PhyScene, OverlapWithFilter);
 
-	CSharpReturnAPI1(PhyController*, EngineNS, PhyScene, CreateBoxController, const PhyBoxControllerDesc*);
-	CSharpReturnAPI1(PhyController*, EngineNS, PhyScene, CreateCapsuleController, const PhyCapsuleControllerDesc*);
+	Cpp2CS1(EngineNS, PhyScene, CreateBoxController);
+	Cpp2CS1(EngineNS, PhyScene, CreateCapsuleController);
 
-	CSharpAPI1(EngineNS, PhyControllerDesc, SetMaterial, PhyMaterial*);
-	CSharpAPI1(EngineNS, PhyControllerDesc, SetQueryFilterData, physx::PxFilterData*);
+	Cpp2CS1(EngineNS, PhyControllerDesc, SetMaterial);
+	Cpp2CS1(EngineNS, PhyControllerDesc, SetQueryFilterData);
 
-	CSharpReturnAPI0(v3dVector3_t, EngineNS, PhyBoxControllerDesc, GetExtent);
-	CSharpAPI1(EngineNS, PhyBoxControllerDesc, SetExtent, const v3dxVector3*);
+	Cpp2CS0(EngineNS, PhyBoxControllerDesc, GetExtent);
+	Cpp2CS1(EngineNS, PhyBoxControllerDesc, SetExtent);
 
-	CSharpReturnAPI0(float, EngineNS, PhyCapsuleControllerDesc, GetCapsuleRadius);
-	CSharpAPI1(EngineNS, PhyCapsuleControllerDesc, SetCapsuleRadius, float);
-	CSharpReturnAPI0(float, EngineNS, PhyCapsuleControllerDesc, GetCapsuleHeight);
-	CSharpAPI1(EngineNS, PhyCapsuleControllerDesc, SetCapsuleHeight, float);
-	CSharpReturnAPI0(physx::PxCapsuleClimbingMode::Enum, EngineNS, PhyCapsuleControllerDesc, GetCapsuleClimbingMode);
-	CSharpAPI1(EngineNS, PhyCapsuleControllerDesc, SetCapsuleClimbingMode, physx::PxCapsuleClimbingMode::Enum);
+	Cpp2CS0(EngineNS, PhyCapsuleControllerDesc, GetCapsuleRadius);
+	Cpp2CS1(EngineNS, PhyCapsuleControllerDesc, SetCapsuleRadius);
+	Cpp2CS0(EngineNS, PhyCapsuleControllerDesc, GetCapsuleHeight);
+	Cpp2CS1(EngineNS, PhyCapsuleControllerDesc, SetCapsuleHeight);
+	Cpp2CS0(EngineNS, PhyCapsuleControllerDesc, GetCapsuleClimbingMode);
+	Cpp2CS1(EngineNS, PhyCapsuleControllerDesc, SetCapsuleClimbingMode);
 }

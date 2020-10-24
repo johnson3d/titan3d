@@ -42,10 +42,10 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(float, EngineNS, PhyMaterial, GetDynamicFriction);
-	CSharpAPI1(EngineNS, PhyMaterial, SetDynamicFriction, float);
-	CSharpReturnAPI0(float, EngineNS, PhyMaterial, GetStaticFriction);
-	CSharpAPI1(EngineNS, PhyMaterial, SetStaticFriction, float);
-	CSharpReturnAPI0(float, EngineNS, PhyMaterial, GetRestitution);
-	CSharpAPI1(EngineNS, PhyMaterial, SetRestitution, float);
+	Cpp2CS0(EngineNS, PhyMaterial, GetDynamicFriction);
+	Cpp2CS1(EngineNS, PhyMaterial, SetDynamicFriction);
+	Cpp2CS0(EngineNS, PhyMaterial, GetStaticFriction);
+	Cpp2CS1(EngineNS, PhyMaterial, SetStaticFriction);
+	Cpp2CS0(EngineNS, PhyMaterial, GetRestitution);
+	Cpp2CS1(EngineNS, PhyMaterial, SetRestitution);
 }

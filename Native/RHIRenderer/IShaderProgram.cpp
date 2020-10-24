@@ -96,22 +96,22 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpAPI1(EngineNS, IShaderProgram, BindVertexShader, IVertexShader*);
-	CSharpAPI1(EngineNS, IShaderProgram, BindPixelShader, IPixelShader*);
-	CSharpAPI1(EngineNS, IShaderProgram, BindInputLayout, IInputLayout*);
-	CSharpReturnAPI1(vBOOL, EngineNS, IShaderProgram, LinkShaders, IRenderContext*);
+	Cpp2CS1(EngineNS, IShaderProgram, BindVertexShader);
+	Cpp2CS1(EngineNS, IShaderProgram, BindPixelShader);
+	Cpp2CS1(EngineNS, IShaderProgram, BindInputLayout);
+	Cpp2CS1(EngineNS, IShaderProgram, LinkShaders);
 
-	CSharpReturnAPI1(UINT, EngineNS, IShaderProgram, FindCBuffer, const char*);
-	CSharpReturnAPI0(UINT, EngineNS, IShaderProgram, GetCBufferNumber);
-	CSharpReturnAPI2(vBOOL, EngineNS, IShaderProgram, GetCBufferDesc, UINT, IConstantBufferDesc*);
+	Cpp2CS1(EngineNS, IShaderProgram, FindCBuffer);
+	Cpp2CS0(EngineNS, IShaderProgram, GetCBufferNumber);
+	Cpp2CS2(EngineNS, IShaderProgram, GetCBufferDesc);
 
-	CSharpReturnAPI0(UINT, EngineNS, IShaderProgram, GetShaderResourceNumber);
-	CSharpReturnAPI2(bool, EngineNS, IShaderProgram, GetShaderResourceBindInfo, UINT, TextureBindInfo*);
-	CSharpReturnAPI1(UINT, EngineNS, IShaderProgram, GetTextureBindSlotIndex, const char*);
-	CSharpReturnAPI2(vBOOL, EngineNS, IShaderProgram, GetSRBindDesc, UINT, TextureBindInfo*);
+	Cpp2CS0(EngineNS, IShaderProgram, GetShaderResourceNumber);
+	Cpp2CS2(EngineNS, IShaderProgram, GetShaderResourceBindInfo);
+	Cpp2CS1(EngineNS, IShaderProgram, GetTextureBindSlotIndex);
+	Cpp2CS2(EngineNS, IShaderProgram, GetSRBindDesc);
 
-	CSharpReturnAPI0(UINT, EngineNS, IShaderProgram, GetSamplerNumber);
-	CSharpReturnAPI2(bool, EngineNS, IShaderProgram, GetSamplerBindInfo, UINT, SamplerBindInfo*);
-	CSharpReturnAPI1(UINT, EngineNS, IShaderProgram, GetSamplerBindSlotIndex, const char*);
-	CSharpReturnAPI2(vBOOL, EngineNS, IShaderProgram, GetSampBindDesc, UINT, SamplerBindInfo*);
+	Cpp2CS0(EngineNS, IShaderProgram, GetSamplerNumber);
+	Cpp2CS2(EngineNS, IShaderProgram, GetSamplerBindInfo);
+	Cpp2CS1(EngineNS, IShaderProgram, GetSamplerBindSlotIndex);
+	Cpp2CS2(EngineNS, IShaderProgram, GetSampBindDesc);
 }

@@ -480,9 +480,9 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI2(vBOOL, EngineNS, FBXAnalyzer, LoadFile, FBXManager*, const char*);
-	CSharpReturnAPI2(vBOOL, EngineNS, FBXAnalyzer, SetGeomtryMeshStream, IRenderContext*, GfxMeshPrimitives*);
-	CSharpReturnAPI0(int, EngineNS, FBXAnalyzer, GetPrimitivesNum);
+	Cpp2CS2(EngineNS, FBXAnalyzer, LoadFile);
+	Cpp2CS2(EngineNS, FBXAnalyzer, SetGeomtryMeshStream);
+	Cpp2CS0(EngineNS, FBXAnalyzer, GetPrimitivesNum);
 
 	//CSharpAPI1(EngineNS, GfxMesh, SetMeshPrimitives, GfxMeshPrimitives*);
 	//CSharpAPI1(EngineNS, GfxMesh, SetGfxMdfQueue, GfxMdfQueue*);

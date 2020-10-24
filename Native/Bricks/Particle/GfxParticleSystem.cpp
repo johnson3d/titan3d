@@ -434,39 +434,39 @@ typedef void(WINAPI *FOnCallDelegate)(int num, int a, float b);
 
 extern "C"
 {
-	CSharpReturnAPI3(vBOOL, EngineNS, GfxParticleSystem, InitParticlePool, IRenderContext*, int, int);
-	CSharpReturnAPI1(GfxParticleSubState*, EngineNS, GfxParticleSystem, GetSubState, int);
-	CSharpAPI1(EngineNS, GfxParticleSystem, Simulate, float);
-	CSharpReturnAPI1(int, EngineNS, GfxParticleSystem, FireParticles, int);
+	Cpp2CS3(EngineNS, GfxParticleSystem, InitParticlePool);
+	Cpp2CS1(EngineNS, GfxParticleSystem, GetSubState);
+	Cpp2CS1(EngineNS, GfxParticleSystem, Simulate);
+	Cpp2CS1(EngineNS, GfxParticleSystem, FireParticles);
 
-	CSharpAPI3(EngineNS, GfxParticleSystem, GetParticlePool, GfxParticle**, int*, int*);
-	CSharpAPI2(EngineNS, GfxParticleSystem, GetParticles, GfxParticle***, int*);
-	CSharpAPI2(EngineNS, GfxParticleSystem, GetDeathParticles, GfxParticle***, int*);
+	Cpp2CS3(EngineNS, GfxParticleSystem, GetParticlePool);
+	Cpp2CS2(EngineNS, GfxParticleSystem, GetParticles);
+	Cpp2CS2(EngineNS, GfxParticleSystem, GetDeathParticles);
 	
-	CSharpReturnAPI0(IVertexBuffer*, EngineNS, GfxParticleSystem, GetPosVB);
-	CSharpReturnAPI0(IVertexBuffer*, EngineNS, GfxParticleSystem, GetScaleVB);
-	CSharpReturnAPI0(IVertexBuffer*, EngineNS, GfxParticleSystem, GetRotateVB);
-	CSharpReturnAPI0(IVertexBuffer*, EngineNS, GfxParticleSystem, GetColorVB);
-	CSharpAPI2(EngineNS, GfxParticleSystem, Flush2VB, ICommandList*, vBOOL);
-	CSharpReturnAPI0(int, EngineNS, GfxParticleSystem, GetParticleNum);
+	Cpp2CS0(EngineNS, GfxParticleSystem, GetPosVB);
+	Cpp2CS0(EngineNS, GfxParticleSystem, GetScaleVB);
+	Cpp2CS0(EngineNS, GfxParticleSystem, GetRotateVB);
+	Cpp2CS0(EngineNS, GfxParticleSystem, GetColorVB);
+	Cpp2CS2(EngineNS, GfxParticleSystem, Flush2VB);
+	Cpp2CS0(EngineNS, GfxParticleSystem, GetParticleNum);
 
-	CSharpReturnAPI0(float, EngineNS, GfxParticleSystem, GetLiveTime);
-	CSharpAPI1(EngineNS, GfxParticleSystem, SetLiveTime, float);
-	CSharpReturnAPI0(float, EngineNS, GfxParticleSystem, GetCurLiveTime);
-	CSharpAPI1(EngineNS, GfxParticleSystem, SetCurLiveTime, float);
-	CSharpReturnAPI0(float, EngineNS, GfxParticleSystem, GetPrevFireTime);
-	CSharpAPI1(EngineNS, GfxParticleSystem, SetPrevFireTime, float);
-	CSharpReturnAPI0(float, EngineNS, GfxParticleSystem, GetFireInterval);
-	CSharpAPI1(EngineNS, GfxParticleSystem, SetFireInterval, float);
-	CSharpReturnAPI0(int, EngineNS, GfxParticleSystem, GetFireCountPerTime);
-	CSharpAPI1(EngineNS, GfxParticleSystem, SetFireCountPerTime, int);
+	Cpp2CS0(EngineNS, GfxParticleSystem, GetLiveTime);
+	Cpp2CS1(EngineNS, GfxParticleSystem, SetLiveTime);
+	Cpp2CS0(EngineNS, GfxParticleSystem, GetCurLiveTime);
+	Cpp2CS1(EngineNS, GfxParticleSystem, SetCurLiveTime);
+	Cpp2CS0(EngineNS, GfxParticleSystem, GetPrevFireTime);
+	Cpp2CS1(EngineNS, GfxParticleSystem, SetPrevFireTime);
+	Cpp2CS0(EngineNS, GfxParticleSystem, GetFireInterval);
+	Cpp2CS1(EngineNS, GfxParticleSystem, SetFireInterval);
+	Cpp2CS0(EngineNS, GfxParticleSystem, GetFireCountPerTime);
+	Cpp2CS1(EngineNS, GfxParticleSystem, SetFireCountPerTime);
 
-	CSharpReturnAPI0(bool, EngineNS, GfxParticleSystem, GetIsTrail);
-	CSharpAPI1(EngineNS, GfxParticleSystem, SetIsTrail, bool);
+	Cpp2CS0(EngineNS, GfxParticleSystem, GetIsTrail);
+	Cpp2CS1(EngineNS, GfxParticleSystem, SetIsTrail);
 
-	CSharpAPI0(EngineNS, GfxParticleSystem, ClearParticles);
+	Cpp2CS0(EngineNS, GfxParticleSystem, ClearParticles);
 
-	CSharpAPI8(EngineNS, GfxParticleSystem, Face2, GfxParticlePose*, GfxParticleSystem::BILLBOARD_TYPE, const GfxCamera*, GfxParticleSystem::CoordinateSpace, const v3dxMatrix4*, vBOOL, vBOOL, const v3dxVector3*);
+	Cpp2CS8(EngineNS, GfxParticleSystem, Face2);
 	
 	VFX_API void SDK_TestCall(int num, int a, float b);
 	

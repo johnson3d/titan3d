@@ -31,7 +31,7 @@ void GfxSkinModifier::Save2Xnd(XNDNode* node)
 	mSkeleton->Save2Xnd(subSkeNode);*/
 	//auto sktNode = node->AddNode("Socket");
 	//if (sktNode != nullptr)
-	//{// 挂接点
+	//{
 
 	//}
 }
@@ -40,13 +40,13 @@ vBOOL GfxSkinModifier::LoadXnd(XNDNode* node)
 {
 	//auto subSkeNode = node->GetChild("SubSkeleton");
 	//if (subSkeNode != nullptr)
-	//{//此vms使用到的最小骨架
+	//{
 	//	mSkeleton = new GfxSkeleton();
 	//	mSkeleton->LoadXnd(subSkeNode);
 	//}
 	//auto sktNode = node->GetChild("Socket");
 	//if (sktNode != nullptr)
-	//{// 挂接点
+	//{
 
 	//}
 	//auto animTreeNode = node->GetChild(vT("AnimTreeNode"));
@@ -77,12 +77,11 @@ GfxModifier* GfxSkinModifier::CloneModifier(IRenderContext* rc)
 
 vBOOL GfxSkinModifier::SetToRenderStream(IConstantBuffer* cb, int AbsBonePos, int AbsBoneQuat, GfxSkeletonPose* animPose)
 {
-	//这里的mSkeleton是mesh自己的，传进来的AnimationPose是整体的，根据自己的skeleton来tick
 	if (mSkeleton == nullptr)
 		return FALSE;
 	if (animPose == nullptr)
 		return FALSE;
-	//shader buffer大小改成了 360个骨骼支持。Shaders\CoreShader\Modifier\SkinModifier.var
+	
 	v3dxQuaternion* absPos = (v3dxQuaternion*)cb->GetVarPtrToWrite(AbsBonePos, (int)mSkeleton->mBones.size() * sizeof(v3dxQuaternion));
 	if (absPos == nullptr)
 		return FALSE;
@@ -95,7 +94,6 @@ vBOOL GfxSkinModifier::SetToRenderStream(IConstantBuffer* cb, int AbsBonePos, in
 		auto bone = bones[i];
 		if (bone != nullptr)
 		{
-			//这里进行translateRetarget,？？？？根据选项选择用自己的shared，自己的transform等等
 			GfxBoneTransform trans;
 			GfxBoneDesc* shared = NULL;
 			auto outBone = animPose->FindBonePose(bone->mSharedData->NameHash);
@@ -133,7 +131,7 @@ using namespace EngineNS;
 
 extern "C"
 {
-	CSharpReturnAPI0(GfxSkeleton*, EngineNS, GfxSkinModifier, GetSkeleton);
-	CSharpAPI1(EngineNS, GfxSkinModifier, SetSkeleton, GfxSkeleton*);
-	CSharpReturnAPI4(vBOOL, EngineNS, GfxSkinModifier, SetToRenderStream, IConstantBuffer*, int, int, GfxSkeletonPose*);
+	Cpp2CS0(EngineNS, GfxSkinModifier, GetSkeleton);
+	Cpp2CS1(EngineNS, GfxSkinModifier, SetSkeleton);
+	Cpp2CS4(EngineNS, GfxSkinModifier, SetToRenderStream);
 }

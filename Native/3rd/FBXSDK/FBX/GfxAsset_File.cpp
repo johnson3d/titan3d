@@ -24,6 +24,6 @@ NS_END
 using namespace EngineNS;
 extern "C"
 {
-	CSharpAPI1(EngineNS, GfxAsset_File, SetImportOption, GfxFileImportOption*);
-	CSharpAPI2(EngineNS, GfxAsset_File, AddCreater, UINT, GfxAssetCreater*);
+	Cpp2CS1(EngineNS, GfxAsset_File, SetImportOption);
+	Cpp2CS2(EngineNS, GfxAsset_File, AddCreater);
 }
