@@ -161,8 +161,8 @@ namespace EngineNS.Graphics
 
             node.AddAttrib("HLSLHashCode", hlslDesc.HashWithDepends.ToString());
             node.AddAttrib("Material_RNameType", ((int)MtlShaderPatch.Name.RNameType).ToString());
-            node.AddAttrib("Material", MtlShaderPatch.Name.ToString());
-            node.AddAttrib("ShadingEnv", EnvShaderPatch.ShaderName.ToString());
+            node.AddAttrib("Material", MtlShaderPatch.Name.Name);
+            node.AddAttrib("ShadingEnv", EnvShaderPatch.ShaderName.Name);
             node.AddAttrib("ShadingEnvType", Rtti.RttiHelper.GetTypeSaveString(EnvShaderPatch.EnvType));
             node.AddAttrib("CacheTime", System.DateTime.Now.ToString());
 

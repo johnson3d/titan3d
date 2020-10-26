@@ -52,7 +52,7 @@ namespace EngineNS.IO
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public extern static int XNDNode_Save(XndNode.NativePointer node, FileWriter.NativePointer file);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int XNDNode_Load(XndNode.NativePointer node, FileReader.NativePointer pRes);
+        public extern static int XNDNode_Load(XndNode.NativePointer node, Resource2Memory.NativePointer pRes);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public extern static Byte XNDAttrib_GetVersion(XndAttrib.NativePointer node);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
@@ -1211,7 +1211,7 @@ namespace EngineNS.IO
                 return true;
             }
         }
-        public bool Load(FileReader pRes)
+        public bool Load(Resource2Memory pRes)
         {
             unsafe
             {
@@ -1245,7 +1245,7 @@ namespace EngineNS.IO
             {
                 return await CEngine.Instance.EventPoster.Post(() =>
                 {
-                    var io = CEngine.Instance.FileManager.OpenFileForRead(file, EFileType.Xnd, false);
+                    var io = CEngine.Instance.FileManager.OpenResource2Memory(file, EFileType.Xnd, false);
                     if (io == null)
                         return null;
 
@@ -1304,7 +1304,7 @@ namespace EngineNS.IO
         {
             return await CEngine.Instance.EventPoster.Post(() =>
             {
-                var io = CEngine.Instance.FileManager.OpenFileForRead(file, EFileType.Xnd, false);
+                var io = CEngine.Instance.FileManager.OpenResource2Memory(file, EFileType.Xnd, false);
                 if (io == null)
                     return null;
 
@@ -1321,7 +1321,7 @@ namespace EngineNS.IO
 
         public static XndHolder SyncLoadXND(System.String file)
         {
-            var io = CEngine.Instance.FileManager.OpenFileForRead(file, EFileType.Xnd, false);
+            var io = CEngine.Instance.FileManager.OpenResource2Memory(file, EFileType.Xnd, false);
             if (io == null)
                 return null;
 
@@ -1339,7 +1339,7 @@ namespace EngineNS.IO
         {
             Dispose();
 
-            var io = CEngine.Instance.FileManager.OpenFileForRead(file, EFileType.Xnd, false);
+            var io = CEngine.Instance.FileManager.OpenResource2Memory(file, EFileType.Xnd, false);
             if (io == null)
                 return false;
             mNode = new XndNode();

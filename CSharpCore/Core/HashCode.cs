@@ -196,6 +196,47 @@ namespace EngineNS
         #endregion
     }
 
+    public unsafe struct Hash160
+    {
+        public fixed byte Data[20];
+        public static Hash160 CreateHash160(string src)
+        {
+            Hash160 result = new Hash160();
+            var bytesSrc = Encoding.ASCII.GetBytes(src);
+            var myRIPEMD160 = System.Security.Cryptography.RIPEMD160.Create();
+            var hashCode = myRIPEMD160.ComputeHash(bytesSrc);
+            fixed (byte* pSrc = &hashCode[0])
+            {
+                byte* pTar = &result.Data[0];
+                CoreSDK.SDK_Memory_Copy(pTar, pSrc, 20);
+            }
+            return result;
+        }
+        public static Hash160 CreateHash160(byte[] bytesSrc)
+        {
+            Hash160 result = new Hash160();
+            var myRIPEMD160 = System.Security.Cryptography.RIPEMD160.Create();
+            var hashCode = myRIPEMD160.ComputeHash(bytesSrc);
+            fixed (byte* pSrc = &hashCode[0])
+            {
+                byte* pTar = &result.Data[0];
+                CoreSDK.SDK_Memory_Copy(pTar, pSrc, 20);
+            }
+            return result;
+        }
+        public override string ToString()
+        {
+            string result = "";
+            for (int i = 0; i < 20; i++)
+            {
+                if(i==19)
+                    result += String.Format("{0:X2}", Data[i]);
+                else
+                    result += String.Format("{0:X2}_", Data[i]);
+            }
+            return result;
+        }
+    }
     public class UniHash
     {
         public static uint DefaultHash(string str)

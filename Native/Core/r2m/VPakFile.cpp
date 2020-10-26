@@ -38,8 +38,8 @@ vBOOL VPakFile::BuildPakFile(const VPakPair* const assets, UINT count, const cha
 
 		std::vector<BYTE> buffer;
 		buffer.resize(srcFile.GetLength());
-		srcFile.Read(&buffer[0], buffer.size());
-
+		if(buffer.size()>0)
+			srcFile.Read(&buffer[0], buffer.size());
 		srcFile.Close();
 
 		VPakAssetDesc desc;

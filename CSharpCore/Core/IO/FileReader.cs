@@ -5,7 +5,24 @@ using System.Runtime.InteropServices;
 
 namespace EngineNS.IO
 {
-    public class FileReader : AuxCoreObject<FileReader.NativePointer>
+    public class FileReader : FileBase
+    {
+        public FileReader()
+        {
+            mCoreObject = SDK_VFile_New();
+        }
+        public unsafe UIntPtr Read(void* lpBuf, UIntPtr nCount)
+        {
+            return SDK_VFile_Read(mCoreObject, lpBuf, nCount);
+        }
+        public bool OpenRead(string fileName)
+        {
+            if (SDK_VFile_Open(mCoreObject, fileName, (UInt32)(OpenFlags.modeRead)) == 0)
+                return false;
+            return true;
+        }
+    }
+    public class Resource2Memory : AuxCoreObject<Resource2Memory.NativePointer>
     {
         public struct NativePointer : INativePointer
         {
@@ -25,7 +42,7 @@ namespace EngineNS.IO
         }
         public EFileType mType = EFileType.Unknown;
 
-        public FileReader(NativePointer self, bool managed)
+        public Resource2Memory(NativePointer self, bool managed)
         {
             mCoreObject = self;
         }
@@ -53,7 +70,7 @@ namespace EngineNS.IO
         {
             SDK_VRes2Memory_Free(CoreObject);
         }
-        public void TryReleaseHolder(NativePointer self)
+        public void TryReleaseHolder()
         {
             SDK_VRes2Memory_TryReleaseHolder(CoreObject);
         }

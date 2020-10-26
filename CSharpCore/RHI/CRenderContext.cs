@@ -524,7 +524,7 @@ namespace EngineNS
 
                 {
                     var xml = IO.XmlHolder.NewXMLHolder($"{type.ToString()}", "");
-                    xml.RootNode.AddAttrib("Shader", shader.ToString());
+                    xml.RootNode.AddAttrib("Shader", shader.Name);
                     xml.RootNode.AddAttrib("Entry", entry);
                     var node = xml.RootNode.AddNode("Macro", "", xml);
                     foreach (var i in defines.mShaderMacroArray)

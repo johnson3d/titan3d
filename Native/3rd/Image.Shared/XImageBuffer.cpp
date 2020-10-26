@@ -464,7 +464,6 @@ void XImageBuffer::SetPalette(int nStart, int nCount, XImagePixel * pPalette)
 
 void XImageBuffer::CalculateMipCount(int * pWidthMipCount, int * pHeightMipCount, int * mipCount, bool * pIsPowerOfTwo) const
 {
-	//	����mipmap����.�����ͬʱ�ѿ�Ⱥ͸߶ȵ�mipmap�����ֱ�������.
 	int value = 1;
 	int exponentForWidth = 0;
 

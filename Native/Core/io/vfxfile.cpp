@@ -13,6 +13,8 @@
 #include "../thread/vfxthread.h"
 #include "../r2m/VPakFile.h"
 
+#include "../../CSharpAPI.h"
+
 #define new VNEW
 
 using namespace EngineNS;
@@ -489,255 +491,20 @@ VString  VTime::FormatGmt(LPCSTR pFormat) const
 
 extern "C"
 {
-	VFX_API VFile* VFile_New()
+	VFX_API VFile* SDK_VFile_New()
 	{
 		return new ViseFile();
 	}
-	VFX_API void VFile_Delete(VFile* vFile)
+	VFX_API void SDK_VFile_Delete(VFile* vFile)
 	{
 		Safe_Delete(vFile);
 	}
-	VFX_API vBOOL VFile_Open(VFile* vFile, LPCSTR fileName, UINT openFlags)
-	{
-		if(vFile == NULL)
-			return FALSE;
-
-		return vFile->Open(fileName, openFlags);
-	}
-	VFX_API void VFile_Close(VFile* vFile)
-	{
-		if(vFile != NULL)
-			vFile->Close();
-	}
-	VFX_API void VFile_EnableFileOpenThreadCheck(vBOOL enable)
-	{
-		GFileOpenThreadCheck = enable;
-	}
-
-#if defined(PLATFORM_WIN)
-
-	 long VFile_CopyFile(LPCWSTR lpExistingFileName, LPCWSTR lpNewFileName, vBOOL overrideFile)
-	{
-		auto retValue = CopyFileW(lpExistingFileName, lpNewFileName, overrideFile ? FALSE : TRUE);
-		if(!retValue)
-			return GetLastError();
-		return 0;
-	}
-	 long VFile_CreateDirectory(LPCWSTR absPathName)
-	{
-		auto retValue = CreateDirectoryW(absPathName, NULL);
-		if(!retValue)
-			return GetLastError();
-		return 0;
-	}
-	long RemoveSubDirectories(LPCWSTR absPathName, vBOOL recursive)
-	{
-		long retValue = 0;
-		if (recursive)
-		{
-			size_t pathCharCount = wcslen(absPathName);
-			WIN32_FIND_DATAW ffd;
-			size_t folderStrCharLen = pathCharCount + 3;
-			wchar_t* folderStr = new wchar_t[folderStrCharLen];
-			swprintf_s(folderStr, folderStrCharLen, L"%s\\*", absPathName);
-			auto hFind = FindFirstFileW(folderStr, &ffd);
-			std::vector<wchar_t*> subFolders;
-			if (INVALID_HANDLE_VALUE != hFind)
-			{
-				do
-				{
-					if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-					{
-						if (StrCmpW(ffd.cFileName, L".") != 0 &&
-							StrCmpW(ffd.cFileName, L"..") != 0)
-						{
-							size_t subFolderCharLen = pathCharCount + wcslen(ffd.cFileName) + 2;
-							wchar_t* subFolder = new wchar_t[subFolderCharLen];
-							swprintf_s(subFolder, subFolderCharLen, L"%s\\%s", absPathName, ffd.cFileName);
-							auto delResult = RemoveSubDirectories(subFolder, recursive);
-							subFolders.push_back(subFolder);
-							//Safe_DeleteArray(subFolder);
-							if (delResult != 0)
-							{
-								retValue = delResult;
-							}
-						}
-					}
-					else
-					{
-						size_t absFileNameCharLen = pathCharCount + wcslen(ffd.cFileName) + 2;
-						wchar_t* absFileName = new wchar_t[absFileNameCharLen];
-						swprintf_s(absFileName, absFileNameCharLen, L"%s\\%s", absPathName, ffd.cFileName);
-						auto delResult = DeleteFileW(absFileName);
-						Safe_DeleteArray(absFileName);
-						if (!delResult)
-						{
-							auto lastErr = GetLastError();
-							if (lastErr != 0)
-								retValue = lastErr;
-						}
-					}
-				} while (FindNextFileW(hFind, &ffd));
-
-				FindClose(hFind);
-			}
-			Safe_DeleteArray(folderStr);
-
-			for (auto ite = subFolders.begin(); ite != subFolders.end(); ite++)
-			{
-				RemoveDirectoryW(*ite);
-				Safe_DeleteArray(*ite);
-			}
-		}
-		return retValue;
-	}
-	 long VFile_RemoveDirectory(LPCWSTR absPathName, vBOOL recursive)
-	{
-		long retValue = RemoveSubDirectories(absPathName, recursive);
-
-		auto result = RemoveDirectoryW(absPathName);
-		if (!result)
-		{
-			auto ret = GetLastError();
-			if (ret != 0)
-				retValue = ret;
-		}
-		return retValue;
-	}
-	 long VFile_DeleteFile(LPCWSTR absPathName)
-	{
-		if (!DeleteFileW(absPathName))
-		{
-			return GetLastError();
-		}
-		return 0;
-	}
-	 vBOOL VFile_IsExist(LPCWSTR absName)
-	{
-		WIN32_FIND_DATAW ffd;
-		auto hFind = FindFirstFileW(absName, &ffd);
-		if (INVALID_HANDLE_VALUE == hFind)
-			return FALSE;
-		FindClose(hFind);
-		return TRUE;
-	}
-	 int VFile_GetFilesCount(LPCWSTR absPathName)
-	{
-		WIN32_FIND_DATAW ffd;
-		auto hFind = FindFirstFileW(absPathName, &ffd);
-		if (INVALID_HANDLE_VALUE == hFind)
-		{
-			return 0;
-		}
-
-		int retCount = 0;
-		do
-		{
-			if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			{
-			}
-			else
-			{
-				retCount++;
-			}
-		} while (FindNextFileW(hFind, &ffd));
-
-		FindClose(hFind);
-		return retCount;
-	}
-	 int VFile_GetDirectoriesCount(LPCWSTR absPathName)
-	{
-		WIN32_FIND_DATAW ffd;
-		auto hFind = FindFirstFileW(absPathName, &ffd);
-		if (INVALID_HANDLE_VALUE == hFind)
-			return 0;
-
-		int retCount = 0;
-		do 
-		{
-			if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			{
-				if (StrCmpW(ffd.cFileName, L".") != 0 &&
-					StrCmpW(ffd.cFileName, L"..") != 0)
-				{
-					retCount++;
-				}
-			}
-		} while (FindNextFileW(hFind, &ffd));
-
-		FindClose(hFind);
-		return retCount;
-	}
-	 void VFile_FreeString(wchar_t* str)
-	{
-		if (str != NULL)
-			delete[] str;
-	}
-	 HANDLE VFile_GetFindHandle(LPCWSTR absPathName)
-	{
-		WIN32_FIND_DATAW ffd;
-		auto retHandle = FindFirstFileW(absPathName, &ffd);
-		if (INVALID_HANDLE_VALUE == retHandle)
-		{
-			return NULL;
-		}
-		return retHandle;
-	}
-	 vBOOL VFile_FindClose(HANDLE findHandle)
-	{
-		return FindClose(findHandle) ? TRUE : FALSE;
-	}
-	 wchar_t* VFile_GetFiles(LPCWSTR absPathName, HANDLE findHandle)
-	{
-		if (findHandle == NULL)
-			return NULL;
-
-		WIN32_FIND_DATAW ffd;
-		if (FindNextFileW(findHandle, &ffd))
-		{
-			if ((ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-				return VFile_GetFiles(absPathName, findHandle);
-			else
-			{
-				auto strLen = wcslen(ffd.cFileName) + 1;
-				wchar_t* retValue = new wchar_t[strLen];
-				swprintf_s(retValue, strLen, L"%s", ffd.cFileName);
-				return retValue;
-			}
-		}
-		
-		return NULL;
-	}
-	 wchar_t* VFile_GetDirectories(LPCWSTR absPathName, HANDLE findHandle)
-	{
-		if (findHandle == NULL)
-			return NULL;
-
-		WIN32_FIND_DATAW ffd;
-		if (FindNextFileW(findHandle, &ffd))
-		{
-			if ((ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-			{
-				if (StrCmpW(ffd.cFileName, L".") != 0 &&
-					StrCmpW(ffd.cFileName, L"..") != 0)
-				{
-					auto strLen = wcslen(ffd.cFileName) + 1;
-					wchar_t* retValue = new wchar_t[strLen];
-					swprintf_s(retValue, strLen, L"%s", ffd.cFileName);
-					return retValue;
-				}
-				else
-					return VFile_GetDirectories(absPathName, findHandle);
-			}
-			else
-			{
-				return VFile_GetDirectories(absPathName, findHandle);
-			}
-		}
-		return NULL;
-	}
-
-#endif
+	Cpp2CS2(, VFile, Open);
+	Cpp2CS0(, VFile, Close);
+	Cpp2CS2(, VFile, Write);
+	Cpp2CS2(, VFile, Read);
+	Cpp2CS0(, VFile, GetLength);
+	Cpp2CS2(, VFile, Seek);
 };
 
 #if !defined(PLATFORM_WIN)

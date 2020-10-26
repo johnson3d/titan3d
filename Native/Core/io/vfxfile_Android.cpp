@@ -5,8 +5,6 @@
 
 #define new VNEW
 
-extern vBOOL GFileOpenThreadCheck;
-
 typedef void (WINAPI *FVFile_Android_GetRelativeFileName)(char* assets, UINT bufferSize, const char* fullFileName);
 FVFile_Android_GetRelativeFileName g_GetRelativeFileNameEvent = nullptr;
 
@@ -188,8 +186,6 @@ UINT_PTR VFile_Android::Write(const void* lpBuf, UINT_PTR nCount)
 
 	if(m_hFile != NULL)
 		return (UINT_PTR)fwrite(lpBuf, sizeof(char), nCount, m_hFile);
-
-	// AAsset���߱�д����
 
 	return 0;
 }

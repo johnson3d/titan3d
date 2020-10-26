@@ -56,6 +56,7 @@ namespace EngineNS.IO
         {
             get { return mBin; }
         }
+
         string mEngineRoot;
         public string EngineRoot
         {
@@ -92,6 +93,10 @@ namespace EngineNS.IO
         public string Cooked
         {
             get { return mCooked; }
+        }
+        public string CookedTemp
+        {
+            get { return mCooked + "temp/"; }
         }
         public string CookingPlatform;
         public string CookingRoot
@@ -238,14 +243,14 @@ namespace EngineNS.IO
         }
         #endregion
 
-        Dictionary<string, FileReader> mReadOnlyFiles = new Dictionary<string, FileReader>();
+        Dictionary<string, Resource2Memory> mReadOnlyFiles = new Dictionary<string, Resource2Memory>();
         ~FileManager()
         {
             Cleanup();
         }
         public void RemoveFromManager(string file)
         {
-            FileReader f2m;
+            Resource2Memory f2m;
             if (mReadOnlyFiles.TryGetValue(file, out f2m))
             {
                 mReadOnlyFiles.Remove(file);
@@ -585,9 +590,9 @@ namespace EngineNS.IO
         }
         
 
-        public FileReader OpenFileForRead(string file, EFileType type, bool bHold)
+        public Resource2Memory OpenResource2Memory(string file, EFileType type, bool bHold)
         {
-            FileReader f2m;
+            Resource2Memory f2m;
             if (mReadOnlyFiles.TryGetValue(file, out f2m))
             {
                 return f2m;
@@ -597,7 +602,7 @@ namespace EngineNS.IO
             var res = VFile2Memory_F2M(finalStr, false);
             if (res.Pointer == IntPtr.Zero)
                 return null;
-            f2m = new FileReader(res, bHold);
+            f2m = new Resource2Memory(res, bHold);
             f2m.mType = type;
             if (bHold)
             {   
@@ -605,21 +610,30 @@ namespace EngineNS.IO
             }
             return f2m;
         }
+        public FileReader OpenFileForRead(string file, EFileType type)
+        {
+            unsafe
+            {
+                var result = new FileReader();
 
+                var fileName = _GetAbsPathFromRelativePath(file);
+                if (result.OpenRead(fileName) == false)
+                    return null;
+
+                return result;
+            }
+        }
         public FileWriter OpenFileForWrite(string file, EFileType type)
         {
             unsafe
             {
-                var io = VFile_New();
+                var result = new FileWriter();
 
                 var fileName = _GetAbsPathFromRelativePath(file);
-                if (VFile_Open(io, fileName, (UInt32)(OpenFlags.modeWrite | OpenFlags.modeCreate)) == 0)
-                {
-                    VFile_Delete(io);
+                if (result.OpenWrite(fileName) == false)
                     return null;
-                }
 
-                return new FileWriter(io);
+                return result;
             }
         }
 
@@ -735,6 +749,11 @@ namespace EngineNS.IO
             return path;
         }
 
+        public DDCDataManager DDCManager
+        {
+            get;
+        } = new DDCDataManager();
+
 #region Platform API
         public bool DirectoryExists(string absFolder)
         {
@@ -760,7 +779,7 @@ namespace EngineNS.IO
             var res = VFile2Memory_F2M(file, false);
             if (res.Pointer == IntPtr.Zero)
                 return null;
-            var fr = new FileReader(res, false);
+            var fr = new Resource2Memory(res, false);
 
             fr.BeginRead();
             byte[] result = new byte[(int)fr.GetLength()];
@@ -906,16 +925,8 @@ namespace EngineNS.IO
 #region SDK
         const string ModuleNC = CoreObjectBase.ModuleNC;
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public extern static FileReader.NativePointer VFile2Memory_F2M(string psz, bool bShareWrite);
-        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public extern static FileWriter.NativePointer VFile_New();
-        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public extern static void VFile_Delete(FileWriter.NativePointer vFile);
-        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public extern static int VFile_Open(FileWriter.NativePointer vFile, string fileName, UInt32 openFlags);
-        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public extern static void VFile_Close(FileWriter.NativePointer vFile);
-#endregion
+        public extern static Resource2Memory.NativePointer VFile2Memory_F2M(string psz, bool bShareWrite);
+        #endregion
     }
 
     public class CHLSLFileDescManager
@@ -1057,6 +1068,48 @@ namespace EngineNS.IO
                 {
                     allDepends.Add(i.Value);
                     CollectDependTree(i.Value, allDepends);
+                }
+            }
+        }
+    }
+
+    public class DDCDataManager
+    {
+        public byte[] GetCacheData(string key, string type)
+        {
+            var hash = Hash160.CreateHash160(key);
+            var ddcName = CEngine.Instance.FileManager.DDCDirectory + type +  "/" + hash.ToString();
+            var fr = CEngine.Instance.FileManager.OpenResource2Memory(ddcName, EFileType.Unknown, false);
+            if (fr == null)
+                return null;
+            fr.BeginRead();
+            var len = (uint)fr.GetLength();
+            byte[] result = new byte[len];
+            unsafe
+            {
+                fixed (byte* pTar = &result[0])
+                {
+                    CoreSDK.SDK_Memory_Copy(pTar, fr.NativePtr.ToPointer(), len);
+                }
+            }
+            fr.EndRead();
+            fr.TryReleaseHolder();
+            return result;
+        }
+        public bool SetCacheData(string key, string type, byte[] data)
+        {
+            var hash = Hash160.CreateHash160(key);
+            var ddcName = CEngine.Instance.FileManager.DDCDirectory + type + "/" + hash.ToString();
+            var fw = CEngine.Instance.FileManager.OpenFileForWrite(ddcName, EFileType.Unknown);
+            if (fw == null)
+                return false;
+
+            unsafe
+            {
+                fixed (byte* p = &data[0])
+                {
+                    var writeNum = fw.Write(p, (UIntPtr)data.Length);
+                    return ((UIntPtr)data.Length == writeNum);
                 }
             }
         }

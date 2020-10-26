@@ -374,7 +374,7 @@ namespace EngineNS
         }
         public override string ToString()
         {
-            return Name;
+            return RNameType.ToString() + ":" + Name;
         }
 
         public class EqualityComparer : IEqualityComparer<RName>

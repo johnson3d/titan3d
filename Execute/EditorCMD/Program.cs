@@ -12,6 +12,10 @@ namespace EditorCMD
     {
         static void Main(string[] args)
         {
+            foreach(var i in args)
+            {
+                Console.WriteLine(i);
+            }
             if (args == null || args.Length == 0)
                 return;
 
@@ -30,6 +34,8 @@ namespace EditorCMD
             CMDEngine.Instance.PreInitEngine();
             CMDEngine.Instance.InitEngine("Game", null);
 
+            cmdEngine.FileManager.CreateDirectory(cmdEngine.FileManager.CookedTemp);
+
             EngineNS.Thread.Async.ContextThreadManager.ImmidiateMode = true;
             var unused = RealMain(cmdEngine, args);
 
@@ -38,6 +44,7 @@ namespace EditorCMD
                 cmdEngine.MainTick();
             }
 
+            cmdEngine.FileManager.DeleteDirectory(cmdEngine.FileManager.CookedTemp, true);
             cmdEngine.Cleanup();
         }
 
