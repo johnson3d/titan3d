@@ -105,4 +105,4 @@ EditorCMD示例
 
 AloneGame示例
 
-1. usecooked=android gpu=Adreno540 create_debug_layer textureformat=none 纹理格式目前只有none和etc2，不知道哪里出了点问题，之前好好的etc2模式会让纹理都变黑，还要找原因
+1. usecooked=android gpu=Adreno540 create_debug_layer textureformat=none 纹理格式目前只有none和etc2
