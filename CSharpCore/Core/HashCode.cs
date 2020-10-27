@@ -196,9 +196,34 @@ namespace EngineNS
         #endregion
     }
 
-    public unsafe struct Hash160
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    public unsafe struct Hash160 : IComparable<Hash160>
     {
         public fixed byte Data[20];
+        public int CompareTo(Hash160 other)
+        {
+            fixed (byte* p0 = &Data[0])
+            {
+                return CoreSDK.SDK_Memory_Cmp(p0, &other.Data[0], 20);
+            }
+        }
+        public static bool operator ==(Hash160 hash1, Hash160 hash2)
+        {
+            return hash1.CompareTo(hash2)==0;
+        }
+        public static bool operator !=(Hash160 hash1, Hash160 hash2)
+        {
+            return hash1.CompareTo(hash2) != 0;
+        }
+        public override bool Equals(object obj)
+        {
+            return this == (Hash160)obj;
+        }
+        public override int GetHashCode()
+        {
+            return (int)UniHash.APHash(this.ToString());
+        }
+        public static Hash160 Emtpy = new Hash160();
         public static Hash160 CreateHash160(string src)
         {
             Hash160 result = new Hash160();
@@ -217,6 +242,18 @@ namespace EngineNS
             Hash160 result = new Hash160();
             var myRIPEMD160 = System.Security.Cryptography.RIPEMD160.Create();
             var hashCode = myRIPEMD160.ComputeHash(bytesSrc);
+            fixed (byte* pSrc = &hashCode[0])
+            {
+                byte* pTar = &result.Data[0];
+                CoreSDK.SDK_Memory_Copy(pTar, pSrc, 20);
+            }
+            return result;
+        }
+        public static Hash160 CreateHash160(EngineNS.IO.Serializer.ChunkWriter chunk)
+        {
+            Hash160 result = new Hash160();
+            var myRIPEMD160 = System.Security.Cryptography.RIPEMD160.Create();
+            var hashCode = myRIPEMD160.ComputeHash(chunk.Ptr, 0, chunk.CurPtr());
             fixed (byte* pSrc = &hashCode[0])
             {
                 byte* pTar = &result.Data[0];

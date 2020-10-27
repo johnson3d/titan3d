@@ -1075,28 +1075,55 @@ namespace EngineNS.IO
 
     public class DDCDataManager
     {
-        public byte[] GetCacheData(string key, string type)
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
+        public struct DDCDataDesc
+        {
+            public Hash160 SourceHash;
+            public long UpdateTimeData;
+            public int Size;
+            public System.DateTime UpdateTime
+            {
+                get
+                {
+                    return System.DateTime.FromBinary(UpdateTimeData);
+                }
+                set
+                {
+                    UpdateTimeData = value.ToBinary();
+                }
+            }
+        }
+        public byte[] GetCacheData(string key, string type, ref Hash160 sourceHash)
         {
             var hash = Hash160.CreateHash160(key);
             var ddcName = CEngine.Instance.FileManager.DDCDirectory + type +  "/" + hash.ToString();
-            var fr = CEngine.Instance.FileManager.OpenResource2Memory(ddcName, EFileType.Unknown, false);
+            var fr = CEngine.Instance.FileManager.OpenFileForRead(ddcName, EFileType.Unknown);
             if (fr == null)
                 return null;
-            fr.BeginRead();
-            var len = (uint)fr.GetLength();
-            byte[] result = new byte[len];
+            var frProxy = new IO.Serializer.FileReaderProxy(fr);
+
+            DDCDataDesc desc = new DDCDataDesc();
             unsafe
             {
-                fixed (byte* pTar = &result[0])
+                frProxy.Read(out desc);
+                if (sourceHash != Hash160.Emtpy && desc.SourceHash != sourceHash)
                 {
-                    CoreSDK.SDK_Memory_Copy(pTar, fr.NativePtr.ToPointer(), len);
+                    fr.Cleanup();
+                    return null;
                 }
+                byte[] result = new byte[desc.Size];
+                unsafe
+                {
+                    fixed (byte* pTar = &result[0])
+                    {
+                        frProxy.ReadPtr(pTar, desc.Size);
+                    }
+                }
+                fr.Cleanup();
+                return result;
             }
-            fr.EndRead();
-            fr.TryReleaseHolder();
-            return result;
         }
-        public bool SetCacheData(string key, string type, byte[] data)
+        public bool SetCacheData(string key, string type, ref Hash160 sourceHash, byte[] data)
         {
             var hash = Hash160.CreateHash160(key);
             var ddcName = CEngine.Instance.FileManager.DDCDirectory + type + "/" + hash.ToString();
@@ -1104,8 +1131,14 @@ namespace EngineNS.IO
             if (fw == null)
                 return false;
 
+            DDCDataDesc desc = new DDCDataDesc();
+            desc.Size = data.Length;
+            desc.UpdateTime = System.DateTime.UtcNow;
+            System.DateTime.UtcNow.ToBinary();
+            desc.SourceHash = sourceHash;
             unsafe
             {
+                fw.Write(&desc, (UIntPtr)sizeof(DDCDataDesc));
                 fixed (byte* p = &data[0])
                 {
                     var writeNum = fw.Write(p, (UIntPtr)data.Length);

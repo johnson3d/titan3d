@@ -176,13 +176,18 @@ namespace EditorCMD
             }
             sw.Close();
 
+            var memStream = new EngineNS.IO.Serializer.ChunkWriter(pngData.Length + sizeof(EngineNS.CTxPicDesc), int.MaxValue);
+            memStream.WriteNoSize(pngData, pngData.Length);
+            memStream.Write(txDesc);
+            var sourceHash = Hash160.CreateHash160(pngData);
+
             bool hasCompressData = false;
             if (pngData != null && (TexCompressFlags & ETexCompressMode.ETC2) != 0 && txDesc.EtcFormat != ETCFormat.UNKNOWN)
             {
                 hasCompressData = true;
                 string etxDDCKey = rn.ToString() + "->etc";
                 var etcCmd = CEngine.Instance.FileManager.Bin + "tools/x64/EtcTool.exe";
-                var etcData = CEngine.Instance.FileManager.DDCManager.GetCacheData(etxDDCKey, "texture");
+                var etcData = CEngine.Instance.FileManager.DDCManager.GetCacheData(etxDDCKey, "texture", ref sourceHash);
                 if (etcData == null)
                 {
                     List<string> args = new List<string>();
@@ -268,7 +273,7 @@ namespace EditorCMD
                             mipAttr.EndWrite();
                         }
                     }
-                    CEngine.Instance.FileManager.DDCManager.SetCacheData(etxDDCKey, "texture", etcData);
+                    CEngine.Instance.FileManager.DDCManager.SetCacheData(etxDDCKey, "texture", ref sourceHash, etcData);
                 }
             }
 

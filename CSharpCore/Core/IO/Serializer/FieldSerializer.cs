@@ -131,6 +131,36 @@ namespace EngineNS.IO.Serializer
                 }
             }
         }
+        public virtual void ReadBigSize(out byte[] v)
+        {
+            unsafe
+            {
+                int len;
+                ReadPtr(&len, sizeof(int));
+                v = new byte[len];
+                if (len > 0)
+                {
+                    fixed (byte* p = &v[0])
+                    {
+                        ReadPtr(p, len);
+                    }
+                }
+            }
+        }
+        public virtual void ReadNoSize(out byte[] v, int len)
+        {
+            unsafe
+            {
+                v = new byte[len];
+                if (len > 0)
+                {
+                    fixed (byte* p = &v[0])
+                    {
+                        ReadPtr(p, len);
+                    }
+                }
+            }
+        }
         public virtual void Read(out ChunkReader v)
         {
             v = new IO.Serializer.ChunkReader();
@@ -391,6 +421,13 @@ namespace EngineNS.IO.Serializer
                 return;
             tDesc.WriteValue(obj, this);
         }
+        public void Write<T>(T v) where T : unmanaged
+        {
+            unsafe
+            {
+                WritePtr(&v, sizeof(T));
+            }
+        }
         public void Write<T>(List<T> v) where T : ISerializer, new()
         {
             var sr = TypeDescGenerator.Instance.GetSerializer(typeof(ISerializer));
@@ -425,6 +462,28 @@ namespace EngineNS.IO.Serializer
             {
                 var len = (UInt16)v.Length;
                 WritePtr(&len, sizeof(UInt16));
+                fixed (byte* p = &v[0])
+                {
+                    WritePtr(p, len);
+                }
+            }
+        }
+        public virtual void WriteIntSize(byte[] v)
+        {
+            unsafe
+            {
+                var len = (UInt16)v.Length;
+                fixed (byte* p = &v[0])
+                {
+                    WritePtr(p, len);
+                }
+            }
+        }
+        public virtual void WriteNoSize(byte[] v, int len)
+        {
+            System.Diagnostics.Debug.Assert(len <= v.Length);
+            unsafe
+            {
                 fixed (byte* p = &v[0])
                 {
                     WritePtr(p, len);
@@ -600,11 +659,33 @@ namespace EngineNS.IO.Serializer
                 this.OnReadError();
                 return;
             }
-            fixed(byte* src = &mByteArray[mCurPos])
+            for(int i=0; i<length; i++)
             {
-                CoreSDK.SDK_Memory_Copy(p, src, (uint)length);
+                ((byte*)p)[i] = mByteArray[mCurPos + i];
             }
+            //fixed(byte* src = &mByteArray[mCurPos])
+            //{
+            //    CoreSDK.SDK_Memory_Copy(p, src, (uint)length);
+            //}
             mCurPos += length;
+        }
+    }
+
+    public class FileReaderProxy : AuxIReader
+    {
+        FileReader mFileReader;
+        public FileReaderProxy(FileReader fr)
+        {
+            mFileReader = fr;
+            mFileReader.Seek(UIntPtr.Zero, FileBase.ESeekPosition.begin);
+        }
+        public override unsafe void ReadPtr(void* p, int length)
+        {
+            var readBytes = mFileReader.Read(p, (UIntPtr)length);
+            if(readBytes != (UIntPtr)length)
+            {
+                this.OnReadError();
+            }
         }
     }
 

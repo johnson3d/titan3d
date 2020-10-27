@@ -76,10 +76,7 @@ namespace EngineNS.IO.Serializer
 
             fixed (byte* src = &mHandle[offset])
             {
-                for (int i = 0; i < length; i++)
-                {
-                    tar[i] = src[i];
-                }
+                CoreSDK.SDK_Memory_Copy(tar, src, (uint)length);
             }
             mPos += length;
         }
@@ -98,12 +95,13 @@ namespace EngineNS.IO.Serializer
         protected int mBuffSize;
         protected byte[] mHandle;
 
-        public ChunkWriter()
+        public ChunkWriter(int Capacity = 128, int maxGrowStep = 64 * 1024)
         {
-            mHandle = new byte[128];
+            mHandle = new byte[Capacity];
 
-            mBuffSize = 128;
+            mBuffSize = Capacity;
             mPos = 0;
+            C_MAXDATASIZE = maxGrowStep;
         }
         public ChunkWriter(byte[] data, int size)
         {
@@ -161,10 +159,7 @@ namespace EngineNS.IO.Serializer
             byte* src = (byte*)p;
             fixed (byte* tar = &mHandle[CurPtr()])
             {
-                for (int i = 0; i < length; i++)
-                {
-                    tar[i] = src[i];
-                }
+                CoreSDK.SDK_Memory_Copy(tar, src, (uint)length);
             }
             mPos += length;
         }
