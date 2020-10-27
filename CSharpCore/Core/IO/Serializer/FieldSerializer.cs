@@ -584,6 +584,30 @@ namespace EngineNS.IO.Serializer
         }
     }
 
+    public class MemoryReaderProxy : AuxIReader
+    {
+        byte[] mByteArray;
+        int mCurPos;
+        public MemoryReaderProxy(byte[] byteArray)
+        {
+            mByteArray = byteArray;
+            mCurPos = 0;
+        }
+        public override unsafe void ReadPtr(void* p, int length)
+        {
+            if (mCurPos + length > mByteArray.Length)
+            {
+                this.OnReadError();
+                return;
+            }
+            fixed(byte* src = &mByteArray[mCurPos])
+            {
+                CoreSDK.SDK_Memory_Copy(p, src, (uint)length);
+            }
+            mCurPos += length;
+        }
+    }
+
     public abstract class FieldSerializer
     {
         public abstract object ReadValue(IReader pkg);

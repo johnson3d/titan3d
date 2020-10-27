@@ -75,7 +75,7 @@ EditorCMD示例
 
 1. Cook游戏
 
-   cook entry=samplers/mergeinstance/mergeinstance.macross platform=android shadermodel=5+4+3 copyrinfo cookshader recompile genvsproj texencoder=PNG+ETC2 pak=D:/OpenSource/titan3d/cooked/android/a.tpak
+   cook entry=samplers/mergeinstance/mergeinstance.macross platform=android shadermodel=5+4+3 copyrinfo cookshader recompile genvsproj ddc_clear_texture texencoder=PNG+ETC2 pak=D:/OpenSource/titan3d/cooked/android/a.tpak
 
 2. 强制刷新修复rinfo的引用关系记录
 

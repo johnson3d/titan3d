@@ -233,21 +233,32 @@ namespace EditorCMD
                     EngineNS.Editor.Runner.ProcessExecuter.RunProcessSync(etcCmd, args, outInfos);
 
                     var pkmReader = CEngine.Instance.FileManager.OpenFileForRead(tmpPngFile + ".ktx", EngineNS.IO.EFileType.Texture);
+                    if (pkmReader != null)
+                    {
+                        etcData = pkmReader.ReadAll();
+                        pkmReader.Cleanup();
+                    }
+                    CEngine.Instance.FileManager.DeleteFile(tmpPngFile + ".ktx");
+                }
+
+                if(etcData!=null)
+                {
                     unsafe
                     {
                         var etcNode = targetXnd.Node.AddNode("EtcMips", 0, 0);
 
+                        var readProxy = new EngineNS.IO.Serializer.MemoryReaderProxy(etcData);
                         KTXHeader ktxHeader = new KTXHeader();
-                        pkmReader.Read(&ktxHeader, (UIntPtr)sizeof(KTXHeader));
+                        readProxy.Read(out ktxHeader);
 
                         for (int mip = 0; mip < ktxHeader.m_u32NumberOfMipmapLevels; mip++)
                         {
                             var layer = new EngineNS.Bricks.TexCompressor.ETCLayer();
-                            pkmReader.Read(&layer, (UIntPtr)sizeof(EngineNS.Bricks.TexCompressor.ETCLayer));
+                            readProxy.Read(out layer);
                             byte[] etcMipData = new byte[layer.Size];
                             fixed (byte* pMD = &etcMipData[0])
                             {
-                                pkmReader.Read(pMD, (UIntPtr)layer.Size);
+                                readProxy.ReadPtr(pMD, (int)layer.Size);
                             }
 
                             var mipAttr = etcNode.AddAttrib($"Mip_{mip}");
@@ -257,8 +268,6 @@ namespace EditorCMD
                             mipAttr.EndWrite();
                         }
                     }
-                    pkmReader.Cleanup();
-                    CEngine.Instance.FileManager.DeleteFile(tmpPngFile + ".ktx");
                     CEngine.Instance.FileManager.DDCManager.SetCacheData(etxDDCKey, "texture", etcData);
                 }
             }

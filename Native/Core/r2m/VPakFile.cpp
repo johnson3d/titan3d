@@ -49,7 +49,8 @@ vBOOL VPakFile::BuildPakFile(const VPakPair* const assets, UINT count, const cha
 		desc.SizeInPak = desc.Size;
 		desc.FullPath = assets[i].FullName;
 
-		file.Write(&buffer[0], desc.Size);
+		if(buffer.size()>0)
+			file.Write(&buffer[0], desc.Size);
 
 		descList.push_back(desc);
 		packedNum++;

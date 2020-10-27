@@ -21,6 +21,19 @@ namespace EngineNS.IO
                 return false;
             return true;
         }
+        public byte[] ReadAll()
+        {
+            this.Seek(UIntPtr.Zero, ESeekPosition.begin);
+            byte[] result = new byte[(int)this.GetLength()];
+            unsafe
+            {
+                fixed (byte* p = &result[0])
+                {
+                    Read(p, (UIntPtr)result.Length);
+                }
+            }
+            return result;
+        }
     }
     public class Resource2Memory : AuxCoreObject<Resource2Memory.NativePointer>
     {

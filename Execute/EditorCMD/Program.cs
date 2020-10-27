@@ -118,6 +118,16 @@ namespace EditorCMD
                             CMDEngine.CMDEngineInstance.IsNeedProject = true;
                         }
 
+                        var ddc_clear_texture = FindArgument(args, "ddc_clear_texture");
+                        if (ddc_clear_texture != null)
+                        {
+                            CEngine.Instance.FileManager.DeleteDirectory(CEngine.Instance.FileManager.DDCDirectory + "texture/", true);
+                        }
+                        if (CEngine.Instance.FileManager.DirectoryExists(CEngine.Instance.FileManager.DDCDirectory + "texture/") == false)
+                        {
+                            CEngine.Instance.FileManager.CreateDirectory(CEngine.Instance.FileManager.DDCDirectory + "texture/");
+                        }
+
                         var texEncoder = FindArgument(args, "texencoder=");
                         if (texEncoder != null)
                         {
