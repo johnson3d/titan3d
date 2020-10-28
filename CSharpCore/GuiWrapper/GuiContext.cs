@@ -40,9 +40,31 @@ namespace EngineNS.GuiWrapper
         public void TickLogic(float deltaSeconds)
         {
             ImGui.SetCurrentContext(mContext);
+
+            ImGui.Render();
+            RenderImDrawData(ImGui.GetDrawData());
+
             SetPerFrameImGuiData(deltaSeconds);
-            ImGui.NewFrame();
+            UpdateImGuiInput();
+
+            SubmitUI();
         }
+        public void SubmitUI()
+        {
+            ImGui.NewFrame();
+
+            //
+        }
+        private void RenderImDrawData(ImDrawDataPtr draw_data)
+        {
+
+        }
+        public Vector2 WindowSize
+        {
+            get;
+            private set;
+        }
+
         public Vector2 ScaleFactor
         {
             get;
@@ -51,11 +73,15 @@ namespace EngineNS.GuiWrapper
         private void SetPerFrameImGuiData(float deltaSeconds)
         {
             ImGuiIOPtr io = ImGui.GetIO();
-            //io.DisplaySize = new Vector2(
-            //    _windowWidth / _scaleFactor.X,
-            //    _windowHeight / _scaleFactor.Y);
-            //io.DisplayFramebufferScale = new System.Numerics.Vector2(ScaleFactor.X, ScaleFactor.Y);
+            io.DisplaySize = new System.Numerics.Vector2(
+                WindowSize.X / ScaleFactor.X,
+                WindowSize.Y / ScaleFactor.Y);
+            io.DisplayFramebufferScale = new System.Numerics.Vector2(ScaleFactor.X, ScaleFactor.Y);
             io.DeltaTime = deltaSeconds; // DeltaTime is in seconds.
+        }
+        private void UpdateImGuiInput()
+        {
+            ImGuiIOPtr io = ImGui.GetIO();
         }
     }
 }
