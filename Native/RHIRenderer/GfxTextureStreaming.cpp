@@ -319,7 +319,7 @@ vBOOL GfxTextureStreaming::LoadNextMip(IRenderContext* rc, IShaderResourceView* 
 		IShaderResourceView::ETCLayer layer;
 		attr->Read(layer);
 		
-		int mipLvl = mMipBuffers.size() - mLoadMaxMip - 1;
+		int mipLvl = (int)(mMipBuffers.size() - mLoadMaxMip - 1);
 		mMipBuffers[mLoadMaxMip].Width = vfxMAX(1, srv->mTxDesc.Width >> mipLvl);
 		mMipBuffers[mLoadMaxMip].Height = vfxMAX(1, srv->mTxDesc.Height >> mipLvl);
 		mMipBuffers[mLoadMaxMip].MemData.resize(layer.Size);

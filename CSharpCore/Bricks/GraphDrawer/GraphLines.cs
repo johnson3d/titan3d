@@ -252,7 +252,7 @@ namespace EngineNS.Bricks.GraphDrawer
                 LinesGen.BuildGraph(mTempPosition, mTempUV, halfWidth);
 
                 mTempNormal.Clear();
-                mTempNormal.SetGrowStep(mTempPosition.Count);
+                mTempNormal.SetCapacity(mTempPosition.Count);
                 for (int i = 0; i < mTempPosition.Count; i++)
                 {
                     //mTempNormal.Add(mTempPosition[i].CalcNormals());
@@ -294,7 +294,7 @@ namespace EngineNS.Bricks.GraphDrawer
                 LinesGen.BuildGraph(mTempPosition, mTempUV, halfWidth);
 
                 mTempNormal.Clear();
-                mTempNormal.SetGrowStep(mTempPosition.Count);
+                mTempNormal.SetCapacity(mTempPosition.Count);
                 for (int i = 0; i < mTempPosition.Count; i++)
                 {
                     //mTempNormal.Add(mTempPosition[i].CalcNormals());

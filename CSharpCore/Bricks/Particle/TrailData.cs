@@ -222,7 +222,7 @@ namespace EngineNS.Bricks.Particle
             if (Positions.Count < 4)
                 return;
 
-            VertexIndexes.Clear((uint)((Positions.Count - 2) * 3));
+            VertexIndexes.Clear();
             for (int i = 2; i < Positions.Count; i += 2)
             {
                 VertexIndexes.Add(StartIndex + i - 2);
@@ -429,14 +429,14 @@ namespace EngineNS.Bricks.Particle
 
         public void Clear()
         {
-            Positions.Clear((uint)Positions.Count);
-            VertexIndexes.Clear((uint)VertexIndexes.Count);
-            Colors.Clear((uint)Colors.Count);
-            LifeTicks.Clear((uint)LifeTicks.Count);
-            UVs.Clear((uint)UVs.Count);
+            Positions.Clear(false);
+            VertexIndexes.Clear(false);
+            Colors.Clear(false);
+            LifeTicks.Clear(false);
+            UVs.Clear(false);
 
-            Tangents.Clear((uint)Tangents.Count);
-            Normals.Clear((uint)Normals.Count);
+            Tangents.Clear(false);
+            Normals.Clear(false);
 
             ComposeCount = 0;
         }

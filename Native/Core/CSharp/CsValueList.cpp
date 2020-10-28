@@ -17,7 +17,7 @@ CsValueList::CsValueList()
 
 CsValueList::~CsValueList()
 {
-	Clear();
+	Clear(TRUE);
 }
 
 UINT CsValueList::GetCount()
@@ -30,7 +30,7 @@ UINT CsValueList::GetCount()
 void CsValueList::SetCapacity(int capacity)
 {
 	ASSERT(mStride != 0);
-	mMemData.InstantArray(mMemData.GetSize(), capacity);
+	mMemData.InstantArray(mMemData.GetSize(), capacity, FALSE);
 }
 
 void CsValueList::AddValue(BYTE* ptr)
@@ -50,6 +50,11 @@ void CsValueList::Append(CsValueList* src)
 	mMemData.Append(src->mMemData);
 }
 
+void CsValueList::AppendArray(BYTE* src, int count)
+{
+	mMemData.Append(src, mStride * count);
+}
+
 void CsValueList::RemoveAt(UINT index)
 {
 	ASSERT(mStride != 0);
@@ -61,9 +66,9 @@ void CsValueList::RemoveAt(UINT index)
 	}
 }
 
-void CsValueList::Clear(UINT size)
+void CsValueList::Clear(vBOOL bFreeMemory)
 {
-	mMemData.SetSize(0);
+	mMemData.RemoveAll(bFreeMemory);
 }
 
 BYTE* CsValueList::GetAddressAt(UINT index)
@@ -234,6 +239,7 @@ extern "C"
 	Cpp2CS0(EngineNS, CsValueList, GetCount);
 	Cpp2CS1(EngineNS, CsValueList, AddValue);
 	Cpp2CS1(EngineNS, CsValueList, Append);
+	Cpp2CS2(EngineNS, CsValueList, AppendArray);
 	Cpp2CS1(EngineNS, CsValueList, RemoveAt);
 	Cpp2CS1(EngineNS, CsValueList, Clear);
 	Cpp2CS1(EngineNS, CsValueList, GetAddressAt);

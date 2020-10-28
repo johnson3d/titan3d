@@ -22,9 +22,10 @@ public:
 	UINT GetCount();
 	void AddValue(BYTE* ptr);
 	void Append(CsValueList* src);
+	void AppendArray(BYTE* src, int count);
 	
 	void RemoveAt(UINT index);
-	void Clear(UINT size = 0);
+	void Clear(vBOOL bFreeMemory);
 	BYTE* GetAddressAt(UINT index);
 	void SetDatas(BYTE* ptr, int countOfObj);
 };

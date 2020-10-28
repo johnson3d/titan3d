@@ -39,8 +39,8 @@ public:
 	inline ArraySizeType GetMaxSize() const{
 		return m_nMaxSize;
 	}
-	void InstantArray( ArraySizeType nMax , ArraySizeType nGrowBy = -1  ){
-		SetSize( nMax , nGrowBy );
+	void InstantArray( ArraySizeType nMax , ArraySizeType nGrowBy = -1, vBOOL bFreeWhenEmpty = TRUE ){
+		SetSize( nMax , nGrowBy, bFreeWhenEmpty);
 		//		m_nSize = 0;
 	}
 // Attributes
@@ -49,12 +49,12 @@ public:
 		return GetSize() * sizeof(TYPE);
 	}
 	ArraySizeType GetUpperBound() const;
-	void SetSize(ArraySizeType nNewSize, ArraySizeType nGrowBy = -1);
+	void SetSize(ArraySizeType nNewSize, ArraySizeType nGrowBy = -1, vBOOL bFreeWhenEmpty = TRUE);
 
 // Operations
 	// Clean up
 	void FreeExtra();
-	void RemoveAll();
+	void RemoveAll(vBOOL bFree = TRUE);
 
 	// Accessing elements
 	const TYPE & GetAt(ArraySizeType nIndex) const;
@@ -69,6 +69,7 @@ public:
 	void SetAtGrow(ArraySizeType nIndex, ARG_TYPE newElement);
 	ArraySizeType Add(ARG_TYPE newElement);
 	ArraySizeType Append(const VArray& src);
+	ArraySizeType Append(TYPE* ptr, ArraySizeType num);
 	void Copy(const VArray& src);
 
 	// overloaded operator helpers
@@ -107,8 +108,8 @@ template<class TYPE, class ARG_TYPE>
 inline ArraySizeType VArray<TYPE, ARG_TYPE>::GetUpperBound() const
 	{ return m_nSize-1; }
 template<class TYPE, class ARG_TYPE>
-inline void VArray<TYPE, ARG_TYPE>::RemoveAll()
-	{ SetSize(0, -1); }
+inline void VArray<TYPE, ARG_TYPE>::RemoveAll(vBOOL bFree)
+	{ SetSize(0, -1, bFree); }
 template<class TYPE, class ARG_TYPE>
 inline const TYPE & VArray<TYPE, ARG_TYPE>::GetAt(ArraySizeType nIndex) const
 	{ ASSERT(nIndex >= 0 && nIndex < m_nSize);
@@ -168,14 +169,14 @@ VArray<TYPE, ARG_TYPE>::~VArray()
 }
 
 template<class TYPE, class ARG_TYPE>
-void VArray<TYPE, ARG_TYPE>::SetSize(ArraySizeType nNewSize, ArraySizeType nGrowBy)
+void VArray<TYPE, ARG_TYPE>::SetSize(ArraySizeType nNewSize, ArraySizeType nGrowBy, vBOOL bFreeWhenEmpty)
 {
 	ASSERT(nNewSize >= 0);
 
 	if (nGrowBy != -1)
 		m_nGrowBy = nGrowBy;  // set new size
 
-	if (nNewSize == 0)
+	if (nNewSize == 0 && bFreeWhenEmpty)
 	{
 		// shrink to nothing
 		if (m_pData != NULL)
@@ -258,6 +259,17 @@ ArraySizeType VArray<TYPE, ARG_TYPE>::Append(const VArray& src)
 	ArraySizeType nOldSize = m_nSize;
 	SetSize(m_nSize + src.m_nSize);
 	VFX::__CopyElements<TYPE>(m_pData + nOldSize, src.m_pData, src.m_nSize);
+	return nOldSize;
+}
+
+template<class TYPE, class ARG_TYPE>
+ArraySizeType VArray<TYPE, ARG_TYPE>::Append(TYPE* ptr, ArraySizeType num)
+{
+	ASSERT(this);
+
+	ArraySizeType nOldSize = m_nSize;
+	SetSize(m_nSize + num);
+	VFX::__CopyElements<TYPE>(m_pData + nOldSize, ptr, num);
 	return nOldSize;
 }
 

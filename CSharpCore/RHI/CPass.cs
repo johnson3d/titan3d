@@ -46,6 +46,11 @@ namespace EngineNS
 		    return StartIndex != 0xFFFFFFFF;
 	    }
     }
+
+    public struct IPassPtr
+    {
+
+    }
     
     public class CPass : AuxCoreObject<CPass.NativePointer>
     {

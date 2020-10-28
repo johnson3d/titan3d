@@ -40,9 +40,9 @@ namespace EngineNS.Support
                 CoreObject.Pointer = IntPtr.Zero;
             }
         }
-        public void SetGrowStep(int step)
+        public void SetCapacity(int cap)
         {
-            SDK_CsValueList_SetCapacity(CoreObject, step);
+            SDK_CsValueList_SetCapacity(CoreObject, cap);
         }
 
         public UInt32 Stride
@@ -69,14 +69,17 @@ namespace EngineNS.Support
         {
             SDK_CsValueList_Append(CoreObject, scr.CoreObject);
         }
-        
+        public unsafe void Append(byte* src, int count)
+        {
+            SDK_CsValueList_AppendArray(CoreObject, src, count);
+        }
         public void RemoveAt(int index)
         {
             SDK_CsValueList_RemoveAt(CoreObject, (UInt32)index);
         }
-        public void Clear(uint size = 0)
+        public void Clear(bool bFreeMemory)
         {
-            SDK_CsValueList_Clear(CoreObject, size);
+            SDK_CsValueList_Clear(CoreObject, vBOOL.FromBoolean(bFreeMemory));
         }
         public IntPtr AddressAt(int index)
         {
@@ -101,9 +104,11 @@ namespace EngineNS.Support
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public extern static void SDK_CsValueList_Append(NativePointer self, NativePointer src);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public extern unsafe static void SDK_CsValueList_AppendArray(NativePointer self, byte* src, int count);
+        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public extern static void SDK_CsValueList_RemoveAt(NativePointer self, UInt32 index);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public extern static void SDK_CsValueList_Clear(NativePointer self, uint size);
+        public extern static void SDK_CsValueList_Clear(NativePointer self, vBOOL bFreeMemory);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public extern static IntPtr SDK_CsValueList_GetAddressAt(NativePointer self, UInt32 index);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -130,9 +135,9 @@ namespace EngineNS.Support
         {
             mImpl.Dispose();
         }
-        public void SetGrowStep(int step)
+        public void SetCapacity(int cap)
         {
-            mImpl.SetGrowStep(step);
+            mImpl.SetCapacity(cap);
         }
         public int Count
         {
@@ -162,6 +167,16 @@ namespace EngineNS.Support
                 }
             }
         }
+        public unsafe void Append(T* scr, int count)
+        {
+            lock (this)
+            {
+                unsafe
+                {
+                    mImpl.Append((byte*)scr, count);
+                }
+            }
+        }
 
         public void RemoveAt(int index)
         {
@@ -170,11 +185,11 @@ namespace EngineNS.Support
                 mImpl.RemoveAt(index);
             }
         }
-        public void Clear(uint size = 0)
+        public void Clear(bool bFreeMemory = true)
         {
             lock (this)
             {
-                mImpl.Clear(size);
+                mImpl.Clear(bFreeMemory);
             }
         }
 
@@ -246,9 +261,9 @@ namespace EngineNS.Support
         {
             mImpl.Dispose();
         }
-        public void SetGrowStep(int step)
+        public void SetCapacity(int cap)
         {
-            mImpl.SetGrowStep(step);
+            mImpl.SetCapacity(cap);
         }
         public int Count
         {
@@ -272,14 +287,21 @@ namespace EngineNS.Support
                 mImpl.Append(scr.mImpl);
             }
         }
+        public unsafe void Append(T* scr, int count)
+        {
+            unsafe
+            {
+                mImpl.Append((byte*)scr, count);
+            }
+        }
 
         public void RemoveAt(int index)
         {
             mImpl.RemoveAt(index);
         }
-        public void Clear(uint size = 0)
+        public void Clear(bool bFreeMemory = true)
         {
-            mImpl.Clear(size);
+            mImpl.Clear(bFreeMemory);
         }
 
         public IntPtr UnsafeAddressAt(int index)
