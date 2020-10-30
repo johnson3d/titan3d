@@ -164,7 +164,6 @@ struct IScissorRect : public VIUnknown
 	void GetSCRect(UINT idx, SRRect* pRect);
 };
 
-//ÿһ����Ⱦ����һ��Passʵ��
 struct IPassDesc
 {
 
@@ -213,7 +212,6 @@ public:
 	IRenderPipeline* GetPipeline() {
 		return m_pPipelineState;
 	}
-	//����Ⱦ״̬
 	virtual void BindPipeline(IRenderPipeline* pipeline);
 	
 	IShaderProgram* GetGpuProgram()
@@ -223,7 +221,6 @@ public:
 
 	virtual void BindGpuProgram(IShaderProgram* pGpuPrgram);
 
-	//Ϊ��Ⱦ���߰�VB,IB
 	virtual void BindGeometry(GfxMeshPrimitives* mesh, UINT atom, float lod);
 	void SetLod(float lod);
 	float GetLod();

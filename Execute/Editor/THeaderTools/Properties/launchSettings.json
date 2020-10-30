@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "THeaderTools": {
+      "commandName": "Project",
+      "commandLineArgs": "vcxproj=D:\\OpenSource\\titan3d\\Execute\\Core.Windows\\Core.Windows.vcxproj"
+    }
+  }
+}

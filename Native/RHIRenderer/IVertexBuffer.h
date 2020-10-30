@@ -18,15 +18,24 @@ struct IVertexBufferDesc
 	void*			InitData;
 };
 
+#define TR_CLASS(...)
+#define TR_FUNCTION(...)
+#define TR_MEMBER(...)
+#define TR_ENUM(...)
+
 class IRenderContext;
 class ICommandList;
+
+TR_CLASS()
 class IVertexBuffer : public IRenderResource
 {
 public:
 	IVertexBuffer();
 	~IVertexBuffer();
 
+	TR_FUNCTION()
 	virtual void GetBufferData(IRenderContext* rc, IBlobObject* data) = 0;
+	TR_FUNCTION()
 	virtual void UpdateGPUBuffData(ICommandList* cmd, void* ptr, UINT size) = 0;
 
 	void UpdateDrawPass(ICommandList* cmd, vBOOL bImm);
