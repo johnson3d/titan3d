@@ -151,6 +151,15 @@ namespace THeaderTools
             int len = GetTokenLength(index, code);
             string klsName = code.Substring(index, len);
             index += len;
+
+            SkipBlank(ref index, code);
+
+            if (code[index] == ':')
+            {
+                SkipBlank(ref index, code);
+                len = GetTokenLength(index, code);
+                string parentName = code.Substring(index, len);
+            }
         }
         public void SkipBlank(ref int i, string code)
         {
