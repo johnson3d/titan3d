@@ -1135,7 +1135,9 @@
   <ItemGroup>
     <Resource Include="Controls\WPG\Effect\TextBlockEffect_None.ps" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
   <Import Project="..\..\..\CSharpCore\Bricks\AssetImpExp\AssetManagement.projitems" Label="Shared" />
   <Import Project="..\..\..\CSharpCore\3rd\FBX\FBX.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

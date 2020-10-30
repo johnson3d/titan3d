@@ -24,12 +24,42 @@ namespace EngineNS.GuiWrapper
         {
             get { return mContext; }
         }
-        public void SetFont(RName fontname)
+        private CCommandList[] CmdList = new CCommandList[2];
+        public CCommandList DrawList
+        {
+            get { return CmdList[0]; }
+        }
+        public CCommandList CommitList
+        {
+            get { return CmdList[1]; }
+        }
+        public void TickSync()
+        {
+            var saved = CmdList[0];
+            CmdList[0] = CmdList[1];
+            CmdList[1] = saved;
+        }
+        public async System.Threading.Tasks.Task<bool> Initialize(UIntPtr winHandle, RName fontname)
+        {
+            ImGui.SetCurrentContext(mContext);
+            var rc = CEngine.Instance.RenderContext;
+            var desc = new CCommandListDesc();
+            CmdList[0] = rc.CreateCommandList(desc);
+            CmdList[1] = rc.CreateCommandList(desc);
+
+            await SetFont(fontname);
+
+            ImGui.NewFrame();
+            mFrameBegun = true;
+            return true;
+        }
+        public async System.Threading.Tasks.Task SetFont(RName fontname)
         {
             var fonts = ImGui.GetIO().Fonts;
             fonts.AddFontDefault();
 
-            FontTexId = GuiManager.Instance.GetFontMaterial(fontname, this).Ptr;
+            var handle = await GuiManager.Instance.GetFontMaterial(fontname, this);
+            FontTexId = handle.Ptr;
             fonts.SetTexID(FontTexId);
         }
         public IntPtr FontTexId
@@ -37,63 +67,63 @@ namespace EngineNS.GuiWrapper
             get;
             private set;
         }
-        public void TickLogic(float deltaSeconds)
+        private bool mFrameBegun = false;
+        public void TickLogic(float deltaSeconds, FSubmitUI drawFunc)
         {
             ImGui.SetCurrentContext(mContext);
 
-            ImGui.Render();
-            RenderImDrawData(ImGui.GetDrawData());
+            if (mFrameBegun)
+            {
+                ImGui.Render();
+            }
 
             SetPerFrameImGuiData(deltaSeconds);
-            UpdateImGuiInput(ImGui.GetDrawData());
+            UpdateImGuiInput();
 
-            SubmitUI();
-        }
-        public void SubmitUI()
-        {
+            mFrameBegun = true;
             ImGui.NewFrame();
+            if (drawFunc!=null)
+                drawFunc();
 
-            //
+            if (mFrameBegun)
+            {
+                mFrameBegun = false;
+                ImGui.Render();
+                RenderImDrawData(ImGui.GetDrawData());
+            }
         }
-        private void RenderImDrawData(ImDrawDataPtr draw_data)
+        public delegate void FSubmitUI();
+        CVertexBuffer VertexBuffer = null;
+        CIndexBuffer IndexBuffer = null;
+        private unsafe void RenderImDrawData(ImDrawDataPtr draw_data)
         {
+            if (draw_data.CmdListsCount == 0)
+            {
+                return;
+            }
 
-        }
-        public Vector2 WindowSize
-        {
-            get;
-            private set;
-        }
+            var rc = CEngine.Instance.RenderContext;
 
-        public Vector2 ScaleFactor
-        {
-            get;
-            set;
-        }
-        private void SetPerFrameImGuiData(float deltaSeconds)
-        {
             ImGuiIOPtr io = ImGui.GetIO();
-            io.DisplaySize = new System.Numerics.Vector2(
-                WindowSize.X / ScaleFactor.X,
-                WindowSize.Y / ScaleFactor.Y);
-            io.DisplayFramebufferScale = new System.Numerics.Vector2(ScaleFactor.X, ScaleFactor.Y);
-            io.DeltaTime = deltaSeconds; // DeltaTime is in seconds.
-        }
-        Support.NativeList<ImDrawVert> mVertexData = new Support.NativeList<ImDrawVert>();
-        Support.NativeList<ushort> mIndexData = new Support.NativeList<ushort>();
-        private unsafe void UpdateImGuiInput(ImDrawDataPtr draw_data)
-        {
-            ImGuiIOPtr io = ImGui.GetIO();
-
             mVertexData.Clear(false);
             mIndexData.Clear(false);
             if (draw_data.TotalVtxCount > mVertexData.Count)
             {
                 mVertexData.SetCapacity(draw_data.TotalVtxCount);
+                var vbDesc = new CVertexBufferDesc();
+                vbDesc.InitData = IntPtr.Zero;
+                vbDesc.Stride = (UInt32)sizeof(ImDrawVert);
+                vbDesc.ByteWidth = (UInt32)(sizeof(ImDrawVert) * draw_data.TotalVtxCount);
+                VertexBuffer = rc.CreateVertexBuffer(vbDesc);
             }
             if (draw_data.TotalIdxCount > mIndexData.Count)
             {
                 mIndexData.SetCapacity(draw_data.TotalIdxCount);
+                var ibDesc = new CIndexBufferDesc();
+                ibDesc.ToDefault();
+                ibDesc.InitData = IntPtr.Zero;
+                ibDesc.ByteWidth = (UInt32)(sizeof(ushort) * draw_data.TotalIdxCount);
+                IndexBuffer = rc.CreateIndexBuffer(ibDesc);
             }
 
             draw_data.ScaleClipRects(io.DisplayFramebufferScale);
@@ -105,6 +135,9 @@ namespace EngineNS.GuiWrapper
                 mVertexData.Append((ImDrawVert*)vbData.ToPointer(), cmd_list.VtxBuffer.Size);
                 mIndexData.Append((ushort*)ibData.ToPointer(), cmd_list.IdxBuffer.Size);
             }
+
+            VertexBuffer.UpdateBuffData(DrawList, mVertexData.GetBufferPtr(), (uint)(mVertexData.Count * sizeof(ImDrawVert)));
+            IndexBuffer.UpdateBuffData(DrawList, mIndexData.GetBufferPtr(), (uint)(mIndexData.Count * sizeof(ushort)));
 
             int vtx_offset = 0;
             int idx_offset = 0;
@@ -122,6 +155,9 @@ namespace EngineNS.GuiWrapper
                     {
                         if (pcmd.TextureId != IntPtr.Zero)
                         {
+                            var mtlHandle = new THandle<Graphics.CGfxMaterialInstance>(pcmd.TextureId);
+                            var mtl = mtlHandle.Get();
+                            mtl.FindSRVIndex("txDiffuse");
                             //if (pcmd.TextureId == _fontAtlasID)
                             //{
                             //    cl.SetGraphicsResourceSet(1, _fontTextureResourceSet);
@@ -144,6 +180,56 @@ namespace EngineNS.GuiWrapper
                     idx_offset += (int)pcmd.ElemCount;
                 }
                 vtx_offset += cmd_list.VtxBuffer.Size;
+            }
+        }
+        public Vector2 WindowSize
+        {
+            get;
+            private set;
+        }
+        public void WindowResized(int width, int height)
+        {
+            WindowSize = new Vector2((float)width, (float)height);
+        }
+
+        public Vector2 ScaleFactor
+        {
+            get;
+            set;
+        } = new Vector2(1, 1);
+        private void SetPerFrameImGuiData(float deltaSeconds)
+        {
+            ImGuiIOPtr io = ImGui.GetIO();
+            io.DisplaySize = new System.Numerics.Vector2(
+                WindowSize.X / ScaleFactor.X,
+                WindowSize.Y / ScaleFactor.Y);
+            io.DisplayFramebufferScale = new System.Numerics.Vector2(ScaleFactor.X, ScaleFactor.Y);
+            io.DeltaTime = deltaSeconds; // DeltaTime is in seconds.
+        }
+        Support.NativeList<ImDrawVert> mVertexData = new Support.NativeList<ImDrawVert>();
+        Support.NativeList<ushort> mIndexData = new Support.NativeList<ushort>();
+        private void UpdateImGuiInput()
+        {
+            ImGuiIOPtr io = ImGui.GetIO();
+
+            
+        }
+    }
+
+    public class UnitTest_GuiContext : BrickDescriptor
+    {
+        public override async System.Threading.Tasks.Task DoTest()
+        {
+            var context = new GuiContext();
+            await context.Initialize(UIntPtr.Zero, RName.GetRName("font/msyh.ttf"));
+            context.WindowResized(1024, 1024);
+
+            for (int i = 0; i < 10; i++)
+            {
+                context.TickLogic(0.1f, () =>
+                {
+                    ImGui.Text("Hello, world!");
+                });
             }
         }
     }

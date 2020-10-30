@@ -7,7 +7,7 @@ namespace EngineNS
 {
     public struct ImageInitData
     {
-        public IntPtr pSysMem;
+        public Support.CBlobObject.NativePointer pSysMem;
         public UInt32 SysMemPitch;
         public UInt32 SysMemSlicePitch;
     }

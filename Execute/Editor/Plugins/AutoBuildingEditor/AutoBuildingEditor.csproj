@@ -103,6 +103,9 @@
   <ItemGroup>
     <Folder Include="System\Collections\Generic\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
   <Import Project="..\..\..\..\CSharpCore\Bricks\EnsureFile\EnsureFile.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

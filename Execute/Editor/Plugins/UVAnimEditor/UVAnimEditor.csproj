@@ -125,5 +125,8 @@
     <Resource Include="Icons\lockH.png" />
     <Resource Include="Icons\lockV.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

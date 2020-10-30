@@ -186,6 +186,9 @@
     <Folder Include="ControlsData\" />
     <Folder Include="Controls\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
   <Import Project="..\CodeGenerate\CodeDomNode\CodeDomNode.projitems" Label="Shared" />
   <Import Project="..\CodeGenerate\CodeDomNodeData\CodeDomNodeData.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
