@@ -154,11 +154,30 @@ namespace THeaderTools
 
             SkipBlank(ref index, code);
 
-            if (code[index] == ':')
+            if (code[index++] == ':')
             {
                 SkipBlank(ref index, code);
                 len = GetTokenLength(index, code);
+                string keyPublic = code.Substring(index, len);
+                index += len;
+                switch (keyPublic)
+                {
+                    case "public":
+                        break;
+                    case "protected":
+                        break;
+                    case "private":
+                        break;
+                    default://没有写继承模式，缺省为private
+                        keyPublic = "private";
+                        index -= len;
+                        break;
+                }
+
+                SkipBlank(ref index, code);
+                len = GetFullNameLength(index, code);
                 string parentName = code.Substring(index, len);
+                index += len;
             }
         }
         public void SkipBlank(ref int i, string code)
@@ -203,6 +222,28 @@ namespace THeaderTools
                     throw new Exception(TraceMessage("error code"));
             }
             return count;
+        }
+        public int GetFullNameLength(int start, string code)
+        {
+            int result = 0;
+            do
+            {
+                var len = GetTokenLength(start, code);
+                result += len;
+                start = start + len;
+                if (start + 2 <= code.Length && code[start] == ':' && code[start + 1] == ':')
+                {
+                    result += 2;
+                    start += 2;
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            while (true);
+            return result;
         }
     }
 }
