@@ -28,6 +28,11 @@ public:
 	IVertexBuffer();
 	~IVertexBuffer();
 
+	TR_MEMBER()
+	int Member0;
+	TR_MEMBER()
+	volatile IRenderContext* Member1;
+
 	TR_FUNCTION()
 	virtual void GetBufferData(IRenderContext* rc, IBlobObject* data) = 0;
 	TR_FUNCTION()

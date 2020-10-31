@@ -205,6 +205,8 @@ namespace THeaderTools
         }
         public static CppClass AnalyzeClassDef(string code, string mustIsClass, string klsMeta)
         {
+            //这里先要丢掉类中类的所有字符
+
             if(code.StartsWith(mustIsClass)==false)
                 throw new Exception(TraceMessage("not a class or struct"));
 
@@ -307,6 +309,7 @@ namespace THeaderTools
 
             result.AnalyzeMetaString(klsMeta);
 
+            AnalyzeClassMember(code, result);
             AnalyzeClassFuntion(code, result);
             
             return result;
@@ -319,11 +322,36 @@ namespace THeaderTools
                 return false;
             return true;
         }
+        public static void AnalyzeClassMember(string code, CppClass klass)
+        {
+            string meta;
+            var index = FindMetaFlags(0, code, Symbol.MetaMember, out meta, null);
+            while (index >= 0)
+            {
+                var memberInfo = new CppMember();
+                SkipBlank(ref index, code);
+                var nameEnd = code.IndexOf(Symbol.Semicolon, index);
+                var nameStrs = code.Substring(index, nameEnd - index + 1);//带上了分号
+                index += nameEnd - index;
+                var tokens = GetTokens(0, nameStrs.Length - 1, nameStrs, IsEndToken_PtrOrRef);
+
+                if(tokens.Count<2)
+                    throw new Exception(TraceMessage("error code"));
+
+                //volatile int xxx;
+                memberInfo.Name = tokens[tokens.Count - 1];
+                memberInfo.Type = tokens[tokens.Count - 2];
+                memberInfo.AnalyzeMetaString(meta);
+
+                klass.Members.Add(memberInfo);
+                index = FindMetaFlags(index, code, Symbol.MetaMember, out meta, null);
+            }
+        }
         public static void AnalyzeClassFuntion(string code, CppClass klass)
         {
             string meta;
             var index = FindMetaFlags(0, code, Symbol.MetaFunction, out meta, null);
-            while (index < code.Length)
+            while (index>=0)
             {
                 var funInfo = new CppFunction();
                 SkipBlank(ref index, code);
@@ -397,6 +425,7 @@ namespace THeaderTools
 
                 AnalyzeClassFuntionArguments(args, funInfo);
 
+                funInfo.AnalyzeMetaString(meta);
                 klass.Methods.Add(funInfo);
 
                 index++;

@@ -67,8 +67,24 @@ namespace THeaderTools
         {
             get;
         } = new List<CppFunction>();
+        public List<CppMember> Members
+        {
+            get;
+        } = new List<CppMember>();
     }
-
+    public class CppMember : CppMetaBase
+    {
+        public string Type
+        {
+            get;
+            set;
+        }
+        public string Name
+        {
+            get;
+            set;
+        }
+    }
     public class CppFunction : CppMetaBase
     {
         public bool IsVirtual
