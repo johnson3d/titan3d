@@ -37,7 +37,6 @@ public:
 	virtual void DoSwap(IRenderContext* rc) override;
 	virtual void SetDebugInfo(const char* info)
 	{
-		
 	}
 public:
 	IVertexBufferDesc		mDesc;
