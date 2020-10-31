@@ -8,6 +8,8 @@ namespace THeaderTools
     {
         public class Symbol
         {
+            public const char BeginParentheses = '(';
+            public const char EndParentheses = ')';
             public const char BeginBrace = '{';
             public const char EndBrace = '}';
             public const char Semicolon = ';';
@@ -23,7 +25,7 @@ namespace THeaderTools
             return $"{sourceFilePath}:{sourceLineNumber}->{memberName}->{message}";
         }
 
-        public void SkipString(ref int i, string src)
+        public static void SkipString(ref int i, string src)
         {
             int j = i + 1;
             while (j < src.Length)
@@ -42,7 +44,7 @@ namespace THeaderTools
             i = j;
         }
 
-        public string RemoveAllComment(string src)
+        public static string RemoveAllComment(string src)
         {
             for (int i = 0; i < src.Length; i++)
             {
@@ -96,17 +98,20 @@ namespace THeaderTools
             string code = System.IO.File.ReadAllText(file);
             code = RemoveAllComment(code);
             string classDef = "";
-            var klsIndex = code.IndexOf("TR_CLASS()");
-            while(klsIndex>=0)
+            string klsMeta;
+            var klsBegin = FindMetaFlags(0, code, "TR_CLASS", out klsMeta);
+            while(klsBegin >= 0)
             {
-                var klsBegin = code.IndexOf("class", klsIndex);
-                if(klsBegin<0)
+                int i = klsBegin;
+                SkipBlank(ref i, code);
+                klsBegin = i;
+                var mustIsClass = GetTokenString(ref i, code);
+                if(mustIsClass != "class" && mustIsClass != "struct")
                 {
-                    throw new Exception("TR_CLASS must use for class");
+                    throw new Exception(TraceMessage("TR_CLASS must use for class"));
                 }
                 int BraceDeep = 0;
                 int klsEnd = -1;
-                int i = klsBegin;
                 while(i < code.Length)
                 {
                     if(code[i] == Symbol.StringFlag)
@@ -134,53 +139,172 @@ namespace THeaderTools
                 }
                 classDef = code.Substring(klsBegin, klsEnd - klsBegin + 1);
 
-                AnalyzeClassDef(classDef);
+                var klass = AnalyzeClassDef(classDef, mustIsClass, klsMeta);
 
-                klsIndex = code.IndexOf("TR_CLASS()", klsEnd);
+                klsBegin = FindMetaFlags(klsEnd, code, "TR_CLASS", out klsMeta);
             }
         }
-
-        public void AnalyzeClassDef(string code)
+        public static int FindMetaFlags(int start, string code, string type, out string meta)
         {
-            var index = code.IndexOf("class ");
-            if(index<0)
-                throw new Exception(TraceMessage("error code"));
-
-            index += "class ".Length;
-            SkipBlank(ref index, code);
-            int len = GetTokenLength(index, code);
-            string klsName = code.Substring(index, len);
-            index += len;
-
-            SkipBlank(ref index, code);
-
-            if (code[index++] == ':')
+            int idx = -1;
+            meta = "";
+            do
             {
+                idx = code.IndexOf(type, start);
+                if (idx < 0)
+                    return -1;
+                idx += type.Length;
+
+                if (IsTokenEndChar(code[idx]) == false)
+                {
+                    start = idx;
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            while (true);
+
+            SkipBlank(ref idx, code);
+
+            if(code[idx++] != Symbol.BeginParentheses)
+            {
+                return -1;
+            }
+            else
+            {
+                var beginIdx = idx;
+                int parenthesesNum = 1;
+                while(idx<code.Length)
+                {
+                    switch (code[idx])
+                    {
+                        case Symbol.BeginParentheses:
+                            parenthesesNum++;
+                            break;
+                        case Symbol.EndParentheses:
+                            parenthesesNum--;
+                            if(parenthesesNum==0)
+                            {
+                                meta = code.Substring(beginIdx, idx - beginIdx);
+                                return idx + 1;
+                            }
+                            break;
+                    }
+                    idx++;
+                }
+            }
+
+            return -1;
+        }
+        public static CppClass AnalyzeClassDef(string code, string mustIsClass, string klsMeta)
+        {
+            if(code.StartsWith(mustIsClass)==false)
+                throw new Exception(TraceMessage("not a class or struct"));
+
+            var index = mustIsClass.Length;
+            if(IsBlankChar(code[index])==false)
+                throw new Exception(TraceMessage("not a class or struct"));
+
+            var result = new CppClass();
+
+            switch (mustIsClass)
+            {
+                case "class":
+                    result.StructType = EStructType.Class;
+                    break;
+                case "struct":
+                    result.StructType = EStructType.Struct;
+                    break;
+                default:
+                    throw new Exception(TraceMessage("not a class or struct"));
+            }
+
+            SkipBlank(ref index, code);
+
+            var firstToken = GetTokenString(ref index, code);
+
+            SkipBlank(ref index, code);
+
+            if (code[index] == ':')
+            {
+                index++;
+                result.Name = firstToken;
+                result.ApiName = null;
+
                 SkipBlank(ref index, code);
-                len = GetTokenLength(index, code);
-                string keyPublic = code.Substring(index, len);
-                index += len;
+                string keyPublic = GetTokenString(ref index, code);
                 switch (keyPublic)
                 {
                     case "public":
+                        result.InheritMode = EVisitMode.Public;
                         break;
                     case "protected":
+                        result.InheritMode = EVisitMode.Protected;
                         break;
                     case "private":
                         break;
                     default://没有写继承模式，缺省为private
                         keyPublic = "private";
-                        index -= len;
+                        result.InheritMode = EVisitMode.Private;
+                        index -= result.Name.Length;
                         break;
                 }
 
                 SkipBlank(ref index, code);
-                len = GetFullNameLength(index, code);
-                string parentName = code.Substring(index, len);
-                index += len;
+                result.ParentName = GetTokenString(ref index, code);
             }
+            else if (code[index] == '{')
+            {
+                index++;
+                result.ParentName = null;
+                result.ApiName = null;
+            }
+            else
+            {
+                result.ApiName = firstToken;
+                result.Name = GetTokenString(ref index, code);
+
+                SkipBlank(ref index, code);
+
+                if (code[index] == ':')
+                {
+                    index++;
+                    SkipBlank(ref index, code);
+                    string keyPublic = GetTokenString(ref index, code);
+                    switch (keyPublic)
+                    {
+                        case "public":
+                            result.InheritMode = EVisitMode.Public;
+                            break;
+                        case "protected":
+                            result.InheritMode = EVisitMode.Protected;
+                            break;
+                        case "private":
+                            break;
+                        default://没有写继承模式，缺省为private
+                            keyPublic = "private";
+                            result.InheritMode = EVisitMode.Private;
+                            index -= result.Name.Length;
+                            break;
+                    }
+
+                    SkipBlank(ref index, code);
+                    result.ParentName = GetTokenString(ref index, code);
+                }
+                else if (code[index] == '{')
+                {
+                    index++;
+                    result.ParentName = null;
+                }
+            }
+
+            result.AnalyzeMetaString(klsMeta);
+            return result;
         }
-        public void SkipBlank(ref int i, string code)
+        public static void SkipBlank(ref int i, string code)
         {
             while(IsBlankChar(code[i]))
             {
@@ -189,7 +313,7 @@ namespace THeaderTools
                     throw new Exception(TraceMessage("error code"));
             }
         }
-        private bool IsTokenEndChar(char c)
+        private static bool IsTokenEndChar(char c)
         {
             if (Char.IsDigit(c))
                 return false;
@@ -199,7 +323,7 @@ namespace THeaderTools
                 return false;
             return true;
         }
-        private bool IsBlankChar(char c)
+        private static bool IsBlankChar(char c)
         {
             if (c == ' ')
                 return true;
@@ -211,7 +335,14 @@ namespace THeaderTools
                 return true;
             return false;
         }
-        public int GetTokenLength(int start, string code)
+        public static string GetTokenString(ref int start, string code)
+        {
+            var len = GetTokenLength(start, code);
+            var result = code.Substring(start, len);
+            start += len;
+            return result;
+        }
+        public static int GetTokenLength(int start, string code)
         {
             int count = 0;
             while(IsTokenEndChar(code[start])==false)
@@ -223,7 +354,7 @@ namespace THeaderTools
             }
             return count;
         }
-        public int GetFullNameLength(int start, string code)
+        public static int GetFullNameLength(int start, string code)
         {
             int result = 0;
             do

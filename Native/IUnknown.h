@@ -433,4 +433,9 @@ public:
 #define VDef_ReadWrite(type, name, prefix) type Get##name(){return prefix##name;} \
 		void Set##name(type value){ prefix##name = value; }
 
+#define TR_CLASS(...)
+#define TR_FUNCTION(...)
+#define TR_MEMBER(...)
+#define TR_ENUM(...)
+
 NS_END

@@ -78,7 +78,7 @@ namespace THeaderTools
             {
                 var headScanner = new CppHeaderScanner();
                 //headScanner.ScanHeader(i.Value);
-                headScanner.ScanHeader(@"E:\titan3d\Native\RHIRenderer\IVertexBuffer.h");
+                headScanner.ScanHeader(@"D:\OpenSource\titan3d\Native\RHIRenderer\IVertexBuffer.h");
             }
         }
         static bool CollectInclude(System.Xml.XmlNode sn, string spjPath, Dictionary<string,string> headers)

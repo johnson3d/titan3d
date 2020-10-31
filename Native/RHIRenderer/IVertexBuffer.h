@@ -18,15 +18,10 @@ struct IVertexBufferDesc
 	void*			InitData;
 };
 
-#define TR_CLASS(...)
-#define TR_FUNCTION(...)
-#define TR_MEMBER(...)
-#define TR_ENUM(...)
-
 class IRenderContext;
 class ICommandList;
 
-TR_CLASS()
+TR_CLASS(AAA="", BBB=1)
 class IVertexBuffer : public IRenderResource
 {
 public:
