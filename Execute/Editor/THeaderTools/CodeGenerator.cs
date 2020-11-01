@@ -21,6 +21,7 @@ namespace THeaderTools
             public const string AppendConstructorMeta = "AppendConstructorMetaInfo";
 
             public const string NativeSuffix = "_Wrapper";
+            public const string SDKPrefix = "TSDK_";
         }
         private CodeGenerator()
         {
@@ -233,6 +234,12 @@ namespace THeaderTools
             string code = "";
 
             foreach (var i in klass.Constructors)
+            {
+                code += i.GenPInvokeBinding(klass);
+                code += "\n";
+            }
+
+            foreach (var i in klass.Members)
             {
                 code += i.GenPInvokeBinding(klass);
                 code += "\n";

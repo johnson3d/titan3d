@@ -268,6 +268,65 @@ namespace THeaderTools
             get;
             set;
         }
+        public bool IsNativePtr()
+        {
+            bool isNativePtr;
+            CodeGenerator.Instance.CppTypeToCSType(Type, true, out isNativePtr);
+            return isNativePtr;
+        }
+        private string GetConverterType()
+        {
+            if (IsNativePtr())
+                return CppClass.RemovePtrAndRef(Type) + ".PtrType";
+            else
+                return Type;
+        }
+        public string GenPInvokeBinding(CppClass klass)
+        {
+            string code = $"extern \"C\" VFX_API {Type} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}({klass.GetFullName(true)}* self)\n";
+            code += "{\n";
+            code += $"\treturn self->{Name};\n";
+            code += "}\n";
+            code += $"extern \"C\" VFX_API void {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Setter_{Name}({klass.GetFullName(true)}* self, {Type} InValue)\n";
+            code += "{\n";
+            code += $"\tself->{Name} = InValue;\n";
+            code += "}\n";
+            return code;
+        }
+        public string GenPInvokeBindingCSharp_Getter(CppClass klass)
+        {
+            return $"private extern static {GetConverterType()} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}(PtrType self);";
+        }
+        public string GenPInvokeBindingCSharp_Setter(CppClass klass)
+        {
+            return $"private extern static void {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Setter_{Name}(PtrType self, {GetConverterType()} InValue);";
+        }
+        public string GenCallBindingCSharp(ref int nTable, CppClass klass)
+        {
+            string code;
+            code = CodeGenerator.GenLine(nTable, $"public {GetConverterType()} {Name}");
+
+            code += CodeGenerator.GenLine(nTable, "{");
+            nTable++;
+            
+            code += CodeGenerator.GenLine(nTable, $"get");
+            code += CodeGenerator.GenLine(nTable, "{");
+            nTable++;
+            code += CodeGenerator.GenLine(nTable, $"return {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}(mPtr);");
+            nTable--;
+            code += CodeGenerator.GenLine(nTable, "}");
+
+            code += CodeGenerator.GenLine(nTable, $"set");
+            code += CodeGenerator.GenLine(nTable, "{");
+            nTable++;
+            code += CodeGenerator.GenLine(nTable, $"{CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Detter_{Name}(mPtr, value);");
+            nTable--;
+            code += CodeGenerator.GenLine(nTable, "}");
+
+            nTable--;
+            code += CodeGenerator.GenLine(nTable, "}");
+            return code;
+        }
     }
     public class CppCallParameters : CppMetaBase
     {
@@ -373,7 +432,7 @@ namespace THeaderTools
         public string GenPInvokeBinding(CppClass klass)
         {
             var afterSelf = Arguments.Count > 0 ? ", " : "";
-            string code = $"extern \"C\" VFX_API {ReturnType} SDK_{klass.Name}_{Name}({klass.GetFullName(true)}* self{afterSelf}{this.GetParameterString()})\n";
+            string code = $"extern \"C\" VFX_API {ReturnType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}({klass.GetFullName(true)}* self{afterSelf}{this.GetParameterString()})\n";
             code += "{\n";
             code += "\tif(self==nullptr) {\n";
             code += $"\t\treturn TypeDefault({ReturnType});\n";
@@ -385,14 +444,14 @@ namespace THeaderTools
         public string GenPInvokeBindingCSharp(CppClass klass)
         {
             var afterSelf = Arguments.Count > 0 ? ", " : "";
-            return $"private extern static {ReturnType} SDK_{klass.Name}_{Name}(PtrType self{afterSelf}{this.GetParameterStringCSharp(true)});";
+            return $"private extern static {ReturnType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}(PtrType self{afterSelf}{this.GetParameterStringCSharp(true)});";
         }
         public string GenCallBindingCSharp(ref int nTable, CppClass klass)
         {
             string code = CodeGenerator.GenLine(nTable, $"public {ReturnType} {Name}({this.GetParameterStringCSharp(false)})");
             code += CodeGenerator.GenLine(nTable, "{");
             nTable++;
-            code += CodeGenerator.GenLine(nTable, $"return SDK_{klass.Name}_{Name}(mPtr, {this.GetParameterCallString(true)});");
+            code += CodeGenerator.GenLine(nTable, $"return {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}(mPtr, {this.GetParameterCallString(true)});");
             nTable--;
             code += CodeGenerator.GenLine(nTable, "}");
             return code;
@@ -412,7 +471,7 @@ namespace THeaderTools
 
         public string GenPInvokeBinding(CppClass klass)
         {
-            string code = $"extern \"C\" VFX_API {klass.GetFullName(true)}* SDK_{klass.Name}_NewConstruct({this.GetParameterString()})\n";
+            string code = $"extern \"C\" VFX_API {klass.GetFullName(true)}* {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstruct({this.GetParameterString()})\n";
             code += "{\n";
             code += $"\treturn new {klass.GetFullName(true)}({this.GetParameterCallString(false)});\n";
             code += "}\n";
@@ -421,14 +480,14 @@ namespace THeaderTools
         public string GenPInvokeBindingCSharp(CppClass klass)
         {
             var afterSelf = Arguments.Count > 0 ? ", " : "";
-            return $"private extern static PtrType SDK_{klass.Name}_NewConstroctor({this.GetParameterStringCSharp(true)});";
+            return $"private extern static PtrType {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstroctor({this.GetParameterStringCSharp(true)});";
         }
         public string GenCallBindingCSharp(ref int nTable, CppClass klass)
         {
             string code = CodeGenerator.GenLine(nTable, $"public {klass.Name}{CodeGenerator.Symbol.NativeSuffix}({this.GetParameterStringCSharp(false)})");
             code += CodeGenerator.GenLine(nTable, "{");
             nTable++;
-            code += CodeGenerator.GenLine(nTable, $"mPtr = SDK_{klass.Name}_NewConstructor({this.GetParameterCallString(true)});");
+            code += CodeGenerator.GenLine(nTable, $"mPtr = {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor({this.GetParameterCallString(true)});");
             nTable--;
             code += CodeGenerator.GenLine(nTable, "}");
             return code;

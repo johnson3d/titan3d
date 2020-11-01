@@ -43,24 +43,37 @@ namespace THeaderTools
             code += GenLine(nTable, "private PtrType mPtr;");
             code += GenLine(nTable, "public PtrType Ptr { get => mPtr; }");
 
-            code += GenLine(nTable, "#region SDK Wrapper");
+            code += GenLine(nTable, "#region Native Wrapper");
             if (klass.Constructors.Count > 0)
             {
-                code += "\n";
+                code += GenLine(nTable, "#region Constructor");
                 foreach (var i in klass.Constructors)
                 {
                     code += i.GenCallBindingCSharp(ref nTable, klass);
                 }
+                code += GenLine(nTable, "#endregion");
+                code += "\n";
+            }
+
+            if (klass.Members.Count > 0)
+            {
+                code += GenLine(nTable, "#region Property");
+                foreach (var i in klass.Members)
+                {
+                    code += i.GenCallBindingCSharp(ref nTable, klass);
+                }
+                code += GenLine(nTable, "#endregion");
                 code += "\n";
             }
 
             if (klass.Methods.Count > 0)
             {
-                code += "\n";
+                code += GenLine(nTable, "#region Method");
                 foreach (var i in klass.Methods)
                 {
                     code += i.GenCallBindingCSharp(ref nTable, klass); 
                 }
+                code += GenLine(nTable, "#endregion");
                 code += "\n";
             }
             code += GenLine(nTable, "#endregion");
@@ -73,6 +86,18 @@ namespace THeaderTools
                 {
                     code += GenLine(nTable, "[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
                     code += GenLine(nTable, i.GenPInvokeBindingCSharp(klass));
+                }
+                code += "\n";
+            }
+            if (klass.Members.Count > 0)
+            {
+                code += "\n";
+                foreach (var i in klass.Members)
+                {
+                    code += GenLine(nTable, "[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
+                    code += GenLine(nTable, i.GenPInvokeBindingCSharp_Getter(klass));
+                    code += GenLine(nTable, "[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
+                    code += GenLine(nTable, i.GenPInvokeBindingCSharp_Setter(klass));
                 }
                 code += "\n";
             }
