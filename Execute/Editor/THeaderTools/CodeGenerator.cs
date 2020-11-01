@@ -80,11 +80,16 @@ namespace THeaderTools
             }
             return null;
         }
-        public CppClass MatchClass(string name, List<string> ns)
+        public CppClass MatchClass(string name, string[] ns)
         {
             var klass = FindClass(name);
             if (klass != null)
                 return klass;
+            klass = FindClass("EngineNS." + name);
+            if (klass != null)
+                return klass;
+            if (ns == null)
+                return null;
             foreach (var i in ns)
             {
                 var fullName = i + "." + name;

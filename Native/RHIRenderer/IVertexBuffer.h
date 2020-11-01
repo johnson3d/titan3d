@@ -21,11 +21,11 @@ struct IVertexBufferDesc
 class IRenderContext;
 class ICommandList;
 
-TR_CLASS(AAA = "", BBB = 1, SV_UsingNS = EngineNS&Titan3D)
+TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS&Titan3D, AAA = "", BBB = 1)
 class IVertexBuffer : public IRenderResource
 {
 public:
-	TR_CLASS(AAA = "", BBB = 2, SV_NameSpace = EngineNS.IVertexBuffer)
+	TR_CLASS(SV_NameSpace = EngineNS.IVertexBuffer, , SV_UsingNS = EngineNS, AAA = "", BBB = 2)
 	class ClassInIVertexBuffer
 	{
 		TR_MEMBER()

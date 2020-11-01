@@ -628,7 +628,7 @@ namespace THeaderTools
                 string type;
                 string name;
                 NormalizeArgument(i, out type, out name);
-                function.Arguments.Add(new KeyValuePair<string, string>(type, name));
+                function.Arguments.Add(new CppCallParameters.ArgKeyValuePair(type, name));
             }
         }
         private static void NormalizeArgument(string code, out string type, out string name)

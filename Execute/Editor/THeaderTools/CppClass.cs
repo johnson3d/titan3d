@@ -193,9 +193,19 @@ namespace THeaderTools
         }
         public void CheckValid(CodeGenerator manager)
         {
-            foreach(var i in Members)
+            var usingNS = this.GetUsingNS();
+            string[] segs = null;
+            if (usingNS!=null)
+                segs = usingNS.Split('&');
+
+            foreach (var i in Members)
             {
                 var realType = RemovePtrAndRef(i.Type);
+                var klass = CodeGenerator.Instance.MatchClass(realType, segs);
+                if (klass != null)
+                {
+                    i.Type = klass.GetFullName(false);
+                }
                 if (IsSystemType(realType))
                     continue;
                 else if (manager.FindClass(realType)!=null)
@@ -216,6 +226,11 @@ namespace THeaderTools
                 foreach(var j in i.Arguments)
                 {
                     realType = RemovePtrAndRef(j.Key);
+                    var klass = CodeGenerator.Instance.MatchClass(realType, segs);
+                    if (klass != null)
+                    {
+                        j.Key = klass.GetFullName(false);
+                    }
                     if (!IsSystemType(realType) && manager.FindClass(realType) == null)
                     {
                         Console.WriteLine($"{realType} used by RTTI Method({i.ToString()}) in {this.ToString()}, Please Reflect this class");
@@ -228,6 +243,11 @@ namespace THeaderTools
                 foreach (var j in i.Arguments)
                 {
                     var realType = RemovePtrAndRef(j.Key);
+                    var klass = CodeGenerator.Instance.MatchClass(realType, segs);
+                    if (klass != null)
+                    {
+                        j.Key = klass.GetFullName(false);
+                    }
                     if (!IsSystemType(realType) && manager.FindClass(realType) == null)
                     {
                         Console.WriteLine($"{realType} used by RTTI Constructor({i.ToString()}) in {this.ToString()}, Please Reflect this class");
@@ -251,10 +271,20 @@ namespace THeaderTools
     }
     public class CppCallParameters : CppMetaBase
     {
-        public List<KeyValuePair<string, string>> Arguments
+        public class ArgKeyValuePair
+        {
+            public ArgKeyValuePair(string k,string v)
+            {
+                Key = k;
+                Value = v;
+            }
+            public string Key;
+            public string Value;
+        }
+        public List<ArgKeyValuePair> Arguments
         {
             get;
-        } = new List<KeyValuePair<string, string>>();
+        } = new List<ArgKeyValuePair>();
         public string GetParameterString()
         {
             string result = "";

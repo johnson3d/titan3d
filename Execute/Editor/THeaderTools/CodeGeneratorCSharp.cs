@@ -39,7 +39,7 @@ namespace THeaderTools
         public string GenCppReflectionCSharp(CppClass klass)
         {
             int nTable = 1;
-            string code = GenLine(nTable, $"public struct {klass.Name}");
+            string code = GenLine(nTable, $"public struct {klass.Name}_Ptr");
             code += GenLine(nTable, "{");
             nTable++;
 
