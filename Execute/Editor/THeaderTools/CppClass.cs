@@ -285,6 +285,12 @@ namespace THeaderTools
         {
             get;
         } = new List<ArgKeyValuePair>();
+        public bool IsNativePtr(int i)
+        {
+            bool isNativePtr;
+            CodeGenerator.Instance.CppTypeToCSType(Arguments[i].Key, true, out isNativePtr);
+            return isNativePtr;
+        }
         public string GetParameterString()
         {
             string result = "";
@@ -298,12 +304,13 @@ namespace THeaderTools
             }
             return result;
         }
-        public string GetParameterStringCSharp()
+        public string GetParameterStringCSharp(bool bPtrType)
         {
             string result = "";
             for (int i = 0; i < Arguments.Count; i++)
             {
-                var type = CodeGenerator.Instance.CppTypeToCSType(Arguments[i].Key);
+                bool isNativePtr;
+                var type = CodeGenerator.Instance.CppTypeToCSType(Arguments[i].Key, bPtrType, out isNativePtr);
                 if (i == 0)
                     result += $"{type} {Arguments[i].Value}";
                 else
@@ -311,15 +318,20 @@ namespace THeaderTools
             }
             return result;
         }
-        public string GetParameterCallString()
+        public string GetParameterCallString(bool bNativePtr)
         {
             string result = "";
             for (int i = 0; i < Arguments.Count; i++)
             {
+                var arg = Arguments[i].Value;
+                if (bNativePtr && IsNativePtr(i))
+                {
+                    arg = arg + ".Ptr";
+                }
                 if (i == 0)
-                    result += $"{Arguments[i].Value}";
+                    result += $"{arg}";
                 else
-                    result += $", {Arguments[i].Value}";
+                    result += $", {arg}";
             }
             return result;
         }
@@ -366,14 +378,24 @@ namespace THeaderTools
             code += "\tif(self==nullptr) {\n";
             code += $"\t\treturn TypeDefault({ReturnType});\n";
             code += "\t}\n";
-            code += $"\treturn self->{Name}({this.GetParameterCallString()});\n";
+            code += $"\treturn self->{Name}({this.GetParameterCallString(false)});\n";
             code += "}\n";
             return code;
         }
         public string GenPInvokeBindingCSharp(CppClass klass)
         {
             var afterSelf = Arguments.Count > 0 ? ", " : "";
-            return $"private extern static {ReturnType} SDK_{klass.Name}_{Name}(PtrType self{afterSelf}{this.GetParameterStringCSharp()})\n";
+            return $"private extern static {ReturnType} SDK_{klass.Name}_{Name}(PtrType self{afterSelf}{this.GetParameterStringCSharp(true)});";
+        }
+        public string GenCallBindingCSharp(ref int nTable, CppClass klass)
+        {
+            string code = CodeGenerator.GenLine(nTable, $"public {ReturnType} {Name}({this.GetParameterStringCSharp(false)})");
+            code += CodeGenerator.GenLine(nTable, "{");
+            nTable++;
+            code += CodeGenerator.GenLine(nTable, $"return SDK_{klass.Name}_{Name}(mPtr, {this.GetParameterCallString(true)});");
+            nTable--;
+            code += CodeGenerator.GenLine(nTable, "}");
+            return code;
         }
     }
     public class CppConstructor : CppCallParameters
@@ -387,5 +409,29 @@ namespace THeaderTools
             get;
             set;
         } = null;
+
+        public string GenPInvokeBinding(CppClass klass)
+        {
+            string code = $"extern \"C\" VFX_API {klass.GetFullName(true)}* SDK_{klass.Name}_NewConstruct({this.GetParameterString()})\n";
+            code += "{\n";
+            code += $"\treturn new {klass.GetFullName(true)}({this.GetParameterCallString(false)});\n";
+            code += "}\n";
+            return code;
+        }
+        public string GenPInvokeBindingCSharp(CppClass klass)
+        {
+            var afterSelf = Arguments.Count > 0 ? ", " : "";
+            return $"private extern static PtrType SDK_{klass.Name}_NewConstroctor({this.GetParameterStringCSharp(true)});";
+        }
+        public string GenCallBindingCSharp(ref int nTable, CppClass klass)
+        {
+            string code = CodeGenerator.GenLine(nTable, $"public {klass.Name}{CodeGenerator.Symbol.NativeSuffix}({this.GetParameterStringCSharp(false)})");
+            code += CodeGenerator.GenLine(nTable, "{");
+            nTable++;
+            code += CodeGenerator.GenLine(nTable, $"mPtr = SDK_{klass.Name}_NewConstructor({this.GetParameterCallString(true)});");
+            nTable--;
+            code += CodeGenerator.GenLine(nTable, "}");
+            return code;
+        }
     }
 }

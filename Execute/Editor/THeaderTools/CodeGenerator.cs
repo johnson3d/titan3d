@@ -19,10 +19,13 @@ namespace THeaderTools
             public const string AppendMemberMeta = "AppendMemberMetaInfo";
             public const string AppendMethodMeta = "AppendMethodMetaInfo";
             public const string AppendConstructorMeta = "AppendConstructorMetaInfo";
+
+            public const string NativeSuffix = "_Wrapper";
         }
         private CodeGenerator()
         {
             Cpp2CSTypes["void"] = "void";
+            Cpp2CSTypes["void*"] = "void*";
             Cpp2CSTypes["char"] = "char";
             Cpp2CSTypes["unsigned char"] = "byte";
             Cpp2CSTypes["short"] = "short";
@@ -52,16 +55,25 @@ namespace THeaderTools
             ClassCollector.Clear();
         }
         Dictionary<string, string> Cpp2CSTypes = new Dictionary<string, string>();
-        public string CppTypeToCSType(string type)
+        public string CppTypeToCSType(string type, bool bPtrType, out bool isNativPtr)
         {
+            isNativPtr = false;
             string result;
             if (Cpp2CSTypes.TryGetValue(type, out result))
                 return result;
 
             if(type.EndsWith("*"))
             {
+                isNativPtr = true;
                 type = CppClass.RemovePtrAndRef(type);
-                return type + "_Ptr.PtrType";
+                if (bPtrType)
+                {
+                    return type + $"{Symbol.NativeSuffix}.PtrType";
+                }
+                else
+                {
+                    return type + $"{Symbol.NativeSuffix}";
+                }
             }
             else
             {
@@ -219,7 +231,14 @@ namespace THeaderTools
         public string GenPInvokeBinding(CppClass klass)
         {
             string code = "";
-            foreach(var i in klass.Methods)
+
+            foreach (var i in klass.Constructors)
+            {
+                code += i.GenPInvokeBinding(klass);
+                code += "\n";
+            }
+
+            foreach (var i in klass.Methods)
             {
                 code += i.GenPInvokeBinding(klass);
                 code += "\n";

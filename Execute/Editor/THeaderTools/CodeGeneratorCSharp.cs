@@ -4,15 +4,6 @@ using System.Text;
 
 namespace THeaderTools
 {
-    public struct IVertexBuffer_Ptr
-    {
-        public struct PtrType
-        {
-            public IntPtr NativePointer;
-        }
-        private PtrType mPtr;
-        public PtrType Ptr { get => mPtr; }
-    }
     partial class CodeGenerator
     {
         public void GenCodeCSharp(string targetDir)
@@ -39,7 +30,7 @@ namespace THeaderTools
         public string GenCppReflectionCSharp(CppClass klass)
         {
             int nTable = 1;
-            string code = GenLine(nTable, $"public struct {klass.Name}_Ptr");
+            string code = GenLine(nTable, $"public struct {klass.Name}{Symbol.NativeSuffix}");
             code += GenLine(nTable, "{");
             nTable++;
 
@@ -52,6 +43,39 @@ namespace THeaderTools
             code += GenLine(nTable, "private PtrType mPtr;");
             code += GenLine(nTable, "public PtrType Ptr { get => mPtr; }");
 
+            code += GenLine(nTable, "#region SDK Wrapper");
+            if (klass.Constructors.Count > 0)
+            {
+                code += "\n";
+                foreach (var i in klass.Constructors)
+                {
+                    code += i.GenCallBindingCSharp(ref nTable, klass);
+                }
+                code += "\n";
+            }
+
+            if (klass.Methods.Count > 0)
+            {
+                code += "\n";
+                foreach (var i in klass.Methods)
+                {
+                    code += i.GenCallBindingCSharp(ref nTable, klass); 
+                }
+                code += "\n";
+            }
+            code += GenLine(nTable, "#endregion");
+
+            code += GenLine(nTable, "#region SDK");
+            if (klass.Constructors.Count > 0)
+            {
+                code += "\n";
+                foreach (var i in klass.Constructors)
+                {
+                    code += GenLine(nTable, "[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
+                    code += GenLine(nTable, i.GenPInvokeBindingCSharp(klass));
+                }
+                code += "\n";
+            }
             if (klass.Methods.Count > 0)
             {
                 code += "\n";
@@ -62,12 +86,13 @@ namespace THeaderTools
                 }
                 code += "\n";
             }
+            code += GenLine(nTable, "#endregion");
 
             nTable--;
             code += GenLine(nTable, "}");//for struct klass.Name
             return code;
         }
-        private string GenLine(int nTable, string content)
+        public static string GenLine(int nTable, string content)
         {
             string codeline = "";
             for(int i=0; i<nTable; i++)
