@@ -319,7 +319,7 @@ namespace THeaderTools
             code += CodeGenerator.GenLine(nTable, $"set");
             code += CodeGenerator.GenLine(nTable, "{");
             nTable++;
-            code += CodeGenerator.GenLine(nTable, $"{CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Detter_{Name}(mPtr, value);");
+            code += CodeGenerator.GenLine(nTable, $"{CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Setter_{Name}(mPtr, value);");
             nTable--;
             code += CodeGenerator.GenLine(nTable, "}");
 
@@ -480,7 +480,7 @@ namespace THeaderTools
         public string GenPInvokeBindingCSharp(CppClass klass)
         {
             var afterSelf = Arguments.Count > 0 ? ", " : "";
-            return $"private extern static PtrType {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstroctor({this.GetParameterStringCSharp(true)});";
+            return $"private extern static PtrType {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor({this.GetParameterStringCSharp(true)});";
         }
         public string GenCallBindingCSharp(ref int nTable, CppClass klass)
         {
