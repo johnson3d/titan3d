@@ -46,10 +46,7 @@ namespace THeaderTools
             public const string SV_NameSpace = "SV_NameSpace";
             public const string SV_ReturnConverter = "SV_ReturenConverter";
         }
-        public string GetNameSpace()
-        {
-            return this.GetMetaValue(Symbol.SV_NameSpace);
-        }
+        
         public string GetReturnConverter()
         {
             return this.GetMetaValue(Symbol.SV_ReturnConverter);
@@ -60,7 +57,7 @@ namespace THeaderTools
     {
         public override string ToString()
         {
-            return $"{Name} : {ParentName}";
+            return $"{GetNameSpace()}.{Name} : {ParentName}";
         }
         public string HeaderSource
         {
@@ -104,6 +101,10 @@ namespace THeaderTools
         {
             get;
         } = new List<CppConstructor>();
+        public string GetNameSpace()
+        {
+            return this.GetMetaValue(Symbol.SV_NameSpace);
+        }
         public string GetGenFileName()
         {
             var ns = this.GetMetaValue(Symbol.SV_NameSpace);
@@ -111,6 +112,98 @@ namespace THeaderTools
                 return Name + ".gen.cpp";
             else
                 return ns + "." + Name + ".gen.cpp";
+        }
+        public static bool IsSystemType(string name)
+        {
+            switch (name)
+            {
+                case "void":
+                case "char":
+                case "unsigned char":
+                case "short":
+                case "unsigned short":
+                case "int":
+                case "unsigned int":
+                case "long":
+                case "unsigned long":
+                case "long long":
+                case "unsigned long long":
+                case "float":
+                case "double":
+                case "std::string":
+                case "BYTE":
+                case "WORD":
+                case "DWORD":
+                case "QWORD":
+                case "SHORT":
+                case "USHORT":
+                case "INT":
+                case "UINT":
+                case "INT64":
+                case "UINT64":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        public static string RemovePtrAndRef(string name)
+        {
+            int i = name.Length - 1;
+            for (; i >= 0; i--)
+            {
+                if (name[i] != '*' && name[i] != '&')
+                {
+                    break;
+                }
+            }
+            if (i == name.Length - 1)
+                return name;
+            else
+                return name.Substring(0, i+1);
+        }
+        public void CheckValid(CodeGenerator manager)
+        {
+            foreach(var i in Members)
+            {
+                var realType = RemovePtrAndRef(i.Type);
+                if (IsSystemType(realType))
+                    continue;
+                else if (manager.FindClass(realType)!=null)
+                    continue;
+                else
+                {
+                    Console.WriteLine($"{realType} used by RTTI member({i.Name}) in {this.ToString()}, Please Reflect this class");
+                }
+            }
+
+            foreach (var i in Methods)
+            {
+                var realType = RemovePtrAndRef(i.ReturnType);
+                if (!IsSystemType(realType) && manager.FindClass(realType) == null)
+                {
+                    Console.WriteLine($"{realType} used by RTTI Method({i.ToString()}) in {this.ToString()}, Please Reflect this class");
+                }
+                foreach(var j in i.Arguments)
+                {
+                    realType = RemovePtrAndRef(j.Key);
+                    if (!IsSystemType(realType) && manager.FindClass(realType) == null)
+                    {
+                        Console.WriteLine($"{realType} used by RTTI Method({i.ToString()}) in {this.ToString()}, Please Reflect this class");
+                    }
+                }
+            }
+
+            foreach (var i in Constructors)
+            {
+                foreach (var j in i.Arguments)
+                {
+                    var realType = RemovePtrAndRef(j.Key);
+                    if (!IsSystemType(realType) && manager.FindClass(realType) == null)
+                    {
+                        Console.WriteLine($"{realType} used by RTTI Constructor({i.ToString()}) in {this.ToString()}, Please Reflect this class");
+                    }
+                }
+            }
         }
     }
     public class CppMember : CppMetaBase
@@ -132,10 +225,33 @@ namespace THeaderTools
         {
             get;
         } = new List<KeyValuePair<string, string>>();
+        public string GetParameterString()
+        {
+            string result = "";
+            for(int i = 0; i < Arguments.Count; i++)
+            {
+                if(i==0)
+                    result += $"{Arguments[i].Key} {Arguments[i].Value}";
+                else
+                    result += $", {Arguments[i].Key} {Arguments[i].Value}";
+            }
+            return result;
+        }
     }
 
     public class CppFunction : CppCallParameters
     {
+        public override string ToString()
+        {
+            if(IsVirtual)
+            {
+                return $"virtual {ReturnType} {Name}({GetParameterString()})";
+            }
+            else
+            {
+                return $"{ReturnType} {Name}({GetParameterString()})";
+            }
+        }
         public bool IsVirtual
         {
             get;
@@ -159,6 +275,10 @@ namespace THeaderTools
     }
     public class CppConstructor : CppCallParameters
     {
+        public override string ToString()
+        {
+            return $"Constructor({GetParameterString()})";
+        }
         public string ApiName
         {
             get;
