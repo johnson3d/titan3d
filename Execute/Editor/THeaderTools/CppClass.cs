@@ -41,6 +41,19 @@ namespace THeaderTools
                 return result;
             return null;
         }
+        public class Symbol
+        {
+            public const string SV_NameSpace = "SV_NameSpace";
+            public const string SV_ReturnConverter = "SV_ReturenConverter";
+        }
+        public string GetNameSpace()
+        {
+            return this.GetMetaValue(Symbol.SV_NameSpace);
+        }
+        public string GetReturnConverter()
+        {
+            return this.GetMetaValue(Symbol.SV_ReturnConverter);
+        }
     }
 
     public class CppClass : CppMetaBase
@@ -87,17 +100,17 @@ namespace THeaderTools
         {
             get;
         } = new List<CppMember>();
+        public List<CppConstructor> Constructors
+        {
+            get;
+        } = new List<CppConstructor>();
         public string GetGenFileName()
         {
-            var ns = this.GetMetaValue("NameSpace");
+            var ns = this.GetMetaValue(Symbol.SV_NameSpace);
             if (ns == null)
                 return Name + ".gen.cpp";
             else
                 return ns + "." + Name + ".gen.cpp";
-        }
-        public string GetNameSpace()
-        {
-            return this.GetMetaValue("NameSpace");
         }
     }
     public class CppMember : CppMetaBase
@@ -113,7 +126,15 @@ namespace THeaderTools
             set;
         }
     }
-    public class CppFunction : CppMetaBase
+    public class CppCallParameters : CppMetaBase
+    {
+        public List<KeyValuePair<string, string>> Arguments
+        {
+            get;
+        } = new List<KeyValuePair<string, string>>();
+    }
+
+    public class CppFunction : CppCallParameters
     {
         public bool IsVirtual
         {
@@ -135,9 +156,13 @@ namespace THeaderTools
             get;
             set;
         }
-        public List<KeyValuePair<string, string>> Arguments
+    }
+    public class CppConstructor : CppCallParameters
+    {
+        public string ApiName
         {
             get;
-        } = new List<KeyValuePair<string, string>>();
+            set;
+        } = null;
     }
 }

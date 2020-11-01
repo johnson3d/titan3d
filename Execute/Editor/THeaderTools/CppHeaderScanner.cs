@@ -12,6 +12,7 @@ namespace THeaderTools
             public const string MetaFunction = "TR_FUNCTION";
             public const string MetaMember = "TR_MEMBER";
             public const string MetaEnum = "TR_ENUM";
+            public const string MetaConstructor = "TR_CONSTRUCTOR";
             public const char BeginParentheses = '(';
             public const char EndParentheses = ')';
             public const char BeginBrace = '{';
@@ -326,7 +327,8 @@ namespace THeaderTools
 
             AnalyzeClassMember(code, result);
             AnalyzeClassFuntion(code, result);
-            
+            AnalyzeClassConstructor(code, result);
+
             return result;
         }
         private static bool IsEndToken_PtrOrRef(char c)
@@ -360,6 +362,65 @@ namespace THeaderTools
 
                 klass.Members.Add(memberInfo);
                 index = FindMetaFlags(index, code, Symbol.MetaMember, out meta, null);
+            }
+        }
+        public static void AnalyzeClassConstructor(string code, CppClass klass)
+        {
+            string meta;
+            var index = FindMetaFlags(0, code, Symbol.MetaConstructor, out meta, null);
+            while (index >= 0)
+            {
+                var funInfo = new CppConstructor();
+                SkipBlank(ref index, code);
+
+                var nameEnd = code.IndexOf(Symbol.BeginParentheses, index);
+                var nameStrs = code.Substring(index, nameEnd - index + 1);//带上了左大括号
+                index += nameEnd - index;
+
+                var tokens = GetTokens(0, nameStrs.Length - 1, nameStrs, IsEndToken_PtrOrRef);
+
+                {
+                    if (tokens.Count == 2)
+                    {//VFX_API ClassName(...)
+                        funInfo.ApiName = tokens[0];
+                    }
+                    else if (tokens.Count == 1)
+                    {//ClassName(...)
+                        funInfo.ApiName = null;
+                    }
+                    else
+                    {
+                        throw new Exception(TraceMessage("error code"));
+                    }
+                }
+
+                int deeps = 0;
+                int argBegin = -1;
+                while (index < code.Length)
+                {
+                    if (code[index] == Symbol.BeginParentheses)
+                    {
+                        if (deeps == 0)
+                            argBegin = index + 1;
+                        deeps++;
+                    }
+                    else if (code[index] == Symbol.EndParentheses)
+                    {
+                        deeps--;
+                        if (deeps == 0)
+                            break;
+                    }
+                    index++;
+                }
+                var args = code.Substring(argBegin, index - argBegin);
+
+                AnalyzeClassFuntionArguments(args, funInfo);
+
+                funInfo.AnalyzeMetaString(meta);
+                klass.Constructors.Add(funInfo);
+
+                index++;
+                index = FindMetaFlags(index, code, Symbol.MetaConstructor, out meta, null);
             }
         }
         public static void AnalyzeClassFuntion(string code, CppClass klass)
@@ -447,12 +508,24 @@ namespace THeaderTools
                 index = FindMetaFlags(index, code, Symbol.MetaFunction, out meta, null);
             }
         }
-        public static void AnalyzeClassFuntionArguments(string code, CppFunction function)
+        public static void AnalyzeClassFuntionArguments(string code, CppCallParameters function)
         {
             var args = code.Split(',');
             function.Arguments.Clear();
+
             foreach (var i in args)
             {
+                bool isBlankStr = true;
+                foreach(var j in i)
+                {
+                    if(IsBlankChar(j)==false)
+                    {
+                        isBlankStr = false;
+                        break;
+                    }
+                }
+                if (isBlankStr)
+                    continue;
                 string type;
                 string name;
                 NormalizeArgument(i, out type, out name);

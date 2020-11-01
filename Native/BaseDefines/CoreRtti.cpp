@@ -185,10 +185,10 @@ struct Test_ConstantVarDesc
 };
 
 StructBegin(Test_ConstantVarDesc, EngineNS)
-	AddClassMetaInfo("abc");
+	AddClassMetaInfo("M0", "abc");
 
 	StructMember(Offset);
-	AppendMemberMetaInfo("Offset info");
+	AppendMemberMetaInfo("M0", "Offset info");
 
 	StructMember(Size);
 	StructMember(Elements);
@@ -197,7 +197,7 @@ StructBegin(Test_ConstantVarDesc, EngineNS)
 	StructMember(Test);
 
 	StructMethod1(SetDirty, d);
-	AppendMethodMetaInfo("SetDirty info");
+	AppendMethodMetaInfo("M0", "SetDirty info");
 
 	StructMethod2(SetDirty2, d, c);
 
@@ -205,7 +205,7 @@ StructBegin(Test_ConstantVarDesc, EngineNS)
 	StructMethodEx2(TestSetDirty, void, std::string, d, int, c);
 
 	StructConstructor0();
-	AppendConstructorMetaInfo("Test_ConstantVarDesc info");	
+	AppendConstructorMetaInfo("M0", "Test_ConstantVarDesc info");	
 StructEnd(void)
 
 StructImpl(Test_ConstantVarDesc);

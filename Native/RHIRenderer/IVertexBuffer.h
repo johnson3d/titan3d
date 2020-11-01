@@ -25,6 +25,7 @@ TR_CLASS(AAA="", BBB=1)
 class IVertexBuffer : public IRenderResource
 {
 public:
+	TR_CONSTRUCTOR()
 	IVertexBuffer();
 	~IVertexBuffer();
 

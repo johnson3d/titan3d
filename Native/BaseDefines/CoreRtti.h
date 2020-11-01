@@ -153,24 +153,24 @@ public:
 
 struct RttiMetaInfo
 {
-	std::vector<std::string>	MetaInfos;
+	std::map<std::string, std::string> MetaInfos;
 	bool HasMeta(const char* info)
 	{
-		for (const auto& i : MetaInfos)
-		{
-			if (i == info)
-				return true;
-		}
-		return false;
+		auto iter = MetaInfos.find(info);
+		if (iter == MetaInfos.end())
+			return false;
+		return true;
 	}
-	void AddMeta(const char* info)
+	void AddMeta(const char* name, const char* value)
 	{
-		for (const auto& i : MetaInfos)
-		{
-			if (i == info)
-				return;
-		}
-		MetaInfos.push_back(info);
+		MetaInfos[name] = value;
+	}
+	std::string GetMetaValue(const char* name)
+	{
+		auto iter = MetaInfos.find(name);
+		if (iter != MetaInfos.end())
+			return iter->second;
+		return "";
 	}
 	virtual ~RttiMetaInfo()
 	{
@@ -975,10 +975,10 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 
 #define  __vsizeof(_type, _name) sizeof(((_type*)nullptr)->_name)
 
-#define AddClassMetaInfo(info) { this->AddMeta(info); }
-#define AppendMemberMetaInfo(info) { if(__current_member!=nullptr){__current_member->AddMeta(info);} }
-#define AppendMethodMetaInfo(info) { if(__current_method!=nullptr){__current_method->AddMeta(info);} }
-#define AppendConstructorMetaInfo(info) { if(__current_constructor!=nullptr){__current_constructor->AddMeta(info);} }
+#define AddClassMetaInfo(n,v) { this->AddMeta(#n,#v); }
+#define AppendMemberMetaInfo(n,v) { if(__current_member!=nullptr){__current_member->AddMeta(#n,#v);} }
+#define AppendMethodMetaInfo(n,v) { if(__current_method!=nullptr){__current_method->AddMeta(#n,#v);} }
+#define AppendConstructorMetaInfo(n,v) { if(__current_constructor!=nullptr){__current_constructor->AddMeta(#n,#v);} }
 
 #define StructMember(_name) \
 		{\

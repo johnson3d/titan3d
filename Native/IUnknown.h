@@ -437,5 +437,6 @@ public:
 #define TR_FUNCTION(...)
 #define TR_MEMBER(...)
 #define TR_ENUM(...)
+#define TR_CONSTRUCTOR(...)
 
 NS_END

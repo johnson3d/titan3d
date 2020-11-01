@@ -12,6 +12,12 @@ namespace THeaderTools
             public const string EndRtti = "StructEnd";
             public const string DefMember = "StructMember";
             public const string DefMethod = "StructMethodEx";
+            public const string DefConstructor = "StructConstructor";
+
+            public const string AppendClassMeta = "AddClassMetaInfo";
+            public const string AppendMemberMeta = "AppendMemberMetaInfo";
+            public const string AppendMethodMeta = "AppendMethodMetaInfo";
+            public const string AppendConstructorMeta = "AppendConstructorMetaInfo";
         }
         public List<CppClass> ClassCollector = new List<CppClass>();
         public CppClass FindClass(string name)
@@ -33,6 +39,8 @@ namespace THeaderTools
 
                 genCode += $"#include \"{i.HeaderSource}\"\n";
 
+                genCode += "\n\n\n";
+
                 genCode += GenCppReflection(i);
 
                 var file = targetDir + i.GetGenFileName();
@@ -48,25 +56,46 @@ namespace THeaderTools
             else
                 ns = ns.Replace(".", "::");
             code += $"{Symbol.BeginRtti}({klass.Name},{ns})\n";
+            WriteMetaCode(ref code, klass, Symbol.AppendClassMeta);
 
             code += "\n";
             foreach (var i in klass.Members)
             {
                 code += $"\t{Symbol.DefMember}({i.Name});\n";
-                WriteMetaCode(ref code, i);
+                WriteMetaCode(ref code, i, Symbol.AppendMemberMeta);
             }
             code += "\n";
 
             code += "\n";
             foreach (var i in klass.Methods)
             {
-                code += $"\t{Symbol.DefMethod}{i.Arguments.Count}({i.Name}, {i.ReturnType}";
+                var returnConverter = i.GetReturnConverter();
+                if (returnConverter == null)
+                    returnConverter = i.ReturnType;
+                code += $"\t{Symbol.DefMethod}{i.Arguments.Count}({i.Name}, {returnConverter}";
                 foreach (var j in i.Arguments)
                 {
                     code += $", {j.Key}, {j.Value}";
                 }
                 code += $");\n";
-                WriteMetaCode(ref code, i);
+                WriteMetaCode(ref code, i, Symbol.AppendMethodMeta);
+            }
+            code += "\n";
+
+            code += "\n";
+            foreach (var i in klass.Constructors)
+            {
+                code += $"\t{Symbol.DefConstructor}{i.Arguments.Count}(";
+                int argIndex = 0;
+                foreach (var j in i.Arguments)
+                {
+                    if(argIndex==0)
+                        code += $"{j.Key}";
+                    else
+                        code += $", {j.Key}";
+                }
+                code += $");\n";
+                WriteMetaCode(ref code, i, Symbol.AppendConstructorMeta);
             }
             code += "\n";
 
@@ -88,9 +117,12 @@ namespace THeaderTools
             return code;
         }
 
-        private void WriteMetaCode(ref string code, CppMetaBase meta)
+        private void WriteMetaCode(ref string code, CppMetaBase meta, string type)
         {
-
+            foreach(var i in meta.MetaInfos)
+            {
+                code += $"\t{type}({i.Key} , {i.Value});\n";
+            }
         }
     }
 }
