@@ -76,13 +76,15 @@ namespace THeaderTools
                 }
             }
 
-            CodeGenerator codeManager = new CodeGenerator();
+            CodeGenerator codeManager = CodeGenerator.Instance;
+            codeManager.Reset();
             foreach (var i in headers)
             {
                 var headScanner = new CppHeaderScanner();
                 headScanner.ScanHeader(i.Value, codeManager.ClassCollector);
             }
             codeManager.GenCode(genDir);
+            codeManager.GenCodeCSharp(genDir);
         }
         static bool CollectInclude(System.Xml.XmlNode sn, string spjPath, Dictionary<string,string> headers)
         {

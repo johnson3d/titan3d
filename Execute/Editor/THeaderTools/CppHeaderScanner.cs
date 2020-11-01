@@ -425,11 +425,13 @@ namespace THeaderTools
 
             return result;
         }
-        private static bool IsEndToken_PtrOrRef(char c)
+        private static bool IsEndToken_TypeDef(char c)
         {
             if (c == '*')
                 return false;
             else if (c == '&')
+                return false;
+            else if (c == '.')
                 return false;
             return true;
         }
@@ -444,7 +446,7 @@ namespace THeaderTools
                 var nameEnd = code.IndexOf(Symbol.Semicolon, index);
                 var nameStrs = code.Substring(index, nameEnd - index + 1);//带上了分号
                 index += nameEnd - index;
-                var tokens = GetTokens(0, nameStrs.Length - 1, nameStrs, IsEndToken_PtrOrRef);
+                var tokens = GetTokens(0, nameStrs.Length - 1, nameStrs, IsEndToken_TypeDef);
 
                 if(tokens.Count<2)
                     throw new Exception(TraceMessage("error code"));
@@ -471,7 +473,8 @@ namespace THeaderTools
                 var nameStrs = code.Substring(index, nameEnd - index + 1);//带上了左大括号
                 index += nameEnd - index;
 
-                var tokens = GetTokens(0, nameStrs.Length - 1, nameStrs, IsEndToken_PtrOrRef);
+                nameStrs = nameStrs.Replace("::", ".");
+                var tokens = GetTokens(0, nameStrs.Length - 1, nameStrs, IsEndToken_TypeDef);
 
                 {
                     if (tokens.Count == 2)
@@ -530,7 +533,8 @@ namespace THeaderTools
                 var nameStrs = code.Substring(index, nameEnd - index + 1);//带上了左大括号
                 index += nameEnd - index;
 
-                var tokens = GetTokens(0, nameStrs.Length - 1, nameStrs, IsEndToken_PtrOrRef);
+                nameStrs = nameStrs.Replace("::", ".");
+                var tokens = GetTokens(0, nameStrs.Length - 1, nameStrs, IsEndToken_TypeDef);
 
                 if (tokens[0] == "virtual")
                 {
@@ -604,6 +608,7 @@ namespace THeaderTools
         }
         public static void AnalyzeClassFuntionArguments(string code, CppCallParameters function)
         {
+            code = code.Replace("::", ".");
             var args = code.Split(',');
             function.Arguments.Clear();
 
@@ -628,7 +633,7 @@ namespace THeaderTools
         }
         private static void NormalizeArgument(string code, out string type, out string name)
         {
-            var tokens = GetTokens(0, code.Length-1, code, IsEndToken_PtrOrRef);
+            var tokens = GetTokens(0, code.Length-1, code, IsEndToken_TypeDef);
             for(int i=0; i<tokens.Count; i++)
             {
                 //去除无用得in out宏标志 
@@ -748,7 +753,7 @@ namespace THeaderTools
 
                 result.Add(str);
             }
-            if(cb == IsEndToken_PtrOrRef)
+            if(cb == IsEndToken_TypeDef)
             {//这里解决数据定义 abc* ** *& 这种变态空格习惯
                 int lastestStr = -1;
                 for(int j=0; j<result.Count; j++)

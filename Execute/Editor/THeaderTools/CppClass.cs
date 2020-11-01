@@ -135,6 +135,14 @@ namespace THeaderTools
             else
                 return ns + "." + Name + ".gen.cpp";
         }
+        public string GetGenFileNameCSharp()
+        {
+            var ns = this.GetMetaValue(Symbol.SV_NameSpace);
+            if (ns == null)
+                return Name + ".gen.cs";
+            else
+                return ns + "." + Name + ".gen.cs";
+        }
         public static bool IsSystemType(string name)
         {
             switch (name)
@@ -252,10 +260,24 @@ namespace THeaderTools
             string result = "";
             for(int i = 0; i < Arguments.Count; i++)
             {
-                if(i==0)
-                    result += $"{Arguments[i].Key} {Arguments[i].Value}";
+                var cppName = Arguments[i].Key.Replace(".", "::");
+                if (i==0)
+                    result += $"{cppName} {Arguments[i].Value}";
                 else
-                    result += $", {Arguments[i].Key} {Arguments[i].Value}";
+                    result += $", {cppName} {Arguments[i].Value}";
+            }
+            return result;
+        }
+        public string GetParameterStringCSharp()
+        {
+            string result = "";
+            for (int i = 0; i < Arguments.Count; i++)
+            {
+                var type = CodeGenerator.Instance.CppTypeToCSType(Arguments[i].Key);
+                if (i == 0)
+                    result += $"{type} {Arguments[i].Value}";
+                else
+                    result += $", {type} {Arguments[i].Value}";
             }
             return result;
         }
@@ -308,7 +330,8 @@ namespace THeaderTools
         }
         public string GenPInvokeBinding(CppClass klass)
         {
-            string code = $"extern \"C\" VFX_API {ReturnType} SDK_{klass.Name}_{Name}({klass.GetFullName(true)}* self, {this.GetParameterString()})\n";
+            var afterSelf = Arguments.Count > 0 ? ", " : "";
+            string code = $"extern \"C\" VFX_API {ReturnType} SDK_{klass.Name}_{Name}({klass.GetFullName(true)}* self{afterSelf}{this.GetParameterString()})\n";
             code += "{\n";
             code += "\tif(self==nullptr) {\n";
             code += $"\t\treturn TypeDefault({ReturnType});\n";
@@ -316,6 +339,11 @@ namespace THeaderTools
             code += $"\treturn self->{Name}({this.GetParameterCallString()});\n";
             code += "}\n";
             return code;
+        }
+        public string GenPInvokeBindingCSharp(CppClass klass)
+        {
+            var afterSelf = Arguments.Count > 0 ? ", " : "";
+            return $"private extern static {ReturnType} SDK_{klass.Name}_{Name}(PtrType self{afterSelf}{this.GetParameterStringCSharp()})\n";
         }
     }
     public class CppConstructor : CppCallParameters
