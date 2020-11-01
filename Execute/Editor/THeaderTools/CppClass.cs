@@ -34,10 +34,26 @@ namespace THeaderTools
                 }
             }
         }
+        public string GetMetaValue(string name)
+        {
+            string result;
+            if (MetaInfos.TryGetValue(name, out result))
+                return result;
+            return null;
+        }
     }
 
     public class CppClass : CppMetaBase
     {
+        public override string ToString()
+        {
+            return $"{Name} : {ParentName}";
+        }
+        public string HeaderSource
+        {
+            get;
+            set;
+        }
         public EStructType StructType
         {
             get;
@@ -71,6 +87,18 @@ namespace THeaderTools
         {
             get;
         } = new List<CppMember>();
+        public string GetGenFileName()
+        {
+            var ns = this.GetMetaValue("NameSpace");
+            if (ns == null)
+                return Name + ".gen.cpp";
+            else
+                return ns + "." + Name + ".gen.cpp";
+        }
+        public string GetNameSpace()
+        {
+            return this.GetMetaValue("NameSpace");
+        }
     }
     public class CppMember : CppMetaBase
     {

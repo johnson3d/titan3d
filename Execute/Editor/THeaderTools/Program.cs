@@ -18,6 +18,9 @@ namespace THeaderTools
 
             var path = proj.Substring(0, proj.LastIndexOf("/")+1);
 
+            var genDir = FindArgument(args, "gen_dir=");
+            genDir = genDir.Substring("gen_dir=".Length);
+
             System.Xml.XmlDocument myXmlDoc = new System.Xml.XmlDocument();
             myXmlDoc.Load(proj);
             var root = myXmlDoc.LastChild;
@@ -73,13 +76,13 @@ namespace THeaderTools
                 }
             }
 
-
-            foreach(var i in headers)
+            CodeGenerator codeManager = new CodeGenerator();
+            foreach (var i in headers)
             {
                 var headScanner = new CppHeaderScanner();
-                //headScanner.ScanHeader(i.Value);
-                headScanner.ScanHeader(@"D:\OpenSource\titan3d\Native\RHIRenderer\IVertexBuffer.h");
+                headScanner.ScanHeader(i.Value, codeManager.ClassCollector);
             }
+            codeManager.GenCode(genDir);
         }
         static bool CollectInclude(System.Xml.XmlNode sn, string spjPath, Dictionary<string,string> headers)
         {
@@ -91,6 +94,8 @@ namespace THeaderTools
                     var attr = i.Attributes["Include"];
                     if (attr != null)
                     {
+                        if (attr.Value == "$(MSBuildThisFileDirectory)..\\IUnknown.h")
+                            continue;
                         var hf = attr.Value.Replace("$(MSBuildThisFileDirectory)", spjPath);
                         bool error;
                         hf = NormalizePath(hf, out error);
@@ -124,7 +129,7 @@ namespace THeaderTools
 
             path = path.Replace("./", "");
 
-            path = path.ToLower();
+            //path = path.ToLower();
 
             int UpDirLength = "$/".Length;
             int startPos = path.LastIndexOf("$/");

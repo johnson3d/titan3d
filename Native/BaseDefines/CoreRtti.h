@@ -996,6 +996,11 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 			__current_method = PushMethod0<TResult, ThisStructType>(&ThisStructType::name, #name);\
 		}
 
+#define StructMethodEx0(name, TResult) \
+		{\
+			__current_method = PushMethod0<TResult, ThisStructType>(&ThisStructType::name, #name);\
+		}
+
 #define StructMethod1(name, a0) \
 		{\
 			auto funAddress = &ThisStructType::name;\

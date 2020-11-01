@@ -40,7 +40,9 @@ namespace THeaderTools
                 }
                 if (j == src.Length - 1)
                 {
-                    throw new Exception(TraceMessage("error code"));
+                    j++;
+                    break;
+                    //throw new Exception(TraceMessage("error code"));
                 }
                 j++;
             }
@@ -68,11 +70,14 @@ namespace THeaderTools
                         while(j < src.Length)
                         {
                             if(src[j] == Symbol.NewLine)
-                            {
+                            {//保留换行，否则代码很难看
                                 break;
                             }
                             if (j == src.Length - 1)
-                                throw new Exception(TraceMessage("error code"));
+                            {
+                                j++;
+                                break;
+                            }
                             j++;
                         }
                         src = src.Remove(i, j - i);
@@ -97,7 +102,7 @@ namespace THeaderTools
             return src;
         }
 
-        public void ScanHeader(string file)
+        public void ScanHeader(string file, List<CppClass> klsCollector)
         {
             string code = System.IO.File.ReadAllText(file);
             code = RemoveAllComment(code);
@@ -112,7 +117,7 @@ namespace THeaderTools
                 var mustIsClass = GetTokenString(ref i, code, null);
                 if(mustIsClass != "class" && mustIsClass != "struct")
                 {
-                    throw new Exception(TraceMessage("TR_CLASS must use for class"));
+                    throw new Exception(TraceMessage($"{Symbol.MetaClass} must use for class"));
                 }
                 int BraceDeep = 0;
                 int klsEnd = -1;
@@ -139,11 +144,21 @@ namespace THeaderTools
                 }
                 if(klsEnd < 0)
                 {
-                    throw new Exception("TR_CLASS must use for class define");
+                    throw new Exception($"{Symbol.MetaClass} must use for class define");
                 }
                 classDef = code.Substring(klsBegin, klsEnd - klsBegin + 1);
 
                 var klass = AnalyzeClassDef(classDef, mustIsClass, klsMeta);
+                klass.HeaderSource = file;
+
+                foreach(var k in  klsCollector)
+                {
+                    if(k.GetGenFileName() == klass.GetGenFileName())
+                    {
+                        throw new Exception($"class name & namspace is same{klass.GetGenFileName()}");
+                    }
+                }
+                klsCollector.Add(klass);
 
                 klsBegin = FindMetaFlags(klsEnd, code, Symbol.MetaClass, out klsMeta, null);
             }
