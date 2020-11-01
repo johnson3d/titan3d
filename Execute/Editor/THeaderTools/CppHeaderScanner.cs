@@ -107,6 +107,11 @@ namespace THeaderTools
         {
             string code = System.IO.File.ReadAllText(file);
             code = RemoveAllComment(code);
+            
+            ScanClassCode(file, code, klsCollector);
+        }
+        public static void ScanClassCode(string sourceHeader, string code, List<CppClass> klsCollector)
+        {
             string classDef = "";
             string klsMeta;
             var klsBegin = FindMetaFlags(0, code, Symbol.MetaClass, out klsMeta, null);
@@ -149,8 +154,8 @@ namespace THeaderTools
                 }
                 classDef = code.Substring(klsBegin, klsEnd - klsBegin + 1);
 
-                var klass = AnalyzeClassDef(classDef, mustIsClass, klsMeta);
-                klass.HeaderSource = file;
+                var klass = AnalyzeClassDef(classDef, mustIsClass, klsMeta, sourceHeader, klsCollector);
+                klass.HeaderSource = sourceHeader;
 
                 foreach(var k in  klsCollector)
                 {
@@ -163,6 +168,29 @@ namespace THeaderTools
 
                 klsBegin = FindMetaFlags(klsEnd, code, Symbol.MetaClass, out klsMeta, null);
             }
+        }
+        public static int FindMetaWithStartup(int start, string code, string type, out string meta, FTokenEndChar cb)
+        {
+            int idx = -1;
+            meta = "";
+            do
+            {
+                idx = code.IndexOf(type, start);
+                if (idx < 0)
+                    return -1;
+                idx += type.Length;
+
+                if (IsTokenEndChar(code[idx], cb) == false)
+                {
+                    start = idx;
+                    continue;
+                }
+                else
+                {
+                    return idx -= type.Length;
+                }
+            }
+            while (true);
         }
         public static int FindMetaFlags(int start, string code, string type, out string meta, FTokenEndChar cb)
         {
@@ -219,11 +247,76 @@ namespace THeaderTools
 
             return -1;
         }
-        public static CppClass AnalyzeClassDef(string code, string mustIsClass, string klsMeta)
+        public static string RemoveClassInClasss(string code, List<string> classInClass)
+        {
+            string klsMeta;
+            var klsBegin = FindMetaFlags(0, code, Symbol.MetaClass, out klsMeta, null);
+            while (klsBegin >= 0)
+            {
+                var removeBegin = FindMetaWithStartup(0, code, Symbol.MetaClass, out klsMeta, null);
+
+                int i = klsBegin;
+                SkipBlank(ref i, code);
+                klsBegin = i;
+
+                var mustIsClass = GetTokenString(ref i, code, null);
+                if (mustIsClass != "class" && mustIsClass != "struct")
+                {
+                    throw new Exception(TraceMessage($"{Symbol.MetaClass} must use for class"));
+                }
+                int BraceDeep = 0;
+                int klsEnd = -1;
+                while (i < code.Length)
+                {
+                    if (code[i] == Symbol.StringFlag)
+                    {
+                        SkipString(ref i, code);
+                    }
+                    else if (code[i] == Symbol.BeginBrace)
+                    {
+                        BraceDeep++;
+                    }
+                    else if (code[i] == Symbol.EndBrace)
+                    {
+                        BraceDeep--;
+                        if (BraceDeep == 0)
+                        {
+                            klsEnd = i;
+                            break;
+                        }
+                    }
+                    i++;
+                }
+                if (klsEnd < 0)
+                {
+                    throw new Exception($"{Symbol.MetaClass} must use for class define");
+                }
+                klsEnd++;//这里把大括号移除
+                SkipBlank(ref klsEnd, code);//移除大括号后面的空白字符
+                var classInCode = code.Substring(klsBegin, klsEnd - klsBegin + 1);
+
+                RemoveClassInClasss(classInCode, classInClass);
+
+                classInCode = code.Substring(removeBegin, klsEnd - removeBegin + 1);
+                classInClass.Add(classInCode);
+                
+                code = code.Remove(removeBegin, klsEnd - removeBegin + 1);//+1是要把class {};的分号移除
+                klsBegin = FindMetaFlags(removeBegin, code, Symbol.MetaClass, out klsMeta, null);
+            }
+            return code;
+        }
+        public static CppClass AnalyzeClassDef(string code, string mustIsClass, string klsMeta, string sourceHeader, List<CppClass> klsCollector)
         {
             //这里先要丢掉类中类的所有字符
+            List<string> classInClass = new List<string>();
+            code = RemoveClassInClasss(code, classInClass);
+            foreach(var i in classInClass)
+            {
+                //假设类中类不允许用struct
+                ScanClassCode(sourceHeader, i, klsCollector);
+            }
 
-            if(code.StartsWith(mustIsClass)==false)
+            if (code.StartsWith(mustIsClass)==false)
                 throw new Exception(TraceMessage("not a class or struct"));
 
             var index = mustIsClass.Length;
@@ -283,6 +376,7 @@ namespace THeaderTools
                 index++;
                 result.ParentName = null;
                 result.ApiName = null;
+                result.Name = firstToken;
             }
             else
             {

@@ -25,6 +25,15 @@ TR_CLASS(AAA="", BBB=1)
 class IVertexBuffer : public IRenderResource
 {
 public:
+	TR_CLASS(AAA = "", BBB = 2, SV_NameSpace = EngineNS.IVertexBuffer)
+	class ClassInIVertexBuffer
+	{
+		TR_MEMBER()
+			int Member0;
+		TR_MEMBER()
+			volatile IRenderContext* Member1;
+	} ;
+
 	TR_CONSTRUCTOR()
 	IVertexBuffer();
 	~IVertexBuffer();
