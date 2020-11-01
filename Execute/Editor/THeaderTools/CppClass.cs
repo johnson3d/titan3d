@@ -45,6 +45,7 @@ namespace THeaderTools
         {
             public const string SV_NameSpace = "SV_NameSpace";
             public const string SV_ReturnConverter = "SV_ReturenConverter";
+            public const string SV_UsingNS = "SV_UsingNS";
         }
         
         public string GetReturnConverter()
@@ -101,9 +102,30 @@ namespace THeaderTools
         {
             get;
         } = new List<CppConstructor>();
+        public string GetFullName(bool asCpp)
+        {
+            var ns = GetNameSpace();
+            string fullName;
+            if (ns == null)
+                return Name;
+            else
+                fullName = ns + "." + this.Name;
+            if (asCpp)
+            {
+                return fullName.Replace(".", "::");
+            }
+            else
+            {
+                return fullName;
+            }
+        }
         public string GetNameSpace()
         {
             return this.GetMetaValue(Symbol.SV_NameSpace);
+        }
+        public string GetUsingNS()
+        {
+            return this.GetMetaValue(Symbol.SV_UsingNS);
         }
         public string GetGenFileName()
         {
@@ -237,6 +259,18 @@ namespace THeaderTools
             }
             return result;
         }
+        public string GetParameterCallString()
+        {
+            string result = "";
+            for (int i = 0; i < Arguments.Count; i++)
+            {
+                if (i == 0)
+                    result += $"{Arguments[i].Value}";
+                else
+                    result += $", {Arguments[i].Value}";
+            }
+            return result;
+        }
     }
 
     public class CppFunction : CppCallParameters
@@ -271,6 +305,17 @@ namespace THeaderTools
         {
             get;
             set;
+        }
+        public string GenPInvokeBinding(CppClass klass)
+        {
+            string code = $"extern \"C\" VFX_API {ReturnType} SDK_{klass.Name}_{Name}({klass.GetFullName(true)}* self, {this.GetParameterString()})\n";
+            code += "{\n";
+            code += "\tif(self==nullptr) {\n";
+            code += $"\t\treturn TypeDefault({ReturnType});\n";
+            code += "\t}\n";
+            code += $"\treturn self->{Name}({this.GetParameterCallString()});\n";
+            code += "}\n";
+            return code;
         }
     }
     public class CppConstructor : CppCallParameters

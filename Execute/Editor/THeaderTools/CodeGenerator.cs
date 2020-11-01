@@ -49,7 +49,23 @@ namespace THeaderTools
 
                 genCode += "\n\n\n";
 
+                var usingNS = i.GetUsingNS();
+
+                genCode += "using EngineNS;\n";
+                if (usingNS != null)
+                {
+                    var segs = usingNS.Split('&');
+                    foreach(var j in segs)
+                    {
+                        genCode += $"using {j.Replace(".","::")};\n";
+                    }
+                }
+                genCode += "\n";
+
                 genCode += GenCppReflection(i);
+
+                genCode += "\n\n\n";
+                genCode += GenPInvokeBinding(i);
 
                 var file = targetDir + i.GetGenFileName();
                 System.IO.File.WriteAllText(file, genCode); ;
@@ -133,7 +149,16 @@ namespace THeaderTools
             code += $"{Symbol.EndRtti}({parent})\n";
             return code;
         }
-
+        public string GenPInvokeBinding(CppClass klass)
+        {
+            string code = "";
+            foreach(var i in klass.Methods)
+            {
+                code += i.GenPInvokeBinding(klass);
+                code += "\n";
+            }
+            return code;
+        }
         private void WriteMetaCode(ref string code, CppMetaBase meta, string type)
         {
             foreach(var i in meta.MetaInfos)

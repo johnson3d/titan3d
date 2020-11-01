@@ -21,7 +21,7 @@ struct IVertexBufferDesc
 class IRenderContext;
 class ICommandList;
 
-TR_CLASS(AAA="", BBB=1)
+TR_CLASS(AAA = "", BBB = 1, SV_UsingNS = EngineNS&Titan3D)
 class IVertexBuffer : public IRenderResource
 {
 public:
