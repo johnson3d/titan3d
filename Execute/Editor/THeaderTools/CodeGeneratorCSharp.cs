@@ -47,6 +47,11 @@ namespace THeaderTools
             if (klass.Constructors.Count > 0)
             {
                 code += GenLine(nTable, "#region Constructor");
+                code += CodeGenerator.GenLine(nTable, $"public {klass.Name}(IntPtr InPtr)");
+                code += CodeGenerator.GenLine(nTable++, "{");
+                code += CodeGenerator.GenLine(nTable, "mPtr.NativePointer = InPtr;");
+                code += CodeGenerator.GenLine(--nTable, "}");
+
                 foreach (var i in klass.Constructors)
                 {
                     code += i.GenCallBindingCSharp(ref nTable, klass);
