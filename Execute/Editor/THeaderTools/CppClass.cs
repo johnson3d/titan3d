@@ -15,8 +15,23 @@ namespace THeaderTools
         Protected,
         Private,
     }
+    [Flags]
+    public enum EDeclareType : uint
+    {
+        DT_Volatile = 1,
+        DT_Const = (1 << 1),
+        DT_Static = (1 << 2),
+        DT_Virtual = (1 << 3),
+        DT_Inline = (1 << 4),
+        DT_API = (1 << 5),
+    }
     public class CppMetaBase
     {
+        public EVisitMode VisitMode
+        {
+            get;
+            set;
+        } = EVisitMode.Public;
         public Dictionary<string, string> MetaInfos
         {
             get;
@@ -258,6 +273,11 @@ namespace THeaderTools
     }
     public class CppMember : CppMetaBase
     {
+        public EDeclareType DeclareType
+        {
+            get;
+            set;
+        } = 0;
         public string Type
         {
             get;
@@ -268,6 +288,11 @@ namespace THeaderTools
             get;
             set;
         }
+        public string DefaultValue
+        {
+            get;
+            set;
+        } = "";
         public bool IsNativePtr()
         {
             bool isNativePtr;
