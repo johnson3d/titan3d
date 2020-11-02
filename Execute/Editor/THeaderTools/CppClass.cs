@@ -47,6 +47,10 @@ namespace THeaderTools
                 {
                     MetaInfos.Add(pair[0].Trim(), pair[1].Trim());
                 }
+                else if (pair.Length == 1)
+                {
+                    MetaInfos.Add(pair[0].Trim(), "");
+                }
             }
         }
         public string GetMetaValue(string name)

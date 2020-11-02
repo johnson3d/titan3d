@@ -29,7 +29,7 @@ public:
 	class ClassInIVertexBuffer
 	{
 		const static int ttt = 9;
-		volatile IRenderContext* Member1; 
+		volatile IRenderContext* Member100; 
 		void UpdateDrawPass(ICommandList* cmd, vBOOL bImm) = 0;
 		public:
 		TR_MEMBER()
@@ -37,7 +37,7 @@ public:
 		TR_MEMBER()
 			int Member1;
 		protected:
-			int Member2;
+			int*& Member2;
 		public:
 			int Member3;
 	} ;
@@ -52,7 +52,7 @@ public:
 	volatile IRenderContext* Member1; 
 
 	TR_FUNCTION()
-	virtual void GetBufferData(EngineNS::IRenderContext* rc, IBlobObject* data) = 0;
+	virtual void GetBufferData(EngineNS:: IRenderContext* rc, IBlobObject* data) = 0;
 	TR_FUNCTION()
 	virtual void UpdateGPUBuffData(ICommandList* cmd, void* ptr, UINT size) = 0;
 

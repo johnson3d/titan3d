@@ -397,30 +397,19 @@ namespace THeaderTools
 
             result.AnalyzeMetaString(klsMeta);
 
-            //if(result.GetMetaValue("SV_ReflectAll") != null)
-            //{
-            //    List<CppMember> members = new List<CppMember>();
-            //    AnalyzeClassFullInfo(code, result.Name, members, null, null);
-            //}
-
-            AnalyzeClassMember(code, result);
-            AnalyzeClassFuntion(code, result);
-            AnalyzeClassConstructor(code, result);
+            if (result.GetMetaValue(CppMetaBase.Symbol.SV_ReflectAll) != null)
+            {
+                List<CppMember> members = new List<CppMember>();
+                AnalyzeClassFullInfo(code, result.Name, members, null, null);
+            }
+            else
+            {
+                AnalyzeClassMember(code, result);
+                AnalyzeClassFuntion(code, result);
+                AnalyzeClassConstructor(code, result);
+            }
 
             return result;
-        }
-        private static bool IsEndToken_TypeDef(int index, string str)
-        {
-            char c = str[index];
-            if (c == '*')
-                return false;
-            else if (c == '&')
-                return false;
-            else if (c == '.')
-                return false;
-            else if (index + 1 < str.Length && c == ':' && str[index + 1]==':')
-                return false;
-            return true;
         }
         private static bool IsSkipKeyToken(string token, ref EDeclareType dtStyles)
         {
@@ -461,24 +450,42 @@ namespace THeaderTools
             while(index<code.Length)
             {
                 var token = GetTokenString(ref index, code, null, true);
-                while (token==";")
+                while (token == ";")
                 {
                     token = GetTokenString(ref index, code, null, true);
                 }
                 EDeclareType dtStyles = 0;
-                token = GetTokenString(ref index, code, IsEndToken_TypeDef, true);
-                if (IsSkipKeyToken(token, ref dtStyles))
+                while (IsSkipKeyToken(token, ref dtStyles))
+                {
                     token = GetTokenString(ref index, code, IsEndToken_TypeDef, true);
+                }
+                if (index >= code.Length)
+                {
+                    if (token != "}")
+                    {
+                        throw new Exception(TraceMessage("error code"));
+                    }
+                    break;
+                }
                 switch (token)
                 {
                     case "public":
                         mode = EVisitMode.Public;
+                        token = GetTokenString(ref index, code, null, true);
+                        if(token!=":")
+                            throw new Exception(TraceMessage("error code"));
                         break;
                     case "protected":
                         mode = EVisitMode.Protected;
+                        token = GetTokenString(ref index, code, null, true);
+                        if (token != ":")
+                            throw new Exception(TraceMessage("error code"));
                         break;
                     case "private":
                         mode = EVisitMode.Private;
+                        token = GetTokenString(ref index, code, null, true);
+                        if (token != ":")
+                            throw new Exception(TraceMessage("error code"));
                         break;
                     case Symbol.MetaMember:
                     case Symbol.MetaFunction:
@@ -492,8 +499,8 @@ namespace THeaderTools
                         break;
                     default:
                         {
-                            var token2 = GetTokenString(ref index, code, IsEndToken_TypeDef);
-                            var token3 = GetTokenString(ref index, code, IsEndToken_TypeDef);
+                            var token2 = GetTokenString(ref index, code, null);
+                            var token3 = GetTokenString(ref index, code, null);
                             if (token3 == ";")
                             {//是成员变量
                                 var tmp = new CppMember();
@@ -501,6 +508,7 @@ namespace THeaderTools
                                 tmp.Name = token2;
                                 tmp.Type = token;
                                 tmp.DeclareType = dtStyles;
+                                members.Add(tmp);
                             }
                             else if (token3 == "=")
                             {//是const成员变量或者c++11后支持的初始化
@@ -509,6 +517,7 @@ namespace THeaderTools
                                 tmp.Name = token2;
                                 tmp.Type = token;
                                 tmp.DeclareType = dtStyles;
+                                members.Add(tmp);
 
                                 tmp.DefaultValue = GetTokenString(ref index, code, null);//初始化值
                                 token3 = GetTokenString(ref index, code, null);
@@ -738,7 +747,6 @@ namespace THeaderTools
         }
         public static void AnalyzeClassFuntionArguments(string code, CppCallParameters function)
         {
-            code = code.Replace("::", ".");
             var args = code.Split(',');
             function.Arguments.Clear();
 
@@ -790,7 +798,10 @@ namespace THeaderTools
         }
         public static void SkipBlank(ref int i, string code)
         {
-            while(IsBlankChar(code[i]))
+            if (i >= code.Length)
+                return;
+
+            while (IsBlankChar(code[i]))
             {
                 i++;
                 if (i >= code.Length)
@@ -828,6 +839,7 @@ namespace THeaderTools
                     if (deep == count)
                         return;
                 }
+                i++;
             }
             throw new Exception(TraceMessage("error code"));
         }
@@ -854,11 +866,12 @@ namespace THeaderTools
                     deep--;
                     if(deep==0)
                     {
-                        rangeEnd = i;
                         i++;
+                        rangeEnd = i;
                         return;
                     }
                 }
+                i++;
             }
             throw new Exception(TraceMessage("error code"));
         }
@@ -866,15 +879,49 @@ namespace THeaderTools
         private static bool IsTokenEndChar(int index, string str, FTokenEndChar cb)
         {
             char c = str[index];
-            if (Char.IsDigit(c))
-                return false;
-            else if (Char.IsLetter(c))
-                return false;
-            else if (c == '_')
-                return false;
+            if (c == ' ')
+                return true;
+            else if (c == '\t')
+                return true;
+            else if (c == '\n')
+                return true;
+            else if (c == '\r')
+                return true;
+            else if (c == ';')
+                return true;
+            else if (c == ',')
+                return true;
+            else if (c == ':')
+            {
+                if(index+1<str.Length && str[index+1]!=':')
+                    return true;
+            }
+            else if (c == '{')
+                return true;
+            else if (c == '}')
+                return true;
+            else if (c == '(')
+                return true;
+            else if (c == ')')
+                return true;
+            else if (c == '[')
+                return true;
+            else if (c == ']')
+                return true;
+            
+            //else if (Char.IsDigit(c))
+            //    return false;
+            //else if (Char.IsLetter(c))
+            //    return false;
+            //else if (c == '_')
+            //    return false;
             if (cb != null)
                 return cb(index, str);
-            return true;
+            return false;
+        }
+        private static bool IsEndToken_TypeDef(int index, string str)
+        {
+            return false;
         }
         private static bool IsBlankChar(char c)
         {
@@ -896,6 +943,9 @@ namespace THeaderTools
             if (tokenEnd == tokenStart)
                 return "";
             var result = code.Substring(tokenStart, tokenEnd - tokenStart);
+            result = result.Replace(" ", "");
+            result = result.Replace("\t", "");
+            result = result.Replace("\n", "");
             start = tokenEnd;
             if(skipFollowBlank)
             {
@@ -910,12 +960,26 @@ namespace THeaderTools
             tokenEnd = start;
             while (IsTokenEndChar(tokenEnd, code, cb)==false)
             {
+                var c1 = code[tokenEnd];
                 tokenEnd++;
                 if (tokenEnd >= code.Length)
                 {
                     //throw new Exception(TraceMessage("error code"));
                     break;
                 }
+                var c2 = code[tokenEnd];
+                if (c1 == ':' && c2 == ':')
+                {//c++里面出现 :: 操作符，后面必须接一个字符串才能组成完整的token信息，但是中间是可以有空白字符的
+                    tokenEnd++;
+                    while (IsBlankChar(code[tokenEnd]))
+                    {
+                        tokenEnd++;
+                    }
+                }
+            }
+            if(tokenEnd == tokenStart)
+            {//不是空字符，那么就是类似;,(一类的操作符了，他也是一个token
+                tokenEnd = tokenStart + 1;
             }
         }
         public static List<string> GetTokens(int start, int end, string code, FTokenEndChar cb)
