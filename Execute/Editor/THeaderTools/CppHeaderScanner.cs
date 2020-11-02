@@ -400,7 +400,8 @@ namespace THeaderTools
             if (result.GetMetaValue(CppMetaBase.Symbol.SV_ReflectAll) != null)
             {
                 List<CppMember> members = new List<CppMember>();
-                AnalyzeClassFullInfo(code, result.Name, members, null, null);
+                List<CppFunction> methods = new List<CppFunction>();
+                AnalyzeClassFullInfo(code, result.Name, members, methods, null);
             }
             else
             {
@@ -449,15 +450,15 @@ namespace THeaderTools
             }
             while(index<code.Length)
             {
-                var token = GetTokenString(ref index, code, null, true);
+                var token = GetTokenStringConbineStarAndRef(ref index, code, null, true);
                 while (token == ";")
                 {
-                    token = GetTokenString(ref index, code, null, true);
+                    token = GetTokenStringConbineStarAndRef(ref index, code, null, true);
                 }
                 EDeclareType dtStyles = 0;
                 while (IsSkipKeyToken(token, ref dtStyles))
                 {
-                    token = GetTokenString(ref index, code, IsEndToken_TypeDef, true);
+                    token = GetTokenStringConbineStarAndRef(ref index, code, null, true);
                 }
                 if (index >= code.Length)
                 {
@@ -499,8 +500,8 @@ namespace THeaderTools
                         break;
                     default:
                         {
-                            var token2 = GetTokenString(ref index, code, null);
-                            var token3 = GetTokenString(ref index, code, null);
+                            var token2 = GetTokenStringConbineStarAndRef(ref index, code, null);
+                            var token3 = GetTokenStringConbineStarAndRef(ref index, code, null);
                             if (token3 == ";")
                             {//是成员变量
                                 var tmp = new CppMember();
@@ -526,17 +527,46 @@ namespace THeaderTools
                             }
                             else if (token3 == "(")
                             {//是函数
+                                var tmp = new CppFunction();
+                                //这里还要加上dtStyles标志出来的virtual static const inline一类的前缀处理，其中const可以用来修饰返回值
+                                if((dtStyles & EDeclareType.DT_Virtual)== EDeclareType.DT_Virtual)
+                                {
+                                    tmp.IsVirtual = true;
+                                }
+                                if ((dtStyles & EDeclareType.DT_Static) == EDeclareType.DT_Static)
+                                {
+                                    tmp.IsStatic = true;
+                                }
+                                if ((dtStyles & EDeclareType.DT_Inline) == EDeclareType.DT_Inline)
+                                {
+                                    tmp.IsInline = true;
+                                }
+
+                                if ((dtStyles & EDeclareType.DT_Const) == EDeclareType.DT_Const)
+                                {
+                                    tmp.ReturnType = "const " + token;
+                                }
+                                else
+                                {
+                                    tmp.ReturnType = token;
+                                }
+                                tmp.Name = token2;
                                 index--;
                                 int rangeStart;
                                 int rangeEnd;
                                 SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
+                                rangeStart++;
+                                rangeEnd--;
                                 var args = code.Substring(rangeStart, rangeEnd - rangeStart);
                                 SkipBlank(ref index, code);
                                 token = GetTokenString(ref index, code, null, true);
                                 if (token == "const")
                                 {
                                     token = GetTokenString(ref index, code, null, true);
+                                    tmp.IsConst = true;
                                 }
+
+                                AnalyzeClassFuntionArguments(args, tmp);
 
                                 if (token == "=")
                                 {//void fun(xxx) = 0;void fun(xxx) = default;void fun(xxx) = delete;
@@ -568,6 +598,8 @@ namespace THeaderTools
                                     SkipPair(ref index, code, '{', '}', out rangeStart, out rangeEnd);
                                     var bodyCode = code.Substring(rangeStart, rangeEnd - rangeStart);
                                 }
+
+                                methods.Add(tmp);
                             }
                         }
                         break;
@@ -878,6 +910,8 @@ namespace THeaderTools
         public delegate bool FTokenEndChar(int index, string str);
         private static bool IsTokenEndChar(int index, string str, FTokenEndChar cb)
         {
+            if (index >= str.Length)
+                return true;
             char c = str[index];
             if (c == ' ')
                 return true;
@@ -935,6 +969,39 @@ namespace THeaderTools
                 return true;
             return false;
         }
+        public static string GetTokenStringConbineStarAndRef(ref int start, string code, FTokenEndChar cb, bool skipFollowBlank = true)
+        {
+            int tokenStart;
+            int tokenEnd;
+
+            GetNextTokenRange(start, code, out tokenStart, out tokenEnd, cb);
+            var result = code.Substring(tokenStart, tokenEnd - tokenStart);
+            start = tokenEnd;
+            do
+            {
+                GetNextTokenRange(start, code, out tokenStart, out tokenEnd, cb);
+                var tmp1 = code.Substring(tokenStart, tokenEnd - tokenStart);
+                if(IsAllPtrOrRef(tmp1))
+                {
+                    start = tokenEnd;
+                    result += tmp1; 
+                }
+                else
+                {
+                    break;
+                }
+            }
+            while (tokenEnd<code.Length);
+
+            result = result.Replace(" ", "");
+            result = result.Replace("\t", "");
+            result = result.Replace("\n", "");
+            if (skipFollowBlank)
+            {
+                SkipBlank(ref start, code);
+            }
+            return result;
+        }
         public static string GetTokenString(ref int start, string code, FTokenEndChar cb, bool skipFollowBlank = false)
         {
             int tokenStart;
@@ -977,6 +1044,8 @@ namespace THeaderTools
                     }
                 }
             }
+            if (tokenEnd == code.Length)
+                return;
             if(tokenEnd == tokenStart)
             {//不是空字符，那么就是类似;,(一类的操作符了，他也是一个token
                 tokenEnd = tokenStart + 1;
@@ -1024,6 +1093,8 @@ namespace THeaderTools
         }
         private static bool IsAllPtrOrRef(string str)
         {
+            if (str.Length == 0)
+                return false;
             foreach(var i in str)
             {
                 if (i != '*' && i != '&')

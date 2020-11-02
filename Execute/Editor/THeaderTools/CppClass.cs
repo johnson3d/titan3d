@@ -65,6 +65,7 @@ namespace THeaderTools
             public const string SV_NameSpace = "SV_NameSpace";
             public const string SV_ReturnConverter = "SV_ReturenConverter";
             public const string SV_UsingNS = "SV_UsingNS";
+            public const string SV_ReflectAll = "SV_ReflectAll";
         }
         
         public string GetReturnConverter()
@@ -438,11 +439,26 @@ namespace THeaderTools
                 return $"{ReturnType} {Name}({GetParameterString()})";
             }
         }
+        public bool IsConst
+        {
+            get;
+            set;
+        } = false;
         public bool IsVirtual
         {
             get;
             set;
-        }
+        } = false;
+        public bool IsStatic
+        {
+            get;
+            set;
+        } = false;
+        public bool IsInline
+        {
+            get;
+            set;
+        } = false;
         public string ApiName
         {
             get;

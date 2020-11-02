@@ -29,8 +29,8 @@ public:
 	class ClassInIVertexBuffer
 	{
 		const static int ttt = 9;
-		volatile IRenderContext* Member100; 
-		void UpdateDrawPass(ICommandList* cmd, vBOOL bImm) = 0;
+		volatile IRenderContext ** Member100; 
+		virtual void * UpdateDrawPass(ICommandList* cmd, vBOOL bImm) const = 0;
 		public:
 		TR_MEMBER()
 			float Member0;
