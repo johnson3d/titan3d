@@ -2,7 +2,7 @@
   "profiles": {
     "THeaderTools": {
       "commandName": "Project",
-      "commandLineArgs": "vcxproj=E:\\titan3d\\Execute\\Core.Windows\\Core.Windows.vcxproj gen_dir=E:\\titan3d\\deriveddatacache\\codegen\\cpp\\"
+      "commandLineArgs": "vcxproj=d:\\OpenSource\\titan3d\\Execute\\Core.Windows\\Core.Windows.vcxproj gen_dir=d:\\OpenSource\\titan3d\\deriveddatacache\\codegen\\ gen_csharpwrapper gen_csharp_internal module_name=\\\"Core.Windows.dll\\\""
     }
   }
 }

@@ -75,7 +75,23 @@ namespace THeaderTools
                     }
                 }
             }
-
+            if (null != FindArgument(args, "gen_csharp_internal"))
+                CodeGenerator.Instance.GenInternalClass = true;
+            bool bGenPInvoke = false;
+            if (null != FindArgument(args, "gen_cpp_pinvoke"))
+                bGenPInvoke = true;
+            bool bGenCSharp = false;
+            if (FindArgument(args, "gen_csharpwrapper") != null)
+            {
+                bGenPInvoke = true;
+                bGenCSharp = true;
+            }
+            string moduleNS = FindArgument(args, "module_name=");
+            if(moduleNS!=null)
+            {//example: module_name=\"libCore.so\"
+                moduleNS = moduleNS.Substring("module_name=".Length);
+                CodeGenerator.Instance.GenImportModuleNC = moduleNS;
+            }
             CodeGenerator codeManager = CodeGenerator.Instance;
             codeManager.Reset();
             foreach (var i in headers)
@@ -83,8 +99,11 @@ namespace THeaderTools
                 var headScanner = new CppHeaderScanner();
                 headScanner.ScanHeader(i.Value, codeManager.ClassCollector);
             }
-            codeManager.GenCode(genDir);
-            codeManager.GenCodeCSharp(genDir);
+            codeManager.GenCode(genDir, bGenPInvoke);
+            if (bGenCSharp)
+            {
+                codeManager.GenCodeCSharp(genDir);
+            }
         }
         static bool CollectInclude(System.Xml.XmlNode sn, string spjPath, Dictionary<string,string> headers)
         {

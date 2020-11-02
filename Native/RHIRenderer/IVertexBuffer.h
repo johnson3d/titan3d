@@ -25,13 +25,13 @@ TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS&Titan3D, AAA = "", BBB =
 class IVertexBuffer : public IRenderResource
 {
 public:
-	TR_CLASS(SV_NameSpace = EngineNS.IVertexBuffer, , SV_UsingNS = EngineNS, AAA = "", BBB = 2)
+	TR_CLASS(SV_NameSpace = EngineNS.IVertexBuffer, SV_UsingNS = EngineNS, AAA = "", BBB = 2)
 	class ClassInIVertexBuffer
 	{
 		TR_MEMBER()
-			int Member0;
+			float Member0;
 		TR_MEMBER()
-			volatile IRenderContext* Member1;
+			int Member1;
 	} ;
 
 	TR_CONSTRUCTOR()
@@ -41,7 +41,7 @@ public:
 	TR_MEMBER()
 	int Member0;
 	TR_MEMBER()
-	volatile IRenderContext* Member1;
+	volatile IRenderContext* Member1; 
 
 	TR_FUNCTION()
 	virtual void GetBufferData(EngineNS::IRenderContext* rc, IBlobObject* data) = 0;

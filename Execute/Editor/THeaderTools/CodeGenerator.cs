@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace THeaderTools
 {
     public partial class CodeGenerator
     {
         public static CodeGenerator Instance = new CodeGenerator();
+        #region Configs
+        public bool GenInternalClass = false;
+        public string GenImportModuleNC = "\"Core.Windows.dll\"";
+        #endregion
         public class Symbol
         {
             public const string BeginRtti = "StructBegin";
@@ -119,7 +124,7 @@ namespace THeaderTools
                 i.CheckValid(this);
             }
         }
-        public void GenCode(string targetDir)
+        public void GenCode(string targetDir, bool bGenPInvoke)
         {
             CheckValid();
             foreach (var i in ClassCollector)
@@ -146,7 +151,11 @@ namespace THeaderTools
                 genCode += GenCppReflection(i);
 
                 genCode += "\n\n\n";
-                genCode += GenPInvokeBinding(i);
+
+                if (bGenPInvoke)
+                {
+                    genCode += GenPInvokeBinding(i);
+                }
 
                 var file = targetDir + i.GetGenFileName();
                 System.IO.File.WriteAllText(file, genCode); ;

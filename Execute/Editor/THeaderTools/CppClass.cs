@@ -484,7 +484,8 @@ namespace THeaderTools
         }
         public string GenCallBindingCSharp(ref int nTable, CppClass klass)
         {
-            string code = CodeGenerator.GenLine(nTable, $"public {klass.Name}{CodeGenerator.Symbol.NativeSuffix}({this.GetParameterStringCSharp(false)})");
+            var afterSelf = Arguments.Count > 0 ? ", " : "";
+            string code = CodeGenerator.GenLine(nTable, $"public {klass.Name}{CodeGenerator.Symbol.NativeSuffix}({this.GetParameterStringCSharp(false)}{afterSelf}bool _dont_care_just_for_compile)");
             code += CodeGenerator.GenLine(nTable, "{");
             nTable++;
             code += CodeGenerator.GenLine(nTable, $"mPtr = {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor({this.GetParameterCallString(true)});");
