@@ -325,8 +325,7 @@ namespace THeaderTools
             {
                 index++;
                 result.Name = firstToken;
-                result.ApiName = null;
-
+                
                 SkipBlank(ref index, code);
                 string keyPublic = GetTokenString(ref index, code, null);
                 switch (keyPublic)
@@ -353,12 +352,14 @@ namespace THeaderTools
             {
                 index++;
                 result.ParentName = null;
-                result.ApiName = null;
                 result.Name = firstToken;
             }
             else
             {
-                result.ApiName = firstToken;
+                if (firstToken == CodeGenerator.Instance.API_Name)
+                {
+                    result.IsAPI = true;
+                }
                 result.Name = GetTokenString(ref index, code, null);
 
                 SkipBlank(ref index, code);
@@ -415,7 +416,12 @@ namespace THeaderTools
         }
         private static bool IsSkipKeyToken(string token, ref EDeclareType dtStyles)
         {
-            switch(token)
+            if (token == CodeGenerator.Instance.API_Name)
+            {
+                dtStyles |= EDeclareType.DT_API;
+                return true;
+            }
+            switch (token)
             {
                 case "volatile":
                     dtStyles |= EDeclareType.DT_Volatile;
@@ -434,9 +440,6 @@ namespace THeaderTools
                     return true;
                 case "friend":
                     dtStyles |= EDeclareType.DT_Friend;
-                    return true;
-                case "VFX_API":
-                    dtStyles |= EDeclareType.DT_API;
                     return true;
                 default:
                     return false;
@@ -647,14 +650,15 @@ namespace THeaderTools
                                 {
                                     tmp.IsInline = true;
                                 }
+                                if ((dtStyles & EDeclareType.DT_Friend) == EDeclareType.DT_Friend)
+                                {
+                                    tmp.IsFriend = true;
+                                }
 
+                                tmp.ReturnType = token;
                                 if ((dtStyles & EDeclareType.DT_Const) == EDeclareType.DT_Const)
                                 {
-                                    tmp.ReturnType = "const " + token;
-                                }
-                                else
-                                {
-                                    tmp.ReturnType = token;
+                                    tmp.IsReturnConstType = true;
                                 }
                                 tmp.Name = token2;
                                 index--;
@@ -855,46 +859,36 @@ namespace THeaderTools
 
                 nameStrs = nameStrs.Replace("::", ".");
                 var tokens = GetTokens(0, nameStrs.Length - 1, nameStrs, IsEndToken_TypeDef);
-
-                if (tokens[0] == "virtual")
+                for (int i = 0; i < tokens.Count; i++)
                 {
-                    funInfo.IsVirtual = true;
-                    if(tokens.Count==4)
-                    {//virtual VFX_API void FunName
-                        funInfo.ApiName = tokens[1];
-                        funInfo.ReturnType = tokens[2];
-                        funInfo.Name = tokens[3];
-                    }
-                    else if (tokens.Count == 3)
-                    {//virtual void FunName
-                        funInfo.ApiName = null;
-                        funInfo.ReturnType = tokens[1];
-                        funInfo.Name = tokens[2];
-                    }
-                    else
+                    if (tokens[i] == "virtual")
                     {
-                        throw new Exception(TraceMessage("error code"));
+                        funInfo.IsVirtual = true;
+                        tokens.RemoveAt(i);
+                        i--;
                     }
+                    else if (tokens[i] == "const")
+                    {
+                        funInfo.IsReturnConstType = true;
+                        tokens.RemoveAt(i);
+                        i--;
+                    }
+                    else if (tokens[i] == CodeGenerator.Instance.API_Name)
+                    {
+                        funInfo.IsAPI = true;
+                        tokens.RemoveAt(i);
+                        i--;
+                    }
+                }
+
+                if (tokens.Count == 2)
+                {
+                    funInfo.ReturnType = tokens[0];
+                    funInfo.Name = tokens[1];
                 }
                 else
                 {
-                    funInfo.IsVirtual = false;
-                    if (tokens.Count == 3)
-                    {//VFX_API void FunName
-                        funInfo.ApiName = tokens[0];
-                        funInfo.ReturnType = tokens[1];
-                        funInfo.Name = tokens[2];
-                    }
-                    else if (tokens.Count == 2)
-                    {//void FunName
-                        funInfo.ApiName = null;
-                        funInfo.ReturnType = tokens[0];
-                        funInfo.Name = tokens[1];
-                    }
-                    else
-                    {
-                        throw new Exception(TraceMessage("error code"));
-                    }
+                    throw new Exception(TraceMessage($"{klass.Name} function is invalid"));
                 }
 
                 int deeps = 0;
@@ -946,18 +940,26 @@ namespace THeaderTools
                     continue;
                 string type;
                 string name;
-                NormalizeArgument(i, out type, out name);
-                function.Arguments.Add(new CppCallParameters.ArgKeyValuePair(type, name));
+                EDeclareType dtStyles;
+                NormalizeArgument(i, out type, out name, out dtStyles);
+                function.Arguments.Add(new CppCallParameters.ArgKeyValuePair(type, name, dtStyles));
             }
         }
-        private static void NormalizeArgument(string code, out string type, out string name)
+        private static void NormalizeArgument(string code, out string type, out string name, out EDeclareType dtStyles)
         {
+            dtStyles = 0;
             var tokens = GetTokens(0, code.Length-1, code, IsEndToken_TypeDef);
             for(int i=0; i<tokens.Count; i++)
             {
                 //去除无用得in out宏标志 
                 if(tokens[i]=="IN" || tokens[i] == "OUT" || tokens[i] == "INOUT")
                 {
+                    tokens.RemoveAt(i);
+                    i--;
+                }
+                else if(tokens[i] == "const")
+                {
+                    dtStyles = EDeclareType.DT_Const;
                     tokens.RemoveAt(i);
                     i--;
                 }

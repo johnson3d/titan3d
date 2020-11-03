@@ -72,7 +72,7 @@ public:
 	volatile IRenderContext* Member1; 
 
 	TR_FUNCTION()
-	virtual void GetBufferData(EngineNS:: IRenderContext* rc, IBlobObject* data) = 0;
+	virtual void GetBufferData(const EngineNS:: IRenderContext* rc, IBlobObject* data) = 0;
 	TR_FUNCTION()
 	virtual void UpdateGPUBuffData(ICommandList* cmd, void* ptr, UINT size) = 0;
 

@@ -116,11 +116,11 @@ namespace THeaderTools
             get;
             set;
         } = EStructType.Class;
-        public string ApiName
+        public bool IsAPI
         {
             get;
             set;
-        } = null;
+        } = false;
         public string Name
         {
             get;
@@ -191,38 +191,7 @@ namespace THeaderTools
         }
         public static bool IsSystemType(string name)
         {
-            switch (name)
-            {
-                case "void":
-                case "void*":
-                case "char":
-                case "const char*":
-                case "unsigned char":
-                case "short":
-                case "unsigned short":
-                case "int":
-                case "unsigned int":
-                case "long":
-                case "unsigned long":
-                case "long long":
-                case "unsigned long long":
-                case "float":
-                case "double":
-                case "std::string":
-                case "BYTE":
-                case "WORD":
-                case "DWORD":
-                case "QWORD":
-                case "SHORT":
-                case "USHORT":
-                case "INT":
-                case "UINT":
-                case "INT64":
-                case "UINT64":
-                    return true;
-                default:
-                    return false;
-            }
+            return CodeGenerator.Instance.IsSystemType(name);
         }
         public static string RemovePtrAndRef(string name)
         {
@@ -238,6 +207,21 @@ namespace THeaderTools
                 return name;
             else
                 return name.Substring(0, i+1);
+        }
+        public static string SplitPureName(string name, out string suffix)
+        {
+            name = name.Replace("::", ".");
+            name = name.Replace(" ", "");
+            int i = name.Length - 1;
+            for (; i >= 0; i--)
+            {
+                if (name[i] != '*' && name[i] != '&')
+                {
+                    break;
+                }
+            }
+            suffix = name.Substring(i + 1);
+            return name.Substring(0, i + 1); ;
         }
         public void CheckValid(CodeGenerator manager)
         {
@@ -321,7 +305,10 @@ namespace THeaderTools
             get { return mType; }
             set
             {
-                mType = value.Replace("::", ".");
+                string suffix;
+                var pureType = CppClass.SplitPureName(value, out suffix);
+                pureType = CodeGenerator.Instance.NormalizePureType(pureType);
+                mType = pureType + suffix;
             }
         }
         public string Name
@@ -398,12 +385,29 @@ namespace THeaderTools
     {
         public class ArgKeyValuePair
         {
-            public ArgKeyValuePair(string k,string v)
+            public ArgKeyValuePair(string k,string v, EDeclareType dt)
             {
                 Key = k;
                 Value = v;
+                DeclType = dt;
             }
-            public string Key;
+            public EDeclareType DeclType
+            {
+                get;
+                set;
+            } = 0;
+            string mKey;
+            public string Key
+            {
+                get { return mKey; }
+                set
+                {
+                    string suffix;
+                    var pureType = CppClass.SplitPureName(value, out suffix);
+                    pureType = CodeGenerator.Instance.NormalizePureType(pureType);
+                    mKey = pureType + suffix;
+                }
+            }
             public string Value;
         }
         public List<ArgKeyValuePair> Arguments
@@ -500,7 +504,10 @@ namespace THeaderTools
                     break;
             }   
 
-            result += $"{ReturnType} {Name}({GetParameterString()})";
+            if(IsReturnConstType)
+                result += $"const {ReturnType} {Name}({GetParameterString()})";
+            else
+                result += $"{ReturnType} {Name}({GetParameterString()})";
 
             return result + suffix;
         }
@@ -524,28 +531,41 @@ namespace THeaderTools
             get;
             set;
         } = false;
+        public bool IsFriend
+        {
+            get;
+            set;
+        } = false;
+        public bool IsAPI
+        {//VFX_API
+            get;
+            set;
+        } = false;
         public EFunctionSuffix Suffix
         {
             get;
             set;
         } = EFunctionSuffix.None;
-        public string ApiName
-        {
-            get;
-            set;
-        } = null;
         public string Name
         {
             get;
             set;
         }
+        public bool IsReturnConstType
+        {
+            get;
+            set;
+        } = false;
         string mReturnType;
         public string ReturnType
         {
             get { return mReturnType; }
             set
             {
-                mReturnType = value.Replace("::", ".");
+                string suffix;
+                var pureType = CppClass.SplitPureName(value, out suffix);
+                pureType = CodeGenerator.Instance.NormalizePureType(pureType);
+                mReturnType = pureType + suffix;
             }
         }
         public string GenPInvokeBinding(CppClass klass)

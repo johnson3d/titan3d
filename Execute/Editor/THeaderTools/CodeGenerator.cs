@@ -9,6 +9,7 @@ namespace THeaderTools
     {
         public static CodeGenerator Instance = new CodeGenerator();
         #region Configs
+        public string API_Name = "VFX_API";
         public bool GenInternalClass = false;
         public string GenImportModuleNC = "\"Core.Windows.dll\"";
         #endregion
@@ -30,32 +31,7 @@ namespace THeaderTools
         }
         private CodeGenerator()
         {
-            Cpp2CSTypes["void"] = "void";
-            Cpp2CSTypes["void*"] = "void*";
-            Cpp2CSTypes["char"] = "char";
-            Cpp2CSTypes["unsigned char"] = "byte";
-            Cpp2CSTypes["short"] = "short";
-            Cpp2CSTypes["unsigned short"] = "ushort";
-            Cpp2CSTypes["int"] = "int";
-            Cpp2CSTypes["unsigned int"] = "uint";
-            Cpp2CSTypes["long"] = "int";
-            Cpp2CSTypes["unsigned long"] = "uint";
-            Cpp2CSTypes["long long"] = "long";
-            Cpp2CSTypes["unsigned long long"] = "ulong";
-            Cpp2CSTypes["float"] = "float";
-            Cpp2CSTypes["float*"] = "float*";
-            Cpp2CSTypes["double"] = "double";
-            //Cpp2CSTypes["std::string"] = "string";
-            Cpp2CSTypes["BYTE"] = "byte";
-            Cpp2CSTypes["WORD"] = "ushort";
-            Cpp2CSTypes["DWORD"] = "uint";
-            Cpp2CSTypes["QWORD"] = "uint64";
-            Cpp2CSTypes["SHORT"] = "short";
-            Cpp2CSTypes["USHORT"] = "ushort";
-            Cpp2CSTypes["INT"] = "int";
-            Cpp2CSTypes["UINT"] = "uint";
-            Cpp2CSTypes["INT64"] = "int64";
-            Cpp2CSTypes["UINT64"] = "uint64";
+            InitType2Type();
         }
         public void Reset()
         {
@@ -64,18 +40,20 @@ namespace THeaderTools
         Dictionary<string, string> Cpp2CSTypes = new Dictionary<string, string>();
         public string CppTypeToCSType(string type, bool bPtrType, out bool isNativPtr)
         {
+            string suffix;
+            var pureType = CppClass.SplitPureName(type, out suffix);
             isNativPtr = false;
-            string result;
-            if (Cpp2CSTypes.TryGetValue(type, out result))
-                return result;
 
-            if(type.EndsWith("*"))
+            if (IsSystemType(pureType))
+                return type;
+
+            if(suffix.Length>0 && suffix[0] == '*')
             {
                 isNativPtr = true;
-                type = CppClass.RemovePtrAndRef(type);
                 if (bPtrType)
                 {
-                    return type + $"{Symbol.NativeSuffix}.PtrType";
+                    var cSharpPtrType = pureType + $"{Symbol.NativeSuffix}.PtrType" + suffix.Substring(1);
+                    return cSharpPtrType;
                 }
                 else
                 {
