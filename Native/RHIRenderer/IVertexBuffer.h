@@ -30,7 +30,10 @@ public:
 	{
 		const static int ttt = 9;
 		volatile IRenderContext ** Member100; 
-		virtual void * UpdateDrawPass(ICommandList* cmd, vBOOL bImm) const = 0;
+		virtual void * UpdateDrawPass(ICommandList* cmd, vBOOL bImm) const = 0
+		{
+			return nullptr;
+		}
 		public:
 		TR_MEMBER()
 			float Member0;

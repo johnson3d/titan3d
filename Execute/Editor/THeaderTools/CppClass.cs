@@ -15,6 +15,14 @@ namespace THeaderTools
         Protected,
         Private,
     }
+    public enum EFunctionSuffix
+    {
+        None,
+        Pure,
+        Override,
+        Default,
+        Delete,
+    }
     [Flags]
     public enum EDeclareType : uint
     {
@@ -27,6 +35,11 @@ namespace THeaderTools
     }
     public class CppMetaBase
     {
+        public bool HasMetaFlag
+        {
+            get;
+            set;
+        } = false;
         public EVisitMode VisitMode
         {
             get;
@@ -39,6 +52,18 @@ namespace THeaderTools
         public void AnalyzeMetaString(string klsMeta)
         {
             MetaInfos.Clear();
+            if (string.IsNullOrEmpty(klsMeta))
+                return;
+            int validCharNum = 0;
+            foreach(var i in klsMeta)
+            {
+                if(CppHeaderScanner.IsBlankChar(i)!=true)
+                {
+                    validCharNum++;
+                }
+            }
+            if (validCharNum == 0)
+                return;
             var segs = klsMeta.Split(',');
             foreach (var i in segs)
             {
@@ -278,6 +303,10 @@ namespace THeaderTools
     }
     public class CppMember : CppMetaBase
     {
+        public override string ToString()
+        {
+            return $"{VisitMode.ToString()}: {Type} {Name}";
+        }
         public EDeclareType DeclareType
         {
             get;
@@ -430,14 +459,43 @@ namespace THeaderTools
     {
         public override string ToString()
         {
+            string result = "";
             if(IsVirtual)
             {
-                return $"virtual {ReturnType} {Name}({GetParameterString()})";
+                result += "virtual ";
             }
-            else
+            if (IsStatic)
             {
-                return $"{ReturnType} {Name}({GetParameterString()})";
+                result += "static ";
             }
+            if (IsInline)
+            {
+                result += "inline ";
+            }
+
+            string suffix = "";
+            if (IsConst)
+                suffix += "const";
+
+            switch (Suffix)
+            {
+                case EFunctionSuffix.Delete:
+                    suffix += " = delete";
+                    break;
+                case EFunctionSuffix.Default:
+                    suffix += " = default";
+                    break;
+                case EFunctionSuffix.Override:
+                    suffix += " override";
+                    break;
+                case EFunctionSuffix.Pure:
+                    suffix += " = 0";
+                    break;
+            }   
+
+            result += $"{ReturnType} {Name}({GetParameterString()})";
+
+            return result + suffix;
         }
         public bool IsConst
         {
@@ -459,6 +517,11 @@ namespace THeaderTools
             get;
             set;
         } = false;
+        public EFunctionSuffix Suffix
+        {
+            get;
+            set;
+        } = EFunctionSuffix.None;
         public string ApiName
         {
             get;

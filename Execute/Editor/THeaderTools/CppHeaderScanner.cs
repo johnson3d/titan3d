@@ -440,6 +440,9 @@ namespace THeaderTools
         }        
         public static void AnalyzeClassFullInfo(string code, string klassName, List<CppMember> members, List<CppFunction> methods, List<CppConstructor> constructors)
         {
+            var curMetType = "";
+            var metaString = "";
+            bool hasMetaFlag = false;
             int index = code.IndexOf('{');
             index++;
             SkipBlank(ref index, code);
@@ -450,21 +453,21 @@ namespace THeaderTools
             }
             while(index<code.Length)
             {
-                var token = GetTokenStringConbineStarAndRef(ref index, code, null, true);
+                var token = GetTokenStringConbineStarAndRef(ref index, code, null);
                 while (token == ";")
                 {
-                    token = GetTokenStringConbineStarAndRef(ref index, code, null, true);
+                    token = GetTokenStringConbineStarAndRef(ref index, code, null);
                 }
                 EDeclareType dtStyles = 0;
                 while (IsSkipKeyToken(token, ref dtStyles))
                 {
-                    token = GetTokenStringConbineStarAndRef(ref index, code, null, true);
+                    token = GetTokenStringConbineStarAndRef(ref index, code, null);
                 }
                 if (index >= code.Length)
                 {
                     if (token != "}")
                     {
-                        throw new Exception(TraceMessage("error code"));
+                        throw new Exception(TraceMessage($"class {klassName} miss end character"));
                     }
                     break;
                 }
@@ -472,21 +475,21 @@ namespace THeaderTools
                 {
                     case "public":
                         mode = EVisitMode.Public;
-                        token = GetTokenString(ref index, code, null, true);
+                        token = GetTokenString(ref index, code, null);
                         if(token!=":")
-                            throw new Exception(TraceMessage("error code"));
+                            throw new Exception(TraceMessage($"class {klassName}: public miss ':'"));
                         break;
                     case "protected":
                         mode = EVisitMode.Protected;
-                        token = GetTokenString(ref index, code, null, true);
+                        token = GetTokenString(ref index, code, null);
                         if (token != ":")
-                            throw new Exception(TraceMessage("error code"));
+                            throw new Exception(TraceMessage($"class {klassName}: protected miss ':'"));
                         break;
                     case "private":
                         mode = EVisitMode.Private;
-                        token = GetTokenString(ref index, code, null, true);
+                        token = GetTokenString(ref index, code, null);
                         if (token != ":")
-                            throw new Exception(TraceMessage("error code"));
+                            throw new Exception(TraceMessage($"class {klassName}: private miss ':'"));
                         break;
                     case Symbol.MetaMember:
                     case Symbol.MetaFunction:
@@ -495,7 +498,11 @@ namespace THeaderTools
                             int rangeStart;
                             int rangeEnd;
                             SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
+                            metaString = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
                             SkipBlank(ref index, code);
+
+                            hasMetaFlag = true;
+                            curMetType = token;
                         }
                         break;
                     default:
@@ -509,7 +516,16 @@ namespace THeaderTools
                                 tmp.Name = token2;
                                 tmp.Type = token;
                                 tmp.DeclareType = dtStyles;
+                                tmp.HasMetaFlag = hasMetaFlag;
+                                tmp.AnalyzeMetaString(metaString);
                                 members.Add(tmp);
+                                if (curMetType!="" && curMetType != Symbol.MetaMember)
+                                {
+                                    throw new Exception(TraceMessage($"Member MetaType invalid:{curMetType}->{tmp.ToString()}"));
+                                }
+                                curMetType = "";
+                                metaString = "";
+                                hasMetaFlag = false;
                             }
                             else if (token3 == "=")
                             {//是const成员变量或者c++11后支持的初始化
@@ -518,12 +534,21 @@ namespace THeaderTools
                                 tmp.Name = token2;
                                 tmp.Type = token;
                                 tmp.DeclareType = dtStyles;
+                                tmp.HasMetaFlag = hasMetaFlag;
+                                tmp.AnalyzeMetaString(metaString);
                                 members.Add(tmp);
+                                if (curMetType != "" && curMetType != Symbol.MetaMember)
+                                {
+                                    throw new Exception(TraceMessage($"Member MetaType invalid:{curMetType}->{tmp.ToString()}"));
+                                }
+                                curMetType = "";
+                                metaString = "";
+                                hasMetaFlag = false;
 
                                 tmp.DefaultValue = GetTokenString(ref index, code, null);//初始化值
                                 token3 = GetTokenString(ref index, code, null);
                                 if(token3!=";")
-                                    throw new Exception(TraceMessage("error code"));
+                                    throw new Exception(TraceMessage($"member {tmp.ToString()} error"));
                             }
                             else if (token3 == "(")
                             {//是函数
@@ -558,11 +583,10 @@ namespace THeaderTools
                                 rangeStart++;
                                 rangeEnd--;
                                 var args = code.Substring(rangeStart, rangeEnd - rangeStart);
-                                SkipBlank(ref index, code);
-                                token = GetTokenString(ref index, code, null, true);
+                                token = GetTokenString(ref index, code, null);
                                 if (token == "const")
                                 {
-                                    token = GetTokenString(ref index, code, null, true);
+                                    token = GetTokenString(ref index, code, null);
                                     tmp.IsConst = true;
                                 }
 
@@ -570,23 +594,62 @@ namespace THeaderTools
 
                                 if (token == "=")
                                 {//void fun(xxx) = 0;void fun(xxx) = default;void fun(xxx) = delete;
-                                    token = GetTokenString(ref index, code, null, true);
+                                    token = GetTokenString(ref index, code, null);
                                     switch (token)
                                     {
                                         case "0":
+                                            //msvc可以支持 virtual TR func(...) abstract这样表示纯虚，但是clang不允许，我们就不做支持了
+                                            tmp.Suffix = EFunctionSuffix.Pure;
                                             break;
                                         case "default":
+                                            tmp.Suffix = EFunctionSuffix.Default;
                                             break;
                                         case "delete":
-                                            break;
-                                        case "override":
+                                            tmp.Suffix = EFunctionSuffix.Delete;
                                             break;
                                         default:
-                                            throw new Exception(TraceMessage("error code"));
+                                            throw new Exception(TraceMessage($"function {tmp.Name} invalid suffix"));
                                     }
-                                    token = GetTokenString(ref index, code, null, true);
+                                    token = GetTokenString(ref index, code, null);
                                     if (token != ";")
-                                        throw new Exception(TraceMessage("error code"));
+                                    {//其实virtual TR  Func(...) = 0 {...}也是c++允许的的，这种奇怪的情况懒得分析了
+                                        if (tmp.Suffix == EFunctionSuffix.Pure)
+                                        {
+                                            if (token == "{")
+                                            {
+                                                index--;
+                                                SkipPair(ref index, code, '{', '}', out rangeStart, out rangeEnd);
+                                                var bodyCode = code.Substring(rangeStart, rangeEnd - rangeStart);
+                                            }
+                                            else
+                                            {
+                                                throw new Exception(TraceMessage($"pure function {tmp.Name} miss ';'"));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            throw new Exception(TraceMessage($"function {tmp.Name} miss ';'"));
+                                        }
+                                    }
+                                }
+                                else if (token == "override")
+                                {
+                                    tmp.Suffix = EFunctionSuffix.Override;
+                                    token = GetTokenString(ref index, code, null);
+                                    if (token == ";")
+                                    {
+
+                                    }
+                                    else if (token == "{")
+                                    {//void fun(...) const override
+                                        index--;
+                                        SkipPair(ref index, code, '{', '}', out rangeStart, out rangeEnd);
+                                        var bodyCode = code.Substring(rangeStart, rangeEnd - rangeStart);
+                                    }
+                                    else
+                                    {
+                                        throw new Exception(TraceMessage($"function {tmp.Name} error"));
+                                    }
                                 }
                                 else if (token == ";")
                                 {//一个函数申明结束
@@ -599,7 +662,16 @@ namespace THeaderTools
                                     var bodyCode = code.Substring(rangeStart, rangeEnd - rangeStart);
                                 }
 
+                                tmp.HasMetaFlag = hasMetaFlag;
+                                tmp.AnalyzeMetaString(metaString);
                                 methods.Add(tmp);
+                                if (curMetType != "" && curMetType != Symbol.MetaFunction)
+                                {
+                                    throw new Exception(TraceMessage($"Function MetaType invalid:{curMetType}->{tmp.ToString()}"));
+                                }
+                                curMetType = "";
+                                metaString = "";
+                                hasMetaFlag = false;
                             }
                         }
                         break;
@@ -860,7 +932,7 @@ namespace THeaderTools
             //var str = src.Substring(i, j - i);
             i = j;
         }
-        public static void SkipPair(ref int i, string code, char Char, int count)
+        public static void SkipChar(ref int i, string code, char Char, int count)
         {
             int deep = 0;
             while (i < code.Length)
@@ -905,7 +977,7 @@ namespace THeaderTools
                 }
                 i++;
             }
-            throw new Exception(TraceMessage("error code"));
+            throw new Exception(TraceMessage($"Miss Pair with {startChar} : {endChar}"));
         }
         public delegate bool FTokenEndChar(int index, string str);
         private static bool IsTokenEndChar(int index, string str, FTokenEndChar cb)
@@ -957,7 +1029,7 @@ namespace THeaderTools
         {
             return false;
         }
-        private static bool IsBlankChar(char c)
+        public static bool IsBlankChar(char c)
         {
             if (c == ' ')
                 return true;
@@ -969,7 +1041,7 @@ namespace THeaderTools
                 return true;
             return false;
         }
-        public static string GetTokenStringConbineStarAndRef(ref int start, string code, FTokenEndChar cb, bool skipFollowBlank = true)
+        public static string GetTokenStringConbineStarAndRef(ref int start, string code, FTokenEndChar cb)
         {
             int tokenStart;
             int tokenEnd;
@@ -996,13 +1068,9 @@ namespace THeaderTools
             result = result.Replace(" ", "");
             result = result.Replace("\t", "");
             result = result.Replace("\n", "");
-            if (skipFollowBlank)
-            {
-                SkipBlank(ref start, code);
-            }
             return result;
         }
-        public static string GetTokenString(ref int start, string code, FTokenEndChar cb, bool skipFollowBlank = false)
+        public static string GetTokenString(ref int start, string code, FTokenEndChar cb)
         {
             int tokenStart;
             int tokenEnd;
@@ -1014,10 +1082,6 @@ namespace THeaderTools
             result = result.Replace("\t", "");
             result = result.Replace("\n", "");
             start = tokenEnd;
-            if(skipFollowBlank)
-            {
-                SkipBlank(ref start, code);
-            }
             return result;
         }
         public static void GetNextTokenRange(int start, string code, out int tokenStart, out int tokenEnd, FTokenEndChar cb)
