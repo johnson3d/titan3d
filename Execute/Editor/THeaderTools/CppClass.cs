@@ -31,7 +31,8 @@ namespace THeaderTools
         DT_Static = (1 << 2),
         DT_Virtual = (1 << 3),
         DT_Inline = (1 << 4),
-        DT_API = (1 << 5),
+        DT_Friend = (1 << 5),
+        DT_API = (1 << 6),
     }
     public class CppMetaBase
     {
@@ -193,7 +194,9 @@ namespace THeaderTools
             switch (name)
             {
                 case "void":
+                case "void*":
                 case "char":
+                case "const char*":
                 case "unsigned char":
                 case "short":
                 case "unsigned short":
@@ -312,10 +315,14 @@ namespace THeaderTools
             get;
             set;
         } = 0;
+        string mType;
         public string Type
         {
-            get;
-            set;
+            get { return mType; }
+            set
+            {
+                mType = value.Replace("::", ".");
+            }
         }
         public string Name
         {
@@ -409,16 +416,16 @@ namespace THeaderTools
             CodeGenerator.Instance.CppTypeToCSType(Arguments[i].Key, true, out isNativePtr);
             return isNativePtr;
         }
-        public string GetParameterString()
+        public string GetParameterString(string split = " ")
         {
             string result = "";
             for(int i = 0; i < Arguments.Count; i++)
             {
                 var cppName = Arguments[i].Key.Replace(".", "::");
                 if (i==0)
-                    result += $"{cppName} {Arguments[i].Value}";
+                    result += $"{cppName}{split}{Arguments[i].Value}";
                 else
-                    result += $", {cppName} {Arguments[i].Value}";
+                    result += $", {cppName}{split}{Arguments[i].Value}";
             }
             return result;
         }
@@ -532,10 +539,14 @@ namespace THeaderTools
             get;
             set;
         }
+        string mReturnType;
         public string ReturnType
         {
-            get;
-            set;
+            get { return mReturnType; }
+            set
+            {
+                mReturnType = value.Replace("::", ".");
+            }
         }
         public string GenPInvokeBinding(CppClass klass)
         {

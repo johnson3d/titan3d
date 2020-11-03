@@ -105,3 +105,9 @@ inline void _vfxTraceA(LPCSTR lpszFormat, ...)
 #else
 #		define VFX_API
 #endif
+
+#define TR_CLASS(...)
+#define TR_FUNCTION(...)
+#define TR_MEMBER(...)
+#define TR_ENUM(...)
+#define TR_CONSTRUCTOR(...)

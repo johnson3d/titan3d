@@ -20,6 +20,19 @@ typedef int	vBOOL;
 
 NS_BEGIN
 
+#define NEW_INHEAD new(__FILE__, __LINE__)
+
+template<typename Type>
+inline Type VGetTypeDefault()
+{
+	return (Type)(0);
+}
+
+inline void VGetTypeDefault()
+{
+
+}
+
 template <typename R, typename... Args>
 struct TFunction_traits_helper
 {
@@ -704,7 +717,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass>
 	RttiMethodBase* PushMethod0(typename VMethod0<Result, Klass>::MethodFun fun, const char* name)
 	{
-		auto desc = new(__FILE__, __LINE__) VMethod0<Result, Klass>(fun, name);
+		auto desc = NEW_INHEAD VMethod0<Result, Klass>(fun, name);
 		
 		Methods.push_back(desc);
 		return desc;
@@ -713,7 +726,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0>
 	RttiMethodBase* PushMethod1(typename VMethod1<Result, Klass, T0>::MethodFun fun, const char* name, const char* a0)
 	{
-		auto desc = new(__FILE__,__LINE__) VMethod1<Result, Klass, T0>(fun, name, a0);
+		auto desc = NEW_INHEAD VMethod1<Result, Klass, T0>(fun, name, a0);
 
 		Methods.push_back(desc);
 		return desc;
@@ -722,7 +735,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1>
 	RttiMethodBase* PushMethod2(typename VMethod2<Result, Klass, T0, T1>::MethodFun fun, const char* name, const char* a0, const char* a1)
 	{
-		auto desc = new(__FILE__, __LINE__) VMethod2<Result, Klass, T0, T1>(fun, name, a0, a1);
+		auto desc = NEW_INHEAD VMethod2<Result, Klass, T0, T1>(fun, name, a0, a1);
 
 		Methods.push_back(desc);
 		return desc;
@@ -731,7 +744,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2>
 	RttiMethodBase* PushMethod3(typename VMethod3<Result, Klass, T0, T1, T2>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2)
 	{
-		auto desc = new(__FILE__, __LINE__) VMethod3<Result, Klass, T0, T1, T2>(fun, name, a0, a1, a2);
+		auto desc = NEW_INHEAD VMethod3<Result, Klass, T0, T1, T2>(fun, name, a0, a1, a2);
 
 		Methods.push_back(desc);
 		return desc;
@@ -740,7 +753,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3>
 	RttiMethodBase* PushMethod4(typename VMethod4<Result, Klass, T0, T1, T2, T3>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3)
 	{
-		auto desc = new(__FILE__, __LINE__) VMethod4<Result, Klass, T0, T1, T2, T3>(fun, name, a0, a1, a2, a3);
+		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3>(fun, name, a0, a1, a2, a3);
 
 		Methods.push_back(desc);
 		return desc;
@@ -1069,21 +1082,21 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 
 #define StructConstructor0() \
 		{\
-			auto desc = new(__FILE__, __LINE__) VConstructor0<ThisStructType>();\
+			auto desc = NEW_INHEAD VConstructor0<ThisStructType>();\
 			Constructors.push_back(desc);\
 			__current_constructor = desc;\
 		}
 
 #define StructConstructor1(_T0) \
 		{\
-			auto desc = new(__FILE__, __LINE__) VConstructor1<ThisStructType, _T0>();\
+			auto desc = NEW_INHEAD VConstructor1<ThisStructType, _T0>();\
 			Constructors.push_back(desc);\
 			__current_constructor = desc;\
 		}
 
 #define StructConstructor2(_T0, _T1) \
 		{\
-			auto desc = new(__FILE__, __LINE__) VConstructor2<ThisStructType, _T0, _T1>();\
+			auto desc = NEW_INHEAD VConstructor2<ThisStructType, _T0, _T1>();\
 			Constructors.push_back(desc);\
 			__current_constructor = desc;\
 		}

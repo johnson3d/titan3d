@@ -115,7 +115,7 @@ namespace THeaderTools
                     var attr = i.Attributes["Include"];
                     if (attr != null)
                     {
-                        if (attr.Value == "$(MSBuildThisFileDirectory)..\\IUnknown.h")
+                        if (attr.Value.EndsWith("BaseHead.h"))
                             continue;
                         var hf = attr.Value.Replace("$(MSBuildThisFileDirectory)", spjPath);
                         bool error;

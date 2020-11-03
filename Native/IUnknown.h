@@ -293,16 +293,6 @@ public:
 		return AutoRef<T>((T*)Handle->mPtrAddress);
 	}
 };
-template<typename Type>
-inline Type VGetTypeDefault()
-{
-	return (Type)(0);
-}
-
-inline void VGetTypeDefault()
-{
-
-}
 
 class VDefferedDeleteManager
 {
@@ -432,11 +422,5 @@ public:
 #define VDef_ReadOnlyReference(name) auto& GetRef##name(){return m##name;}
 #define VDef_ReadWrite(type, name, prefix) type Get##name(){return prefix##name;} \
 		void Set##name(type value){ prefix##name = value; }
-
-#define TR_CLASS(...)
-#define TR_FUNCTION(...)
-#define TR_MEMBER(...)
-#define TR_ENUM(...)
-#define TR_CONSTRUCTOR(...)
 
 NS_END

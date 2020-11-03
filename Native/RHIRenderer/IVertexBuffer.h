@@ -40,9 +40,26 @@ public:
 		TR_MEMBER()
 			int Member1;
 		protected:
-			int*& Member2;
+			int** Member2;
 		public:
 			int Member3;
+		
+		ClassInIVertexBuffer& operator=(int a);
+		ClassInIVertexBuffer& operator+(int a)
+		{
+		}
+
+		friend struct IVertexBufferDesc;
+		friend int FriendTestFunction(int a);
+		friend bool operator==(const ClassInIVertexBuffer& l, const ClassInIVertexBuffer& h)
+		{
+			return true;
+		}
+
+		ClassInIVertexBuffer();
+		ClassInIVertexBuffer(int a)
+		{
+		}
 	} ;
 
 	TR_CONSTRUCTOR()

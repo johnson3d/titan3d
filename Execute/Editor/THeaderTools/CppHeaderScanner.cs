@@ -401,7 +401,8 @@ namespace THeaderTools
             {
                 List<CppMember> members = new List<CppMember>();
                 List<CppFunction> methods = new List<CppFunction>();
-                AnalyzeClassFullInfo(code, result.Name, members, methods, null);
+                List<CppConstructor> constructors = new List<CppConstructor>();
+                AnalyzeClassFullInfo(code, result.Name, members, methods, constructors);
             }
             else
             {
@@ -430,6 +431,9 @@ namespace THeaderTools
                     return true;
                 case "inline":
                     dtStyles |= EDeclareType.DT_Inline;
+                    return true;
+                case "friend":
+                    dtStyles |= EDeclareType.DT_Friend;
                     return true;
                 case "VFX_API":
                     dtStyles |= EDeclareType.DT_API;
@@ -471,6 +475,24 @@ namespace THeaderTools
                     }
                     break;
                 }
+                if ((dtStyles & EDeclareType.DT_Friend) == EDeclareType.DT_Friend)
+                {//处理友元类和函数
+                    int savedIndex = index;
+                    SkipChar(ref index, code, ";(", 1);
+                    if (code[index] == ';')
+                    {
+                        continue;
+                    }
+                    else if (code[index] == '(')
+                    {
+                        index--;
+                        int rangeStart;
+                        int rangeEnd;
+                        SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
+                        var args = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
+                        index = savedIndex;
+                    }
+                }
                 switch (token)
                 {
                     case "public":
@@ -507,7 +529,66 @@ namespace THeaderTools
                         break;
                     default:
                         {
+                            int rangeStart;
+                            int rangeEnd;
                             var token2 = GetTokenStringConbineStarAndRef(ref index, code, null);
+                            if(token == klassName && token2 =="(")
+                            {//Constructor(...)构造器
+                                var tmp = new CppConstructor();
+                                index--;
+                                SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
+                                var args = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
+                                AnalyzeClassFuntionArguments(args, tmp);
+
+                                tmp.VisitMode = mode;
+                                tmp.HasMetaFlag = hasMetaFlag;
+                                tmp.AnalyzeMetaString(metaString);                                
+                                constructors.Add(tmp);
+                                if (curMetType != "" && curMetType != Symbol.MetaConstructor)
+                                {
+                                    throw new Exception(TraceMessage($"{klassName} Constructor MetaType invalid:{curMetType}->{tmp.ToString()}"));
+                                }
+                                curMetType = "";
+                                metaString = "";
+                                hasMetaFlag = false;
+                                token = GetTokenString(ref index, code, null);
+                                if(token == ";")
+                                {
+                                    continue;
+                                }
+                                else if(token == "{")
+                                {
+                                    index--;
+                                    SkipPair(ref index, code, '{', '}', out rangeStart, out rangeEnd);
+                                    var bodyCode = code.Substring(rangeStart, rangeEnd - rangeStart);
+                                    continue;
+                                }
+                                else
+                                {
+                                    throw new Exception(TraceMessage($"{klassName} Constructor miss ending"));
+                                }
+                            }
+                            else if(token2=="operator")
+                            {//操作符重载，这个无法分析反射信息，直接跳过
+                                //var op = GetTokenStringConbineStarAndRef(ref index, code, null);
+                                SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
+                                var tk0 =  GetTokenStringConbineStarAndRef(ref index, code, null);
+                                if (tk0 == ";")
+                                {
+                                    continue;
+                                }
+                                else if (tk0 == "{")
+                                {
+                                    index--;
+                                    SkipPair(ref index, code, '{', '}', out rangeStart, out rangeEnd);
+                                    var bodyCode = code.Substring(rangeStart, rangeEnd - rangeStart);
+                                    continue;
+                                }
+                                else
+                                {
+                                    throw new Exception(TraceMessage($"{klassName} operator error"));
+                                }
+                            }
                             var token3 = GetTokenStringConbineStarAndRef(ref index, code, null);
                             if (token3 == ";")
                             {//是成员变量
@@ -577,12 +658,8 @@ namespace THeaderTools
                                 }
                                 tmp.Name = token2;
                                 index--;
-                                int rangeStart;
-                                int rangeEnd;
                                 SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
-                                rangeStart++;
-                                rangeEnd--;
-                                var args = code.Substring(rangeStart, rangeEnd - rangeStart);
+                                var args = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
                                 token = GetTokenString(ref index, code, null);
                                 if (token == "const")
                                 {
@@ -887,12 +964,12 @@ namespace THeaderTools
             }
             if (tokens.Count==1)
             {
-                type = tokens[0];
+                type = tokens[0].Replace("::", ".");
                 name = null;
             }
             else if (tokens.Count == 2)
             {
-                type = tokens[0];
+                type = tokens[0].Replace("::", ".");
                 name = tokens[1];
             }
             else
@@ -932,20 +1009,28 @@ namespace THeaderTools
             //var str = src.Substring(i, j - i);
             i = j;
         }
-        public static void SkipChar(ref int i, string code, char Char, int count)
+        public static void SkipChar(ref int i, string code, string CmpChars, int count)
         {
+            int saveStart = i;
             int deep = 0;
             while (i < code.Length)
             {
-                if (code[i] == Char && code[i-1] != '\\')
-                {//转义过的字符不算
-                    deep++;
-                    if (deep == count)
-                        return;
+                if (code[i] == '\\')
+                {
+                    i++;
+                }
+                foreach(var j in CmpChars)
+                {
+                    if(code[i] == j)
+                    {
+                        deep++;
+                        if (deep == count)
+                            return;
+                    }
                 }
                 i++;
             }
-            throw new Exception(TraceMessage("error code"));
+            throw new Exception(TraceMessage($"no any character[{CmpChars}] in {code} from {saveStart}"));
         }
         public static void SkipPair(ref int i, string code, char startChar, char endChar, out int rangeStart, out int rangeEnd)
         {//得到的结果跳过endChar了
@@ -1014,7 +1099,23 @@ namespace THeaderTools
                 return true;
             else if (c == ']')
                 return true;
-            
+            else if (c == '=')
+                return true;
+            else if (c == '+')
+                return true;
+            else if (c == '-')
+                return true;
+            else if (c == '*')
+                return true;
+            else if (c == '/')
+                return true;
+            else if (c == '%')
+                return true;
+            else if (c == '&')
+                return true;
+            else if (c == '!')
+                return true;
+
             //else if (Char.IsDigit(c))
             //    return false;
             //else if (Char.IsLetter(c))

@@ -43,6 +43,7 @@ namespace THeaderTools
             Cpp2CSTypes["long long"] = "long";
             Cpp2CSTypes["unsigned long long"] = "ulong";
             Cpp2CSTypes["float"] = "float";
+            Cpp2CSTypes["float*"] = "float*";
             Cpp2CSTypes["double"] = "double";
             //Cpp2CSTypes["std::string"] = "string";
             Cpp2CSTypes["BYTE"] = "byte";
@@ -137,13 +138,13 @@ namespace THeaderTools
 
                 var usingNS = i.GetUsingNS();
 
-                genCode += "using EngineNS;\n";
+                genCode += "using namespace EngineNS;\n";
                 if (usingNS != null)
                 {
                     var segs = usingNS.Split('&');
                     foreach(var j in segs)
                     {
-                        genCode += $"using {j.Replace(".","::")};\n";
+                        genCode += $"using namespace {j.Replace(".","::")};\n";
                     }
                 }
                 genCode += "\n";
@@ -194,7 +195,7 @@ namespace THeaderTools
                     code += $"\t{Symbol.DefMethod}{i.Arguments.Count}({i.Name}, {returnConverter}";
                     if (i.Arguments.Count > 0)
                         code += ", ";
-                    code += i.GetParameterString();
+                    code += i.GetParameterString(", ");
                     code += $");\n";
                     WriteMetaCode(ref code, i, Symbol.AppendMethodMeta);
                 }

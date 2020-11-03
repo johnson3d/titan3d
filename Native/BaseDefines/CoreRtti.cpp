@@ -89,12 +89,6 @@ RttiStruct::MemberDesc* RttiStruct::PushMember(RttiStruct* type, unsigned int of
 	return &Members[Members.size() - 1];
 }
 
-
-struct ABC : public VIUnknown
-{
-
-};
-
 void RttiStruct::Init()
 {
 	//RttiStructManager::GetInstance()->RegStructType(GetFullName().c_str(), this);
