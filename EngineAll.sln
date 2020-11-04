@@ -378,6 +378,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "GuiWrapper", "CSharpCore\Gu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "THeaderTools", "Execute\Editor\THeaderTools\THeaderTools.csproj", "{71A6D35F-E02D-4E3A-8991-9E7D225508DB}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImGui", "Native\3rd\ImGui\ImGui.vcxitems", "{4F6FDC9C-E278-4674-843E-EBB8711A1527}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Native\3rd\Recast\DebugUtils\DebugUtils.vcxitems*{07f7e779-db97-4a5f-86e2-747bbf05a434}*SharedItemsImports = 9
@@ -453,6 +455,7 @@ Global
 		Native\RHIRenderer\MacMetal\MacMetal.vcxitems*{465805a5-ea05-4bae-b329-5de1845fe772}*SharedItemsImports = 9
 		CSharpCore\Bricks\HollowMaker\HollowMaker.projitems*{475e47d6-3c79-43fa-b21f-20bb50aded81}*SharedItemsImports = 13
 		CSharpCore\Bricks\GpuDriven\GpuDriven.projitems*{4edd13d5-bb8d-4291-a3c9-b373938e2041}*SharedItemsImports = 13
+		Native\3rd\ImGui\ImGui.vcxitems*{4f6fdc9c-e278-4674-843e-ebb8711a1527}*SharedItemsImports = 9
 		Native\Bricks\TextConverter\TextConverter.vcxitems*{516d1f12-ce55-4f94-913a-8d4d82ddfedb}*SharedItemsImports = 9
 		Native\Bricks\Profiler\Profiler.vcxitems*{5191180c-ad2d-4054-b48b-7256d2fb1eee}*SharedItemsImports = 9
 		Native\RHIRenderer\OpenGL\OpenGL.vcxitems*{54ec50e5-b9a8-4c43-b1f4-d37f892113da}*SharedItemsImports = 9
@@ -563,6 +566,7 @@ Global
 		Native\3rd\HLSLcc\HLSLcc.vcxitems*{c4cc88b4-6d1d-4a3c-8f4c-20c62c29acf3}*SharedItemsImports = 4
 		Native\3rd\iconv\iconv.vcxitems*{c4cc88b4-6d1d-4a3c-8f4c-20c62c29acf3}*SharedItemsImports = 4
 		Native\3rd\Image.Shared\Image.Shared.vcxitems*{c4cc88b4-6d1d-4a3c-8f4c-20c62c29acf3}*SharedItemsImports = 4
+		Native\3rd\ImGui\ImGui.vcxitems*{c4cc88b4-6d1d-4a3c-8f4c-20c62c29acf3}*SharedItemsImports = 4
 		Native\3rd\OpenXLSX\OpenXLSX.vcxitems*{c4cc88b4-6d1d-4a3c-8f4c-20c62c29acf3}*SharedItemsImports = 4
 		Native\3rd\Recast\DebugUtils\DebugUtils.vcxitems*{c4cc88b4-6d1d-4a3c-8f4c-20c62c29acf3}*SharedItemsImports = 4
 		Native\3rd\Recast\DetourCrowd\DetourCrowd.vcxitems*{c4cc88b4-6d1d-4a3c-8f4c-20c62c29acf3}*SharedItemsImports = 4
@@ -1797,6 +1801,7 @@ Global
 		{3BC0AC7E-3B3B-4D3F-9CC0-B2BDECC460A6} = {B566EAFE-704D-46C5-8F89-F660ED3ED5FB}
 		{F55A7184-959F-43B3-B21D-5F5BE4D9F278} = {28DA65BF-19E6-4A6F-8F58-C0ED66E8827F}
 		{71A6D35F-E02D-4E3A-8991-9E7D225508DB} = {156FCD06-3A75-4547-990C-C64D6BF14556}
+		{4F6FDC9C-E278-4674-843E-EBB8711A1527} = {AB70C7F9-7549-49E3-92FF-D0D653EC60C9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E5358727-553E-4358-9CE3-918CC5CF5E58}

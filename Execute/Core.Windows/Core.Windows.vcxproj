@@ -96,6 +96,7 @@
     <Import Project="..\..\Native\3rd\FBXSDK\FBX\FBX.vcxitems" Label="Shared" />
     <Import Project="..\..\Native\3rd\OpenXLSX\OpenXLSX.vcxitems" Label="Shared" />
     <Import Project="..\..\Native\RHIRenderer\VirtualDevice\VirtualDevice.vcxitems" Label="Shared" />
+    <Import Project="..\..\Native\3rd\ImGui\ImGui.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
