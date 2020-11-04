@@ -30,7 +30,7 @@ namespace THeaderTools
 
                 genCode += $"namespace {ns}\n";
                 genCode += "{\n";
-                if(i.GetMetaValue(CppMetaBase.Symbol.SV_ReflectAll)!=null && i.GetMetaValue(CppMetaBase.Symbol.SV_LayoutStruct)!=null)
+                if(i.GetMetaValue(CppMetaBase.Symbol.SV_LayoutStruct)!=null)
                 {
                     genCode += GenCSharpLayoutStruct(i);
                 }

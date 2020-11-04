@@ -337,10 +337,8 @@ namespace THeaderTools
         }
         private string GetConverterType()
         {
-            if (IsNativePtr())
-                return CppClass.RemovePtrAndRef(Type) + ".PtrType";
-            else
-                return Type;
+            bool isNativePtr;
+            return CodeGenerator.Instance.CppTypeToCSType(Type, true, out isNativePtr);
         }
         public string GenPInvokeBinding(CppClass klass)
         {
