@@ -64,9 +64,10 @@ namespace THeaderTools
                 code += CodeGenerator.GenLine(nTable, "mPtr.NativePointer = InPtr;");
                 code += CodeGenerator.GenLine(--nTable, "}");
 
+                int ConstructorIndex = 0;
                 foreach (var i in klass.Constructors)
                 {
-                    code += i.GenCallBindingCSharp(ref nTable, klass);
+                    code += i.GenCallBindingCSharp(ref nTable, klass, ConstructorIndex++);
                 }
                 code += GenLine(nTable, "#endregion");
                 code += "\n";
@@ -77,6 +78,8 @@ namespace THeaderTools
                 code += GenLine(nTable, "#region Property");
                 foreach (var i in klass.Members)
                 {
+                    if ((i.DeclareType & (EDeclareType.DT_Const | EDeclareType.DT_Static)) != 0)
+                        continue;
                     code += i.GenCallBindingCSharp(ref nTable, klass);
                 }
                 code += GenLine(nTable, "#endregion");
@@ -86,13 +89,14 @@ namespace THeaderTools
             if (klass.Methods.Count > 0)
             {
                 code += GenLine(nTable, "#region Method");
+                int MethodIndex = 0;
                 foreach (var i in klass.Methods)
                 {
                     if (i.IsFriend)
                         continue;
                     if (i.IsStatic)
                         continue;
-                    code += i.GenCallBindingCSharp(ref nTable, klass); 
+                    code += i.GenCallBindingCSharp(ref nTable, klass, MethodIndex++); 
                 }
                 code += GenLine(nTable, "#endregion");
                 code += "\n";
@@ -104,10 +108,11 @@ namespace THeaderTools
             if (klass.Constructors.Count > 0)
             {
                 code += "\n";
+                int ConstructorIndex = 0;
                 foreach (var i in klass.Constructors)
                 {
                     code += GenLine(nTable, "[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
-                    code += GenLine(nTable, i.GenPInvokeBindingCSharp(klass));
+                    code += GenLine(nTable, i.GenPInvokeBindingCSharp(klass, ConstructorIndex++));
                 }
                 code += "\n";
             }
@@ -116,6 +121,9 @@ namespace THeaderTools
                 code += "\n";
                 foreach (var i in klass.Members)
                 {
+                    if ((i.DeclareType & (EDeclareType.DT_Const | EDeclareType.DT_Static)) != 0)
+                        continue;
+
                     code += GenLine(nTable, "[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
                     code += GenLine(nTable, i.GenPInvokeBindingCSharp_Getter(klass));
                     code += GenLine(nTable, "[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
@@ -126,10 +134,16 @@ namespace THeaderTools
             if (klass.Methods.Count > 0)
             {
                 code += "\n";
+                int MethodIndex = 0;
                 foreach (var i in klass.Methods)
                 {
+                    if (i.IsFriend)
+                        continue;
+                    if (i.IsStatic)
+                        continue;
+
                     code += GenLine(nTable, "[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
-                    code += GenLine(nTable, i.GenPInvokeBindingCSharp(klass));
+                    code += GenLine(nTable, i.GenPInvokeBindingCSharp(klass, "PtrType", false, MethodIndex++));
                 }
                 code += "\n";
             }
@@ -192,9 +206,14 @@ namespace THeaderTools
             if (klass.Methods.Count > 0)
             {
                 code += GenLine(nTable, "#region Method");
+                int MethodIndex = 0;
                 foreach (var i in klass.Methods)
                 {
-                    code += i.GenCallBindingCSharp(ref nTable, klass);
+                    if (i.IsFriend)
+                        continue;
+                    if (i.IsStatic)
+                        continue;
+                    code += i.GenCallBindingCSharp(ref nTable, klass, MethodIndex++);
                 }
                 code += GenLine(nTable, "#endregion");
                 code += "\n";
@@ -205,10 +224,15 @@ namespace THeaderTools
             if (klass.Methods.Count > 0)
             {
                 code += "\n";
+                int MethodIndex = 0;
                 foreach (var i in klass.Methods)
                 {
+                    if (i.IsFriend)
+                        continue;
+                    if (i.IsStatic)
+                        continue;
                     code += GenLine(nTable, "[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
-                    code += GenLine(nTable, i.GenPInvokeBindingCSharp(klass, $"{Symbol.LayoutPrefix}{klass.Name}*", true));
+                    code += GenLine(nTable, i.GenPInvokeBindingCSharp(klass, $"{Symbol.LayoutPrefix}{klass.Name}*", true, MethodIndex++));
                 }
                 code += "\n";
             }

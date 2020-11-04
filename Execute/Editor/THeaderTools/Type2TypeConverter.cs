@@ -8,6 +8,16 @@ namespace THeaderTools
     {
         private void InitType2Type()
         {
+            Cpp2CSTypes["char*"] = "string";
+            Cpp2CSTypes["Int8"] = "Int8";
+            Cpp2CSTypes["Int16"] = "Int16";
+            Cpp2CSTypes["Int32"] = "Int32";
+            Cpp2CSTypes["Int64"] = "Int64";
+            Cpp2CSTypes["UInt8"] = "UInt8";
+            Cpp2CSTypes["UInt16"] = "UInt16";
+            Cpp2CSTypes["UInt32"] = "UInt32";
+            Cpp2CSTypes["UInt64"] = "UInt64";
+            
             Cpp2CSTypes["bool"] = "bool";
             Cpp2CSTypes["void"] = "void";
             Cpp2CSTypes["char"] = "char";
@@ -22,7 +32,6 @@ namespace THeaderTools
             Cpp2CSTypes["unsigned long long"] = "UInt64";
             Cpp2CSTypes["float"] = "float";
             Cpp2CSTypes["double"] = "double";
-            //Cpp2CSTypes["std::string"] = "string";
             Cpp2CSTypes["BYTE"] = "byte";
             Cpp2CSTypes["WORD"] = "UInt16";
             Cpp2CSTypes["DWORD"] = "UInt32";

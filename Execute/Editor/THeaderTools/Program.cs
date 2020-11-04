@@ -93,7 +93,7 @@ namespace THeaderTools
                 CodeGenerator.Instance.GenImportModuleNC = moduleNS;
             }
             CodeGenerator codeManager = CodeGenerator.Instance;
-            codeManager.Reset();
+            codeManager.Reset(genDir);
             foreach (var i in headers)
             {
                 var headScanner = new CppHeaderScanner();
@@ -104,6 +104,8 @@ namespace THeaderTools
             {
                 codeManager.GenCodeCSharp(genDir);
             }
+
+            codeManager.MakeSharedProject();
         }
         static bool CollectInclude(System.Xml.XmlNode sn, string spjPath, Dictionary<string,string> headers)
         {

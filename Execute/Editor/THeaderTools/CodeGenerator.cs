@@ -17,6 +17,7 @@ namespace THeaderTools
         {
             public const string BeginRtti = "StructBegin";
             public const string EndRtti = "StructEnd";
+            public const string RttiImpl = "StructImpl";
             public const string DefMember = "StructMember";
             public const string DefMethod = "StructMethodEx";
             public const string DefConstructor = "StructConstructor";
@@ -34,9 +35,41 @@ namespace THeaderTools
         {
             InitType2Type();
         }
-        public void Reset()
+        string mGenDirectory;
+        public void Reset(string genDir)
         {
+            mGenDirectory = genDir;
             ClassCollector.Clear();
+            var allFiles = System.IO.Directory.GetFiles(genDir, "*.cpp");
+            foreach(var i in allFiles)
+            {
+                System.IO.File.Delete(i);
+                //System.IO.File.Move(i, i + ".tmp");
+            }
+            allFiles = System.IO.Directory.GetFiles(genDir, "*.cs");
+            foreach (var i in allFiles)
+            {
+                System.IO.File.Delete(i);
+                //System.IO.File.Move(i, i + ".tmp");
+            }
+        }
+        public void MakeSharedProject()
+        {
+            System.Xml.XmlDocument myXmlDoc = new System.Xml.XmlDocument();
+            myXmlDoc.Load(mGenDirectory + "Empty_CodeGen.vcxitems");
+            var root = myXmlDoc.LastChild;
+            var compile = myXmlDoc.CreateElement("ItemGroup", root.NamespaceURI);
+            root.AppendChild(compile);
+            var allFiles = System.IO.Directory.GetFiles(mGenDirectory, "*.cpp");
+            foreach (var i in allFiles)
+            {                
+                var cpp = myXmlDoc.CreateElement("ClCompile", root.NamespaceURI);
+                var file = myXmlDoc.CreateAttribute("Include");
+                file.Value = i;
+                cpp.Attributes.Append(file);
+                compile.AppendChild(cpp);
+            }
+            myXmlDoc.Save(mGenDirectory + "CodeGen.vcxitems");
         }
         private void CheckValid()
         {
@@ -89,7 +122,7 @@ namespace THeaderTools
                 genCode += "\n\n\n";
 
                 genCode += "using namespace EngineNS;\n";
-
+                
                 //var usingNS = i.GetUsingNS();
                 //if (usingNS != null)
                 //{
@@ -130,6 +163,8 @@ namespace THeaderTools
                 code += "\n";
                 foreach (var i in klass.Members)
                 {
+                    if ((i.DeclareType & (EDeclareType.DT_Const | EDeclareType.DT_Static)) != 0)
+                        continue;
                     code += $"\t{Symbol.DefMember}({i.Name});\n";
                     WriteMetaCode(ref code, i, Symbol.AppendMemberMeta);
                 }
@@ -141,6 +176,10 @@ namespace THeaderTools
                 code += "\n";
                 foreach (var i in klass.Methods)
                 {
+                    if (i.IsFriend)
+                        continue;
+                    if (i.IsStatic)
+                        continue;
                     var returnConverter = i.GetReturnConverter();
                     if (returnConverter == null)
                         returnConverter = i.ReturnType;
@@ -189,29 +228,80 @@ namespace THeaderTools
                 }
             }
             code += $"{Symbol.EndRtti}({parent})\n";
+            code += $"{Symbol.RttiImpl}({ns}::{klass.Name});\n";
             return code;
         }
         public string GenPInvokeBinding(CppClass klass)
         {
-            string code = "";
+            var friendCode = "";
+            var invokeCode = "";
+            var visitor_ns = "";
+            var container = klass.GetContainClass();
+            if (container == null)
+            {
+                visitor_ns = $"{klass.GetNameSpace(true)}";
+            }
+            else
+            {
+                var ns = klass.GetNameSpace();
+                int pos = ns.LastIndexOf(container) - 1;
+                ns = ns.Substring(0, pos);
+                visitor_ns = $"{ns.Replace(".", "::")}";
+            }
 
+            string code = "";
+            int nTable = 1;
+            int ConstructorIndex = 0;
             foreach (var i in klass.Constructors)
             {
-                code += i.GenPInvokeBinding(klass);
+                nTable = 2;
+                friendCode += i.GenPInvokeBinding_Friend(ref nTable, klass);
+
+                nTable = 0;
+                invokeCode += i.GenPInvokeBinding(ref nTable, klass, $"{visitor_ns}::{klass.Name}_Visitor", ConstructorIndex++);
+
                 code += "\n";
             }
 
             foreach (var i in klass.Members)
             {
-                code += i.GenPInvokeBinding(klass);
+                if ((i.DeclareType & (EDeclareType.DT_Const | EDeclareType.DT_Static)) != 0)
+                    continue;
+
+                nTable = 2;
+                friendCode += i.GenPInvokeBinding_Friend(ref nTable, klass);
+                nTable = 0;
+                invokeCode += i.GenPInvokeBinding(ref nTable, klass, $"{visitor_ns}::{klass.Name}_Visitor");
+
                 code += "\n";
             }
 
+            int MethodIndex = 0;
             foreach (var i in klass.Methods)
             {
-                code += i.GenPInvokeBinding(klass);
-                code += "\n";
+                if (i.IsFriend)
+                    continue;
+                if (i.IsStatic)
+                    continue;
+                nTable = 2;
+                friendCode += i.GenPInvokeBinding_Friend(ref nTable, klass);
+
+                nTable = 0;
+                invokeCode += i.GenPInvokeBinding(ref nTable, klass, $"{visitor_ns}::{klass.Name}_Visitor", MethodIndex++);
             }
+
+            nTable = 0;           
+            code += CodeGenerator.GenLine(nTable, $"namespace {visitor_ns}");
+            code += CodeGenerator.GenLine(nTable++, "{");
+            code += CodeGenerator.GenLine(nTable, $"struct {klass.Name}_Visitor");
+            code += CodeGenerator.GenLine(nTable, "{");
+            code += friendCode;
+            code += CodeGenerator.GenLine(nTable, "};");
+            code += CodeGenerator.GenLine(--nTable, "}");
+
+            code += invokeCode;
+
+            code += "\n";
             return code;
         }
         private void WriteMetaCode(ref string code, CppMetaBase meta, string type)
