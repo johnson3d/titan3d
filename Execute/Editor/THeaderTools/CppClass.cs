@@ -92,6 +92,7 @@ namespace THeaderTools
             public const string SV_ReturnConverter = "SV_ReturenConverter";
             public const string SV_UsingNS = "SV_UsingNS";
             public const string SV_ReflectAll = "SV_ReflectAll";
+            public const string SV_LayoutStruct = "SV_LayoutStruct";
         }
         
         public string GetReturnConverter()
@@ -311,6 +312,13 @@ namespace THeaderTools
                 mType = pureType + suffix;
             }
         }
+        public string PureType
+        {
+            get
+            {
+                return CppClass.RemovePtrAndRef(mType);
+            }
+        }
         public string Name
         {
             get;
@@ -434,7 +442,7 @@ namespace THeaderTools
             return result;
         }
         public string GetParameterStringCSharp(bool bPtrType)
-        {
+        {//bPtrType如果true，那么就要把XXX_Wrapper转换成XXX_Wrapper.PtrType
             string result = "";
             for (int i = 0; i < Arguments.Count; i++)
             {
@@ -568,6 +576,15 @@ namespace THeaderTools
                 mReturnType = pureType + suffix;
             }
         }
+        public string CSReturnType
+        {
+            get
+            {
+                bool isNativePtr;
+                var type = CodeGenerator.Instance.CppTypeToCSType(mReturnType, true, out isNativePtr);
+                return type;
+            }
+        }
         public string GenPInvokeBinding(CppClass klass)
         {
             var afterSelf = Arguments.Count > 0 ? ", " : "";
@@ -580,14 +597,15 @@ namespace THeaderTools
             code += "}\n";
             return code;
         }
-        public string GenPInvokeBindingCSharp(CppClass klass)
+        public string GenPInvokeBindingCSharp(CppClass klass, string selfType = "PtrType", bool isUnsafe = false)
         {
             var afterSelf = Arguments.Count > 0 ? ", " : "";
-            return $"private extern static {ReturnType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}(PtrType self{afterSelf}{this.GetParameterStringCSharp(true)});";
+            var unsafeDef = isUnsafe ? "unsafe " : "";
+            return $"private extern static {unsafeDef}{ReturnType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}({selfType} self{afterSelf}{this.GetParameterStringCSharp(true)});";
         }
         public string GenCallBindingCSharp(ref int nTable, CppClass klass)
         {
-            string code = CodeGenerator.GenLine(nTable, $"public {ReturnType} {Name}({this.GetParameterStringCSharp(false)})");
+            string code = CodeGenerator.GenLine(nTable, $"public {CSReturnType} {Name}({this.GetParameterStringCSharp(false)})");
             code += CodeGenerator.GenLine(nTable, "{");
             nTable++;
             code += CodeGenerator.GenLine(nTable, $"return {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}(mPtr, {this.GetParameterCallString(true)});");

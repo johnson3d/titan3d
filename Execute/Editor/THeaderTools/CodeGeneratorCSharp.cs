@@ -4,6 +4,15 @@ using System.Text;
 
 namespace THeaderTools
 {
+    public struct TestStruct
+    {
+        public int M0;
+        public float M1;
+        public unsafe TestStruct* mPtr
+        {
+            get { fixed (TestStruct* pThis = &this) return pThis; }
+        }
+    }
     partial class CodeGenerator
     {
         public void GenCodeCSharp(string targetDir)
@@ -21,7 +30,14 @@ namespace THeaderTools
 
                 genCode += $"namespace {ns}\n";
                 genCode += "{\n";
-                genCode += GenCppReflectionCSharp(i);
+                if(i.GetMetaValue(CppMetaBase.Symbol.SV_ReflectAll)!=null && i.GetMetaValue(CppMetaBase.Symbol.SV_LayoutStruct)!=null)
+                {
+                    genCode += GenCSharpLayoutStruct(i);
+                }
+                else
+                {
+                    genCode += GenCppReflectionCSharp(i);
+                }
                 genCode += "}\n";
 
                 var file = targetDir + i.GetGenFileNameCSharp();
@@ -126,6 +142,79 @@ namespace THeaderTools
 
             nTable--;
             code += GenLine(nTable, "}");//for struct klass.Name
+            return code;
+        }
+        public string GenCSharpLayoutStruct(CppClass klass)
+        {
+            int nTable = 1;
+            string code;
+            code = GenLine(nTable, "[StructLayout(LayoutKind.Sequential)]");//Explicit
+            code += GenLine(nTable, $"public unsafe struct {Symbol.LayoutPrefix}{klass.Name}");
+            code += GenLine(nTable++, "{");
+
+            var PtrType = $"{Symbol.LayoutPrefix}{klass.Name}*";
+            code += GenLine(nTable, $"private unsafe {PtrType} mPtr");
+            code += GenLine(nTable++, "{");
+            code += GenLine(nTable, $"get {{ fixed ({PtrType} pThis = &this) return pThis; }}");
+            code += GenLine(--nTable, "}");
+
+            foreach (var i in klass.Members)
+            {
+                if ((i.DeclareType & (EDeclareType.DT_Const | EDeclareType.DT_Static)) != 0)
+                    continue;
+
+                string declMember = "";
+                switch (i.VisitMode)
+                {
+                    case EVisitMode.Public:
+                        declMember += "public ";
+                        break;
+                    case EVisitMode.Protected:
+                        declMember += "protected ";
+                        break;
+                    case EVisitMode.Private:
+                        declMember += "private ";
+                        break;
+                }
+
+                if (CodeGenerator.Instance.IsSystemType(i.PureType))
+                    declMember += $"{i.Type} {i.Name};";
+                else
+                {
+                    bool isNativPtr;
+                    var csType = CppTypeToCSType(i.Type, true, out isNativPtr);
+                    declMember += $"{Symbol.LayoutPrefix}{csType} {i.Name};";
+                }
+
+                code += GenLine(nTable, declMember);
+            }
+
+            if (klass.Methods.Count > 0)
+            {
+                code += GenLine(nTable, "#region Method");
+                foreach (var i in klass.Methods)
+                {
+                    code += i.GenCallBindingCSharp(ref nTable, klass);
+                }
+                code += GenLine(nTable, "#endregion");
+                code += "\n";
+            }
+
+            code += GenLine(nTable, "#region SDK");
+            code += GenLine(nTable, $"const string ModuleNC={CodeGenerator.Instance.GenImportModuleNC};");
+            if (klass.Methods.Count > 0)
+            {
+                code += "\n";
+                foreach (var i in klass.Methods)
+                {
+                    code += GenLine(nTable, "[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
+                    code += GenLine(nTable, i.GenPInvokeBindingCSharp(klass, $"{Symbol.LayoutPrefix}{klass.Name}*", true));
+                }
+                code += "\n";
+            }
+            code += GenLine(nTable, "#endregion");
+
+            code += GenLine(--nTable, "}");
             return code;
         }
         public static string GenLine(int nTable, string content)

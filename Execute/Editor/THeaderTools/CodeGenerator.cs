@@ -27,6 +27,7 @@ namespace THeaderTools
             public const string AppendConstructorMeta = "AppendConstructorMetaInfo";
 
             public const string NativeSuffix = "_Wrapper";
+            public const string LayoutPrefix = "CS";//CppStruct的意思
             public const string SDKPrefix = "TSDK_";
         }
         private CodeGenerator()
@@ -44,20 +45,31 @@ namespace THeaderTools
             var pureType = CppClass.SplitPureName(type, out suffix);
             isNativPtr = false;
 
+            //内嵌类型直接返回
             if (IsSystemType(pureType))
                 return type;
 
+            //后缀有*
             if(suffix.Length>0 && suffix[0] == '*')
             {
                 isNativPtr = true;
                 if (bPtrType)
-                {
+                {//如果要求使用c++指针类型，进行Wrapper的PtrType转换
                     var cSharpPtrType = pureType + $"{Symbol.NativeSuffix}.PtrType" + suffix.Substring(1);
                     return cSharpPtrType;
                 }
                 else
                 {
-                    return type + $"{Symbol.NativeSuffix}";
+                    if (suffix.Length == 1)
+                    {
+                        //只有一层C++指针，转换成Wrapper作为对外暴露接口
+                        return pureType + $"{Symbol.NativeSuffix}";
+                    }
+                    else//说明是***这种东西，不可能变成wrapper
+                    {
+                        var cSharpPtrType = pureType + $"{Symbol.NativeSuffix}.PtrType" + suffix.Substring(1);
+                        return cSharpPtrType;
+                    }
                 }
             }
             else

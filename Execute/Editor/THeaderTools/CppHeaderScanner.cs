@@ -399,11 +399,8 @@ namespace THeaderTools
             result.AnalyzeMetaString(klsMeta);
 
             if (result.GetMetaValue(CppMetaBase.Symbol.SV_ReflectAll) != null)
-            {
-                List<CppMember> members = new List<CppMember>();
-                List<CppFunction> methods = new List<CppFunction>();
-                List<CppConstructor> constructors = new List<CppConstructor>();
-                AnalyzeClassFullInfo(code, result.Name, members, methods, constructors);
+            {   
+                AnalyzeClassFullInfo(code, result.Name, result.Members, result.Methods, result.Constructors);
             }
             else
             {
