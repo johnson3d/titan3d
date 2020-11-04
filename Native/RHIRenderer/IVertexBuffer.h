@@ -67,13 +67,8 @@ public:
 	IVertexBuffer();
 	~IVertexBuffer();
 
-	TR_MEMBER()
-	int Member0;
-	TR_MEMBER()
-	volatile IRenderContext* Member1; 
-
 	TR_FUNCTION()
-	virtual void GetBufferData(const EngineNS:: IRenderContext* rc, IBlobObject* data) = 0;
+	virtual void GetBufferData(EngineNS:: IRenderContext* rc, IBlobObject* data) = 0;
 	TR_FUNCTION()
 	virtual void UpdateGPUBuffData(ICommandList* cmd, void* ptr, UINT size) = 0;
 

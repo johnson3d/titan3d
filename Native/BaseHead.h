@@ -111,3 +111,13 @@ inline void _vfxTraceA(LPCSTR lpszFormat, ...)
 #define TR_MEMBER(...)
 #define TR_ENUM(...)
 #define TR_CONSTRUCTOR(...)
+
+typedef char Int8;
+typedef SHORT Int16;
+typedef INT Int32;
+typedef INT64 Int64;
+
+typedef BYTE UInt8;
+typedef USHORT UInt16;
+typedef UINT UInt32;
+typedef UINT64 UInt64;

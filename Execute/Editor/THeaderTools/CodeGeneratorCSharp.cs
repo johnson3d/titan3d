@@ -4,15 +4,6 @@ using System.Text;
 
 namespace THeaderTools
 {
-    public struct TestStruct
-    {
-        public int M0;
-        public float M1;
-        public unsafe TestStruct* mPtr
-        {
-            get { fixed (TestStruct* pThis = &this) return pThis; }
-        }
-    }
     partial class CodeGenerator
     {
         public void GenCodeCSharp(string targetDir)
