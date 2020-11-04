@@ -398,7 +398,7 @@ namespace THeaderTools
 
             result.AnalyzeMetaString(klsMeta);
 
-            if (result.GetMetaValue(CppMetaBase.Symbol.SV_ReflectAll) != null)
+            if (result.GetMetaValue(CppMetaBase.Symbol.SV_ReflectAll) != null || result.GetMetaValue(CppMetaBase.Symbol.SV_LayoutStruct) != null)
             {   
                 AnalyzeClassFullInfo(code, result.Name, result.Members, result.Methods, result.Constructors);
             }

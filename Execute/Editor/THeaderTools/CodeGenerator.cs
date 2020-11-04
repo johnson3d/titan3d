@@ -52,7 +52,8 @@ namespace THeaderTools
             //后缀有*
             if(suffix.Length>0 && suffix[0] == '*')
             {
-                isNativPtr = true;
+                if(suffix.Length == 1)
+                    isNativPtr = true;
                 if (bPtrType)
                 {//如果要求使用c++指针类型，进行Wrapper的PtrType转换
                     var cSharpPtrType = pureType + $"{Symbol.NativeSuffix}.PtrType" + suffix.Substring(1);

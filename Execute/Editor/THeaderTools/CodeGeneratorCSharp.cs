@@ -146,9 +146,15 @@ namespace THeaderTools
         }
         public string GenCSharpLayoutStruct(CppClass klass)
         {
+            int structPack = 8;
+            var layout = klass.GetMetaValue(CppMetaBase.Symbol.SV_LayoutStruct);
+            if (layout != null)
+            {
+                structPack = System.Convert.ToInt32(layout);
+            }
             int nTable = 1;
             string code;
-            code = GenLine(nTable, "[StructLayout(LayoutKind.Sequential)]");//Explicit
+            code = GenLine(nTable, $"[StructLayout(LayoutKind.Sequential, Pack={structPack})]");//Explicit
             code += GenLine(nTable, $"public unsafe struct {Symbol.LayoutPrefix}{klass.Name}");
             code += GenLine(nTable++, "{");
 

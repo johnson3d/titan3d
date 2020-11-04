@@ -25,7 +25,7 @@ TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS&Titan3D, AAA = "", BBB =
 class IVertexBuffer : public IRenderResource
 {
 public:
-	TR_CLASS(SV_NameSpace = EngineNS.IVertexBuffer, SV_UsingNS = EngineNS, SV_ReflectAll, SV_LayoutStruct, AAA = "", BBB = 2)
+	TR_CLASS(SV_NameSpace = EngineNS.IVertexBuffer, SV_UsingNS = EngineNS, SV_ReflectAll, SV_LayoutStruct=8, AAA = "", BBB = 2)
 	class ClassInIVertexBuffer
 	{
 		const static int ttt = 9;
