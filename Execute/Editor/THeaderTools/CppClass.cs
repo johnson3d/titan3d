@@ -142,6 +142,16 @@ namespace THeaderTools
             get;
             set;
         }
+        public string GetCppName(int starNum)
+        {
+            var result = "";
+            result = GetNameSpace() + "." + Name;
+            for (int i = 0; i < starNum; i++)
+            {
+                result += '*';
+            }
+            return result.Replace(".", "::");
+        }
         public string GetCSName(int starNum)
         {
             var result = "";
@@ -366,6 +376,17 @@ namespace THeaderTools
                 return Type;
             }
         }
+        public string CppType
+        {
+            get
+            {
+                if (TypeClass != null)
+                {
+                    return TypeClass.GetCSName(TypeStarNum);
+                }
+                return Type;
+            }
+        }
         public CppClass TypeClass
         {
             get;
@@ -388,17 +409,6 @@ namespace THeaderTools
             get;
             set;
         } = "";
-        public bool IsNativePtr()
-        {
-            bool isNativePtr;
-            CodeGenerator.Instance.CppTypeToCSType(Type, true, out isNativePtr);
-            return isNativePtr;
-        }
-        private string GetConverterType()
-        {
-            bool isNativePtr;
-            return CodeGenerator.Instance.CppTypeToCSType(Type, true, out isNativePtr);
-        }
         public string GenPInvokeBinding(CppClass klass)
         {
             string code = $"extern \"C\" VFX_API {Type} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}({klass.GetFullName(true)}* self)\n";
@@ -413,16 +423,16 @@ namespace THeaderTools
         }
         public string GenPInvokeBindingCSharp_Getter(CppClass klass)
         {
-            return $"private extern static {GetConverterType()} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}(PtrType self);";
+            return $"private extern static {CppType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}(PtrType self);";
         }
         public string GenPInvokeBindingCSharp_Setter(CppClass klass)
         {
-            return $"private extern static void {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Setter_{Name}(PtrType self, {GetConverterType()} InValue);";
+            return $"private extern static void {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Setter_{Name}(PtrType self, {CppType} InValue);";
         }
         public string GenCallBindingCSharp(ref int nTable, CppClass klass)
         {
             string code;
-            code = CodeGenerator.GenLine(nTable, $"public {GetConverterType()} {Name}");
+            code = CodeGenerator.GenLine(nTable, $"public {CSType} {Name}");
 
             code += CodeGenerator.GenLine(nTable, "{");
             nTable++;
@@ -499,6 +509,15 @@ namespace THeaderTools
                     return Type;
                 }
             }
+            public string CppType
+            {
+                get
+                {
+                    if (TypeClass != null)
+                        return TypeClass.GetCppName(TypeStarNum);
+                    return Type.Replace(".", "::");
+                }
+            }
         }
         public List<CppParameter> Arguments
         {
@@ -509,7 +528,7 @@ namespace THeaderTools
             string result = "";
             for(int i = 0; i < Arguments.Count; i++)
             {
-                var cppName = Arguments[i].Type.Replace(".", "::");
+                var cppName = Arguments[i].CppType;
                 if (i==0)
                     result += $"{cppName}{split}{Arguments[i].Value}";
                 else
@@ -667,13 +686,22 @@ namespace THeaderTools
                 return mReturnType;
             }
         }
+        public string CppReturnType
+        {
+            get
+            {
+                if (ReturnTypeClass != null)
+                    return ReturnTypeClass.GetCppName(ReturnTypeStarNum);
+                return mReturnType.Replace(".", "::");
+            }
+        }
         public string GenPInvokeBinding(CppClass klass)
         {
             var afterSelf = Arguments.Count > 0 ? ", " : "";
-            string code = $"extern \"C\" VFX_API {ReturnType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}({klass.GetFullName(true)}* self{afterSelf}{this.GetParameterString()})\n";
+            string code = $"extern \"C\" VFX_API {CppReturnType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}({klass.GetFullName(true)}* self{afterSelf}{this.GetParameterString()})\n";
             code += "{\n";
             code += "\tif(self==nullptr) {\n";
-            code += $"\t\treturn TypeDefault({ReturnType});\n";
+            code += $"\t\treturn TypeDefault({CppReturnType});\n";
             code += "\t}\n";
             code += $"\treturn self->{Name}({this.GetParameterCallString()});\n";
             code += "}\n";

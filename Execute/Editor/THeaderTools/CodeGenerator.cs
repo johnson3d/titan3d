@@ -77,45 +77,6 @@ namespace THeaderTools
             return null;
         }
         Dictionary<string, string> Cpp2CSTypes = new Dictionary<string, string>();
-        public string CppTypeToCSType(string type, bool bPtrType, out bool isNativPtr)
-        {
-            string suffix;
-            var pureType = CppClass.SplitPureName(type, out suffix);
-            isNativPtr = false;
-
-            //内嵌类型直接返回
-            if (IsSystemType(pureType))
-                return type;
-
-            //后缀有*
-            if(suffix.Length>0 && suffix[0] == '*')
-            {
-                if(suffix.Length == 1)
-                    isNativPtr = true;
-                if (bPtrType)
-                {//如果要求使用c++指针类型，进行Wrapper的PtrType转换
-                    var cSharpPtrType = pureType + $"{Symbol.NativeSuffix}.PtrType" + suffix.Substring(1);
-                    return cSharpPtrType;
-                }
-                else
-                {
-                    if (suffix.Length == 1)
-                    {
-                        //只有一层C++指针，转换成Wrapper作为对外暴露接口
-                        return pureType + $"{Symbol.NativeSuffix}";
-                    }
-                    else//说明是***这种东西，不可能变成wrapper
-                    {
-                        var cSharpPtrType = pureType + $"{Symbol.NativeSuffix}.PtrType" + suffix.Substring(1);
-                        return cSharpPtrType;
-                    }
-                }
-            }
-            else
-            {
-                return type;
-            }
-        }
         public void GenCode(string targetDir, bool bGenPInvoke)
         {
             CheckValid();
@@ -127,17 +88,17 @@ namespace THeaderTools
 
                 genCode += "\n\n\n";
 
-                var usingNS = i.GetUsingNS();
+                //var usingNS = i.GetUsingNS();
 
-                genCode += "using namespace EngineNS;\n";
-                if (usingNS != null)
-                {
-                    var segs = usingNS.Split('&');
-                    foreach(var j in segs)
-                    {
-                        genCode += $"using namespace {j.Replace(".","::")};\n";
-                    }
-                }
+                //genCode += "using namespace EngineNS;\n";
+                //if (usingNS != null)
+                //{
+                //    var segs = usingNS.Split('&');
+                //    foreach(var j in segs)
+                //    {
+                //        genCode += $"using namespace {j.Replace(".","::")};\n";
+                //    }
+                //}
                 genCode += "\n";
 
                 genCode += GenCppReflection(i);
@@ -160,7 +121,7 @@ namespace THeaderTools
             if (ns == null)
                 ns = "EngineNS";
             else
-                ns = ns.Replace(".", "::");
+                ns = ns.Replace(".", "::");            
             code += $"{Symbol.BeginRtti}({klass.Name},{ns})\n";
             WriteMetaCode(ref code, klass, Symbol.AppendClassMeta);
 

@@ -182,8 +182,7 @@ namespace THeaderTools
                     declMember += $"{i.Type} {i.Name};";
                 else
                 {
-                    bool isNativPtr;
-                    var csType = CppTypeToCSType(i.Type, true, out isNativPtr);
+                    var csType = i.CSType;// CppTypeToCSType(i.Type, true, out isNativPtr);
                     declMember += $"{Symbol.LayoutPrefix}{csType} {i.Name};";
                 }
 
