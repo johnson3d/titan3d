@@ -73,6 +73,39 @@ struct TFunction_traits<R(ClassType::*)(Args...) const> : public TFunction_trait
 	using class_type = ClassType;
 };
 
+template <typename T>
+struct remove_all_ref_ptr { typedef T type; };
+
+template <typename T>
+struct remove_all_ref_ptr<T *> : public remove_all_ref_ptr<T> { };
+
+template <typename T>
+struct remove_all_ref_ptr<const T *> : public remove_all_ref_ptr<T> { };
+
+template <typename T>
+struct remove_all_ref_ptr<T * const> : public remove_all_ref_ptr<T> { };
+
+template <typename T>
+struct remove_all_ref_ptr<const T * const> : public remove_all_ref_ptr<T> { };
+
+template <typename T>
+struct remove_all_ref_ptr<T * volatile> : public remove_all_ref_ptr<T> { };
+
+template <typename T>
+struct remove_all_ref_ptr<const T * volatile> : public remove_all_ref_ptr<T> { };
+
+template <typename T>
+struct remove_all_ref_ptr<const T * const volatile> : public remove_all_ref_ptr<T> { };
+
+template <typename T>
+struct remove_all_ref_ptr<T &> : public remove_all_ref_ptr<T> { };
+
+template <typename T>
+struct remove_all_ref_ptr<const T &> : public remove_all_ref_ptr<T> { };
+
+template <typename T>
+struct remove_all_ref_ptr<T &&> : public remove_all_ref_ptr<T> { };
+
 class VIUnknown;
 
 typedef VIUnknown* (*FConstructor)(const char*, int);
@@ -962,23 +995,41 @@ struct AuxRttiStruct<std::string> : public RttiStruct
 	}
 };
 
+template<int _Size, class _Type>
+struct VArrayElement
+{
+	enum
+	{
+		Result = _Size / sizeof(_Type),
+	};
+};
+
+template<int _Size>
+struct VArrayElement<_Size, void>
+{
+	enum
+	{
+		Result = 1,
+	};
+};
+
 #define StructBegin(Type, ns) \
 template<> \
-struct AuxRttiStruct<Type> : public RttiStruct\
+struct AuxRttiStruct<ns::Type> : public RttiStruct\
 {\
-	typedef Type	ThisStructType;\
-	static AuxRttiStruct<Type>		Instance;\
+	typedef ns::Type	ThisStructType;\
+	static AuxRttiStruct<ns::Type>		Instance;\
 	AuxRttiStruct()\
 	{\
-		Size = sizeof(Type);\
+		Size = sizeof(ThisStructType);\
 		Name = #Type;\
 		NameSpace = #ns;\
 		RttiStructManager::GetInstance()->RegStructType(GetFullName().c_str(), this);\
-		IsEnum = AuxRttiEnum<Type>::IsEnum; \
+		IsEnum = AuxRttiEnum<ThisStructType>::IsEnum; \
 	}\
 	virtual void AssignOperator(void* pTar, const void* pSrc) const override\
 	{\
-		*(Type*)pTar = *(Type*)pSrc;\
+		*(ThisStructType*)pTar = *(ThisStructType*)pSrc;\
 	}\
 	virtual void Init() override\
 	{\
@@ -998,8 +1049,8 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 			using declType = decltype(((ThisStructType*)nullptr)->_name);\
 			using noPointerType = std::remove_pointer<declType>::type;\
 			using realType = std::remove_extent<noPointerType>::type;\
-			unsigned int size = __vsizeof(ThisStructType, _name);\
-			__current_member = PushMember(&AuxRttiStruct<realType>::Instance, __voffsetof(ThisStructType, _name), size, size/sizeof(realType),\
+			const unsigned int size = __vsizeof(ThisStructType, _name);\
+			__current_member = PushMember(&AuxRttiStruct<remove_all_ref_ptr<realType>::type>::Instance, __voffsetof(ThisStructType, _name), size, VArrayElement<size,realType>::Result,\
 					#_name, std::is_pointer<decltype(((ThisStructType*)nullptr)->_name)>::value);\
 		}
 
@@ -1114,7 +1165,7 @@ struct AuxRttiStruct<Type> : public RttiStruct\
 template<typename T>
 void RttiStruct::MemberDesc::SetValue(void* pThis, const T* v) const
 {
-	if (AuxRttiStruct<T>::Instance.IsA(MemberType) == false)
+	if (AuxRttiStruct<remove_all_ref_ptr<T>::type>::Instance.IsA(MemberType) == false)
 	{
 		return;
 	}
@@ -1130,7 +1181,7 @@ void RttiStruct::MemberDesc::SetValue(void* pThis, const T* v) const
 template<typename T>
 T* RttiStruct::MemberDesc::GetValueAddress(void* pThis) const
 {
-	if (AuxRttiStruct<T>::Instance.IsA(MemberType) == false)
+	if (AuxRttiStruct<remove_all_ref_ptr<T>::type>::Instance.IsA(MemberType) == false)
 		return nullptr;
 	BYTE* pAddress = (BYTE*)pThis + Offset;
 	if (IsPointer)
@@ -1148,14 +1199,14 @@ T* RttiStruct::MemberDesc::GetValueAddress(void* pThis) const
 template<typename Klass, typename T0>
 VConstructor1<Klass, T0>::VConstructor1()
 {
-	mArguments.push_back(&AuxRttiStruct<T0>::Instance);
+	mArguments.push_back(&AuxRttiStruct<remove_all_ref_ptr<T0>::type>::Instance);
 }
 
 template<typename Klass, typename T0, typename T1>
 VConstructor2<Klass, T0, T1>::VConstructor2()
 {
-	mArguments.push_back(&AuxRttiStruct<T0>::Instance);
-	mArguments.push_back(&AuxRttiStruct<T1>::Instance);
+	mArguments.push_back(&AuxRttiStruct<remove_all_ref_ptr<T0>::type>::Instance);
+	mArguments.push_back(&AuxRttiStruct<remove_all_ref_ptr<T1>::type>::Instance);
 }
 
 template<typename Result, typename Klass>
@@ -1163,8 +1214,8 @@ VMethod0<Result, Klass>::VMethod0(MethodFun fun, const char* name)
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<Result>::Instance;
-	ThisObject = &AuxRttiStruct<Klass>::Instance;
+	ResultType = &AuxRttiStruct<remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<remove_all_ref_ptr<Klass>::type>::Instance;
 }
 
 template<typename Result, typename Klass, typename T0>
@@ -1172,10 +1223,10 @@ VMethod1<Result, Klass, T0>::VMethod1(MethodFun fun, const char* name, const cha
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<Result>::Instance;
-	ThisObject = &AuxRttiStruct<Klass>::Instance;
+	ResultType = &AuxRttiStruct<remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0,&AuxRttiStruct<T0>::Instance));
+	Arguments.push_back(std::make_pair(a0,&AuxRttiStruct<remove_all_ref_ptr<T0>::type>::Instance));
 }
 
 template<typename Result, typename Klass, typename T0, typename T1>
@@ -1183,11 +1234,11 @@ VMethod2<Result, Klass, T0, T1>::VMethod2(MethodFun fun, const char* name, const
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<Result>::Instance;
-	ThisObject = &AuxRttiStruct<Klass>::Instance;
+	ResultType = &AuxRttiStruct<remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<T0>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<T1>::Instance));
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<remove_all_ref_ptr<T1>::type>::Instance));
 }
 
 template<typename Result, typename Klass, typename T0, typename T1, typename T2>
@@ -1195,12 +1246,12 @@ VMethod3<Result, Klass, T0, T1, T2>::VMethod3(MethodFun fun, const char* name, c
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<Result>::Instance;
-	ThisObject = &AuxRttiStruct<Klass>::Instance;
+	ResultType = &AuxRttiStruct<remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<T0>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<T1>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<T2>::Instance));
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<remove_all_ref_ptr<T1>::type>::Instance));
+	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<remove_all_ref_ptr<T2>::type>::Instance));
 }
 
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3>
@@ -1208,13 +1259,13 @@ VMethod4<Result, Klass, T0, T1, T2, T3>::VMethod4(MethodFun fun, const char* nam
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<Result>::Instance;
-	ThisObject = &AuxRttiStruct<Klass>::Instance;
+	ResultType = &AuxRttiStruct<remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<T0>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<T1>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<T2>::Instance));
-	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<T3>::Instance));
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<remove_all_ref_ptr<T1>::type>::Instance));
+	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<remove_all_ref_ptr<T2>::type>::Instance));
+	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<remove_all_ref_ptr<T3>::type>::Instance));
 }
 
 NS_END

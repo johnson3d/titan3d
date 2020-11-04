@@ -341,7 +341,7 @@ EnumBegin(EStreamingState)
 	EnumMember(SS_PendingKill);
 	EnumMember(SS_Killing);
 	EnumMember(SS_Killed);
-EnumEnd(EStreamingState,Global)
+EnumEnd(EStreamingState,EngineNS)
 
 struct IResourceState
 {
@@ -408,7 +408,7 @@ EnumBegin(EPlatformType)
 	EnumMember(PLTF_Windows);
 	EnumMember(PLTF_Android);
 	EnumMember(PLTF_AppleIOS);
-EnumEnd(EPlatformType,Global)
+EnumEnd(EPlatformType,EngineNS)
 
 class IVPlatform : VIUnknown
 {	
