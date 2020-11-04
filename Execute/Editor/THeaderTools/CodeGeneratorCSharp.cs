@@ -88,6 +88,10 @@ namespace THeaderTools
                 code += GenLine(nTable, "#region Method");
                 foreach (var i in klass.Methods)
                 {
+                    if (i.IsFriend)
+                        continue;
+                    if (i.IsStatic)
+                        continue;
                     code += i.GenCallBindingCSharp(ref nTable, klass); 
                 }
                 code += GenLine(nTable, "#endregion");

@@ -22,7 +22,7 @@ struct IVertexBufferDesc
 class IRenderContext;
 class ICommandList;
 
-TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS&Titan3D, AAA = "", BBB = 1)
+TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS&EngineNS.IVertexBuffer, AAA = "", BBB = 1)
 class IVertexBuffer : public IRenderResource
 {
 public:
@@ -68,13 +68,18 @@ public:
 	~IVertexBuffer();
 
 	TR_FUNCTION()
-	virtual void GetBufferData(EngineNS:: IRenderContext* rc, IBlobObject* data) = 0;
+	virtual void GetBufferData(EngineNS::IRenderContext* rc, IBlobObject* data) = 0;
 	TR_FUNCTION()
 	virtual void UpdateGPUBuffData(ICommandList* cmd, void* ptr, UINT size) = 0;
 
 	void UpdateDrawPass(ICommandList* cmd, vBOOL bImm);
 	virtual void DoSwap(IRenderContext* rc) override;
 	virtual void SetDebugInfo(const char* info)
+	{
+	}
+
+	TR_FUNCTION()
+	void TestReflectionFunc(ClassInIVertexBuffer** t, ClassInIVertexBuffer* tt, IVertexBufferDesc ttt, IVertexBufferDesc* tttt)
 	{
 	}
 public:

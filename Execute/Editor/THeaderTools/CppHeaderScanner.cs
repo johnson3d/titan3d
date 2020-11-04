@@ -401,6 +401,10 @@ namespace THeaderTools
             if (result.GetMetaValue(CppMetaBase.Symbol.SV_ReflectAll) != null || result.GetMetaValue(CppMetaBase.Symbol.SV_LayoutStruct) != null)
             {   
                 AnalyzeClassFullInfo(code, result.Name, result.Members, result.Methods, result.Constructors);
+                if (result.GetMetaValue(CppMetaBase.Symbol.SV_LayoutStruct) != null)
+                    result.IsLayout = true;
+                else
+                    result.IsLayout = false;
             }
             else
             {
@@ -939,7 +943,7 @@ namespace THeaderTools
                 string name;
                 EDeclareType dtStyles;
                 NormalizeArgument(i, out type, out name, out dtStyles);
-                function.Arguments.Add(new CppCallParameters.ArgKeyValuePair(type, name, dtStyles));
+                function.Arguments.Add(new CppCallParameters.CppParameter(type, name, dtStyles));
             }
         }
         private static void NormalizeArgument(string code, out string type, out string name, out EDeclareType dtStyles)

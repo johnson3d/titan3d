@@ -112,6 +112,11 @@ namespace THeaderTools
             get;
             set;
         }
+        public bool IsLayout
+        {
+            get;
+            set;
+        }
         public EStructType StructType
         {
             get;
@@ -136,6 +141,28 @@ namespace THeaderTools
         {
             get;
             set;
+        }
+        public string GetCSName(int starNum)
+        {
+            var result = "";
+            if (IsLayout)
+            {//CSharp的内存布局值类型
+                result = GetNameSpace() + "." + CodeGenerator.Symbol.LayoutPrefix + Name;
+                for (int i = 0; i < starNum; i++)
+                {
+                    result += '*';
+                }
+                return result;
+            }
+            else
+            {
+                result = GetNameSpace() + "." + Name + CodeGenerator.Symbol.NativeSuffix + ".PtrType";
+                for (int i = 1; i < starNum; i++)
+                {
+                    result += '*';
+                }
+                return result;
+            }
         }
         public List<CppFunction> Methods
         {
@@ -214,35 +241,38 @@ namespace THeaderTools
             name = name.Replace("::", ".");
             name = name.Replace(" ", "");
             int i = name.Length - 1;
+            suffix = "";
             for (; i >= 0; i--)
             {
                 if (name[i] != '*' && name[i] != '&')
                 {
                     break;
                 }
+                suffix += '*';
             }
-            suffix = name.Substring(i + 1);
             return name.Substring(0, i + 1); ;
         }
         public void CheckValid(CodeGenerator manager)
         {
             var usingNS = this.GetUsingNS();
             string[] segs = null;
-            if (usingNS!=null)
+            if (usingNS != null)
                 segs = usingNS.Split('&');
 
             foreach (var i in Members)
             {
-                var realType = RemovePtrAndRef(i.Type);
+                string suffix;
+                var realType = SplitPureName(i.Type, out suffix);
                 var klass = CodeGenerator.Instance.MatchClass(realType, segs);
                 if (klass != null)
                 {
-                    i.Type = klass.GetFullName(false);
+                    i.TypeClass = klass;
+                    continue;
                 }
-                if (IsSystemType(realType))
+                else if (IsSystemType(realType))
+                {
                     continue;
-                else if (manager.FindClass(realType)!=null)
-                    continue;
+                }
                 else
                 {
                     Console.WriteLine($"{realType} used by RTTI member({i.Name}) in {this.ToString()}, Please Reflect this class");
@@ -251,20 +281,26 @@ namespace THeaderTools
 
             foreach (var i in Methods)
             {
-                var realType = RemovePtrAndRef(i.ReturnType);
-                if (!IsSystemType(realType) && manager.FindClass(realType) == null)
+                string suffix;
+                var realType = SplitPureName(i.ReturnType, out suffix);
+                var klass = CodeGenerator.Instance.MatchClass(realType, segs);
+                if (klass != null)
+                {
+                    i.ReturnTypeClass = klass;
+                }
+                else if(!IsSystemType(realType))
                 {
                     Console.WriteLine($"{realType} used by RTTI Method({i.ToString()}) in {this.ToString()}, Please Reflect this class");
                 }
                 foreach(var j in i.Arguments)
                 {
-                    realType = RemovePtrAndRef(j.Key);
-                    var klass = CodeGenerator.Instance.MatchClass(realType, segs);
+                    realType = SplitPureName(j.Type, out suffix);
+                    klass = CodeGenerator.Instance.MatchClass(realType, segs);
                     if (klass != null)
                     {
-                        j.Key = klass.GetFullName(false);
+                        j.TypeClass = klass;
                     }
-                    if (!IsSystemType(realType) && manager.FindClass(realType) == null)
+                    else if (!IsSystemType(realType))
                     {
                         Console.WriteLine($"{realType} used by RTTI Method({i.ToString()}) in {this.ToString()}, Please Reflect this class");
                     }
@@ -273,15 +309,16 @@ namespace THeaderTools
 
             foreach (var i in Constructors)
             {
+                string suffix;
                 foreach (var j in i.Arguments)
                 {
-                    var realType = RemovePtrAndRef(j.Key);
+                    var realType = SplitPureName(j.Type, out suffix);
                     var klass = CodeGenerator.Instance.MatchClass(realType, segs);
                     if (klass != null)
                     {
-                        j.Key = klass.GetFullName(false);
+                        j.TypeClass = klass;
                     }
-                    if (!IsSystemType(realType) && manager.FindClass(realType) == null)
+                    else if (!IsSystemType(realType))
                     {
                         Console.WriteLine($"{realType} used by RTTI Constructor({i.ToString()}) in {this.ToString()}, Please Reflect this class");
                     }
@@ -300,6 +337,11 @@ namespace THeaderTools
             get;
             set;
         } = 0;
+        public int TypeStarNum
+        {
+            get;
+            protected set;
+        } = 0;
         string mType;
         public string Type
         {
@@ -310,7 +352,24 @@ namespace THeaderTools
                 var pureType = CppClass.SplitPureName(value, out suffix);
                 pureType = CodeGenerator.Instance.NormalizePureType(pureType);
                 mType = pureType + suffix;
+                TypeStarNum = suffix.Length;
             }
+        }
+        public string CSType
+        {
+            get
+            {
+                if (TypeClass != null)
+                {
+                    return TypeClass.GetCSName(TypeStarNum);
+                }
+                return Type;
+            }
+        }
+        public CppClass TypeClass
+        {
+            get;
+            set;
         }
         public string PureType
         {
@@ -389,49 +448,68 @@ namespace THeaderTools
     }
     public class CppCallParameters : CppMetaBase
     {
-        public class ArgKeyValuePair
+        public class CppParameter
         {
-            public ArgKeyValuePair(string k,string v, EDeclareType dt)
+            public CppParameter(string type,string v, EDeclareType dt)
             {
-                Key = k;
+                Type = type;
                 Value = v;
                 DeclType = dt;
+                TypeClass = null;
             }
             public EDeclareType DeclType
             {
                 get;
                 set;
             } = 0;
-            string mKey;
-            public string Key
+            string mType;
+            public string Type
             {
-                get { return mKey; }
+                get { return mType; }
                 set
                 {
                     string suffix;
                     var pureType = CppClass.SplitPureName(value, out suffix);
                     pureType = CodeGenerator.Instance.NormalizePureType(pureType);
-                    mKey = pureType + suffix;
+                    mType = pureType + suffix;
+                    TypeStarNum = suffix.Length;
                 }
             }
-            public string Value;
+            public string Value
+            {
+                get;
+                set;
+            }
+            public int TypeStarNum
+            {
+                get;
+                protected set;
+            } = 0;
+            public CppClass TypeClass
+            {
+                get;
+                set;
+            }
+            public string CSType
+            {
+                get
+                {
+                    if (TypeClass != null)
+                        return TypeClass.GetCSName(TypeStarNum);
+                    return Type;
+                }
+            }
         }
-        public List<ArgKeyValuePair> Arguments
+        public List<CppParameter> Arguments
         {
             get;
-        } = new List<ArgKeyValuePair>();
-        public bool IsNativePtr(int i)
-        {
-            bool isNativePtr;
-            CodeGenerator.Instance.CppTypeToCSType(Arguments[i].Key, true, out isNativePtr);
-            return isNativePtr;
-        }
+        } = new List<CppParameter>();
         public string GetParameterString(string split = " ")
         {
             string result = "";
             for(int i = 0; i < Arguments.Count; i++)
             {
-                var cppName = Arguments[i].Key.Replace(".", "::");
+                var cppName = Arguments[i].Type.Replace(".", "::");
                 if (i==0)
                     result += $"{cppName}{split}{Arguments[i].Value}";
                 else
@@ -439,30 +517,25 @@ namespace THeaderTools
             }
             return result;
         }
-        public string GetParameterStringCSharp(bool bPtrType)
-        {//bPtrType如果true，那么就要把XXX_Wrapper转换成XXX_Wrapper.PtrType
+        public string GetParameterStringCSharp()
+        {//bPtrType如果false，那么就要把XXX_Wrapper.PtrType转换成XXX_Wrapper
             string result = "";
             for (int i = 0; i < Arguments.Count; i++)
             {
-                bool isNativePtr;
-                var type = CodeGenerator.Instance.CppTypeToCSType(Arguments[i].Key, bPtrType, out isNativePtr);
+                var csType = Arguments[i].CSType;
                 if (i == 0)
-                    result += $"{type} {Arguments[i].Value}";
+                    result += $"{csType} {Arguments[i].Value}";
                 else
-                    result += $", {type} {Arguments[i].Value}";
+                    result += $", {csType} {Arguments[i].Value}";
             }
             return result;
         }
-        public string GetParameterCallString(bool bNativePtr)
+        public string GetParameterCallString()
         {
             string result = "";
             for (int i = 0; i < Arguments.Count; i++)
             {
                 var arg = Arguments[i].Value;
-                if (bNativePtr && IsNativePtr(i))
-                {
-                    arg = arg + ".Ptr";
-                }
                 if (i == 0)
                     result += $"{arg}";
                 else
@@ -572,15 +645,26 @@ namespace THeaderTools
                 var pureType = CppClass.SplitPureName(value, out suffix);
                 pureType = CodeGenerator.Instance.NormalizePureType(pureType);
                 mReturnType = pureType + suffix;
+                ReturnTypeStarNum = suffix.Length;
             }
+        }
+        public int ReturnTypeStarNum
+        {
+            get;
+            protected set;
+        } = 0;
+        public CppClass ReturnTypeClass
+        {
+            get;
+            set;
         }
         public string CSReturnType
         {
             get
             {
-                bool isNativePtr;
-                var type = CodeGenerator.Instance.CppTypeToCSType(mReturnType, true, out isNativePtr);
-                return type;
+                if (ReturnTypeClass != null)
+                    return ReturnTypeClass.GetCSName(ReturnTypeStarNum);
+                return mReturnType;
             }
         }
         public string GenPInvokeBinding(CppClass klass)
@@ -591,7 +675,7 @@ namespace THeaderTools
             code += "\tif(self==nullptr) {\n";
             code += $"\t\treturn TypeDefault({ReturnType});\n";
             code += "\t}\n";
-            code += $"\treturn self->{Name}({this.GetParameterCallString(false)});\n";
+            code += $"\treturn self->{Name}({this.GetParameterCallString()});\n";
             code += "}\n";
             return code;
         }
@@ -599,14 +683,14 @@ namespace THeaderTools
         {
             var afterSelf = Arguments.Count > 0 ? ", " : "";
             var unsafeDef = isUnsafe ? "unsafe " : "";
-            return $"private extern static {unsafeDef}{ReturnType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}({selfType} self{afterSelf}{this.GetParameterStringCSharp(true)});";
+            return $"private extern static {unsafeDef}{ReturnType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}({selfType} self{afterSelf}{this.GetParameterStringCSharp()});";
         }
         public string GenCallBindingCSharp(ref int nTable, CppClass klass)
         {
-            string code = CodeGenerator.GenLine(nTable, $"public {CSReturnType} {Name}({this.GetParameterStringCSharp(false)})");
+            string code = CodeGenerator.GenLine(nTable, $"public {CSReturnType} {Name}({this.GetParameterStringCSharp()})");
             code += CodeGenerator.GenLine(nTable, "{");
             nTable++;
-            code += CodeGenerator.GenLine(nTable, $"return {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}(mPtr, {this.GetParameterCallString(true)});");
+            code += CodeGenerator.GenLine(nTable, $"return {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}(mPtr, {this.GetParameterCallString()});");
             nTable--;
             code += CodeGenerator.GenLine(nTable, "}");
             return code;
@@ -628,22 +712,22 @@ namespace THeaderTools
         {
             string code = $"extern \"C\" VFX_API {klass.GetFullName(true)}* {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstruct({this.GetParameterString()})\n";
             code += "{\n";
-            code += $"\treturn new {klass.GetFullName(true)}({this.GetParameterCallString(false)});\n";
+            code += $"\treturn new {klass.GetFullName(true)}({this.GetParameterCallString()});\n";
             code += "}\n";
             return code;
         }
         public string GenPInvokeBindingCSharp(CppClass klass)
         {
             var afterSelf = Arguments.Count > 0 ? ", " : "";
-            return $"private extern static PtrType {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor({this.GetParameterStringCSharp(true)});";
+            return $"private extern static PtrType {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor({this.GetParameterStringCSharp()});";
         }
         public string GenCallBindingCSharp(ref int nTable, CppClass klass)
         {
             var afterSelf = Arguments.Count > 0 ? ", " : "";
-            string code = CodeGenerator.GenLine(nTable, $"public {klass.Name}{CodeGenerator.Symbol.NativeSuffix}({this.GetParameterStringCSharp(false)}{afterSelf}bool _dont_care_just_for_compile)");
+            string code = CodeGenerator.GenLine(nTable, $"public {klass.Name}{CodeGenerator.Symbol.NativeSuffix}({this.GetParameterStringCSharp()}{afterSelf}bool _dont_care_just_for_compile)");
             code += CodeGenerator.GenLine(nTable, "{");
             nTable++;
-            code += CodeGenerator.GenLine(nTable, $"mPtr = {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor({this.GetParameterCallString(true)});");
+            code += CodeGenerator.GenLine(nTable, $"mPtr = {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor({this.GetParameterCallString()});");
             nTable--;
             code += CodeGenerator.GenLine(nTable, "}");
             return code;

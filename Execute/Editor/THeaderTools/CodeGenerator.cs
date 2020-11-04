@@ -26,7 +26,7 @@ namespace THeaderTools
             public const string AppendMethodMeta = "AppendMethodMetaInfo";
             public const string AppendConstructorMeta = "AppendConstructorMetaInfo";
 
-            public const string NativeSuffix = "_Wrapper";
+            public const string NativeSuffix = "_PtrType";
             public const string LayoutPrefix = "CS";//CppStruct的意思
             public const string SDKPrefix = "TSDK_";
         }
@@ -37,6 +37,44 @@ namespace THeaderTools
         public void Reset()
         {
             ClassCollector.Clear();
+        }
+        private void CheckValid()
+        {
+            foreach (var i in ClassCollector)
+            {
+                i.CheckValid(this);
+            }
+        }
+        public List<CppClass> ClassCollector = new List<CppClass>();
+        public CppClass FindClass(string fullName)
+        {
+            foreach (var i in ClassCollector)
+            {
+                if (i.GetFullName(false) == fullName)
+                {
+                    return i;
+                }
+            }
+            return null;
+        }
+        public CppClass MatchClass(string name, string[] ns)
+        {
+            var klass = FindClass(name);
+            if (klass != null)
+                return klass;
+            klass = FindClass("EngineNS." + name);
+            if (klass != null)
+                return klass;
+            if (ns == null)
+                return null;
+            foreach (var i in ns)
+            {
+                var fullName = i + "." + name;
+                klass = FindClass(fullName);
+                if (klass != null)
+                    return klass;
+            }
+            return null;
         }
         Dictionary<string, string> Cpp2CSTypes = new Dictionary<string, string>();
         public string CppTypeToCSType(string type, bool bPtrType, out bool isNativPtr)
@@ -76,44 +114,6 @@ namespace THeaderTools
             else
             {
                 return type;
-            }
-        }
-        public List<CppClass> ClassCollector = new List<CppClass>();
-        public CppClass FindClass(string fullName)
-        {
-            foreach(var i in ClassCollector)
-            {
-                if(i.Name == fullName)
-                {
-                    return i;
-                }
-            }
-            return null;
-        }
-        public CppClass MatchClass(string name, string[] ns)
-        {
-            var klass = FindClass(name);
-            if (klass != null)
-                return klass;
-            klass = FindClass("EngineNS." + name);
-            if (klass != null)
-                return klass;
-            if (ns == null)
-                return null;
-            foreach (var i in ns)
-            {
-                var fullName = i + "." + name;
-                klass = FindClass(fullName);
-                if (klass != null)
-                    return klass;
-            }
-            return null;
-        }
-        private void CheckValid()
-        {
-            foreach (var i in ClassCollector)
-            {
-                i.CheckValid(this);
             }
         }
         public void GenCode(string targetDir, bool bGenPInvoke)
@@ -203,9 +203,9 @@ namespace THeaderTools
                     foreach (var j in i.Arguments)
                     {
                         if (argIndex == 0)
-                            code += $"{j.Key}";
+                            code += $"{j.Type}";
                         else
-                            code += $", {j.Key}";
+                            code += $", {j.Type}";
                     }
                     code += $");\n";
                     WriteMetaCode(ref code, i, Symbol.AppendConstructorMeta);
