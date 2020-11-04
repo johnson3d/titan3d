@@ -88,9 +88,9 @@ namespace THeaderTools
 
                 genCode += "\n\n\n";
 
-                //var usingNS = i.GetUsingNS();
+                genCode += "using namespace EngineNS;\n";
 
-                //genCode += "using namespace EngineNS;\n";
+                //var usingNS = i.GetUsingNS();
                 //if (usingNS != null)
                 //{
                 //    var segs = usingNS.Split('&');
