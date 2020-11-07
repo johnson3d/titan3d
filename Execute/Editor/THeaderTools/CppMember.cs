@@ -60,7 +60,7 @@ namespace THeaderTools
         {
             get
             {
-                string result = CppClass.GetCSTypeImpl(TypeClass, TypeStarNum, DeclareType, PureType, false);
+                string result = CppClass.GetCSTypeImpl(TypeClass, TypeEnum, TypeCallback, TypeStarNum, DeclareType, PureType, false);
                 if (result[0] == '.')
                 {
                     return result.Substring(1);
@@ -79,6 +79,16 @@ namespace THeaderTools
             }
         }
         public CppClass TypeClass
+        {
+            get;
+            set;
+        }
+        public CppEnum TypeEnum
+        {
+            get;
+            set;
+        }
+        public CppCallback TypeCallback
         {
             get;
             set;
@@ -145,8 +155,11 @@ namespace THeaderTools
                 }
                 string code = CodeGenerator.GenLine(nTable, $"extern \"C\" {CodeGenerator.Instance.API_Name} {converter} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}({klass.GetFullName(true)}* self)");
                 code += CodeGenerator.GenLine(nTable++, "{");
-                if(hasConverter)
-                    code += CodeGenerator.GenLine(nTable, $"return *({converter}*)&({visitorName}::_Getter_{Name}(self));");
+                if (hasConverter)
+                {
+                    code += CodeGenerator.GenLine(nTable, $"auto result = {visitorName}::_Getter_{Name}(self);");
+                    code += CodeGenerator.GenLine(nTable, $"return *({converter}*)&(result);");
+                }
                 else
                     code += CodeGenerator.GenLine(nTable, $"return {visitorName}::_Getter_{Name}(self);");
                 code += CodeGenerator.GenLine(--nTable, "}");

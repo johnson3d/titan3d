@@ -46,8 +46,8 @@ namespace THeaderTools
         string mGenDirectory;
         string[] OldCppFiles;
         string[] OldCsFiles;
-        List<string> NewCppFiles = new List<string>();
-        List<string> NewCsFiles = new List<string>();
+        internal List<string> NewCppFiles = new List<string>();
+        internal List<string> NewCsFiles = new List<string>();
         public void Reset(string genDir)
         {
             mGenDirectory = genDir;
@@ -156,9 +156,14 @@ namespace THeaderTools
             {
                 i.CheckValid(this);
             }
+            foreach (var i in CBCollector)
+            {
+                i.CheckValid(this);
+            }
         }
         public List<CppClass> ClassCollector = new List<CppClass>();
         public List<CppEnum> EnumCollector = new List<CppEnum>();
+        public List<CppCallback> CBCollector = new List<CppCallback>();
         public CppClass FindClass(string fullName)
         {
             foreach (var i in ClassCollector)
@@ -184,6 +189,66 @@ namespace THeaderTools
             {
                 var fullName = i + "." + name;
                 klass = FindClass(fullName);
+                if (klass != null)
+                    return klass;
+            }
+            return null;
+        }
+        public CppEnum FindEnum(string fullName)
+        {
+            foreach (var i in EnumCollector)
+            {
+                if (i.GetFullName(false) == fullName)
+                {
+                    return i;
+                }
+            }
+            return null;
+        }
+        public CppEnum MatchEnum(string name, string[] ns)
+        {
+            var klass = FindEnum(name);
+            if (klass != null)
+                return klass;
+            klass = FindEnum("EngineNS." + name);
+            if (klass != null)
+                return klass;
+            if (ns == null)
+                return null;
+            foreach (var i in ns)
+            {
+                var fullName = i + "." + name;
+                klass = FindEnum(fullName);
+                if (klass != null)
+                    return klass;
+            }
+            return null;
+        }
+        public CppCallback FindCallback(string fullName)
+        {
+            foreach (var i in CBCollector)
+            {
+                if (i.GetFullName(false) == fullName)
+                {
+                    return i;
+                }
+            }
+            return null;
+        }
+        public CppCallback MatchCallback(string name, string[] ns)
+        {
+            var klass = FindCallback(name);
+            if (klass != null)
+                return klass;
+            klass = FindCallback("EngineNS." + name);
+            if (klass != null)
+                return klass;
+            if (ns == null)
+                return null;
+            foreach (var i in ns)
+            {
+                var fullName = i + "." + name;
+                klass = FindCallback(fullName);
                 if (klass != null)
                     return klass;
             }

@@ -76,6 +76,16 @@ namespace THeaderTools
         {
             get;
         } = new List<EnumMember>();
+        public string GetCSName(int starNum)
+        {
+            var result = "";
+            result = GetNameSpace() + "." + Name;
+            for (int i = 0; i < starNum; i++)
+            {
+                result += '*';
+            }
+            return result;
+        }
         public void CheckValid(CodeGenerator manager)
         {
             foreach(var i in Members)

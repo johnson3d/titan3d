@@ -109,7 +109,7 @@ namespace THeaderTools
             foreach (var i in headers)
             {
                 var headScanner = new CppHeaderScanner();
-                headScanner.ScanHeader(i.Value, codeManager.ClassCollector, codeManager.EnumCollector);
+                headScanner.ScanHeader(i.Value, codeManager.ClassCollector, codeManager.EnumCollector, codeManager.CBCollector);
             }
             codeManager.GenCode(genDir, bGenPInvoke);
             if (bGenCSharp)

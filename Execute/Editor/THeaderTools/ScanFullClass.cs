@@ -369,6 +369,35 @@ namespace THeaderTools
             }
         }
 
+        public static bool IsAllowFixedArrayType(string type)
+        {
+            switch(type)
+            {
+                case "bool":
+                case "byte":
+                case "short":
+                case "int":
+                case "long":
+                case "char":
+                case "sbyte":
+                case "ushort":
+                case "uint":
+                case "ulong":
+                case "float":
+                case "double":
+                case "SByte":
+                case "Int16":
+                case "Int32":
+                case "Int64":
+                case "Byte":
+                case "UInt16":
+                case "UInt32":
+                case "UInt64":
+                    return true;
+                default:
+                    return false;
+            }
+        }
         private static void ProcArrayMember(ref int index, string code, string klassName, List<CppMember> members,
             EVisitMode mode, string type, string name, EDeclareType dtStyles, 
             ref bool hasMetaFlag, ref string metaString, ref string curMetType)
@@ -377,6 +406,21 @@ namespace THeaderTools
             int rangeEnd;
 
             var tmp = new CppMember();
+            tmp.AnalyzeMetaString(metaString);
+            var constValue = tmp.GetMetaValue(CppMetaBase.Symbol.SV_ConstValue);
+            Dictionary<string, string> ConstMapper = new Dictionary<string, string>();
+            if(constValue!=null)
+            {
+                var segs = constValue.Split('+');
+                foreach(var i in segs)
+                {
+                    var pair = i.Split(':');
+                    if (pair.Length != 2)
+                        continue;
+
+                    ConstMapper[pair[0]] = pair[1];
+                }
+            }
             tmp.IsArray = true;
             do
             {
@@ -387,13 +431,18 @@ namespace THeaderTools
                 int sz = 0;
                 try
                 {
-                    sz = System.Convert.ToInt32(args);
+                    string tarNum;
+                    if(ConstMapper.TryGetValue(args, out tarNum)==false)
+                    {
+                        tarNum = args;
+                    }
+                    sz = System.Convert.ToInt32(tarNum);
                 }
                 catch
                 {
                     Console.WriteLine($"{klassName}::{name} array size error");
                 }
-                tmp.ArraySize.Add(System.Convert.ToInt32(args));
+                tmp.ArraySize.Add(sz);
                 var token = GetTokenString(ref index, code, null);
                 if (token == ";")
                 {
@@ -402,7 +451,6 @@ namespace THeaderTools
                     tmp.Type = type;
                     tmp.DeclareType = dtStyles;
                     tmp.HasMetaFlag = hasMetaFlag;
-                    tmp.AnalyzeMetaString(metaString);
                     members.Add(tmp);
                     if (curMetType != "" && curMetType != Symbol.MetaMember)
                     {

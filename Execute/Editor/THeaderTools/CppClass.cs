@@ -92,6 +92,7 @@ namespace THeaderTools
             public const string SV_NameSpace = "SV_NameSpace";
             public const string SV_ContainClass = "SV_ContainClass";//用于标志类种类
             public const string SV_ReturnConverter = "SV_ReturnConverter";//For method member
+            public const string SV_ConstValue = "SV_ConstValue";//For method member
             public const string SV_UsingNS = "SV_UsingNS";//For class enum
             public const string SV_ReflectAll = "SV_ReflectAll";//For class 
             public const string SV_LayoutStruct = "SV_LayoutStruct";//For class 
@@ -238,10 +239,14 @@ namespace THeaderTools
                 return result;
             }
         }
-        public static string GetCSTypeImpl(CppClass TypeClass, int TypeStarNum, EDeclareType DeclType, string PureType, bool tryMashralString)
+        public static string GetCSTypeImpl(CppClass TypeClass, CppEnum TypeEnum, CppCallback TypeCallback, int TypeStarNum, EDeclareType DeclType, string PureType, bool tryMashralString)
         {
             if (TypeClass != null)
                 return TypeClass.GetCSName(TypeStarNum);
+            if (TypeEnum != null)
+                return TypeEnum.GetCSName(TypeStarNum);
+            if (TypeCallback != null)
+                return TypeCallback.GetCSName(TypeStarNum);
             string csType = "";
             if ((DeclType & EDeclareType.DT_Unsigned) == EDeclareType.DT_Unsigned)
             {
@@ -365,10 +370,20 @@ namespace THeaderTools
                 string suffix;
                 var realType = SplitPureName(i.Type, out suffix);
                 var klass = CodeGenerator.Instance.MatchClass(realType, segs);
+                var enumType = CodeGenerator.Instance.MatchEnum(realType, segs);
+                var cbType = CodeGenerator.Instance.MatchCallback(realType, segs);
                 if (klass != null)
                 {
                     i.TypeClass = klass;
                     continue;
+                }
+                else if (enumType != null)
+                {
+                    i.TypeEnum = enumType;
+                }
+                else if (cbType != null)
+                {
+                    i.TypeCallback = cbType;
                 }
                 else if (IsSystemType(realType))
                 {
@@ -385,9 +400,19 @@ namespace THeaderTools
                 string suffix;
                 var realType = SplitPureName(i.ReturnType, out suffix);
                 var klass = CodeGenerator.Instance.MatchClass(realType, segs);
+                var enumType = CodeGenerator.Instance.MatchEnum(realType, segs);
+                var cbType = CodeGenerator.Instance.MatchCallback(realType, segs);
                 if (klass != null)
                 {
                     i.ReturnTypeClass = klass;
+                }
+                else if (enumType != null)
+                {
+                    i.ReturnTypeEnum = enumType;
+                }
+                else if (cbType != null)
+                {
+                    i.ReturnTypeCallback = cbType;
                 }
                 else if(!IsSystemType(realType))
                 {
@@ -397,9 +422,19 @@ namespace THeaderTools
                 {
                     realType = SplitPureName(j.Type, out suffix);
                     klass = CodeGenerator.Instance.MatchClass(realType, segs);
+                    enumType = CodeGenerator.Instance.MatchEnum(realType, segs);
+                    cbType = CodeGenerator.Instance.MatchCallback(realType, segs);
                     if (klass != null)
                     {
                         j.TypeClass = klass;
+                    }
+                    else if (enumType != null)
+                    {
+                        j.TypeEnum = enumType;
+                    }
+                    else if (cbType != null)
+                    {
+                        j.TypeCallback = cbType;
                     }
                     else if (!IsSystemType(realType))
                     {
@@ -415,9 +450,14 @@ namespace THeaderTools
                 {
                     var realType = SplitPureName(j.Type, out suffix);
                     var klass = CodeGenerator.Instance.MatchClass(realType, segs);
+                    var cbType = CodeGenerator.Instance.MatchCallback(realType, segs);
                     if (klass != null)
                     {
                         j.TypeClass = klass;
+                    }
+                    else if(cbType!=null)
+                    {
+                        j.TypeCallback = cbType;
                     }
                     else if (!IsSystemType(realType))
                     {
@@ -427,144 +467,4 @@ namespace THeaderTools
             }
         }
     }
-    
-    public class CppCallParameters : CppMetaBase
-    {
-        public string GetCharSet()
-        {
-            var meta = this.GetMetaValue(CppClass.Symbol.SV_CharSet);
-            if (meta == null)
-                return "CharSet.Ansi";
-            return meta;
-        }
-        public class CppParameter
-        {
-            public CppCallParameters Caller
-            {
-                get;
-                private set;
-            }
-            public CppParameter(CppCallParameters func, string type,string v, EDeclareType dt)
-            {
-                Type = type;
-                Value = v;
-                DeclType = dt;
-                TypeClass = null;
-                Caller = func;
-            }
-            public EDeclareType DeclType
-            {
-                get;
-                set;
-            } = 0;
-            string mType;
-            public string Type
-            {
-                get { return mType; }
-                set
-                {
-                    string suffix;
-                    CppPureType = CppClass.SplitPureName(value, out suffix);
-                    PureType = CodeGenerator.Instance.NormalizePureType(CppPureType);
-                    mType = PureType + suffix;
-                    TypeStarNum = suffix.Length;
-                }
-            }
-            public string CppPureType
-            {
-                get;
-                private set;
-            }
-            public string PureType
-            {
-                get;
-                private set;
-            }
-            public string Value
-            {
-                get;
-                set;
-            }
-            public int TypeStarNum
-            {
-                get;
-                protected set;
-            } = 0;
-            public CppClass TypeClass
-            {
-                get;
-                set;
-            }
-            public string CSType
-            {
-                get
-                {
-                    bool tryMashralString = true;
-                    if (Caller.GetCharSet() == "CharSet.None")
-                        tryMashralString = false;
-                    string result = CppClass.GetCSTypeImpl(TypeClass, TypeStarNum, DeclType, PureType, tryMashralString);
-                    if(result[0]=='.')
-                    {
-                        return result.Substring(1);
-                    }
-                    else
-                    {
-                        return result;
-                    }
-                }
-            }
-            public string CppType
-            {
-                get
-                {
-                    return CppClass.GetCppTypeImpl(TypeClass, TypeStarNum, DeclType, CppPureType);
-                }
-            }
-        }
-        public List<CppParameter> Arguments
-        {
-            get;
-        } = new List<CppParameter>();
-        public string GetParameterString(string split = " ", bool needConst = false)
-        {
-            string result = "";
-            for(int i = 0; i < Arguments.Count; i++)
-            {
-                var cppName = Arguments[i].CppType;
-                
-                if (i==0)
-                    result += $"{cppName}{split}{Arguments[i].Value}";
-                else
-                    result += $", {cppName}{split}{Arguments[i].Value}";
-            }
-            return result;
-        }
-        public string GetParameterStringCSharp()
-        {//bPtrType如果false，那么就要把XXX_Wrapper.PtrType转换成XXX_Wrapper
-            string result = "";
-            for (int i = 0; i < Arguments.Count; i++)
-            {
-                var csType = Arguments[i].CSType;
-                if (i == 0)
-                    result += $"{csType} {Arguments[i].Value}";
-                else
-                    result += $", {csType} {Arguments[i].Value}";
-            }
-            return result;
-        }
-        public string GetParameterCallString()
-        {
-            string result = "";
-            for (int i = 0; i < Arguments.Count; i++)
-            {
-                var arg = Arguments[i].Value;
-                if (i == 0)
-                    result += $"{arg}";
-                else
-                    result += $", {arg}";
-            }
-            return result;
-        }
-    }
-
 }

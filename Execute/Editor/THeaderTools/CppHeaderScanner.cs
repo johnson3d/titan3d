@@ -14,6 +14,7 @@ namespace THeaderTools
             public const string MetaEnum = "TR_ENUM";
             public const string MetaEnumMember = "TR_ENUM_MEMBER";
             public const string MetaConstructor = "TR_CONSTRUCTOR";
+            public const string MetaCallback = "TR_CALLBACK";
             public const string MetaDiscard = "TR_DISCARD";
             public const char BeginParentheses = '(';
             public const char EndParentheses = ')';
@@ -32,7 +33,7 @@ namespace THeaderTools
             return $"{sourceFilePath}:{sourceLineNumber}->{memberName}->{message}";
         }
         
-        public void ScanHeader(string file, List<CppClass> klsCollector, List<CppEnum> EnumCollector)
+        public void ScanHeader(string file, List<CppClass> klsCollector, List<CppEnum> EnumCollector, List<CppCallback> cbCollector)
         {
             string code = System.IO.File.ReadAllText(file);
 
@@ -40,6 +41,7 @@ namespace THeaderTools
 
             ScanClassCode(file, code, klsCollector);
             ScanEnumCode(file, code, EnumCollector);
+            CppCallbackAnalizer.ScanCode(file, code, cbCollector);
         }
         public static void ScanClassCode(string sourceHeader, string code, List<CppClass> klsCollector)
         {
