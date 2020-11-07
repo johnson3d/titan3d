@@ -59,7 +59,6 @@ namespace THeaderTools
         }
         public static void Preprocess(ref string code)
         {
-            code = RemoveAllComment(code);
             var pos = code.IndexOf(CodeGenerator.Symbol.PreprocessDiscardBegin, 0);
             while (pos >= 0)
             {
@@ -67,8 +66,9 @@ namespace THeaderTools
                 code = code.Remove(pos, endPos + CodeGenerator.Symbol.PreprocessDiscardEnd.Length - pos);
                 pos = code.IndexOf(CodeGenerator.Symbol.PreprocessDiscardBegin, pos);
             }
+            code = RemoveAllComment(code);
 
-            foreach(var i in CodeGenerator.Symbol.PreprocessDiscardMacros)
+            foreach (var i in CodeGenerator.Symbol.PreprocessDiscardMacros)
             {
                 RemoveMacro(ref code, i);
             }
