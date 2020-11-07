@@ -32,7 +32,8 @@ namespace THeaderTools
         DT_Virtual = (1 << 3),
         DT_Inline = (1 << 4),
         DT_Friend = (1 << 5),
-        DT_API = (1 << 6),
+        DT_Unsigned = (1 << 6),
+        DT_API = (1 << 7),
     }
     public class CppMetaBase
     {
@@ -90,10 +91,13 @@ namespace THeaderTools
         {
             public const string SV_NameSpace = "SV_NameSpace";
             public const string SV_ContainClass = "SV_ContainClass";//用于标志类种类
-            public const string SV_ReturnConverter = "SV_ReturenConverter";
-            public const string SV_UsingNS = "SV_UsingNS";
-            public const string SV_ReflectAll = "SV_ReflectAll";
-            public const string SV_LayoutStruct = "SV_LayoutStruct";
+            public const string SV_ReturnConverter = "SV_ReturnConverter";//For method member
+            public const string SV_UsingNS = "SV_UsingNS";//For class enum
+            public const string SV_ReflectAll = "SV_ReflectAll";//For class 
+            public const string SV_LayoutStruct = "SV_LayoutStruct";//For class 
+            public const string SV_EnumType = "SV_EnumType";
+            public const string SV_RemoveStrings = "SV_RemoveStrings";//For class 
+            public const string SV_CharSet = "SV_CharSet";//For method: CharSet.Ansi , CharSet.Unicode
         }
         
         public string GetReturnConverter()
@@ -102,7 +106,50 @@ namespace THeaderTools
         }
     }
 
-    public class CppClass : CppMetaBase
+    public class CppContainer : CppMetaBase
+    {
+        public string GetNameSpace(bool asCpp = false)
+        {
+            var ns = this.GetMetaValue(Symbol.SV_NameSpace);
+            if (ns == null)
+                return ns;
+            if (asCpp)
+                return ns.Replace(".", "::");
+            return ns;
+        }
+        public string GetContainClass()
+        {
+            return this.GetMetaValue(Symbol.SV_ContainClass);
+        }
+        public string GetUsingNS()
+        {
+            return this.GetMetaValue(Symbol.SV_UsingNS);
+        }
+        public string[] GetRemoveStrings()
+        {
+            var str = this.GetMetaValue(Symbol.SV_RemoveStrings);
+            if (str == null)
+                return null;
+            return str.Split('+');
+        }
+        public string GetPureNameSpace(bool asCpp = false)
+        {
+            var container = GetContainClass();
+            if (container == null)
+                return GetNameSpace(asCpp);
+            var ns = GetNameSpace();
+            if(ns.EndsWith(container)==false)
+            {
+                throw new Exception(CppHeaderScanner.TraceMessage($"{ns} no {container}"));
+            }
+            if(asCpp)
+                return ns.Substring(0, ns.Length - container.Length - 1).Replace(".", "::");
+            else
+                return ns.Substring(0, ns.Length - container.Length - 1);
+        }
+    }
+
+    public class CppClass : CppContainer
     {
         public override string ToString()
         {
@@ -112,6 +159,22 @@ namespace THeaderTools
         {
             get;
             set;
+        }
+        public string GetGenFileName()
+        {
+            var ns = this.GetMetaValue(Symbol.SV_NameSpace);
+            if (ns == null)
+                return Name + ".gen.cpp";
+            else
+                return ns + "." + Name + ".gen.cpp";
+        }
+        public string GetGenFileNameCSharp()
+        {
+            var ns = this.GetMetaValue(Symbol.SV_NameSpace);
+            if (ns == null)
+                return Name + ".gen.cs";
+            else
+                return ns + "." + Name + ".gen.cs";
         }
         public bool IsLayout
         {
@@ -175,6 +238,57 @@ namespace THeaderTools
                 return result;
             }
         }
+        public static string GetCSTypeImpl(CppClass TypeClass, int TypeStarNum, EDeclareType DeclType, string PureType, bool tryMashralString)
+        {
+            if (TypeClass != null)
+                return TypeClass.GetCSName(TypeStarNum);
+            string csType = "";
+            if ((DeclType & EDeclareType.DT_Unsigned) == EDeclareType.DT_Unsigned)
+            {
+                csType = CodeGenerator.Instance.NormalizePureType("unsigned " + PureType);
+            }
+            else
+            {
+                csType = CodeGenerator.Instance.NormalizePureType(PureType);
+            }
+            for (int i = 0; i < TypeStarNum; i++)
+            {
+                csType += "*";
+            }
+            if (tryMashralString)
+            {
+                if (csType == "SByte*")
+                    return "string";
+                else if (csType == "Wchar16*")
+                    return "string";
+                else if (csType == "Wchar32*")
+                    return "string";
+            }
+            return csType;
+        }
+        public static string GetCppTypeImpl(CppClass TypeClass, int TypeStarNum, EDeclareType DeclType, string Type)
+        {
+            string result = "";
+            if (TypeClass != null)
+                result = TypeClass.GetCppName(TypeStarNum);
+            else
+            {
+                result = Type;
+                for (int i = 0; i < TypeStarNum; i++)
+                {
+                    result += '*';
+                }
+            }
+            if ((DeclType & EDeclareType.DT_Unsigned) == EDeclareType.DT_Unsigned)
+            {
+                result = "unsigned " + result;
+            }
+            if ((DeclType & EDeclareType.DT_Const) == EDeclareType.DT_Const)
+            {
+                result = "const " + result;
+            }
+            return result.Replace(".", "::");
+        }
         public List<CppFunction> Methods
         {
             get;
@@ -203,37 +317,6 @@ namespace THeaderTools
             {
                 return fullName;
             }
-        }
-        public string GetNameSpace(bool asCpp = false)
-        {
-            if(asCpp)
-                return this.GetMetaValue(Symbol.SV_NameSpace).Replace(".", "::");
-            return this.GetMetaValue(Symbol.SV_NameSpace);
-        }
-        public string GetContainClass()
-        {
-            return this.GetMetaValue(Symbol.SV_ContainClass);
-        }
-        
-        public string GetUsingNS()
-        {
-            return this.GetMetaValue(Symbol.SV_UsingNS);
-        }
-        public string GetGenFileName()
-        {
-            var ns = this.GetMetaValue(Symbol.SV_NameSpace);
-            if (ns == null)
-                return Name + ".gen.cpp";
-            else
-                return ns + "." + Name + ".gen.cpp";
-        }
-        public string GetGenFileNameCSharp()
-        {
-            var ns = this.GetMetaValue(Symbol.SV_NameSpace);
-            if (ns == null)
-                return Name + ".gen.cs";
-            else
-                return ns + "." + Name + ".gen.cs";
         }
         public static bool IsSystemType(string name)
         {
@@ -344,148 +427,30 @@ namespace THeaderTools
             }
         }
     }
-    public class CppMember : CppMetaBase
-    {
-        public override string ToString()
-        {
-            return $"{VisitMode.ToString()}: {Type} {Name}";
-        }
-        public EDeclareType DeclareType
-        {
-            get;
-            set;
-        } = 0;
-        public int TypeStarNum
-        {
-            get;
-            protected set;
-        } = 0;
-        string mType;
-        public string Type
-        {
-            get { return mType; }
-            set
-            {
-                string suffix;
-                var pureType = CppClass.SplitPureName(value, out suffix);
-                pureType = CodeGenerator.Instance.NormalizePureType(pureType);
-                mType = pureType + suffix;
-                TypeStarNum = suffix.Length;
-            }
-        }
-        public string CSType
-        {
-            get
-            {
-                if (TypeClass != null)
-                {
-                    return TypeClass.GetCSName(TypeStarNum);
-                }
-                return Type;
-            }
-        }
-        public string CppType
-        {
-            get
-            {
-                if (TypeClass != null)
-                {
-                    return TypeClass.GetCSName(TypeStarNum);
-                }
-                return Type;
-            }
-        }
-        public CppClass TypeClass
-        {
-            get;
-            set;
-        }
-        public string PureType
-        {
-            get
-            {
-                return CppClass.RemovePtrAndRef(mType);
-            }
-        }
-        public string Name
-        {
-            get;
-            set;
-        }
-        public string DefaultValue
-        {
-            get;
-            set;
-        } = "";
-        public string GenPInvokeBinding_Friend(ref int nTable, CppClass klass)
-        {
-            string code = CodeGenerator.GenLine(nTable, $"static {Type} _Getter_{Name}({klass.GetFullName(true)}* self)");
-            code += CodeGenerator.GenLine(nTable++, "{");
-            code += CodeGenerator.GenLine(nTable, $"return self->{Name};");
-            code += CodeGenerator.GenLine(--nTable, "}");
-            code += CodeGenerator.GenLine(nTable, $"static void _Setter_{Name}({klass.GetFullName(true)}* self, {Type} InValue)");
-            code += CodeGenerator.GenLine(nTable++, "{");
-            code += CodeGenerator.GenLine(nTable, $"self->{Name} = InValue;");
-            code += CodeGenerator.GenLine(--nTable, "}");
-            return code;
-        }
-        public string GenPInvokeBinding(ref int nTable, CppClass klass, string visitorName)
-        {
-            string code = CodeGenerator.GenLine(nTable, $"extern \"C\" {CodeGenerator.Instance.API_Name} {Type} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}({klass.GetFullName(true)}* self)");
-            code += CodeGenerator.GenLine(nTable++, "{");
-            code += CodeGenerator.GenLine(nTable, $"return {visitorName}::_Getter_{Name}(self);");
-            code += CodeGenerator.GenLine(--nTable, "}");
-            code += CodeGenerator.GenLine(nTable, $"extern \"C\" {CodeGenerator.Instance.API_Name} void {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Setter_{Name}({klass.GetFullName(true)}* self, {Type} InValue)");
-            code += CodeGenerator.GenLine(nTable++, "{");
-            code += CodeGenerator.GenLine(nTable, $"{visitorName}::_Setter_{Name}(self, InValue);");
-            code += CodeGenerator.GenLine(--nTable, "}");
-            return code;
-        }
-        public string GenPInvokeBindingCSharp_Getter(CppClass klass)
-        {
-            return $"private extern static {CppType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}(PtrType self);";
-        }
-        public string GenPInvokeBindingCSharp_Setter(CppClass klass)
-        {
-            return $"private extern static void {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Setter_{Name}(PtrType self, {CppType} InValue);";
-        }
-        public string GenCallBindingCSharp(ref int nTable, CppClass klass)
-        {
-            string code;
-            code = CodeGenerator.GenLine(nTable, $"public {CSType} {Name}");
-
-            code += CodeGenerator.GenLine(nTable, "{");
-            nTable++;
-            
-            code += CodeGenerator.GenLine(nTable, $"get");
-            code += CodeGenerator.GenLine(nTable, "{");
-            nTable++;
-            code += CodeGenerator.GenLine(nTable, $"return {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}(mPtr);");
-            nTable--;
-            code += CodeGenerator.GenLine(nTable, "}");
-
-            code += CodeGenerator.GenLine(nTable, $"set");
-            code += CodeGenerator.GenLine(nTable, "{");
-            nTable++;
-            code += CodeGenerator.GenLine(nTable, $"{CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Setter_{Name}(mPtr, value);");
-            nTable--;
-            code += CodeGenerator.GenLine(nTable, "}");
-
-            nTable--;
-            code += CodeGenerator.GenLine(nTable, "}");
-            return code;
-        }
-    }
+    
     public class CppCallParameters : CppMetaBase
     {
+        public string GetCharSet()
+        {
+            var meta = this.GetMetaValue(CppClass.Symbol.SV_CharSet);
+            if (meta == null)
+                return "CharSet.Ansi";
+            return meta;
+        }
         public class CppParameter
         {
-            public CppParameter(string type,string v, EDeclareType dt)
+            public CppCallParameters Caller
+            {
+                get;
+                private set;
+            }
+            public CppParameter(CppCallParameters func, string type,string v, EDeclareType dt)
             {
                 Type = type;
                 Value = v;
                 DeclType = dt;
                 TypeClass = null;
+                Caller = func;
             }
             public EDeclareType DeclType
             {
@@ -499,11 +464,21 @@ namespace THeaderTools
                 set
                 {
                     string suffix;
-                    var pureType = CppClass.SplitPureName(value, out suffix);
-                    pureType = CodeGenerator.Instance.NormalizePureType(pureType);
-                    mType = pureType + suffix;
+                    CppPureType = CppClass.SplitPureName(value, out suffix);
+                    PureType = CodeGenerator.Instance.NormalizePureType(CppPureType);
+                    mType = PureType + suffix;
                     TypeStarNum = suffix.Length;
                 }
+            }
+            public string CppPureType
+            {
+                get;
+                private set;
+            }
+            public string PureType
+            {
+                get;
+                private set;
             }
             public string Value
             {
@@ -524,19 +499,25 @@ namespace THeaderTools
             {
                 get
                 {
-                    if (TypeClass != null)
-                        return TypeClass.GetCSName(TypeStarNum);
-                    return CodeGenerator.Instance.NormalizePureType(Type);
-                    //return Type;
+                    bool tryMashralString = true;
+                    if (Caller.GetCharSet() == "CharSet.None")
+                        tryMashralString = false;
+                    string result = CppClass.GetCSTypeImpl(TypeClass, TypeStarNum, DeclType, PureType, tryMashralString);
+                    if(result[0]=='.')
+                    {
+                        return result.Substring(1);
+                    }
+                    else
+                    {
+                        return result;
+                    }
                 }
             }
             public string CppType
             {
                 get
                 {
-                    if (TypeClass != null)
-                        return TypeClass.GetCppName(TypeStarNum);
-                    return Type.Replace(".", "::");
+                    return CppClass.GetCppTypeImpl(TypeClass, TypeStarNum, DeclType, CppPureType);
                 }
             }
         }
@@ -550,10 +531,6 @@ namespace THeaderTools
             for(int i = 0; i < Arguments.Count; i++)
             {
                 var cppName = Arguments[i].CppType;
-                if ((Arguments[i].DeclType & EDeclareType.DT_Const)!=0)
-                {
-                    cppName = "const " + cppName;
-                }
                 
                 if (i==0)
                     result += $"{cppName}{split}{Arguments[i].Value}";
@@ -590,220 +567,4 @@ namespace THeaderTools
         }
     }
 
-    public class CppFunction : CppCallParameters
-    {
-        public override string ToString()
-        {
-            string result = "";
-            if(IsVirtual)
-            {
-                result += "virtual ";
-            }
-            if (IsStatic)
-            {
-                result += "static ";
-            }
-            if (IsInline)
-            {
-                result += "inline ";
-            }
-
-            string suffix = "";
-            if (IsConst)
-                suffix += "const";
-
-            switch (Suffix)
-            {
-                case EFunctionSuffix.Delete:
-                    suffix += " = delete";
-                    break;
-                case EFunctionSuffix.Default:
-                    suffix += " = default";
-                    break;
-                case EFunctionSuffix.Override:
-                    suffix += " override";
-                    break;
-                case EFunctionSuffix.Pure:
-                    suffix += " = 0";
-                    break;
-            }   
-
-            if(IsReturnConstType)
-                result += $"const {ReturnType} {Name}({GetParameterString()})";
-            else
-                result += $"{ReturnType} {Name}({GetParameterString()})";
-
-            return result + suffix;
-        }
-        public bool IsConst
-        {
-            get;
-            set;
-        } = false;
-        public bool IsVirtual
-        {
-            get;
-            set;
-        } = false;
-        public bool IsStatic
-        {
-            get;
-            set;
-        } = false;
-        public bool IsInline
-        {
-            get;
-            set;
-        } = false;
-        public bool IsFriend
-        {
-            get;
-            set;
-        } = false;
-        public bool IsAPI
-        {//VFX_API
-            get;
-            set;
-        } = false;
-        public EFunctionSuffix Suffix
-        {
-            get;
-            set;
-        } = EFunctionSuffix.None;
-        public string Name
-        {
-            get;
-            set;
-        }
-        public bool IsReturnConstType
-        {
-            get;
-            set;
-        } = false;
-        string mReturnType;
-        public string ReturnType
-        {
-            get { return mReturnType; }
-            set
-            {
-                string suffix;
-                var pureType = CppClass.SplitPureName(value, out suffix);
-                pureType = CodeGenerator.Instance.NormalizePureType(pureType);
-                mReturnType = pureType + suffix;
-                ReturnTypeStarNum = suffix.Length;
-            }
-        }
-        public int ReturnTypeStarNum
-        {
-            get;
-            protected set;
-        } = 0;
-        public CppClass ReturnTypeClass
-        {
-            get;
-            set;
-        }
-        public string CSReturnType
-        {
-            get
-            {
-                if (ReturnTypeClass != null)
-                    return ReturnTypeClass.GetCSName(ReturnTypeStarNum);
-                return mReturnType;
-            }
-        }
-        public string CppReturnType
-        {
-            get
-            {
-                if (ReturnTypeClass != null)
-                    return ReturnTypeClass.GetCppName(ReturnTypeStarNum);
-                return mReturnType.Replace(".", "::");
-            }
-        }
-        public string GenPInvokeBinding_Friend(ref int nTable, CppClass klass)
-        {
-            var afterSelf = Arguments.Count > 0 ? ", " : "";
-            string code = CodeGenerator.GenLine(nTable, $"static {CppReturnType} {Name}({klass.GetFullName(true)}* self{afterSelf}{this.GetParameterString()})");
-            code += CodeGenerator.GenLine(nTable++, "{");
-            code += CodeGenerator.GenLine(nTable, $"if(self==nullptr)");
-            code += CodeGenerator.GenLine(nTable++, "{");
-            code += CodeGenerator.GenLine(nTable, $"return TypeDefault({CppReturnType});");
-            code += CodeGenerator.GenLine(--nTable, "}");
-            code += CodeGenerator.GenLine(nTable, $"return self->{Name}({this.GetParameterCallString()});");
-            code += CodeGenerator.GenLine(--nTable, "}");
-            return code;
-        }
-        public string GenPInvokeBinding(ref int nTable, CppClass klass, string visitorName, int index)
-        {
-            var afterSelf = Arguments.Count > 0 ? ", " : "";
-            string code = CodeGenerator.GenLine(nTable, $"extern \"C\" {CodeGenerator.Instance.API_Name} {CppReturnType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}{index}({klass.GetFullName(true)}* self{afterSelf}{this.GetParameterString()})");
-            code += CodeGenerator.GenLine(nTable++, "{");
-            code += CodeGenerator.GenLine(nTable, $"return {visitorName}::{Name}(self, {this.GetParameterCallString()});");
-            code += CodeGenerator.GenLine(--nTable, "}");
-            return code;
-        }
-        public string GenPInvokeBindingCSharp(CppClass klass, string selfType, bool isUnsafe, int index)
-        {
-            var afterSelf = Arguments.Count > 0 ? ", " : "";
-            var unsafeDef = isUnsafe ? "unsafe " : "";
-            return $"private extern static {unsafeDef}{ReturnType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}{index}({selfType} self{afterSelf}{this.GetParameterStringCSharp()});";
-        }
-        public string GenCallBindingCSharp(ref int nTable, CppClass klass, int index)
-        {
-            string code = CodeGenerator.GenLine(nTable, $"public {CSReturnType} {Name}({this.GetParameterStringCSharp()})");
-            code += CodeGenerator.GenLine(nTable, "{");
-            nTable++;
-            code += CodeGenerator.GenLine(nTable, $"return {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}{index}(mPtr, {this.GetParameterCallString()});");
-            nTable--;
-            code += CodeGenerator.GenLine(nTable, "}");
-            return code;
-        }
-    }
-    public class CppConstructor : CppCallParameters
-    {
-        public override string ToString()
-        {
-            return $"Constructor({GetParameterString()})";
-        }
-        public string ApiName
-        {
-            get;
-            set;
-        } = null;
-
-        public string GenPInvokeBinding_Friend(ref int nTable, CppClass klass)
-        {
-            string code = CodeGenerator.GenLine(nTable, $"static {klass.GetFullName(true)}* _NewConstruct({this.GetParameterString()})");
-            code += CodeGenerator.GenLine(nTable++, "{");
-            code += CodeGenerator.GenLine(nTable, $"return new {klass.GetFullName(true)}({this.GetParameterCallString()});");
-            code += CodeGenerator.GenLine(--nTable, "}");
-            return code;
-        }
-        public string GenPInvokeBinding(ref int nTable, CppClass klass, string visitorName, int index)
-        {
-            var afterSelf = Arguments.Count > 0 ? ", " : "";
-            string code = CodeGenerator.GenLine(nTable, $"extern \"C\" {CodeGenerator.Instance.API_Name} {klass.GetFullName(true)}* {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstruct{index}({this.GetParameterString()})");
-            code += CodeGenerator.GenLine(nTable++, "{");
-            code += CodeGenerator.GenLine(nTable, $"return {visitorName}::_NewConstruct({this.GetParameterCallString()});");
-            code += CodeGenerator.GenLine(--nTable, "}");
-            return code;
-        }
-        public string GenPInvokeBindingCSharp(CppClass klass, int index)
-        {
-            var afterSelf = Arguments.Count > 0 ? ", " : "";
-            return $"private extern static PtrType {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor{index}({this.GetParameterStringCSharp()});";
-        }
-        public string GenCallBindingCSharp(ref int nTable, CppClass klass, int index)
-        {
-            var afterSelf = Arguments.Count > 0 ? ", " : "";
-            string code = CodeGenerator.GenLine(nTable, $"public {klass.Name}{CodeGenerator.Symbol.NativeSuffix}({this.GetParameterStringCSharp()}{afterSelf}bool _dont_care_just_for_compile)");
-            code += CodeGenerator.GenLine(nTable, "{");
-            nTable++;
-            code += CodeGenerator.GenLine(nTable, $"mPtr = {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor{index}({this.GetParameterCallString()});");
-            nTable--;
-            code += CodeGenerator.GenLine(nTable, "}");
-            return code;
-        }
-    }
 }

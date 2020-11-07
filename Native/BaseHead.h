@@ -110,7 +110,18 @@ inline void _vfxTraceA(LPCSTR lpszFormat, ...)
 #define TR_FUNCTION(...)
 #define TR_MEMBER(...)
 #define TR_ENUM(...)
+#define TR_ENUM_MEMBER(...)
 #define TR_CONSTRUCTOR(...)
+
+#define TR_DECL(type) friend struct AuxRttiStruct<type>;\
+					friend struct type##_Visitor;
+
+#define TR_DISCARD(...)
+
+//typedef char SByte;
+#define SByte char
+#define Wchar16 unsigned short
+#define Wchar32 unsigned int
 
 typedef char Int8;
 typedef SHORT Int16;

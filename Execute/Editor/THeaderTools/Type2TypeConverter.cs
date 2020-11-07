@@ -8,20 +8,24 @@ namespace THeaderTools
     {
         private void InitType2Type()
         {
-            Cpp2CSTypes["char*"] = "string";
-            Cpp2CSTypes["Int8"] = "Int8";
+            Cpp2CSTypes["unsigned SByte"] = "byte";
+            Cpp2CSTypes["unsigned char"] = "byte";
+            Cpp2CSTypes["unsigned int"] = "UInt32";
+            Cpp2CSTypes["unsigned long"] = "UInt32";
+            Cpp2CSTypes["unsigned short"] = "UInt16";
+            
+            Cpp2CSTypes["Int8"] = "SByte";
             Cpp2CSTypes["Int16"] = "Int16";
             Cpp2CSTypes["Int32"] = "Int32";
             Cpp2CSTypes["Int64"] = "Int64";
-            Cpp2CSTypes["UInt8"] = "UInt8";
+            Cpp2CSTypes["UInt8"] = "byte";
             Cpp2CSTypes["UInt16"] = "UInt16";
             Cpp2CSTypes["UInt32"] = "UInt32";
             Cpp2CSTypes["UInt64"] = "UInt64";
             
             Cpp2CSTypes["bool"] = "bool";
             Cpp2CSTypes["void"] = "void";
-            Cpp2CSTypes["char"] = "char";
-            Cpp2CSTypes["unsigned char"] = "UInt8";
+            Cpp2CSTypes["char"] = "SByte";
             Cpp2CSTypes["short"] = "short";
             Cpp2CSTypes["unsigned short"] = "UInt16";
             Cpp2CSTypes["int"] = "int";
@@ -54,6 +58,24 @@ namespace THeaderTools
             if (Cpp2CSTypes.TryGetValue(pureType, out result))
                 return result;
             return pureType;
+        }
+        public void LoadType2TypeMapper(string file)
+        {
+            string text = System.IO.File.ReadAllText(file);
+            var lines = text.Split('\n');
+            foreach(var i in lines)
+            {
+                var pair = i.Split(',');
+                if (pair.Length != 2)
+                    continue;
+
+                string tar = pair[1];
+                if (pair[1].EndsWith('\r'))
+                    tar = tar.Substring(0, tar.Length - 1);
+                if (pair[1].EndsWith('\n'))
+                    tar = tar.Substring(0, tar.Length - 1);
+                Cpp2CSTypes[pair[0]] = tar;
+            }
         }
     }
 }

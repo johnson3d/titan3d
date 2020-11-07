@@ -4,7 +4,7 @@ using System.Text;
 
 namespace THeaderTools
 {
-    public class CppHeaderScanner
+    public partial class CppHeaderScanner
     {
         public class Symbol
         {
@@ -12,7 +12,9 @@ namespace THeaderTools
             public const string MetaFunction = "TR_FUNCTION";
             public const string MetaMember = "TR_MEMBER";
             public const string MetaEnum = "TR_ENUM";
+            public const string MetaEnumMember = "TR_ENUM_MEMBER";
             public const string MetaConstructor = "TR_CONSTRUCTOR";
+            public const string MetaDiscard = "TR_DISCARD";
             public const char BeginParentheses = '(';
             public const char EndParentheses = ')';
             public const char BeginBrace = '{';
@@ -29,64 +31,15 @@ namespace THeaderTools
         {
             return $"{sourceFilePath}:{sourceLineNumber}->{memberName}->{message}";
         }
-        public static string RemoveAllComment(string src)
-        {
-            for (int i = 0; i < src.Length; i++)
-            {
-                if (src[i] == Symbol.StringFlag)
-                {
-                    SkipString(ref i, src);
-                }
-                else if (src[i] == '/')
-                {
-                    if (i == src.Length - 1)
-                    {
-                        throw new Exception("error code: end with /'");
-                    }
-                    else if (src[i + 1] == '/')
-                    {
-                        int j = i + 2;
-                        while(j < src.Length)
-                        {
-                            if(src[j] == Symbol.NewLine)
-                            {//保留换行，否则代码很难看
-                                break;
-                            }
-                            if (j == src.Length - 1)
-                            {
-                                j++;
-                                break;
-                            }
-                            j++;
-                        }
-                        src = src.Remove(i, j - i);
-                    }
-                    else if (src[i + 1] == '*')
-                    {
-                        int j = i + 2;
-                        while (j < src.Length)
-                        {
-                            if (j == src.Length - 1)
-                                throw new Exception("error code");
-                            if (src[j] == '*' && src[j + 1] == '/')
-                            {
-                                break;
-                            }
-                            j++;
-                        }
-                        src = src.Remove(i, j - i + 2);
-                    }
-                }
-            }
-            return src;
-        }
-
-        public void ScanHeader(string file, List<CppClass> klsCollector)
+        
+        public void ScanHeader(string file, List<CppClass> klsCollector, List<CppEnum> EnumCollector)
         {
             string code = System.IO.File.ReadAllText(file);
-            code = RemoveAllComment(code);
-            
+
+            CppPreprocess.Preprocess(ref code);
+
             ScanClassCode(file, code, klsCollector);
+            ScanEnumCode(file, code, EnumCollector);
         }
         public static void ScanClassCode(string sourceHeader, string code, List<CppClass> klsCollector)
         {
@@ -172,13 +125,20 @@ namespace THeaderTools
         }
         public static int FindMetaFlags(int start, string code, string type, out string meta, FTokenEndChar cb)
         {
+            int metaStart;
+            return FindMetaFlags2(start, code, type, out metaStart, out meta, cb);
+        }
+        public static int FindMetaFlags2(int start, string code, string type, out int metaStart, out string meta, FTokenEndChar cb)
+        {
             int idx = -1;
+            metaStart = -1;
             meta = "";
             do
             {
                 idx = code.IndexOf(type, start);
                 if (idx < 0)
                     return -1;
+                metaStart = idx;
                 idx += type.Length;
 
                 if (IsTokenEndChar(idx, code, cb) == false)
@@ -294,14 +254,58 @@ namespace THeaderTools
                 ScanClassCode(sourceHeader, i, klsCollector);
             }
 
+            var result = new CppClass();
+            result.AnalyzeMetaString(klsMeta);
+
+            CppPreprocess.RemoveNextMember(ref code);
+
+            var rmvStrs = result.GetRemoveStrings();
+            if (rmvStrs != null)
+            {
+                foreach (var r in rmvStrs)
+                {
+                    int pos = code.IndexOf(r, 0);
+                    while(pos >= 0)
+                    {
+                        bool before = false;
+                        bool after = false;
+                        if ( pos>0)
+                        {
+                            if(IsValidVarChar(code[pos - 1])==false)
+                            {
+                                before = true;
+                            }
+                        }
+                        else
+                        {
+                            before = true;
+                        }
+                        if (pos + r.Length < code.Length - 1)
+                        {
+                            if(IsValidVarChar(code[pos + r.Length]) == false)
+                            {
+                                after = true;
+                            }
+                        }
+                        else
+                        {
+                            after = true;
+                        }
+                        if(before && after)
+                        {
+                            code = code.Remove(pos, r.Length);
+                        }
+                        pos = code.IndexOf(r, pos);
+                    }
+                }
+            }
+
             if (code.StartsWith(mustIsClass)==false)
                 throw new Exception(TraceMessage("not a class or struct"));
 
             var index = mustIsClass.Length;
             if(IsBlankChar(code[index])==false)
                 throw new Exception(TraceMessage("not a class or struct"));
-
-            var result = new CppClass();
 
             switch (mustIsClass)
             {
@@ -396,8 +400,6 @@ namespace THeaderTools
                 }
             }
 
-            result.AnalyzeMetaString(klsMeta);
-
             if (result.GetMetaValue(CppMetaBase.Symbol.SV_ReflectAll) != null || result.GetMetaValue(CppMetaBase.Symbol.SV_LayoutStruct) != null)
             {   
                 AnalyzeClassFullInfo(code, result.Name, result.Members, result.Methods, result.Constructors);
@@ -415,7 +417,7 @@ namespace THeaderTools
 
             return result;
         }
-        private static bool IsSkipKeyToken(string token, ref EDeclareType dtStyles)
+        public static bool IsSkipKeyToken(string token, ref EDeclareType dtStyles)
         {
             if (token == CodeGenerator.Instance.API_Name)
             {
@@ -442,324 +444,14 @@ namespace THeaderTools
                 case "friend":
                     dtStyles |= EDeclareType.DT_Friend;
                     return true;
+                case "unsigned":
+                    dtStyles |= EDeclareType.DT_Unsigned;
+                    return true;
                 default:
                     return false;
             }
         }        
-        public static void AnalyzeClassFullInfo(string code, string klassName, List<CppMember> members, List<CppFunction> methods, List<CppConstructor> constructors)
-        {
-            var curMetType = "";
-            var metaString = "";
-            bool hasMetaFlag = false;
-            int index = code.IndexOf('{');
-            index++;
-            SkipBlank(ref index, code);
-            EVisitMode mode = EVisitMode.Private;
-            if(code.StartsWith("struct"))
-            {
-                mode = EVisitMode.Public;
-            }
-            while(index<code.Length)
-            {
-                var token = GetTokenStringConbineStarAndRef(ref index, code, null);
-                while (token == ";")
-                {
-                    token = GetTokenStringConbineStarAndRef(ref index, code, null);
-                }
-                EDeclareType dtStyles = 0;
-                while (IsSkipKeyToken(token, ref dtStyles))
-                {
-                    token = GetTokenStringConbineStarAndRef(ref index, code, null);
-                }
-                if (index >= code.Length)
-                {
-                    if (token != "}")
-                    {
-                        throw new Exception(TraceMessage($"class {klassName} miss end character"));
-                    }
-                    break;
-                }
-                if ((dtStyles & EDeclareType.DT_Friend) == EDeclareType.DT_Friend)
-                {//处理友元类和函数
-                    int savedIndex = index;
-                    SkipChar(ref index, code, ";(", 1);
-                    if (code[index] == ';')
-                    {
-                        continue;
-                    }
-                    else if (code[index] == '(')
-                    {
-                        index--;
-                        int rangeStart;
-                        int rangeEnd;
-                        SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
-                        var args = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
-                        index = savedIndex;
-                    }
-                }
-                switch (token)
-                {
-                    case "public":
-                        mode = EVisitMode.Public;
-                        token = GetTokenString(ref index, code, null);
-                        if(token!=":")
-                            throw new Exception(TraceMessage($"class {klassName}: public miss ':'"));
-                        break;
-                    case "protected":
-                        mode = EVisitMode.Protected;
-                        token = GetTokenString(ref index, code, null);
-                        if (token != ":")
-                            throw new Exception(TraceMessage($"class {klassName}: protected miss ':'"));
-                        break;
-                    case "private":
-                        mode = EVisitMode.Private;
-                        token = GetTokenString(ref index, code, null);
-                        if (token != ":")
-                            throw new Exception(TraceMessage($"class {klassName}: private miss ':'"));
-                        break;
-                    case Symbol.MetaMember:
-                    case Symbol.MetaFunction:
-                    case Symbol.MetaConstructor:
-                        {
-                            int rangeStart;
-                            int rangeEnd;
-                            SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
-                            metaString = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
-                            SkipBlank(ref index, code);
-
-                            hasMetaFlag = true;
-                            curMetType = token;
-                        }
-                        break;
-                    default:
-                        {
-                            int rangeStart;
-                            int rangeEnd;
-                            var token2 = GetTokenStringConbineStarAndRef(ref index, code, null);
-                            if(token == klassName && token2 =="(")
-                            {//Constructor(...)构造器
-                                var tmp = new CppConstructor();
-                                index--;
-                                SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
-                                var args = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
-                                AnalyzeClassFuntionArguments(args, tmp);
-
-                                tmp.VisitMode = mode;
-                                tmp.HasMetaFlag = hasMetaFlag;
-                                tmp.AnalyzeMetaString(metaString);                                
-                                constructors.Add(tmp);
-                                if (curMetType != "" && curMetType != Symbol.MetaConstructor)
-                                {
-                                    throw new Exception(TraceMessage($"{klassName} Constructor MetaType invalid:{curMetType}->{tmp.ToString()}"));
-                                }
-                                curMetType = "";
-                                metaString = "";
-                                hasMetaFlag = false;
-                                token = GetTokenString(ref index, code, null);
-                                if(token == ";")
-                                {
-                                    continue;
-                                }
-                                else if(token == "{")
-                                {
-                                    index--;
-                                    SkipPair(ref index, code, '{', '}', out rangeStart, out rangeEnd);
-                                    var bodyCode = code.Substring(rangeStart, rangeEnd - rangeStart);
-                                    continue;
-                                }
-                                else
-                                {
-                                    throw new Exception(TraceMessage($"{klassName} Constructor miss ending"));
-                                }
-                            }
-                            else if(token2=="operator")
-                            {//操作符重载，这个无法分析反射信息，直接跳过
-                                //var op = GetTokenStringConbineStarAndRef(ref index, code, null);
-                                SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
-                                var tk0 =  GetTokenStringConbineStarAndRef(ref index, code, null);
-                                if (tk0 == ";")
-                                {
-                                    continue;
-                                }
-                                else if (tk0 == "{")
-                                {
-                                    index--;
-                                    SkipPair(ref index, code, '{', '}', out rangeStart, out rangeEnd);
-                                    var bodyCode = code.Substring(rangeStart, rangeEnd - rangeStart);
-                                    continue;
-                                }
-                                else
-                                {
-                                    throw new Exception(TraceMessage($"{klassName} operator error"));
-                                }
-                            }
-                            var token3 = GetTokenStringConbineStarAndRef(ref index, code, null);
-                            if (token3 == ";")
-                            {//是成员变量
-                                var tmp = new CppMember();
-                                tmp.VisitMode = mode;
-                                tmp.Name = token2;
-                                tmp.Type = token;
-                                tmp.DeclareType = dtStyles;
-                                tmp.HasMetaFlag = hasMetaFlag;
-                                tmp.AnalyzeMetaString(metaString);
-                                members.Add(tmp);
-                                if (curMetType!="" && curMetType != Symbol.MetaMember)
-                                {
-                                    throw new Exception(TraceMessage($"Member MetaType invalid:{curMetType}->{tmp.ToString()}"));
-                                }
-                                curMetType = "";
-                                metaString = "";
-                                hasMetaFlag = false;
-                            }
-                            else if (token3 == "=")
-                            {//是const成员变量或者c++11后支持的初始化
-                                var tmp = new CppMember();
-                                tmp.VisitMode = mode;
-                                tmp.Name = token2;
-                                tmp.Type = token;
-                                tmp.DeclareType = dtStyles;
-                                tmp.HasMetaFlag = hasMetaFlag;
-                                tmp.AnalyzeMetaString(metaString);
-                                members.Add(tmp);
-                                if (curMetType != "" && curMetType != Symbol.MetaMember)
-                                {
-                                    throw new Exception(TraceMessage($"Member MetaType invalid:{curMetType}->{tmp.ToString()}"));
-                                }
-                                curMetType = "";
-                                metaString = "";
-                                hasMetaFlag = false;
-
-                                tmp.DefaultValue = GetTokenString(ref index, code, null);//初始化值
-                                token3 = GetTokenString(ref index, code, null);
-                                if(token3!=";")
-                                    throw new Exception(TraceMessage($"member {tmp.ToString()} error"));
-                            }
-                            else if (token3 == "(")
-                            {//是函数
-                                var tmp = new CppFunction();
-                                //这里还要加上dtStyles标志出来的virtual static const inline一类的前缀处理，其中const可以用来修饰返回值
-                                if((dtStyles & EDeclareType.DT_Virtual)== EDeclareType.DT_Virtual)
-                                {
-                                    tmp.IsVirtual = true;
-                                }
-                                if ((dtStyles & EDeclareType.DT_Static) == EDeclareType.DT_Static)
-                                {
-                                    tmp.IsStatic = true;
-                                }
-                                if ((dtStyles & EDeclareType.DT_Inline) == EDeclareType.DT_Inline)
-                                {
-                                    tmp.IsInline = true;
-                                }
-                                if ((dtStyles & EDeclareType.DT_Friend) == EDeclareType.DT_Friend)
-                                {
-                                    tmp.IsFriend = true;
-                                }
-
-                                tmp.ReturnType = token;
-                                if ((dtStyles & EDeclareType.DT_Const) == EDeclareType.DT_Const)
-                                {
-                                    tmp.IsReturnConstType = true;
-                                }
-                                tmp.Name = token2;
-                                index--;
-                                SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
-                                var args = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
-                                token = GetTokenString(ref index, code, null);
-                                if (token == "const")
-                                {
-                                    token = GetTokenString(ref index, code, null);
-                                    tmp.IsConst = true;
-                                }
-
-                                AnalyzeClassFuntionArguments(args, tmp);
-
-                                if (token == "=")
-                                {//void fun(xxx) = 0;void fun(xxx) = default;void fun(xxx) = delete;
-                                    token = GetTokenString(ref index, code, null);
-                                    switch (token)
-                                    {
-                                        case "0":
-                                            //msvc可以支持 virtual TR func(...) abstract这样表示纯虚，但是clang不允许，我们就不做支持了
-                                            tmp.Suffix = EFunctionSuffix.Pure;
-                                            break;
-                                        case "default":
-                                            tmp.Suffix = EFunctionSuffix.Default;
-                                            break;
-                                        case "delete":
-                                            tmp.Suffix = EFunctionSuffix.Delete;
-                                            break;
-                                        default:
-                                            throw new Exception(TraceMessage($"function {tmp.Name} invalid suffix"));
-                                    }
-                                    token = GetTokenString(ref index, code, null);
-                                    if (token != ";")
-                                    {//其实virtual TR  Func(...) = 0 {...}也是c++允许的的，这种奇怪的情况懒得分析了
-                                        if (tmp.Suffix == EFunctionSuffix.Pure)
-                                        {
-                                            if (token == "{")
-                                            {
-                                                index--;
-                                                SkipPair(ref index, code, '{', '}', out rangeStart, out rangeEnd);
-                                                var bodyCode = code.Substring(rangeStart, rangeEnd - rangeStart);
-                                            }
-                                            else
-                                            {
-                                                throw new Exception(TraceMessage($"pure function {tmp.Name} miss ';'"));
-                                            }
-                                        }
-                                        else
-                                        {
-                                            throw new Exception(TraceMessage($"function {tmp.Name} miss ';'"));
-                                        }
-                                    }
-                                }
-                                else if (token == "override")
-                                {
-                                    tmp.Suffix = EFunctionSuffix.Override;
-                                    token = GetTokenString(ref index, code, null);
-                                    if (token == ";")
-                                    {
-
-                                    }
-                                    else if (token == "{")
-                                    {//void fun(...) const override
-                                        index--;
-                                        SkipPair(ref index, code, '{', '}', out rangeStart, out rangeEnd);
-                                        var bodyCode = code.Substring(rangeStart, rangeEnd - rangeStart);
-                                    }
-                                    else
-                                    {
-                                        throw new Exception(TraceMessage($"function {tmp.Name} error"));
-                                    }
-                                }
-                                else if (token == ";")
-                                {//一个函数申明结束
-
-                                }
-                                else if (token == "{")
-                                {//void fun(...) const
-                                    index--;
-                                    SkipPair(ref index, code, '{', '}', out rangeStart, out rangeEnd);
-                                    var bodyCode = code.Substring(rangeStart, rangeEnd - rangeStart);
-                                }
-
-                                tmp.HasMetaFlag = hasMetaFlag;
-                                tmp.AnalyzeMetaString(metaString);
-                                methods.Add(tmp);
-                                if (curMetType != "" && curMetType != Symbol.MetaFunction)
-                                {
-                                    throw new Exception(TraceMessage($"Function MetaType invalid:{curMetType}->{tmp.ToString()}"));
-                                }
-                                curMetType = "";
-                                metaString = "";
-                                hasMetaFlag = false;
-                            }
-                        }
-                        break;
-                }
-            }
-        }
+        
         public static void AnalyzeClassMember(string code, CppClass klass)
         {
             string meta;
@@ -767,18 +459,25 @@ namespace THeaderTools
             while (index >= 0)
             {
                 var memberInfo = new CppMember();
-                SkipBlank(ref index, code);
-                var nameEnd = code.IndexOf(Symbol.Semicolon, index);
-                var nameStrs = code.Substring(index, nameEnd - index + 1);//带上了分号
-                index += nameEnd - index;
-                var tokens = GetTokens(0, nameStrs.Length - 1, nameStrs, IsEndToken_TypeDef);
+                var token = "";
+                EDeclareType dtStyles = 0;
+                token = GetTokenStringConbineStarAndRef(ref index, code, null);
+                while (IsSkipKeyToken(token, ref dtStyles))
+                {
+                    token = GetTokenStringConbineStarAndRef(ref index, code, null);
+                }
 
-                if(tokens.Count<2)
-                    throw new Exception(TraceMessage("error code"));
+                memberInfo.DeclareType = dtStyles;
 
-                //volatile int xxx;
-                memberInfo.Name = tokens[tokens.Count - 1];
-                memberInfo.Type = tokens[tokens.Count - 2];
+                memberInfo.Type = token;
+                memberInfo.Name = GetTokenString(ref index, code, null);
+
+                token = GetTokenString(ref index, code, null);
+                if(token!=";")
+                {
+                    throw new Exception(TraceMessage($"{klass}.{memberInfo.Name} error"));
+                }
+
                 memberInfo.AnalyzeMetaString(meta);
 
                 klass.Members.Add(memberInfo);
@@ -792,49 +491,22 @@ namespace THeaderTools
             while (index >= 0)
             {
                 var funInfo = new CppConstructor();
-                SkipBlank(ref index, code);
-
-                var nameEnd = code.IndexOf(Symbol.BeginParentheses, index);
-                var nameStrs = code.Substring(index, nameEnd - index + 1);//带上了左大括号
-                index += nameEnd - index;
-
-                nameStrs = nameStrs.Replace("::", ".");
-                var tokens = GetTokens(0, nameStrs.Length - 1, nameStrs, IsEndToken_TypeDef);
-
+                var token = "";
+                EDeclareType dtStyles = 0;
+                token = GetTokenStringConbineStarAndRef(ref index, code, null);
+                while (IsSkipKeyToken(token, ref dtStyles))
                 {
-                    if (tokens.Count == 2)
-                    {//VFX_API ClassName(...)
-                        funInfo.ApiName = tokens[0];
-                    }
-                    else if (tokens.Count == 1)
-                    {//ClassName(...)
-                        funInfo.ApiName = null;
-                    }
-                    else
-                    {
-                        throw new Exception(TraceMessage("error code"));
-                    }
+                    token = GetTokenStringConbineStarAndRef(ref index, code, null);
+                }
+                if (token != klass.Name)
+                {
+                    throw new Exception(TraceMessage($"{klass} constructor error"));
                 }
 
-                int deeps = 0;
-                int argBegin = -1;
-                while (index < code.Length)
-                {
-                    if (code[index] == Symbol.BeginParentheses)
-                    {
-                        if (deeps == 0)
-                            argBegin = index + 1;
-                        deeps++;
-                    }
-                    else if (code[index] == Symbol.EndParentheses)
-                    {
-                        deeps--;
-                        if (deeps == 0)
-                            break;
-                    }
-                    index++;
-                }
-                var args = code.Substring(argBegin, index - argBegin);
+                int rangeStart;
+                int rangeEnd;
+                SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
+                var args = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
 
                 AnalyzeClassFuntionArguments(args, funInfo);
 
@@ -852,67 +524,54 @@ namespace THeaderTools
             while (index>=0)
             {
                 var funInfo = new CppFunction();
-                SkipBlank(ref index, code);
-
-                var nameEnd = code.IndexOf(Symbol.BeginParentheses, index);
-                var nameStrs = code.Substring(index, nameEnd - index + 1);//带上了左大括号
-                index += nameEnd - index;
-
-                nameStrs = nameStrs.Replace("::", ".");
-                var tokens = GetTokens(0, nameStrs.Length - 1, nameStrs, IsEndToken_TypeDef);
-                for (int i = 0; i < tokens.Count; i++)
+                var token = "";
+                EDeclareType dtStyles = 0;
+                token = GetTokenStringConbineStarAndRef(ref index, code, null);
+                while (IsSkipKeyToken(token, ref dtStyles))
                 {
-                    if (tokens[i] == "virtual")
-                    {
-                        funInfo.IsVirtual = true;
-                        tokens.RemoveAt(i);
-                        i--;
-                    }
-                    else if (tokens[i] == "const")
-                    {
-                        funInfo.IsReturnConstType = true;
-                        tokens.RemoveAt(i);
-                        i--;
-                    }
-                    else if (tokens[i] == CodeGenerator.Instance.API_Name)
-                    {
-                        funInfo.IsAPI = true;
-                        tokens.RemoveAt(i);
-                        i--;
-                    }
+                    token = GetTokenStringConbineStarAndRef(ref index, code, null);
+                }
+                if ((dtStyles & EDeclareType.DT_Virtual) == EDeclareType.DT_Virtual)
+                {
+                    funInfo.IsVirtual = true;
+                }
+                if ((dtStyles & EDeclareType.DT_Static) == EDeclareType.DT_Static)
+                {
+                    funInfo.IsStatic = true;
+                }
+                if ((dtStyles & EDeclareType.DT_Inline) == EDeclareType.DT_Inline)
+                {
+                    funInfo.IsInline = true;
+                }
+                if ((dtStyles & EDeclareType.DT_Friend) == EDeclareType.DT_Friend)
+                {
+                    funInfo.IsFriend = true;
                 }
 
-                if (tokens.Count == 2)
+                funInfo.ReturnType = token;
+                if ((dtStyles & EDeclareType.DT_Const) == EDeclareType.DT_Const)
                 {
-                    funInfo.ReturnType = tokens[0];
-                    funInfo.Name = tokens[1];
+                    funInfo.IsReturnConstType = true;
                 }
-                else
+                if ((dtStyles & EDeclareType.DT_Unsigned) == EDeclareType.DT_Unsigned)
                 {
-                    throw new Exception(TraceMessage($"{klass.Name} function is invalid"));
+                    funInfo.IsReturnUnsignedType = true;
                 }
 
-                int deeps = 0;
-                int argBegin = -1;
-                while(index<code.Length)
-                {
-                    if (code[index] == Symbol.BeginParentheses)
-                    {
-                        if (deeps == 0)
-                            argBegin = index + 1;
-                        deeps++;
-                    }
-                    else if (code[index] == Symbol.EndParentheses)
-                    {
-                        deeps--;
-                        if (deeps == 0)
-                            break;
-                    }
-                    index++;
-                }
-                var args = code.Substring(argBegin, index - argBegin);
+                funInfo.Name = GetTokenString(ref index, code, null);
+
+                int rangeStart;
+                int rangeEnd;
+                SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
+                var args = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
 
                 AnalyzeClassFuntionArguments(args, funInfo);
+
+                token = GetTokenString(ref index, code, null);
+                if (token == "const")
+                {//这是一个const函数
+                    funInfo.IsConst = true;
+                }
 
                 funInfo.AnalyzeMetaString(meta);
                 klass.Methods.Add(funInfo);
@@ -943,11 +602,16 @@ namespace THeaderTools
                 string name;
                 EDeclareType dtStyles;
                 NormalizeArgument(i, out type, out name, out dtStyles);
-                function.Arguments.Add(new CppCallParameters.CppParameter(type, name, dtStyles));
+                function.Arguments.Add(new CppCallParameters.CppParameter(function, type, name, dtStyles));
             }
         }
         private static void NormalizeArgument(string code, out string type, out string name, out EDeclareType dtStyles)
         {
+            var defaultValue = code.IndexOf('=');
+            if (defaultValue>0)
+            {
+                code = code.Substring(0, defaultValue);
+            }
             dtStyles = 0;
             var tokens = GetTokens(0, code.Length-1, code, IsEndToken_TypeDef);
             for(int i=0; i<tokens.Count; i++)
@@ -960,7 +624,13 @@ namespace THeaderTools
                 }
                 else if(tokens[i] == "const")
                 {
-                    dtStyles = EDeclareType.DT_Const;
+                    dtStyles |= EDeclareType.DT_Const;
+                    tokens.RemoveAt(i);
+                    i--;
+                }
+                else if (tokens[i] == "unsigned")
+                {
+                    dtStyles |= EDeclareType.DT_Unsigned;
                     tokens.RemoveAt(i);
                     i--;
                 }
@@ -1129,6 +799,16 @@ namespace THeaderTools
                 return cb(index, str);
             return false;
         }
+        public static bool IsValidVarChar(char c)
+        {
+            if (Char.IsDigit(c))
+                return true;
+            else if (Char.IsLetter(c))
+                return true;
+            else if (c == '_')
+                return true;
+            return false;
+        }
         private static bool IsEndToken_TypeDef(int index, string str)
         {
             return false;
@@ -1157,7 +837,7 @@ namespace THeaderTools
             {
                 GetNextTokenRange(start, code, out tokenStart, out tokenEnd, cb);
                 var tmp1 = code.Substring(tokenStart, tokenEnd - tokenStart);
-                if(IsAllPtrOrRef(tmp1))
+                if(IsAllPtrOrRef(tmp1) && IsValidVarChar(result[result.Length - 1]))
                 {
                     start = tokenEnd;
                     result += tmp1; 

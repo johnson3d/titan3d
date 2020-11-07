@@ -92,12 +92,24 @@ namespace THeaderTools
                 moduleNS = moduleNS.Substring("module_name=".Length);
                 CodeGenerator.Instance.GenImportModuleNC = moduleNS;
             }
+            string pch = FindArgument(args, "pch=");
+            if (pch != null)
+            {//example: module_name=\"libCore.so\"
+                pch = pch.Substring("pch=".Length);
+                CodeGenerator.Instance.IncludePCH = pch;
+            }
+            string type2type = FindArgument(args, "type2type=");
+            if (type2type != null)
+            {//example: module_name=\"libCore.so\"
+                type2type = type2type.Substring("type2type=".Length);
+                CodeGenerator.Instance.LoadType2TypeMapper(type2type);
+            }
             CodeGenerator codeManager = CodeGenerator.Instance;
             codeManager.Reset(genDir);
             foreach (var i in headers)
             {
                 var headScanner = new CppHeaderScanner();
-                headScanner.ScanHeader(i.Value, codeManager.ClassCollector);
+                headScanner.ScanHeader(i.Value, codeManager.ClassCollector, codeManager.EnumCollector);
             }
             codeManager.GenCode(genDir, bGenPInvoke);
             if (bGenCSharp)
@@ -105,7 +117,8 @@ namespace THeaderTools
                 codeManager.GenCodeCSharp(genDir);
             }
 
-            codeManager.MakeSharedProject();
+            codeManager.MakeSharedProjectCpp();
+            codeManager.MakeSharedProjectCSharp();
         }
         static bool CollectInclude(System.Xml.XmlNode sn, string spjPath, Dictionary<string,string> headers)
         {

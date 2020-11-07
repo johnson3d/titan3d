@@ -12,6 +12,7 @@ namespace THeaderTools
         public string API_Name = "VFX_API";
         public bool GenInternalClass = false;
         public string GenImportModuleNC = "\"Core.Windows.dll\"";
+        public string IncludePCH = null;
         #endregion
         public class Symbol
         {
@@ -30,30 +31,34 @@ namespace THeaderTools
             public const string NativeSuffix = "_PtrType";
             public const string LayoutPrefix = "CS";//CppStruct的意思
             public const string SDKPrefix = "TSDK_";
+
+            public const string PreprocessDiscardBegin = "//Begin!@#$%^&<This block will be discard for tht.exe analyze>";
+            public const string PreprocessDiscardEnd = "//End!@#$%^&<This block will be discard for tht.exe analyze>";
+
+            public static readonly string[] PreprocessDiscardMacros = {
+                "TR_DECL",
+            };
         }
         private CodeGenerator()
         {
             InitType2Type();
         }
         string mGenDirectory;
+        string[] OldCppFiles;
+        string[] OldCsFiles;
+        List<string> NewCppFiles = new List<string>();
+        List<string> NewCsFiles = new List<string>();
         public void Reset(string genDir)
         {
             mGenDirectory = genDir;
             ClassCollector.Clear();
-            var allFiles = System.IO.Directory.GetFiles(genDir, "*.cpp");
-            foreach(var i in allFiles)
-            {
-                System.IO.File.Delete(i);
-                //System.IO.File.Move(i, i + ".tmp");
-            }
-            allFiles = System.IO.Directory.GetFiles(genDir, "*.cs");
-            foreach (var i in allFiles)
-            {
-                System.IO.File.Delete(i);
-                //System.IO.File.Move(i, i + ".tmp");
-            }
+            EnumCollector.Clear();
+            OldCppFiles = System.IO.Directory.GetFiles(genDir, "*.cpp");            
+            OldCsFiles = System.IO.Directory.GetFiles(genDir, "*.cs");
+            NewCppFiles.Clear();
+            NewCsFiles.Clear();
         }
-        public void MakeSharedProject()
+        public void MakeSharedProjectCpp()
         {
             System.Xml.XmlDocument myXmlDoc = new System.Xml.XmlDocument();
             myXmlDoc.Load(mGenDirectory + "Empty_CodeGen.vcxitems");
@@ -62,6 +67,14 @@ namespace THeaderTools
             root.AppendChild(compile);
             var allFiles = System.IO.Directory.GetFiles(mGenDirectory, "*.cpp");
             foreach (var i in allFiles)
+            {
+                if (NewCppFiles.Contains(i))
+                    continue;
+                else
+                    System.IO.File.Delete(i);
+            }
+            allFiles = System.IO.Directory.GetFiles(mGenDirectory, "*.cpp");
+            foreach (var i in allFiles)
             {                
                 var cpp = myXmlDoc.CreateElement("ClCompile", root.NamespaceURI);
                 var file = myXmlDoc.CreateAttribute("Include");
@@ -69,7 +82,69 @@ namespace THeaderTools
                 cpp.Attributes.Append(file);
                 compile.AppendChild(cpp);
             }
-            myXmlDoc.Save(mGenDirectory + "CodeGen.vcxitems");
+
+            var streamXml = new System.IO.MemoryStream();
+            var writer = new System.Xml.XmlTextWriter(streamXml, Encoding.UTF8);
+            writer.Formatting = System.Xml.Formatting.Indented;
+            myXmlDoc.Save(writer);
+            var reader = new System.IO.StreamReader(streamXml, Encoding.UTF8);
+            streamXml.Position = 0;
+            var content = reader.ReadToEnd();
+            reader.Close();
+            streamXml.Close();
+
+            var projFile = mGenDirectory + "CodeGen.vcxitems";
+            if (System.IO.File.Exists(projFile))
+            {
+                string old_code = System.IO.File.ReadAllText(projFile);
+                if (content == old_code)
+                    return;
+            }
+            System.IO.File.WriteAllText(projFile, content);
+        }
+        public void MakeSharedProjectCSharp()
+        {
+            System.Xml.XmlDocument myXmlDoc = new System.Xml.XmlDocument();
+            myXmlDoc.Load(mGenDirectory + "Empty_CodeGenCSharp.projitems");
+            var root = myXmlDoc.LastChild;
+            var compile = myXmlDoc.CreateElement("ItemGroup", root.NamespaceURI);
+            root.AppendChild(compile);
+            var allFiles = System.IO.Directory.GetFiles(mGenDirectory, "*.cs");
+            foreach (var i in allFiles)
+            {
+                if (NewCsFiles.Contains(i))
+                    continue;
+                else
+                    System.IO.File.Delete(i);
+            }
+            allFiles = System.IO.Directory.GetFiles(mGenDirectory, "*.cs");
+            foreach (var i in allFiles)
+            {
+                var cs = myXmlDoc.CreateElement("Compile", root.NamespaceURI);
+                var file = myXmlDoc.CreateAttribute("Include");
+                file.Value = i;
+                cs.Attributes.Append(file);
+                compile.AppendChild(cs);
+            }
+
+            var streamXml = new System.IO.MemoryStream();
+            var writer = new System.Xml.XmlTextWriter(streamXml, Encoding.UTF8);
+            writer.Formatting = System.Xml.Formatting.Indented;
+            myXmlDoc.Save(writer);
+            var reader = new System.IO.StreamReader(streamXml, Encoding.UTF8);
+            streamXml.Position = 0;
+            var content = reader.ReadToEnd();
+            reader.Close();
+            streamXml.Close();
+
+            var projFile = mGenDirectory + "CodeGenCSharp.projitems";
+            if (System.IO.File.Exists(projFile))
+            {
+                string old_code = System.IO.File.ReadAllText(projFile);
+                if (content == old_code)
+                    return;
+            }
+            System.IO.File.WriteAllText(projFile, content);
         }
         private void CheckValid()
         {
@@ -77,8 +152,13 @@ namespace THeaderTools
             {
                 i.CheckValid(this);
             }
+            foreach (var i in EnumCollector)
+            {
+                i.CheckValid(this);
+            }
         }
         public List<CppClass> ClassCollector = new List<CppClass>();
+        public List<CppEnum> EnumCollector = new List<CppEnum>();
         public CppClass FindClass(string fullName)
         {
             foreach (var i in ClassCollector)
@@ -117,6 +197,10 @@ namespace THeaderTools
             {
                 string genCode = "//This cpp is generated by THT.exe\n";
 
+                if (CodeGenerator.Instance.IncludePCH != null)
+                {
+                    genCode += $"#include \"{CodeGenerator.Instance.IncludePCH}\"\n";
+                }
                 genCode += $"#include \"{i.HeaderSource}\"\n";
 
                 genCode += "\n\n\n";
@@ -144,6 +228,37 @@ namespace THeaderTools
                 }
 
                 var file = targetDir + i.GetGenFileName();
+                NewCppFiles.Add(file);
+                if (System.IO.File.Exists(file))
+                {
+                    string old_code = System.IO.File.ReadAllText(file);
+                    if (genCode == old_code)
+                        continue;
+                }
+                System.IO.File.WriteAllText(file, genCode); ;
+            }
+
+            foreach (var i in EnumCollector)
+            {
+                string genCode = "//This cpp is generated by THT.exe\n";
+
+                genCode += $"#include \"{i.HeaderSource}\"\n";
+
+                genCode += "\n\n\n";
+
+                genCode += "using namespace EngineNS;\n";
+
+                genCode += "\n";
+                genCode += EnumCodeHelper.GenCppReflection(i);
+
+                var file = targetDir + i.GetGenFileName();
+                NewCppFiles.Add(file);
+                if (System.IO.File.Exists(file))
+                {
+                    string old_code = System.IO.File.ReadAllText(file);
+                    if (genCode == old_code)
+                        continue;
+                }
                 System.IO.File.WriteAllText(file, genCode); ;
             }
         }
@@ -151,9 +266,7 @@ namespace THeaderTools
         {
             string code = "";
             var ns = klass.GetNameSpace();
-            if (ns == null)
-                ns = "EngineNS";
-            else
+            if (ns != null)
                 ns = ns.Replace(".", "::");            
             code += $"{Symbol.BeginRtti}({klass.Name},{ns})\n";
             WriteMetaCode(ref code, klass, Symbol.AppendClassMeta);
@@ -164,6 +277,8 @@ namespace THeaderTools
                 foreach (var i in klass.Members)
                 {
                     if ((i.DeclareType & (EDeclareType.DT_Const | EDeclareType.DT_Static)) != 0)
+                        continue;
+                    if (i.FunctionPtr != null)
                         continue;
                     code += $"\t{Symbol.DefMember}({i.Name});\n";
                     WriteMetaCode(ref code, i, Symbol.AppendMemberMeta);
@@ -179,10 +294,12 @@ namespace THeaderTools
                     if (i.IsFriend)
                         continue;
                     if (i.IsStatic)
+                    {
                         continue;
+                    }
                     var returnConverter = i.GetReturnConverter();
                     if (returnConverter == null)
-                        returnConverter = i.ReturnType;
+                        returnConverter = i.CppReturnType;
                     code += $"\t{Symbol.DefMethod}{i.Arguments.Count}({i.Name}, {returnConverter}";
                     if (i.Arguments.Count > 0)
                         code += ", ";
@@ -268,6 +385,9 @@ namespace THeaderTools
                 if ((i.DeclareType & (EDeclareType.DT_Const | EDeclareType.DT_Static)) != 0)
                     continue;
 
+                if (i.FunctionPtr != null)
+                    continue;
+
                 nTable = 2;
                 friendCode += i.GenPInvokeBinding_Friend(ref nTable, klass);
                 nTable = 0;
@@ -282,12 +402,21 @@ namespace THeaderTools
                 if (i.IsFriend)
                     continue;
                 if (i.IsStatic)
-                    continue;
-                nTable = 2;
-                friendCode += i.GenPInvokeBinding_Friend(ref nTable, klass);
+                {
+                    nTable = 2;
+                    friendCode += i.GenPInvokeBinding_StaticFriend(ref nTable, klass);
 
-                nTable = 0;
-                invokeCode += i.GenPInvokeBinding(ref nTable, klass, $"{visitor_ns}::{klass.Name}_Visitor", MethodIndex++);
+                    nTable = 0;
+                    invokeCode += i.GenPInvokeBinding_Static(ref nTable, klass, $"{visitor_ns}::{klass.Name}_Visitor", MethodIndex++);
+                }
+                else
+                {
+                    nTable = 2;
+                    friendCode += i.GenPInvokeBinding_Friend(ref nTable, klass);
+
+                    nTable = 0;
+                    invokeCode += i.GenPInvokeBinding(ref nTable, klass, $"{visitor_ns}::{klass.Name}_Visitor", MethodIndex++);
+                }
             }
 
             nTable = 0;           
