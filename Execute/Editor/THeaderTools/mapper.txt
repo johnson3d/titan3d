@@ -1,0 +1,12 @@
+ImWchar,Wchar16
+Wchar16,Wchar16
+ImVec2,Vector2
+ImVec3,Vector3
+ImVec4,Vector4
+Vector2,Vector2
+ImU32,UInt32
+ImGuiID,UInt32
+ImTextureID,void*
+ImGuiDir,ImGuiDir_
+ImGuiInputTextFlags,ImGuiInputTextFlags_
+ImGuiKey,ImGuiKey_

@@ -57,16 +57,6 @@ namespace THeaderTools
                 return fullName;
             }
         }
-        public string Type
-        {
-            get
-            {
-                var type = GetMetaValue(Symbol.SV_EnumType);
-                if (type == null)
-                    return "int";
-                return type;
-            }
-        }
         public string Name
         {
             get;

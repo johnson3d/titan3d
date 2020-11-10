@@ -112,6 +112,7 @@ inline void _vfxTraceA(LPCSTR lpszFormat, ...)
 #define TR_ENUM(...)
 #define TR_ENUM_MEMBER(...)
 #define TR_CONSTRUCTOR(...)
+#define TR_CALLBACK(...)
 
 #define TR_DECL(type) friend struct AuxRttiStruct<type>;\
 					friend struct type##_Visitor;

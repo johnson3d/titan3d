@@ -126,7 +126,7 @@ namespace THeaderTools
             return result;
         }
         public string GetParameterStringCSharp()
-        {//bPtrType如果false，那么就要把XXX_Wrapper.PtrType转换成XXX_Wrapper
+        {//bPtrType如果false，那么就要把XXX_PtrType.PtrType转换成XXX_PtrType
             string result = "";
             for (int i = 0; i < Arguments.Count; i++)
             {

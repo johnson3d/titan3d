@@ -96,7 +96,6 @@ namespace THeaderTools
             public const string SV_UsingNS = "SV_UsingNS";//For class enum
             public const string SV_ReflectAll = "SV_ReflectAll";//For class 
             public const string SV_LayoutStruct = "SV_LayoutStruct";//For class 
-            public const string SV_EnumType = "SV_EnumType";
             public const string SV_RemoveStrings = "SV_RemoveStrings";//For class 
             public const string SV_CharSet = "SV_CharSet";//For method: CharSet.Ansi , CharSet.Unicode
         }

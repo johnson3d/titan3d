@@ -251,6 +251,9 @@ namespace THeaderTools
                         break;
                 }
 
+
+                var converter = i.CSType;
+
                 if (i.FunctionPtr != null)
                 {
                     var pname = i.Name.Replace("*", "");
@@ -260,7 +263,7 @@ namespace THeaderTools
                 {
                     if (CppHeaderScanner.IsAllowFixedArrayType(i.Type))
                     {
-                        declMember += $"fixed {i.Type} {i.Name}[";
+                        declMember += $"fixed {converter} {i.Name}[";
                         foreach (var j in i.ArraySize)
                         {
                             declMember += $"{j},";
@@ -275,7 +278,7 @@ namespace THeaderTools
                         {
                             numOfElements += j;
                         }
-                        declMember += $"{i.Type} ";
+                        declMember += $"{converter} ";
                         for (int j = 0; j < numOfElements; j++)
                         {
                             if (j == numOfElements - 1)
@@ -287,12 +290,12 @@ namespace THeaderTools
                 }
                 else if (CodeGenerator.Instance.IsSystemType(i.PureType))
                 {
-                    declMember += $"{i.Type} {i.Name};";
+                    declMember += $"{converter} {i.Name};";
                 }
                 else
                 {
                     var csType = i.CSType;
-                    declMember += $"{csType} {i.Name};";
+                    declMember += $"{converter} {i.Name};";
                 }
 
                 code += GenLine(nTable, declMember);

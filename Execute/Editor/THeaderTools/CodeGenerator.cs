@@ -29,7 +29,7 @@ namespace THeaderTools
             public const string AppendConstructorMeta = "AppendConstructorMetaInfo";
 
             public const string NativeSuffix = "_PtrType";
-            public const string LayoutPrefix = "CS";//CppStruct的意思
+            public const string LayoutPrefix = "";//"CS";//CppStruct的意思
             public const string SDKPrefix = "TSDK_";
 
             public const string PreprocessDiscardBegin = "//Begin!@#$%^&<This block will be discard for tht.exe analyze>";

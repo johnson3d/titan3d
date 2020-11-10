@@ -584,28 +584,93 @@ namespace THeaderTools
         }
         public static void AnalyzeClassFuntionArguments(string code, CppCallParameters function)
         {
-            var args = code.Split(',');
-            function.Arguments.Clear();
-
-            foreach (var i in args)
+            bool isBlankStr = true;
+            foreach (var j in code)
             {
-                bool isBlankStr = true;
-                foreach(var j in i)
+                if (IsBlankChar(j) == false)
                 {
-                    if(IsBlankChar(j)==false)
+                    isBlankStr = false;
+                    break;
+                }
+            }
+            if (isBlankStr == true)
+            {
+                return;
+            }
+            code = code + ";";
+            int index = 0;
+            SkipBlank(ref index, code);
+            List<KeyValuePair<string, string>> args = new List<KeyValuePair<string, string>>();
+            while(index<code.Length)
+            {
+                int start = index;
+                SkipChar(ref index, code, ",=;", 1);
+                if (code[index] == ';')
+                {
+                    var tmp = code.Substring(start, index - start);
+                    string type;
+                    string name;
+                    EDeclareType dtStyles;
+                    NormalizeArgument(tmp, out type, out name, out dtStyles);
+                    function.Arguments.Add(new CppCallParameters.CppParameter(function, type, name, dtStyles));
+                    return;
+                }
+                else if (code[index] == ',')
+                {
+                    var tmp = code.Substring(start, index - start);
+                    index++;
+                    string type;
+                    string name;
+                    EDeclareType dtStyles;
+                    NormalizeArgument(tmp, out type, out name, out dtStyles);
+                    function.Arguments.Add(new CppCallParameters.CppParameter(function, type, name, dtStyles));
+                }
+                else if (code[index] == '=')
+                {
+                    var tmp = code.Substring(start, index - start);
+                    string type;
+                    string name;
+                    EDeclareType dtStyles;
+                    NormalizeArgument(tmp, out type, out name, out dtStyles);
+                    function.Arguments.Add(new CppCallParameters.CppParameter(function, type, name, dtStyles));
+
+                    //如果有缺省值，那么就要找到,;确认本参数的缺省值表达式结束，但是c++有int a = (int)(0)以及char* a = "afsad"，还有Vector2 a = new Vector2(1,1),int[] a = {1,2}这种变态写法
+                    //所以这里通过Skip配对的字符来跳过，然后再统计
+                    index++;
+                    SkipChar(ref index, code, ",;", 1, "([{", ")]}");
+                    if (code[index] == ';')
                     {
-                        isBlankStr = false;
-                        break;
+                        return;
+                    }
+                    else if (code[index] == ',')
+                    {
+                        index++;
+                        continue;
                     }
                 }
-                if (isBlankStr)
-                    continue;
-                string type;
-                string name;
-                EDeclareType dtStyles;
-                NormalizeArgument(i, out type, out name, out dtStyles);
-                function.Arguments.Add(new CppCallParameters.CppParameter(function, type, name, dtStyles));
             }
+            //var args = code.Split(',');
+            //function.Arguments.Clear();
+
+            //foreach (var i in args)
+            //{
+            //    bool isBlankStr = true;
+            //    foreach(var j in i)
+            //    {
+            //        if(IsBlankChar(j)==false)
+            //        {
+            //            isBlankStr = false;
+            //            break;
+            //        }
+            //    }
+            //    if (isBlankStr)
+            //        continue;
+            //    string type;
+            //    string name;
+            //    EDeclareType dtStyles;
+            //    NormalizeArgument(i, out type, out name, out dtStyles);
+            //    function.Arguments.Add(new CppCallParameters.CppParameter(function, type, name, dtStyles));
+            //}
         }
         private static void NormalizeArgument(string code, out string type, out string name, out EDeclareType dtStyles)
         {
@@ -684,7 +749,39 @@ namespace THeaderTools
             //var str = src.Substring(i, j - i);
             i = j;
         }
-        public static void SkipChar(ref int i, string code, string CmpChars, int count)
+        public static bool SkipChar(ref int i, string code, string CmpChars, int count, string skipPairBegins, string skipPairEnds)
+        {//匹配跳过CmpChars里面的字符n个，如果skipPairBegins里面有匹配的，那么在skipPairEns中匹配的字符都需要舍弃
+            if (skipPairBegins.Length != skipPairEnds.Length)
+            {
+                throw new Exception(TraceMessage($"SkipChar [{skipPairBegins} {skipPairEnds}] invalid"));
+            }
+            int matchCount = 0;
+            while(i<code.Length)
+            {
+                var c = code[i];
+                if (CmpChars.Contains(c))
+                {
+                    matchCount++;
+                    if (matchCount == count)
+                        return true;
+                }
+                var curPair = skipPairBegins.IndexOf(c);
+                if (curPair >= 0)
+                {
+                    i--;
+                    int rangeStart;
+                    int rangeEnd;
+                    SkipPair(ref i, code, skipPairBegins[curPair], skipPairEnds[curPair], out rangeStart, out rangeEnd);
+                    i = rangeEnd;
+                }
+                else
+                {
+                    i++;
+                }
+            }
+            return false;
+        }
+        public static bool SkipChar(ref int i, string code, string CmpChars, int count)
         {
             int saveStart = i;
             int deep = 0;
@@ -700,12 +797,13 @@ namespace THeaderTools
                     {
                         deep++;
                         if (deep == count)
-                            return;
+                            return true;
                     }
                 }
                 i++;
             }
-            throw new Exception(TraceMessage($"no any character[{CmpChars}] in {code} from {saveStart}"));
+            //throw new Exception(TraceMessage($"no any character[{CmpChars}] in {code} from {saveStart}"));
+            return false;
         }
         public static void SkipPair(ref int i, string code, char startChar, char endChar, out int rangeStart, out int rangeEnd)
         {//得到的结果跳过endChar了
