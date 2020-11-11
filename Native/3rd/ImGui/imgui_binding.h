@@ -1,7 +1,4 @@
 #pragma once
-#include "BaseHead.h"
-#include "CoreRtti.h"
-#include "CSharpAPI.h"
 #include "imgui.h"
 
 NS_BEGIN

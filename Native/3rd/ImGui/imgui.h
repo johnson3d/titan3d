@@ -37,9 +37,9 @@ Index of this file:
 
 #pragma once
 
-#include "../NativeCode/BaseHead.h"
-#include "../NativeCode/CoreRtti.h"
-#include "../NativeCode/CSharpAPI.h"
+#include "../../BaseHead.h"
+#include "../../BaseDefines/CoreRtti.h"
+#include "../../CSharpAPI.h"
 
 // Configuration file with compile-time options (edit imconfig.h or #define IMGUI_USER_CONFIG to your own filename)
 #ifdef IMGUI_USER_CONFIG
