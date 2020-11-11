@@ -378,11 +378,20 @@ inline ArgumentStream& operator >>(ArgumentStream& stream, std::string& v)
 struct RttiStruct;
 struct RttiMethodBase : public RttiMetaInfo
 {
+	RttiMethodBase()
+	{
+		IsStatic = false;
+		IsConst = false;
+		ThisObject = nullptr;
+		ResultType = nullptr;
+	}
 	std::string			Name;
 	RttiStruct*			ThisObject;
 
 	RttiStruct*			ResultType;
 	std::vector<std::pair<std::string,RttiStruct*>>	Arguments;
+	bool				IsStatic;
+	bool				IsConst;
 	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const
 	{
 		
@@ -425,15 +434,22 @@ struct RttiConstructor : public RttiMetaInfo
 template<typename Result, typename BindClass>
 struct VMethod0 : public RttiMethodBase
 {
+	typedef Result(*StaticMethodFun)();
 	typedef Result(BindClass::*MethodFun)();
 	typedef Result(BindClass::*ConstMethodFun)() const;
-	VMethod0(MethodFun fun, const char* name);	
+	VMethod0(MethodFun fun, const char* name);
+	VMethod0(StaticMethodFun fun, const char* name);
 	VMethod0(ConstMethodFun fun, const char* name)
 		: VMethod0((MethodFun)fun, name)
 	{
-
+		IsConst = true;
 	}
-	MethodFun	FuncPtr;
+	union
+	{
+		StaticMethodFun StaticFuncPtr;
+		MethodFun FuncPtr;
+		//ConstMethodFun ConstFuncPtr;
+	};
 
 	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
 	{
@@ -443,13 +459,28 @@ private:
 	template<typename TR>
 	void InvokeImpl(void* pThis, ArgumentStream& args, ArgumentStream& result) const
 	{
-		TR ret = (((BindClass*)pThis)->*(FuncPtr))();
-		result << ret;
+		if (IsStatic)
+		{
+			auto ret = (StaticFuncPtr)();
+			result << ret;
+		}
+		else
+		{
+			auto ret = (((BindClass*)pThis)->*(FuncPtr))();
+			result << ret;
+		}
 	}
 	template<>
 	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
 	{
-		(((BindClass*)pThis)->*(FuncPtr))();
+		if (IsStatic)
+		{
+			(StaticFuncPtr)();
+		}
+		else
+		{
+			(((BindClass*)pThis)->*(FuncPtr))();
+		}
 	}
 };
 
@@ -460,15 +491,21 @@ private:
 template<typename Result, typename BindClass, typename T0>
 struct VMethod1 : public RttiMethodBase
 {
+	typedef Result(*StaticMethodFun)(T0);
 	typedef Result(BindClass::*MethodFun)(T0);
 	typedef Result(BindClass::*ConstMethodFun)(T0) const;
 	VMethod1(MethodFun fun, const char* name, const char* a0);
+	VMethod1(StaticMethodFun fun, const char* name, const char* a0);
 	VMethod1(ConstMethodFun fun, const char* name, const char* a0)
 		: VMethod1((MethodFun)fun, name, a0)
 	{
-
+		IsConst = true;
 	}
-	MethodFun	FuncPtr;
+	union
+	{
+		StaticMethodFun StaticFuncPtr;
+		MethodFun FuncPtr;
+	};
 
 	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
 	{
@@ -481,30 +518,51 @@ private:
 	{
 		args.mReadPosition = 0;
 		Method_Arg_Def(0);
-		TR ret = (((BindClass*)pThis)->*(FuncPtr))(a0);
-		result << ret;
+		if (IsStatic)
+		{
+			auto ret = (StaticFuncPtr)(a0);
+			result << ret;
+		}
+		else
+		{
+			auto ret = (((BindClass*)pThis)->*(FuncPtr))(a0);
+			result << ret;
+		}
 	}
 	template<>
 	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
 	{
 		args.mReadPosition = 0;
 		Method_Arg_Def(0);
-		(((BindClass*)pThis)->*(FuncPtr))(a0);
+		if (IsStatic)
+		{
+			(StaticFuncPtr)(a0);
+		}
+		else
+		{
+			(((BindClass*)pThis)->*(FuncPtr))(a0);
+		}
 	}
 };
 
 template<typename Result, typename BindClass, typename T0, typename T1>
 struct VMethod2 : public RttiMethodBase
 {
+	typedef Result(*StaticMethodFun)(T0, T1);
 	typedef Result(BindClass::*MethodFun)(T0,T1);
 	typedef Result(BindClass::*ConstMethodFun)(T0, T1) const;
 	VMethod2(MethodFun fun, const char* name, const char* a0, const char* a1);
+	VMethod2(StaticMethodFun fun, const char* name, const char* a0, const char* a1);
 	VMethod2(ConstMethodFun fun, const char* name, const char* a0, const char* a1)
 		: VMethod2((MethodFun)fun, name, a0, a1)
 	{
-
+		IsConst = true;
 	}
-	MethodFun	FuncPtr;
+	union
+	{
+		StaticMethodFun StaticFuncPtr;
+		MethodFun FuncPtr;
+	};
 
 	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
 	{
@@ -518,8 +576,16 @@ private:
 		args.mReadPosition = 0;
 		Method_Arg_Def(0);
 		Method_Arg_Def(1);
-		TR ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1);
-		result << ret;
+		if (IsStatic)
+		{
+			auto ret = (StaticFuncPtr)(a0, a1);
+			result << ret;
+		}
+		else
+		{
+			auto ret = (((BindClass*)pThis)->*(FuncPtr))(a0,a1);
+			result << ret;
+		}
 	}
 	template<>
 	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
@@ -527,22 +593,35 @@ private:
 		args.mReadPosition = 0;
 		Method_Arg_Def(0);
 		Method_Arg_Def(1);
-		(((BindClass*)pThis)->*(FuncPtr))(a0, a1);
+		if (IsStatic)
+		{
+			(StaticFuncPtr)(a0, a1);
+		}
+		else
+		{
+			(((BindClass*)pThis)->*(FuncPtr))(a0, a1);
+		}
 	}
 };
 
 template<typename Result, typename BindClass, typename T0, typename T1, typename T2>
 struct VMethod3 : public RttiMethodBase
 {
+	typedef Result(*StaticMethodFun)(T0, T1, T2);
 	typedef Result(BindClass::*MethodFun)(T0, T1, T2);
 	typedef Result(BindClass::*ConstMethodFun)(T0, T1, T2) const;
 	VMethod3(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2);
+	VMethod3(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2);
 	VMethod3(ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2)
 		: VMethod3((MethodFun)fun, name, a0, a1, a2)
 	{
-
+		IsConst = true;
 	}
-	MethodFun	FuncPtr;
+	union
+	{
+		StaticMethodFun StaticFuncPtr;
+		MethodFun FuncPtr;
+	};
 
 	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
 	{
@@ -557,8 +636,16 @@ private:
 		Method_Arg_Def(0);
 		Method_Arg_Def(1);
 		Method_Arg_Def(2);
-		TR ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2);
-		result << ret;
+		if (IsStatic)
+		{
+			auto ret = (StaticFuncPtr)(a0, a1, a2);
+			result << ret;
+		}
+		else
+		{
+			auto ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2);
+			result << ret;
+		}
 	}
 	template<>
 	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
@@ -567,22 +654,35 @@ private:
 		Method_Arg_Def(0);
 		Method_Arg_Def(1);
 		Method_Arg_Def(2);
-		(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2);
+		if (IsStatic)
+		{
+			(StaticFuncPtr)(a0, a1, a2);
+		}
+		else
+		{
+			(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2);
+		}
 	}
 };
 
 template<typename Result, typename BindClass, typename T0, typename T1, typename T2, typename T3>
 struct VMethod4 : public RttiMethodBase
 {
+	typedef Result(*StaticMethodFun)(T0, T1, T2, T3);
 	typedef Result(BindClass::*MethodFun)(T0, T1, T2, T3);
 	typedef Result(BindClass::*ConstMethodFun)(T0, T1, T2, T3) const;
 	VMethod4(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3);
+	VMethod4(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3);
 	VMethod4(ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3)
 		: VMethod4((MethodFun)fun, name, a0, a1, a2, a3)
 	{
-
+		IsConst = true;
 	}
-	MethodFun	FuncPtr;
+	union
+	{
+		StaticMethodFun StaticFuncPtr;
+		MethodFun FuncPtr;
+	};
 
 	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
 	{
@@ -598,8 +698,16 @@ private:
 		Method_Arg_Def(1);
 		Method_Arg_Def(2);
 		Method_Arg_Def(3);
-		TR ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3);
-		result << ret;
+		if (IsStatic)
+		{
+			auto ret = (StaticFuncPtr)(a0, a1, a2, a3);
+			result << ret;
+		}
+		else
+		{
+			auto ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3);
+			result << ret;
+		}
 	}
 	template<>
 	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
@@ -609,22 +717,35 @@ private:
 		Method_Arg_Def(1);
 		Method_Arg_Def(2);
 		Method_Arg_Def(3);
-		(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3);
+		if (IsStatic)
+		{
+			(StaticFuncPtr)(a0, a1, a2, a3);
+		}
+		else
+		{
+			(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3);
+		}
 	}
 };
 
 template<typename Result, typename BindClass, typename T0, typename T1, typename T2, typename T3, typename T4>
 struct VMethod5 : public RttiMethodBase
 {
+	typedef Result(*StaticMethodFun)(T0, T1, T2, T3, T4);
 	typedef Result(BindClass::*MethodFun)(T0, T1, T2, T3, T4);
 	typedef Result(BindClass::*ConstMethodFun)(T0, T1, T2, T3, T4) const;
 	VMethod5(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4);
+	VMethod5(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4);
 	VMethod5(ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4)
 		: VMethod5((MethodFun)fun, name, a0, a1, a2, a3, a4)
 	{
-
+		IsConst = true;
 	}
-	MethodFun	FuncPtr;
+	union
+	{
+		StaticMethodFun StaticFuncPtr;
+		MethodFun FuncPtr;
+	};
 
 	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
 	{
@@ -641,8 +762,16 @@ private:
 		Method_Arg_Def(2);
 		Method_Arg_Def(3);
 		Method_Arg_Def(4);
-		TR ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4);
-		result << ret;
+		if (IsStatic)
+		{
+			auto ret = (StaticFuncPtr)(a0, a1, a2, a3, a4);
+			result << ret;
+		}
+		else
+		{
+			auto ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4);
+			result << ret;
+		}
 	}
 	template<>
 	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
@@ -653,22 +782,35 @@ private:
 		Method_Arg_Def(2);
 		Method_Arg_Def(3);
 		Method_Arg_Def(4);
-		(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4);
+		if (IsStatic)
+		{
+			(StaticFuncPtr)(a0, a1, a2, a3, a4);
+		}
+		else
+		{
+			(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4);
+		}
 	}
 };
 
 template<typename Result, typename BindClass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
 struct VMethod6 : public RttiMethodBase
 {
+	typedef Result(*StaticMethodFun)(T0, T1, T2, T3, T4, T5);
 	typedef Result(BindClass::*MethodFun)(T0, T1, T2, T3, T4, T5);
 	typedef Result(BindClass::*ConstMethodFun)(T0, T1, T2, T3, T4, T5) const;
 	VMethod6(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5);
+	VMethod6(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5);
 	VMethod6(ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5)
 		: VMethod6((MethodFun)fun, name, a0, a1, a2, a3, a4, a5)
 	{
-
+		IsConst = true;
 	}
-	MethodFun	FuncPtr;
+	union
+	{
+		StaticMethodFun StaticFuncPtr;
+		MethodFun FuncPtr;
+	};
 
 	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
 	{
@@ -686,8 +828,16 @@ private:
 		Method_Arg_Def(3);
 		Method_Arg_Def(4);
 		Method_Arg_Def(5);
-		TR ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5);
-		result << ret;
+		if (IsStatic)
+		{
+			auto ret = (StaticFuncPtr)(a0, a1, a2, a3, a4, a5);
+			result << ret;
+		}
+		else
+		{
+			auto ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5);
+			result << ret;
+		}
 	}
 	template<>
 	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
@@ -699,22 +849,35 @@ private:
 		Method_Arg_Def(3);
 		Method_Arg_Def(4);
 		Method_Arg_Def(5);
-		(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5);
+		if (IsStatic)
+		{
+			(StaticFuncPtr)(a0, a1, a2, a3, a4, a5);
+		}
+		else
+		{
+			(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5);
+		}
 	}
 };
 
 template<typename Result, typename BindClass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
 struct VMethod7 : public RttiMethodBase
 {
+	typedef Result(*StaticMethodFun)(T0, T1, T2, T3, T4, T5, T6);
 	typedef Result(BindClass::*MethodFun)(T0, T1, T2, T3, T4, T5, T6);
 	typedef Result(BindClass::*ConstMethodFun)(T0, T1, T2, T3, T4, T5, T6) const;
 	VMethod7(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6);
+	VMethod7(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6);
 	VMethod7(ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6)
 		: VMethod7((MethodFun)fun, name, a0, a1, a2, a3, a4, a5, a6)
 	{
-
+		IsStatic = true;
 	}
-	MethodFun	FuncPtr;
+	union
+	{
+		StaticMethodFun StaticFuncPtr;
+		MethodFun FuncPtr;
+	};
 
 	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
 	{
@@ -733,8 +896,16 @@ private:
 		Method_Arg_Def(4);
 		Method_Arg_Def(5);
 		Method_Arg_Def(6);
-		TR ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5, a6);
-		result << ret;
+		if (IsStatic)
+		{
+			auto ret = (StaticFuncPtr)(a0, a1, a2, a3, a4, a5, a6);
+			result << ret;
+		}
+		else
+		{
+			auto ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5, a6);
+			result << ret;
+		}
 	}
 	template<>
 	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
@@ -747,22 +918,35 @@ private:
 		Method_Arg_Def(4);
 		Method_Arg_Def(5);
 		Method_Arg_Def(6);
-		(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5, a6);
+		if (IsStatic)
+		{
+			(StaticFuncPtr)(a0, a1, a2, a3, a4, a5, a6);
+		}
+		else
+		{
+			(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5, a6);
+		}
 	}
 };
 
 template<typename Result, typename BindClass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
 struct VMethod8 : public RttiMethodBase
 {
+	typedef Result(*StaticMethodFun)(T0, T1, T2, T3, T4, T5, T6, T7);
 	typedef Result(BindClass::*MethodFun)(T0, T1, T2, T3, T4, T5, T6, T7);
 	typedef Result(BindClass::*ConstMethodFun)(T0, T1, T2, T3, T4, T5, T6, T7) const;
 	VMethod8(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7);
+	VMethod8(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7);
 	VMethod8(ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7)
 		: VMethod8((MethodFun)fun, name, a0, a1, a2, a3, a4, a5, a6, a7)
 	{
 
 	}
-	MethodFun	FuncPtr;
+	union
+	{
+		StaticMethodFun StaticFuncPtr;
+		MethodFun FuncPtr;
+	};
 
 	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
 	{
@@ -782,8 +966,16 @@ private:
 		Method_Arg_Def(5);
 		Method_Arg_Def(6);
 		Method_Arg_Def(7);
-		TR ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5, a6, a7);
-		result << ret;
+		if (IsStatic)
+		{
+			auto ret = (StaticFuncPtr)(a0, a1, a2, a3, a4, a5, a6, a7);
+			result << ret;
+		}
+		else
+		{
+			auto ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5, a6, a7);
+			result << ret;
+		}
 	}
 	template<>
 	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
@@ -797,7 +989,14 @@ private:
 		Method_Arg_Def(5);
 		Method_Arg_Def(6);
 		Method_Arg_Def(7);
-		(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5, a6, a7);
+		if (IsStatic)
+		{
+			(StaticFuncPtr)(a0, a1, a2, a3, a4, a5, a6, a7);
+		}
+		else
+		{
+			(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5, a6, a7);
+		}
 	}
 };
 
@@ -976,9 +1175,16 @@ struct RttiStruct : public RttiMetaInfo
 		Methods.push_back(desc);
 		return desc;
 	}
-
 	template<typename Result, typename Klass>
 	RttiMethodBase* PushMethod0(typename VMethod0<Result, Klass>::ConstMethodFun fun, const char* name)
+	{
+		auto desc = NEW_INHEAD VMethod0<Result, Klass>(fun, name);
+
+		Methods.push_back(desc);
+		return desc;
+	}
+	template<typename Result, typename Klass>
+	RttiMethodBase* PushMethod0(typename VMethod0<Result, Klass>::StaticMethodFun fun, const char* name)
 	{
 		auto desc = NEW_INHEAD VMethod0<Result, Klass>(fun, name);
 
@@ -1002,6 +1208,14 @@ struct RttiStruct : public RttiMetaInfo
 		Methods.push_back(desc);
 		return desc;
 	}
+	template<typename Result, typename Klass, typename T0>
+	RttiMethodBase* PushMethod1(typename VMethod1<Result, Klass, T0>::StaticMethodFun fun, const char* name, const char* a0)
+	{
+		auto desc = NEW_INHEAD VMethod1<Result, Klass, T0>(fun, name, a0);
+
+		Methods.push_back(desc);
+		return desc;
+	}
 
 	template<typename Result, typename Klass, typename T0, typename T1>
 	RttiMethodBase* PushMethod2(typename VMethod2<Result, Klass, T0, T1>::MethodFun fun, const char* name, const char* a0, const char* a1)
@@ -1013,6 +1227,14 @@ struct RttiStruct : public RttiMetaInfo
 	}
 	template<typename Result, typename Klass, typename T0, typename T1>
 	RttiMethodBase* PushMethod2(typename VMethod2<Result, Klass, T0, T1>::ConstMethodFun fun, const char* name, const char* a0, const char* a1)
+	{
+		auto desc = NEW_INHEAD VMethod2<Result, Klass, T0, T1>(fun, name, a0, a1);
+
+		Methods.push_back(desc);
+		return desc;
+	}
+	template<typename Result, typename Klass, typename T0, typename T1>
+	RttiMethodBase* PushMethod2(typename VMethod2<Result, Klass, T0, T1>::StaticMethodFun fun, const char* name, const char* a0, const char* a1)
 	{
 		auto desc = NEW_INHEAD VMethod2<Result, Klass, T0, T1>(fun, name, a0, a1);
 
@@ -1036,6 +1258,14 @@ struct RttiStruct : public RttiMetaInfo
 		Methods.push_back(desc);
 		return desc;
 	}
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2>
+	RttiMethodBase* PushMethod3(typename VMethod3<Result, Klass, T0, T1, T2>::StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2)
+	{
+		auto desc = NEW_INHEAD VMethod3<Result, Klass, T0, T1, T2>(fun, name, a0, a1, a2);
+
+		Methods.push_back(desc);
+		return desc;
+	}
 
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3>
 	RttiMethodBase* PushMethod4(typename VMethod4<Result, Klass, T0, T1, T2, T3>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3)
@@ -1047,6 +1277,14 @@ struct RttiStruct : public RttiMetaInfo
 	}
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3>
 	RttiMethodBase* PushMethod4(typename VMethod4<Result, Klass, T0, T1, T2, T3>::ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3)
+	{
+		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3>(fun, name, a0, a1, a2, a3);
+
+		Methods.push_back(desc);
+		return desc;
+	}
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3>
+	RttiMethodBase* PushMethod4(typename VMethod4<Result, Klass, T0, T1, T2, T3>::StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3)
 	{
 		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3>(fun, name, a0, a1, a2, a3);
 
@@ -1070,6 +1308,14 @@ struct RttiStruct : public RttiMetaInfo
 		Methods.push_back(desc);
 		return desc;
 	}
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4>
+	RttiMethodBase* PushMethod5(typename VMethod5<Result, Klass, T0, T1, T2, T3, T4>::StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4)
+	{
+		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4>(fun, name, a0, a1, a2, a3, a4);
+
+		Methods.push_back(desc);
+		return desc;
+	}
 
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
 	RttiMethodBase* PushMethod6(typename VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5)
@@ -1081,6 +1327,14 @@ struct RttiStruct : public RttiMetaInfo
 	}
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
 	RttiMethodBase* PushMethod6(typename VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>::ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5)
+	{
+		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5>(fun, name, a0, a1, a2, a3, a4, a5);
+
+		Methods.push_back(desc);
+		return desc;
+	}
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
+	RttiMethodBase* PushMethod6(typename VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>::StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5)
 	{
 		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5>(fun, name, a0, a1, a2, a3, a4, a5);
 
@@ -1104,6 +1358,14 @@ struct RttiStruct : public RttiMetaInfo
 		Methods.push_back(desc);
 		return desc;
 	}
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
+	RttiMethodBase* PushMethod7(typename VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>::StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6)
+	{
+		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5, T6>(fun, name, a0, a1, a2, a3, a4, a5, a6);
+
+		Methods.push_back(desc);
+		return desc;
+	}
 
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
 	RttiMethodBase* PushMethod8(typename VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7)
@@ -1115,6 +1377,14 @@ struct RttiStruct : public RttiMetaInfo
 	}
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
 	RttiMethodBase* PushMethod8(typename VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7)
+	{
+		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>(fun, name, a0, a1, a2, a3, a4, a5, a6, a6);
+
+		Methods.push_back(desc);
+		return desc;
+	}
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
+	RttiMethodBase* PushMethod8(typename VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7)
 	{
 		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>(fun, name, a0, a1, a2, a3, a4, a5, a6, a6);
 
@@ -1629,6 +1899,15 @@ VMethod0<Result, Klass>::VMethod0(MethodFun fun, const char* name)
 	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 }
+template<typename Result, typename Klass>
+VMethod0<Result, Klass>::VMethod0(StaticMethodFun fun, const char* name)
+{
+	IsStatic = true;
+	StaticFuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
+}
 
 template<typename Result, typename Klass, typename T0>
 VMethod1<Result, Klass, T0>::VMethod1(MethodFun fun, const char* name, const char* a0)
@@ -1640,11 +1919,34 @@ VMethod1<Result, Klass, T0>::VMethod1(MethodFun fun, const char* name, const cha
 
 	Arguments.push_back(std::make_pair(a0,&AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
 }
+template<typename Result, typename Klass, typename T0>
+VMethod1<Result, Klass, T0>::VMethod1(StaticMethodFun fun, const char* name, const char* a0)
+{
+	IsStatic = true;
+	StaticFuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
+
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
+}
 
 template<typename Result, typename Klass, typename T0, typename T1>
 VMethod2<Result, Klass, T0, T1>::VMethod2(MethodFun fun, const char* name, const char* a0, const char* a1)
 {
 	FuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
+
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
+}
+template<typename Result, typename Klass, typename T0, typename T1>
+VMethod2<Result, Klass, T0, T1>::VMethod2(StaticMethodFun fun, const char* name, const char* a0, const char* a1)
+{
+	IsStatic = true;
+	StaticFuncPtr = fun;
 	Name = name;
 	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
@@ -1665,11 +1967,38 @@ VMethod3<Result, Klass, T0, T1, T2>::VMethod3(MethodFun fun, const char* name, c
 	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
 	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
 }
+template<typename Result, typename Klass, typename T0, typename T1, typename T2>
+VMethod3<Result, Klass, T0, T1, T2>::VMethod3(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2)
+{
+	IsStatic = true;
+	StaticFuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
+
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
+	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
+}
 
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3>
 VMethod4<Result, Klass, T0, T1, T2, T3>::VMethod4(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3)
 {
 	FuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
+
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
+	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
+	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
+}
+template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3>
+VMethod4<Result, Klass, T0, T1, T2, T3>::VMethod4(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3)
+{
+	IsStatic = true;
+	StaticFuncPtr = fun;
 	Name = name;
 	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
@@ -1694,11 +2023,42 @@ VMethod5<Result, Klass, T0, T1, T2, T3, T4>::VMethod5(MethodFun fun, const char*
 	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
 	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
 }
+template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4>
+VMethod5<Result, Klass, T0, T1, T2, T3, T4>::VMethod5(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4)
+{
+	IsStatic = true;
+	StaticFuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
+
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
+	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
+	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
+	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
+}
 
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
 VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>::VMethod6(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5)
 {
 	FuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
+
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
+	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
+	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
+	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
+	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
+}
+template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
+VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>::VMethod6(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5)
+{
+	IsStatic = true;
+	StaticFuncPtr = fun;
 	Name = name;
 	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
@@ -1727,11 +2087,46 @@ VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>::VMethod7(MethodFun fun, con
 	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
 	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
 }
+template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
+VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>::VMethod7(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6)
+{
+	IsStatic = true;
+	StaticFuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
+
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
+	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
+	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
+	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
+	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
+	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
+}
 
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
 VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::VMethod8(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7)
 {
 	FuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
+
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
+	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
+	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
+	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
+	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
+	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
+	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
+}
+template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
+VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::VMethod8(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7)
+{
+	IsStatic = true;
+	StaticFuncPtr = fun;
 	Name = name;
 	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;

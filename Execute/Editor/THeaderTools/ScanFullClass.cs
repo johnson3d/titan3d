@@ -59,6 +59,17 @@ namespace THeaderTools
                 }
                 switch (token)
                 {
+                    case "class":
+                    case "struct":
+                        {
+                            int rangeStart;
+                            int rangeEnd;
+                            SkipPair(ref index, code, '{', '}', out rangeStart, out rangeEnd);
+                            token = GetTokenString(ref index, code, null);
+                            if (token != ";")
+                                throw new Exception(TraceMessage($"class {klassName}: public miss ':'"));
+                        }
+                        break;
                     case "public":
                         mode = EVisitMode.Public;
                         token = GetTokenString(ref index, code, null);

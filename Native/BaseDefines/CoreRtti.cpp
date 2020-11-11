@@ -176,6 +176,10 @@ struct Test_ConstantVarDesc
 		if (d == "true")
 			Dirty = 1;
 	}
+	static void TestStaticFunction(std::string d, int c)
+	{
+
+	}
 };
 
 StructBegin(Test_ConstantVarDesc, EngineNS)
@@ -198,11 +202,13 @@ StructBegin(Test_ConstantVarDesc, EngineNS)
 	StructMethodEx1(TestSetDirty , void, std::string, d);
 	StructMethodEx2(TestSetDirty, void, std::string, d, int, c);
 
+	StructMethod2(TestStaticFunction, d, c);
+
 	StructConstructor0();
 	AppendConstructorMetaInfo("M0", "Test_ConstantVarDesc info");	
 StructEnd(void)
 
-StructImpl(Test_ConstantVarDesc);
+StructImpl(EngineNS::Test_ConstantVarDesc);
 
 int FTestFuncTraits(int, int)
 {

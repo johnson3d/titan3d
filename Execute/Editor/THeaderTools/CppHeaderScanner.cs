@@ -302,7 +302,9 @@ namespace THeaderTools
                 }
             }
 
-            if (code.StartsWith(mustIsClass)==false)
+            //if (code.StartsWith(mustIsClass)==false)
+            //    throw new Exception(TraceMessage("not a class or struct"));
+            if (code.StartsWith("class")==false && code.StartsWith("struct") == false)
                 throw new Exception(TraceMessage("not a class or struct"));
 
             var index = mustIsClass.Length;
