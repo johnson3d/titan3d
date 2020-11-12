@@ -98,6 +98,8 @@ namespace THeaderTools
             public const string SV_LayoutStruct = "SV_LayoutStruct";//For class 
             public const string SV_RemoveStrings = "SV_RemoveStrings";//For class 
             public const string SV_CharSet = "SV_CharSet";//For method: CharSet.Ansi , CharSet.Unicode
+            public const string SV_CallConvention = "SV_CallConvention";//For method: System.Runtime.InteropServices.CallingConvention.Cdecl , System.Runtime.InteropServices.CallingConvention.StdCall
+            public const string SV_GenStaticFunction = "SV_GenStaticFunction";//For method:对外暴露PInvoke函数，使得可输入self指针
         }
         
         public string GetReturnConverter()

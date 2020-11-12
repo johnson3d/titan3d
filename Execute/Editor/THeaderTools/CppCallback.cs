@@ -265,8 +265,11 @@ namespace THeaderTools
                     genCode += CodeGenerator.GenLine(nTable, $"namespace {ns}");                    
                     genCode += CodeGenerator.GenLine(nTable++, "{");
                 }
-
-                genCode += CodeGenerator.GenLine(nTable++, $"public unsafe delegate {i.CSReturnType} {i.Name}({i.GetParameterStringCSharp()});");
+                var callConvention = i.GetMetaValue("SV_CallConvention");
+                if(callConvention==null)
+                    callConvention = "System.Runtime.InteropServices.CallingConvention.Cdecl";
+                genCode += CodeGenerator.GenLine(nTable, $"[UnmanagedFunctionPointer({callConvention})]"); 
+                genCode += CodeGenerator.GenLine(nTable, $"public unsafe delegate {i.CSReturnType} {i.Name}({i.GetParameterStringCSharp(false)});");
 
                 if (ns != null)
                 {

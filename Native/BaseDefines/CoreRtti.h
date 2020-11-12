@@ -271,9 +271,12 @@ struct RttiEnum : public RttiMetaInfo
 template<typename Type>
 struct AuxRttiEnum : public RttiEnum
 {
-	static AuxRttiEnum<Type>*		Instance;
+	static AuxRttiEnum<Type>		Instance;
 	static const bool IsEnum = false;
 };
+
+template<typename Type>
+AuxRttiEnum<Type>		AuxRttiEnum<Type>::Instance;
 
 class RttiEnumManager
 {
@@ -319,8 +322,9 @@ StructBegin(name, ns)\
 StructEnd(void)
 
 #define EnumImpl(name) \
-AuxRttiEnum<name> AuxRttiEnum<name>::Instance;\
-AuxRttiStruct<name> AuxRttiStruct<name>::Instance;
+
+//AuxRttiEnum<name> AuxRttiEnum<name>::Instance;\
+//AuxRttiStruct<name> AuxRttiStruct<name>::Instance;
 
 struct ArgumentStream
 {
@@ -1000,6 +1004,79 @@ private:
 	}
 };
 
+template<typename Result, typename BindClass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+struct VMethod9 : public RttiMethodBase
+{
+	typedef Result(*StaticMethodFun)(T0, T1, T2, T3, T4, T5, T6, T7, T8);
+	typedef Result(BindClass::*MethodFun)(T0, T1, T2, T3, T4, T5, T6, T7, T8);
+	typedef Result(BindClass::*ConstMethodFun)(T0, T1, T2, T3, T4, T5, T6, T7, T8) const;
+	VMethod9(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8);
+	VMethod9(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8);
+	VMethod9(ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8)
+		: VMethod9((MethodFun)fun, name, a0, a1, a2, a3, a4, a5, a6, a7, a8)
+	{
+
+	}
+	union
+	{
+		StaticMethodFun StaticFuncPtr;
+		MethodFun FuncPtr;
+	};
+
+	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
+	{
+		InvokeImpl<Result>(pThis, args, result);
+	}
+
+private:
+	template<typename TR>
+	void InvokeImpl(void* pThis, ArgumentStream& args, ArgumentStream& result) const
+	{
+		args.mReadPosition = 0;
+		Method_Arg_Def(0);
+		Method_Arg_Def(1);
+		Method_Arg_Def(2);
+		Method_Arg_Def(3);
+		Method_Arg_Def(4);
+		Method_Arg_Def(5);
+		Method_Arg_Def(6);
+		Method_Arg_Def(7);
+		Method_Arg_Def(8);
+		if (IsStatic)
+		{
+			auto ret = (StaticFuncPtr)(a0, a1, a2, a3, a4, a5, a6, a7, a8);
+			result << ret;
+		}
+		else
+		{
+			auto ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5, a6, a7, a8);
+			result << ret;
+		}
+	}
+	template<>
+	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
+	{
+		args.mReadPosition = 0;
+		Method_Arg_Def(0);
+		Method_Arg_Def(1);
+		Method_Arg_Def(2);
+		Method_Arg_Def(3);
+		Method_Arg_Def(4);
+		Method_Arg_Def(5);
+		Method_Arg_Def(6);
+		Method_Arg_Def(7);
+		Method_Arg_Def(8);
+		if (IsStatic)
+		{
+			(StaticFuncPtr)(a0, a1, a2, a3, a4, a5, a6, a7, a8);
+		}
+		else
+		{
+			(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5, a6, a7, a8);
+		}
+	}
+};
+
 template<typename Klass>
 struct VConstructor0 : public RttiConstructor
 {
@@ -1295,7 +1372,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4>
 	RttiMethodBase* PushMethod5(typename VMethod5<Result, Klass, T0, T1, T2, T3, T4>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4)
 	{
-		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4>(fun, name, a0, a1, a2, a3, a4);
+		auto desc = NEW_INHEAD VMethod5<Result, Klass, T0, T1, T2, T3, T4>(fun, name, a0, a1, a2, a3, a4);
 
 		Methods.push_back(desc);
 		return desc;
@@ -1303,7 +1380,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4>
 	RttiMethodBase* PushMethod5(typename VMethod5<Result, Klass, T0, T1, T2, T3, T4>::ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4)
 	{
-		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4>(fun, name, a0, a1, a2, a3, a4);
+		auto desc = NEW_INHEAD VMethod5<Result, Klass, T0, T1, T2, T3, T4>(fun, name, a0, a1, a2, a3, a4);
 
 		Methods.push_back(desc);
 		return desc;
@@ -1311,7 +1388,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4>
 	RttiMethodBase* PushMethod5(typename VMethod5<Result, Klass, T0, T1, T2, T3, T4>::StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4)
 	{
-		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4>(fun, name, a0, a1, a2, a3, a4);
+		auto desc = NEW_INHEAD VMethod5<Result, Klass, T0, T1, T2, T3, T4>(fun, name, a0, a1, a2, a3, a4);
 
 		Methods.push_back(desc);
 		return desc;
@@ -1320,7 +1397,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
 	RttiMethodBase* PushMethod6(typename VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5)
 	{
-		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5>(fun, name, a0, a1, a2, a3, a4, a5);
+		auto desc = NEW_INHEAD VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>(fun, name, a0, a1, a2, a3, a4, a5);
 
 		Methods.push_back(desc);
 		return desc;
@@ -1328,7 +1405,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
 	RttiMethodBase* PushMethod6(typename VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>::ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5)
 	{
-		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5>(fun, name, a0, a1, a2, a3, a4, a5);
+		auto desc = NEW_INHEAD VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>(fun, name, a0, a1, a2, a3, a4, a5);
 
 		Methods.push_back(desc);
 		return desc;
@@ -1336,7 +1413,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
 	RttiMethodBase* PushMethod6(typename VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>::StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5)
 	{
-		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5>(fun, name, a0, a1, a2, a3, a4, a5);
+		auto desc = NEW_INHEAD VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>(fun, name, a0, a1, a2, a3, a4, a5);
 
 		Methods.push_back(desc);
 		return desc;
@@ -1345,7 +1422,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
 	RttiMethodBase* PushMethod7(typename VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6)
 	{
-		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5, T6>(fun, name, a0, a1, a2, a3, a4, a5, a6);
+		auto desc = NEW_INHEAD VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>(fun, name, a0, a1, a2, a3, a4, a5, a6);
 
 		Methods.push_back(desc);
 		return desc;
@@ -1353,7 +1430,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
 	RttiMethodBase* PushMethod7(typename VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>::ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6)
 	{
-		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5, T6>(fun, name, a0, a1, a2, a3, a4, a5, a6);
+		auto desc = NEW_INHEAD VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>(fun, name, a0, a1, a2, a3, a4, a5, a6);
 
 		Methods.push_back(desc);
 		return desc;
@@ -1361,7 +1438,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
 	RttiMethodBase* PushMethod7(typename VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>::StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6)
 	{
-		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5, T6>(fun, name, a0, a1, a2, a3, a4, a5, a6);
+		auto desc = NEW_INHEAD VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>(fun, name, a0, a1, a2, a3, a4, a5, a6);
 
 		Methods.push_back(desc);
 		return desc;
@@ -1370,7 +1447,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
 	RttiMethodBase* PushMethod8(typename VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7)
 	{
-		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>(fun, name, a0, a1, a2, a3, a4, a5, a6, a6);
+		auto desc = NEW_INHEAD VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>(fun, name, a0, a1, a2, a3, a4, a5, a6, a7);
 
 		Methods.push_back(desc);
 		return desc;
@@ -1378,7 +1455,7 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
 	RttiMethodBase* PushMethod8(typename VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7)
 	{
-		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>(fun, name, a0, a1, a2, a3, a4, a5, a6, a6);
+		auto desc = NEW_INHEAD VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>(fun, name, a0, a1, a2, a3, a4, a5, a6, a7);
 
 		Methods.push_back(desc);
 		return desc;
@@ -1386,7 +1463,32 @@ struct RttiStruct : public RttiMetaInfo
 	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
 	RttiMethodBase* PushMethod8(typename VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7)
 	{
-		auto desc = NEW_INHEAD VMethod4<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>(fun, name, a0, a1, a2, a3, a4, a5, a6, a6);
+		auto desc = NEW_INHEAD VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>(fun, name, a0, a1, a2, a3, a4, a5, a6, a7);
+
+		Methods.push_back(desc);
+		return desc;
+	}
+
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+	RttiMethodBase* PushMethod9(typename VMethod9<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8)
+	{
+		auto desc = NEW_INHEAD VMethod9<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8>(fun, name, a0, a1, a2, a3, a4, a5, a6, a7, a8);
+
+		Methods.push_back(desc);
+		return desc;
+	}
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+	RttiMethodBase* PushMethod9(typename VMethod9<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8>::ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8)
+	{
+		auto desc = NEW_INHEAD VMethod9<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8>(fun, name, a0, a1, a2, a3, a4, a5, a6, a7, a8);
+
+		Methods.push_back(desc);
+		return desc;
+	}
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+	RttiMethodBase* PushMethod9(typename VMethod9<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8>::StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8)
+	{
+		auto desc = NEW_INHEAD VMethod9<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8>(fun, name, a0, a1, a2, a3, a4, a5, a6, a7, a8);
 
 		Methods.push_back(desc);
 		return desc;
@@ -1421,6 +1523,9 @@ struct AuxRttiStruct : public RttiStruct
 {
 	static AuxRttiStruct<Type>		Instance;
 };
+
+template<typename Type>
+AuxRttiStruct<Type>		AuxRttiStruct<Type>::Instance;
 
 template<>
 struct AuxRttiStruct<void> : public RttiStruct
@@ -1813,6 +1918,29 @@ struct AuxRttiStruct<ns::Type> : public RttiStruct\
 			__current_method = PushMethod8<TResult, ThisStructType, TA0, TA1, TA2, TA3, TA4, TA5, TA6, TA7>(&ThisStructType::name, #name, #a0, #a1, #a2, #a3, #a4, #a5, #a6, #a7);\
 		}
 
+#define StructMethod9(name, a0, a1, a2, a3, a4, a5, a6, a7, a8) \
+		{\
+			auto funAddress = &ThisStructType::name;\
+			using TFunctionType = decltype(funAddress);\
+			static_assert(TFunction_traits<TFunctionType>::param_count==4);\
+			using TResult = TFunction_traits<TFunctionType>::return_type;\
+			using TA0 = TFunction_traits<TFunctionType>::param_type<0>;\
+			using TA1 = TFunction_traits<TFunctionType>::param_type<1>;\
+			using TA2 = TFunction_traits<TFunctionType>::param_type<2>;\
+			using TA3 = TFunction_traits<TFunctionType>::param_type<3>;\
+			using TA4 = TFunction_traits<TFunctionType>::param_type<4>;\
+			using TA5 = TFunction_traits<TFunctionType>::param_type<5>;\
+			using TA6 = TFunction_traits<TFunctionType>::param_type<6>;\
+			using TA7 = TFunction_traits<TFunctionType>::param_type<7>;\
+			using TA8 = TFunction_traits<TFunctionType>::param_type<8>;\
+			__current_method = PushMethod9<TResult, ThisStructType, TA0, TA1, TA2, TA3, TA4, TA5, TA6, TA7, TA8>(funAddress, #name, #a0, #a1, #a2, #a3, #a4, #a5, #a6, #a7, $a8);\
+		}
+
+#define StructMethodEx9(name, TResult, TA0, a0, TA1, a1, TA2, a2, TA3, a3, TA4, a4, TA5, a5, TA6, a6, TA7, a7, TA8, a8) \
+		{\
+			__current_method = PushMethod9<TResult, ThisStructType, TA0, TA1, TA2, TA3, TA4, TA5, TA6, TA7, TA8>(&ThisStructType::name, #name, #a0, #a1, #a2, #a3, #a4, #a5, #a6, #a7, #a8);\
+		}
+
 #define StructConstructor0() \
 		{\
 			auto desc = NEW_INHEAD VConstructor0<ThisStructType>();\
@@ -1842,7 +1970,10 @@ struct AuxRttiStruct<ns::Type> : public RttiStruct\
 		RttiStruct::Init();\
 	}\
 };
-#define StructImpl(Type) AuxRttiStruct<Type> AuxRttiStruct<Type>::Instance;
+
+#define StructImpl(Type) \
+
+//AuxRttiStruct<Type> AuxRttiStruct<Type>::Instance;
 
 template<typename T>
 void RttiStruct::MemberDesc::SetValue(void* pThis, const T* v) const
@@ -2085,7 +2216,7 @@ VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>::VMethod7(MethodFun fun, con
 	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
 	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
 	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
+	Arguments.push_back(std::make_pair(a6, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
 }
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
 VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>::VMethod7(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6)
@@ -2102,7 +2233,7 @@ VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>::VMethod7(StaticMethodFun fu
 	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
 	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
 	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
+	Arguments.push_back(std::make_pair(a6, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
 }
 
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
@@ -2119,8 +2250,8 @@ VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::VMethod8(MethodFun fun,
 	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
 	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
 	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
+	Arguments.push_back(std::make_pair(a6, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
+	Arguments.push_back(std::make_pair(a7, &AuxRttiStruct<typename remove_all_ref_ptr<T7>::type>::Instance));
 }
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
 VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::VMethod8(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7)
@@ -2137,8 +2268,46 @@ VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::VMethod8(StaticMethodFu
 	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
 	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
 	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
+	Arguments.push_back(std::make_pair(a6, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
+	Arguments.push_back(std::make_pair(a7, &AuxRttiStruct<typename remove_all_ref_ptr<T7>::type>::Instance));
+}
+
+template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+VMethod9<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8>::VMethod9(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8)
+{
+	FuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
+
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
+	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
+	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
+	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
+	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
+	Arguments.push_back(std::make_pair(a6, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
+	Arguments.push_back(std::make_pair(a7, &AuxRttiStruct<typename remove_all_ref_ptr<T7>::type>::Instance));
+	Arguments.push_back(std::make_pair(a8, &AuxRttiStruct<typename remove_all_ref_ptr<T8>::type>::Instance));
+}
+template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+VMethod9<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8>::VMethod9(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8)
+{
+	IsStatic = true;
+	StaticFuncPtr = fun;
+	Name = name;
+	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
+
+	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
+	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
+	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
+	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
+	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
+	Arguments.push_back(std::make_pair(a6, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
+	Arguments.push_back(std::make_pair(a7, &AuxRttiStruct<typename remove_all_ref_ptr<T7>::type>::Instance));
+	Arguments.push_back(std::make_pair(a8, &AuxRttiStruct<typename remove_all_ref_ptr<T8>::type>::Instance));
 }
 
 NS_END

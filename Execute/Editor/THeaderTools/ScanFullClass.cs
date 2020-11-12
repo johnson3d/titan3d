@@ -439,21 +439,13 @@ namespace THeaderTools
                 SkipPair(ref index, code, '[', ']', out rangeStart, out rangeEnd);
                 var args = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
                 args = args.Replace(" ", "");
-                int sz = 0;
-                try
+                string tarNum;
+                if (ConstMapper.TryGetValue(args, out tarNum) == false)
                 {
-                    string tarNum;
-                    if(ConstMapper.TryGetValue(args, out tarNum)==false)
-                    {
-                        tarNum = args;
-                    }
-                    sz = System.Convert.ToInt32(tarNum);
+                    tarNum = args;
                 }
-                catch
-                {
-                    Console.WriteLine($"{klassName}::{name} array size error");
-                }
-                tmp.ArraySize.Add(sz);
+                tmp.ArraySize.Add(tarNum);
+                
                 var token = GetTokenString(ref index, code, null);
                 if (token == ";")
                 {
@@ -498,24 +490,21 @@ namespace THeaderTools
             var funName = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
             funName = funName.Replace(" ", "");
             tmp.Name = funName;
-            tmp.FunctionPtr = new CppFunction();
+            tmp.TypeCallback = new CppCallback();
 
             SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
             var args = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
-            AnalyzeClassFuntionArguments(args, tmp.FunctionPtr);
+            AnalyzeClassFuntionArguments(args, tmp.TypeCallback);
 
-            if ((dtStyles & EDeclareType.DT_Const) == EDeclareType.DT_Const)
-            {
-                tmp.FunctionPtr.IsReturnConstType = true;
-            }
-            tmp.FunctionPtr.ReturnType = returnType;
+            tmp.TypeCallback.ReturnType = returnType;
 
             var token = GetTokenString(ref index, code, null);
             if (token == "const")
             {
-                tmp.FunctionPtr.IsConst = true;
+                dtStyles |= EDeclareType.DT_Const;
                 token = GetTokenString(ref index, code, null);
             }
+            tmp.TypeCallback.DeclType = dtStyles;
             if (token != ";")
             {
                 throw new Exception(TraceMessage($"{klassName}::{funName} is a invalid function pointer"));

@@ -3,26 +3,34 @@
 
 NS_BEGIN
 
-TR_CALLBACK()
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef bool(*items_getter)(void* data, int idx, const char** out_text);
-TR_CALLBACK()
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef float(*values_getter)(void* data, int idx);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void* (*alloc_func)(size_t sz, void* user_data);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void(*free_func)(void* ptr, void* user_data);
 
-TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = ImGui, SV_ReflectAll)
+TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = ImGui, SV_LayoutStruct=8)
 class ImGuiAPI
 {
 public:
-	static void* CreateContext(ImFontAtlas* shared_font_atlas)
+	static void* CreateContext(ImFontAtlas* shared_font_atlas = NULL)
 	{
 		return ImGui::CreateContext(shared_font_atlas);
 	}
-	static void DestroyContext(void* ctx)
+	static void DestroyContext(void* ctx = NULL)
 	{
 		return ImGui::DestroyContext((ImGuiContext*)ctx);
 	}
 	static void* GetCurrentContext()
 	{
 		return ImGui::GetCurrentContext();
+	}
+	static void SetCurrentContext(void* ctx)
+	{
+		return ImGui::SetCurrentContext((ImGuiContext*)ctx);
 	}
 	static ImGuiIO* GetIO()
 	{
@@ -48,6 +56,39 @@ public:
 	{
 		return ImGui::GetDrawData();
 	}
+	// Demo, Debug, Information
+	static void          ShowDemoWindow(bool* p_open = NULL)
+	{
+		return ImGui::ShowDemoWindow(p_open);
+	}
+	static void          ShowAboutWindow(bool* p_open = NULL)
+	{
+		return ImGui::ShowAboutWindow(p_open);
+	}
+	static void          ShowMetricsWindow(bool* p_open = NULL)
+	{
+		return ImGui::ShowMetricsWindow(p_open);
+	}
+	static void          ShowStyleEditor(ImGuiStyle* refValue = NULL)
+	{
+		return ImGui::ShowStyleEditor(refValue);
+	}
+	static bool          ShowStyleSelector(const char* label)
+	{
+		return ImGui::ShowStyleSelector(label);
+	}
+	static void          ShowFontSelector(const char* label)
+	{
+		return ImGui::ShowFontSelector(label);
+	}
+	static void          ShowUserGuide()
+	{
+		return ImGui::ShowUserGuide();
+	}
+	static const char*   GetVersion()
+	{
+		return ImGui::GetVersion();
+	}
 	// Styles
 	static void          StyleColorsDark(ImGuiStyle* dst = NULL)
 	{
@@ -71,7 +112,7 @@ public:
 		return ImGui::End();
 	}
 	// Child Windows
-	static bool          BeginChild(const char* str_id, const ImVec2* size, bool border, ImGuiWindowFlags_ flags)
+	static bool          BeginChild(const char* str_id, const ImVec2* size = &ImVec2(0, 0), bool border = false, ImGuiWindowFlags_ flags = (ImGuiWindowFlags_)0)
 	{
 		return ImGui::BeginChild(str_id, *size, border, flags);
 	}
@@ -123,7 +164,7 @@ public:
 		return ImGui::GetWindowHeight();
 	}
 	// Prefer using SetNextXXX functions (before Begin) rather that SetXXX functions (after Begin).
-	static void          SetNextWindowPos(const ImVec2* pos, ImGuiCond_ cond, const ImVec2* pivot)
+	static void          SetNextWindowPos(const ImVec2* pos, ImGuiCond_ cond, const ImVec2* pivot = &ImVec2(0, 0))
 	{
 		return ImGui::SetNextWindowPos(*pos, cond, *pivot);
 	}
@@ -515,7 +556,7 @@ public:
 		return ImGui::BulletText(fmt);
 	}
 	// Widgets: Main
-	static bool          Button(const char* label, const ImVec2* size)
+	static bool          Button(const char* label, const ImVec2* size = &ImVec2(0, 0))
 	{
 		return ImGui::Button(label, *size);
 	}
@@ -531,7 +572,7 @@ public:
 	{
 		return ImGui::ArrowButton(str_id, dir);
 	}
-	static void          Image(ImTextureID user_texture_id, const ImVec2* size, const ImVec2* uv0, const ImVec2* uv1, const ImVec4* tint_col, const ImVec4* border_col)
+	static void          Image(ImTextureID user_texture_id, const ImVec2* size, const ImVec2* uv0 = &ImVec2(0, 0), const ImVec2* uv1 = &ImVec2(1, 1), const ImVec4* tint_col = &ImVec4(1, 1, 1, 1), const ImVec4* border_col = &ImVec4(0, 0, 0, 0))
 	{
 		return ImGui::Image(user_texture_id, *size, *uv0, *uv1, *tint_col, *border_col);
 	}
@@ -691,9 +732,9 @@ public:
 		return ImGui::VSliderScalar(label, *size, data_type, p_data, p_min, p_max, format, flags);
 	}
 	// Widgets: Input with Keyboard
-	static bool          InputText(const char* label, char* buf, UINT buf_size, ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL)
+	static bool          InputText(const char* label, void* buf, UINT buf_size, ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL)
 	{
-		return ImGui::InputText(label, buf, (UINT)buf_size, flags, callback, user_data);
+		return ImGui::InputText(label, (char*)buf, (UINT)buf_size, flags, callback, user_data);
 	}
 	static bool          InputTextMultiline(const char* label, char* buf, UINT buf_size, const ImVec2* size, ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL)
 	{
@@ -976,12 +1017,456 @@ public:
 	{
 		return ImGui::IsPopupOpen(str_id, flags);
 	}
+	// Columns
+	static void          Columns(int count = 1, const char* id = NULL, bool border = true)
+	{
+		return ImGui::EndPopup();
+	}
+	static void          NextColumn()
+	{
+		return ImGui::EndPopup();
+	}
+	static int           GetColumnIndex()
+	{
+		return ImGui::GetColumnIndex();
+	}
+	static float         GetColumnWidth(int column_index = -1)
+	{
+		return ImGui::GetColumnWidth(column_index);
+	}
+	static void          SetColumnWidth(int column_index, float width)
+	{
+		return ImGui::SetColumnWidth(column_index, width);
+	}
+	static float         GetColumnOffset(int column_index = -1)
+	{
+		return ImGui::GetColumnOffset(column_index);
+	}
+	static void          SetColumnOffset(int column_index, float offset_x)
+	{
+		return ImGui::SetColumnOffset(column_index, offset_x);
+	}
+	static int           GetColumnsCount()
+	{
+		return ImGui::GetColumnsCount();
+	}
+	// Tab Bars, Tabs
+	static bool          BeginTabBar(const char* str_id, ImGuiTabBarFlags_ flags)
+	{
+		return ImGui::BeginTabBar(str_id, flags);
+	}
+	static void          EndTabBar()
+	{
+		return ImGui::EndTabBar();
+	}
+	static bool          BeginTabItem(const char* label, bool* p_open = NULL, ImGuiTabItemFlags_ flags = (ImGuiTabItemFlags_)0)
+	{
+		return ImGui::GetColumnsCount();
+	}
+	static void          EndTabItem()
+	{
+		return ImGui::EndTabItem();
+	}
+	static bool          TabItemButton(const char* label, ImGuiTabItemFlags_ flags = (ImGuiTabItemFlags_)0)
+	{
+		return ImGui::TabItemButton(label, flags);
+	}
+	static void          SetTabItemClosed(const char* tab_or_docked_window_label)
+	{
+		return ImGui::SetTabItemClosed(tab_or_docked_window_label);
+	}
+	// Logging/Capture
+	static void          LogToTTY(int auto_open_depth = -1)
+	{
+		return ImGui::LogToTTY(auto_open_depth);
+	}
+	static void          LogToFile(int auto_open_depth = -1, const char* filename = NULL)
+	{
+		return ImGui::LogToFile(auto_open_depth, filename);
+	}
+	static void          LogToClipboard(int auto_open_depth = -1)
+	{
+		return ImGui::LogToClipboard(auto_open_depth);
+	}
+	static void          LogFinish()
+	{
+		return ImGui::LogFinish();
+	}
+	static void          LogButtons()
+	{
+		return ImGui::LogButtons();
+	}
+	static void          LogText(const char* fmt)
+	{
+		return ImGui::LogText(fmt);
+	}
+	// Drag and Drop
+	static bool          BeginDragDropSource(ImGuiDragDropFlags_ flags = (ImGuiDragDropFlags_)0)
+	{
+		return ImGui::BeginDragDropSource(flags);
+	}
+	static bool          SetDragDropPayload(const char* type, const void* data, UINT sz, ImGuiCond_ cond = (ImGuiCond_)0)
+	{
+		return ImGui::SetDragDropPayload(type, data, (UINT)sz, cond);
+	}
+	static void          EndDragDropSource()
+	{
+		return ImGui::EndDragDropSource();
+	}
+	static bool                  BeginDragDropTarget()
+	{
+		return ImGui::BeginDragDropTarget();
+	}
+	static const ImGuiPayload*   AcceptDragDropPayload(const char* type, ImGuiDragDropFlags_ flags = (ImGuiDragDropFlags_)0)
+	{
+		return ImGui::AcceptDragDropPayload(type, flags);
+	}
+	static void                  EndDragDropTarget()
+	{
+		return ImGui::EndDragDropTarget();
+	}
+	static const ImGuiPayload*   GetDragDropPayload()
+	{
+		return ImGui::GetDragDropPayload();
+	}
+	// Clipping
+	static void          PushClipRect(const ImVec2* clip_rect_min, const ImVec2* clip_rect_max, bool intersect_with_current_clip_rect)
+	{
+		return ImGui::PushClipRect(*clip_rect_min, *clip_rect_max, intersect_with_current_clip_rect);
+	}
+	static void          PopClipRect()
+	{
+		return ImGui::PopClipRect();
+	}
+	// Focus, Activation
+	static void          SetItemDefaultFocus()
+	{
+		return ImGui::SetItemDefaultFocus();
+	}
+	static void          SetKeyboardFocusHere(int offset = 0)
+	{
+		return ImGui::SetKeyboardFocusHere(offset);
+	}
+	// Item/Widgets Utilities
+	static bool          IsItemHovered(ImGuiHoveredFlags_ flags = (ImGuiHoveredFlags_)0)
+	{
+		return ImGui::IsItemHovered(flags);
+	}
+	static bool          IsItemActive()
+	{
+		return ImGui::IsItemActive();
+	}
+	static bool          IsItemFocused()
+	{
+		return ImGui::IsItemFocused();
+	}
+	static bool          IsItemClicked(ImGuiMouseButton_ mouse_button = (ImGuiMouseButton_)0)
+	{
+		return ImGui::IsItemClicked(mouse_button);
+	}
+	static bool          IsItemVisible()
+	{
+		return ImGui::IsItemVisible();
+	}
+	static bool          IsItemEdited()
+	{
+		return ImGui::IsItemEdited();
+	}
+	static bool          IsItemActivated()
+	{
+		return ImGui::IsItemActivated();
+	}
+	static bool          IsItemDeactivated()
+	{
+		return ImGui::IsItemDeactivated();
+	}
+	static bool          IsItemDeactivatedAfterEdit()
+	{
+		return ImGui::IsItemDeactivatedAfterEdit();
+	}
+	static bool          IsItemToggledOpen()
+	{
+		return ImGui::IsItemToggledOpen();
+	}
+	static bool          IsAnyItemHovered()
+	{
+		return ImGui::IsAnyItemHovered();
+	}
+	static bool          IsAnyItemActive()
+	{
+		return ImGui::IsAnyItemActive();
+	}
+	static bool          IsAnyItemFocused()
+	{
+		return ImGui::IsAnyItemFocused();
+	}
+	TR_FUNCTION(SV_ReturnConverter=v3dVector2_t)
+	static ImVec2        GetItemRectMin()
+	{
+		return ImGui::GetItemRectMin();
+	}
+	TR_FUNCTION(SV_ReturnConverter = v3dVector2_t)
+	static ImVec2        GetItemRectMax()
+	{
+		return ImGui::GetItemRectMax();
+	}
+	TR_FUNCTION(SV_ReturnConverter = v3dVector2_t)
+	static ImVec2        GetItemRectSize()
+	{
+		return ImGui::GetItemRectSize();
+	}
+	static void          SetItemAllowOverlap()
+	{
+		return ImGui::SetItemAllowOverlap();
+	}
+	// Miscellaneous Utilities
+	static bool          IsRectVisible(const ImVec2* size)
+	{
+		return ImGui::IsRectVisible(*size);
+	}
+	static bool          IsRectVisible(const ImVec2* rect_min, const ImVec2* rect_max)
+	{
+		return ImGui::IsRectVisible(* rect_min, * rect_max);
+	}
+	static double        GetTime()
+	{
+		return ImGui::GetTime();
+	}
+	static int           GetFrameCount()
+	{
+		return ImGui::GetFrameCount();
+	}
+	static ImDrawList*   GetBackgroundDrawList()
+	{
+		return ImGui::GetBackgroundDrawList();
+	}
+	static ImDrawList*   GetForegroundDrawList()
+	{
+		return ImGui::GetForegroundDrawList();
+	}
+	static void* GetDrawListSharedData()
+	{
+		return ImGui::GetDrawListSharedData();
+	}
+	static const char*   GetStyleColorName(ImGuiCol_ idx)
+	{
+		return ImGui::GetStyleColorName(idx);
+	}
+	static void          SetStateStorage(ImGuiStorage* storage)
+	{
+		return ImGui::SetStateStorage(storage);
+	}
+	static ImGuiStorage* GetStateStorage()
+	{
+		return ImGui::GetStateStorage();
+	}
+	static void          CalcListClipping(int items_count, float items_height, int* out_items_display_start, int* out_items_display_end)
+	{
+		return ImGui::CalcListClipping(items_count, items_height, out_items_display_start, out_items_display_end);
+	}
+	static bool          BeginChildFrame(ImGuiID id, const ImVec2* size, ImGuiWindowFlags_ flags = (ImGuiWindowFlags_)0)
+	{
+		return ImGui::BeginChildFrame(id, *size, flags);
+	}
+	static void          EndChildFrame()
+	{
+		return ImGui::EndChildFrame();
+	}
+	// Text Utilities
+	TR_FUNCTION(SV_ReturnConverter = v3dVector2_t)
+	static ImVec2        CalcTextSize(const char* text, const char* text_end = NULL, bool hide_text_after_double_hash = false, float wrap_width = -1.0f)
+	{
+		return ImGui::CalcTextSize(text, text_end, hide_text_after_double_hash, wrap_width);
+	}
+	// Color Utilities
+	TR_FUNCTION(SV_ReturnConverter = v3dVector4_t)
+	static ImVec4        ColorConvertU32ToFloat4(ImU32 inValue)
+	{
+		return ImGui::ColorConvertU32ToFloat4(inValue);
+	}
+	TR_FUNCTION(SV_ReturnConverter = v3dVector2_t)
+	static ImU32         ColorConvertFloat4ToU32(const ImVec4* inValue)
+	{
+		return ImGui::ColorConvertFloat4ToU32(*inValue);
+	}
+	static void          ColorConvertRGBtoHSV(float r, float g, float b, float* out_h, float* out_s, float* out_v)
+	{
+		return ImGui::ColorConvertRGBtoHSV(r, g, b, *out_h, *out_s, *out_v);
+	}
+	static void          ColorConvertHSVtoRGB(float h, float s, float v, float* out_r, float* out_g, float* out_b)
+	{
+		return ImGui::ColorConvertHSVtoRGB(h, s, v, *out_r, *out_g, *out_b);
+	}
+	// Inputs Utilities: Keyboard
+	static int           GetKeyIndex(ImGuiKey_ imgui_key)
+	{
+		return ImGui::GetKeyIndex(imgui_key);
+	}
+	static bool          IsKeyDown(int user_key_index)
+	{
+		return ImGui::IsKeyDown(user_key_index);
+	}
+	static bool          IsKeyPressed(int user_key_index, bool repeat = true)
+	{
+		return ImGui::IsKeyPressed(user_key_index, repeat);
+	}
+	static bool          IsKeyReleased(int user_key_index)
+	{
+		return ImGui::IsKeyReleased(user_key_index);
+	}
+	static int           GetKeyPressedAmount(int key_index, float repeat_delay, float rate)
+	{
+		return ImGui::GetKeyPressedAmount(key_index, repeat_delay, rate);
+	}
+	static void          CaptureKeyboardFromApp(bool want_capture_keyboard_value = true)
+	{
+		return ImGui::CaptureKeyboardFromApp(want_capture_keyboard_value);
+	}
+	// Inputs Utilities: Mouse
+	static bool          IsMouseDown(ImGuiMouseButton_ button)
+	{
+		return ImGui::IsMouseDown(button);
+	}
+	static bool          IsMouseClicked(ImGuiMouseButton_ button, bool repeat = false)
+	{
+		return ImGui::IsMouseClicked(button, repeat);
+	}
+	static bool          IsMouseReleased(ImGuiMouseButton_ button)
+	{
+		return ImGui::IsMouseReleased(button);
+	}
+	static bool          IsMouseDoubleClicked(ImGuiMouseButton_ button)
+	{
+		return ImGui::IsMouseDoubleClicked(button);
+	}
+	static bool          IsMouseHoveringRect(const ImVec2* r_min, const ImVec2* r_max, bool clip = true)
+	{
+		return ImGui::IsMouseHoveringRect(* r_min, * r_max, clip);
+	}
+	static bool          IsMousePosValid(const ImVec2* mouse_pos = NULL)
+	{
+		return ImGui::IsMousePosValid(mouse_pos);
+	}
+	static bool          IsAnyMouseDown()
+	{
+		return ImGui::IsAnyMouseDown();
+	}
+	TR_FUNCTION(SV_ReturnConverter = v3dVector2_t)
+	static ImVec2        GetMousePos()
+	{
+		return ImGui::GetMousePos();
+	}
+	TR_FUNCTION(SV_ReturnConverter = v3dVector2_t)
+	static ImVec2        GetMousePosOnOpeningCurrentPopup()
+	{
+		return ImGui::GetMousePosOnOpeningCurrentPopup();
+	}
+	static bool          IsMouseDragging(ImGuiMouseButton_ button, float lock_threshold = -1.0f)
+	{
+		return ImGui::IsMouseDragging(button, lock_threshold);
+	}
+	TR_FUNCTION(SV_ReturnConverter = v3dVector2_t)
+	static ImVec2        GetMouseDragDelta(ImGuiMouseButton_ button, float lock_threshold = -1.0f)
+	{
+		return ImGui::GetMouseDragDelta(button, lock_threshold);
+	}
+	static void          ResetMouseDragDelta(ImGuiMouseButton_ button)
+	{
+		return ImGui::ResetMouseDragDelta(button);
+	}
+	static ImGuiMouseCursor_ GetMouseCursor()
+	{
+		return (ImGuiMouseCursor_)ImGui::GetMouseCursor();
+	}
+	static void          SetMouseCursor(ImGuiMouseCursor_ cursor_type)
+	{
+		return ImGui::SetMouseCursor(cursor_type);
+	}
+	static void          CaptureMouseFromApp(bool want_capture_mouse_value = true)
+	{
+		return ImGui::CaptureMouseFromApp(want_capture_mouse_value);
+	}
+	// Clipboard Utilities
+	static const char*   GetClipboardText()
+	{
+		return ImGui::GetClipboardText();
+	}
+	static void          SetClipboardText(const char* text)
+	{
+		return ImGui::SetClipboardText(text);
+	}
+	// Settings/.Ini Utilities
+	static void          LoadIniSettingsFromDisk(const char* ini_filename)
+	{
+		return ImGui::LoadIniSettingsFromDisk(ini_filename);
+	}
+	static void          LoadIniSettingsFromMemory(const char* ini_data, UINT ini_size = 0)
+	{
+		return ImGui::LoadIniSettingsFromMemory(ini_data, ini_size);
+	}
+	static void          SaveIniSettingsToDisk(const char* ini_filename)
+	{
+		return ImGui::SaveIniSettingsToDisk(ini_filename);
+	}
+	static const char*   SaveIniSettingsToMemory(UINT* out_ini_size = NULL)
+	{
+		size_t sz;
+		auto ret = ImGui::SaveIniSettingsToMemory(&sz);
+		if(out_ini_size!=NULL)
+			*out_ini_size = (UINT)sz;
+		return ret;
+	}
+	// Debug Utilities
+	static bool          DebugCheckVersionAndDataLayout(const char* version_str, size_t sz_io, size_t sz_style, size_t sz_vec2, size_t sz_vec4, size_t sz_drawvert, size_t sz_drawidx)
+	{
+		return ImGui::DebugCheckVersionAndDataLayout(version_str, sz_io, sz_style, sz_vec2, sz_vec4, sz_drawvert, sz_drawidx);
+	}
+	// Memory Allocators
+	static void          SetAllocatorFunctions(alloc_func fn_alloc_func, free_func fn_free_func, void* user_data = NULL)
+	{
+		return ImGui::SetAllocatorFunctions(fn_alloc_func, fn_free_func, user_data);
+	}
+	static void*         MemAlloc(size_t size)
+	{
+		return ImGui::MemAlloc(size);
+	}
+	static void          MemFree(void* ptr)
+	{
+		return ImGui::MemFree(ptr);
+	}
 };
 
-StructBegin(ImVec2,)
+StructBegin(ImVec2, )
 StructEnd(void)
 
 StructBegin(ImVec4, )
 StructEnd(void)
+
+StructBegin(items_getter, EngineNS)
+StructEnd(void)
+
+StructBegin(values_getter, EngineNS)
+StructEnd(void)
+
+StructBegin(alloc_func, EngineNS)
+StructEnd(void)
+
+StructBegin(free_func, EngineNS)
+StructEnd(void)
+
+StructBegin(ImGuiSizeCallback, )
+StructEnd(void)
+
+StructBegin(ImGuiInputTextCallback, )
+StructEnd(void)
+
+template<int _Size>
+struct VArrayElement<_Size, ImDrawCallback>
+{
+	enum
+	{
+		Result = 1,
+	};
+};
 
 NS_END

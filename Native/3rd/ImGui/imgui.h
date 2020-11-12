@@ -943,6 +943,7 @@ enum ImGuiComboFlags_
 };
 
 // Flags for ImGui::BeginTabBar()
+TR_ENUM()
 enum ImGuiTabBarFlags_
 {
     ImGuiTabBarFlags_None                           = 0,
@@ -959,6 +960,7 @@ enum ImGuiTabBarFlags_
 };
 
 // Flags for ImGui::BeginTabItem()
+TR_ENUM()
 enum ImGuiTabItemFlags_
 {
     ImGuiTabItemFlags_None                          = 0,
@@ -1003,6 +1005,7 @@ enum ImGuiHoveredFlags_
 };
 
 // Flags for ImGui::BeginDragDropSource(), ImGui::AcceptDragDropPayload()
+TR_ENUM()
 enum ImGuiDragDropFlags_
 {
     ImGuiDragDropFlags_None                         = 0,
@@ -1337,6 +1340,7 @@ enum ImGuiSliderFlags_
 
 // Identify a mouse button.
 // Those values are guaranteed to be stable and we frequently use 0/1 directly. Named enums provided for convenience.
+TR_ENUM()
 enum ImGuiMouseButton_
 {
     ImGuiMouseButton_Left = 0,
@@ -1347,6 +1351,7 @@ enum ImGuiMouseButton_
 
 // Enumeration for GetMouseCursor()
 // User code may request backend to display given cursor by calling SetMouseCursor(), which is why we have some cursors that are marked unused here
+TR_ENUM()
 enum ImGuiMouseCursor_
 {
     ImGuiMouseCursor_None = -1,
@@ -1542,7 +1547,9 @@ struct ImGuiIO
 
     ImGuiConfigFlags   ConfigFlags;             // = 0              // See ImGuiConfigFlags_ enum. Set by user/application. Gamepad/keyboard navigation options, etc.
     ImGuiBackendFlags  BackendFlags;            // = 0              // See ImGuiBackendFlags_ enum. Set by backend (imgui_impl_xxx files or custom backend) to communicate features supported by the backend.
+	TR_MEMBER(SV_ReturnConverter=v3dVector2_t)
     ImVec2      DisplaySize;                    // <unset>          // Main display size, in pixels.
+	TR_MEMBER()
     float       DeltaTime;                      // = 1.0f/60.0f     // Time elapsed since last frame, in seconds.
     float       IniSavingRate;                  // = 5.0f           // Minimum time between saving positions/sizes to .ini file, in seconds.
     const char* IniFilename;                    // = "imgui.ini"    // Path to .ini file. Set NULL to disable automatic .ini loading/saving, if e.g. you want to manually load/save from memory.
@@ -1550,16 +1557,19 @@ struct ImGuiIO
     float       MouseDoubleClickTime;           // = 0.30f          // Time for a double-click, in seconds.
     float       MouseDoubleClickMaxDist;        // = 6.0f           // Distance threshold to stay in to validate a double-click, in pixels.
     float       MouseDragThreshold;             // = 6.0f           // Distance threshold before considering we are dragging.
+	TR_MEMBER(SV_ConstValue = ImGuiKey_COUNT:ImGuiKey_.ImGuiKey_COUNT)
     int         KeyMap[ImGuiKey_COUNT];         // <unset>          // Map of indices into the KeysDown[512] entries array which represent your "native" keyboard state.
     float       KeyRepeatDelay;                 // = 0.250f         // When holding a key/button, time before it starts repeating, in seconds (for buttons in Repeat mode, etc.).
     float       KeyRepeatRate;                  // = 0.050f         // When holding a key/button, rate at which it repeats, in seconds.
     void*       UserData;                       // = NULL           // Store your own data for retrieval by callbacks.
 
+	TR_MEMBER()
     ImFontAtlas*Fonts;                          // <auto>           // Font atlas: load, rasterize and pack one or more fonts into a single texture.
     float       FontGlobalScale;                // = 1.0f           // Global scale all fonts
     bool        FontAllowUserScaling;           // = false          // Allow user scaling text of individual window with CTRL+Wheel.
     ImFont*     FontDefault;                    // = NULL           // Font to use on NewFrame(). Use NULL to uses Fonts->Fonts[0].
-    ImVec2      DisplayFramebufferScale;        // = (1, 1)         // For retina display or other situations where window coordinates are different from framebuffer coordinates. This generally ends up in ImDrawData::FramebufferScale.
+	TR_MEMBER(SV_ReturnConverter = v3dVector2_t)
+	ImVec2      DisplayFramebufferScale;        // = (1, 1)         // For retina display or other situations where window coordinates are different from framebuffer coordinates. This generally ends up in ImDrawData::FramebufferScale.
 
     // Miscellaneous options
     bool        MouseDrawCursor;                // = false          // Request ImGui to draw a mouse cursor for you (if you are on a platform without a mouse cursor). Cannot be easily renamed to 'io.ConfigXXX' because this is frequently used by backend implementations.
@@ -1596,18 +1606,27 @@ struct ImGuiIO
     // Input - Fill before calling NewFrame()
     //------------------------------------------------------------------
 
+	TR_MEMBER(SV_ReturnConverter=v3dVector2_t)
     ImVec2      MousePos;                       // Mouse position, in pixels. Set to ImVec2(-FLT_MAX, -FLT_MAX) if mouse is unavailable (on another screen, etc.)
-    bool        MouseDown[5];                   // Mouse buttons: 0=left, 1=right, 2=middle + extras (ImGuiMouseButton_COUNT == 5). Dear ImGui mostly uses left and right buttons. Others buttons allows us to track if the mouse is being used by your application + available to user as a convenience via IsMouse** API.
-    float       MouseWheel;                     // Mouse wheel Vertical: 1 unit scrolls about 5 lines text.
+	TR_MEMBER()
+	bool        MouseDown[5];                   // Mouse buttons: 0=left, 1=right, 2=middle + extras (ImGuiMouseButton_COUNT == 5). Dear ImGui mostly uses left and right buttons. Others buttons allows us to track if the mouse is being used by your application + available to user as a convenience via IsMouse** API.
+	TR_MEMBER()
+	float       MouseWheel;                     // Mouse wheel Vertical: 1 unit scrolls about 5 lines text.
     float       MouseWheelH;                    // Mouse wheel Horizontal. Most users don't have a mouse with an horizontal wheel, may not be filled by all backends.
-    bool        KeyCtrl;                        // Keyboard modifier pressed: Control
-    bool        KeyShift;                       // Keyboard modifier pressed: Shift
-    bool        KeyAlt;                         // Keyboard modifier pressed: Alt
-    bool        KeySuper;                       // Keyboard modifier pressed: Cmd/Super/Windows
-    bool        KeysDown[512];                  // Keyboard keys that are pressed (ideally left in the "native" order your engine has access to keyboard keys, so you can use your own defines/enums for keys).
+	TR_MEMBER()
+	bool        KeyCtrl;                        // Keyboard modifier pressed: Control
+	TR_MEMBER()
+	bool        KeyShift;                       // Keyboard modifier pressed: Shift
+	TR_MEMBER()
+	bool        KeyAlt;                         // Keyboard modifier pressed: Alt
+	TR_MEMBER()
+	bool        KeySuper;                       // Keyboard modifier pressed: Cmd/Super/Windows
+	TR_MEMBER()
+	bool        KeysDown[512];                  // Keyboard keys that are pressed (ideally left in the "native" order your engine has access to keyboard keys, so you can use your own defines/enums for keys).
     float       NavInputs[ImGuiNavInput_COUNT]; // Gamepad inputs. Cleared back to zero by EndFrame(). Keyboard keys will be auto-mapped and be written here by NewFrame().
 
     // Functions
+	TR_FUNCTION()
     IMGUI_API void  AddInputCharacter(unsigned int c);          // Queue new character input
     IMGUI_API void  AddInputCharacterUTF16(ImWchar16 c);        // Queue new character input from an UTF-16 character, it can be a surrogate
     IMGUI_API void  AddInputCharactersUTF8(const char* str);    // Queue new characters input from an UTF-8 string
@@ -1626,7 +1645,8 @@ struct ImGuiIO
     bool        WantSaveIniSettings;            // When manual .ini load/save is active (io.IniFilename == NULL), this will be set to notify your application that you can call SaveIniSettingsToMemory() and save yourself. Important: clear io.WantSaveIniSettings yourself after saving!
     bool        NavActive;                      // Keyboard/Gamepad navigation is currently allowed (will handle ImGuiKey_NavXXX events) = a window is focused and it doesn't use the ImGuiWindowFlags_NoNavInputs flag.
     bool        NavVisible;                     // Keyboard/Gamepad navigation is visible and allowed (will handle ImGuiKey_NavXXX events).
-    float       Framerate;                      // Application framerate estimate, in frame per second. Solely for convenience. Rolling average estimation based on io.DeltaTime over 120 frames.
+    TR_MEMBER()
+	float       Framerate;                      // Application framerate estimate, in frame per second. Solely for convenience. Rolling average estimation based on io.DeltaTime over 120 frames.
     int         MetricsRenderVertices;          // Vertices output during last call to Render()
     int         MetricsRenderIndices;           // Indices output during last call to Render() = number of triangles * 3
     int         MetricsRenderWindows;           // Number of visible windows
@@ -1702,6 +1722,7 @@ struct ImGuiInputTextCallbackData
     IMGUI_API void      InsertChars(int pos, const char* text, const char* text_end = NULL);
     void                SelectAll()             { SelectionStart = 0; SelectionEnd = BufTextLen; }
     void                ClearSelection()        { SelectionStart = SelectionEnd = BufTextLen; }
+	TR_FUNCTION(SV_GenStaticFunction)
     bool                HasSelection() const    { return SelectionStart != SelectionEnd; }
 };
 
@@ -1720,6 +1741,7 @@ struct ImGuiSizeCallbackData
 };
 
 // Data payload for Drag and Drop operations: AcceptDragDropPayload(), GetDragDropPayload()
+TR_CLASS(SV_UsingNS = ImGui, SV_LayoutStruct = 8, SV_RemoveStrings = IMGUI_API)
 struct ImGuiPayload
 {
     // Members
@@ -1730,7 +1752,7 @@ struct ImGuiPayload
     ImGuiID         SourceId;           // Source item id
     ImGuiID         SourceParentId;     // Source parent id (if available)
     int             DataFrameCount;     // Data timestamp
-    char            DataType[32 + 1];   // Data type tag (short user-supplied string, 32 characters max)
+	char            DataType[33]; //[32 + 1];   // Data type tag (short user-supplied string, 32 characters max)
     bool            Preview;            // Set when AcceptDragDropPayload() was called and mouse has been hovering the target item (nb: handle overlapping drag targets)
     bool            Delivery;           // Set when AcceptDragDropPayload() was called and mouse button is released over the target item.
 
@@ -1861,6 +1883,7 @@ struct ImGuiTextBuffer
 // - You want to manipulate the open/close state of a particular sub-tree in your interface (tree node uses Int 0/1 to store their state).
 // - You want to store custom debug data easily without adding or editing structures in your code (probably not efficient, but convenient)
 // Types are NOT stored, so it is up to you to make sure your Key don't collide with different types.
+TR_CLASS(SV_UsingNS = ImGui, SV_ReflectAll, SV_RemoveStrings = IMGUI_API)
 struct ImGuiStorage
 {
     // [Internal]
@@ -1873,6 +1896,7 @@ struct ImGuiStorage
         ImGuiStoragePair(ImGuiID _key, void* _val_p)    { key = _key; val_p = _val_p; }
     };
 
+	TR_DISCARD()
     ImVector<ImGuiStoragePair>      Data;
 
     // - Get***() functions find pair, never add/allocate. Pairs are sorted so a query is O(log N)
@@ -2004,6 +2028,7 @@ struct ImColor
 // The expected behavior from your rendering function is 'if (cmd.UserCallback != NULL) { cmd.UserCallback(parent_list, cmd); } else { RenderTriangles() }'
 // If you want to override the signature of ImDrawCallback, you can simply use e.g. '#define ImDrawCallback MyDrawCallback' (in imconfig.h) + update rendering backend accordingly.
 #ifndef ImDrawCallback
+TR_CALLBACK()
 typedef void (*ImDrawCallback)(const ImDrawList* parent_list, const ImDrawCmd* cmd);
 #endif
 
@@ -2018,8 +2043,10 @@ typedef void (*ImDrawCallback)(const ImDrawList* parent_list, const ImDrawCmd* c
 //   those fields allow us to render meshes larger than 64K vertices while keeping 16-bit indices.
 //   Pre-1.71 backends will typically ignore the VtxOffset/IdxOffset fields.
 // - The ClipRect/TextureId/VtxOffset fields must be contiguous as we memcmp() them together (this is asserted for).
+TR_CLASS(SV_LayoutStruct = 8)
 struct ImDrawCmd
 {
+	TR_MEMBER(SV_ReturnConverter=v3dVector4_t)
     ImVec4          ClipRect;           // 4*4  // Clipping rectangle (x1, y1, x2, y2). Subtract ImDrawData->DisplayPos to get clipping rectangle in "viewport" coordinates
     ImTextureID     TextureId;          // 4-8  // User-provided texture ID. Set by user in ImfontAtlas::SetTexID() for fonts or passed to Image*() functions. Ignore if never using images or multiple fonts atlas.
     unsigned int    VtxOffset;          // 4    // Start offset in vertex buffer. ImGuiBackendFlags_RendererHasVtxOffset: always 0, otherwise may be >0 to support meshes larger than 64K vertices with 16-bit indices.
@@ -2040,9 +2067,12 @@ typedef unsigned short ImDrawIdx;
 
 // Vertex layout
 #ifndef IMGUI_OVERRIDE_DRAWVERT_STRUCT_LAYOUT
+TR_CLASS(SV_UsingNS = ImGui, SV_RemoveStrings = IMGUI_API, SV_LayoutStruct = 4)
 struct ImDrawVert
 {
+	TR_MEMBER(SV_ReturnConverter=v3dVector2_t)
     ImVec2  pos;
+	TR_MEMBER(SV_ReturnConverter = v3dVector2_t)
     ImVec2  uv;
     ImU32   col;
 };
@@ -2119,6 +2149,25 @@ struct ImDrawList
     ImVector<ImDrawIdx>     IdxBuffer;          // Index buffer. Each command consume ImDrawCmd::ElemCount of those
     ImVector<ImDrawVert>    VtxBuffer;          // Vertex buffer.
     ImDrawListFlags         Flags;              // Flags, you may poke into these to adjust anti-aliasing settings per-primitive.
+
+	TR_FUNCTION()
+	ImDrawCmd* GetCmdBuffer(int* size)
+	{
+		*size = CmdBuffer.Size;
+		return CmdBuffer.Data;
+	}
+	TR_FUNCTION()
+	ImDrawIdx* GetIdxBuffer(int* size)
+	{
+		*size = IdxBuffer.Size;
+		return IdxBuffer.Data;
+	}
+	TR_FUNCTION()
+	ImDrawVert* GetVtxBuffer(int* size)
+	{
+		*size = VtxBuffer.Size;
+		return VtxBuffer.Data;
+	}
 
     // [Internal, used while building lists]
     const ImDrawListSharedData* _Data;          // Pointer to shared draw data (you can use ImGui::GetDrawListSharedData() to get the one from current ImGui context)
@@ -2226,13 +2275,18 @@ struct ImDrawList
 // All draw data to render a Dear ImGui frame
 // (NB: the style and the naming convention here is a little inconsistent, we currently preserve them for backward compatibility purpose,
 // as this is one of the oldest structure exposed by the library! Basically, ImDrawList == CmdList)
-TR_CLASS(SV_UsingNS = ImGui, SV_RemoveStrings = IMGUI_API, SV_ReflectAll)
+TR_CLASS(SV_UsingNS = ImGui, SV_RemoveStrings = IMGUI_API, SV_LayoutStruct = 8)
 struct ImDrawData
 {
+	TR_MEMBER()
     bool            Valid;                  // Only valid after Render() is called and before the next NewFrame() is called.
+	TR_MEMBER()
     ImDrawList**    CmdLists;               // Array of ImDrawList* to render. The ImDrawList are owned by ImGuiContext and only pointed to from here.
+	TR_MEMBER()
     int             CmdListsCount;          // Number of ImDrawList* to render
+	TR_MEMBER()
     int             TotalIdxCount;          // For convenience, sum of all ImDrawList's IdxBuffer.Size
+	TR_MEMBER()
     int             TotalVtxCount;          // For convenience, sum of all ImDrawList's VtxBuffer.Size
 	TR_MEMBER(SV_ReturnConverter = v3dVector2_t)
     ImVec2          DisplayPos;             // Upper-left position of the viewport to render (== upper-left of the orthogonal projection matrix to use)
@@ -2285,6 +2339,8 @@ struct ImFontConfig
     ImFont*         DstFont;
 
     IMGUI_API ImFontConfig();
+
+	IMGUI_API void InitFontConfig();
 };
 
 // Hold rendering data for one glyph.
@@ -2315,12 +2371,14 @@ struct ImFontGlyphRangesBuilder
 };
 
 // See ImFontAtlas::AddCustomRectXXX functions.
+TR_CLASS(SV_LayoutStruct = 8)
 struct ImFontAtlasCustomRect
 {
     unsigned short  Width, Height;  // Input    // Desired rectangle dimension
     unsigned short  X, Y;           // Output   // Packed position in Atlas
     unsigned int    GlyphID;        // Input    // For custom font glyphs only (ID < 0x110000)
     float           GlyphAdvanceX;  // Input    // For custom font glyphs only: glyph xadvance
+	TR_MEMBER(SV_ReturnConverter=v3dVector2_t)
     ImVec2          GlyphOffset;    // Input    // For custom font glyphs only: glyph display offset
     ImFont*         Font;           // Input    // For custom font glyphs only: target font
     ImFontAtlasCustomRect()         { Width = Height = 0; X = Y = 0xFFFF; GlyphID = 0; GlyphAdvanceX = 0.0f; GlyphOffset = ImVec2(0, 0); Font = NULL; }
@@ -2358,17 +2416,26 @@ struct ImFontAtlas
 {
     IMGUI_API ImFontAtlas();
     IMGUI_API ~ImFontAtlas();
-    IMGUI_API ImFont*           AddFont(const ImFontConfig* font_cfg);
+	TR_FUNCTION()
+	IMGUI_API ImFont*           AddFont(const ImFontConfig* font_cfg);
+	TR_FUNCTION()
     IMGUI_API ImFont*           AddFontDefault(const ImFontConfig* font_cfg = NULL);
 	TR_FUNCTION(SV_CharSet = CharSet.None)
     IMGUI_API ImFont*           AddFontFromFileTTF(const char* filename, float size_pixels, const ImFontConfig* font_cfg = NULL, const ImWchar* glyph_ranges = NULL);
-    IMGUI_API ImFont*           AddFontFromMemoryTTF(void* font_data, int font_size, float size_pixels, const ImFontConfig* font_cfg = NULL, const ImWchar* glyph_ranges = NULL); // Note: Transfer ownership of 'ttf_data' to ImFontAtlas! Will be deleted after destruction of the atlas. Set font_cfg->FontDataOwnedByAtlas=false to keep ownership of your data and it won't be freed.
-    IMGUI_API ImFont*           AddFontFromMemoryCompressedTTF(const void* compressed_font_data, int compressed_font_size, float size_pixels, const ImFontConfig* font_cfg = NULL, const ImWchar* glyph_ranges = NULL); // 'compressed_font_data' still owned by caller. Compress with binary_to_compressed_c.cpp.
-    IMGUI_API ImFont*           AddFontFromMemoryCompressedBase85TTF(const char* compressed_font_data_base85, float size_pixels, const ImFontConfig* font_cfg = NULL, const ImWchar* glyph_ranges = NULL);              // 'compressed_font_data_base85' still owned by caller. Compress with binary_to_compressed_c.cpp with -base85 parameter.
-    IMGUI_API void              ClearInputData();           // Clear input data (all ImFontConfig structures including sizes, TTF data, glyph ranges, etc.) = all the data used to build the texture and fonts.
-    IMGUI_API void              ClearTexData();             // Clear output texture data (CPU side). Saves RAM once the texture has been copied to graphics memory.
-    IMGUI_API void              ClearFonts();               // Clear output font data (glyphs storage, UV coordinates).
-    IMGUI_API void              Clear();                    // Clear all input and output.
+	TR_FUNCTION()
+	IMGUI_API ImFont*           AddFontFromMemoryTTF(void* font_data, int font_size, float size_pixels, const ImFontConfig* font_cfg = NULL, const ImWchar* glyph_ranges = NULL); // Note: Transfer ownership of 'ttf_data' to ImFontAtlas! Will be deleted after destruction of the atlas. Set font_cfg->FontDataOwnedByAtlas=false to keep ownership of your data and it won't be freed.
+	TR_FUNCTION()
+	IMGUI_API ImFont*           AddFontFromMemoryCompressedTTF(const void* compressed_font_data, int compressed_font_size, float size_pixels, const ImFontConfig* font_cfg = NULL, const ImWchar* glyph_ranges = NULL); // 'compressed_font_data' still owned by caller. Compress with binary_to_compressed_c.cpp.
+	TR_FUNCTION()
+	IMGUI_API ImFont*           AddFontFromMemoryCompressedBase85TTF(const char* compressed_font_data_base85, float size_pixels, const ImFontConfig* font_cfg = NULL, const ImWchar* glyph_ranges = NULL);              // 'compressed_font_data_base85' still owned by caller. Compress with binary_to_compressed_c.cpp with -base85 parameter.
+	TR_FUNCTION()
+	IMGUI_API void              ClearInputData();           // Clear input data (all ImFontConfig structures including sizes, TTF data, glyph ranges, etc.) = all the data used to build the texture and fonts.
+	TR_FUNCTION()
+	IMGUI_API void              ClearTexData();             // Clear output texture data (CPU side). Saves RAM once the texture has been copied to graphics memory.
+	TR_FUNCTION()
+	IMGUI_API void              ClearFonts();               // Clear output font data (glyphs storage, UV coordinates).
+	TR_FUNCTION()
+	IMGUI_API void              Clear();                    // Clear all input and output.
 
     // Build atlas, retrieve pixel data.
     // User is in charge of copying the pixels into graphics memory (e.g. create a texture with your engine). Then store your texture handle with SetTexID().
@@ -2376,10 +2443,14 @@ struct ImFontAtlas
     // Building in RGBA32 format is provided for convenience and compatibility, but note that unless you manually manipulate or copy color data into
     // the texture (e.g. when using the AddCustomRect*** api), then the RGB pixels emitted will always be white (~75% of memory/bandwidth waste.
     IMGUI_API bool              Build();                    // Build pixels data. This is called automatically for you by the GetTexData*** functions.
-    IMGUI_API void              GetTexDataAsAlpha8(unsigned char** out_pixels, int* out_width, int* out_height, int* out_bytes_per_pixel = NULL);  // 1 byte per-pixel
-    IMGUI_API void              GetTexDataAsRGBA32(unsigned char** out_pixels, int* out_width, int* out_height, int* out_bytes_per_pixel = NULL);  // 4 bytes-per-pixel
-    bool                        IsBuilt() const             { return Fonts.Size > 0 && (TexPixelsAlpha8 != NULL || TexPixelsRGBA32 != NULL); }
-    void                        SetTexID(ImTextureID id)    { TexID = id; }
+	TR_FUNCTION()
+	IMGUI_API void              GetTexDataAsAlpha8(unsigned char** out_pixels, int* out_width, int* out_height, int* out_bytes_per_pixel = NULL);  // 1 byte per-pixel
+	TR_FUNCTION()
+	IMGUI_API void              GetTexDataAsRGBA32(unsigned char** out_pixels, int* out_width, int* out_height, int* out_bytes_per_pixel = NULL);  // 4 bytes-per-pixel
+	TR_FUNCTION()
+	bool                        IsBuilt() const             { return Fonts.Size > 0 && (TexPixelsAlpha8 != NULL || TexPixelsRGBA32 != NULL); }
+	TR_FUNCTION()
+	void                        SetTexID(ImTextureID id)    { TexID = id; }
 
     //-------------------------------------------
     // Glyph Ranges
@@ -2388,14 +2459,22 @@ struct ImFontAtlas
     // Helpers to retrieve list of common Unicode ranges (2 value per range, values are inclusive, zero-terminated list)
     // NB: Make sure that your string are UTF-8 and NOT in your local code page. In C++11, you can create UTF-8 string literal using the u8"Hello world" syntax. See FAQ for details.
     // NB: Consider using ImFontGlyphRangesBuilder to build glyph ranges from textual data.
-    IMGUI_API const ImWchar*    GetGlyphRangesDefault();                // Basic Latin, Extended Latin
-    IMGUI_API const ImWchar*    GetGlyphRangesKorean();                 // Default + Korean characters
-    IMGUI_API const ImWchar*    GetGlyphRangesJapanese();               // Default + Hiragana, Katakana, Half-Width, Selection of 1946 Ideographs
-    IMGUI_API const ImWchar*    GetGlyphRangesChineseFull();            // Default + Half-Width + Japanese Hiragana/Katakana + full set of about 21000 CJK Unified Ideographs
-    IMGUI_API const ImWchar*    GetGlyphRangesChineseSimplifiedCommon();// Default + Half-Width + Japanese Hiragana/Katakana + set of 2500 CJK Unified Ideographs for common simplified Chinese
-    IMGUI_API const ImWchar*    GetGlyphRangesCyrillic();               // Default + about 400 Cyrillic characters
-    IMGUI_API const ImWchar*    GetGlyphRangesThai();                   // Default + Thai characters
-    IMGUI_API const ImWchar*    GetGlyphRangesVietnamese();             // Default + Vietnamese characters
+	TR_FUNCTION()
+	IMGUI_API const ImWchar*    GetGlyphRangesDefault();                // Basic Latin, Extended Latin
+	TR_FUNCTION()
+	IMGUI_API const ImWchar*    GetGlyphRangesKorean();                 // Default + Korean characters
+	TR_FUNCTION()
+	IMGUI_API const ImWchar*    GetGlyphRangesJapanese();               // Default + Hiragana, Katakana, Half-Width, Selection of 1946 Ideographs
+	TR_FUNCTION()
+	IMGUI_API const ImWchar*    GetGlyphRangesChineseFull();            // Default + Half-Width + Japanese Hiragana/Katakana + full set of about 21000 CJK Unified Ideographs
+	TR_FUNCTION()
+	IMGUI_API const ImWchar*    GetGlyphRangesChineseSimplifiedCommon();// Default + Half-Width + Japanese Hiragana/Katakana + set of 2500 CJK Unified Ideographs for common simplified Chinese
+	TR_FUNCTION()
+	IMGUI_API const ImWchar*    GetGlyphRangesCyrillic();               // Default + about 400 Cyrillic characters
+	TR_FUNCTION()
+	IMGUI_API const ImWchar*    GetGlyphRangesThai();                   // Default + Thai characters
+	TR_FUNCTION()
+	IMGUI_API const ImWchar*    GetGlyphRangesVietnamese();             // Default + Vietnamese characters
 
     //-------------------------------------------
     // [BETA] Custom Rectangles/Glyphs API
@@ -2407,8 +2486,15 @@ struct ImFontAtlas
     // so you can render e.g. custom colorful icons and use them as regular glyphs.
     // Read docs/FONTS.md for more details about using colorful icons.
     // Note: this API may be redesigned later in order to support multi-monitor varying DPI settings.
+	TR_FUNCTION()
     IMGUI_API int               AddCustomRectRegular(int width, int height);
+	TR_FUNCTION()
+	IMGUI_API int               AddCustomRectFontGlyph(ImFont* font, ImWchar id, int width, int height, float advance_x, const ImVec2* offset = &ImVec2(0, 0))
+	{
+		return AddCustomRectFontGlyph(font, id, width, height, advance_x, *offset);
+	}
     IMGUI_API int               AddCustomRectFontGlyph(ImFont* font, ImWchar id, int width, int height, float advance_x, const ImVec2& offset = ImVec2(0, 0));
+	TR_FUNCTION()
     ImFontAtlasCustomRect*      GetCustomRectByIndex(int index) { IM_ASSERT(index >= 0); return &CustomRects[index]; }
 
     // [Internal]

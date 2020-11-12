@@ -463,6 +463,21 @@ namespace THeaderTools
             while (index >= 0)
             {
                 var memberInfo = new CppMember();
+                memberInfo.AnalyzeMetaString(meta);
+                var constValue = memberInfo.GetMetaValue(CppMetaBase.Symbol.SV_ConstValue);
+                Dictionary<string, string> ConstMapper = new Dictionary<string, string>();
+                if (constValue != null)
+                {
+                    var segs = constValue.Split('+');
+                    foreach (var i in segs)
+                    {
+                        var pair = i.Split(':');
+                        if (pair.Length != 2)
+                            continue;
+
+                        ConstMapper[pair[0]] = pair[1];
+                    }
+                }
                 var token = "";
                 EDeclareType dtStyles = 0;
                 token = GetTokenStringConbineStarAndRef(ref index, code, null);
@@ -477,7 +492,44 @@ namespace THeaderTools
                 memberInfo.Name = GetTokenString(ref index, code, null);
 
                 token = GetTokenString(ref index, code, null);
-                if(token!=";")
+                if (token == "[")
+                {
+                    memberInfo.IsArray = true;
+                    int rangeStart;
+                    int rangeEnd;
+                    do
+                    {
+                        index--;
+                        SkipPair(ref index, code, '[', ']', out rangeStart, out rangeEnd);
+                        var args = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
+                        args = args.Replace(" ", "");
+                        string tarNum;
+                        if (ConstMapper.TryGetValue(args, out tarNum) == false)
+                        {
+                            tarNum = args;
+                        }
+                        memberInfo.ArraySize.Add(tarNum);
+
+                        token = GetTokenString(ref index, code, null);
+                        if (token == ";")
+                        {
+                            memberInfo.VisitMode = EVisitMode.Public;
+                            memberInfo.DeclareType = dtStyles;
+                            memberInfo.HasMetaFlag = true;
+                            break;
+                        }
+                        else if (token == "[")
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            throw new Exception(TraceMessage($"{klass.Name}::{memberInfo.Name} is invalid"));
+                        }
+                    }
+                    while (index < code.Length);
+                }
+                else if (token != ";")
                 {
                     throw new Exception(TraceMessage($"{klass}.{memberInfo.Name} error"));
                 }
@@ -634,12 +686,15 @@ namespace THeaderTools
                     string name;
                     EDeclareType dtStyles;
                     NormalizeArgument(tmp, out type, out name, out dtStyles);
-                    function.Arguments.Add(new CppCallParameters.CppParameter(function, type, name, dtStyles));
+                    var curArg = new CppCallParameters.CppParameter(function, type, name, dtStyles);
+                    function.Arguments.Add(curArg);
 
                     //如果有缺省值，那么就要找到,;确认本参数的缺省值表达式结束，但是c++有int a = (int)(0)以及char* a = "afsad"，还有Vector2 a = new Vector2(1,1),int[] a = {1,2}这种变态写法
                     //所以这里通过Skip配对的字符来跳过，然后再统计
                     index++;
+                    int dftStart = index;
                     SkipChar(ref index, code, ",;", 1, "([{", ")]}");
+                    curArg.CppDefaultValue = code.Substring(dftStart, index - dftStart);
                     if (code[index] == ';')
                     {
                         return;
@@ -939,7 +994,9 @@ namespace THeaderTools
             {
                 GetNextTokenRange(start, code, out tokenStart, out tokenEnd, cb);
                 var tmp1 = code.Substring(tokenStart, tokenEnd - tokenStart);
-                if(IsAllPtrOrRef(tmp1) && IsValidVarChar(result[result.Length - 1]))
+                if( IsAllPtrOrRef(tmp1) && 
+                    (result[result.Length - 1]=='*' || IsValidVarChar(result[result.Length - 1]))
+                    )
                 {
                     start = tokenEnd;
                     result += tmp1; 

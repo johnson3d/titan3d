@@ -36,7 +36,7 @@ namespace THeaderTools
         public string GenPInvokeBindingCSharp(CppClass klass, int index)
         {
             var afterSelf = Arguments.Count > 0 ? ", " : "";
-            return $"private extern static PtrType {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor{index}({this.GetParameterStringCSharp()});";
+            return $"private extern static PtrType {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor{index}({this.GetParameterStringCSharp(false)});";
         }
         public string GenCallBindingCSharp(ref int nTable, CppClass klass, int index)
         {
@@ -54,7 +54,7 @@ namespace THeaderTools
                     break;
             }
             var afterSelf = Arguments.Count > 0 ? ", " : "";
-            string code = CodeGenerator.GenLine(nTable, $"{mode} {klass.Name}{CodeGenerator.Symbol.NativeSuffix}({this.GetParameterStringCSharp()}{afterSelf}bool _dont_care_just_for_compile)");
+            string code = CodeGenerator.GenLine(nTable, $"{mode} {klass.Name}{CodeGenerator.Symbol.NativeSuffix}({this.GetParameterStringCSharp(true)}{afterSelf}bool _dont_care_just_for_compile)");
             code += CodeGenerator.GenLine(nTable, "{");
             nTable++;
             code += CodeGenerator.GenLine(nTable, $"mPtr = {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor{index}({this.GetParameterCallString()});");

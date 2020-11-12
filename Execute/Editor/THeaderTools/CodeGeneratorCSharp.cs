@@ -120,7 +120,11 @@ namespace THeaderTools
                 {
                     if ((i.DeclareType & (EDeclareType.DT_Const | EDeclareType.DT_Static)) != 0)
                         continue;
-                    if(i.FunctionPtr!=null)
+                    if(i.TypeCallback != null)
+                    {
+                        continue;
+                    }
+                    if (i.IsArray)
                     {
                         continue;
                     }
@@ -173,15 +177,18 @@ namespace THeaderTools
                     if ((i.DeclareType & (EDeclareType.DT_Const | EDeclareType.DT_Static)) != 0)
                         continue;
 
-                    if(i.FunctionPtr!=null)
+                    if(i.TypeCallback != null)
                     {
                         continue;
                     }
 
                     code += GenLine(nTable, $"[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
                     code += GenLine(nTable, i.GenPInvokeBindingCSharp_Getter(klass));
-                    code += GenLine(nTable, "[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
-                    code += GenLine(nTable, i.GenPInvokeBindingCSharp_Setter(klass));
+                    if (i.IsArray == false)
+                    {
+                        code += GenLine(nTable, "[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
+                        code += GenLine(nTable, i.GenPInvokeBindingCSharp_Setter(klass));
+                    }
                 }
                 code += "\n";
             }
@@ -223,7 +230,7 @@ namespace THeaderTools
             int nTable = 1;
             string code;
             code = GenLine(nTable, $"[StructLayout(LayoutKind.Sequential, Pack={structPack})]");//Explicit
-            code += GenLine(nTable, $"public unsafe struct {Symbol.LayoutPrefix}{klass.Name}");
+            code += GenLine(nTable, $"public unsafe partial struct {Symbol.LayoutPrefix}{klass.Name}");
             code += GenLine(nTable++, "{");
 
             var PtrType = $"{Symbol.LayoutPrefix}{klass.Name}*";
@@ -254,10 +261,10 @@ namespace THeaderTools
 
                 var converter = i.CSType;
 
-                if (i.FunctionPtr != null)
+                if (i.TypeCallback != null)
                 {
                     var pname = i.Name.Replace("*", "");
-                    declMember += $"IntPtr {pname};";
+                    declMember += $"IntPtr {pname};//{i.TypeCallback.Name}";
                 }
                 else if(i.IsArray)
                 {
@@ -276,7 +283,14 @@ namespace THeaderTools
                         int numOfElements = 0;
                         foreach (var j in i.ArraySize)
                         {
-                            numOfElements += j;
+                            try
+                            {
+                                numOfElements += System.Convert.ToInt32(j);
+                            }
+                            catch
+                            {
+                                throw new Exception(CppHeaderScanner.TraceMessage($"Array Member Size is not a number"));
+                            }
                         }
                         declMember += $"{converter} ";
                         for (int j = 0; j < numOfElements; j++)
@@ -310,8 +324,13 @@ namespace THeaderTools
                     if (i.IsFriend)
                         continue;
                     if (i.IsStatic)
-                        continue;
-                    code += i.GenCallBindingCSharp(ref nTable, klass, MethodIndex++);
+                    {
+                        code += i.GenCallBindingCSharp_Static(ref nTable, klass, MethodIndex++);
+                    }
+                    else
+                    {
+                        code += i.GenCallBindingCSharp(ref nTable, klass, MethodIndex++);
+                    }
                 }
                 code += GenLine(nTable, "#endregion");
                 code += "\n";
@@ -328,9 +347,15 @@ namespace THeaderTools
                     if (i.IsFriend)
                         continue;
                     if (i.IsStatic)
-                        continue;
-                    code += GenLine(nTable, "[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]");
-                    code += GenLine(nTable, i.GenPInvokeBindingCSharp(klass, $"{Symbol.LayoutPrefix}{klass.Name}*", true, MethodIndex++));
+                    {
+                        code += GenLine(nTable, $"[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = {i.GetCharSet()})]");
+                        code += GenLine(nTable, i.GenPInvokeBindingCSharp_Static(klass, false, MethodIndex++));
+                    }
+                    else
+                    {
+                        code += GenLine(nTable, $"[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = {i.GetCharSet()})]");
+                        code += GenLine(nTable, i.GenPInvokeBindingCSharp(klass, $"{Symbol.LayoutPrefix}{klass.Name}*", true, MethodIndex++));
+                    }
                 }
                 code += "\n";
             }

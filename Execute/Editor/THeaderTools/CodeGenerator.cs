@@ -343,7 +343,7 @@ namespace THeaderTools
                 {
                     if ((i.DeclareType & (EDeclareType.DT_Const | EDeclareType.DT_Static)) != 0)
                         continue;
-                    if (i.FunctionPtr != null)
+                    if (i.TypeCallback != null)
                         continue;
                     code += $"\t{Symbol.DefMember}({i.Name});\n";
                     WriteMetaCode(ref code, i, Symbol.AppendMemberMeta);
@@ -358,13 +358,11 @@ namespace THeaderTools
                 {
                     if (i.IsFriend)
                         continue;
-                    if (i.IsStatic)
-                    {
-                        continue;
-                    }
-                    var returnConverter = i.GetReturnConverter();
-                    if (returnConverter == null)
-                        returnConverter = i.CppReturnType;
+                    //if (i.IsStatic)
+                    //{
+                    //    continue;
+                    //}
+                    var returnConverter = i.CppReturnType;
                     code += $"\t{Symbol.DefMethod}{i.Arguments.Count}({i.Name}, {returnConverter}";
                     if (i.Arguments.Count > 0)
                         code += ", ";
@@ -450,7 +448,7 @@ namespace THeaderTools
                 if ((i.DeclareType & (EDeclareType.DT_Const | EDeclareType.DT_Static)) != 0)
                     continue;
 
-                if (i.FunctionPtr != null)
+                if (i.TypeCallback != null)
                     continue;
 
                 nTable = 2;

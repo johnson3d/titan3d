@@ -106,6 +106,11 @@ namespace THeaderTools
                 get;
                 set;
             }
+            public string CppDefaultValue
+            {
+                get;
+                set;
+            }
         }
         public List<CppParameter> Arguments
         {
@@ -125,16 +130,28 @@ namespace THeaderTools
             }
             return result;
         }
-        public string GetParameterStringCSharp()
+        public string GetParameterStringCSharp(bool convertStar2Ref)
         {//bPtrType如果false，那么就要把XXX_PtrType.PtrType转换成XXX_PtrType
             string result = "";
             for (int i = 0; i < Arguments.Count; i++)
             {
                 var csType = Arguments[i].CSType;
+                if (convertStar2Ref)
+                {
+                    if (csType.EndsWith("*") && Arguments[i].TypeStarNum == 1 && csType != "void*")
+                    {
+                        csType = "ref " + csType.Substring(0, csType.Length - 1);
+                    }
+                }
+                var dftValue = Arguments[i].CppDefaultValue;
+                if(dftValue!=null)
+                {
+                    dftValue = $"/*{dftValue}*/";
+                }
                 if (i == 0)
-                    result += $"{csType} {Arguments[i].Value}";
+                    result += $"{csType} {Arguments[i].Value}{dftValue}";
                 else
-                    result += $", {csType} {Arguments[i].Value}";
+                    result += $", {csType} {Arguments[i].Value}{dftValue}";
             }
             return result;
         }
@@ -144,6 +161,27 @@ namespace THeaderTools
             for (int i = 0; i < Arguments.Count; i++)
             {
                 var arg = Arguments[i].Value;
+                if (i == 0)
+                    result += $"{arg}";
+                else
+                    result += $", {arg}";
+            }
+            return result;
+        }
+        public string GetParameterCallStringWithStar2Ref(int nTable, out string fixedCode)
+        {
+            fixedCode = "";
+            string result = "";
+            for (int i = 0; i < Arguments.Count; i++)
+            {
+                var arg = Arguments[i].Value;
+                var csType = Arguments[i].CSType;
+                if (csType.EndsWith("*") && Arguments[i].TypeStarNum == 1 && csType != "void*")
+                {
+                    fixedCode += CodeGenerator.GenLine(nTable, $"fixed ({csType} native_ptr_{arg} = &{arg})");
+                    arg = $"native_ptr_{arg}";
+                }
+                
                 if (i == 0)
                     result += $"{arg}";
                 else

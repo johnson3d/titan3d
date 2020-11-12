@@ -1647,6 +1647,11 @@ void ImGui::ShadeVertsLinearUV(ImDrawList* draw_list, int vert_start_idx, int ve
 
 ImFontConfig::ImFontConfig()
 {
+	InitFontConfig();
+}
+
+void ImFontConfig::InitFontConfig()
+{
     FontData = NULL;
     FontDataSize = 0;
     FontDataOwnedByAtlas = true;

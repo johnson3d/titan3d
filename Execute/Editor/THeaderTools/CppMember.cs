@@ -20,15 +20,15 @@ namespace THeaderTools
             get;
             set;
         } = false;
-        public List<int> ArraySize
+        public List<string> ArraySize
         {
             get;
-        } = new List<int>();
-        public CppFunction FunctionPtr
-        {
-            get;
-            set;
-        } = null;
+        } = new List<string>();
+        //public CppFunction FunctionPtr
+        //{
+        //    get;
+        //    set;
+        //} = null;
         public int TypeStarNum
         {
             get;
@@ -42,10 +42,6 @@ namespace THeaderTools
             {
                 string suffix;
                 CppPureType = CppClass.SplitPureName(value, out suffix);
-                if(value.Contains("ImVec2"))
-                {
-                    int xxx = 0;
-                }
                 PureType = CodeGenerator.Instance.NormalizePureType(CppPureType);
                 mType = PureType + suffix;
                 TypeStarNum = suffix.Length;
@@ -172,7 +168,10 @@ namespace THeaderTools
         }
         public string GenPInvokeBindingCSharp_Getter(CppClass klass)
         {
-            return $"private extern static {CSType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}(PtrType self);";
+            if(IsArray)
+                return $"private extern static {CSType}* {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}_ArrayAddress(PtrType self);";
+            else
+                return $"private extern static {CSType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}(PtrType self);";
         }
         public string GenPInvokeBindingCSharp_Setter(CppClass klass)
         {
@@ -187,7 +186,8 @@ namespace THeaderTools
                     mode = "public";
                     break;
                 case EVisitMode.Protected:
-                    mode = "protected";
+                    //mode = "protected";//编译器错误 CS0666结构体不接受protected的成员
+                    mode = "private";
                     break;
                 case EVisitMode.Private:
                     mode = "private";
