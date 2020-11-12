@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>cbec1eae-eca1-4442-935f-0d923aba94b9</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>CodeGenCSharp</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\CppDelegateDefine.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.ImGuiAPI.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.IVertexBuffer.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.IVertexBufferDesc.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawCmd.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawData.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawList.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawVert.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImFont.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImFontAtlas.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImFontAtlasCustomRect.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImFontConfig.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiButtonFlags_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiColorEditFlags_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiCol_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiComboFlags_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiCond_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiDataType_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiDir_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiDragDropFlags_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiFocusedFlags_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiHoveredFlags_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiInputTextCallbackData.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiInputTextFlags_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiIO.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiKey_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiMouseButton_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiMouseCursor_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiPayload.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiPopupFlags_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiSelectableFlags_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiSizeCallbackData.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiSliderFlags_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiStorage.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiStyle.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiStyleVar_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiTabBarFlags_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiTabItemFlags_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiTreeNodeFlags_.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiWindowFlags_.gen.cs" />
+  </ItemGroup>
+</Project>
