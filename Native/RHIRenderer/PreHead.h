@@ -28,10 +28,7 @@ enum ERHIType
 	RHIType_Metal,
 };
 
-class RHIUnknown : public VIUnknown
-{
-
-};
+typedef VIUnknown RHIUnknown;
 
 enum EColorSpace{
 	COLOR_SPACE_SRGB_NONLINEAR = 0,

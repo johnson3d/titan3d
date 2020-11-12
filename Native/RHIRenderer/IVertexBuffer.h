@@ -6,6 +6,7 @@ NS_BEGIN
 TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct=8)
 struct IVertexBufferDesc
 {
+	TR_DECL(IVertexBufferDesc);
 	IVertexBufferDesc()
 	{
 		CPUAccess = 0;
@@ -22,64 +23,21 @@ struct IVertexBufferDesc
 class IRenderContext;
 class ICommandList;
 
-TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS&EngineNS.IVertexBuffer, AAA = "", BBB = 1)
+TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
 class IVertexBuffer : public IRenderResource
 {
 public:
-	TR_CLASS(SV_NameSpace = EngineNS.IVertexBuffer, SV_UsingNS = EngineNS, SV_ReflectAll, AAA = "", BBB = 2)
-	class ClassInIVertexBuffer
-	{
-		const static int ttt = 9;
-		volatile IRenderContext ** Member100; 
-		virtual void * UpdateDrawPass(ICommandList* cmd, vBOOL bImm) const = 0
-		{
-			return nullptr;
-		}
-		public:
-		TR_MEMBER()
-			float Member0;
-		TR_MEMBER()
-			int Member1;
-		protected:
-			int** Member2;
-		public:
-			int Member3;
-		
-		ClassInIVertexBuffer& operator=(int a);
-		ClassInIVertexBuffer& operator+(int a)
-		{
-		}
-
-		friend struct IVertexBufferDesc;
-		friend int FriendTestFunction(int a);
-		friend bool operator==(const ClassInIVertexBuffer& l, const ClassInIVertexBuffer& h)
-		{
-			return true;
-		}
-
-		ClassInIVertexBuffer();
-		ClassInIVertexBuffer(int a)
-		{
-		}
-	} ;
-
-	TR_CONSTRUCTOR()
+	TR_DECL(IVertexBuffer);
+public:
 	IVertexBuffer();
 	~IVertexBuffer();
 
-	TR_FUNCTION()
 	virtual void GetBufferData(EngineNS::IRenderContext* rc, IBlobObject* data) = 0;
-	TR_FUNCTION()
 	virtual void UpdateGPUBuffData(ICommandList* cmd, void* ptr, UINT size) = 0;
 
 	void UpdateDrawPass(ICommandList* cmd, vBOOL bImm);
 	virtual void DoSwap(IRenderContext* rc) override;
 	virtual void SetDebugInfo(const char* info)
-	{
-	}
-
-	TR_FUNCTION()
-	void TestReflectionFunc(ClassInIVertexBuffer** t, ClassInIVertexBuffer* tt, IVertexBufferDesc ttt, IVertexBufferDesc* tttt)
 	{
 	}
 public:

@@ -1,0 +1,2 @@
+cd %~dp0
+binaries\Tools\THT\netcoreapp2.1\win10-x64\THeaderTools.exe vcxproj=%~dp0Execute\Core.Windows\Core.Windows.vcxproj gen_dir=%~dp0deriveddatacache\codegen\ gen_csharpwrapper gen_csharp_internal module_name=\"Core.Windows.dll\" pch=%~dp0Native\pch.h type2type=mapper.txt

@@ -30,6 +30,11 @@ public:
 	static const vIID __UID__ = 0x0000000000000000;
 	virtual CoreRtti* GetRtti() { return &_RttiInfo; }
 
+	inline VIUnknown& operator = (const VIUnknown& rh) {
+		assert(false);
+		return *this;
+	}
+
 	virtual long AddRef();
 	virtual void Release();
 

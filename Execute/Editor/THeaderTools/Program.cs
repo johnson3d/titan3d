@@ -104,6 +104,7 @@ namespace THeaderTools
                 type2type = type2type.Substring("type2type=".Length);
                 CodeGenerator.Instance.LoadType2TypeMapper(type2type);
             }
+            Console.WriteLine("THeaderTools.exe ScanHeader ...");
             CodeGenerator codeManager = CodeGenerator.Instance;
             codeManager.Reset(genDir);
             foreach (var i in headers)
@@ -111,12 +112,14 @@ namespace THeaderTools
                 var headScanner = new CppHeaderScanner();
                 headScanner.ScanHeader(i.Value, codeManager.ClassCollector, codeManager.EnumCollector, codeManager.CBCollector);
             }
+            Console.WriteLine("THeaderTools.exe GenCode ...");
             codeManager.GenCode(genDir, bGenPInvoke);
             if (bGenCSharp)
             {
                 codeManager.GenCodeCSharp(genDir);
             }
 
+            Console.WriteLine("THeaderTools.exe GenSharedProject ...");
             codeManager.MakeSharedProjectCpp();
             codeManager.MakeSharedProjectCSharp();
         }

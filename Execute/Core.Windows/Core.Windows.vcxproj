@@ -97,6 +97,7 @@
     <Import Project="..\..\Native\3rd\OpenXLSX\OpenXLSX.vcxitems" Label="Shared" />
     <Import Project="..\..\Native\RHIRenderer\VirtualDevice\VirtualDevice.vcxitems" Label="Shared" />
     <Import Project="..\..\Native\3rd\ImGui\ImGui.vcxitems" Label="Shared" />
+    <Import Project="..\..\deriveddatacache\codegen\CodeGen.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -155,6 +156,9 @@
       <Command>cd $(ProjectDir)..\..\binaries 
 $(ProjectDir)..\..\binaries\PostNativeX64.bat</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)CallTHT.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -174,6 +178,9 @@ $(ProjectDir)..\..\binaries\PostNativeX64.bat</Command>
       <AdditionalLibraryDirectories>..\..\Native\3rd\DxSDK\Lib\x86;..\..\Native\3rd\pthread\lib\x86;..\..\Native\3rd\FBXSDK\2019.0\lib\vs2015\x86\release;..\..\Native\3rd\Image.Shared\TextureConverter\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>shlwapi.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)CallTHT.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -197,6 +204,9 @@ $(ProjectDir)..\..\binaries\PostNativeX64.bat</Command>
       <AdditionalLibraryDirectories>..\..\Native\3rd\DxSDK\Lib\x86;..\..\Native\3rd\pthread\lib\x86;..\..\Native\3rd\FBXSDK\2019.0\lib\vs2015\x86\release;..\..\Native\3rd\Image.Shared\TextureConverter\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>shlwapi.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)CallTHT.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -226,6 +236,9 @@ $(ProjectDir)..\..\binaries\PostNativeX64.bat</Command>
       <Command>cd $(ProjectDir)..\..\binaries
 $(ProjectDir)..\..\binaries\PostNativeX64.bat $(Configuration)</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)CallTHT.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

@@ -50,7 +50,10 @@ namespace THeaderTools
         }
         public bool IsSystemType(string type)
         {
-            return Cpp2CSTypes.ContainsKey(type);
+            if (Cpp2CSTypes.ContainsKey(type) == true)
+                return true;
+
+            return Cpp2CSTypes.ContainsValue(type);
         }
         public string NormalizePureType(string pureType)
         {

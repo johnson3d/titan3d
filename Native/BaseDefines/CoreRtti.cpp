@@ -208,7 +208,7 @@ StructBegin(Test_ConstantVarDesc, EngineNS)
 	AppendConstructorMetaInfo("M0", "Test_ConstantVarDesc info");	
 StructEnd(void)
 
-StructImpl(EngineNS::Test_ConstantVarDesc);
+StructImpl(Test_ConstantVarDesc);
 
 int FTestFuncTraits(int, int)
 {

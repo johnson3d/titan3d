@@ -42,9 +42,6 @@
     <Reference Include="HPSocketCS">
       <HintPath>..\..\CSharpCore\3rd\HPSocket\Windows\x64\HPSocketCS.dll</HintPath>
     </Reference>
-    <Reference Include="ImGui.NET">
-      <HintPath>..\..\CSharpCore\3rd\ImGui\ImGui.NET.dll</HintPath>
-    </Reference>
     <Reference Include="NPOI, Version=2.3.0.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\CSharpCore\Bricks\ExcelTable\NPOI\solution\Lib\NPOI.dll</HintPath>
@@ -129,6 +126,7 @@
   <Import Project="..\..\CSharpCore\Bricks\SandBox\SandBox.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCore\Bricks\Components\Show2D\Image2D.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCore\Bricks\GpuDriven\GpuDriven.projitems" Label="Shared" />
-  <Import Project="..\..\CSharpCore\GuiWrapper\GuiWrapper.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCore\3rd\ImGui\ImGui.projitems" Label="Shared" />
+  <Import Project="..\..\deriveddatacache\codegen\CodeGenCSharp.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

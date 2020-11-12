@@ -275,8 +275,8 @@ struct AuxRttiEnum : public RttiEnum
 	static const bool IsEnum = false;
 };
 
-template<typename Type>
-AuxRttiEnum<Type>		AuxRttiEnum<Type>::Instance;
+//template<typename Type>
+//AuxRttiEnum<Type>		AuxRttiEnum<Type>::Instance;
 
 class RttiEnumManager
 {
@@ -322,9 +322,8 @@ StructBegin(name, ns)\
 StructEnd(void)
 
 #define EnumImpl(name) \
-
-//AuxRttiEnum<name> AuxRttiEnum<name>::Instance;\
-//AuxRttiStruct<name> AuxRttiStruct<name>::Instance;
+AuxRttiEnum<name> AuxRttiEnum<name>::Instance;\
+AuxRttiStruct<name> AuxRttiStruct<name>::Instance;
 
 struct ArgumentStream
 {
@@ -1524,8 +1523,8 @@ struct AuxRttiStruct : public RttiStruct
 	static AuxRttiStruct<Type>		Instance;
 };
 
-template<typename Type>
-AuxRttiStruct<Type>		AuxRttiStruct<Type>::Instance;
+//template<typename Type>
+//AuxRttiStruct<Type>		AuxRttiStruct<Type>::Instance;
 
 template<>
 struct AuxRttiStruct<void> : public RttiStruct
@@ -1972,8 +1971,7 @@ struct AuxRttiStruct<ns::Type> : public RttiStruct\
 };
 
 #define StructImpl(Type) \
-
-//AuxRttiStruct<Type> AuxRttiStruct<Type>::Instance;
+AuxRttiStruct<Type> AuxRttiStruct<Type>::Instance;
 
 template<typename T>
 void RttiStruct::MemberDesc::SetValue(void* pThis, const T* v) const

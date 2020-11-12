@@ -636,9 +636,6 @@ namespace EngineNS.Editor
             }
             set
             {
-                var t1 = new EngineNS.GuiWrapper.UnitTest_GuiContext().DoTest();
-                return;
-
                 var rc = CEngine.Instance.RenderContext;
                 if (false)
                 {
