@@ -1442,6 +1442,13 @@ StructEnd(void)
 StructBegin(ImVec4, )
 StructEnd(void)
 
+VTypeHelperDefine(items_getter, sizeof(void*));
+VTypeHelperDefine(values_getter, sizeof(void*));
+VTypeHelperDefine(alloc_func, sizeof(void*));
+VTypeHelperDefine(free_func, sizeof(void*));
+VTypeHelperDefine(ImGuiSizeCallback, sizeof(void*));
+VTypeHelperDefine(ImGuiInputTextCallback, sizeof(void*));
+
 StructBegin(items_getter, EngineNS)
 StructEnd(void)
 
@@ -1460,13 +1467,6 @@ StructEnd(void)
 StructBegin(ImGuiInputTextCallback, )
 StructEnd(void)
 
-template<int _Size>
-struct VArrayElement<_Size, ImDrawCallback>
-{
-	enum
-	{
-		Result = 1,
-	};
-};
+
 
 NS_END

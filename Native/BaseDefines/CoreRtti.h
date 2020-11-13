@@ -1699,33 +1699,81 @@ struct AuxRttiStruct<std::string> : public RttiStruct
 	}
 };
 
-template<int _Size, class _Type>
-struct VArrayElement
+template<typename _Type>
+struct VTypeHelper
 {
-	enum
+	enum 
 	{
-		Result = _Size / sizeof(_Type),
+		TypeSizeOf = sizeof(_Type),
+	};
+	static void AssignOperator(void* pTar, const void* pSrc)
+	{
+		*(_Type*)pTar = *(_Type*)pSrc;
+	}
+	template<int _Size>
+	struct VArrayElement
+	{
+		enum
+		{
+			Result = _Size / TypeSizeOf,
+		};
 	};
 };
 
-template<int _Size>
-struct VArrayElement<_Size, void>
+#define VTypeHelperDefine(_Type, TypeSize)	\
+template<>\
+struct VTypeHelper<typename remove_all_ref_ptr<_Type>::type>\
+{\
+	typedef typename remove_all_ref_ptr<_Type>::type RealType;\
+	enum\
+	{\
+		TypeSizeOf = TypeSize,\
+	};\
+	static void AssignOperator(void* pTar, const void* pSrc)\
+	{\
+		memcpy(pTar, pSrc, TypeSizeOf);\
+	}\
+	template<int _Size>\
+	struct VArrayElement\
+	{\
+		enum\
+		{\
+			Result = _Size / TypeSizeOf,\
+		};\
+	};\
+};
+
+template<>
+struct VTypeHelper<void>
 {
 	enum
 	{
-		Result = 1,
+		TypeSizeOf = 0,
+	};
+	static void AssignOperator(void* pTar, const void* pSrc)
+	{
+		
+	}
+	template<int _Size>
+	struct VArrayElement
+	{
+		enum
+		{
+			Result = 1,
+		};
 	};
 };
+
 
 #define StructBegin(Type, ns) \
 template<> \
-struct AuxRttiStruct<ns::Type> : public RttiStruct\
+struct AuxRttiStruct<typename remove_all_ref_ptr<ns::Type>::type> : public RttiStruct\
 {\
-	typedef ns::Type	ThisStructType;\
-	static AuxRttiStruct<ns::Type>		Instance;\
+	typedef remove_all_ref_ptr<ns::Type>::type	ThisStructType;\
+	static AuxRttiStruct<typename remove_all_ref_ptr<ns::Type>::type>		Instance;\
 	AuxRttiStruct()\
 	{\
-		Size = sizeof(ThisStructType);\
+		Size = VTypeHelper<ThisStructType>::TypeSizeOf;\
 		Name = #Type;\
 		NameSpace = #ns;\
 		RttiStructManager::GetInstance()->RegStructType(GetFullName().c_str(), this);\
@@ -1733,7 +1781,7 @@ struct AuxRttiStruct<ns::Type> : public RttiStruct\
 	}\
 	virtual void AssignOperator(void* pTar, const void* pSrc) const override\
 	{\
-		*(ThisStructType*)pTar = *(ThisStructType*)pSrc;\
+		VTypeHelper<ThisStructType>::AssignOperator(pTar, pSrc);\
 	}\
 	virtual void Init() override\
 	{\
@@ -1751,11 +1799,12 @@ struct AuxRttiStruct<ns::Type> : public RttiStruct\
 #define StructMember(_name) \
 		{\
 			using declType = decltype(((ThisStructType*)nullptr)->_name);\
-			using noPointerType = std::remove_pointer<declType>::type;\
-			using realType = std::remove_all_extents<noPointerType>::type;\
+			using noConstType = std::remove_const<declType>::type;\
+			using realType = std::remove_all_extents<noConstType>::type;\
+			using pureType = remove_all_ref_ptr<realType>::type; \
 			const unsigned int size = __vsizeof(ThisStructType, _name);\
-			__current_member = PushMember(&AuxRttiStruct<remove_all_ref_ptr<realType>::type>::Instance, __voffsetof(ThisStructType, _name), size, VArrayElement<size,realType>::Result,\
-					#_name, std::is_pointer<decltype(((ThisStructType*)nullptr)->_name)>::value);\
+			__current_member = PushMember(&AuxRttiStruct<pureType>::Instance, __voffsetof(ThisStructType, _name), size, VTypeHelper<realType>::VArrayElement<size>::Result,\
+					#_name, std::is_pointer<noConstType>::value);\
 		}
 
 #define StructMethod0(name) \
@@ -1971,7 +2020,7 @@ struct AuxRttiStruct<ns::Type> : public RttiStruct\
 };
 
 #define StructImpl(Type) \
-AuxRttiStruct<Type> AuxRttiStruct<Type>::Instance;
+AuxRttiStruct<typename remove_all_ref_ptr<Type>::type> AuxRttiStruct<typename remove_all_ref_ptr<Type>::type>::Instance;
 
 template<typename T>
 void RttiStruct::MemberDesc::SetValue(void* pThis, const T* v) const
