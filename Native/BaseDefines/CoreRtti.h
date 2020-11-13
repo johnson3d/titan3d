@@ -200,6 +200,23 @@ public:
 	}
 };
 
+typedef const char* RttiNameString;
+struct RttiNameStringHelper
+{
+	static inline const char* VRttiNameString2Ansi(RttiNameString s) {
+		return s;
+	}
+	static inline int VRttiNameStringCmp(RttiNameString s, const char* rh) {
+		return strcmp(s, rh);
+	}
+	struct RttiNameStringCmp {
+		bool operator()(RttiNameString l, const char* r) const {
+			return RttiNameStringHelper::VRttiNameStringCmp(l, r) < 0;
+		}
+	};
+};
+
+
 struct RttiMetaInfo
 {
 	std::map<std::string, std::string> MetaInfos;
@@ -229,12 +246,12 @@ struct RttiMetaInfo
 
 struct RttiEnum : public RttiMetaInfo
 {
-	std::string					Name;
-	std::string					NameSpace;
+	RttiNameString				Name;
+	RttiNameString				NameSpace;
 	struct MemberDesc : public RttiMetaInfo
 	{
-		std::string		Name;
-		int				Value;
+		RttiNameString		Name;
+		int					Value;
 	};
 	std::vector<MemberDesc>		Members;
 
@@ -248,19 +265,20 @@ struct RttiEnum : public RttiMetaInfo
 	}
 
 	const char* GetName() const {
-		return Name.c_str();
+		return RttiNameStringHelper::VRttiNameString2Ansi(Name);
 	}
 	const char* GetNameSpace() const {
-		return NameSpace.c_str();
+		return RttiNameStringHelper::VRttiNameString2Ansi(NameSpace);
 	}
 	std::string GetFullName() {
-		return NameSpace + "::" + Name;
+		std::string result = NameSpace;
+		return result + "::" + Name;
 	}
 	unsigned int GetMemberNumber() const {
 		return (unsigned int)Members.size();
 	}
 	const char* GetMemberName(unsigned int index) {
-		return Members[index].Name.c_str();
+		return RttiNameStringHelper::VRttiNameString2Ansi(Members[index].Name);
 	}
 	int GetMemberValue(unsigned int index) {
 		return Members[index].Value;
@@ -275,12 +293,8 @@ struct AuxRttiEnum : public RttiEnum
 	static const bool IsEnum = false;
 };
 
-//template<typename Type>
-//AuxRttiEnum<Type>		AuxRttiEnum<Type>::Instance;
-
 class RttiEnumManager
 {
-	std::map<std::string, RttiEnum*>	EnumTyps;
 	std::vector<RttiEnum*>				AllEnumTyps;
 public:
 	void RegEnumType(const char* name, RttiEnum* type);
@@ -310,7 +324,8 @@ struct AuxRttiEnum<name> : public RttiEnum \
 
 #define EnumMember(m) PushMember(#m, m);
 
-#define EnumEnd(name, ns) \
+#define EnumEnd(name, ns) EnumEnd_Impl(name, ns)
+#define EnumEnd_Impl(name, ns) \
 		Name = #name; \
 		NameSpace = #ns; \
 		Init();\
@@ -388,11 +403,11 @@ struct RttiMethodBase : public RttiMetaInfo
 		ThisObject = nullptr;
 		ResultType = nullptr;
 	}
-	std::string			Name;
+	RttiNameString		Name;
 	RttiStruct*			ThisObject;
 
 	RttiStruct*			ResultType;
-	std::vector<std::pair<std::string,RttiStruct*>>	Arguments;
+	std::vector<std::pair<RttiNameString,RttiStruct*>>	Arguments;
 	bool				IsStatic;
 	bool				IsConst;
 	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const
@@ -1112,8 +1127,8 @@ struct VConstructor2 : public RttiConstructor
 struct RttiStruct : public RttiMetaInfo
 {
 	RttiStruct*					ParentStructType;
-	std::string					Name;
-	std::string					NameSpace;
+	RttiNameString				Name;
+	RttiNameString				NameSpace;
 	unsigned int				Size;
 	RttiEnum*					EnumDesc;
 	bool						IsEnum;
@@ -1123,7 +1138,7 @@ struct RttiStruct : public RttiMetaInfo
 		unsigned int		Offset;
 		unsigned int		Size;
 		unsigned int		ArrayElements;
-		std::string			MemberName;
+		RttiNameString		MemberName;
 		bool				IsPointer;
 
 		template<typename T>
@@ -1167,13 +1182,14 @@ struct RttiStruct : public RttiMetaInfo
 		return IsEnum?1:0;
 	}
 	const char* GetName() const {
-		return Name.c_str();
+		return RttiNameStringHelper::VRttiNameString2Ansi(Name);
 	}
 	const char* GetNameSpace() const {
-		return NameSpace.c_str();
+		return RttiNameStringHelper::VRttiNameString2Ansi(NameSpace);
 	}
 	std::string GetFullName() {
-		return NameSpace + "::" + Name;
+		std::string result = NameSpace;
+		return result + "::" + Name;
 	}
 	unsigned int GetSize() const {
 		return Size;
@@ -1184,7 +1200,7 @@ struct RttiStruct : public RttiMetaInfo
 	unsigned int FindMemberIndex(const char* name) const{
 		for (unsigned int i = 0; i < (unsigned int)Members.size(); i++)
 		{
-			if (Members[i].MemberName == name)
+			if (RttiNameStringHelper::VRttiNameStringCmp(Members[i].MemberName, name)==0)
 				return i;
 		}
 		return -1;
@@ -1193,7 +1209,7 @@ struct RttiStruct : public RttiMetaInfo
 		return Members[index].MemberType;
 	}
 	const char* GetMemberName(unsigned int index) const {
-		return Members[index].MemberName.c_str();
+		return RttiNameStringHelper::VRttiNameString2Ansi(Members[index].MemberName);
 	}
 	const MemberDesc* FindMember(const char* name) const {
 		for (const auto& i : Members)
@@ -1209,7 +1225,7 @@ struct RttiStruct : public RttiMetaInfo
 	unsigned int FindMethodIndex(const char* name) const{
 		for (unsigned int i = 0; i < (unsigned int)Methods.size(); i++)
 		{
-			if (Methods[i]->Name == name)
+			if (RttiNameStringHelper::VRttiNameStringCmp(Methods[i]->Name, name)==0)
 				return i;
 		}
 		return -1;
@@ -1217,7 +1233,7 @@ struct RttiStruct : public RttiMetaInfo
 	const RttiMethodBase* FindMethod(const char* name) const{
 		for (auto i : Methods)
 		{
-			if (i->Name == name)
+			if (RttiNameStringHelper::VRttiNameStringCmp(i->Name, name)==0)
 				return i;
 		}
 		return nullptr;
@@ -1498,7 +1514,6 @@ struct RttiStruct : public RttiMetaInfo
 
 class RttiStructManager
 {
-	std::map<std::string, RttiStruct*>	StructTyps;
 	std::vector<RttiStruct*>			AllStructTyps;
 public:
 	void RegStructType(const char* name, RttiStruct* type);
@@ -1764,8 +1779,9 @@ struct VTypeHelper<void>
 	};
 };
 
+#define StructBegin(Type, ns) StructBegin_Impl(Type, ns)
 
-#define StructBegin(Type, ns) \
+#define StructBegin_Impl(Type, ns) \
 template<> \
 struct AuxRttiStruct<typename remove_all_ref_ptr<ns::Type>::type> : public RttiStruct\
 {\

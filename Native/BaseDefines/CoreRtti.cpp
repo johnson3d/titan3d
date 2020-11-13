@@ -27,18 +27,7 @@ void RttiEnum::Init()
 
 void RttiEnumManager::RegEnumType(const char* name, RttiEnum* type)
 {
-	std::string userName = name;
-	auto pos = userName.find("EngineNS::");
-	if (pos == 0)
-	{
-		userName = userName.replace(pos, strlen("EngineNS::"), EngineNSStringEx);
-	}
-	pos = type->NameSpace.find("EngineNS");
-	if (pos == 0)
-	{
-		type->NameSpace = type->NameSpace.replace(pos, strlen("EngineNS"), EngineNSString);
-	}
-	EnumTyps.insert(std::make_pair(userName, type));
+	AllEnumTyps.push_back(type);
 }
 
 RttiEnumManager* RttiEnumManager::GetInstance() 
@@ -49,10 +38,9 @@ RttiEnumManager* RttiEnumManager::GetInstance()
 
 void RttiEnumManager::BuildRtti()
 {
-	AllEnumTyps.clear();
-	for (auto i : EnumTyps)
+	for (auto i : AllEnumTyps)
 	{
-		AllEnumTyps.push_back(i.second);
+		
 	}
 }
 
@@ -63,10 +51,12 @@ void RttiEnumManager::Finalize()
 
 RttiEnum* RttiEnumManager::FindEnum(const char* name)
 {
-	auto i = EnumTyps.find(name);
-	if (i == EnumTyps.end())
-		return nullptr;
-	return i->second;
+	for (auto i : AllEnumTyps)
+	{
+		if (i->GetFullName() == name)
+			return i;
+	}
+	return nullptr;
 }
 
 RttiStruct::MemberDesc* RttiStruct::PushMember(RttiStruct* type, unsigned int offset, unsigned int size, unsigned int arrayElements, const char* name, bool isPointer)
@@ -118,18 +108,8 @@ bool RttiStruct::IsA(RttiStruct* pTar)
 
 void RttiStructManager::RegStructType(const char* name, RttiStruct* type)
 {
-	std::string userName = name;
-	auto pos = userName.find("EngineNS::");
-	if (pos == 0)
-	{
-		userName = userName.replace(pos, strlen("EngineNS::"), EngineNSStringEx);
-	}
-	pos = type->NameSpace.find("EngineNS");
-	if (pos == 0)
-	{
-		type->NameSpace = type->NameSpace.replace(pos, strlen("EngineNS"), EngineNSString);
-	}
-	StructTyps.insert(std::make_pair(userName, type));
+	//StructTyps.insert(std::make_pair(name, type));
+	AllStructTyps.push_back(type);
 }
 
 RttiStructManager* RttiStructManager::GetInstance() 
@@ -247,11 +227,9 @@ void TestReflection()
 
 void RttiStructManager::BuildRtti()
 {
-	AllStructTyps.clear();
-	for (auto i : StructTyps)
+	for (auto i : AllStructTyps)
 	{
-		i.second->Init();
-		AllStructTyps.push_back(i.second);
+		i->Init();
 	}
 
 	TestReflection();
@@ -259,18 +237,20 @@ void RttiStructManager::BuildRtti()
 
 void RttiStructManager::Finalize()
 {
-	for (auto& i : StructTyps)
+	for (auto i : AllStructTyps)
 	{
-		i.second->Cleanup();
+		i->Cleanup();
 	}
 }
 
 RttiStruct* RttiStructManager::FindStruct(const char* name)
 {
-	auto i = StructTyps.find(name);
-	if (i == StructTyps.end())
-		return nullptr;
-	return i->second;
+	for (auto i : AllStructTyps)
+	{
+		if (i->GetFullName() == name)
+			return i;
+	}
+	return nullptr;
 }
 
 CoreRttiManager* CoreRttiManager::GetInstance() 
