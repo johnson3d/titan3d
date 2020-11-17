@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 #include <map>
 #include <vector>
@@ -11,103 +12,16 @@
 #include "../vfxtypes_nw.h"
 #endif
 
+#include "TypeUtility.h"
+
 typedef unsigned long long	vIID;
 typedef int	vBOOL;
 
-#define EngineNS Titan3D
-#define NS_BEGIN namespace EngineNS{
-#define NS_END }
 
 NS_BEGIN
 
 #define NEW_INHEAD new(__FILE__, __LINE__)
-
-template<typename Type>
-inline Type VGetTypeDefault()
-{
-	return (Type)(0);
-}
-
-inline void VGetTypeDefault()
-{
-
-}
-
-template <typename R, typename... Args>
-struct TFunction_traits_helper
-{
-	static constexpr auto param_count = sizeof...(Args);
-	using return_type = R;
-
-	template <std::size_t N>
-	using param_type = std::tuple_element_t<N, std::tuple<Args...>>;
-};
-
-template <typename T>
-struct TFunction_traits;
-
-template <typename R, typename... Args>
-struct TFunction_traits<R(*)(Args...)> : public TFunction_traits_helper<R, Args...>
-{
-};
-
-template <typename R, typename... Args>
-struct TFunction_traits<R(&)(Args...)> : public TFunction_traits_helper<R, Args...>
-{
-};
-
-template <typename R, typename... Args>
-struct TFunction_traits<R(Args...)> : public TFunction_traits_helper<R, Args...>
-{
-};
-
-template <typename ClassType, typename R, typename... Args>
-struct TFunction_traits<R(ClassType::*)(Args...)> : public TFunction_traits_helper<R, Args...>
-{
-	using class_type = ClassType;
-};
-
-template <typename ClassType, typename R, typename... Args>
-struct TFunction_traits<R(ClassType::*)(Args...) const> : public TFunction_traits_helper<R, Args...>
-{
-	using class_type = ClassType;
-};
-
-template <typename T>
-struct remove_all_ref_ptr { typedef T type; };
-
-template <typename T>
-struct remove_all_ref_ptr<const T> : public remove_all_ref_ptr<T> { };
-
-template <typename T>
-struct remove_all_ref_ptr<T *> : public remove_all_ref_ptr<T> { };
-
-template <typename T>
-struct remove_all_ref_ptr<const T *> : public remove_all_ref_ptr<T> { };
-
-template <typename T>
-struct remove_all_ref_ptr<T * const> : public remove_all_ref_ptr<T> { };
-
-template <typename T>
-struct remove_all_ref_ptr<const T * const> : public remove_all_ref_ptr<T> { };
-
-template <typename T>
-struct remove_all_ref_ptr<T * volatile> : public remove_all_ref_ptr<T> { };
-
-template <typename T>
-struct remove_all_ref_ptr<const T * volatile> : public remove_all_ref_ptr<T> { };
-
-template <typename T>
-struct remove_all_ref_ptr<const T * const volatile> : public remove_all_ref_ptr<T> { };
-
-template <typename T>
-struct remove_all_ref_ptr<T &> : public remove_all_ref_ptr<T> { };
-
-template <typename T>
-struct remove_all_ref_ptr<const T &> : public remove_all_ref_ptr<T> { };
-
-template <typename T>
-struct remove_all_ref_ptr<T &&> : public remove_all_ref_ptr<T> { };
+//#define NEW_INHEAD new
 
 class VIUnknown;
 
@@ -147,22 +61,6 @@ public:
 	}
 	VIUnknown* CreateInstance(const char* file, int line) {
 		return Constructor(file, line);
-	}
-};
-
-template<typename Type, bool canNew> 
-struct TObjectCreator
-{
-	static Type* NewObject(const char* file, int line) {
-		return new(file, line) Type();
-	}
-};
-
-template<typename Type>
-struct TObjectCreator<Type, false>
-{
-	static Type* NewObject(const char* file, int line) {
-		return nullptr;
 	}
 };
 
@@ -244,6 +142,7 @@ struct RttiMetaInfo
 	}
 };
 
+TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
 struct RttiEnum : public RttiMetaInfo
 {
 	RttiNameString				Name;
@@ -293,16 +192,20 @@ struct AuxRttiEnum : public RttiEnum
 	static const bool IsEnum = false;
 };
 
+TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
 class RttiEnumManager
 {
 	std::vector<RttiEnum*>				AllEnumTyps;
 public:
 	void RegEnumType(const char* name, RttiEnum* type);
+	TR_FUNCTION()
 	static RttiEnumManager* GetInstance();
 
+	TR_FUNCTION()
 	void BuildRtti();
 	void Finalize();
 
+	TR_FUNCTION()
 	RttiEnum* FindEnum(const char* name);
 	unsigned int GetEnumNumber() {
 		return (unsigned int)AllEnumTyps.size();
@@ -394,6 +297,32 @@ inline ArgumentStream& operator >>(ArgumentStream& stream, std::string& v)
 }
 
 struct RttiStruct;
+
+TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+struct RttiType
+{
+	TR_MEMBER()
+	RttiStruct*			Type;
+	TR_MEMBER()
+	int					NumOfPointer;
+	TR_MEMBER()
+	bool				IsRefer;
+	template<typename _Type>
+	void BuildType();
+};
+
+TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+struct RttiParameter
+{
+	TR_MEMBER()
+	RttiNameString		Name;
+	TR_MEMBER()
+	RttiType			ParameterType;
+	template<typename _Type>
+	static RttiParameter BuildParameter(const char* name);
+};
+
+TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
 struct RttiMethodBase : public RttiMetaInfo
 {
 	RttiMethodBase()
@@ -401,13 +330,14 @@ struct RttiMethodBase : public RttiMetaInfo
 		IsStatic = false;
 		IsConst = false;
 		ThisObject = nullptr;
-		ResultType = nullptr;
 	}
+	TR_MEMBER()
 	RttiNameString		Name;
+	TR_MEMBER()
 	RttiStruct*			ThisObject;
-
-	RttiStruct*			ResultType;
-	std::vector<std::pair<RttiNameString,RttiStruct*>>	Arguments;
+	TR_MEMBER()
+	RttiType			ResultType;
+	std::vector<RttiParameter>	Arguments;
 	bool				IsStatic;
 	bool				IsConst;
 	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const
@@ -416,13 +346,13 @@ struct RttiMethodBase : public RttiMetaInfo
 	}
 	bool MatchArgument(const RttiStruct* returnType, const std::vector<RttiStruct*>& args) const
 	{
-		if (returnType != ResultType)
+		if (returnType != ResultType.Type)
 			return false;
 		if (args.size() != Arguments.size())
 			return false;
 		for (size_t i = 0; i < args.size(); i++)
 		{
-			if (args[i] != Arguments[i].second)
+			if (args[i] != Arguments[i].ParameterType.Type)
 				return false;
 		}
 		return true;
@@ -431,14 +361,14 @@ struct RttiMethodBase : public RttiMetaInfo
 
 struct RttiConstructor : public RttiMetaInfo
 {
-	std::vector<RttiStruct*> mArguments;
+	std::vector<RttiParameter> mArguments;
 	bool MatchArgument(const std::vector<RttiStruct*>& args) const
 	{
 		if (args.size() != mArguments.size())
 			return false;
 		for (size_t i = 0; i < args.size(); i++)
 		{
-			if (args[i] != mArguments[i])
+			if (args[i] != mArguments[i].ParameterType.Type)
 				return false;
 		}
 		return true;
@@ -502,9 +432,15 @@ private:
 	}
 };
 
-#define Method_Arg_Def(index) \
-	T##index a##index = T##index();\
-	args >> a##index;
+#define Method_Arg_Def(Index) \
+	typename VRefAsPtr<T##Index>::Result tmp_a##Index;\
+	tmp_a##Index = typename VRefAsPtr<T##Index>::Result();\
+	args >> tmp_a##Index;\
+	typename VTypeAsRef<T##Index>::Result a##Index = (typename VTypeAsRef<T##Index>::Result)(tmp_a##Index);
+
+//#define Method_Arg_Def(index) \
+//	T##index a##index = T##index();\
+//	args >> a##index;
 
 template<typename Result, typename BindClass, typename T0>
 struct VMethod1 : public RttiMethodBase
@@ -536,6 +472,7 @@ private:
 	{
 		args.mReadPosition = 0;
 		Method_Arg_Def(0);
+
 		if (IsStatic)
 		{
 			auto ret = (StaticFuncPtr)(a0);
@@ -1091,6 +1028,81 @@ private:
 	}
 };
 
+template<typename Result, typename BindClass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9>
+struct VMethod10 : public RttiMethodBase
+{
+	typedef Result(*StaticMethodFun)(T0, T1, T2, T3, T4, T5, T6, T7, T8, T9);
+	typedef Result(BindClass::*MethodFun)(T0, T1, T2, T3, T4, T5, T6, T7, T8, T9);
+	typedef Result(BindClass::*ConstMethodFun)(T0, T1, T2, T3, T4, T5, T6, T7, T8, T9) const;
+	VMethod10(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8, const char* a9);
+	VMethod10(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8, const char* a9);
+	VMethod10(ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8, const char* a9)
+		: VMethod10((MethodFun)fun, name, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9)
+	{
+
+	}
+	union
+	{
+		StaticMethodFun StaticFuncPtr;
+		MethodFun FuncPtr;
+	};
+
+	virtual void Invoke(void* pThis, ArgumentStream& args, ArgumentStream& result) const override
+	{
+		InvokeImpl<Result>(pThis, args, result);
+	}
+
+private:
+	template<typename TR>
+	void InvokeImpl(void* pThis, ArgumentStream& args, ArgumentStream& result) const
+	{
+		args.mReadPosition = 0;
+		Method_Arg_Def(0);
+		Method_Arg_Def(1);
+		Method_Arg_Def(2);
+		Method_Arg_Def(3);
+		Method_Arg_Def(4);
+		Method_Arg_Def(5);
+		Method_Arg_Def(6);
+		Method_Arg_Def(7);
+		Method_Arg_Def(8);
+		Method_Arg_Def(9);
+		if (IsStatic)
+		{
+			auto ret = (StaticFuncPtr)(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+			result << ret;
+		}
+		else
+		{
+			auto ret = (((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+			result << ret;
+		}
+	}
+	template<>
+	void InvokeImpl<void>(void* pThis, ArgumentStream& args, ArgumentStream& result) const
+	{
+		args.mReadPosition = 0;
+		Method_Arg_Def(0);
+		Method_Arg_Def(1);
+		Method_Arg_Def(2);
+		Method_Arg_Def(3);
+		Method_Arg_Def(4);
+		Method_Arg_Def(5);
+		Method_Arg_Def(6);
+		Method_Arg_Def(7);
+		Method_Arg_Def(8);
+		Method_Arg_Def(9);
+		if (IsStatic)
+		{
+			(StaticFuncPtr)(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+		}
+		else
+		{
+			(((BindClass*)pThis)->*(FuncPtr))(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+		}
+	}
+};
+
 template<typename Klass>
 struct VConstructor0 : public RttiConstructor
 {
@@ -1124,21 +1136,34 @@ struct VConstructor2 : public RttiConstructor
 	}
 };
 
+TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS&EngineNS.RttiStruct)
 struct RttiStruct : public RttiMetaInfo
 {
 	RttiStruct*					ParentStructType;
+	TR_MEMBER()
 	RttiNameString				Name;
+	TR_MEMBER()
 	RttiNameString				NameSpace;
+	TR_MEMBER()
 	unsigned int				Size;
+	TR_MEMBER()
 	RttiEnum*					EnumDesc;
+	TR_MEMBER()
 	bool						IsEnum;
+	TR_CLASS(SV_NameSpace = EngineNS.RttiStruct, SV_ContainClass = RttiStruct, SV_UsingNS = EngineNS)
 	struct MemberDesc : public RttiMetaInfo
 	{
+		TR_MEMBER()
 		RttiStruct*			MemberType;
+		TR_MEMBER()
 		unsigned int		Offset;
+		TR_MEMBER()
 		unsigned int		Size;
+		TR_MEMBER()
 		unsigned int		ArrayElements;
+		TR_MEMBER()
 		RttiNameString		MemberName;
+		TR_MEMBER()
 		bool				IsPointer;
 
 		template<typename T>
@@ -1173,6 +1198,7 @@ struct RttiStruct : public RttiMetaInfo
 		}
 		Constructors.clear();
 	}
+	TR_FUNCTION()
 	bool IsA(RttiStruct* pTar);
 	virtual void AssignOperator(void* pTar, const void* pSrc) const
 	{
@@ -1211,10 +1237,11 @@ struct RttiStruct : public RttiMetaInfo
 	const char* GetMemberName(unsigned int index) const {
 		return RttiNameStringHelper::VRttiNameString2Ansi(Members[index].MemberName);
 	}
+	TR_FUNCTION()
 	const MemberDesc* FindMember(const char* name) const {
 		for (const auto& i : Members)
 		{
-			if (i.MemberName == name)
+			if (RttiNameStringHelper::VRttiNameStringCmp(i.MemberName,name) == 0)
 				return &i;
 		}
 		return nullptr;
@@ -1230,6 +1257,7 @@ struct RttiStruct : public RttiMetaInfo
 		}
 		return -1;
 	}
+	TR_FUNCTION()
 	const RttiMethodBase* FindMethod(const char* name) const{
 		for (auto i : Methods)
 		{
@@ -1509,20 +1537,49 @@ struct RttiStruct : public RttiMetaInfo
 		return desc;
 	}
 
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9>
+	RttiMethodBase* PushMethod10(typename VMethod10<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>::MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8, const char* a9)
+	{
+		auto desc = NEW_INHEAD VMethod10<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(fun, name, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+
+		Methods.push_back(desc);
+		return desc;
+	}
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9>
+	RttiMethodBase* PushMethod10(typename VMethod10<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>::ConstMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8, const char* a9)
+	{
+		auto desc = NEW_INHEAD VMethod10<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(fun, name, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+
+		Methods.push_back(desc);
+		return desc;
+	}
+	template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9>
+	RttiMethodBase* PushMethod10(typename VMethod10<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>::StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8, const char* a9)
+	{
+		auto desc = NEW_INHEAD VMethod10<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(fun, name, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+
+		Methods.push_back(desc);
+		return desc;
+	}
+
 	virtual void Init();
 };
 
+TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS=EngineNS)
 class RttiStructManager
 {
 	std::vector<RttiStruct*>			AllStructTyps;
 public:
 	void RegStructType(const char* name, RttiStruct* type);
+	TR_FUNCTION()
 	static RttiStructManager* GetInstance();
 	
 	~RttiStructManager();
+	TR_FUNCTION()
 	void BuildRtti();
 	void Finalize();
 
+	TR_FUNCTION()
 	RttiStruct* FindStruct(const char* name);
 	unsigned int GetStructNumber() {
 		return (unsigned int)AllStructTyps.size();
@@ -1997,12 +2054,36 @@ struct AuxRttiStruct<typename remove_all_ref_ptr<ns::Type>::type> : public RttiS
 			using TA6 = TFunction_traits<TFunctionType>::param_type<6>;\
 			using TA7 = TFunction_traits<TFunctionType>::param_type<7>;\
 			using TA8 = TFunction_traits<TFunctionType>::param_type<8>;\
-			__current_method = PushMethod9<TResult, ThisStructType, TA0, TA1, TA2, TA3, TA4, TA5, TA6, TA7, TA8>(funAddress, #name, #a0, #a1, #a2, #a3, #a4, #a5, #a6, #a7, $a8);\
+			__current_method = PushMethod9<TResult, ThisStructType, TA0, TA1, TA2, TA3, TA4, TA5, TA6, TA7, TA8>(funAddress, #name, #a0, #a1, #a2, #a3, #a4, #a5, #a6, #a7, #a8);\
 		}
 
 #define StructMethodEx9(name, TResult, TA0, a0, TA1, a1, TA2, a2, TA3, a3, TA4, a4, TA5, a5, TA6, a6, TA7, a7, TA8, a8) \
 		{\
 			__current_method = PushMethod9<TResult, ThisStructType, TA0, TA1, TA2, TA3, TA4, TA5, TA6, TA7, TA8>(&ThisStructType::name, #name, #a0, #a1, #a2, #a3, #a4, #a5, #a6, #a7, #a8);\
+		}
+
+#define StructMethod10(name, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) \
+		{\
+			auto funAddress = &ThisStructType::name;\
+			using TFunctionType = decltype(funAddress);\
+			static_assert(TFunction_traits<TFunctionType>::param_count==4);\
+			using TResult = TFunction_traits<TFunctionType>::return_type;\
+			using TA0 = TFunction_traits<TFunctionType>::param_type<0>;\
+			using TA1 = TFunction_traits<TFunctionType>::param_type<1>;\
+			using TA2 = TFunction_traits<TFunctionType>::param_type<2>;\
+			using TA3 = TFunction_traits<TFunctionType>::param_type<3>;\
+			using TA4 = TFunction_traits<TFunctionType>::param_type<4>;\
+			using TA5 = TFunction_traits<TFunctionType>::param_type<5>;\
+			using TA6 = TFunction_traits<TFunctionType>::param_type<6>;\
+			using TA7 = TFunction_traits<TFunctionType>::param_type<7>;\
+			using TA8 = TFunction_traits<TFunctionType>::param_type<8>;\
+			using TA9 = TFunction_traits<TFunctionType>::param_type<9>;\
+			__current_method = PushMethod10<TResult, ThisStructType, TA0, TA1, TA2, TA3, TA4, TA5, TA6, TA7, TA8, TA9>(funAddress, #name, #a0, #a1, #a2, #a3, #a4, #a5, #a6, #a7, #a8, #a9);\
+		}
+
+#define StructMethodEx10(name, TResult, TA0, a0, TA1, a1, TA2, a2, TA3, a3, TA4, a4, TA5, a5, TA6, a6, TA7, a7, TA8, a8, TA9, a9) \
+		{\
+			__current_method = PushMethod10<TResult, ThisStructType, TA0, TA1, TA2, TA3, TA4, TA5, TA6, TA7, TA8, TA9>(&ThisStructType::name, #name, #a0, #a1, #a2, #a3, #a4, #a5, #a6, #a7, #a8, #a9);\
 		}
 
 #define StructConstructor0() \
@@ -2072,17 +2153,37 @@ T* RttiStruct::MemberDesc::GetValueAddress(void* pThis) const
 	}
 }
 
+template<typename _Type>
+void RttiType::BuildType()
+{
+	Type = &AuxRttiStruct<typename remove_all_ref_ptr<_Type>::type>::Instance;
+
+	IsRefer = std::is_reference<_Type>::value;
+	using _TypeNoRefer = std::remove_reference<_Type>;
+	NumOfPointer = TypePointerCounter<_TypeNoRefer>::Value;
+}
+
+template<typename _Type>
+RttiParameter RttiParameter::BuildParameter(const char* name)
+{
+	RttiParameter result;
+	result.Name = name;
+	result.ParameterType.BuildType<_Type>();
+
+	return result;
+}
+
 template<typename Klass, typename T0>
 VConstructor1<Klass, T0>::VConstructor1()
 {
-	mArguments.push_back(&AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance);
+	mArguments.push_back(RttiParameter::BuildParameter<T0>(""));
 }
 
 template<typename Klass, typename T0, typename T1>
 VConstructor2<Klass, T0, T1>::VConstructor2()
 {
-	mArguments.push_back(&AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance);
-	mArguments.push_back(&AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance);
+	mArguments.push_back(RttiParameter::BuildParameter<T0>(""));
+	mArguments.push_back(RttiParameter::BuildParameter<T1>(""));
 }
 
 template<typename Result, typename Klass>
@@ -2090,7 +2191,7 @@ VMethod0<Result, Klass>::VMethod0(MethodFun fun, const char* name)
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 }
 template<typename Result, typename Klass>
@@ -2099,7 +2200,7 @@ VMethod0<Result, Klass>::VMethod0(StaticMethodFun fun, const char* name)
 	IsStatic = true;
 	StaticFuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 }
 
@@ -2108,10 +2209,10 @@ VMethod1<Result, Klass, T0>::VMethod1(MethodFun fun, const char* name, const cha
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0,&AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
 }
 template<typename Result, typename Klass, typename T0>
 VMethod1<Result, Klass, T0>::VMethod1(StaticMethodFun fun, const char* name, const char* a0)
@@ -2119,10 +2220,10 @@ VMethod1<Result, Klass, T0>::VMethod1(StaticMethodFun fun, const char* name, con
 	IsStatic = true;
 	StaticFuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
 }
 
 template<typename Result, typename Klass, typename T0, typename T1>
@@ -2130,11 +2231,11 @@ VMethod2<Result, Klass, T0, T1>::VMethod2(MethodFun fun, const char* name, const
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
 }
 template<typename Result, typename Klass, typename T0, typename T1>
 VMethod2<Result, Klass, T0, T1>::VMethod2(StaticMethodFun fun, const char* name, const char* a0, const char* a1)
@@ -2142,11 +2243,11 @@ VMethod2<Result, Klass, T0, T1>::VMethod2(StaticMethodFun fun, const char* name,
 	IsStatic = true;
 	StaticFuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
 }
 
 template<typename Result, typename Klass, typename T0, typename T1, typename T2>
@@ -2154,12 +2255,12 @@ VMethod3<Result, Klass, T0, T1, T2>::VMethod3(MethodFun fun, const char* name, c
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
 }
 template<typename Result, typename Klass, typename T0, typename T1, typename T2>
 VMethod3<Result, Klass, T0, T1, T2>::VMethod3(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2)
@@ -2167,12 +2268,12 @@ VMethod3<Result, Klass, T0, T1, T2>::VMethod3(StaticMethodFun fun, const char* n
 	IsStatic = true;
 	StaticFuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
 }
 
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3>
@@ -2180,13 +2281,13 @@ VMethod4<Result, Klass, T0, T1, T2, T3>::VMethod4(MethodFun fun, const char* nam
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
-	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
 }
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3>
 VMethod4<Result, Klass, T0, T1, T2, T3>::VMethod4(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3)
@@ -2194,13 +2295,13 @@ VMethod4<Result, Klass, T0, T1, T2, T3>::VMethod4(StaticMethodFun fun, const cha
 	IsStatic = true;
 	StaticFuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
-	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
 }
 
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4>
@@ -2208,14 +2309,14 @@ VMethod5<Result, Klass, T0, T1, T2, T3, T4>::VMethod5(MethodFun fun, const char*
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
-	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
-	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
+	Arguments.push_back(RttiParameter::BuildParameter<T4>(a4));
 }
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4>
 VMethod5<Result, Klass, T0, T1, T2, T3, T4>::VMethod5(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4)
@@ -2223,14 +2324,14 @@ VMethod5<Result, Klass, T0, T1, T2, T3, T4>::VMethod5(StaticMethodFun fun, const
 	IsStatic = true;
 	StaticFuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
-	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
-	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
+	Arguments.push_back(RttiParameter::BuildParameter<T4>(a4));
 }
 
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
@@ -2238,15 +2339,15 @@ VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>::VMethod6(MethodFun fun, const c
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
-	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
-	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
+	Arguments.push_back(RttiParameter::BuildParameter<T4>(a4));
+	Arguments.push_back(RttiParameter::BuildParameter<T5>(a5));
 }
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
 VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>::VMethod6(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5)
@@ -2254,15 +2355,15 @@ VMethod6<Result, Klass, T0, T1, T2, T3, T4, T5>::VMethod6(StaticMethodFun fun, c
 	IsStatic = true;
 	StaticFuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
-	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
-	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
+	Arguments.push_back(RttiParameter::BuildParameter<T4>(a4));
+	Arguments.push_back(RttiParameter::BuildParameter<T5>(a5));
 }
 
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
@@ -2270,16 +2371,16 @@ VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>::VMethod7(MethodFun fun, con
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
-	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
-	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
-	Arguments.push_back(std::make_pair(a6, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
+	Arguments.push_back(RttiParameter::BuildParameter<T4>(a4));
+	Arguments.push_back(RttiParameter::BuildParameter<T5>(a5));
+	Arguments.push_back(RttiParameter::BuildParameter<T6>(a6));
 }
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
 VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>::VMethod7(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6)
@@ -2287,16 +2388,16 @@ VMethod7<Result, Klass, T0, T1, T2, T3, T4, T5, T6>::VMethod7(StaticMethodFun fu
 	IsStatic = true;
 	StaticFuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
-	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
-	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
-	Arguments.push_back(std::make_pair(a6, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
+	Arguments.push_back(RttiParameter::BuildParameter<T4>(a4));
+	Arguments.push_back(RttiParameter::BuildParameter<T5>(a5));
+	Arguments.push_back(RttiParameter::BuildParameter<T6>(a6));
 }
 
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
@@ -2304,17 +2405,17 @@ VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::VMethod8(MethodFun fun,
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
-	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
-	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
-	Arguments.push_back(std::make_pair(a6, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
-	Arguments.push_back(std::make_pair(a7, &AuxRttiStruct<typename remove_all_ref_ptr<T7>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
+	Arguments.push_back(RttiParameter::BuildParameter<T4>(a4));
+	Arguments.push_back(RttiParameter::BuildParameter<T5>(a5));
+	Arguments.push_back(RttiParameter::BuildParameter<T6>(a6));
+	Arguments.push_back(RttiParameter::BuildParameter<T7>(a7));
 }
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
 VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::VMethod8(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7)
@@ -2322,17 +2423,17 @@ VMethod8<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7>::VMethod8(StaticMethodFu
 	IsStatic = true;
 	StaticFuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
-	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
-	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
-	Arguments.push_back(std::make_pair(a6, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
-	Arguments.push_back(std::make_pair(a7, &AuxRttiStruct<typename remove_all_ref_ptr<T7>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
+	Arguments.push_back(RttiParameter::BuildParameter<T4>(a4));
+	Arguments.push_back(RttiParameter::BuildParameter<T5>(a5));
+	Arguments.push_back(RttiParameter::BuildParameter<T6>(a6));
+	Arguments.push_back(RttiParameter::BuildParameter<T7>(a7));
 }
 
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
@@ -2340,18 +2441,18 @@ VMethod9<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8>::VMethod9(MethodFun 
 {
 	FuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
-	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
-	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
-	Arguments.push_back(std::make_pair(a6, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
-	Arguments.push_back(std::make_pair(a7, &AuxRttiStruct<typename remove_all_ref_ptr<T7>::type>::Instance));
-	Arguments.push_back(std::make_pair(a8, &AuxRttiStruct<typename remove_all_ref_ptr<T8>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
+	Arguments.push_back(RttiParameter::BuildParameter<T4>(a4));
+	Arguments.push_back(RttiParameter::BuildParameter<T5>(a5));
+	Arguments.push_back(RttiParameter::BuildParameter<T6>(a6));
+	Arguments.push_back(RttiParameter::BuildParameter<T7>(a7));
+	Arguments.push_back(RttiParameter::BuildParameter<T8>(a8));
 }
 template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
 VMethod9<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8>::VMethod9(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8)
@@ -2359,18 +2460,58 @@ VMethod9<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8>::VMethod9(StaticMeth
 	IsStatic = true;
 	StaticFuncPtr = fun;
 	Name = name;
-	ResultType = &AuxRttiStruct<typename remove_all_ref_ptr<Result>::type>::Instance;
+	ResultType.BuildType<Result>();
 	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
 
-	Arguments.push_back(std::make_pair(a0, &AuxRttiStruct<typename remove_all_ref_ptr<T0>::type>::Instance));
-	Arguments.push_back(std::make_pair(a1, &AuxRttiStruct<typename remove_all_ref_ptr<T1>::type>::Instance));
-	Arguments.push_back(std::make_pair(a2, &AuxRttiStruct<typename remove_all_ref_ptr<T2>::type>::Instance));
-	Arguments.push_back(std::make_pair(a3, &AuxRttiStruct<typename remove_all_ref_ptr<T3>::type>::Instance));
-	Arguments.push_back(std::make_pair(a4, &AuxRttiStruct<typename remove_all_ref_ptr<T4>::type>::Instance));
-	Arguments.push_back(std::make_pair(a5, &AuxRttiStruct<typename remove_all_ref_ptr<T5>::type>::Instance));
-	Arguments.push_back(std::make_pair(a6, &AuxRttiStruct<typename remove_all_ref_ptr<T6>::type>::Instance));
-	Arguments.push_back(std::make_pair(a7, &AuxRttiStruct<typename remove_all_ref_ptr<T7>::type>::Instance));
-	Arguments.push_back(std::make_pair(a8, &AuxRttiStruct<typename remove_all_ref_ptr<T8>::type>::Instance));
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
+	Arguments.push_back(RttiParameter::BuildParameter<T4>(a4));
+	Arguments.push_back(RttiParameter::BuildParameter<T5>(a5));
+	Arguments.push_back(RttiParameter::BuildParameter<T6>(a6));
+	Arguments.push_back(RttiParameter::BuildParameter<T7>(a7));
+	Arguments.push_back(RttiParameter::BuildParameter<T8>(a8));
+}
+
+template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9>
+VMethod10<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>::VMethod10(MethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8, const char* a9)
+{
+	FuncPtr = fun;
+	Name = name;
+	ResultType.BuildType<Result>();
+	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
+
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
+	Arguments.push_back(RttiParameter::BuildParameter<T4>(a4));
+	Arguments.push_back(RttiParameter::BuildParameter<T5>(a5));
+	Arguments.push_back(RttiParameter::BuildParameter<T6>(a6));
+	Arguments.push_back(RttiParameter::BuildParameter<T7>(a7));
+	Arguments.push_back(RttiParameter::BuildParameter<T8>(a8));
+	Arguments.push_back(RttiParameter::BuildParameter<T9>(a9));
+}
+template<typename Result, typename Klass, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9>
+VMethod10<Result, Klass, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>::VMethod10(StaticMethodFun fun, const char* name, const char* a0, const char* a1, const char* a2, const char* a3, const char* a4, const char* a5, const char* a6, const char* a7, const char* a8, const char* a9)
+{
+	IsStatic = true;
+	StaticFuncPtr = fun;
+	Name = name;
+	ResultType.BuildType<Result>();
+	ThisObject = &AuxRttiStruct<typename remove_all_ref_ptr<Klass>::type>::Instance;
+
+	Arguments.push_back(RttiParameter::BuildParameter<T0>(a0));
+	Arguments.push_back(RttiParameter::BuildParameter<T1>(a1));
+	Arguments.push_back(RttiParameter::BuildParameter<T2>(a2));
+	Arguments.push_back(RttiParameter::BuildParameter<T3>(a3));
+	Arguments.push_back(RttiParameter::BuildParameter<T4>(a4));
+	Arguments.push_back(RttiParameter::BuildParameter<T5>(a5));
+	Arguments.push_back(RttiParameter::BuildParameter<T6>(a6));
+	Arguments.push_back(RttiParameter::BuildParameter<T7>(a7));
+	Arguments.push_back(RttiParameter::BuildParameter<T8>(a8));
+	Arguments.push_back(RttiParameter::BuildParameter<T9>(a9));
 }
 
 NS_END

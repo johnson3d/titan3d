@@ -17,7 +17,16 @@
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.ImGuiAPI.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.IVertexBuffer.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.IVertexBufferDesc.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiEnum.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiEnumManager.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiMethodBase.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiParameter.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiStruct.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiStruct.MemberDesc.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiStructManager.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiType.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawCmd.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawCornerFlags_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawData.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawList.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawVert.gen.cpp" />

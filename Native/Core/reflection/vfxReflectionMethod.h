@@ -1,5 +1,5 @@
 // ***************************************************************
-//  vfxReflectionMethod   version:  1.0   ·  date: 04/02/2008
+//  vfxReflectionMethod   version:  1.0   date: 04/02/2008
 //  -------------------------------------------------------------
 //  johnson
 //  -------------------------------------------------------------
@@ -671,7 +671,7 @@ namespace Reflection
 		virtual void Invoke( ObjBase* retValue , VReflectBase* pBindObject , std::vector<ObjBase*>& pArgs )
 		{
 			if( pArgs.size()<ArgTypes.size() )
-				throw "参数给的不够，无法Invoke";
+				throw "Invoke";
 			/*static const bool HasReturn = (tpl_utility::ClassEqual<tpl_utility::NullObject,typename FunctorType::TReturnType>::Result==false
 				&& tpl_utility::ClassEqual<void,typename FunctorType::TReturnType>::Result==false );*/
 			Invoke_Selector<FunctorType,FunctorType::HasReturn>::Invoker(retValue,pBindObject,pArgs,Caller,ArgTypes);
@@ -682,7 +682,7 @@ namespace Reflection
 		virtual void Constructor( void** ppRetValue , std::vector<ObjBase*>& pArgs )
 		{
 			if( pArgs.size()<ArgTypes.size() )
-				throw "参数给的不够，无法Constructor";
+				throw "Constructor";
 
 			Constructor_Selector<FunctorType,FunctorType::HasReturn>::Invoker(ppRetValue,pArgs,Caller,ArgTypes);
 		}

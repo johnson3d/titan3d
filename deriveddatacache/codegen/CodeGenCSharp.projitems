@@ -13,7 +13,16 @@
     <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.ImGuiAPI.gen.cs" />
     <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.IVertexBuffer.gen.cs" />
     <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.IVertexBufferDesc.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiEnum.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiEnumManager.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiMethodBase.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiParameter.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiStruct.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiStruct.MemberDesc.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiStructManager.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.RttiType.gen.cs" />
     <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawCmd.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawCornerFlags_.gen.cs" />
     <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawData.gen.cs" />
     <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawList.gen.cs" />
     <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImDrawVert.gen.cs" />

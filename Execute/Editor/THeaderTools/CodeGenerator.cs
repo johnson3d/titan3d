@@ -366,7 +366,7 @@ namespace THeaderTools
                     code += $"\t{Symbol.DefMethod}{i.Arguments.Count}({i.Name}, {returnConverter}";
                     if (i.Arguments.Count > 0)
                         code += ", ";
-                    code += i.GetParameterString(", ");
+                    code += i.GetParameterString(", ", false, true);
                     code += $");\n";
                     WriteMetaCode(ref code, i, Symbol.AppendMethodMeta);
                 }

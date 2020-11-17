@@ -328,21 +328,6 @@ namespace THeaderTools
         {
             return CodeGenerator.Instance.IsSystemType(name);
         }
-        public static string RemovePtrAndRef(string name)
-        {
-            int i = name.Length - 1;
-            for (; i >= 0; i--)
-            {
-                if (name[i] != '*' && name[i] != '&')
-                {
-                    break;
-                }
-            }
-            if (i == name.Length - 1)
-                return name;
-            else
-                return name.Substring(0, i+1);
-        }
         public static string SplitPureName(string name, out string suffix)
         {
             name = name.Replace("::", ".");

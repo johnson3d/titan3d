@@ -110,6 +110,8 @@ void RttiStructManager::RegStructType(const char* name, RttiStruct* type)
 {
 	//StructTyps.insert(std::make_pair(name, type));
 	AllStructTyps.push_back(type);
+	
+	static_assert(TypePointerCounter<int***>::Value == 3, "");
 }
 
 RttiStructManager* RttiStructManager::GetInstance() 
@@ -196,7 +198,7 @@ int FTestFuncTraits(int, int)
 }
 
 void TestReflection()
-{
+{	
 	auto rtti = RttiStructManager::GetInstance()->FindStruct("Titan3D::Test_ConstantVarDesc");
 	rtti->HasMeta("abc");
 	auto method = rtti->FindMethod("SetDirty");

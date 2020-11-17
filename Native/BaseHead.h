@@ -106,19 +106,6 @@ inline void _vfxTraceA(LPCSTR lpszFormat, ...)
 #		define VFX_API
 #endif
 
-#define TR_CLASS(...)
-#define TR_FUNCTION(...)
-#define TR_MEMBER(...)
-#define TR_ENUM(...)
-#define TR_ENUM_MEMBER(...)
-#define TR_CONSTRUCTOR(...)
-#define TR_CALLBACK(...)
-
-#define TR_DECL(type) friend struct AuxRttiStruct<type>;\
-					friend struct type##_Visitor;
-
-#define TR_DISCARD(...)
-
 //typedef char SByte;
 #define SByte char
 #define Wchar16 unsigned short

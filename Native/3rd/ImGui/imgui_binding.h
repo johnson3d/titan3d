@@ -1061,7 +1061,7 @@ public:
 	}
 	static bool          BeginTabItem(const char* label, bool* p_open = NULL, ImGuiTabItemFlags_ flags = (ImGuiTabItemFlags_)0)
 	{
-		return ImGui::GetColumnsCount();
+		return ImGui::BeginTabItem(label, p_open, flags);
 	}
 	static void          EndTabItem()
 	{

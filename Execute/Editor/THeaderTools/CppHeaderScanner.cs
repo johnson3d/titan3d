@@ -752,6 +752,12 @@ namespace THeaderTools
                     tokens.RemoveAt(i);
                     i--;
                 }
+                else if (tokens[i] == "volatile")
+                {
+                    dtStyles |= EDeclareType.DT_Volatile;
+                    tokens.RemoveAt(i);
+                    i--;
+                }
                 else if (tokens[i] == "unsigned")
                 {
                     dtStyles |= EDeclareType.DT_Unsigned;

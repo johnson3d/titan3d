@@ -12,3 +12,5 @@ ImTextureID,void*
 ImGuiDir,ImGuiDir_
 ImGuiInputTextFlags,ImGuiInputTextFlags_
 ImGuiKey,ImGuiKey_
+ImDrawCornerFlags,ImDrawCornerFlags_
+RttiNameString,char*

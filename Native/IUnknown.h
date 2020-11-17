@@ -16,6 +16,7 @@ typedef long long vTimeTick;
 class vfxObjectLocker;
 
 NS_BEGIN
+
 struct ObjectHandle;
 struct IResourceState;
 class VIUnknown

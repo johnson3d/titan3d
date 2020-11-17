@@ -44,8 +44,15 @@ namespace THeaderTools
                     PureType = CodeGenerator.Instance.NormalizePureType(CppPureType);
                     mType = PureType + suffix;
                     TypeStarNum = suffix.Length;
+                    if (value[value.Length-1] == '&')
+                        IsRefer = true;
                 }
             }
+            public bool IsRefer
+            {
+                get;
+                set;
+            } = false;
             public string CppPureType
             {
                 get;
@@ -116,12 +123,19 @@ namespace THeaderTools
         {
             get;
         } = new List<CppParameter>();
-        public string GetParameterString(string split = " ", bool needConst = false)
+        public string GetParameterString(string split = " ", bool needConst = false, bool tryParseRefer = false)
         {
             string result = "";
             for (int i = 0; i < Arguments.Count; i++)
             {
                 var cppName = Arguments[i].CppType;
+                if(tryParseRefer)
+                {
+                    if(Arguments[i].IsRefer)
+                    {
+                        cppName = cppName.Substring(0, cppName.Length - 1) + "&";
+                    }
+                }
 
                 if (i == 0)
                     result += $"{cppName}{split}{Arguments[i].Value}";
@@ -155,12 +169,16 @@ namespace THeaderTools
             }
             return result;
         }
-        public string GetParameterCallString()
+        public string GetParameterCallString(bool tryParseRefer = false)
         {
             string result = "";
             for (int i = 0; i < Arguments.Count; i++)
             {
                 var arg = Arguments[i].Value;
+                if(tryParseRefer && Arguments[i].IsRefer)
+                {
+                    arg = "*" + arg;
+                }
                 if (i == 0)
                     result += $"{arg}";
                 else

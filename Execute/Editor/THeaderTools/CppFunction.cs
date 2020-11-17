@@ -191,7 +191,7 @@ namespace THeaderTools
             code += CodeGenerator.GenLine(nTable++, "{");
             code += CodeGenerator.GenLine(nTable, $"return TypeDefault({CppReturnType});");
             code += CodeGenerator.GenLine(--nTable, "}");
-            code += CodeGenerator.GenLine(nTable, $"return self->{Name}({this.GetParameterCallString()});");
+            code += CodeGenerator.GenLine(nTable, $"return self->{Name}({this.GetParameterCallString(true)});");
             code += CodeGenerator.GenLine(--nTable, "}");
             return code;
         }
@@ -226,7 +226,7 @@ namespace THeaderTools
         {
             string code = CodeGenerator.GenLine(nTable, $"static {CppReturnType} Static_{Name}({this.GetParameterString()})");
             code += CodeGenerator.GenLine(nTable++, "{");
-            code += CodeGenerator.GenLine(nTable, $"return {klass.GetFullName(true)}::{Name}({this.GetParameterCallString()});");
+            code += CodeGenerator.GenLine(nTable, $"return {klass.GetFullName(true)}::{Name}({this.GetParameterCallString(true)});");
             code += CodeGenerator.GenLine(--nTable, "}");
             return code;
         }
