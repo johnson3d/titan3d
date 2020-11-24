@@ -35,8 +35,9 @@ namespace THeaderTools
         DT_Unsigned = (1 << 6),
         DT_API = (1 << 7),
     }
-    public class CppMetaBase
+    public abstract class CppMetaBase
     {
+        public abstract string Name { get; set; }
         public bool HasMetaFlag
         {
             get;
@@ -100,6 +101,7 @@ namespace THeaderTools
             public const string SV_CharSet = "SV_CharSet";//For method: CharSet.Ansi , CharSet.Unicode
             public const string SV_CallConvention = "SV_CallConvention";//For method: System.Runtime.InteropServices.CallingConvention.Cdecl , System.Runtime.InteropServices.CallingConvention.StdCall
             public const string SV_GenStaticFunction = "SV_GenStaticFunction";//For method:对外暴露PInvoke函数，使得可输入self指针
+            public const string SV_NoStarToRef = "SV_NoStarToRef";//For method:不尝试地址到ref的转换
         }
         
         public string GetReturnConverter()
@@ -110,6 +112,12 @@ namespace THeaderTools
 
     public class CppContainer : CppMetaBase
     {
+        string mName;
+        public override string Name
+        {
+            get => mName;
+            set => mName = value;
+        }
         public string GetNameSpace(bool asCpp = false)
         {
             var ns = this.GetMetaValue(Symbol.SV_NameSpace);
@@ -193,11 +201,6 @@ namespace THeaderTools
             get;
             set;
         } = false;
-        public string Name
-        {
-            get;
-            set;
-        }
         public EVisitMode InheritMode
         {
             get;
@@ -239,61 +242,6 @@ namespace THeaderTools
                 }
                 return result;
             }
-        }
-        public static string GetCSTypeImpl(CppClass TypeClass, CppEnum TypeEnum, CppCallback TypeCallback, int TypeStarNum, EDeclareType DeclType, string PureType, bool tryMashralString)
-        {
-            if (TypeClass != null)
-                return TypeClass.GetCSName(TypeStarNum);
-            if (TypeEnum != null)
-                return TypeEnum.GetCSName(TypeStarNum);
-            if (TypeCallback != null)
-                return TypeCallback.GetCSName(TypeStarNum);
-            string csType = "";
-            if ((DeclType & EDeclareType.DT_Unsigned) == EDeclareType.DT_Unsigned)
-            {
-                csType = CodeGenerator.Instance.NormalizePureType("unsigned " + PureType);
-            }
-            else
-            {
-                csType = CodeGenerator.Instance.NormalizePureType(PureType);
-            }
-            for (int i = 0; i < TypeStarNum; i++)
-            {
-                csType += "*";
-            }
-            if (tryMashralString)
-            {
-                if (csType == "SByte*")
-                    return "string";
-                else if (csType == "Wchar16*")
-                    return "string";
-                else if (csType == "Wchar32*")
-                    return "string";
-            }
-            return csType;
-        }
-        public static string GetCppTypeImpl(CppClass TypeClass, int TypeStarNum, EDeclareType DeclType, string Type)
-        {
-            string result = "";
-            if (TypeClass != null)
-                result = TypeClass.GetCppName(TypeStarNum);
-            else
-            {
-                result = Type;
-                for (int i = 0; i < TypeStarNum; i++)
-                {
-                    result += '*';
-                }
-            }
-            if ((DeclType & EDeclareType.DT_Unsigned) == EDeclareType.DT_Unsigned)
-            {
-                result = "unsigned " + result;
-            }
-            if ((DeclType & EDeclareType.DT_Const) == EDeclareType.DT_Const)
-            {
-                result = "const " + result;
-            }
-            return result.Replace(".", "::");
         }
         public List<CppFunction> Methods
         {
@@ -353,103 +301,132 @@ namespace THeaderTools
 
             foreach (var i in Members)
             {
-                string suffix;
-                var realType = SplitPureName(i.Type, out suffix);
-                var klass = CodeGenerator.Instance.MatchClass(realType, segs);
-                var enumType = CodeGenerator.Instance.MatchEnum(realType, segs);
-                var cbType = CodeGenerator.Instance.MatchCallback(realType, segs);
-                if (klass != null)
-                {
-                    i.TypeClass = klass;
-                    continue;
-                }
-                else if (enumType != null)
-                {
-                    i.TypeEnum = enumType;
-                }
-                else if (cbType != null)
-                {
-                    i.TypeCallback = cbType;
-                }
-                else if (IsSystemType(realType))
-                {
-                    continue;
-                }
-                else
-                {
-                    Console.WriteLine($"{realType} used by RTTI member({i.Name}) in {this.ToString()}, Please Reflect this class");
-                }
+                i.Type.CheckValid(segs);
             }
 
             foreach (var i in Methods)
             {
-                string suffix;
-                var realType = SplitPureName(i.ReturnType, out suffix);
-                var klass = CodeGenerator.Instance.MatchClass(realType, segs);
-                var enumType = CodeGenerator.Instance.MatchEnum(realType, segs);
-                var cbType = CodeGenerator.Instance.MatchCallback(realType, segs);
-                if (klass != null)
-                {
-                    i.ReturnTypeClass = klass;
-                }
-                else if (enumType != null)
-                {
-                    i.ReturnTypeEnum = enumType;
-                }
-                else if (cbType != null)
-                {
-                    i.ReturnTypeCallback = cbType;
-                }
-                else if(!IsSystemType(realType))
-                {
-                    Console.WriteLine($"{realType} used by RTTI Method({i.ToString()}) in {this.ToString()}, Please Reflect this class");
-                }
+                i.ReturnType.CheckValid(segs);
                 foreach(var j in i.Arguments)
                 {
-                    realType = SplitPureName(j.Type, out suffix);
-                    klass = CodeGenerator.Instance.MatchClass(realType, segs);
-                    enumType = CodeGenerator.Instance.MatchEnum(realType, segs);
-                    cbType = CodeGenerator.Instance.MatchCallback(realType, segs);
-                    if (klass != null)
-                    {
-                        j.TypeClass = klass;
-                    }
-                    else if (enumType != null)
-                    {
-                        j.TypeEnum = enumType;
-                    }
-                    else if (cbType != null)
-                    {
-                        j.TypeCallback = cbType;
-                    }
-                    else if (!IsSystemType(realType))
-                    {
-                        Console.WriteLine($"{realType} used by RTTI Method({i.ToString()}) in {this.ToString()}, Please Reflect this class");
-                    }
+                    j.Type.CheckValid(segs);
                 }
             }
 
             foreach (var i in Constructors)
             {
-                string suffix;
                 foreach (var j in i.Arguments)
                 {
-                    var realType = SplitPureName(j.Type, out suffix);
-                    var klass = CodeGenerator.Instance.MatchClass(realType, segs);
-                    var cbType = CodeGenerator.Instance.MatchCallback(realType, segs);
-                    if (klass != null)
-                    {
-                        j.TypeClass = klass;
-                    }
-                    else if(cbType!=null)
-                    {
-                        j.TypeCallback = cbType;
-                    }
-                    else if (!IsSystemType(realType))
-                    {
-                        Console.WriteLine($"{realType} used by RTTI Constructor({i.ToString()}) in {this.ToString()}, Please Reflect this class");
-                    }
+                    j.Type.CheckValid(segs);
                 }
+            }
+        }
+    }
+
+    public class CppTypeDesc
+    {
+        string mType;
+        public string Type
+        {
+            get { return mType; }
+            set
+            {
+                string suffix;
+                CppPureType = CppClass.SplitPureName(value, out suffix);
+                PureType = CodeGenerator.Instance.NormalizePureType(CppPureType);
+                mType = PureType + suffix;
+                TypeStarNum = suffix.Length;
+                if (value[value.Length - 1] == '&')
+                    IsRefer = true;
+            }
+        }
+        public CppClass TypeClass
+        {
+            get;
+            set;
+        }
+        public CppEnum TypeEnum
+        {
+            get;
+            set;
+        }
+        public CppCallback TypeCallback
+        {
+            get;
+            set;
+        }        
+        public string CppPureType
+        {
+            get;
+            private set;
+        }
+        public string PureType
+        {
+            get;
+            private set;
+        }
+        public bool IsRefer
+        {
+            get;
+            set;
+        } = false;
+        public int TypeStarNum
+        {
+            get;
+            protected set;
+        } = 0;
+        public string GetCppType(EDeclareType DeclType)
+        {
+            return GetCppTypeImpl(TypeClass, TypeStarNum, DeclType, CppPureType);
+        }
+        private static string GetCppTypeImpl(CppClass TypeClass, int TypeStarNum, EDeclareType DeclType, string Type)
+        {
+            string result = "";
+            if (TypeClass != null)
+                result = TypeClass.GetCppName(TypeStarNum);
+            else
+            {
+                result = Type;
+                for (int i = 0; i < TypeStarNum; i++)
+                {
+                    result += '*';
+                }
+            }
+            if ((DeclType & EDeclareType.DT_Unsigned) == EDeclareType.DT_Unsigned)
+            {
+                result = "unsigned " + result;
+            }
+            if ((DeclType & EDeclareType.DT_Const) == EDeclareType.DT_Const)
+            {
+                result = "const " + result;
+            }
+            return result.Replace(".", "::");
+        }
+        public void CheckValid(string[] segs)
+        {
+            var realType = CppPureType;
+            var klass = CodeGenerator.Instance.MatchClass(realType, segs);
+            var enumType = CodeGenerator.Instance.MatchEnum(realType, segs);
+            var cbType = CodeGenerator.Instance.MatchCallback(realType, segs);
+            if (klass != null)
+            {
+                TypeClass = klass;
+            }
+            else if (enumType != null)
+            {
+                TypeEnum = enumType;
+            }
+            else if (cbType != null)
+            {
+                TypeCallback = cbType;
+            }
+            else if (CodeGenerator.Instance.IsSystemType(realType))
+            {
+                
+            }
+            else
+            {
+                Console.WriteLine($"{realType} type error, Please Reflect this class");
             }
         }
     }

@@ -44,19 +44,19 @@ namespace THeaderTools
             InitType2Type();
         }
         string mGenDirectory;
+        public string GenDirectory
+        {
+            get { return mGenDirectory; }
+        }
         string[] OldCppFiles;
-        string[] OldCsFiles;
         internal List<string> NewCppFiles = new List<string>();
-        internal List<string> NewCsFiles = new List<string>();
         public void Reset(string genDir)
         {
             mGenDirectory = genDir;
             ClassCollector.Clear();
             EnumCollector.Clear();
             OldCppFiles = System.IO.Directory.GetFiles(genDir, "*.cpp");            
-            OldCsFiles = System.IO.Directory.GetFiles(genDir, "*.cs");
             NewCppFiles.Clear();
-            NewCsFiles.Clear();
         }
         public void MakeSharedProjectCpp()
         {
@@ -94,50 +94,6 @@ namespace THeaderTools
             streamXml.Close();
 
             var projFile = mGenDirectory + "CodeGen.vcxitems";
-            if (System.IO.File.Exists(projFile))
-            {
-                string old_code = System.IO.File.ReadAllText(projFile);
-                if (content == old_code)
-                    return;
-            }
-            System.IO.File.WriteAllText(projFile, content);
-        }
-        public void MakeSharedProjectCSharp()
-        {
-            System.Xml.XmlDocument myXmlDoc = new System.Xml.XmlDocument();
-            myXmlDoc.Load(mGenDirectory + "Empty_CodeGenCSharp.projitems");
-            var root = myXmlDoc.LastChild;
-            var compile = myXmlDoc.CreateElement("ItemGroup", root.NamespaceURI);
-            root.AppendChild(compile);
-            var allFiles = System.IO.Directory.GetFiles(mGenDirectory, "*.cs");
-            foreach (var i in allFiles)
-            {
-                if (NewCsFiles.Contains(i))
-                    continue;
-                else
-                    System.IO.File.Delete(i);
-            }
-            allFiles = System.IO.Directory.GetFiles(mGenDirectory, "*.cs");
-            foreach (var i in allFiles)
-            {
-                var cs = myXmlDoc.CreateElement("Compile", root.NamespaceURI);
-                var file = myXmlDoc.CreateAttribute("Include");
-                file.Value = i;
-                cs.Attributes.Append(file);
-                compile.AppendChild(cs);
-            }
-
-            var streamXml = new System.IO.MemoryStream();
-            var writer = new System.Xml.XmlTextWriter(streamXml, Encoding.UTF8);
-            writer.Formatting = System.Xml.Formatting.Indented;
-            myXmlDoc.Save(writer);
-            var reader = new System.IO.StreamReader(streamXml, Encoding.UTF8);
-            streamXml.Position = 0;
-            var content = reader.ReadToEnd();
-            reader.Close();
-            streamXml.Close();
-
-            var projFile = mGenDirectory + "CodeGenCSharp.projitems";
             if (System.IO.File.Exists(projFile))
             {
                 string old_code = System.IO.File.ReadAllText(projFile);
@@ -343,7 +299,7 @@ namespace THeaderTools
                 {
                     if ((i.DeclareType & (EDeclareType.DT_Const | EDeclareType.DT_Static)) != 0)
                         continue;
-                    if (i.TypeCallback != null)
+                    if (i.Type.TypeCallback != null)
                         continue;
                     code += $"\t{Symbol.DefMember}({i.Name});\n";
                     WriteMetaCode(ref code, i, Symbol.AppendMemberMeta);
@@ -383,9 +339,9 @@ namespace THeaderTools
                     foreach (var j in i.Arguments)
                     {
                         if (argIndex == 0)
-                            code += $"{j.Type}";
+                            code += $"{j.Type.Type}";
                         else
-                            code += $", {j.Type}";
+                            code += $", {j.Type.Type}";
                     }
                     code += $");\n";
                     WriteMetaCode(ref code, i, Symbol.AppendConstructorMeta);
@@ -448,7 +404,7 @@ namespace THeaderTools
                 if ((i.DeclareType & (EDeclareType.DT_Const | EDeclareType.DT_Static)) != 0)
                     continue;
 
-                if (i.TypeCallback != null)
+                if (i.Type.TypeCallback != null)
                     continue;
 
                 nTable = 2;

@@ -488,7 +488,7 @@ namespace THeaderTools
 
                 memberInfo.DeclareType = dtStyles;
 
-                memberInfo.Type = token;
+                memberInfo.Type.Type = token;
                 memberInfo.Name = GetTokenString(ref index, code, null);
 
                 token = GetTokenString(ref index, code, null);
@@ -604,7 +604,7 @@ namespace THeaderTools
                     funInfo.IsFriend = true;
                 }
 
-                funInfo.ReturnType = token;
+                funInfo.ReturnType.Type = token;
                 if ((dtStyles & EDeclareType.DT_Const) == EDeclareType.DT_Const)
                 {
                     funInfo.IsReturnConstType = true;

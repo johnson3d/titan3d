@@ -1566,7 +1566,8 @@ struct ImGuiIO
 	TR_MEMBER()
     ImFontAtlas*Fonts;                          // <auto>           // Font atlas: load, rasterize and pack one or more fonts into a single texture.
     float       FontGlobalScale;                // = 1.0f           // Global scale all fonts
-    bool        FontAllowUserScaling;           // = false          // Allow user scaling text of individual window with CTRL+Wheel.
+	TR_MEMBER()
+	bool        FontAllowUserScaling;           // = false          // Allow user scaling text of individual window with CTRL+Wheel.
     ImFont*     FontDefault;                    // = NULL           // Font to use on NewFrame(). Use NULL to uses Fonts->Fonts[0].
 	TR_MEMBER(SV_ReturnConverter = v3dVector2_t)
 	ImVec2      DisplayFramebufferScale;        // = (1, 1)         // For retina display or other situations where window coordinates are different from framebuffer coordinates. This generally ends up in ImDrawData::FramebufferScale.
@@ -2526,10 +2527,6 @@ struct ImFontAtlas
 	TR_FUNCTION()
     IMGUI_API int               AddCustomRectRegular(int width, int height);
 	TR_FUNCTION()
-	IMGUI_API int               AddCustomRectFontGlyph(ImFont* font, ImWchar id, int width, int height, float advance_x, const ImVec2* offset = &ImVec2(0, 0))
-	{
-		return AddCustomRectFontGlyph(font, id, width, height, advance_x, *offset);
-	}
     IMGUI_API int               AddCustomRectFontGlyph(ImFont* font, ImWchar id, int width, int height, float advance_x, const ImVec2& offset = ImVec2(0, 0));
 	TR_FUNCTION()
     ImFontAtlasCustomRect*      GetCustomRectByIndex(int index) { IM_ASSERT(index >= 0); return &CustomRects[index]; }

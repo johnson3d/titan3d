@@ -121,7 +121,6 @@ namespace THeaderTools
 
             Console.WriteLine("THeaderTools.exe GenSharedProject ...");
             codeManager.MakeSharedProjectCpp();
-            codeManager.MakeSharedProjectCSharp();
         }
         static bool CollectInclude(System.Xml.XmlNode sn, string spjPath, Dictionary<string,string> headers)
         {

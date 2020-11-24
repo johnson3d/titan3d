@@ -1,4 +1,5 @@
 #pragma once
+#include <tuple>
 
 #define EngineNS Titan3D
 #define NS_BEGIN namespace EngineNS{
@@ -175,5 +176,67 @@ struct TypePointerCounter<_type*> : TypePointerCounter<_type>
 		Value = TypePointerCounter<_type>::Value + 1,
 	};
 };
+
+template<typename _Tuple, class _Visitor, int _Index>
+struct ForEachTupleHelper
+{
+	static void Iterate(_Tuple& t, _Visitor visitor)
+	{
+		visitor(std::get<_Index>(t));
+		ForEachTupleHelper<_Tuple, _Visitor, _Index - 1>::Iterate(t, visitor);
+	}
+};
+
+template<typename _Tuple, class _Visitor>
+struct ForEachTupleHelper<_Tuple, _Visitor, 0>
+{
+	static void Iterate(_Tuple& t, _Visitor visitor)
+	{
+		visitor(std::get<0>(t));
+	}
+};
+
+template<typename _Tuple, class _Visitor>
+void ForEachTuple(_Tuple& t, _Visitor visitor)
+{
+	ForEachTupleHelper<_Tuple, _Visitor, std::tuple_size<_Tuple>::value - 1>::Iterate(t, visitor);
+}
+
+template<class _Visitor>
+void ForEachTuple(std::tuple<>& t, _Visitor visitor)
+{
+	
+}
+
+struct VisitTupleElement
+{
+	template<typename _Type>
+	void operator()(_Type& element) {
+
+	}
+};
+
+inline void TestForeachTuple()
+{
+	auto t = std::make_tuple(1, 1.2f);
+	ForEachTuple(t, [](auto& e) {});
+	ForEachTuple(t, VisitTupleElement());
+}
+
+template<class T1, class... Args>
+void MutiArg(const T1&t1, Args... args)
+{
+	//对第一个调用参数进行操作
+	//.....
+
+	//对参数包进行递归解析，这个函数会一直调用直到其参数个数为1时停止调用
+	MutiArg(args...);
+}
+
+template<class T1>
+void MutiArg(const T1&t1)
+{
+	//do something with t1
+}
 
 NS_END

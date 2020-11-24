@@ -8,10 +8,11 @@ namespace THeaderTools
     {
         public class EnumMember : CppMetaBase
         {
-            public string Name
+            string mName;
+            public override string Name
             {
-                get;
-                set;
+                get => mName;
+                set => mName = value;
             }
             public string Value
             {
@@ -56,11 +57,6 @@ namespace THeaderTools
             {
                 return fullName;
             }
-        }
-        public string Name
-        {
-            get;
-            set;
         }
         public List<EnumMember> Members
         {

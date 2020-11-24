@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>d904b28b-d843-4d2c-8aeb-45d748352dd5</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>ImGui</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\NodeBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\NodeGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\PinLinker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PGRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PropertyGrid.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImGuiAPI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MarshalType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TName.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UVAnim.cs" />
+  </ItemGroup>
+</Project>

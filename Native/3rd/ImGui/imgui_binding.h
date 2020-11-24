@@ -103,6 +103,7 @@ public:
 		return ImGui::StyleColorsLight(dst);
 	}
 	// Windows
+	TR_FUNCTION(SV_NoStarToRef = p_open)
 	static bool          Begin(const char* name, bool* p_open, ImGuiWindowFlags_ flags)
 	{
 		return ImGui::Begin(name, p_open, flags);
@@ -736,6 +737,13 @@ public:
 	{
 		return ImGui::InputText(label, (char*)buf, (UINT)buf_size, flags, callback, user_data);
 	}
+	static bool          InputTextNoName(const char* label, void* buf, UINT buf_size, ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL)
+	{
+		//提供一个版本直接c++操作不要显示名字，这主要减少c#的字符串+操作导致的垃圾产生的。
+		std::string labelName = "##";
+		labelName += label;
+		return ImGui::InputText(labelName.c_str(), (char*)buf, (UINT)buf_size, flags, callback, user_data);
+	}
 	static bool          InputTextMultiline(const char* label, char* buf, UINT buf_size, const ImVec2* size, ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL)
 	{
 		return ImGui::InputTextMultiline(label, buf, (UINT)buf_size, *size, flags, callback, user_data);
@@ -747,6 +755,13 @@ public:
 	static bool          InputFloat(const char* label, float* v, float step = 0.0f, float step_fast = 0.0f, const char* format = "%.3f", ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0)
 	{
 		return ImGui::InputFloat(label, v, step, step_fast, format, flags);
+	}
+	static bool          InputFloatNoName(const char* label, float* v, float step = 0.0f, float step_fast = 0.0f, const char* format = "%.3f", ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0)
+	{
+		//提供一个版本直接c++操作不要显示名字，这主要减少c#的字符串+操作导致的垃圾产生的。
+		std::string labelName = "##";
+		labelName += label;
+		return ImGui::InputFloat(labelName.c_str(), v, step, step_fast, format, flags);
 	}
 	static bool          InputFloat2(const char* label, float* v, const char* format = "%.3f", ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0)
 	{
@@ -763,6 +778,12 @@ public:
 	static bool          InputInt(const char* label, int* v, int step = 1, int step_fast = 100, ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0)
 	{
 		return ImGui::InputInt(label, v, step, step_fast, flags);
+	}
+	static bool          InputIntNoName(const char* label, int* v, int step = 1, int step_fast = 100, ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0)
+	{
+		std::string labelName = "##";
+		labelName += label;
+		return ImGui::InputInt(labelName.c_str(), v, step, step_fast, flags);
 	}
 	static bool          InputInt2(const char* label, int* v, ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0)
 	{
@@ -991,15 +1012,15 @@ public:
 	}
 	static void          OpenPopup(const char* str_id, ImGuiPopupFlags_ popup_flags = (ImGuiPopupFlags_)0)
 	{
-		return ImGui::EndPopup();
+		return ImGui::OpenPopup(str_id, popup_flags);
 	}
 	static void          OpenPopupOnItemClick(const char* str_id = NULL, ImGuiPopupFlags_ popup_flags = (ImGuiPopupFlags_)1)
 	{
-		return ImGui::EndPopup();
+		return ImGui::OpenPopupOnItemClick(str_id, popup_flags);
 	}
 	static void          CloseCurrentPopup()
 	{
-		return ImGui::EndPopup();
+		return ImGui::CloseCurrentPopup();
 	}
 	static bool          BeginPopupContextItem(const char* str_id = NULL, ImGuiPopupFlags_ popup_flags = (ImGuiPopupFlags_)1)
 	{
@@ -1020,11 +1041,11 @@ public:
 	// Columns
 	static void          Columns(int count = 1, const char* id = NULL, bool border = true)
 	{
-		return ImGui::EndPopup();
+		return ImGui::Columns(count, id, border);
 	}
 	static void          NextColumn()
 	{
-		return ImGui::EndPopup();
+		return ImGui::NextColumn();
 	}
 	static int           GetColumnIndex()
 	{
@@ -1274,9 +1295,9 @@ public:
 	}
 	// Text Utilities
 	TR_FUNCTION(SV_ReturnConverter = v3dVector2_t)
-	static ImVec2        CalcTextSize(const char* text, const char* text_end = NULL, bool hide_text_after_double_hash = false, float wrap_width = -1.0f)
+	static ImVec2        CalcTextSize(const char* text, bool hide_text_after_double_hash = false, float wrap_width = -1.0f)
 	{
-		return ImGui::CalcTextSize(text, text_end, hide_text_after_double_hash, wrap_width);
+		return ImGui::CalcTextSize(text, nullptr, hide_text_after_double_hash, wrap_width);
 	}
 	// Color Utilities
 	TR_FUNCTION(SV_ReturnConverter = v3dVector4_t)

@@ -264,20 +264,20 @@ namespace EngineNS
         }
     }
 
-    public class CoreSDK
+    public partial struct CoreSDK
     {
-        public const string ModuleNC = CoreObjectBase.ModuleNC;
-        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public const string ModuleNC1 = CoreObjectBase.ModuleNC;
+        [System.Runtime.InteropServices.DllImport(ModuleNC1, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public extern static unsafe void SDK_Memory_Copy(void* dest, void* src, UInt32 size);
-        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        [System.Runtime.InteropServices.DllImport(ModuleNC1, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public extern static unsafe int SDK_Memory_Cmp(void* dest, void* src, UInt32 size);
-        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
+        [System.Runtime.InteropServices.DllImport(ModuleNC1, CallingConvention = CallingConvention.Cdecl)]
         public extern static unsafe int SDK_Compress_RLE(byte* src, UInt32 in_length_by_count, byte* _out);
-        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
+        [System.Runtime.InteropServices.DllImport(ModuleNC1, CallingConvention = CallingConvention.Cdecl)]
         public extern static unsafe int SDK_UnCompress_RLE(byte* src, UInt32 in_length_by_count, byte* _out);
-        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
+        [System.Runtime.InteropServices.DllImport(ModuleNC1, CallingConvention = CallingConvention.Cdecl)]
         public extern static unsafe void SDK_ByteArray_Sub(byte* lh, byte* rh, byte* pOut, int length);
-        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
+        [System.Runtime.InteropServices.DllImport(ModuleNC1, CallingConvention = CallingConvention.Cdecl)]
         public extern static unsafe void SDK_ByteArray_Add(byte* lh, byte* rh, byte* pOut, int length);
     }
 }

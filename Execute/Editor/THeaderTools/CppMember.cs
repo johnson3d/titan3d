@@ -29,75 +29,23 @@ namespace THeaderTools
         //    get;
         //    set;
         //} = null;
-        public int TypeStarNum
+        public CppTypeDesc Type
         {
             get;
-            protected set;
-        } = 0;
-        string mType;
-        public string Type
-        {
-            get { return mType; }
-            set
-            {
-                string suffix;
-                CppPureType = CppClass.SplitPureName(value, out suffix);
-                PureType = CodeGenerator.Instance.NormalizePureType(CppPureType);
-                mType = PureType + suffix;
-                TypeStarNum = suffix.Length;
-            }
-        }
-        public string CppPureType
-        {
-            get;
-            private set;
-        }
-        public string CSType
-        {
-            get
-            {
-                string result = CppClass.GetCSTypeImpl(TypeClass, TypeEnum, TypeCallback, TypeStarNum, DeclareType, PureType, false);
-                if (result[0] == '.')
-                {
-                    return result.Substring(1);
-                }
-                else
-                {
-                    return result;
-                }
-            }
-        }
+        } = new CppTypeDesc();
+        
         public string CppType
         {
             get
             {
-                return CppClass.GetCppTypeImpl(TypeClass, TypeStarNum, DeclareType, CppPureType);
+                return Type.GetCppType(DeclareType);
             }
         }
-        public CppClass TypeClass
+        string mName;
+        public override string Name
         {
-            get;
-            set;
-        }
-        public CppEnum TypeEnum
-        {
-            get;
-            set;
-        }
-        public CppCallback TypeCallback
-        {
-            get;
-            set;
-        }
-        public string PureType
-        {
-            get;
-            private set;
-        }
-        public string Name
-        {
-            get;
-            set;
+            get => mName;
+            set => mName = value;
         }
         public string DefaultValue
         {
@@ -165,57 +113,6 @@ namespace THeaderTools
                 code += CodeGenerator.GenLine(--nTable, "}");
                 return code;
             }
-        }
-        public string GenPInvokeBindingCSharp_Getter(CppClass klass)
-        {
-            if(IsArray)
-                return $"private extern static {CSType}* {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}_ArrayAddress(PtrType self);";
-            else
-                return $"private extern static {CSType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}(PtrType self);";
-        }
-        public string GenPInvokeBindingCSharp_Setter(CppClass klass)
-        {
-            return $"private extern static void {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Setter_{Name}(PtrType self, {CSType} InValue);";
-        }
-        public string GenCallBindingCSharp(ref int nTable, CppClass klass)
-        {
-            string mode = "";
-            switch (VisitMode)
-            {
-                case EVisitMode.Public:
-                    mode = "public";
-                    break;
-                case EVisitMode.Protected:
-                    //mode = "protected";//编译器错误 CS0666结构体不接受protected的成员
-                    mode = "private";
-                    break;
-                case EVisitMode.Private:
-                    mode = "private";
-                    break;
-            }
-            string code;
-            code = CodeGenerator.GenLine(nTable, $"{mode} {CSType} {Name}");
-
-            code += CodeGenerator.GenLine(nTable, "{");
-            nTable++;
-
-            code += CodeGenerator.GenLine(nTable, $"get");
-            code += CodeGenerator.GenLine(nTable, "{");
-            nTable++;
-            code += CodeGenerator.GenLine(nTable, $"return {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Getter_{Name}(mPtr);");
-            nTable--;
-            code += CodeGenerator.GenLine(nTable, "}");
-
-            code += CodeGenerator.GenLine(nTable, $"set");
-            code += CodeGenerator.GenLine(nTable, "{");
-            nTable++;
-            code += CodeGenerator.GenLine(nTable, $"{CodeGenerator.Symbol.SDKPrefix}{klass.Name}_Setter_{Name}(mPtr, value);");
-            nTable--;
-            code += CodeGenerator.GenLine(nTable, "}");
-
-            nTable--;
-            code += CodeGenerator.GenLine(nTable, "}");
-            return code;
         }
     }
 }

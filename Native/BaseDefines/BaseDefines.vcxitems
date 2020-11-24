@@ -21,6 +21,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\pch.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\vfxtypes_nw.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)CoreRtti.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)CoreSDK.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\HashDefine.cpp" />

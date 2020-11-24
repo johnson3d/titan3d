@@ -33,34 +33,5 @@ namespace THeaderTools
             code += CodeGenerator.GenLine(--nTable, "}");
             return code;
         }
-        public string GenPInvokeBindingCSharp(CppClass klass, int index)
-        {
-            var afterSelf = Arguments.Count > 0 ? ", " : "";
-            return $"private extern static PtrType {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor{index}({this.GetParameterStringCSharp(false)});";
-        }
-        public string GenCallBindingCSharp(ref int nTable, CppClass klass, int index)
-        {
-            string mode = "";
-            switch (VisitMode)
-            {
-                case EVisitMode.Public:
-                    mode = "public";
-                    break;
-                case EVisitMode.Protected:
-                    mode = "protected";
-                    break;
-                case EVisitMode.Private:
-                    mode = "private";
-                    break;
-            }
-            var afterSelf = Arguments.Count > 0 ? ", " : "";
-            string code = CodeGenerator.GenLine(nTable, $"{mode} {klass.Name}{CodeGenerator.Symbol.NativeSuffix}({this.GetParameterStringCSharp(true)}{afterSelf}bool _dont_care_just_for_compile)");
-            code += CodeGenerator.GenLine(nTable, "{");
-            nTable++;
-            code += CodeGenerator.GenLine(nTable, $"mPtr = {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor{index}({this.GetParameterCallString()});");
-            nTable--;
-            code += CodeGenerator.GenLine(nTable, "}");
-            return code;
-        }
     }
 }

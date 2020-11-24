@@ -84,11 +84,6 @@ namespace THeaderTools
             get;
             set;
         } = EFunctionSuffix.None;
-        public string Name
-        {
-            get;
-            set;
-        }
         public bool IsReturnConstType
         {
             get;
@@ -99,73 +94,10 @@ namespace THeaderTools
             get;
             set;
         } = false;
-        string mReturnType;
-        public string ReturnType
-        {
-            get { return mReturnType; }
-            set
-            {
-                string suffix;
-                CppReturnPureType = CppClass.SplitPureName(value, out suffix);
-                ReturnPureType = CodeGenerator.Instance.NormalizePureType(CppReturnPureType);
-                mReturnType = ReturnPureType + suffix;
-                ReturnTypeStarNum = suffix.Length;
-            }
-        }
-        public string ReturnPureType
+        public CppTypeDesc ReturnType
         {
             get;
-            private set;
-        }
-        public string CppReturnPureType
-        {
-            get;
-            private set;
-        }
-        public int ReturnTypeStarNum
-        {
-            get;
-            protected set;
-        } = 0;
-        public CppClass ReturnTypeClass
-        {
-            get;
-            set;
-        }
-        public CppEnum ReturnTypeEnum
-        {
-            get;
-            set;
-        }
-        public CppCallback ReturnTypeCallback
-        {
-            get;
-            set;
-        }
-        public string CSReturnType
-        {
-            get
-            {
-                EDeclareType dtStyle = 0;
-                if (IsReturnUnsignedType)
-                {
-                    dtStyle |= EDeclareType.DT_Unsigned;
-                }
-                if (IsReturnConstType)
-                {
-                    dtStyle |= EDeclareType.DT_Const;
-                }
-                string result = CppClass.GetCSTypeImpl(ReturnTypeClass, ReturnTypeEnum, ReturnTypeCallback, ReturnTypeStarNum, dtStyle, ReturnPureType, false);
-                if (result[0] == '.')
-                {
-                    return result.Substring(1);
-                }
-                else
-                {
-                    return result;
-                }
-            }
-        }
+        } = new CppTypeDesc();
         public string CppReturnType
         {
             get
@@ -179,7 +111,7 @@ namespace THeaderTools
                 {
                     dtStyle |= EDeclareType.DT_Const;
                 }
-                return CppClass.GetCppTypeImpl(ReturnTypeClass, ReturnTypeStarNum, dtStyle, CppReturnPureType);
+                return ReturnType.GetCppType(dtStyle);
             }
         }
         public string GenPInvokeBinding_Friend(ref int nTable, CppClass klass)
@@ -252,101 +184,6 @@ namespace THeaderTools
             else
             {
                 code += CodeGenerator.GenLine(nTable, $"return {visitorName}::Static_{Name}({this.GetParameterCallString()});");
-            }
-            code += CodeGenerator.GenLine(--nTable, "}");
-            return code;
-        }
-        public string GenPInvokeBindingCSharp(CppClass klass, string selfType, bool isUnsafe, int index)
-        {
-            var afterSelf = Arguments.Count > 0 ? ", " : "";
-            var unsafeDef = isUnsafe ? "unsafe " : "";
-            return $"private extern static {unsafeDef}{this.CSReturnType} {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}{index}({selfType} self{afterSelf}{this.GetParameterStringCSharp(false)});";
-        }
-        public string GenCallBindingCSharp(ref int nTable, CppClass klass, int index)
-        {
-            string mode = "";
-            switch (VisitMode)
-            {
-                case EVisitMode.Public:
-                    mode = "public";
-                    break;
-                case EVisitMode.Protected:
-                    mode = "protected";
-                    break;
-                case EVisitMode.Private:
-                    mode = "private";
-                    break;
-            }
-            var afterSelf = Arguments.Count > 0 ? ", " : "";
-            string code = CodeGenerator.GenLine(nTable, $"{mode} {CSReturnType} {Name}({this.GetParameterStringCSharp(true)})");
-            code += CodeGenerator.GenLine(nTable++, "{");
-            string fixedCode;
-            var callArgs = this.GetParameterCallStringWithStar2Ref(nTable, out fixedCode);
-            if (fixedCode != "")
-            {
-                code += fixedCode;
-                code += CodeGenerator.GenLine(nTable++, "{");
-            }
-            if (this.ReturnType == "void")
-                code += CodeGenerator.GenLine(nTable, $"{CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}{index}(mPtr{afterSelf}{callArgs});");
-            else
-                code += CodeGenerator.GenLine(nTable, $"return {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}{index}(mPtr{afterSelf}{callArgs});");
-            if (fixedCode != "")
-            {
-                code += CodeGenerator.GenLine(--nTable, "}");
-            }
-            code += CodeGenerator.GenLine(--nTable, "}");
-
-            var genStatic = this.GetMetaValue(CppClass.Symbol.SV_GenStaticFunction);
-            if (genStatic != null)
-            {
-                var selfType = klass.Name + "_PtrType.PtrType";//
-                if (klass.GetMetaValue(CppClass.Symbol.SV_LayoutStruct) != null)
-                {
-                    selfType = klass.Name;
-                }
-                code += CodeGenerator.GenLine(nTable, $"{mode} static {CSReturnType} {Name}({selfType}* self{afterSelf}{this.GetParameterStringCSharp(true)})");
-                code += CodeGenerator.GenLine(nTable++, "{");
-                if (fixedCode != "")
-                {
-                    code += fixedCode;
-                    code += CodeGenerator.GenLine(nTable++, "{");
-                }
-                if (this.ReturnType == "void")
-                    code += CodeGenerator.GenLine(nTable, $"{CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}{index}(self{afterSelf}{callArgs});");
-                else
-                    code += CodeGenerator.GenLine(nTable, $"return {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}{index}(self{afterSelf}{callArgs});");
-                if (fixedCode != "")
-                {
-                    code += CodeGenerator.GenLine(--nTable, "}");
-                }
-                code += CodeGenerator.GenLine(--nTable, "}");
-            }
-            return code;
-        }
-        public string GenPInvokeBindingCSharp_Static(CppClass klass, bool isUnsafe, int index)
-        {
-            var unsafeDef = isUnsafe ? "unsafe " : "";
-            return $"private extern static {unsafeDef}{CSReturnType} Static_{CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}{index}({this.GetParameterStringCSharp(false)});";
-        }
-        public string GenCallBindingCSharp_Static(ref int nTable, CppClass klass, int index)
-        {
-            string code = CodeGenerator.GenLine(nTable, $"public static {CSReturnType} {Name}({this.GetParameterStringCSharp(true)})");
-            code += CodeGenerator.GenLine(nTable++, "{");
-            string fixedCode;
-            var callArgs = this.GetParameterCallStringWithStar2Ref(nTable, out fixedCode);
-            if (fixedCode != "")
-            {
-                code += fixedCode;
-                code += CodeGenerator.GenLine(nTable++, "{");
-            }
-            if (this.ReturnType == "void")
-                code += CodeGenerator.GenLine(nTable, $"Static_{CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}{index}({callArgs});");
-            else
-                code += CodeGenerator.GenLine(nTable, $"return Static_{CodeGenerator.Symbol.SDKPrefix}{klass.Name}_{Name}{index}({callArgs});");
-            if (fixedCode != "")
-            {
-                code += CodeGenerator.GenLine(--nTable, "}");
             }
             code += CodeGenerator.GenLine(--nTable, "}");
             return code;

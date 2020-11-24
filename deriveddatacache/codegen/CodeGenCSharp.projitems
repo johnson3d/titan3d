@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\CppDelegateDefine.gen.cs" />
+    <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.CoreSDK.gen.cs" />
     <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.ImGuiAPI.gen.cs" />
     <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.IVertexBuffer.gen.cs" />
     <Compile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.IVertexBufferDesc.gen.cs" />

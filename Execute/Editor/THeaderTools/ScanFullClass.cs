@@ -214,7 +214,7 @@ namespace THeaderTools
                                 var tmp = new CppMember();
                                 tmp.VisitMode = mode;
                                 tmp.Name = token2;
-                                tmp.Type = token;
+                                tmp.Type.Type = token;
                                 tmp.DeclareType = dtStyles;
                                 tmp.HasMetaFlag = hasMetaFlag;
                                 tmp.AnalyzeMetaString(metaString);
@@ -232,7 +232,7 @@ namespace THeaderTools
                                 var tmp = new CppMember();
                                 tmp.VisitMode = mode;
                                 tmp.Name = token2;
-                                tmp.Type = token;
+                                tmp.Type.Type = token;
                                 tmp.DeclareType = dtStyles;
                                 tmp.HasMetaFlag = hasMetaFlag;
                                 tmp.AnalyzeMetaString(metaString);
@@ -271,7 +271,7 @@ namespace THeaderTools
                                     tmp.IsFriend = true;
                                 }
 
-                                tmp.ReturnType = token;
+                                tmp.ReturnType.Type = token;
                                 if ((dtStyles & EDeclareType.DT_Const) == EDeclareType.DT_Const)
                                 {
                                     tmp.IsReturnConstType = true;
@@ -379,36 +379,6 @@ namespace THeaderTools
                 }
             }
         }
-
-        public static bool IsAllowFixedArrayType(string type)
-        {
-            switch(type)
-            {
-                case "bool":
-                case "byte":
-                case "short":
-                case "int":
-                case "long":
-                case "char":
-                case "sbyte":
-                case "ushort":
-                case "uint":
-                case "ulong":
-                case "float":
-                case "double":
-                case "SByte":
-                case "Int16":
-                case "Int32":
-                case "Int64":
-                case "Byte":
-                case "UInt16":
-                case "UInt32":
-                case "UInt64":
-                    return true;
-                default:
-                    return false;
-            }
-        }
         private static void ProcArrayMember(ref int index, string code, string klassName, List<CppMember> members,
             EVisitMode mode, string type, string name, EDeclareType dtStyles, 
             ref bool hasMetaFlag, ref string metaString, ref string curMetType)
@@ -451,7 +421,7 @@ namespace THeaderTools
                 {
                     tmp.VisitMode = mode;
                     tmp.Name = name;
-                    tmp.Type = type;
+                    tmp.Type.Type = type;
                     tmp.DeclareType = dtStyles;
                     tmp.HasMetaFlag = hasMetaFlag;
                     members.Add(tmp);
@@ -490,13 +460,13 @@ namespace THeaderTools
             var funName = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
             funName = funName.Replace(" ", "");
             tmp.Name = funName;
-            tmp.TypeCallback = new CppCallback();
+            tmp.Type.TypeCallback = new CppCallback();
 
             SkipPair(ref index, code, '(', ')', out rangeStart, out rangeEnd);
             var args = code.Substring(rangeStart + 1, rangeEnd - rangeStart - 2);
-            AnalyzeClassFuntionArguments(args, tmp.TypeCallback);
+            AnalyzeClassFuntionArguments(args, tmp.Type.TypeCallback);
 
-            tmp.TypeCallback.ReturnType = returnType;
+            tmp.Type.TypeCallback.ReturnType.Type = returnType;
 
             var token = GetTokenString(ref index, code, null);
             if (token == "const")
@@ -504,14 +474,14 @@ namespace THeaderTools
                 dtStyles |= EDeclareType.DT_Const;
                 token = GetTokenString(ref index, code, null);
             }
-            tmp.TypeCallback.DeclType = dtStyles;
+            tmp.Type.TypeCallback.DeclType = dtStyles;
             if (token != ";")
             {
                 throw new Exception(TraceMessage($"{klassName}::{funName} is a invalid function pointer"));
             }
 
             tmp.VisitMode = mode;
-            tmp.Type = "void*";
+            tmp.Type.Type = "void*";
             tmp.DeclareType = 0;
             tmp.HasMetaFlag = hasMetaFlag;
             tmp.AnalyzeMetaString(metaString);

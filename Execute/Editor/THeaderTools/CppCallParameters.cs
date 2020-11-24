@@ -6,6 +6,12 @@ namespace THeaderTools
 {
     public class CppCallParameters : CppMetaBase
     {
+        string mName;
+        public override string Name
+        {
+            get => mName;
+            set => mName = value;
+        }
         public string GetCharSet()
         {
             var meta = this.GetMetaValue(CppClass.Symbol.SV_CharSet);
@@ -22,10 +28,9 @@ namespace THeaderTools
             }
             public CppParameter(CppCallParameters func, string type, string v, EDeclareType dt)
             {
-                Type = type;
+                Type.Type = type;
                 Value = v;
                 DeclType = dt;
-                TypeClass = null;
                 Caller = func;
             }
             public EDeclareType DeclType
@@ -33,74 +38,20 @@ namespace THeaderTools
                 get;
                 set;
             } = 0;
-            string mType;
-            public string Type
-            {
-                get { return mType; }
-                set
-                {
-                    string suffix;
-                    CppPureType = CppClass.SplitPureName(value, out suffix);
-                    PureType = CodeGenerator.Instance.NormalizePureType(CppPureType);
-                    mType = PureType + suffix;
-                    TypeStarNum = suffix.Length;
-                    if (value[value.Length-1] == '&')
-                        IsRefer = true;
-                }
-            }
-            public bool IsRefer
+            public CppTypeDesc Type
             {
                 get;
-                set;
-            } = false;
-            public string CppPureType
-            {
-                get;
-                private set;
-            }
-            public string PureType
-            {
-                get;
-                private set;
-            }
+            } = new CppTypeDesc();
             public string Value
             {
                 get;
                 set;
             }
-            public int TypeStarNum
-            {
-                get;
-                protected set;
-            } = 0;
-            public CppClass TypeClass
-            {
-                get;
-                set;
-            }
-            public string CSType
-            {
-                get
-                {
-                    bool tryMashralString = true;
-                    if (Caller.GetCharSet() == "CharSet.None")
-                        tryMashralString = false;
-                    string result = CppClass.GetCSTypeImpl(TypeClass, TypeEnum, TypeCallback, TypeStarNum, DeclType, PureType, tryMashralString);
-                    if (result[0] == '.')
-                    {
-                        return result.Substring(1);
-                    }
-                    else
-                    {
-                        return result;
-                    }
-                }
-            }
             public string CppType
             {
                 get
                 {
-                    return CppClass.GetCppTypeImpl(TypeClass, TypeStarNum, DeclType, CppPureType);
+                    return Type.GetCppType(DeclType);
                 }
             }
             public CppEnum TypeEnum
@@ -131,7 +82,7 @@ namespace THeaderTools
                 var cppName = Arguments[i].CppType;
                 if(tryParseRefer)
                 {
-                    if(Arguments[i].IsRefer)
+                    if(Arguments[i].Type.IsRefer)
                     {
                         cppName = cppName.Substring(0, cppName.Length - 1) + "&";
                     }
@@ -144,38 +95,13 @@ namespace THeaderTools
             }
             return result;
         }
-        public string GetParameterStringCSharp(bool convertStar2Ref)
-        {//bPtrType如果false，那么就要把XXX_PtrType.PtrType转换成XXX_PtrType
-            string result = "";
-            for (int i = 0; i < Arguments.Count; i++)
-            {
-                var csType = Arguments[i].CSType;
-                if (convertStar2Ref)
-                {
-                    if (csType.EndsWith("*") && Arguments[i].TypeStarNum == 1 && csType != "void*")
-                    {
-                        csType = "ref " + csType.Substring(0, csType.Length - 1);
-                    }
-                }
-                var dftValue = Arguments[i].CppDefaultValue;
-                if(dftValue!=null)
-                {
-                    dftValue = $"/*{dftValue}*/";
-                }
-                if (i == 0)
-                    result += $"{csType} {Arguments[i].Value}{dftValue}";
-                else
-                    result += $", {csType} {Arguments[i].Value}{dftValue}";
-            }
-            return result;
-        }
         public string GetParameterCallString(bool tryParseRefer = false)
         {
             string result = "";
             for (int i = 0; i < Arguments.Count; i++)
             {
                 var arg = Arguments[i].Value;
-                if(tryParseRefer && Arguments[i].IsRefer)
+                if(tryParseRefer && Arguments[i].Type.IsRefer)
                 {
                     arg = "*" + arg;
                 }
@@ -186,26 +112,25 @@ namespace THeaderTools
             }
             return result;
         }
-        public string GetParameterCallStringWithStar2Ref(int nTable, out string fixedCode)
+        public bool IsNoStar2RefArgument(int index)
         {
-            fixedCode = "";
-            string result = "";
-            for (int i = 0; i < Arguments.Count; i++)
+            var noStar2Ref = GetMetaValue(Symbol.SV_NoStarToRef);
+            if (noStar2Ref == null)
+                return false;
+            string[] noTransTabs = null;
+            if (noStar2Ref != null)
             {
-                var arg = Arguments[i].Value;
-                var csType = Arguments[i].CSType;
-                if (csType.EndsWith("*") && Arguments[i].TypeStarNum == 1 && csType != "void*")
-                {
-                    fixedCode += CodeGenerator.GenLine(nTable, $"fixed ({csType} native_ptr_{arg} = &{arg})");
-                    arg = $"native_ptr_{arg}";
-                }
-                
-                if (i == 0)
-                    result += $"{arg}";
-                else
-                    result += $", {arg}";
+                noTransTabs = noStar2Ref.Split('+');
             }
-            return result;
+            var arg = Arguments[index].Value;
+            foreach (var j in noTransTabs)
+            {
+                if (j == arg)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
