@@ -1,5 +1,5 @@
 #pragma once
-#include "BaseHead.h"
+#include "../BaseHead.h"
 #include "TypeUtility.h"
 
 NS_BEGIN
