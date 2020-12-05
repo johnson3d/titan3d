@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Numerics;
 using EngineNS;
 
 namespace CSharpCode.UIEditor
@@ -101,6 +100,16 @@ namespace CSharpCode.UIEditor
                 if (container != null)
                 {
                     var bShow = ImGuiAPI.TreeNode(cur.Name, cur.Name);
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                    {
+                        structureEditor.mMenuType = FormStructureEditor.EMenuType.Elements;
+                        structureEditor.MenuPopContainer = container;
+                    }
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    {
+                        structureEditor.PGrid.SingleTarget = cur;
+                        structureEditor.mMenuType = FormStructureEditor.EMenuType.None;
+                    }
                     var bActive = ImGuiAPI.IsItemActive();
                     var hover1 = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
                     ImGuiAPI.SameLine(0, -1);
@@ -146,16 +155,6 @@ namespace CSharpCode.UIEditor
                     }
                     if (bShow)
                     {
-                        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
-                        {
-                            structureEditor.mMenuType = FormStructureEditor.EMenuType.Elements;
-                            structureEditor.MenuPopContainer = container;
-                        }
-                        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
-                        {
-                            structureEditor.PGrid.SingleTarget = cur;
-                            structureEditor.mMenuType = FormStructureEditor.EMenuType.None;
-                        }
                         container.OnDraw(form);
                         ImGuiAPI.TreePop();
                     }

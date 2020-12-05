@@ -25,7 +25,7 @@ namespace CSharpCode.UIEditor.Elements
             //}
             if (WidgetWidth > 0)
             {
-                form.AddLine($"ImGuiAPI.SetNextItemWidth({WidgetWidth})");
+                form.AddLine($"ImGuiAPI.SetNextItemWidth({WidgetWidth});");
             }
             form.AddLine($"var tmpColor = new {typeof(Vector4).FullName}({TextColor.X}, {TextColor.Y}, {TextColor.Z}, {TextColor.W});");
             if (Binder != null)

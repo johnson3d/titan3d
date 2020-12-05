@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Numerics;
 using EngineNS;
 
 namespace CSharpCode.UIEditor.Elements
