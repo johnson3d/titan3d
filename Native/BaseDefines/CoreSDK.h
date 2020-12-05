@@ -40,4 +40,48 @@ public:
 	}
 };
 
+TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class BigStackBuffer
+{
+	BYTE*		mBuffer;
+	int			mSize;
+public:
+	TR_CONSTRUCTOR()
+	BigStackBuffer(int size)
+	{
+		mBuffer = new BYTE[size];
+		memset(mBuffer, 0, size);
+		mSize = size;
+	}
+	TR_CONSTRUCTOR()
+	BigStackBuffer(int size, const char* text)
+	{
+		if ((int)strlen(text) > size)
+			size = (int)strlen(text) * 2;
+		mBuffer = new BYTE[size];
+		memset(mBuffer, 0, size);
+		mSize = size;
+
+		strcpy((char*)mBuffer, text);
+	}
+	~BigStackBuffer()
+	{
+		delete[] mBuffer;
+		mBuffer = nullptr;
+	}
+	TR_FUNCTION()
+	void* GetBuffer() {
+		return mBuffer;
+	}
+	TR_FUNCTION()
+	int GetSize() const{
+		return mSize;
+	}
+	TR_FUNCTION()
+	void DestroyMe()
+	{
+		delete this;
+	}
+};
+
 NS_END

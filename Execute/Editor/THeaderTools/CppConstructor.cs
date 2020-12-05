@@ -18,7 +18,7 @@ namespace THeaderTools
 
         public string GenPInvokeBinding_Friend(ref int nTable, CppClass klass)
         {
-            string code = CodeGenerator.GenLine(nTable, $"static {klass.GetFullName(true)}* _NewConstruct({this.GetParameterString()})");
+            string code = CodeGenerator.GenLine(nTable, $"static {klass.GetFullName(true)}* _NewConstructor({this.GetParameterString()})");
             code += CodeGenerator.GenLine(nTable++, "{");
             code += CodeGenerator.GenLine(nTable, $"return new {klass.GetFullName(true)}({this.GetParameterCallString()});");
             code += CodeGenerator.GenLine(--nTable, "}");
@@ -27,9 +27,9 @@ namespace THeaderTools
         public string GenPInvokeBinding(ref int nTable, CppClass klass, string visitorName, int index)
         {
             var afterSelf = Arguments.Count > 0 ? ", " : "";
-            string code = CodeGenerator.GenLine(nTable, $"extern \"C\" {CodeGenerator.Instance.API_Name} {klass.GetFullName(true)}* {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstruct{index}({this.GetParameterString()})");
+            string code = CodeGenerator.GenLine(nTable, $"extern \"C\" {CodeGenerator.Instance.API_Name} {klass.GetFullName(true)}* {CodeGenerator.Symbol.SDKPrefix}{klass.Name}_NewConstructor{index}({this.GetParameterString()})");
             code += CodeGenerator.GenLine(nTable++, "{");
-            code += CodeGenerator.GenLine(nTable, $"return {visitorName}::_NewConstruct({this.GetParameterCallString()});");
+            code += CodeGenerator.GenLine(nTable, $"return {visitorName}::_NewConstructor({this.GetParameterCallString()});");
             code += CodeGenerator.GenLine(--nTable, "}");
             return code;
         }

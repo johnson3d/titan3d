@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)imgui.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)imgui_demo.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)imgui_draw.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)imgui_widgets.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)imgui_binding.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)imgui_impl_win32.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)imconfig.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui_internal.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui_binding.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)imgui_impl_win32.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Win32">
+      <UniqueIdentifier>{a72fcdbc-c43f-4766-a6f2-610a1e564a62}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="$(MSBuildThisFileDirectory)LICENSE.txt" />
+  </ItemGroup>
+</Project>

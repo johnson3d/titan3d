@@ -14,6 +14,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.BigStackBuffer.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.CoreSDK.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.ImGuiAPI.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\EngineNS.IVertexBuffer.gen.cpp" />
@@ -35,13 +36,16 @@
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImFontAtlas.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImFontAtlasCustomRect.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImFontConfig.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiBackendFlags_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiButtonFlags_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiColorEditFlags_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiCol_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiComboFlags_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiCond_.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiConfigFlags_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiDataType_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiDir_.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiDockNodeFlags_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiDragDropFlags_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiFocusedFlags_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiHoveredFlags_.gen.cpp" />
@@ -52,6 +56,7 @@
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiMouseButton_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiMouseCursor_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiPayload.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiPlatformIO.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiPopupFlags_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiSelectableFlags_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiSizeCallbackData.gen.cpp" />
@@ -62,6 +67,9 @@
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiTabBarFlags_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiTabItemFlags_.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiTreeNodeFlags_.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiViewport.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiViewportFlags_.gen.cpp" />
+    <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiWindowClass.gen.cpp" />
     <ClCompile Include="D:\OpenSource\titan3d\deriveddatacache\codegen\ImGuiWindowFlags_.gen.cpp" />
   </ItemGroup>
 </Project>

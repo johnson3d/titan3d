@@ -342,6 +342,7 @@ namespace THeaderTools
                             code += $"{j.Type.Type}";
                         else
                             code += $", {j.Type.Type}";
+                        argIndex++;
                     }
                     code += $");\n";
                     WriteMetaCode(ref code, i, Symbol.AppendConstructorMeta);

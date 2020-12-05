@@ -179,13 +179,18 @@ namespace THeaderTools.CodeGen.CSharp
             System.IO.File.WriteAllText(file, genCode); ;
         }
         #endregion
-
         #region Enum Gen
         public override string GenEnumDefine(CppEnum klass)
         {
             string code = "";
 
+            var noFlags = klass.GetMetaValue(CppClass.Symbol.SV_EnumNoFlags);
+
             int nTable = 1;
+            if (noFlags == null)
+            {
+                code += CodeGenerator.GenLine(nTable, $"[System.Flags]");
+            }
             code += CodeGenerator.GenLine(nTable, $"public enum {klass.Name}");
             code += CodeGenerator.GenLine(nTable++, "{");
             foreach (var i in klass.Members)

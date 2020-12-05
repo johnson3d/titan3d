@@ -14,9 +14,20 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\PinLinker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PGRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PropertyGrid.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CSharpCompiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiAPI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MarshalType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TCoreSDK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TName.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\EditableFormData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\Columns.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\DataBinder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\InputText.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\Separator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\Text.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Form.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\FormStructureEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UVAnim.cs" />
   </ItemGroup>
 </Project>

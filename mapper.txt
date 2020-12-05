@@ -13,4 +13,8 @@ ImGuiDir,ImGuiDir_
 ImGuiInputTextFlags,ImGuiInputTextFlags_
 ImGuiKey,ImGuiKey_
 ImDrawCornerFlags,ImDrawCornerFlags_
+ImGuiViewportFlags,ImGuiViewportFlags_
+ImGuiDockNodeFlags,ImGuiDockNodeFlags_
+ImGuiConfigFlags,ImGuiConfigFlags_
+ImGuiBackendFlags,ImGuiBackendFlags_
 RttiNameString,char*

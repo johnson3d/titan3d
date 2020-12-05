@@ -2,10 +2,22 @@
 using System.Collections.Generic;
 using System.Text;
 
+using EngineNS;
+
 namespace EngineNS
 {
     public unsafe partial struct ImGuiAPI
     {
+        public static void GotoColumns(int index)
+        {
+            index = index % GetColumnsCount();
+            var cur = GetColumnIndex();
+            while (cur != index)
+            {
+                NextColumn();
+                cur = GetColumnIndex();
+            }
+        }
         //这个文件是手撸代码，做一些marshal
         public static bool Combo(string label, ref int current_item, List<string> items, int items_count, int popup_max_height_in_items)
         {
@@ -41,7 +53,14 @@ namespace EngineNS
                 return new ImGuiIO_PtrType(ptr);
             }
         }
-
+        public static ImGuiPlatformIO_PtrType PlatformIO
+        {
+            get
+            {
+                var ptr = ImGuiAPI.GetPlatformIO().NativePointer;
+                return new ImGuiPlatformIO_PtrType(ptr);
+            }
+        }
         public static bool PointInRect(ref Vector2 pt, ref Vector2 min, ref Vector2 max)
         {
             if (pt.X > max.X || pt.X < min.X || pt.Y > max.Y || pt.Y < min.Y)
@@ -79,6 +98,45 @@ public unsafe partial struct ImGuiIO_PtrType
         get
         {
             return TSDK_ImGuiIO_Getter_KeysDown_ArrayAddress(mPtr);
+        }
+    }
+}
+
+public unsafe partial struct ImGuiPlatformIO_PtrType
+{
+    public Renderer_CreateWindow RCreateWindow
+    {
+        set
+        {
+            ImGuiAPI.Set_Renderer_CreateWindow(mPtr, value);
+        }
+    }
+    public Renderer_DestroyWindow RDestroyWindow
+    {
+        set
+        {
+            ImGuiAPI.Set_Renderer_DestroyWindow(mPtr, value);
+        }
+    }
+    public Renderer_SetWindowSize RSetWindowSize
+    {
+        set
+        {
+            ImGuiAPI.Set_Renderer_SetWindowSize(mPtr, value);
+        }
+    }
+    public Renderer_RenderWindow RRenderWindow
+    {
+        set
+        {
+            ImGuiAPI.Set_Renderer_RenderWindow(mPtr, value);
+        }
+    }
+    public Renderer_SwapBuffers RSwapBuffers
+    {
+        set
+        {
+            ImGuiAPI.Set_Renderer_SwapBuffers(mPtr, value);
         }
     }
 }

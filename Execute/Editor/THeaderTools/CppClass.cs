@@ -102,6 +102,7 @@ namespace THeaderTools
             public const string SV_CallConvention = "SV_CallConvention";//For method: System.Runtime.InteropServices.CallingConvention.Cdecl , System.Runtime.InteropServices.CallingConvention.StdCall
             public const string SV_GenStaticFunction = "SV_GenStaticFunction";//For method:对外暴露PInvoke函数，使得可输入self指针
             public const string SV_NoStarToRef = "SV_NoStarToRef";//For method:不尝试地址到ref的转换
+            public const string SV_EnumNoFlags = "SV_EnumNoFlags";//For enum:不要添加Flags的Attribute
         }
         
         public string GetReturnConverter()

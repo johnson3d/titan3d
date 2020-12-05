@@ -11,6 +11,16 @@ TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention
 typedef void* (*alloc_func)(size_t sz, void* user_data);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void(*free_func)(void* ptr, void* user_data);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void(*Renderer_CreateWindow)(ImGuiViewport* vp);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void(*Renderer_DestroyWindow)(ImGuiViewport* vp);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void(*Renderer_SetWindowSize)(ImGuiViewport* vp, ImVec2 size);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void(*Renderer_RenderWindow)(ImGuiViewport* vp, void* render_arg);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void(*Renderer_SwapBuffers)(ImGuiViewport* vp, void* render_arg);
 
 TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = ImGui, SV_LayoutStruct=8)
 class ImGuiAPI
@@ -146,6 +156,14 @@ public:
 	{
 		return ImGui::GetWindowDrawList();
 	}
+	static float         GetWindowDpiScale()
+	{
+		return ImGui::GetWindowDpiScale();
+	}
+	static ImGuiViewport* GetWindowViewport()
+	{
+		return ImGui::GetWindowViewport();
+	}
 	TR_FUNCTION(SV_ReturnConverter = v3dVector2_t)
 	static ImVec2        GetWindowPos()
 	{
@@ -192,6 +210,10 @@ public:
 	static void          SetNextWindowBgAlpha(float alpha)
 	{
 		return ImGui::SetNextWindowBgAlpha(alpha);
+	}
+	static void          SetNextWindowViewport(ImGuiID viewport_id)
+	{
+		return ImGui::SetNextWindowViewport(viewport_id);
 	}
 	static void          SetWindowPos(const ImVec2* pos, ImGuiCond_ cond)
 	{
@@ -585,6 +607,10 @@ public:
 	{
 		return ImGui::Checkbox(label, v);
 	}
+	static bool          CheckboxFlags(const char* label, int* flags, int flags_value)
+	{
+		return ImGui::CheckboxFlags(label, flags, flags_value);
+	}
 	static bool          CheckboxFlags(const char* label, unsigned int* flags, unsigned int flags_value)
 	{
 		return ImGui::CheckboxFlags(label, flags, flags_value);
@@ -810,18 +836,22 @@ public:
 		return ImGui::InputScalarN(label, data_type, p_data, components, p_step, p_step_fast, format, flags);
 	}
 	// Widgets: Color Editor/Picker (tip: the ColorEdit* functions have a little color square that can be left-clicked to open a picker, and right-clicked to open an option menu.)
+	TR_FUNCTION(SV_NoStarToRef = col)
 	static bool          ColorEdit3(const char* label, float* col, ImGuiColorEditFlags_ flags = (ImGuiColorEditFlags_)0)
 	{
 		return ImGui::ColorEdit3(label, col, flags);
 	}
+	TR_FUNCTION(SV_NoStarToRef = col+ref_col)
 	static bool          ColorEdit4(const char* label, float* col, ImGuiColorEditFlags_ flags = (ImGuiColorEditFlags_)0)
 	{
 		return ImGui::ColorEdit4(label, col, flags);
 	}
+	TR_FUNCTION(SV_NoStarToRef = col)
 	static bool          ColorPicker3(const char* label, float* col, ImGuiColorEditFlags_ flags = (ImGuiColorEditFlags_)0)
 	{
 		return ImGui::ColorPicker3(label, col, flags);
 	}
+	TR_FUNCTION(SV_NoStarToRef = col+ref_col)
 	static bool          ColorPicker4(const char* label, float* col, ImGuiColorEditFlags_ flags = (ImGuiColorEditFlags_)0, const float* ref_col = NULL)
 	{
 		return ImGui::ColorPicker4(label, col, flags, ref_col);
@@ -888,11 +918,11 @@ public:
 		return ImGui::SetNextItemOpen(is_open, cond);
 	}
 	// Widgets: Selectables
-	static bool          Selectable(const char* label, bool selected, ImGuiSelectableFlags_ flags, const ImVec2* size)
+	static bool          Selectable(const char* label, bool selected, ImGuiSelectableFlags_ flags = (ImGuiSelectableFlags_)0, const ImVec2* size = &ImVec2(0, 0))
 	{
 		return ImGui::Selectable(label, selected, flags, *size);
 	}
-	static bool          Selectable(const char* label, bool* p_selected, ImGuiSelectableFlags_ flags, const ImVec2* size)
+	static bool          Selectable(const char* label, bool* p_selected, ImGuiSelectableFlags_ flags = (ImGuiSelectableFlags_)0, const ImVec2* size = &ImVec2(0, 0))
 	{
 		return ImGui::Selectable(label, p_selected, flags, *size);
 	}
@@ -1002,6 +1032,7 @@ public:
 	{
 		return ImGui::BeginPopup(str_id, flags);
 	}
+	TR_FUNCTION(SV_NoStarToRef = p_open)
 	static bool          BeginPopupModal(const char* name, bool* p_open = NULL, ImGuiWindowFlags_ flags = (ImGuiWindowFlags_)0)
 	{
 		return ImGui::BeginPopupModal(name, p_open, flags);
@@ -1095,6 +1126,31 @@ public:
 	static void          SetTabItemClosed(const char* tab_or_docked_window_label)
 	{
 		return ImGui::SetTabItemClosed(tab_or_docked_window_label);
+	}
+	// Docking
+	static void          DockSpace(ImGuiID id, const ImVec2& size = ImVec2(0, 0), ImGuiDockNodeFlags flags = 0, const ImGuiWindowClass* window_class = NULL)
+	{
+		return ImGui::DockSpace(id, size, flags, window_class);
+	}
+	static ImGuiID       DockSpaceOverViewport(ImGuiViewport* viewport = NULL, ImGuiDockNodeFlags flags = 0, const ImGuiWindowClass* window_class = NULL)
+	{
+		return ImGui::DockSpaceOverViewport(viewport, flags, window_class);
+	}
+	static void          SetNextWindowDockID(ImGuiID dock_id, ImGuiCond_ cond = (ImGuiCond_)0)
+	{
+		return ImGui::SetNextWindowDockID(dock_id, cond);
+	}
+	static void          SetNextWindowClass(const ImGuiWindowClass* window_class)
+	{
+		return ImGui::SetNextWindowClass(window_class);
+	}
+	static ImGuiID       GetWindowDockID()
+	{
+		return ImGui::GetWindowDockID();
+	}
+	static bool          IsWindowDocked()
+	{
+		return ImGui::IsWindowDocked();
 	}
 	// Logging/Capture
 	static void          LogToTTY(int auto_open_depth = -1)
@@ -1264,6 +1320,14 @@ public:
 	static ImDrawList*   GetForegroundDrawList()
 	{
 		return ImGui::GetForegroundDrawList();
+	}
+	static ImDrawList*   GetBackgroundDrawList(ImGuiViewport* viewport)
+	{
+		return ImGui::GetBackgroundDrawList(viewport);
+	}
+	static ImDrawList*   GetForegroundDrawList(ImGuiViewport* viewport)
+	{
+		return ImGui::GetForegroundDrawList(viewport);
 	}
 	static void* GetDrawListSharedData()
 	{
@@ -1455,6 +1519,60 @@ public:
 	{
 		return ImGui::MemFree(ptr);
 	}
+	// (Optional) Platform/OS interface for multi-viewport support
+	static ImGuiPlatformIO*  GetPlatformIO()
+	{
+		return &ImGui::GetPlatformIO();
+	}
+	static ImGuiViewport*    GetMainViewport()
+	{
+		return ImGui::GetMainViewport();
+	}
+	static void              UpdatePlatformWindows()
+	{
+		return ImGui::UpdatePlatformWindows();
+	}
+	static void              RenderPlatformWindowsDefault(void* platform_render_arg = NULL, void* renderer_render_arg = NULL)
+	{
+		return ImGui::RenderPlatformWindowsDefault(platform_render_arg, renderer_render_arg);
+	}
+	static void              DestroyPlatformWindows()
+	{
+		return ImGui::DestroyPlatformWindows();
+	}
+	static ImGuiViewport*    FindViewportByID(ImGuiID id)
+	{
+		return ImGui::FindViewportByID(id);
+	}
+	static ImGuiViewport*    FindViewportByPlatformHandle(void* platform_handle)
+	{
+		return ImGui::FindViewportByPlatformHandle(platform_handle);
+	}
+	// (Optional) Renderer functions (e.g. DirectX, OpenGL, Vulkan)
+	static void Set_Renderer_CreateWindow(ImGuiPlatformIO* PlatformIO, Renderer_CreateWindow fn)
+	{
+		PlatformIO->Renderer_CreateWindow = fn;
+	}
+	static void Set_Renderer_DestroyWindow(ImGuiPlatformIO* PlatformIO, Renderer_DestroyWindow fn)
+	{
+		PlatformIO->Renderer_DestroyWindow = fn;
+	}
+	static void Set_Renderer_SetWindowSize(ImGuiPlatformIO* PlatformIO, Renderer_SetWindowSize fn)
+	{
+		PlatformIO->Renderer_SetWindowSize = fn;
+	}
+	static void Set_Renderer_RenderWindow(ImGuiPlatformIO* PlatformIO, Renderer_RenderWindow fn)
+	{
+		PlatformIO->Renderer_RenderWindow = fn;
+	}
+	static void Set_Renderer_SwapBuffers(ImGuiPlatformIO* PlatformIO, Renderer_SwapBuffers fn)
+	{
+		PlatformIO->Renderer_SwapBuffers = fn;
+	}
+	static void		ImGui_NativeWindow_EnableDpiAwareness();
+	static bool     ImGui_NativeWindow_Init(void* hwnd);
+	static void     ImGui_NativeWindow_Shutdown();
+	static void     ImGui_NativeWindow_NewFrame();
 };
 
 StructBegin(ImVec2, )
@@ -1469,6 +1587,12 @@ VTypeHelperDefine(alloc_func, sizeof(void*));
 VTypeHelperDefine(free_func, sizeof(void*));
 VTypeHelperDefine(ImGuiSizeCallback, sizeof(void*));
 VTypeHelperDefine(ImGuiInputTextCallback, sizeof(void*));
+
+VTypeHelperDefine(Renderer_CreateWindow, sizeof(void*));
+//VTypeHelperDefine(Renderer_DestroyWindow, sizeof(void*));
+VTypeHelperDefine(Renderer_SetWindowSize, sizeof(void*));
+VTypeHelperDefine(Renderer_RenderWindow, sizeof(void*));
+//VTypeHelperDefine(Renderer_SwapBuffers, sizeof(void*));
 
 StructBegin(items_getter, EngineNS)
 StructEnd(void)
@@ -1488,6 +1612,13 @@ StructEnd(void)
 StructBegin(ImGuiInputTextCallback, )
 StructEnd(void)
 
+StructBegin(Renderer_CreateWindow, EngineNS)
+StructEnd(void)
 
+StructBegin(Renderer_SetWindowSize, EngineNS)
+StructEnd(void)
+
+StructBegin(Renderer_RenderWindow, EngineNS)
+StructEnd(void)
 
 NS_END
