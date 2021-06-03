@@ -14,20 +14,16 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)Base2D.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerCamera.cginc" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerFrame.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerInstance.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerMaterial.cginc" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerMesh.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerShadingEnv.cginc" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerViewport.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)Common.function" />
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\GpuDrivenDataDef.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\MergeInstance.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VertexShaderVTF.cginc" />
     <None Include="$(MSBuildThisFileDirectory)DSBase2RT.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)DSDirLighting.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)Dummy.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Font.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)FSBase.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Gizmos.shadingenv" />
@@ -41,10 +37,11 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\LightCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Math.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\MixUtility.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)Inc\MobileBasePassPS.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\PerlinNoise.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\PostEffectCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Random.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\ShadowCommon.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\SysFunction.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\VertexLayout.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl" />
     <None Include="$(MSBuildThisFileDirectory)MobileAoBlurH.shadingenv" />
@@ -59,7 +56,6 @@
     <None Include="$(MSBuildThisFileDirectory)MobileCopyEditor.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileCustomTranslucent.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileCustomTranslucentEditor.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileOpaque.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileOpaqueEditor.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileSky.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileTranslucent.shadingenv" />
@@ -71,7 +67,17 @@
     <None Include="$(MSBuildThisFileDirectory)PickedSetUp.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)SceneCapture.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Selected.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\heightmap.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileBasePassPS.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileCopyEditor.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileOpaque.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\copy2d.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\NoPixelShader.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\HitProxy.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_blur.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_hollow.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_setup.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\rect2d.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Snapshot.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)SSM.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileSunShaftBlur.shadingenv" />

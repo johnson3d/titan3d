@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Engine.Window": {
+      "commandName": "Project",
+      "workingDirectory": "..\\..\\binaries\\",
+      "nativeDebugging": true
+    }
+  }
+}

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>09a701b1-eb1f-41c3-bd63-1b3823894da2</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Graphics.Pipeline</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CCamera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\UHitproxyShading.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\USceenSpaceProcessor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CRenderLayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Mobile\UBasePassShading.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Mobile\UMobileEditorFSPolicy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shader\CommanShading\UDraw2DShading.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shader\CommanShading\UDraw2DPolicy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shader\IShaderCodeProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shader\UEffect.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shader\UMaterial.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shader\UMaterialInstance.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shader\UMdfQueue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shader\UShadingEnv.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UGfxDevice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IRenderPolicy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Mobile\UMobileFSPolicy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UGraphicsBuffers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UHitproxyManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPresentWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)USlateApplication.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UStateManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UViewportSlate.cs" />
+  </ItemGroup>
+</Project>

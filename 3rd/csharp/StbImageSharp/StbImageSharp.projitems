@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>e0ad6c9d-2af8-43e8-bbb5-8bd96fe1dee2</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>StbImageSharp</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AnimatedFrameResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ColorComponents.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CRuntime.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImageProcessor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImageResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MemoryStats.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StbImage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StbImage.Generated.Bmp.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StbImage.Generated.Common.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StbImage.Generated.Gif.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StbImage.Generated.Jpg.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StbImage.Generated.Png.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StbImage.Generated.Psd.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StbImage.Generated.Tga.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StbImage.Generated.Zlib.cs" />
+  </ItemGroup>
+</Project>

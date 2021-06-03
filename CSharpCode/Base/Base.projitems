@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>c0f05488-22ec-4212-8fc4-4873d8360c52</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AuxPtrType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\IStreaming.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\IAssemblyLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\UMacrossModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Profiler\UNativeMemory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\CBlobObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\UNativeArray.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\CPerlin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\UActionChain.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\UBitset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UNativeWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPooledObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Profiler\TimeScope.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\Async\AsyncObjManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\Async\ContextThreadManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\Async\TaskLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\ContextThread.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\EventPoster.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\ThreadAsync.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\ThreadAsyncForEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\ThreadLogic.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\ThreadMain.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\ThreadPhysics.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\ThreadPool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\ThreadRender.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\ThreadRHI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thread\UEngine.Thread.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UEngine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Transform.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Hash160.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\FileManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\IAssetMeta.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\IReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\ISerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\IWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\XndAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\XndHolder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\XndNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ITickable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MarshalType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Profiler\Log.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RName.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SDKDefine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\DebugHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\TConvert.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\Time.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TCoreSDK.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TName.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UTest\UnitTester.cs" />
+  </ItemGroup>
+</Project>

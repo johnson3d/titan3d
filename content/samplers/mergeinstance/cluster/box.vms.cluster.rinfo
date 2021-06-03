@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="gb2312"?>
-<EditorCommon.ResourceInfos.MeshClusterResourceInfo Description="" ResourceType="" SkeletonAsset="null">
-	<ReferenceRNameList>System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</ReferenceRNameList>
-	<RNameHistory>System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</RNameHistory>
-</EditorCommon.ResourceInfos.MeshClusterResourceInfo>
-

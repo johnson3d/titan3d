@@ -1,0 +1,9 @@
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.28.29910\include
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.28.29910\atlmfc\include
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\VS\include
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\um
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\winrt
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\cppwinrt
+C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\Include\um

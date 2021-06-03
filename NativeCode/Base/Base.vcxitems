@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{99a85112-a63d-4b30-a610-b17025e3bb64}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)BaseHead.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)CoreRtti.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)CoreSDK.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)CSharpAPI.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)csharp\CsBinder.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)csharp\CsValueList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)debug\vfxdebug.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)debug\vfxmemory.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)debug\vfxMemPoolObject.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)debug\vfxnew.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)float16\eLut.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)float16\float16.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)float16\toFloat.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfxarray.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfxAsyncCaller.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfxDynSimulate.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfxsimplemap.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfxtemplate.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfxTemplateUtil.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfx_temp_base.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)HashDefine.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)io\MemStream.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)io\vfxfile.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)io\vfxfile_Android.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)io\vfxfile_IOS.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IUnknown.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)perlin\perlin.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)r2m\F2MManager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)r2m\file_2_memory.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)r2m\res_2_memory.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)r2m\VPakFile.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)string\vfxHashString.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)string\vfxstring.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)thread\vfxcritical.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)thread\vfxevent.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)thread\vfxthread.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)timekeys\TimeKeys.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TypeUtility.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)vfxsampcounter.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)vfxtypes_nw.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)xnd\vfxxnd.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)CoreRtti.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)CoreSDK.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)csharp\CsBinder.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)csharp\CsValueList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)debug\vfxdebug.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)debug\vfxmemory.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)debug\vfxMemPoolObject.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)debug\vfxnew.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)float16\float16.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)HashDefine.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)io\MemStream.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)io\vfxfile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)io\vfxfile_Android.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)io\vfxfile_IOS.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)IUnknown.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)perlin\perlin.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)r2m\F2MManager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)r2m\file_2_memory.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)r2m\VPakFile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)string\vfxstring.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)thread\vfxcritical.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)thread\vfxevent.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)thread\vfxthread.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)timekeys\TimeKeys.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)vfxsampcounter.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)xnd\vfxxnd.cpp" />
+  </ItemGroup>
+</Project>

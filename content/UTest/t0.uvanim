@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.EGui.UVAnim@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/t0.uvanim,2ceda5c3-9a87-451d-aaf8-2aeab4cb4914" />
+  <Color Type="System.UInt32@mscorlib" Value="4294967295" />
+  <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+  <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
+</Root>

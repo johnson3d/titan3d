@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>ebb45312-f4af-4999-8c7f-b73b2a4b09bb</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.WorldSimulator</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BaseElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GOAP\IAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GOAP\IActor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GOAP\IEnvironment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GOAP\IGoal.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GOAP\IInventory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GOAP\IPlanner.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GOAP\ISensor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GOAP\IWeights.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)World.cs" />
+  </ItemGroup>
+</Project>

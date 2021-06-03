@@ -24,12 +24,11 @@ struct PointLight
 //CBuffers
 #include "../CBuffer/VarBase_PerCamera.cginc"
 #include "../CBuffer/VarBase_PerFrame.cginc"
-#include "../CBuffer/VarBase_PerInstance.cginc"
+#include "../CBuffer/VarBase_PerMaterial.cginc"
 #include "../CBuffer/VarBase_PerViewport.cginc"
-#include "../CBuffer/VarBase_PerShadingEnv.cginc"
 #include "../CBuffer/VarBase_PerMesh.cginc"
 
 //Functions
-#include "../Common.function"
+#include "SysFunction.cginc"
 
 #endif

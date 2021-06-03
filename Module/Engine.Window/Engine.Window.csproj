@@ -1,0 +1,95 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\..\binaries\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DefineConstants>TRACE;PWindow</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\..\binaries\</OutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DefineConstants>TRACE;PWindow</DefineConstants>
+  </PropertyGroup>
+
+  <Import Project="..\..\CSharpCode\Base\Base.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Bricks\CodeBuilder\CodeBuilder.projitems" Label="Shared" />
+
+  <Import Project="..\..\codegen\NativeBinder\CodeGenCSharp.projitems" Label="Shared" />
+
+  <Import Project="..\..\codegen\Rpc\Engine\EngineRPC.projitems" Label="Shared" />
+
+  <Import Project="..\..\codegen\Property\Engine\EngineProperty.projitems" Label="Shared" />
+
+  <Import Project="..\..\codegen\Cs2Cpp\cs\Cs2Cpp.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Editor\Editor.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\GamePlay\GamePlay.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\ImGui\ImGui.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Math\Math.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Grapics\Mesh\Mesh.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Grapics\Pipeline\Pipeline.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Bricks\Procedure\Procedure.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\RHI\RHI.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Rtti\Rtti.projitems" Label="Shared" />
+
+  <Import Project="..\..\3rd\csharp\StbImageSharp\StbImageSharp.projitems" Label="Shared" />
+
+  <Import Project="..\..\3rd\csharp\StbImageWriteSharp\StbImageWriteSharp.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Platform\Windows\Windows.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Bricks\Plugins\Plugins.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Bricks\DataSet\DataSet.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Bricks\AssemblyLoader\AssemblyLoader.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Bricks\CSScripting\CSScripting.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Bricks\FBX\FBX.projitems" Label="Shared" />
+
+  <Import Project="..\..\CSharpCode\Bricks\Network\Network.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Animation\Animation.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="3.9.0" />
+    <PackageReference Include="Mono.Cecil" Version="0.11.3" />
+    <PackageReference Include="NPOI" Version="2.5.2" />
+    <PackageReference Include="ppy.SDL2-CS" Version="1.0.82" />
+    <PackageReference Include="RIPEMD160" Version="1.0.1" />
+    <PackageReference Include="System.CodeDom" Version="5.0.0" />
+    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms">
+      <HintPath>..\..\3rd\csharp\System.Windows.Forms.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="$(SolutionDir)CS_Rpc_Engine.bat" />
+  </Target>
+
+</Project>

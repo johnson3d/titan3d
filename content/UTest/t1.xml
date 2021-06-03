@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.UTest.UTest_MetaObject@EngineCore">
+  <A Type="System.Int32@Unknown" Value="2" />
+  <B Type="System.Single@Unknown" Value="3" />
+  <C Type="System.String@Unknown" Value="4" />
+  <D Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+    <A Type="System.Int32@Unknown" Value="30" />
+    <B Type="System.Single@Unknown" Value="0" />
+  </D>
+  <E Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+    <A Type="System.Int32@Unknown" Value="10" />
+    <B Type="System.Single@Unknown" Value="0" />
+  </E>
+  <F Type="EngineNS.Transform@EngineCore" Value="[Position(1,1,1),Scale(1,1,1),Quat(0,0,0,1)]" />
+  <G Type="System.Collections.Generic.List&lt;System.Int32@Unknown,&gt;@Unknown" Count="3">
+    <e_0 Value="1" />
+    <e_1 Value="2" />
+    <e_2 Value="15" />
+  </G>
+  <H Type="System.Collections.Generic.List&lt;EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+      <A Type="System.Int32@Unknown" Value="5" />
+      <B Type="System.Single@Unknown" Value="0" />
+    </e_0>
+    <e_1 Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+      <A Type="System.Int32@Unknown" Value="9" />
+      <B Type="System.Single@Unknown" Value="0" />
+    </e_1>
+    <e_2 Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+      <A Type="System.Int32@Unknown" Value="10" />
+      <B Type="System.Single@Unknown" Value="0" />
+    </e_2>
+  </H>
+  <I Type="System.Collections.Generic.Dictionary&lt;System.Int32@Unknown,System.String@Unknown,&gt;@Unknown" Count="2">
+    <e_0>
+      <Key Value="1" />
+      <Value Value="a" />
+    </e_0>
+    <e_1>
+      <Key Value="2" />
+      <Value Value="b" />
+    </e_1>
+  </I>
+  <J Type="System.Collections.Generic.Dictionary&lt;System.Int32@Unknown,EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore,&gt;@Unknown" Count="2">
+    <e_0>
+      <Key Value="1" />
+      <Value Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+        <A Type="System.Int32@Unknown" Value="5" />
+        <B Type="System.Single@Unknown" Value="0" />
+      </Value>
+    </e_0>
+    <e_1>
+      <Key Value="2" />
+      <Value Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+        <A Type="System.Int32@Unknown" Value="9" />
+        <B Type="System.Single@Unknown" Value="0" />
+      </Value>
+    </e_1>
+  </J>
+  <ReadSignal Type="System.Boolean@Unknown" Value="True" />
+</Root>

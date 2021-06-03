@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassGraph@EngineCore">
+  <DefClass Type="EngineNS.Bricks.CodeBuilder.DefineClass@EngineCore">
+    <ClassName Type="System.String@Unknown" Value="NewClass" />
+    <Functions Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.DefineFunction@EngineCore,&gt;@Unknown" Count="0" />
+    <Members Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.DefineVar@EngineCore,&gt;@Unknown" Count="0" />
+  </DefClass>
+</Root>

@@ -1,0 +1,68 @@
+#include "../../Inc/VertexLayout.cginc"
+
+#include "Material"
+#include "MdfQueue"
+
+cbuffer cbPerShadingEnv : register(b4)
+{
+	matrix RenderMatrix;
+	float4 RenderColor;
+	float RenderOpacity;
+}
+
+#ifdef MDFQUEUE_FUNCTION
+	MDFQUEUE_FUNCTION
+#endif
+
+PS_INPUT VS_Main( VS_INPUT input )
+{
+	PS_INPUT output = (PS_INPUT)0;
+
+#ifdef MDFQUEUE_FUNCTION
+	MdfQueueDoModifiers(output, input);
+#endif
+
+	output.vPosition.xyz = input.vPosition.xyz;
+	output.vUV = input.vUV;
+	output.vColor = input.vColor;
+
+	float3 transPos = mul(float4(input.vPosition.xyz, 1), RenderMatrix).xyz;
+	//float3 transPos = input.vPosition.xyz;
+
+	output.vPosition.w = 1;
+	output.vPosition.z = transPos.z;
+	output.vPosition.x = -1 + transPos.x*2 * gViewportSizeAndRcp.z;
+	output.vPosition.y = 1 - transPos.y*2 * gViewportSizeAndRcp.w;
+
+	return output;
+}
+
+struct PS_OUTPUT
+{
+	float4 RenderTarget0 : SV_Target0;
+};
+PS_OUTPUT PS_Main( PS_INPUT input )
+{
+#ifndef DO_PS_MATERIAL
+	#define DO_PS_MATERIAL DoDefaultPSMaterial
+#endif
+
+	MTL_OUTPUT mtl = Default_PSInput2Material(input);
+
+	DO_PS_MATERIAL(input, mtl);
+
+	half Alpha = (half)mtl.mAlpha;
+	half AlphaTestThreshold = (half)mtl.mAlphaTest;
+
+#ifdef ALPHA_TEST
+	clip(Alpha - AlphaTestThreshold);
+#endif // AlphaTest
+
+	PS_OUTPUT output = (PS_OUTPUT)0;
+
+	float alpha = mtl.mAlpha * RenderColor.w;
+	output.RenderTarget0 = half4(mtl.mAlbedo * RenderColor.xyz, alpha) + half4(mtl.mEmissive * RenderColor.xyz, alpha);
+
+	output.RenderTarget0 = float4(1, 1, 0, 1);
+	return output;
+}

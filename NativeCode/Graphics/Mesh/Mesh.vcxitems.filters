@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Modifier">
+      <UniqueIdentifier>{33bb52fe-15cd-4a66-80c6-4f4debae48fd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Modifier\IModifier.cpp">
+      <Filter>Modifier</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Modifier\IStaticModifier.cpp">
+      <Filter>Modifier</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)IMdfQueue.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Modifier\ISkinModifier.cpp">
+      <Filter>Modifier</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Modifier\IModifier.h">
+      <Filter>Modifier</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Modifier\IStaticModifier.h">
+      <Filter>Modifier</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)IMdfQueue.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Modifier\ISkinModifier.h">
+      <Filter>Modifier</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

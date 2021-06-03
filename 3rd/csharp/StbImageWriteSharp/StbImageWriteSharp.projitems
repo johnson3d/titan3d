@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>6eb3104e-609f-4157-9dd5-5e510d939bf2</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>StbImageWriteSharp</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ColorComponents.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CRuntime.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImageWriter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MemoryStats.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StbImageWrite.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StbImageWrite.Generated.cs" />
+  </ItemGroup>
+</Project>

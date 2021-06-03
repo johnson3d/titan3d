@@ -1,0 +1,123 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace EngineNS.GamePlay
+{
+    public class UWorldRootNode : Scene.UScene
+    {
+        public UWorldRootNode(Scene.UNodeData data)
+            : base(data)
+        {
+            
+        }
+        public override string NodeName
+        {
+            get
+            {
+                return "WorldRootNode";
+            }
+        }        
+        public override void OnGatherVisibleMeshes(Graphics.Pipeline.IRenderPolicy rp)
+        {
+            base.OnGatherVisibleMeshes(rp);
+        }
+    }
+
+    public class UWorld
+    {
+        public UWorld()
+        {
+            mOnVisitNode_GatherVisibleMeshesAll = this.OnVisitNode_GatherVisibleMeshesAll;
+            mOnVisitNode_GatherBoundShapes = this.OnVisitNode_GatherBoundShapes;
+        }
+        public UWorldRootNode Root
+        {
+            get;
+        } = new UWorldRootNode(new Scene.UNodeData());
+        #region Culling
+        public virtual void GatherVisibleMeshes(Graphics.Pipeline.IRenderPolicy rp)
+        {
+            rp.VisibleMeshes.Clear();
+
+            OnVisitNode_GatherVisibleMeshes(Root, rp);
+        }
+        private unsafe bool OnVisitNode_GatherVisibleMeshes(Scene.UNode node, object arg)
+        {
+            if (node.HasStyle(Scene.UNode.ENodeStyles.VisibleMeshProvider) == false)
+            {
+                return false;
+            }
+            Graphics.Pipeline.IRenderPolicy rp = arg as Graphics.Pipeline.IRenderPolicy;
+            
+            CONTAIN_TYPE type;
+            if (node.HasStyle(Scene.UNode.ENodeStyles.VisibleFollowParent))
+            {
+                type = CONTAIN_TYPE.CONTAIN_TEST_INNER;
+            }
+            else
+            {
+                var frustom = rp.GBuffers.Camera.mCoreObject.GetFrustum();
+                type = frustom->whichContainTypeFast(ref node.AABB, ref node.Placement.AbsTransformInv, 1);
+            }
+            switch(type)
+            {
+                case CONTAIN_TYPE.CONTAIN_TEST_OUTER:
+                    break;
+                case CONTAIN_TYPE.CONTAIN_TEST_INNER:
+                    node.DFS_VisitNodeTree(mOnVisitNode_GatherVisibleMeshesAll, rp);
+                    break;
+                case CONTAIN_TYPE.CONTAIN_TEST_REFER:
+                    {
+                        node.OnGatherVisibleMeshes(rp);
+                        foreach (var i in node.Children)
+                        {
+                            OnVisitNode_GatherVisibleMeshes(i, arg);
+                        }
+                    }
+                    break;
+            }
+            return false;
+        }
+        Scene.UNode.FOnVisitNode mOnVisitNode_GatherVisibleMeshesAll;
+        private unsafe bool OnVisitNode_GatherVisibleMeshesAll(Scene.UNode node, object arg)
+        {
+            Graphics.Pipeline.IRenderPolicy rp = arg as Graphics.Pipeline.IRenderPolicy;
+            
+            node.OnGatherVisibleMeshes(rp);
+            return false;
+        }
+        #endregion
+        #region DebugAssist
+        
+        public void GatherBoundShapes(List<Graphics.Mesh.UMesh> boundVolumes, Scene.UNode node = null)
+        {
+            if (node == null)
+                node = Root;
+            node.DFS_VisitNodeTree(mOnVisitNode_GatherBoundShapes, boundVolumes);
+        }
+        Scene.UNode.FOnVisitNode mOnVisitNode_GatherBoundShapes;
+        private unsafe bool OnVisitNode_GatherBoundShapes(Scene.UNode node, object arg)
+        {
+            var bvs = arg as List<Graphics.Mesh.UMesh>;
+
+            ref var aabb = ref node.AABB;
+            var size = aabb.GetSize();
+            var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeBoxWireframe(aabb.Minimum.X, aabb.Minimum.Y, aabb.Minimum.Z,
+                size.X, size.Y, size.Z).ToMesh();
+            var mesh2 = new Graphics.Mesh.UMesh();
+
+            var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
+            materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
+            mesh2.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            var noScaleTM = node.Placement.AbsTransform;
+            noScaleTM.NoScale();
+            mesh2.SetWorldMatrix(ref noScaleTM);
+
+            bvs.Add(mesh2);
+
+            return false;
+        }
+        #endregion
+    }
+}

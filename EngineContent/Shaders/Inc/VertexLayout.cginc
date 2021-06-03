@@ -22,6 +22,7 @@ struct VS_INPUT
 	float4 vF4_2 : TEXCOORD11;
 	float4 vF4_3 : TEXCOORD12;
 
+	uint vVertexID : SV_VertexID;
 #if ShaderModel >= 4
 	uint vInstanceId : SV_InstanceID;
 #endif
@@ -134,5 +135,8 @@ void DoDefaultPSMaterial(in PS_INPUT pixel, inout MTL_OUTPUT mtl)
 {
 	
 }
+
+Texture2D gDefaultTextue2D;
+SamplerState gDefaultSamplerState;
 
 #endif //_VertexLayout_cginc_

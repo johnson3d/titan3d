@@ -1,1 +1,0 @@
-xcopy /y x64\Debug\*.dll

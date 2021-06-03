@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\..\binaries\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\..\binaries\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Engine.Window\Engine.Window.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Engine.Window">
+      <HintPath>..\..\binaries\net5.0\Engine.Window.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Import Project="..\..\Macross\MacrossGenCSharp\MacrossGenCSharp.projitems" Label="Shared" />
+
+</Project>

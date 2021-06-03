@@ -28,6 +28,12 @@
     <Filter Include="Compute\GpuDriven">
       <UniqueIdentifier>{1edc0aa8-5788-4625-9ecb-b63896c146c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ShadingEnv\Mobile">
+      <UniqueIdentifier>{258e282e-f4f2-478c-a2b8-e78be83a8ada}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ShadingEnv\Sys\pick">
+      <UniqueIdentifier>{21b5ed54-bd34-4ae5-8049-d0b294a832e4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -45,9 +51,6 @@
     <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.var">
       <Filter>Modifier</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Base2D.shadingenv">
-      <Filter>ShadingEnv\Sys</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)DSBase2RT.shadingenv">
       <Filter>ShadingEnv\Deffered</Filter>
     </None>
@@ -55,9 +58,6 @@
       <Filter>ShadingEnv\Deffered</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Font.shadingenv">
-      <Filter>ShadingEnv\Sys</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)Dummy.shadingenv">
       <Filter>ShadingEnv\Sys</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Selected.shadingenv">
@@ -73,7 +73,6 @@
     <None Include="$(MSBuildThisFileDirectory)MobileBloomSetUp.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileBloomUS.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileCopy.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileOpaque.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileTranslucent.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Snapshot.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)UFOMobileCopy.shadingenv" />
@@ -121,20 +120,11 @@
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerFrame.cginc">
       <Filter>CBuffer</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerInstance.cginc">
-      <Filter>CBuffer</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerMesh.cginc">
-      <Filter>CBuffer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerShadingEnv.cginc">
       <Filter>CBuffer</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerViewport.cginc">
       <Filter>CBuffer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)Common.function">
-      <Filter>Inc</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Inc\CommonDeferredShadingFunc.cginc">
       <Filter>Inc</Filter>
@@ -163,9 +153,6 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\VertexLayout.cginc">
       <Filter>Inc</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Inc\MobileBasePassPS.cginc">
-      <Filter>Inc</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)Inc\PostEffectCommon.cginc">
       <Filter>Inc</Filter>
     </None>
@@ -177,6 +164,45 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VertexShaderVTF.cginc">
       <Filter>Compute\GpuDriven</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerMaterial.cginc">
+      <Filter>CBuffer</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\copy2d.shadingenv">
+      <Filter>ShadingEnv\Sys</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\rect2d.shadingenv">
+      <Filter>ShadingEnv\Sys</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileOpaque.shadingenv">
+      <Filter>ShadingEnv\Mobile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileBasePassPS.cginc">
+      <Filter>ShadingEnv\Mobile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\SysFunction.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\heightmap.cginc">
+      <Filter>ShadingEnv\Mobile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\PerlinNoise.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_blur.cginc">
+      <Filter>ShadingEnv\Sys\pick</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_setup.cginc">
+      <Filter>ShadingEnv\Sys\pick</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\HitProxy.cginc">
+      <Filter>ShadingEnv\Sys\pick</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_hollow.cginc">
+      <Filter>ShadingEnv\Sys\pick</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileCopyEditor.cginc">
+      <Filter>ShadingEnv\Mobile</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

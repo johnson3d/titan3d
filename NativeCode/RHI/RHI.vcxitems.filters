@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)IRenderSystem.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IRenderContext.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ICommandList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)PreHead.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IVertexBuffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IIndexBuffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IShader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IVertexShader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IPixelShader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IConstantBuffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ITextureBase.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IRenderTargetView.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IRenderPipeline.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IRenderResource.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ISwapChain.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IShaderResourceView.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IDepthStencilView.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ShaderReflector.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IInputLayout.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ISamplerState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IRasterizerState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IDepthStencilState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IFrameBuffers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IShaderProgram.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IBlendState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IComputeShader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IUnorderedAccessView.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Utility\GfxTextureStreaming.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Utility\GraphicsProfiler.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Utility\IGeometryMesh.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)RHI.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IDrawCall.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Utility\IMeshPrimitives.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IFence.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)IRenderSystem.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IRenderContext.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ICommandList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IVertexBuffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IIndexBuffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IShader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IVertexShader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IPixelShader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IConstantBuffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ITextureBase.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IRenderTargetView.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IRenderPipeline.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IRenderResource.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ISwapChain.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IShaderResourceView.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IDepthStencilView.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ShaderReflector.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IInputLayout.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ISamplerState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IRasterizerState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IDepthStencilState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IFrameBuffers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IShaderProgram.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)PreHead.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IBlendState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IComputeShader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IUnorderedAccessView.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Utility\GfxTextureStreaming.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Utility\GraphicsProfiler.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Utility\IGeometryMesh.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)IDrawCall.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Utility\IMeshPrimitives.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IFence.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{10b0fca4-b8df-44fd-b44d-866d05e90620}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

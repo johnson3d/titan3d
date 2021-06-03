@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>4d32ea41-561f-43f2-a2bb-d57b217fec2a</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Rtti</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)MissingTypeConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TypeInheritTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TypeManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassMeta.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UNativeCoreProvider.cs" />
+  </ItemGroup>
+</Project>

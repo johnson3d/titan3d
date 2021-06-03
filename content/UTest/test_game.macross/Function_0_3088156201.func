@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.FunctionGraph@EngineCore">
+  <Function Type="EngineNS.Bricks.CodeBuilder.DefineFunction@EngineCore">
+    <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.DefineVar@EngineCore,&gt;@Unknown" Count="0" />
+    <Name Type="System.String@Unknown" Value="Function_0" />
+    <ReturnType Type="System.String@Unknown" Value="System.Void" />
+  </Function>
+  <GraphName Type="System.String@Unknown" Value="NodeGraph" />
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.EGui.Controls.NodeGraph.NodeBase@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.FunctionStartNode@EngineCore">
+      <Name Type="System.String@Unknown" Value="Function_0" />
+      <NodeId Type="System.Guid@Unknown" Value="ea0b0409-fa1d-4a57-81fe-d450dfa4cd0b" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="100,100" />
+    </e_0>
+  </Nodes>
+  <StartNodeId Type="System.Guid@Unknown" Value="ea0b0409-fa1d-4a57-81fe-d450dfa4cd0b" />
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.EGui.Controls.NodeGraph.PinLinker@EngineCore,&gt;@Unknown" Count="0" />
+  <ReadSignal Type="System.Boolean@Unknown" Value="True" />
+</Root>

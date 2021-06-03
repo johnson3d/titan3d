@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="gb2312"?>
-<MaterialEditor.ResourceInfos.MaterialResourceInfo ResourceType="Material">
-	<ReferenceRNameList 0="0|texture/uvchecker.txpic">System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</ReferenceRNameList>
-	<RNameHistory>System.Collections.Generic.List`1[[EngineNS.RName, CoreClient.Windows, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]</RNameHistory>
-</MaterialEditor.ResourceInfos.MaterialResourceInfo>
-

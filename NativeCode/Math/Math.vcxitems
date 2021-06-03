@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{7f39f73c-1410-498f-a711-6a13209642e4}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)IntegerType.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxBezier.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxBox3.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxColor4.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxConvex.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxCylinder.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxFrustum.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxIntersectFunction.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxLine.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxMath.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxMatrix3.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxMatrix4.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxOBB.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxPlane3.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxPoint.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxPoly3.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxQuaternion.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxRayCast.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxRect.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxSegment3.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxSize.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxSphere.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxSpline.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxTransform.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxVector2.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxVector3.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)IntegerType.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxBezier.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxBox3.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxBox3.inl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxColor4.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxConvex.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxCylinder.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxFrustum.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxIntersectFunction.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxLine.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxMath.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxMatrix3.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxMatrix3.inl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxMatrix4.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxMatrix4.inl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxOBB.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxPlane3.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxPoint.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxPoly3.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxQuaternion.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxQuaternion.inl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxRayCast.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxRect.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxSegment3.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxSize.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxSphere.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxSpline.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxTransform.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector2.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector2.inl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector3.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxVector3.inl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)vfxgeometry.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)vfxGeomTypes.h" />
+  </ItemGroup>
+</Project>

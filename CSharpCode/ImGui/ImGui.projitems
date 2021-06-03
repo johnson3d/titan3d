@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>30bc6f10-34dc-43fc-aa1e-ea73602b074f</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.EGui</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\ContentBrowser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\CtrlUtility.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\NodeBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\NodeGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\PinLinker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\KeyValueCreator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PGRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PropertyCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PropertyGrid.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\TypeSelector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\UAssetSelector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CSharpCompiler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImGuiAPI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Slate\BaseRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UDockWindowSDL.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\EditableFormData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\Columns.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\DataBinder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\InputText.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\Separator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\Text.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Form.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIEditor\FormStructureEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Base.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Button.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Image.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Menu.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIProxy\SearchBar.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIProxy\StyleConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Toolbar.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UVAnim.cs" />
+  </ItemGroup>
+</Project>

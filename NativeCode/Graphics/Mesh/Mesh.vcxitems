@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{da3d7904-6611-4c03-ac80-f251d8a68ecd}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)IMdfQueue.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)IMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Modifier\IModifier.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Modifier\ISkinModifier.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Modifier\IStaticModifier.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)IMdfQueue.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Modifier\IModifier.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Modifier\ISkinModifier.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Modifier\IStaticModifier.h" />
+  </ItemGroup>
+</Project>

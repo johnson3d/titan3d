@@ -1,2 +1,2 @@
 cd %~dp0
-binaries\Tools\THT\netcoreapp2.1\win10-x64\THeaderTools.exe vcxproj=%~dp0Execute\Core.Windows\Core.Windows.vcxproj gen_dir=%~dp0deriveddatacache\codegen\ gen_csharpwrapper gen_csharp_internal module_name=CoreObjectBase.ModuleNC pch=%~dp0Native\pch.h type2type=mapper.txt
+%~dp0binaries\Tools\net5.0\ClangHeadTools.exe vcxproj=%~dp0Core.Window\Core.Window.vcxproj gen_dir=%~dp0codegen\NativeBinder\ gen_csharpwrapper module_name=CoreSDK.CoreModule pch=%~dp0Core.Window\pch.h include=%~dp0Module\IncludePath.txt preprocessor=%~dp0Module\MacroDefine.txt

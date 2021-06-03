@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>fd56162e-fcd2-46a7-89fb-e4a0079dfe3e</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Animation</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Base\AnimatableObjectHierarchy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationAsset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationClip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\AnimationCurve.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\AnimHierarchy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\Curve.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\Animatable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pose\CBonePose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pose\CSkeletonPose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\AnimatableSkeletonHierarchy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\CBone.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\CPartialSkeleton.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\UFullSkeleton.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\USocket.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Asset\" />
+    <Folder Include="$(MSBuildThisFileDirectory)AnimationMacross\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Pose\Control\" />
+    <Folder Include="$(MSBuildThisFileDirectory)StateMachine\" />
+  </ItemGroup>
+</Project>

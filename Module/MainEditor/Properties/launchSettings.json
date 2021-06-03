@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "MainEditor": {
+      "commandName": "Project",
+      "workingDirectory": "..\\..\\binaries\\",
+      "nativeDebugging": true
+    }
+  }
+}

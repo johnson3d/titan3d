@@ -1,0 +1,46 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace EngineNS
+{
+    public interface IPtrType
+    {
+        IntPtr NativePointer { get; set; }
+    }
+    public class AuxPtrType<T> where T : unmanaged, IPtrType
+    {
+        public T mCoreObject;
+        ~AuxPtrType()
+        {
+            Dispose();
+        }
+        public void Dispose()
+        {
+            unsafe
+            {
+                if (mCoreObject.NativePointer != IntPtr.Zero)
+                {
+                    var saved = mCoreObject.NativePointer;
+                    mCoreObject.NativePointer = IntPtr.Zero;
+                    
+                    CoreSDK.IUnknown_Release(saved.ToPointer());
+                }
+            }
+        }
+        public int Core_AddRef()
+        {
+            unsafe
+            {
+                return CoreSDK.IUnknown_AddRef(mCoreObject.NativePointer.ToPointer());
+            }
+        }
+        public void Core_Release()
+        {
+            unsafe
+            {
+                CoreSDK.IUnknown_Release(mCoreObject.NativePointer.ToPointer());
+            }
+        }
+    }
+}

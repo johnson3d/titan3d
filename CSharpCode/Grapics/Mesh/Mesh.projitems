@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>34d2b60f-879e-4656-882f-810e3fbbf177</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Graphics.Mesh</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)UMaterialMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UMdfStaticMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UMdfTerrainMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CMeshDataProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CMeshPrimitives.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Modifier\CStaticModifier.cs" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,6 @@
+Include=CSharpCode
+Exclude=CSharpCode/ImGui,Math
+Target=codegen/Rpc/Engine
+Property_Target=codegen/Property/Engine
+Cs2Cpp_Target=codegen/Cs2Cpp
+Pch=Core.Window/pch.h

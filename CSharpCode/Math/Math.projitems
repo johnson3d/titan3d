@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>ba72ed15-3c3c-4a4c-8d57-5a9f181a59d0</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Bezier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bezier\BezierCalculate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BoundingBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BoundingCapsule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BoundingSphere.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Color.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Color3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Color4.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Convex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\BoundingBoxConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\BoundingSphereConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Color3Converter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Color4Converter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\FieldPropertyDescriptor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\MatrixConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\PlaneConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\QuaternionConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\RayConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Vector2Converter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Vector3Converter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Vector4Converter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Half.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HermiteSpline.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IDllImportApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IntegerType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MathHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Matrix.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Matrix3x2.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Matrix3x3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Plane.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PlatformDefine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Point.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Point3i.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PointF.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Quaternion.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ray.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Rect.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Rectangle.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RectangleF.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Size.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SizeF.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Thickness.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vector2.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vector3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vector4.cs" />
+  </ItemGroup>
+</Project>

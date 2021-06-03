@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>df4345b3-0c74-43e1-890c-190395767fce</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.GamePlay</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\UMeshNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\UNode_Editor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPlacement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UWorld.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\UBoundVolume.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\UNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\UScene.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UGameBase.cs" />
+  </ItemGroup>
+</Project>

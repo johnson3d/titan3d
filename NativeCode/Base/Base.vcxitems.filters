@@ -1,0 +1,215 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)CoreRtti.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)io\vfxfile.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)io\vfxfile_Android.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)io\vfxfile_IOS.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)string\vfxstring.cpp">
+      <Filter>string</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)debug\vfxdebug.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)debug\vfxmemory.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)debug\vfxMemPoolObject.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)debug\vfxnew.cpp">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)thread\vfxcritical.cpp">
+      <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)thread\vfxevent.cpp">
+      <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)thread\vfxthread.cpp">
+      <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)r2m\file_2_memory.cpp">
+      <Filter>r2m</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)r2m\VPakFile.cpp">
+      <Filter>r2m</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)IUnknown.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)HashDefine.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)xnd\vfxxnd.cpp">
+      <Filter>xnd</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)io\MemStream.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)CoreSDK.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)r2m\F2MManager.cpp">
+      <Filter>r2m</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)vfxsampcounter.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)timekeys\TimeKeys.cpp">
+      <Filter>timekeys</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)float16\float16.cpp">
+      <Filter>float16</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)csharp\CsValueList.cpp">
+      <Filter>csharp</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)perlin\perlin.cpp">
+      <Filter>perlin</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)csharp\CsBinder.cpp">
+      <Filter>csharp</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)BaseHead.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)CoreRtti.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)CoreSDK.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)CSharpAPI.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TypeUtility.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)vfxtypes_nw.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)io\vfxfile.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)io\vfxfile_Android.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)io\vfxfile_IOS.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)string\vfxHashString.h">
+      <Filter>string</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)string\vfxstring.h">
+      <Filter>string</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)debug\vfxdebug.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)debug\vfxmemory.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)debug\vfxMemPoolObject.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)debug\vfxnew.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)thread\vfxcritical.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)thread\vfxevent.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)thread\vfxthread.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)r2m\file_2_memory.h">
+      <Filter>r2m</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)r2m\res_2_memory.h">
+      <Filter>r2m</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)r2m\VPakFile.h">
+      <Filter>r2m</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)IUnknown.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)HashDefine.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfx_temp_base.h">
+      <Filter>generic</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfxarray.h">
+      <Filter>generic</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfxAsyncCaller.h">
+      <Filter>generic</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfxDynSimulate.h">
+      <Filter>generic</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfxsimplemap.h">
+      <Filter>generic</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfxtemplate.h">
+      <Filter>generic</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)generic\vfxTemplateUtil.h">
+      <Filter>generic</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)xnd\vfxxnd.h">
+      <Filter>xnd</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)vfxsampcounter.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)io\MemStream.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)r2m\F2MManager.h">
+      <Filter>r2m</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)timekeys\TimeKeys.h">
+      <Filter>timekeys</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)float16\eLut.h">
+      <Filter>float16</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)float16\float16.h">
+      <Filter>float16</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)float16\toFloat.h">
+      <Filter>float16</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)csharp\CsValueList.h">
+      <Filter>csharp</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)perlin\perlin.h">
+      <Filter>perlin</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)csharp\CsBinder.h">
+      <Filter>csharp</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="io">
+      <UniqueIdentifier>{a6d6d96c-fd3d-41f5-a28d-2ac6210ce8b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="string">
+      <UniqueIdentifier>{98206730-8f33-48c9-961a-55779e98804f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="debug">
+      <UniqueIdentifier>{65d46318-5dd0-4607-868a-9009664fcd43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thread">
+      <UniqueIdentifier>{3f2353e6-d6ce-4f2d-9ad8-0c129d001ff1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="r2m">
+      <UniqueIdentifier>{6b4ec72c-191f-4fb6-aeac-1cade936850c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="generic">
+      <UniqueIdentifier>{825be827-e08c-475b-a96c-482fc024e824}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="xnd">
+      <UniqueIdentifier>{e55cb8f9-a70c-41f3-9a7d-029fa8fdce96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="timekeys">
+      <UniqueIdentifier>{7eb2ed09-cad6-4d37-8482-1230e394efc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="float16">
+      <UniqueIdentifier>{6f2fb13b-de86-438c-a54b-5941dabf6daa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="csharp">
+      <UniqueIdentifier>{c68fde8f-e634-4318-a15e-34458dee9f01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="perlin">
+      <UniqueIdentifier>{ef094c94-0b2f-4493-980d-1c758ea26bed}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

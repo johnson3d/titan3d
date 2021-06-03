@@ -4,25 +4,25 @@
 #include "../Inc/Math.cginc"
 
 cbuffer cbPerViewport : register( b1 )
-{
-	// ShaderParamAnalyse Start
-	
+{	
 	float2 ViewportPos; // leftup position
-
 	float mDirLightSpecularIntensity;
+	float mDirLightShadingSSS;
+
 	float4 mDirLightingAmbient;
 	float4 mDirLightingDiffuse;
 	float4 mDirLightingSpecular;
-	float mDirLightShadingSSS;
+	
+	float3 mGroundLightColor;
+	int gCsmNum;
 
+	float3 mSkyLightColor;
 	float FogStart;// = 30;
+
 	float FogHorizontalRange;// = 170;
 	float FogCeil;// = 70;
 	float FogVerticalRange;// = 150;
 	float FogDensity;// = 1.57;
-
-	float3 mSkyLightColor;
-	float3 mGroundLightColor;
 
 	float4 gDirLightColor_Intensity;
 	float4 gDirLightDirection_Leak;
@@ -36,16 +36,12 @@ cbuffer cbPerViewport : register( b1 )
 	matrix gViewer2ShadowMtxArrayEditor[4];
 	float4 gCsmDistanceArray;
 	float4 gShadowTransitionScaleArrayEditor;
+	
 	float gShadowTransitionScale;
 	float gShadowDistance;
-	int gCsmNum;
-	float gEnvMapMaxMipLevel;
-	float gEyeEnvMapMaxMipLevel;
-
+	
 	float4 gSunPosNDC;
 	float4 gAoParam;//radius_platform_bias_dark;
-
-	// ShaderParamAnalyse End
 
 	float4 PointLightPos_RadiusInv[MaxPointLightNumber];
 	float4 PointLightColor_Intensity[MaxPointLightNumber];
@@ -55,7 +51,6 @@ cbuffer cbPerViewport : register( b1 )
 	#endif
 
 	UserDef_Viewport
-
 };
 
 #endif

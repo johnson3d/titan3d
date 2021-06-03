@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{a415eb90-cf3a-4cbc-bd98-14eed4d0fcd1}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Pose\IBonePose.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Pose\ISkeletonPose.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Skeleton\IBone.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Skeleton\IPartialSkeleton.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Pose\IBonePose.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Pose\ISkeletonPose.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Skeleton\IBone.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Skeleton\IPartialSkeleton.h" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ClangHeadTools": {
+      "commandName": "Project",
+      "commandLineArgs": "$(SolutionDir)binaries\\Tools\\net5.0\\ClangHeadTools.exe vcxproj=$(SolutionDir)Core.Window\\Core.Window.vcxproj gen_dir=$(SolutionDir)codegen\\NativeBinder\\ gen_csharpwrapper module_name=CoreSDK.CoreModule pch=$(SolutionDir)Core.Window\\pch.h include=$(SolutionDir)Module\\IncludePath.txt preprocessor=$(SolutionDir)Module\\MacroDefine.txt"
+    }
+  }
+}

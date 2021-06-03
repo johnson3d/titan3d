@@ -3,7 +3,6 @@
 
 cbuffer cbPerCamera : register( b0 )
 {
-	// ShaderParamAnalyse Start
 	matrix CameraViewMatrix;
 	matrix CameraViewInverse;
 	matrix ViewPrjMtx;
@@ -11,15 +10,20 @@ cbuffer cbPerCamera : register( b0 )
 	matrix PrjMtx;
 	matrix PrjInvMtx;
 
-
 	float3 CameraPosition;
+	float gZNear;
+
 	float3 CameraLookAt;
-	float3 CameraDirection;
-	float3 CameraRight;
-	float3 CameraUp;
-	// ShaderParamAnalyse End
 	float gZFar;
 
+	float3 CameraDirection;
+	float pad0;
+
+	float3 CameraRight;
+	float pad1;
+
+	float3 CameraUp;
+	float pad2;
 
 	#ifndef UserDef_PerCamera
 		#define UserDef_PerCamera 
