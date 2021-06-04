@@ -44,6 +44,44 @@ public:
 	void SetDatas(BYTE* ptr, int countOfObj);
 };
 
+template<typename _Type>
+struct CSList
+{
+	CsValueList			mImpl;
+	CSList()
+		: mImpl(sizeof(_Type))
+	{
+
+	}
+	UINT GetCount() {
+		return mImpl.GetCount();
+	}
+	void SetCapacity(int capacity)
+	{
+		mImpl.SetCapacity(capacity);
+	}
+	void AddValue(const _Type& v)
+	{
+		mImpl.AddValue((BYTE*)&v);
+	}
+	void Append(CSList<_Type>& src)
+	{
+		mImpl.Append(&src.mImpl);
+	}
+	void AppendArray(_Type* src, int count)
+	{
+		mImpl.AppendArray((BYTE*)src, count);
+	}
+	void RemoveAt(UINT index)
+	{
+		mImpl.RemoveAt(index);
+	}
+	void Clear(vBOOL bFreeMemory)
+	{
+		mImpl.Clear(bFreeMemory);
+	}
+};
+
 class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
 CsQueue : public VIUnknown
 {

@@ -19,6 +19,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Support\CPerlin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\UActionChain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\UBitset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\UNativeDictionary.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UNativeWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UPooledObject.cs" />

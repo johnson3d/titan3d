@@ -385,3 +385,21 @@ namespace EngineNS.Graphics.Pipeline
         }
     }
 }
+
+
+namespace EngineNS.RHI
+{
+    public partial class CDrawCall
+    {
+        public void BindGBuffer(Graphics.Pipeline.UGraphicsBuffers GBuffers)
+        {
+            unsafe
+            {
+                if (GBuffers.PerViewportCBuffer != null)
+                    mCoreObject.BindCBufferAll(Effect.CBPerViewportIndex, GBuffers.PerViewportCBuffer.mCoreObject);
+                if (GBuffers.Camera.PerCameraCBuffer != null)
+                    mCoreObject.BindCBufferAll(Effect.CBPerCameraIndex, GBuffers.Camera.PerCameraCBuffer.mCoreObject);
+            }
+        }
+    }
+}

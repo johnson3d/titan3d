@@ -70,13 +70,13 @@ namespace EngineNS.RHI
     {
         public CShaderResourceView()
         {
-            System.Threading.Interlocked.Increment(ref NunOfInstance);
+            System.Threading.Interlocked.Increment(ref NumOfInstance);
         }
         ~CShaderResourceView()
         {
-            System.Threading.Interlocked.Decrement(ref NunOfInstance);
+            System.Threading.Interlocked.Decrement(ref NumOfInstance);
         }
-        public static int NunOfInstance = 0;
+        public static int NumOfInstance = 0;
         public const string AssetExt = ".srv";
 
         public class UPicDesc

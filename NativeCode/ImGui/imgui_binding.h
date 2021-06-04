@@ -142,7 +142,7 @@ public:
 		return ImGui::End();
 	}
 	// Child Windows
-	static bool          BeginChild(const char* str_id, const ImVec2* size = &ImVec2(0, 0), bool border = false, ImGuiWindowFlags_ flags = (ImGuiWindowFlags_)0)
+	static bool          BeginChild(const char* str_id, const ImVec2* size/* = &ImVec2(0, 0)*/, bool border = false, ImGuiWindowFlags_ flags = (ImGuiWindowFlags_)0)
 	{
 		return ImGui::BeginChild(str_id, *size, border, flags);
 	}
@@ -202,7 +202,7 @@ public:
 		return ImGui::GetWindowHeight();
 	}
 	// Prefer using SetNextXXX functions (before Begin) rather that SetXXX functions (after Begin).
-	static void          SetNextWindowPos(const ImVec2* pos, ImGuiCond_ cond, const ImVec2* pivot = &ImVec2(0, 0))
+	static void          SetNextWindowPos(const ImVec2* pos, ImGuiCond_ cond, const ImVec2* pivot/* = &ImVec2(0, 0)*/)
 	{
 		return ImGui::SetNextWindowPos(*pos, cond, *pivot);
 	}
@@ -600,7 +600,7 @@ public:
 		return ImGui::BulletText(fmt);
 	}
 	// Widgets: Main
-	static bool          Button(const char* label, const ImVec2* size = &ImVec2(0, 0))
+	static bool          Button(const char* label, const ImVec2* size/* = &ImVec2(0, 0)*/)
 	{
 		return ImGui::Button(label, *size);
 	}
@@ -616,7 +616,7 @@ public:
 	{
 		return ImGui::ArrowButton(str_id, dir);
 	}
-	static void          Image(ImTextureID user_texture_id, const ImVec2* size, const ImVec2* uv0 = &ImVec2(0, 0), const ImVec2* uv1 = &ImVec2(1, 1), const ImVec4* tint_col = &ImVec4(1, 1, 1, 1), const ImVec4* border_col = &ImVec4(0, 0, 0, 0))
+	static void          Image(ImTextureID user_texture_id, const ImVec2* size, const ImVec2* uv0/* = &ImVec2(0, 0)*/, const ImVec2* uv1/* = &ImVec2(1, 1)*/, const ImVec4* tint_col/* = &ImVec4(1, 1, 1, 1)*/, const ImVec4* border_col/* = &ImVec4(0, 0, 0, 0)*/)
 	{
 		return ImGui::Image(user_texture_id, *size, *uv0, *uv1, *tint_col, *border_col);
 	}
@@ -932,11 +932,11 @@ public:
 		return ImGui::SetNextItemOpen(is_open, cond);
 	}
 	// Widgets: Selectables
-	static bool          Selectable(const char* label, bool selected, ImGuiSelectableFlags_ flags = (ImGuiSelectableFlags_)0, const ImVec2* size = &ImVec2(0, 0))
+	static bool          Selectable(const char* label, bool selected, ImGuiSelectableFlags_ flags/* = (ImGuiSelectableFlags_)0*/, const ImVec2* size/* = &ImVec2(0, 0)*/)
 	{
 		return ImGui::Selectable(label, selected, flags, *size);
 	}
-	static bool          Selectable(const char* label, bool* p_selected, ImGuiSelectableFlags_ flags = (ImGuiSelectableFlags_)0, const ImVec2* size = &ImVec2(0, 0))
+	static bool          Selectable(const char* label, bool* p_selected, ImGuiSelectableFlags_ flags/* = (ImGuiSelectableFlags_)0*/, const ImVec2* size/* = &ImVec2(0, 0)*/)
 	{
 		return ImGui::Selectable(label, p_selected, flags, *size);
 	}

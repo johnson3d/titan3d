@@ -6,7 +6,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 {
     public class UMobileFSPolicy : IRenderPolicy
     {
-        public UDrawBuffers BasePass = new UDrawBuffers();
+        public UPassDrawBuffers BasePass = new UPassDrawBuffers();
         public RenderPassDesc PassDesc = new RenderPassDesc();
         public RHI.CShaderResourceView EnvMapSRV;
         public override RHI.CShaderResourceView GetFinalShowRSV()
@@ -84,9 +84,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickLogic()
         {
-            var cmdlist = BasePass.DrawCmdList.mCoreObject;
-            cmdlist.ClearMeshDrawPassArray();
-            cmdlist.SetViewport(GBuffers.ViewPort.mCoreObject);
+            BasePass.ClearMeshDrawPassArray();
+            BasePass.SetViewport(GBuffers.ViewPort);
             //cmdlist.SetScissorRect(ScissorRect.mCoreObject.Ptr);
             foreach (var i in VisibleMeshes)
             {
@@ -100,27 +99,19 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                         continue;
 
                     GBuffers.SureCBuffer(drawcall.Effect, "UMobileFSPolicy");
-                    if (GBuffers.PerViewportCBuffer != null)
-                        drawcall.mCoreObject.BindCBufferAll(drawcall.Effect.CBPerViewportIndex, GBuffers.PerViewportCBuffer.mCoreObject);
-                    if (GBuffers.Camera.PerCameraCBuffer != null)
-                        drawcall.mCoreObject.BindCBufferAll(drawcall.Effect.CBPerCameraIndex, GBuffers.Camera.PerCameraCBuffer.mCoreObject);
-                    
-                    cmdlist.PushDrawCall(drawcall.mCoreObject);
+                    drawcall.BindGBuffer(GBuffers);
+
+                    var layer = i.Atoms[j].Material.RenderLayer;
+                    BasePass.PushDrawCall(layer, drawcall);
                 }
             }
-            cmdlist.BeginCommand();
-            cmdlist.BeginRenderPass(ref PassDesc, GBuffers.FrameBuffers.mCoreObject);
-            int DPLimitter = int.MaxValue;
-            //IDrawCall* tmp = (IDrawCall*)0;
-            cmdlist.BuildRenderPass(0, DPLimitter, (IDrawCall**)0);
-            cmdlist.EndRenderPass();
-            cmdlist.EndCommand();
+
+            BasePass.BuildRenderPass(ref PassDesc, GBuffers.FrameBuffers);
         }
         public unsafe override void TickRender()
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            var cmdlist = BasePass.CommitCmdList.mCoreObject;
-            cmdlist.Commit(rc.mCoreObject);
+            BasePass.Commit(rc);
         }
         public unsafe override void TickSync()
         {

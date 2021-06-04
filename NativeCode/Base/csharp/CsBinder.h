@@ -11,6 +11,15 @@ namespace EngineNS::Rtti
 	struct UNativeCoreProvider;
 }
 
+#pragma pack(push)
+#pragma pack(1)
+template <class Type>
+struct PInvokePOD
+{
+	alignas(alignof(Type)) char MemData[sizeof(Type)];
+};
+#pragma pack(pop)
+
 NS_BEGIN
 
 struct FDNObjectHandle
@@ -45,6 +54,12 @@ UCs2CppBase
 	static EngineNS::Rtti::UNativeCoreProvider* GetNativeCoreProvider();
 };
 
+template<class _Type>
+struct VTypeGetCSDesc
+{
+	static const char* GetCSTypeName() { return nullptr; }
+};
+
 #pragma pack(push)
 #pragma pack(4)
 struct UAnyValue
@@ -64,6 +79,7 @@ struct UAnyValue
 		UI64,
 		F32,
 		F64,
+		Name,
 		Struct,
 		Ptr,
 		V2,
@@ -114,6 +130,7 @@ struct UAnyValue
 		float mF32Value;
 		double mF64Value;
 		void* mPointer;
+		int mNameIndex;
 		FStructDesc mStruct;
 		FDNObjectHandle mGCHandle;
 		v3dVector2_t mV2;
@@ -212,6 +229,12 @@ struct UAnyValue
 		mValueType = EValueType::F64;
 		mF64Value = v;
 	}
+	void SetName(const VNameString& name)
+	{
+		Dispose();
+		mValueType = EValueType::Name;
+		mNameIndex = name.Index;
+	}
 	void SetVector2(v3dVector2_t v)
 	{
 		Dispose();
@@ -229,6 +252,251 @@ struct UAnyValue
 		Dispose();
 		mValueType = EValueType::V4;
 		mV4 = v;
+	}
+
+	template<class _Type>
+	void GetValue(_Type& v)
+	{
+		ASSERT(mValueType == EValueType::ManagedHandle);
+		ASSERT(mStruct.mStructSize == sizeof(_Type));
+		CoreSDK::MemoryCopy(&v, mStruct.mStructPointer, sizeof(_Type));
+	}
+	void GetValue(char& v)
+	{
+		ASSERT(mValueType == EValueType::I8);
+		v = mI8Value;
+	}
+	void GetValue(short& v)
+	{
+		ASSERT(mValueType == EValueType::I16);
+		v = mI16Value;
+	}
+	void GetValue(int& v)
+	{
+		ASSERT(mValueType == EValueType::I32);
+		v = mI32Value;
+	}
+	void GetValue(INT64& v)
+	{
+		ASSERT(mValueType == EValueType::I64);
+		v = mI64Value;
+	}
+	void GetValue(BYTE& v)
+	{
+		ASSERT(mValueType == EValueType::UI8);
+		v = mUI8Value;
+	}
+	void GetValue(UINT16& v)
+	{
+		ASSERT(mValueType == EValueType::UI16);
+		v = mUI16Value;
+	}
+	void GetValue(UINT& v)
+	{
+		ASSERT(mValueType == EValueType::UI32);
+		v = mUI32Value;
+	}
+	void GetValue(UINT64& v)
+	{
+		ASSERT(mValueType == EValueType::UI64);
+		v = mUI64Value;
+	}
+	void GetValue(float& v)
+	{
+		ASSERT(mValueType == EValueType::F32);
+		v = mF32Value;
+	}
+	void GetValue(double& v)
+	{
+		ASSERT(mValueType == EValueType::F64);
+		v = mF64Value;
+	}
+	void GetValue(VNameString& v)
+	{
+		ASSERT(mValueType == EValueType::Name);
+		v.Index = mNameIndex;
+	}
+	void GetValue(void*& v)
+	{
+		ASSERT(mValueType == EValueType::Ptr);
+		v = mPointer;
+	}
+	void GetValue(FDNObjectHandle& v)
+	{
+		ASSERT(mValueType == EValueType::ManagedHandle);
+		v = mPointer;
+	}
+	template<class _Type>
+	void SetValue(const _Type& v)
+	{
+		SetStruct<_Type>(v, VTypeGetCSDesc<_Type>::GetCSTypeName());
+	}
+	void SetValue(const char v)
+	{
+		SetI8(v);
+	}
+	void SetValue(const short v)
+	{
+		SetI16(v);
+	}
+	void SetValue(const int v)
+	{
+		SetI32(v);
+	}
+	void SetValue(const INT64 v)
+	{
+		SetI64(v);
+	}
+	void SetValue(const BYTE v)
+	{
+		SetUI8(v);
+	}
+	void SetValue(const UINT16 v)
+	{
+		SetUI16(v);
+	}
+	void SetValue(const UINT32 v)
+	{
+		SetUI32(v);
+	}
+	void SetValue(const UINT64 v)
+	{
+		SetUI64(v);
+	}
+	void SetValue(const float v)
+	{
+		SetF32(v);
+	}
+	void SetValue(const double v)
+	{
+		SetF64(v);
+	}
+	void SetValue(const VNameString v)
+	{
+		SetName(v);
+	}
+	void SetValue(const v3dVector2_t v)
+	{
+		SetVector2(v);
+	}
+	void SetValue(const v3dVector3_t v)
+	{
+		SetVector3(v);
+	}
+	void SetValue(const v3dVector4_t v)
+	{
+		SetQuaternion(v);
+	}
+	void SetValue(const void* v)
+	{
+		SetPointer((void*)v);
+	}
+	void SetValue(const FDNObjectHandle& v)
+	{
+		SetManagedHandle(v);
+	}
+	friend constexpr bool operator ==(const UAnyValue& lh, const UAnyValue& rh)
+	{
+		if (lh.mValueType != rh.mValueType)
+			return false;
+		switch (lh.mValueType)
+		{
+			case Unknown:
+			case ManagedHandle:
+			case I8:
+				return lh.mI8Value == rh.mI8Value;
+			case I16:
+				return lh.mI16Value == rh.mI16Value;
+			case I32:
+				return lh.mI32Value == rh.mI32Value;
+			case I64:
+				return lh.mI64Value == rh.mI64Value;
+			case UI8:
+				return lh.mUI8Value == rh.mUI8Value;
+			case UI16:
+				return lh.mUI16Value == rh.mUI16Value;
+			case UI32:
+				return lh.mUI32Value == rh.mUI32Value;
+			case UI64:
+				return lh.mUI64Value == rh.mUI64Value;
+			case F32:
+				return lh.mF32Value == rh.mF32Value;
+			case F64:
+				return lh.mF64Value == rh.mF64Value;
+			case Name:
+				return lh.mNameIndex == rh.mNameIndex;
+			case Struct:
+				{
+					if (lh.mStruct.mStructSize != rh.mStruct.mStructSize)
+						return false;
+					return CoreSDK::MemoryCmp(lh.mStruct.mStructPointer, rh.mStruct.mStructPointer, lh.mStruct.mStructSize) == 0;
+				}
+			case Ptr:
+				return lh.mPointer == rh.mPointer;
+			case V2:
+			case V3:
+			case V4:
+			default:
+				break;
+		}
+		return false;
+	}
+	friend constexpr bool operator !=(const UAnyValue& lh, const UAnyValue& rh)
+	{
+		return !(lh == rh);
+	}
+	friend constexpr bool operator < (const UAnyValue& lh, const UAnyValue& rh)
+	{
+		if (lh.mValueType < rh.mValueType)
+			return true;
+		else if (lh.mValueType > rh.mValueType)
+			return false;
+		else
+		{
+			switch (lh.mValueType)
+			{
+				case Unknown:
+				case ManagedHandle:
+				case I8:
+					return lh.mI8Value < rh.mI8Value;
+				case I16:
+					return lh.mI16Value < rh.mI16Value;
+				case I32:
+					return lh.mI32Value < rh.mI32Value;
+				case I64:
+					return lh.mI64Value < rh.mI64Value;
+				case UI8:
+					return lh.mUI8Value < rh.mUI8Value;
+				case UI16:
+					return lh.mUI16Value < rh.mUI16Value;
+				case UI32:
+					return lh.mUI32Value < rh.mUI32Value;
+				case UI64:
+					return lh.mUI64Value < rh.mUI64Value;
+				case F32:
+					return lh.mF32Value < rh.mF32Value;
+				case F64:
+					return lh.mF64Value < rh.mF64Value;
+				case Name:
+					return lh.mNameIndex < rh.mNameIndex;
+				case Struct:
+					{
+						if (lh.mStruct.mStructSize < rh.mStruct.mStructSize)
+							return true;
+						else if (lh.mStruct.mStructSize < rh.mStruct.mStructSize)
+							return false;
+						else
+							return CoreSDK::MemoryCmp(lh.mStruct.mStructPointer, rh.mStruct.mStructPointer, rh.mStruct.mStructSize) < 0;
+					}
+				case Ptr:
+					return (UINT64)lh.mPointer < (UINT64)rh.mPointer;
+				case V2:
+				case V3:
+				case V4:
+				default:
+					return lh.mUI64Value < rh.mUI64Value;
+			}
+		}
 	}
 };
 #pragma pack(pop)

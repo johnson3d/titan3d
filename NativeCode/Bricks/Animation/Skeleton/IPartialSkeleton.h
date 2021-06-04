@@ -5,7 +5,7 @@
 namespace EngineNS
 {
 
-	class TR_CLASS(SV_Dispose = delete self)
+	class TR_CLASS(SV_NameSpace = EngineNS, SV_Dispose = self->Release())
 		IPartialSkeleton : public VIUnknown
 	{
 		public:
@@ -20,7 +20,7 @@ namespace EngineNS
 					return NULL;
 				return mBones[index.ToInt()]; 
 			}
-			inline int GetBoneNumber() const {
+			inline int GetBonesNum() const {
 				return (int)mBones.size();
 			}
 			IBone* FindBone(VNameString name) const {
@@ -29,27 +29,22 @@ namespace EngineNS
 					return nullptr;
 				return iter->second;
 			}
-			IBone* FindBoneByNameHash(int boneNameHashId) const {
-				return FindBone(boneNameHashId);
-			}
 			IBone* FindBone(int boneNameHashId) const {
 				auto iter = mBoneMap.find(boneNameHashId);
 				if (iter == mBoneMap.end())
 					return nullptr;
 				return iter->second;
 			}
-			int AddBone(IBone * pBone);
-			bool RemoveBone(UINT nameHash);
+			v3dxIndexInSkeleton AddBone(IBone * pBone);
 			inline IBone* GetRoot() const {
 				return GetBone(mRoot);
 			}
 			bool SetRoot(VNameString name);
-			void SetRootByIndex(const v3dxIndexInSkeleton& index) {
-				mRoot = index;
-			}
-			void GenerateHierarchy();
-			const std::vector<IBone*>& GetBones() { return mBones; }
-		protected:
+			void RefreshHierarchy();
+			const std::vector<IBone*>& GetBones()  const { return mBones; }
+		private:
+			bool RemoveBone(UINT nameHash);
+		private:
 			v3dxIndexInSkeleton			mRoot;
 			std::vector<IBone*>			mBones;
 			std::map<int, IBone*>		mBoneMap;

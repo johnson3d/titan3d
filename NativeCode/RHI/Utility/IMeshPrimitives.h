@@ -5,6 +5,7 @@
 #include "../../Math/v3dxBox3.h"
 #include "IGeometryMesh.h"
 #include "../IDrawCall.h"
+#include "../../Bricks/Animation/Skeleton/IPartialSkeleton.h"
 
 NS_BEGIN
 
@@ -38,6 +39,14 @@ public:
 	virtual vBOOL RestoreResource() override;
 	IGeometryMesh* GetGeomtryMesh() const {
 		return mGeometryMesh;
+	}
+	IPartialSkeleton* GetPartialSkeleton() const
+	{
+		return mPartialSkeleton;
+	}
+	void SetPartialSkeleton(IPartialSkeleton* value)
+	{
+		mPartialSkeleton = value;
 	}
 
 	TR_FUNCTION()
@@ -92,6 +101,8 @@ protected:
 	VModelDesc				mDesc;
 	v3dxBox3				mAABB;
 	IResourceState			mResourceState;
+
+	AutoRef<IPartialSkeleton> mPartialSkeleton;
 };
 
 class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)

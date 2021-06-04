@@ -86,7 +86,10 @@ bool IVKSwapChain::Init(IVKRenderContext* rc, const ISwapChainDesc* desc)
 	if (false == CheckSwapSurfaceFormat(surfaceFormat, scs.formats))
 		return false;
 
+	// TODO: chooseSwapPresentMode
 	VkPresentModeKHR presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+
+	// TODO: chooseSwapExtent
 	VkExtent2D extent;
 	extent.width = desc->Width;
 	extent.height = desc->Height;

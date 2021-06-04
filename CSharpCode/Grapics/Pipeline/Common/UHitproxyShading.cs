@@ -198,11 +198,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }   
             }
 
-            int DPLimitter = int.MaxValue;
             cmdlist.BeginCommand();
             cmdlist.BeginRenderPass(ref PassDesc, PickedBuffer.FrameBuffers.mCoreObject);
-            //IDrawCall* tmp = (IDrawCall*)0;
-            cmdlist.BuildRenderPass(0, DPLimitter, (IDrawCall**)0);
+            cmdlist.BuildRenderPass(0);
             cmdlist.EndRenderPass();
             cmdlist.EndCommand();
 

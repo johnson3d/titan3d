@@ -4,7 +4,23 @@ using System.Text;
 
 namespace EngineNS.Animation.Skeleton
 {
-    public class USocket : ILimb
+    public class USocketDesc : IO.BaseSerializer, ILimbDesc
     {
+        public VNameString Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    }
+    public class USocket : IO.BaseSerializer, ILimb
+    {
+        public USocket()
+        {
+
+        }
+        public USocket(USocketDesc desc)
+        {
+            mDesc = desc;
+        }
+
+        public List<ILimb> Children { get; set; } = new List<ILimb>();
+        private USocketDesc mDesc = null;
+        public ILimbDesc Desc => mDesc;
     }
 }

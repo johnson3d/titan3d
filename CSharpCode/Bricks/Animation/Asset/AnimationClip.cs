@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Animation
 {
-    public class UAnimationClip : IAnimationAsset
+    public class UAnimationClip : IO.BaseSerializer, IAnimationAsset
     {
         Data.UAnimationData AnimationData = null;
         public Base.AnimHierarchy AnimatedHierarchy
@@ -141,29 +141,6 @@ namespace EngineNS.Animation
                     }
                 }
             }
-        }
-
-        public async Task<bool> LoadXnd(IO.CXndHolder xndHolder)
-        {
-            await UEngine.Instance.EventPoster.Post(async () =>
-            {
-                AnimationData = new Data.UAnimationData();
-                await AnimationData.LoadXnd(xndHolder, xndHolder.RootNode.mCoreObject);
-
-                return true;
-            }, Thread.Async.EAsyncTarget.AsyncIO);
-            return true;
-        }
-
-        public async Task<bool> SaveXnd(IO.CXndHolder xndHolder)
-        {
-            await UEngine.Instance.EventPoster.Post(async () =>
-            {
-                var xnd = new CXndHolder("AnimationClip", 1, 0);
-                await AnimationData.SaveXnd(xndHolder, xnd.RootNode.mCoreObject);
-
-            }, Thread.Async.EAsyncTarget.AsyncIO);
-            return true;
         }
     }
 }

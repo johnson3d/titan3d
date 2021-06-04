@@ -6,75 +6,48 @@ namespace EngineNS.Animation
 {
     namespace Curve
     {
-        public struct TKeyframe<T, K> where T : unmanaged where K : unmanaged
+        public struct Keyframe
         {
             public float Time { get; set; }
-            public T Value { get; set; }
-            public K InSlope { get; set; }
-            public K OutSlope { get; set; }
+            public float Value { get; set; }
+            public float InSlope { get; set; }
+            public float OutSlope { get; set; }
         }
-        public struct TCurveCache<K>
+        public struct CurveCache
         {
             public int Index { get; set; }
             public float Time { get; set; }
             public float TimeEnd { get; set; }
-            public K Coeff0 { get; set; }
-            public K Coeff1 { get; set; }
-            public K Coeff2 { get; set; }
-            public K Coeff3 { get; set; }
+            public float Coeff0 { get; set; }
+            public float Coeff1 { get; set; }
+            public float Coeff2 { get; set; }
+            public float Coeff3 { get; set; }
         }
 
-        public class TCurve<T, K> where T : unmanaged where K : unmanaged
+        public class Curve : IO.BaseSerializer
         {
-            public List<TKeyframe<T, K>> KeyFramesList { get; set; }
-            public bool AddKeyframeBack(ref TKeyframe<T, K> keyframe)
+            [Rtti.Meta]
+            public List<Keyframe> KeyFramesList { get; set; }
+            public bool AddKeyframeBack(ref Keyframe keyframe)
             {
                 return true;
             }
-            public bool InsertKeyframe(uint index, ref TKeyframe<T, K> keyframe)
+            public bool InsertKeyframe(uint index, ref Keyframe keyframe)
             {
                 return true;
             }
 
             /// Evaluates the AnimationCurve caching the segment.
-            public T Evaluate(float curveT, ref TCurveCache<K> animCurveCache)
+            public float Evaluate(float curveT, ref CurveCache animCurveCache)
             {
                 var key = KeyFramesList[0];
                 var cache = animCurveCache;
                 return default;
             }
-            public T EvaluateClamp(float curveT)
+            public float EvaluateClamp(float curveT)
             {
                 return default;
             }
-
-            public bool LoadXnd(XndAttribute att)
-            {
-                att.BeginRead();
-                int length = 0;
-                att.Read(ref length);
-                for (int i = 0; i < length; ++i)
-                {
-                    TKeyframe<T, K> keyframe = new TKeyframe<T, K>();
-                    att.Read(ref keyframe);
-                    KeyFramesList.Add(keyframe);
-                }
-                att.EndRead();
-                return true;
-            }
-
-            public bool SaveXnd(XndAttribute att)
-            {
-                att.BeginWrite(1000);
-                att.Write(KeyFramesList.Count);
-                for (int i = 0; i < KeyFramesList.Count; ++i)
-                {
-                    att.Write(KeyFramesList[i]);
-                }
-                att.EndWrite();
-                return true;
-            }
-
         }
     }
 }

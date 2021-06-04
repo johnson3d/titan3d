@@ -159,12 +159,12 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             HitproxyPassDesc.mFBStoreAction_Stencil = FrameBufferStoreAction.StoreActionStore;
             HitproxyPassDesc.mStencilClearValue = 0u;
 
-            mReadHitproxyFence = rc.CreateFence();
-            unsafe
-            {
-                var cmdlist = BasePass.DrawCmdList.mCoreObject;
-                cmdlist.Signal(mReadHitproxyFence.mCoreObject, 0);
-            }
+            //mReadHitproxyFence = rc.CreateFence();
+            //unsafe
+            //{
+            //    var cmdlist = BasePass.DrawCmdList.mCoreObject;
+            //    cmdlist.Signal(mReadHitproxyFence.mCoreObject, 0);
+            //}
 
             await PickedProxiableManager.Initialize(this, x, y);
             await EditorFinalProcessor.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UEditorFinalShading>(), x, y);
@@ -256,16 +256,13 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         bool CanDrawHitproxy = false;
         public unsafe override void TickLogic()
         {
-            var cmdlist = BasePass.DrawCmdList.mCoreObject;
-            cmdlist.ClearMeshDrawPassArray();
+            BasePass.ClearMeshDrawPassArray();
+            BasePass.SetViewport(GBuffers.ViewPort);
 
             var cmdlist_hp = HitproxyPass.DrawCmdList.mCoreObject;
             cmdlist_hp.ClearMeshDrawPassArray();
-
-            cmdlist.SetViewport(GBuffers.ViewPort.mCoreObject);
             cmdlist_hp.SetViewport(GHitproxyBuffers.ViewPort.mCoreObject);
-            //cmdlist.SetScissorRect(ScissorRect.mCoreObject.Ptr);
-
+            
             foreach (var i in VisibleMeshes)
             {
                 if (i.Atoms == null)
@@ -278,12 +275,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                         if (drawcall != null)
                         {
                             GBuffers.SureCBuffer(drawcall.Effect, "UMobileEditorFSPolicy");
-                            if (GBuffers.PerViewportCBuffer != null)
-                                drawcall.mCoreObject.BindCBufferAll(drawcall.Effect.CBPerViewportIndex, GBuffers.PerViewportCBuffer.mCoreObject);
-                            if (GBuffers.Camera.PerCameraCBuffer != null)
-                                drawcall.mCoreObject.BindCBufferAll(drawcall.Effect.CBPerCameraIndex, GBuffers.Camera.PerCameraCBuffer.mCoreObject);
+                            drawcall.BindGBuffer(GBuffers);
 
-                            cmdlist.PushDrawCall(drawcall.mCoreObject);
+                            var layer = i.Atoms[j].Material.RenderLayer;
+                            BasePass.PushDrawCall(layer, drawcall);
                         }
                     }
 
@@ -293,31 +288,21 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                         if (hpDrawcall != null)
                         {
                             GHitproxyBuffers.SureCBuffer(hpDrawcall.Effect, "UMobileEditorFSPolicy.HitproxyBuffers");
-
-                            if (GHitproxyBuffers.PerViewportCBuffer != null)
-                                hpDrawcall.mCoreObject.BindCBufferAll(hpDrawcall.Effect.CBPerViewportIndex, GHitproxyBuffers.PerViewportCBuffer.mCoreObject);
-                            if (GHitproxyBuffers.Camera.PerCameraCBuffer != null)
-                                hpDrawcall.mCoreObject.BindCBufferAll(hpDrawcall.Effect.CBPerCameraIndex, GHitproxyBuffers.Camera.PerCameraCBuffer.mCoreObject);
-
+                            hpDrawcall.BindGBuffer(GHitproxyBuffers);
+                            
                             cmdlist_hp.PushDrawCall(hpDrawcall.mCoreObject);
                         }
                     }
                 }
             }
 
-            int DPLimitter = int.MaxValue;
-            cmdlist.BeginCommand();
-            cmdlist.BeginRenderPass(ref PassDesc, GBuffers.FrameBuffers.mCoreObject);
-            //IDrawCall* tmp = (IDrawCall*)0;
-            cmdlist.BuildRenderPass(0, DPLimitter, (IDrawCall**)0);
-            cmdlist.EndRenderPass();
-            cmdlist.EndCommand();
+            BasePass.BuildRenderPass(ref PassDesc, GBuffers.FrameBuffers);
 
             if (CanDrawHitproxy)
             {
                 cmdlist_hp.BeginCommand();
                 cmdlist_hp.BeginRenderPass(ref HitproxyPassDesc, GHitproxyBuffers.FrameBuffers.mCoreObject);
-                cmdlist_hp.BuildRenderPass(0, DPLimitter, (IDrawCall**)0);
+                cmdlist_hp.BuildRenderPass(0);
                 cmdlist_hp.EndRenderPass();
                 cmdlist_hp.EndCommand();
 
@@ -337,8 +322,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public unsafe override void TickRender()
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            var cmdlist = BasePass.CommitCmdList.mCoreObject;
-            cmdlist.Commit(rc.mCoreObject);
+            BasePass.Commit(rc);
 
             var cmdlist_hp = HitproxyPass.CommitCmdList.mCoreObject;
             cmdlist_hp.Commit(rc.mCoreObject);

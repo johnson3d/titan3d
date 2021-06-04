@@ -117,7 +117,6 @@ bool ID11ShaderResourceView::Init(ID11RenderContext* rc, ID11GpuBuffer* pBuffer,
 	if (FAILED(hr))
 		return false;
 	m_pDX11SRV = pSrv;
-	//m_pDX11SRV->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen("ShaderResource"), "ShaderResource");
 	return true;
 }
 

@@ -3,36 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
-{
-    public class UDrawBuffers
-    {
-        private RHI.CCommandList[] mCmdLists = new RHI.CCommandList[2];
-        public void Initialize(RHI.CRenderContext rc)
-        {
-            var desc = new ICommandListDesc();
-            mCmdLists[0] = rc.CreateCommandList(ref desc);
-            mCmdLists[1] = rc.CreateCommandList(ref desc);
-        }
-        public RHI.CCommandList DrawCmdList
-        {
-            get { return mCmdLists[0]; }
-        }
-        public RHI.CCommandList CommitCmdList
-        {
-            get { return mCmdLists[1]; }
-        }
-        public void SwapBuffer()
-        {
-            var save = mCmdLists[0];
-            mCmdLists[0] = mCmdLists[1];
-            mCmdLists[1] = save;
-        }
-        public void SetDebugName(string name)
-        {
-            mCmdLists[0].mCoreObject.SetDebugName(name);
-            mCmdLists[1].mCoreObject.SetDebugName(name);
-        }
-    }
+{   
     public class IRenderPolicy
     {
         public enum EShadingType

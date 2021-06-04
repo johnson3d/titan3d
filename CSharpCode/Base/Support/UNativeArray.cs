@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Support
 {
-    public class UNativeArray<T> : IDisposable, IEnumerable<T> where T : unmanaged
+    public struct UNativeArray<T> : IDisposable, IEnumerable<T> where T : unmanaged
     {
         public CsValueList mCoreObject;
         public static UNativeArray<T> CreateInstance()
@@ -107,47 +107,32 @@ namespace EngineNS.Support
         }
         public void Add(T item)
         {
-            lock (this)
+            unsafe
             {
-                unsafe
-                {
-                    mCoreObject.AddValue((byte*)(&item));
-                }
+                mCoreObject.AddValue((byte*)(&item));
             }
         }
         public void Append(UNativeArray<T> src)
         {
-            lock (this)
+            unsafe
             {
-                unsafe
-                {
-                    mCoreObject.Append(src.mCoreObject);
-                }
+                mCoreObject.Append(src.mCoreObject);
             }
         }
         public unsafe void Append(T* scr, int count)
         {
-            lock (this)
+            unsafe
             {
-                unsafe
-                {
-                    mCoreObject.AppendArray((byte*)scr, count);
-                }
+                mCoreObject.AppendArray((byte*)scr, count);
             }
         }
         public void RemoveAt(int index)
         {
-            lock (this)
-            {
-                mCoreObject.RemoveAt((uint)index);
-            }
+            mCoreObject.RemoveAt((uint)index);
         }
         public void Clear(bool bFreeMemory = true)
         {
-            lock (this)
-            {
-                mCoreObject.Clear(bFreeMemory?1:0);
-            }
+            mCoreObject.Clear(bFreeMemory ? 1 : 0);
         }
         public IntPtr UnsafeAddressAt(int index)
         {
@@ -188,10 +173,7 @@ namespace EngineNS.Support
                     var ptr = (IntPtr)mCoreObject.GetAddressAt((uint)index);
                     if (ptr == IntPtr.Zero)
                         return;
-                    lock (this)
-                    {
-                        CoreSDK.MemoryCopy(ptr.ToPointer(), &value, (UInt32)sizeof(T));
-                    }
+                    CoreSDK.MemoryCopy(ptr.ToPointer(), &value, (UInt32)sizeof(T));
                 }
             }
         }

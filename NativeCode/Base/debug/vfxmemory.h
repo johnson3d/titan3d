@@ -227,11 +227,6 @@ namespace	VFX_Memory
 		__memory_init();
 		~__memory_init();
 	};
-
-	extern "C"
-	{
-		 void vfxMemory_SetDebugInfo(void* memory, LPCSTR info);
-	}
 }
 
 #endif //end __VFX_MEMORY_H__

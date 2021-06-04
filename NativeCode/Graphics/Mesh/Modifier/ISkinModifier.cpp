@@ -41,20 +41,20 @@ void ISkinModifier::GetProvideStreams(DWORD& pOutStreams)
 	pOutStreams |= ((1 << VOT_Position) | (1 << VOT_Normal) | (1 << VOT_Tangent) | (1 << VOT_WorldPos) | (1 << VOT_UV) | (1 << VOT_Color) | (1 << VST_SkinIndex) | (1 << VST_SkinWeight));
 }
 
-bool ISkinModifier::SetToRenderStream(IConstantBuffer* cb, int AbsBonePos, int AbsBoneQuat, ISkeletonPose* skeletonPose)
+bool ISkinModifier::FlushSkinPose(IConstantBuffer* cb, int AbsBonePos, int AbsBoneQuat, IPartialSkeleton* partialSkeleton,ISkeletonPose* skeletonPose)
 {
-	if (mPartialSkeleton== nullptr)
+	if (partialSkeleton == nullptr)
 		return FALSE;
 	if (skeletonPose == nullptr)
 		return FALSE;
 	//shader buffer大小改成了 360个骨骼支持。Shaders\CoreShader\Modifier\SkinModifier.var
-	v3dxQuaternion* absPos = (v3dxQuaternion*)cb->GetVarPtrToWrite(AbsBonePos, (int)mPartialSkeleton->GetBoneNumber() * sizeof(v3dxQuaternion));
+	v3dxQuaternion* absPos = (v3dxQuaternion*)cb->GetVarPtrToWrite(AbsBonePos, (int)partialSkeleton->GetBonesNum() * sizeof(v3dxQuaternion));
 	if (absPos == nullptr)
 		return FALSE;
-	v3dxQuaternion* absQuat = (v3dxQuaternion*)cb->GetVarPtrToWrite(AbsBoneQuat, (int)mPartialSkeleton->GetBoneNumber() * sizeof(v3dxQuaternion));
+	v3dxQuaternion* absQuat = (v3dxQuaternion*)cb->GetVarPtrToWrite(AbsBoneQuat, (int)partialSkeleton->GetBonesNum() * sizeof(v3dxQuaternion));
 	if (absPos == nullptr)
 		return FALSE;
-	const auto& bones = mPartialSkeleton->GetBones();
+	const auto& bones = partialSkeleton->GetBones();
 	for (size_t i = 0; i < bones.size(); i++)
 	{
 		IBone* bone = bones[i];
@@ -63,11 +63,11 @@ bool ISkinModifier::SetToRenderStream(IConstantBuffer* cb, int AbsBonePos, int A
 			//这里进行translateRetarget,？？？？根据选项选择用自己的shared，自己的transform等等
 			v3dxTransform trans;
 			const IBoneDesc* shared = nullptr;
-			EngineNS::IBonePose* outBone = skeletonPose->FindBonePose(bone->Desc->Name);
+			EngineNS::IBonePose* outBone = skeletonPose->FindBonePose(bone->Desc.Name);
 			if (outBone)
 			{
 				trans = outBone->Transform;
-				shared = bone->Desc;
+				shared = &bone->Desc;
 			}
 			if (shared == nullptr)
 			{

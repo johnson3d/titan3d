@@ -296,11 +296,17 @@ namespace ClangHeadTools.CSharp
                 }
 
                 bool bRetConvert = false;
+                string podDefine;
                 var retTypeStr = GetFullNameCpp(i.ReturnType);
-                if (GetCReturnMapper(retTypeStr) != null)
+                if (GetCReturnMapper(i.ReturnType, retTypeStr, out podDefine) != null)
                 {
-                    retTypeStr = GetCReturnMapper(retTypeStr);
+                    retTypeStr = GetCReturnMapper(i.ReturnType, retTypeStr, out podDefine);
                     bRetConvert = true;
+                }
+
+                if (podDefine != null)
+                {
+                    AddLine(podDefine);
                 }
 
                 if (i.Parameters.Count > 0)
@@ -365,11 +371,15 @@ namespace ClangHeadTools.CSharp
 
                 bool bRetConvert = false;
                 var retTypeStr = GetFullNameCpp(i.Type);
-                if (GetCReturnMapper(retTypeStr) != null)
+                string podDefine;
+                if (GetCReturnMapper(i.Type, retTypeStr, out podDefine) != null)
                 {
-                    retTypeStr = GetCReturnMapper(retTypeStr);
+                    retTypeStr = GetCReturnMapper(i.Type, retTypeStr, out podDefine);
                     bRetConvert = true;
                 }
+
+                if (podDefine != null)
+                    AddLine(podDefine);
 
                 AddLine($"extern \"C\" {GlueExporter} {retTypeStr} {GluePrefix}_{fn}_{mDecl.Name}__FieldGet__{i.Name}({FullNameCpp}* self)");
                 PushBrackets();

@@ -221,6 +221,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             set; 
         } = ELightingMode.Stand;
         [Rtti.Meta]
+        public ERenderLayer RenderLayer
+        {
+            get;
+            set;
+        } = ERenderLayer.RL_Opaque;
+        [Rtti.Meta]
         public bool AlphaTest { get; set; } = false;
         internal virtual void UpdateShaderCode(bool EmptyMaterial)
         {

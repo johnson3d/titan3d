@@ -369,8 +369,11 @@ void IDrawCall::BuildPass(ICommandList* cmd, vBOOL bImmCBuffer)
 			cmd->OnPassBuilt(cmd, this);
 		}
 
-		cmd->mDrawCall++;
-		cmd->mDrawTriangle += NumInstances * dpDesc->NumPrimitives;
+		if(cmd->mPipelineStat!=nullptr)
+		{
+			cmd->mPipelineStat->mDrawCall++;
+			cmd->mPipelineStat->mDrawTriangle += NumInstances * dpDesc->NumPrimitives;
+		}
 
 		if (IndirectDrawArgsBuffer)
 		{

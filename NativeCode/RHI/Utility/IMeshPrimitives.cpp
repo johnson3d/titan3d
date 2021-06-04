@@ -281,6 +281,21 @@ void IMeshPrimitives::Save2Xnd(IRenderContext* rc, XndNode* pNode)
 		pAttr->Write(buffData.GetData(), desc.ByteWidth);
 		pAttr->EndWrite();
 	}
+
+	XndNode* node = pNode->GetOrAddNode("PartialSkeleton", 0, 0);
+	{
+		XndAttribute* boneNumAttr = node->GetOrAddAttribute("BoneNum", 0, 0);
+		boneNumAttr->BeginWrite();
+		boneNumAttr->Write(mPartialSkeleton->GetBonesNum());
+		boneNumAttr->EndWrite();
+		XndAttribute* descAttr = node->GetOrAddAttribute("BoneDescs", 0, 0);
+		descAttr->BeginWrite();
+		for (int i = 0; i < mPartialSkeleton->GetBonesNum(); ++i)
+		{
+			descAttr->Write(mPartialSkeleton->GetBones()[i]->Desc);
+		}
+		descAttr->EndWrite();
+	}
 }
 
 vBOOL IMeshPrimitives::LoadXnd(IRenderContext* rc, const char* name, XndHolder* xnd, bool isLoad)
@@ -333,6 +348,28 @@ vBOOL IMeshPrimitives::LoadXnd(IRenderContext* rc, const char* name, XndHolder* 
 	{
 		return FALSE;
 	}
+
+	XndNode* node = pNode->TryGetChildNode("PartialSkeleton");
+	if(node)
+	{
+		XndAttribute* boneNumAttr = node->TryGetAttribute("BoneNum");
+		boneNumAttr->BeginRead();
+		int boneNum = 0;
+		boneNumAttr->Read(boneNum);
+		boneNumAttr->EndRead();
+		XndAttribute* descAttr = node->GetOrAddAttribute("BoneDescs", 0, 0);
+		descAttr->BeginRead();
+		mPartialSkeleton = new IPartialSkeleton();
+		for (int i = 0; i < mPartialSkeleton->GetBonesNum(); ++i)
+		{
+			IBoneDesc boneDesc;
+			descAttr->Read(boneDesc);
+			mPartialSkeleton->AddBone(new IBone(boneDesc));
+		}
+		mPartialSkeleton->RefreshHierarchy();
+		descAttr->EndRead();
+	}
+
 
 	if (mAABB.IsEmpty())
 	{

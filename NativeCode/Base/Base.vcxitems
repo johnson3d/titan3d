@@ -19,6 +19,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)CoreSDK.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)CSharpAPI.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)csharp\CsBinder.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)csharp\CsDictionary.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)csharp\CsValueList.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)debug\vfxdebug.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)debug\vfxmemory.h" />
@@ -60,6 +61,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)CoreRtti.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)CoreSDK.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)csharp\CsBinder.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)csharp\CsDictionary.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)csharp\CsValueList.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)debug\vfxdebug.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)debug\vfxmemory.cpp" />

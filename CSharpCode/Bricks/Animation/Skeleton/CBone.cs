@@ -4,30 +4,33 @@ using System.Text;
 
 namespace EngineNS.Animation.Skeleton
 {
-    public struct IndexInSkeleton
+
+    public class CBone : AuxPtrType<IBone>
     {
-        public IndexInSkeleton(int index)
+        //ibone was created in c++
+        public static CBone Create(IBone iBone)
         {
-            Value = index;
+            CBone bone = new CBone(iBone);
+            for(int i = 0; i< iBone.GetChildNum(); ++i)
+            {
+                bone.mChildren.Add(iBone.GetChild(i));
+            }
+            return bone;
         }
-        public int ToInt()
-        {
-            return Value;
-        }
-        public bool IsValid()
-        {
-            return Value != -1 ? true : false ;
-        }
-        private int Value;
-    }
-    public class CBone : AuxPtrType<IBone>, ILimb
-    {
         public CBone(IBoneDesc boneDesc)
         {
             unsafe
             {
                 mCoreObject = IBone.CreateInstance(&boneDesc);
                 Desc = boneDesc;
+            }
+        }
+        protected CBone(IBone iBone)
+        {
+            mCoreObject = iBone;
+            unsafe
+            {
+                Desc = iBone.Desc;
             }
         }
         IndexInSkeleton GetChild(int index)
@@ -51,7 +54,8 @@ namespace EngineNS.Animation.Skeleton
             get => mCoreObject.Index;
             set => mCoreObject.Index = value;
         }
-        public List<IndexInSkeleton> Children { get; } = new List<IndexInSkeleton>();
+        protected List<IndexInSkeleton> mChildren = new List<IndexInSkeleton>();
+        public List<IndexInSkeleton> Children { get => mChildren; }
         //std::vector<USHORT>			GrantChildren;
         public IBoneDesc Desc { get; }
     }

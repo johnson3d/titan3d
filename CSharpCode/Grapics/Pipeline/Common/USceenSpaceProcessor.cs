@@ -64,8 +64,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var cmdlist = BasePass.DrawCmdList.mCoreObject;
             cmdlist.BeginCommand();
             cmdlist.BeginRenderPass(ref PassDesc, GBuffers.FrameBuffers.mCoreObject);
-            int DPLimitter = int.MaxValue;
-            cmdlist.BuildRenderPass(0, DPLimitter, (IDrawCall**)0);
+            cmdlist.BuildRenderPass(0);
             cmdlist.EndRenderPass();
             cmdlist.EndCommand();
         }
@@ -107,8 +106,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             cmdlist.BeginCommand();
             cmdlist.BeginRenderPass(ref PassDesc, GBuffers.FrameBuffers.mCoreObject);
-            int DPLimitter = int.MaxValue;
-            cmdlist.BuildRenderPass(0, DPLimitter, (IDrawCall**)0);
+            cmdlist.BuildRenderPass(0);
             cmdlist.EndRenderPass();
             cmdlist.EndCommand();
         }

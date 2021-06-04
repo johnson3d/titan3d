@@ -27,7 +27,7 @@ namespace MainEditor
                 System.GC.WaitForPendingFinalizers();
             }
 
-            while(EngineNS.RHI.CShaderResourceView.NunOfInstance>0)
+            while(EngineNS.RHI.CShaderResourceView.NumOfInstance>0)
             {
                 System.GC.Collect();
                 System.GC.WaitForPendingFinalizers();

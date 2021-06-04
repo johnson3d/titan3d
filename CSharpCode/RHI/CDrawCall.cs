@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.RHI
 {
-    public class CDrawCall : AuxPtrType<IDrawCall>
+    public partial class CDrawCall : AuxPtrType<IDrawCall>
     {
         public Graphics.Pipeline.Shader.UEffect Effect { get; private set; }
         public object TagObject { get; set; }

@@ -75,6 +75,8 @@ void ID11CommandList::EndCommand()
 
 void ID11CommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer)
 {
+	if (pRenderPassDesc == nullptr)
+		return;
 	if (mProfiler != nullptr && mProfiler->mNoPixelWrite)
 	{
 		pFrameBuffer = mProfiler->mOnePixelFB;
@@ -181,8 +183,6 @@ void ID11CommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuf
 
 void ID11CommandList::EndRenderPass()
 {
-	mDrawCall = 0;
-	mDrawTriangle = 0;
 	ICommandList::EndRenderPass();
 }
 

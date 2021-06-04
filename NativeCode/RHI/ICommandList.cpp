@@ -39,9 +39,6 @@ bool ICommandList::ContextState::IsSameScissors(IScissorRect* lh, IScissorRect* 
 
 ICommandList::ICommandList()
 {
-	mDrawCall = 0;
-	mDrawTriangle = 0;
-	mCmdCount = 0;
 	OnPassBuilt = nullptr;
 }
 
@@ -84,16 +81,18 @@ void ICommandList::SetGraphicsProfiler(GraphicsProfiler* profiler)
 	mProfiler.StrongRef(profiler);
 }
 
-void ICommandList::BuildRenderPass(vBOOL bImmCBuffer, int limitter, IDrawCall** ppPass)
+void ICommandList::BuildRenderPass(vBOOL bImmCBuffer)
 {
 	for (auto i = mPassArray.begin(); i != mPassArray.end(); i++)
 	{
 		(*i)->BuildPass(this, bImmCBuffer);
-		if (mDrawCall > limitter)
-			return;
-		if (ppPass != nullptr)
+
+		if(mPipelineStat!=nullptr)
 		{
-			*ppPass = *i;
+			if (mPipelineStat->IsOverLimit())
+				return;
+
+			mPipelineStat->mLastestDrawCall = *i;
 		}
 	}
 }

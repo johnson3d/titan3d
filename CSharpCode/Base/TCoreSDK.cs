@@ -41,6 +41,12 @@ namespace EngineNS
 
 public unsafe partial struct VNameString
 {
+    public static VNameString FromString(string name)
+    {
+        var result = new VNameString();
+        result.Index = VNameString.GetIndexFromString(name);
+        return result;
+    }
     public string Text
     {
         get

@@ -42,6 +42,8 @@ void IGLCommandList::EndCommand()
 
 void IGLCommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer)
 {
+	if (pRenderPassDesc == nullptr)
+		return;
 	if (mProfiler != nullptr && mProfiler->mNoPixelWrite)
 	{
 		pFrameBuffer = mProfiler->mOnePixelFB;
@@ -91,8 +93,6 @@ void IGLCommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuff
 
 void IGLCommandList::EndRenderPass()
 {
-	mDrawCall = 0;
-	mDrawTriangle = 0;
 	ICommandList::EndRenderPass();
 	
 	//mCmdList->BindFramebuffer(GL_FRAMEBUFFER, mSavedFrameBuffer);
@@ -125,7 +125,8 @@ void IGLCommandList::Commit(IRenderContext* pRHICtx)
 		_vfxTraceA("IGLCommandList::Execute Begin = %d", mCmdList->GetCommandNumber());
 	}
 	
-	mCmdCount = (UINT)mCmdList->mCommands.size();
+	if (mPipelineStat != nullptr)
+		mPipelineStat->mCmdCount = (UINT)mCmdList->mCommands.size();
 
 	{
 		mCmdList->Execute();

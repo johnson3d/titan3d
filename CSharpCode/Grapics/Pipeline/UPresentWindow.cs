@@ -90,8 +90,7 @@ namespace EngineNS.Graphics.Pipeline
             unsafe
             {
                 cmdlist.BeginRenderPass(ref SwapChainPassDesc, SwapChainBuffer.FrameBuffers.mCoreObject);
-                int DPLimitter = int.MaxValue;
-                cmdlist.BuildRenderPass(0, DPLimitter, (IDrawCall**)0);
+                cmdlist.BuildRenderPass(0);
                 cmdlist.EndRenderPass();
             }
             cmdlist.EndCommand();

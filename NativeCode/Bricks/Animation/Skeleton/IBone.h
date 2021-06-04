@@ -48,10 +48,10 @@ namespace EngineNS
 		IBone : public VIUnknown
 	{
 	public:
-		static IBone* Create(const IBoneDesc * desc);
-		IBone(const IBoneDesc * desc);
+		static IBone* Create(const IBoneDesc& desc);
+		IBone(const IBoneDesc& desc);
 	public:
-		int GetChildNumber() const {
+		int GetChildNum() const {
 			return (int)Children.size();
 		} 
 		v3dxIndexInSkeleton GetChild(int index) const {
@@ -71,7 +71,7 @@ namespace EngineNS
 		v3dxIndexInSkeleton						Index;
 		std::vector<v3dxIndexInSkeleton>		Children;
 		//std::vector<USHORT>			GrantChildren;
-		const IBoneDesc* Desc;
+		IBoneDesc Desc;
 	};
 
 

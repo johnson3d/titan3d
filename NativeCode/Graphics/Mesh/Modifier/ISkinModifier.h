@@ -19,11 +19,7 @@ public:
 	virtual void GetInputStreams(DWORD & pOutStreams);
 	virtual void GetProvideStreams(DWORD & pOutStreams);
 
-	bool SetToRenderStream(IConstantBuffer * cb, int AbsBonePos, int AbsBoneQuat, ISkeletonPose * pose);
-
-	void SetPartialSkeleton(IPartialSkeleton* val) { mPartialSkeleton = val; }
-protected:
-	IPartialSkeleton* mPartialSkeleton;
+	bool FlushSkinPose(IConstantBuffer * cb, int AbsBonePos, int AbsBoneQuat, IPartialSkeleton * partialSkeleton, ISkeletonPose * pose);
 };
 
 NS_END

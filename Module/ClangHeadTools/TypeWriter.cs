@@ -32,12 +32,34 @@ namespace ClangHeadTools
                 return result;
             return null;
         }
-        public static string GetCReturnMapper(string src)
+        public static string GetCReturnMapper(ClangSharp.Type type, string src, out string PodDefine)
         {
+            PodDefine = null;
+            var saved = src;
             src = src.Replace("::", ".");
             string result;
             if (mCReturnTypeMapper.TryGetValue(src, out result))
                 return result;
+
+            if (type.AsCXXRecordDecl != null)
+            {
+                if (src.EndsWith("*") == false)
+                {
+                    var name = src.Replace(".", "_");
+                    PodDefine = $"#ifndef PODDef_{name}\n";
+                    PodDefine += $"#define PODDef_{name}\n";
+                    PodDefine += "#pragma pack(push)\n";
+                    PodDefine += "#pragma pack(1)\n";
+                    PodDefine += $"const int OnlyUseByCodeGen_PodSize_{name} = sizeof({saved});\n";
+                    PodDefine += $"struct PInvokePOD__{name} {{ char MemData[OnlyUseByCodeGen_PodSize_{name}]; }};\n";
+                    PodDefine += "#pragma pack(pop)\n";
+                    PodDefine += "#endif\n";
+                    return $"PInvokePOD__{name}";
+
+                    //return $"PInvokePOD<{saved}>";
+                }
+            }
+
             return null;
         }
         public static string GetParameterMarshal(string src)

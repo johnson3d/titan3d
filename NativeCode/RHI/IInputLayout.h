@@ -24,11 +24,6 @@ IInputLayoutDesc : public VIUnknown
 	//only for d11,try to match input & vs layout.maybe It is not necessary
 	AutoRef<IShaderDesc>		ShaderDesc;
 
-	TR_CONSTRUCTOR()
-	IInputLayoutDesc()
-	{
-
-	}
 	TR_FUNCTION()
 	void AddElement(const char* SemanticName,
 				UINT SemanticIndex,

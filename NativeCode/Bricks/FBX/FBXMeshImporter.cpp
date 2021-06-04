@@ -282,28 +282,29 @@ namespace AssetImportAndExport
 			{
 				//child->mSharedData->InitMatrix = child->mSharedData->InitMatrix * parent->mSharedData->InitMatrix;
 			}
-			for (int i = 0; i < child->GetChildNumber(); ++i)
+			for (int i = 0; i < child->GetChildNum(); ++i)
 			{
 				ReCalculateBoneBindMatrix(skeleton->GetBone(child->GetChild(i)), child, skeleton);
 			}
 		}
 
-		void IBoneDesc_SetName(IBoneDesc* desc, const VNameString& name)
+		void IBoneDesc_SetName(IBoneDesc& desc, const VNameString& name)
 		{
-			desc->Name = name;
-			desc->NameHash = HashHelper::APHash(name.c_str());
+			desc.Name = name;
+			desc.NameHash = HashHelper::APHash(name.c_str());
 		}
-		void IBoneDesc_SetParent(IBoneDesc* desc, const VNameString& name)
+		void IBoneDesc_SetParent(IBoneDesc& desc, const VNameString& name)
 		{
-			desc->ParentName = name;
-			desc->ParentHash = HashHelper::APHash(name.c_str());
+			
+			desc.ParentName = name;
+			desc.ParentHash = HashHelper::APHash(name.c_str());
 		}
-		void IBoneDesc_SetBindMatrix(IBoneDesc* desc, const v3dxMatrix4& mat)
+		void IBoneDesc_SetBindMatrix(IBoneDesc& desc, const v3dxMatrix4& mat)
 		{
-			desc->InitMatrix = mat;
-			auto invMat = desc->InitMatrix.inverse();
-			desc->InvInitMatrix = invMat;
-			desc->InvInitMatrix.Decompose(desc->InvScale, desc->InvPos, desc->InvQuat);
+			desc.InitMatrix = mat;
+			auto invMat = desc.InitMatrix.inverse();
+			desc.InvInitMatrix = invMat;
+			desc.InvInitMatrix.Decompose(desc.InvScale, desc.InvPos, desc.InvQuat);
 		}
 
 		OverlappingVertexs::OverlappingVertexs(const std::vector<v3dxVector3>& InVertices, const std::vector<UINT>& InIndices, float ComparisonThreshold)
@@ -644,7 +645,7 @@ namespace AssetImportAndExport
 								if (attType != FbxNodeAttribute::eSkeleton && attType != FbxNodeAttribute::eNull)
 									continue;
 								FbxSkeleton* fbxBone = (FbxSkeleton*)attr;
-								IBoneDesc* boneDesc = new IBoneDesc();
+								IBoneDesc boneDesc;;
 								IBoneDesc_SetName(boneDesc, boneName.c_str());
 								auto mat = transformMatrix.Inverse() * linkTransformMatrix;
 								auto scaleT = mat.GetT() * meshDesc->Scale * mHostFBXImporter->GetFileImportDesc()->ScaleFactor;
@@ -697,8 +698,9 @@ namespace AssetImportAndExport
 
 						}
 
-						mPartialSkeleton->GenerateHierarchy();
+						mPartialSkeleton->RefreshHierarchy();
 						ReCalculateBoneBindMatrix(mPartialSkeleton->GetRoot(), NULL, mPartialSkeleton);
+						mMeshPrimitives->SetPartialSkeleton(mPartialSkeleton);
 					}
 				}
 
@@ -912,8 +914,8 @@ namespace AssetImportAndExport
 					return;
 				FbxSkeleton* fbxBone = (FbxSkeleton*)attr;
 
-				IBoneDesc* boneDesc = new IBoneDesc();
-				boneDesc->Name = boneName.c_str();
+				IBoneDesc boneDesc;
+				IBoneDesc_SetName(boneDesc ,boneName.c_str());
 				auto mat = boneNode->EvaluateGlobalTransform();
 				auto scaleT = mat.GetT() * mHostFBXImporter->GetFBXMeshDescs(mMeshIndex)->Scale;
 				mat.SetT(scaleT);

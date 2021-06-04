@@ -71,11 +71,179 @@ namespace EngineNS.Support
             UI64,
             F32,
             F64,
+            Name,
             Struct,
             Ptr,
             V2,
             V3,
             V4,
+        }
+        public unsafe void SetValue<T>(T v) where T : unmanaged
+        {
+            if (typeof(T) == typeof(sbyte))
+            {
+                SetI8(*(sbyte*)&v);
+            }
+            else if (typeof(T) == typeof(short))
+            {
+                SetI16(*(short*)&v);
+            }
+            else if (typeof(T) == typeof(int))
+            {
+                SetI32(*(int*)&v);
+            }
+            else if (typeof(T) == typeof(long))
+            {
+                SetI64(*(long*)&v);
+            }
+            else if (typeof(T) == typeof(byte))
+            {
+                SetUI8(*(byte*)&v);
+            }
+            else if (typeof(T) == typeof(ushort))
+            {
+                SetUI16(*(ushort*)&v);
+            }
+            else if (typeof(T) == typeof(uint))
+            {
+                SetUI32(*(uint*)&v);
+            }
+            else if (typeof(T) == typeof(ulong))
+            {
+                SetUI64(*(ulong*)&v);
+            }
+            else if (typeof(T) == typeof(VNameString))
+            {
+                SetName(*(VNameString*)&v);
+            }
+            else if (typeof(T) == typeof(Vector2))
+            {
+                SetVector2(*(Vector2*)&v);
+            }
+            else if (typeof(T) == typeof(Vector3))
+            {
+                SetVector3(*(Vector3*)&v);
+            }
+            else if (typeof(T) == typeof(Quaternion))
+            {
+                SetQuaternion(*(Quaternion*)&v);
+            }
+            else if (typeof(T) == typeof(IntPtr))
+            {
+                SetPointer(*(IntPtr*)&v);
+            }
+            else
+            {
+                SetStruct<T>(v);
+            }
+        }
+        private unsafe void CopyData(void* tar, int size)
+        {
+            fixed (sbyte* p = &mI8Value)
+            {
+                CoreSDK.MemoryCopy(tar, (void*)p, (uint)size);
+            }
+        }
+        public unsafe void GetValue<T>(ref T v) where T : unmanaged
+        {
+            if (typeof(T) == typeof(sbyte))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(short))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(int))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(long))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(byte))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(ushort))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(uint))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(ulong))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(VNameString))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(Vector2))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(Vector3))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(Quaternion))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(IntPtr))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else
+            {
+                fixed (T* p = &v)
+                {
+                    CoreSDK.MemoryCopy(p, mStruct.mStructPointer.ToPointer(), (uint)sizeof(T));
+                }
+            }
         }
         public struct FStructDesc : IDisposable
         {
@@ -157,6 +325,15 @@ namespace EngineNS.Support
         private IntPtr mPointer;
         public IntPtr Pointer { get => mPointer; }
         [FieldOffset(4)]
+        private VNameString mNameString;
+        public VNameString NameString
+        { 
+            get
+            {
+                return NameString;
+            }
+        }
+        [FieldOffset(4)]
         private FStructDesc mStruct;
         public FStructDesc Struct { get => mStruct; }
         [FieldOffset(4)]
@@ -211,6 +388,18 @@ namespace EngineNS.Support
             Dispose();
             mValueType = EValueType.Struct;
             mStruct.SetStruct(v, v.GetType(), sourceFilePath, sourceLineNumber);
+        }
+        public void SetName(string v)
+        {
+            Dispose();
+            mValueType = EValueType.Name;
+            mNameString = VNameString.FromString(v);
+        }
+        public void SetName(VNameString v)
+        {
+            Dispose();
+            mValueType = EValueType.Name;
+            mNameString = v;
         }
         public void SetPointer(IntPtr v)
         {

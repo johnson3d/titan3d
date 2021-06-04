@@ -97,9 +97,10 @@ namespace EngineNS.Graphics.Mesh
                     buffer.DestroyMe();
 
                     ImGuiAPI.Separator();
-
-                    PGAsset.OnDraw(false, false, false);
-
+                    if (PGAsset.SingleTarget != null)
+                    {
+                        PGAsset.OnDraw(false, false, false);
+                    }
                     ImGuiAPI.Separator();
 
                     sz = new Vector2(0, 0);
@@ -132,22 +133,33 @@ namespace EngineNS.Graphics.Mesh
                     {
                         meshImporter.Process(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
                         var mesh = meshImporter.GetMeshPrimitives();
-                        var partialSkeleton = meshImporter.GetPartialSkeleton();
-                        
-                        
                         var rn = RName.GetRName(mDir.Name + mName + CMeshPrimitives.AssetExt);
                         var xnd = new IO.CXndHolder("CMeshPrimitives", 0, 0);
                         mesh.Save2Xnd(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, xnd.RootNode.mCoreObject);
                         xnd.SaveXnd(rn.Address);
-                        mesh.NativeSuper.Release();
+                        
                         var ameta = new CMeshPrimitivesAMeta();
                         ameta.SetAssetName(rn);
                         ameta.AssetId = Guid.NewGuid();
                         ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(CMeshPrimitives));
                         ameta.Description = $"This is a {typeof(CMeshPrimitives).FullName}\n";
                         ameta.SaveAMeta();
-
                         UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
+                        var partialSkeleton = meshImporter.GetPartialSkeleton();
+                        Animation.Skeleton.USkeletonAsset ska = new Animation.Skeleton.USkeletonAsset();
+                        ska.Skeleton.MergeWith(partialSkeleton);
+                        rn = RName.GetRName(mDir.Name + mName + Animation.Skeleton.USkeletonAsset.AssetExt);
+                        ska.SaveAssetTo(rn);
+                        var sktameta = new Animation.Skeleton.USkeletonAssetAMeta();
+                        sktameta.SetAssetName(rn);
+                        sktameta.AssetId = Guid.NewGuid();
+                        sktameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(Animation.Skeleton.USkeletonAssetAMeta));
+                        sktameta.Description = $"This is a {typeof(Animation.Skeleton.USkeletonAssetAMeta).FullName}\n";
+                        sktameta.SaveAMeta();
+                        UEngine.Instance.AssetMetaManager.RegAsset(sktameta);
+
+                        mesh.NativeSuper.Release();
                     }
                 }
                 mFBXImporter.Dispose();
@@ -188,6 +200,10 @@ namespace EngineNS.Graphics.Mesh
         {
             get;
             set;
+        }
+        public Animation.Skeleton.CPartialSkeleton PartialSkeleton
+        {
+            get { return Animation.Skeleton.CPartialSkeleton.Create(mCoreObject.GetPartialSkeleton()); }
         }
         public static CMeshPrimitives LoadXnd(UMeshPrimitiveManager manager, IO.CXndHolder xnd)
         {

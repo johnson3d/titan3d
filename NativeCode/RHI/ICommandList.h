@@ -64,6 +64,34 @@ EPrimitiveType
 	EPT_TriangleFan = 6,
 };
 
+struct TR_CLASS()
+IPipelineStat : public VIUnknown
+{
+	IPipelineStat()
+	{
+		Reset();
+		mDrawLimit = INT_MAX;
+	}
+	inline void Reset()
+	{
+		mDrawCall = 0;
+		mDrawTriangle = 0;
+		mCmdCount = 0;
+
+		mLastestDrawCall = nullptr;
+	}
+	int						mDrawCall;
+	int						mDrawTriangle;
+	UINT					mCmdCount;
+	int						mDrawLimit;
+
+	IDrawCall* mLastestDrawCall;
+	inline bool IsOverLimit()
+	{
+		return mDrawCall >= mDrawLimit;
+	}
+};
+
 class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
 ICommandList : public VIUnknown
 {
@@ -72,12 +100,10 @@ protected:
 	//1 dp=> 1 pass;
 	std::vector<IDrawCall*>		mPassArray;
 
-	std::string				mDebugName;
+	std::string					mDebugName;
 public:
-	int						mDrawCall;
-	int						mDrawTriangle;
+	AutoRef<IPipelineStat>		mPipelineStat;
 	AutoRef<GraphicsProfiler>	mProfiler;
-	UINT					mCmdCount;
 	
 	FOnPassBuilt			OnPassBuilt;
 public:
@@ -85,6 +111,15 @@ public:
 	~ICommandList();
 
 	AutoRef<IRenderContext> GetContext();
+
+	void SetPipelineState(IPipelineStat* stat)
+	{
+		mPipelineStat.StrongRef(stat);
+	}
+
+	IPipelineStat* GetPipelineState() {
+		return mPipelineStat;
+	}
 
 	TR_FUNCTION()
 	virtual void BeginCommand() = 0;
@@ -121,7 +156,7 @@ public:
 	TR_FUNCTION()
 	virtual void BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer) = 0;
 	TR_FUNCTION()
-	virtual void BuildRenderPass(vBOOL bImmCBuffer, int limitter, IDrawCall** ppPass);
+	virtual void BuildRenderPass(vBOOL bImmCBuffer);
 	TR_FUNCTION()
 	virtual void EndRenderPass() = 0;
 

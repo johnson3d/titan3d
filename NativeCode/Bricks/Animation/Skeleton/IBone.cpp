@@ -7,12 +7,12 @@ namespace EngineNS
 {
 	AuxRttiStruct<v3dxIndexInSkeleton>		AuxRttiStruct<v3dxIndexInSkeleton>::Instance;
 
-	IBone* IBone::Create(const IBoneDesc* desc)
+	IBone* IBone::Create(const IBoneDesc& desc)
 	{
 		return new IBone(desc);
 	}
 
-	IBone::IBone(const IBoneDesc* desc): ParentIndex(-1), Index(-1)
+	IBone::IBone(const IBoneDesc& desc): ParentIndex(-1), Index(-1)
 	{
 		Desc = desc;
 	}
