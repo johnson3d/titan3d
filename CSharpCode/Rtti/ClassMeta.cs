@@ -244,10 +244,20 @@ namespace EngineNS.Rtti
             {
                 return result;
             }
+
+            //var myXmlDoc = new System.Xml.XmlDocument();
+            //var file = Path + "\\" + hash.ToString() + ".metadata";
+            //file = file.Replace("/", "\\");
+            //myXmlDoc.Load(file);
+            //var ver = new UMetaVersion(this);
+            //ver.LoadVersion(hash, myXmlDoc.LastChild);
+            //MetaVersions[ver.MetaHash] = ver;
             return null;
         }
+        private string Path;
         public bool LoadClass(string path)
         {
+            Path = path;
             var versions = EngineNS.IO.FileManager.GetFiles(path, "*.metadata", false);
             foreach(var i in versions)
             {

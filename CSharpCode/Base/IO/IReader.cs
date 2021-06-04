@@ -204,11 +204,14 @@ namespace EngineNS.IO
             var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeHash);
             if (meta == null)
             {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost:{typeHash}");
                 throw new Exception($"Meta Type lost:{typeHash}");
             }
             Rtti.UMetaVersion metaVersion = meta.GetMetaVersion(versionHash);
             if (metaVersion == null)
             {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost:{typeHash}");
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"MetaVersion lost:{versionHash}");
                 throw new Exception($"MetaVersion lost:{versionHash}");
             }
             v = Rtti.UTypeDescManager.CreateInstance(meta.ClassType.SystemType) as ISerializer;
