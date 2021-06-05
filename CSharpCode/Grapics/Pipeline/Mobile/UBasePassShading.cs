@@ -22,12 +22,19 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             disable_PointLights.Values.Add("1");
             MacroDefines.Add(disable_PointLights);
 
+            var disable_Shadow = new MacroDefine();//2
+            disable_Shadow.Name = "ENV_DISABLE_SHADOW";
+            disable_Shadow.Values.Add("0");
+            disable_Shadow.Values.Add("1");
+            MacroDefines.Add(disable_Shadow);
+
             UpdatePermutation();
 
             uint permuationId;
             var values = new List<string>();
-            values.Add("0");
-            values.Add("0");
+            values.Add("0");//disable_AO = 0
+            values.Add("0");//disalbe_PointLights = 0
+            values.Add("0");//disalbe_Shadow = 0
             this.GetPermutation(values, out permuationId);
             this.CurrentPermutationId = permuationId;
         }
@@ -187,12 +194,14 @@ namespace EngineNS.UTest
             var values = new List<string>();
             values.Add("1");
             values.Add("1");
+            values.Add("0");
             env.GetPermutation(values, out permuationId);
             UnitTestManager.TAssert(permuationId == 3, "");
 
             values.Clear();
             values.Add("0");
             values.Add("1");
+            values.Add("0");
             env.GetPermutation(values, out permuationId);
             UnitTestManager.TAssert(permuationId == 2, "");
         }
