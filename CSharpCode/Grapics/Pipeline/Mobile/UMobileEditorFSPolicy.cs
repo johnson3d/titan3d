@@ -9,6 +9,41 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public UEditorFinalShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Mobile/MobileCopyEditor.cginc", RName.ERNameType.Engine);
+
+            var disable_AO = new MacroDefine();//0
+            disable_AO.Name = "ENV_DISABLE_AO";
+            disable_AO.Values.Add("0");
+            disable_AO.Values.Add("1");
+            MacroDefines.Add(disable_AO);
+
+            var disable_Sunshaft = new MacroDefine();//1
+            disable_Sunshaft.Name = "ENV_DISABLE_SUNSHAFT";
+            disable_Sunshaft.Values.Add("0");
+            disable_Sunshaft.Values.Add("1");
+            MacroDefines.Add(disable_Sunshaft);
+
+            var disable_Bloom = new MacroDefine();//2
+            disable_Bloom.Name = "ENV_DISABLE_BLOOM";
+            disable_Bloom.Values.Add("0");
+            disable_Bloom.Values.Add("1");
+            MacroDefines.Add(disable_Bloom);
+
+            var disable_Hdr = new MacroDefine();//2
+            disable_Hdr.Name = "ENV_DISABLE_HDR";
+            disable_Hdr.Values.Add("0");
+            disable_Hdr.Values.Add("1");
+            MacroDefines.Add(disable_Hdr);
+
+            UpdatePermutation();
+
+            uint permuationId;
+            var values = new List<string>();
+            values.Add("0");//disable_AO = 0
+            values.Add("1");//disable_Sunshaft = 1
+            values.Add("1");//disable_Bloom = 1
+            values.Add("1");//disable_Hdr = 1
+            this.GetPermutation(values, out permuationId);
+            this.CurrentPermutationId = permuationId;
         }
         public UMobileEditorFSPolicy Manager;
         public unsafe override void OnBuildDrawCall(RHI.CDrawCall drawcall)

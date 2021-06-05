@@ -12,10 +12,6 @@
 
 #include "MdfQueue"
 
-#define ENV_DISABLE_AO 1
-#define ENV_DISABLE_SUNSHAFT 1
-#define ENV_DISABLE_BLOOM 1
-
 #define FXAA_GREEN_AS_LUMA		1
 #define FXAA_QUALITY__PRESET		10
 #define FXAA_HLSL_4 1

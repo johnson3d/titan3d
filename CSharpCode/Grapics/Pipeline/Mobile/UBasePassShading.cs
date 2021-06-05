@@ -26,7 +26,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             uint permuationId;
             var values = new List<string>();
-            values.Add("1");
+            values.Add("0");
             values.Add("0");
             this.GetPermutation(values, out permuationId);
             this.CurrentPermutationId = permuationId;
