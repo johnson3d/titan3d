@@ -36,6 +36,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>();
             EnvMapSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/default_envmap.srv"));
+            mBasePassShading.EnvMapSRV = EnvMapSRV;
         }
         public override void OnResize(float x, float y)
         {
@@ -52,13 +53,13 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         protected UBasePassOpaque mBasePassShading;
         public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh)
         {
-            if (mesh.Tag != null)
-            {
-                if (type == EShadingType.BasePass)
-                {
-                    return mesh.Tag.GetPassShading(type, mesh);
-                }
-            }
+            //if (mesh.Tag != null)
+            //{
+            //    if (type == EShadingType.BasePass)
+            //    {
+            //        return mesh.Tag.GetPassShading(type, mesh);
+            //    }
+            //}
             switch (type)
             {
                 case EShadingType.BasePass:
@@ -70,13 +71,13 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh)
         {
-            if (mesh.Tag != null)
-            {
-                var shading = mesh.Tag.GetPassShading(shadingType, mesh) as Mobile.UBasePassShading;
-                if(shading!=null)
-                    shading.OnDrawCall(shadingType, drawcall, this, mesh);
-            }
-            else
+            //if (mesh.Tag != null)
+            //{
+            //    var shading = mesh.Tag.GetPassShading(shadingType, mesh) as Mobile.UBasePassShading;
+            //    if(shading!=null)
+            //        shading.OnDrawCall(shadingType, drawcall, this, mesh);
+            //}
+            //else
             {
                 if (shadingType == EShadingType.BasePass)
                     mBasePassShading.OnDrawCall(shadingType, drawcall, this, mesh);

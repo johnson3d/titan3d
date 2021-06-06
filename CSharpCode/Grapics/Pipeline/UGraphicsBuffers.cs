@@ -27,6 +27,7 @@ namespace EngineNS.Graphics.Pipeline
         public RHI.CViewPort ViewPort = new RHI.CViewPort();
         public RHI.CFrameBuffers FrameBuffers;
         public RHI.CDepthStencilView DepthStencilView;
+        public RHI.CShaderResourceView DepthStencilSRV;
         public RHI.CShaderResourceView[] GBufferSRV;
         public RHI.CConstantBuffer PerViewportCBuffer;
         public int SwapChainIndex = -1;
@@ -86,19 +87,25 @@ namespace EngineNS.Graphics.Pipeline
             dsTexDesc.SetDefault();
             dsTexDesc.Width = width;
             dsTexDesc.Height = height;
-            dsTexDesc.Format = EPixelFormat.PXF_D24_UNORM_S8_UINT;
+            dsTexDesc.Format = dsFormat;// EPixelFormat.PXF_D24_UNORM_S8_UINT;
             dsTexDesc.BindFlags = (UInt32)(EBindFlags.BF_SHADER_RES | EBindFlags.BF_DEPTH_STENCIL);
             var DepthStencilTexture = rc.CreateTexture2D(ref dsTexDesc);
 
             var dsvDesc = new IDepthStencilViewDesc();
             dsvDesc.SetDefault();
+            dsvDesc.Format = dsFormat;
             dsvDesc.Width = width;
             dsvDesc.Height = height;
             unsafe
             {
-                dsvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject.Ptr;
+                dsvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
                 DepthStencilView = rc.CreateDepthRenderTargetView(ref dsvDesc);
                 FrameBuffers.mCoreObject.BindDepthStencilView(DepthStencilView.mCoreObject.Ptr);
+
+                var srvDesc = new IShaderResourceViewDesc();
+                srvDesc.mFormat = dsFormat;
+                srvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
+                DepthStencilSRV = rc.CreateShaderResourceView(ref srvDesc);
             }
 
             Camera = new CCamera();
@@ -106,10 +113,6 @@ namespace EngineNS.Graphics.Pipeline
             var eyePos = new Vector3(0, 0, -10);
             Camera.mCoreObject.LookAtLH(ref eyePos, ref Vector3.Zero, ref Vector3.Up);
 
-            SunLightColor = new Vector3(1, 1, 1);
-            SunLightDirection = new Vector3(0, 0, 240);
-            SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);
-            GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             UpdateViewportCBuffer();
         }
         public bool CreateGBuffer(int index, ITexture2D showTarget)
@@ -195,6 +198,7 @@ namespace EngineNS.Graphics.Pipeline
 
                 var dsvDesc = new IDepthStencilViewDesc();
                 dsvDesc.SetDefault();
+                dsvDesc.Format = desc.Format;
                 dsvDesc.Width = desc.Width;
                 dsvDesc.Height = desc.Height;
                 dsvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject.Ptr;
@@ -202,6 +206,12 @@ namespace EngineNS.Graphics.Pipeline
                 DepthStencilView.Dispose();
                 DepthStencilView = rc.CreateDepthRenderTargetView(ref dsvDesc);
                 FrameBuffers.mCoreObject.BindDepthStencilView(DepthStencilView.mCoreObject.Ptr);
+
+                DepthStencilSRV.Dispose();
+                var srvDesc = new IShaderResourceViewDesc();
+                srvDesc.mFormat = desc.Format;
+                srvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
+                DepthStencilSRV = rc.CreateShaderResourceView(ref srvDesc);
             }
 
             if (GBufferSRV != null)
@@ -248,113 +258,6 @@ namespace EngineNS.Graphics.Pipeline
 
             UpdateViewportCBuffer();
         }
-        
-        #region SunLigt
-        Vector3 mSunLightDirection;
-        public Vector3 SunLightDirection
-        {
-            get => mSunLightDirection;
-            set
-            {
-                mSunLightDirection = value;
-
-                var mx = Matrix.RotationX(mSunLightDirection.X * MathHelper.Deg2Rad);
-                var my = Matrix.RotationY(mSunLightDirection.Y * MathHelper.Deg2Rad);
-                var mz = Matrix.RotationZ(mSunLightDirection.Z * MathHelper.Deg2Rad);
-                var rotMatrix = mz * my * mx;
-                var dir = Vector3.TransformNormal(Vector3.UnitX, rotMatrix);
-
-                if (PerViewportCBuffer != null)
-                {
-                    var indexer = PerViewportCBuffer.PerViewportIndexer;
-                    var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, mSunLightLeak);
-                    PerViewportCBuffer.SetValue(indexer.gDirLightDirection_Leak, ref gDirLightDirection_Leak);
-                }
-            }
-        }
-        float mSunLightLeak = 0.05f;
-        public float SunLightLeak
-        {
-            get => mSunLightLeak;
-            set
-            {
-                mSunLightLeak = value;
-                if (PerViewportCBuffer != null)
-                {
-                    var indexer = PerViewportCBuffer.PerViewportIndexer;
-                    var mx = Matrix.RotationX(mSunLightDirection.X * MathHelper.Deg2Rad);
-                    var my = Matrix.RotationY(mSunLightDirection.Y * MathHelper.Deg2Rad);
-                    var mz = Matrix.RotationZ(mSunLightDirection.Z * MathHelper.Deg2Rad);
-                    var rotMatrix = mz * my * mx;
-                    var dir = Vector3.TransformNormal(Vector3.UnitX, rotMatrix);
-                    var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, mSunLightLeak);
-                    PerViewportCBuffer.SetValue(indexer.gDirLightDirection_Leak, ref gDirLightDirection_Leak);
-                }
-            }
-        }
-        Vector3 mSunLightColor;
-        [EGui.Controls.PropertyGrid.Color3PickerEditor]
-        public Vector3 SunLightColor
-        {
-            get => mSunLightColor;
-            set
-            {
-                mSunLightColor = value;
-                if (PerViewportCBuffer != null)
-                {
-                    var indexer = PerViewportCBuffer.PerViewportIndexer;
-                    var gDirLightColor_Intensity = new Vector4(mSunLightColor.X, mSunLightColor.Y, mSunLightColor.Z, mSunLightIntensity);
-                    PerViewportCBuffer.SetValue(indexer.gDirLightColor_Intensity, ref gDirLightColor_Intensity);
-                }
-            }
-        }
-        float mSunLightIntensity = 2.5f;
-        public float SunLightIntensity
-        {
-            get => mSunLightIntensity;
-            set
-            {
-                mSunLightIntensity = value;
-                if (PerViewportCBuffer != null)
-                {
-                    var indexer = PerViewportCBuffer.PerViewportIndexer;
-                    var gDirLightDirection_Leak = new Vector4(mSunLightDirection.X, mSunLightDirection.Y, mSunLightDirection.Z, mSunLightLeak);
-                    PerViewportCBuffer.SetValue(indexer.gDirLightDirection_Leak, ref gDirLightDirection_Leak);
-                }
-            }
-        }
-        Vector3 mSkyLightColor;
-        [EGui.Controls.PropertyGrid.Color3PickerEditor]
-        public Vector3 SkyLightColor
-        {
-            get => mSkyLightColor;
-            set
-            {
-                mSkyLightColor = value;
-                if (PerViewportCBuffer != null)
-                {
-                    var indexer = PerViewportCBuffer.PerViewportIndexer;
-                    PerViewportCBuffer.SetValue(indexer.mSkyLightColor, ref mSkyLightColor);
-                }
-            }
-        }
-        Vector3 mGroundLightColor;
-        [EGui.Controls.PropertyGrid.Color3PickerEditor]
-        public Vector3 GroundLightColor
-        {
-            get => mGroundLightColor;
-            set
-            {
-                mGroundLightColor = value;
-                if (PerViewportCBuffer != null)
-                {
-                    var indexer = PerViewportCBuffer.PerViewportIndexer;
-                    PerViewportCBuffer.SetValue(indexer.mGroundLightColor, ref mGroundLightColor);
-                }
-            }
-        }
-        #endregion
-
         public void UpdateViewportCBuffer()
         {
             unsafe
@@ -365,21 +268,6 @@ namespace EngineNS.Graphics.Pipeline
 
                     Vector4 gViewportSizeAndRcp = new Vector4(ViewPort.mCoreObject.Width, ViewPort.mCoreObject.Height, 1 / ViewPort.mCoreObject.Width, 1 / ViewPort.mCoreObject.Height);
                     PerViewportCBuffer.SetValue(indexer.gViewportSizeAndRcp, ref gViewportSizeAndRcp);
-
-                    PerViewportCBuffer.SetValue(indexer.mSkyLightColor, ref mSkyLightColor);
-                    PerViewportCBuffer.SetValue(indexer.mGroundLightColor, ref mGroundLightColor);
-
-                    var gDirLightColor_Intensity = new Vector4(mSunLightColor.X, mSunLightColor.Y, mSunLightColor.Z, mSunLightIntensity);
-                    PerViewportCBuffer.SetValue(indexer.gDirLightColor_Intensity, ref gDirLightColor_Intensity);
-
-                    var mx = Matrix.RotationX(mSunLightDirection.X * MathHelper.Deg2Rad);
-                    var my = Matrix.RotationY(mSunLightDirection.Y * MathHelper.Deg2Rad);
-                    var mz = Matrix.RotationZ(mSunLightDirection.Z * MathHelper.Deg2Rad);
-                    var rotMatrix = mz * my * mx;
-                    var dir = Vector3.TransformNormal(Vector3.UnitX, rotMatrix);
-
-                    var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, mSunLightLeak);
-                    PerViewportCBuffer.SetValue(indexer.gDirLightDirection_Leak, ref gDirLightDirection_Leak);
                 }
             }
         }

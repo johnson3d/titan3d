@@ -6,6 +6,7 @@ namespace EngineNS.Graphics.Mesh
 {
     public class UMesh
     {
+        public GamePlay.Scene.UNode HostNode;
         public UMaterialMesh MaterialMesh { get; private set; }
         public Pipeline.Shader.UMdfQueue MdfQueue { get; private set; }
         RHI.CConstantBuffer mPerMeshCBuffer;

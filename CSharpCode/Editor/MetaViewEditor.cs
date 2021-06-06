@@ -72,10 +72,12 @@ namespace EngineNS.Editor
                     //var trans = Matrix.Scaling(0.01f);
                     //mesh.SetWorldMatrix(ref trans);// Matrix.mIdentity);
 
-                    var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(root, new GamePlay.Scene.UNodeData(), typeof(GamePlay.UPlacement), mesh, Vector3.Zero, new Vector3(0.01f), Quaternion.Identity);
+                    var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(root, new GamePlay.Scene.UNodeData(), typeof(GamePlay.UPlacement), mesh, new Vector3(5,5,5), new Vector3(0.01f), Quaternion.Identity);
                     meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                     meshNode.NodeData.Name = "Robot0";
                     meshNode.IsScaleChildren = false;
+                    meshNode.IsCastShadow = true;
+                    meshNode.IsAcceptShadow = true;
 
                     var mesh1 = new Graphics.Mesh.UMesh();
 
@@ -148,6 +150,7 @@ namespace EngineNS.Editor
                     //mainEditor.WorldViewportSlate.World.Root.AddMesh(terrainMesh, Vector3.Zero, Vector3.UnitXYZ, Quaternion.Identity);
                     var trNode = GamePlay.Scene.UMeshNode.AddMeshNode(root, new GamePlay.Scene.UNodeData(), typeof(GamePlay.UPlacement), terrainMesh, Vector3.Zero, new Vector3(1.0f), Quaternion.Identity);
                     trNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                    trNode.IsAcceptShadow = true;
                 }
 
                 mainEditor.WorldViewportSlate.ShowBoundVolumes(true, null);

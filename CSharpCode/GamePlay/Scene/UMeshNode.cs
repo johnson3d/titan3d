@@ -71,17 +71,25 @@ namespace EngineNS.GamePlay.Scene
             }
             set
             {
+                if (mMesh != null)
+                {
+                    mMesh.HostNode = null;
+                }
+                
                 mMesh = value;
 
                 if (mMesh != null)
+                {
                     BoundVolume.LocalAABB = mMesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+                    mMesh.HostNode = this;
+                }
                 else
                     BoundVolume.LocalAABB.InitEmptyBox();
                 UpdateAABB();
                 Parent?.UpdateAABB();
             }
         }
-        public override void OnGatherVisibleMeshes(Graphics.Pipeline.IRenderPolicy rp)
+        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {
             rp.VisibleMeshes.Add(mMesh);
         }

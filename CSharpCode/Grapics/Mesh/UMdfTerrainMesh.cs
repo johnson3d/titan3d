@@ -41,6 +41,7 @@ namespace EngineNS.Graphics.Mesh
         }
         public unsafe override void OnDrawCall(IRenderPolicy.EShadingType shadingType, CDrawCall drawcall, IRenderPolicy policy, UMesh mesh)
         {
+            base.OnDrawCall(shadingType, drawcall, policy, mesh);
             if (drawcall.TagObject == null)
             {
                 //这里可以缓存Effec里面各种VarIndex，不过这里只有两个需要每次都查找，而地形对象又不会太多，那就别缓存了

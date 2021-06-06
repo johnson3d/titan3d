@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UMeshNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UNode_Editor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UDirectionLight.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UPlacement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UWorld.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UBoundVolume.cs" />

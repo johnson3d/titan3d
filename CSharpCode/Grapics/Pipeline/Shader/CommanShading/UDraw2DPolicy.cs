@@ -18,7 +18,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         }
         public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh)
         {
-            mBasePassShading.OnDrawCall(drawcall, this, mesh);
+            mBasePassShading.OnDrawCall(shadingType, drawcall, this, mesh);
         }
     }
     public class UCopy2DPolicy : IRenderPolicy

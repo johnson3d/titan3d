@@ -137,6 +137,7 @@ namespace EngineNS.Editor
             return true;
         }
         #endregion
+        GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
         public unsafe void TickLogic(int ellapse)
         {
             if (IsDrawing == false)
@@ -164,7 +165,9 @@ namespace EngineNS.Editor
                 }
             }
 
-            World.GatherVisibleMeshes(RenderPolicy);
+            mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
+            mVisParameter.CullCamera = RenderPolicy.GBuffers.Camera;
+            World.GatherVisibleMeshes(mVisParameter);
 
             if (mWorldBoundShapes != null)
             {

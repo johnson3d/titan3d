@@ -13,7 +13,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
     }
     public class UShadowMap
     {
-        public List<Mesh.UMesh> VisibleMeshes = new List<Mesh.UMesh>();
+        public GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
         public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
         public UDrawBuffers BasePass = new UDrawBuffers();
         public RenderPassDesc PassDesc = new RenderPassDesc();
@@ -41,23 +41,26 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         private Vector3[] mSSM_FrustumVtx = new Vector3[8];
         public UShadowShading mShadowShading;
 
-        public async System.Threading.Tasks.Task Initialize(float x, float y)
+        public void Initialize(float x, float y)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
+            mShadowShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UShadowShading>();
+
             GBuffers.Initialize(0, EPixelFormat.PXF_D16_UNORM, (uint)x, (uint)y);
-            //GBuffers.CreateGBuffer(0, EPixelFormat.PXF_R16G16B16A16_FLOAT, (uint)x, (uint)y);
+            //GBuffers.CreateGBuffer(0, EPixelFormat.PXF_UNKNOWN, (uint)x, (uint)y);
             GBuffers.SwapChainIndex = -1;
             GBuffers.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
+            GBuffers.OnResize(mInnerResolutionY, mInnerResolutionY);
 
             BasePass = new UDrawBuffers();
             BasePass.Initialize(rc);
 
             var TempClearColor = new Color4();
-            TempClearColor.Red = 1.0f;
-            TempClearColor.Green = 1.0f;
-            TempClearColor.Blue = 1.0f;
-            TempClearColor.Alpha = 1.0f;
+            //TempClearColor.Red = 1.0f;
+            //TempClearColor.Green = 1.0f;
+            //TempClearColor.Blue = 1.0f;
+            //TempClearColor.Alpha = 1.0f;
             PassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionClear;
             PassDesc.mFBStoreAction_Color = FrameBufferStoreAction.StoreActionStore;
             PassDesc.mFBClearColorRT0 = TempClearColor;
@@ -94,15 +97,23 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 mOrtho2UVMtx.M41 = 0.5f;
                 mOrtho2UVMtx.M42 = 0.5f;
             }
+
+            mVisParameter.VisibleMeshes = new List<Mesh.UMesh>();
+        }
+        public void Cleanup()
+        {
+            GBuffers?.Cleanup();
+            GBuffers = null;
         }
         private static float Clamp(float X, float Min, float Max)
         {
             return X < Min ? Min : X < Max ? X : Max;
         }
-        public void TickLogic(CCamera ViewerCamera, Vector3 DirLightDir)
+        public unsafe void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
         {
-            mDirLightDirection = DirLightDir;
+            mDirLightDirection = world.DirectionLight.mDirection;
 
+            var ViewerCamera = policy.GBuffers.Camera;
             //calculate viewer camera frustum bounding sphere and shadow camera data;
             float HalfFoV = ViewerCamera.mCoreObject.mFov * 0.5f;
             float zNear = ViewerCamera.mCoreObject.mZNear;
@@ -173,8 +184,11 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             float DepthBiasClipSpace = UniformDepthBias / (ShadowCameraZFar - ShadowCameraZNear) * (FrustumSphereDiameter / mResolutionY) * PerObjCustomDepthBias;
 
             var cBuffer = GBuffers.PerViewportCBuffer;
-            var tmp = new Vector2(0.0f, 1.0f / ShadowCameraZFar);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gDepthBiasAndZFarRcp, ref tmp);
+            if (cBuffer != null)
+            {
+                var tmp = new Vector2(0.0f, 1.0f / ShadowCameraZFar);
+                cBuffer.SetValue(cBuffer.PerViewportIndexer.gDepthBiasAndZFarRcp, ref tmp);
+            }
 
             mShadowTransitionScale = 1.0f / (DepthBiasClipSpace + 0.00001f);
 
@@ -183,6 +197,52 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             mFadeParam.Y = -FadeStartDistance * mFadeParam.X;
 
             //render Shadow Caster
+
+            mVisParameter.CullCamera = GBuffers.Camera;
+            world.GatherVisibleMeshes(mVisParameter);
+
+            var cmdlist = BasePass.DrawCmdList.mCoreObject;
+            cmdlist.ClearMeshDrawPassArray();
+            cmdlist.SetViewport(GBuffers.ViewPort.mCoreObject);
+            foreach (var i in mVisParameter.VisibleMeshes)
+            {
+                if (i.HostNode == null || i.HostNode.IsCastShadow == false)
+                    continue;
+                if (i.Atoms == null)
+                    continue;
+
+                for (int j = 0; j < i.Atoms.Length; j++)
+                {
+                    var drawcall = i.GetDrawCall(GBuffers, (uint)j, policy, IRenderPolicy.EShadingType.DepthPass);
+                    if (drawcall != null)
+                    {
+                        GBuffers.SureCBuffer(drawcall.Effect, "UMobileEditorFSPolicy");
+                        drawcall.BindGBuffer(GBuffers);
+
+                        cmdlist.PushDrawCall(drawcall.mCoreObject);
+                    }
+                }
+            }
+
+            cmdlist.BeginCommand();
+            if (bClear)
+                cmdlist.BeginRenderPass(ref PassDesc, GBuffers.FrameBuffers.mCoreObject);
+            else
+                cmdlist.BeginRenderPass((RenderPassDesc*)0, GBuffers.FrameBuffers.mCoreObject);
+            cmdlist.BuildRenderPass(0);
+            cmdlist.EndRenderPass();
+            cmdlist.EndCommand();
+        }
+
+        public unsafe void TickRender()
+        {
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var cmdlist = BasePass.CommitCmdList.mCoreObject;
+            cmdlist.Commit(rc.mCoreObject);
+        }
+        public void TickSync()
+        {
+            BasePass.SwapBuffer();
         }
     }
 }

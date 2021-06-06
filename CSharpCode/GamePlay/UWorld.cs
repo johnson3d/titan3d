@@ -18,7 +18,7 @@ namespace EngineNS.GamePlay
                 return "WorldRootNode";
             }
         }        
-        public override void OnGatherVisibleMeshes(Graphics.Pipeline.IRenderPolicy rp)
+        public override void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
         {
             base.OnGatherVisibleMeshes(rp);
         }
@@ -35,8 +35,14 @@ namespace EngineNS.GamePlay
         {
             get;
         } = new UWorldRootNode(new Scene.UNodeData());
+        public UDirectionLight DirectionLight { get; } = new UDirectionLight();
         #region Culling
-        public virtual void GatherVisibleMeshes(Graphics.Pipeline.IRenderPolicy rp)
+        public class UVisParameter
+        {
+            public Graphics.Pipeline.CCamera CullCamera;
+            public List<Graphics.Mesh.UMesh> VisibleMeshes = new List<Graphics.Mesh.UMesh>();
+        }
+        public virtual void GatherVisibleMeshes(UVisParameter rp)
         {
             rp.VisibleMeshes.Clear();
 
@@ -48,7 +54,7 @@ namespace EngineNS.GamePlay
             {
                 return false;
             }
-            Graphics.Pipeline.IRenderPolicy rp = arg as Graphics.Pipeline.IRenderPolicy;
+            var rp = arg as UVisParameter;
             
             CONTAIN_TYPE type;
             if (node.HasStyle(Scene.UNode.ENodeStyles.VisibleFollowParent))
@@ -57,7 +63,7 @@ namespace EngineNS.GamePlay
             }
             else
             {
-                var frustom = rp.GBuffers.Camera.mCoreObject.GetFrustum();
+                var frustom = rp.CullCamera.mCoreObject.GetFrustum();
                 type = frustom->whichContainTypeFast(ref node.AABB, ref node.Placement.AbsTransformInv, 1);
             }
             switch(type)
@@ -82,7 +88,7 @@ namespace EngineNS.GamePlay
         Scene.UNode.FOnVisitNode mOnVisitNode_GatherVisibleMeshesAll;
         private unsafe bool OnVisitNode_GatherVisibleMeshesAll(Scene.UNode node, object arg)
         {
-            Graphics.Pipeline.IRenderPolicy rp = arg as Graphics.Pipeline.IRenderPolicy;
+            var rp = arg as UVisParameter;
             
             node.OnGatherVisibleMeshes(rp);
             return false;

@@ -157,9 +157,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             return true;
         }
-        public virtual void OnDrawCall(RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
+        public virtual void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
         {
-
+            mesh.MdfQueue.OnDrawCall(shadingType, drawcall, policy, mesh);
         }
     }
     public class UShadingEnvManager : UModule<UEngine>

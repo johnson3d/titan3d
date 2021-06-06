@@ -48,8 +48,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public unsafe override void OnBuildDrawCall(RHI.CDrawCall drawcall)
         {
         }
-        public unsafe override void OnDrawCall(RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
         {
+            base.OnDrawCall(shadingType, drawcall, policy, mesh);
+
             var gpuProgram = drawcall.Effect.ShaderProgram;
             var index = drawcall.mCoreObject.FindSRVIndex("gBaseSceneView");
             drawcall.mCoreObject.BindSRVAll(index, Manager.GBuffers.GBufferSRV[0].mCoreObject);
@@ -75,6 +77,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             return EditorFinalProcessor.GBuffers.GBufferSRV[0];
         }
+        public Shadow.UShadowMap mShadowMap;
         public Common.UPickedProxiableManager PickedProxiableManager { get; protected set; } = new Common.UPickedProxiableManager();
         public UEditorFinalProcessor EditorFinalProcessor = new UEditorFinalProcessor();
         public UGraphicsBuffers GHitproxyBuffers { get; protected set; } = new UGraphicsBuffers();
@@ -202,6 +205,11 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             await PickedProxiableManager.Initialize(this, x, y);
             await EditorFinalProcessor.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UEditorFinalShading>(), x, y);
+
+            mShadowMap = new Shadow.UShadowMap();
+            mShadowMap.Initialize(x, y);
+
+            mBasePassShading.mShadowMapSRV = mShadowMap.GBuffers.DepthStencilSRV;
         }
         public override void OnResize(float x, float y)
         {
@@ -218,6 +226,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void Cleanup()
         {
+            mShadowMap?.Cleanup();
+            mShadowMap = null;
+
             PickedProxiableManager?.Cleanup();
             PickedProxiableManager = null;
 
@@ -254,6 +265,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     if (mBasePassShading == null)
                         mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>();
                     return mBasePassShading;
+                case EShadingType.DepthPass:
+                    return mShadowMap.mShadowShading;
                 case EShadingType.HitproxyPass:
                     if (mHitproxyShading == null)
                         mHitproxyShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Common.UHitproxyShading>();
@@ -266,30 +279,57 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         //如果产生了对应的ShadingType的Drawcall，则会callback到这里设置一些这个shading的特殊参数
         public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh)
         {
-            mesh.MdfQueue.OnDrawCall(shadingType, drawcall, this, mesh);
+            base.OnDrawCall(shadingType, drawcall, mesh);
 
-            if (mesh.Tag != null)
-            {
-                var shading = mesh.Tag.GetPassShading(shadingType, mesh) as Mobile.UBasePassShading;
-                if (shading != null)
-                    shading.OnDrawCall(shadingType, drawcall, this, mesh);
-            }
-            else
-            {
-                if (shadingType == EShadingType.BasePass)
-                    mBasePassShading.OnDrawCall(shadingType, drawcall, this, mesh);
-                else if (shadingType == EShadingType.HitproxyPass)
-                    return;
-                else if (shadingType == EShadingType.Picked)
-                    return;
-                //else if (shadingType == EShadingType.HitproxyPass)
-                //    mHitproxyShading.OnDrawCall(shadingType, drawcall, this, mesh);
-            }
+            //if (mesh.Tag != null)
+            //{
+            //    var shading = mesh.Tag.GetPassShading(shadingType, mesh) as Mobile.UBasePassShading;
+            //    if (shading != null)
+            //        shading.OnDrawCall(shadingType, drawcall, this, mesh);
+            //}
+            //else
+            //{
+            //    if (shadingType == EShadingType.BasePass)
+            //        mBasePassShading.OnDrawCall(shadingType, drawcall, this, mesh);
+            //    else if (shadingType == EShadingType.HitproxyPass)
+            //        return;
+            //    else if (shadingType == EShadingType.Picked)
+            //        return;
+            //    //else if (shadingType == EShadingType.HitproxyPass)
+            //    //    mHitproxyShading.OnDrawCall(shadingType, drawcall, this, mesh);
+            //}
         }
         int DelayFrame = 0;
         bool CanDrawHitproxy = false;
         public unsafe override void TickLogic()
         {
+            var app = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+            if (app != null)
+            {
+                mShadowMap.TickLogic(app.WorldViewportSlate.World, this, true);
+
+                var cBuffer = GBuffers.PerViewportCBuffer;
+                if (cBuffer != null)
+                {
+                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gFadeParam, ref mShadowMap.mFadeParam);
+                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowTransitionScale, ref mShadowMap.mShadowTransitionScale);
+                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowMapSizeAndRcp, ref mShadowMap.mShadowMapSizeAndRcp);
+                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gViewer2ShadowMtx, ref mShadowMap.mViewer2ShadowMtx);
+                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowDistance, ref mShadowMap.mShadowDistance);
+
+                    var dirLight = app.WorldViewportSlate.World.DirectionLight;
+                    //dirLight.mDirection = MathHelper.RandomDirection();
+                    var dir = dirLight.mDirection;
+                    var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
+                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightDirection_Leak, ref gDirLightDirection_Leak);
+                    var gDirLightColor_Intensity = new Vector4(dirLight.mSunLightColor.X, dirLight.mSunLightColor.Y, dirLight.mSunLightColor.Z, dirLight.mSunLightIntensity);
+                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightColor_Intensity, ref gDirLightColor_Intensity);
+
+                    cBuffer.SetValue(cBuffer.PerViewportIndexer.mSkyLightColor, ref dirLight.mSkyLightColor);
+                    cBuffer.SetValue(cBuffer.PerViewportIndexer.mGroundLightColor, ref dirLight.mGroundLightColor);
+                }
+            }
+
             BasePass.ClearMeshDrawPassArray();
             BasePass.SetViewport(GBuffers.ViewPort);
 
@@ -355,6 +395,12 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickRender()
         {
+            var app = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+            if (app != null)
+            {
+                mShadowMap.TickRender();
+            }
+
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Commit(rc);
 
@@ -390,6 +436,11 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickSync()
         {
+            var app = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+            if (app != null)
+            {
+                mShadowMap.TickSync();
+            }
             DelayFrame++;
             if (DelayFrame >= 10)
             {

@@ -8,6 +8,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 {
     public class UBasePassShading : Shader.UShadingEnv
     {
+        public RHI.CShaderResourceView EnvMapSRV;
+        public RHI.CShaderResourceView mShadowMapSRV;
         public UBasePassShading()
         {
             var disable_AO = new MacroDefine();//0
@@ -39,7 +41,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             mMacroValues.Add("0");//disable_AO = 0
             mMacroValues.Add("0");//disalbe_PointLights = 0
             mMacroValues.Add("0");//disalbe_Shadow = 0
-            mMacroValues.Add("1");//mode_editor = 0
+            mMacroValues.Add("0");//mode_editor = 0
             
             UpdatePermutation(mMacroValues);
         }
@@ -110,16 +112,26 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             if (PerShadingCBuffer != null)
                 drawcall.mCoreObject.BindCBufferAll(indexer.cbPerShadingEnv, PerShadingCBuffer.mCoreObject);
         }
-        public unsafe virtual void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, UMobileFSPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
         {
+            base.OnDrawCall(shadingType, drawcall, policy, mesh);
+
             var indexer = GetVarIndexer(drawcall);
 
-            drawcall.mCoreObject.BindSRVAll(indexer.gEnvMap, policy.EnvMapSRV.mCoreObject);
-
-            if (PerShadingCBuffer != null)
+            if (EnvMapSRV != null)
             {
-                float gEnvMapMaxMipLevel = policy.EnvMapSRV.PicDesc.MipLevel - 1;
-                PerShadingCBuffer.SetValue(indexer.gEnvMapMaxMipLevel, ref gEnvMapMaxMipLevel);
+                drawcall.mCoreObject.BindSRVAll(indexer.gEnvMap, EnvMapSRV.mCoreObject);
+
+                if (PerShadingCBuffer != null)
+                {
+                    float gEnvMapMaxMipLevel = EnvMapSRV.PicDesc.MipLevel - 1;
+                    PerShadingCBuffer.SetValue(indexer.gEnvMapMaxMipLevel, ref gEnvMapMaxMipLevel);
+                }
+            }
+
+            if (mShadowMapSRV != null)
+            {
+                drawcall.mCoreObject.BindSRVAll(indexer.gShadowMap, mShadowMapSRV.mCoreObject);
             }
         }
     }

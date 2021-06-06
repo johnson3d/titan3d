@@ -44,6 +44,8 @@ namespace EngineNS.GamePlay.Scene
             VisibleFollowParent = (1 << 1),
             HitproxyMasks = (1 << 2) | (1 << 3),//value: 0,1,2 NoProxy,RootProxy,FollowProxy
             ScaleChildren = (1 << 4),
+            CastShadow = (1 << 5),
+            AcceptShadow = (1 << 6),
         }
         [Rtti.Meta]
         public ENodeStyles NodeStyles { get; set; } = 0;
@@ -74,6 +76,42 @@ namespace EngineNS.GamePlay.Scene
                 else
                 {
                     UnsetStyle(ENodeStyles.ScaleChildren);
+                }
+            }
+        }
+        public bool IsCastShadow
+        {
+            get
+            {
+                return HasStyle(ENodeStyles.CastShadow);
+            }
+            set
+            {
+                if (value)
+                {
+                    SetStyle(ENodeStyles.CastShadow);
+                }
+                else
+                {
+                    UnsetStyle(ENodeStyles.CastShadow);
+                }
+            }
+        }
+        public bool IsAcceptShadow
+        {
+            get
+            {
+                return HasStyle(ENodeStyles.AcceptShadow);
+            }
+            set
+            {
+                if (value)
+                {
+                    SetStyle(ENodeStyles.AcceptShadow);
+                }
+                else
+                {
+                    UnsetStyle(ENodeStyles.AcceptShadow);
                 }
             }
         }
@@ -356,7 +394,7 @@ namespace EngineNS.GamePlay.Scene
         }
         #endregion
 
-        public virtual void OnGatherVisibleMeshes(Graphics.Pipeline.IRenderPolicy rp)
+        public virtual void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {
 
         }

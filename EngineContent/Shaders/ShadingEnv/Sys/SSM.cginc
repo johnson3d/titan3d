@@ -1,22 +1,19 @@
 #ifndef _SSM_
 #define _SSM_
 
-#include "Inc/VertexLayout.cginc"
-#include "Inc/LightCommon.cginc"
-#include "Inc/Math.cginc"
+#include "../../Inc/VertexLayout.cginc"
+#include "../../Inc/LightCommon.cginc"
+#include "../../Inc/Math.cginc"
 
-#include "dummy.gen"
+#include "Material"
+#include "MdfQueue"
 
-
-#ifdef MDFQUEUE_FUNCTION
-MDFQUEUE_FUNCTION
-#endif
 
 //WARNING:don't change vs_main or ps_main's parameters name cause we also use it in c++;It's an appointment;
 PS_INPUT VS_Main(VS_INPUT input)
 {
 	PS_INPUT output = (PS_INPUT)0;
-	DO_VSInput_To_PSInput(output, input);
+	Default_VSInput2PSInput(output, input);
 
 #if defined(MDF_INSTANCING)
 	output.PointLightIndices = PointLightIndices;

@@ -40,8 +40,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             //    drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject.Ptr);
             //}
         }
-        public unsafe override void OnDrawCall(RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
         {
+            base.OnDrawCall(shadingType, drawcall, policy, mesh);
+
             var gpuProgram = drawcall.Effect.ShaderProgram;
             var index = drawcall.mCoreObject.FindSRVIndex("SourceTexture");
             drawcall.mCoreObject.BindSRVAll(index, Manager.PickedBuffer.GBufferSRV[0].mCoreObject);
@@ -68,7 +70,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public unsafe override void OnBuildDrawCall(RHI.CDrawCall drawcall)
         {
         }
-        public unsafe override void OnDrawCall(RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
         {
             var gpuProgram = drawcall.Effect.ShaderProgram;
             var index = drawcall.mCoreObject.FindSRVIndex("gPickedSetUpTex");
