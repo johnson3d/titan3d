@@ -7,9 +7,9 @@ namespace EngineNS.GamePlay
     public class UDirectionLight
     {
         public Vector3 mDirection;
-        public float mSunLightLeak;
+        public float mSunLightLeak = 0.05f;
         public Vector3 mSunLightColor;
-        public float mSunLightIntensity;
+        public float mSunLightIntensity = 2.5f;
         public Vector3 mSkyLightColor;
         public Vector3 mGroundLightColor;
         [EGui.Controls.PropertyGrid.Color3PickerEditor]
@@ -41,10 +41,13 @@ namespace EngineNS.GamePlay
         }
         public UDirectionLight()
         {
-            mSunLightColor = new Vector3(1, 1, 1);
-            mDirection = new Vector3(1, 1, 1);
-            mSunLightLeak = 0.05f;
+            mDirection = new Vector3(1, -1, 1);
             mDirection.Normalize();
+            mSunLightLeak = 0.05f;
+
+            mSunLightColor = new Vector3(1, 1, 1);
+            mSunLightIntensity = 2.5f;
+                    
             mSkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             mGroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
         }

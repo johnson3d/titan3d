@@ -72,7 +72,7 @@ namespace EngineNS.Editor
                     //var trans = Matrix.Scaling(0.01f);
                     //mesh.SetWorldMatrix(ref trans);// Matrix.mIdentity);
 
-                    var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(root, new GamePlay.Scene.UNodeData(), typeof(GamePlay.UPlacement), mesh, Vector3.Zero, new Vector3(0.01f), Quaternion.Identity);
+                    var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(root, new GamePlay.Scene.UNodeData(), typeof(GamePlay.UPlacement), mesh, new Vector3(5,5,5), new Vector3(0.01f), Quaternion.Identity);
                     meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                     meshNode.NodeData.Name = "Robot0";
                     meshNode.IsScaleChildren = false;
