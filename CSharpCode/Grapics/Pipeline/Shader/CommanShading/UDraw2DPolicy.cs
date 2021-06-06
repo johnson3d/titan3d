@@ -7,7 +7,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
     public class UBasePassPolicy : IRenderPolicy
     {
         public UShadingEnv mBasePassShading;
-        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh)
+        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom)
         {
             switch (type)
             {
@@ -16,7 +16,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
             }
             return null;
         }
-        public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh)
+        public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom)
         {
             mBasePassShading.OnDrawCall(shadingType, drawcall, this, mesh);
         }
@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
     {//坐标在-1,1，直接拷贝给ps
         UCopy2DShading mBasePassShading;
         public Graphics.Pipeline.IRenderPolicy ViewPolicy;
-        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh)
+        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom)
         {
             switch (type)
             {
@@ -36,7 +36,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
             }
             return null;
         }
-        public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh)
+        public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom)
         {
             mBasePassShading.OnDrawCall(drawcall, this, mesh);
         }
@@ -44,7 +44,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
     public class UDraw2DPolicy : IRenderPolicy
     {//屏幕像素坐标
         URect2DShading mBasePassShading;
-        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh)
+        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom)
         {
             switch (type)
             {

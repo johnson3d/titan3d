@@ -180,6 +180,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             HitproxyPass.Initialize(rc);
 
+            mHitproxyShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Common.UHitproxyShading>();
+
             GHitproxyBuffers.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
             GHitproxyBuffers.CreateGBuffer(0, EPixelFormat.PXF_R8G8B8A8_UNORM, (uint)x, (uint)y);
             GHitproxyBuffers.SwapChainIndex = -1;
@@ -249,55 +251,34 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             
             base.Cleanup();
         }
-        //如果本渲染策略不提供指定的EShadingType，那么UAtom内的s对应的Drawcall就不会产生出来
-        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh)
+        //Build DrawCall的时候调用，如果本渲染策略不提供指定的EShadingType，那么UAtom内的s对应的Drawcall就不会产生出来
+        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom)
         {
-            if (mesh.Tag != null)
-            {
-                if (type == EShadingType.BasePass)
-                {
-                    return mesh.Tag.GetPassShading(type, mesh);
-                }
-            }
             switch (type)
             {
                 case EShadingType.BasePass:
-                    if (mBasePassShading == null)
-                        mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>();
+                    {
+                        switch(mesh.Atoms[atom].Material.RenderLayer)
+                        {
+                            default:
+                                break;
+                        }
+                    }
                     return mBasePassShading;
                 case EShadingType.DepthPass:
                     return mShadowMap.mShadowShading;
                 case EShadingType.HitproxyPass:
-                    if (mHitproxyShading == null)
-                        mHitproxyShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Common.UHitproxyShading>();
                     return mHitproxyShading;
                 case EShadingType.Picked:
                     return PickedProxiableManager.PickedShading;
             }
             return null;
         }
-        //如果产生了对应的ShadingType的Drawcall，则会callback到这里设置一些这个shading的特殊参数
-        public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh)
+        //渲染DrawCall的时候调用，如果产生了对应的ShadingType的Drawcall，则会callback到这里设置一些这个shading的特殊参数
+        public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom)
         {
-            base.OnDrawCall(shadingType, drawcall, mesh);
-
-            //if (mesh.Tag != null)
-            //{
-            //    var shading = mesh.Tag.GetPassShading(shadingType, mesh) as Mobile.UBasePassShading;
-            //    if (shading != null)
-            //        shading.OnDrawCall(shadingType, drawcall, this, mesh);
-            //}
-            //else
-            //{
-            //    if (shadingType == EShadingType.BasePass)
-            //        mBasePassShading.OnDrawCall(shadingType, drawcall, this, mesh);
-            //    else if (shadingType == EShadingType.HitproxyPass)
-            //        return;
-            //    else if (shadingType == EShadingType.Picked)
-            //        return;
-            //    //else if (shadingType == EShadingType.HitproxyPass)
-            //    //    mHitproxyShading.OnDrawCall(shadingType, drawcall, this, mesh);
-            //}
+            //drawcall.Effect.ShadingEnv
+            base.OnDrawCall(shadingType, drawcall, mesh, atom);
         }
         int DelayFrame = 0;
         bool CanDrawHitproxy = false;
@@ -345,7 +326,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 for (int j = 0; j < i.Atoms.Length; j++)
                 {
                     {
-                        var drawcall = i.GetDrawCall(GBuffers, (uint)j, this, EShadingType.BasePass);
+                        var drawcall = i.GetDrawCall(GBuffers, j, this, EShadingType.BasePass);
                         if (drawcall != null)
                         {
                             GBuffers.SureCBuffer(drawcall.Effect, "UMobileEditorFSPolicy");
@@ -358,7 +339,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
                     if (CanDrawHitproxy && i.IsDrawHitproxy)
                     {
-                        var hpDrawcall = i.GetDrawCall(GHitproxyBuffers, (uint)j, this, EShadingType.HitproxyPass);
+                        var hpDrawcall = i.GetDrawCall(GHitproxyBuffers, j, this, EShadingType.HitproxyPass);
                         if (hpDrawcall != null)
                         {
                             GHitproxyBuffers.SureCBuffer(hpDrawcall.Effect, "UMobileEditorFSPolicy.HitproxyBuffers");

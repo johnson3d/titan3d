@@ -51,38 +51,20 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             base.Cleanup();
         }
         protected UBasePassOpaque mBasePassShading;
-        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh)
+        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom)
         {
-            //if (mesh.Tag != null)
-            //{
-            //    if (type == EShadingType.BasePass)
-            //    {
-            //        return mesh.Tag.GetPassShading(type, mesh);
-            //    }
-            //}
             switch (type)
             {
                 case EShadingType.BasePass:
-                    if (mBasePassShading == null)
-                        mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>();
                     return mBasePassShading;
             }
             return null;
         }
-        public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh)
+        public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom)
         {
-            base.OnDrawCall(shadingType, drawcall, mesh);
-            //if (mesh.Tag != null)
-            //{
-            //    var shading = mesh.Tag.GetPassShading(shadingType, mesh) as Mobile.UBasePassShading;
-            //    if(shading!=null)
-            //        shading.OnDrawCall(shadingType, drawcall, this, mesh);
-            //}
-            //else
-            {
-                if (shadingType == EShadingType.BasePass)
-                    mBasePassShading.OnDrawCall(shadingType, drawcall, this, mesh);
-            }
+            base.OnDrawCall(shadingType, drawcall, mesh, atom);
+            if (shadingType == EShadingType.BasePass)
+                mBasePassShading.OnDrawCall(shadingType, drawcall, this, mesh);
         }
         public unsafe override void TickLogic()
         {
@@ -96,7 +78,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     
                 for (int j = 0; j < i.Atoms.Length; j++)
                 {
-                    var drawcall = i.GetDrawCall(GBuffers, (uint)j, this, EShadingType.BasePass);
+                    var drawcall = i.GetDrawCall(GBuffers, j, this, EShadingType.BasePass);
                     if (drawcall == null)
                         continue;
 

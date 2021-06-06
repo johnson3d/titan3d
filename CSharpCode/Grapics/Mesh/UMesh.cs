@@ -33,15 +33,7 @@ namespace EngineNS.Graphics.Mesh
         }
         public class UMeshAttachment
         {
-            public virtual Pipeline.Shader.UShadingEnv GetPassShading(Pipeline.IRenderPolicy.EShadingType type, Mesh.UMesh mesh)
-            {
-                switch (type)
-                {
-                    case Pipeline.IRenderPolicy.EShadingType.BasePass:
-                        return UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>();
-                }
-                return null;
-            }
+            
         }
         public bool IsDrawHitproxy = false;
         public UMeshAttachment Tag { get; set; }
@@ -59,7 +51,7 @@ namespace EngineNS.Graphics.Mesh
 
             public List<ViewDrawCalls> TargetViews;
             System.Threading.Tasks.Task TaskBuildDrawCall = null;
-            public unsafe virtual RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, UMesh mesh, uint atom, Pipeline.IRenderPolicy policy, Pipeline.IRenderPolicy.EShadingType shadingType)
+            public unsafe virtual RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, UMesh mesh, int atom, Pipeline.IRenderPolicy policy, Pipeline.IRenderPolicy.EShadingType shadingType)
             {
                 //每个TargetView都要对应一个DrawCall数组
                 ViewDrawCalls drawCalls = null;
@@ -129,17 +121,17 @@ namespace EngineNS.Graphics.Mesh
                     }
                 }
                 
-                policy.OnDrawCall(shadingType, result, mesh);
+                policy.OnDrawCall(shadingType, result, mesh, atom);
                 return result;
             }
-            public async System.Threading.Tasks.Task BuildDrawCall(RHI.CDrawCall[] drawCalls, UMesh mesh, uint atom, Pipeline.IRenderPolicy policy, Pipeline.IRenderPolicy.EShadingType shadingType)
+            public async System.Threading.Tasks.Task BuildDrawCall(RHI.CDrawCall[] drawCalls, UMesh mesh, int atom, Pipeline.IRenderPolicy policy, Pipeline.IRenderPolicy.EShadingType shadingType)
             {
                 if (atom >= mesh.MaterialMesh.Materials.Length)
                     return;
                 for (Pipeline.IRenderPolicy.EShadingType i = Pipeline.IRenderPolicy.EShadingType.BasePass;
                     i < Pipeline.IRenderPolicy.EShadingType.Count; i++)
                 {
-                    var shading = policy.GetPassShading(i, mesh);
+                    var shading = policy.GetPassShading(i, mesh, atom);
                     if (shading != null)
                     {
                         var drawcall = await UEngine.Instance.GfxDevice.RenderContext.CreateDrawCall(shading, Material.ParentMaterial, mesh.MdfQueue);
@@ -148,7 +140,7 @@ namespace EngineNS.Graphics.Mesh
                         #region Textures
                         unsafe
                         {
-                            drawcall.mCoreObject.BindGeometry(mesh.MaterialMesh.Mesh.mCoreObject, atom, 0);
+                            drawcall.mCoreObject.BindGeometry(mesh.MaterialMesh.Mesh.mCoreObject, (uint)atom, 0);
                         }
                         var textures = new RHI.CShaderResources();
                         for (int j = 0; j < Material.NumOfSRV; j++)
@@ -346,7 +338,7 @@ namespace EngineNS.Graphics.Mesh
         //渲染原子Id
         //渲染策略policy
         //本次渲染的Shading模式
-        public RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, uint atom, Pipeline.IRenderPolicy policy, Pipeline.IRenderPolicy.EShadingType shadingType)
+        public RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, int atom, Pipeline.IRenderPolicy policy, Pipeline.IRenderPolicy.EShadingType shadingType)
         {
             if (atom >= Atoms.Length)
                 return null;

@@ -17,8 +17,8 @@ namespace EngineNS.Graphics.Pipeline
         //[EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
         public List<Mesh.UMesh> VisibleMeshes = new List<Mesh.UMesh>();
-        public virtual Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh) { return null; }
-        public virtual void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh) 
+        public virtual Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom) { return null; }
+        public virtual void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom) 
         {
             mesh.MdfQueue.OnDrawCall(shadingType, drawcall, this, mesh);
         }

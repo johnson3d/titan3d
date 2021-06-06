@@ -213,7 +213,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                 for (int j = 0; j < i.Atoms.Length; j++)
                 {
-                    var drawcall = i.GetDrawCall(GBuffers, (uint)j, policy, IRenderPolicy.EShadingType.DepthPass);
+                    var drawcall = i.GetDrawCall(GBuffers, j, policy, IRenderPolicy.EShadingType.DepthPass);
                     if (drawcall != null)
                     {
                         GBuffers.SureCBuffer(drawcall.Effect, "UMobileEditorFSPolicy");

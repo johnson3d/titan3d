@@ -187,7 +187,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 for (int j = 0; j < mesh.Atoms.Length; j++)
                 {
-                    var drawcall = mesh.GetDrawCall(PickedBuffer, (uint)j, policy, Graphics.Pipeline.IRenderPolicy.EShadingType.Picked);
+                    var drawcall = mesh.GetDrawCall(PickedBuffer, j, policy, Graphics.Pipeline.IRenderPolicy.EShadingType.Picked);
                     if (drawcall != null)
                     {
                         PickedBuffer.SureCBuffer(drawcall.Effect, "UPickedProxiableManager");

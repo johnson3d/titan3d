@@ -77,7 +77,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.SetViewport(GBuffers.ViewPort.mCoreObject);
                 for (int j = 0; j < ScreenMesh.Atoms.Length; j++)
                 {
-                    var drawcall = ScreenMesh.GetDrawCall(GBuffers, (uint)j, ScreenDrawPolicy, Graphics.Pipeline.IRenderPolicy.EShadingType.BasePass);
+                    var drawcall = ScreenMesh.GetDrawCall(GBuffers, j, ScreenDrawPolicy, Graphics.Pipeline.IRenderPolicy.EShadingType.BasePass);
                     if (drawcall == null)
                         continue;
                     if (drawcall.Effect.CBPerViewportIndex != 0xFFFFFFFF)
