@@ -18,7 +18,10 @@ namespace EngineNS.Graphics.Pipeline
         public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
         public List<Mesh.UMesh> VisibleMeshes = new List<Mesh.UMesh>();
         public virtual Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh) { return null; }
-        public virtual void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh) { }
+        public virtual void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh) 
+        {
+            mesh.MdfQueue.OnDrawCall(shadingType, drawcall, this, mesh);
+        }
         public virtual RHI.CShaderResourceView GetFinalShowRSV() { return null; }
         public virtual async System.Threading.Tasks.Task Initialize(float x, float y)
         {

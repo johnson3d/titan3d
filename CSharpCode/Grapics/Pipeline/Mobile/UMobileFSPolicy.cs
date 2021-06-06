@@ -71,6 +71,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh)
         {
+            base.OnDrawCall(shadingType, drawcall, mesh);
             //if (mesh.Tag != null)
             //{
             //    var shading = mesh.Tag.GetPassShading(shadingType, mesh) as Mobile.UBasePassShading;

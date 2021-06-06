@@ -72,6 +72,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public unsafe override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
         {
+            base.OnDrawCall(shadingType, drawcall, policy, mesh);
             var gpuProgram = drawcall.Effect.ShaderProgram;
             var index = drawcall.mCoreObject.FindSRVIndex("gPickedSetUpTex");
             drawcall.mCoreObject.BindSRVAll(index, Manager.PickedBuffer.GBufferSRV[0].mCoreObject);
