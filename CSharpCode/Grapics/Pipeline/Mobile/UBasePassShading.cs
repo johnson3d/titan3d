@@ -28,16 +28,37 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             disable_Shadow.Values.Add("1");
             MacroDefines.Add(disable_Shadow);
 
-            UpdatePermutation();
+            var mode_editor = new MacroDefine();//3
+            mode_editor.Name = "MODE_EDITOR";
+            mode_editor.Values.Add("0");
+            mode_editor.Values.Add("1");
+            MacroDefines.Add(mode_editor);
 
-            uint permuationId;
-            var values = new List<string>();
-            values.Add("0");//disable_AO = 0
-            values.Add("0");//disalbe_PointLights = 0
-            values.Add("0");//disalbe_Shadow = 0
-            this.GetPermutation(values, out permuationId);
-            this.CurrentPermutationId = permuationId;
+            UpdatePermutationBitMask();
+
+            mMacroValues.Add("0");//disable_AO = 0
+            mMacroValues.Add("0");//disalbe_PointLights = 0
+            mMacroValues.Add("0");//disalbe_Shadow = 0
+            mMacroValues.Add("1");//mode_editor = 0
+            
+            UpdatePermutation(mMacroValues);
         }
+        public void SetDisableAO(bool value)
+        {
+            mMacroValues[0] = value ? "1" : "0";
+            UpdatePermutation(mMacroValues);
+        }
+        public void SetDisablePointLights(bool value)
+        {
+            mMacroValues[1] = value ? "1" : "0";
+            UpdatePermutation(mMacroValues);
+        }
+        public void SetDisableShadow(bool value)
+        {
+            mMacroValues[2] = value ? "1" : "0";
+            UpdatePermutation(mMacroValues);
+        }
+        List<string> mMacroValues = new List<string>();
         public RHI.CConstantBuffer PerShadingCBuffer;
         public override bool IsValidPermutation(Shader.UMaterial mtl, uint permutation)
         {
@@ -106,7 +127,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     {
         public UBasePassOpaque()
         {
-            CodeName = RName.GetRName("shaders/ShadingEnv/Mobile/MobileOpaque.shadingenv", RName.ERNameType.Engine);
+            CodeName = RName.GetRName("shaders/ShadingEnv/Mobile/MobileOpaque.cginc", RName.ERNameType.Engine);
         }
     }
 
@@ -195,12 +216,14 @@ namespace EngineNS.UTest
             values.Add("1");
             values.Add("1");
             values.Add("0");
+            values.Add("0");
             env.GetPermutation(values, out permuationId);
             UnitTestManager.TAssert(permuationId == 3, "");
 
             values.Clear();
             values.Add("0");
             values.Add("1");
+            values.Add("0");
             values.Add("0");
             env.GetPermutation(values, out permuationId);
             UnitTestManager.TAssert(permuationId == 2, "");

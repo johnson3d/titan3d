@@ -1,5 +1,5 @@
-#ifndef _HIT_PROXY_AXIS_
-#define _HIT_PROXY_AXIS_
+#ifndef _SSM_
+#define _SSM_
 
 #include "Inc/VertexLayout.cginc"
 #include "Inc/LightCommon.cginc"
@@ -16,6 +16,8 @@ MDFQUEUE_FUNCTION
 PS_INPUT VS_Main(VS_INPUT input)
 {
 	PS_INPUT output = (PS_INPUT)0;
+	DO_VSInput_To_PSInput(output, input);
+
 #if defined(MDF_INSTANCING)
 	output.PointLightIndices = PointLightIndices;
 	output.SpecialData.x = PointLightNum;
@@ -28,38 +30,24 @@ PS_INPUT VS_Main(VS_INPUT input)
 		MdfQueueDoModifiers(output, input);
 #endif
 
-#ifndef DO_VSInput_To_PSInput
-#define DO_VSInput_To_PSInput Default_VSInput2PSInput
-#endif
-
-		DO_VSInput_To_PSInput(output, input);
-
 #ifndef DO_VS_MATERIAL
-#define DO_VS_MATERIAL DoDefaultVSMaterial
-#endif
-
 		DO_VS_MATERIAL(output, mtl);
+#endif
 	}
 
 	output.vPosition.xyz += mtl.mVertexOffset;
-	matrix WVPMtx = mul(WorldMatrix, ViewPrjMtx);
-	output.vPosition = mul(float4(output.vPosition.xyz, 1), WVPMtx);
 
-	/*float4 PosV = mul(float4(output.vPosition.xyz, 1), WorldViewMatrix);
-
-	float OutlineThickness = 0.01f * output.vColor.a;
-
-	float3 Nv = normalize(mul(float4(output.vNormal, 0), WorldViewMatrix).xyz) * PosV.z;
-
-	PosV = PosV + float4(Nv, 0.0f) * OutlineThickness;
-	output.vPosition = mul(PosV, PrjMtx);*/
+	matrix ShadowWVPMtx = mul(WorldMatrix, ViewPrjMtx);
+	output.vPosition = mul(float4(output.vPosition.xyz, 1), ShadowWVPMtx);
+	
+	output.vPosition.z = output.vPosition.z + gDepthBiasAndZFarRcp.x;
 
 	return output;
 }
 
 struct PS_OUTPUT
 {
-	float4 RT0 : SV_Target0;
+	//float4 RT0 : SV_Target0;
 };
 
 PS_OUTPUT PS_Main(PS_INPUT input)
@@ -78,15 +66,12 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #ifdef ALPHA_TEST
 	half Alpha = mtl.mAlpha;
 	half AlphaTestThreshold = mtl.mAlphaTest;
-
 	clip(Alpha - AlphaTestThreshold);
-#endif // AlphaTest
+#endif 
 
-	output.RT0 = SelectColor;
-	//output.RT0 = float4(0.0f, HitProxyId.a * 30.0f, 0.0f, 1.0f);
-
+	//output.RT0 = half4(0.0f, 0.0f, 0.0f, 1.0f);
+	
 	return output;
 }
-
 
 #endif

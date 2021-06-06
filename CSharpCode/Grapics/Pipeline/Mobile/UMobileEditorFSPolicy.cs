@@ -34,17 +34,16 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             disable_Hdr.Values.Add("1");
             MacroDefines.Add(disable_Hdr);
 
-            UpdatePermutation();
+            UpdatePermutationBitMask();
 
-            uint permuationId;
-            var values = new List<string>();
-            values.Add("0");//disable_AO = 0
-            values.Add("1");//disable_Sunshaft = 1
-            values.Add("1");//disable_Bloom = 1
-            values.Add("1");//disable_Hdr = 1
-            this.GetPermutation(values, out permuationId);
-            this.CurrentPermutationId = permuationId;
+            mMacroValues.Add("0");//disable_AO = 0
+            mMacroValues.Add("1");//disable_Sunshaft = 1
+            mMacroValues.Add("1");//disable_Bloom = 1
+            mMacroValues.Add("1");//disable_Hdr = 1
+
+            UpdatePermutation(mMacroValues);
         }
+        List<string> mMacroValues = new List<string>();
         public UMobileEditorFSPolicy Manager;
         public unsafe override void OnBuildDrawCall(RHI.CDrawCall drawcall)
         {

@@ -66,11 +66,10 @@
     <None Include="$(MSBuildThisFileDirectory)PickedHollow.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)PickedSetUp.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)SceneCapture.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)Selected.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\heightmap.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileBasePassPS.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileCopyEditor.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileOpaque.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileOpaque.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\copy2d.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\NoPixelShader.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\HitProxy.cginc" />
@@ -78,6 +77,7 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_hollow.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_setup.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\rect2d.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\SSM.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Snapshot.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)SSM.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileSunShaftBlur.shadingenv" />

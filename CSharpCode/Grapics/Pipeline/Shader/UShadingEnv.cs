@@ -47,9 +47,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return -1;
             }
         }
+        public void UpdatePermutation(List<string> values)
+        {
+            uint permuationId;
+            this.GetPermutation(values, out permuationId);
+            this.CurrentPermutationId = permuationId;
+        }
         public List<MacroDefine> MacroDefines = new List<MacroDefine>();
         public uint NumOfBits;
-        protected void UpdatePermutation()
+        protected void UpdatePermutationBitMask()
         {
             NumOfBits = 0;
             int bitStart = 0;

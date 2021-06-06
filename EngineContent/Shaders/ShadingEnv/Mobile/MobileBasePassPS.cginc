@@ -85,7 +85,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		//half PerPixelViewerDistance = (half)input.vPosition.w;
 		half PerPixelViewerDistance = (half)input.psCustomUV0.w;
 
-	#ifdef MODE_EDITOR
+	#if MODE_EDITOR == 1
 		for (int CsmIdx = 0; CsmIdx < gCsmNum; CsmIdx++)
 		{
 			if (PerPixelViewerDistance < (half)gCsmDistanceArray[CsmIdx])

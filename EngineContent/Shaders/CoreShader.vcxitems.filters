@@ -60,9 +60,6 @@
     <None Include="$(MSBuildThisFileDirectory)Font.shadingenv">
       <Filter>ShadingEnv\Sys</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Selected.shadingenv">
-      <Filter>ShadingEnv\Sys</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)FSBase.shadingenv">
       <Filter>ShadingEnv\Sys</Filter>
     </None>
@@ -174,7 +171,7 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\rect2d.shadingenv">
       <Filter>ShadingEnv\Sys</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileOpaque.shadingenv">
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileOpaque.cginc">
       <Filter>ShadingEnv\Mobile</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileBasePassPS.cginc">
@@ -203,6 +200,9 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileCopyEditor.cginc">
       <Filter>ShadingEnv\Mobile</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\SSM.cginc">
+      <Filter>ShadingEnv\Sys</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
