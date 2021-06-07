@@ -210,7 +210,7 @@ namespace EngineNS.IO
             Rtti.UMetaVersion metaVersion = meta.GetMetaVersion(versionHash);
             if (metaVersion == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost:{typeHash}");
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost in direct:{meta.MetaDirectoryName}");
                 Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"MetaVersion lost:{versionHash}");
                 throw new Exception($"MetaVersion lost:{versionHash}");
             }

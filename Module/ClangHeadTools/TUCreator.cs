@@ -17,7 +17,9 @@ namespace ClangHeadTools
 
             var index = ClangSharp.Interop.CXIndex.Create();
             const ClangSharp.Interop.CXTranslationUnit_Flags DefaultTranslationUnitFlags = ClangSharp.Interop.CXTranslationUnit_Flags.CXTranslationUnit_IncludeAttributedTypes      // Include attributed types in CXType
-                                                                            | ClangSharp.Interop.CXTranslationUnit_Flags.CXTranslationUnit_VisitImplicitAttributes;    // Implicit attributes should be visited
+                                                                            | ClangSharp.Interop.CXTranslationUnit_Flags.CXTranslationUnit_VisitImplicitAttributes    // Implicit attributes should be visited
+                                                                            //| ClangSharp.Interop.CXTranslationUnit_Flags.CXTranslationUnit_ForSerialization
+                                                                            | ClangSharp.Interop.CXTranslationUnit_Flags.CXTranslationUnit_SkipFunctionBodies;
 
             var args = new List<string>();
             args.Add("-std=c++17");
@@ -58,7 +60,8 @@ namespace ClangHeadTools
                     }
                 }
             }
-
+            //translationUnit.Save();
+            //ClangSharp.Interop.CXTranslationUnit.Create()
             mTransUnit = ClangSharp.TranslationUnit.GetOrCreate(translationUnit);
             return true;
         }

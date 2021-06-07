@@ -25,6 +25,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public Hash160 MaterialHash { get; set; }
             [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
+            public Hash160 MdfQueueHash { get; set; }
+            [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public RName MaterialName { get; set; }
             [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public string MdfQueueType { get; set; }
@@ -110,7 +112,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     return null;
 
                 var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shading.CodeName);
-                if (shadingCode.CodeHash != effectDesc.CodeHash || material.GetHash() != effectDesc.MaterialHash)
+                if (shadingCode.CodeHash != effectDesc.CodeHash ||
+                        material.GetHash() != effectDesc.MaterialHash ||
+                        mdf.GetHash() != effectDesc.MdfQueueHash)
                 {
                     xnd.mCoreObject.TryReleaseHolder();
                     xnd.Dispose();
@@ -148,7 +152,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             unsafe
             {
                 var layoutDesc = new IInputLayoutDesc(IMesh.CreateInputLayoutDesc(result.Desc.InputStreams));
-                layoutDesc.SetShaderDesc(result.DescVS.mCoreObject.Ptr);
+                layoutDesc.SetShaderDesc(result.DescVS.mCoreObject);
                 UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, layoutDesc);
                 InputLayout = rc.CreateInputLayout(layoutDesc);
 
@@ -178,6 +182,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shading.CodeName);
             result.Desc.CodeHash = shadingCode.CodeHash;
             result.Desc.MaterialHash = material.GetHash();
+            result.Desc.MdfQueueHash = mdf.GetHash();
             result.Desc.MaterialName = material.AssetName;
             result.Desc.MdfQueueType = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType());
             result.Desc.ShadingType = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(shading.GetType());
@@ -278,6 +283,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             this.DescVS = descVS;
             this.DescPS = descPS;
             this.Desc.MaterialHash = material.GetHash();
+            this.Desc.MdfQueueHash = mdf.GetHash();
 
             var VertexShader = rc.CreateVertexShader(DescVS);
             if (VertexShader == null)

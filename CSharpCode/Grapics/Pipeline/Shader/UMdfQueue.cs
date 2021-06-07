@@ -12,6 +12,25 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result += $"Code: {SourceCode.AsText}\n";
             return result;
         }
+        protected Hash160 mMdfQueueHash;
+        public virtual Hash160 MdfQueueHash
+        {
+            get
+            {
+                return mMdfQueueHash;
+            }
+            set
+            {
+                mMdfQueueHash = value;
+            }
+        }
+        public virtual Hash160 GetHash()
+        {
+            string result = DefineCode?.AsText;
+            result += SourceCode?.AsText;
+            mMdfQueueHash = Hash160.CreateHash160(result);
+            return mMdfQueueHash;
+        }
         public UMdfQueue()
         {
             mCoreObject = IMdfQueue.CreateInstance();

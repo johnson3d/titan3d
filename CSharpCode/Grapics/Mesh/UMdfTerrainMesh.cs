@@ -16,6 +16,16 @@ namespace EngineNS.Graphics.Mesh
         public float HeightStep = 0.01f;
         public RHI.CShaderResourceView HeightMapRSV { get; set; }
         public RHI.CConstantBuffer TerrainCBuffer;
+        private static string CodeString;
+        public override Hash160 GetHash()
+        {
+            if (CodeString == null)
+            {
+                CodeString = IO.FileManager.ReadAllText(RName.GetRName("shaders/shadingenv/mobile/heightmap.cginc", RName.ERNameType.Engine).Address);
+            }
+            mMdfQueueHash = Hash160.CreateHash160(CodeString);
+            return mMdfQueueHash;
+        }
         protected override void UpdateShaderCode()
         {
             {

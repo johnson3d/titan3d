@@ -20,6 +20,10 @@ struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
 IInputLayoutDesc : public VIUnknown
 {
 	RTTI_DEF(IInputLayoutDesc, 0x47e443e45b0395a3, true);
+	IInputLayoutDesc()
+	{
+
+	}
 	std::vector<LayoutElement>	Layouts;
 	//only for d11,try to match input & vs layout.maybe It is not necessary
 	AutoRef<IShaderDesc>		ShaderDesc;
