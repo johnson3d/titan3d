@@ -18,6 +18,8 @@
 #include "INullBlendState.h"
 #include "INullRasterizerState.h"
 #include "INullSamplerState.h"
+#include "INullTexture2D.h"
+#include "INullShaderResourceView.h"
 
 #include <set>
 
@@ -115,11 +117,13 @@ IDepthStencilView* INullRenderContext::CreateDepthRenderTargetView(const IDepthS
 
 ITexture2D* INullRenderContext::CreateTexture2D(const ITexture2DDesc* desc)
 {
-	return nullptr;
+	auto drt = new INullTexture2D();
+	return drt;
 }
 IShaderResourceView* INullRenderContext::CreateShaderResourceView(const IShaderResourceViewDesc* desc)
 {
-	return nullptr;
+	auto drt = new INullShaderResourceView();
+	return drt;
 }
 IShaderResourceView* INullRenderContext::CreateShaderResourceViewFromBuffer(IGpuBuffer* pBuffer, const ISRVDesc* desc)
 {

@@ -33,6 +33,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)INullShaderProgram.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)INullShaderResourceView.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)INullSwapChain.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)INullTexture2D.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)INullVertexBuffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)INullVertexShader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)NullPreHead.cpp" />
@@ -57,6 +58,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)INullShaderProgram.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)INullShaderResourceView.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)INullSwapChain.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)INullTexture2D.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)INullVertexBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)INullVertexShader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)NullPreHead.h" />

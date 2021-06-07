@@ -84,13 +84,13 @@ namespace EngineNS
         {
             get;
         } = new Profiler.UNativeMemory();
-        public static void StartEngine(UEngine engine)
+        public static void StartEngine(UEngine engine, string cfgFile = null)
         {
             System.Threading.Thread.CurrentThread.Name = "Main";
             mInstance = engine;
-            mInstance.PreInitEngine();
+            mInstance.PreInitEngine(cfgFile);
         }
-        public bool PreInitEngine()
+        public bool PreInitEngine(string cfgFile=null)
         {
             NativeMemory.BeginProfiler();
 
@@ -103,7 +103,8 @@ namespace EngineNS
 
             StartSystemThreads();
 
-            var cfgFile = FileManager.GetRoot(IO.FileManager.ERootDir.Game) + "EngineConfig.cfg";
+            if (cfgFile == null)
+                cfgFile = FileManager.GetRoot(IO.FileManager.ERootDir.Game) + "EngineConfig.cfg";
             Config = IO.FileManager.LoadXmlToObject<UEngineConfig>(cfgFile);
             if (Config == null)
             {

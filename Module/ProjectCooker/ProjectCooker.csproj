@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Engine.Window\Engine.Window.csproj" />
+    <ProjectReference Include="..\Engine.Console\Engine.Console.csproj" />
   </ItemGroup>
 
 </Project>

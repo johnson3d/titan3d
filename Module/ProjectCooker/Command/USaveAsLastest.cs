@@ -20,36 +20,74 @@ namespace ProjectCooker.Command
             var assetTypes = GetArguments(args, Param_Types);
             if (assetTypes == null)
             {
-                throw new Exception("AssetType error");
+                //throw new Exception("AssetType error");
+                await ProcTextures();
+                await ProcMaterial();
+                await ProcMaterialInstance();
             }
-            foreach(var i in assetTypes)
+            else
             {
-                switch (i)
+                foreach (var i in assetTypes)
                 {
-                    case Type_Texture:
-                        {
-                            await ProcTextures();
-                        }
-                        break;
-                    case Type_Mesh:
-                        break;
-                    case Type_Material:
-                        break;
-                    case Type_MaterialInst:
-                        break;
+                    switch (i)
+                    {
+                        case Type_Texture:
+                            {
+                                await ProcTextures();
+                            }
+                            break;
+                        case Type_Mesh:
+                            break;
+                        case Type_Material:
+                            {
+                                await ProcMaterial();
+                            }
+                            break;
+                        case Type_MaterialInst:
+                            {
+                                await ProcMaterialInstance();
+                            }
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
         async System.Threading.Tasks.Task ProcTextures()
         {
             var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Game);
-            var files = EngineNS.IO.FileManager.GetFiles(root, EngineNS.RHI.CShaderResourceView.AssetExt, true);
+            var files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.RHI.CShaderResourceView.AssetExt, true);
             foreach (var i in files)
             {
-                var rp = EngineNS.IO.FileManager.GetRelativePath(i, root);
+                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
-                var texture = await EngineNS.UEngine.Instance.GfxDevice.TextureManager.GetTexture(rn);
-                texture.SaveAssetTo(rn);
+                var asset = await EngineNS.UEngine.Instance.GfxDevice.TextureManager.GetTexture(rn);
+                asset.SaveAssetTo(rn);
+            }
+        }
+        async System.Threading.Tasks.Task ProcMaterial()
+        {
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Game);
+            var files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.UMaterial.AssetExt, true);
+            foreach (var i in files)
+            {
+                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
+                var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
+                var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
+                asset.SaveAssetTo(rn);
+            }
+        }
+        async System.Threading.Tasks.Task ProcMaterialInstance()
+        {
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Game);
+            var files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.UMaterial.AssetExt, true);
+            foreach (var i in files)
+            {
+                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
+                var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
+                var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
+                asset.SaveAssetTo(rn);
             }
         }
     }

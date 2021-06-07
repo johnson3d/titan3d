@@ -88,7 +88,7 @@ namespace EngineNS.Graphics.Pipeline
         public USlateApplication MainWindow;
         public RHI.CRenderSystem RenderSystem { get; private set; }
         public RHI.CRenderContext RenderContext { get; private set; }
-        private unsafe bool InitGPU(UInt32 Adapter, ERHIType rhi, IntPtr window, bool bDebugLayer)
+        protected unsafe bool InitGPU(UInt32 Adapter, ERHIType rhi, IntPtr window, bool bDebugLayer)
         {
             if (UEngine.Instance.PlayMode != EPlayMode.Game)
             {
@@ -162,6 +162,18 @@ namespace EngineNS
 {
     public partial class UEngine
     {
-        public Graphics.Pipeline.UGfxDevice GfxDevice { get; } = new Graphics.Pipeline.UGfxDevice();
+        public static System.Type UGfxDeviceType = typeof(Graphics.Pipeline.UGfxDevice);
+        private Graphics.Pipeline.UGfxDevice mGfxDevice;
+        public Graphics.Pipeline.UGfxDevice GfxDevice 
+        { 
+            get
+            {
+                if (mGfxDevice == null)
+                {
+                    mGfxDevice = Rtti.UTypeDescManager.CreateInstance(UGfxDeviceType) as Graphics.Pipeline.UGfxDevice;
+                }
+                return mGfxDevice;
+            }
+        }
     }
 }
