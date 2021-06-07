@@ -8,7 +8,8 @@ namespace ProjectCooker
         {
             Console.WriteLine("Hello!Titan Cooker!");
 
-            var cfgFile = @"F:\titan3d\content\EngineConfigForCook.cfg";
+            var cfgFile = UCookCommand.FindArgument(args, "CookCfg=");
+            //var cfgFile = @"F:\titan3d\content\EngineConfigForCook.cfg";
             EngineNS.UEngine.UGfxDeviceType = typeof(EngineNS.Graphics.Pipeline.UGfxDeviceConsole);
             EngineNS.UEngine.StartEngine(new EngineNS.UEngine(), cfgFile);
 

@@ -21,7 +21,7 @@ namespace ProjectCooker.Command
             if (assetTypes == null)
             {
                 //throw new Exception("AssetType error");
-                await ProcTextures();
+                //await ProcTextures();
                 await ProcMaterial();
                 await ProcMaterialInstance();
             }
@@ -81,7 +81,7 @@ namespace ProjectCooker.Command
         async System.Threading.Tasks.Task ProcMaterialInstance()
         {
             var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Game);
-            var files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.UMaterial.AssetExt, true);
+            var files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.UMaterialInstance.AssetExt, true);
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
