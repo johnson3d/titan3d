@@ -247,6 +247,27 @@ namespace EngineNS.Graphics.Mesh
             }
         }
         public UAtom[] Atoms;
+        public bool Initialize(UMaterialMesh materialMesh, Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
+        {
+            if (atomType == null)
+                atomType = Rtti.UTypeDescGetter<UAtom>.TypeDesc;
+            if (atomType != Rtti.UTypeDescGetter<UAtom>.TypeDesc && atomType.SystemType.IsSubclassOf(typeof(UAtom)) == false)
+                return false;
+            MaterialMesh = materialMesh;
+
+            MdfQueue = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.UMdfQueue;
+            if (MdfQueue == null)
+                return false;
+
+            Atoms = new UAtom[MaterialMesh.Materials.Length];
+            for (int i = 0; i < Atoms.Length; i++)
+            {
+                Atoms[i] = Rtti.UTypeDescManager.CreateInstance(atomType) as UAtom;
+                Atoms[i].Material = MaterialMesh.Materials[i];
+            }
+
+            return true;
+        }
         public async System.Threading.Tasks.Task<bool> Initialize(RName materialMesh, Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
             if (atomType == null)

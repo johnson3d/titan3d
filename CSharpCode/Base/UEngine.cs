@@ -159,6 +159,12 @@ namespace EngineNS
                 return true;
             }
         }
+        public void PostQuitMessage()
+        {
+            var closeEvent = new SDL2.SDL.SDL_Event();
+            closeEvent.type = SDL2.SDL.SDL_EventType.SDL_QUIT;
+            SDL2.SDL.SDL_PushEvent(ref closeEvent);
+        }
         public void FinalCleanup()
         {
             StopSystemThreads();

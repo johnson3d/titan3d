@@ -1058,8 +1058,28 @@ namespace EngineNS.IO
                         object e = null;
                         if (j.GetAttributeNode("IsNull") == null)
                         {
-                            e = Rtti.UTypeDescManager.CreateInstance(keyType);
-                            ReadObjectMetaFields(paramObject, j, ref e, obj);
+                            if (type.GetGenericArguments()[0] == typeof(RName))
+                            {
+                                var valueAttr = j.GetAttribute("Value");
+                                if (string.IsNullOrEmpty(valueAttr))
+                                {
+                                    continue;
+                                }
+                                var rn = obj as RName;
+                                var segs = valueAttr.Split(',');
+                                Guid assetId;
+                                Guid.TryParse(segs[2], out assetId);
+                                var rnType = (RName.ERNameType)Support.TConvert.ToEnumValue(typeof(RName.ERNameType), segs[0]);
+                                var v = RName.GetRName(segs[1], rnType);
+                                v.AssetId = assetId;
+
+                                e = v;
+                            }
+                            else
+                            {
+                                e = Rtti.UTypeDescManager.CreateInstance(keyType);
+                                ReadObjectMetaFields(paramObject, j, ref e, obj);
+                            }
                         }
                         lst.Add(e);
                     }
@@ -1090,8 +1110,29 @@ namespace EngineNS.IO
                             if (kt != null)
                                 keyType = kt;
                         }
-                        var keyValue = Rtti.UTypeDescManager.CreateInstance(keyType);
-                        ReadObjectMetaFields(paramObject, key, ref keyValue, obj);
+                        object keyValue;
+                        if (type.GetGenericArguments()[0] == typeof(RName))
+                        {
+                            var valueAttr = j.GetAttribute("Value");
+                            if (string.IsNullOrEmpty(valueAttr))
+                            {
+                                continue;
+                            }
+                            var rn = obj as RName;
+                            var segs = valueAttr.Split(',');
+                            Guid assetId;
+                            Guid.TryParse(segs[2], out assetId);
+                            var rnType = (RName.ERNameType)Support.TConvert.ToEnumValue(typeof(RName.ERNameType), segs[0]);
+                            var v = RName.GetRName(segs[1], rnType);
+                            v.AssetId = assetId;
+
+                            keyValue = v;
+                        }
+                        else
+                        {
+                            keyValue = Rtti.UTypeDescManager.CreateInstance(keyType);
+                            ReadObjectMetaFields(paramObject, key, ref keyValue, obj);
+                        }
 
                         var valueType = type.GetGenericArguments()[1];
                         typeAttr = value.GetAttribute("Type");
@@ -1101,8 +1142,29 @@ namespace EngineNS.IO
                             if (kt != null)
                                 valueType = kt;
                         }
-                        var valueValue = Rtti.UTypeDescManager.CreateInstance(valueType);
-                        ReadObjectMetaFields(paramObject, value, ref valueValue, obj);
+                        object valueValue;
+                        if (type.GetGenericArguments()[0] == typeof(RName))
+                        {
+                            var valueAttr = j.GetAttribute("Value");
+                            if (string.IsNullOrEmpty(valueAttr))
+                            {
+                                continue;
+                            }
+                            var rn = obj as RName;
+                            var segs = valueAttr.Split(',');
+                            Guid assetId;
+                            Guid.TryParse(segs[2], out assetId);
+                            var rnType = (RName.ERNameType)Support.TConvert.ToEnumValue(typeof(RName.ERNameType), segs[0]);
+                            var v = RName.GetRName(segs[1], rnType);
+                            v.AssetId = assetId;
+
+                            valueValue = v;
+                        }
+                        else
+                        {
+                            valueValue = Rtti.UTypeDescManager.CreateInstance(valueType);
+                            ReadObjectMetaFields(paramObject, value, ref valueValue, obj);
+                        }
 
                         dict[keyValue] = valueValue;
                     }

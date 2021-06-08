@@ -10,7 +10,8 @@ namespace EngineNS.Graphics.Pipeline
     {
         public override async System.Threading.Tasks.Task<bool> Initialize(UEngine engine)
         {
-            if (InitGPU(engine.Config.AdaperId, engine.Config.RHIType, IntPtr.Zero, engine.Config.HasDebugLayer) == false)
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            if (InitGPU(engine.Config.AdaperId, ERHIType.RHT_VirtualDevice, IntPtr.Zero, engine.Config.HasDebugLayer) == false)
             {
                 return false;
             }

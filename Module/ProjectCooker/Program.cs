@@ -24,7 +24,14 @@ namespace ProjectCooker
                             await exe.ExecuteCommand(args);
                         }
                         break;
+                    case "RenameAsset":
+                        {
+                            var exe = new Command.URenameAsset();
+                            await exe.ExecuteCommand(args);
+                        }
+                        break;
                 }
+                EngineNS.UEngine.Instance.PostQuitMessage();
             };
             action();
 

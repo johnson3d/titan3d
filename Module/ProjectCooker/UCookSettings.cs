@@ -13,6 +13,12 @@ namespace ProjectCooker
 
     class UCookCommand
     {
+        public const string Param_Types = "AssetType=";
+        public const string Type_Texture = "Texture";
+        public const string Type_Mesh = "Mesh";
+        public const string Type_Material = "Material";
+        public const string Type_MaterialInst = "MaterialInst";
+
         public virtual async System.Threading.Tasks.Task ExecuteCommand(string[] args)
         {
             await EngineNS.Thread.AsyncDummyClass.DummyFunc();

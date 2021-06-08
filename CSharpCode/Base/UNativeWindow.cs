@@ -186,7 +186,11 @@ namespace EngineNS
             SDL.SDL_Event evt;
             while (SDL.SDL_PollEvent(out evt) != 0)
             {
-                EGui.UDockWindowSDL.ImGui_ImplSDL2_ProcessEvent(ref evt);
+                unsafe
+                {
+                    if (ImGuiAPI.GetCurrentContext() != (void*)0)
+                        EGui.UDockWindowSDL.ImGui_ImplSDL2_ProcessEvent(ref evt);
+                }
 
                 if (evt.type == SDL.SDL_EventType.SDL_QUIT)
                 {

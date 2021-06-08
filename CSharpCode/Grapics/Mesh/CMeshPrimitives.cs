@@ -254,6 +254,17 @@ namespace EngineNS.Graphics.Mesh
 
             return null;
         }
+        public void UnsafeRenameForCook(RName name, RName newName)
+        {
+            CMeshPrimitives result;
+            if (Meshes.TryGetValue(name, out result) == false)
+                return;
+
+            Meshes.Remove(name);
+            result.GetAMeta().SetAssetName(newName);
+            result.AssetName = newName;
+            Meshes.Add(newName, result);
+        }
     }
 }
 

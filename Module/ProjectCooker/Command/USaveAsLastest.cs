@@ -8,20 +8,14 @@ namespace ProjectCooker.Command
 {
     class USaveAsLastest : UCookCommand
     {
-        public const string Param_Types = "AssetType=";
-        public const string Type_Texture = "Texture";
-        public const string Type_Mesh = "Mesh";
-        public const string Type_Material = "Material";
-        public const string Type_MaterialInst = "MaterialInst";
         public override async System.Threading.Tasks.Task ExecuteCommand(string[] args)
         {
-            await base.ExecuteCommand(args);
-
             var assetTypes = GetArguments(args, Param_Types);
             if (assetTypes == null)
             {
                 //throw new Exception("AssetType error");
                 //await ProcTextures();
+                await ProcUMesh();
                 await ProcMaterial();
                 await ProcMaterialInstance();
             }
@@ -37,6 +31,9 @@ namespace ProjectCooker.Command
                             }
                             break;
                         case Type_Mesh:
+                            {
+                                await ProcUMesh();
+                            }
                             break;
                         case Type_Material:
                             {
@@ -63,6 +60,18 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.TextureManager.GetTexture(rn);
+                asset.SaveAssetTo(rn);
+            }
+        }
+        async System.Threading.Tasks.Task ProcUMesh()
+        {
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Game);
+            var files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.Graphics.Mesh.UMaterialMesh.AssetExt, true);
+            foreach (var i in files)
+            {
+                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
+                var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
+                var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(rn);
                 asset.SaveAssetTo(rn);
             }
         }

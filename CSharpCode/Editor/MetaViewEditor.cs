@@ -64,9 +64,19 @@ namespace EngineNS.Editor
                 if (materials[0] == null)
                     return;
                 var puppetMesh =await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(RName.GetRName("utest/mesh/puppet_low_ue4.vms"));
+                var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("utest/mesh/puppet_low_ue4.ums"));
+                if (materialMesh == null)
+                {
+                    materialMesh = UEngine.Instance.AssetMetaManager.NewAsset<Graphics.Mesh.UMaterialMesh>(RName.GetRName("utest/mesh/puppet_low_ue4.ums"));
+                    materialMesh.Initialize(puppetMesh, materials);
+                    materialMesh.SaveAssetTo(RName.GetRName("utest/mesh/puppet_low_ue4.ums"));
+                }
+
                 var mesh = new Graphics.Mesh.UMesh();
-                
-                var ok = mesh.Initialize(puppetMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+
+                //var ok = mesh.Initialize(puppetMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                //var ok = mesh.Initialize(materialMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                var ok = mesh.Initialize(materialMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 if (ok)
                 {
                     //var trans = Matrix.Scaling(0.01f);

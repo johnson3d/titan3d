@@ -97,6 +97,16 @@ namespace EngineNS
         {
             return RNameManager.Instance.GetRName(name, rNameType);
         }
+        public static RName ParseFrom(string nameStr)
+        {
+            if (nameStr == null)
+                return null;
+            var segs = nameStr.Split(',');
+            if (segs.Length < 2)
+                return null;
+            var rnType = (RName.ERNameType)Support.TConvert.ToEnumValue(typeof(RName.ERNameType), segs[0]);
+            return RNameManager.Instance.GetRName(segs[1], rnType);
+        }
         public override string ToString()
         {
             return $"{mName}:{mRNameType}";

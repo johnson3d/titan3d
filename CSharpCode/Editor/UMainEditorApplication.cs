@@ -100,9 +100,7 @@ namespace EngineNS.Editor
                 var num = ImGuiAPI.PlatformIO_Viewports_Size(ImGuiAPI.GetPlatformIO());
                 if (num == 1)
                 {//只剩下被特意隐藏的主Viewport了
-                    var closeEvent = new SDL.SDL_Event();
-                    closeEvent.type = SDL.SDL_EventType.SDL_QUIT;
-                    SDL.SDL_PushEvent(ref closeEvent);
+                    UEngine.Instance.PostQuitMessage();
                 }
                 return;
             }

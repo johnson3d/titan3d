@@ -40,9 +40,28 @@ namespace EngineNS.Graphics.Mesh
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
             ameta.RefAssetRNames.Clear();
+
+            if (MeshName != null)
+                ameta.RefAssetRNames.Add(MeshName);
+
+            if (Materials != null)
+            {
+                foreach (var i in Materials)
+                {
+                    if (i == null)
+                        continue;
+                    ameta.RefAssetRNames.Add(i.AssetName);
+                }
+            }
         }
         public void SaveAssetTo(RName name)
         {
+            var ameta = this.GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta();
+            }
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             var xnd = new IO.CXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("MaterialMesh", 0, 0))
@@ -72,6 +91,20 @@ namespace EngineNS.Graphics.Mesh
         public virtual void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml)
         {
 
+        }
+        public bool Initialize(CMeshPrimitives mesh, Pipeline.Shader.UMaterial[] materials)
+        {
+            if (mesh.mCoreObject.GetAtomNumber() != materials.Length)
+                return false;
+
+            Mesh = mesh;
+
+            for (int i = 0; i < materials.Length; i++)
+            {
+                Materials[i] = materials[i];
+            }
+
+            return true;
         }
         public static UMaterialMesh LoadXnd(UMaterialMeshManager manager, IO.CXndNode node)
         {
