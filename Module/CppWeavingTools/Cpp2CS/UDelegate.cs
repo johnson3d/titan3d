@@ -45,7 +45,10 @@ namespace CppWeaving.Cpp2CS
 		}
 		public string GetCsDelegateDefine()
 		{
-			return $"unsafe delegate {FunctionType.ReturnType.GetCsTypeName()} FDelegate_{FunctionType.Name}({FunctionType.GetParameterDefineCs()})";
+			var retType = FunctionType.ReturnType.GetCsTypeName();
+			if (retType == "string")
+				retType = "sbyte*";
+			return $"unsafe delegate {retType} FDelegate_{FunctionType.Name}({FunctionType.GetParameterDefineCs(true)})";
 		}
 		public override string ToCsName()
 		{

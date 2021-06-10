@@ -212,6 +212,11 @@ namespace CppWeaving.Cpp2CS
 		}
 		public UTypeBase FindType(ClangSharp.Interop.CXType t)
 		{
+			if (t.kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef && t.ToString() == "size_t")
+			{
+				return USysClassManager.Instance.FindClass("size_t");
+			}
+			
 			UTypeBase result = UTypeManager.Instance.FindClass(t);
 			if (result != null)
 				return result;

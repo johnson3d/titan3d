@@ -52,9 +52,9 @@ namespace CppWeaving.Cpp2CS
 					continue;
 
 				if (i.Parameters.Count > 0)
-					AddLine($"static void UnsafeConstruct({mClass.ToCppName()}* self, {i.GetParameterDefineCpp()})");
+					AddLine($"static void UnsafeCallConstructor({mClass.ToCppName()}* self, {i.GetParameterDefineCpp()})");
 				else
-					AddLine($"static void UnsafeConstruct({mClass.ToCppName()}* self)");
+					AddLine($"static void UnsafeCallConstructor({mClass.ToCppName()}* self)");
 				PushBrackets();
 				{
 					if (i.Parameters.Count > 0) {
@@ -71,7 +71,7 @@ namespace CppWeaving.Cpp2CS
 			}
 			if (true) {
 				var dispose = mClass.GetMeta(UProjectSettings.SV_Dispose);
-				AddLine($"static void UnsafeDestruct({mClass.ToCppName()}* self)");
+				AddLine($"static void UnsafeCallDestructor({mClass.ToCppName()}* self)");
 				PushBrackets();
 				{
 					//AddLine($"self->~{mClass.ToCppName()}();");
@@ -85,9 +85,9 @@ namespace CppWeaving.Cpp2CS
 				if (i.Access != EAccess.Public && bExpProtected == false)
 					continue;
 				if (i.Parameters.Count > 0)
-					AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{visitor_name}_UnsafeConstruct_{i.FunctionHash}({mClass.ToCppName()}* self, {i.GetParameterDefineCpp()})");
+					AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{visitor_name}_UnsafeCallConstructor_{i.FunctionHash}({mClass.ToCppName()}* self, {i.GetParameterDefineCpp()})");
 				else
-					AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{visitor_name}_UnsafeConstruct_{i.FunctionHash}({mClass.ToCppName()}* self)");
+					AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{visitor_name}_UnsafeCallConstructor_{i.FunctionHash}({mClass.ToCppName()}* self)");
 				PushBrackets();
 				{
 					if (i.Parameters.Count > 0)
@@ -99,7 +99,7 @@ namespace CppWeaving.Cpp2CS
 			}
 			if (true) {
 				var dispose = mClass.GetMeta(UProjectSettings.SV_Dispose);
-				AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{visitor_name}_UnsafeDestruct({mClass.ToCppName()}* self)");
+				AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{visitor_name}_UnsafeCallDestructor({mClass.ToCppName()}* self)");
 				PushBrackets();
 				{
 					AddLine($"return {visitor_name}::UnsafeDestruct(self);");

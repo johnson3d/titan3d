@@ -33,7 +33,7 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     unsafe
                     {
-                        mCoreObject.BindConstBuffer(UEngine.Instance.GfxDevice.RenderContext.mCoreObject.CppPointer, value.mCoreObject.CppPointer);
+                        mCoreObject.BindConstBuffer(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, value.mCoreObject);
                     }
                 }
             }

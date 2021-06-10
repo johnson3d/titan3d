@@ -22,6 +22,10 @@ namespace EngineNS
 	private:
 		int Value;
 	};
+	struct v3dxIndexInSkeleton_t
+	{
+		int Value;
+	};
 #pragma pack(pop)
 
 	struct TR_CLASS(SV_LayoutStruct = 8)

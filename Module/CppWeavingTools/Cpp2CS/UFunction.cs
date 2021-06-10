@@ -114,7 +114,7 @@ namespace CppWeaving.Cpp2CS
                 }
             }
 		}
-		public string GetParameterDefineCs()
+		public string GetParameterDefineCs(bool noMarshal = false)
 		{
             string result = "";
 			foreach (var j in Parameters) {
@@ -128,6 +128,22 @@ namespace CppWeaving.Cpp2CS
 				else
 				{
 					var argType = j.GetCsTypeName();
+					if (noMarshal == false)
+					{						
+						if (j.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
+						{
+							if (argType == "sbyte*")
+							{
+								argType = "string";
+							}
+						}
+                        if (j.IsTypeDef)
+                        {
+                            var dypeDef = USysClassManager.Instance.FindTypeDef(j.CxxName);
+                            if (dypeDef != null)
+								argType = dypeDef;
+                        }
+                    }
 					result += $"{argType} {j.Name}";
 				}
 			}
@@ -177,7 +193,12 @@ namespace CppWeaving.Cpp2CS
 		}
 		private bool IsRefConvertType(UProperty prop)
 		{
-			if (prop.PropertyType.ClassType == EClassType.StructType &&
+			if (prop.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
+			{
+				if (prop.GetCsTypeName() == "sbyte*")
+					return false;
+			}
+			if (prop.IsStructType &&
 					prop.NumOfTypePointer == 1) {
 				return true;
 			}
@@ -189,8 +210,26 @@ namespace CppWeaving.Cpp2CS
 			foreach (var j in Parameters) {
 				if (!string.IsNullOrEmpty(result))
 					result += ",";
+
 				var argType = j.GetCsTypeName();
-				if (IsRefConvertType(j)) {
+				if (j.NumOfTypePointer == 1 && j.PropertyType.ClassType == EClassType.PointerType)
+                {
+                    argType = j.PropertyType.ToCsName();
+                }
+                if (j.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
+                {
+                    if (argType == "sbyte*")
+                    {
+                        argType = "string";
+                    }
+                }
+                if (j.IsTypeDef)
+                {
+                    var dypeDef = USysClassManager.Instance.FindTypeDef(j.CxxName);
+                    if (dypeDef != null)
+                        argType = dypeDef;
+                }
+                if (IsRefConvertType(j)) {
 					argType = $" ref {j.PropertyType.ToCsName()}";
 				}
 				result += $"{argType} {j.Name}";

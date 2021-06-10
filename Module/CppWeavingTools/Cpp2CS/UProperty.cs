@@ -26,6 +26,7 @@ namespace CppWeaving.Cpp2CS
 			}
         }
 		public bool IsReference;
+		public bool IsTypeDef;
 		public UTypeBase PropertyType;
 		public int NumOfTypePointer;
 		public int NumOfElement;

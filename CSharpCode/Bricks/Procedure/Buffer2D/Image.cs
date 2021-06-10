@@ -97,7 +97,7 @@ namespace EngineNS.Bricks.Procedure.Buffer2D
                     texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture2D(ref desc);
                 }
                 var rsvDesc = new IShaderResourceViewDesc();
-                rsvDesc.m_pTexture2D = texture.mCoreObject.CppPointer;
+                rsvDesc.m_pTexture2D = texture.mCoreObject;
                 rsvDesc.mFormat = EPixelFormat.PXF_R32_FLOAT;
                 return UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(ref rsvDesc);
             }

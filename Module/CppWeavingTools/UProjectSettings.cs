@@ -23,6 +23,7 @@ namespace CppWeaving
 		public const string SV_Dispose = "SV_Dispose";
 		public const string SV_Marshal = "SV_Marshal";
 		public const string SV_EnumNoFlags = "SV_EnumNoFlags";
+		public const string SV_NoStringConverter = "SV_NoStringConverter";
 
 
 		public string CppOutputDir;

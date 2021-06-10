@@ -16,8 +16,8 @@ namespace EngineNS.Graphics.Mesh
             {
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
                 var result = new CMeshPrimitives();
-                result.mCoreObject.Init(rc.mCoreObject.CppPointer, "", 1);
-                mCoreObject.ToMesh(rc.mCoreObject.CppPointer, result.mCoreObject.CppPointer);
+                result.mCoreObject.Init(rc.mCoreObject, "", 1);
+                mCoreObject.ToMesh(rc.mCoreObject, result.mCoreObject);
                 return result;
             }
         }

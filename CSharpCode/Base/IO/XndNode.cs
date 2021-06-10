@@ -14,7 +14,7 @@ namespace EngineNS.IO
         {
             get
             {
-                return mCoreObject.CastToSuper().GetName();
+                return mCoreObject.NativeSuper.GetName();
             }
             set
             {
@@ -98,28 +98,28 @@ namespace EngineNS.IO
         {
             unsafe
             {
-                mCoreObject.AddAttribute(attr.CppPointer);
+                mCoreObject.AddAttribute(attr);
             }
         }
         public void AddNodePtr(XndNode node)
         {
             unsafe
             {
-                mCoreObject.AddNode(node.CppPointer);
+                mCoreObject.AddNode(node);
             }
         }
         public void AddAttribute(XndAttribute attr)
         {
             unsafe
             {
-                mCoreObject.AddAttribute(attr.CppPointer);
+                mCoreObject.AddAttribute(attr);
             }
         }
         public void AddNode(XndNode node)
         {
             unsafe
             {
-                mCoreObject.AddNode(node.CppPointer);
+                mCoreObject.AddNode(node);
             }
         }
     }

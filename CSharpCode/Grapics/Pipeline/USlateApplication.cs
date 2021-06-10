@@ -34,7 +34,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 mDrawData.InitializeGraphics();
 
-                mImGuiContext = (IntPtr)ImGuiAPI.CreateContext((ImFontAtlas*)0);
+                mImGuiContext = (IntPtr)ImGuiAPI.CreateContext(new ImFontAtlas((void*)0));
                 ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
                 UEngine.Instance.GfxDevice.SlateRenderer.RecreateFontDeviceTexture();
 
@@ -135,8 +135,8 @@ namespace EngineNS.Graphics.Pipeline
 
             //ImGuiAPI.GetClipboardTextSetter(io.Ptr, GetClipboardTextFn);
             //ImGuiAPI.SetClipboardTextSetter(io, SetClipboardTextFn);
-            io.SetClipboardTextFn = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(EGui.UDockWindowSDL.ImGui_ImplSDL2_SetClipboardText);
-            io.GetClipboardTextFn = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(EGui.UDockWindowSDL.ImGui_ImplSDL2_GetClipboardText);
+            io.SetClipboardTextFn = EGui.UDockWindowSDL.ImGui_ImplSDL2_SetClipboardText;
+            io.GetClipboardTextFn = EGui.UDockWindowSDL.ImGui_ImplSDL2_GetClipboardText;
             io.ClipboardUserData = (void*)0;
 
             //// Load mouse cursors

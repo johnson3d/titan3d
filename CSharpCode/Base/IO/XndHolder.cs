@@ -78,7 +78,7 @@ namespace EngineNS.IO
                 mRootNode = value;
                 unsafe
                 {
-                    mCoreObject.SetRootNode(value.mCoreObject.CppPointer);
+                    mCoreObject.SetRootNode(value.mCoreObject);
                 }
             }
         }
@@ -124,7 +124,7 @@ namespace EngineNS.IO
                         attr.Write(a);
                         attr.Write(a);
                         attr.EndWrite();
-                        cld.AddAttribute(attr.CppPointer);
+                        cld.AddAttribute(attr);
                     }
                 }
 
