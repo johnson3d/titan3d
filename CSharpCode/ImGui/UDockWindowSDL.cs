@@ -110,7 +110,7 @@ namespace EngineNS.EGui
             case SDL.SDL_EventType.SDL_KEYUP:
                 {
                     var key = (int)ev.key.keysym.scancode;
-                    bool * keysDown = (bool*)io.UnsafeAsLayout->KeysDown;
+                    bool * keysDown = (bool*)&io.UnsafeAsLayout->KeysDown;
                     //IM_ASSERT(key >= 0 && key<IM_ARRAYSIZE(io.KeysDown));
                     keysDown[key] = (ev.type == SDL.SDL_EventType.SDL_KEYDOWN);
                     io.KeyShift = ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_SHIFT) != 0);

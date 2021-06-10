@@ -200,6 +200,7 @@ namespace CppWeaving.Cpp2CS
                     pointerTypeWrapper = true;
                 }
 
+                string marshalReturn = null;
                 if (i.IsDelegate)
                 {
                     var dlgt = i.PropertyType as UDelegate;
@@ -215,12 +216,13 @@ namespace CppWeaving.Cpp2CS
                         AddLine($"{GetAccessDefine(i.Access)} {i.PropertyType.ToCsName()} {i.Name}");
                     else
                     {
-                        var retType = i.GetCsTypeName();
+                         var retType = i.GetCsTypeName();
                         if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
                         {
                             if (retType == "sbyte*")
                             {
                                 retType = "string";
+                                marshalReturn = $"System.Runtime.InteropServices.Marshal.PtrToStringAnsi";
                             }
                         }
                         if (i.IsTypeDef)
@@ -245,7 +247,10 @@ namespace CppWeaving.Cpp2CS
                         }
                         else
                         {
-                            AddLine($"return {pinvoke};");
+                            if (marshalReturn != null)
+                                AddLine($"return {marshalReturn}((IntPtr){pinvoke});");
+                            else
+                                AddLine($"return {pinvoke};");
                         }
                         EndInvoke(i);
                     }
@@ -280,14 +285,7 @@ namespace CppWeaving.Cpp2CS
                 if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
                     continue;
 
-                var retType = i.GetCsTypeName();
-                if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
-                {
-                    if (retType == "sbyte*")
-                    {
-                        retType = "string";
-                    }
-                }
+                var retType = i.GetCsTypeName();                
                 if (i.IsTypeDef)
                 {
                     var dypeDef = USysClassManager.Instance.FindTypeDef(i.CxxName);
@@ -298,6 +296,13 @@ namespace CppWeaving.Cpp2CS
                 UTypeManager.WritePInvokeAttribute(this, i);
                 AddLine($"extern static {retType} TSDK_{mClass.VisitorPInvoke}_FieldGet__{i.Name}(void* self);");
 
+                if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
+                {
+                    if (retType == "sbyte*")
+                    {
+                        retType = "string";
+                    }
+                }
                 UTypeManager.WritePInvokeAttribute(this, i);
                 AddLine($"extern static void TSDK_{mClass.VisitorPInvoke}_FieldSet__{i.Name}(void* self, {retType} value);");
             }
@@ -309,6 +314,7 @@ namespace CppWeaving.Cpp2CS
             {
                 if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
                     continue;
+                string marshalReturn = null;
                 bool pointerTypeWrapper = false;
                 if (i.ReturnType.NumOfTypePointer == 1 && i.ReturnType.PropertyType.ClassType == UTypeBase.EClassType.PointerType)
                 {
@@ -326,6 +332,7 @@ namespace CppWeaving.Cpp2CS
                         if (retTypeStr == "sbyte*")
                         {
                             retTypeStr = "string";
+                            marshalReturn = $"System.Runtime.InteropServices.Marshal.PtrToStringAnsi";
                         }
                     }
                 }
@@ -377,7 +384,10 @@ namespace CppWeaving.Cpp2CS
                     }
                     else
                     {
-                        AddLine($"{retStr}{invoke}({callArg});");
+                        if (marshalReturn == null)
+                            AddLine($"{retStr}{invoke}({callArg});");
+                        else
+                            AddLine($"{retStr}{marshalReturn}((IntPtr){invoke}({callArg}));");
                     }
                     EndInvoke(i);
                 }
@@ -425,13 +435,13 @@ namespace CppWeaving.Cpp2CS
                         callStr += ", " + i.GetParameterDefineCs();
                 }
                 var retTypeStr = i.ReturnType.GetCsTypeName();
-                if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
-                {
-                    if (retTypeStr == "sbyte*")
-                    {
-                        retTypeStr = "string";
-                    }
-                }
+                //if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
+                //{
+                //    if (retTypeStr == "sbyte*")
+                //    {
+                //        retTypeStr = "string";
+                //    }
+                //}
                 AddLine($"extern static {retTypeStr} TSDK_{mClass.VisitorPInvoke}_{i.Name}_{i.FunctionHash}({callStr});");
             }
         }
