@@ -100,6 +100,7 @@ protected:
 	};
 	VModelDesc				mDesc;
 	v3dxBox3				mAABB;
+	TR_MEMBER(SV_NoBind)
 	IResourceState			mResourceState;
 
 	AutoRef<IPartialSkeleton> mPartialSkeleton;

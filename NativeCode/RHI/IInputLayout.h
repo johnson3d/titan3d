@@ -67,13 +67,12 @@ public:
 	IInputLayout();
 	~IInputLayout();
 
+	TR_MEMBER(SV_NoBind)
 	IInputLayoutDesc		mDesc;
 public:
-	TR_FUNCTION()
 	inline UINT GetElemNumber() const {
 		return (UINT)mDesc.Layouts.size();
 	}
-	TR_FUNCTION()
 	inline const LayoutElement* GetElement(UINT StreamIndex) const {
 		for (size_t i = 0; i < mDesc.Layouts.size(); i++)
 		{

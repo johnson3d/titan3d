@@ -45,10 +45,10 @@ namespace CppWeaving.Cpp2CS
 			}
 			PopBrackets(true);
 		}
-		protected override void GenConstructor(bool bExpProtected, string visitor_name)
+		protected override void GenConstructor()
 		{
 			foreach (var i in mClass.Constructors) {
-				if (i.Access != EAccess.Public && bExpProtected == false)
+				if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
 					continue;
 
 				if (i.Parameters.Count > 0)
@@ -79,30 +79,30 @@ namespace CppWeaving.Cpp2CS
 				PopBrackets();
 			}
 		}
-		protected override void GenPInvokeConstructor(bool bExpProtected, string visitor_name)
+		protected override void GenPInvokeConstructor()
 		{
 			foreach (var i in mClass.Constructors) {
-				if (i.Access != EAccess.Public && bExpProtected == false)
+				if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
 					continue;
 				if (i.Parameters.Count > 0)
-					AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{visitor_name}_UnsafeCallConstructor_{i.FunctionHash}({mClass.ToCppName()}* self, {i.GetParameterDefineCpp()})");
+					AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{mClass.VisitorPInvoke}_UnsafeCallConstructor_{i.FunctionHash}({mClass.ToCppName()}* self, {i.GetParameterDefineCpp()})");
 				else
-					AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{visitor_name}_UnsafeCallConstructor_{i.FunctionHash}({mClass.ToCppName()}* self)");
+					AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{mClass.VisitorPInvoke}_UnsafeCallConstructor_{i.FunctionHash}({mClass.ToCppName()}* self)");
 				PushBrackets();
 				{
 					if (i.Parameters.Count > 0)
-						AddLine($"return {visitor_name}::UnsafeConstruct(self, {i.GetParameterCalleeCpp()});");
+						AddLine($"return {mClass.VisitorName}::UnsafeCallConstructor(self, {i.GetParameterCalleeCpp()});");
 					else
-						AddLine($"return {visitor_name}::UnsafeConstruct(self);");
+						AddLine($"return {mClass.VisitorName}::UnsafeCallConstructor(self);");
 				}
 				PopBrackets();
 			}
 			if (true) {
 				var dispose = mClass.GetMeta(UProjectSettings.SV_Dispose);
-				AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{visitor_name}_UnsafeCallDestructor({mClass.ToCppName()}* self)");
+				AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{mClass.VisitorPInvoke}_UnsafeCallDestructor({mClass.ToCppName()}* self)");
 				PushBrackets();
 				{
-					AddLine($"return {visitor_name}::UnsafeDestruct(self);");
+					AddLine($"return {mClass.VisitorName}::UnsafeCallDestructor(self);");
 				}
 				PopBrackets();
 			}
@@ -119,7 +119,7 @@ namespace CppWeaving.Cpp2CS
 		{
 			return ".cpp2cs.cs";
 		}
-        protected override void DefineLayout(bool bExpProtected, string visitor_name)
+        protected override void DefineLayout()
         {
             AddLine($"private void* mPointer;");
             AddLine($"public {mClass.Name}(void* p) {{ mPointer = p; }}");
@@ -135,11 +135,11 @@ namespace CppWeaving.Cpp2CS
             }
             PopBrackets();
         }
-        protected override void GenConstructor(bool bExpProtected, string visitor_name)
+        protected override void GenConstructor()
         {
             foreach (var i in mClass.Constructors)
             {
-                if (i.Access != EAccess.Public && bExpProtected == false)
+                if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
                     continue;
 
                 if (i.Parameters.Count > 0)
@@ -148,7 +148,7 @@ namespace CppWeaving.Cpp2CS
                     AddLine($"public void UnsafeCallConstructor()");
                 PushBrackets();
                 {
-                    var sdk_fun = $"TSDK_{visitor_name}_UnsafeCallConstructor_{i.FunctionHash}";
+                    var sdk_fun = $"TSDK_{mClass.VisitorPInvoke}_UnsafeCallConstructor_{i.FunctionHash}";
                     if (i.Parameters.Count > 0)
                         AddLine($"{sdk_fun}(mPointer, {i.GetParameterCalleeCs()});");
                     else
@@ -160,28 +160,28 @@ namespace CppWeaving.Cpp2CS
             AddLine($"public void UnsafeCallDestructor()");
             PushBrackets();
             {
-                var sdk_fun = $"TSDK_{visitor_name}_UnsafeCallDestructor";
+                var sdk_fun = $"TSDK_{mClass.VisitorPInvoke}_UnsafeCallDestructor";
                 BeginInvoke();
                 AddLine($"{sdk_fun}(mPointer);");
                 EndInvoke();
             }
             PopBrackets();
         }
-        protected override void GenPInvokeConstructor(bool bExpProtected, string visitor_name)
+        protected override void GenPInvokeConstructor()
         {
             AddLine($"//Constructor&Cast");
             foreach (var i in mClass.Constructors)
             {
-                if (i.Access != EAccess.Public && bExpProtected == false)
+                if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
                     continue;
                 UTypeManager.WritePInvokeAttribute(this, i);
                 if (i.Parameters.Count > 0)
-                    AddLine($"extern static void TSDK_{visitor_name}_UnsafeCallConstructor_{i.FunctionHash}(void* self, {i.GetParameterDefineCs()});");
+                    AddLine($"extern static void TSDK_{mClass.VisitorPInvoke}_UnsafeCallConstructor_{i.FunctionHash}(void* self, {i.GetParameterDefineCs()});");
                 else
-                    AddLine($"extern static void TSDK_{visitor_name}_UnsafeCallConstructor_{i.FunctionHash}(void* self);");
+                    AddLine($"extern static void TSDK_{mClass.VisitorPInvoke}_UnsafeCallConstructor_{i.FunctionHash}(void* self);");
             }
             UTypeManager.WritePInvokeAttribute(this, null);
-            AddLine($"extern static void TSDK_{visitor_name}_UnsafeCallDestructor(void* self);");
+            AddLine($"extern static void TSDK_{mClass.VisitorPInvoke}_UnsafeCallDestructor(void* self);");
         }
     }
 }

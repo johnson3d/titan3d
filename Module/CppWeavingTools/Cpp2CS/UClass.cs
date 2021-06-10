@@ -23,7 +23,32 @@ namespace CppWeaving.Cpp2CS
 		public List<UProperty> Properties = new List<UProperty>();
 
 		public List<string> Friends = new List<string>();
-		public void BuildClass()
+
+		public string VisitorNS;
+		public string VisitorClassName;
+		public string VisitorName;
+		public string VisitorPInvoke;
+		public bool IsExpProtected;
+        public void GetNamespaceAndName(string fullname, out string ns, out string name)
+        {
+            if (fullname.StartsWith("class "))
+                fullname = fullname.Substring("class ".Length);
+            else if (fullname.StartsWith("struct "))
+                fullname = fullname.Substring("struct ".Length);
+
+            var pos = fullname.LastIndexOf("::");
+            if (pos >= 0)
+            {
+                name = fullname.Substring(pos + 2);
+                ns = fullname.Substring(0, pos);
+            }
+            else
+            {
+                ns = "";
+                name = fullname;
+            }
+        }
+        public void BuildClass()
 		{
             MetaInfos.Clear();
 			UTypeManager.BuildMetaData(Decl.Attrs, MetaInfos);
@@ -34,7 +59,34 @@ namespace CppWeaving.Cpp2CS
 					Friends.Add(j.Spelling);
 				}
 			}
-			foreach(var i in Decl.Bases) {
+
+			IsExpProtected = false;
+            foreach (var i in Friends)
+            {
+                GetNamespaceAndName(i, out VisitorNS, out VisitorClassName);
+                if (VisitorClassName.EndsWith("_Visitor"))
+                {
+					IsExpProtected = true;
+                    break;
+                }
+            }
+            if (IsExpProtected == false)
+            {
+				VisitorClassName = Name + "_Visitor";
+            }
+
+			if (string.IsNullOrEmpty(VisitorNS) == false)
+			{
+                VisitorName = VisitorNS + "::" + VisitorClassName;
+            }
+			else
+			{
+				VisitorName = VisitorClassName;
+			}
+
+			VisitorPInvoke = VisitorName.Replace("::", "_");
+
+			foreach (var i in Decl.Bases) {
 				var parent = i.Referenced as ClangSharp.CXXRecordDecl;
 				var basekls = UTypeManager.Instance.FindClass(parent.TypeForDecl.Handle);
 				if (basekls != null)

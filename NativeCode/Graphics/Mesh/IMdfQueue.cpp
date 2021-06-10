@@ -4,7 +4,7 @@
 
 NS_BEGIN
 
-void IMdfQueue::GetInputStreams(DWORD* pOutStreams)
+void IMdfQueue::GetInputStreams(UINT* pOutStreams)
 {
 	if (pOutStreams == nullptr)
 		return;
@@ -12,11 +12,11 @@ void IMdfQueue::GetInputStreams(DWORD* pOutStreams)
 	*pOutStreams = 0;
 	for (auto i : mMdfQueue)
 	{
-		i->GetInputStreams(*pOutStreams);
+		i->GetInputStreams(pOutStreams);
 	}
 }
 
-void IMdfQueue::GetProvideStreams(DWORD* pOutStreams)
+void IMdfQueue::GetProvideStreams(UINT* pOutStreams)
 {
 	if (pOutStreams == nullptr)
 		return;
@@ -24,7 +24,7 @@ void IMdfQueue::GetProvideStreams(DWORD* pOutStreams)
 	*pOutStreams = 0;
 	for (auto i : mMdfQueue)
 	{
-		i->GetProvideStreams(*pOutStreams);
+		i->GetProvideStreams(pOutStreams);
 	}
 }
 

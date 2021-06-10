@@ -16,8 +16,8 @@ public:
 	TR_CONSTRUCTOR()
 		ISkinModifier();
 	virtual void SetInputStreams(IMeshPrimitives * mesh, IVertexArray * vao);
-	virtual void GetInputStreams(DWORD & pOutStreams);
-	virtual void GetProvideStreams(DWORD & pOutStreams);
+	virtual void GetInputStreams(UINT * pOutStreams);
+	virtual void GetProvideStreams(UINT * pOutStreams);
 
 	bool FlushSkinPose(IConstantBuffer * cb, int AbsBonePos, int AbsBoneQuat, IPartialSkeleton * partialSkeleton, ISkeletonPose * pose);
 };

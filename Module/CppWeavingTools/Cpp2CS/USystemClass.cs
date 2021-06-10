@@ -77,19 +77,19 @@ namespace CppWeaving.Cpp2CS
 		{
 			RegClass("size_t", new USystemTypeClass() { CppName = "size_t", CSName = "IntPtr" });
 			RegClass("void", new USystemTypeClass() { CppName = "void", CSName = "void" });
-			RegClass("bool", new USystemTypeStruct() { CppName = "bool", CSName = "bool" });
-			RegClass("char", new USystemTypeStruct() { CppName = "char", CSName = "sbyte" });
-			RegClass("short", new USystemTypeStruct() { CppName = "short", CSName = "short" });
-			RegClass("int", new USystemTypeStruct() { CppName = "int", CSName = "int" });
-			RegClass("long", new USystemTypeStruct() { CppName = "int", CSName = "int" });
-			RegClass("long long", new USystemTypeStruct() { CppName = "long long", CSName = "long" });
-			RegClass("unsigned char", new USystemTypeStruct() { CppName = "unsigned char", CSName = "byte" });
-			RegClass("unsigned short", new USystemTypeStruct() { CppName = "unsigned short", CSName = "ushort" });
-			RegClass("unsigned int", new USystemTypeStruct() { CppName = "unsigned int", CSName = "uint" });
-			RegClass("unsigned long", new USystemTypeStruct() { CppName = "unsigned int", CSName = "uint" });
-			RegClass("unsigned long long", new USystemTypeStruct() { CppName = "unsigned long long", CSName = "ulong" });
-			RegClass("float", new USystemTypeStruct() { CppName = "float", CSName = "float" });
-			RegClass("double", new USystemTypeStruct() { CppName = "float", CSName = "double" });
+			RegClass("bool", new USystemTypeStruct() { CppName = "bool", CSName = "bool", RetPodName = "char" });
+			RegClass("char", new USystemTypeStruct() { CppName = "char", CSName = "sbyte", RetPodName = "char" });
+			RegClass("short", new USystemTypeStruct() { CppName = "short", CSName = "short", RetPodName = "short" });
+			RegClass("int", new USystemTypeStruct() { CppName = "int", CSName = "int", RetPodName = "int" });
+			RegClass("long", new USystemTypeStruct() { CppName = "int", CSName = "int", RetPodName = "int" });
+			RegClass("long long", new USystemTypeStruct() { CppName = "long long", CSName = "long", RetPodName = "long long" });
+			RegClass("unsigned char", new USystemTypeStruct() { CppName = "unsigned char", CSName = "byte", RetPodName = "unsigned char" });
+			RegClass("unsigned short", new USystemTypeStruct() { CppName = "unsigned short", CSName = "ushort", RetPodName = "unsigned short" });
+			RegClass("unsigned int", new USystemTypeStruct() { CppName = "unsigned int", CSName = "uint", RetPodName = "unsigned int" });
+			RegClass("unsigned long", new USystemTypeStruct() { CppName = "unsigned int", CSName = "uint", RetPodName = "unsigned long" });
+			RegClass("unsigned long long", new USystemTypeStruct() { CppName = "unsigned long long", CSName = "ulong", RetPodName = "unsigned long long" });
+			RegClass("float", new USystemTypeStruct() { CppName = "float", CSName = "float", RetPodName = "float" });
+			RegClass("double", new USystemTypeStruct() { CppName = "float", CSName = "double", RetPodName = "double" });
 
 			RegClass("v3dxVector2", new USystemTypeStruct() { CppName = "v3dxVector2", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
 			RegClass("v3dxVector3", new USystemTypeStruct() { CppName = "v3dxVector3", CSName = "EngineNS.Vector3", RetPodName = "v3dVector3_t" });

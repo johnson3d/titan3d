@@ -16,9 +16,9 @@ public:
 
 	}
 	TR_FUNCTION()
-	void GetInputStreams(DWORD* pOutStreams);
+	void GetInputStreams(UINT* pOutStreams);
 	TR_FUNCTION()
-	void GetProvideStreams(DWORD* pOutStreams);
+	void GetProvideStreams(UINT* pOutStreams);
 	TR_FUNCTION()
 	IModifier* GetModifier(UINT index) {
 		if (index >= mMdfQueue.size())
