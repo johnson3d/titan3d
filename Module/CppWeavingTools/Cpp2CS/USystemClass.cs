@@ -98,6 +98,7 @@ namespace CppWeaving.Cpp2CS
 			RegClass("v3dxBox3", new USystemTypeStruct() { CppName = "v3dxBox3", CSName = "EngineNS.BoundingBox", RetPodName = "v3dBox3_t" });
 			RegClass("v3dxMatrix4", new USystemTypeStruct() { CppName = "v3dxMatrix4", CSName = "EngineNS.Matrix", RetPodName = "v3dMatrix4_t" });
 			RegClass("ImVec2", new USystemTypeStruct() { CppName = "ImVec2", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
+			RegClass("ImGuiPlatformIO.ImVec2_t", new USystemTypeStruct() { CppName = "ImGuiPlatformIO::ImVec2_t", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
 			RegClass("ImVec4", new USystemTypeStruct() { CppName = "ImVec4", CSName = "EngineNS.Vector4", RetPodName = "v3dVector4_t" });
 			RegClass("EngineNS.UAnyValue", new USystemTypeStruct() { CppName = "EngineNS::UAnyValue", CSName = "EngineNS.Support.UAnyValue", RetPodName = "EngineNS::UAnyValue_t" });
 			RegClass("EngineNS.v3dxIndexInSkeleton", new USystemTypeStruct() { CppName = "EngineNS::v3dxIndexInSkeleton", CSName = "EngineNS.Animation.Skeleton.IndexInSkeleton", RetPodName = "EngineNS::v3dxIndexInSkeleton_t" });
