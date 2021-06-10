@@ -61,8 +61,7 @@ namespace EngineNS.EGui
             // SDL2 by default doesn't pass mouse clicks to the application when the click focused a window. This is getting in the way of our interactions and we disable that behavior.
             SDL.SDL_SetHint(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
         }
-        public unsafe delegate sbyte* Delegate_ImGui_ImplSDL2_GetClipboardText(void* dummy);
-        public static unsafe Delegate_ImGui_ImplSDL2_GetClipboardText ImGui_ImplSDL2_GetClipboardText = ImGui_ImplSDL2_GetClipboardText_Impl;
+        public static unsafe ImGuiIO.FDelegate_GetClipboardTextFn ImGui_ImplSDL2_GetClipboardText = ImGui_ImplSDL2_GetClipboardText_Impl;
         static unsafe sbyte* ImGui_ImplSDL2_GetClipboardText_Impl(void* dummy)
         {
             if (g_ClipboardTextData != IntPtr.Zero)
@@ -74,11 +73,10 @@ namespace EngineNS.EGui
             return (sbyte*)g_ClipboardTextData.ToPointer();
         }
         unsafe static IntPtr g_ClipboardTextData;
-        public unsafe delegate void Delegate_ImGui_ImplSDL2_SetClipboardText(void* dummy, string text);
-        public static unsafe Delegate_ImGui_ImplSDL2_SetClipboardText ImGui_ImplSDL2_SetClipboardText = ImGui_ImplSDL2_SetClipboardText_Impl;
-        static unsafe void ImGui_ImplSDL2_SetClipboardText_Impl(void* dummy, string text)
+        public static unsafe ImGuiIO.FDelegate_SetClipboardTextFn ImGui_ImplSDL2_SetClipboardText = ImGui_ImplSDL2_SetClipboardText_Impl;
+        static unsafe void ImGui_ImplSDL2_SetClipboardText_Impl(void* dummy, sbyte* text)
         {
-            SDL.SDL_SetClipboardText(text);
+            SDL.SDL_SetClipboardText(System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)text));
         }
         static bool[] g_MousePressed = new bool[]{ false, false, false };
         public static unsafe bool ImGui_ImplSDL2_ProcessEvent(ref SDL.SDL_Event ev)
@@ -104,8 +102,8 @@ namespace EngineNS.EGui
             case SDL.SDL_EventType.SDL_TEXTINPUT:
                 {
                     var text = ev.text;
-                    var pText = (sbyte*)text.text;
-                    io.AddInputCharactersUTF8(pText);
+                    var pText = (sbyte*)text.text;                        
+                    io.AddInputCharactersUTF8(System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)pText));
                     return true;
                 }
             case SDL.SDL_EventType.SDL_KEYDOWN:
@@ -284,7 +282,7 @@ namespace EngineNS.EGui
                     for (int cmd_i = 0; cmd_i < cmd_list.CmdBufferSize; cmd_i++)
                     {
                         ImDrawCmd* pcmd = &cmd_list.CmdBufferData[cmd_i];
-                        if (pcmd->UserCallback != IntPtr.Zero)
+                        if (pcmd->UserCallback != null)
                         {
                             throw new NotImplementedException();
                         }
@@ -301,7 +299,7 @@ namespace EngineNS.EGui
                                 {
                                     var rsv = handle.Target as RHI.CShaderResourceView;
                                     if (rsv != null)
-                                        drawCmd.PSSetShaderResource(0, rsv.mCoreObject.Ptr);
+                                        drawCmd.PSSetShaderResource(0, rsv.mCoreObject);
                                 }
                             }
                         }

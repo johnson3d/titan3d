@@ -86,7 +86,7 @@ namespace EngineNS.Editor
                 for (int i = 0; i < count; i++)
                 {
                     var pViewport = ImGuiAPI.PlatformIO_Viewports_Get(ImGuiAPI.GetPlatformIO(), i);
-                    var nativeWindow = pViewport->m_PlatformHandle;
+                    var nativeWindow = pViewport->PlatformHandle;
                     var flags = SDL.SDL_GetWindowFlags((IntPtr)nativeWindow);
                     if ((flags & (uint)SDL.SDL_WindowFlags.SDL_WINDOW_INPUT_FOCUS) != 0)
                     {

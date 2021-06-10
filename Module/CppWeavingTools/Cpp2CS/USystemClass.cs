@@ -94,7 +94,7 @@ namespace CppWeaving.Cpp2CS
 			RegClass("v3dxVector2", new USystemTypeStruct() { CppName = "v3dxVector2", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
 			RegClass("v3dxVector3", new USystemTypeStruct() { CppName = "v3dxVector3", CSName = "EngineNS.Vector3", RetPodName = "v3dVector3_t" });
 			RegClass("v3dxQuaternion", new USystemTypeStruct() { CppName = "v3dxQuaternion", CSName = "EngineNS.Quaternion", RetPodName = "v3dVector4_t" });
-			RegClass("v3dxColor4", new USystemTypeStruct() { CppName = "v3dxColor4", CSName = "EngineNS.Quaternion", RetPodName = "v3dVector4_t" }); 
+			RegClass("v3dxColor4", new USystemTypeStruct() { CppName = "v3dxColor4", CSName = "EngineNS.Color4", RetPodName = "v3dVector4_t" }); 
 			RegClass("v3dxBox3", new USystemTypeStruct() { CppName = "v3dxBox3", CSName = "EngineNS.BoundingBox", RetPodName = "v3dBox3_t" });
 			RegClass("v3dxMatrix4", new USystemTypeStruct() { CppName = "v3dxMatrix4", CSName = "EngineNS.Matrix", RetPodName = "v3dMatrix4_t" });
 			RegClass("ImVec2", new USystemTypeStruct() { CppName = "ImVec2", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
@@ -103,8 +103,20 @@ namespace CppWeaving.Cpp2CS
 			RegClass("EngineNS.v3dxIndexInSkeleton", new USystemTypeStruct() { CppName = "EngineNS::v3dxIndexInSkeleton", CSName = "EngineNS.Animation.Skeleton.IndexInSkeleton", RetPodName = "EngineNS::v3dxIndexInSkeleton_t" });
 
 
-			mTypeDefs["ImGuiConfigFlags"] = "ImGuiConfigFlags_";
-			mTypeDefs["ImDrawFlags"] = "ImDrawFlags_"; 
+            mTypeDefs["ImGuiDir"] = "ImGuiDir_";
+            mTypeDefs["ImGuiInputTextFlags"] = "ImGuiInputTextFlags_";
+            mTypeDefs["ImGuiKey"] = "ImGuiKey_";
+            mTypeDefs["ImDrawCornerFlags"] = "ImDrawCornerFlags_";
+            mTypeDefs["ImGuiViewportFlags"] = "ImGuiViewportFlags_";
+            mTypeDefs["ImGuiDockNodeFlags"] = "ImGuiDockNodeFlags_";
+            mTypeDefs["ImGuiConfigFlags"] = "ImGuiConfigFlags_";
+            mTypeDefs["ImGuiBackendFlags"] = "ImGuiBackendFlags_";
+            mTypeDefs["ImDrawFlags"] = "ImDrawFlags_";
+            mTypeDefs["ImGuiTabItemFlags"] = "ImGuiTabItemFlags_";
+            mTypeDefs["ImGuiTableFlags"] = "ImGuiTableFlags_";
+            mTypeDefs["ImGuiTableRowFlags"] = "ImGuiTableRowFlags_";
+            mTypeDefs["ImGuiTableColumnFlags"] = "ImGuiTableColumnFlags_";
+			mTypeDefs["ImGuiTableBgTarget"] = "ImGuiTableBgTarget_";
 		}
 		public void RegClass(string fullname, UClass kls)
 		{

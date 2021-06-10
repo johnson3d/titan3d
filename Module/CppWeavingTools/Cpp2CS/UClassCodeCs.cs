@@ -26,19 +26,10 @@ namespace CppWeaving.Cpp2CS
             string friendNS = "";
             foreach (var i in mClass.Friends)
             {
-                if (i.Contains(visitor_name))
+                var frd = i.Replace("::", "_");
+                if (frd.Contains(visitor_name))
                 {
                     bExpProtected = true;
-                    var frd = i;
-                    if (frd.StartsWith("class "))
-                    {
-                        frd = frd.Substring("class ".Length);
-                    }
-                    var pos = frd.LastIndexOf("::");
-                    if (pos >= 0)
-                    {
-                        friendNS = frd.Substring(0, pos);
-                    }
                     break;
                 }
             }

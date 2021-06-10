@@ -55,6 +55,10 @@ namespace EngineNS
 		static IBone* Create(const IBoneDesc& desc);
 		IBone(const IBoneDesc& desc);
 	public:
+		IBone() 
+		{
+
+		}
 		int GetChildNum() const {
 			return (int)Children.size();
 		} 

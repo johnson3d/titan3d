@@ -114,7 +114,7 @@ namespace EngineNS.EGui.Slate
             // Store our identifier
             io.FontsWrapper.SetTexID((void*)0);
 
-            ImageInitData initData;
+            ImageInitData initData = new ImageInitData();
             initData.pSysMem = pixels;
             initData.SysMemPitch = (uint)(width * bytesPerPixel);
 

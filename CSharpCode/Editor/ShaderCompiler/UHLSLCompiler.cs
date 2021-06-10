@@ -75,8 +75,8 @@ namespace EngineNS.Editor.ShaderCompiler
             MdfQueueType = Rtti.UTypeDesc.TypeOf(mdfType);
             IShaderDefinitions* defPtr = (IShaderDefinitions*)0;
             if (defines != null)
-                defPtr = defines.mCoreObject.Ptr;
-            var ok = mCoreObject.CompileShader(desc.mCoreObject.Ptr, shader, entry, type, sm, defPtr,
+                defPtr = defines.mCoreObject;
+            var ok = mCoreObject.CompileShader(desc.mCoreObject, shader, entry, type, sm, defPtr,
                         bDebugShader, bDxbc, bGlsl, bMetal);
 
             if (ok == false)

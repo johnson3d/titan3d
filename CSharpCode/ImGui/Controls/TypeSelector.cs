@@ -61,7 +61,9 @@ namespace EngineNS.EGui.Controls
         string mFilterText = "";
         unsafe int ImGuiInputTextCallback(ImGuiInputTextCallbackData* data)
         {
-            if (CoreSDK.SDK_StrLen(data->Buf) == 0)
+            //if (CoreSDK.SDK_StrLen(data->Buf) == 0)
+            //    return 0;
+            if (data->Buf.Length == 0)
                 return 0;
             if (ImGuiAPI.IsKeyDown((int)ImGuiKey_.ImGuiKey_Backspace))
             {

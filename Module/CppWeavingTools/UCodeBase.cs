@@ -143,17 +143,18 @@ namespace CppWeaving
 		}
 		public string GetAccessDefine(Cpp2CS.EAccess access)
 		{
-			switch(access) {
-				case Cpp2CS.EAccess.Public:
-					return "public";
-				case Cpp2CS.EAccess.Protected:
-					return "protected";
-				case Cpp2CS.EAccess.Private:
-					return "private";
-				default:
-					return "";
-			}
-		}
+            switch (access)
+            {
+                case Cpp2CS.EAccess.Public:
+                    return "public";
+                case Cpp2CS.EAccess.Protected:
+                    return "internal";
+                case Cpp2CS.EAccess.Private:
+                    return "internal";
+                default:
+                    return "";
+            }
+        }
         public static bool MatchPair(string code, char sChar, char eChar, out int start, out int end)
         {
             int deep = 0;

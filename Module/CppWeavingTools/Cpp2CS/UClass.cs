@@ -25,6 +25,10 @@ namespace CppWeaving.Cpp2CS
 		public List<string> Friends = new List<string>();
 		public void BuildClass()
 		{
+            if (Name == "IBone")
+            {
+                int xx = 0;
+            }
             MetaInfos.Clear();
 			UTypeManager.BuildMetaData(Decl.Attrs, MetaInfos);
 
@@ -116,10 +120,6 @@ namespace CppWeaving.Cpp2CS
 				}
 				tmp.Name = i.Name;
 				tmp.IsStatic = i.IsStatic;
-				if(i.Name == "AddRect")
-                {
-					int xx = 0;
-                }
 				foreach (var j in i.Parameters) {
 					var arg = new UProperty();
 					arg.Name = j.Name;
@@ -205,7 +205,7 @@ namespace CppWeaving.Cpp2CS
 		}
 		public bool IsIgnoreFunction(ClangSharp.FunctionDecl decl, ClangSharp.CXXRecordDecl host)
 		{
-			if (UTypeManager.HasMeta(decl.Attrs, UProjectSettings.SV_NoBind))
+            if (UTypeManager.HasMeta(decl.Attrs, UProjectSettings.SV_NoBind))
 				return true;
 			if (decl.Access != ClangSharp.Interop.CX_CXXAccessSpecifier.CX_CXXPublic)
 				return true;
@@ -215,14 +215,15 @@ namespace CppWeaving.Cpp2CS
 				return true;
 			if (decl.Kind == ClangSharp.Interop.CX_DeclKind.CX_DeclKind_CXXConstructor && decl.Parameters.Count == 1)
 			{
-				if (decl.Parameters[0].Type.Kind == ClangSharp.Interop.CXTypeKind.CXType_LValueReference)
-				{
+                if (decl.Parameters[0].Type.Kind == ClangSharp.Interop.CXTypeKind.CXType_LValueReference)
+                {
+					if (decl.Parameters[0].Type.PointeeType.Desugar == host.TypeForDecl)
+						return true;
 					//var realType = decl.Parameters[0].Type.CanonicalType;
 					//if (realType.AsCXXRecordDecl == host)
 					//	return true;
-					return true;
-				}
-			}
+                }
+            }
 			return false;
 		}
 		public static bool IsValidType(ClangSharp.Interop.CXType t)

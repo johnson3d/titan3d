@@ -119,5 +119,53 @@ namespace CppWeaving.Cpp2CS
 		{
 			return ".cpp2cs.cs";
 		}
-	}
+        protected override void GenConstructor(bool bExpProtected, string visitor_name)
+        {
+            foreach (var i in mClass.Constructors)
+            {
+                if (i.Access != EAccess.Public && bExpProtected == false)
+                    continue;
+
+                if (i.Parameters.Count > 0)
+                    AddLine($"public void UnsafeCallConstructor({i.GetParameterDefineCs()})");
+                else
+                    AddLine($"public void UnsafeCallConstructor()");
+                PushBrackets();
+                {
+                    var sdk_fun = $"TSDK_{visitor_name}_UnsafeCallConstructor_{i.FunctionHash}";
+                    if (i.Parameters.Count > 0)
+                        AddLine($"{sdk_fun}(mPointer, {i.GetParameterCalleeCs()});");
+                    else
+                        AddLine($"{sdk_fun}(mPointer);");
+                }
+                PopBrackets();
+            }
+			var dispose = mClass.GetMeta(UProjectSettings.SV_Dispose);
+            AddLine($"public void UnsafeCallDestructor()");
+            PushBrackets();
+            {
+                var sdk_fun = $"TSDK_{visitor_name}_UnsafeCallDestructor";
+                BeginInvoke();
+                AddLine($"{sdk_fun}(mPointer);");
+                EndInvoke();
+            }
+            PopBrackets();
+        }
+        protected override void GenPInvokeConstructor(bool bExpProtected, string visitor_name)
+        {
+            AddLine($"//Constructor&Cast");
+            foreach (var i in mClass.Constructors)
+            {
+                if (i.Access != EAccess.Public && bExpProtected == false)
+                    continue;
+                UTypeManager.WritePInvokeAttribute(this, i);
+                if (i.Parameters.Count > 0)
+                    AddLine($"extern static void TSDK_{visitor_name}_UnsafeCallConstructor_{i.FunctionHash}(void* self, {i.GetParameterDefineCs()});");
+                else
+                    AddLine($"extern static void TSDK_{visitor_name}_UnsafeCallConstructor_{i.FunctionHash}(void* self);");
+            }
+            UTypeManager.WritePInvokeAttribute(this, null);
+            AddLine($"extern static void TSDK_{visitor_name}_UnsafeCallDestructor(void* self);");
+        }
+    }
 }

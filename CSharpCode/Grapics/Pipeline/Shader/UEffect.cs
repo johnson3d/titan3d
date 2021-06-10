@@ -299,7 +299,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 mdf.mCoreObject.GetInputStreams(ref inputSteams);
 
                 var layoutDesc = IMesh.CreateInputLayoutDesc(inputSteams);
-                layoutDesc.SetShaderDesc(DescVS.mCoreObject.Ptr);
+                layoutDesc.SetShaderDesc(DescVS.mCoreObject);
                 UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, *layoutDesc.CppPointer);
                 InputLayout = rc.CreateInputLayout(*layoutDesc.CppPointer);                
                 CoreSDK.IUnknown_Release(layoutDesc);
@@ -310,9 +310,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var progDesc = new IShaderProgramDesc();
             unsafe
             {
-                progDesc.InputLayout = InputLayout.mCoreObject.Ptr;
-                progDesc.VertexShader = VertexShader.mCoreObject.Ptr;
-                progDesc.PixelShader = PixelShader.mCoreObject.Ptr;
+                progDesc.InputLayout = InputLayout.mCoreObject;
+                progDesc.VertexShader = VertexShader.mCoreObject;
+                progDesc.PixelShader = PixelShader.mCoreObject;
             }
             ShaderProgram = rc.CreateShaderProgram(ref progDesc);
 

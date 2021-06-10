@@ -107,7 +107,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CInputLayout();
-                result.mCoreObject.UnsafeSetPointer(mCoreObject.CreateInputLayout(desc.Ptr));
+                result.mCoreObject.UnsafeSetPointer(mCoreObject.CreateInputLayout(desc));
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -305,7 +305,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CVertexShader();
-                result.mCoreObject.UnsafeSetPointer(mCoreObject.CreateVertexShader(desc.mCoreObject.Ptr));
+                result.mCoreObject.UnsafeSetPointer(mCoreObject.CreateVertexShader(desc.mCoreObject));
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -316,7 +316,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CPixelShader();
-                result.mCoreObject.UnsafeSetPointer(mCoreObject.CreatePixelShader(desc.mCoreObject.Ptr));
+                result.mCoreObject.UnsafeSetPointer(mCoreObject.CreatePixelShader(desc.mCoreObject));
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -327,7 +327,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CComputeShader();
-                result.mCoreObject.UnsafeSetPointer(mCoreObject.CreateComputeShader(desc.mCoreObject.Ptr));
+                result.mCoreObject.UnsafeSetPointer(mCoreObject.CreateComputeShader(desc.mCoreObject));
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -338,7 +338,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CConstantBuffer();
-                result.mCoreObject.UnsafeSetPointer(mCoreObject.CreateConstantBuffer(program.mCoreObject.Ptr, index));
+                result.mCoreObject.UnsafeSetPointer(mCoreObject.CreateConstantBuffer(program.mCoreObject, index));
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -349,7 +349,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CConstantBuffer();
-                result.mCoreObject.UnsafeSetPointer(mCoreObject.CreateConstantBuffer2(program.mCoreObject.Ptr, index));
+                result.mCoreObject.UnsafeSetPointer(mCoreObject.CreateConstantBuffer2(program.mCoreObject, index));
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
