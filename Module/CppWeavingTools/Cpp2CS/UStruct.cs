@@ -119,6 +119,22 @@ namespace CppWeaving.Cpp2CS
 		{
 			return ".cpp2cs.cs";
 		}
+        protected override void DefineLayout(bool bExpProtected, string visitor_name)
+        {
+            AddLine($"private void* mPointer;");
+            AddLine($"public {mClass.Name}(void* p) {{ mPointer = p; }}");
+            AddLine($"public void UnsafeSetPointer(void* p) {{ mPointer = p; }}");
+            AddLine($"public IntPtr NativePointer {{ get => (IntPtr)mPointer; set => mPointer = value.ToPointer(); }}");
+            AddLine($"public {mClass.Name}* CppPointer {{ get => ({mClass.Name}*)mPointer; }}");
+            AddLine($"public bool IsValidPointer {{ get => mPointer != (void*)0; }}");
+
+            AddLine($"public static implicit operator {mClass.Name}* ({mClass.Name} v)");
+            PushBrackets();
+            {
+                AddLine($"return ({Name}*)v.mPointer;");
+            }
+            PopBrackets();
+        }
         protected override void GenConstructor(bool bExpProtected, string visitor_name)
         {
             foreach (var i in mClass.Constructors)

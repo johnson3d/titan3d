@@ -324,7 +324,7 @@ namespace EngineNS.EGui
             }
             drawCmd.EndCommand();
 
-            drawCmd.SetScissorRect((IScissorRect*)0);
+            drawCmd.SetScissorRect(new IScissorRect((void*)0));
 
             drawCmd.Commit(rc.mCoreObject);
         }

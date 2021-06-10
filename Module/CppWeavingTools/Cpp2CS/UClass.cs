@@ -25,10 +25,6 @@ namespace CppWeaving.Cpp2CS
 		public List<string> Friends = new List<string>();
 		public void BuildClass()
 		{
-            if (Name == "IBone")
-            {
-                int xx = 0;
-            }
             MetaInfos.Clear();
 			UTypeManager.BuildMetaData(Decl.Attrs, MetaInfos);
 

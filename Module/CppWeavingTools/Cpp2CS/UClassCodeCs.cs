@@ -94,7 +94,33 @@ namespace CppWeaving.Cpp2CS
         }
         protected virtual void DefineLayout(bool bExpProtected, string visitor_name)
         {
+            AddLine($"[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit, Size = {mClass.Decl.TypeForDecl.Handle.SizeOf}, Pack = {mClass.Decl.TypeForDecl.Handle.AlignOf})]");
+            AddLine($"public struct CppStructLayout");
+            PushBrackets();
+            {
+                foreach(var i in mClass.Properties)
+                {
+                    var field = i as UField;
+                    AddLine($"[System.Runtime.InteropServices.FieldOffset({field.Offset / 8})]");
+                    if(i.IsDelegate)
+                        AddLine($"public IntPtr {i.Name};");
+                    else
+                    {
+                        var retType = i.GetCsTypeName();
+                        if (i.IsTypeDef)
+                        {
+                            var dypeDef = USysClassManager.Instance.FindTypeDef(i.CxxName);
+                            if (dypeDef != null)
+                                retType = dypeDef;
+                        }
+                        AddLine($"public {retType} {i.Name};");
+                    }   
+                }
+            }
+            PopBrackets();
+
             AddLine($"private void* mPointer;");
+            AddLine($"public CppStructLayout* UnsafeAsLayout {{ get => (CppStructLayout*)mPointer; }}");
             AddLine($"public {mClass.Name}(void* p) {{ mPointer = p; }}");
             AddLine($"public void UnsafeSetPointer(void* p) {{ mPointer = p; }}");
             AddLine($"public IntPtr NativePointer {{ get => (IntPtr)mPointer; set => mPointer = value.ToPointer(); }}");
