@@ -69,7 +69,7 @@ RttiEnum* RttiEnumManager::FindEnum(const char* name)
 	return nullptr;
 }
 
-RttiStruct::MemberDesc* RttiStruct::PushMember(RttiStruct* type, unsigned int offset, unsigned int size, unsigned int arrayElements, const char* name, bool isPointer)
+MemberDesc* RttiStruct::PushMember(RttiStruct* type, unsigned int offset, unsigned int size, unsigned int arrayElements, const char* name, bool isPointer)
 {
 	MemberDesc desc;
 	desc.MemberType = type;
@@ -222,14 +222,14 @@ void TestReflection()
 	Test_ConstantVarDesc* tmp = (Test_ConstantVarDesc*)constructor->CreateInstance(createArgs);
 	method->Invoke(tmp, args, result);
 
-	const RttiStruct::MemberDesc* pMemberName = rtti->FindMember("Name");
+	auto pMemberName = rtti->FindMember("Name");
 	std::string tt = *pMemberName->GetValueAddress<std::string>(tmp);
 	std::string strTemp("bbb");
 	pMemberName->SetValue(tmp, &strTemp);
 
 	rtti->FindMember("TestString")->SetValue(tmp, (std::string*)nullptr);
 
-	const RttiStruct::MemberDesc* pMember = rtti->FindMember("Size");
+	auto pMember = rtti->FindMember("Size");
 	assert(pMember->MemberType->Name == "UInt32");
 	assert(pMember->Offset == 4);
 	assert(pMember->MemberName == "Size");

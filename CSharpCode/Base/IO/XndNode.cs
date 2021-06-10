@@ -18,7 +18,7 @@ namespace EngineNS.IO
             }
             set
             {
-                var super = mCoreObject.CastToSuper();
+                var super = mCoreObject.NativeSuper;
                 super.SetName(value);
             }
         }
@@ -26,11 +26,11 @@ namespace EngineNS.IO
         {
             get
             {
-                return mCoreObject.CastToSuper().mVersion;
+                return mCoreObject.NativeSuper.mVersion;
             }
             set
             {
-                var super = mCoreObject.CastToSuper();
+                var super = mCoreObject.NativeSuper;
                 super.mVersion = value;
             }
         }
@@ -38,11 +38,11 @@ namespace EngineNS.IO
         {
             get
             {
-                return mCoreObject.CastToSuper().mFlags;
+                return mCoreObject.NativeSuper.mFlags;
             }
             set
             {
-                var super = mCoreObject.CastToSuper();
+                var super = mCoreObject.NativeSuper;
                 super.mFlags = value;
             }
         }

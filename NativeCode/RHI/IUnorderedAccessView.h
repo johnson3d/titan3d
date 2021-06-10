@@ -171,6 +171,7 @@ public:
 	}
 
 	IGpuBufferDesc			mDesc;
+	TR_MEMBER(SV_NoBind)
 	IResourceState			mResourceState;
 };
 

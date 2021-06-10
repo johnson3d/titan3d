@@ -29,7 +29,7 @@ namespace EngineNS.Profiler
             CoreSDK.SetMemLeakCallBack(null);
         }
         int CountOfAlloc = 0;
-        FOnNativeMemAlloc OnNativeMemAlloc;
+        CoreSDK.FDelegate_FOnNativeMemAlloc OnNativeMemAlloc;
         private unsafe void OnNativeMemAllocImpl(IntPtr size, sbyte* file, IntPtr line, IntPtr id)
         {
             var sourceFile = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)file);
@@ -38,12 +38,12 @@ namespace EngineNS.Profiler
                 CountOfAlloc++;
             }
         }
-        FOnNativeMemAlloc OnNativeMemFree;
+        CoreSDK.FDelegate_FOnNativeMemFree OnNativeMemFree;
         private unsafe void OnNativeMemFreeImpl(IntPtr size, sbyte* file, IntPtr line, IntPtr id)
         {
             var sourceFile = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)file);
         }
-        FOnNativeMemLeak OnNativeMemLeak;
+        CoreSDK.FDelegate_FOnNativeMemLeak OnNativeMemLeak;
         private unsafe void OnNativeMemLeakImpl(void* ptr, IntPtr size, sbyte* file, IntPtr line, IntPtr id, sbyte* debugInfo)
         {
             var sourceFile = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)file);

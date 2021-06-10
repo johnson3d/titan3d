@@ -12,7 +12,7 @@ namespace EngineNS.Editor.ShaderCompiler
             GetShaderCodeStream = this.GetHLSLCode;
             mCoreObject.SetCodeStreamGetter(GetShaderCodeStream);
         }
-        private FGetShaderCodeStream GetShaderCodeStream;
+        private IShaderConductor.FDelegate_FGetShaderCodeStream GetShaderCodeStream;
         //[UnmanagedFunctionPointer(System.Runtime.InteropServices.CallingConvention.Cdecl)]
         private MemStreamWriter* GetHLSLCode(void* includeName)
         {

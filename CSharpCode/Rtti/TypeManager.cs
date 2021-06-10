@@ -140,7 +140,7 @@ namespace EngineNS.Rtti
         {
             OnTypeChanged?.Invoke();
         }
-        unsafe static FCreateManagedObject CreateObject = CreateObjectImpl;
+        unsafe static CoreSDK.FDelegate_FCreateManagedObject CreateObject = CreateObjectImpl;
         unsafe static void* CreateObjectImpl(sbyte* arg0, EngineNS.Support.UAnyValue* arg1, int NumOfArg, int WeakType)
         {
             var className = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)arg0);
@@ -163,13 +163,13 @@ namespace EngineNS.Rtti
             var gcHandle = System.Runtime.InteropServices.GCHandle.Alloc(obj, (System.Runtime.InteropServices.GCHandleType)WeakType);
             return System.Runtime.InteropServices.GCHandle.ToIntPtr(gcHandle).ToPointer();
         }
-        unsafe static FFreeManagedObjectGCHandle FreeManagedObjectGCHandle = FreeManagedObjectGCHandleImpl;
+        unsafe static CoreSDK.FDelegate_FFreeManagedObjectGCHandle FreeManagedObjectGCHandle = FreeManagedObjectGCHandleImpl;
         unsafe static void FreeManagedObjectGCHandleImpl(void* handle)
         {
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)handle);
             gcHandle.Free();
         }
-        unsafe static FGetManagedObjectFromGCHandle GetManagedObjectFromGCHandle = GetManagedObjectFromGCHandleImpl;
+        unsafe static CoreSDK.FDelegate_FGetManagedObjectFromGCHandle GetManagedObjectFromGCHandle = GetManagedObjectFromGCHandleImpl;
         unsafe static void* GetManagedObjectFromGCHandleImpl(void* handle)
         {
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)handle);
