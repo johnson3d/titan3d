@@ -12,7 +12,7 @@ namespace EngineNS.Editor.ShaderCompiler
             GetShaderCodeStream = this.GetHLSLCode;
             mCoreObject.SetCodeStreamGetter(GetShaderCodeStream);
         }
-        private FGetShaderCodeStream GetShaderCodeStream;
+        private IShaderConductor.FDelegate_FGetShaderCodeStream GetShaderCodeStream;
         //[UnmanagedFunctionPointer(System.Runtime.InteropServices.CallingConvention.Cdecl)]
         private MemStreamWriter* GetHLSLCode(void* includeName)
         {
@@ -73,10 +73,10 @@ namespace EngineNS.Editor.ShaderCompiler
             RHI.CShaderDesc desc = new RHI.CShaderDesc(type);
             Material = mtl;
             MdfQueueType = Rtti.UTypeDesc.TypeOf(mdfType);
-            IShaderDefinitions* defPtr = (IShaderDefinitions*)0;
+            IShaderDefinitions defPtr = new IShaderDefinitions((void*)0);
             if (defines != null)
-                defPtr = defines.mCoreObject.Ptr;
-            var ok = mCoreObject.CompileShader(desc.mCoreObject.Ptr, shader, entry, type, sm, defPtr,
+                defPtr = defines.mCoreObject;
+            var ok = mCoreObject.CompileShader(desc.mCoreObject, shader, entry, type, sm, defPtr,
                         bDebugShader, bDxbc, bGlsl, bMetal);
 
             if (ok == false)

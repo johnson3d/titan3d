@@ -25,124 +25,126 @@ namespace AssetImportAndExport
             {
                 get
                 {
-                    return mInner->NativeSuper->m_Name;
+                    return mInner->NativeSuper->Name;
                 }
             }
             public AssetImportAndExport.FBX.EFBXObjectType Type
             {
                 get
                 {
-                    return mInner->NativeSuper->m_Type;
+                    return mInner->NativeSuper->Type;
                 }
             }
             public float Scale
             {
                 get
                 {
-                    return mInner->NativeSuper->m_Scale;
+                    return mInner->NativeSuper->Scale;
                 }
                 set
                 {
-                    mInner->NativeSuper->m_Scale = value;
+                    var super = mInner->NativeSuper;
+                    super->Scale = value;
                 }
             }
             public bool Imported
             {
                 get
                 {
-                    return mInner->NativeSuper->m_Imported;
+                    return mInner->NativeSuper->Imported;
                 }
                 set
                 {
-                    mInner->NativeSuper->m_Imported = value;
+                    var super = mInner->NativeSuper;
+                    super->Imported = value;
                 }
             }
             public bool ReCalculateTangent
             {
                 get
                 {
-                    return mInner->m_ReCalculateTangent;
+                    return mInner->ReCalculateTangent;
                 }
                 set
                 {
-                    mInner->m_ReCalculateTangent = value;
+                    mInner->ReCalculateTangent = value;
                 }
             }
             public bool AsCollision
             {
                 get
                 {
-                    return mInner->m_AsCollision;
+                    return mInner->AsCollision;
                 }
                 set
                 {
-                    mInner->m_AsCollision = value;
+                    mInner->AsCollision = value;
                 }
             }
             public bool AsLocalSpace
             {
                 get
                 {
-                    return mInner->m_AsLocalSpace;
+                    return mInner->AsLocalSpace;
                 }
                 set
                 {
-                    mInner->m_AsLocalSpace = value;
+                    mInner->AsLocalSpace = value;
                 }
             }
             public bool HaveSkin
             {
                 get
                 {
-                    return mInner->m_HaveSkin;
+                    return mInner->HaveSkin;
                 }
                 set
                 {
-                    mInner->m_HaveSkin = value;
+                    mInner->HaveSkin = value;
                 }
             }
             public bool AsStaticMesh
             {
                 get
                 {
-                    return mInner->m_AsStaticMesh;
+                    return mInner->AsStaticMesh;
                 }
                 set
                 {
-                    mInner->m_AsStaticMesh = value;
+                    mInner->AsStaticMesh = value;
                 }
             }
             public uint m_RenderAtom
             {
                 get
                 {
-                    return mInner->m_RenderAtom;
+                    return mInner->RenderAtom;
                 }
                 set
                 {
-                    mInner->m_RenderAtom = value;
+                    mInner->RenderAtom = value;
                 }
             }
             public bool TransformVertexToAbsolute
             {
                 get
                 {
-                    return mInner->m_TransformVertexToAbsolute;
+                    return mInner->TransformVertexToAbsolute;
                 }
                 set
                 {
-                    mInner->m_TransformVertexToAbsolute = value;
+                    mInner->TransformVertexToAbsolute = value;
                 }
             }
             public bool BakePivotInVertex
             {
                 get
                 {
-                    return mInner->m_BakePivotInVertex;
+                    return mInner->BakePivotInVertex;
                 }
                 set
                 {
-                    mInner->m_BakePivotInVertex = value;
+                    mInner->BakePivotInVertex = value;
                 }
             }
 

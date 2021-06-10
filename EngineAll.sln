@@ -143,7 +143,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Animation", "NativeCode\Bri
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectCooker", "Module\ProjectCooker\ProjectCooker.csproj", "{6662C012-7CCC-4389-8714-91AD955EB70B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.Console", "Module\Engine.Console\Engine.Console.csproj", "{D5A7D7FA-99B0-4C4A-9797-2DD7DB395930}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Console", "Module\Engine.Console\Engine.Console.csproj", "{D5A7D7FA-99B0-4C4A-9797-2DD7DB395930}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CppWeavingTools", "Module\CppWeavingTools\CppWeavingTools.csproj", "{4B151A28-784F-4ED5-9490-FA959B23C9E0}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -400,6 +402,18 @@ Global
 		{D5A7D7FA-99B0-4C4A-9797-2DD7DB395930}.Release|x64.Build.0 = Release|Any CPU
 		{D5A7D7FA-99B0-4C4A-9797-2DD7DB395930}.Release|x86.ActiveCfg = Release|Any CPU
 		{D5A7D7FA-99B0-4C4A-9797-2DD7DB395930}.Release|x86.Build.0 = Release|Any CPU
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Debug|x64.Build.0 = Debug|Any CPU
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Debug|x86.Build.0 = Debug|Any CPU
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Release|x64.ActiveCfg = Release|Any CPU
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Release|x64.Build.0 = Release|Any CPU
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Release|x86.ActiveCfg = Release|Any CPU
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -466,6 +480,7 @@ Global
 		{A415EB90-CF3A-4CBC-BD98-14EED4D0FCD1} = {041F2057-6090-446E-8CEF-D524C973477F}
 		{6662C012-7CCC-4389-8714-91AD955EB70B} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 		{D5A7D7FA-99B0-4C4A-9797-2DD7DB395930} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}

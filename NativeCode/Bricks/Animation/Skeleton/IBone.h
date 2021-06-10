@@ -22,6 +22,10 @@ namespace EngineNS
 	private:
 		int Value;
 	};
+	struct v3dxIndexInSkeleton_t
+	{
+		int Value;
+	};
 #pragma pack(pop)
 
 	struct TR_CLASS(SV_LayoutStruct = 8)
@@ -51,6 +55,10 @@ namespace EngineNS
 		static IBone* Create(const IBoneDesc& desc);
 		IBone(const IBoneDesc& desc);
 	public:
+		IBone() 
+		{
+
+		}
 		int GetChildNum() const {
 			return (int)Children.size();
 		} 

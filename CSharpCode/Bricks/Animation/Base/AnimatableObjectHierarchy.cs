@@ -28,8 +28,8 @@ namespace EngineNS.Animation.Base
         {
             unsafe
             {
-                mTypeStr = *VNameString.CreateInstance();
-                mName = *VNameString.CreateInstance();
+                //mTypeStr = VNameString.CreateInstance();
+                //mName = VNameString.CreateInstance();
             }
         }
     }

@@ -499,6 +499,12 @@ struct UAnyValue
 		}
 	}
 };
+
+struct UAnyValue_t
+{
+	static constexpr int StructSize = sizeof(UAnyValue);
+	char MemData[StructSize];
+};
 #pragma pack(pop)
 
 NS_END

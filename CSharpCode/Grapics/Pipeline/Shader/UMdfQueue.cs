@@ -50,7 +50,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             unsafe
             {
                 var layoutDesc = IMesh.CreateInputLayoutDesc(inputStreams);
-                layoutDesc.SetShaderDesc(vsDesc.mCoreObject.Ptr);
+                layoutDesc.SetShaderDesc(vsDesc.mCoreObject);
                 var ret = UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, *layoutDesc.CppPointer);
                 CoreSDK.IUnknown_Release(layoutDesc);
                 return ret;

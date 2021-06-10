@@ -21,6 +21,10 @@ ConstantVarDesc
 	{
 		Dirty = TRUE;
 	}
+	~ConstantVarDesc()
+	{
+
+	}
 	EShaderVarType	Type;
 	UINT			Offset;
 	UINT			Size;

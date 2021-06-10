@@ -30,15 +30,15 @@ namespace EngineNS.EGui.Slate
             iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
             iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
             iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
-            iptDesc.mCoreObject.SetShaderDesc(vsDesc.mCoreObject.Ptr);
+            iptDesc.mCoreObject.SetShaderDesc(vsDesc.mCoreObject);
             var InputLayout = UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc.mCoreObject);
 
             var spDesc = new IShaderProgramDesc();
-            spDesc.InputLayout = InputLayout.mCoreObject.Ptr;
-            spDesc.VertexShader = VertexShader.mCoreObject.Ptr;
-            spDesc.PixelShader = PixelShader.mCoreObject.Ptr;
+            spDesc.InputLayout = InputLayout.mCoreObject;
+            spDesc.VertexShader = VertexShader.mCoreObject;
+            spDesc.PixelShader = PixelShader.mCoreObject;
             var ShaderProgram = rc.CreateShaderProgram(ref spDesc);
-            ShaderProgram.mCoreObject.LinkShaders(rc.mCoreObject.Ptr);
+            ShaderProgram.mCoreObject.LinkShaders(rc.mCoreObject);
 
             var cbIndex = ShaderProgram.mCoreObject.FindCBuffer("ProjectionMatrixBuffer");
             FontCBuffer = rc.CreateConstantBuffer(ShaderProgram, cbIndex);
@@ -65,17 +65,17 @@ namespace EngineNS.EGui.Slate
             var BlendState = UEngine.Instance.GfxDevice.BlendStateManager.GetPipelineState(rc, ref bldDesc);
 
             var sdProgDesc = new IShaderProgramDesc();
-            sdProgDesc.InputLayout = InputLayout.mCoreObject.Ptr;
-            sdProgDesc.VertexShader = VertexShader.mCoreObject.Ptr;
-            sdProgDesc.PixelShader = PixelShader.mCoreObject.Ptr;
+            sdProgDesc.InputLayout = InputLayout.mCoreObject;
+            sdProgDesc.VertexShader = VertexShader.mCoreObject;
+            sdProgDesc.PixelShader = PixelShader.mCoreObject;
             var gpuProgram = rc.CreateShaderProgram(ref sdProgDesc);
 
             var pipelineDesc = new IRenderPipelineDesc();
             pipelineDesc.SetDefault();
-            pipelineDesc.Blend = BlendState.mCoreObject.Ptr;
-            pipelineDesc.GpuProgram = gpuProgram.mCoreObject.Ptr;
-            pipelineDesc.Rasterizer = RasterizerState.mCoreObject.Ptr;
-            pipelineDesc.DepthStencil = DepthStencilState.mCoreObject.Ptr;
+            pipelineDesc.Blend = BlendState.mCoreObject;
+            pipelineDesc.GpuProgram = gpuProgram.mCoreObject;
+            pipelineDesc.Rasterizer = RasterizerState.mCoreObject;
+            pipelineDesc.DepthStencil = DepthStencilState.mCoreObject;
             Pipeline = rc.CreateRenderPipeline(ref pipelineDesc);
 
             var splDesc = new ISamplerStateDesc();
@@ -114,7 +114,7 @@ namespace EngineNS.EGui.Slate
             // Store our identifier
             io.FontsWrapper.SetTexID((void*)0);
 
-            ImageInitData initData;
+            ImageInitData initData = new ImageInitData();
             initData.pSysMem = pixels;
             initData.SysMemPitch = (uint)(width * bytesPerPixel);
 
@@ -130,7 +130,7 @@ namespace EngineNS.EGui.Slate
 
             var srvDesc = new IShaderResourceViewDesc();
             srvDesc.mFormat = txDesc.Format;
-            srvDesc.m_pTexture2D = FontTexture.mCoreObject.Ptr;
+            srvDesc.m_pTexture2D = FontTexture.mCoreObject;
             FontSRV = rc.CreateShaderResourceView(ref srvDesc);
 
             io.FontsWrapper.ClearTexData();

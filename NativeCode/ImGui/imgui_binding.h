@@ -27,7 +27,7 @@ typedef const char* (*FGetClipboardTextFn)(void* user_data);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void(*FSetClipboardTextFn)(void* user_data, const char* text);
 
-struct TR_CLASS(SV_LayoutStruct = 8, SV_Dispose = delete self)
+struct TR_CLASS(SV_LayoutStruct = 8)
 ImGuiViewportDataSDL2
 {
 	ImGuiViewportDataSDL2()

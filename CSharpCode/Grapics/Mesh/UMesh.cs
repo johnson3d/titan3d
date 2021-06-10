@@ -117,7 +117,7 @@ namespace EngineNS.Graphics.Mesh
                 {
                     if (result.Effect.CBPerMeshIndex != 0xFFFFFFFF)
                     {
-                        result.mCoreObject.BindCBufferAll(result.Effect.CBPerMeshIndex, mesh.PerMeshCBuffer.mCoreObject.Ptr);
+                        result.mCoreObject.BindCBufferAll(result.Effect.CBPerMeshIndex, mesh.PerMeshCBuffer.mCoreObject);
                     }
                 }
                 
@@ -231,11 +231,11 @@ namespace EngineNS.Graphics.Mesh
                         {
                             var pipeline = new IRenderPipeline(drawcall.mCoreObject.GetPipeline());
                             if (Material.RasterizerState != null)
-                                pipeline.BindRasterizerState(Material.RasterizerState.mCoreObject.CppPointer);
+                                pipeline.BindRasterizerState(Material.RasterizerState.mCoreObject);
                             if (Material.DepthStencilState != null)
-                                pipeline.BindDepthStencilState(Material.DepthStencilState.mCoreObject.CppPointer);
+                                pipeline.BindDepthStencilState(Material.DepthStencilState.mCoreObject);
                             if (Material.BlendState != null)
-                                pipeline.BindBlendState(Material.BlendState.mCoreObject.CppPointer);
+                                pipeline.BindBlendState(Material.BlendState.mCoreObject);
                         }
                         #endregion
 

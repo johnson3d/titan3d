@@ -8,8 +8,8 @@ IModifier : public VIUnknown
 {
 public:
 	virtual void SetInputStreams(IMeshPrimitives* mesh, IVertexArray* vao) {}
-	virtual void GetInputStreams(DWORD& pOutStreams) {}
-	virtual void GetProvideStreams(DWORD& pOutStreams) {}
+	virtual void GetInputStreams(UINT* pOutStreams) {}
+	virtual void GetProvideStreams(UINT* pOutStreams) {}
 };
 
 NS_END

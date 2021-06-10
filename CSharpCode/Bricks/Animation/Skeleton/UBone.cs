@@ -25,15 +25,15 @@ namespace EngineNS.Animation.Skeleton
         public static UBoneDesc Create(IBoneDesc iBoneDesc)
         {
             UBoneDesc desc = new UBoneDesc();
-            desc.Name = iBoneDesc.m_Name;
-            desc.NameHash = iBoneDesc.m_NameHash;
-            desc.ParentName = iBoneDesc.m_ParentName;
-            desc.ParentHash= iBoneDesc.m_ParentHash;
-            desc.InitMatrix= iBoneDesc.m_InitMatrix;
-            desc.InvInitMatrix= iBoneDesc.m_InvInitMatrix;
-            desc.InvPos= iBoneDesc.m_InvPos;
-            desc.InvQuat= iBoneDesc.m_InvQuat;
-            desc.InvScale= iBoneDesc.m_InvScale;
+            desc.Name = iBoneDesc.Name;
+            desc.NameHash = iBoneDesc.NameHash;
+            desc.ParentName = iBoneDesc.ParentName;
+            desc.ParentHash= iBoneDesc.ParentHash;
+            desc.InitMatrix= iBoneDesc.InitMatrix;
+            desc.InvInitMatrix= iBoneDesc.InvInitMatrix;
+            desc.InvPos= iBoneDesc.InvPos;
+            desc.InvQuat= iBoneDesc.InvQuat;
+            desc.InvScale= iBoneDesc.InvScale;
             return desc;
         }
         [Rtti.Meta]

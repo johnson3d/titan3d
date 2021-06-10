@@ -190,7 +190,7 @@ namespace EngineNS.Graphics.Mesh
             var xnd = new IO.CXndHolder("CMeshPrimitives", 0, 0);
             unsafe
             {
-                mCoreObject.Save2Xnd(rc.mCoreObject.CppPointer, xnd.RootNode.mCoreObject.CppPointer);
+                mCoreObject.Save2Xnd(rc.mCoreObject, xnd.RootNode.mCoreObject);
             }
 
             xnd.SaveXnd(name.Address);
@@ -210,7 +210,7 @@ namespace EngineNS.Graphics.Mesh
             var result = new CMeshPrimitives();
             unsafe
             {
-                var ret = result.mCoreObject.LoadXnd(UEngine.Instance.GfxDevice.RenderContext.mCoreObject.CppPointer, "", xnd.mCoreObject.CppPointer, true);
+                var ret = result.mCoreObject.LoadXnd(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, "", xnd.mCoreObject, true);
                 if (ret == 0)
                     return null;
                 return result;

@@ -31,14 +31,14 @@ void ISkinModifier::SetInputStreams(IMeshPrimitives* mesh, IVertexArray* vao)
 	vao->BindVertexBuffer(VST_SkinWeight, vb);
 }
 
-void ISkinModifier::GetInputStreams(DWORD& pOutStreams)
+void ISkinModifier::GetInputStreams(UINT* pOutStreams)
 {
-	pOutStreams |= ((1 << VST_Position) | (1 << VST_Normal) | (1 << VST_Tangent) | (1 << VST_UV) | (1 << VST_Color) | (1 << VST_SkinIndex) | (1 << VST_SkinWeight));
+	*pOutStreams |= ((1 << VST_Position) | (1 << VST_Normal) | (1 << VST_Tangent) | (1 << VST_UV) | (1 << VST_Color) | (1 << VST_SkinIndex) | (1 << VST_SkinWeight));
 }
 
-void ISkinModifier::GetProvideStreams(DWORD& pOutStreams)
+void ISkinModifier::GetProvideStreams(UINT* pOutStreams)
 {
-	pOutStreams |= ((1 << VOT_Position) | (1 << VOT_Normal) | (1 << VOT_Tangent) | (1 << VOT_WorldPos) | (1 << VOT_UV) | (1 << VOT_Color) | (1 << VST_SkinIndex) | (1 << VST_SkinWeight));
+	*pOutStreams |= ((1 << VOT_Position) | (1 << VOT_Normal) | (1 << VOT_Tangent) | (1 << VOT_WorldPos) | (1 << VOT_UV) | (1 << VOT_Color) | (1 << VST_SkinIndex) | (1 << VST_SkinWeight));
 }
 
 bool ISkinModifier::FlushSkinPose(IConstantBuffer* cb, int AbsBonePos, int AbsBoneQuat, IPartialSkeleton* partialSkeleton,ISkeletonPose* skeletonPose)
@@ -47,7 +47,7 @@ bool ISkinModifier::FlushSkinPose(IConstantBuffer* cb, int AbsBonePos, int AbsBo
 		return FALSE;
 	if (skeletonPose == nullptr)
 		return FALSE;
-	//shader buffer´óÐ¡¸Ä³ÉÁË 360¸ö¹Ç÷ÀÖ§³Ö¡£Shaders\CoreShader\Modifier\SkinModifier.var
+	//shader bufferï¿½ï¿½Ð¡ï¿½Ä³ï¿½ï¿½ï¿½ 360ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö§ï¿½Ö¡ï¿½Shaders\CoreShader\Modifier\SkinModifier.var
 	v3dxQuaternion* absPos = (v3dxQuaternion*)cb->GetVarPtrToWrite(AbsBonePos, (int)partialSkeleton->GetBonesNum() * sizeof(v3dxQuaternion));
 	if (absPos == nullptr)
 		return FALSE;
@@ -60,7 +60,7 @@ bool ISkinModifier::FlushSkinPose(IConstantBuffer* cb, int AbsBonePos, int AbsBo
 		IBone* bone = bones[i];
 		if (bone != nullptr)
 		{
-			//ÕâÀï½øÐÐtranslateRetarget,£¿£¿£¿£¿¸ù¾ÝÑ¡ÏîÑ¡ÔñÓÃ×Ô¼ºµÄshared£¬×Ô¼ºµÄtransformµÈµÈ
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½translateRetarget,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½sharedï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½transformï¿½Èµï¿½
 			v3dxTransform trans;
 			const IBoneDesc* shared = nullptr;
 			EngineNS::IBonePose* outBone = skeletonPose->FindBonePose(bone->Desc.Name);

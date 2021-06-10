@@ -269,7 +269,7 @@ namespace EngineNS.GamePlay.Scene
             if (NodeData != null)
             {
                 var dataAttr = new EngineNS.XndAttribute(xnd.NewAttribute("NodeData", 1, 0));
-                node.AddAttribute(dataAttr.Ptr);
+                node.AddAttribute(dataAttr);
                 var attrProxy = new EngineNS.IO.XndAttributeWriter(dataAttr);
 
                 var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.XndAttributeWriter>(attrProxy);
@@ -282,7 +282,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(i.GetType());
                 var nd = new EngineNS.XndNode(xnd.NewNode(typeStr, 1, 0));
-                node.AddNode(nd.Ptr);
+                node.AddNode(nd);
                 SaveXndNode(scene, xnd, nd);
             }
         }

@@ -39,13 +39,13 @@ namespace EngineNS.RHI
                     if (pipeline.NativePointer == IntPtr.Zero)
                     {
                         var desc = new IRenderPipelineDesc();
-                        desc.GpuProgram = Effect.ShaderProgram.mCoreObject.Ptr;
+                        desc.GpuProgram = Effect.ShaderProgram.mCoreObject;
                         var pl = UEngine.Instance.GfxDevice.RenderContext.CreateRenderPipeline(ref desc);
-                        mCoreObject.BindPipeline(pl.mCoreObject.Ptr);
+                        mCoreObject.BindPipeline(pl.mCoreObject);
                     }
                     else
                     {
-                        pipeline.BindGpuProgram(Effect.ShaderProgram.mCoreObject.Ptr);
+                        pipeline.BindGpuProgram(Effect.ShaderProgram.mCoreObject);
                     }
                 }
             }
@@ -61,13 +61,13 @@ namespace EngineNS.RHI
             if (pipeline.NativePointer == IntPtr.Zero)
             {
                 var desc = new IRenderPipelineDesc();
-                desc.GpuProgram = Effect.ShaderProgram.mCoreObject.Ptr;
+                desc.GpuProgram = Effect.ShaderProgram.mCoreObject;
                 var pl = UEngine.Instance.GfxDevice.RenderContext.CreateRenderPipeline(ref desc);
-                mCoreObject.BindPipeline(pl.mCoreObject.Ptr);
+                mCoreObject.BindPipeline(pl.mCoreObject);
             }
             else
             {
-                pipeline.BindGpuProgram(Effect.ShaderProgram.mCoreObject.Ptr);
+                pipeline.BindGpuProgram(Effect.ShaderProgram.mCoreObject);
             }
 
             var textures = new IShaderResources(mCoreObject.GetShaderResources());
@@ -82,11 +82,11 @@ namespace EngineNS.RHI
                 var srv = Material.TryGetSRV(j);
                 if (bindInfo.PSBindPoint != 0xffffffff && srv != null)
                 {
-                    textures.PSBindTexture(bindInfo.PSBindPoint, srv.mCoreObject.Ptr);
+                    textures.PSBindTexture(bindInfo.PSBindPoint, srv.mCoreObject);
                 }
                 if (bindInfo.VSBindPoint != 0xffffffff && srv != null)
                 {
-                    textures.VSBindTexture(bindInfo.VSBindPoint, srv.mCoreObject.Ptr);
+                    textures.VSBindTexture(bindInfo.VSBindPoint, srv.mCoreObject);
                 }
             }
 
@@ -97,12 +97,12 @@ namespace EngineNS.RHI
                     var rc = UEngine.Instance.GfxDevice.RenderContext;
                     Material.PerMaterialCBuffer = rc.CreateConstantBuffer(Effect.ShaderProgram, Effect.CBPerMaterialIndex);
                     Material.UpdateUniformVars(Material.PerMaterialCBuffer);
-                    mCoreObject.BindCBufferAll(Effect.CBPerMaterialIndex, Material.PerMaterialCBuffer.mCoreObject.Ptr);
+                    mCoreObject.BindCBufferAll(Effect.CBPerMaterialIndex, Material.PerMaterialCBuffer.mCoreObject);
                 }
             }
             if (Effect.CBPerFrameIndex != 0xFFFFFFFF)
             {
-                mCoreObject.BindCBufferAll(Effect.CBPerFrameIndex, UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject.Ptr);
+                mCoreObject.BindCBufferAll(Effect.CBPerFrameIndex, UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject);
             }
             return true;
         }        

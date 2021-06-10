@@ -138,7 +138,7 @@ namespace EngineNS.IO
                 string text;
                 Read(out text);
                 v = new VNameString();
-                v.UnsafeCallConstructor(text);
+                v.Index = VNameString.GetIndexFromString(text);
             }
         }
 

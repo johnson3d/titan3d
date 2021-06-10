@@ -223,6 +223,7 @@ public:
 	ITxPicDesc			mTxDesc;
 	AutoRef<ITexture2D>		mTexture2D;
 	AutoRef<IGpuBuffer>		mBuffer;
+	TR_MEMBER(SV_NoBind)
 	IResourceState		mResourceState;
 public:
 	/*struct ETCDesc
