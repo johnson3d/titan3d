@@ -22,16 +22,17 @@
     <Compile Include="$(MSBuildThisFileDirectory)Skeleton\AnimatableSkeletonHierarchy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Skeleton\CBone.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Skeleton\CPartialSkeleton.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\UBone.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\Limb\ILimb.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\Limb\UBone.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Skeleton\UFullSkeleton.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Skeleton\USKeletonAsset.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\USocket.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\Limb\USocket.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UAnimationModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Asset\" />
-    <Folder Include="$(MSBuildThisFileDirectory)AnimationMacross\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Pose\Control\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Macross\" />
     <Folder Include="$(MSBuildThisFileDirectory)StateMachine\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Pose\Control\" />
   </ItemGroup>
 </Project>
