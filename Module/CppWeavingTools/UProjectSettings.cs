@@ -17,7 +17,8 @@ namespace CppWeaving
 		public static string ModuleNC;
         public string CppOutputDir;
         public string CsOutputDir;
-        public const string VReturnValueMarshal = "EngineNS::VReturnValueMarshal";		
+        public const string VReturnValueMarshal = "EngineNS::VReturnValueMarshal";
+		public const string VGetTypeDefault = "EngineNS::VGetTypeDefault";
 		public static string GlueExporter = "VFX_API";
 		
 		public const string SV_LayoutStruct = "SV_LayoutStruct";
@@ -25,8 +26,9 @@ namespace CppWeaving
 		public const string SV_Dispose = "SV_Dispose";
 		public const string SV_Marshal = "SV_Marshal";
 		public const string SV_EnumNoFlags = "SV_EnumNoFlags";
-		public const string SV_NoStringConverter = "SV_NoStringConverter";
+		public const string SV_NoStringConverter = "SV_NoStringConverter";		
 		public const string SV_SuppressGC = "SV_SuppressGC";
-		public const string SV_ReadOnly = "SV_ReadOnly";		
+		public const string SV_ReadOnly = "SV_ReadOnly";
+		
 	}
 }
