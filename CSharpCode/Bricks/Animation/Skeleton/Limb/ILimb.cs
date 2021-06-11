@@ -13,7 +13,7 @@ namespace EngineNS.Animation.Skeleton
         }
         public int ToInt()
         {
-            return Value;
+            return Value; 
         }
         public bool IsValid()
         {
