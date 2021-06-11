@@ -110,6 +110,7 @@ namespace CppWeaving.Cpp2CS
 				
 				var tmp = new UField();
 				tmp.BuildMetaInfo(i.Attrs);
+				tmp.MetaInfos["SV_SuppressGC"] = "SV_SuppressGC";
 				if (func != null) {
 					tmp.Name = i.Name;
 					func.Name = i.Name;

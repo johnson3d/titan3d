@@ -108,45 +108,49 @@ namespace CppWeaving.Cpp2CS
                     AddLine($"return ({retTypeStr})self->{i.Name};");
                 }
                 PopBrackets();
-                if (i.IsDelegate)
-                {
-                    AddLine($"static void FieldSet__{i.Name}({mClass.ToCppName()}* self, {i.GetCppTypeName()})");
-                }
-                else
-                {
-                    AddLine($"static void FieldSet__{i.Name}({mClass.ToCppName()}* self, {i.GetCppTypeName()} value)");
-                }
-                PushBrackets();
-                {
-                    AddLine($"if(self==nullptr)");
-                    PushBrackets();
-                    {
-                        AddLine($"return;");
-                    }
-                    PopBrackets();
 
-                    if (i.NumOfElement > 0)
+                if (!i.HasMeta(UProjectSettings.SV_ReadOnly))
+                {
+                    if (i.IsDelegate)
                     {
-                        AddLine($"for (int i = 0; i < {i.NumOfElement}; i++)");
-                        PushBrackets();
-                        {
-                            AddLine($"self->{i.Name}[i] = value[i];");
-                        }
-                        PopBrackets();
+                        AddLine($"static void FieldSet__{i.Name}({mClass.ToCppName()}* self, {i.GetCppTypeName()})");
                     }
                     else
                     {
-                        if (i.IsDelegate)
+                        AddLine($"static void FieldSet__{i.Name}({mClass.ToCppName()}* self, {i.GetCppTypeName()} value)");
+                    }
+                    PushBrackets();
+                    {
+                        AddLine($"if(self==nullptr)");
+                        PushBrackets();
                         {
-                            AddLine($"*(void**)&(self->{i.Name}) = (void*){i.Name};");
+                            AddLine($"return;");
+                        }
+                        PopBrackets();
+
+                        if (i.NumOfElement > 0)
+                        {
+                            AddLine($"for (int i = 0; i < {i.NumOfElement}; i++)");
+                            PushBrackets();
+                            {
+                                AddLine($"self->{i.Name}[i] = value[i];");
+                            }
+                            PopBrackets();
                         }
                         else
                         {
-                            AddLine($"self->{i.Name} = value;");
+                            if (i.IsDelegate)
+                            {
+                                AddLine($"*(void**)&(self->{i.Name}) = (void*){i.Name};");
+                            }
+                            else
+                            {
+                                AddLine($"self->{i.Name} = value;");
+                            }
                         }
                     }
-                }
-                PopBrackets();
+                    PopBrackets();
+                }   
             }
 
         }
@@ -181,18 +185,22 @@ namespace CppWeaving.Cpp2CS
                         AddLine($"return {mClass.VisitorName}::FieldGet__{i.Name}(self);");
                 }
                 PopBrackets();
-                if (i.IsDelegate)
-                    AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{mClass.VisitorPInvoke}_FieldSet__{i.Name}({mClass.ToCppName()}* self, {i.GetCppTypeName()})");
-                else
-                    AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{mClass.VisitorPInvoke}_FieldSet__{i.Name}({mClass.ToCppName()}* self, {i.GetCppTypeName()} value)");
-                PushBrackets();
+                
+                if (!i.HasMeta(UProjectSettings.SV_ReadOnly))
                 {
                     if (i.IsDelegate)
-                        AddLine($"{mClass.VisitorName}::FieldSet__{i.Name}(self, {i.Name});");
+                        AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{mClass.VisitorPInvoke}_FieldSet__{i.Name}({mClass.ToCppName()}* self, {i.GetCppTypeName()})");
                     else
-                        AddLine($"{mClass.VisitorName}::FieldSet__{i.Name}(self, value);");
-                }
-                PopBrackets();
+                        AddLine($"extern \"C\" {UProjectSettings.GlueExporter} void TSDK_{mClass.VisitorPInvoke}_FieldSet__{i.Name}({mClass.ToCppName()}* self, {i.GetCppTypeName()} value)");
+                    PushBrackets();
+                    {
+                        if (i.IsDelegate)
+                            AddLine($"{mClass.VisitorName}::FieldSet__{i.Name}(self, {i.Name});");
+                        else
+                            AddLine($"{mClass.VisitorName}::FieldSet__{i.Name}(self, value);");
+                    }
+                    PopBrackets();
+                }   
             }
 
         }

@@ -256,22 +256,25 @@ namespace CppWeaving.Cpp2CS
                     }
                     PopBrackets();
 
-                    AddLine($"set");
-                    PushBrackets();
+                    if (!i.HasMeta(UProjectSettings.SV_ReadOnly))
                     {
-                        BeginInvoke(i);
-                        string pinvoke = $"TSDK_{mClass.VisitorPInvoke}_FieldSet__{i.Name}";
-                        if (pointerTypeWrapper)
+                        AddLine($"set");
+                        PushBrackets();
                         {
-                            AddLine($"{pinvoke}(mPointer, value);");
+                            BeginInvoke(i);
+                            string pinvoke = $"TSDK_{mClass.VisitorPInvoke}_FieldSet__{i.Name}";
+                            if (pointerTypeWrapper)
+                            {
+                                AddLine($"{pinvoke}(mPointer, value);");
+                            }
+                            else
+                            {
+                                AddLine($"{pinvoke}(mPointer, value);");
+                            }
+                            EndInvoke(i);
                         }
-                        else
-                        {
-                            AddLine($"{pinvoke}(mPointer, value);");
-                        }
-                        EndInvoke(i);
-                    }
-                    PopBrackets();
+                        PopBrackets();
+                    }   
                 }
                 PopBrackets();
             }
@@ -296,15 +299,18 @@ namespace CppWeaving.Cpp2CS
                 UTypeManager.WritePInvokeAttribute(this, i);
                 AddLine($"extern static {retType} TSDK_{mClass.VisitorPInvoke}_FieldGet__{i.Name}(void* self);");
 
-                if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
+                if (!i.HasMeta(UProjectSettings.SV_ReadOnly))
                 {
-                    if (retType == "sbyte*")
+                    if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
                     {
-                        retType = "string";
+                        if (retType == "sbyte*")
+                        {
+                            retType = "string";
+                        }
                     }
+                    UTypeManager.WritePInvokeAttribute(this, i);
+                    AddLine($"extern static void TSDK_{mClass.VisitorPInvoke}_FieldSet__{i.Name}(void* self, {retType} value);");
                 }
-                UTypeManager.WritePInvokeAttribute(this, i);
-                AddLine($"extern static void TSDK_{mClass.VisitorPInvoke}_FieldSet__{i.Name}(void* self, {retType} value);");
             }
         }
 

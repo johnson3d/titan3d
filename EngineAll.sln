@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core.Window", "Core.Window\Core.Window.vcxproj", "{AD0E23E3-ECA5-4E52-B69D-BB6E669C48C6}"
 	ProjectSection(ProjectDependencies) = postProject
-		{BC6D2F72-6740-4A70-BF0E-C9893A4D1528} = {BC6D2F72-6740-4A70-BF0E-C9893A4D1528}
+		{4B151A28-784F-4ED5-9490-FA959B23C9E0} = {4B151A28-784F-4ED5-9490-FA959B23C9E0}
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cpp", "Cpp", "{892AFF4D-69EA-4061-8F59-320A21A0814A}"
@@ -145,7 +145,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectCooker", "Module\Pro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Console", "Module\Engine.Console\Engine.Console.csproj", "{D5A7D7FA-99B0-4C4A-9797-2DD7DB395930}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CppWeavingTools", "Module\CppWeavingTools\CppWeavingTools.csproj", "{4B151A28-784F-4ED5-9490-FA959B23C9E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CppWeavingTools", "Module\CppWeavingTools\CppWeavingTools.csproj", "{4B151A28-784F-4ED5-9490-FA959B23C9E0}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution

@@ -12,6 +12,9 @@ namespace CppWeaving.Cpp2CS
 		public Dictionary<string, UClass> ClassTypes = new Dictionary<string, UClass>();
 		public Dictionary<string, UEnum> EnumTypes = new Dictionary<string, UEnum>();
 		public Dictionary<string, UDelegate> DelegateTypes = new Dictionary<string, UDelegate>();
+		public List<UClass> SortedClassTypes = new List<UClass>();
+		public List<UEnum> SortedEnumTypes = new List<UEnum>();
+		public List<UDelegate> SortedDelegateTypes = new List<UDelegate>();
 		public void RegClass(TUCreator tu, ClangSharp.CXXRecordDecl decl, string ns, string name)
 		{
 			var fullname = ns + "." + name;
@@ -115,7 +118,7 @@ namespace CppWeaving.Cpp2CS
             TaskThreadManager.Instance.WaitAllThreadFinished();
 
 			var rmvDelegates = new List<string>();
-            foreach (var i in DelegateTypes)
+			foreach (var i in DelegateTypes)
             {
 				if (i.Value.BuildType() == false)
 				{
@@ -126,86 +129,108 @@ namespace CppWeaving.Cpp2CS
 			{
 				DelegateTypes.Remove(i);
 			}
+			SortedDelegateTypes = DelegateTypes.Values.ToList();
+			SortedDelegateTypes.Sort((lh, rh) =>
+			{
+				return lh.FullName.CompareTo(rh.FullName);
+			});
 
 			foreach (var i in ClassTypes) {
 				i.Value.BuildClass();
 			}
-			foreach (var i in EnumTypes) {
+            SortedClassTypes = ClassTypes.Values.ToList();
+			SortedClassTypes.Sort((lh, rh) =>
+            {
+                return lh.FullName.CompareTo(rh.FullName);
+            });
+
+            foreach (var i in EnumTypes) {
 				i.Value.BuildType();
 			}
+            SortedEnumTypes = EnumTypes.Values.ToList();
+			SortedEnumTypes.Sort((lh, rh) =>
+            {
+                return lh.FullName.CompareTo(rh.FullName);
+            });
 
             {
 				var cppGen = new UStructCodeCpp();
 				cppGen.AddLine("#pragma once");
 
-				foreach (var i in ClassTypes)
+				foreach (var i in SortedClassTypes)
                 {
-                    if (i.Value as UStruct != null)
+                    if (i as UStruct != null)
                     {
-						cppGen.mClass = i.Value;
-						cppGen.FullName = i.Value.FullName;
+						cppGen.mClass = i;
+						cppGen.FullName = i.FullName;
 
 						cppGen.WritePODStruct();
                     }
                 }
                 var file = UProjectSettings.CppPODStruct;
-                //if (!WroteFiles.ContainsKey(file))
-                //{
-                //    WroteFiles.Add(file, file.Replace("\\", "/").ToLower());
-                //}
-
-                if (System.IO.File.Exists(file))
+				var saveFile = file;
+                file = file.Replace("\\", "/").ToLower();
+                if (!WroteFiles.ContainsKey(file))
                 {
-                    var oldCode = System.IO.File.ReadAllText(file);
+                    WroteFiles.Add(file, file);
+                }
+
+                if (System.IO.File.Exists(saveFile))
+                {
+                    var oldCode = System.IO.File.ReadAllText(saveFile);
                     if (oldCode != cppGen.ClassCode)
-                        System.IO.File.WriteAllText(file, cppGen.ClassCode);
+                        System.IO.File.WriteAllText(saveFile, cppGen.ClassCode);
                 }
                 else
                 {
-                    System.IO.File.WriteAllText(file, cppGen.ClassCode);
+                    System.IO.File.WriteAllText(saveFile, cppGen.ClassCode);
                 }
             }
 			
-			foreach (var i in ClassTypes) {
-				if (i.Value as UStruct != null) {
-					var cppGen = new UStructCodeCpp(i.Value);
+			foreach (var i in SortedClassTypes) {
+				if (i as UStruct != null) {
+					var cppGen = new UStructCodeCpp(i);
 					cppGen.Write(this, settings.CppOutputDir);
 
-					var csGen = new UStructCodeCs(i.Value);
+					var csGen = new UStructCodeCs(i);
 					csGen.Write(this, settings.CsOutputDir);
 				} else {
-					var cppGen = new UClassCodeCpp(i.Value);
+					var cppGen = new UClassCodeCpp(i);
 					cppGen.Write(this, settings.CppOutputDir);
 
-					var csGen = new UClassCodeCs(i.Value);
+					var csGen = new UClassCodeCs(i);
 					csGen.Write(this, settings.CsOutputDir);
 				}
 			}
-			foreach (var i in EnumTypes) {
-				var csGen = new UEnumCodeCs(i.Value);
+			foreach (var i in SortedEnumTypes) {
+				var csGen = new UEnumCodeCs(i);
 				csGen.Write(this, settings.CsOutputDir);
 			}
 
-			{
-				var csGen = new UDelegateCodeCs();
-				foreach (var i in DelegateTypes) {
-					csGen.mClass = i.Value;
-					csGen.OnGenCode();
-				}
+			//{
+			//	var csGen = new UDelegateCodeCs();
+			//	csGen.AddLine("using System;");
+			//	foreach (var i in SortedDelegateTypes) {
+			//		csGen.mClass = i;
+			//		csGen.OnGenCode();
+			//	}
 
-				var file = $"{settings.CsOutputDir}/DelegateBinder.gen.cs";
-				if (!WroteFiles.ContainsKey(file)) {
-					WroteFiles.Add(file, file.Replace("\\", "/").ToLower());
-				}
+			//	var file = $"{settings.CsOutputDir}/DelegateBinder.gen.cs";
+   //             var saveFile = file;
+   //             file = file.Replace("\\", "/").ToLower();
+   //             if (!WroteFiles.ContainsKey(file))
+   //             {
+   //                 WroteFiles.Add(file, file);
+   //             }
 
-				if (System.IO.File.Exists(file)) {
-					var oldCode = System.IO.File.ReadAllText(file);
-					if (oldCode != csGen.ClassCode)
-						System.IO.File.WriteAllText(file, csGen.ClassCode);
-				} else {
-					System.IO.File.WriteAllText(file, csGen.ClassCode);
-				}
-			}
+   //             if (System.IO.File.Exists(saveFile)) {
+			//		var oldCode = System.IO.File.ReadAllText(saveFile);
+			//		if (oldCode != csGen.ClassCode)
+			//			System.IO.File.WriteAllText(saveFile, csGen.ClassCode);
+			//	} else {
+			//		System.IO.File.WriteAllText(saveFile, csGen.ClassCode);
+			//	}
+			//}
 
 			MakeSharedProjectCpp(settings.CsOutputDir + "/", "CodeGen.vcxitems");
 			MakeSharedProjectCSharp(settings.CppOutputDir + "/", "CodeGenCSharp.projitems");			
@@ -463,6 +488,10 @@ namespace CppWeaving.Cpp2CS
 			if (CallingConvention == null)
 				CallingConvention = "CallingConvention.Cdecl";
 			codeGen.AddLine($"[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = {CallingConvention}, CharSet = {CharSet})]");
+
+			var supressGC = attrs?.GetMeta("SV_SuppressGC");
+			if (supressGC != null)
+				codeGen.AddLine($"[SuppressGCTransition]");
 		}
 	}
 }

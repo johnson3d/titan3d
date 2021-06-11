@@ -15,18 +15,18 @@ namespace CppWeaving
 		public static string Pch;
 		public static string CppPODStruct;
 		public static string ModuleNC;
-		public const string VReturnValueMarshal = "EngineNS::VReturnValueMarshal";		
+        public string CppOutputDir;
+        public string CsOutputDir;
+        public const string VReturnValueMarshal = "EngineNS::VReturnValueMarshal";		
 		public static string GlueExporter = "VFX_API";
-		public static string GlueNamespace = "EngineNS";
+		
 		public const string SV_LayoutStruct = "SV_LayoutStruct";
 		public const string SV_NoBind = "SV_NoBind";
 		public const string SV_Dispose = "SV_Dispose";
 		public const string SV_Marshal = "SV_Marshal";
 		public const string SV_EnumNoFlags = "SV_EnumNoFlags";
 		public const string SV_NoStringConverter = "SV_NoStringConverter";
-
-
-		public string CppOutputDir;
-		public string CsOutputDir;
+		public const string SV_SuppressGC = "SV_SuppressGC";
+		public const string SV_ReadOnly = "SV_ReadOnly";		
 	}
 }

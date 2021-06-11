@@ -128,18 +128,20 @@ namespace CppWeaving
             
             SureDirectory(dir + "/" + subPath);
 
+            var saveFile = file;
+            file = file.Replace("\\", "/").ToLower();
             if (!manager.WroteFiles.ContainsKey(file)) 
 			{
-				manager.WroteFiles.Add(file.Replace("\\", "/").ToLower(), file.Replace("\\", "/").ToLower());
+				manager.WroteFiles.Add(file, file);
 			}
 
-			if (System.IO.File.Exists(file)) {
-				var oldCode = System.IO.File.ReadAllText(file);
+			if (System.IO.File.Exists(saveFile)) {
+				var oldCode = System.IO.File.ReadAllText(saveFile);
 				if (oldCode == ClassCode)
 					return;
 			}
 
-			System.IO.File.WriteAllText(file, ClassCode);
+			System.IO.File.WriteAllText(saveFile, ClassCode);
 		}
 		public string GetAccessDefine(Cpp2CS.EAccess access)
 		{
