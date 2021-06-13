@@ -43,6 +43,8 @@ namespace EngineNS
         [Rtti.Meta]
         public Vector4 MainWindow { get; set; } = new Vector4(100, 100, 1280, 720);
         [Rtti.Meta]
+        public bool DoUnitTest { get; set; } = true;
+        [Rtti.Meta]
         public ERHIType RHIType { get; set; } = ERHIType.RHT_D3D11;
         [Rtti.Meta]
         public bool HasDebugLayer { get; set; } = false;
@@ -119,7 +121,10 @@ namespace EngineNS
             System.Action action = async () =>
             {
                 await base.InitializeModules();
-                EngineNS.UTest.UnitTestManager.DoUnitTests();
+                if (Config.DoUnitTest)
+                {
+                    EngineNS.UTest.UnitTestManager.DoUnitTests();
+                }
             };
             action();
 

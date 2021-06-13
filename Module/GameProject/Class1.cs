@@ -46,10 +46,14 @@ namespace GameProject
         {
 
         }
+        EngineNS.Macross.UMacrossStackFrame mFrame_BeginPlay = new EngineNS.Macross.UMacrossStackFrame();
         public override async System.Threading.Tasks.Task<bool> BeginPlay(EngineNS.GamePlay.UGameBase host)
         {
-            await base.BeginPlay(host);
-            return true;
+            using (var guard = new EngineNS.Macross.UMacrossStackGuard(mFrame_BeginPlay))
+            {
+                await base.BeginPlay(host);
+                return true;
+            }
         }
         public override void Tick(EngineNS.GamePlay.UGameBase host, int elapsedMillisecond)
         {

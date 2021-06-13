@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)IO\IStreaming.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\IAssemblyLoader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\UMacrossModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\UMacrossStackTracer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Profiler\UNativeMemory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\CBlobObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\UNativeArray.cs" />
