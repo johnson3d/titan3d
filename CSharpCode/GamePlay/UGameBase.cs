@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public class IGameBase
+    public partial class IGameBase
     {
         [Rtti.Meta]
         public virtual async System.Threading.Tasks.Task<bool> BeginPlay(UGameBase host)

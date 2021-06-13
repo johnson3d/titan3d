@@ -9,6 +9,12 @@ namespace CSharpCodeTools
     class UClassCodeBase
     {
         public List<string> Usings = new List<string>();
+        public void AddUsing(string code)
+        {
+            if (Usings.Contains(code))
+                return;
+            Usings.Add(code);
+        }
         public string FullName;
         public string Namespace
         {

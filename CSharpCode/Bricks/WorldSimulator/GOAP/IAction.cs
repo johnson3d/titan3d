@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.WorldSimulator.GOAP
 {
-    public class IAction
+    public partial class IAction
     {
         public float TmpCost = float.MaxValue;
         [Rtti.Meta]

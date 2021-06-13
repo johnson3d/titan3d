@@ -45,13 +45,7 @@ namespace CSharpCodeTools.Cs2Cpp
             return false;
         }
 
-        public void WriteCode(string dir)
-        {
-            foreach (var i in ClassDefines)
-            {
-                i.Value.GenCode(dir);
-            }
-        }
+        
 
         protected override bool GetClassAttribute(ClassDeclarationSyntax decl)
         {

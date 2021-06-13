@@ -4,9 +4,13 @@ using System.Text;
 
 namespace EngineNS.Macross
 {
-    public class UMacrossStackFrame
+    public class UMacrossStackFrame : IDisposable
     {
         public Dictionary<string, object> mFrameStates = new Dictionary<string, object>();
+        public void Dispose()
+        {
+
+        }
         public void SetWatchVariable<T>(string name, T value)
         {
             mFrameStates[name] = value;
@@ -22,10 +26,14 @@ namespace EngineNS.Macross
             }
         }
     }
-    public class UMacrossStackTracer
+    public class UMacrossStackTracer 
     {
         [ThreadStatic]
-        public static UMacrossStackTracer ThreadInstance = new UMacrossStackTracer();
+        private static UMacrossStackTracer ThreadInstance = new UMacrossStackTracer();
+        public static UMacrossStackTracer GetStackTracer()
+        {
+            return ThreadInstance;
+        }
         public Stack<UMacrossStackFrame> mFrames = new Stack<UMacrossStackFrame>();
         public static UMacrossStackFrame CurrentFrame
         {

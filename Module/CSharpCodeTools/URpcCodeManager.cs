@@ -30,13 +30,6 @@ namespace CSharpCodeTools
         {
 
         }
-        public void WriteCode(string dir)
-        {
-            foreach(var i in ClassDefines)
-            {
-                i.Value.GenCode(dir);
-            }
-        }
         public override void IterateClass(CompilationUnitSyntax root, MemberDeclarationSyntax decl)
         {
             switch (decl.Kind())

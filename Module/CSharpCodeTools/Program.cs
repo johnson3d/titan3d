@@ -5,12 +5,23 @@ namespace CSharpCodeTools
 {
     class Program
     {
-        static string FindArgument(string[] args, string startWith)
+        public static string FindArgument(string[] args, string startWith)
         {
             foreach (var i in args)
             {
                 if (i.StartsWith(startWith))
-                    return i;
+                {
+                    return i.Substring(startWith.Length);
+                }
+            }
+            return null;
+        }
+        public static string[] GetArguments(string[] args, string startWith, char split = '+')
+        {
+            var types = FindArgument(args, startWith);
+            if (types != null)
+            {
+                return types.Split(split);
             }
             return null;
         }
@@ -25,14 +36,14 @@ namespace CSharpCodeTools
             bool workRpc = true;
             bool workProp = true;
             bool workCs2Cpp = true;
-            var text = FindArgument(args, "mode=");
-            if (text != null)
+            bool workMacross = true;
+            var modes = GetArguments(args, "mode=");
+            if (modes != null)
             {
                 workRpc = false;
                 workProp = false;
                 workCs2Cpp = false;
-                text = text.Substring("mode=".Length);
-                var modes = text.Split('+');
+                workMacross = false;
                 foreach(var i in modes)
                 {
                     switch(i)
@@ -46,15 +57,17 @@ namespace CSharpCodeTools
                         case "Cs2Cpp":
                             workCs2Cpp = true;
                             break;
+                        case "Macross":
+                            workMacross = true;
+                            break;
                     }
                 }
             }
 
-            text = FindArgument(segs, "Include=");
+            var text = FindArgument(segs, "Include=");
             List<string> includes = new List<string>();
             {
-                var text1 = text.Substring("Include=".Length);
-                var inc = text1.Split(',');
+                var inc = text.Split(',');
                 Console.WriteLine("Include:");
                 foreach (var i in inc)
                 {
@@ -63,15 +76,10 @@ namespace CSharpCodeTools
                 }
             }
             text = FindArgument(segs, "Exclude=");
-            text = text.Replace("\r", "");
-            if (!text.StartsWith("Exclude="))
-            {
-                return;
-            }
+            text = text.Replace("\r", "");            
             List<string> excludes = new List<string>();
             {
-                var text1 = text.Substring("Exclude=".Length);
-                var inc = text1.Split(',');
+                var inc = text.Split(',');
                 Console.WriteLine("Exclude:");
                 foreach (var i in inc)
                 {
@@ -81,14 +89,14 @@ namespace CSharpCodeTools
             }
 
             text = FindArgument(segs, "Target=");
-            if (!text.StartsWith("Target="))
+            if (text == null)
             {
                 return;
             }
             
             if (workRpc)
             {
-                string target = dir + "/" + text.Substring("Target=".Length);
+                string target = dir + "/" + text;
                 Console.WriteLine($"Target={target}");
 
                 Console.WriteLine("Rpc:GatherClass");
@@ -101,13 +109,13 @@ namespace CSharpCodeTools
             }
 
             text = FindArgument(segs, "Property_Target=");
-            if (!text.StartsWith("Property_Target="))
+            if (text==null)
             {
                 return;
             }
             if (workProp)
             {
-                string property_target = dir + "/" + text.Substring("Property_Target=".Length);
+                string property_target = dir + "/" + text;
 
                 PropertyGen.UPropertyCodeManager.Instance.GatherCodeFiles(includes, excludes);
                 Console.WriteLine("Property:GatherClass");
@@ -121,16 +129,16 @@ namespace CSharpCodeTools
             if (workCs2Cpp)
             {
                 text = FindArgument(segs, "Pch=");
-                if (text.StartsWith("Pch="))
+                if (text!=null)
                 {
-                    Cs2Cpp.UCs2CppManager.Instance.Pch = dir + "/" + text.Substring("Pch=".Length);
+                    Cs2Cpp.UCs2CppManager.Instance.Pch = dir + "/" + text;
                 }
                 text = FindArgument(segs, "Cs2Cpp_Target=");
-                if (!text.StartsWith("Cs2Cpp_Target="))
+                if (text==null)
                 {
                     return;
                 }
-                string cs2cpp_target = dir + "/" + text.Substring("Cs2Cpp_Target=".Length);
+                string cs2cpp_target = dir + "/" + text;
 
                 Cs2Cpp.UCs2CppManager.Instance.GatherCodeFiles(includes, excludes);
                 Console.WriteLine("Cs2Cpp:GatherClass");
@@ -140,6 +148,24 @@ namespace CSharpCodeTools
                 Cs2Cpp.UCs2CppManager.Instance.MakeSharedProjectCSharp(cs2cpp_target + "/cs/", "Cs2Cpp.projitems");
                 Cs2Cpp.UCs2CppManager.Instance.MakeSharedProjectCpp(cs2cpp_target + "/cpp/", "Cs2Cpp.vcxitems");
                 Console.WriteLine("Cs2Cpp:Finished");
+            }
+
+            if (workMacross)
+            {
+                text = FindArgument(segs, "Macross_Target=");
+                if (text==null)
+                {
+                    return;
+                }
+                string macross_target = dir + "/" + text;
+
+                Macross.UMacrossClassManager.Instance.GatherCodeFiles(includes, excludes);
+                Console.WriteLine("Macross:GatherClass");
+                Macross.UMacrossClassManager.Instance.GatherClass();
+                Console.WriteLine("Macross:WriteCode");
+                Macross.UMacrossClassManager.Instance.WriteCode(macross_target);
+                Macross.UMacrossClassManager.Instance.MakeSharedProjectCSharp(macross_target + "/", "EngineMacross.projitems");
+                Console.WriteLine("Macross:Finished");
             }
         }
     }

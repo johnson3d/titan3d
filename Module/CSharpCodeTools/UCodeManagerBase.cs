@@ -267,7 +267,7 @@ namespace CSharpCodeTools
                             var klsDeffine = FindOrCreate(fullname);
                             foreach (var i in root.Usings)
                             {
-                                klsDeffine.Usings.Add(i.ToString());
+                                klsDeffine.AddUsing(i.ToString());
                             }
                         }
                         {
@@ -320,6 +320,14 @@ namespace CSharpCodeTools
                 }
             }
             return false;
+        }
+
+        public void WriteCode(string dir)
+        {
+            foreach (var i in ClassDefines)
+            {
+                i.Value.GenCode(dir);
+            }
         }
         #endregion
     }
