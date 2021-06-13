@@ -8,6 +8,7 @@ namespace CSharpCodeTools
 {
     class UClassCodeBase
     {
+        public List<string> Usings = new List<string>();
         public string FullName;
         public string Namespace
         {
@@ -25,6 +26,15 @@ namespace CSharpCodeTools
                 return FullName.Substring(pos + 1);
             }
         }
+        public virtual void Build()
+        {
+
+        }
+        public virtual void GenCode(string dir)
+        {
+
+        }
+
         #region code writer
         private int NumOfTab = 0;
         public int GetTabNum()

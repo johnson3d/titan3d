@@ -12,19 +12,10 @@ namespace CSharpCodeTools.PropertyGen
     class UPropertyCodeManager : UCodeManagerBase
     {
         public static UPropertyCodeManager Instance = new UPropertyCodeManager();
-        public Dictionary<string, UPropertyClassDefine> ClassDefines = new Dictionary<string, UPropertyClassDefine>();
-        
-        public UPropertyClassDefine FindOrCreate(string fullname)
+        protected override UClassCodeBase CreateClassDefine(string fullname)
         {
-            UPropertyClassDefine result;
-            if (ClassDefines.TryGetValue(fullname, out result))
-            {
-                return result;
-            }
-            result = new UPropertyClassDefine();
+            var result = new UPropertyClassDefine();
             result.FullName = fullname;
-            ClassDefines.Add(fullname, result);
-
             return result;
         }
         protected override bool CheckSourceCode(string code)
@@ -33,22 +24,6 @@ namespace CSharpCodeTools.PropertyGen
                 return true;
             return false;
         }
-
-        public void GatherClass()
-        {
-            foreach (var i in SourceCodes)
-            {
-                var code = System.IO.File.ReadAllText(i);
-                SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
-
-                CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
-
-                foreach (var j in root.Members)
-                {
-                    IterateClass(root, j);
-                }
-            }
-        }
         public void WriteCode(string dir)
         {
             foreach (var i in ClassDefines)
@@ -56,7 +31,7 @@ namespace CSharpCodeTools.PropertyGen
                 i.Value.GenCode(dir);
             }
         }
-        private void IterateClass(CompilationUnitSyntax root, MemberDeclarationSyntax decl)
+        public override void IterateClass(CompilationUnitSyntax root, MemberDeclarationSyntax decl)
         {
             switch (decl.Kind())
             {
@@ -74,7 +49,7 @@ namespace CSharpCodeTools.PropertyGen
                         bool IsOverrideBitset;
                         if (GetClassAttribute(kls, out IsOverrideBitset))
                         {
-                            var klsDeffine = FindOrCreate(fullname);
+                            var klsDeffine = FindOrCreate(fullname) as UPropertyClassDefine;
                             klsDeffine.IsOverrideBitset = IsOverrideBitset;
                         }
                         foreach (var i in kls.Members)
@@ -89,7 +64,7 @@ namespace CSharpCodeTools.PropertyGen
                                         var attributeName = k.Name.NormalizeWhitespace().ToFullString();
                                         if (attributeName.EndsWith("GenMeta") || attributeName.EndsWith("GenMetaAttribute"))
                                         {
-                                            var klsDeffine = FindOrCreate(fullname);
+                                            var klsDeffine = FindOrCreate(fullname) as UPropertyClassDefine;
                                             var prop = new UPropertyField();
                                             prop.Type = field.Declaration.Type.ToString();
                                             prop.Name = field.Declaration.Variables.First().Identifier.Text;
@@ -135,7 +110,7 @@ namespace CSharpCodeTools.PropertyGen
             }
         }
 
-        private bool GetClassAttribute(ClassDeclarationSyntax decl, out bool IsOverrideBitset)
+        protected bool GetClassAttribute(ClassDeclarationSyntax decl, out bool IsOverrideBitset)
         {
             IsOverrideBitset = true;
             foreach (var i in decl.AttributeLists)

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CSharpCodeTools
 {
@@ -203,5 +206,121 @@ namespace CSharpCodeTools
             }
             System.IO.File.WriteAllText(projFile, content);
         }
+
+        #region Iterator
+        public Dictionary<string, UClassCodeBase> ClassDefines = new Dictionary<string, UClassCodeBase>();
+        public UClassCodeBase FindOrCreate(string fullname)
+        {
+            UClassCodeBase result;
+            if (ClassDefines.TryGetValue(fullname, out result))
+            {
+                return result;
+            }
+
+            result = CreateClassDefine(fullname);
+
+            ClassDefines.Add(fullname, result);
+
+            return result;
+        }
+        protected virtual UClassCodeBase CreateClassDefine(string fullname)
+        {
+            var result = new UClassCodeBase();
+            result.FullName = fullname;
+            return result;
+        }
+        protected virtual void OnVisitMethod(UClassCodeBase kls, MethodDeclarationSyntax method)
+        {
+
+        }
+        public void GatherClass()
+        {
+            foreach (var i in SourceCodes)
+            {
+                var code = System.IO.File.ReadAllText(i);
+                SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
+
+                CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
+
+                foreach (var j in root.Members)
+                {
+                    IterateClass(root, j);
+                }
+            }
+
+            foreach (var i in ClassDefines)
+            {
+                var klsDefine = i.Value;
+                klsDefine.Build();
+            }
+        }
+        public virtual void IterateClass(CompilationUnitSyntax root, MemberDeclarationSyntax decl)
+        {
+            switch (decl.Kind())
+            {
+                case SyntaxKind.ClassDeclaration:
+                    {
+                        var kls = decl as ClassDeclarationSyntax;
+                        var fullname = ClassDeclarationSyntaxExtensions.GetFullName(kls);
+                        if (GetClassAttribute(kls))
+                        {
+                            var klsDeffine = FindOrCreate(fullname);
+                            foreach (var i in root.Usings)
+                            {
+                                klsDeffine.Usings.Add(i.ToString());
+                            }
+                        }
+                        {
+                            var klsDeffine = FindOrCreate(fullname);
+                            foreach (var i in kls.Members)
+                            {
+                                if (i.Kind() == SyntaxKind.MethodDeclaration)
+                                {
+                                    var method = i as MethodDeclarationSyntax;
+                                    OnVisitMethod(klsDeffine, method);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case SyntaxKind.NamespaceDeclaration:
+                    {
+                        var ns = decl as NamespaceDeclarationSyntax;
+                        foreach (var i in ns.Members)
+                        {
+                            IterateClass(root, i);
+                        }
+                    }
+                    break;
+            }
+        }
+
+        protected virtual bool GetClassAttribute(ClassDeclarationSyntax decl)
+        {
+            foreach (var i in decl.AttributeLists)
+            {
+                foreach (var j in i.Attributes)
+                {
+                    var attributeName = j.Name.NormalizeWhitespace().ToFullString();
+                    if (attributeName.EndsWith("UCs2CppAttribute") || attributeName.EndsWith("UCs2Cpp"))
+                    {
+                        if (j.ArgumentList != null)
+                        {
+                            foreach (var m in j.ArgumentList.Arguments)
+                            {
+                                var argName = m.NormalizeWhitespace().ToFullString();
+                                if (m.NameEquals != null && m.Expression != null)
+                                {
+                                    var name = m.NameEquals.Name.Identifier.ValueText;
+                                }
+                            }
+                        }
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        #endregion
     }
 }

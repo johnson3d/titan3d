@@ -13,8 +13,6 @@ namespace CSharpCodeTools
     class URpcCodeManager : UCodeManagerBase
     {
         public static URpcCodeManager Instance = new URpcCodeManager();
-        
-        public Dictionary<string, URpcClassDefine> ClassDefines = new Dictionary<string, URpcClassDefine>();
 
         protected override bool CheckSourceCode(string code)
         {
@@ -22,33 +20,15 @@ namespace CSharpCodeTools
                 return true;
             return false;
         }
-        public URpcClassDefine FindOrCreate(string fullname)
+        protected override UClassCodeBase CreateClassDefine(string fullname)
         {
-            URpcClassDefine result;
-            if (ClassDefines.TryGetValue(fullname, out result))
-            {
-                return result;
-            }
-            result = new URpcClassDefine();
+            var result = new URpcClassDefine();
             result.FullName = fullname;
-            ClassDefines.Add(fullname, result);
             return result;
         }
-        
-        public void GatherClass()
+        protected override void OnVisitMethod(UClassCodeBase kls, MethodDeclarationSyntax method)
         {
-            foreach (var i in SourceCodes)
-            {
-                var code = System.IO.File.ReadAllText(i);
-                SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
-                
-                CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
-                
-                foreach (var j in root.Members)
-                {
-                    IterateClass(root, j);
-                }
-            }
+
         }
         public void WriteCode(string dir)
         {
@@ -57,7 +37,7 @@ namespace CSharpCodeTools
                 i.Value.GenCode(dir);
             }
         }
-        private void IterateClass(CompilationUnitSyntax root, MemberDeclarationSyntax decl)
+        public override void IterateClass(CompilationUnitSyntax root, MemberDeclarationSyntax decl)
         {
             switch (decl.Kind())
             {
@@ -75,7 +55,7 @@ namespace CSharpCodeTools
                         string target, executer;
                         if (GetRpcClassAttribute(kls, out target, out executer))
                         {
-                            var klsDeffine = FindOrCreate(fullname);
+                            var klsDeffine = FindOrCreate(fullname) as URpcClassDefine;
                             klsDeffine.RunTarget = target;
                             klsDeffine.Executer = executer;
                         }
@@ -91,7 +71,7 @@ namespace CSharpCodeTools
                                         var attributeName = k.Name.NormalizeWhitespace().ToFullString();
                                         if (attributeName.EndsWith("URpcMethodAttribute") || attributeName.EndsWith("URpcMethod"))
                                         {
-                                            var klsDeffine = FindOrCreate(fullname);
+                                            var klsDeffine = FindOrCreate(fullname) as URpcClassDefine;
                                             URpcMethod rpcMethod = new URpcMethod();
                                             rpcMethod.Name = method.Identifier.Text;
                                             if (method.ToString().Contains("async "))

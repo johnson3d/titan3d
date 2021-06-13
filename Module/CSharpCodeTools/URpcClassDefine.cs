@@ -38,12 +38,11 @@ namespace CSharpCodeTools
     }
     class URpcClassDefine : UClassCodeBase
     {
-        public List<string> Usings = new List<string>();
         public string RunTarget;
         public string Executer;
         public List<URpcMethod> Methods = new List<URpcMethod>();
         
-        public void GenCode(string dir)
+        public override void  GenCode(string dir)
         {
             if (Methods.Count == 0)
                 return;

@@ -24,10 +24,9 @@ namespace CSharpCodeTools.PropertyGen
     class UPropertyClassDefine : UClassCodeBase
     {
         public bool IsOverrideBitset = true;
-        public List<string> Usings = new List<string>();
         public List<UPropertyField> Properties = new List<UPropertyField>();
         // { "", 1 } };
-        public void GenCode(string dir)
+        public override void GenCode(string dir)
         {
             if (Properties.Count == 0)
                 return;
