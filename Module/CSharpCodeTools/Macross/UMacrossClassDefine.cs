@@ -31,6 +31,18 @@ namespace CSharpCodeTools.Macross
                 return false;
             }
         }
+        public bool IsAsync
+        {
+            get
+            {
+                foreach (var i in MethodSyntax.Modifiers)
+                {
+                    if (i.ValueText == "async")
+                        return true;
+                }
+                return false;
+            }
+        }
         public string GetDefineString(UMacrossClassDefine kls)
         {
             string result = kls.FullName + "->";
@@ -149,12 +161,16 @@ namespace CSharpCodeTools.Macross
                             }
                         }
 
+                        string asyncStr = "";
+                        var isAsync = i.IsAsync;
+                        if (isAsync)
+                            asyncStr = "async ";
                         var funName = i.GetDefineString(this);
                         AddLine($"private static EngineNS.Macross.UMacrossBreak macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()} = new EngineNS.Macross.UMacrossBreak(\"{funName}\");");
                         if (i.ParamenterCount > 0)
-                            AddLine($"public {isStatic}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text}(string nodeName, {i.GetParameterDefine()})");
+                            AddLine($"public {isStatic}{asyncStr}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text}(string nodeName, {i.GetParameterDefine()})");
                         else
-                            AddLine($"public {isStatic}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text}(string nodeName)");
+                            AddLine($"public {isStatic}{asyncStr}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text}(string nodeName)");
                         PushBrackets();
                         {
                             bool hasOut = false;
@@ -176,12 +192,18 @@ namespace CSharpCodeTools.Macross
                             bool needReturen = false;
                             if (i.MethodSyntax.ReturnType.ToString() == "void" || i.MethodSyntax.ReturnType.ToString() == "System.Void")
                             {
-                                AddLine($"{i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
+                                if (isAsync)
+                                    AddLine($"await {i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
+                                else
+                                    AddLine($"{i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
                             }
                             else
                             {
                                 needReturen = true;
-                                AddLine($"var _return_value = {i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
+                                if (isAsync)
+                                    AddLine($"var _return_value = await {i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
+                                else
+                                    AddLine($"var _return_value = {i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
                             }
 
                             if (hasOut)

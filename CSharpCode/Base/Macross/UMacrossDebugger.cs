@@ -33,6 +33,19 @@ namespace EngineNS.Macross
         internal System.Threading.AutoResetEvent mBreakEvent = new System.Threading.AutoResetEvent(false);
         internal UMacrossBreak CurrrentBreak;
         public List<UMacrossBreak> Breaks = new List<UMacrossBreak>();
+        private bool mIsEnableDebugger = true;
+        public bool IsEnableDebugger
+        {
+            get => mIsEnableDebugger;
+        }
+        public void EnableDebugger(bool enable)
+        {
+            mIsEnableDebugger = enable;
+            if (enable == false)
+            {
+                DisableAllBreaks();
+            }
+        }
         public UMacrossBreak Run()
         {
             lock (Instance)

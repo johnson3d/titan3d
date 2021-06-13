@@ -8,6 +8,10 @@ namespace EngineNS.Macross
     public class UMacrossStackFrame : IDisposable
     {
         public Dictionary<string, object> mFrameStates = new Dictionary<string, object>();
+        public void ClearDebugInfo()
+        {
+            mFrameStates.Clear();
+        }
         public void Dispose()
         {
 
@@ -41,6 +45,8 @@ namespace EngineNS.Macross
         {
             get
             {
+                if (UMacrossDebugger.Instance.IsEnableDebugger == false)
+                    return null;
                 if (ThreadInstance.mFrames.Count == 0)
                     return null;
                 return ThreadInstance.mFrames.Peek();
@@ -48,11 +54,24 @@ namespace EngineNS.Macross
         }
         public static void PushFrame(UMacrossStackFrame frame)
         {
+            if (UMacrossDebugger.Instance.IsEnableDebugger == false)
+                return;
             ThreadInstance.mFrames.Push(frame);
         }
         public static void PopFrame()
         {
-            ThreadInstance.mFrames.Pop();
+            if (UMacrossDebugger.Instance.IsEnableDebugger == false)
+                return;
+            if (ThreadInstance.mFrames.Count > 0)
+            {
+                var cur = ThreadInstance.mFrames.Peek();
+                cur.ClearDebugInfo();
+                ThreadInstance.mFrames.Pop();
+            }
+            else
+            {
+                System.Diagnostics.Debugger.Break();
+            }
         }
     }
 
