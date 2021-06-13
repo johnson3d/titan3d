@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace EngineNS.Macross
@@ -11,6 +12,7 @@ namespace EngineNS.Macross
         {
 
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetWatchVariable<T>(string name, T value)
         {
             mFrameStates[name] = value;
@@ -39,6 +41,8 @@ namespace EngineNS.Macross
         {
             get
             {
+                if (ThreadInstance.mFrames.Count == 0)
+                    return null;
                 return ThreadInstance.mFrames.Peek();
             }
         }

@@ -19,12 +19,49 @@ namespace CSharpCodeTools.Macross
                 return MethodSyntax.ParameterList.Parameters.Count;
             }
         }
+        public bool IsStatic
+        {
+            get
+            {
+                foreach(var i in MethodSyntax.Modifiers)
+                {
+                    if (i.ValueText == "static")
+                        return true;
+                }
+                return false;
+            }
+        }
+        public string GetDefineString(UMacrossClassDefine kls)
+        {
+            string result = kls.FullName + "->";
+            var staticPrefix = IsStatic ? "static " : "";
+            result += $"{staticPrefix}{MethodSyntax.ReturnType.ToString()} {MethodSyntax.Identifier.ValueText}({GetParameterDefine()})";
+            return result;
+        }
+        public static int GetStableHashCode(string str)
+        {
+            unchecked
+            {
+                int hash1 = 5381;
+                int hash2 = hash1;
+
+                for (int i = 0; i < str.Length && str[i] != '\0'; i += 2)
+                {
+                    hash1 = ((hash1 << 5) + hash1) ^ str[i];
+                    if (i == str.Length - 1 || str[i + 1] == '\0')
+                        break;
+                    hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
+                }
+
+                return hash1 + (hash2 * 1566083941);
+            }
+        }
+        public uint GetParameterHashCode()
+        {
+            return (uint)GetStableHashCode(GetParameterDefine() + IsStatic.ToString());
+        }
         public string GetParameterDefine()
         {
-            if(MethodSyntax.Identifier.Text == "SampleLevel2D")
-            {
-                int xx = 0;
-            }
             string result = "";
             foreach(var i in MethodSyntax.ParameterList.Parameters)
             {
@@ -103,10 +140,21 @@ namespace CSharpCodeTools.Macross
                 {
                     foreach (var i in Functions)
                     {
+                        string isStatic = "";
+                        foreach (var j in i.MethodSyntax.Modifiers)
+                        {
+                            if (j.ValueText == "static")
+                            {
+                                isStatic = "static ";
+                            }
+                        }
+
+                        var funName = i.GetDefineString(this);
+                        AddLine($"private static EngineNS.Macross.UMacrossBreak macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()} = new EngineNS.Macross.UMacrossBreak(\"{funName}\");");
                         if (i.ParamenterCount > 0)
-                            AddLine($"public {i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text}(string nodeName, {i.GetParameterDefine()})");
+                            AddLine($"public {isStatic}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text}(string nodeName, {i.GetParameterDefine()})");
                         else
-                            AddLine($"public {i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text}(string nodeName)");
+                            AddLine($"public {isStatic}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text}(string nodeName)");
                         PushBrackets();
                         {
                             bool hasOut = false;
@@ -133,10 +181,7 @@ namespace CSharpCodeTools.Macross
                             else
                             {
                                 needReturen = true;
-                                if(hasOut)
-                                    AddLine($"var _return_value = {i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
-                                else
-                                    AddLine($"return {i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
+                                AddLine($"var _return_value = {i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
                             }
 
                             if (hasOut)
@@ -153,12 +198,14 @@ namespace CSharpCodeTools.Macross
                                     }
                                 }
                                 PopBrackets();
+                            }
 
-                                if (needReturen)
-                                {
-                                    AddLine($"return _return_value;");
-                                }
-                            }   
+                            AddLine($"macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()}.TryBreak();");
+
+                            if (needReturen)
+                            {
+                                AddLine($"return _return_value;");
+                            }
                         }
                         PopBrackets();
                     }
