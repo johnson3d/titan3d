@@ -7,9 +7,13 @@ namespace EngineNS.Macross
 {
     public class UMacrossStackFrame : IDisposable
     {
-        public Dictionary<string, object> mFrameStates = new Dictionary<string, object>();
+        public Dictionary<string, Support.UAnyPointer> mFrameStates = new Dictionary<string, Support.UAnyPointer>();
         public void ClearDebugInfo()
         {
+            foreach (var i in mFrameStates)
+            {
+                i.Value.Dispose();
+            }
             mFrameStates.Clear();
         }
         public void Dispose()
@@ -17,9 +21,48 @@ namespace EngineNS.Macross
 
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetWatchVariable<T>(string name, T value)
+        public void SetWatchVariable<T>(string name, T value) where T : unmanaged
         {
-            mFrameStates[name] = value;
+            Support.UAnyPointer tmp;
+            if (mFrameStates.TryGetValue(name, out tmp))
+            {
+                tmp.SetValue(value);
+            }
+            else
+            {
+                tmp.SetValue(value);
+            }
+            mFrameStates[name] = tmp;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetWatchVariable(string name, object value)
+        {
+            Support.UAnyPointer tmp;
+            if (mFrameStates.TryGetValue(name, out tmp))
+            {
+                tmp.SetValue(value);
+            }
+            else
+            {
+                tmp.SetValue(value);
+            }
+            mFrameStates[name] = tmp;
+        }
+        public object GetWatchVariable(string name)
+        {
+            Support.UAnyPointer tmp;
+            if (mFrameStates.TryGetValue(name, out tmp) == false)
+            {
+                return null;
+            }
+            if (tmp.Value.ValueType != Support.UAnyValue.EValueType.Unknown)
+            {
+                return tmp.Value.ToObject();
+            }
+            else
+            {
+                return tmp.RefObject;
+            }
         }
         public void OnCallMethod(string nodeName, System.Reflection.MethodBase method)
         {
@@ -98,7 +141,22 @@ namespace EngineNS.UTest
         {
             using(var guard = new Macross.UMacrossStackGuard(mFrame_UnitTestEntrance))
             {
+                float v = 3;
+                MathHelper.macross_Abs("static MathHelper.Abs(float v)", v);
 
+                var frame = Macross.UMacrossStackTracer.CurrentFrame;
+                foreach (var i in frame.mFrameStates)
+                {
+                    var name = i.Key;
+                    float debug_v = (float)i.Value.ToObject();
+                }
+                if (Macross.UMacrossDebugger.Instance.CurrrentBreak != null)
+                {//如果break，在别的线程可以通过这个获得break的framestate
+                    foreach (var i in Macross.UMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame.mFrameStates)
+                    {
+
+                    }
+                }
             }
         }
     }

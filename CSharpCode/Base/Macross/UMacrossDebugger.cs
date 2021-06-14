@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.CompilerServices;
 
 namespace EngineNS.Macross
 {
@@ -8,23 +9,30 @@ namespace EngineNS.Macross
     {
         public string BreakName;
         internal bool Enable;
+        public UMacrossStackFrame BreakStackFrame;
         public UMacrossBreak(string name)
         {
             BreakName = name;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void TryBreak()
         {
             if (Enable)
             {
-                lock (UMacrossDebugger.Instance)
-                {
-                    if (UMacrossDebugger.Instance.CurrrentBreak != null)
-                        return;
-                    UMacrossDebugger.Instance.CurrrentBreak = this;
-                    UMacrossDebugger.Instance.mBreakEvent.Reset();
-                }
-                UMacrossDebugger.Instance.mBreakEvent.WaitOne();
+                TryBreakInner();
             }
+        }
+        private void TryBreakInner()
+        {
+            lock (UMacrossDebugger.Instance)
+            {
+                if (UMacrossDebugger.Instance.CurrrentBreak != null)
+                    return;
+                BreakStackFrame = UMacrossStackTracer.CurrentFrame;
+                UMacrossDebugger.Instance.CurrrentBreak = this;
+                UMacrossDebugger.Instance.mBreakEvent.Reset();
+            }
+            UMacrossDebugger.Instance.mBreakEvent.WaitOne();
         }
     }
     public class UMacrossDebugger
