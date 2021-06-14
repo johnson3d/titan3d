@@ -19,6 +19,10 @@ namespace EngineNS.Macross
         {
             if (Enable)
             {
+                if (Thread.ContextThread.CurrentContext.ThreadId == UEngine.Instance.ThreadMain.ThreadId)
+                {
+                    return;
+                }
                 TryBreakInner();
             }
         }
