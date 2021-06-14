@@ -177,15 +177,20 @@ namespace CSharpCodeTools.Macross
                             AddLine($"using(var stackframe = EngineNS.Macross.UMacrossStackTracer.CurrentFrame)");
                             PushBrackets();
                             {
-                                foreach (var j in i.MethodSyntax.ParameterList.Parameters)
+                                AddLine($"if(stackframe != null)");
+                                PushBrackets();
                                 {
-                                    if (j.ToString().StartsWith("out "))
+                                    foreach (var j in i.MethodSyntax.ParameterList.Parameters)
                                     {
-                                        hasOut = true;
-                                        continue;
+                                        if (j.ToString().StartsWith("out "))
+                                        {
+                                            hasOut = true;
+                                            continue;
+                                        }
+                                        AddLine($"stackframe.SetWatchVariable(nodeName + \":{j.Identifier.ValueText}\", {j.Identifier.ValueText});");
                                     }
-                                    AddLine($"stackframe.SetWatchVariable(nodeName + \":{j.Identifier.ValueText}\", {j.Identifier.ValueText});");
                                 }
+                                PopBrackets();
                             }
                             PopBrackets();
 
@@ -211,13 +216,18 @@ namespace CSharpCodeTools.Macross
                                 AddLine($"using(var stackframe = EngineNS.Macross.UMacrossStackTracer.CurrentFrame)");
                                 PushBrackets();
                                 {
-                                    foreach (var j in i.MethodSyntax.ParameterList.Parameters)
+                                    AddLine($"if(stackframe != null)");
+                                    PushBrackets();
                                     {
-                                        if (j.ToString().StartsWith("out "))
+                                        foreach (var j in i.MethodSyntax.ParameterList.Parameters)
                                         {
-                                            AddLine($"stackframe.SetWatchVariable(nodeName + \":{j.Identifier.ValueText}\", {j.Identifier.ValueText});");
+                                            if (j.ToString().StartsWith("out "))
+                                            {
+                                                AddLine($"stackframe.SetWatchVariable(nodeName + \":{j.Identifier.ValueText}\", {j.Identifier.ValueText});");
+                                            }
                                         }
                                     }
+                                    PopBrackets();
                                 }
                                 PopBrackets();
                             }
