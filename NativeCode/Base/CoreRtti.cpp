@@ -186,15 +186,15 @@ StructBegin(Test_ConstantVarDesc, EngineNS)
 	StructMember(TestString);
 	StructMember(Test);
 
-	StructMethod1(SetDirty, d);
+	//StructMethod1(SetDirty, d);
 	AppendMethodMetaInfo("M0", "SetDirty info");
 
-	StructMethod2(SetDirty2, d, c);
+	//StructMethod2(SetDirty2, d, c);
 
 	StructMethodEx1(TestSetDirty , void, std::string, d);
 	StructMethodEx2(TestSetDirty, void, std::string, d, int, c);
 
-	StructMethod2(TestStaticFunction, d, c);
+	//StructMethod2(TestStaticFunction, d, c);
 
 	StructConstructor0();
 	AppendConstructorMetaInfo("M0", "Test_ConstantVarDesc info");	

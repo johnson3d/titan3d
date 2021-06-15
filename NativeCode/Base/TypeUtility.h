@@ -71,8 +71,13 @@ inline std::string VParameterMarshal<char*, std::string>(char* v)
 {
 	return std::string(v);
 }
+template<>
+inline std::string VParameterMarshal<const char*, std::string>(const char* v)
+{
+	return std::string(v);
+}
 //template<>
-//inline std::string VParameterMarshal<char*, std::string>(char* v)
+//inline const std::string& VParameterMarshal<char*, const std::string&>(char* v)
 //{
 //	return std::string(v);
 //}
@@ -262,12 +267,12 @@ struct VisitTupleElement
 	}
 };
 
-inline void TestForeachTuple()
-{
-	auto t = std::make_tuple(1, 1.2f);
-	ForEachTuple(t, [](auto& e) {});
-	ForEachTuple(t, VisitTupleElement());
-}
+//inline void TestForeachTuple()
+//{
+//	auto t = std::make_tuple(1, 1.2f);
+//	ForEachTuple(t, [](auto& e) {});
+//	ForEachTuple(t, VisitTupleElement());
+//}
 
 template<class T1, class... Args>
 void MutiArg(const T1&t1, Args... args)
