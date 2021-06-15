@@ -64,7 +64,7 @@ namespace EngineNS.Animation.Skeleton
         }
         private void LinkWith(IPartialSkeleton partialSkeleton)
         {
-
+            System.Diagnostics.Debug.Assert(false);
         }
         public void AddLimb(ILimb limb)
         {
