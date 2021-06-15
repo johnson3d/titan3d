@@ -9,10 +9,13 @@ namespace EngineNS.Macross
     {
         public string BreakName;
         internal bool Enable;
+        public UMacrossStackTracer StackTracer;
         public UMacrossStackFrame BreakStackFrame;
-        public UMacrossBreak(string name)
+        public UMacrossBreak(string name, bool enable = false)
         {
+            Enable = enable;
             BreakName = name;
+            UMacrossDebugger.Instance.AddBreak(this);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void TryBreak()
@@ -32,9 +35,11 @@ namespace EngineNS.Macross
             {
                 if (UMacrossDebugger.Instance.CurrrentBreak != null)
                     return;
+                StackTracer = UMacrossStackTracer.ThreadInstance;
                 BreakStackFrame = UMacrossStackTracer.CurrentFrame;
                 UMacrossDebugger.Instance.CurrrentBreak = this;
                 UMacrossDebugger.Instance.mBreakEvent.Reset();
+                UEngine.Instance.ThreadLogic.mMacrossDebug.Set();
             }
             UMacrossDebugger.Instance.mBreakEvent.WaitOne();
         }
@@ -44,7 +49,7 @@ namespace EngineNS.Macross
         public static UMacrossDebugger Instance = new UMacrossDebugger();
         internal System.Threading.AutoResetEvent mBreakEvent = new System.Threading.AutoResetEvent(false);
         internal UMacrossBreak CurrrentBreak;
-        public List<UMacrossBreak> Breaks = new List<UMacrossBreak>();
+        public List<WeakReference<UMacrossBreak>> Breaks = new List<WeakReference<UMacrossBreak>>();
         private bool mIsEnableDebugger = true;
         public bool IsEnableDebugger
         {
@@ -55,7 +60,22 @@ namespace EngineNS.Macross
             mIsEnableDebugger = enable;
             if (enable == false)
             {
-                DisableAllBreaks();
+                SetBreakStateAll(false);
+            }
+        }
+        public void ClearDestroyedBreaks()
+        {
+            lock (Instance)
+            {
+                for (int i = 0; i < Breaks.Count; i++)
+                {
+                    UMacrossBreak tmp;
+                    if (Breaks[i].TryGetTarget(out tmp) == false)
+                    {
+                        Breaks.RemoveAt(i);
+                        i--;
+                    }
+                }
             }
         }
         public UMacrossBreak Run()
@@ -65,8 +85,11 @@ namespace EngineNS.Macross
                 if (CurrrentBreak == null)
                     return null;
                 var result = CurrrentBreak;
-                mBreakEvent = null;
+                CurrrentBreak = null;
+
+                UEngine.Instance.ThreadLogic.mMacrossDebug.Reset();
                 mBreakEvent.Set();
+
                 return result;
             }
         }
@@ -75,9 +98,16 @@ namespace EngineNS.Macross
             lock (Instance)
             {
                 brk.Enable = true;
-                if (Breaks.Contains(brk))
-                    return;
-                Breaks.Add(brk);
+                foreach(var i in Breaks)
+                {
+                    UMacrossBreak tmp;
+                    if (i.TryGetTarget(out tmp))
+                    {
+                        if (tmp == brk)
+                            return;
+                    }
+                }
+                Breaks.Add(new WeakReference<UMacrossBreak>(brk));
             }   
         }
         public void RemoveBreak(UMacrossBreak brk)
@@ -85,27 +115,41 @@ namespace EngineNS.Macross
             lock (Instance)
             {
                 brk.Enable = false;
-                Breaks.Remove(brk);
+                foreach (var i in Breaks)
+                {
+                    UMacrossBreak tmp;
+                    if (i.TryGetTarget(out tmp))
+                    {
+                        if (tmp == brk)
+                        {
+                            Breaks.Remove(i);
+                            return;
+                        }
+                    }
+                }
             }
         }
         public void RemoveAllBreaks()
         {
             lock (Instance)
             {
-                foreach (var i in Breaks)
-                {
-                    i.Enable = false;
-                }
+                SetBreakStateAll(false);                
                 Breaks.Clear();
             }
         }
-        public void DisableAllBreaks()
+        public void SetBreakStateAll(bool enable)
         {
+            ClearDestroyedBreaks();
+
             lock (Instance)
             {
                 foreach (var i in Breaks)
                 {
-                    i.Enable = false;
+                    UMacrossBreak tmp;
+                    if (i.TryGetTarget(out tmp))
+                    {
+                        tmp.Enable = enable;
+                    }
                 }
             }
         }
@@ -113,8 +157,12 @@ namespace EngineNS.Macross
         {
             foreach(var i in Breaks)
             {
-                if (i.BreakName == name)
-                    return i;
+                UMacrossBreak tmp;
+                if (i.TryGetTarget(out tmp))
+                {
+                    if (tmp.BreakName == name)
+                        return tmp;
+                }
             }
             return null;
         }

@@ -187,6 +187,21 @@ namespace EngineNS.Editor
             await Thread.AsyncDummyClass.DummyFunc();
             UEngine.Instance.EndPlayInEditor();
         }
+        async System.Threading.Tasks.Task MacrossRun()
+        {
+            await Thread.AsyncDummyClass.DummyFunc();
+            Macross.UMacrossDebugger.Instance.Run();
+        }
+        async System.Threading.Tasks.Task MacrossDisableAllBreaks()
+        {
+            await Thread.AsyncDummyClass.DummyFunc();
+            Macross.UMacrossDebugger.Instance.SetBreakStateAll(false);
+        }
+        async System.Threading.Tasks.Task MacrossEnableAllBreaks()
+        {
+            await Thread.AsyncDummyClass.DummyFunc();
+            Macross.UMacrossDebugger.Instance.SetBreakStateAll(true);
+        }
         public unsafe void OnDraw()
         {
             if (Visible == false)
@@ -215,6 +230,18 @@ namespace EngineNS.Editor
                 if (ImGuiAPI.Button("EndPIE", ref sz))
                 {
                     var nu = DoTest4();
+                }
+                if (ImGuiAPI.Button("Macross GO!", ref sz))
+                {
+                    var nu = MacrossRun();
+                }
+                if (ImGuiAPI.Button("DisableAllBreaks", ref sz))
+                {
+                    var nu = MacrossDisableAllBreaks();
+                }
+                if (ImGuiAPI.Button("EnableAllBreaks", ref sz))
+                {
+                    var nu = MacrossEnableAllBreaks();
                 }
                 if (ImGuiAPI.CollapsingHeader("ClassView", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {

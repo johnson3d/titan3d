@@ -71,11 +71,11 @@ inline std::string VParameterMarshal<char*, std::string>(char* v)
 {
 	return std::string(v);
 }
-template<>
-inline const std::string& VParameterMarshal<char*, const std::string&>(char* v)
-{
-	return std::string(v);
-}
+//template<>
+//inline std::string VParameterMarshal<char*, std::string>(char* v)
+//{
+//	return std::string(v);
+//}
 
 template <typename R, typename... Args>
 struct TFunction_traits_helper
@@ -84,7 +84,7 @@ struct TFunction_traits_helper
 	using return_type = R;
 
 	template <std::size_t N>
-	using param_type = std::tuple_element_t<N, std::tuple<Args...>>;
+	using param_type = std::tuple_element<N, std::tuple<Args...>>;
 };
 
 template <typename T>

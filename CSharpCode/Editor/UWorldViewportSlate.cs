@@ -140,6 +140,8 @@ namespace EngineNS.Editor
         GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
         public unsafe void TickLogic(int ellapse)
         {
+            World.TickLogic();
+
             if (IsDrawing == false)
                 return;
             if (this.IsFocused)

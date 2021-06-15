@@ -125,5 +125,12 @@ namespace EngineNS.GamePlay
             return false;
         }
         #endregion
+
+        #region GamePlay
+        public virtual void TickLogic()
+        {
+            Root.TickLogic();
+        }
+        #endregion
     }
 }

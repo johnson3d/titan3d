@@ -131,7 +131,7 @@ namespace EngineNS.UTest
             if (ilfixAassembly == null)
                 return;
 
-            var code = IO.FileManager.ReadAllText(@"D:\work\titan3d\CSharpCode\Bricks\CSScripting\UScript.cs");
+            //var code = IO.FileManager.ReadAllText(@"D:\work\titan3d\CSharpCode\Bricks\CSScripting\UScript.cs");
             foreach (var i in ilfixAassembly.Modules)
             {
                 foreach (var j in i.Types)
@@ -156,8 +156,8 @@ namespace EngineNS.UTest
                                 foreach (var m in pt)
                                 {
                                     m.Value.ToString();
-                                    var str = ReadText(code, m.Value.StartLine, m.Value.StartColumn, m.Value.EndLine, m.Value.EndColumn);
-                                    Console.WriteLine($"{str}");
+                                    //var str = ReadText(code, m.Value.StartLine, m.Value.StartColumn, m.Value.EndLine, m.Value.EndColumn);
+                                    //Console.WriteLine($"{str}");
                                 }
                                 foreach (var m in k.Body.Variables)
                                 {

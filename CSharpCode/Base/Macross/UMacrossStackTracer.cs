@@ -7,6 +7,11 @@ namespace EngineNS.Macross
 {
     public class UMacrossStackFrame : IDisposable
     {
+        public RName MacrossName
+        {
+            get;
+            set;
+        }
         public Dictionary<string, Support.UAnyPointer> mFrameStates = new Dictionary<string, Support.UAnyPointer>();
         public void ClearDebugInfo()
         {
@@ -75,13 +80,27 @@ namespace EngineNS.Macross
             }
         }
     }
-    public class UMacrossStackTracer 
+    public class UMacrossStackTracer
     {
+        public static List<UMacrossStackTracer> mThreadMacrossStacks = new List<UMacrossStackTracer>();
         [ThreadStatic]
-        private static UMacrossStackTracer ThreadInstance = new UMacrossStackTracer();
-        public static UMacrossStackTracer GetStackTracer()
+        private static UMacrossStackTracer mThreadInstance;
+        public Thread.ContextThread mThreadContext { get; private set; }
+        public static UMacrossStackTracer ThreadInstance
         {
-            return ThreadInstance;
+            get
+            {
+                if (mThreadInstance == null)
+                {
+                    mThreadInstance = new UMacrossStackTracer();
+                    mThreadInstance.mThreadContext = Thread.ContextThread.CurrentContext;
+                    lock (mThreadMacrossStacks)
+                    {
+                        mThreadMacrossStacks.Add(mThreadInstance);
+                    }
+                }
+                return mThreadInstance;
+            }
         }
         public Stack<UMacrossStackFrame> mFrames = new Stack<UMacrossStackFrame>();
         public static UMacrossStackFrame CurrentFrame
@@ -136,7 +155,7 @@ namespace EngineNS.UTest
     [UTest.UTest]
     class UTest_UMacrossStackTracer
     {
-        Macross.UMacrossStackFrame mFrame_UnitTestEntrance = new Macross.UMacrossStackFrame();
+        Macross.UMacrossStackFrame mFrame_UnitTestEntrance = new Macross.UMacrossStackFrame() { MacrossName = RName.GetRName("") };
         public unsafe void UnitTestEntrance()
         {
             using(var guard = new Macross.UMacrossStackGuard(mFrame_UnitTestEntrance))
