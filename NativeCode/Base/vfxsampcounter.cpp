@@ -1,4 +1,4 @@
-#include "vfxSampCounter.h"
+#include "vfxsampcounter.h"
 #include "CoreSDK.h"
 #include "thread/vfxcritical.h"
 

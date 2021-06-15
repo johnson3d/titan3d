@@ -577,27 +577,27 @@ public:
 	{
 		if (fmt == nullptr)
 			return ImGui::Text("");
-		return ImGui::Text(fmt);
+		return ImGui::Text("%s", fmt);
 	}
 	static void          TextColored(const ImVec4* col, const char* fmt)
 	{
-		return ImGui::TextColored(*col, fmt);
+		return ImGui::TextColored(*col, "%s", fmt);
 	}
 	static void          TextDisabled(const char* fmt)
 	{
-		return ImGui::TextDisabled(fmt);
+		return ImGui::TextDisabled("%s", fmt);
 	}
 	static void          TextWrapped(const char* fmt)
 	{
-		return ImGui::TextWrapped(fmt);
+		return ImGui::TextWrapped("%s", fmt);
 	}
 	static void          LabelText(const char* label, const char* fmt)
 	{
-		return ImGui::LabelText(label, fmt);
+		return ImGui::LabelText(label, "%s", fmt);
 	}
 	static void          BulletText(const char* fmt)
 	{
-		return ImGui::BulletText(fmt);
+		return ImGui::BulletText("%s", fmt);
 	}
 	// Widgets: Main
 	static bool          Button(const char* label, const ImVec2* size/* = &ImVec2(0, 0)*/)
@@ -885,11 +885,11 @@ public:
 	}
 	static bool          TreeNode(const char* str_id, const char* fmt)
 	{
-		return ImGui::TreeNode(str_id, fmt);
+		return ImGui::TreeNode(str_id, "%s", fmt);
 	}
 	static bool          TreeNode(const void* ptr_id, const char* fmt)
 	{
-		return ImGui::TreeNode(ptr_id, fmt);
+		return ImGui::TreeNode(ptr_id, "%s", fmt);
 	}
 	static bool          TreeNodeEx(const char* label, ImGuiTreeNodeFlags_ flags)
 	{
@@ -897,11 +897,11 @@ public:
 	}
 	static bool          TreeNodeEx(const char* str_id, ImGuiTreeNodeFlags_ flags, const char* fmt)
 	{
-		return ImGui::TreeNodeEx(str_id, flags, fmt);
+		return ImGui::TreeNodeEx(str_id, flags, "%s", fmt);
 	}
 	static bool          TreeNodeEx(const void* ptr_id, ImGuiTreeNodeFlags_ flags, const char* fmt)
 	{
-		return ImGui::TreeNodeEx(ptr_id, flags, fmt);
+		return ImGui::TreeNodeEx(ptr_id, flags, "%s", fmt);
 	}
 	static void          TreePush(const char* str_id)
 	{
@@ -1039,7 +1039,7 @@ public:
 	}
 	static void          SetTooltip(const char* fmt)
 	{
-		return ImGui::SetTooltip(fmt);
+		return ImGui::SetTooltip("%s", fmt);
 	}
 	// Popups, Modals
 	static bool          BeginPopup(const char* str_id, ImGuiWindowFlags_ flags = (ImGuiWindowFlags_)0)
@@ -1259,7 +1259,7 @@ public:
 	}
 	static void          LogText(const char* fmt)
 	{
-		return ImGui::LogText(fmt);
+		return ImGui::LogText("%s", fmt);
 	}
 	// Drag and Drop
 	static bool          BeginDragDropSource(ImGuiDragDropFlags_ flags = (ImGuiDragDropFlags_)0)

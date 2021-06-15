@@ -9,7 +9,7 @@ NS_BEGIN
 //
 //}
 
-static_assert(sizeof(bool)==1);
+static_assert(sizeof(bool)==1,"");
 
 AuxRttiStruct<void>		AuxRttiStruct<void>::Instance;
 AuxRttiStruct<bool>		AuxRttiStruct<bool>::Instance;
@@ -30,6 +30,20 @@ AuxRttiStruct<std::string>		AuxRttiStruct<std::string>::Instance;
 const char* EngineNSString = "EngineNS";
 const char* EngineNSStringEx = "EngineNS::";
 
+class What
+{
+	template<typename _Type>
+	_Type TestFFFF(void* a)
+	{
+		return _Type();
+	}
+	template<>
+	void TestFFFF<void>(void* a)
+	{
+
+	}
+};
+
 void RttiEnum::Init()
 {
 	RttiEnumManager::GetInstance()->RegEnumType(this->GetFullName().c_str(), this);
@@ -48,10 +62,10 @@ RttiEnumManager* RttiEnumManager::GetInstance()
 
 void RttiEnumManager::BuildRtti()
 {
-	for (auto i : AllEnumTyps)
+	/*for (auto i : AllEnumTyps)
 	{
 		
-	}
+	}*/
 }
 
 void RttiEnumManager::FinalCleanup()

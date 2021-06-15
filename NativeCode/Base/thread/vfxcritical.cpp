@@ -7,7 +7,7 @@
 //-----------------------------------------------------------------------------
 //#include "../precompile.h"
 #include "vfxcritical.h"
-#include "../vfxSampCounter.h"
+#include "../vfxsampcounter.h"
 #include "../CoreSDK.h"
 //#include "../generic/vfx_temp_base.h"
 

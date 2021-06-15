@@ -9,14 +9,14 @@
 
 
 NS_BEGIN
-AuxRttiStruct<v3dxMatrix4>		AuxRttiStruct<v3dxMatrix4>::Instance;
-AuxRttiStruct<v3dxBox3>			AuxRttiStruct<v3dxBox3>::Instance;
-AuxRttiStruct<v3dxVector2>		AuxRttiStruct<v3dxVector2>::Instance;
-AuxRttiStruct<v3dxVector3>		AuxRttiStruct<v3dxVector3>::Instance;
-AuxRttiStruct<v3dxColor4>		AuxRttiStruct<v3dxColor4>::Instance;
-AuxRttiStruct<v3dxPlane3>		AuxRttiStruct<v3dxPlane3>::Instance;
-AuxRttiStruct<v3dxQuaternion>	AuxRttiStruct<v3dxQuaternion>::Instance;
-AuxRttiStruct<v3dxTransform>	AuxRttiStruct<v3dxTransform>::Instance;
+template<> AuxRttiStruct<v3dxMatrix4>		AuxRttiStruct<v3dxMatrix4>::Instance;
+template<> AuxRttiStruct<v3dxBox3>			AuxRttiStruct<v3dxBox3>::Instance;
+template<> AuxRttiStruct<v3dxVector2>		AuxRttiStruct<v3dxVector2>::Instance;
+template<> AuxRttiStruct<v3dxVector3>		AuxRttiStruct<v3dxVector3>::Instance;
+template<> AuxRttiStruct<v3dxColor4>		AuxRttiStruct<v3dxColor4>::Instance;
+template<> AuxRttiStruct<v3dxPlane3>		AuxRttiStruct<v3dxPlane3>::Instance;
+template<> AuxRttiStruct<v3dxQuaternion>	AuxRttiStruct<v3dxQuaternion>::Instance;
+template<> AuxRttiStruct<v3dxTransform>		AuxRttiStruct<v3dxTransform>::Instance;
 NS_END
 
 v3dUInt32_4 v3dUInt32_4::GetVar(int x, int y, int z, int w)

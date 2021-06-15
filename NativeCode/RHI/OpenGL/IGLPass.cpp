@@ -442,9 +442,6 @@ void IGLDrawCall::PSSetSampler(ICommandList* cmd, UINT32 Index, ISamplerState* S
 	
 	if (cmd->mCurrentState.TrySet_PSSampler(Index, Sampler) == false)
 	{
-		//OpenGL���ﳬ���ӣ���ΪglUniform1i�ǰ�Program��Slot��devicecontext��Index��
-		//���㵱ǰ����״̬��ͬһ����������Ϊ�л�����Program�����Ի���Ҫ���°�����֮��Ĺ�ϵ
-		//�������ʵ��Ҫ�Ż����ͻ�Ҫ��鵱ǰPass�õ��ǲ���device context��ͬһ��Program��
 		sdk->Uniform1i(Index, Index);
 		return;
 	}

@@ -29,7 +29,7 @@ void XndAttribute::EndRead()
 	mMemReader->Cleanup();
 }
 
-void XndAttribute::BeginWrite(size_t length)
+void XndAttribute::BeginWrite(UINT64 length)
 {
 	if (mMemWriter == nullptr)
 	{
