@@ -7,7 +7,7 @@
 #include "glew/include/GL/glew.h"
 #include "glew/include/GL/wglew.h"
 #elif defined(PLATFORM_DROID)
-#include <GL/glew.h>
+#include "glew/include/GL/glew.h"
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 //#include <GLES2/gl2.h>

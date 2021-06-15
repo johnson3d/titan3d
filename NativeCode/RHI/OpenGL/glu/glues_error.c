@@ -38,7 +38,7 @@
 #include <GL/glew.h>
 #include <GL/wglew.h>
 #elif defined(PLATFORM_DROID)
-#include <GL/glew.h>
+#include "../glew/include/GL/glew.h"
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #elif defined(PLATFORM_IOS)

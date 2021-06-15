@@ -4,7 +4,7 @@
 #include "IGLVertexShader.h"
 #include "IGLPixelShader.h"
 #include "../../Base/thread/vfxthread.h"
-#include "../../Base/vfxSampCounter.h"
+#include "../../Base/vfxsampcounter.h"
 
 NS_BEGIN
 
