@@ -22,7 +22,7 @@ extern "C" {
 	#else
 		#define ABI "unknown"
 	#endif
-		LOGI("This dynamic shared library is compiled with ABI: %s", ABI);
+		//LOGI("This dynamic shared library is compiled with ABI: %s", ABI);
 		return "This native library is compiled with ABI: %s" ABI ".";
 	}
 

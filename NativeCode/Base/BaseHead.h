@@ -1,6 +1,22 @@
 #pragma once
 
 #if defined(PLATFORM_WIN)
+
+#define HasModule_ImGui
+#define HasModule_Base
+#define HasModule_Math
+#define HasModule_D3D11
+#define HasModule_OpenGL
+#define HasModule_RHI
+#define HasModule_VirtualDevice
+#define HasModule_CrossShaderCompiler
+#define HasModule_Image_Shared
+#define HasModule_Pipeline
+#define HasModule_Mesh
+#define HasModule_FBX
+#define HasModule_TextConverter
+#define HasModule_Animation
+
 #include <WinSock2.h>
 #include <mswsock.h>
 #include <windows.h>
@@ -15,6 +31,20 @@
 #pragma warning(disable:4819)
 
 #elif defined(PLATFORM_DROID)
+
+#define HasModule_Android
+#define HasModule_ImGui
+#define HasModule_Base
+#define HasModule_Math
+#define HasModule_OpenGL
+#define HasModule_RHI
+#define HasModule_CrossShaderCompiler
+#define HasModule_Image_Shared
+#define HasModule_Pipeline
+#define HasModule_Mesh
+#define HasModule_TextConverter
+#define HasModule_Animation
+
 #include <jni.h>
 #include <errno.h>
 #include <android/log.h>

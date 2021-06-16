@@ -150,6 +150,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CppWeavingTools", "Module\C
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core.Android", "Core.Android\Core.Android.vcxproj", "{8DE1FCD5-27C3-4AF6-8FC3-3590240A7A5F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Android", "NativeCode\Platform\Android\Android.vcxitems", "{5325AAB3-27C6-4B3B-BC33-4A7C1E1272E2}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		CSharpCode\Grapics\Pipeline\Pipeline.projitems*{09a701b1-eb1f-41c3-bd63-1b3823894da2}*SharedItemsImports = 13
@@ -195,6 +197,7 @@ Global
 		NativeCode\Graphics\Pipeline\Pipeline.vcxitems*{4f3c9d18-a29b-49ca-a7d7-26e6eff61229}*SharedItemsImports = 9
 		NativeCode\ImGui\ImGui.vcxitems*{4f6fdc9c-e278-4674-843e-ebb8711a1527}*SharedItemsImports = 9
 		NativeCode\Bricks\TextConverter\TextConverter.vcxitems*{516d1f12-ce55-4f94-913a-8d4d82ddfedb}*SharedItemsImports = 9
+		NativeCode\Platform\Android\Android.vcxitems*{5325aab3-27c6-4b3b-bc33-4a7c1e1272e2}*SharedItemsImports = 9
 		NativeCode\RHI\OpenGL\OpenGL.vcxitems*{54ec50e5-b9a8-4c43-b1f4-d37f892113da}*SharedItemsImports = 9
 		NativeCode\RHI\D3D11\D3D11.vcxitems*{56f4895c-2d86-4965-acd3-33d089bade0d}*SharedItemsImports = 9
 		CSharpCode\Bricks\CSScripting\CSScripting.projitems*{575605b6-98e4-4c83-a845-88061a67ad6b}*SharedItemsImports = 13
@@ -204,8 +207,9 @@ Global
 		CSharpCode\Bricks\Network\Network.projitems*{78931d6f-319b-4176-9e0d-c4057910315b}*SharedItemsImports = 13
 		enginecontent\shaders\CoreShader.vcxitems*{7edc3425-c745-477d-906a-69d82cda1283}*SharedItemsImports = 9
 		NativeCode\Math\Math.vcxitems*{7f39f73c-1410-498f-a711-6a13209642e4}*SharedItemsImports = 9
-		3rd\native\iconv\iconv.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\Image.Shared\Image.Shared.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		codegen\Cs2Cpp\cpp\Cs2Cpp.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		codegen\NativeBinder\CodeGen.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Base\Base.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Animation\Animation.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
@@ -214,6 +218,7 @@ Global
 		NativeCode\Graphics\Pipeline\Pipeline.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\ImGui\ImGui.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Math\Math.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		NativeCode\Platform\Android\Android.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\RHI\OpenGL\OpenGL.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\RHI\RHI.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\iconv\iconv.vcxitems*{977204fe-461a-4786-b996-f125b5496c61}*SharedItemsImports = 9
@@ -607,6 +612,7 @@ Global
 		{D5A7D7FA-99B0-4C4A-9797-2DD7DB395930} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 		{4B151A28-784F-4ED5-9490-FA959B23C9E0} = {F63E0682-61A8-4FB5-8DFD-EF759DFBD88F}
 		{8DE1FCD5-27C3-4AF6-8FC3-3590240A7A5F} = {892AFF4D-69EA-4061-8F59-320A21A0814A}
+		{5325AAB3-27C6-4B3B-BC33-4A7C1E1272E2} = {5DF48BD8-2DD5-4225-B211-929683D01CB7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}

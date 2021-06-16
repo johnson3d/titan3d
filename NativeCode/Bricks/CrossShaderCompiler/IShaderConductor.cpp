@@ -5,9 +5,8 @@
 
 #if defined(PLATFORM_WIN)
 #include "D3D11/D11PreHead.h"
-#endif
-
 #pragma comment(lib, "ShaderConductor.lib")
+#endif
 
 #define  new VNEW
 
@@ -393,6 +392,7 @@ bool IShaderConductor::CompileShader(IShaderDesc* desc, const char* shader, cons
 bool IShaderConductor::CompileHLSL(IShaderDesc* desc, std::string incRoot, std::string hlsl, LPCSTR entry, std::string sm, 
 	const IShaderDefinitions* defines, IShaderConductor::Includer* inc, bool hasGLSL, bool hasMetal)
 {
+#if defined(PLATFORM_WIN)
 	ViseFile io;
 	if (io.Open(hlsl.c_str(), ViseFile::modeRead) == FALSE)
 	{
@@ -588,6 +588,9 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, std::string incRoot, std::
 	}
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 NS_END

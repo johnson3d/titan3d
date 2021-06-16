@@ -33,7 +33,8 @@ namespace CppWeaving.Cpp2CS
 						tmp = new UClass(ns, name);
 						tmp.ClassType = UClass.EClassType.PointerType;
 					}
-					
+
+					tmp.ModuleName = tu.Hpp.Module;
 					tmp.CompileUnit = tu;
 					tmp.Decl = decl;
 					ClassTypes.Add(fullname, tmp);
@@ -52,6 +53,7 @@ namespace CppWeaving.Cpp2CS
 				UEnum tmp;
 				if (EnumTypes.TryGetValue(fullname, out tmp) == false) {
 					tmp = new UEnum();
+					tmp.ModuleName = tu.Hpp.Module;
 					tmp.Namespace = ns;
 					tmp.Name = name;
 					tmp.CompileUnit = tu;
@@ -74,6 +76,7 @@ namespace CppWeaving.Cpp2CS
 				UDelegate tmp;
 				if (DelegateTypes.TryGetValue(fullname, out tmp) == false) {
 					tmp = new UDelegate();
+					tmp.ModuleName = tu.Hpp.Module;
 					tmp.Namespace = ns;
 					tmp.Name = name;
 					tmp.CompileUnit = tu;
@@ -87,7 +90,7 @@ namespace CppWeaving.Cpp2CS
         public class TUTask : IBuilderTask
         {
 			public UProjectSettings Settings;
-			public string CppFile;
+			public HppCollector.HppUnit CppFile;
             public override void Execute(TaskThread thread)
             {
                 var tmp = new TUCreator();

@@ -29,6 +29,7 @@ namespace CppWeaving.Cpp2CS
             uint line, col, offset;
             mClass.Decl.Location.GetFileLocation(out tfile, out line, out col, out offset);
             AddLine($"#include \"{UProjectSettings.Pch}\"");
+            AddLine($"#if defined(HasModule_{mClass.ModuleName})");
             AddLine($"#include \"{UTypeManagerBase.GetRegularPath(tfile.ToString())}\"");
             AddLine($"#include \"{UProjectSettings.CppPODStruct}\"");
 
@@ -65,6 +66,8 @@ namespace CppWeaving.Cpp2CS
             GenPInvokeFields();
             NewLine();
             GenPInvokeFunction();
+
+            AddLine($"#endif//HasModule_{mClass.ModuleName}");
         }
         protected void GenFields()
         {

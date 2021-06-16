@@ -10,7 +10,7 @@ namespace CppWeaving
 	{
 		public List<string> Includes = new List<string>();
 		public List<string> MacroDefines = new List<string>();
-		public List<string> ParseSources = new List<string>();
+		public List<HppCollector.HppUnit> ParseSources = new List<HppCollector.HppUnit>();
 
 		public static string Pch;
 		public static string CppPODStruct;

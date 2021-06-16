@@ -47,49 +47,49 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-26</AndroidAPILevel>
+    <AndroidAPILevel>android-28</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-26</AndroidAPILevel>
+    <AndroidAPILevel>android-28</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-27</AndroidAPILevel>
+    <AndroidAPILevel>android-28</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-26</AndroidAPILevel>
+    <AndroidAPILevel>android-28</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-27</AndroidAPILevel>
+    <AndroidAPILevel>android-28</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-26</AndroidAPILevel>
+    <AndroidAPILevel>android-28</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-26</AndroidAPILevel>
+    <AndroidAPILevel>android-28</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>Clang_5_0</PlatformToolset>
-    <AndroidAPILevel>android-26</AndroidAPILevel>
+    <AndroidAPILevel>android-28</AndroidAPILevel>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
@@ -102,10 +102,12 @@
     <Import Project="..\NativeCode\Graphics\Pipeline\Pipeline.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\RHI\RHI.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\TextConverter\TextConverter.vcxitems" Label="Shared" />
-    <Import Project="..\3rd\native\iconv\iconv.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Animation\Animation.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\Image.Shared\Image.Shared.vcxitems" Label="Shared" />
+    <Import Project="..\codegen\NativeBinder\CodeGen.vcxitems" Label="Shared" />
+    <Import Project="..\codegen\Cs2Cpp\cpp\Cs2Cpp.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Platform\Android\Android.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
@@ -137,66 +139,101 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <Link>
+      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <Link>
+      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
+      <EnableNeonCodegen>true</EnableNeonCodegen>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <Link>
+      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <Link>
+      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;PTR_64;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;PTR_64;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
+      <EnableNeonCodegen>true</EnableNeonCodegen>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <Link>
+      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;PTR_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;PTR_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <Link>
+      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
+      <EnableNeonCodegen>true</EnableNeonCodegen>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <Link>
+      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
+      <ExceptionHandling>Enabled</ExceptionHandling>
     </ClCompile>
+    <Link>
+      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Core_Android.cpp" />

@@ -25,6 +25,18 @@ namespace CppWeaving
 			}
 			return path;
 		}
+        public static string GetPureFileName(string path)
+        {
+            bool error;
+            path = NormalizePath(path, out error);
+            var pos1 = path.LastIndexOf('/');
+            var pos2 = path.LastIndexOf('.');
+            return path.Substring(pos1 + 1, pos2 - pos1 - 1);
+        }
+        public static string GetFileDirectory(string file)
+        {
+            return file.Substring(0, file.LastIndexOf("/") + 1);
+        }
         static string NormalizePath(string path, out bool error)
         {
             error = false;
