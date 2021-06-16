@@ -37,7 +37,6 @@ namespace MainEditor
         static WeakReference Main_Impl(string[] args)
         {
             EngineNS.UEngine.StartEngine(new EngineNS.UEngine());
-            EngineNS.UEngine.Instance.Config.CookGLSL = true;
 
             while (true)
             {
