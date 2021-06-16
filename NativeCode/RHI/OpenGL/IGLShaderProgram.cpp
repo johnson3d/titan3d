@@ -37,7 +37,7 @@ vBOOL IGLShaderProgram::LinkShaders(IRenderContext* rc)
 	auto glvs = mVertexShader.UnsafeConvertTo<IGLVertexShader>();
 	sdk->AttachShader(mProgram, glvs->mShader);
 
-	auto glps = mPixelShader.UnsafeConvertTo<IGLVertexShader>();
+	auto glps = mPixelShader.UnsafeConvertTo<IGLPixelShader>();
 	sdk->AttachShader(mProgram, glps->mShader);
 
 	sdk->LinkProgram(mProgram, this);

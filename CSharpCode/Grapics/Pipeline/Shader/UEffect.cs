@@ -195,7 +195,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.DescVS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material.AssetName, mdf.GetType(), defines, true, cfg.CookDXBC, cfg.CookGLSL, cfg.CookMETAL);
+                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material.AssetName, mdf.GetType(), defines, true);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (result.DescVS == null)
                 return null;
@@ -203,7 +203,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.DescPS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material.AssetName, mdf.GetType(), defines, true, cfg.CookDXBC, cfg.CookGLSL, cfg.CookMETAL);
+                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material.AssetName, mdf.GetType(), defines, true);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (result.DescPS == null)
                 return null;
@@ -267,7 +267,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var descVS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material.AssetName, mdfType.SystemType, defines, true, true, false, false);
+                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material.AssetName, mdfType.SystemType, defines, true);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (descVS == null)
                 return false;
@@ -275,7 +275,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var descPS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material.AssetName, mdfType.SystemType, defines, true, true, false, false);
+                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material.AssetName, mdfType.SystemType, defines, true);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (descPS == null)
                 return false;

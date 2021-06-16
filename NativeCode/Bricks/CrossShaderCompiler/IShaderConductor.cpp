@@ -418,20 +418,23 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, const char* hlsl, const ch
 	}
 
 	std::string essl_version = "310";
-	auto pShaderModel = defines->FindDefine("ShaderModel");
-	if (pShaderModel != nullptr)
+	if (defines != nullptr)
 	{
-		if (pShaderModel->Definition == "3")
+		auto pShaderModel = defines->FindDefine("ShaderModel");
+		if (pShaderModel != nullptr)
 		{
-			essl_version = "300";
-		}
-		else if (pShaderModel->Definition == "4")
-		{
-			essl_version = "310";
-		}
-		else if (pShaderModel->Definition == "5")
-		{
-			essl_version = "320";
+			if (pShaderModel->Definition == "3")
+			{
+				essl_version = "300";
+			}
+			else if (pShaderModel->Definition == "4")
+			{
+				essl_version = "310";
+			}
+			else if (pShaderModel->Definition == "5")
+			{
+				essl_version = "320";
+			}
 		}
 	}
 
@@ -451,12 +454,20 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, const char* hlsl, const ch
 	};
 
 	ShaderConductor::MacroDefine defs[32];
-	src.numDefines = (int)defines->Definitions.size();
-	src.defines = defs;
-	for (size_t i=0; i<defines->Definitions.size(); i++)
+	if (defines != nullptr)
 	{
-		defs[i].name = defines->Definitions[i].Name.c_str();
-		defs[i].value = defines->Definitions[i].Definition.c_str();
+		src.numDefines = (int)defines->Definitions.size();
+		src.defines = defs;
+		for (size_t i = 0; i < defines->Definitions.size(); i++)
+		{
+			defs[i].name = defines->Definitions[i].Name.c_str();
+			defs[i].value = defines->Definitions[i].Definition.c_str();
+		}
+	}
+	else
+	{
+		src.numDefines = 0;
+		src.defines = defs;
 	}
 
 	ShaderConductor::Compiler::Options opt;
