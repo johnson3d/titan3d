@@ -14,12 +14,14 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)FBXAnimImporter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FbxDataConverter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FBX.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FBXImporter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FBXMeshImporter.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)FBXAnimImporter.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FbxDataConverter.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FBX.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FBXImporter.cpp" />

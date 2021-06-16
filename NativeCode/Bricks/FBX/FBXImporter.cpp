@@ -3,6 +3,8 @@
 #include "fbxsdk/core/fbxsystemunit.h"
 #include "FBXMeshImporter.h"
 #include "../../Base/CoreSDK.h"
+#include <string>
+#include "FBXAnimImporter.h"
 
 using namespace EngineNS;
 #define  new VNEW
@@ -144,11 +146,30 @@ namespace AssetImportAndExport::FBX
 
 	const FBXMeshImportDesc* FBXImporter::GetFBXMeshDescs(UINT index) const
 	{
-		if (CheckValided)
+		if (CheckValided && mFBXFileImportDesc->MeshNum > index)
 		{
 			return mFBXFileImportDesc->Meshes[index];
 		}
 		return nullptr;
+	}
+
+	FBXMeshImporter* FBXImporter::CreateMeshImporter(UINT meshIndex)
+	{
+		return new FBXMeshImporter(this, meshIndex);
+	}
+
+	const AssetImportAndExport::FBX::FBXAnimImportDesc* FBXImporter::GetFBXAnimDesc(UINT index) const
+	{
+		if (CheckValided && mFBXFileImportDesc->AnimNum> index)
+		{
+			return mFBXFileImportDesc->Anims[index];
+		}
+		return nullptr;
+	}
+
+	AssetImportAndExport::FBX::FBXMeshImporter* FBXImporter::CreateAnimImporter(UINT animIndex)
+	{
+		return new FBXAnimImporter(this, animIndex);
 	}
 
 	void FBXImporter::ExtractFBXFileDesc(fbxsdk::FbxScene* scene, fbxsdk::FbxImporter* importer)
@@ -158,7 +179,7 @@ namespace AssetImportAndExport::FBX
 		auto time = info->mCreationTimeStamp;
 		char* charName = new char[strlen(info->mCreator.Buffer()) + 1];
 		strcpy_s(charName, strlen(info->mCreator.Buffer()) + 1, info->mCreator.Buffer());
-		mFBXFileImportDesc->Creater = charName;
+		mFBXFileImportDesc->Creater = VNameString(charName);
 		FbxSystemUnit SceneSystemUnit = scene->GetGlobalSettings().GetSystemUnit();
 		mFBXFileImportDesc->FileSystemUnit = GetSystemUnitType(SceneSystemUnit);
 		mFBXFileImportDesc->ScaleFactor = (float)FbxSystemUnit::m.GetConversionFactorFrom(SceneSystemUnit);
@@ -168,7 +189,7 @@ namespace AssetImportAndExport::FBX
 		auto pureFileName = mFilename.substr(indexStart + 1, indexEnd - indexStart - 1);
 		charName = new char[pureFileName.size() + 1];
 		strcpy_s(charName, pureFileName.size() + 1, pureFileName.c_str());
-		mFBXFileImportDesc->FileName = charName;
+		mFBXFileImportDesc->FileName = VNameString(charName);
 	}
 
 	void FBXImporter::ExtractFBXOBjectDescs(fbxsdk::FbxScene* scene)
@@ -189,12 +210,33 @@ namespace AssetImportAndExport::FBX
 			{
 				mFBXFileImportDesc->Meshes[i] = meshDescs[i];
 			}
-
+			meshDescs.clear();
 		}
-		meshDescs.clear();
 		//animation
-
-
+		FbxArray<FbxString*> animStackNameArray;
+		std::vector<FBXAnimImportDesc*> animDescs;
+		for (int i = 0; i < animStackNameArray.GetCount(); ++i)
+		{
+			// select the base layer from the animation stack
+			FbxAnimStack* lAnimationStack = scene->FindMember<FbxAnimStack>(animStackNameArray[i]->Buffer());
+			if (lAnimationStack == NULL)
+			{
+				// this is a problem. The anim stack should be found in the scene!
+				break;
+			}
+			FbxAnimLayer* lanimationLayer = lAnimationStack->GetMember<FbxAnimLayer>();
+			ExtractFBXAnimsDescRecursive(scene->GetRootNode(), lAnimationStack, lanimationLayer, animDescs);
+		}
+		if (animDescs.size() > 0)
+		{
+			mFBXFileImportDesc->AnimNum = (UINT)animDescs.size();
+			mFBXFileImportDesc->Anims = new FBXAnimImportDesc * [mFBXFileImportDesc->AnimNum];
+			for (int i = 0; i < meshDescs.size(); ++i)
+			{
+				mFBXFileImportDesc->Anims[i] = animDescs[i];
+			}
+			animDescs.clear();
+		}
 
 	}
 
@@ -232,9 +274,102 @@ namespace AssetImportAndExport::FBX
 		}
 	}
 
-	FBXMeshImporter* FBXImporter::CreateMeshImporter(UINT meshIndex)
+	void FBXImporter::ExtractFBXAnimsDescRecursive(fbxsdk::FbxNode* node, FbxAnimStack* animStack, FbxAnimLayer* animLayer, std::vector<FBXAnimImportDesc*>& outFBXAnimImportDesces)
 	{
-		return new FBXMeshImporter(this, meshIndex);
+		FbxScene* scene = node->GetScene();
+		std::string animName = FbxDataConverter::ConvertToStdString(node->GetName());
+		auto att = node->GetNodeAttribute();
+		if (att == NULL)
+		{
+
+		}
+		else
+		{
+			bool createOption = false;
+			auto attType = att->GetAttributeType();
+			if (attType == EFBXObjectType::FOT_Skeleton || attType == EFBXObjectType::FOT_Null)//dummy as bone
+			{
+				if (IsSkeletonHaveAnimCurve(node, animLayer))
+				{
+					createOption = true;
+					if (scene->GetRootNode() == node)
+					{
+	
+						animName = mFilename + std::string("_") + FbxDataConverter::ConvertToStdString(animStack->GetName());
+
+					}
+				}
+			}
+			else if (IsHaveAnimCurve(node, animLayer) || IsHaveAnimCurve(att, animLayer))
+			{
+				createOption = true;
+			}
+			if (createOption)
+			{
+				FBXAnimImportDesc* animDesc = new FBXAnimImportDesc();
+				animDesc->Name = VNameString(animName.c_str());
+				animDesc->FBXNode = node;
+				animDesc->AnimLayer = animLayer;
+				animDesc->AnimStack = animStack;
+				auto span = animStack->GetLocalTimeSpan();
+				auto start = span.GetStart().GetSecondDouble();
+				auto duration = span.GetDuration().GetSecondDouble();
+				auto end = span.GetStop().GetSecondDouble();
+				auto rate = FbxTime::GetFrameRate(node->GetScene()->GetGlobalSettings().GetTimeMode());
+				animDesc->Duration = (float)duration;
+				animDesc->SampleRate = (float)rate;
+				outFBXAnimImportDesces.push_back(animDesc);
+			}
+
+			//skeleton only root
+			if (attType == EFBXObjectType::FOT_Skeleton || attType == EFBXObjectType::FOT_Null)
+				return;
+		}
+		for (int i = 0; i < node->GetChildCount(); ++i)
+		{
+			ExtractFBXAnimsDescRecursive(node->GetChild(i), animStack, animLayer, outFBXAnimImportDesces);
+		}
 	}
+
+	bool FBXImporter::IsHaveAnimCurve(FbxNode* node, FbxAnimLayer* animLayer)
+	{
+		FbxProperty lProperty = node->GetFirstProperty();
+		while (lProperty.IsValid())
+		{
+			auto curveNode = lProperty.GetCurveNode(animLayer);
+			if (curveNode)
+				return true;
+			lProperty = node->GetNextProperty(lProperty);
+		}
+		return false;
+	}
+
+	bool FBXImporter::IsHaveAnimCurve(FbxNodeAttribute* nodeAtt, FbxAnimLayer* animLayer)
+	{
+		FbxProperty lProperty = nodeAtt->GetFirstProperty();
+		while (lProperty.IsValid())
+		{
+			auto curveNode = lProperty.GetCurveNode(animLayer);
+			if (curveNode)
+				return true;
+			lProperty = nodeAtt->GetNextProperty(lProperty);
+		}
+		return false;
+	}
+
+	bool FBXImporter::IsSkeletonHaveAnimCurve(FbxNode* node, FbxAnimLayer* animLayer)
+	{
+		if (IsHaveAnimCurve(node, animLayer))
+			return true;
+		for (int i = 0; i < node->GetChildCount(); ++i)
+		{
+			auto result = IsSkeletonHaveAnimCurve(node->GetChild(i), animLayer);
+			if (result)
+				return true;
+		}
+		return false;
+	}
+
+
 
 }

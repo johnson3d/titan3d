@@ -21,7 +21,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Pose\CSkeletonPose.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pose\ULimbPose.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pose\USkeletonPose.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\AnimatableSkeletonHierarchy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Skeleton\CBone.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Skeleton\CPartialSkeleton.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Skeleton\Limb\ILimb.cs" />

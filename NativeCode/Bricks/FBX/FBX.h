@@ -66,11 +66,10 @@ namespace AssetImportAndExport::FBX
 		}
 		~FBXObjectImportDesc()
 		{
-			Safe_DeleteArray<const char>(Name);
 			FBXNode = nullptr;
 		}
 	public:
-		const char* Name;
+		VNameString Name;
 		EFBXObjectType Type;
 		float Scale;
 		bool Imported;
@@ -83,6 +82,7 @@ namespace AssetImportAndExport::FBX
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FBXMeshImportDesc :public FBXObjectImportDesc
 	{
+		friend class FBXImporter;
 	public:
 		bool ReCalculateTangent;
 		bool AsCollision;
@@ -92,6 +92,19 @@ namespace AssetImportAndExport::FBX
 		UINT RenderAtom;
 		bool TransformVertexToAbsolute;
 		bool BakePivotInVertex;
+	};
+
+
+	struct TR_CLASS(SV_LayoutStruct = 8)
+	FBXAnimImportDesc :public FBXObjectImportDesc
+	{
+		friend class FBXImporter;
+	public:
+		float Duration;
+		float SampleRate;
+	private:
+		FbxAnimStack* AnimStack;
+		FbxAnimLayer* AnimLayer;
 	};
 
 	struct TR_CLASS(SV_Dispose = delete self)
@@ -111,17 +124,20 @@ namespace AssetImportAndExport::FBX
 		};
 		~FBXFileImportDesc()
 		{
-			Safe_DeleteArray<const char>(FileName);
-			Safe_DeleteArray<const char>(Creater);
 			for (UINT i = 0; i < MeshNum; ++i)
 			{
 				Safe_Delete<FBXMeshImportDesc>(Meshes[i]);
 			}
 			Safe_DeleteArray<FBXMeshImportDesc*>(Meshes);
+			for (UINT i = 0; i < MeshNum; ++i)
+			{
+				Safe_Delete<FBXAnimImportDesc>(Anims[i]);
+			}
+			Safe_DeleteArray<FBXAnimImportDesc*>(Anims);
 		}
 	public:
-		const char* FileName;
-		const char* Creater;
+		VNameString FileName;
+		VNameString Creater;
 		SystemUnit FileSystemUnit;
 		bool ConvertSceneUnit;
 		float ScaleFactor;
@@ -130,7 +146,7 @@ namespace AssetImportAndExport::FBX
 	protected:
 		//FBXObjectImportDesc** Objects;
 		FBXMeshImportDesc** Meshes;
-
+		FBXAnimImportDesc** Anims;
 	};
 	
 	class TR_CLASS(SV_Dispose = delete self)

@@ -21,11 +21,18 @@ namespace AssetImportAndExport
 			const FBXFileImportDesc* GetFileImportDesc() const;
 			const FBXMeshImportDesc* GetFBXMeshDescs(UINT index) const;
 			FBXMeshImporter* CreateMeshImporter(UINT meshIndex);
+			const FBXAnimImportDesc* GetFBXAnimDesc(UINT index) const;
+			FBXMeshImporter* CreateAnimImporter(UINT meshIndex);
 		protected:
 			void ExtractFBXFileDesc(fbxsdk::FbxScene* scene, fbxsdk::FbxImporter * importer);
 			void ExtractFBXOBjectDescs(fbxsdk::FbxScene * scene);
-			void ExtractFBXObjectsDescRecursive(fbxsdk::FbxNode * node, const EFBXObjectType objectType, std::vector<FBXObjectImportDesc*>&outFileImportDescs);
+			//void ExtractFBXObjectsDescRecursive(fbxsdk::FbxNode * node, const EFBXObjectType objectType, std::vector<FBXObjectImportDesc*>&outFileImportDescs);
 			void ExtractFBXMeshesDescRecursive(fbxsdk::FbxNode * node, std::vector<FBXMeshImportDesc*>&outFBXMeshImportDesces);
+			void ExtractFBXAnimsDescRecursive(fbxsdk::FbxNode * node, FbxAnimStack * animStack, FbxAnimLayer * animLayer, std::vector<FBXAnimImportDesc*>&outFBXAnimImportDesces);
+
+			bool IsHaveAnimCurve(FbxNode * node, FbxAnimLayer * animLayer);
+			bool IsHaveAnimCurve(FbxNodeAttribute * nodeAtt, FbxAnimLayer * animLayer);
+			bool IsSkeletonHaveAnimCurve(FbxNode * node, FbxAnimLayer * animLayer);
 
 		protected:
 			std::string mFilename;
