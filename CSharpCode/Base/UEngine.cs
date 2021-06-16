@@ -54,6 +54,14 @@ namespace EngineNS
         public string MainWindowRPolicy { get; set; }// = Rtti.TypeManager.Instance.GetTypeStringFromType(typeof(Graphics.Pipeline.Mobile.UMobileFSPolicy));
         [Rtti.Meta]
         public string RpcRootType { get; set; } = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(EngineNS.UTest.UTest_Rpc));
+        [Rtti.Meta]
+        public bool CookDXBC { get; set; } = true;
+        [Rtti.Meta]
+        public bool CookSPIRV { get; set; } = false;
+        [Rtti.Meta]
+        public bool CookGLSL { get; set; } = false;
+        [Rtti.Meta]
+        public bool CookMETAL { get; set; } = false;
     }
     public partial class UEngine : UModuleHost<UEngine>
     {

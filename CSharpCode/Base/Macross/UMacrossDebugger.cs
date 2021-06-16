@@ -97,7 +97,6 @@ namespace EngineNS.Macross
         {
             lock (Instance)
             {
-                brk.Enable = true;
                 foreach(var i in Breaks)
                 {
                     UMacrossBreak tmp;

@@ -386,31 +386,36 @@ bool IShaderConductor::CompileShader(IShaderDesc* desc, const char* shader, cons
 #endif
 	}
 
+	if (bGlsl)
+	{
+		CompileHLSL(desc, shader, entry, type, sm, defines, bGlsl, bMetal);
+	}
 	return true;
 }
 
-bool IShaderConductor::CompileHLSL(IShaderDesc* desc, std::string incRoot, std::string hlsl, LPCSTR entry, std::string sm, 
-	const IShaderDefinitions* defines, IShaderConductor::Includer* inc, bool hasGLSL, bool hasMetal)
+bool IShaderConductor::CompileHLSL(IShaderDesc* desc, const char* hlsl, const char* entry, EShaderType type, std::string sm,
+	const IShaderDefinitions* defines, bool hasGLSL, bool hasMetal)
 {
 #if defined(PLATFORM_WIN)
-	ViseFile io;
-	if (io.Open(hlsl.c_str(), ViseFile::modeRead) == FALSE)
-	{
-		return false;
-	}
-	std::string code;
-	{
-		int len = (int)io.GetLength();
-		char* buffer = new char[len +1];
-		buffer[len] = '\0';
-		io.Read(buffer, len);
-		code = buffer;
-		delete[] buffer;
-	}
-	io.Close();
+	MemStreamWriter* ar = GetShaderCodeStream((void*)hlsl);
 
-	incRoot = hlsl;
 	ShaderConductor::ShaderStage stage = ShaderConductor::ShaderStage::VertexShader;
+	switch (type)
+	{
+	case EngineNS::EST_UnknownShader:
+		break;
+	case EngineNS::EST_VertexShader:
+		stage = ShaderConductor::ShaderStage::VertexShader;
+		break;
+	case EngineNS::EST_PixelShader:
+		stage = ShaderConductor::ShaderStage::PixelShader;
+		break;
+	case EngineNS::EST_ComputeShader:
+		stage = ShaderConductor::ShaderStage::ComputeShader;
+		break;
+	default:
+		break;
+	}
 
 	std::string essl_version = "310";
 	auto pShaderModel = defines->FindDefine("ShaderModel");
@@ -429,61 +434,20 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, std::string incRoot, std::
 			essl_version = "320";
 		}
 	}
-	
-	if (sm == "vs_5_0")
-	{
-		stage = ShaderConductor::ShaderStage::VertexShader;
-	}
-	else if (sm == "ps_5_0")
-	{
-		stage = ShaderConductor::ShaderStage::PixelShader;
-	}
-	else if (sm == "cs_5_0")
-	{
-		stage = ShaderConductor::ShaderStage::ComputeShader;
-	}
 
 	ShaderConductor::Compiler::SourceDesc src;
-	src.source = code.c_str();
+	src.source = (const char*)ar->GetDataPointer();
 	src.entryPoint = entry;
 	src.stage = stage;
-	src.fileName = incRoot.c_str();
+	src.fileName = hlsl;
 	src.loadIncludeCallback = [=](const char* includeName)->ShaderConductor::Blob*
 	{
-		std::vector<char> ret;
-		if (strstr(includeName, "cbPerInstance.var") != nullptr)
-		{
-			ret.resize(inc->cbPerInstance_var.size());
-			if (inc->cbPerInstance_var.size() > 0)
-			{
-				memcpy(&ret[0], &inc->cbPerInstance_var[0], ret.size());
-			}
-		}
-		else if (strstr(includeName, "dummy.gen") != nullptr)
-		{
-			ret.resize(inc->dummy_gen.size());
-			if (inc->dummy_gen.size() > 0)
-			{
-				memcpy(&ret[0], &inc->dummy_gen[0], ret.size());
-			}
-		}
+		MemStreamWriter* ar_inc = GetShaderCodeStream((void*)includeName);
+		
+		if (ar_inc != nullptr)
+			return ShaderConductor::CreateBlob(ar_inc->GetDataPointer(), static_cast<uint32_t>(ar_inc->Tell()));
 		else
-		{
-			std::ifstream includeFile(includeName, std::ios_base::in);
-			if (includeFile)
-			{
-				includeFile.seekg(0, std::ios::end);
-				ret.resize(includeFile.tellg());
-				includeFile.seekg(0, std::ios::beg);
-				includeFile.read(ret.data(), ret.size());
-				ret.resize(includeFile.gcount());
-			}
-			else
-			{
-				throw std::runtime_error(std::string("COULDN'T load included file ") + includeName + ".");
-			}
-		}
-		return ShaderConductor::CreateBlob(ret.data(), static_cast<uint32_t>(ret.size()));
+			return ShaderConductor::CreateBlob(nullptr, static_cast<uint32_t>(0));
 	};
 
 	ShaderConductor::MacroDefine defs[32];
@@ -493,25 +457,6 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, std::string incRoot, std::
 	{
 		defs[i].name = defines->Definitions[i].Name.c_str();
 		defs[i].value = defines->Definitions[i].Definition.c_str();
-	}
-
-	bool DxCompileBugFixed = true;
-	if(DxCompileBugFixed == false)
-	{
-		src.numDefines += 6;
-		int HalfStartIndex = (int)defines->Definitions.size();
-		defs[HalfStartIndex + 0].name = "half";
-		defs[HalfStartIndex + 0].value = "float";
-		defs[HalfStartIndex + 1].name = "half2";
-		defs[HalfStartIndex + 1].value = "float2";
-		defs[HalfStartIndex + 2].name = "half3";
-		defs[HalfStartIndex + 2].value = "float3";
-		defs[HalfStartIndex + 3].name = "half4";
-		defs[HalfStartIndex + 3].value = "float4";
-		defs[HalfStartIndex + 4].name = "half4x4";
-		defs[HalfStartIndex + 4].value = "float4x4"; 
-		defs[HalfStartIndex + 5].name = "half3x3";
-		defs[HalfStartIndex + 5].value = "float3x3";
 	}
 
 	ShaderConductor::Compiler::Options opt;

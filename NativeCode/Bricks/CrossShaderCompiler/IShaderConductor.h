@@ -23,12 +23,7 @@ IShaderConductor : public VIUnknown
 public:
 	FGetShaderCodeStream			GetShaderCodeStream;
 public:
-	static IShaderConductor* GetInstance();
-	struct Includer
-	{
-		std::string cbPerInstance_var;
-		std::string dummy_gen;
-	};
+	static IShaderConductor* GetInstance();	
 	TR_CONSTRUCTOR()
 	IShaderConductor()
 	{
@@ -43,8 +38,8 @@ public:
 	bool CompileShader(IShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm,
 				const IShaderDefinitions* defines, bool bDebugShader, bool bDxbc, bool bGlsl, bool bMetal);
 
-	bool CompileHLSL(IShaderDesc* desc, std::string incRoot, std::string hlsl, LPCSTR entry, std::string sm, 
-				const IShaderDefinitions* defines, Includer* inc, bool hasGLSL, bool hasMetal);
+	bool CompileHLSL(IShaderDesc* desc, const char* hlsl, const char* entry, EShaderType type, std::string sm,
+				const IShaderDefinitions* defines, bool hasGLSL, bool hasMetal);
 };
 
 NS_END

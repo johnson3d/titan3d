@@ -100,7 +100,7 @@ namespace EngineNS.GamePlay.Scene
             mMesh.SetWorldMatrix(ref Placement.AbsTransform);
         }
         static Macross.UMacrossStackFrame mLogicTickFrame = new Macross.UMacrossStackFrame();
-        static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", true);
+        static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
         public override bool OnTickLogic()
         {
             using (var guard = new Macross.UMacrossStackGuard(mLogicTickFrame))
