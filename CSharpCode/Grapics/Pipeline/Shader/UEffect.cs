@@ -87,14 +87,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
             XndNode psNode = new XndNode();
             unsafe
             {
-                descAttr.UnsafeSetPointer(xnd.RootNode.mCoreObject.TryGetAttribute("Desc"));
-                if (descAttr.NativePointer == IntPtr.Zero)
+                descAttr = xnd.RootNode.mCoreObject.TryGetAttribute("Desc");
+                if (descAttr.IsValidPointer == false)
                     return null;
-                vsNode.UnsafeSetPointer(xnd.RootNode.mCoreObject.TryGetChildNode("VSCode"));
-                if (vsNode.NativePointer == IntPtr.Zero)
+                vsNode = xnd.RootNode.mCoreObject.TryGetChildNode("VSCode");
+                if (vsNode.IsValidPointer == false)
                     return null;
-                psNode.UnsafeSetPointer(xnd.RootNode.mCoreObject.TryGetChildNode("PSCode"));
-                if (psNode.NativePointer == IntPtr.Zero)
+                psNode = xnd.RootNode.mCoreObject.TryGetChildNode("PSCode");
+                if (psNode.IsValidPointer == false)
                     return null;
             }
             
