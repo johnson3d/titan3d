@@ -165,11 +165,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 InputLayout = rc.CreateInputLayout(layoutDesc);
 
                 CoreSDK.IUnknown_Release(layoutDesc.NativePointer.ToPointer());
-            }
 
-            var progDesc = new IShaderProgramDesc();
-            unsafe
-            {
+                var progDesc = new IShaderProgramDesc();
+
                 progDesc.InputLayout = InputLayout.mCoreObject;
                 progDesc.VertexShader = VertexShader.mCoreObject;
                 progDesc.PixelShader = PixelShader.mCoreObject;
