@@ -62,16 +62,18 @@ vBOOL IGeometryMesh::ApplyGeometry(ICommandList* cmd, IDrawCall* pass, vBOOL bIm
 		if (vb == nullptr)
 		{
 			//continue;
-			pass->SetVertexBuffer(cmd, i, nullptr, 0, 0);
+			cmd->SetVertexBuffer(i, nullptr, 0, 0);
+			//pass->SetVertexBuffer(cmd, i, nullptr, 0, 0);
 		}
 		else
 		{
 			//vb->UpdateDrawPass(cmd, bImm);
-			pass->SetVertexBuffer(cmd, i, vb, 0, vb->mDesc.Stride);
+			cmd->SetVertexBuffer(i, vb, 0, vb->mDesc.Stride);
+			//pass->SetVertexBuffer(cmd, i, vb, 0, vb->mDesc.Stride);
 		}
 	}
 	if(IndexBuffer!=nullptr)
-		pass->SetIndexBuffer(cmd, IndexBuffer);
+		cmd->SetIndexBuffer(IndexBuffer);
 
 	return TRUE;
 }

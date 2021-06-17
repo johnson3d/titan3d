@@ -22,9 +22,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             await ScreenDrawPolicy.Initialize(x, y);
             ScreenDrawPolicy.mBasePassShading = shading;
 
-            GBuffers.Initialize(1, EPixelFormat.PXF_UNKNOWN, (uint)x, (uint)y);
-            GBuffers.CreateGBuffer(0, EPixelFormat.PXF_R16G16_FLOAT, (uint)x, (uint)y);
             GBuffers.SwapChainIndex = -1;
+            GBuffers.Initialize(1, EPixelFormat.PXF_UNKNOWN, (uint)x, (uint)y);
+            GBuffers.CreateGBuffer(0, EPixelFormat.PXF_R16G16_FLOAT, (uint)x, (uint)y);            
             GBuffers.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;

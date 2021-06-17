@@ -110,6 +110,7 @@ namespace EngineNS.Graphics.Pipeline
             RenderSystem.GetContextDesc(Adapter, ref rcDesc);
 
             rcDesc.CreateDebugLayer = bDebugLayer?1:0;
+            rcDesc.AppHandle = window.ToPointer();
             RenderContext = RenderSystem.CreateContext(ref rcDesc);
             if (RenderContext == null)
                 return false;

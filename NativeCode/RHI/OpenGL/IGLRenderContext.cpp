@@ -200,6 +200,10 @@ IRenderPipeline* IGLRenderContext::CreateRenderPipeline(const IRenderPipelineDes
 		rpl->Release();
 		return nullptr;
 	}
+	rpl->BindBlendState(desc->Blend);
+	rpl->BindDepthStencilState(desc->DepthStencil);
+	rpl->BindRasterizerState(desc->Rasterizer);
+	rpl->BindGpuProgram(desc->GpuProgram);
 	return rpl;
 }
 
@@ -249,7 +253,7 @@ IVertexBuffer* IGLRenderContext::CreateVertexBufferFromBuffer(const IVertexBuffe
 
 IGeometryMesh* IGLRenderContext::CreateGeometryMesh()
 {
-	return new IGeometryMesh();
+	return new IGLGeometryMesh();
 }
 
 IFrameBuffers* IGLRenderContext::CreateFrameBuffers(const IFrameBuffersDesc* desc)
@@ -493,16 +497,93 @@ EGLint GetContextRenderableType(EGLDisplay eglDisplay)
 
 void GLAPIENTRY EngineGLDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
-	if (source == 33350 && type == 33360 && id == 131202)
+	/*if (source == 33350 && type == 33360 && id == 131202)
 		return;
 	else if (source == 33350 && type == 33361 && id == 131185)
 		return;
 	else if (source == 33350 && type == 33356 && id == 1282)
-		return;
+		return;*/
 
 	//IGLRenderContext* rc = (IGLRenderContext*)userParam;
-	VFX_LTRACE(ELTT_Graphics, "GLDebug: source=%d, type=%d, id=%d, severity=%d \n%s\n",
-		source, type, id, severity, message);
+
+	const char* _source;
+	const char* _type;
+	const char* _severity;
+
+	switch (severity)
+	{
+	case GL_DEBUG_SEVERITY_HIGH:
+		_severity = "HIGH";
+		break;
+	case GL_DEBUG_SEVERITY_MEDIUM:
+		_severity = "MEDIUM";
+		break;
+	case GL_DEBUG_SEVERITY_LOW:
+		_severity = "LOW";
+		break;
+	case GL_DEBUG_SEVERITY_NOTIFICATION:
+		_severity = "NOTIFICATION";
+		return;
+	default:
+		_severity = "UNKNOWN";
+		break;
+	}
+
+	switch (source) 
+	{
+		case GL_DEBUG_SOURCE_API:
+			_source = "API";
+			break;
+		case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+			_source = "WINDOW SYSTEM";
+			break;
+		case GL_DEBUG_SOURCE_SHADER_COMPILER:
+			_source = "SHADER COMPILER";
+			break;
+		case GL_DEBUG_SOURCE_THIRD_PARTY:
+			_source = "THIRD PARTY";
+			break;
+		case GL_DEBUG_SOURCE_APPLICATION:
+			_source = "APPLICATION";
+			break;
+		case GL_DEBUG_SOURCE_OTHER:
+			_source = "UNKNOWN";
+			break;
+		default:
+			_source = "UNKNOWN";
+			break;
+	}
+
+	switch (type)
+	{
+		case GL_DEBUG_TYPE_ERROR:
+			_type = "ERROR";
+			break;
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+			_type = "DEPRECATED BEHAVIOR";
+			break;
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+			_type = "UDEFINED BEHAVIOR";
+			break;
+		case GL_DEBUG_TYPE_PORTABILITY:
+			_type = "PORTABILITY";
+			break;
+		case GL_DEBUG_TYPE_PERFORMANCE:
+			_type = "PERFORMANCE";
+			break;
+		case GL_DEBUG_TYPE_OTHER:
+			_type = "OTHER";
+			break;
+		case GL_DEBUG_TYPE_MARKER:
+			_type = "MARKER";
+			break;
+		default:
+			_type = "UNKNOWN";
+			break;
+	}
+
+	VFX_LTRACE(ELTT_Graphics, "%d: %s of %s severity, raised from %s: %s\n",
+		id, _type, _severity, _source, message);
 }
 
 #if defined(PLATFORM_WIN)
@@ -602,10 +683,8 @@ bool IGLRenderContext::Init(IGLRenderSystem* sys, const IRenderContextDesc* desc
 	{
 		return false;
 	}
-	EGLint majorVersion;
-	EGLint minorVersion;
 	
-	if (!eglInitialize(mEglDisplay, &majorVersion, &minorVersion))
+	if (!eglInitialize(mEglDisplay, &MajorVersion, &MinorVersion))
 	{
 		return false;
 	}
@@ -700,7 +779,6 @@ bool IGLRenderContext::Init(IGLRenderSystem* sys, const IRenderContextDesc* desc
 	if (pExt != nullptr)
 		mGLExtensions = pExt;
 
-	GLint MajorVersion, MinorVersion;
 	glGetIntegerv(GL_MAJOR_VERSION, &MajorVersion);
 	glGetIntegerv(GL_MINOR_VERSION, &MinorVersion);
 	std::string strVersion = GLVersion;
@@ -932,16 +1010,16 @@ bool IGLRenderContext::Init2(void* winHandle)
 
 	//const int iPixelFormatAttributeList[] =
 	//{
-	//	WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,                        // ���Ƶ�����
-	//	WGL_SUPPORT_OPENGL_ARB, GL_TRUE,                            // ֧��OpenGL
-	//	WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,        // Ӳ������
-	//	WGL_DOUBLE_BUFFER_ARB, GL_TRUE,                            // ˫����
-	//	WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,                    // RGBA
-	//	WGL_COLOR_BITS_ARB, 32,                                    // ��ɫλ��32
-	//	WGL_DEPTH_BITS_ARB, 24,                                    // ���λ��24
-	//	WGL_STENCIL_BITS_ARB, 8,                                    // ģ��λ��8
-	//	WGL_SWAP_METHOD_ARB, WGL_SWAP_EXCHANGE_ARB,                // ˫����swap��ʽֱ�ӽ���
-	//	WGL_SAMPLES_ARB, 4,                                // 4�������
+	//	WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,                        
+	//	WGL_SUPPORT_OPENGL_ARB, GL_TRUE,                        
+	//	WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,        
+	//	WGL_DOUBLE_BUFFER_ARB, GL_TRUE,                         
+	//	WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,                  
+	//	WGL_COLOR_BITS_ARB, 32,                                 
+	//	WGL_DEPTH_BITS_ARB, 24,                                 
+	//	WGL_STENCIL_BITS_ARB, 8,                                
+	//	WGL_SWAP_METHOD_ARB, WGL_SWAP_EXCHANGE_ARB,             
+	//	WGL_SAMPLES_ARB, 4,                                
 	//	0
 	//};
 	
@@ -966,18 +1044,19 @@ bool IGLRenderContext::Init2(void* winHandle)
 //			ShowLastErrorMessage(error);
 //		}
 //#if defined _DEBUG
-//		return false;//��Ҳ����֣�release���ﷵ��0��Ȼ����滹����ȷ
+//		return false;
 //#endif
 //	}
 	
 	const int iContextAttributeList[] =
 	{
-		WGL_CONTEXT_MAJOR_VERSION_ARB, 4,                        // ���汾��
-		WGL_CONTEXT_MINOR_VERSION_ARB, 5,                        // �ΰ汾��
+		WGL_CONTEXT_MAJOR_VERSION_ARB, MajorVersion,
+		WGL_CONTEXT_MINOR_VERSION_ARB, MinorVersion,
 		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB | WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
 		0
 	};
 	mContext = wglCreateContextAttribsARB(mDC, NULL, iContextAttributeList);
+	auto errorcode = GetLastError();
 	if (mContext == 0)
 	{
 		return false;

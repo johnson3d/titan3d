@@ -390,6 +390,11 @@ bool IShaderConductor::CompileShader(IShaderDesc* desc, const char* shader, cons
 	{
 		CompileHLSL(desc, shader, entry, type, sm, defines, bGlsl, bMetal);
 	}
+
+	if (desc->Reflector == nullptr)
+	{
+		desc->Reflector = new ShaderReflector();
+	}
 	return true;
 }
 

@@ -18,10 +18,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc);
-            
+
+            GBuffers.SwapChainIndex = -1;
             GBuffers.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
             GBuffers.CreateGBuffer(0, EPixelFormat.PXF_R16G16B16A16_FLOAT, (uint)x, (uint)y);
-            GBuffers.SwapChainIndex = -1;
             GBuffers.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
 
             PassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionClear;
@@ -75,7 +75,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             {
                 if (i.Atoms == null)
                     continue;
-    
                 for (int j = 0; j < i.Atoms.Length; j++)
                 {
                     var drawcall = i.GetDrawCall(GBuffers, j, this, EShadingType.BasePass);

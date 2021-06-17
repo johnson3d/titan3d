@@ -36,7 +36,10 @@ namespace MainEditor
         static bool Run = true;
         static WeakReference Main_Impl(string[] args)
         {
-            EngineNS.UEngine.StartEngine(new EngineNS.UEngine());
+            var cfg = FindArgument(args, "config=");
+            Console.WriteLine($"Config={cfg}");
+            
+            EngineNS.UEngine.StartEngine(new EngineNS.UEngine(), cfg);
 
             while (true)
             {
@@ -47,6 +50,26 @@ namespace MainEditor
             var wr = new WeakReference(EngineNS.UEngine.Instance);
             EngineNS.UEngine.Instance.FinalCleanup();
             return wr;
+        }
+        public static string FindArgument(string[] args, string startWith)
+        {
+            foreach (var i in args)
+            {
+                if (i.StartsWith(startWith))
+                {
+                    return i.Substring(startWith.Length);
+                }
+            }
+            return null;
+        }
+        public static string[] GetArguments(string[] args, string startWith, char split = '+')
+        {
+            var types = FindArgument(args, startWith);
+            if (types != null)
+            {
+                return types.Split(split);
+            }
+            return null;
         }
     }
 }

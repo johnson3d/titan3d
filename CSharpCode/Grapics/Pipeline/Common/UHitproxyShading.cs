@@ -133,9 +133,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             BasePass.Initialize(rc);
             BasePass.SetDebugName("UPickedProxiableManager");
 
-            PickedBuffer.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
-            PickedBuffer.CreateGBuffer(0, EPixelFormat.PXF_R16G16_FLOAT, (uint)x, (uint)y);
             PickedBuffer.SwapChainIndex = -1;
+            PickedBuffer.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
+            PickedBuffer.CreateGBuffer(0, EPixelFormat.PXF_R16G16_FLOAT, (uint)x, (uint)y);            
             PickedBuffer.TargetViewIdentifier = policy.GBuffers.TargetViewIdentifier;
             PickedBuffer.Camera = policy.GBuffers.Camera;
 

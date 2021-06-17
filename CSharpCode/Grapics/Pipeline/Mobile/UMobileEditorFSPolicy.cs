@@ -182,12 +182,11 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             mHitproxyShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Common.UHitproxyShading>();
 
-            GHitproxyBuffers.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
-            GHitproxyBuffers.CreateGBuffer(0, EPixelFormat.PXF_R8G8B8A8_UNORM, (uint)x, (uint)y);
             GHitproxyBuffers.SwapChainIndex = -1;
+            GHitproxyBuffers.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
+            GHitproxyBuffers.CreateGBuffer(0, EPixelFormat.PXF_R8G8B8A8_UNORM, (uint)x, (uint)y);            
             GHitproxyBuffers.TargetViewIdentifier = GBuffers.TargetViewIdentifier;
             GHitproxyBuffers.Camera = GBuffers.Camera;
-
             HitproxyPassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionClear;
             HitproxyPassDesc.mFBStoreAction_Color = FrameBufferStoreAction.StoreActionStore;
             HitproxyPassDesc.mFBClearColorRT0 = new Color4(0, 0, 0, 0);

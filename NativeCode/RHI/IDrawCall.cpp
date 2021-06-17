@@ -517,6 +517,12 @@ UINT IDrawCall::FindSRVIndex(const char* name)
 void IDrawCall::BindSRVAll(UINT Index, IShaderResourceView* srv)
 {
 	IShaderProgram* program = this->m_pPipelineState->GetGpuProgram();
+	if (program == nullptr)
+	{
+		ASSERT(false);
+		return;
+	}
+
 	TSBindInfo info;
 	if (program->GetShaderResourceBindInfo(Index, &info, sizeof(TSBindInfo)) == false)
 		return;

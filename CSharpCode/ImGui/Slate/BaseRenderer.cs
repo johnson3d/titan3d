@@ -69,6 +69,7 @@ namespace EngineNS.EGui.Slate
             sdProgDesc.VertexShader = VertexShader.mCoreObject;
             sdProgDesc.PixelShader = PixelShader.mCoreObject;
             var gpuProgram = rc.CreateShaderProgram(ref sdProgDesc);
+            gpuProgram.mCoreObject.LinkShaders(rc.mCoreObject);
 
             var pipelineDesc = new IRenderPipelineDesc();
             pipelineDesc.SetDefault();

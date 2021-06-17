@@ -153,6 +153,7 @@ namespace EngineNS.EGui
         {
             public RHI.CCommandList CmdList;
             public RenderPassDesc PassDesc = new RenderPassDesc();
+            public RHI.CGeometryMesh GeomMesh;
             public RHI.CVertexBuffer VertexBuffer;
             public RHI.CIndexBuffer IndexBuffer;
             public Support.UNativeArray<ImDrawVert> DataVB = Support.UNativeArray<ImDrawVert>.CreateInstance();
@@ -171,6 +172,8 @@ namespace EngineNS.EGui
                 PassDesc.mFBLoadAction_Stencil = FrameBufferLoadAction.LoadActionDontCare;
                 PassDesc.mFBStoreAction_Stencil = FrameBufferStoreAction.StoreActionStore;
                 PassDesc.mStencilClearValue = 0u;
+
+                GeomMesh = UEngine.Instance.GfxDevice.RenderContext.CreateGeometryMesh();
                 return true;
             }
             public void Cleanup()
@@ -183,6 +186,8 @@ namespace EngineNS.EGui
                 VertexBuffer = null;
                 IndexBuffer?.Dispose();
                 IndexBuffer = null;
+                GeomMesh?.Dispose();
+                GeomMesh = null;
             }
         }
         public unsafe static void RenderImDrawData(ref ImDrawData draw_data, Graphics.Pipeline.UGraphicsBuffers SwapChainBuffer, UImDrawDataRHI rhiData)
@@ -202,9 +207,11 @@ namespace EngineNS.EGui
                 rhiData.VertexBuffer?.Dispose();
                 var vbDesc = new IVertexBufferDesc();
                 vbDesc.SetDefault();
+                vbDesc.Stride = (uint)sizeof(ImDrawVert);
                 vbDesc.CPUAccess = (UInt32)ECpuAccess.CAS_WRITE;
                 vbDesc.ByteWidth = (uint)(totalVBSize * 1.5f);
                 rhiData.VertexBuffer = rc.CreateVertexBuffer(ref vbDesc);
+                rhiData.GeomMesh.mCoreObject.BindVertexBuffer(EVertexSteamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
             }
 
             uint totalIBSize = (uint)(draw_data.TotalIdxCount * sizeof(ushort));
@@ -217,6 +224,7 @@ namespace EngineNS.EGui
                 ibDesc.ByteWidth = (uint)(totalIBSize * 1.5f);
                 ibDesc.Type = EIndexBufferType.IBT_Int16;
                 rhiData.IndexBuffer = rc.CreateIndexBuffer(ref ibDesc);
+                rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
             }
 
             rhiData.DataVB.Clear(false);
@@ -237,6 +245,9 @@ namespace EngineNS.EGui
 
             rhiData.IndexBuffer.mCoreObject.UpdateGPUBuffData(rhiData.CmdList.mCoreObject,
                 rhiData.DataIB.UnsafeAddressAt(0).ToPointer(), (uint)(indexOffsetInElements * sizeof(ushort)));
+
+            rhiData.GeomMesh.mCoreObject.BindVertexBuffer(EVertexSteamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
+            rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
 
             // Setup orthographic projection matrix into our constant buffer
             var io = ImGuiAPI.GetIO();
@@ -266,8 +277,10 @@ namespace EngineNS.EGui
 
                 drawCmd.SetRenderPipeline(renderer.Pipeline.mCoreObject);
 
-                drawCmd.SetVertexBuffer(0, rhiData.VertexBuffer.mCoreObject, 0, (uint)sizeof(ImDrawVert));
-                drawCmd.SetIndexBuffer(rhiData.IndexBuffer.mCoreObject);
+                rhiData.GeomMesh.mCoreObject.ApplyGeometry(drawCmd, new IDrawCall(), 0);
+
+                //drawCmd.SetVertexBuffer(0, rhiData.VertexBuffer.mCoreObject, 0, (uint)sizeof(ImDrawVert));
+                //drawCmd.SetIndexBuffer(rhiData.IndexBuffer.mCoreObject);
                 drawCmd.SetViewport(SwapChainBuffer.ViewPort.mCoreObject);
                 drawCmd.PSSetSampler(0, renderer.SamplerState.mCoreObject);
                 drawCmd.VSSetConstantBuffer(0, renderer.FontCBuffer.mCoreObject);

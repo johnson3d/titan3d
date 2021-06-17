@@ -31,6 +31,7 @@ vBOOL IGLShaderProgram::LinkShaders(IRenderContext* rc)
 {
 	auto sdk = GLSdk::ImmSDK;
 	ASSERT(mProgram);
+	ASSERT(mProgram->IsValidBuffer());
 	ASSERT(sdk->IsGLThread());
 	RHI_ASSERT(mInputLayout != nullptr);
 
@@ -69,16 +70,23 @@ vBOOL IGLShaderProgram::LinkShaders(IRenderContext* rc)
 
 	for (size_t i = 0; i < mInputLayout->mDesc.Layouts.size(); i++)
 	{
-		//attribName = "in_+ elem.SemanticName + std::to_string(elem.SemanticIndex);;
+		GLint loc = -1;
+
 		auto& elem = mInputLayout->mDesc.Layouts[i];
 		std::string attribName = std::string("in_var_") + elem.SemanticName.c_str();
 		if (elem.SemanticIndex > 0)
 			attribName += std::to_string(elem.SemanticIndex);
 
-		GLint loc;
 		sdk->GetAttribLocation(&loc, mProgram, attribName.c_str());
-
-		mVBSlotMapper[elem.InputSlot] = loc;
+		if (loc == -1)
+		{
+			if (elem.SemanticIndex == 0)
+			{
+				attribName = std::string("in_var_") + elem.SemanticName.c_str() + "0";
+				sdk->GetAttribLocation(&loc, mProgram, attribName.c_str());
+			}
+		}
+		elem.GLAttribLocation = loc;
 	}
 	return TRUE;
 }
@@ -86,10 +94,10 @@ vBOOL IGLShaderProgram::LinkShaders(IRenderContext* rc)
 /*
 glBindBufferBase(GL_UNIFORM_BUFFER, 0, rain_buffer);
 glGetUniformLocation();
-glGetUniformBlockIndex();//�õ� Uniform Block ����������
-glGetUniformIndices();//����һ�� Uniform Block �ڱ������ֵ����飨��������������Ȼ�󷵻���Щ����������������������ĸ�������
-glGetActiveUniformsiv();//��ָ�� GL_UNIFORM_BLOCK_DATA_SIZE ����ʱ�����Բ�ѯ Block �ռ�Ĵ�С����������Ϊ�洢 Uniform Block �Ļ����������ݷ���ռ�
-glGetActiveUniformsiv()// ��ָ�� GL_UNIFORM_OFFSET ����ʱ��ͨ�� Uniform Block �ڱ����������õ� Block ��ͬ������ƫ����
+glGetUniformBlockIndex();
+glGetUniformIndices();
+glGetActiveUniformsiv();
+glGetActiveUniformsiv()
 */
 
 void IGLShaderProgram::ApplyShaders(ICommandList* cmd)
