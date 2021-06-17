@@ -594,7 +594,7 @@ namespace AssetImportAndExport
 			float* skinWeightsStream = new float[4 * renderVertexCount];
 
 			mMeshPrimitives = new IMeshPrimitives();
-			mMeshPrimitives->Init(rc, meshDesc->Name, meshDesc->RenderAtom);
+			mMeshPrimitives->Init(rc, meshDesc->Name.GetString(), meshDesc->RenderAtom);
 
 			if (meshDesc->HaveSkin)
 			{

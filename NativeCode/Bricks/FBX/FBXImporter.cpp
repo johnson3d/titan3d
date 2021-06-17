@@ -158,7 +158,7 @@ namespace AssetImportAndExport::FBX
 		return new FBXMeshImporter(this, meshIndex);
 	}
 
-	const AssetImportAndExport::FBX::FBXAnimImportDesc* FBXImporter::GetFBXAnimDesc(UINT index) const
+	const FBXAnimImportDesc* FBXImporter::GetFBXAnimDesc(UINT index) const
 	{
 		if (CheckValided && mFBXFileImportDesc->AnimNum> index)
 		{
@@ -167,7 +167,7 @@ namespace AssetImportAndExport::FBX
 		return nullptr;
 	}
 
-	AssetImportAndExport::FBX::FBXMeshImporter* FBXImporter::CreateAnimImporter(UINT animIndex)
+	FBXAnimImporter* FBXImporter::CreateAnimImporter(UINT animIndex)
 	{
 		return new FBXAnimImporter(this, animIndex);
 	}

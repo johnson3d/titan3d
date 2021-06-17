@@ -2,6 +2,7 @@
 #include "../../RHI/PreHead.h"
 #include "fbxsdk.h"
 #include "../../Base/CoreSDK.h"
+#include "../../Base/String/vfxstring.h"
 
 using namespace EngineNS;
 
@@ -102,6 +103,10 @@ namespace AssetImportAndExport::FBX
 	public:
 		float Duration;
 		float SampleRate;
+		EFBXObjectType AnimationType;
+	public:
+		const FbxAnimStack* GetFBXAnimStack() const { return AnimStack; }
+		const FbxAnimLayer* GetFBXAnimLayer() const { return AnimLayer; }
 	private:
 		FbxAnimStack* AnimStack;
 		FbxAnimLayer* AnimLayer;

@@ -25,7 +25,7 @@ namespace AssetImportAndExport
             {
                 get
                 {
-                    return mInner->NativeSuper->Name;
+                    return mInner->NativeSuper->Name.Text;
                 }
             }
             public AssetImportAndExport.FBX.EFBXObjectType Type
@@ -165,14 +165,14 @@ namespace AssetImportAndExport
             {
                 get
                 {
-                    return mInner.FileName;
+                    return mInner.FileName.Text;
                 }
             }
             public string Creater
             {
                 get
                 {
-                    return mInner.Creater;
+                    return mInner.Creater.Text;
                 }
             }
             public AssetImportAndExport.FBX.SystemUnit FileSystemUnit

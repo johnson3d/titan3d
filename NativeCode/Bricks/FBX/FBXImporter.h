@@ -8,6 +8,15 @@ namespace AssetImportAndExport
 	namespace FBX
 	{
 		class FBXMeshImporter;
+		class FBXAnimImporter;
+
+		enum TR_ENUM(SV_EnumNoFlags)
+			EFBXImportResult
+		{
+			FIR_Sucess = 0,
+				FIR_Failed,
+				FIR_Cancel,
+		};
 
 		class TR_CLASS(SV_Dispose = delete self)
 			FBXImporter
@@ -22,7 +31,7 @@ namespace AssetImportAndExport
 			const FBXMeshImportDesc* GetFBXMeshDescs(UINT index) const;
 			FBXMeshImporter* CreateMeshImporter(UINT meshIndex);
 			const FBXAnimImportDesc* GetFBXAnimDesc(UINT index) const;
-			FBXMeshImporter* CreateAnimImporter(UINT meshIndex);
+			FBXAnimImporter* CreateAnimImporter(UINT meshIndex);
 		protected:
 			void ExtractFBXFileDesc(fbxsdk::FbxScene* scene, fbxsdk::FbxImporter * importer);
 			void ExtractFBXOBjectDescs(fbxsdk::FbxScene * scene);

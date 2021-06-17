@@ -12,14 +12,6 @@ namespace AssetImportAndExport
 {
 	namespace FBX
 	{
-		enum TR_ENUM(SV_EnumNoFlags)
-			EFBXImportResult
-		{
-			FIR_Sucess = 0,
-				FIR_Failed,
-				FIR_Cancel,
-		};
-
 		struct MeshVertex
 		{
 			v3dxVector3 Postion;

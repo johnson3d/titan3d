@@ -26,11 +26,8 @@ namespace EngineNS.Animation.Base
 
         public AnimatableObjectClassDesc()
         {
-            unsafe
-            {
-                mTypeStr = *VNameString.CreateInstance();
-                mName = *VNameString.CreateInstance();
-            }
+            mTypeStr = new VNameString();
+            mName = new VNameString();
         }
     }
     public class AnimatableObjectPropertyDesc : IO.BaseSerializer, IAnimatablePropertyDesc

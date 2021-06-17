@@ -162,6 +162,13 @@ namespace EngineNS.Graphics.Mesh
                         mesh.NativeSuper.Release();
                     }
                 }
+                for(uint i = 0; i< fileDesc.AnimNum; ++i)
+                {
+                   using (var animImporter = mFBXImporter.CreateAnimImporter(i))
+                    {
+                        
+                    }
+                }
                 mFBXImporter.Dispose();
                 return true;
             }
