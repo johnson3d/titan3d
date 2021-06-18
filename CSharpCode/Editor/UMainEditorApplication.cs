@@ -14,7 +14,7 @@ namespace EngineNS.Editor
             mCpuProfiler = new Editor.Forms.UCpuProfiler();            
             mMetaViewer = new Editor.MetaViewEditor();            
             mMainInspector = new Forms.UInspector();
-            WorldViewportSlate = new UWorldViewportSlate(true);
+            WorldViewportSlate = new UEditorWorldViewportSlate(true);
             mWorldOutliner = new Editor.Forms.UWorldOutliner();
             
             mWorldOutliner.TestUWorldOutliner(this);
@@ -25,7 +25,7 @@ namespace EngineNS.Editor
         public Editor.Forms.UInspector mMainInspector;
         public Editor.MetaViewEditor mMetaViewer = null;
 
-        public UWorldViewportSlate WorldViewportSlate = null;
+        public UEditorWorldViewportSlate WorldViewportSlate = null;
         public EGui.Controls.ContentBrowser ContentBrowser = new EGui.Controls.ContentBrowser();
         public override void Cleanup()
         {

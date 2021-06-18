@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.EGui.Slate
 {
-    public class BaseRenderer
+    public class UBaseRenderer
     {
         public RHI.CRenderPipeline Pipeline;
         public RHI.CSamplerState SamplerState;

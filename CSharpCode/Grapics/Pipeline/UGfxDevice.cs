@@ -40,7 +40,7 @@ namespace EngineNS.Graphics.Pipeline
                 return false;
             }
 
-            SlateRenderer = new EGui.Slate.BaseRenderer();
+            SlateRenderer = new EGui.Slate.UBaseRenderer();
             SlateRenderer.Initialize(RName.GetRName("shaders/slate/imgui-vertex.hlsl", RName.ERNameType.Engine), RName.GetRName("shaders/slate/imgui-frag.hlsl", RName.ERNameType.Engine));
 
             var rpType = Rtti.UTypeDescManager.Instance.GetTypeFromString(engine.Config.MainWindowRPolicy);
@@ -132,7 +132,7 @@ namespace EngineNS.Graphics.Pipeline
         public RHI.UTextureManager TextureManager { get; } = new RHI.UTextureManager();
         public Shader.UMaterialManager MaterialManager { get; private set; } = new Shader.UMaterialManager();
         public Shader.UMaterialInstanceManager MaterialInstanceManager { get; private set; } = new Shader.UMaterialInstanceManager();
-        public EGui.Slate.BaseRenderer SlateRenderer { get; private set; }
+        public EGui.Slate.UBaseRenderer SlateRenderer { get; private set; }
         public Graphics.Pipeline.Shader.UEffectManager EffectManager
         {
             get;

@@ -4,12 +4,12 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public class UGameViewportState : EngineNS.Editor.UWorldViewportSlate
+    public class UGameViewportState : EngineNS.EGui.Slate.UWorldViewportSlate
     {
         public UGameViewportState(bool regRoot)
             : base(regRoot)
         {
-
+            CameraController = new Editor.Controller.EditorCameraController();
         }
         public override unsafe void OnDraw()
         {
