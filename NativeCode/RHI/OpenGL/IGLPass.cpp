@@ -303,8 +303,7 @@ vBOOL IGLDrawCall::ApplyGeomtry(ICommandList* cmd, vBOOL bImmCBuffer)
 	auto geoMesh = MeshPrimitives->GetGeomtryMesh();
 	geoMesh->ApplyGeometry(cmd, this, bImmCBuffer);
 	
-	auto glCmd = ((IGLCommandList*)cmd);
-	
+	//auto glCmd = ((IGLCommandList*)cmd);
 
 	if (AttachVBs != nullptr)
 		AttachVBs->ApplyVBs(cmd, this, bImmCBuffer);

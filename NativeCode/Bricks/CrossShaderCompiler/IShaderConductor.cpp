@@ -1,5 +1,6 @@
 #include "IShaderConductor.h"
 #include "../../RHI/IShader.h"
+#include "../../RHI/ShaderReflector.h"
 #include "../../Base/io/vfxfile.h"
 #include "../../Base/io/MemStream.h"
 
