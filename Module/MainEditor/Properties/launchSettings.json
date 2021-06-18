@@ -2,7 +2,7 @@
   "profiles": {
     "MainEditor": {
       "commandName": "Project",
-      "commandLineArgs": "config=$(SolutionDir)content\\EngineConfigForGL.cfg",
+      "commandLineArgs": "config=$(SolutionDir)content\\AloneGame.cfg",
       "workingDirectory": "..\\..\\binaries\\",
       "nativeDebugging": true
     }

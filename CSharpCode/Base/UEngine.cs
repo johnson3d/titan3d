@@ -43,6 +43,8 @@ namespace EngineNS
         [Rtti.Meta]
         public Vector4 MainWindow { get; set; } = new Vector4(100, 100, 1280, 720);
         [Rtti.Meta]
+        public bool SupportMultWindows { get; set; } = true;
+        [Rtti.Meta]
         public bool DoUnitTest { get; set; } = true;
         [Rtti.Meta]
         public ERHIType RHIType { get; set; } = ERHIType.RHT_D3D11;

@@ -42,6 +42,7 @@ namespace EngineNS.Graphics.Pipeline
             SwapChainBuffer.SwapChainIndex = 0;
             SwapChainBuffer.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)w, (uint)h);
             SwapChainBuffer.CreateGBuffer(0, SwapChain.mCoreObject.GetTexture2D());
+            SwapChainBuffer.FrameBuffers.mCoreObject.SetSwapChain(SwapChain.mCoreObject);
 
             SwapChainPassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionClear;
             SwapChainPassDesc.mFBStoreAction_Color = FrameBufferStoreAction.StoreActionStore;
@@ -81,6 +82,7 @@ namespace EngineNS.Graphics.Pipeline
                 if (SwapChain != null)
                 {
                     SwapChainBuffer.CreateGBuffer(0, SwapChain.mCoreObject.GetTexture2D());
+                    SwapChainBuffer.FrameBuffers.mCoreObject.SetSwapChain(SwapChain.mCoreObject);
                 }
             }
         }

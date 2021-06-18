@@ -1048,14 +1048,22 @@ bool IGLRenderContext::Init2(void* winHandle)
 //#endif
 //	}
 	
-	const int iContextAttributeList[] =
+	mContextAttributeList.clear();
+	mContextAttributeList.push_back(WGL_CONTEXT_MAJOR_VERSION_ARB);
+	mContextAttributeList.push_back(MajorVersion);
+	mContextAttributeList.push_back(WGL_CONTEXT_MINOR_VERSION_ARB);
+	mContextAttributeList.push_back(MinorVersion);
+	mContextAttributeList.push_back(WGL_CONTEXT_FLAGS_ARB);
+	mContextAttributeList.push_back(WGL_CONTEXT_DEBUG_BIT_ARB | WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB);
+	mContextAttributeList.push_back(0);
+	/*const int iContextAttributeList[] =
 	{
 		WGL_CONTEXT_MAJOR_VERSION_ARB, MajorVersion,
 		WGL_CONTEXT_MINOR_VERSION_ARB, MinorVersion,
 		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB | WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
 		0
-	};
-	mContext = wglCreateContextAttribsARB(mDC, NULL, iContextAttributeList);
+	};*/
+	mContext = wglCreateContextAttribsARB(mDC, NULL, &mContextAttributeList[0]);
 	auto errorcode = GetLastError();
 	if (mContext == 0)
 	{

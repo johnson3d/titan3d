@@ -5,8 +5,27 @@ using SDL2;
 
 namespace EngineNS.Graphics.Pipeline
 {
+    public interface IRootForm
+    {
+        bool Visible { get; set; }
+        void OnDraw();
+        uint DockId { get; set; }
+        ImGuiCond_ DockCond { get; set; }
+    }
     public class USlateApplication
     {
+        public static List<IRootForm> RootForms { get; } = new List<IRootForm>();
+        public static void RegRootForm(IRootForm form)
+        {
+            if (RootForms.Contains(form))
+                return;
+            RootForms.Add(form);
+        }
+        public static void UnregRootForm(IRootForm form)
+        {
+            RootForms.Remove(form);
+        }
+
         public UPresentWindow NativeWindow;
         
         public IntPtr mImGuiContext;
@@ -15,13 +34,16 @@ namespace EngineNS.Graphics.Pipeline
         bool[] MousePressed = new bool[3] { false, false, false };
         IntPtr[] MouseCursors = new IntPtr[(int)ImGuiMouseCursor_.ImGuiMouseCursor_COUNT];
 
-        public bool CreateNativeWindow(string title, int x, int y, int w, int h)
+        public bool CreateNativeWindow(UEngine engine, string title, int x, int y, int w, int h)
         {
             NativeWindow = new UPresentWindow();
             SDL.SDL_WindowFlags sdl_flags = 0;
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
-            sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN;
-            sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
+            if (engine.Config.SupportMultWindows)
+            {
+                sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN;
+                sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
+            }
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
             return NativeWindow.CreateNativeWindow(title, x, y, w, h, sdl_flags) != IntPtr.Zero;
         }
@@ -44,7 +66,8 @@ namespace EngineNS.Graphics.Pipeline
                 configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
                 //configFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
                 configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_DockingEnable;           // Enable Docking
-                configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+                if (UEngine.Instance.Config.SupportMultWindows)
+                    configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
                 //io.ConfigViewportsNoAutoMerge = true;
                 //io.ConfigViewportsNoTaskBarIcon = true;
                 io.ConfigFlags = configFlags;
@@ -303,8 +326,12 @@ namespace EngineNS.Graphics.Pipeline
                 ImGuiAPI.Render();
                 unsafe
                 {
-                    var draw_data = ImGuiAPI.GetDrawData();
-                    EGui.UDockWindowSDL.RenderImDrawData(ref *draw_data, NativeWindow.SwapChainBuffer, mDrawData);
+                    if (UEngine.Instance.Config.SupportMultWindows == false)
+                    {
+                        var draw_data = ImGuiAPI.GetDrawData();
+                        EGui.UDockWindowSDL.RenderImDrawData(ref *draw_data, NativeWindow.SwapChainBuffer, mDrawData);
+                        NativeWindow.SwapChain.mCoreObject.Present(0, 0);
+                    }
                 }
 
                 // Update and Render additional Platform Windows

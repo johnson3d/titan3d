@@ -22,7 +22,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
     }
 
-    public class UShaderEditor : Editor.IAssetEditor, IO.ISerializer, ITickable, Editor.IRootForm
+    public class UShaderEditor : Editor.IAssetEditor, IO.ISerializer, ITickable, Graphics.Pipeline.IRootForm
     {
         public UShaderEditor()
         {
@@ -41,7 +41,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public bool Visible { get; set; } = true;
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-        public Editor.IRootForm GetRootForm()
+        public Graphics.Pipeline.IRootForm GetRootForm()
         {
             return this;
         }

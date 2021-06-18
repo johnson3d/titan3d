@@ -8,23 +8,13 @@ namespace EngineNS.Editor
     public class UMainEditorApplication : Graphics.Pipeline.USlateApplication, ITickable
     {
         public UAssetEditorManager AssetEditorManager { get; } = new UAssetEditorManager();
-        public static List<IRootForm> RootForms { get; } = new List<IRootForm>();
-        public static void RegRootForm(IRootForm form)
-        {
-            if (RootForms.Contains(form))
-                return;
-            RootForms.Add(form);
-        }
-        public static void UnregRootForm(IRootForm form)
-        {
-            RootForms.Remove(form);
-        }
+        
         public UMainEditorApplication()
         {
             mCpuProfiler = new Editor.Forms.UCpuProfiler();            
             mMetaViewer = new Editor.MetaViewEditor();            
             mMainInspector = new Forms.UInspector();
-            WorldViewportSlate = new UWorldViewportSlate(true);            
+            WorldViewportSlate = new UWorldViewportSlate(true);
             mWorldOutliner = new Editor.Forms.UWorldOutliner();
             
             mWorldOutliner.TestUWorldOutliner(this);
@@ -39,7 +29,7 @@ namespace EngineNS.Editor
         public EGui.Controls.ContentBrowser ContentBrowser = new EGui.Controls.ContentBrowser();
         public override void Cleanup()
         {
-            RootForms.Clear();
+            Graphics.Pipeline.USlateApplication.RootForms.Clear();
             UEngine.Instance?.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
@@ -331,13 +321,5 @@ namespace EngineNS.Editor
             OnDrawSlate();
         }
         #endregion
-    }
-
-    public interface IRootForm
-    {
-        bool Visible { get; set; }
-        void OnDraw();
-        uint DockId { get; set; }
-        ImGuiCond_ DockCond { get; set; }
     }
 }

@@ -20,11 +20,21 @@ namespace EngineNS.Graphics.Pipeline
             MainWindow = Rtti.UTypeDescManager.CreateInstance(wtType) as Graphics.Pipeline.USlateApplication;
             var winRect = engine.Config.MainWindow;
 
-            //if (false == MainWindow.CreateNativeWindow("T3D", (int)winRect.X, (int)winRect.Y, (int)winRect.Z, (int)winRect.W))
-            if (false == MainWindow.CreateNativeWindow("T3D", (int)winRect.X, (int)winRect.Y, (int)1, (int)1))
+            if(engine.Config.SupportMultWindows)
             {
-                return false;
-            }   
+                if (false == MainWindow.CreateNativeWindow(engine, "T3D", (int)winRect.X, (int)winRect.Y, (int)1, (int)1))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (false == MainWindow.CreateNativeWindow(engine, "T3D", (int)winRect.X, (int)winRect.Y, (int)winRect.Z, (int)winRect.W))
+                {
+                    return false;
+                }
+            }
+            
             if (InitGPU(engine.Config.AdaperId, engine.Config.RHIType, MainWindow.NativeWindow.HWindow, engine.Config.HasDebugLayer) == false)
             {
                 return false;

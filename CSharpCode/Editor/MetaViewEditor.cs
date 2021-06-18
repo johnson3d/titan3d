@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Editor
 {
-    public class MetaViewEditor : IRootForm
+    public class MetaViewEditor : Graphics.Pipeline.IRootForm
     {
         public MetaViewEditor()
         {

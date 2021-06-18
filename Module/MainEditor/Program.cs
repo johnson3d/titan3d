@@ -46,7 +46,7 @@ namespace MainEditor
                 if (EngineNS.UEngine.Instance.Tick() == false)
                     break;
             }
-
+            
             var wr = new WeakReference(EngineNS.UEngine.Instance);
             EngineNS.UEngine.Instance.FinalCleanup();
             return wr;
