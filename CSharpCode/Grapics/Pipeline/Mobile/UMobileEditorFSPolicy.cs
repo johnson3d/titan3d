@@ -63,9 +63,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     public class UEditorFinalProcessor : Common.USceenSpaceProcessor
     {
         public UMobileEditorFSPolicy Manager;
-        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, float x, float y)
+        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
         {
-            await base.Initialize(policy, shading, x, y);
+            await base.Initialize(policy, shading, rtFmt, dsFmt, x, y);
 
             var hollowShading = shading as UEditorFinalShading;
             hollowShading.Manager = policy as UMobileEditorFSPolicy;
@@ -205,7 +205,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             //}
 
             await PickedProxiableManager.Initialize(this, x, y);
-            await EditorFinalProcessor.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UEditorFinalShading>(), x, y);
+            await EditorFinalProcessor.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UEditorFinalShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_UNKNOWN, x, y);
 
             mShadowMap = new Shadow.UShadowMap();
             mShadowMap.Initialize(x, y);

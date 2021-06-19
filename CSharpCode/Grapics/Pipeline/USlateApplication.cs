@@ -27,7 +27,8 @@ namespace EngineNS.Graphics.Pipeline
         }
 
         public UPresentWindow NativeWindow;
-        
+        public virtual EGui.Slate.UWorldViewportSlate GetWorldViewportSlate() { return null; }
+
         public IntPtr mImGuiContext;
         public EGui.UDockWindowSDL.UImDrawDataRHI mDrawData = new EGui.UDockWindowSDL.UImDrawDataRHI();
         

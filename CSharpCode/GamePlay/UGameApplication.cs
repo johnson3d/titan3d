@@ -7,8 +7,13 @@ namespace EngineNS.GamePlay
     class UGameApplication : Graphics.Pipeline.USlateApplication, ITickable
     {
         public UGameViewportState WorldViewportSlate = null;
+        public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
+        {
+            return WorldViewportSlate;
+        }
         public override void Cleanup()
         {
+            UEngine.Instance.EndPlayInEditor();
             Graphics.Pipeline.USlateApplication.RootForms.Clear();
             WorldViewportSlate?.Cleanup();
             WorldViewportSlate = null;
@@ -25,6 +30,11 @@ namespace EngineNS.GamePlay
             await WorldViewportSlate.Initialize(this, RenderPolicy, 0, 1);
             WorldViewportSlate.ShowCloseButton = true;
             UEngine.Instance.TickableManager.AddTickable(this);
+
+            var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current);
+            UEngine.Instance.MacrossModule.ReloadAssembly(root + "/net5.0/GameProject.dll");
+
+            await UEngine.Instance.StartPlayInEditor(RName.GetRName("Demo0.mcrs"));
             return true;
         }
         public override void OnResize(float x, float y)

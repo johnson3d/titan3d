@@ -26,6 +26,10 @@ namespace EngineNS.Editor
         public Editor.MetaViewEditor mMetaViewer = null;
 
         public UEditorWorldViewportSlate WorldViewportSlate = null;
+        public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
+        {
+            return WorldViewportSlate;
+        }
         public EGui.Controls.ContentBrowser ContentBrowser = new EGui.Controls.ContentBrowser();
         public override void Cleanup()
         {

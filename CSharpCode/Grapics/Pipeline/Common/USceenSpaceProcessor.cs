@@ -16,15 +16,15 @@ namespace EngineNS.Graphics.Pipeline.Common
             GBuffers?.Cleanup();
             GBuffers = null;
         }
-        public virtual async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, float x, float y)
+        public virtual async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
         {
             ScreenDrawPolicy = new Shader.CommanShading.UBasePassPolicy();
             await ScreenDrawPolicy.Initialize(x, y);
             ScreenDrawPolicy.mBasePassShading = shading;
 
             GBuffers.SwapChainIndex = -1;
-            GBuffers.Initialize(1, EPixelFormat.PXF_UNKNOWN, (uint)x, (uint)y);
-            GBuffers.CreateGBuffer(0, EPixelFormat.PXF_R16G16_FLOAT, (uint)x, (uint)y);            
+            GBuffers.Initialize(1, dsFmt, (uint)x, (uint)y);
+            GBuffers.CreateGBuffer(0, rtFmt, (uint)x, (uint)y);            
             GBuffers.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
