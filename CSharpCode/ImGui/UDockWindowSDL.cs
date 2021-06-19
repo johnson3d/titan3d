@@ -263,7 +263,7 @@ namespace EngineNS.EGui
                 1.0f);
 
             var renderer = UEngine.Instance.GfxDevice.SlateRenderer;
-            renderer.FontCBuffer.mCoreObject.SetVarValuePtr(0, &mvp, sizeof(Matrix), 0);
+            renderer.FontCBuffer.mCoreObject.SetVarValuePtr(0, &mvp, sizeof(Matrix), 0);            
 
             var fb_scale = io.DisplayFramebufferScale;
             draw_data.ScaleClipRects(ref fb_scale);
