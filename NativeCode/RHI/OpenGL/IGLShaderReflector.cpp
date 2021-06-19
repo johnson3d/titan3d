@@ -219,12 +219,21 @@ void IGLShaderReflector::ReflectProgram(IGLRenderContext* rc, const std::shared_
 		case GL_SAMPLER_3D:
 		case GL_SAMPLER_CUBE:
 		{
+			std::string spirv_name_samp = "gDefaultSamplerState";
 			std::string spirv_name = varNames;// "SPIRV_Cross_Combined" + mTextures[i].Name + "Samp_" + mTextures[i].Name;
 			if (spirv_name.find("SPIRV_Cross_Combined") == 0)
 			{
 				spirv_name = spirv_name.substr(strlen("SPIRV_Cross_Combined"));
 				auto pos = spirv_name.find("Samp_");
-				spirv_name = spirv_name.substr(0, pos);
+				if (pos == std::string::npos)
+				{
+					pos = spirv_name.find("gDefaultSamplerState");
+				}
+				if (pos != std::string::npos)
+				{
+					spirv_name_samp = spirv_name.substr(pos);
+					spirv_name = spirv_name.substr(0, pos);
+				}
 			}
 
 			TSBindInfo tDesc;
@@ -233,7 +242,7 @@ void IGLShaderReflector::ReflectProgram(IGLRenderContext* rc, const std::shared_
 			tDesc.BindCount = 1;
 
 			TSBindInfo sDesc;
-			sDesc.Name = "Samp_" + spirv_name;
+			sDesc.Name = spirv_name_samp;// "Samp_" + spirv_name;
 			GL_DescSetBindPoint(shaderType, sDesc, bindLoc);
 			sDesc.BindCount = 1;
 
