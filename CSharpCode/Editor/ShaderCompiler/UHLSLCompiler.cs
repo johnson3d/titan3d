@@ -100,18 +100,31 @@ namespace EngineNS.Editor.ShaderCompiler
             RHI.CShaderDesc desc = new RHI.CShaderDesc(type);
             Material = mtl;
             MdfQueueType = Rtti.UTypeDesc.TypeOf(mdfType);
-            IShaderDefinitions defPtr = new IShaderDefinitions((void*)0);
-            if (defines != null)
-                defPtr = defines.mCoreObject;
+            //IShaderDefinitions defPtr = new IShaderDefinitions((void*)0);
+            unsafe
+            {
+                using (IShaderDefinitions defPtr = IShaderDefinitions.CreateInstance())
+                {
+                    if (defines != null)
+                    {
+                        defPtr.MergeDefinitions(defines.mCoreObject);
+                    }
 
-            var cfg = UEngine.Instance.Config;
-            var ok = mCoreObject.CompileShader(desc.mCoreObject, shader, entry, type, sm, defPtr,
-                        bDebugShader, cfg.CookDXBC, cfg.CookGLSL, cfg.CookMETAL);
+                    var cfg = UEngine.Instance.Config;
+                    if (cfg.CookGLSL)
+                    {
+                        defPtr.AddDefine("RHI_OGL", "1");
+                    }
 
-            if (ok == false)
-                return null;
+                    var ok = mCoreObject.CompileShader(desc.mCoreObject, shader, entry, type, sm, defPtr,
+                                bDebugShader, cfg.CookDXBC, cfg.CookGLSL, cfg.CookMETAL);
 
-            return desc;
+                    if (ok == false)
+                        return null;
+
+                    return desc;
+                }
+            }   
         }
     }
 }

@@ -11,7 +11,7 @@ class IConstantBuffer;
 struct TSBindInfo;
 class ShaderReflector;
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+enum TR_ENUM()
 EShaderType
 {
 	EST_UnknownShader,
@@ -32,7 +32,7 @@ inline EShaderType GetShaderTypeFrom(std::string sm)
 	return EST_VertexShader;
 }
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IShaderDesc : public VIUnknown
 {
 private:
@@ -122,7 +122,7 @@ public:
 	UINT FindSamplerDesc(const char* name);
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IShader : public IRenderResource
 {
 protected:
@@ -158,7 +158,7 @@ public:
 	const TSBindInfo* FindSamplerBindInfo(const char* name);
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS(SV_Dispose=self->Release())
 IShaderDefinitions : public VIUnknown
 {
 public:
