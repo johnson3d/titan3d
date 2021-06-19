@@ -50,9 +50,9 @@ void IGLSwapChain::BindCurrent()
 	if (rc == nullptr)
 		return;
 #if defined(PLATFORM_WIN)
-	wglMakeCurrent(rc->mDC, rc->mContext);
+	//wglMakeCurrent(rc->mDC, rc->mContext);
 	//wglMakeCurrent(mDC, (HGLRC)&rc->mContextAttributeList[0]);
-	GLCheck;
+	//GLCheck;
 #else
 	eglMakeCurrent(rc->mEglDisplay, mEglSurface, mEglSurface, rc->mEglContext);
 	GLCheck;

@@ -34,7 +34,12 @@ namespace CppWeaving.Cpp2CS
 						tmp.ClassType = UClass.EClassType.PointerType;
 					}
 
-					tmp.ModuleName = tu.Hpp.Module;
+                    ClangSharp.Interop.CXFile tfile;
+                    uint line, col, offset;
+                    decl.Location.GetFileLocation(out tfile, out line, out col, out offset);
+					var hpp = HppCollector.Instance.FindHpp(tfile.ToString());
+
+                    tmp.ModuleName = hpp.Module;
 					tmp.CompileUnit = tu;
 					tmp.Decl = decl;
 					ClassTypes.Add(fullname, tmp);
@@ -53,7 +58,12 @@ namespace CppWeaving.Cpp2CS
 				UEnum tmp;
 				if (EnumTypes.TryGetValue(fullname, out tmp) == false) {
 					tmp = new UEnum();
-					tmp.ModuleName = tu.Hpp.Module;
+                    ClangSharp.Interop.CXFile tfile;
+                    uint line, col, offset;
+                    decl.Location.GetFileLocation(out tfile, out line, out col, out offset);
+                    var hpp = HppCollector.Instance.FindHpp(tfile.ToString());
+
+                    tmp.ModuleName = hpp.Module;
 					tmp.Namespace = ns;
 					tmp.Name = name;
 					tmp.CompileUnit = tu;
@@ -76,7 +86,12 @@ namespace CppWeaving.Cpp2CS
 				UDelegate tmp;
 				if (DelegateTypes.TryGetValue(fullname, out tmp) == false) {
 					tmp = new UDelegate();
-					tmp.ModuleName = tu.Hpp.Module;
+                    ClangSharp.Interop.CXFile tfile;
+                    uint line, col, offset;
+                    decl.Location.GetFileLocation(out tfile, out line, out col, out offset);
+                    var hpp = HppCollector.Instance.FindHpp(tfile.ToString());
+
+                    tmp.ModuleName = hpp.Module;
 					tmp.Namespace = ns;
 					tmp.Name = name;
 					tmp.CompileUnit = tu;

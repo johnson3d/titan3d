@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CppWeavingTools": {
+      "commandName": "Project",
+      "commandLineArgs": "vcxproj=$(SolutionDir)Core.Window\\Core.Window.vcxproj CppOut=$(SolutionDir)codegen\\NativeBinder\\ CsOut=$(SolutionDir)codegen\\NativeBinder\\ ModuleNC=EngineNS.CoreSDK.CoreModule Pch=$(SolutionDir)Core.Window\\pch.h TargetCppPOD=$(SolutionDir)codegen\\NativeBinder\\PODStructDefine.h"
+    }
+  }
+}

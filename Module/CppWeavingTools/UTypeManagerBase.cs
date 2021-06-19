@@ -37,7 +37,7 @@ namespace CppWeaving
         {
             return file.Substring(0, file.LastIndexOf("/") + 1);
         }
-        static string NormalizePath(string path, out bool error)
+        public static string NormalizePath(string path, out bool error)
         {
             error = false;
 

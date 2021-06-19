@@ -20,18 +20,19 @@ namespace CppWeaving
             UProjectSettings.ModuleNC = FindArgument(args, "ModuleNC=");
             settings.CppOutputDir = FindArgument(args, "CppOut=");
             settings.CsOutputDir = FindArgument(args, "CsOut=");
-            var mHppCollector = new HppCollector();
-            mHppCollector.Collect(vcxproj, @"'$(Configuration)|$(Platform)'=='Debug|x64'");
 
-            foreach(var i in mHppCollector.Headers)
+            HppCollector.Instance.Reset();
+            HppCollector.Instance.Collect(vcxproj, @"'$(Configuration)|$(Platform)'=='Debug|x64'");
+
+            foreach(var i in HppCollector.Instance.Headers)
             {
                 settings.ParseSources.Add(i.Value);
             }
-            foreach (var i in mHppCollector.IncludePath)
+            foreach (var i in HppCollector.Instance.IncludePath)
             {
                 settings.Includes.Add(i);
             }
-            foreach (var i in mHppCollector.MacroDefines)
+            foreach (var i in HppCollector.Instance.MacroDefines)
             {
                 settings.MacroDefines.Add(i);
             }

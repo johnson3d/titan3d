@@ -8,12 +8,34 @@ namespace CppWeaving
 {
     public class HppCollector
     {
+        public static HppCollector Instance = new HppCollector();
+        public void Reset()
+        {
+            Headers.Clear();
+            IncludePath.Clear();
+            MacroDefines.Clear();
+        }
         public class HppUnit
         {
             public string File;
             public string Module;
         }
         public Dictionary<string, HppUnit> Headers = new Dictionary<string, HppUnit>();
+        public HppUnit FindHpp(string file)
+        {
+            bool error;
+            file = UTypeManagerBase.NormalizePath(file, out error);
+            file = file.ToLower();
+            lock (this)
+            {
+                HppUnit result;
+                if (Headers.TryGetValue(file, out result))
+                {
+                    return result;
+                }
+                return null;
+            }
+        }
 
         public List<string> IncludePath = new List<string>();
         public List<string> MacroDefines = new List<string>();
@@ -176,7 +198,8 @@ namespace CppWeaving
                         tmp.File = hf;
                         tmp.Module = UTypeManagerBase.GetPureFileName(vcxFile);
                         tmp.Module = tmp.Module.Replace('.', '_');
-                        headers[hf] = tmp;
+
+                        headers[hf.ToLower()] = tmp;
                         bFinded = true;
                     }
                 }

@@ -2,7 +2,7 @@
   "profiles": {
     "MainEditor": {
       "commandName": "Project",
-      "commandLineArgs": "config=$(SolutionDir)content\\EngineConfig.cfg",
+      "commandLineArgs": "config=$(SolutionDir)content\\EngineConfigForGL.cfg",
       "workingDirectory": "..\\..\\binaries\\",
       "nativeDebugging": true
     }
