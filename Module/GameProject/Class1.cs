@@ -108,45 +108,48 @@ namespace GameProject
                     //meshNode1.Placement.Position = meshNode1.Placement.Position;
                 }
 
-                var terrainMesh = new EngineNS.Graphics.Mesh.UMesh();
-                var grid = EngineNS.Graphics.Mesh.CMeshDataProvider.MakeGridIndices(127, 127);
-                var gridMesh = grid.ToMesh();
-                var tMaterials = new EngineNS.Graphics.Pipeline.Shader.UMaterialInstance[1];
-                tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ddd.uminst"));
-                ok = terrainMesh.Initialize(gridMesh, tMaterials, EngineNS.Rtti.UTypeDescGetter<EngineNS.Graphics.Mesh.UMdfTerrainMesh>.TypeDesc);
-                if (ok)
+                if (UEngine.Instance.Config.RHIType != ERHIType.RHT_OGL)
                 {
-                    //var trAttach = new Graphics.Pipeline.Mobile.UBasePassTerrain.UTerrainAttachment();
-                    var oriImage = new EngineNS.Bricks.Procedure.Buffer2D.Image();
-                    oriImage.SetSize(128, 128, 0);
-                    var perlin = new EngineNS.Bricks.Procedure.Buffer2D.NoisePerlin();
-                    perlin.Amptitude = 1500;
-                    perlin.Freq = 0.02f;
-                    perlin.Octaves = 3;
-                    perlin.Process(oriImage);
+                    var terrainMesh = new EngineNS.Graphics.Mesh.UMesh();
+                    var grid = EngineNS.Graphics.Mesh.CMeshDataProvider.MakeGridIndices(127, 127);
+                    var gridMesh = grid.ToMesh();
+                    var tMaterials = new EngineNS.Graphics.Pipeline.Shader.UMaterialInstance[1];
+                    tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ddd.uminst"));
+                    ok = terrainMesh.Initialize(gridMesh, tMaterials, EngineNS.Rtti.UTypeDescGetter<EngineNS.Graphics.Mesh.UMdfTerrainMesh>.TypeDesc);
+                    if (ok)
+                    {
+                        //var trAttach = new Graphics.Pipeline.Mobile.UBasePassTerrain.UTerrainAttachment();
+                        var oriImage = new EngineNS.Bricks.Procedure.Buffer2D.Image();
+                        oriImage.SetSize(128, 128, 0);
+                        var perlin = new EngineNS.Bricks.Procedure.Buffer2D.NoisePerlin();
+                        perlin.Amptitude = 1500;
+                        perlin.Freq = 0.02f;
+                        perlin.Octaves = 3;
+                        perlin.Process(oriImage);
 
-                    var perlin2 = new EngineNS.Bricks.Procedure.Buffer2D.NoisePerlin();
-                    perlin2.Amptitude = 300;
-                    perlin2.Freq = 0.82f;
-                    perlin2.Octaves = 3;
-                    perlin2.Process(oriImage);
+                        var perlin2 = new EngineNS.Bricks.Procedure.Buffer2D.NoisePerlin();
+                        perlin2.Amptitude = 300;
+                        perlin2.Freq = 0.82f;
+                        perlin2.Octaves = 3;
+                        perlin2.Process(oriImage);
 
-                    var addOp = new EngineNS.Bricks.Procedure.Buffer2D.PixelAdd();
-                    addOp.Process(perlin.mResultImage, perlin2.mResultImage);
+                        var addOp = new EngineNS.Bricks.Procedure.Buffer2D.PixelAdd();
+                        addOp.Process(perlin.mResultImage, perlin2.mResultImage);
 
-                    var mdfTerrain = terrainMesh.MdfQueue as EngineNS.Graphics.Mesh.UMdfTerrainMesh;
-                    mdfTerrain.HeightMapRSV = addOp.mResultImage.CreateAsTexture2D();//await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/taxi.srv"));
-                    //terrainMesh.Tag = trAttach;
-                    float minH, maxH;
-                    addOp.mResultImage.GetHeghtRange(out minH, out maxH);
-                    var aabb = new BoundingBox(0, minH * mdfTerrain.HeightStep, 0, 128.0f * mdfTerrain.GridSize, maxH * mdfTerrain.HeightStep, 128.0f * mdfTerrain.GridSize);
-                    terrainMesh.MaterialMesh.Mesh.mCoreObject.SetAABB(ref aabb);
-                    //terrainMesh.SetWorldMatrix(ref Matrix.mIdentity);
-                    //mainEditor.WorldViewportSlate.RenderPolicy.VisibleMeshes.Add(terrainMesh);
-                    //mainEditor.WorldViewportSlate.World.Root.AddMesh(terrainMesh, Vector3.Zero, Vector3.UnitXYZ, Quaternion.Identity);
-                    var trNode = EngineNS.GamePlay.Scene.UMeshNode.AddMeshNode(root, new EngineNS.GamePlay.Scene.UNodeData(), typeof(EngineNS.GamePlay.UPlacement), terrainMesh, Vector3.Zero, new Vector3(1.0f), Quaternion.Identity);
-                    trNode.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
-                    trNode.IsAcceptShadow = true;
+                        var mdfTerrain = terrainMesh.MdfQueue as EngineNS.Graphics.Mesh.UMdfTerrainMesh;
+                        mdfTerrain.HeightMapRSV = addOp.mResultImage.CreateAsTexture2D();//await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/taxi.srv"));
+                                                                                         //terrainMesh.Tag = trAttach;
+                        float minH, maxH;
+                        addOp.mResultImage.GetHeghtRange(out minH, out maxH);
+                        var aabb = new BoundingBox(0, minH * mdfTerrain.HeightStep, 0, 128.0f * mdfTerrain.GridSize, maxH * mdfTerrain.HeightStep, 128.0f * mdfTerrain.GridSize);
+                        terrainMesh.MaterialMesh.Mesh.mCoreObject.SetAABB(ref aabb);
+                        //terrainMesh.SetWorldMatrix(ref Matrix.mIdentity);
+                        //mainEditor.WorldViewportSlate.RenderPolicy.VisibleMeshes.Add(terrainMesh);
+                        //mainEditor.WorldViewportSlate.World.Root.AddMesh(terrainMesh, Vector3.Zero, Vector3.UnitXYZ, Quaternion.Identity);
+                        var trNode = EngineNS.GamePlay.Scene.UMeshNode.AddMeshNode(root, new EngineNS.GamePlay.Scene.UNodeData(), typeof(EngineNS.GamePlay.UPlacement), terrainMesh, Vector3.Zero, new Vector3(1.0f), Quaternion.Identity);
+                        trNode.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                        trNode.IsAcceptShadow = true;
+                    }
                 }
 
                 app.GetWorldViewportSlate().ShowBoundVolumes(true, null);
