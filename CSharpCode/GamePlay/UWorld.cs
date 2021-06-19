@@ -31,6 +31,10 @@ namespace EngineNS.GamePlay
             mOnVisitNode_GatherVisibleMeshesAll = this.OnVisitNode_GatherVisibleMeshesAll;
             mOnVisitNode_GatherBoundShapes = this.OnVisitNode_GatherBoundShapes;
         }
+        public void Cleanup()
+        {
+            Root.ClearChildren();
+        }
         public UWorldRootNode Root
         {
             get;

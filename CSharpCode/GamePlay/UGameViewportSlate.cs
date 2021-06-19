@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace EngineNS.GamePlay
 {
-    public class UGameViewportState : EngineNS.EGui.Slate.UWorldViewportSlate
+    public class UGameViewportSlate : EngineNS.EGui.Slate.UWorldViewportSlate
     {
-        public UGameViewportState(bool regRoot)
+        public UGameViewportSlate(bool regRoot)
             : base(regRoot)
         {
             CameraController = new Editor.Controller.EditorCameraController();

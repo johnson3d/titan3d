@@ -130,7 +130,7 @@ void IGLFrameBuffers::ApplyBuffers(GLSdk* sdk)
 	}
 	else
 	{
-		mSwapChain->BindCurrent();
+		//mSwapChain->BindCurrent();
 		sdk->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		/*auto glSwapChain = mSwapChain.UnsafeConvertTo<IGLSwapChain>();

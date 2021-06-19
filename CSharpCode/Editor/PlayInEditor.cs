@@ -16,6 +16,7 @@ namespace EngineNS.Editor
         {
             if (engine.GameInstance == null)
                 return;
+
             engine.GameInstance.BeginDestroy();
             engine.GameInstance = null;
         }

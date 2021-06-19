@@ -6,13 +6,14 @@ namespace EngineNS.GamePlay
 {
     class UGameApplication : Graphics.Pipeline.USlateApplication, ITickable
     {
-        public UGameViewportState WorldViewportSlate = null;
+        public UGameViewportSlate WorldViewportSlate = null;
         public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
         {
             return WorldViewportSlate;
         }
         public override void Cleanup()
         {
+            this.NativeWindow.UnregEventProcessor(WorldViewportSlate);
             UEngine.Instance.EndPlayInEditor();
             Graphics.Pipeline.USlateApplication.RootForms.Clear();
             WorldViewportSlate?.Cleanup();
@@ -26,7 +27,7 @@ namespace EngineNS.GamePlay
 
             var RenderPolicy = Rtti.UTypeDescManager.CreateInstance(rpType) as Graphics.Pipeline.IRenderPolicy;
 
-            WorldViewportSlate = new UGameViewportState(true);
+            WorldViewportSlate = new UGameViewportSlate(true);
             await WorldViewportSlate.Initialize(this, RenderPolicy, 0, 1);
             WorldViewportSlate.ShowCloseButton = true;
 

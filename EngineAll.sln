@@ -83,7 +83,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Graphics", "Graphics", "{FC
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pipeline", "NativeCode\Graphics\Pipeline\Pipeline.vcxitems", "{4F3C9D18-A29B-49CA-A7D7-26E6EFF61229}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoreShader", "enginecontent\Shaders\CoreShader.vcxitems", "{7EDC3425-C745-477D-906A-69D82CDA1283}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoreShader", "enginecontent\shaders\CoreShader.vcxitems", "{7EDC3425-C745-477D-906A-69D82CDA1283}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Mesh", "NativeCode\Graphics\Mesh\Mesh.vcxitems", "{DA3D7904-6611-4C03-AC80-F251D8A68ECD}"
 EndProject
@@ -117,6 +117,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameProject", "Module\GameProject\GameProject.csproj", "{52C1E4B9-D416-471C-8B95-F8A149067D8E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MainEditor", "Module\MainEditor\MainEditor.csproj", "{921E9FEA-31DA-4BA4-BD83-19C0C0EBFBD2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{52C1E4B9-D416-471C-8B95-F8A149067D8E} = {52C1E4B9-D416-471C-8B95-F8A149067D8E}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClangHeadTools", "Module\ClangHeadTools\ClangHeadTools.csproj", "{BC6D2F72-6740-4A70-BF0E-C9893A4D1528}"
 EndProject

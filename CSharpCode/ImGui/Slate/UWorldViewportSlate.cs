@@ -6,7 +6,7 @@ namespace EngineNS.EGui.Slate
 {
     public class UWorldViewportSlate : Graphics.Pipeline.UViewportSlate
     {
-        public GamePlay.UWorld World { get; } = new GamePlay.UWorld();
+        public GamePlay.UWorld World { get; protected set; } = new GamePlay.UWorld();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
         public Graphics.Pipeline.Shader.CommanShading.UCopy2DPolicy Draw2ViewportPolicy { get; } = new Graphics.Pipeline.Shader.CommanShading.UCopy2DPolicy();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
@@ -29,6 +29,8 @@ namespace EngineNS.EGui.Slate
         }
         public void Cleanup()
         {
+            World?.Cleanup();
+            World = null;
             if (SnapshotPtr != IntPtr.Zero)
             {
                 var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
