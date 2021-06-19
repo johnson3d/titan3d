@@ -7,7 +7,7 @@
 #include "glew/include/GL/glew.h"
 #include "glew/include/GL/wglew.h"
 #elif defined(PLATFORM_DROID)
-#include <GL/glew.h>
+#include "glew/include/GL/glew.h"
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 //#include <GLES2/gl2.h>
@@ -63,12 +63,15 @@ public:
 		};
 		GLBufferId()
 		{
-			BufferId = 0;
+			BufferId = -1;
 			Type = IdTypeBuffer;
 		}
 		~GLBufferId();
 		EBufferIdType	Type;
 		GLuint			BufferId;
+		inline bool IsValidBuffer() {
+			return BufferId != -1;
+		}
 
 #if _DEBUG
 		//debug data
@@ -101,6 +104,10 @@ public:
 	{
 		if (IsGLThread() && this==ImmSDK)
 		{
+			if (mAppendCommands.size() > 0 || mCommands.size() > 0)
+			{
+				Execute();
+			}
 			cmd();
 		}
 		else

@@ -5,7 +5,7 @@
 
 namespace EngineNS
 {
-	AuxRttiStruct<v3dxIndexInSkeleton>		AuxRttiStruct<v3dxIndexInSkeleton>::Instance;
+	template<> AuxRttiStruct<v3dxIndexInSkeleton>		AuxRttiStruct<v3dxIndexInSkeleton>::Instance;
 
 	IBone* IBone::Create(const IBoneDesc& desc)
 	{

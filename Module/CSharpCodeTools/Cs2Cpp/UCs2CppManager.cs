@@ -12,21 +12,31 @@ namespace CSharpCodeTools.Cs2Cpp
     class UCs2CppManager : UCodeManagerBase
     {
         public string Pch = "";
-        public static UCs2CppManager Instance = new UCs2CppManager();
-        public Dictionary<string, UCs2CppClassDefine> ClassDefines = new Dictionary<string, UCs2CppClassDefine>();
-        
-        public UCs2CppClassDefine FindOrCreate(string fullname)
+        public static UCs2CppManager Instance = new UCs2CppManager();        
+        protected override UClassCodeBase CreateClassDefine(string fullname)
         {
-            UCs2CppClassDefine result;
-            if (ClassDefines.TryGetValue(fullname, out result))
-            {
-                return result;
-            }
-            result = new UCs2CppClassDefine();
+            var result = new UCs2CppClassDefine();
             result.FullName = fullname;
-            ClassDefines.Add(fullname, result);
-
             return result;
+        }
+        protected override void OnVisitMethod(UClassCodeBase kls, MethodDeclarationSyntax method)
+        {
+            foreach (var j in method.AttributeLists)
+            {
+                foreach (var k in j.Attributes)
+                {
+                    var attributeName = k.Name.NormalizeWhitespace().ToFullString();
+                    if (attributeName.EndsWith("UCs2CppAttribute") || attributeName.EndsWith("UCs2Cpp"))
+                    {
+                        var tmp = new UCppCallback();
+                        tmp.MethodSyntax = method;
+                        tmp.Name = method.Identifier.Text;
+                        var klsDeffine = kls as UCs2CppClassDefine;
+                        klsDeffine.Callbacks.Add(tmp);
+                        break;
+                    }
+                }
+            }
         }
         protected override bool CheckSourceCode(string code)
         {
@@ -35,87 +45,9 @@ namespace CSharpCodeTools.Cs2Cpp
             return false;
         }
 
-        public void GatherClass()
-        {
-            foreach (var i in SourceCodes)
-            {
-                var code = System.IO.File.ReadAllText(i);
-                SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
+        
 
-                CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
-
-                foreach (var j in root.Members)
-                {
-                    IterateClass(root, j);
-                }
-            }
-
-            foreach(var i in ClassDefines)
-            {
-                i.Value.Build();
-            }
-        }
-        public void WriteCode(string dir)
-        {
-            foreach (var i in ClassDefines)
-            {
-                i.Value.GenCode(dir);
-            }
-        }
-        private void IterateClass(CompilationUnitSyntax root, MemberDeclarationSyntax decl)
-        {
-            switch (decl.Kind())
-            {
-                case SyntaxKind.ClassDeclaration:
-                    {
-                        var kls = decl as ClassDeclarationSyntax;
-                        var fullname = ClassDeclarationSyntaxExtensions.GetFullName(kls);
-                        if (GetClassAttribute(kls))
-                        {
-                            var klsDeffine = FindOrCreate(fullname);
-                            foreach (var i in root.Usings)
-                            {
-                                klsDeffine.Usings.Add(i.ToString());
-                            }
-                        }
-                        foreach (var i in kls.Members)
-                        {
-                            if (i.Kind() == SyntaxKind.MethodDeclaration)
-                            {
-                                var method = i as MethodDeclarationSyntax;
-                                foreach (var j in method.AttributeLists)
-                                {
-                                    foreach (var k in j.Attributes)
-                                    {
-                                        var attributeName = k.Name.NormalizeWhitespace().ToFullString();
-                                        if (attributeName.EndsWith("UCs2CppAttribute") || attributeName.EndsWith("UCs2Cpp"))
-                                        {
-                                            var klsDeffine = FindOrCreate(fullname);
-                                            var tmp = new UCppCallback();
-                                            tmp.MethodSyntax = method;
-                                            tmp.Name = method.Identifier.Text;
-                                            klsDeffine.Callbacks.Add(tmp);
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    break;
-                case SyntaxKind.NamespaceDeclaration:
-                    {
-                        var ns = decl as NamespaceDeclarationSyntax;
-                        foreach (var i in ns.Members)
-                        {
-                            IterateClass(root, i);
-                        }
-                    }
-                    break;
-            }
-        }
-
-        private bool GetClassAttribute(ClassDeclarationSyntax decl)
+        protected override bool GetClassAttribute(ClassDeclarationSyntax decl)
         {
             foreach (var i in decl.AttributeLists)
             {

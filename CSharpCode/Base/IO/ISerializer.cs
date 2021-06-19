@@ -1191,7 +1191,7 @@ namespace EngineNS.UTest
 {
     [Rtti.Meta]
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public class UTest_MetaObject : EngineNS.IO.ISerializer
+    public partial class UTest_MetaObject : EngineNS.IO.ISerializer
     {
         [Rtti.Meta]
         public class TestSubClass : EngineNS.IO.ISerializer

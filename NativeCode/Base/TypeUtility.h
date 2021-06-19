@@ -72,10 +72,15 @@ inline std::string VParameterMarshal<char*, std::string>(char* v)
 	return std::string(v);
 }
 template<>
-inline const std::string& VParameterMarshal<char*, const std::string&>(char* v)
+inline std::string VParameterMarshal<const char*, std::string>(const char* v)
 {
 	return std::string(v);
 }
+//template<>
+//inline const std::string& VParameterMarshal<char*, const std::string&>(char* v)
+//{
+//	return std::string(v);
+//}
 
 template <typename R, typename... Args>
 struct TFunction_traits_helper
@@ -84,7 +89,7 @@ struct TFunction_traits_helper
 	using return_type = R;
 
 	template <std::size_t N>
-	using param_type = std::tuple_element_t<N, std::tuple<Args...>>;
+	using param_type = std::tuple_element<N, std::tuple<Args...>>;
 };
 
 template <typename T>
@@ -262,12 +267,12 @@ struct VisitTupleElement
 	}
 };
 
-inline void TestForeachTuple()
-{
-	auto t = std::make_tuple(1, 1.2f);
-	ForEachTuple(t, [](auto& e) {});
-	ForEachTuple(t, VisitTupleElement());
-}
+//inline void TestForeachTuple()
+//{
+//	auto t = std::make_tuple(1, 1.2f);
+//	ForEachTuple(t, [](auto& e) {});
+//	ForEachTuple(t, VisitTupleElement());
+//}
 
 template<class T1, class... Args>
 void MutiArg(const T1&t1, Args... args)

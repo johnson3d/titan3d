@@ -4,6 +4,7 @@
 #include "IGLTexture2D.h"
 #include "IGLShaderResourceView.h"
 #include "IGLRenderContext.h"
+#include "IGLSwapChain.h"
 
 #define new VNEW
 
@@ -129,7 +130,12 @@ void IGLFrameBuffers::ApplyBuffers(GLSdk* sdk)
 	}
 	else
 	{
+		mSwapChain->BindCurrent();
 		sdk->BindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		/*auto glSwapChain = mSwapChain.UnsafeConvertTo<IGLSwapChain>();
+		auto Framebuffer0 = wglAcquireDCFramebuffer(glSwapChain->mDC);
+		sdk->BindFramebuffer(GL_FRAMEBUFFER, Framebuffer0);*/
 	}
 }
 

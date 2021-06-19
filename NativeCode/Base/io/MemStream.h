@@ -156,7 +156,7 @@ public:
 		Read(&len, sizeof(len));
 		v.resize(len + 1);
 		Read(&v[0], len);
-		v[len] = NULL;
+		v[len] = '\0';
 	}
 };
 
@@ -169,10 +169,10 @@ public:
 	{
 
 	}
-	virtual size_t Tell() {
+	virtual UINT64 Tell() {
 		return mFile.GetPosition();
 	}
-	virtual bool Seek(size_t offset) {
+	virtual bool Seek(UINT64 offset) {
 		mFile.Seek(offset, VFile_Base::begin);
 		return true;
 	}
@@ -231,7 +231,7 @@ public:
 		Read(&len, sizeof(len));
 		v.resize(len + 1);
 		Read(&v[0], len);
-		v[len] = NULL;
+		v[len] = '\0';
 	}
 };
 

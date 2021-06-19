@@ -25,7 +25,7 @@ public:
 	ISwapChainDesc			mDesc;
 	TObjectHandle<IGLRenderContext> mRenderContext;
 #if defined(PLATFORM_WIN)
-	HDC					mDC;
+	//HDC					mDC;
 #elif defined(PLATFORM_DROID)
 	EGLConfig			mConfig;
 	EGLSurface			mEglSurface;

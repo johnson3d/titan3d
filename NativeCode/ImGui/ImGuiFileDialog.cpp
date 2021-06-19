@@ -50,12 +50,12 @@ SOFTWARE.
 #define stat _stat
 #define stricmp _stricmp
 #include <cctype>
-#include "dirent.h" // directly open the dirent file attached to this lib
+#include "dirent_win.h" // directly open the dirent file attached to this lib
 #define PATH_SEP '\\'
 #ifndef PATH_MAX
 #define PATH_MAX 260
 #endif // PATH_MAX
-#elif defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__APPLE__) || defined (__EMSCRIPTEN__)
+#elif defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__APPLE__) || defined (__EMSCRIPTEN__) || defined (PLATFORM_DROID)
 #define UNIX
 #define stricmp strcasecmp
 #include <sys/types.h>
@@ -1599,10 +1599,16 @@ namespace IGFD
 		{
 			std::string selectedDirectory = FileNameBuffer;
 			if (!selectedDirectory.empty() && selectedDirectory != ".")
+			{
 				if (path.empty())
+				{
 					path = selectedDirectory;
+				}
 				else
+				{
 					path += PATH_SEP + selectedDirectory;
+				}
+			}
 		}
 
 		return path;

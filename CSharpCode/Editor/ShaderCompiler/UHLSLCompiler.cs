@@ -68,7 +68,7 @@ namespace EngineNS.Editor.ShaderCompiler
         private Rtti.UTypeDesc MdfQueueType;
         public RHI.CShaderDesc CompileShader(string shader, string entry, EShaderType type, string sm,
             RName mtl, Type mdfType,
-            RHI.CShaderDefinitions defines, bool bDebugShader, bool bDxbc, bool bGlsl, bool bMetal)
+            RHI.CShaderDefinitions defines, bool bDebugShader)
         {
             RHI.CShaderDesc desc = new RHI.CShaderDesc(type);
             Material = mtl;
@@ -76,8 +76,10 @@ namespace EngineNS.Editor.ShaderCompiler
             IShaderDefinitions defPtr = new IShaderDefinitions((void*)0);
             if (defines != null)
                 defPtr = defines.mCoreObject;
+
+            var cfg = UEngine.Instance.Config;
             var ok = mCoreObject.CompileShader(desc.mCoreObject, shader, entry, type, sm, defPtr,
-                        bDebugShader, bDxbc, bGlsl, bMetal);
+                        bDebugShader, cfg.CookDXBC, cfg.CookGLSL, cfg.CookMETAL);
 
             if (ok == false)
                 return null;

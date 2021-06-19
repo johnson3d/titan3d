@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.EGui.Slate
 {
-    public class BaseRenderer
+    public class UBaseRenderer
     {
         public RHI.CRenderPipeline Pipeline;
         public RHI.CSamplerState SamplerState;
@@ -16,12 +16,12 @@ namespace EngineNS.EGui.Slate
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
             var shaderCompiler = new Editor.ShaderCompiler.UHLSLCompiler();
-            var vsDesc = shaderCompiler.CompileShader(vs.Address, "VS", EShaderType.EST_VertexShader, "5_0", null, null, null, true, true, false, false);
+            var vsDesc = shaderCompiler.CompileShader(vs.Address, "VS", EShaderType.EST_VertexShader, "5_0", null, null, null, true);
 
             var VertexShader = rc.CreateVertexShader(vsDesc);
 
             shaderCompiler = new Editor.ShaderCompiler.UHLSLCompiler();
-            var psDesc = shaderCompiler.CompileShader(ps.Address, "FS", EShaderType.EST_PixelShader, "5_0", null, null, null, true, true, false, false);
+            var psDesc = shaderCompiler.CompileShader(ps.Address, "FS", EShaderType.EST_PixelShader, "5_0", null, null, null, true);
             if (psDesc == null)
                 return;
             var PixelShader = rc.CreatePixelShader(psDesc);
@@ -69,6 +69,7 @@ namespace EngineNS.EGui.Slate
             sdProgDesc.VertexShader = VertexShader.mCoreObject;
             sdProgDesc.PixelShader = PixelShader.mCoreObject;
             var gpuProgram = rc.CreateShaderProgram(ref sdProgDesc);
+            gpuProgram.mCoreObject.LinkShaders(rc.mCoreObject);
 
             var pipelineDesc = new IRenderPipelineDesc();
             pipelineDesc.SetDefault();

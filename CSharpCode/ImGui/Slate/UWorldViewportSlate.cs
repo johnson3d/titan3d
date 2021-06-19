@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using SDL2;
 
-namespace EngineNS.Editor
+namespace EngineNS.EGui.Slate
 {
     public class UWorldViewportSlate : Graphics.Pipeline.UViewportSlate
     {
@@ -17,7 +17,7 @@ namespace EngineNS.Editor
         public Graphics.Pipeline.UDrawBuffers Copy2SwapChainPass = new Graphics.Pipeline.UDrawBuffers();
         public RenderPassDesc SwapChainPassDesc = new RenderPassDesc();
 
-        public Controller.EditorCameraController CameraController = new Controller.EditorCameraController();
+        public Graphics.Pipeline.ICameraController CameraController;
         public UWorldViewportSlate(bool regRoot)
             : base(regRoot)
         {
@@ -140,6 +140,8 @@ namespace EngineNS.Editor
         GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
         public unsafe void TickLogic(int ellapse)
         {
+            World.TickLogic();
+
             if (IsDrawing == false)
                 return;
             if (this.IsFocused)

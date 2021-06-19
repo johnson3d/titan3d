@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.EGui.Controls
 {
-    public class ContentBrowser : Editor.IRootForm, EGui.IPanel
+    public class ContentBrowser : Graphics.Pipeline.IRootForm, EGui.IPanel
     {
         public ContentBrowser()
         {

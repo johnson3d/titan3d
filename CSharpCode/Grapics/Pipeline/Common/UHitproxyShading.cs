@@ -52,9 +52,9 @@ namespace EngineNS.Graphics.Pipeline.Common
     public class UPickBlurProcessor : USceenSpaceProcessor
     {
         public UPickedProxiableManager Manager;
-        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, float x, float y)
+        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
         {
-            await base.Initialize(policy, shading, x, y);
+            await base.Initialize(policy, shading, rtFmt, dsFmt, x, y);
 
             var blurShading = shading as UPickBlurShading;
             blurShading.Manager = Manager;
@@ -84,9 +84,9 @@ namespace EngineNS.Graphics.Pipeline.Common
     public class UPickHollowProcessor : USceenSpaceProcessor
     {
         public UPickedProxiableManager Manager;
-        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, float x, float y)
+        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
         {
-            await base.Initialize(policy, shading, x, y);
+            await base.Initialize(policy, shading, rtFmt, dsFmt, x, y);
 
             var hollowShading = shading as UPickHollowShading;
             hollowShading.Manager = Manager;
@@ -133,9 +133,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             BasePass.Initialize(rc);
             BasePass.SetDebugName("UPickedProxiableManager");
 
-            PickedBuffer.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
-            PickedBuffer.CreateGBuffer(0, EPixelFormat.PXF_R16G16_FLOAT, (uint)x, (uint)y);
             PickedBuffer.SwapChainIndex = -1;
+            PickedBuffer.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
+            PickedBuffer.CreateGBuffer(0, EPixelFormat.PXF_R16G16_FLOAT, (uint)x, (uint)y);            
             PickedBuffer.TargetViewIdentifier = policy.GBuffers.TargetViewIdentifier;
             PickedBuffer.Camera = policy.GBuffers.Camera;
 
@@ -152,10 +152,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             PickedShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickSetupShading>();
 
             PickBlurProcessor.Manager = this;
-            await PickBlurProcessor.Initialize(policy, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickBlurShading>(), x, y);
+            await PickBlurProcessor.Initialize(policy, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickBlurShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y);
 
             PickHollowProcessor.Manager = this;
-            await PickHollowProcessor.Initialize(policy, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickHollowShading>(), x, y);
+            await PickHollowProcessor.Initialize(policy, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickHollowShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y);
         }
         public void OnResize(float x, float y)
         {

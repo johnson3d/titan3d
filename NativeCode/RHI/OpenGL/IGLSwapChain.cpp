@@ -10,7 +10,7 @@ NS_BEGIN
 IGLSwapChain::IGLSwapChain()
 {
 #if defined(PLATFORM_WIN)
-	mDC = 0;
+	//mDC = 0;
 #elif defined(PLATFORM_DROID)
 	mEglSurface = 0;
 	mConfig = nullptr;
@@ -27,11 +27,11 @@ IGLSwapChain::~IGLSwapChain()
 void IGLSwapChain::Cleanup()
 {
 #if defined(PLATFORM_WIN)
-	if (mDC != nullptr)
+	/*if (mDC != nullptr)
 	{
 		ReleaseDC((HWND)mDesc.WindowHandle, mDC);
 		mDC = nullptr;
-	}
+	}*/
 #elif defined(PLATFORM_DROID)
 	auto rc = mRenderContext.GetPtr();
 	auto mEglDisplay = rc->mEglDisplay;
@@ -50,8 +50,9 @@ void IGLSwapChain::BindCurrent()
 	if (rc == nullptr)
 		return;
 #if defined(PLATFORM_WIN)
-	wglMakeCurrent(mDC, rc->mContext);
-	GLCheck;
+	//wglMakeCurrent(rc->mDC, rc->mContext);
+	//wglMakeCurrent(mDC, (HGLRC)&rc->mContextAttributeList[0]);
+	//GLCheck;
 #else
 	eglMakeCurrent(rc->mEglDisplay, mEglSurface, mEglSurface, rc->mEglContext);
 	GLCheck;
@@ -62,7 +63,11 @@ void IGLSwapChain::Present(UINT SyncInterval, UINT Flags)
 {
 	AUTO_SAMP("Native.ISwapChain.Present");
 	
-	BindCurrent();
+	auto rc = mRenderContext.GetPtr();
+	if (rc == nullptr)
+		return;
+
+	//BindCurrent();
 
 	/*auto rc = (IGLRenderContext*)mRenderContext.GetPtr();
 	if (rc != nullptr)
@@ -76,11 +81,9 @@ void IGLSwapChain::Present(UINT SyncInterval, UINT Flags)
 
 	rc->SwapImmCmdList();*/
 #if defined(PLATFORM_WIN)
-	SwapBuffers(mDC);
+	SwapBuffers(rc->mDC);
+	//SwapBuffers(mDC);
 #else
-	auto rc = mRenderContext.GetPtr();
-	if (rc == nullptr)
-		return;
 	auto mEglDisplay = rc->mEglDisplay;
 	eglSwapBuffers(mEglDisplay, mEglSurface);
 #endif
@@ -193,73 +196,72 @@ bool IGLSwapChain::Init(IGLRenderContext* rc, const ISwapChainDesc* desc)
 	mRenderContext.FromObject(rc);
 
 #if defined(PLATFORM_WIN)
-	mDC = ::GetDC((HWND)desc->WindowHandle);
-	PIXELFORMATDESCRIPTOR pfd;
-	//memset(&pfd, 0, sizeof(pfd));
-	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-	pfd.nVersion = 1;
-	pfd.dwFlags = 32804;
-	pfd.iPixelType = 0;
-	pfd.cColorBits = 32;
-	pfd.cRedBits = 8;
-	pfd.cRedShift = 16;
-	pfd.cGreenBits = 8;
-	pfd.cGreenShift = 8;
-	pfd.cBlueBits = 8;
-	pfd.cBlueShift = 0;
-	pfd.cAlphaBits = 8;
-	pfd.cAlphaShift = 24;
-	pfd.cAccumBits = 64;
-	pfd.cAccumRedBits = 16;
-	pfd.cAccumGreenBits = 16;
-	pfd.cAccumBlueBits = 16;
-	pfd.cAccumAlphaBits = 16;
-	pfd.cDepthBits = 24;
-	pfd.cStencilBits = 8;
-	pfd.cAuxBuffers = 4;
-	pfd.iLayerType = 0;
-	pfd.bReserved = 0;
-	pfd.dwLayerMask = 0;
-	pfd.dwDamageMask = 0;
-
-	//const int iPixelFormatAttributeList[] =
-	//{
-	//	WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,                        // ���Ƶ�����
-	//	WGL_SUPPORT_OPENGL_ARB, GL_TRUE,                            // ֧��OpenGL
-	//	WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,        // Ӳ������
-	//	WGL_DOUBLE_BUFFER_ARB, GL_TRUE,                            // ˫����
-	//	WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,                    // RGBA
-	//	WGL_COLOR_BITS_ARB, 32,                                    // ��ɫλ��32
-	//	WGL_DEPTH_BITS_ARB, 24,                                    // ���λ��24
-	//	WGL_STENCIL_BITS_ARB, 8,                                    // ģ��λ��8
-	//	WGL_SWAP_METHOD_ARB, WGL_SWAP_EXCHANGE_ARB,                // ˫����swap��ʽֱ�ӽ���
-	//	WGL_SAMPLES_ARB, 4,                                // 4�������
-	//	0
-	//};
-
-	int iPixelFormat;
-	iPixelFormat = ChoosePixelFormat(mDC, &pfd);
-	if (!DescribePixelFormat(mDC,
-		iPixelFormat,
-		sizeof(PIXELFORMATDESCRIPTOR),
-		&pfd))
-	{
-		return false;
-	}
-
-	vBOOL ok = SetPixelFormat(mDC, iPixelFormat, &pfd);
-	if (!ok)
-	{
-		auto error = ::GetLastError();
-		if (error != 0)
-		{
-			ShowLastErrorMessage(error);
-		}
-#if defined _DEBUG
-		return false;//��Ҳ����֣�release���ﷵ��0��Ȼ����滹����ȷ
-#endif
-	}
-	::wglMakeCurrent(mDC, rc->mContext);
+//	mDC = ::GetDC((HWND)desc->WindowHandle);
+//	PIXELFORMATDESCRIPTOR pfd;
+//	//memset(&pfd, 0, sizeof(pfd));
+//	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+//	pfd.nVersion = 1;
+//	pfd.dwFlags = 32804;
+//	pfd.iPixelType = 0;
+//	pfd.cColorBits = 32;
+//	pfd.cRedBits = 8;
+//	pfd.cRedShift = 16;
+//	pfd.cGreenBits = 8;
+//	pfd.cGreenShift = 8;
+//	pfd.cBlueBits = 8;
+//	pfd.cBlueShift = 0;
+//	pfd.cAlphaBits = 8;
+//	pfd.cAlphaShift = 24;
+//	pfd.cAccumBits = 64;
+//	pfd.cAccumRedBits = 16;
+//	pfd.cAccumGreenBits = 16;
+//	pfd.cAccumBlueBits = 16;
+//	pfd.cAccumAlphaBits = 16;
+//	pfd.cDepthBits = 24;
+//	pfd.cStencilBits = 8;
+//	pfd.cAuxBuffers = 4;
+//	pfd.iLayerType = 0;
+//	pfd.bReserved = 0;
+//	pfd.dwLayerMask = 0;
+//	pfd.dwDamageMask = 0;
+//
+//	//const int iPixelFormatAttributeList[] =
+//	//{
+//	//	WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+//	//	WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+//	//	WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
+//	//	WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+//	//	WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
+//	//	WGL_COLOR_BITS_ARB, 32,
+//	//	WGL_DEPTH_BITS_ARB, 24,
+//	//	WGL_STENCIL_BITS_ARB, 8,
+//	//	WGL_SWAP_METHOD_ARB, WGL_SWAP_EXCHANGE_ARB,
+//	//	WGL_SAMPLES_ARB, 4,
+//	//	0
+//	//};
+//
+//	int iPixelFormat;
+//	iPixelFormat = ChoosePixelFormat(mDC, &pfd);
+//	if (!DescribePixelFormat(mDC,
+//		iPixelFormat,
+//		sizeof(PIXELFORMATDESCRIPTOR),
+//		&pfd))
+//	{
+//		return false;
+//	}
+//
+//	vBOOL ok = SetPixelFormat(mDC, iPixelFormat, &pfd);
+//	if (!ok)
+//	{
+//		auto error = ::GetLastError();
+//		if (error != 0)
+//		{
+//			ShowLastErrorMessage(error);
+//		}
+//#if defined _DEBUG
+//		return false;
+//#endif
+//	}
 #elif defined(PLATFORM_DROID)
 	//auto mEglDisplay = rc->mEglDisplay;
 	EGLConfigParms param;

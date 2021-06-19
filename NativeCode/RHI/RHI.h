@@ -25,7 +25,7 @@
 #include "ITextureBase.h"
 #include "IUnorderedAccessView.h"
 #include "IVertexShader.h"
-#include "Shaderreflector.h"
+#include "ShaderReflector.h"
 
 #include "Utility/IGeometryMesh.h"
 #include "Utility/IMeshPrimitives.h"

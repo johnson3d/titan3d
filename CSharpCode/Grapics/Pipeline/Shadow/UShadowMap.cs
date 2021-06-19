@@ -47,9 +47,9 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
             mShadowShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UShadowShading>();
 
-            GBuffers.Initialize(0, EPixelFormat.PXF_D16_UNORM, (uint)x, (uint)y);
-            //GBuffers.CreateGBuffer(0, EPixelFormat.PXF_UNKNOWN, (uint)x, (uint)y);
             GBuffers.SwapChainIndex = -1;
+            GBuffers.Initialize(0, EPixelFormat.PXF_D16_UNORM, (uint)x, (uint)y);
+            //GBuffers.CreateGBuffer(0, EPixelFormat.PXF_UNKNOWN, (uint)x, (uint)y);            
             GBuffers.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
             GBuffers.OnResize(mInnerResolutionY, mInnerResolutionY);
 

@@ -11,7 +11,7 @@ namespace EngineNS
         void TickSync(int ellapse);
     }
 
-    public class UTickableManager
+    public partial class UTickableManager
     {
         public List<ITickable> Tickables { get; } = new List<ITickable>();
         public void Cleanup()

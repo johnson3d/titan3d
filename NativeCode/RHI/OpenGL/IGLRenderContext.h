@@ -97,10 +97,12 @@ public:
 	{
 		return mImmContext;
 	}
-
+	GLint				MajorVersion;
+	GLint				MinorVersion;
 #if defined(PLATFORM_WIN)
 	HDC					mDC;
 	HGLRC				mContext;
+	std::vector<int>	mContextAttributeList;
 #elif defined(PLATFORM_DROID)
 	EGLContext			mEglContext;
 	EGLDisplay			mEglDisplay;

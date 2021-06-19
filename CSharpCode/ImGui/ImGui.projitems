@@ -22,7 +22,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UAssetSelector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CSharpCompiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiAPI.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Slate\BaseRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Slate\UBaseRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Slate\UWorldViewportSlate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UDockWindowSDL.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIEditor\EditableFormData.cs" />

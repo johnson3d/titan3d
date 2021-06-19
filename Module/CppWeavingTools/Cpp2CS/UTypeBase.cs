@@ -8,6 +8,7 @@ namespace CppWeaving.Cpp2CS
 {
 	class UTypeBase
 	{
+		public string ModuleName;
 		public enum EClassType
 		{
 			PointerType,

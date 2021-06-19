@@ -63,9 +63,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     public class UEditorFinalProcessor : Common.USceenSpaceProcessor
     {
         public UMobileEditorFSPolicy Manager;
-        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, float x, float y)
+        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
         {
-            await base.Initialize(policy, shading, x, y);
+            await base.Initialize(policy, shading, rtFmt, dsFmt, x, y);
 
             var hollowShading = shading as UEditorFinalShading;
             hollowShading.Manager = policy as UMobileEditorFSPolicy;
@@ -182,12 +182,11 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             mHitproxyShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Common.UHitproxyShading>();
 
-            GHitproxyBuffers.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
-            GHitproxyBuffers.CreateGBuffer(0, EPixelFormat.PXF_R8G8B8A8_UNORM, (uint)x, (uint)y);
             GHitproxyBuffers.SwapChainIndex = -1;
+            GHitproxyBuffers.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
+            GHitproxyBuffers.CreateGBuffer(0, EPixelFormat.PXF_R8G8B8A8_UNORM, (uint)x, (uint)y);            
             GHitproxyBuffers.TargetViewIdentifier = GBuffers.TargetViewIdentifier;
             GHitproxyBuffers.Camera = GBuffers.Camera;
-
             HitproxyPassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionClear;
             HitproxyPassDesc.mFBStoreAction_Color = FrameBufferStoreAction.StoreActionStore;
             HitproxyPassDesc.mFBClearColorRT0 = new Color4(0, 0, 0, 0);
@@ -206,7 +205,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             //}
 
             await PickedProxiableManager.Initialize(this, x, y);
-            await EditorFinalProcessor.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UEditorFinalShading>(), x, y);
+            await EditorFinalProcessor.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UEditorFinalShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_UNKNOWN, x, y);
 
             mShadowMap = new Shadow.UShadowMap();
             mShadowMap.Initialize(x, y);
@@ -284,10 +283,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         bool CanDrawHitproxy = false;
         public unsafe override void TickLogic()
         {
-            var app = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+            var app = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
             if (app != null)
             {
-                mShadowMap.TickLogic(app.WorldViewportSlate.World, this, true);
+                mShadowMap.TickLogic(app.GetWorldViewportSlate().World, this, true);
 
                 var cBuffer = GBuffers.PerViewportCBuffer;
                 if (cBuffer != null)
@@ -298,7 +297,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     cBuffer.SetValue(cBuffer.PerViewportIndexer.gViewer2ShadowMtx, ref mShadowMap.mViewer2ShadowMtx);
                     cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowDistance, ref mShadowMap.mShadowDistance);
 
-                    var dirLight = app.WorldViewportSlate.World.DirectionLight;
+                    var dirLight = app.GetWorldViewportSlate().World.DirectionLight;
                     //dirLight.mDirection = MathHelper.RandomDirection();
                     var dir = dirLight.mDirection;
                     var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
@@ -376,7 +375,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickRender()
         {
-            var app = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+            var app = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
             if (app != null)
             {
                 mShadowMap.TickRender();
@@ -417,7 +416,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickSync()
         {
-            var app = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+            var app = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
             if (app != null)
             {
                 mShadowMap.TickSync();

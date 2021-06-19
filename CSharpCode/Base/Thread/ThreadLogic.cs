@@ -11,9 +11,13 @@ namespace EngineNS.Thread
         public ThreadLogic()
         {
             this.Interval = 0;
+            LogicEndEvents[0] = mLogicEnd;
+            LogicEndEvents[1] = mMacrossDebug;
         }
         public System.Threading.AutoResetEvent mLogicBegin = new System.Threading.AutoResetEvent(false);
         public System.Threading.AutoResetEvent mLogicEnd = new System.Threading.AutoResetEvent(false);
+        public System.Threading.EventWaitHandle mMacrossDebug = new System.Threading.EventWaitHandle(false, System.Threading.EventResetMode.ManualReset);
+        public System.Threading.EventWaitHandle[] LogicEndEvents = new System.Threading.EventWaitHandle[2];
         public bool IsTicking
         {
             get;

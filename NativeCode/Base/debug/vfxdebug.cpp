@@ -18,7 +18,21 @@
 #if !defined(PLATFORM_WIN)
 void OutputDebugStringA(LPCSTR lpOutputString)
 {
-	printf(lpOutputString);
+	printf("%s", lpOutputString);
+}
+
+inline vBOOL IsBadReadPtr(CONST VOID* lp, UINT_PTR ucb)
+{
+	return FALSE;
+}
+
+int MessageBoxA(
+	HWND hWnd,
+	LPCSTR lpText,
+	LPCSTR lpCaption,
+	UINT uType)
+{
+	return 0;
 }
 #endif
 

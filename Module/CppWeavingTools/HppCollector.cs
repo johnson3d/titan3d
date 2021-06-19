@@ -8,7 +8,34 @@ namespace CppWeaving
 {
     public class HppCollector
     {
-        public Dictionary<string, string> Headers = new Dictionary<string, string>();
+        public static HppCollector Instance = new HppCollector();
+        public void Reset()
+        {
+            Headers.Clear();
+            IncludePath.Clear();
+            MacroDefines.Clear();
+        }
+        public class HppUnit
+        {
+            public string File;
+            public string Module;
+        }
+        public Dictionary<string, HppUnit> Headers = new Dictionary<string, HppUnit>();
+        public HppUnit FindHpp(string file)
+        {
+            bool error;
+            file = UTypeManagerBase.NormalizePath(file, out error);
+            file = file.ToLower();
+            lock (this)
+            {
+                HppUnit result;
+                if (Headers.TryGetValue(file, out result))
+                {
+                    return result;
+                }
+                return null;
+            }
+        }
 
         public List<string> IncludePath = new List<string>();
         public List<string> MacroDefines = new List<string>();
@@ -119,14 +146,13 @@ namespace CppWeaving
 
                     System.Xml.XmlDocument sharedProjXmlDoc = new System.Xml.XmlDocument();
                     sharedProjXmlDoc.Load(sharedProjFile);
-                    var spjPath = sharedProjFile.Substring(0, sharedProjFile.LastIndexOf("/") + 1);
                     //var spjRoot = sharedProjXmlDoc.SelectSingleNode("Project");
                     var spjRoot = sharedProjXmlDoc.LastChild;
                     foreach (System.Xml.XmlNode sn in spjRoot.ChildNodes)
                     {
                         if (sn.Name == "ItemGroup")
                         {
-                            if (CollectInclude(sn, spjPath, Headers))
+                            if (CollectInclude(sn, sharedProjFile, Headers))
                             {
                                 break;
                             }
@@ -146,8 +172,9 @@ namespace CppWeaving
             }
             return null;
         }
-        static bool CollectInclude(System.Xml.XmlNode sn, string spjPath, Dictionary<string, string> headers)
+        static bool CollectInclude(System.Xml.XmlNode sn, string vcxFile, Dictionary<string, HppUnit> headers)
         {
+            var spjPath = UTypeManagerBase.GetFileDirectory(vcxFile);
             bool bFinded = false;
             foreach (System.Xml.XmlNode i in sn.ChildNodes)
             {
@@ -167,7 +194,12 @@ namespace CppWeaving
                         {
                             Console.WriteLine($"header file {hf} is error path");
                         }
-                        headers[hf] = hf;
+                        var tmp = new HppUnit();
+                        tmp.File = hf;
+                        tmp.Module = UTypeManagerBase.GetPureFileName(vcxFile);
+                        tmp.Module = tmp.Module.Replace('.', '_');
+
+                        headers[hf.ToLower()] = tmp;
                         bFinded = true;
                     }
                 }

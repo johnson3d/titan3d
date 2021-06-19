@@ -33,7 +33,13 @@ namespace CppWeaving.Cpp2CS
 						tmp = new UClass(ns, name);
 						tmp.ClassType = UClass.EClassType.PointerType;
 					}
-					
+
+                    ClangSharp.Interop.CXFile tfile;
+                    uint line, col, offset;
+                    decl.Location.GetFileLocation(out tfile, out line, out col, out offset);
+					var hpp = HppCollector.Instance.FindHpp(tfile.ToString());
+
+                    tmp.ModuleName = hpp.Module;
 					tmp.CompileUnit = tu;
 					tmp.Decl = decl;
 					ClassTypes.Add(fullname, tmp);
@@ -52,6 +58,12 @@ namespace CppWeaving.Cpp2CS
 				UEnum tmp;
 				if (EnumTypes.TryGetValue(fullname, out tmp) == false) {
 					tmp = new UEnum();
+                    ClangSharp.Interop.CXFile tfile;
+                    uint line, col, offset;
+                    decl.Location.GetFileLocation(out tfile, out line, out col, out offset);
+                    var hpp = HppCollector.Instance.FindHpp(tfile.ToString());
+
+                    tmp.ModuleName = hpp.Module;
 					tmp.Namespace = ns;
 					tmp.Name = name;
 					tmp.CompileUnit = tu;
@@ -74,6 +86,12 @@ namespace CppWeaving.Cpp2CS
 				UDelegate tmp;
 				if (DelegateTypes.TryGetValue(fullname, out tmp) == false) {
 					tmp = new UDelegate();
+                    ClangSharp.Interop.CXFile tfile;
+                    uint line, col, offset;
+                    decl.Location.GetFileLocation(out tfile, out line, out col, out offset);
+                    var hpp = HppCollector.Instance.FindHpp(tfile.ToString());
+
+                    tmp.ModuleName = hpp.Module;
 					tmp.Namespace = ns;
 					tmp.Name = name;
 					tmp.CompileUnit = tu;
@@ -87,7 +105,7 @@ namespace CppWeaving.Cpp2CS
         public class TUTask : IBuilderTask
         {
 			public UProjectSettings Settings;
-			public string CppFile;
+			public HppCollector.HppUnit CppFile;
             public override void Execute(TaskThread thread)
             {
                 var tmp = new TUCreator();

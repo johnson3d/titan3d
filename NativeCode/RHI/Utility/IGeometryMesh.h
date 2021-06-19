@@ -132,6 +132,7 @@ public:
 			vb->AddRef();
 		Safe_Release(VertexBuffers[index]);
 		VertexBuffers[index] = vb;
+		mIsDirty = TRUE;
 	}
 	TR_FUNCTION()
 	virtual void BindIndexBuffer(IIndexBuffer* ib)
@@ -142,6 +143,7 @@ public:
 			ib->AddRef();
 		Safe_Release(IndexBuffer);
 		IndexBuffer = ib;
+		mIsDirty = TRUE;
 	}
 
 	virtual vBOOL ApplyGeometry(ICommandList* cmd, IDrawCall* pass, vBOOL bImm);

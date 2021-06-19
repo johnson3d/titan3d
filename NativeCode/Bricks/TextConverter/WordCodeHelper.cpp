@@ -2,21 +2,19 @@
 
 #define new VNEW
 
-#if defined(PLATFORM_WIN)  //？？64
+#if defined(PLATFORM_WIN) 
 const char* WordCodeHelper::SrcCode = "GB18030//TRANSLIT";
 const char* WordCodeHelper::DesCode = "UTF-16LE";
-#endif //  WIN
-#ifdef ANDROID
+#else
 const char* WordCodeHelper::SrcCode = "UTF-8";
 const char* WordCodeHelper::DesCode = "UTF-32LE";
-#endif // ANDROID
+#endif
 
 WordCodeHelper::WordCodeHelper()
 {
-#if defined(PLATFORM_WIN)  //？？64
+#if defined(PLATFORM_WIN) 
 	mOriginCode = "GB18030//TRANSLIT";
-#endif //  WIN
-#ifdef ANDROID
+#elif defined(PLATFORM_ROID)
 	mOriginCode = "UTF-8";
 #endif // ANDROID
 
@@ -53,7 +51,6 @@ void WordCodeHelper::SetDestCode(const char* destCode)
 size_t WordCodeHelper::ChangeCode(const char* pInBuf, size_t* iInLen, char* pOutBuf, size_t* iOutLen)
 {
 	size_t iRet = 0;
-	//打开字符集转换
 	iconv_t hIconv = iconv_open(mDestCode, mOriginCode);
 	if ((iconv_t)-1 == hIconv)
 	{
@@ -68,9 +65,6 @@ size_t WordCodeHelper::ChangeCode(const char* pInBuf, size_t* iInLen, char* pOut
 			return -1;
 		}
 	}
-	//开始转换
-
-	//关闭字符集转换
 	iconv_close(hIconv);
 	return iRet;
 }
@@ -78,7 +72,6 @@ size_t WordCodeHelper::ChangeCode(const char* pInBuf, size_t* iInLen, char* pOut
 int WordCodeHelper::ChangeCodeStatic(const char* srcCode, const char* desCode, const char* pInBuf, size_t* iInLen, char* pOutBuf, size_t* iOutLen)
 {
 	int iRet = 0;
-	//打开字符集转换
 	iconv_t hIconv = iconv_open(desCode, srcCode);
 	if ((iconv_t)-1 == hIconv)
 	{
@@ -96,9 +89,6 @@ int WordCodeHelper::ChangeCodeStatic(const char* srcCode, const char* desCode, c
 			return -1;
 		}
 	}
-	//开始转换
-
-	//关闭字符集转换
 	iconv_close(hIconv);
 	return iRet;
 }

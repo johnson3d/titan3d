@@ -107,8 +107,6 @@ bool __InitContext(HWND hWnd, HDC& dc, HGLRC& hContext)
 {
 	dc = ::GetDC((HWND)hWnd);
 	PIXELFORMATDESCRIPTOR pfd;
-	//����һ��Ҫ��һ�£�����ٺ٣�release��ʱ��ȡ������pfid����ȷ��Ȼ��glcontext�ͳ�����
-	//Ѫ�Ľ�ѵѽ��release�������ˣ�����Ҫ�࿴apiѽ
 	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
 	pfd.nVersion = 1;
 	pfd.dwFlags = 32804;
@@ -153,8 +151,8 @@ bool __InitContext(HWND hWnd, HDC& dc, HGLRC& hContext)
 
 	//const int iContextAttributeList[] =
 	//{
-	//	WGL_CONTEXT_MAJOR_VERSION_ARB, 3,                        // ���汾��
-	//	WGL_CONTEXT_MINOR_VERSION_ARB, 3,                        // �ΰ汾��
+	//	WGL_CONTEXT_MAJOR_VERSION_ARB, 3,                        
+	//	WGL_CONTEXT_MINOR_VERSION_ARB, 3,                        
 	//	WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
 	//	0
 	//};

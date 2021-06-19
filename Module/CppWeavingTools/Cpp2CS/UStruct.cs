@@ -32,6 +32,7 @@ namespace CppWeaving.Cpp2CS
 		}
 		public void WritePODStruct()
         {
+            AddLine($"#if defined(HasModule_{mClass.ModuleName})");
             ClangSharp.Interop.CXFile tfile;
             uint line, col, offset;
             mClass.Decl.Location.GetFileLocation(out tfile, out line, out col, out offset);
@@ -44,7 +45,9 @@ namespace CppWeaving.Cpp2CS
 				AddLine($"char MemData[StructSize];");
 			}
 			PopBrackets(true);
-		}
+            AddLine($"#endif//HasModule_{mClass.ModuleName}");
+            NewLine();
+        }
 		protected override void GenConstructor()
 		{
 			foreach (var i in mClass.Constructors) {
