@@ -140,6 +140,28 @@ namespace EngineNS.EGui.Slate
         }
         #endregion
         GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
+        protected virtual void TickOnFocus()
+        {
+            float step = (UEngine.Instance.ElapseTickCount * 0.001f) * CameraMoveSpeed;
+            var keyboards = UEngine.Instance.EventProcessorManager.Keyboards;
+            if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_W])
+            {
+                CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, step, true);
+            }
+            else if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_S])
+            {
+                CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, -step, true);
+            }
+
+            if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_A])
+            {
+                CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, step, true);
+            }
+            else if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_D])
+            {
+                CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, -step, true);
+            }
+        }
         public unsafe void TickLogic(int ellapse)
         {
             World.TickLogic();
@@ -148,25 +170,7 @@ namespace EngineNS.EGui.Slate
                 return;
             if (this.IsFocused)
             {
-                float step = (UEngine.Instance.ElapseTickCount * 0.001f) * CameraMoveSpeed;
-                var keyboards = UEngine.Instance.EventProcessorManager.Keyboards;
-                if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_W])
-                {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, step, true);
-                }
-                else if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_S])
-                {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, -step, true);
-                }
-
-                if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_A])
-                {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, step, true);
-                }
-                else if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_D])
-                {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, -step, true);
-                }
+                TickOnFocus();
             }
 
             mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
