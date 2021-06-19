@@ -48,13 +48,14 @@ namespace EngineNS.Editor
             {
                 GamePlay.Scene.UNode aabbTreeRoot = null;
 
-                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
-                var root = mainEditor.WorldViewportSlate.World.Root.FindFirstChild("DrawMeshNode");
+                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
+                var world = mainEditor.GetWorldViewportSlate().World;
+                var root = mainEditor.GetWorldViewportSlate().World.Root.FindFirstChild("DrawMeshNode");
                 if (root == null)
                 {
-                    var scene = mainEditor.WorldViewportSlate.World.Root.GetNearestParentScene();
+                    var scene = world.Root.GetNearestParentScene();
                     root = scene.NewNode(typeof(GamePlay.Scene.UNode), new GamePlay.Scene.UNodeData() { Name = "DrawMeshNode" }, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacementBase));
-                    root.Parent = mainEditor.WorldViewportSlate.World.Root;
+                    root.Parent = world.Root;
                 }
                 root.ClearChildren();
 
@@ -163,7 +164,7 @@ namespace EngineNS.Editor
                     trNode.IsAcceptShadow = true;
                 }
 
-                mainEditor.WorldViewportSlate.ShowBoundVolumes(true, null);
+                mainEditor.GetWorldViewportSlate().ShowBoundVolumes(true, null);
             }
         }
         async System.Threading.Tasks.Task DoTest2()

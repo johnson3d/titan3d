@@ -283,10 +283,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         bool CanDrawHitproxy = false;
         public unsafe override void TickLogic()
         {
-            var app = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+            var app = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
             if (app != null)
             {
-                mShadowMap.TickLogic(app.WorldViewportSlate.World, this, true);
+                mShadowMap.TickLogic(app.GetWorldViewportSlate().World, this, true);
 
                 var cBuffer = GBuffers.PerViewportCBuffer;
                 if (cBuffer != null)
@@ -297,7 +297,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     cBuffer.SetValue(cBuffer.PerViewportIndexer.gViewer2ShadowMtx, ref mShadowMap.mViewer2ShadowMtx);
                     cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowDistance, ref mShadowMap.mShadowDistance);
 
-                    var dirLight = app.WorldViewportSlate.World.DirectionLight;
+                    var dirLight = app.GetWorldViewportSlate().World.DirectionLight;
                     //dirLight.mDirection = MathHelper.RandomDirection();
                     var dir = dirLight.mDirection;
                     var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
@@ -375,7 +375,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickRender()
         {
-            var app = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+            var app = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
             if (app != null)
             {
                 mShadowMap.TickRender();
@@ -416,7 +416,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickSync()
         {
-            var app = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+            var app = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
             if (app != null)
             {
                 mShadowMap.TickSync();

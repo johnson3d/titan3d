@@ -178,20 +178,20 @@ namespace EngineNS.Graphics.Pipeline
             }
             if (proxy == null)
             {
-                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
                 if (mainEditor != null)
                 {
-                    mainEditor.WorldViewportSlate.ShowBoundVolumes(false, null);
+                    mainEditor.GetWorldViewportSlate().ShowBoundVolumes(false, null);
                 }
                 return;
             }
             var node = proxy as GamePlay.Scene.UNode;
             if (node != null)
             {
-                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
                 if (mainEditor != null)
                 {
-                    mainEditor.WorldViewportSlate.ShowBoundVolumes(true, node);
+                    mainEditor.GetWorldViewportSlate().ShowBoundVolumes(true, node);
                 }
             }
         }
