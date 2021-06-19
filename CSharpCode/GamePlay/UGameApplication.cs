@@ -29,7 +29,9 @@ namespace EngineNS.GamePlay
             WorldViewportSlate = new UGameViewportState(true);
             await WorldViewportSlate.Initialize(this, RenderPolicy, 0, 1);
             WorldViewportSlate.ShowCloseButton = true;
+
             UEngine.Instance.TickableManager.AddTickable(this);
+            this.NativeWindow.RegEventProcessor(WorldViewportSlate);
 
             var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current);
             UEngine.Instance.MacrossModule.ReloadAssembly(root + "/net5.0/GameProject.dll");
