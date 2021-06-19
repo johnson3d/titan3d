@@ -41,21 +41,24 @@ void Safe_Release(T*& p)
 
 struct UAnyValue;
 
-TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, SV_NameSpace=EngineNS)
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void(*FWriteLogString)(const void* threadName, const void* logStr, ELevelTraceType level, const void* file, int line);
 
-TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, SV_NameSpace = EngineNS)
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void(* FOnNativeMemAlloc)(size_t size, const char* file, size_t line, size_t id);
-TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, SV_NameSpace = EngineNS)
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void(* FOnNativeMemFree)(size_t size, const char* file, size_t line, size_t id);
-TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, SV_NameSpace = EngineNS)
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void(* FOnNativeMemLeak)(void* ptr, size_t size, const char* file, size_t line, size_t id, const char* debugInfo);
-TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, SV_NameSpace = EngineNS)
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void* (*FCreateManagedObject)(const char* fullname, UAnyValue* args, int NumOfArg, int refType);
-TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, SV_NameSpace = EngineNS)
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void (*FFreeManagedObjectGCHandle)(void* handle);
-TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, SV_NameSpace = EngineNS)
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void* (*FGetManagedObjectFromGCHandle)(void* handle);
+class IShaderDesc;
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void (*FOnShaderTranslated)(IShaderDesc* shaderDesc);
 
 class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct=8)
 CoreSDK
@@ -98,6 +101,11 @@ public:
 		GetManagedObjectFromGCHandle = fn;
 	}
 
+	static FOnShaderTranslated OnShaderTranslated;
+	static void SetOnShaderTranslated(FOnShaderTranslated fn)
+	{
+		OnShaderTranslated = fn;
+	}
 	static void TestStdString(const std::string& a)
 	{
 
@@ -159,6 +167,7 @@ VTypeHelperDefine(FOnNativeMemLeak, sizeof(void*));
 VTypeHelperDefine(FCreateManagedObject, sizeof(void*));
 VTypeHelperDefine(FFreeManagedObjectGCHandle, sizeof(void*));
 VTypeHelperDefine(FGetManagedObjectFromGCHandle, sizeof(void*));
+VTypeHelperDefine(FOnShaderTranslated, sizeof(void*));
 
 StructBegin(FWriteLogString, EngineNS)
 StructEnd(void)
@@ -179,6 +188,9 @@ StructBegin(FFreeManagedObjectGCHandle, EngineNS)
 StructEnd(void)
 
 StructBegin(FGetManagedObjectFromGCHandle, EngineNS)
+StructEnd(void)
+
+StructBegin(FOnShaderTranslated, EngineNS)
 StructEnd(void)
 
 NS_END

@@ -73,11 +73,13 @@ StructImpl(FOnNativeMemLeak)
 StructImpl(FCreateManagedObject);
 StructImpl(FFreeManagedObjectGCHandle);
 StructImpl(FGetManagedObjectFromGCHandle);
+StructImpl(FOnShaderTranslated);
 
 FWriteLogString CoreSDK::mWriteLogString = nullptr;
 FCreateManagedObject CoreSDK::CreateManagedObject = nullptr;
 FFreeManagedObjectGCHandle CoreSDK::FreeManagedObjectGCHandle = nullptr;
 FGetManagedObjectFromGCHandle CoreSDK::GetManagedObjectFromGCHandle = nullptr;
+FOnShaderTranslated CoreSDK::OnShaderTranslated = nullptr;
 
 void CoreSDK::StartNativeMemWatcher()
 {

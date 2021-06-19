@@ -6,6 +6,33 @@ namespace EngineNS.Editor.ShaderCompiler
 {
     public unsafe class UHLSLCompiler : AuxPtrType<IShaderConductor>
     {
+        static CoreSDK.FDelegate_FOnShaderTranslated OnShaderTranslated = OnShaderTranslatedImpl;
+        static void OnShaderTranslatedImpl(EngineNS.IShaderDesc arg0)
+        {
+            var glsl = arg0.GetGLCode();
+            if (glsl.Length > 0)
+            {
+                bool changed = false;
+                if (glsl.Contains("#error No extension available for FP16."))
+                {
+                    glsl = glsl.Replace("#error No extension available for Int16.", "#define float16_t float");
+                    changed = true;
+                }
+                if (glsl.Contains("#error No extension available for Int16."))
+                {
+                    glsl = glsl.Replace("#error No extension available for Int16.", "#define uint16_t uint");
+                    changed = true;
+                }
+                if (changed)
+                {
+                    arg0.SetGLCode(glsl);
+                }
+            }
+        }
+        static UHLSLCompiler()
+        {
+            CoreSDK.SetOnShaderTranslated(OnShaderTranslated);
+        }
         public UHLSLCompiler()
         {
             mCoreObject = IShaderConductor.CreateInstance();

@@ -828,6 +828,10 @@ bool IGLRenderContext::Init(IGLRenderSystem* sys, const IRenderContextDesc* desc
 	{
 		VFX_LTRACE(ELTT_Graphics, "Half Shader:NV shader5 half\r\n", pExt);
 	}
+	else if (HasExtension("GL_AMD_gpu_shader_int16"))
+	{
+		VFX_LTRACE(ELTT_Graphics, "Half Shader: shader_int16\r\n", pExt);
+	}
 	else if (HasExtension("EXT_shader_16bit_storage"))
 	{
 		VFX_LTRACE(ELTT_Graphics, "Half Shader:16bit storage\r\n", pExt);

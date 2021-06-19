@@ -108,7 +108,7 @@ namespace GameProject
                     //meshNode1.Placement.Position = meshNode1.Placement.Position;
                 }
 
-                if (UEngine.Instance.Config.RHIType != ERHIType.RHT_OGL)
+                //if (UEngine.Instance.Config.RHIType != ERHIType.RHT_OGL)
                 {
                     var terrainMesh = new EngineNS.Graphics.Mesh.UMesh();
                     var grid = EngineNS.Graphics.Mesh.CMeshDataProvider.MakeGridIndices(127, 127);

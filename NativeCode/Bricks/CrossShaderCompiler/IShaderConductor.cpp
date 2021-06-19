@@ -3,6 +3,7 @@
 #include "../../RHI/ShaderReflector.h"
 #include "../../Base/io/vfxfile.h"
 #include "../../Base/io/MemStream.h"
+#include "../../Base/CoreSDK.h"
 
 #if defined(PLATFORM_WIN)
 #include "D3D11/D11PreHead.h"
@@ -306,10 +307,6 @@ IShaderConductor* IShaderConductor::GetInstance()
 //	}
 //}
 
-typedef void (WINAPI *FOnShaderTranslated)(IShaderDesc* shaderDesc);
-
-FOnShaderTranslated GOnShaderTranslated = nullptr;
-
 bool IShaderConductor::CompileShader(IShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm,
 			const IShaderDefinitions* defines, bool bDebugShader, bool bDxbc, bool bGlsl, bool bMetal)
 {
@@ -544,9 +541,9 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, const char* hlsl, const ch
 		ShaderConductor::DestroyBlob(tmp.target);
 	}
 
-	if (GOnShaderTranslated != nullptr)
+	if (CoreSDK::OnShaderTranslated != nullptr)
 	{
-		GOnShaderTranslated(desc);
+		CoreSDK::OnShaderTranslated(desc);
 	}
 
 	return true;
@@ -556,13 +553,3 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, const char* hlsl, const ch
 }
 
 NS_END
-
-using namespace EngineNS;
-
-extern "C"
-{
-	VFX_API void SDK_CscShaderConductor_SetTranslateCB(FOnShaderTranslated func)
-	{
-		GOnShaderTranslated = func;
-	}
-}
