@@ -31,12 +31,13 @@ namespace EngineNS.GamePlay
             WorldViewportSlate.ShowCloseButton = true;
 
             UEngine.Instance.TickableManager.AddTickable(this);
-            this.NativeWindow.RegEventProcessor(WorldViewportSlate);
 
             var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current);
             UEngine.Instance.MacrossModule.ReloadAssembly(root + "/net5.0/GameProject.dll");
 
             await UEngine.Instance.StartPlayInEditor(RName.GetRName("Demo0.mcrs"));
+
+            this.NativeWindow.RegEventProcessor(WorldViewportSlate);
             return true;
         }
         public override void OnResize(float x, float y)

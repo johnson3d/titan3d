@@ -115,6 +115,11 @@ namespace EngineNS.GamePlay
 
             var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
             materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
+            if (materials1[0] == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return false;
+            }
             mesh2.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             var noScaleTM = node.Placement.AbsTransform;
             noScaleTM.NoScale();
