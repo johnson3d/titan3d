@@ -13,18 +13,8 @@ namespace EngineNS.Editor
         }
         protected override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
         {
-            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.Mobile.UMobileEditorFSPolicy;
-            if (edtorPolicy != null)
-            {
-                if (proxy == null)
-                {
-                    edtorPolicy.PickedProxiableManager.ClearSelected();
-                }
-                else
-                {
-                    edtorPolicy.PickedProxiableManager.Selected(proxy);
-                }
-            }
+            base.OnHitproxySelected(proxy);
+
             if (proxy == null)
             {
                 this.ShowBoundVolumes(false, null);
