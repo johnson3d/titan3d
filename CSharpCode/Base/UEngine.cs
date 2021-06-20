@@ -106,10 +106,17 @@ namespace EngineNS
         {
             NativeMemory.BeginProfiler();
 
+            var t1 = Support.Time.HighPrecision_GetTickCount();
             EngineNS.Rtti.UTypeDescManager.Instance.InitTypes();
+            var t2 = Support.Time.HighPrecision_GetTickCount();
+            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Collect Type Info:{(t2-t1)/1000} ms");
             EngineNS.Rtti.UClassMetaManager.Instance.LoadMetas();
+            var t3 = Support.Time.HighPrecision_GetTickCount();
+            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Load Rtti MetaDatas:{(t3 - t2) / 1000} ms");
             EngineNS.Profiler.Log.InitLogger();
             UEngine.Instance.AssetMetaManager.LoadMetas();
+            var t4 = Support.Time.HighPrecision_GetTickCount();
+            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Load AssetMetas:{(t4 - t3) / 1000} ms");
 
             EngineNS.UCs2CppBase.InitializeNativeCoreProvider();
 
@@ -117,6 +124,8 @@ namespace EngineNS
 
             if (cfgFile == null)
                 cfgFile = FileManager.GetRoot(IO.FileManager.ERootDir.Game) + "EngineConfig.cfg";
+            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Load Application Config:{cfgFile}");
+
             Config = IO.FileManager.LoadXmlToObject<UEngineConfig>(cfgFile);
             if (Config == null)
             {
@@ -127,17 +136,22 @@ namespace EngineNS
 
             GatherModules();
 
-            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "PreInitEngine OK");
+            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", "PreInitEngine OK");
             System.Action action = async () =>
             {
                 await base.InitializeModules();
                 if (Config.DoUnitTest)
                 {
+                    t2 = Support.Time.HighPrecision_GetTickCount();
                     EngineNS.UTest.UnitTestManager.DoUnitTests();
+                    t3 = Support.Time.HighPrecision_GetTickCount();
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Unit Test:{(t3-t2)/1000} ms");
                 }
             };
             action();
 
+            var tEnd = Support.Time.HighPrecision_GetTickCount();
+            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Engine PreInit Time:{(tEnd - t1) / 1000} ms");
             return true;
         }
         [ThreadStatic]

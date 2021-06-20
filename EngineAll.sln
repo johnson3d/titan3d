@@ -155,8 +155,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core.Android", "Core.Androi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Android", "NativeCode\Platform\Android\Android.vcxitems", "{5325AAB3-27C6-4B3B-BC33-4A7C1E1272E2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EngineConfig", "EngineConfig.vcxitems", "{009D7483-131D-43DE-BCBE-56F21FECADCF}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		EngineConfig.vcxitems*{009d7483-131d-43de-bcbe-56f21fecadcf}*SharedItemsImports = 9
 		CSharpCode\Grapics\Pipeline\Pipeline.projitems*{09a701b1-eb1f-41c3-bd63-1b3823894da2}*SharedItemsImports = 13
 		CSharpCode\Editor\Editor.projitems*{0b1a3442-4420-414f-aa79-15575e9f8885}*SharedItemsImports = 13
 		CSharpCode\Bricks\CodeBuilder\CodeBuilder.projitems*{0b90fed7-a3e5-4169-9532-6aa4e9f89001}*SharedItemsImports = 13
@@ -257,6 +260,7 @@ Global
 		3rd\csharp\StbImageSharp\StbImageSharp.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5
 		3rd\csharp\StbImageWriteSharp\StbImageWriteSharp.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5
 		codegen\Cs2Cpp\cs\Cs2Cpp.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5
+		codegen\Macross\Engine\EngineMacross.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5
 		codegen\NativeBinder\CodeGenCSharp.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5
 		codegen\Property\Engine\EngineProperty.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5
 		codegen\Rpc\Engine\EngineRPC.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5

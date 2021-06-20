@@ -31,6 +31,8 @@
 
   <Import Project="..\..\codegen\Cs2Cpp\cs\Cs2Cpp.projitems" Label="Shared" />
 
+  <Import Project="..\..\codegen\Macross\Engine\EngineMacross.projitems" Label="Shared" />
+
   <Import Project="..\..\CSharpCode\Editor\Editor.projitems" Label="Shared" />
 
   <Import Project="..\..\CSharpCode\GamePlay\GamePlay.projitems" Label="Shared" />

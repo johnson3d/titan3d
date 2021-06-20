@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "ProjectCooker": {
+      "commandName": "Project",
+      "commandLineArgs": "ExeCmd=MakeSln",
+      "workingDirectory": "..\\..\\binaries\\"
+    }
+  }
+}

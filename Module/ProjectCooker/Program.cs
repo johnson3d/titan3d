@@ -30,6 +30,17 @@ namespace ProjectCooker
                             await exe.ExecuteCommand(args);
                         }
                         break;
+                    case "MakeSln":
+                        {
+                            //using (var sln = new net.r_eg.MvsSln.Sln("e:/Titan3d/EngineAll.sln", net.r_eg.MvsSln.SlnItems.All & ~net.r_eg.MvsSln.SlnItems.ProjectDependencies))
+                            //{
+                            //    foreach(var i in sln.Result.ProjectItems)
+                            //    {
+                            //        Console.WriteLine(i.fullPath);
+                            //    }
+                            //}
+                        }
+                        break;
                 }
                 EngineNS.UEngine.Instance.PostQuitMessage();
             };
