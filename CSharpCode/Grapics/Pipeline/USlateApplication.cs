@@ -15,8 +15,8 @@ namespace EngineNS.Graphics.Pipeline
     public class USlateApplication
     {
         #region RootForms
-        public static List<IRootForm> AppendForms { get; } = new List<IRootForm>();
-        public static List<IRootForm> RootForms { get; } = new List<IRootForm>();
+        private static List<IRootForm> AppendForms { get; } = new List<IRootForm>();
+        private static List<IRootForm> RootForms { get; } = new List<IRootForm>();
         public static void RegRootForm(IRootForm form)
         {
             if (AppendForms.Contains(form))
@@ -44,6 +44,11 @@ namespace EngineNS.Graphics.Pipeline
                     continue;
                 i.OnDraw();
             }
+        }
+        public static void ClearRootForms()
+        {
+            AppendForms.Clear();
+            RootForms.Clear();
         }
         #endregion
 

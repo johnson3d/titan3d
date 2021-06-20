@@ -28,7 +28,7 @@ namespace EngineNS
     public partial class UEngine
     {
         public Editor.UPIEModule PIEModule { get; } = new Editor.UPIEModule();
-        public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(Rtti.UTypeDesc appType, Type rpType, RName main)
+        public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(Graphics.Pipeline.USlateApplication application, Type rpType, RName main)
         {
             if (this.GameInstance != null)
                 return false;
@@ -66,6 +66,8 @@ namespace EngineNS
             if (this.GameInstance == null)
                 return null;
 
+            var igame = this.GameInstance.McObject.Get();
+            UEngine.Instance?.TickableManager.RemoveTickable(igame);
             this.GameInstance.BeginDestroy();
             var wr = new WeakReference(this.GameInstance);
             this.GameInstance = null;

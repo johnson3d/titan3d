@@ -33,7 +33,7 @@ namespace EngineNS.Editor
         public EGui.Controls.ContentBrowser ContentBrowser = new EGui.Controls.ContentBrowser();
         public override void Cleanup()
         {
-            Graphics.Pipeline.USlateApplication.RootForms.Clear();
+            Graphics.Pipeline.USlateApplication.ClearRootForms();
             UEngine.Instance?.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }

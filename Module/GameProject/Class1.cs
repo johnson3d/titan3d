@@ -55,6 +55,8 @@ namespace GameProject
             WorldViewportSlate = new EngineNS.GamePlay.UGameViewportSlate(true);
             
             await WorldViewportSlate.Initialize(null, RenderPolicy, 0, 1);
+            UEngine.Instance.GfxDevice.MainWindow.NativeWindow.RegEventProcessor(WorldViewportSlate);
+
             using (var guard = new EngineNS.Macross.UMacrossStackGuard(mFrame_BeginPlay))
             {
                 await base.BeginPlay(host);
@@ -165,6 +167,7 @@ namespace GameProject
         }
         public override void BeginDestroy(EngineNS.GamePlay.UGameBase host)
         {
+            UEngine.Instance.GfxDevice.MainWindow.NativeWindow.UnregEventProcessor(WorldViewportSlate);
             base.BeginDestroy(host);
         }
     }

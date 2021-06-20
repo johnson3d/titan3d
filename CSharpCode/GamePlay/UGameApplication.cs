@@ -6,76 +6,45 @@ namespace EngineNS.GamePlay
 {
     public class UGameApplication : Graphics.Pipeline.USlateApplication, ITickable
     {
-        public UGameViewportSlate WorldViewportSlate = null;
         public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
         {
-            return WorldViewportSlate;
+            return UEngine.Instance.GameInstance?.McObject.Get().WorldViewportSlate;
         }
         public override void Cleanup()
         {
-            this.NativeWindow.UnregEventProcessor(WorldViewportSlate);
-            UEngine.Instance.EndPlayInEditor();
-            Graphics.Pipeline.USlateApplication.RootForms.Clear();
-            WorldViewportSlate?.Cleanup();
-            WorldViewportSlate = null;
-            UEngine.Instance?.TickableManager.RemoveTickable(this);
+            Graphics.Pipeline.USlateApplication.ClearRootForms();
+
+            UEngine.Instance.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
         public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, Type rpType)
         {
             await base.InitializeApplication(rc, rpType);
-
-            var RenderPolicy = Rtti.UTypeDescManager.CreateInstance(rpType) as Graphics.Pipeline.IRenderPolicy;
-
-            WorldViewportSlate = new UGameViewportSlate(true);
-            await WorldViewportSlate.Initialize(this, RenderPolicy, 0, 1);
-            WorldViewportSlate.ShowCloseButton = true;
+            await UEngine.Instance.StartPlayInEditor(this, typeof(EngineNS.Graphics.Pipeline.Mobile.UMobileEditorFSPolicy), EngineNS.RName.GetRName("Demo0.mcrs"));
 
             UEngine.Instance.TickableManager.AddTickable(this);
-
-            this.NativeWindow.RegEventProcessor(WorldViewportSlate);
             return true;
-        }
-        public override void OnResize(float x, float y)
-        {
-            base.OnResize(x, y);
         }
         protected unsafe override void OnDrawUI()
         {
-            if (WorldViewportSlate.Visible)
-            {
-                if (UEngine.Instance.Config.SupportMultWindows == false)
-                {
-                    var size = NativeWindow.GetWindowSize();
-                    var pos = new Vector2(0);
-                    var pivot = new Vector2(0);
-                    ImGuiAPI.SetNextWindowPos(ref pos, ImGuiCond_.ImGuiCond_Always, ref pivot);
-                    ImGuiAPI.SetNextWindowSize(ref size, ImGuiCond_.ImGuiCond_Always);
-                }
-                WorldViewportSlate.OnDraw();
-            }
+            var worldSlate = UEngine.Instance.GameInstance?.McObject.Get().WorldViewportSlate;
+            worldSlate.IsSetViewportPos = true;            
+            worldSlate.GameViewportPos = new Vector2(0);
+            worldSlate.GameViewportSize = this.NativeWindow.GetWindowSize();
+
+            DrawRootForms();
         }
         #region Tick
-        public void TickLogic(int ellapse)
+        public virtual void TickLogic(int ellapse)
         {
-            WorldViewportSlate.TickLogic(ellapse);
+            
         }
-        public void TickRender(int ellapse)
+        public virtual void TickRender(int ellapse)
         {
-            WorldViewportSlate.TickRender(ellapse);
+            
         }
-        public void TickSync(int ellapse)
+        public virtual void TickSync(int ellapse)
         {
-            WorldViewportSlate.TickSync(ellapse);
-
-            if (WorldViewportSlate.Visible == false)
-            {
-                var num = ImGuiAPI.PlatformIO_Viewports_Size(ImGuiAPI.GetPlatformIO());
-                if (num == 1)
-                {//只剩下被特意隐藏的主Viewport了
-                    UEngine.Instance.PostQuitMessage();
-                }
-            }
             OnDrawSlate();
         }
         #endregion

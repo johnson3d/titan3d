@@ -16,11 +16,17 @@ namespace EngineNS.GamePlay
         {
             UEngine.Instance.EndPlayInEditor();
         }
+        public bool IsSetViewportPos = false;
+        public Vector2 GameViewportPos;
+        public Vector2 GameViewportSize;
         public override unsafe void OnDraw()
         {
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            var sz = new Vector2(100, 100);
-            //ImGuiAPI.SetNextWindowSize(ref sz, ImGuiCond_.ImGuiCond_FirstUseEver);            
+            if (IsSetViewportPos)
+            {
+                ImGuiAPI.SetNextWindowPos(ref GameViewportPos, ImGuiCond_.ImGuiCond_Always, ref Vector2.mZero);
+                ImGuiAPI.SetNextWindowSize(ref GameViewportSize, ImGuiCond_.ImGuiCond_Always);
+            }
             IsDrawing = false;
             bool bShow = ImGuiAPI.Begin(Title, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
             if (ImGuiAPI.IsWindowDocked())
@@ -29,7 +35,7 @@ namespace EngineNS.GamePlay
             }
             if (bShow)
             {
-                sz = ImGuiAPI.GetWindowSize();
+                var sz = ImGuiAPI.GetWindowSize();
                 var imViewport = ImGuiAPI.GetWindowViewport();
                 if ((IntPtr)imViewport->PlatformUserData != IntPtr.Zero)
                 {

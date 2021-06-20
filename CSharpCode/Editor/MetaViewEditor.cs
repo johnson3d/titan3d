@@ -181,7 +181,7 @@ namespace EngineNS.Editor
         }
         async System.Threading.Tasks.Task DoTest3()
         {
-            await UEngine.Instance.StartPlayInEditor(Rtti.UTypeDesc.TypeOf(typeof(GamePlay.UGameApplication)), typeof(Graphics.Pipeline.Mobile.UMobileEditorFSPolicy), RName.GetRName("Demo0.mcrs"));
+            await UEngine.Instance.StartPlayInEditor(UEngine.Instance.GfxDevice.MainWindow, typeof(Graphics.Pipeline.Mobile.UMobileEditorFSPolicy), RName.GetRName("Demo0.mcrs"));
         }
         async System.Threading.Tasks.Task DoTest4()
         {
