@@ -15,16 +15,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)FBXAnimImporter.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)FbxDataConverter.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FBXDataConverter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FBX.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FBXImporter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FBXMeshImporter.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FBXUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)FBXAnimImporter.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)FbxDataConverter.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FBXDataConverter.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FBX.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FBXImporter.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FBXMeshImporter.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FBXUtils.cpp" />
   </ItemGroup>
 </Project>

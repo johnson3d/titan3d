@@ -9,6 +9,8 @@
     <Import_RootNamespace>FBX</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssetImport\PartialAnimationClip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetImport\PartialMeshPrimitives.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FBXImporter.cs" />
   </ItemGroup>
 </Project>

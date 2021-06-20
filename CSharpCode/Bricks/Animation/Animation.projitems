@@ -13,7 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationAsset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationClip.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\AnimationCurve.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationChunk.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\AnimHierarchy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Curve.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Animatable.cs" />

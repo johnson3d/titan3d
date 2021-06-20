@@ -4,33 +4,120 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EngineNS.Animation
+namespace EngineNS.Animation.Asset
 {
-    public class UAnimationClip : IO.BaseSerializer, IAnimationAsset
+    [Rtti.Meta]
+    public class UAnimationClipAMeta : IO.IAssetMeta
     {
-        Data.UAnimationData AnimationData = null;
+        public override bool CanRefAssetType(IO.IAssetMeta ameta)
+        {
+            //必须是TextureAsset
+            return true;
+        }
+        public override void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        {
+            base.OnDraw(ref cmdlist, ref sz, ContentBrowser);
+        }
+    }
+
+    [Rtti.Meta]
+    [UAnimationClip.Import]
+    [IO.AssetCreateMenu(MenuName = "Animation")]
+    public partial class UAnimationClip : IO.BaseSerializer, IAnimationAsset
+    {
+        //DynamicInitialize
+        Dictionary<Animatable.IPropertySetter, Guid> PropertySetFuncMapping { get; set; } = new Dictionary<Animatable.IPropertySetter, Guid>();
+        #region IAnimationAsset
+        public const string AssetExt = ".animclip";
+        [Rtti.Meta]
+        public RName AssetName
+        {
+            get;
+            set;
+        }
+
+        public IAssetMeta CreateAMeta()
+        {
+            var result = new UAnimationClipAMeta();
+            return result;
+        }
+
+        public IAssetMeta GetAMeta()
+        {
+            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+        }
+
+        public void UpdateAMetaReferences(IAssetMeta ameta)
+        {
+            ameta.RefAssetRNames.Clear();
+        }
+
+        public void SaveAssetTo(RName name)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion IAnimationAsset
+
+        #region AnimationChunk
+        UAnimationChunk AnimationChunk = null;
         public Base.AnimHierarchy AnimatedHierarchy
         {
             get
             {
-                return AnimationData.AnimatedHierarchy;
+                return AnimationChunk.AnimatedHierarchy;
             }
         }
-        public List<Curve.ICurve> AnimCurvesList
+        public Dictionary<Guid, Curve.ICurve> AnimCurvesList
         {
             get
             {
-                return AnimationData.AnimCurvesList;
+                return AnimationChunk.AnimCurvesList;
             }
         }
-        //DynamicInitialize
-        Dictionary<Animatable.IPropertySetter, int> PropertySetFuncMapping { get; set; } = new Dictionary<Animatable.IPropertySetter, int>();
+        #endregion
+
+        #region ImprotAttribute
+        public partial class ImportAttribute : IO.CommonCreateAttribute
+        {
+            ~ImportAttribute()
+            {
+                mFileDialog.Dispose();
+            }
+            string mSourceFile;
+            ImGui.ImGuiFileDialog mFileDialog = ImGui.ImGuiFileDialog.CreateInstance();
+            //EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
+            public override void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            {
+                mDir = dir;
+                //mDesc.Desc.SetDefault();
+                //PGAsset.SingleTarget = mDesc;
+            }
+            public override unsafe void OnDraw(EGui.Controls.ContentBrowser ContentBrowser)
+            {
+                FBXCreateCreateDraw(ContentBrowser);
+            }
+
+            //for just create a clip as a property animation not from fbx 
+            public unsafe void SimpleCreateDraw(EGui.Controls.ContentBrowser ContentBrowser)
+            {
+
+            }
+            private unsafe bool SimpleImport()
+            {
+                return false;
+            }
+
+            public unsafe partial void FBXCreateCreateDraw(EGui.Controls.ContentBrowser ContentBrowser);
+        }
+        #endregion
+
         public void Update(float time)
         {
             //loop repead pingpong
             //time = ......
             ///
 
+            //normal do not call evaluate in update
             Evaluate(time);
         }
         public void Evaluate(float time)
@@ -67,7 +154,7 @@ namespace EngineNS.Animation
                             for (int j = 0; j < AnimatedHierarchy.Value.Properties.Count; ++j)
                             {
                                 var hierarchyNodePropertyDesc = AnimatedHierarchy.Value.Properties[j];
-                                if (property.Name == hierarchyNodePropertyDesc.Name.ToString()
+                                if (property.Name == hierarchyNodePropertyDesc.Name.GetString()
                                     && property.PropertyType == hierarchyNodePropertyDesc.ClassType.SystemType)
                                 {
                                     Animatable.AnimatablePropertyDesc desc = new Animatable.AnimatablePropertyDesc();
@@ -75,7 +162,7 @@ namespace EngineNS.Animation
                                     desc.PropertyType = hierarchyNodePropertyDesc.ClassType;
                                     var func = UEngine.Instance.AnimatablePropertySetterModule.CreateInstance(desc);
                                     func.SetAnimatableObject(animatable);
-                                    PropertySetFuncMapping.Add(func, hierarchyNodePropertyDesc.CurveIndex);
+                                    PropertySetFuncMapping.Add(func, hierarchyNodePropertyDesc.CurveId);
                                 }
                             }
                         }
@@ -86,7 +173,7 @@ namespace EngineNS.Animation
                         var childAnimatable = property.GetValue(animatable) as Animatable.IAnimatable;
                         for (int j = 0; j < AnimatedHierarchy.Children.Count; ++j)
                         {
-                            if (AnimatedHierarchy.Children[j].Value.Name.ToString() == property.Name)
+                            if (AnimatedHierarchy.Children[j].Value.Name.GetString() == property.Name)
                             {
                                 BindeRecursion(childAnimatable, AnimatedHierarchy.Children[i]);
                             }
@@ -109,7 +196,7 @@ namespace EngineNS.Animation
                         for (int j = 0; j < AnimatedHierarchy.Value.Properties.Count; ++j)
                         {
                             var animatedPropertyDesc = AnimatedHierarchy.Value.Properties[j];
-                            if (property.Name == animatedPropertyDesc.Name.ToString())
+                            if (property.Name == animatedPropertyDesc.Name.GetString())
                             {
                                 var atts = property.GetCustomAttributes(false);
                                 for (int k = 0; k < atts.Length; ++k)
@@ -122,7 +209,7 @@ namespace EngineNS.Animation
                                         desc.PropertyType = attType;
                                         var func = UEngine.Instance.AnimatablePropertySetterModule.CreateInstance(desc);
                                         func.SetAnimatableObject(animatable);
-                                        PropertySetFuncMapping.Add(func, animatedPropertyDesc.CurveIndex);
+                                        PropertySetFuncMapping.Add(func, animatedPropertyDesc.CurveId);
                                     }
                                 }
                             }
@@ -133,7 +220,7 @@ namespace EngineNS.Animation
                         var childAnimatable = property.GetValue(animatable) as Animatable.IAnimatable;
                         for (int j = 0; j < instanceHierarchy.Children.Count; ++j)
                         {
-                            if (instanceHierarchy.Children[j].Value.Name.ToString() == property.Name)
+                            if (instanceHierarchy.Children[j].Value.Name.GetString() == property.Name)
                             {
                                 BindeRecursion(childAnimatable, instanceHierarchy.Children[i]);
                             }
@@ -142,5 +229,6 @@ namespace EngineNS.Animation
                 }
             }
         }
+
     }
 }
