@@ -14,17 +14,38 @@ namespace EngineNS.Graphics.Pipeline
     }
     public class USlateApplication
     {
+        #region RootForms
+        public static List<IRootForm> AppendForms { get; } = new List<IRootForm>();
         public static List<IRootForm> RootForms { get; } = new List<IRootForm>();
         public static void RegRootForm(IRootForm form)
         {
+            if (AppendForms.Contains(form))
+                return;
             if (RootForms.Contains(form))
                 return;
-            RootForms.Add(form);
+            AppendForms.Add(form);
         }
         public static void UnregRootForm(IRootForm form)
         {
+            AppendForms.Remove(form);
             RootForms.Remove(form);
         }
+        public static void DrawRootForms()
+        {
+            foreach (var i in AppendForms)
+            {
+                RootForms.Add(i);
+            }
+            AppendForms.Clear();
+
+            foreach (var i in RootForms)
+            {
+                if (i.Visible == false)
+                    continue;
+                i.OnDraw();
+            }
+        }
+        #endregion
 
         public UPresentWindow NativeWindow;
         public virtual EGui.Slate.UWorldViewportSlate GetWorldViewportSlate() { return null; }

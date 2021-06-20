@@ -28,14 +28,22 @@ namespace EngineNS
     public partial class UEngine
     {
         public Editor.UPIEModule PIEModule { get; } = new Editor.UPIEModule();
-        public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(RName main)
+        public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(Rtti.UTypeDesc appType, Type rpType, RName main)
         {
             if (this.GameInstance != null)
                 return false;
+
+            var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current);
+            UEngine.Instance.MacrossModule.ReloadAssembly(root + "/net5.0/GameProject.dll");
+
             this.GameInstance = new GamePlay.UGameBase();
             this.GameInstance.McObject.Name = main;
 
-            return await this.GameInstance.BeginPlay();
+            var ret = await this.GameInstance.BeginPlay();
+            var igame = this.GameInstance.McObject.Get();
+            igame.WorldViewportSlate.Title = $"Game:{main.Name}";
+            UEngine.Instance.TickableManager.AddTickable(igame);
+            return ret;
         }
         public void EndPlayInEditor()
         {

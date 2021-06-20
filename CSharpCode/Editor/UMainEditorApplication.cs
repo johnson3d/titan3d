@@ -178,12 +178,7 @@ namespace EngineNS.Editor
 
                 WorldViewportSlate.DockId = CenterDockId;
 
-                foreach(var i in RootForms)
-                {
-                    if (i.Visible == false)
-                        continue;
-                    i.OnDraw();
-                }
+                DrawRootForms();
 
                 AssetEditorManager.OnDraw();
 

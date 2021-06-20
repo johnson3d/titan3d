@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    class UGameApplication : Graphics.Pipeline.USlateApplication, ITickable
+    public class UGameApplication : Graphics.Pipeline.USlateApplication, ITickable
     {
         public UGameViewportSlate WorldViewportSlate = null;
         public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
@@ -32,11 +32,6 @@ namespace EngineNS.GamePlay
             WorldViewportSlate.ShowCloseButton = true;
 
             UEngine.Instance.TickableManager.AddTickable(this);
-
-            var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current);
-            UEngine.Instance.MacrossModule.ReloadAssembly(root + "/net5.0/GameProject.dll");
-
-            await UEngine.Instance.StartPlayInEditor(RName.GetRName("Demo0.mcrs"));
 
             this.NativeWindow.RegEventProcessor(WorldViewportSlate);
             return true;

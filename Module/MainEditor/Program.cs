@@ -27,19 +27,10 @@ namespace MainEditor
                 System.GC.WaitForPendingFinalizers();
             }
 
-            int TimesOfGC = 20;
             while(EngineNS.RHI.CShaderResourceView.NumOfInstance>0)
             {
-                if (TimesOfGC >= 0)
-                {
-                    TimesOfGC--;
-                    System.GC.Collect();
-                    System.GC.WaitForPendingFinalizers();
-                }
-                else
-                {
-                    System.Threading.Thread.Sleep(50);
-                }
+                System.GC.Collect();
+                System.GC.WaitForPendingFinalizers();
             }
         }
         static bool Run = true;

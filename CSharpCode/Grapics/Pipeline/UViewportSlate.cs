@@ -139,6 +139,14 @@ namespace EngineNS.Graphics.Pipeline
                 mClientChanged = false;
                 mSizeChanged = false;
             }
+            if (mVisible == false)
+            {
+                OnVieportClosed();
+            }
+        }
+        protected virtual void OnVieportClosed()
+        {
+
         }
         protected virtual void OnClientChanged(bool bSizeChanged)
         {

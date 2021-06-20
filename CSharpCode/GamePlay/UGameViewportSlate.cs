@@ -12,6 +12,10 @@ namespace EngineNS.GamePlay
         {
             CameraController = new Editor.Controller.EditorCameraController();
         }
+        protected override void OnVieportClosed()
+        {
+            UEngine.Instance.EndPlayInEditor();
+        }
         public override unsafe void OnDraw()
         {
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
@@ -95,6 +99,10 @@ namespace EngineNS.GamePlay
                 OnClientChanged(mSizeChanged);
                 mClientChanged = false;
                 mSizeChanged = false;
+            }
+            if (mVisible == false)
+            {
+                OnVieportClosed();
             }
         }
     }

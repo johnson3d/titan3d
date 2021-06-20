@@ -46,16 +46,20 @@ namespace GameProject
         ~Demo0Game()
         {
 
-        }
+        }        
+
         EngineNS.Macross.UMacrossStackFrame mFrame_BeginPlay = new EngineNS.Macross.UMacrossStackFrame();
-        public override async System.Threading.Tasks.Task<bool> BeginPlay(EngineNS.GamePlay.UGameBase host)
+        public async override System.Threading.Tasks.Task<bool> BeginPlay(EngineNS.GamePlay.UGameBase host)
         {
+            var RenderPolicy = EngineNS.Rtti.UTypeDescManager.CreateInstance(typeof(EngineNS.Graphics.Pipeline.Mobile.UMobileEditorFSPolicy)) as EngineNS.Graphics.Pipeline.IRenderPolicy;
+            WorldViewportSlate = new EngineNS.GamePlay.UGameViewportSlate(true);
+            
+            await WorldViewportSlate.Initialize(null, RenderPolicy, 0, 1);
             using (var guard = new EngineNS.Macross.UMacrossStackGuard(mFrame_BeginPlay))
             {
                 await base.BeginPlay(host);
 
-                var app = UEngine.Instance.GfxDevice.MainWindow as EngineNS.Graphics.Pipeline.USlateApplication;
-                var world = app.GetWorldViewportSlate().World;
+                var world = WorldViewportSlate.World;
                 var root = world.Root.FindFirstChild("DrawMeshNode");
                 if (root == null)
                 {
@@ -151,7 +155,7 @@ namespace GameProject
                     }
                 }
 
-                app.GetWorldViewportSlate().ShowBoundVolumes(true, null);
+                WorldViewportSlate.ShowBoundVolumes(true, null);
                 return true;
             }
         }
