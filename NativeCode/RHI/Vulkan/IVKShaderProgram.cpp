@@ -46,7 +46,7 @@ UINT IVKShaderProgram::GetShaderResourceNumber() const
 	return 0;
 }
 
-bool IVKShaderProgram::GetShaderResourceBindInfo(UINT Index, TextureBindInfo* info) const
+bool IVKShaderProgram::GetShaderResourceBindInfo(UINT Index, TSBindInfo* info, int dataSize) const
 {
 	return false;
 }
@@ -61,7 +61,7 @@ UINT IVKShaderProgram::GetSamplerNumber() const
 	return 0;
 }
 
-bool IVKShaderProgram::GetSamplerBindInfo(UINT Index, SamplerBindInfo* info) const
+bool IVKShaderProgram::GetSamplerBindInfo(UINT Index, TSBindInfo* info, int dataSize) const
 {
 	return false;
 }

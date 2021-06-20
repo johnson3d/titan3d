@@ -65,13 +65,13 @@ void IVKDrawCall::UpdateCBufferLayoutSet(IVKRenderContext* rc)
 	memset(bufferInfo, 0, sizeof(bufferInfo));
 	for (int i = 0; i < MaxCB; i++)
 	{
-		auto vkCB = (IVKConstantBuffer*)CBuffersVS[0];
-		if(vkCB ==nullptr)
-			continue;
+		//auto vkCB = (IVKConstantBuffer*)CBuffersVS[0].second();
+		//if(vkCB ==nullptr)
+		//	continue;
 
-		bufferInfo[i].buffer = vkCB->mBuffer;
-		bufferInfo[i].offset = 0;
-		bufferInfo[i].range = vkCB->Desc.Size;
+		//bufferInfo[i].buffer = vkCB->mBuffer;
+		//bufferInfo[i].offset = 0;
+		//bufferInfo[i].range = vkCB->Desc.Size;
 	}
 
 	VkWriteDescriptorSet descriptorWrite = {};

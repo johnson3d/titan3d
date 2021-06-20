@@ -1,5 +1,5 @@
 #include "VKPreHead.h"
-#include "../../Core/thread/vfxthread.h"
+#include "../../Base/thread/vfxthread.h"
 #include "IVKRenderContext.h"
 
 #define new VNEW

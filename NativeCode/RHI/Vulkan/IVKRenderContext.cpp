@@ -193,7 +193,8 @@ IVertexBuffer* IVKRenderContext::CreateVertexBufferFromBuffer(const IVertexBuffe
 
 IGeometryMesh* IVKRenderContext::CreateGeometryMesh()
 {
-	return new IVKGeometryMesh();
+	return nullptr;
+	//return new IVKGeometryMesh();
 }
 //��Դ��Ϣ
 IFrameBuffers* IVKRenderContext::CreateFrameBuffers(const IFrameBuffersDesc* desc)

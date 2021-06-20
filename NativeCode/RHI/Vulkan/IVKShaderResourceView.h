@@ -19,6 +19,12 @@ public:
 
 	bool Init(IVKRenderContext* rc, const IShaderResourceViewDesc* desc);
 	bool Init(IVKRenderContext* rc, VkImage pBuffer, const ISRVDesc* desc);
+
+	bool UpdateTexture2D(IRenderContext* rc, const ITexture2D* pTexture2D)
+	{
+		return true;
+	}
+
 };
 
 NS_END

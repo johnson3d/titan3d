@@ -220,6 +220,7 @@ Global
 		NativeCode\RHI\OpenGL\OpenGL.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\RHI\RHI.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\RHI\VirtualDevice\VirtualDevice.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		NativeCode\RHI\Vulkan\Vulkan.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		CSharpCode\RHI\RHI.projitems*{adeb9174-81ed-41a3-b1ad-2e26b6a2ec4e}*SharedItemsImports = 13
 		NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems*{b5361ff2-8412-484c-ba35-7a2c6099a964}*SharedItemsImports = 9
 		CSharpCode\Math\Math.projitems*{ba72ed15-3c3c-4a4c-8d57-5a9f181a59d0}*SharedItemsImports = 13

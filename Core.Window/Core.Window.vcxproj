@@ -73,6 +73,7 @@
     <Import Project="..\3rd\native\iconv\iconv.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\TextConverter\TextConverter.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Animation\Animation.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\RHI\Vulkan\Vulkan.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -133,13 +134,13 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\FBXSDK\2019.2\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FBXSDK\2019.2\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories);..\3rd\native\Vulkan\1.2.176.1\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\FBXSDK\2019.2\lib\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/Vulkan/1.2.176.1/Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
@@ -183,7 +184,7 @@ $(SolutionDir)CS_Rpc_Engine.bat</Command>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>c:\aaa;..\3rd\native\FBXSDK\2019.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\aaa;..\3rd\native\FBXSDK\2019.2\include;%(AdditionalIncludeDirectories);..\3rd\native\Vulkan\1.2.176.1\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -191,7 +192,7 @@ $(SolutionDir)CS_Rpc_Engine.bat</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\FBXSDK\2019.2\lib\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/Vulkan/1.2.176.1/Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>

@@ -1,5 +1,5 @@
 #pragma once
-#include "../IPass.h"
+#include "../IDrawCall.h"
 #include "VKPreHead.h"
 
 NS_BEGIN
