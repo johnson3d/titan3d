@@ -14,6 +14,7 @@ namespace EngineNS.Graphics.Pipeline
             Picked,
             Count,
         }
+        public object TagObject;
         //[EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
         public List<Mesh.UMesh> VisibleMeshes = new List<Mesh.UMesh>();

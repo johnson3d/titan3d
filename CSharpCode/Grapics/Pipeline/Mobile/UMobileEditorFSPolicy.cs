@@ -44,13 +44,14 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             UpdatePermutation(mMacroValues);
         }
         List<string> mMacroValues = new List<string>();
-        public UMobileEditorFSPolicy Manager;
         public unsafe override void OnBuildDrawCall(RHI.CDrawCall drawcall)
         {
         }
         public unsafe override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
+
+            UMobileEditorFSPolicy Manager = policy.TagObject as UMobileEditorFSPolicy;
 
             var gpuProgram = drawcall.Effect.ShaderProgram;
             var index = drawcall.mCoreObject.FindSRVIndex("gBaseSceneView");
@@ -62,13 +63,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     }
     public class UEditorFinalProcessor : Common.USceenSpaceProcessor
     {
-        public UMobileEditorFSPolicy Manager;
         public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
         {
             await base.Initialize(policy, shading, rtFmt, dsFmt, x, y);
-
-            var hollowShading = shading as UEditorFinalShading;
-            hollowShading.Manager = policy as UMobileEditorFSPolicy;
         }
     }
     public class UMobileEditorFSPolicy : UMobileFSPolicy
@@ -206,6 +203,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             await PickedProxiableManager.Initialize(this, x, y);
             await EditorFinalProcessor.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UEditorFinalShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_UNKNOWN, x, y);
+
+            PickedProxiableManager.PickBlurProcessor.ScreenDrawPolicy.TagObject = PickedProxiableManager;
+            PickedProxiableManager.PickHollowProcessor.ScreenDrawPolicy.TagObject = PickedProxiableManager;
+            EditorFinalProcessor.ScreenDrawPolicy.TagObject = this;
 
             mShadowMap = new Shadow.UShadowMap();
             mShadowMap.Initialize(x, y);

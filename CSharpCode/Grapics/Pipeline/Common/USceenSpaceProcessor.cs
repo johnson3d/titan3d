@@ -7,7 +7,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     public class USceenSpaceProcessor
     {
         public Graphics.Mesh.UMesh ScreenMesh;
-        private Shader.CommanShading.UBasePassPolicy ScreenDrawPolicy;
+        public Shader.CommanShading.UBasePassPolicy ScreenDrawPolicy;
         public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
         public UDrawBuffers BasePass = new UDrawBuffers();
         public RenderPassDesc PassDesc = new RenderPassDesc();

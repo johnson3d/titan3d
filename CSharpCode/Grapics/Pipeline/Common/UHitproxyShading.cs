@@ -24,7 +24,6 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/pick/pick_blur.cginc", RName.ERNameType.Engine);
         }
-        public UPickedProxiableManager Manager;
         public unsafe override void OnBuildDrawCall(RHI.CDrawCall drawcall)
         {
             //var cbIndex = drawcall.mCoreObject.FindCBufferIndex("cbPerShadingEnv");
@@ -44,6 +43,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
 
+            UPickedProxiableManager Manager = policy.TagObject as UPickedProxiableManager;
+
             var gpuProgram = drawcall.Effect.ShaderProgram;
             var index = drawcall.mCoreObject.FindSRVIndex("SourceTexture");
             drawcall.mCoreObject.BindSRVAll(index, Manager.PickedBuffer.GBufferSRV[0].mCoreObject);
@@ -51,13 +52,9 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
     public class UPickBlurProcessor : USceenSpaceProcessor
     {
-        public UPickedProxiableManager Manager;
         public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
         {
             await base.Initialize(policy, shading, rtFmt, dsFmt, x, y);
-
-            var blurShading = shading as UPickBlurShading;
-            blurShading.Manager = Manager;
         }
     }
     public class UPickHollowShading : Shader.UShadingEnv
@@ -66,13 +63,14 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/pick/pick_hollow.cginc", RName.ERNameType.Engine);
         }
-        public UPickedProxiableManager Manager;
         public unsafe override void OnBuildDrawCall(RHI.CDrawCall drawcall)
         {
         }
         public unsafe override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
+
+            UPickedProxiableManager Manager = policy.TagObject as UPickedProxiableManager;
             var gpuProgram = drawcall.Effect.ShaderProgram;
             var index = drawcall.mCoreObject.FindSRVIndex("gPickedSetUpTex");
             drawcall.mCoreObject.BindSRVAll(index, Manager.PickedBuffer.GBufferSRV[0].mCoreObject);
@@ -83,13 +81,9 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
     public class UPickHollowProcessor : USceenSpaceProcessor
     {
-        public UPickedProxiableManager Manager;
         public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
         {
             await base.Initialize(policy, shading, rtFmt, dsFmt, x, y);
-
-            var hollowShading = shading as UPickHollowShading;
-            hollowShading.Manager = Manager;
         }
     }
     public class UPickedProxiableManager
@@ -151,10 +145,8 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             PickedShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickSetupShading>();
 
-            PickBlurProcessor.Manager = this;
             await PickBlurProcessor.Initialize(policy, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickBlurShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y);
 
-            PickHollowProcessor.Manager = this;
             await PickHollowProcessor.Initialize(policy, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickHollowShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y);
         }
         public void OnResize(float x, float y)
