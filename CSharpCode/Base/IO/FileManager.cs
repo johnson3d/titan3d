@@ -253,6 +253,8 @@ namespace EngineNS.IO
         }
         public static string ReadAllText(string file)
         {
+            if (System.IO.File.Exists(file) == false)
+                return null;
             return System.IO.File.ReadAllText(file);
         }
         public static void WriteAllText(string file, string text)

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1728543288 Type="EngineNS.RHI.CDepthStencilStateDesc@EngineCore">
+  <BackFace Type="EngineNS.StencilOpDesc@EngineCore" Order="0" />
+  <DepthEnable Type="System.Int32@Unknown" Order="0" />
+  <DepthFunc Type="EngineNS.EComparisionMode@EngineCore" Order="0" />
+  <DepthWriteMask Type="EngineNS.EDepthWriteMask@EngineCore" Order="0" />
+  <FrontFace Type="EngineNS.StencilOpDesc@EngineCore" Order="0" />
+  <StencilEnable Type="System.Int32@Unknown" Order="0" />
+  <StencilReadMask Type="System.Byte@Unknown" Order="0" />
+  <StencilRef Type="System.UInt32@Unknown" Order="0" />
+  <StencilWriteMask Type="System.Byte@Unknown" Order="0" />
+</Hash_1728543288>

@@ -170,14 +170,14 @@ namespace EngineNS.Editor
         async System.Threading.Tasks.Task DoTest2()
         {
             await Thread.AsyncDummyClass.DummyFunc();
-            var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current);
+            //var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current);
 
-            UEngine.Instance.MacrossModule.ReloadAssembly(root + "/net5.0/GameProject.dll");
+            //UEngine.Instance.MacrossModule.ReloadAssembly(root + "/net5.0/GameProject.dll");
 
-            var typeDesc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName("utest.mt");
-            var ins = System.Activator.CreateInstance(typeDesc.SystemType);
-            var method = typeDesc.SystemType.GetMethod("Function_0");
-            method.Invoke(ins, null);
+            //var typeDesc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName("utest.mt");
+            //var ins = System.Activator.CreateInstance(typeDesc.SystemType);
+            //var method = typeDesc.SystemType.GetMethod("Function_0");
+            //method.Invoke(ins, null);
         }
         async System.Threading.Tasks.Task DoTest3()
         {

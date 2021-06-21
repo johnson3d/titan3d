@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1040388684 Type="EngineNS.Graphics.Mesh.UMaterialMesh.TSaveData@EngineCore">
+  <Materials Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Order="0" />
+  <MeshName Type="EngineNS.RName@EngineCore" Order="0" />
+</Hash_1040388684>
