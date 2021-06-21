@@ -63,8 +63,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             DefClass.Reset();
             Functions.Clear();
             OpenFunctions.Clear();
-            NodePropGrid.SingleTarget = null;
-            PGMember.SingleTarget = null;
+            NodePropGrid.Target = null;
+            PGMember.Target = null;
 
             {
                 // old
@@ -282,7 +282,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
-                        PGMember.SingleTarget = DefClass;
+                        PGMember.Target = DefClass;
                     }
                     ImGuiAPI.TreePop();
                 }
@@ -302,7 +302,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         {
                             if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                             {
-                                PGMember.SingleTarget = i;
+                                PGMember.Target = i;
                                 mMenuType = EMenuType.None;
                                 DraggingMember = MemberVar.NewMemberVar(DefClass, i.VarName);
                                 DraggingMember.Graph = this;
@@ -332,7 +332,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             }
                             else if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                             {
-                                PGMember.SingleTarget = i.Function;
+                                PGMember.Target = i.Function;
                                 mMenuType = EMenuType.None;
                             }
                         }

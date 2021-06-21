@@ -43,7 +43,7 @@ namespace EngineNS.IO
             TypeSlt.SelectedType = type;
 
             mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType.SystemType) as IAsset;
-            PGAsset.SingleTarget = mAsset;
+            PGAsset.Target = mAsset;
         }
         public override unsafe void OnDraw(EGui.Controls.ContentBrowser ContentBrowser)
         {
@@ -75,7 +75,7 @@ namespace EngineNS.IO
                 if (TypeSlt.SelectedType != saved)
                 {
                     mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType.SystemType) as IAsset;
-                    PGAsset.SingleTarget = mAsset;
+                    PGAsset.Target = mAsset;
                 }
 
                 var sz = new Vector2(0, 0);

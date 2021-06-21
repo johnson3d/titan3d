@@ -155,6 +155,61 @@ namespace EngineNS
 
 		    return value;
 	    }
+        public UInt32 ToAbgr()
+        {
+		    UInt32 a, r, g, b;
+
+		    a = (UInt32)(Alpha * 255.0f);
+		    r = (UInt32)(Red * 255.0f);
+		    g = (UInt32)(Green * 255.0f);
+		    b = (UInt32)(Blue * 255.0f);
+
+		    UInt32 value = r;
+		    value += g << 8;
+		    value += b << 16;
+		    value += a << 24;
+
+		    return value;
+        }
+        public static Color4 FromABGR(uint color)
+        {
+            Color4 retValue = new Color4();
+            retValue.Alpha = ((color >> 24) & 255) / 255.0f;
+            retValue.Red = (color & 255) / 255.0f;
+            retValue.Green = ((color >> 8) & 255) / 255.0f;
+            retValue.Blue = ((color >> 16) & 255) / 255.0f;
+            return retValue;
+        }
+        public static UInt32 Argb2Abgr(UInt32 color)
+        {
+            var a = ((color >> 24) & 255);
+            var r = ((color >> 16) & 255);
+            var g = ((color >> 8) & 255);
+            var b = (color & 255);
+
+            UInt32 value = r;
+            value += g << 8;
+            value += b << 16;
+            value += a << 24;
+
+            return value;
+        }
+        public static UInt32 ToAbgr(Color4 color)
+        {
+            UInt32 value = (UInt32)(color.Red * 255);
+            value += (UInt32)(color.Green * 255) << 8;
+            value += (UInt32)(color.Blue * 255) << 16;
+            value += (UInt32)(color.Alpha * 255) << 24;
+            return value;
+        }
+        public static UInt32 ToAbgr(Vector4 color)
+        {
+            UInt32 value = (UInt32)(color.X * 255);
+            value += (UInt32)(color.Y * 255) << 8;
+            value += (UInt32)(color.Z * 255) << 16;
+            value += (UInt32)(color.W * 255) << 24;
+            return value;
+        }
         public UInt32 ToRgb()
         {
             UInt32 a, r, g, b;

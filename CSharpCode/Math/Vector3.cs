@@ -23,21 +23,26 @@ namespace EngineNS
         }
         public class Vector3EditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
-            public override unsafe void OnDraw(System.Reflection.PropertyInfo prop, object target, object value, EGui.Controls.PropertyGrid.PropertyGrid pg, List<KeyValuePair<object, System.Reflection.PropertyInfo>> callstack)
+            public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
-                var v = (Vector3)value;
-                var saved = v;
-                ImGuiAPI.SetNextItemWidth(-1);
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.PGInputFramePadding);
-                ImGuiAPI.InputFloat3(TName.FromString2("##", prop.Name).ToString(), (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
-                ImGuiAPI.PopStyleVar(1);
-                if (v != saved)
+                newValue = info.Value;
+                var v = (Vector3)info.Value;
+                //var saved = v;
+                var index = ImGuiAPI.TableGetColumnIndex();
+                var width = ImGuiAPI.GetColumnWidth(index);
+                ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
+                //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
+                var minValue = float.MinValue;
+                var maxValue = float.MaxValue;
+                var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 3, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                //ImGuiAPI.InputFloat3(TName.FromString2("##", info.Name).ToString(), (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
+                //ImGuiAPI.PopStyleVar(1);
+                if (changed)//(v != saved)
                 {
-                    foreach (var j in pg.TargetObjects)
-                    {
-                        EGui.Controls.PropertyGrid.PropertyGrid.SetValue(pg, j, callstack, prop, target, v);
-                    }
+                    newValue = v;
+                    return true;
                 }
+                return false;
             }
         }
         public override string ToString()

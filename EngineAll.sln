@@ -145,6 +145,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectCooker", "Module\Pro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.Console", "Module\Engine.Console\Engine.Console.csproj", "{D5A7D7FA-99B0-4C4A-9797-2DD7DB395930}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FreeType", "3rd\native\FreeType\FreeType.vcxitems", "{B6C92324-224E-420B-8D99-343A9CDE08AE}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		CSharpCode\Grapics\Pipeline\Pipeline.projitems*{09a701b1-eb1f-41c3-bd63-1b3823894da2}*SharedItemsImports = 13
@@ -201,6 +203,7 @@ Global
 		NativeCode\Base\Base.vcxitems*{99a85112-a63d-4b30-a610-b17025e3bb64}*SharedItemsImports = 9
 		CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems*{9a454650-729c-496e-bae4-71b863ea036e}*SharedItemsImports = 13
 		NativeCode\Bricks\Animation\Animation.vcxitems*{a415eb90-cf3a-4cbc-bd98-14eed4d0fcd1}*SharedItemsImports = 9
+		3rd\native\FreeType\FreeType.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\iconv\iconv.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\Image.Shared\Image.Shared.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		codegen\Cs2Cpp\cpp\Cs2Cpp.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
@@ -220,6 +223,7 @@ Global
 		NativeCode\RHI\VirtualDevice\VirtualDevice.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		CSharpCode\RHI\RHI.projitems*{adeb9174-81ed-41a3-b1ad-2e26b6a2ec4e}*SharedItemsImports = 13
 		NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems*{b5361ff2-8412-484c-ba35-7a2c6099a964}*SharedItemsImports = 9
+		3rd\native\FreeType\FreeType.vcxitems*{b6c92324-224e-420b-8d99-343a9cde08ae}*SharedItemsImports = 9
 		CSharpCode\Math\Math.projitems*{ba72ed15-3c3c-4a4c-8d57-5a9f181a59d0}*SharedItemsImports = 13
 		NativeCode\RHI\RHI.vcxitems*{c0ee8b08-b424-4c8a-a7ee-99dd5c09247b}*SharedItemsImports = 9
 		CSharpCode\Base\Base.projitems*{c0f05488-22ec-4212-8fc4-4873d8360c52}*SharedItemsImports = 13

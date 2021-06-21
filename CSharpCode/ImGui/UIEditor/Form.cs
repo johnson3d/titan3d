@@ -107,7 +107,7 @@ namespace EngineNS.EGui.UIEditor
                     }
                     if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
-                        structureEditor.PGrid.SingleTarget = cur;
+                        structureEditor.PGrid.Target = cur;
                         structureEditor.mMenuType = FormStructureEditor.EMenuType.None;
                     }
                     var bActive = ImGuiAPI.IsItemActive();
@@ -182,7 +182,7 @@ namespace EngineNS.EGui.UIEditor
                     }
                     if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
-                        structureEditor.PGrid.SingleTarget = cur;
+                        structureEditor.PGrid.Target = cur;
                         structureEditor.mMenuType = FormStructureEditor.EMenuType.None;
                     }
                     if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))

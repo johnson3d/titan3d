@@ -65,7 +65,7 @@ namespace EngineNS.Graphics.Mesh
                             {
                                 mFBXImporter = UEngine.Instance.FBXFactoryModule.Instance.CreateImporter();
                                 var fileDesc = mFBXImporter.PreImport(mSourceFile);
-                                PGAsset.SingleTarget = fileDesc;
+                                PGAsset.Target = fileDesc;
                                 mName = IO.FileManager.GetPureName(mSourceFile);
                             }
                         }
@@ -97,7 +97,7 @@ namespace EngineNS.Graphics.Mesh
                     buffer.DestroyMe();
 
                     ImGuiAPI.Separator();
-                    if (PGAsset.SingleTarget != null)
+                    if (PGAsset.Target != null)
                     {
                         PGAsset.OnDraw(false, false, false);
                     }

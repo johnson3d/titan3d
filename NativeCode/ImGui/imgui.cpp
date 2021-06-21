@@ -17039,7 +17039,47 @@ void ImGui::DebugNodeWindow(ImGuiWindow* window, const char* label)
         TreePop();
     }
     DebugNodeStorage(&window->StateStorage, "Storage");
+    DebugNodeStyle();
     TreePop();
+}
+
+void ImGui::DebugNodeStyle()
+{
+    if (TreeNode("Style"))
+    {
+        auto style = ImGui::GetStyle();
+		BulletText("WindowPadding: %.3f, %.3f", style.WindowPadding.x, style.WindowPadding.y);
+        BulletText("WindowRounding: %.3f", style.WindowRounding);
+        BulletText("WindowBorderSize: %.3f", style.WindowBorderSize);
+		BulletText("WindowMinSize: %.3f, %.3f", style.WindowMinSize.x, style.WindowMinSize.y);
+		BulletText("WindowTitleAlign: %.3f, %.3f", style.WindowTitleAlign.x, style.WindowTitleAlign.y);
+        BulletText("ChildRounding: %.3f", style.ChildRounding);
+        BulletText("ChildBorderSize: %.3f", style.ChildBorderSize);
+        BulletText("PopupRounding: %.3f", style.PopupRounding);
+        BulletText("PopupBorderSize: %.3f", style.PopupBorderSize);
+        BulletText("FramePadding: %.3f, %.3f", style.FramePadding.x, style.FramePadding.y);
+        BulletText("FrameRounding: %.3f", style.FrameRounding);
+        BulletText("FrameBorderSize: %.3f", style.FrameBorderSize);
+        BulletText("ItemSpacing: %.3f, %.3f", style.ItemSpacing.x, style.ItemSpacing.y);
+        BulletText("ItemInnerSpacing: %.3f, %.3f", style.ItemInnerSpacing.x, style.ItemInnerSpacing.y);
+        BulletText("CellPadding: %.3f, %.3f", style.CellPadding.x, style.CellPadding.y);
+        BulletText("TouchExtraPadding: %.3f, %.3f", style.TouchExtraPadding.x, style.TouchExtraPadding.y);
+        BulletText("IndentSpacing: %.3f", style.IndentSpacing);
+        BulletText("ColumnsMinSpacing: %.3f", style.ColumnsMinSpacing);
+        BulletText("ScrollbarSize: %.3f", style.ScrollbarSize);
+        BulletText("ScrollbarRounding: %.3f", style.ScrollbarRounding);
+        BulletText("GrabMinSize: %.3f", style.GrabMinSize);
+        BulletText("GrabRounding: %.3f", style.GrabRounding);
+        BulletText("LogSliderDeadzone: %.3f", style.LogSliderDeadzone);
+        BulletText("TabRounding: %.3f", style.TabRounding);
+        BulletText("TabBorderSize: %.3f", style.TabBorderSize);
+        BulletText("TabMinWidthForCloseButton: %.3f", style.TabMinWidthForCloseButton);
+		BulletText("ButtonTextAlign: %.3f, %.3f", style.ButtonTextAlign.x, style.ButtonTextAlign.y);
+		BulletText("SelectableTextAlign: %.3f, %.3f", style.SelectableTextAlign.x, style.SelectableTextAlign.y);
+		BulletText("DisplayWindowPadding: %.3f, %.3f", style.DisplayWindowPadding.x, style.DisplayWindowPadding.y);
+		BulletText("DisplaySafeAreaPadding: %.3f, %.3f", style.DisplaySafeAreaPadding.x, style.DisplaySafeAreaPadding.y);
+        TreePop();
+    }
 }
 
 void ImGui::DebugNodeWindowSettings(ImGuiWindowSettings* settings)

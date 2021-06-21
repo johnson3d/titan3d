@@ -53,7 +53,7 @@ namespace EngineNS.EGui.UIEditor
                         ImGuiAPI.TreeNodeEx("WinForm", flags, "WinForm");
                         if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                         {
-                            PGrid.SingleTarget = EditableFormData.Instance.CurrentForm;
+                            PGrid.Target = EditableFormData.Instance.CurrentForm;
                             mMenuType = EMenuType.None;
                         }
                         if (ImGuiAPI.TreeNode("ElementsLayout", "ElementsLayout"))

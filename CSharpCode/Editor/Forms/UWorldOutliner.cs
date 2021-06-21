@@ -182,7 +182,7 @@ namespace EngineNS.Editor.Forms
             var appliction = UEngine.Instance.GfxDevice.MainWindow as EngineNS.Editor.UMainEditorApplication;
             if (appliction == null)
                 return;
-            appliction.mMainInspector.PropertyGrid.SingleTarget = provider;
+            appliction.mMainInspector.PropertyGrid.Target = provider;
         }
     }
 }

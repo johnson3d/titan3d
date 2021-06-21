@@ -15,7 +15,7 @@ namespace EngineNS.EGui.UIEditor.Elements
         }
         public class PropNameEditor : Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
-            public override unsafe void OnDraw(System.Reflection.PropertyInfo prop, object target, object value, Controls.PropertyGrid.PropertyGrid pg, List<KeyValuePair<object, System.Reflection.PropertyInfo>> callstack)
+            public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
                 var sz = new Vector2(0, 0);
                 //var v = value as string;
@@ -39,26 +39,22 @@ namespace EngineNS.EGui.UIEditor.Elements
                 //}
                 //System.Runtime.InteropServices.Marshal.FreeHGlobal(strPtr);
 
+                bool valueChanged = false;
+                newValue = info.Value;
                 var bindType = UIEditor.EditableFormData.Instance.CurrentForm.BindType;
                 if (bindType == null)
-                    return;
-                var props = bindType.SystemType.GetProperties();
+                    return false;
                 ImGuiAPI.SetNextItemWidth(-1);
-                if (ImGuiAPI.BeginCombo(TName.FromString2("##PropName_", prop.Name).ToString(), value?.ToString(), ImGuiComboFlags_.ImGuiComboFlags_None))
+                if (ImGuiAPI.BeginCombo(TName.FromString2("##PropName_", info.Name).ToString(), info.Value?.ToString(), ImGuiComboFlags_.ImGuiComboFlags_None))
                 {
-                    foreach(var i in props)
+                    if (ImGuiAPI.Selectable(info.Name, true, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, ref sz))
                     {
-                        if (ImGuiAPI.Selectable(i.Name, true, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, ref sz))
-                        {
-                            var v = i.Name;
-                            foreach (var j in pg.TargetObjects)
-                            {
-                                Controls.PropertyGrid.PropertyGrid.SetValue(pg, j, callstack, prop, target, v);
-                            }
-                        }
+                        newValue = info.Name;
+                        valueChanged = true;
                     }
                     ImGuiAPI.EndCombo();
                 }
+                return valueChanged;
             }
         }
         [PropNameEditor()]

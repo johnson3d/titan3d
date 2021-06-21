@@ -32,7 +32,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                     if (ImGuiAPI.TreeNode("Settings"))
                     {
-                        PGKeyData.SingleTarget = KeyData;
+                        PGKeyData.Target = KeyData;
                         PGKeyData.OnDraw(false, false, false);
                         ImGuiAPI.TreePop();
                     }
@@ -52,7 +52,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                     if (ImGuiAPI.TreeNode("Settings"))
                     {
-                        PGValueData.SingleTarget = ValueData;
+                        PGValueData.Target = ValueData;
                         PGValueData.OnDraw(false, false, false);
                         ImGuiAPI.TreePop();
                     }

@@ -176,16 +176,16 @@ namespace EngineNS.Graphics.Mesh
             {
                 FullRedraw = true;
             }
-            public override void OnDraw(System.Reflection.PropertyInfo prop, object target, object value, EGui.Controls.PropertyGrid.PropertyGrid pg, List<KeyValuePair<object, System.Reflection.PropertyInfo>> callstack)
+            public override bool OnDraw(in EditorInfo info, out object newValue)
             {
-                var umesh = target as UMaterialMesh;
+                newValue = info.Value;
+                var umesh = info.ObjectInstance as UMaterialMesh;
                 ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;
-                var materials = value as Pipeline.Shader.UMaterialInstance[];
+                var materials = info.Value as Pipeline.Shader.UMaterialInstance[];
 
-                ImGuiAPI.AlignTextToFramePadding();
-                ImGuiAPI.TreeNodeEx(prop.Name, flags, prop.Name);
+                ImGuiAPI.GotoColumns(0);
                 ImGuiAPI.SameLine(0, -1);
-                var showChild = ImGuiAPI.TreeNode(prop.Name, "");
+                var showChild = ImGuiAPI.TreeNode(info.Name, "");
                 ImGuiAPI.NextColumn();
                 ImGuiAPI.Text(materials.Length.ToString());
                 ImGuiAPI.NextColumn();
@@ -218,6 +218,8 @@ namespace EngineNS.Graphics.Mesh
                     }
                     ImGuiAPI.TreePop();
                 }
+
+                return false;
             }
         }
         [PGMaterials]

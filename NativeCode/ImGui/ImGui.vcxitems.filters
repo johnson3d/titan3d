@@ -12,6 +12,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_tables.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImGuiFileDialog.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_filedialog.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.cpp">
+      <Filter>freetype</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)imconfig.h" />
@@ -25,10 +28,16 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)ImGuiFileDialogConfig.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)dirent.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_filedialog.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.h">
+      <Filter>freetype</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Win32">
       <UniqueIdentifier>{a72fcdbc-c43f-4766-a6f2-610a1e564a62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="freetype">
+      <UniqueIdentifier>{4210eed5-0902-48a4-9e1c-714ef461d41a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

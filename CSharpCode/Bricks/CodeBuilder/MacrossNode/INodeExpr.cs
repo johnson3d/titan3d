@@ -72,18 +72,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if (Graph != null)
                 {
-                    Graph.NodePropGrid.SingleTarget = CodeExcept;
+                    Graph.NodePropGrid.Target = CodeExcept;
                 }
                 return;
             }
             if (GetPropertyEditObject() == null)
             {
                 if (Graph != null)
-                    Graph.NodePropGrid.SingleTarget = null;
+                    Graph.NodePropGrid.Target = null;
                 return;
             }
 
-            Graph.NodePropGrid.SingleTarget = GetPropertyEditObject();
+            Graph.NodePropGrid.Target = GetPropertyEditObject();
         }
         public override void OnMouseStayPin(NodePin stayPin)
         {

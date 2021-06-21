@@ -18,28 +18,17 @@ namespace EngineNS.EGui.UIProxy
 
         public ImageProxy()
         {
-        }
-        ~ImageProxy()
-        {
-            Dispose();
+
         }
         public ImageProxy(RName imageFile)
         {
             ImageFile = imageFile;
         }
-        public void Dispose()
-        {
-            if (mImagePtr != IntPtr.Zero)
-            {
-                System.Runtime.InteropServices.GCHandle.FromIntPtr(mImagePtr).Free();
-                mImagePtr = IntPtr.Zero;
-            }
-        }
 
-        public unsafe void OnDraw(ref ImDrawList drawList)
+        public unsafe bool OnDraw(ref ImDrawList drawList)
         {
             if (ImageFile == null)
-                return;
+                return false;
 
             if (mImagePtr == IntPtr.Zero)
             {
@@ -61,6 +50,7 @@ namespace EngineNS.EGui.UIProxy
             if(mImagePtr != IntPtr.Zero)
                 drawList.AddImage(mImagePtr.ToPointer(), ref startPos, ref endPos, ref UVMin, ref UVMax, Color);
             ImGuiAPI.PopClipRect();
+            return true;
         }
         public unsafe void OnDraw(ref ImDrawList drawList, ref Vector2 pos)
         {

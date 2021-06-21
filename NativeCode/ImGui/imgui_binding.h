@@ -1,5 +1,8 @@
 #pragma once
 #include "imgui.h"
+#ifndef IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS
+#endif
 #include "imgui_internal.h"
 
 NS_BEGIN
@@ -1718,6 +1721,217 @@ public:
 	{
 		ImRect bb(*bbMin, *bbMax);
 		return ImGui::ItemAdd(bb, id, nullptr, flags);
+	}
+	static bool GetTableWorkRect(ImVec2* min, ImVec2* max)
+	{
+		if (min == nullptr || max == nullptr)
+			return false;
+		ImGuiTable* table = ImGui::GetCurrentTable();
+		if (table == nullptr)
+			return false;
+		*min = table->WorkRect.Min;
+		*max = table->WorkRect.Max;
+		return true;
+	}
+	static bool GetTableRowStartY(float* yValue)
+	{
+		if (yValue == nullptr)
+			return false;
+		ImGuiTable* table = ImGui::GetCurrentTable();
+		if (table == nullptr)
+			return false;
+		*yValue = table->RowPosY1;
+		return true;
+	}
+	static bool GetTableRowEndY(float* yValue)
+	{
+		if (yValue == nullptr)
+			return false;
+		ImGuiTable* table = ImGui::GetCurrentTable();
+		if (table == nullptr)
+			return false;
+		*yValue = table->RowPosY2;
+		return true;
+	}
+	static bool IsHoverCurrentWindow()
+	{
+		auto context = ImGui::GetCurrentContext();
+		if (context == nullptr)
+			return false;
+		return context->CurrentWindow == context->HoveredWindow;
+	}
+	static bool IsMouseHoveringRectInCurrentWindow(const ImVec2* r_min, const ImVec2* r_max, bool clip = true)
+	{
+		return ImGui::IsMouseHoveringRect(*r_min, *r_max, clip) && IsHoverCurrentWindow();
+	}
+	static bool IsMouseDownInRectInCurrentWindow(const ImVec2* r_min, const ImVec2* r_max, ImGuiMouseButton_ button, bool clip = true)
+	{
+		return ImGui::IsMouseHoveringRect(*r_min, *r_max, clip) && IsHoverCurrentWindow() && IsMouseDown(button);
+	}
+	static bool IsMouseClickedInRectInCurrentWindow(const ImVec2* r_min, const ImVec2* r_max, ImGuiMouseButton_ button, bool clip = true)
+	{
+		auto context = ImGui::GetCurrentContext();
+		if (context == nullptr)
+			return false;
+		IM_ASSERT(button >= 0 && button < IM_ARRAYSIZE(context->IO.MouseDown));
+		return ImGui::IsMouseHoveringRect(*r_min, *r_max, clip) && IsHoverCurrentWindow() && context->IO.MouseClicked[button];
+	}
+	static bool IsMouseDoubleClickedInRectInCurrentWindow(const ImVec2* r_min, const ImVec2* r_max, ImGuiMouseButton_ button, bool clip = true)
+	{
+		auto context = ImGui::GetCurrentContext();
+		if (context == nullptr)
+			return false;
+		IM_ASSERT(button >= 0 && button < IM_ARRAYSIZE(context->IO.MouseDown));
+		return ImGui::IsMouseHoveringRect(*r_min, *r_max, clip) && IsHoverCurrentWindow() && context->IO.MouseDoubleClicked[button];
+	}
+	static bool IsMouseDragPastThreshold(ImGuiMouseButton_ button, float lock_threshold = -1.0f)
+	{
+		return ImGui::IsMouseDragPastThreshold(button, lock_threshold);
+	}
+	static bool IsCurrentWindowSkipItems()
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		return window->SkipItems;
+	}
+	static bool          ItemHoverable(const ImVec2* bbMin, const ImVec2* bbMax, ImGuiID id)
+	{
+		if (bbMin == nullptr || bbMax == nullptr)
+			return false;
+
+		ImRect rect(*bbMin, *bbMax);
+		return ImGui::ItemHoverable(rect, id);
+	}
+	static bool             TempInputIsActive(ImGuiID id)
+	{
+		return ImGui::TempInputIsActive(id);
+	}
+	static bool LastItemStatusFlagsHasFocused()
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window == nullptr)
+			return false;
+		return (window->DC.LastItemStatusFlags & ImGuiItemStatusFlags_Focused) != 0;
+	}
+	static void SetActiveID(ImGuiID id)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window != nullptr)
+			ImGui::SetActiveID(id, window);
+	}
+	static ImGuiID GetActiveID()
+	{
+		return ImGui::GetActiveID();
+	}
+	static void SetFocusID(ImGuiID id)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window != nullptr)
+			ImGui::SetFocusID(id, window);
+	}
+	static void SetNavInputID(ImGuiID id)
+	{
+		auto context = ImGui::GetCurrentContext();
+		if (context == nullptr)
+			return;
+		context->NavInputId = id;
+	}
+	static void SetTempInputID(ImGuiID id)
+	{
+		auto context = ImGui::GetCurrentContext();
+		if (context == nullptr)
+			return;
+		context->TempInputId = id;
+	}
+	static ImGuiID GetTempInputID()
+	{
+		auto context = ImGui::GetCurrentContext();
+		if (context == nullptr)
+			return 0;
+		return context->TempInputId;
+	}
+	static void ClearActiveID()
+	{
+		ImGui::ClearActiveID();
+	}
+	static void FocusCurrentWindow()
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window != nullptr)
+			ImGui::FocusWindow(window);
+	}
+	static bool IsIDNavActivated(ImGuiID id)
+	{
+		auto context = ImGui::GetCurrentContext();
+		if (context == nullptr)
+			return false;
+		return context->NavActivateId == id;
+	}
+	static bool IsIDNavInput(ImGuiID id)
+	{
+		auto context = ImGui::GetCurrentContext();
+		if (context == nullptr)
+			return false;
+		return context->NavInputId == id;
+	}
+	static bool DragBehavior(ImGuiID id, ImGuiDataType data_type, void* p_v, float v_speed, const void* p_min, const void* p_max, const char* format, ImGuiSliderFlags_ flags)
+	{
+		return ImGui::DragBehavior(id, data_type, p_v, v_speed, p_min, p_max, format, flags);
+	}
+	static bool DragActiveIdUpdate(ImGuiID id)
+	{
+		auto context = ImGui::GetCurrentContext();
+		if (context == nullptr)
+			return false;
+		if (context->ActiveId == id)
+		{
+			if (context->ActiveIdSource == ImGuiInputSource_Mouse && !context->IO.MouseDown[0])
+				ImGui::ClearActiveID();
+			else if (context->ActiveIdSource == ImGuiInputSource_Nav && context->NavActivatePressedId == id && !context->ActiveIdIsJustActivated)
+				ImGui::ClearActiveID();
+		}
+		if (context->ActiveId != id)
+			return false;
+		return true;
+	}
+
+	static bool ButtonBehavior(const ImVec2* min, const ImVec2* max, ImGuiID id, bool* out_hovered, bool* out_held, ImGuiButtonFlags_ flags)
+	{
+		ImRect rect(*min, *max);
+		return ImGui::ButtonBehavior(rect, id, out_hovered, out_held, flags);
+	}
+
+	static bool DragScalar2(const char* label, ImGuiDataType data_type, void* p_data, float v_speed, const void* p_min, const void* p_max, const char* format, ImGuiSliderFlags_ flags);
+	static bool DragScalarN2(const char* label, ImGuiDataType data_type, void* p_data, int components, float v_speed, const void* p_min, const void* p_max, const char* format, ImGuiSliderFlags_ flags);
+
+	static void RenderFrame(ImVec2* p_min, ImVec2* p_max, ImU32 fill_col, bool border, float rounding)
+	{
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = g.CurrentWindow;
+		window->DrawList->AddRectFilled(*p_min, *p_max, fill_col, rounding);
+		const float border_size = g.Style.FrameBorderSize;
+		if (border && border_size > 0.0f)
+		{
+			window->DrawList->AddRect(*p_min + ImVec2(1, 1), *p_max + ImVec2(1, 1), GetColorU32(ImGuiCol_BorderShadow), rounding, 0, border_size);
+			window->DrawList->AddRect(*p_min, *p_max, GetColorU32(ImGuiCol_Border), rounding, 0, border_size);
+		}
+	}
+
+	static ImVec2 CalcItemSize(ImVec2* size, float default_w, float default_h)
+	{
+		return ImGui::CalcItemSize(*size, default_w, default_h);
+	}
+
+	static bool CollapsingHeader_SpanAllColumns(const char* label, ImGuiTreeNodeFlags_ flags);
+	static void TableNextRow(ImGuiTableRowFlags_ row_flags, float row_min_height, float cellPaddingEnd, float cellPaddingBegin);
+	static void TableNextRow_FirstColumn(ImGuiTableRowFlags_ row_flags, float row_min_height, float cellPaddingEnd, float cellPaddingBegin);
+	static void TableSetCellPaddingY(float value)
+	{
+		ImGuiContext& g = *GImGui;
+		ImGuiTable* table = g.CurrentTable;
+		if (table == nullptr)
+			return;
+
+		table->CellPaddingY = value;
 	}
 };
 

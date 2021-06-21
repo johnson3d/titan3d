@@ -18,32 +18,34 @@ namespace EngineNS.EGui.UIProxy
 
         public List<IUIProxyBase> SubMenus;
 
-        public void OnDraw(ref ImDrawList drawList)
+        public bool OnDraw(ref ImDrawList drawList)
         {
+            bool retValue = false;
             //ImGuiAPI.BeginGroup();
             bool colorPushed = false;
             if (this.Opened)
             {
-                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF000000);
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextSelectedColor);
                 colorPushed = true;
             }
             if (this.Hovered)
-                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF000000);
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextHoveredColor);
             if (this.IsTopMenuItem)
             {
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref StyleConfig.TopMenuFramePadding);
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, StyleConfig.Instance.MenuHeaderColor);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref StyleConfig.Instance.TopMenuFramePadding);
             }
             else
             {
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref StyleConfig.MenuItemFramePadding);
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, ref StyleConfig.MenuItemSpacing);
-                ImGuiAPI.Indent(StyleConfig.MenuItemIndent);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref StyleConfig.Instance.MenuItemFramePadding);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, ref StyleConfig.Instance.MenuItemSpacing);
+                ImGuiAPI.Indent(StyleConfig.Instance.MenuItemIndent);
             }
             if(Icon != null)
             {
                 Icon.OnDraw(ref drawList);
                 var posX = ImGuiAPI.GetCursorPosX();
-                posX += Icon.ImageSize.X + StyleConfig.ItemSpacing.X;
+                posX += Icon.ImageSize.X + StyleConfig.Instance.ItemSpacing.X;
                 ImGuiAPI.SetCursorPosX(posX);
 
             }
@@ -54,12 +56,13 @@ namespace EngineNS.EGui.UIProxy
             //ImGuiAPI.EndGroup();
             if(this.IsTopMenuItem)
             {
+                ImGuiAPI.PopStyleColor(1);
                 ImGuiAPI.PopStyleVar(1);
             }
             else
             {
                 ImGuiAPI.PopStyleVar(2);
-                ImGuiAPI.Unindent(StyleConfig.MenuItemIndent);
+                ImGuiAPI.Unindent(StyleConfig.Instance.MenuItemIndent);
             }
             if (this.Hovered)
                 ImGuiAPI.PopStyleColor(1);
@@ -67,7 +70,10 @@ namespace EngineNS.EGui.UIProxy
             if (this.Opened)
             {
                 if(!(this.SubMenus != null && this.SubMenus.Count > 0))
+                {
                     Action?.Invoke();
+                    retValue = true;
+                }
                 if (colorPushed)
                 {
                     ImGuiAPI.PopStyleColor(1);
@@ -94,6 +100,7 @@ namespace EngineNS.EGui.UIProxy
                     colorPushed = false;
                 }
             }
+            return retValue;
         }
     }
 
@@ -102,10 +109,11 @@ namespace EngineNS.EGui.UIProxy
         public string Name = "Unknow";
         public float Thickness = 1.0f;
 
-        public void OnDraw(ref ImDrawList drawList)
+        public bool OnDraw(ref ImDrawList drawList)
         {
             ImGuiAPI.BeginGroup();
-            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.NamedMenuSeparatorColor);
+            UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.BaseRenderer.enFont.Font_Bold_13px);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.NamedMenuSeparatorColor);
             ImGuiAPI.Text(Name);
             ImGuiAPI.PopStyleColor(1);
             ImGuiAPI.SameLine(0, -1);
@@ -113,9 +121,11 @@ namespace EngineNS.EGui.UIProxy
             var winWidth = ImGuiAPI.GetWindowWidth();
             var itemSize = ImGuiAPI.GetItemRectSize();
             var start = new Vector2(cursorPos.X, cursorPos.Y + itemSize.Y * 0.5f);
-            var end = new Vector2(start.X + winWidth - itemSize.X - StyleConfig.WindowPadding.X * 2 - StyleConfig.ItemSpacing.X, start.Y);
-            drawList.AddLine(ref start, ref end, StyleConfig.NamedMenuSeparatorColor, Thickness);
+            var end = new Vector2(start.X + winWidth - itemSize.X - StyleConfig.Instance.WindowPadding.X * 2 - StyleConfig.Instance.ItemSpacing.X, start.Y);
+            drawList.AddLine(ref start, ref end, StyleConfig.Instance.NamedMenuSeparatorColor, Thickness);
+            UEngine.Instance.GfxDevice.SlateRenderer.PopFont();
             ImGuiAPI.EndGroup();
+            return true;
         }
     }
 }

@@ -41,17 +41,6 @@ namespace EngineNS
     }
 }
 
-public unsafe partial struct ImGuiIO
-{
-    public ImFontAtlas FontsWrapper
-    {
-        get
-        {
-            return Fonts;
-        }
-    }
-}
-
 public unsafe partial struct ImDrawList
 {
     public ImDrawCmd* CmdBufferData

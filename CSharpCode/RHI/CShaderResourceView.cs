@@ -104,7 +104,7 @@ namespace EngineNS.RHI
             {
                 mDir = dir;
                 mDesc.Desc.SetDefault();
-                PGAsset.SingleTarget = mDesc;
+                PGAsset.Target = mDesc;
             }
             public override unsafe void OnDraw(EGui.Controls.ContentBrowser ContentBrowser)
             {

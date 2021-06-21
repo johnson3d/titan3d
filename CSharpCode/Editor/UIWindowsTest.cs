@@ -1,23 +1,88 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Editor
 {
+    public struct ValueType
+    {
+        public bool BoolValue { get; set; }
+    }
+    public class PropertyGridTestClass
+    {
+        public PropertyGridTestClass NewTest { get; set; }
+        public ValueType ValueType { get; set; }
+        public bool BoolValue { get; set; }
+        public SByte SByteValue { get; set; }
+        public UInt16 UInt16Value { get; set; }
+        public UInt32 UInt32Value { get; set; }
+        public UInt64 UInt64Value { get; set; }
+        public Byte ByteValue { get; set; }
+        public Int16 Int16Value { get; set; }
+        public Int32 Int32Value { get; set; }
+        public Int64 Int64Value { get; set; }
+        public float FloatValue { get; set; }
+        public double DoubleValue { get; set; }
+        public string StringValue { get; set; }
+        public enum NormalEnum
+        {
+            EnumV0,
+            EnumV1,
+            EnumV2,
+            EnumV3,
+            EnumV4,
+        }
+        public NormalEnum NEnumValue { get; set; }
+        [Flags]
+        public enum FlagEnum
+        {
+            FEV0 = 1,
+            FEV1 = 1<<1,
+            FEV2 = 1<<2,
+            FEV3 = 1<<3,
+            FEV4 = 1<<4,
+        }
+        public FlagEnum FlagEnumValue { get; set; }
+        [Category("Collections")]
+        public int[] ArrayValue = new int[8] { 1, 2, 3, 4, 5, 6, 7, 8 };
+        [Category("Collections")]
+        public List<int> ListValue = new List<int>()
+        {
+            0,1,2,3,4,5
+        };
+        [Category("Collections")]
+        public Dictionary<int, string> DicValue = new Dictionary<int, string>();
+        public Vector2 Vector2Value { get; set; } = new Vector2();
+        public Vector3 Vector3Value { get; set; } = new Vector3();
+        public Vector4 Vector4Value { get; set; } = new Vector4();
+        [EngineNS.EGui.Controls.PropertyGrid.Color4PickerEditorAttribute()]
+        public Vector4 Color4Value { get; set; } = new Vector4(1, 1, 1, 1);
+        [EngineNS.EGui.Controls.PropertyGrid.Color3PickerEditorAttribute()]
+        public Vector3 Color3Value { get; set; } = new Vector3(1, 1, 1);
+        [EGui.Controls.PropertyGrid.UByte4ToColor4PickerEditor]
+        public UInt32 Color { get; set; } = 0xFFFFFFFF;
+
+        public PropertyGridTestClass()
+        {
+            //for(int i=0; i<5; i++)
+            //    DicValue[i] = "A" + i;
+        }
+    }
+
     public class UIWindowsTest
     {
-        ImFont mDefaultFont;
-
         public unsafe void Initialized()
         {
             //var io = ImGuiAPI.GetIO();
             //var size_pixels = 18.0f;
             //ImFontConfig fontConfig = new ImFontConfig();
-            //fontConfig.MergeMode = true;
-            //mDefaultFont = io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", size_pixels, &fontConfig, io.Fonts.GetGlyphRangesDefault());
-            ////io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", size_pixels, &fontConfig, io.Fonts.GetGlyphRangesDefault());
-            ////io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", size_pixels, &fontConfig, io.Fonts.GetGlyphRangesChineseSimplifiedCommon());
-            ////io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", size_pixels, &fontConfig, io.Fonts.GetGlyphRangesDefault());
+            ////fontConfig.MergeMode = true;
+            ////var font = io.Fonts.AddFontDefault(&fontConfig);
+            //mDefaultFont = io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Medium.ttf", size_pixels, &fontConfig, io.Fonts.GetGlyphRangesDefault());
+            //////io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", size_pixels, &fontConfig, io.Fonts.GetGlyphRangesDefault());
+            //////io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", size_pixels, &fontConfig, io.Fonts.GetGlyphRangesChineseSimplifiedCommon());
+            //////io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", size_pixels, &fontConfig, io.Fonts.GetGlyphRangesDefault());
             //io.Fonts.Build();
 
             var style = ImGuiAPI.GetStyle();
@@ -42,6 +107,7 @@ namespace EngineNS.Editor
             style->Colors[(int)ImGuiCol_.ImGuiCol_FrameBg] = new Vector4(0.06f, 0.06f, 0.06f, 1.00f);
             style->Colors[(int)ImGuiCol_.ImGuiCol_FrameBgHovered] = new Vector4(0.06f, 0.06f, 0.06f, 1.00f);
             style->Colors[(int)ImGuiCol_.ImGuiCol_FrameBgActive] = new Vector4(0.06f, 0.06f, 0.06f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_Header] = new Vector4(0.13f, 0.13f, 0.13f, 1.00f);
             //style->WindowPadding = new Vector2(1, 0);
             style->ChildBorderSize = 0.0f;
             style->ScrollbarSize = 14.0f;
@@ -271,8 +337,9 @@ namespace EngineNS.Editor
             {
 
                 // Menu
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.TopMenuFramePadding);
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, ref EGui.UIProxy.StyleConfig.TopMenuItemSpacing);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.TopMenuFramePadding);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, ref EGui.UIProxy.StyleConfig.Instance.TopMenuItemSpacing);
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, EGui.UIProxy.StyleConfig.Instance.MenuBG);
                 if (ImGuiAPI.BeginMenuBar())
                 {
                     var drawList = ImGuiAPI.GetWindowDrawList();
@@ -286,11 +353,11 @@ namespace EngineNS.Editor
                 //var menubarMax = ImGuiAPI.GetItemRectMax();
                 //var menubarSize = ImGuiAPI.GetItemRectSize();
                 ImGuiAPI.PopStyleVar(2);
+                ImGuiAPI.PopStyleColor(1);
 
-                var winPadding = new Vector2(1, 0);
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, ref winPadding);
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.MainTabFramePadding);
-                //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, ref EGui.UIProxy.StyleConfig.TopMenuWindowPadding);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, ref EGui.UIProxy.StyleConfig.Instance.WindowPadding);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.MainTabFramePadding);
+                //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, ref EGui.UIProxy.StyleConfig.Instance.TopMenuWindowPadding);
 
                 var size = new Vector2(0, 0);
                 ImGuiWindowClass dockClass = new ImGuiWindowClass()
@@ -424,7 +491,9 @@ namespace EngineNS.Editor
             var inspector = new EGui.Controls.PropertyGrid.PropertyGrid();
             inspector.Initialize();
             inspector.SearchInfo = "Search Details";
-            inspector.SingleTarget = *viewPort;
+            //inspector.Target = *viewPort;
+            //inspector.Target = EGui.UIProxy.StyleConfig.Instance;
+            inspector.Target = new PropertyGridTestClass();//EGui.UIProxy.StyleConfig.Instance;
             mPanels.Add(inspector);
             var contentBrowser = new ContentBrowser();
             contentBrowser.Initialize();
@@ -453,9 +522,8 @@ namespace EngineNS.Editor
                 ImGuiAPI.SetNextWindowPos(ref winPos, ImGuiCond_.ImGuiCond_Always, ref pivot);
                 if(ImGuiAPI.BeginChild("MeshEDDockChild", ref contentSize, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
-                    var winPadding = new Vector2(1, 0);
-                    ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, ref winPadding);
-                    ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.MainTabFramePadding);
+                    ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, ref EGui.UIProxy.StyleConfig.Instance.WindowPadding);
+                    ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.MainTabFramePadding);
 
                     var size = new Vector2(0, 0);
                     ImGuiWindowClass centerDockClass = new ImGuiWindowClass();
@@ -588,7 +656,7 @@ namespace EngineNS.Editor
                     var childDrawList = ImGuiAPI.GetWindowDrawList();
                     var posMin = ImGuiAPI.GetWindowPos();
                     var posMax = posMin + ImGuiAPI.GetWindowSize();
-                    childDrawList.AddRectFilled(ref posMin, ref posMax, EGui.UIProxy.StyleConfig.PanelBackground, 1, ImDrawFlags_.ImDrawFlags_None);
+                    childDrawList.AddRectFilled(ref posMin, ref posMax, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 1, ImDrawFlags_.ImDrawFlags_None);
                 }
                 ImGuiAPI.EndChild();
             }

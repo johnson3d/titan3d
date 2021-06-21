@@ -136,30 +136,27 @@ namespace EngineNS.Bricks.CodeBuilder
         public bool IsLocalVar { get; set; } = true;
         public class PropDefTypeEditor : EGui.Controls.PropertyGrid.PGTypeEditorAttribute
         {
-            public override unsafe void OnDraw(System.Reflection.PropertyInfo prop, object target, object value, EGui.Controls.PropertyGrid.PropertyGrid pg, List<KeyValuePair<object, System.Reflection.PropertyInfo>> callstack)
+            public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
+                newValue = info.Value;
                 var sz = new Vector2(0, 0);
                 var bindType = EGui.UIEditor.EditableFormData.Instance.CurrentForm?.BindType;
                 if (bindType == null)
-                    return;
-                var props = bindType.SystemType.GetProperties();
+                    return false;
+
                 ImGuiAPI.SetNextItemWidth(-1);
                 TypeSlt.AssemblyFilter = AssemblyFilter;
                 TypeSlt.ExcludeValueType = ExcludeValueType;
                 TypeSlt.BaseType = BaseType;
-                var typeStr = value as string;
+                var typeStr = info.Value as string;
                 TypeSlt.SelectedType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeStr);
                 if (TypeSlt.OnDraw(-1, 12))
                 {
-                    foreach (var i in props)
-                    {
-                        var v = TypeSlt.SelectedType;
-                        foreach (var j in pg.TargetObjects)
-                        {
-                            EGui.Controls.PropertyGrid.PropertyGrid.SetValue(pg, j, callstack, prop, target, v.FullName);
-                        }
-                    }
+                    var v = TypeSlt.SelectedType;
+                    newValue = v.FullName;
+                    return true;
                 }
+                return false;
             }
         }
         [PropDefTypeEditor()]

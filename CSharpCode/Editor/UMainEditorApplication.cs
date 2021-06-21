@@ -53,7 +53,7 @@ namespace EngineNS.Editor
             await WorldViewportSlate.Initialize(this, RenderPolicy, 0, 1);
 
             mMainInspector.PropertyGrid.PGName = "MainInspector";
-            mMainInspector.PropertyGrid.SingleTarget = WorldViewportSlate;
+            mMainInspector.PropertyGrid.Target = EGui.UIProxy.StyleConfig.Instance;// WorldViewportSlate;
 
             UEngine.Instance.TickableManager.AddTickable(this);
 

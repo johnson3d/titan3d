@@ -210,13 +210,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 if (Graph != null)
                 {
-                    Graph.ShaderEditor.NodePropGrid.SingleTarget = null;
+                    Graph.ShaderEditor.NodePropGrid.Target = null;
                 }
                 return;
             }
 
             Graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<IBaseNode>.TypeDesc;
-            Graph.ShaderEditor.NodePropGrid.SingleTarget = GetPropertyEditObject();
+            Graph.ShaderEditor.NodePropGrid.Target = GetPropertyEditObject();
         }
         protected virtual object GetPropertyEditObject()
         {

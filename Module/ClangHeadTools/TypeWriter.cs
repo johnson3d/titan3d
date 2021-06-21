@@ -87,6 +87,7 @@ namespace ClangHeadTools
             mTypeMapper["ImGuiTableRowFlags"] = "ImGuiTableRowFlags_";
             mTypeMapper["ImGuiTableColumnFlags"] = "ImGuiTableColumnFlags_";
             mTypeMapper["ImGuiTableBgTarget"] = "ImGuiTableBgTarget_";
+            mTypeMapper["ImGuiDataType"] = "ImGuiDataType_";
 
             //POD
             mTypeMapper["char"] = "sbyte";
@@ -104,6 +105,7 @@ namespace ClangHeadTools
             mTypeMapper["double"] = "double";
             mTypeMapper["bool"] = "bool";
             mTypeMapper["ImWchar16"] = "Wchar16";
+            mTypeMapper["ImGuiID"] = "uint";
 
             //POD struct
             mTypeMapper["EngineNS.v3dxIndexInSkeleton"] = "EngineNS.Animation.Skeleton.IndexInSkeleton";

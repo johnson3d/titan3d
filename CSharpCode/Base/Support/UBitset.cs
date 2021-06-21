@@ -245,6 +245,86 @@ namespace EngineNS.Support
                 }
             }
         }
+        public bool AddValue(float value)
+        {
+            switch(mValueType)
+            {
+                case EValueType.I8:
+                    mI8Value += (sbyte)value;
+                    return true;
+                case EValueType.I16:
+                    mI16Value += (short)value;
+                    return true;
+                case EValueType.I32:
+                    mI32Value += (int)value;
+                    return true;
+                case EValueType.I64:
+                    mI64Value += (long)value;
+                    return true;
+                case EValueType.UI8:
+                    mUI8Value += (byte)value;
+                    return true;
+                case EValueType.UI16:
+                    mUI16Value += (ushort)value;
+                    return true;
+                case EValueType.UI32:
+                    mUI32Value += (uint)value;
+                    return true;
+                case EValueType.UI64:
+                    mUI64Value += (ulong)value;
+                    return true;
+                case EValueType.F32:
+                    mF32Value += (float)value;
+                    return true;
+                case EValueType.F64:
+                    mF64Value += (double)value;
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        public override string ToString()
+        {
+            switch(mValueType)
+            {
+                case EValueType.ManagedHandle:
+                    return mGCHandle.ToString();
+                case EValueType.I8:
+                    return mI8Value.ToString();
+                case EValueType.I16:
+                    return mI16Value.ToString();
+                case EValueType.I32:
+                    return mI32Value.ToString();
+                case EValueType.I64:
+                    return mI64Value.ToString();
+                case EValueType.UI8:
+                    return mUI8Value.ToString();
+                case EValueType.UI16:
+                    return mUI16Value.ToString();
+                case EValueType.UI32:
+                    return mUI32Value.ToString();
+                case EValueType.UI64:
+                    return mUI64Value.ToString();
+                case EValueType.F32:
+                    return mF32Value.ToString();
+                case EValueType.F64:
+                    return mF64Value.ToString();
+                case EValueType.Name:
+                    return mNameString.ToString();
+                case EValueType.Struct:
+                    return mStruct.ToString();
+                case EValueType.Ptr:
+                    return mPointer.ToString();
+                case EValueType.V2:
+                    return mV2.ToString();
+                case EValueType.V3:
+                    return mV3.ToString();
+                case EValueType.V4:
+                    return mV4.ToString();
+            }
+
+            return "";
+        }
         public struct FStructDesc : IDisposable
         {
             public IntPtr mStructPointer;

@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 TypeSlt.SelectedType = type;
 
                 mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType.SystemType) as IAsset;
-                PGAsset.SingleTarget = mAsset;
+                PGAsset.Target = mAsset;
             }
         }
 

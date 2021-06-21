@@ -237,7 +237,7 @@ namespace EngineNS.Editor
                         {
                             if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                             {
-                                PGMember.SingleTarget = i.Value;
+                                PGMember.Target = i.Value;
                             }
                             foreach (var j in i.Value.MetaVersions)
                             {
@@ -245,7 +245,7 @@ namespace EngineNS.Editor
                                 {
                                     if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                                     {
-                                        PGMember.SingleTarget = j.Value;
+                                        PGMember.Target = j.Value;
                                     }
                                 }
                             }

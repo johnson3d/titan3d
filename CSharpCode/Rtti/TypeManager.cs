@@ -65,6 +65,9 @@ namespace EngineNS.Rtti
                 return SystemType.Namespace;
             }
         }
+        public bool IsValueType => SystemType.IsValueType;
+        public bool IsEnum => SystemType.IsEnum;
+        public bool IsArray => SystemType.IsArray;
         string mTypeString;
         public string TypeString
         {
@@ -92,7 +95,8 @@ namespace EngineNS.Rtti
         {
             if (type == null)
                 return null;
-            return TypeOfFullName(type.FullName);
+            var typeStr = UTypeDescManager.Instance.GetTypeStringFromType(type);
+            return TypeOf(typeStr);
         }
         public static UTypeDesc TypeOfFullName(string fullName)
         {
@@ -110,6 +114,11 @@ namespace EngineNS.Rtti
         public static string TypeStr(System.Type type)
         {
             return UTypeDescManager.Instance.GetTypeStringFromType(type);
+        }
+
+        public override string ToString()
+        {
+            return SystemType.ToString();
         }
     }
 

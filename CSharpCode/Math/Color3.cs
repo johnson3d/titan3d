@@ -1,4 +1,6 @@
-﻿namespace EngineNS
+﻿using System;
+
+namespace EngineNS
 {
     /// <summary>
     /// 颜色结构体
@@ -96,5 +98,13 @@
 	    {
 		    return ( value1.Red == value2.Red && value1.Green == value2.Green && value1.Blue == value2.Blue );
 	    }
+        public static UInt32 ToAbgr(Vector3 color)
+        {
+            UInt32 value = (UInt32)(color.X * 255);
+            value += (UInt32)(color.Y * 255) << 8;
+            value += (UInt32)(color.Z * 255) << 16;
+            value += (UInt32)(255) << 24;
+            return value;
+        }
     }
 }

@@ -23,6 +23,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_impl_win32.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_internal.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_binding.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui.cpp" />
@@ -36,6 +37,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_tables.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_widgets.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)imgui_binding.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="$(MSBuildThisFileDirectory)LICENSE.txt">

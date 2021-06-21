@@ -14,10 +14,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\NodeBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\NodeGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\PinLinker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\Attributes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\KeyValueCreator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PGRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PropertyCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PropertyGrid.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\TypeEditors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\TypeSelector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UAssetSelector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CSharpCompiler.cs" />

@@ -6,6 +6,6 @@ namespace EngineNS.EGui.UIProxy
 {
     public interface IUIProxyBase
     {
-        void OnDraw(ref ImDrawList drawList);
+        bool OnDraw(ref ImDrawList drawList);
     }
 }

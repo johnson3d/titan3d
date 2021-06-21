@@ -10,17 +10,17 @@ namespace EngineNS
         public class PGRNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
             public string FilterExts;
-            public override unsafe void OnDraw(System.Reflection.PropertyInfo prop, object target, object value, EGui.Controls.PropertyGrid.PropertyGrid pg, List<KeyValuePair<object, System.Reflection.PropertyInfo>> callstack)
+            public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
-                var name = value as RName;
-                var newName = EGui.Controls.CtrlUtility.DrawRName(name, prop.Name, FilterExts, ReadOnly);
+                newValue = info.Value;
+                var name = info.Value as RName;
+                var newName = EGui.Controls.CtrlUtility.DrawRName(name, info.Name, FilterExts, ReadOnly);
                 if (newName != name)
                 {
-                    foreach (var j in pg.TargetObjects)
-                    {
-                        EGui.Controls.PropertyGrid.PropertyGrid.SetValue(pg, j, callstack, prop, target, newName);
-                    }
+                    newValue = newName;
+                    return true;
                 }
+                return false;
             }
         }
         internal RName(string name, ERNameType type)

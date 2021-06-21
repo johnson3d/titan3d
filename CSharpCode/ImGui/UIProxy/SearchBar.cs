@@ -24,21 +24,22 @@ namespace EngineNS.EGui.UIProxy
             };
         }
 
-        public unsafe void OnDraw(ref ImDrawList drawList)
+        public unsafe bool OnDraw(ref ImDrawList drawList)
         {
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref StyleConfig.PGSearchBoxFramePadding);
+            bool retValue = false;
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref StyleConfig.Instance.PGSearchBoxFramePadding);
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FrameBorderSize, 1.0f);
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FrameRounding, 12.0f);
              
             if(mFocused)
-                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.PGSearchBoxFocusBorderColor);
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.Instance.PGSearchBoxFocusBorderColor);
 
             var buffer = BigStackBuffer.CreateInstance(256);
             var oldValue = SearchText;
             buffer.SetText(oldValue);
             ImGuiAPI.SetNextItemWidth(Width);
-            ImGuiAPI.InputText(TName.FromString2("##", "PropertyGridFilterString").ToString(), buffer.GetBuffer(), (uint)buffer.GetSize(),
-                ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsHexadecimal, null, (void*)0);
+            retValue = ImGuiAPI.InputText(TName.FromString2("##", "PropertyGridFilterString").ToString(), buffer.GetBuffer(), (uint)buffer.GetSize(),
+                ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
 
             var itemMin = ImGuiAPI.GetItemRectMin();
             var itemMax = ImGuiAPI.GetItemRectMax();
@@ -56,12 +57,13 @@ namespace EngineNS.EGui.UIProxy
             if (string.IsNullOrEmpty(SearchText))
             {
                 var textSize = ImGuiAPI.CalcTextSize(InfoText, false, 0);
-                var pos = new Vector2(itemMin.X + StyleConfig.PGSearchBoxFramePadding.X, itemMin.Y + (itemMax.Y - itemMin.Y - textSize.Y) * 0.5f);
-                drawList.AddText(ref pos, StyleConfig.PGSearchBoxInfoTextColor, InfoText, null);
+                var pos = new Vector2(itemMin.X + StyleConfig.Instance.PGSearchBoxFramePadding.X, itemMin.Y + (itemMax.Y - itemMin.Y - textSize.Y) * 0.5f);
+                drawList.AddText(ref pos, StyleConfig.Instance.PGSearchBoxInfoTextColor, InfoText, null);
             }
             buffer.DestroyMe();
 
             ImGuiAPI.PopStyleVar(3);
+            return retValue;
         }
     }
 }

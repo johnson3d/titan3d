@@ -17,21 +17,21 @@ public struct CppBool
 {
     public class PropEditor : EngineNS.EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
     {
-        public override unsafe void OnDraw(System.Reflection.PropertyInfo prop, object target, object value, EngineNS.EGui.Controls.PropertyGrid.PropertyGrid pg, List<KeyValuePair<object, System.Reflection.PropertyInfo>> callstack)
+        public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
+            newValue = info.Value;
+            bool valueChanged = false;
             ImGuiAPI.SetNextItemWidth(-1);
-            var v = (CppBool)value;
+            var v = (CppBool)info.Value;
             bool v2 = v;
             var saved = v;
-            ImGuiAPI.Checkbox($"##{prop.Name}", &v2);
+            ImGuiAPI.Checkbox($"##{info.Name}", &v2);
             if (v != saved)
             {
-                foreach (var j in pg.TargetObjects)
-                {
-                    EngineNS.EGui.Controls.PropertyGrid.PropertyGrid.SetValue(pg, j, callstack, prop, target, v);
-                }
+                newValue = v;
+                valueChanged = true;
             }
-            ImGuiAPI.NextColumn();
+            return valueChanged;
         }
     }
     public sbyte Value;
@@ -96,20 +96,19 @@ public struct vBOOL
 {
     public class PropEditor : EngineNS.EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
     {
-        public override unsafe void OnDraw(System.Reflection.PropertyInfo prop, object target, object value, EngineNS.EGui.Controls.PropertyGrid.PropertyGrid pg, List<KeyValuePair<object, System.Reflection.PropertyInfo>> callstack)
+        public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
+            newValue = info.Value;
             ImGuiAPI.SetNextItemWidth(-1);
-            var v = ((vBOOL)value);
+            var v = ((vBOOL)info.Value);
             var saved = v;
-            ImGuiAPI.Checkbox($"##{prop.Name}", (bool*)&v);
+            ImGuiAPI.Checkbox($"##{info.Name}", (bool*)&v);
             if (v.Value != saved.Value)
             {
-                foreach (var j in pg.TargetObjects)
-                {
-                    EngineNS.EGui.Controls.PropertyGrid.PropertyGrid.SetValue(pg, j, callstack, prop, target, vBOOL.FromBoolean(v));
-                }
+                newValue = vBOOL.FromBoolean(v);
+                return true;
             }
-            //ImGuiAPI.NextColumn();
+            return false;
         }
     }
     public int Value;

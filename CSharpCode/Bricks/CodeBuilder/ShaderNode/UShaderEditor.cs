@@ -36,7 +36,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             PreviewViewport?.Cleanup();
             PreviewViewport = null;
-            MaterialPropGrid.SingleTarget = null;
+            MaterialPropGrid.Target = null;
         }
         public bool Visible { get; set; } = true;
         public uint DockId { get; set; }
@@ -102,12 +102,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             IsStarting = false;
 
             MaterialPropGrid.IsReadOnly = true;
-            MaterialPropGrid.SingleTarget = Material;
+            MaterialPropGrid.Target = Material;
 
             PreviewViewport.Title = "Preview";
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileFSPolicy(), 0, 1);
 
-            PreviewPropGrid.SingleTarget = PreviewViewport;
+            PreviewPropGrid.Target = PreviewViewport;
 
             UEngine.Instance.TickableManager.AddTickable(this);
             return true;

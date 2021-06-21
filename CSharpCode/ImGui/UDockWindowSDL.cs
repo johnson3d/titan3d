@@ -290,11 +290,11 @@ namespace EngineNS.EGui
                         }
                         else
                         {
-                            if (pcmd->TextureId == (void*)0)
-                            {
-                                drawCmd.PSSetShaderResource(0, renderer.FontSRV.mCoreObject);
-                            }
-                            else
+                            //if (pcmd->TextureId == (void*)0)
+                            //{
+                            //    drawCmd.PSSetShaderResource(0, renderer.FontSRV.mCoreObject);
+                            //}
+                            //else
                             {
                                 var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)pcmd->TextureId);
                                 if (handle.IsAllocated)

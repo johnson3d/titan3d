@@ -15,11 +15,7 @@ namespace EngineNS.EGui.UIProxy
         public Vector2 Size
         {
             get => mSize;
-            set
-            {
-                mSize = value;
-                mImage.ImageSize = mSize - ImagePadding * 2;
-            }
+            set => mSize = value;
         }
         public Vector2 UVMin
         {
@@ -31,70 +27,60 @@ namespace EngineNS.EGui.UIProxy
             get => mImage.UVMax;
             set => mImage.UVMax = value;
         }
-        public Vector2 ImagePadding = new Vector2(2);
+        public Vector2 ImageSize
+        {
+            get => mImage.ImageSize;
+            set => mImage.ImageSize = value;
+        }
         public Action Action;
+        public UInt32 ImageColor = 0xFFBFBFBF;
+        public UInt32 ImageHoveredColor = 0xFFFFFFFF;
+        public UInt32 ImageActiveColor = 0xFFFFFFFF;
+        public bool ShowBG = false;
 
-        System.Threading.Tasks.Task<RHI.CShaderResourceView> mTask;
-        IntPtr mImagePtr;
+        //System.Threading.Tasks.Task<RHI.CShaderResourceView> mTask;
+        //IntPtr mImagePtr;
 
         ImageProxy mImage = new ImageProxy();
 
-        ~ImageButtonProxy()
+        public unsafe bool OnDraw(ref ImDrawList drawList)
         {
-            Dispose();
-        }
-        public void Dispose()
-        {
-            if (mImagePtr != IntPtr.Zero)
-            {
-                System.Runtime.InteropServices.GCHandle.FromIntPtr(mImagePtr).Free();
-                mImagePtr = IntPtr.Zero;
-            }
-        }
-
-        public unsafe void OnDraw(ref ImDrawList drawList)
-        {
+            bool retValue = false;
             var rectStart = ImGuiAPI.GetCursorScreenPos();
-            var rectEnd = rectStart + mSize;
-            var imgPos = rectStart + ImagePadding;
+
+            var id = ImGuiAPI.GetID("#Button");
+            var style = ImGuiAPI.GetStyle();
+            var size = ImGuiAPI.CalcItemSize(ref mSize, ImageSize.X + style->FramePadding.X * 2.0f, ImageSize.Y + style->FramePadding.Y * 2.0f);
+            var rectEnd = rectStart + size;
+
+            ImGuiAPI.ItemSize(ref size, style->FramePadding.Y);
+            if (!ImGuiAPI.ItemAdd(ref rectStart, ref rectEnd, id, 0))
+                return false;
+
+            bool hovered = false, held = false;
+            var pressed = ImGuiAPI.ButtonBehavior(ref rectStart, ref rectEnd, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            if (pressed)
+                mImage.Color = ImageActiveColor;
+            else if (hovered)
+                mImage.Color = ImageHoveredColor;
+            else
+                mImage.Color = ImageColor;
+            if(ShowBG)
+            {
+                var col = ImGuiAPI.ColorConvertFloat4ToU32(&style->Colors[(int)((held && hovered) ? ImGuiCol_.ImGuiCol_ButtonActive : hovered ? ImGuiCol_.ImGuiCol_ButtonHovered : ImGuiCol_.ImGuiCol_Button)]);
+                ImGuiAPI.RenderFrame(ref rectStart, ref rectEnd, col, true, style->FrameRounding);
+            }
+
+            if (pressed)
+            {
+                Action?.Invoke();
+                retValue = true;
+            }
+
+            var imgPos = rectStart + (size - mImage.ImageSize) * 0.5f;
             mImage.OnDraw(ref drawList, ref imgPos);
 
-            //if (mImagePtr == IntPtr.Zero)
-            //{
-            //    if (mTask == null)
-            //    {
-            //        var rc = UEngine.Instance.GfxDevice.RenderContext;
-            //        mTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(ImageFile);
-            //    }
-            //    else if (mTask.IsCompleted)
-            //    {
-            //        mImagePtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(mTask.Result));
-            //        mTask = null;
-            //    }
-            //}
-
-            //Vector4 bg = new Vector4(1.0f, 0.0f, 0.0f, 1.0f);
-            //Vector4 tint = new Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-            //var size = Size;
-            //var uvMin = UVMin;
-            //var uvMax = UVMax;
-            //ImGuiAPI.ImageButton(mImagePtr.ToPointer(), ref mImage.ImageSize, ref mImage.UVMin, ref mImage.UVMax, 2, ref bg, ref tint);
-
-            if (ImGuiAPI.IsMouseHoveringRect(ref rectStart, ref rectEnd, true))
-            {
-                mImage.Color = 0xFFFFFFFF;
-                if(ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left))
-                {
-                    Action?.Invoke();
-                }
-            }
-            else
-            {
-                mImage.Color = 0xFFBFBFBF;
-            }
-
-            ImGuiAPI.ItemSize(ref mSize, 0);
-            ImGuiAPI.ItemAdd(ref rectStart, ref rectEnd, ImGuiAPI.GetID("#Button"), 0);
+            return retValue;
         }
     }
 }

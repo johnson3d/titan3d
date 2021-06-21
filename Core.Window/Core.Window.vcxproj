@@ -73,6 +73,7 @@
     <Import Project="..\3rd\native\iconv\iconv.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\TextConverter\TextConverter.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Animation\Animation.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\FreeType\FreeType.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -128,12 +129,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;_DEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;_DEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\FBXSDK\2019.2\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -177,12 +178,12 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NDEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NDEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>c:\aaa;..\3rd\native\FBXSDK\2019.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\aaa;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
