@@ -554,7 +554,7 @@ namespace CppWeaving.Cpp2CS
 
             var supressGC = attrs?.GetMeta("SV_SuppressGC");
             if (supressGC != null)
-                codeGen.AddLine($"[SuppressGCTransition]");
+                codeGen.AddLine($"[SuppressGC]");
         }
     }
 }

@@ -4,6 +4,9 @@ using System.Text;
 
 namespace EngineNS.Rtti
 {
+    public class UDummyAttribute : Attribute
+    {
+    }
     public class MetaParameterAttribute : Attribute
     {
         [Flags]

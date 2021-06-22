@@ -25,6 +25,20 @@ namespace CppWeaving.Cpp2CS
             AddLine($"using System;");
             AddLine($"using System.Runtime.InteropServices;");
 
+            AddLine($"#if DEBUG");
+            PushTab();
+            {
+                AddLine($"using SuppressGC = EngineNS.Rtti.UDummyAttribute;");
+            }
+            PopTab();
+            AddLine($"#else");
+            PushTab();
+            {
+                AddLine($"using SuppressGC = System.Runtime.InteropServices.SuppressGCTransitionAttribute;");
+            }
+            PopTab();
+            AddLine($"#endif");
+
             NewLine();
 
             if (!string.IsNullOrEmpty(mClass.Namespace))
