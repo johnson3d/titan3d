@@ -70,21 +70,21 @@ public:
 	MemStreamWriter(UINT size);
 	~MemStreamWriter();
 
-	TR_FUNCTION(SV_SuppressGC = true)
+	//TR_FUNCTION(SV_SuppressGC = true)
 	void ResetStream(UINT64 size = 0);
-	TR_FUNCTION(SV_SuppressGC = true)
+	//TR_FUNCTION(SV_SuppressGC = true)
 	inline void* GetDataPointer() {
 		return &mDataStream[0];
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
+	//TR_FUNCTION(SV_SuppressGC = true)
 	virtual UINT64 GetLength() const {
 		return mBufferSize;
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
+	//TR_FUNCTION(SV_SuppressGC = true)
 	virtual UINT64 Tell() {
 		return mPosition;
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
+	//TR_FUNCTION(SV_SuppressGC = true)
 	virtual bool Seek(UINT64 offset);
 	virtual void Write(const void* pSrc, UINT t);
 	template<typename _Type>
@@ -114,7 +114,7 @@ public:
 	{
 
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
+	//TR_FUNCTION(SV_SuppressGC = true)
 	void ProxyPointer(BYTE* ptr, UINT64 len)
 	{
 		mProxyPointer = ptr;
@@ -127,19 +127,19 @@ public:
 		mLength = 0;
 		mPosition = 0;
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
+	//TR_FUNCTION(SV_SuppressGC = true)
 	BYTE* GetPointer() {
 		return mProxyPointer;
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
+	//TR_FUNCTION(SV_SuppressGC = true)
 	virtual UINT64 GetLength() const{
 		return mLength;
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
+	//TR_FUNCTION(SV_SuppressGC = true)
 	virtual UINT64 Tell() {
 		return mPosition;
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
+	//TR_FUNCTION(SV_SuppressGC = true)
 	virtual bool Seek(UINT64 offset) {
 		if (mPosition <= offset)
 		{

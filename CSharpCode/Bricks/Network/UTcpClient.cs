@@ -14,6 +14,8 @@ namespace EngineNS.Bricks.Network
         }
         public void Send(ref IO.AuxWriter<RPC.UMemWriter> pkg)
         {
+            if (Connected == false)
+                return;
             unsafe
             {
                 mCoreObject.Send((sbyte*)pkg.CoreWriter.Writer.GetDataPointer(), (uint)pkg.CoreWriter.Writer.GetLength());
@@ -23,12 +25,14 @@ namespace EngineNS.Bricks.Network
         {
             if (Connected == false)
                 return;
-            mCoreObject.Disconnect();
+            Connected = false;
+            mCoreObject.Disconnect();            
         }
         private System.Threading.Thread mRcvThread;
         public Support.UNativeArray<byte> mRcvBuffer = new Support.UNativeArray<byte>();
-        public async System.Threading.Tasks.Task<bool> Connect(string ip, UInt16 port, int timeOut = 2000)
+        public async System.Threading.Tasks.Task<bool> Connect(string ip, UInt16 port, UInt16 connId, int timeOut = 2000)
         {
+            ConnectId = connId;
             var ok = await UEngine.Instance.EventPoster.Post(() =>
             {
                 return mCoreObject.Connect(ip, port, timeOut);
@@ -59,11 +63,13 @@ namespace EngineNS.Bricks.Network
                         }
                         else
                         {
-                            Connected = false;
                             break;
                         }
                     }
+                    Connected = false;
                 });
+                mRcvThread.Name = $"TcpClient";
+                mRcvThread.Start();
             }
             return Connected;
         }
