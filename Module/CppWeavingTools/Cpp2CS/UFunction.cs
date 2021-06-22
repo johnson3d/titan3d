@@ -137,6 +137,10 @@ namespace CppWeaving.Cpp2CS
 								argType = "string";
 							}
 						}
+						else
+                        {
+							int xxx = 0;
+                        }
                         if (j.IsTypeDef)
                         {
                             var dypeDef = USysClassManager.Instance.FindTypeDef(j.CxxName);

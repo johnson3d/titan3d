@@ -28,7 +28,7 @@ public:
 	vBOOL Connect(const char* address, int port, int timeout);
 	void Disconnect();
 
-	int Send(TR_META(SV_NoStringConverter) char* p, UINT size);
+	int Send(TR_META(SV_NoStringConverter=true) char* p, UINT size);
 
 	vBOOL WaitData(int* errCode);
 	int RecvData(void* pBuffer, UINT bufferSize);

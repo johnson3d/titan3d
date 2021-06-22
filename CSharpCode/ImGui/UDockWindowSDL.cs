@@ -103,7 +103,7 @@ namespace EngineNS.EGui
                 {
                     var text = ev.text;
                     var pText = (sbyte*)text.text;                        
-                    io.AddInputCharactersUTF8(System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)pText));
+                    io.AddInputCharactersUTF8(pText);
                     return true;
                 }
             case SDL.SDL_EventType.SDL_KEYDOWN:

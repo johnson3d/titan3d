@@ -14,7 +14,10 @@ namespace EngineNS.Bricks.Network
         }
         public void Send(ref IO.AuxWriter<RPC.UMemWriter> pkg)
         {
-            //mCoreObject.Send(pkg.CoreWriter.Writer);
+            unsafe
+            {
+                mCoreObject.Send((sbyte*)pkg.CoreWriter.Writer.GetDataPointer(), (uint)pkg.CoreWriter.Writer.GetLength());
+            }
         }
         public void Disconnect()
         {
