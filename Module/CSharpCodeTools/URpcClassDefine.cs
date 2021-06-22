@@ -13,6 +13,7 @@ namespace CSharpCodeTools
         public string ArgType;
         public string ArgName;
         public string ReturnType;
+        public string Flags;
         public bool IsAsync;
         public enum EDataType
         {
@@ -84,8 +85,12 @@ namespace CSharpCodeTools
                                 AddLine($"router.RunTarget = {this.RunTarget};");
                                 AddLine($"router.Executer = {this.Executer};");
                                 AddLine($"router.Index = ExeIndex;");
-                                AddLine($"EPkgTypes pkgTypes = 0;");
-                                AddLine($"pkg.Write(pkgTypes);");
+                                AddLine($"var pkgHeader = new FPkgHeader();");
+                                if (i.Flags != null)
+                                {
+                                    AddLine($"pkgHeader.PKGFlags = (byte){i.Flags};");
+                                }
+                                AddLine($"pkg.Write(pkgHeader);");
                                 AddLine($"pkg.Write(router);");
                                 AddLine($"UInt16 methodIndex = {i.Index};");
                                 AddLine($"pkg.Write(methodIndex);");
@@ -103,6 +108,7 @@ namespace CSharpCodeTools
                                     AddLine($"pkg.Write(retContext.Context);");
                                 }
 
+                                AddLine($"pkg.CoreWriter.SurePkgHeader();"); 
                                 AddLine($"NetConnect?.Send(ref pkg);");
 
                                 if (i.ReturnType != null)
@@ -170,10 +176,12 @@ namespace CSharpCodeTools
                                 PushBrackets();
                                 {
                                     AddLine($"var pkg = new IO.AuxWriter<UMemWriter>(writer);");
-                                    AddLine($"EPkgTypes pkgTypes = EPkgTypes.IsReturn;");
-                                    AddLine($"pkg.Write(pkgTypes);");
+                                    AddLine($"var pkgHeader = new FPkgHeader();");
+                                    AddLine($"pkgHeader.SetHasReturn(true);");
+                                    AddLine($"pkg.Write(pkgHeader);");
                                     AddLine($"pkg.Write(retContext);");
                                     AddLine($"pkg.Write(ret);");
+                                    AddLine($"pkg.CoreWriter.SurePkgHeader();");
                                     AddLine($"context.NetConnect?.Send(ref pkg);");
                                 }
                                 PopBrackets();

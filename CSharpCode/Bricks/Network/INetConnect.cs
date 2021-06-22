@@ -7,11 +7,20 @@ namespace EngineNS.Bricks.Network
 {
     public interface INetConnect
     {
+        bool Connected { get; set; }
         UInt16 GetConnectId();
         void Send(ref IO.AuxWriter<RPC.UMemWriter> pkg);
     }
     public class UFakeNetConnect : INetConnect
     {
+        public bool Connected 
+        { 
+            get => true; 
+            set
+            {
+
+            }
+        }
         public UInt16 GetConnectId()
         {
             return 0;
@@ -54,9 +63,9 @@ namespace EngineNS.Bricks.Network
                 using (var reader = UMemReader.CreateInstance((byte*)i.Writer.GetDataPointer(), i.Writer.Tell()))
                 {
                     var pkg = new IO.AuxReader<UMemReader>(reader, null);
-                    EPkgTypes pkgTypes = EPkgTypes.IsReturn;
-                    pkg.Read(out pkgTypes);
-                    if (pkgTypes == EPkgTypes.IsReturn)
+                    var pkgHeader = new RPC.FPkgHeader();
+                    pkg.Read(out pkgHeader);
+                    if (pkgHeader.IsHasReturn())
                     {
                         UReturnContext retContext;
                         pkg.Read(out retContext);

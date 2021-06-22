@@ -33,7 +33,6 @@ namespace MainEditor
                 System.GC.WaitForPendingFinalizers();
             }
         }
-        static bool Run = true;
         static WeakReference Main_Impl(string[] args)
         {
             var cfg = FindArgument(args, "config=");

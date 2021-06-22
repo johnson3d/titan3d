@@ -96,6 +96,11 @@ namespace CSharpCodeTools
                                                         var value = m.Expression.NormalizeWhitespace().ToFullString();
                                                         rpcMethod.ArgDataType = URpcMethod.EDataType.ISerializer;
                                                     }
+                                                    else if (name == "PkgFlags")
+                                                    {
+                                                        var value = m.Expression.NormalizeWhitespace().ToFullString();
+                                                        rpcMethod.Flags = value;
+                                                    }
                                                 }
                                             }
 

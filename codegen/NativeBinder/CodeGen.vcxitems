@@ -157,6 +157,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ShaderReflector.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/SRRect.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/StencilOpDesc.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TcpClient.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEX1D_ARRAY_SRV.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEX1D_SRV.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEX2DMS_ARRAY_SRV.cpp2cs.cpp" />

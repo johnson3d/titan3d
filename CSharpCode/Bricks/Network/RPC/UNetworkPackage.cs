@@ -31,6 +31,14 @@ namespace EngineNS.Bricks.Network.RPC
         {
             Writer.Dispose();
         }
+        public void SurePkgHeader()
+        {
+            System.Diagnostics.Debug.Assert(Writer.Tell() < ushort.MaxValue);
+            unsafe
+            {
+                ((FPkgHeader*)Writer.GetDataPointer())->PackageSize = (ushort)Writer.Tell();
+            }
+        }
     }
     public struct UMemReader : IO.ICoreReader, IDisposable
     {

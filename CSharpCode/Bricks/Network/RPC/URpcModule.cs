@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 namespace EngineNS.Bricks.Network.RPC
 {
     [Flags]
-    public enum EPkgTypes : UInt32
+    public enum EPkgTypes : byte
     {
-        IsReturn = (1 << 0),
+        IsReturn = (1 << 0),//这个是系统用的flags，不允许写道Attribute上
+        WeakPkg = (1 << 1),
     }
     public enum ERunTarget : sbyte
     {
@@ -34,6 +35,7 @@ namespace EngineNS.Bricks.Network.RPC
     public class URpcMethodAttribute : Attribute
     {
         public UInt16 Index;
+        public EPkgTypes PkgFlags;
         public int Authority = 0;
         public bool ReturnISerializer;
         public bool ArgISerializer;
@@ -220,7 +222,7 @@ namespace EngineNS.UTest
         }
 
         const int RpcIndexStart = 100;
-        [URpcMethod(Index = RpcIndexStart + 0)]
+        [URpcMethod(Index = RpcIndexStart + 0, PkgFlags = EPkgTypes.WeakPkg)]
         public int TestRpc1(float arg, UCallContext context)
         {
             AutoGenProp1 = 1;

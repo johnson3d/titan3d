@@ -61,7 +61,7 @@ namespace EngineNS.IO
     }
     public struct AuxReader<TR> : IReader where TR : ICoreReader
     {
-        TR CoreReader;
+        public TR CoreReader;
         public AuxReader(TR cr, object tag)
         {
             CoreReader = cr;
@@ -97,21 +97,18 @@ namespace EngineNS.IO
         {
             unsafe
             {
-                unsafe
+                int len = 0;
+                ReadPtr(&len, sizeof(int));
+                if (len == 0)
                 {
-                    int len = 0;
-                    ReadPtr(&len, sizeof(int));
-                    if (len == 0)
-                    {
-                        v = "";
-                        return;
-                    }
-                    var str = new System.Char[len];
-                    fixed (System.Char* pChar = &str[0])
-                    {
-                        ReadPtr(pChar, sizeof(System.Char) * len);
-                        v = System.Runtime.InteropServices.Marshal.PtrToStringUni((IntPtr)pChar);
-                    }
+                    v = "";
+                    return;
+                }
+                var str = new System.Char[len];
+                fixed (System.Char* pChar = &str[0])
+                {
+                    ReadPtr(pChar, sizeof(System.Char) * len);
+                    v = System.Runtime.InteropServices.Marshal.PtrToStringUni((IntPtr)pChar);
                 }
             }
         }
