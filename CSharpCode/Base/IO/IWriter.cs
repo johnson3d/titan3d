@@ -285,7 +285,7 @@ namespace EngineNS.IO
             unsafe
             {
                 var ptr = System.Runtime.InteropServices.Marshal.StringToHGlobalAnsi(txt);
-                mCoreObject.ResetStream(1);
+                mCoreObject.Seek(0);
                 mCoreObject.Write(ptr.ToPointer(), CoreSDK.SDK_StrLen(ptr.ToPointer()));
                 System.Runtime.InteropServices.Marshal.FreeHGlobal(ptr);
             }

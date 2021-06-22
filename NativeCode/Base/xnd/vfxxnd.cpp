@@ -36,7 +36,7 @@ void XndAttribute::BeginWrite(UINT64 length)
 		auto p = new MemStreamWriter();
 		mMemWriter = AutoRef<MemStreamWriter>(p);
 	}
-	mMemWriter->ResetStream(length);
+	mMemWriter->ResetBufferSize(length);
 }
 
 void XndAttribute::EndWrite()
