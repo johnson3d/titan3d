@@ -44,6 +44,34 @@ ImGuiViewportDataSDL2
 	bool WindowOwned;
 };
 
+struct TR_CLASS(SV_LayoutStruct = 8, SV_Dispose = delete self)
+	ImGuiTableRowData
+{
+	ImGuiTableRowData()
+	{
+		IndentTextureId = nullptr;
+		MinHeight = 0;
+		CellPaddingYEnd = 0;
+		CellPaddingYBegin = 0;
+		IndentImageWidth = 0;
+		IndentTextureUVMin = ImVec2(0, 0);
+		IndentTextureUVMax = ImVec2(0, 0);
+		IndentColor = 0xFFFFFFFF;
+		HoverColor = 0xFFFFFFFF;
+		Flags = 0;
+	}
+	ImTextureID IndentTextureId;
+	float MinHeight;
+	float CellPaddingYEnd;
+	float CellPaddingYBegin;
+	float IndentImageWidth;
+	ImVec2 IndentTextureUVMin;
+	ImVec2 IndentTextureUVMax;
+	ImU32 IndentColor;
+	ImU32 HoverColor;
+	ImGuiTableRowFlags Flags;
+};
+
 class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = ImGui, SV_LayoutStruct=8)
 ImGuiAPI
 {
@@ -1922,8 +1950,8 @@ public:
 	}
 
 	static bool CollapsingHeader_SpanAllColumns(const char* label, ImGuiTreeNodeFlags_ flags);
-	static void TableNextRow(ImGuiTableRowFlags_ row_flags, float row_min_height, float cellPaddingEnd, float cellPaddingBegin);
-	static void TableNextRow_FirstColumn(ImGuiTableRowFlags_ row_flags, float row_min_height, float cellPaddingEnd, float cellPaddingBegin);
+	static void TableNextRow(const ImGuiTableRowData* rowData);
+	static void TableNextRow_FirstColumn(const ImGuiTableRowData* rowData);
 	static void TableSetCellPaddingY(float value)
 	{
 		ImGuiContext& g = *GImGui;

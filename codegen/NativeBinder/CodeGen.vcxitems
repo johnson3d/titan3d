@@ -157,8 +157,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IMesh.gen.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IMeshDataProvider.gen.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IMeshPrimitives.gen.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiAPI.gen.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiViewportDataSDL2.gen.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IModifier.gen.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IPartialSkeleton.gen.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IPipelineStat.gen.cpp" />
@@ -248,6 +246,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/XndElement.gen.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/XndHolder.gen.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/XndNode.gen.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiViewportDataSDL2.gen.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiTableRowData.gen.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiAPI.gen.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImGui/ImGuiFileDialog.gen.cpp" />
   </ItemGroup>
 </Project>

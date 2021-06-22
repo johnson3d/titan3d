@@ -153,8 +153,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IMesh.gen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IMeshDataProvider.gen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IMeshPrimitives.gen.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiAPI.gen.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiViewportDataSDL2.gen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IModifier.gen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IPartialSkeleton.gen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IPipelineStat.gen.cs" />
@@ -244,6 +242,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/XndElement.gen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/XndHolder.gen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/XndNode.gen.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiViewportDataSDL2.gen.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiTableRowData.gen.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiAPI.gen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGui/ImGuiFileDialog.gen.cs" />
   </ItemGroup>
 </Project>

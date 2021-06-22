@@ -15,6 +15,24 @@ namespace EngineNS.EGui.UIProxy
 
         System.Threading.Tasks.Task<RHI.CShaderResourceView> mTask;
         IntPtr mImagePtr;
+        public unsafe void* GetImagePtrPointer()
+        {
+            if (mImagePtr == IntPtr.Zero)
+            {
+                if (mTask == null)
+                {
+                    var rc = UEngine.Instance.GfxDevice.RenderContext;
+                    mTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(ImageFile);
+                }
+                else if (mTask.IsCompleted)
+                {
+                    mImagePtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(mTask.Result));
+                    mTask = null;
+                }
+            }
+
+            return mImagePtr.ToPointer();
+        }
 
         public ImageProxy()
         {

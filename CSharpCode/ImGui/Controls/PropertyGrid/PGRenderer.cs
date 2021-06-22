@@ -63,6 +63,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         EGui.UIProxy.ImageButtonProxy mOpenInPropertyMatrix;
         EGui.UIProxy.ImageButtonProxy mConfig;
         EGui.UIProxy.ImageButtonProxy mDelete;
+        EGui.UIProxy.ImageProxy mIndentDec;
+        EGui.UIProxy.ImageProxy mDropShadowDec;
         public void Initialize()
         {
             mSearchBar = new UIProxy.SearchBarProxy();
@@ -93,6 +95,20 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImageSize = new Vector2(16, 16),
                 ShowBG = true,
                 ImageColor = 0xFFFFFFFF,
+            };
+            mIndentDec = new UIProxy.ImageProxy()
+            {
+                ImageFile = RName.GetRName("icons/indentdec.srv", RName.ERNameType.Engine),
+                ImageSize = new Vector2(32, 2),
+                UVMin = Vector2.Zero,
+                UVMax = Vector2.UnitXY,
+            };
+            mDropShadowDec = new UIProxy.ImageProxy()
+            {
+                ImageFile = RName.GetRName("icons/shadowtop.srv", RName.ERNameType.Engine),
+                ImageSize = new Vector2(32, 2),
+                UVMin = Vector2.Zero,
+                UVMax = Vector2.UnitXY,
             };
         }
         
@@ -251,6 +267,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
         float mEndRowPadding = 0.0f;
         float mBeginRowPadding = 0.0f;
+        //CustomPropertyDescriptor mLastPropDesc = null;
+        //Vector2 mHightlightRowMin = Vector2.Zero;
+        //Vector2 mHightlightRowMax = Vector2.Zero;
         public bool UseProvider = true;
         static readonly ImGuiTableFlags_ mTabFlags = ImGuiTableFlags_.ImGuiTableFlags_BordersInner | ImGuiTableFlags_.ImGuiTableFlags_Resizable;// | ImGuiTableFlags_.ImGuiTableFlags_SizingFixedFit;
         public Rtti.UTypeDesc HideInheritDeclareType = null;
@@ -292,7 +311,20 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                     if(isSubPropertyGrid)
                     {
-                        ImGuiAPI.TableNextRow_FirstColumn(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0, mEndRowPadding, 0);
+                        ImGuiTableRowData rowData = new ImGuiTableRowData()
+                        {
+                            IndentTextureId = mIndentDec.GetImagePtrPointer(),
+                            MinHeight = 0,
+                            CellPaddingYEnd = mEndRowPadding,
+                            CellPaddingYBegin = 0,
+                            IndentImageWidth = 21,
+                            IndentTextureUVMin = Vector2.Zero,
+                            IndentTextureUVMax = Vector2.UnitXY,
+                            IndentColor = 0xFFFFFFFF,
+                            HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
+                            Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
+                        };
+                        ImGuiAPI.TableNextRow_FirstColumn(ref rowData);
                         //ImGuiAPI.TableSetCellPaddingY(0);
                         ////ImGuiAPI.TableNextRow_NoCellPaddingY(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
                         //ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
@@ -326,8 +358,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 }
                 if (tableBegin || isSubPropertyGrid)
                 {
-                    Vector2 tableWorkRectMin, tableWorkRectMax;
-                    ImGuiAPI.GetTableWorkRect(&tableWorkRectMin, &tableWorkRectMax);
+                    //Vector2 tableWorkRectMin, tableWorkRectMax;
+                    //ImGuiAPI.GetTableWorkRect(&tableWorkRectMin, &tableWorkRectMax);
 
                     /////////////////////////////////////////////
                     //Vector2 size = Vector2.Zero;
@@ -338,7 +370,6 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     if (showCollection)
                     {
                         var collection = proDicValue.Value;
-                        CustomPropertyDescriptor lastPropDesc = null;
                         for (int i = 0; i < collection.Count; i++)
                         {
                             var propDesc = collection[i];
@@ -367,7 +398,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             var showType = propDesc.GetPropertyType(propertyValue);
                             var showTypeDesc = Rtti.UTypeDesc.TypeOf(showType);
                             var isReadonly = propDesc.GetIsReadonly(propertyValue);
-                            var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
+                            var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow;
                             if (IsLeafTreeNode(propDesc, propertyValue, showTypeDesc))
                                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
 
@@ -383,24 +414,39 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 Flags = flags,
                                 RowHeight = propDesc.RowHeight,
                             };
-
-                            ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0, mEndRowPadding, mBeginRowPadding);
+                            ImGuiTableRowData rowData = new ImGuiTableRowData()
+                            {
+                                IndentTextureId = mIndentDec.GetImagePtrPointer(),
+                                MinHeight = 0,
+                                CellPaddingYEnd = mEndRowPadding,
+                                CellPaddingYBegin = mBeginRowPadding,
+                                IndentImageWidth = 21,
+                                IndentTextureUVMin = Vector2.Zero,
+                                IndentTextureUVMax = Vector2.UnitXY,
+                                IndentColor = 0xFFFFFFFF,
+                                HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
+                                Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
+                            };
+                            ImGuiAPI.TableNextRow(ref rowData);
                             mEndRowPadding = EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y;
 
                             float y = 0;
                             ImGuiAPI.GetTableRowStartY(&y);
                             //ImGuiAPI.GotoColumns(0);
-                            var cursorStartPos = ImGuiAPI.GetCursorScreenPos();
-                            propDesc.RowRectMin.X = tableWorkRectMin.X;// workRectMin.X;
-                            propDesc.RowRectMin.Y = y;
-                            propDesc.RowRectMax.X = tableWorkRectMax.X;// workRectMax.X;
-                            if (lastPropDesc != null)
-                            {
-                                lastPropDesc.RowRectMax.Y = y;
-                            }
-                            propDesc.RowHeight = propDesc.RowRectMax.Y - propDesc.RowRectMin.Y;
-                            if (propDesc.IsMouseHovered)
-                                drawList.AddRectFilled(ref propDesc.RowRectMin, ref propDesc.RowRectMax, EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor, 0, ImDrawFlags_.ImDrawFlags_None);
+                            //var cursorStartPos = ImGuiAPI.GetCursorScreenPos();
+                            //propDesc.RowRectMin.X = tableWorkRectMin.X;// workRectMin.X;
+                            //propDesc.RowRectMin.Y = y;
+                            //propDesc.RowRectMax.X = tableWorkRectMax.X;// workRectMax.X;
+                            //if (mLastPropDesc != null)
+                            //{
+                            //    mLastPropDesc.RowRectMax.Y = y;
+                            //}
+                            //mHightlightRowMin.X = tableWorkRectMin.X;
+                            //mHightlightRowMin.Y = y;
+                            //mHightlightRowMax.X = tableWorkRectMax.X;
+                            //propDesc.RowHeight = propDesc.RowRectMax.Y - propDesc.RowRectMin.Y;
+                            //if (propDesc.IsMouseHovered)
+                            //    drawList.AddRectFilled(ref mHightlightRowMin, ref mHightlightRowMax, EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor, 0, ImDrawFlags_.ImDrawFlags_None);
 
                             if (propertyValue == null && CanNewObject(showTypeDesc))
                             {
@@ -494,11 +540,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 }
                             }
 
-                            propDesc.IsMouseHovered = ImGuiAPI.IsMouseHoveringRectInCurrentWindow(ref propDesc.RowRectMin, ref propDesc.RowRectMax, false);
-                            ImGuiAPI.GetTableRowEndY(&y);
-                            propDesc.RowRectMax.Y = y;
+                            //ImGuiAPI.GetTableRowEndY(&y);
+                            //mHightlightRowMax.Y = y;
+                            //propDesc.IsMouseHovered = ImGuiAPI.IsMouseHoveringRectInCurrentWindow(ref mHightlightRowMin, ref mHightlightRowMax, false);
+                            //propDesc.RowRectMax.Y = y;
 
-                            lastPropDesc = propDesc;
+                            //mLastPropDesc = propDesc;
                         }
                     }
                     if(tableBegin)

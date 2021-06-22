@@ -137,7 +137,7 @@ namespace EngineNS.Editor
                             },
                             Action = ()=>
                             {
-                                var files = IO.FileManager.GetFiles(@"F:\work\TProject\icons", "*.*");
+                                var files = IO.FileManager.GetFiles(@"I:\titan3d\icons", "*.*");
                                 var tagDir = RName.GetRName("icons", RName.ERNameType.Engine);
                                 foreach(var file in files)
                                 {

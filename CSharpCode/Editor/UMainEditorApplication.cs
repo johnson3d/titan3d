@@ -52,6 +52,7 @@ namespace EngineNS.Editor
             var RenderPolicy = Rtti.UTypeDescManager.CreateInstance(rpType) as Graphics.Pipeline.IRenderPolicy;
             await WorldViewportSlate.Initialize(this, RenderPolicy, 0, 1);
 
+            mMainInspector.Initialize();
             mMainInspector.PropertyGrid.PGName = "MainInspector";
             mMainInspector.PropertyGrid.Target = EGui.UIProxy.StyleConfig.Instance;// WorldViewportSlate;
 

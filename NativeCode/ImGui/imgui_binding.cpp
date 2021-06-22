@@ -367,7 +367,8 @@ bool ImGuiAPI::CollapsingHeader_SpanAllColumns(const char* label, ImGuiTreeNodeF
 
 	return retValue;
 }
-void ImGuiAPI::TableNextRow(ImGuiTableRowFlags_ row_flags, float row_min_height, float cellPaddingEnd, float cellPaddingBegin)
+
+void ImGuiAPI::TableNextRow(const ImGuiTableRowData* rowData)
 {
 	ImGuiContext& g = *GImGui;
 	ImGuiTable* table = g.CurrentTable;
@@ -376,27 +377,47 @@ void ImGuiAPI::TableNextRow(ImGuiTableRowFlags_ row_flags, float row_min_height,
 		ImGui::TableUpdateLayout(table);
 	if (table->IsInsideRow)
 	{
-		table->CellPaddingY = cellPaddingEnd;
+		table->CellPaddingY = rowData->CellPaddingYEnd;
 		ImGui::TableEndRow(table);
 	}
 
+	const ImRect& workRect = table->WorkRect;
+	ImRect rect(ImVec2(workRect.Min.x, table->RowPosY1), ImVec2(workRect.Max.x, table->RowPosY2));
+	if(IsMouseHoveringRectInCurrentWindow(&rect.Min, &rect.Max, false))
+	//if (ImGui::ItemHoverable(rect, table->ID))
+	{
+		g.CurrentWindow->DrawList->AddRectFilled(rect.Min, rect.Max, rowData->HoverColor);
+	}
+
+	if (g.Style.IndentSpacing > 0.0f && rowData->IndentTextureId)
+	{
+		auto indentCount = (int)(table->RowIndentOffsetX / g.Style.IndentSpacing);
+		for (int indentIdx = 1; indentIdx <= indentCount; indentIdx++)
+		{
+			g.CurrentWindow->DrawList->AddImage(rowData->IndentTextureId,
+				ImVec2(indentIdx * g.Style.IndentSpacing - rowData->IndentImageWidth + rect.Min.x, rect.Min.y),
+				ImVec2(indentIdx * g.Style.IndentSpacing + rect.Min.x, rect.Max.y),
+				rowData->IndentTextureUVMin, rowData->IndentTextureUVMax, rowData->IndentColor);
+		}
+	}
+
 	table->LastRowFlags = table->RowFlags;
-	table->RowFlags = row_flags;
-	table->RowMinHeight = row_min_height;
-	table->CellPaddingY = cellPaddingBegin;
+	table->RowFlags = rowData->Flags;
+	table->RowMinHeight = rowData->MinHeight;
+	table->CellPaddingY = rowData->CellPaddingYBegin;
 	ImGui::TableBeginRow(table);
 
 	// We honor min_row_height requested by user, but cannot guarantee per-row maximum height,
 	// because that would essentially require a unique clipping rectangle per-cell.
 	table->RowPosY2 += table->CellPaddingY * 2.0f;
-	table->RowPosY2 = ImMax(table->RowPosY2, table->RowPosY1 + row_min_height);
+	table->RowPosY2 = ImMax(table->RowPosY2, table->RowPosY1 + rowData->MinHeight);
 
 	// Disable output until user calls TableNextColumn()
 	table->InnerWindow->SkipItems = true;
 
 	table->CellPaddingY = cellPaddingY;
 }
-void ImGuiAPI::TableNextRow_FirstColumn(ImGuiTableRowFlags_ row_flags, float row_min_height, float cellPaddingEnd, float cellPaddingBegin)
+void ImGuiAPI::TableNextRow_FirstColumn(const ImGuiTableRowData* rowData)
 {
 	ImGuiContext& g = *GImGui;
 	ImGuiWindow* window = g.CurrentWindow;
@@ -404,9 +425,9 @@ void ImGuiAPI::TableNextRow_FirstColumn(ImGuiTableRowFlags_ row_flags, float row
 	if (table == nullptr)
 		return;
 
-	TableNextRow(row_flags, row_min_height, cellPaddingEnd, cellPaddingBegin);
+	TableNextRow(rowData);
 	auto cellPaddingYStore = table->CellPaddingY;
-	table->CellPaddingY = cellPaddingBegin;
+	table->CellPaddingY = rowData->CellPaddingYBegin;
 	ImGui::TableSetColumnIndex(0);
 	table->CellPaddingY = cellPaddingYStore;
 }

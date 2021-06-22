@@ -16,6 +16,12 @@ namespace EngineNS.Editor.Forms
         public bool ShowReadOnly { get; set; } = true;
         protected EGui.Controls.PropertyGrid.PropertyGrid mPropertyGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid PropertyGrid { get => mPropertyGrid; }
+        
+        public void Initialize()
+        {
+            mPropertyGrid.Initialize();
+        }
+        
         public unsafe void OnDraw()
         {
             if (Visible == false)
