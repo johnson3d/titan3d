@@ -394,6 +394,10 @@ void ImGuiAPI::TableNextRow(const ImGuiTableRowData* rowData)
 		auto indentCount = (int)(table->RowIndentOffsetX / g.Style.IndentSpacing);
 		for (int indentIdx = 1; indentIdx <= indentCount; indentIdx++)
 		{
+			//g.CurrentWindow->DrawList->AddRectFilledMultiColor(
+			//	ImVec2(indentIdx * g.Style.IndentSpacing - rowData->IndentImageWidth + rect.Min.x, rect.Min.y),
+			//	ImVec2(indentIdx * g.Style.IndentSpacing + rect.Min.x, rect.Max.y),
+			//	rowData->IndentColorLeft, rowData->IndentColorRight, rowData->IndentColorRight, rowData->IndentColorLeft);
 			g.CurrentWindow->DrawList->AddImage(rowData->IndentTextureId,
 				ImVec2(indentIdx * g.Style.IndentSpacing - rowData->IndentImageWidth + rect.Min.x, rect.Min.y),
 				ImVec2(indentIdx * g.Style.IndentSpacing + rect.Min.x, rect.Max.y),

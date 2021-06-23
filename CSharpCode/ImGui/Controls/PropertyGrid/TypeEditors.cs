@@ -460,20 +460,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             else
             {
-                ImGuiAPI.GotoColumns(0);
-                ImGuiAPI.SameLine(0, -1);
-                var showChild = ImGuiAPI.TreeNode(info.Name, "");
-                ImGuiAPI.NextColumn();
                 ImGuiAPI.Text(info.Type.ToString());
-                ImGuiAPI.NextColumn();
-                if (showChild)
+                if (info.Expand)
                 {
                     var lst = info.Value as System.Array;
                     if(OnArray(in info, lst))
                     {
                         valueChanged = true;
                     }
-                    ImGuiAPI.TreePop();
                 }
             }
 
@@ -484,21 +478,39 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             bool valueChanged = false;
             var sz = new Vector2(0, 0);
+            ImGuiTableRowData rowData = new ImGuiTableRowData()
+            {
+                IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
+                MinHeight = 0,
+                CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
+                CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
+                IndentImageWidth = info.HostPropertyGrid.Indent,
+                IndentTextureUVMin = Vector2.Zero,
+                IndentTextureUVMax = Vector2.UnitXY,
+                IndentColor = info.HostPropertyGrid.IndentColor,
+                HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
+                Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
+            };
             for (int i = 0; i < lst.Length; i++)
             {
+                ImGuiAPI.TableNextRow(ref rowData);
+
                 var name = "[" + i.ToString() + "]";
                 var obj = lst.GetValue(i);
 
+                ImGuiAPI.TableSetColumnIndex(0);
                 ImGuiAPI.PushID(info.Name);
                 ImGuiAPI.AlignTextToFramePadding();
-                ImGuiAPI.TreeNodeEx(name, info.Flags, name);
-                ImGuiAPI.NextColumn();
+                var flags = info.Flags;
+                if (PropertyGrid.IsLeafTreeNode(obj, null))
+                    flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
+                var treeNodeRet = ImGuiAPI.TreeNodeEx(name, flags, name);
+                ImGuiAPI.TableNextColumn();
                 ImGuiAPI.SetNextItemWidth(-1);
 
                 if (obj == null)
                 {
                     ImGuiAPI.Text("null");
-                    ImGuiAPI.NextColumn();
                 }
                 else
                 {
@@ -514,13 +526,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     };
                     object newValue;
                     var changed = PropertyGrid.DrawPropertyGridItem(ref elementEditorInfo, out newValue);
-                    if(changed)
+                    if (changed)
                     {
                         lst.SetValue(newValue, i);
                         valueChanged = true;
                     }
-                    ImGuiAPI.NextColumn();
                 }
+                if(treeNodeRet)
+                    ImGuiAPI.TreePop();
 
                 ImGuiAPI.PopID();
             }
@@ -536,10 +549,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             newValue = info.Value;
             if (info.HostPropertyGrid.IsReadOnly == false)
             {
-                ImGuiAPI.SameLine(0, -1);
-                var sz = new Vector2(0, 0);
-                ImGuiAPI.PushID(info.Name);
-                ImGuiAPI.SameLine(0, -1);
+                //ImGuiAPI.SameLine(0, -1);
+                //var sz = new Vector2(0, 0);
+                //ImGuiAPI.PushID(info.Name);
+                //ImGuiAPI.SameLine(0, -1);
                 ImGuiAPI.OpenPopupOnItemClick("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                 //var pos = ImGuiAPI.GetItemRectMin();
                 //var size = ImGuiAPI.GetItemRectSize();
@@ -564,19 +577,18 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                     ImGuiAPI.EndPopup();
                 }
-                ImGuiAPI.PopID();
+                //ImGuiAPI.PopID();
             }
-            ImGuiAPI.SameLine(0, -1);
-            var showChild = ImGuiAPI.TreeNode(info.Name, "");
-            ImGuiAPI.NextColumn();
-            ImGuiAPI.Text(info.Type.ToString());
-            ImGuiAPI.NextColumn();
-            if (showChild)
+            //ImGuiAPI.SameLine(0, -1);
+            //var showChild = ImGuiAPI.TreeNode(info.Name, "");
+            //ImGuiAPI.NextColumn();
+            //ImGuiAPI.Text(info.Type.ToString());
+            //ImGuiAPI.NextColumn();
+            if (info.Expand)
             {
                 var dict = info.Value as System.Collections.IList;
                 if (OnList(in info, dict))
                     valueChanged = true;
-                ImGuiAPI.TreePop();
             }
             return valueChanged;
         }
@@ -584,14 +596,28 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         private unsafe bool OnList(in EditorInfo info, System.Collections.IList lst)
         {
             bool itemChanged = false;
-            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;
             var sz = new Vector2(0, 0);
+            ImGuiTableRowData rowData = new ImGuiTableRowData()
+            {
+                IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
+                MinHeight = 0,
+                CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
+                CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
+                IndentImageWidth = info.HostPropertyGrid.Indent,
+                IndentTextureUVMin = Vector2.Zero,
+                IndentTextureUVMax = Vector2.UnitXY,
+                IndentColor = info.HostPropertyGrid.IndentColor,
+                HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
+                Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
+            };
             for (int i = 0; i < lst.Count; i++)
             {
                 var name = "[" + i.ToString() + "]";
                 var obj = lst[i];
 
                 ImGuiAPI.AlignTextToFramePadding();
+                ImGuiAPI.TableNextRow(ref rowData);
+                ImGuiAPI.TableSetColumnIndex(0);
                 if (info.HostPropertyGrid.IsReadOnly == false)
                 {
                     bool operated = false;
@@ -619,14 +645,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         return true;
                     ImGuiAPI.SameLine(0, -1);
                 }
-                ImGuiAPI.TreeNodeEx(name, flags, name);
-                ImGuiAPI.NextColumn();
+                var flags = info.Flags;
+                if (PropertyGrid.IsLeafTreeNode(obj, null))
+                    flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
+                var treeNodeRet = ImGuiAPI.TreeNodeEx(name, flags, name);
+                ImGuiAPI.TableSetColumnIndex(1);
                 ImGuiAPI.SetNextItemWidth(-1);
 
                 if (obj == null)
                 {
                     ImGuiAPI.Text("null");
-                    ImGuiAPI.NextColumn();
                 }
                 else
                 {
@@ -641,12 +669,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     };
                     object newValue;
                     var changed = PropertyGrid.DrawPropertyGridItem(ref elementEditorInfo, out newValue);
-                    if(changed)
+                    if (changed)
                     {
                         lst[i] = newValue;
                         itemChanged = true;
                     }
                 }
+                if (treeNodeRet)
+                    ImGuiAPI.TreePop();
             }
 
             return itemChanged;

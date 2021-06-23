@@ -38,16 +38,16 @@ namespace EngineNS.Editor
         public enum FlagEnum
         {
             FEV0 = 1,
-            FEV1 = 1<<1,
-            FEV2 = 1<<2,
-            FEV3 = 1<<3,
-            FEV4 = 1<<4,
+            FEV1 = 1 << 1,
+            FEV2 = 1 << 2,
+            FEV3 = 1 << 3,
+            FEV4 = 1 << 4,
         }
         public FlagEnum FlagEnumValue { get; set; }
         [Category("Collections")]
-        public int[] ArrayValue = new int[8] { 1, 2, 3, 4, 5, 6, 7, 8 };
+        public int[] ArrayValue { get; set; } = new int[8] { 1, 2, 3, 4, 5, 6, 7, 8 };
         [Category("Collections")]
-        public List<int> ListValue = new List<int>()
+        public List<int> ListValue { get; set; } = new List<int>()
         {
             0,1,2,3,4,5
         };

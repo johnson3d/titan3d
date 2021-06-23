@@ -63,7 +63,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         EGui.UIProxy.ImageButtonProxy mOpenInPropertyMatrix;
         EGui.UIProxy.ImageButtonProxy mConfig;
         EGui.UIProxy.ImageButtonProxy mDelete;
-        EGui.UIProxy.ImageProxy mIndentDec;
+        public EGui.UIProxy.ImageProxy IndentDec;
         EGui.UIProxy.ImageProxy mDropShadowDec;
         public void Initialize()
         {
@@ -96,7 +96,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ShowBG = true,
                 ImageColor = 0xFFFFFFFF,
             };
-            mIndentDec = new UIProxy.ImageProxy()
+            IndentDec = new UIProxy.ImageProxy()
             {
                 ImageFile = RName.GetRName("icons/indentdec.srv", RName.ERNameType.Engine),
                 ImageSize = new Vector2(32, 2),
@@ -265,8 +265,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return treeNodeRet;
         }
 
-        float mEndRowPadding = 0.0f;
-        float mBeginRowPadding = 0.0f;
+        public float Indent = 21.0f;
+        public float EndRowPadding = 0.0f;
+        public float BeginRowPadding = 0.0f;
+        public UInt32 IndentColor = 0x60000000;
         //CustomPropertyDescriptor mLastPropDesc = null;
         //Vector2 mHightlightRowMin = Vector2.Zero;
         //Vector2 mHightlightRowMax = Vector2.Zero;
@@ -313,14 +315,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     {
                         ImGuiTableRowData rowData = new ImGuiTableRowData()
                         {
-                            IndentTextureId = mIndentDec.GetImagePtrPointer(),
+                            IndentTextureId = IndentDec.GetImagePtrPointer(),
                             MinHeight = 0,
-                            CellPaddingYEnd = mEndRowPadding,
+                            CellPaddingYEnd = EndRowPadding,
                             CellPaddingYBegin = 0,
-                            IndentImageWidth = 21,
+                            IndentImageWidth = Indent,
                             IndentTextureUVMin = Vector2.Zero,
                             IndentTextureUVMax = Vector2.UnitXY,
-                            IndentColor = 0xFFFFFFFF,
+                            IndentColor = IndentColor,
                             HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                             Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
                         };
@@ -330,13 +332,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         //ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
                         //ImGuiAPI.TableSetColumnIndex(0);
                         //ImGuiAPI.TableSetCellPaddingY(EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y);
-                        mBeginRowPadding = EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y;
-                        mEndRowPadding = 0.0f;
+                        BeginRowPadding = EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y;
+                        EndRowPadding = 0.0f;
                     }
                     else
                     {
-                        mBeginRowPadding = EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y;
-                        mEndRowPadding = EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y;
+                        BeginRowPadding = EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y;
+                        EndRowPadding = EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y;
                     }
                     showCollection = ImGuiAPI.CollapsingHeader_SpanAllColumns(categoryName, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen);
 
@@ -395,9 +397,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             if (!string.IsNullOrEmpty(FilterString) && !displayName.ToLower().Contains(FilterString))
                                 continue;
 
-                            var showType = propDesc.GetPropertyType(propertyValue);
+                            var showType = propDesc.GetPropertyType(target);
                             var showTypeDesc = Rtti.UTypeDesc.TypeOf(showType);
-                            var isReadonly = propDesc.GetIsReadonly(propertyValue);
+                            var isReadonly = propDesc.GetIsReadonly(target);
                             var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow;
                             if (IsLeafTreeNode(propDesc, propertyValue, showTypeDesc))
                                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
@@ -416,19 +418,19 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             };
                             ImGuiTableRowData rowData = new ImGuiTableRowData()
                             {
-                                IndentTextureId = mIndentDec.GetImagePtrPointer(),
+                                IndentTextureId = IndentDec.GetImagePtrPointer(),
                                 MinHeight = 0,
-                                CellPaddingYEnd = mEndRowPadding,
-                                CellPaddingYBegin = mBeginRowPadding,
-                                IndentImageWidth = 21,
+                                CellPaddingYEnd = EndRowPadding,
+                                CellPaddingYBegin = BeginRowPadding,
+                                IndentImageWidth = Indent,
                                 IndentTextureUVMin = Vector2.Zero,
                                 IndentTextureUVMax = Vector2.UnitXY,
-                                IndentColor = 0xFFFFFFFF,
+                                IndentColor = IndentColor,
                                 HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                                 Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
                             };
                             ImGuiAPI.TableNextRow(ref rowData);
-                            mEndRowPadding = EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y;
+                            EndRowPadding = EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y;
 
                             float y = 0;
                             ImGuiAPI.GetTableRowStartY(&y);
@@ -549,7 +551,23 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         }
                     }
                     if(tableBegin)
+                    {
+                        ImGuiTableRowData rowData = new ImGuiTableRowData()
+                        {
+                            IndentTextureId = IndentDec.GetImagePtrPointer(),
+                            MinHeight = 0,
+                            CellPaddingYEnd = EndRowPadding,
+                            CellPaddingYBegin = BeginRowPadding,
+                            IndentImageWidth = Indent,
+                            IndentTextureUVMin = Vector2.Zero,
+                            IndentTextureUVMax = Vector2.UnitXY,
+                            IndentColor = IndentColor,
+                            HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
+                            Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
+                        };
+                        ImGuiAPI.TableNextRow(ref rowData);
                         ImGuiAPI.EndTable();
+                    }
                 }
             }
             ImGuiAPI.PopStyleColor(1);
@@ -563,24 +581,29 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             ImGuiAPI.PopStyleVar(1);
         }
-        public bool IsLeafTreeNode(CustomPropertyDescriptor propDesc, object value, Rtti.UTypeDesc propertyTypeDesc)
+        public static bool IsLeafTreeNode(CustomPropertyDescriptor propDesc, object value, Rtti.UTypeDesc propertyTypeDesc)
         {
             if (propDesc.CustomValueEditor != null)
                 return !propDesc.CustomValueEditor.Expandable;
 
-            var editor = PGTypeEditorManager.Instance.GetEditorType(propertyTypeDesc);
-            if(editor != null)
-            {
+            return IsLeafTreeNode(value, propertyTypeDesc);
+        }
+        public static bool IsLeafTreeNode(object value, Rtti.UTypeDesc typeDesc)
+        {
+            if(typeDesc == null)
+                typeDesc = Rtti.UTypeDesc.TypeOf(value.GetType());
+            var editor = PGTypeEditorManager.Instance.GetEditorType(typeDesc);
+            if (editor != null)
                 return !editor.Expandable;
-            }
+            if (typeDesc.SystemType.IsEnum)
+                return true;
 
-            var attrs = propertyTypeDesc.SystemType.GetCustomAttributes(typeof(PGCustomValueEditorAttribute), false);
+            var attrs = typeDesc.SystemType.GetCustomAttributes(typeof(PGCustomValueEditorAttribute), false);
             if (attrs != null && attrs.Length > 0)
             {
                 var editorOnDraw = attrs[0] as PGCustomValueEditorAttribute;
                 return !editorOnDraw.Expandable;
             }
-
             if (value != null)
                 return false;
 
