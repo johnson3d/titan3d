@@ -42,8 +42,8 @@ vBOOL TcpClient::Connect(const char* address, int port, int timeout)
 		FD_ZERO(&r);
 		FD_SET(mSocket, &r);
 		struct timeval timeo = { timeout/1000, 0 };
-		auto ret = select(0, &r, 0, 0, &timeo);
-		if (ret < 0)
+		auto ret = select(0, 0, &r, 0, &timeo);
+		if (ret <= 0)
 		{
 			VFX_LTRACE(ELTT_Network, "connect fail");
 			return FALSE;
