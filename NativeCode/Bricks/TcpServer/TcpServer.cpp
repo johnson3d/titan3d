@@ -221,7 +221,7 @@ void TcpServer::CloseTcpConnect(HP_CONNID dwConnID)
 {
 	VAutoVSLLock lk(mLocker);
 	auto iter = mTcpConnects.find(dwConnID);
-	if (iter != mTcpConnects.end())
+	if (iter == mTcpConnects.end())
 	{
 		return;
 	}

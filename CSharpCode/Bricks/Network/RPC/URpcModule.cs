@@ -295,6 +295,10 @@ namespace EngineNS.UTest
                 {
                     pConnect = tcpClient;
                 }
+                else
+                {
+                    tcpClient = null;
+                }
                 var ret = await UTest_Rpc.TestRpc1(2.0f, 0, pConnect);
                 if (ret != 4)
                 {
@@ -313,7 +317,7 @@ namespace EngineNS.UTest
 
                 var base_ret7 = await URpcManager.TestBaseRpc1(5.0f, 0, pConnect);
 
-                tcpClient.Disconnect();
+                tcpClient?.Disconnect();
             };
             action();
         }
