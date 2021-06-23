@@ -290,7 +290,7 @@ namespace EngineNS.UTest
             {
                 INetConnect pConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
                 UTcpClient tcpClient = new UTcpClient();
-                var ok = await tcpClient.Connect("127.0.0.1", 5555, 1);
+                var ok = await tcpClient.Connect("127.0.0.1", 5555, 1, 1000);
                 if (ok)
                 {
                     pConnect = tcpClient;
