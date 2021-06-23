@@ -2,7 +2,7 @@
   "profiles": {
     "ProjectCooker": {
       "commandName": "Project",
-      "commandLineArgs": "ExeCmd=StartDS DS_Port=5555",
+      "commandLineArgs": "ExeCmd=StartDS DS_Port=5555 CookCfg=$(SolutionDir)content\\EngineConfigForCook.cfg",
       "workingDirectory": "..\\..\\binaries\\",
       "nativeDebugging": true
     }

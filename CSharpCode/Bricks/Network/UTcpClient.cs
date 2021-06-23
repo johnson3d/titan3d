@@ -6,6 +6,10 @@ namespace EngineNS.Bricks.Network
 {
     public class UTcpClient : AuxPtrType<EngineNS.TcpClient>, INetConnect
     {
+        public UTcpClient()
+        {
+            mCoreObject = EngineNS.TcpClient.CreateInstance();
+        }
         public bool Connected { get; set; }
         public UInt16 ConnectId { get; private set; }
         public UInt16 GetConnectId()
@@ -18,7 +22,7 @@ namespace EngineNS.Bricks.Network
                 return;
             unsafe
             {
-                mCoreObject.Send((sbyte*)pkg.CoreWriter.Writer.GetDataPointer(), (uint)pkg.CoreWriter.Writer.GetLength());
+                mCoreObject.Send((sbyte*)pkg.CoreWriter.Writer.GetDataPointer(), (uint)pkg.CoreWriter.Writer.Tell());
             }
         }
         public void Disconnect()
@@ -29,7 +33,7 @@ namespace EngineNS.Bricks.Network
             mCoreObject.Disconnect();            
         }
         private System.Threading.Thread mRcvThread;
-        public Support.UNativeArray<byte> mRcvBuffer = new Support.UNativeArray<byte>();
+        public Support.UNativeArray<byte> mRcvBuffer = Support.UNativeArray<byte>.CreateInstance();
         public async System.Threading.Tasks.Task<bool> Connect(string ip, UInt16 port, UInt16 connId, int timeOut = 2000)
         {
             mPkgBuilder.NetPackageManager = UEngine.Instance.RpcModule.NetPackageManager;
@@ -46,25 +50,29 @@ namespace EngineNS.Bricks.Network
             {
                 unsafe
                 {
-                    mRcvBuffer.mCoreObject.SetCapacity(BufferLimit);
+                    mRcvBuffer.mCoreObject.SetSize(BufferLimit);
                 }
                 mRcvThread = new System.Threading.Thread(()=>
                 {
                     while (true)
                     {
                         int error = 0;
-                        if (mCoreObject.WaitData(ref error) != 0)
+                        var ret = mCoreObject.WaitData(ref error);
+                        if (error == -1)
+                        {
+                            break;
+                        }
+                        else if(ret == 1)
                         {
                             unsafe
                             {
                                 var ptr = (byte*)mRcvBuffer.UnsafeAddressAt(0).ToPointer();
                                 int SizeOfRecv = mCoreObject.RecvData(ptr, BufferLimit);
-                                OnRcvData(ptr, SizeOfRecv);
+
+                                if (SizeOfRecv > 0)
+                                    OnRcvData(ptr, SizeOfRecv);
                             }
-                        }
-                        else
-                        {
-                            break;
+                            
                         }
                     }
                     Connected = false;

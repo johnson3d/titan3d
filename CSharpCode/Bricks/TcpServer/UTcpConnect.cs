@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.TcpServer
         {
             unsafe 
             {
-                mCoreObject.Send((byte*)pkg.CoreWriter.Writer.GetDataPointer(), (int)pkg.CoreWriter.Writer.GetLength());
+                mCoreObject.Send((byte*)pkg.CoreWriter.Writer.GetDataPointer(), (int)pkg.CoreWriter.Writer.Tell());
             }
         }
         public virtual void Tick()

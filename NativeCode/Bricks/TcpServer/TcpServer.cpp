@@ -152,8 +152,8 @@ En_HP_HandleResult TcpServer::OnReceive(HP_Server pSender, HP_CONNID dwConnID, i
 			{
 				break;
 			}
-			iLength -= (int)conn->mRcvTmpBuffer.size();
 			conn->PushData(&conn->mRcvTmpBuffer[0], (int)conn->mRcvTmpBuffer.size());
+			iLength -= (int)conn->mRcvTmpBuffer.size();
 		}
 		else
 		{
@@ -162,8 +162,8 @@ En_HP_HandleResult TcpServer::OnReceive(HP_Server pSender, HP_CONNID dwConnID, i
 			{
 				break;
 			}
-			iLength = 0;
 			conn->PushData(&conn->mRcvTmpBuffer[0], iLength);
+			iLength = 0;
 		}		
 	}
 	return HR_OK;

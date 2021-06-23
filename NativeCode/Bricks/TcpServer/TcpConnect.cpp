@@ -13,6 +13,7 @@ TcpConnect::TcpConnect()
 	mServer = nullptr;
 	mConnected = false;
 	GCHandle = nullptr;
+	mRcvTmpBuffer.resize(1024 * 2);
 }
 
 TcpConnect::~TcpConnect()
@@ -25,7 +26,10 @@ TcpConnect::~TcpConnect()
 
 void TcpConnect::PushData(BYTE* ptr, int size)
 {
-
+	if (OnTcpConnectRcvData != nullptr)
+	{
+		OnTcpConnectRcvData(this, ptr, size);
+	}
 }
 
 bool TcpConnect::Send(BYTE* ptr, int size)

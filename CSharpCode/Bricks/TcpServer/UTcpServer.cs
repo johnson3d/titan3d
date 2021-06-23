@@ -14,7 +14,7 @@ namespace EngineNS.Bricks.TcpServer
 
         static unsafe void OnTcpConnectAcceptImpl(EngineNS.TcpServer arg0, EngineNS.TcpConnect arg1)
         {
-            if (arg0.GCHandle == (void*)0 || arg1.GCHandle == (void*)0)
+            if (arg0.GCHandle == (void*)0)
                 return;
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)arg0.GCHandle);
             var server = gcHandle.Target as UTcpServer;
@@ -28,8 +28,8 @@ namespace EngineNS.Bricks.TcpServer
                 return;
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)arg0.GCHandle);
             var server = gcHandle.Target as UTcpServer;
-            var gcHandle1 = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)arg0.GCHandle);
-            var connect = gcHandle.Target as UTcpConnect;
+            var gcHandle1 = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)arg1.GCHandle);
+            var connect = gcHandle1.Target as UTcpConnect;
             server.OnConnectClosed(connect);
             connect.Dispose();
         }

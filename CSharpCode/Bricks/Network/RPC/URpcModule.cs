@@ -288,23 +288,32 @@ namespace EngineNS.UTest
         {
             Action action = async () =>
             {
-                var ret = await UTest_Rpc.TestRpc1(2.0f);
+                INetConnect pConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+                UTcpClient tcpClient = new UTcpClient();
+                var ok = await tcpClient.Connect("127.0.0.1", 5555, 1);
+                if (ok)
+                {
+                    pConnect = tcpClient;
+                }
+                var ret = await UTest_Rpc.TestRpc1(2.0f, 0, pConnect);
                 if (ret != 4)
                 {
                     return;
                 }
-                UTest_Rpc.TestRpc2("");
-                var ret3 = await UTest_Rpc.TestRpc3(1);
-                var ret4 = await UTest_Rpc.TestRpc4("2");
+                UTest_Rpc.TestRpc2("", 0, pConnect);
+                var ret3 = await UTest_Rpc.TestRpc3(1, 0, pConnect);
+                var ret4 = await UTest_Rpc.TestRpc4("2", 0, pConnect);
                 if (ret4 != "2")
                 {
                     return;
                 }
-                var ret5 = await UTest_Rpc.TestRpc5(Vector3.UnitXYZ);
-                var ret6 = await UTest_Rpc.TestRpc6(new TestRPCArgument() { AA = 8 });
-                var ret7 = await UTest_Rpc.TestRpc7(new TestUnmanagedStruct() { A = 8 });
+                var ret5 = await UTest_Rpc.TestRpc5(Vector3.UnitXYZ, 0, pConnect);
+                var ret6 = await UTest_Rpc.TestRpc6(new TestRPCArgument() { AA = 8 }, 0, pConnect);
+                var ret7 = await UTest_Rpc.TestRpc7(new TestUnmanagedStruct() { A = 8 }, 0, pConnect);
 
-                var base_ret7 = await URpcManager.TestBaseRpc1(5.0f);
+                var base_ret7 = await URpcManager.TestBaseRpc1(5.0f, 0, pConnect);
+
+                tcpClient.Disconnect();
             };
             action();
         }

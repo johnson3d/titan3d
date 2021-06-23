@@ -17,6 +17,7 @@
     <None Include="$(MSBuildThisFileDirectory)content\AloneGame.cfg" />
     <None Include="$(MSBuildThisFileDirectory)content\AloneGameForGL.cfg" />
     <None Include="$(MSBuildThisFileDirectory)content\EngineConfig.cfg" />
+    <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForCook.cfg" />
     <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForGL.cfg" />
   </ItemGroup>
 </Project>

@@ -4,11 +4,23 @@ using System.Collections.Generic;
 
 namespace EngineNS.Bricks.Network.RPC
 {
-    public class PacketBuilder
+    public class PacketBuilder : IDisposable
     {
         public UNetPackageManager NetPackageManager;
         MemStreamWriter Writer;
         uint PacketSize = 0;
+        public PacketBuilder()
+        {
+            Writer = MemStreamWriter.CreateInstance(1024 * 2);
+        }
+        ~PacketBuilder()
+        {
+            Dispose();
+        }
+        public void Dispose()
+        {
+            Writer.Dispose();
+        }
         private unsafe byte* GetPointer()
         {
             return (byte*)Writer.GetDataPointer();
@@ -48,7 +60,7 @@ namespace EngineNS.Bricks.Network.RPC
                         //包头还没有读出来，不知道长度
                         if (PacketSize == 0)
                         {
-                            if ((uint)Writer.GetLength() < PacketHeadSize)
+                            if ((uint)Writer.Tell() + length < PacketHeadSize)
                             {//加上新读取的都还没有完成包头
                                 AppendData(pData, length, ref length);
                                 return true;
@@ -66,14 +78,14 @@ namespace EngineNS.Bricks.Network.RPC
                             return false;
                         }
 
-                        if ((uint)Writer.GetLength() < PacketSize)
+                        if ((uint)Writer.Tell() + length < PacketSize)
                         {//还不够
                             AppendData(pData, length, ref length);
                             return true;
                         }
                         else
                         {
-                            pData = AppendData(pData, PacketSize - (uint)Writer.GetLength(), ref length);
+                            pData = AppendData(pData, PacketSize - (uint)Writer.Tell(), ref length);
 
                             NetPackageManager.PushPackage(GetPointer(), PacketSize, conn);
                             Writer.Seek(0);
