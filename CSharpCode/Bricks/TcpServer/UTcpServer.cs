@@ -69,6 +69,15 @@ namespace EngineNS.Bricks.TcpServer
                 mCoreObject.GCHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(this)).ToPointer();
             }
         }
+        public unsafe override void Dispose()
+        {
+            if (mCoreObject.GCHandle != (void*)0)
+            {
+                System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)mCoreObject.GCHandle).Free();
+                mCoreObject.GCHandle = (void*)0;
+            }
+            base.Dispose();
+        }
         public bool IsListened { get; protected set; }
         public Dictionary<ulong, UTcpConnect> mTcpConnects = new Dictionary<ulong, UTcpConnect>();
         public bool StartServer(string ip, UInt16 port)

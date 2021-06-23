@@ -24,6 +24,15 @@ namespace EngineNS.Bricks.TcpServer
 
             mPkgBuilder.NetPackageManager = NetPackageManager;
         }
+        public unsafe override void Dispose()
+        {
+            if (mCoreObject.GCHandle != (void*)0)
+            {
+                System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)mCoreObject.GCHandle).Free();
+                mCoreObject.GCHandle = (void*)0;
+            }
+            base.Dispose();
+        }
         public Bricks.Network.UNetPackageManager NetPackageManager = new Network.UNetPackageManager();
         Bricks.Network.RPC.PacketBuilder mPkgBuilder = new Bricks.Network.RPC.PacketBuilder();
         protected unsafe virtual void OnRcvData(byte* ptr, int size)
