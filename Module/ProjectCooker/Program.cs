@@ -41,6 +41,12 @@ namespace ProjectCooker
                             //}
                         }
                         break;
+                    case "StartDS":
+                        {
+                            var exe = new Command.UStartDS();
+                            await exe.ExecuteCommand(args);
+                        }
+                        return;
                 }
                 EngineNS.UEngine.Instance.PostQuitMessage();
             };

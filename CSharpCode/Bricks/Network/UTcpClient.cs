@@ -32,6 +32,7 @@ namespace EngineNS.Bricks.Network
         public Support.UNativeArray<byte> mRcvBuffer = new Support.UNativeArray<byte>();
         public async System.Threading.Tasks.Task<bool> Connect(string ip, UInt16 port, UInt16 connId, int timeOut = 2000)
         {
+            mPkgBuilder.NetPackageManager = UEngine.Instance.RpcModule.NetPackageManager;
             ConnectId = connId;
             var ok = await UEngine.Instance.EventPoster.Post(() =>
             {

@@ -223,7 +223,8 @@ namespace EngineNS.Rtti
             var ass = AppDomain.CurrentDomain.GetAssemblies();
             string[] TypeAssembies = {
                 "System.Private.CoreLib",
-                "Engine.Window"
+                "Engine.Window",
+                "Engine.Console",
             };
             foreach(var i in ass)
             {

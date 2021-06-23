@@ -2,8 +2,9 @@
   "profiles": {
     "ProjectCooker": {
       "commandName": "Project",
-      "commandLineArgs": "ExeCmd=MakeSln",
-      "workingDirectory": "..\\..\\binaries\\"
+      "commandLineArgs": "ExeCmd=StartDS DS_Port=5555",
+      "workingDirectory": "..\\..\\binaries\\",
+      "nativeDebugging": true
     }
   }
 }

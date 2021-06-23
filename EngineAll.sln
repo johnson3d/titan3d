@@ -151,6 +151,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EngineConfig", "EngineConfi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TcpClient", "NativeCode\Bricks\TcpClient\TcpClient.vcxitems", "{9F919C6F-01E0-4560-9706-7F9CDEA2C1C9}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TcpServer", "NativeCode\Bricks\TcpServer\TcpServer.vcxitems", "{5B10575B-B34E-4644-8A58-E6CA5B3DBE3F}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "TcpServer", "CSharpCode\Bricks\TcpServer\TcpServer.shproj", "{2D94AEAF-8C89-4373-9987-79259902BDBA}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		EngineConfig.vcxitems*{009d7483-131d-43de-bcbe-56f21fecadcf}*SharedItemsImports = 9
@@ -175,6 +179,7 @@ Global
 		CSharpCode\Bricks\Network\Network.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Plugins\Plugins.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Procedure\Procedure.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\TcpServer\TcpServer.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\WorldSimulator\WorldSimulator.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Editor\Editor.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\GamePlay\GamePlay.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -187,6 +192,7 @@ Global
 		CSharpCode\Rtti\Rtti.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Procedure\Procedure.projitems*{10aee1eb-9ce5-4b81-9973-960d39a80141}*SharedItemsImports = 13
 		NativeCode\RHI\VirtualDevice\VirtualDevice.vcxitems*{13bf47b0-a18f-465f-a13d-f6cae2e6f461}*SharedItemsImports = 9
+		CSharpCode\Bricks\TcpServer\TcpServer.projitems*{2d94aeaf-8c89-4373-9987-79259902bdba}*SharedItemsImports = 13
 		NativeCode\RHI\Vulkan\Vulkan.vcxitems*{2e4b9163-6283-45b1-9a17-b4e1a37bb77e}*SharedItemsImports = 9
 		CSharpCode\ImGui\ImGui.projitems*{30bc6f10-34dc-43fc-aa1e-ea73602b074f}*SharedItemsImports = 13
 		CSharpCode\Grapics\Mesh\Mesh.projitems*{34d2b60f-879e-4656-882f-810e3fbbf177}*SharedItemsImports = 13
@@ -201,6 +207,7 @@ Global
 		NativeCode\RHI\OpenGL\OpenGL.vcxitems*{54ec50e5-b9a8-4c43-b1f4-d37f892113da}*SharedItemsImports = 9
 		NativeCode\RHI\D3D11\D3D11.vcxitems*{56f4895c-2d86-4965-acd3-33d089bade0d}*SharedItemsImports = 9
 		CSharpCode\Bricks\CSScripting\CSScripting.projitems*{575605b6-98e4-4c83-a845-88061a67ad6b}*SharedItemsImports = 13
+		NativeCode\Bricks\TcpServer\TcpServer.vcxitems*{5b10575b-b34e-4644-8a58-e6ca5b3dbe3f}*SharedItemsImports = 9
 		CSharpCode\Platform\Android\Android.projitems*{696256cb-8710-4790-805b-1f2424bf19cd}*SharedItemsImports = 13
 		CSharpCode\Bricks\Plugins\Plugins.projitems*{6d8c1a1c-c33f-4034-80c4-4cf08530b3d5}*SharedItemsImports = 13
 		3rd\csharp\StbImageWriteSharp\StbImageWriteSharp.projitems*{6eb3104e-609f-4157-9dd5-5e510d939bf2}*SharedItemsImports = 13
@@ -236,6 +243,7 @@ Global
 		NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\FBX\FBX.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\TcpClient\TcpClient.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		NativeCode\Bricks\TcpServer\TcpServer.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\TextConverter\TextConverter.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Graphics\Mesh\Mesh.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Graphics\Pipeline\Pipeline.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
@@ -272,6 +280,7 @@ Global
 		CSharpCode\Bricks\Network\Network.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5
 		CSharpCode\Bricks\Plugins\Plugins.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5
 		CSharpCode\Bricks\Procedure\Procedure.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5
+		CSharpCode\Bricks\TcpServer\TcpServer.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5
 		CSharpCode\Bricks\WorldSimulator\WorldSimulator.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5
 		CSharpCode\Editor\Editor.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5
 		CSharpCode\GamePlay\GamePlay.projitems*{d5a7d7fa-99b0-4c4a-9797-2dd7db395930}*SharedItemsImports = 5
@@ -565,6 +574,8 @@ Global
 		{8DE1FCD5-27C3-4AF6-8FC3-3590240A7A5F} = {892AFF4D-69EA-4061-8F59-320A21A0814A}
 		{5325AAB3-27C6-4B3B-BC33-4A7C1E1272E2} = {5DF48BD8-2DD5-4225-B211-929683D01CB7}
 		{9F919C6F-01E0-4560-9706-7F9CDEA2C1C9} = {041F2057-6090-446E-8CEF-D524C973477F}
+		{5B10575B-B34E-4644-8A58-E6CA5B3DBE3F} = {041F2057-6090-446E-8CEF-D524C973477F}
+		{2D94AEAF-8C89-4373-9987-79259902BDBA} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}

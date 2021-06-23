@@ -6,6 +6,7 @@ namespace EngineNS.Bricks.Network.RPC
 {
     public class PacketBuilder
     {
+        public UNetPackageManager NetPackageManager;
         MemStreamWriter Writer;
         uint PacketSize = 0;
         private unsafe byte* GetPointer()
@@ -74,7 +75,7 @@ namespace EngineNS.Bricks.Network.RPC
                         {
                             pData = AppendData(pData, PacketSize - (uint)Writer.GetLength(), ref length);
 
-                            UEngine.Instance.RpcModule.NetPackageManager.PushPackage(GetPointer(), PacketSize, conn);
+                            NetPackageManager.PushPackage(GetPointer(), PacketSize, conn);
                             Writer.Seek(0);
                             PacketSize = 0;
                         }

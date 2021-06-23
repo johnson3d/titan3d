@@ -16,6 +16,8 @@
 #define HasModule_FBX
 #define HasModule_TextConverter
 #define HasModule_Animation
+#define HasModule_TcpClient
+#define HasModule_TcpServer
 
 #include <WinSock2.h>
 #include <mswsock.h>
@@ -44,6 +46,7 @@
 #define HasModule_Mesh
 #define HasModule_TextConverter
 #define HasModule_Animation
+#define HasModule_TcpClient
 
 #include <jni.h>
 #include <errno.h>
