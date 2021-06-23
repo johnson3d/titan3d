@@ -91,11 +91,13 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             {
                 // D3D 
                 mOrtho2UVMtx.M11 = 0.5f;
-                mOrtho2UVMtx.M22 = -0.5f;
-                mOrtho2UVMtx.M33 = 1.0f;
+                mOrtho2UVMtx.M22 = 0.5f;
+                mOrtho2UVMtx.M33 = 0.5f;
                 mOrtho2UVMtx.M44 = 1.0f;
-                mOrtho2UVMtx.M41 = 0.5f;
-                mOrtho2UVMtx.M42 = 0.5f;
+                mOrtho2UVMtx.M14 = 0.5f;
+                mOrtho2UVMtx.M24 = 0.5f;
+                mOrtho2UVMtx.M34 = 0.5f;
+
             }
 
             mVisParameter.VisibleMeshes = new List<Mesh.UMesh>();
@@ -177,7 +179,17 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             float TexelOffsetNdcY = TexelPosAdjustedNdcY - WorldCenterNDC.Y;
             shadowCamera.DoOrthoProjectionForShadow(FrustumSphereDiameter, FrustumSphereDiameter, ShadowCameraZNear, ShadowCameraZFar, TexelOffsetNdcX, TexelOffsetNdcY);
 
-            mViewer2ShadowMtx = shadowCamera.GetViewProjection() * mOrtho2UVMtx;
+            Matrix vp = shadowCamera.GetViewProjection();
+            Matrix result;
+            Matrix.Transpose(ref vp, out result);
+
+            //result.M14 = 0.50911f;
+            //result.M24 = -0.29384f;
+            //result.M34 = 0.7085f;
+            //result.M44 = 1.00f;
+
+            mViewer2ShadowMtx = mOrtho2UVMtx * result;
+
 
             float UniformDepthBias = 2.0f;
             float PerObjCustomDepthBias = 1.0f;

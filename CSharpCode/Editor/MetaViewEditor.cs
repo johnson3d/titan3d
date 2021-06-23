@@ -97,7 +97,7 @@ namespace EngineNS.Editor
                     meshNode1.Parent = meshNode;
                     meshNode1.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent;
                     //meshNode1.Placement.Position = meshNode1.Placement.Position;
-
+                    meshNode1.IsCastShadow = true;
                     aabbTreeRoot = meshNode;
                 }
 
