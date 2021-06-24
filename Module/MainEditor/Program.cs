@@ -52,6 +52,7 @@ namespace MainEditor
             {
                 if (EngineNS.UEngine.Instance.Tick() == false)
                     break;
+                //System.GC.Collect();
             }
             
             var wr = new WeakReference(EngineNS.UEngine.Instance);

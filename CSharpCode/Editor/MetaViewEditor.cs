@@ -170,6 +170,8 @@ namespace EngineNS.Editor
         async System.Threading.Tasks.Task DoTest2()
         {
             await Thread.AsyncDummyClass.DummyFunc();
+            var kk = new Rtti.MetaAttribute();
+            System.GC.Collect();
             //var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current);
 
             //UEngine.Instance.MacrossModule.ReloadAssembly(root + "/net5.0/GameProject.dll");

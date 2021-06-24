@@ -120,7 +120,7 @@ public:
 	HRESULT __stdcall DynamicMethodJITCompilationFinished(FunctionID functionId, HRESULT hrStatus, BOOL fIsSafeToBlock) override;
 
 private:
-	std::string GetTypeName(mdTypeDef type, ModuleID module) const;
-	std::string GetMethodName(FunctionID function) const;
+	const char* GetTypeName(mdTypeDef type, ModuleID module) const;
+	const char* GetMethodName(FunctionID function) const;
 	CComPtr<ICorProfilerInfo8> _info;
 };

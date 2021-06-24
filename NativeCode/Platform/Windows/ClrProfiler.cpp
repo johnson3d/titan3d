@@ -85,14 +85,17 @@ HRESULT CoreProfiler::Initialize(IUnknown* pICorProfilerInfoUnk) {
 	assert(_info);
 
 	_info->SetEventMask(
+		//COR_PRF_MONITOR_ALL |
 		COR_PRF_MONITOR_MODULE_LOADS |
 		COR_PRF_MONITOR_ASSEMBLY_LOADS |
 		COR_PRF_MONITOR_GC |
 		COR_PRF_MONITOR_CLASS_LOADS |
 		COR_PRF_MONITOR_THREADS |
-		COR_PRF_MONITOR_EXCEPTIONS |
-		COR_PRF_MONITOR_JIT_COMPILATION);
-	//|	COR_PRF_MONITOR_OBJECT_ALLOCATED | COR_PRF_ENABLE_OBJECT_ALLOCATED);
+		//COR_PRF_MONITOR_EXCEPTIONS |
+		//COR_PRF_MONITOR_JIT_COMPILATION  |
+		COR_PRF_MONITOR_OBJECT_ALLOCATED |
+		COR_PRF_ENABLE_OBJECT_ALLOCATED 
+	);
 
 	return S_OK;
 }
@@ -190,13 +193,13 @@ HRESULT CoreProfiler::FunctionUnloadStarted(FunctionID functionId) {
 }
 
 HRESULT CoreProfiler::JITCompilationStarted(FunctionID functionId, BOOL fIsSafeToBlock) {
-	printf("JIT compilation started: %s", GetMethodName(functionId).c_str());
+	//printf("JIT compilation started: %s", GetMethodName(functionId));
 
 	return S_OK;
 }
 
 HRESULT CoreProfiler::JITCompilationFinished(FunctionID functionId, HRESULT hrStatus, BOOL fIsSafeToBlock) {
-	printf("JIT compilation finished: %s", GetMethodName(functionId).c_str());
+	//printf("JIT compilation finished: %s", GetMethodName(functionId));
 
 	return S_OK;
 }
@@ -226,7 +229,7 @@ HRESULT CoreProfiler::ThreadDestroyed(ThreadID threadId) {
 }
 
 HRESULT CoreProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) {
-	printf("Thread 0x%p assigned to OS thread %d", (void*)managedThreadId, osThreadId);
+	//printf("Thread 0x%p assigned to OS thread %d", (void*)managedThreadId, osThreadId);
 	return S_OK;
 }
 
@@ -307,9 +310,9 @@ HRESULT CoreProfiler::ObjectAllocated(ObjectID objectId, ClassID classId) {
 	mdTypeDef type;
 	if (SUCCEEDED(_info->GetClassIDInfo(classId, &module, &type))) {
 		auto name = GetTypeName(type, module);
-		if (!name.empty())
+		if (strlen(name) == 0)
 		{
-			printf("Allocated object 0x%p of type %s", (void*)objectId, name.c_str());
+			//printf("Allocated object 0x%p of type %s", (void*)objectId, name);
 		}
 	}
 	return S_OK;
@@ -333,7 +336,7 @@ HRESULT CoreProfiler::ExceptionThrown(ObjectID thrownObjectId) {
 	ModuleID module;
 	mdTypeDef type;
 	_info->GetClassIDInfo(classid, &module, &type);
-	printf("Exception %s thrown", GetTypeName(type, module).c_str());
+	printf("Exception %s thrown", GetTypeName(type, module));
 
 	//std::vector<std::string> data;
 	//if (SUCCEEDED(_info->DoStackSnapshot(0, StackSnapshotCB, 0, &data, nullptr, 0))) {
@@ -416,8 +419,8 @@ HRESULT CoreProfiler::ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR*
 }
 
 HRESULT CoreProfiler::GarbageCollectionStarted(int cGenerations, BOOL* generationCollected, COR_PRF_GC_REASON reason) {
-	printf("GC started. Gen0=%s, Gen1=%s, Gen2=%s",
-		generationCollected[0] ? "Yes" : "No", generationCollected[1] ? "Yes" : "No", generationCollected[2] ? "Yes" : "No");
+	/*printf("GC started. Gen0=%s, Gen1=%s, Gen2=%s",
+		generationCollected[0] ? "Yes" : "No", generationCollected[1] ? "Yes" : "No", generationCollected[2] ? "Yes" : "No");*/
 
 	return S_OK;
 }
@@ -504,21 +507,25 @@ HRESULT CoreProfiler::DynamicMethodJITCompilationFinished(FunctionID functionId,
 	return S_OK;
 }
 
-std::string CoreProfiler::GetTypeName(mdTypeDef type, ModuleID module) const {
+const char* CoreProfiler::GetTypeName(mdTypeDef type, ModuleID module) const 
+{
 	CComPtr<IMetaDataImport> spMetadata;
-	if (SUCCEEDED(_info->GetModuleMetaData(module, ofRead, IID_IMetaDataImport, reinterpret_cast<IUnknown**>(&spMetadata)))) {
+	if (SUCCEEDED(_info->GetModuleMetaData(module, ofRead, IID_IMetaDataImport, reinterpret_cast<IUnknown**>(&spMetadata)))) 
+	{
 		WCHAR name[256];
 		ULONG nameSize = 256;
 		DWORD flags;
 		mdTypeDef baseType;
-		if (SUCCEEDED(spMetadata->GetTypeDefProps(type, name, 256, &nameSize, &flags, &baseType))) {
+		if (SUCCEEDED(spMetadata->GetTypeDefProps(type, name, 256, &nameSize, &flags, &baseType)))
+		{
 			//return std::string(name);
 		}
 	}
 	return "";
 }
 
-std::string CoreProfiler::GetMethodName(FunctionID function) const {
+const char* CoreProfiler::GetMethodName(FunctionID function) const 
+{
 	ModuleID module;
 	mdToken token;
 	mdTypeDef type;
