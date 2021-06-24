@@ -12,7 +12,7 @@ namespace EngineNS.Graphics.Pipeline
             if (SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING) == -1)
                 return false;
 
-            var wtType = Rtti.UTypeDescManager.Instance.GetTypeFromString(engine.Config.MainWindowType);
+            var wtType = Rtti.UTypeDesc.TypeOf(engine.Config.MainWindowType).SystemType;
             if (wtType == null)
             {
                 wtType = typeof(EngineNS.Editor.UMainEditorApplication);
@@ -43,7 +43,7 @@ namespace EngineNS.Graphics.Pipeline
             SlateRenderer = new EGui.Slate.UBaseRenderer();
             SlateRenderer.Initialize(RName.GetRName("shaders/slate/imgui-vertex.hlsl", RName.ERNameType.Engine), RName.GetRName("shaders/slate/imgui-frag.hlsl", RName.ERNameType.Engine));
 
-            var rpType = Rtti.UTypeDescManager.Instance.GetTypeFromString(engine.Config.MainWindowRPolicy);
+            var rpType = Rtti.UTypeDesc.TypeOf(engine.Config.MainWindowRPolicy).SystemType;
             await MainWindow.InitializeApplication(RenderContext, rpType);
             MainWindow.OnResize(winRect.Z, winRect.W);
 

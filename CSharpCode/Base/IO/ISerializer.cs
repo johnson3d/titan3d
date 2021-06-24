@@ -669,7 +669,7 @@ namespace EngineNS.IO
                     var skipPoint = GetSkipOffset(ar);
                     try
                     {
-                        var elemType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemTypeStr);
+                        var elemType = Rtti.UTypeDesc.TypeOf(elemTypeStr).SystemType;
                         if (elemType == null)
                         {
                             throw new IOException($"Read List: {elemTypeStr} is missing");
@@ -695,7 +695,7 @@ namespace EngineNS.IO
                         var skipPoint = GetSkipOffset(ar);
                         try
                         {
-                            var elemType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemTypeStr);
+                            var elemType = Rtti.UTypeDesc.TypeOf(elemTypeStr).SystemType;
                             if (elemType == null)
                             {
                                 throw new IOException($"Read List: {elemTypeStr} is missing");
@@ -731,10 +731,10 @@ namespace EngineNS.IO
                     var skipPoint = GetSkipOffset(ar);
                     try
                     {
-                        var elemKeyType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemKeyTypeStr);
+                        var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
                         if (elemKeyType == null)
                             throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
-                        var elemValueType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemValueTypeStr);
+                        var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;
                         if (elemValueType == null)
                             throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
                         for (int i = 0; i < count; i++)
@@ -757,7 +757,7 @@ namespace EngineNS.IO
                     var skipPoint = GetSkipOffset(ar);
                     try
                     {
-                        var elemKeyType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemKeyTypeStr);
+                        var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
                         if (elemKeyType == null)
                             throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
                         for (int i = 0; i < count; i++)
@@ -765,7 +765,7 @@ namespace EngineNS.IO
                             string elemValueTypeStr;
                             ar.Read(out elemValueTypeStr);
                             var skipPoint1 = GetSkipOffset(ar);
-                            var elemValueType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemValueTypeStr);
+                            var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;
                             if (elemValueType == null)
                                 throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
                             try
@@ -794,7 +794,7 @@ namespace EngineNS.IO
                     var skipPoint = GetSkipOffset(ar);
                     try
                     {
-                        var elemValueType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemValueTypeStr);
+                        var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;
                         if (elemValueType == null)
                             throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
 
@@ -805,7 +805,7 @@ namespace EngineNS.IO
                             var skipPoint1 = GetSkipOffset(ar);
                             try
                             {
-                                var elemKeyType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemKeyTypeStr);
+                                var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
                                 if (elemKeyType == null)
                                     throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
                                 var key = ReadObject(ar, elemKeyType, hostObject);
@@ -834,12 +834,12 @@ namespace EngineNS.IO
                         var skipPoint = GetSkipOffset(ar);
                         try
                         {
-                            var elemKeyType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemKeyTypeStr);
+                            var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
                             if (elemKeyType == null)
                                 throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
                             string elemValueTypeStr;
                             ar.Read(out elemValueTypeStr);
-                            var elemValueType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemValueTypeStr);
+                            var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;
                             if (elemValueType == null)
                                 throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
                             var key = ReadObject(ar, elemKeyType, hostObject);
@@ -977,7 +977,7 @@ namespace EngineNS.IO
                 obj = Support.TConvert.ToObject(obj.GetType(), node.GetAttribute("Value"));
                 return;
             }
-            var thisType = Rtti.UTypeDescManager.Instance.GetTypeFromString(thisTypeStr);
+            var thisType = Rtti.UTypeDesc.TypeOf(thisTypeStr).SystemType;
             if (obj == null && thisType == null)
                 return;
             if (obj == null)
@@ -1050,7 +1050,7 @@ namespace EngineNS.IO
                         typeAttr = j.GetAttribute("Type");
                         if (!string.IsNullOrEmpty(typeAttr))
                         {
-                            var elemType = Rtti.UTypeDescManager.Instance.GetTypeFromString(typeAttr);
+                            var elemType = Rtti.UTypeDesc.TypeOf(typeAttr).SystemType;
                             if (elemType != null)
                                 keyType = elemType;
                         }
@@ -1106,7 +1106,7 @@ namespace EngineNS.IO
                         typeAttr = key.GetAttribute("Type");
                         if (!string.IsNullOrEmpty(typeAttr))
                         {
-                            var kt = Rtti.UTypeDescManager.Instance.GetTypeFromString(typeAttr);
+                            var kt = Rtti.UTypeDesc.TypeOf(typeAttr).SystemType;
                             if (kt != null)
                                 keyType = kt;
                         }
@@ -1138,7 +1138,7 @@ namespace EngineNS.IO
                         typeAttr = value.GetAttribute("Type");
                         if (!string.IsNullOrEmpty(typeAttr))
                         {
-                            var kt = Rtti.UTypeDescManager.Instance.GetTypeFromString(typeAttr);
+                            var kt = Rtti.UTypeDesc.TypeOf(typeAttr).SystemType;
                             if (kt != null)
                                 valueType = kt;
                         }

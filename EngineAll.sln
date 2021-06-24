@@ -155,6 +155,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TcpServer", "NativeCode\Bri
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "TcpServer", "CSharpCode\Bricks\TcpServer\TcpServer.shproj", "{2D94AEAF-8C89-4373-9987-79259902BDBA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Windows", "NativeCode\Platform\Windows\Windows.vcxitems", "{A8CA4BE8-8F39-4696-AB3B-265F4294DE5B}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		EngineConfig.vcxitems*{009d7483-131d-43de-bcbe-56f21fecadcf}*SharedItemsImports = 9
@@ -234,6 +236,7 @@ Global
 		CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems*{9a454650-729c-496e-bae4-71b863ea036e}*SharedItemsImports = 13
 		NativeCode\Bricks\TcpClient\TcpClient.vcxitems*{9f919c6f-01e0-4560-9706-7f9cdea2c1c9}*SharedItemsImports = 9
 		NativeCode\Bricks\Animation\Animation.vcxitems*{a415eb90-cf3a-4cbc-bd98-14eed4d0fcd1}*SharedItemsImports = 9
+		NativeCode\Platform\Windows\Windows.vcxitems*{a8ca4be8-8f39-4696-ab3b-265f4294de5b}*SharedItemsImports = 9
 		3rd\native\iconv\iconv.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\Image.Shared\Image.Shared.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		codegen\Cs2Cpp\cpp\Cs2Cpp.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
@@ -249,6 +252,7 @@ Global
 		NativeCode\Graphics\Pipeline\Pipeline.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\ImGui\ImGui.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Math\Math.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		NativeCode\Platform\Windows\Windows.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\RHI\D3D11\D3D11.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\RHI\OpenGL\OpenGL.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\RHI\RHI.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
@@ -576,6 +580,7 @@ Global
 		{9F919C6F-01E0-4560-9706-7F9CDEA2C1C9} = {041F2057-6090-446E-8CEF-D524C973477F}
 		{5B10575B-B34E-4644-8A58-E6CA5B3DBE3F} = {041F2057-6090-446E-8CEF-D524C973477F}
 		{2D94AEAF-8C89-4373-9987-79259902BDBA} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
+		{A8CA4BE8-8F39-4696-AB3B-265F4294DE5B} = {5DF48BD8-2DD5-4225-B211-929683D01CB7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}

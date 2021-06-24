@@ -21,4 +21,6 @@
     <ProjectReference Include="..\Engine.Window\Engine.Window.csproj" />
   </ItemGroup>
 
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
+
 </Project>

@@ -318,7 +318,7 @@ namespace EngineNS.IO
             {
                 if (i.Name == "Type")
                 {
-                    type = Rtti.UTypeDescManager.Instance.GetTypeFromString(i.Value);
+                    type = Rtti.UTypeDesc.TypeOf(i.Value).SystemType;
                     break;
                 }
             }
