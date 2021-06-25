@@ -236,7 +236,7 @@ namespace CppWeaving.Cpp2CS
                             if (retType == "sbyte*")
                             {
                                 retType = "string";
-                                marshalReturn = $"System.Runtime.InteropServices.Marshal.PtrToStringAnsi";
+                                marshalReturn = $"EngineNS.Rtti.UNativeCoreProvider.MarshalPtrAnsi";
                             }
                         }
                         if (i.IsTypeDef)
@@ -262,7 +262,9 @@ namespace CppWeaving.Cpp2CS
                         else
                         {
                             if (marshalReturn != null)
+                            {
                                 AddLine($"return {marshalReturn}((IntPtr){pinvoke});");
+                            }
                             else
                                 AddLine($"return {pinvoke};");
                         }
@@ -352,7 +354,7 @@ namespace CppWeaving.Cpp2CS
                         if (retTypeStr == "sbyte*")
                         {
                             retTypeStr = "string";
-                            marshalReturn = $"System.Runtime.InteropServices.Marshal.PtrToStringAnsi";
+                            marshalReturn = $"EngineNS.Rtti.UNativeCoreProvider.MarshalPtrAnsi";
                         }
                     }
                 }

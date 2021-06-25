@@ -6,6 +6,10 @@ namespace EngineNS.Rtti
 {
     public class UDummyAttribute : Attribute
     {
+        public static void GetStringProperty()
+        {
+            int xxx = 0;
+        }
     }
     public class MetaParameterAttribute : Attribute
     {

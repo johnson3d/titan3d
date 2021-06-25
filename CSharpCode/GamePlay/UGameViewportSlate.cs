@@ -28,6 +28,7 @@ namespace EngineNS.GamePlay
                 ImGuiAPI.SetNextWindowSize(ref GameViewportSize, ImGuiCond_.ImGuiCond_Always);
             }
             IsDrawing = false;
+            //CoreSDK.Print2Console2("aaa", true);
             bool bShow = ImGuiAPI.Begin(Title, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
             if (ImGuiAPI.IsWindowDocked())
             {

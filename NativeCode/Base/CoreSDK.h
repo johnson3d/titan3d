@@ -66,6 +66,16 @@ CoreSDK
 public:
 	static FWriteLogString mWriteLogString;
 public:
+	static void Print2Console(TR_META(SV_NoStringConverter=true) char* txt, bool newLine) {
+		printf(txt);
+		if(newLine)
+			printf("\n");
+	}
+	static void Print2Console2(const char* txt, bool newLine) {
+		printf(txt);
+		if (newLine)
+			printf("\n");
+	}
 	static void UpdateEngineTick(INT64 tick);
 	static void IUnknown_Release(void* unk);
 	static int IUnknown_AddRef(void* unk);

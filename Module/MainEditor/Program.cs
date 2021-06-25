@@ -25,7 +25,7 @@ namespace MainEditor
             }
 #if PWindow
             var handle = GetConsoleWindow();
-            ShowWindow(handle, 0);
+            ShowWindow(handle, 1);
 #endif
 
             WeakReference wr = Main_Impl(args);
@@ -53,6 +53,21 @@ namespace MainEditor
                 if (EngineNS.UEngine.Instance.Tick() == false)
                     break;
                 //System.GC.Collect();
+                ClrString clrStr = new ClrString();
+                int num = 0;
+                var ok = ClrLogger.PopLogInfo(ref clrStr);
+                while (ok)
+                {
+                    if (clrStr.mType == EClrLogStringType.ObjectAlloc)
+                    {
+                        num++;
+                        unsafe
+                        {
+                            EngineNS.CoreSDK.Print2Console((sbyte*)&clrStr.m_mString, true);
+                        }
+                    }
+                    ok = ClrLogger.PopLogInfo(ref clrStr);
+                }
             }
             
             var wr = new WeakReference(EngineNS.UEngine.Instance);
