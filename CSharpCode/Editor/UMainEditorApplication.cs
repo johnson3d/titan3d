@@ -5,7 +5,7 @@ using SDL2;
 
 namespace EngineNS.Editor
 {
-    public class UMainEditorApplication : Graphics.Pipeline.USlateApplication, ITickable
+    public partial class UMainEditorApplication : Graphics.Pipeline.USlateApplication, ITickable
     {
         public UAssetEditorManager AssetEditorManager { get; } = new UAssetEditorManager();
         

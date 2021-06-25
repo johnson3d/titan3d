@@ -225,94 +225,24 @@ namespace EngineNS.IO
         }
         private static void WriteObject(IWriter ar, Type t, object obj)
         {
-            if (t == typeof(sbyte))
+            if (t.IsEnum)
             {
-                var v = (sbyte)obj;
+                var v = System.Convert.ToString(obj);
                 ar.Write(v);
             }
-            else if (t == typeof(Int16))
+            else if (t.IsValueType)
             {
-                var v = (Int16)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Int32))
-            {
-                var v = (Int32)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Int64))
-            {
-                var v = (Int64)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(byte))
-            {
-                var v = (byte)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(UInt16))
-            {
-                var v = (UInt16)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(UInt32))
-            {
-                var v = (UInt32)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(UInt64))
-            {
-                var v = (UInt64)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(float))
-            {
-                var v = (float)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(double))
-            {
-                var v = (double)obj;
-                ar.Write(v);
+                unsafe
+                {
+                    var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
+                    var pBuffer = stackalloc byte[size];
+                    System.Runtime.InteropServices.Marshal.StructureToPtr(obj, (IntPtr)pBuffer, false);
+                    ar.WritePtr(pBuffer, size);
+                }
             }
             else if (t == typeof(string))
             {
                 var v = (string)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Vector2))
-            {
-                var v = (Vector2)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Vector3))
-            {
-                var v = (Vector3)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Vector4))
-            {
-                var v = (Vector4)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Quaternion))
-            {
-                var v = (Quaternion)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Matrix))
-            {
-                var v = (Matrix)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Guid))
-            {
-                var v = (Guid)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Hash64))
-            {
-                var v = (Hash64)obj;
                 ar.Write(v);
             }
             else if (t == typeof(RName))
@@ -333,22 +263,7 @@ namespace EngineNS.IO
             else if (t.GetInterface(nameof(ISerializer)) != null)
             {
                 Write(ar, obj as ISerializer, null);
-            }
-            else if (t.IsEnum)
-            {
-                var v = System.Convert.ToString(obj);
-                ar.Write(v);
-            }
-            else if (t.IsValueType)
-            {
-                unsafe
-                {
-                    var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
-                    var pBuffer = stackalloc byte[size];
-                    System.Runtime.InteropServices.Marshal.StructureToPtr(obj, (IntPtr)pBuffer, false);
-                    ar.WritePtr(pBuffer, size);
-                }
-            }
+            }            
             else if(obj is System.Collections.IList)
             {
                 var lst = obj as System.Collections.IList;
@@ -463,123 +378,26 @@ namespace EngineNS.IO
         }
         private static object ReadObject(IReader ar, Type t, object hostObject)
         {
-            if (t == typeof(sbyte))
+            if (t.IsEnum)
             {
-                sbyte v;
+                string v;
                 ar.Read(out v);
-                return v;
+                return Support.TConvert.ToEnumValue(t, v);
             }
-            else if (t == typeof(Int16))
+            else if (t.IsValueType)
             {
-                Int16 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Int32))
-            {
-                Int32 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Int64))
-            {
-                Int64 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(byte))
-            {
-                byte v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(UInt16))
-            {
-                UInt16 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(UInt32))
-            {
-                UInt32 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(UInt64))
-            {
-                UInt64 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(float))
-            {
-                float v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(double))
-            {
-                double v;
-                ar.Read(out v);
-                return v;
+                unsafe
+                {
+                    var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
+                    var pBuffer = stackalloc byte[size];
+                    ar.ReadPtr(pBuffer, size);
+                    var v = System.Runtime.InteropServices.Marshal.PtrToStructure((IntPtr)pBuffer, t);
+                    return v;
+                }
             }
             else if (t == typeof(string))
             {
                 string v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Vector2))
-            {
-                Vector2 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Vector3))
-            {
-                Vector3 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Vector4))
-            {
-                Vector4 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Quaternion))
-            {
-                Quaternion v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Matrix))
-            {
-                Matrix v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Guid))
-            {
-                Guid v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Hash64))
-            {
-                Hash64 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(vBOOL))
-            {
-                int v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(CppBool))
-            {
-                bool v;
                 ar.Read(out v);
                 return v;
             }
@@ -637,24 +455,7 @@ namespace EngineNS.IO
                     ar.Seek(savePos);
                     return null;
                 }
-            }
-            else if (t.IsEnum)
-            {
-                string v;
-                ar.Read(out v);
-                return Support.TConvert.ToEnumValue(t, v);
-            }
-            else if (t.IsValueType)
-            {
-                unsafe
-                {
-                    var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
-                    var pBuffer = stackalloc byte[size];
-                    ar.ReadPtr(pBuffer, size);
-                    var v = System.Runtime.InteropServices.Marshal.PtrToStructure((IntPtr)pBuffer, t);
-                    return v;
-                }
-            }
+            }            
             else if (t.GetInterface(nameof(System.Collections.IList)) != null)
             {
                 var lst = Rtti.UTypeDescManager.CreateInstance(t) as System.Collections.IList;

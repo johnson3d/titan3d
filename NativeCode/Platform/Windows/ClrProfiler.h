@@ -23,6 +23,8 @@ class CoreProfiler : public ICorProfilerCallback8
 {
 	std::atomic<unsigned> _refCount{ 1 };
 public:
+	CoreProfiler();
+	~CoreProfiler();
 	// Inherited via ICorProfilerCallback8
 	HRESULT __stdcall QueryInterface(REFIID riid, void** ppvObject) override;
 	ULONG __stdcall AddRef(void) override;

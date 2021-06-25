@@ -1,6 +1,11 @@
 #include "ClrProfiler.h"
 #include <mscoree.h>  
 #include <assert.h>
+#include "ClrLogger.h"
+
+#include "../../base/debug/vfxnew.h"
+
+#define new VNEW
 
 class __declspec(uuid("805A308B-061C-47F3-9B30-F785C3186E81")) CoreProfiler;
 
@@ -35,7 +40,7 @@ ULONG __stdcall CoreProfilerFactory::Release(void) {
 }
 
 HRESULT __stdcall CoreProfilerFactory::CreateInstance(IUnknown* pUnkOuter, REFIID riid, void** ppvObject) {
-	auto profiler = new (std::nothrow) CoreProfiler;
+	auto profiler = new CoreProfiler();
 	if (profiler == nullptr)
 		return E_OUTOFMEMORY;
 
@@ -46,6 +51,16 @@ HRESULT __stdcall CoreProfilerFactory::CreateInstance(IUnknown* pUnkOuter, REFII
 }
 
 ///==================
+CoreProfiler::CoreProfiler()
+{
+	ClrLogger::StartClrLogger();
+}
+
+CoreProfiler::~CoreProfiler()
+{
+	ClrLogger::StopClrLogger();
+}
+
 HRESULT __stdcall CoreProfiler::QueryInterface(REFIID riid, void** ppvObject) {
 	if (ppvObject == nullptr)
 		return E_POINTER;
@@ -84,7 +99,7 @@ HRESULT CoreProfiler::Initialize(IUnknown* pICorProfilerInfoUnk) {
 	pICorProfilerInfoUnk->QueryInterface(&_info);
 	assert(_info);
 
-	_info->SetEventMask(
+	auto hr = _info->SetEventMask(
 		//COR_PRF_MONITOR_ALL |
 		COR_PRF_MONITOR_MODULE_LOADS |
 		COR_PRF_MONITOR_ASSEMBLY_LOADS |
@@ -97,7 +112,7 @@ HRESULT CoreProfiler::Initialize(IUnknown* pICorProfilerInfoUnk) {
 		COR_PRF_ENABLE_OBJECT_ALLOCATED 
 	);
 
-	return S_OK;
+	return hr;
 }
 
 HRESULT CoreProfiler::Shutdown() {
@@ -310,15 +325,29 @@ HRESULT CoreProfiler::ObjectAllocated(ObjectID objectId, ClassID classId) {
 	mdTypeDef type;
 	if (SUCCEEDED(_info->GetClassIDInfo(classId, &module, &type))) {
 		auto name = GetTypeName(type, module);
-		if (strlen(name) == 0)
-		{
-			//printf("Allocated object 0x%p of type %s", (void*)objectId, name);
-		}
+		ClrString info("Allocated object ");
+		info.Append(name);
+		ClrLogger::PushLogInfo(EClrLogStringType::ObjectAlloc, info);
 	}
 	return S_OK;
 }
 
-HRESULT CoreProfiler::ObjectsAllocatedByClass(ULONG cClassCount, ClassID* classIds, ULONG* cObjects) {
+HRESULT CoreProfiler::ObjectsAllocatedByClass(ULONG cClassCount, ClassID* classIds, ULONG* cObjects) 
+{
+	ClrString info("ObjectsAllocatedByClass:");
+	for (ULONG i = 0; i < cClassCount; i++)
+	{
+		ModuleID module;
+		mdTypeDef type;
+		if (SUCCEEDED(_info->GetClassIDInfo(classIds[i], &module, &type)))
+		{
+			auto name = GetTypeName(type, module);
+			info.Append(name);
+			info.Append(",");
+		}
+	}
+	ClrLogger::PushLogInfo(EClrLogStringType::ObjectsAllocdByClass, info);
+	
 	return S_OK;
 }
 
@@ -336,7 +365,10 @@ HRESULT CoreProfiler::ExceptionThrown(ObjectID thrownObjectId) {
 	ModuleID module;
 	mdTypeDef type;
 	_info->GetClassIDInfo(classid, &module, &type);
-	printf("Exception %s thrown", GetTypeName(type, module));
+	/*ClrString info("Exception ");
+	info.Append(GetTypeName(type, module));
+	info.Append(" thrown");
+	ClrLogger::PushLogInfo(info);*/
 
 	//std::vector<std::string> data;
 	//if (SUCCEEDED(_info->DoStackSnapshot(0, StackSnapshotCB, 0, &data, nullptr, 0))) {
@@ -421,7 +453,22 @@ HRESULT CoreProfiler::ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR*
 HRESULT CoreProfiler::GarbageCollectionStarted(int cGenerations, BOOL* generationCollected, COR_PRF_GC_REASON reason) {
 	/*printf("GC started. Gen0=%s, Gen1=%s, Gen2=%s",
 		generationCollected[0] ? "Yes" : "No", generationCollected[1] ? "Yes" : "No", generationCollected[2] ? "Yes" : "No");*/
+	ClrString info("GC started.");
+	if (generationCollected[0])
+	{
+		info.Append("Gen0 = Yes,");
+	}
+	if (generationCollected[1])
+	{
+		info.Append("Gen1 = Yes,");
+	}
+	if (generationCollected[2])
+	{
+		info.Append("Gen2 = Yes");
+	}
+	
 
+	ClrLogger::PushLogInfo(EClrLogStringType::GCStart, info);
 	return S_OK;
 }
 
@@ -429,8 +476,9 @@ HRESULT CoreProfiler::SurvivingReferences(ULONG cSurvivingObjectIDRanges, Object
 	return S_OK;
 }
 
-HRESULT CoreProfiler::GarbageCollectionFinished() {
-	printf("GC finished");
+HRESULT CoreProfiler::GarbageCollectionFinished() 
+{
+	ClrLogger::PushLogInfo(EClrLogStringType::GCFinish, "GC finished");
 
 	return S_OK;
 }
@@ -518,7 +566,13 @@ const char* CoreProfiler::GetTypeName(mdTypeDef type, ModuleID module) const
 		mdTypeDef baseType;
 		if (SUCCEEDED(spMetadata->GetTypeDefProps(type, name, 256, &nameSize, &flags, &baseType)))
 		{
-			//return std::string(name);
+			static thread_local char ascii_name[256];
+			for (int i = 0; i < (int)nameSize; i++)
+			{
+				ascii_name[i] = (char)name[i];
+			}
+			ascii_name[nameSize] = '\0';
+			return ascii_name;
 		}
 	}
 	return "";

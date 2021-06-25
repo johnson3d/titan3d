@@ -573,6 +573,12 @@ public:
 	{
 		return ImGui::TextUnformatted(text);
 	}
+	static void          TextAsiPointer(void* fmt)
+	{
+		if (fmt == nullptr)
+			return ImGui::Text("");
+		return ImGui::Text("%s", fmt);
+	}
 	static void          Text(const char* fmt)
 	{
 		if (fmt == nullptr)

@@ -9,6 +9,7 @@
     <OutputPath>..\..\binaries\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
     <DefineConstants>TRACE;PWindow</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

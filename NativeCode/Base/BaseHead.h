@@ -18,6 +18,7 @@
 #define HasModule_Animation
 #define HasModule_TcpClient
 #define HasModule_TcpServer
+#define HasModule_Windows
 
 #include <WinSock2.h>
 #include <mswsock.h>
