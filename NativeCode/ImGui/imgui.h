@@ -3040,13 +3040,13 @@ ImGuiPlatformIO
     // Platform functions are typically called before their Renderer counterpart, apart from Destroy which are called the other way.
 
     // Platform function --------------------------------------------------- Called by -----
-	/*struct ImVec2_t
+	struct ImVec2_t
 	{
 		float x, y;
 		operator ImVec2() {
 			return ImVec2(x, y);
 		}
-	};*/
+	};
     void    (*Platform_CreateWindow)(ImGuiViewport* vp);                    // . . U . .  // Create a new platform window for the given viewport
     void    (*Platform_DestroyWindow)(ImGuiViewport* vp);                   // N . U . D  //
     void    (*Platform_ShowWindow)(ImGuiViewport* vp);                      // . . U . .  // Newly created windows are initially hidden so SetWindowPos/Size/Title can be called on them before showing the window
