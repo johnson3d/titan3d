@@ -88,7 +88,6 @@ namespace EngineNS.Editor
                     meshNode.NodeData.Name = "Robot0";
                     meshNode.IsScaleChildren = false;
                     meshNode.IsCastShadow = true;
-                    meshNode.IsAcceptShadow = true;
 
                     var mesh1 = new Graphics.Mesh.UMesh();
 

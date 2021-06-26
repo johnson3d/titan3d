@@ -91,7 +91,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             {
                 // D3D 
                 mOrtho2UVMtx.M11 = 0.5f;
-                mOrtho2UVMtx.M22 = 0.5f;
+                mOrtho2UVMtx.M22 = -0.5f;
                 mOrtho2UVMtx.M33 = 0.5f;
                 mOrtho2UVMtx.M44 = 1.0f;
                 mOrtho2UVMtx.M14 = 0.5f;
@@ -183,11 +183,6 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             Matrix result;
             Matrix.Transpose(ref vp, out result);
 
-            //result.M14 = 0.50911f;
-            //result.M24 = -0.29384f;
-            //result.M34 = 0.7085f;
-            //result.M44 = 1.00f;
-
             mViewer2ShadowMtx = mOrtho2UVMtx * result;
 
 
@@ -255,6 +250,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         public void TickSync()
         {
             BasePass.SwapBuffer();
+            GBuffers?.Camera?.mCoreObject.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
         }
     }
 }
