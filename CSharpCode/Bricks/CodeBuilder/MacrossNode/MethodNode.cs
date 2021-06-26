@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public class MethodNode : INodeExpr, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class MethodNode : INodeExpr, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public EGui.Controls.NodeGraph.PinOut Result = null;
         public EGui.Controls.NodeGraph.PinIn Self = null;

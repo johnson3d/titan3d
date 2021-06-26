@@ -5,7 +5,7 @@ using EngineNS.EGui.Controls.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public class Binocular : INodeExpr
+    public partial class Binocular : INodeExpr
     {
         public Rtti.UTypeDesc LeftType;
         public EBinocularOp Op { get; set; }
@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
 
     #region ValueOp
-    public class ValueOpNode : Binocular
+    public partial class ValueOpNode : Binocular
     {
         public ValueOpNode(EBinocularOp op)
             : base(op)
@@ -174,42 +174,42 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
     }
-    public class AddNode : ValueOpNode
+    public partial class AddNode : ValueOpNode
     {
         public AddNode()
             : base(EBinocularOp.Add)
         {
         }
     }
-    public class SubNode : ValueOpNode
+    public partial class SubNode : ValueOpNode
     {
         public SubNode()
             : base(EBinocularOp.Sub)
         {
         }
     }
-    public class MulNode : ValueOpNode
+    public partial class MulNode : ValueOpNode
     {
         public MulNode()
             : base(EBinocularOp.Mul)
         {
         }
     }
-    public class DivNode : ValueOpNode
+    public partial class DivNode : ValueOpNode
     {
         public DivNode()
             : base(EBinocularOp.Div)
         {
         }
     }
-    public class ModNode : ValueOpNode
+    public partial class ModNode : ValueOpNode
     {
         public ModNode()
             : base(EBinocularOp.Mod)
         {
         }
     }
-    public class BitAndNode : ValueOpNode
+    public partial class BitAndNode : ValueOpNode
     {
         public BitAndNode()
             : base(EBinocularOp.BitAnd)
@@ -217,7 +217,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
          
         }
     }
-    public class BitOrNode : ValueOpNode
+    public partial class BitOrNode : ValueOpNode
     {
         public BitOrNode()
             : base(EBinocularOp.BitOr)
@@ -227,7 +227,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     #endregion
 
     #region Cmp
-    public class CmpNode : Binocular
+    public partial class CmpNode : Binocular
     {
         public CmpNode(EBinocularOp op)
             : base(op)
@@ -315,7 +315,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return EditObject;
         }
     }
-    public class EqualNode : CmpNode
+    public partial class EqualNode : CmpNode
     {
         public EqualNode()
             : base(EBinocularOp.CmpEqual)
@@ -323,7 +323,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             
         }
     }
-    public class NotEqualNode : CmpNode
+    public partial class NotEqualNode : CmpNode
     {
         public NotEqualNode()
             : base(EBinocularOp.CmpNotEqual)
@@ -331,7 +331,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             
         }
     }
-    public class GreateNode : CmpNode
+    public partial class GreateNode : CmpNode
     {
         public GreateNode()
             : base(EBinocularOp.CmpGreate)
@@ -339,7 +339,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             
         }
     }
-    public class GreateEqualNode : CmpNode
+    public partial class GreateEqualNode : CmpNode
     {
         public GreateEqualNode()
             : base(EBinocularOp.CmpGreateEqual)
@@ -347,7 +347,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             
         }
     }
-    public class LessNode : CmpNode
+    public partial class LessNode : CmpNode
     {
         public LessNode()
             : base(EBinocularOp.CmpLess)
@@ -355,7 +355,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             
         }
     }
-    public class LessEqualNode : CmpNode
+    public partial class LessEqualNode : CmpNode
     {
         public LessEqualNode()
             : base(EBinocularOp.CmpLessEqual)
@@ -366,7 +366,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     #endregion
 
     #region Bool
-    public class BoolNode : Binocular
+    public partial class BoolNode : Binocular
     {
         public BoolNode(EBinocularOp op)
             : base(op)
@@ -392,14 +392,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return true;
         }
     }
-    public class AndNode : BoolNode
+    public partial class AndNode : BoolNode
     {
         public AndNode()
             : base(EBinocularOp.And)
         {
         }
     }
-    public class OrNode : BoolNode
+    public partial class OrNode : BoolNode
     {
         public OrNode()
             : base(EBinocularOp.Or)

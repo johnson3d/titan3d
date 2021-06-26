@@ -7,7 +7,7 @@ using System.Xml;
 namespace EngineNS.Bricks.CodeBuilder
 {
     [Rtti.Meta]
-    public class UMacrossConfig
+    public partial class UMacrossConfig
     {
         [Rtti.Meta]
         public string TargetFramework;

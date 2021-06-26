@@ -9,7 +9,7 @@
     <OutputPath>..\..\binaries\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DefineConstants>TRACE;PWindow</DefineConstants>
+    <DefineConstants>TRACE;PWindow;UseSerializerCodeGen</DefineConstants>
     <SkipPostSharp>True</SkipPostSharp>
   </PropertyGroup>
 
@@ -33,6 +33,8 @@
   <Import Project="..\..\codegen\Cs2Cpp\cs\Cs2Cpp.projitems" Label="Shared" />
 
   <Import Project="..\..\codegen\Macross\Engine\EngineMacross.projitems" Label="Shared" />
+
+  <Import Project="..\..\codegen\Serializer\Engine\EngineSerializer.projitems" Label="Shared" />
 
   <Import Project="..\..\CSharpCode\Editor\Editor.projitems" Label="Shared" />
 

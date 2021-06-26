@@ -5,7 +5,7 @@ using EngineNS.EGui.Controls.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public class VarNode : INodeExpr
+    public partial class VarNode : INodeExpr
     {
         public DefineVar Var;
         public Rtti.UTypeDesc VarType;
@@ -82,7 +82,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    public class MemberVar : VarNode
+    public partial class MemberVar : VarNode
     {
         public static MemberVar NewMemberVar(DefineClass kls, string varName)
         {
@@ -132,7 +132,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    public class ClassMemberVar : VarNode
+    public partial class ClassMemberVar : VarNode
     {   
         public static ClassMemberVar NewClassMemberVar(DefineClass kls, string varName)
         {
@@ -242,7 +242,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     
-    public class LocalVar : VarNode
+    public partial class LocalVar : VarNode
     {
         public LocalVar()
         {
@@ -298,7 +298,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return EditObject;
         }
     }
-    public class AnyVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class AnyVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public AnyVar()
         {
@@ -333,7 +333,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
     }
-    public class SByteLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class SByteLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public SByteLVar()
         {
@@ -347,7 +347,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Var.InitValue = ev.Value.ToString();
         }
     }
-    public class Int16LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class Int16LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public Int16LVar()
         {
@@ -361,7 +361,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Var.InitValue = ev.Value.ToString();
         }
     }
-    public class Int32LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class Int32LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public Int32LVar()
         {
@@ -375,7 +375,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Var.InitValue = ev.Value.ToString();
         }
     }
-    public class Int64LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class Int64LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public Int64LVar()
         {
@@ -389,7 +389,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Var.InitValue = ev.Value.ToString();
         }
     }
-    public class ByteLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class ByteLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public ByteLVar()
         {
@@ -403,7 +403,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Var.InitValue = ev.Value.ToString();
         }
     }
-    public class UInt16LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class UInt16LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public UInt16LVar()
         {
@@ -417,7 +417,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Var.InitValue = ev.Value.ToString();
         }
     }
-    public class UInt32LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class UInt32LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public UInt32LVar()
         {
@@ -431,7 +431,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Var.InitValue = ev.Value.ToString();
         }
     }
-    public class UInt64LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class UInt64LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public UInt64LVar()
         {
@@ -445,7 +445,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Var.InitValue = ev.Value.ToString();
         }
     }
-    public class FloatLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class FloatLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public FloatLVar()
         {
@@ -459,7 +459,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Var.InitValue = ev.Value.ToString();
         }
     }
-    public class DoubleLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class DoubleLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public DoubleLVar()
         {
@@ -473,7 +473,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Var.InitValue = ev.Value.ToString();
         }
     }
-    public class StringLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class StringLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public StringLVar()
         {
@@ -487,7 +487,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Var.InitValue = ev.Value.ToString();
         }
     }
-    public class Vector2LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class Vector2LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public Vector2LVar()
         {
@@ -501,7 +501,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Var.InitValue = ev.Value.ToString();
         }
     }
-    public class Vector3LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class Vector3LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public Vector3LVar()
         {
@@ -515,7 +515,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Var.InitValue = ev.Value.ToString();
         }
     }
-    public class Vector4LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class Vector4LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public Vector4LVar()
         {
@@ -531,7 +531,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
 
     #region VarSetNode
-    public class VarSetNode : INodeExpr
+    public partial class VarSetNode : INodeExpr
     {
         public EGui.Controls.NodeGraph.PinIn Left { get; set; } = new EGui.Controls.NodeGraph.PinIn();
         public EGui.Controls.NodeGraph.PinIn Right { get; set; } = new EGui.Controls.NodeGraph.PinIn();

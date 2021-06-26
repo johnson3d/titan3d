@@ -18,13 +18,13 @@ namespace EngineNS.Animation.Skeleton
         public List<ILimb> Children { get; }
     }
 
-    public class UFullSkeletonDesc : IO.BaseSerializer, ILimbDesc
+    public partial class UFullSkeletonDesc : IO.BaseSerializer, ILimbDesc
     {
         public VNameString Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
     }
 
-    public class UFullSkeleton : IO.BaseSerializer, ILimb
+    public partial class UFullSkeleton : IO.BaseSerializer, ILimb
     {
         public UFullSkeleton()
         {

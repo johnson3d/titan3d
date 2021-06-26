@@ -4,7 +4,7 @@ using EngineNS.EGui.Controls.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
-    public class UUniformVar : IBaseNode
+    public partial class UUniformVar : IBaseNode
     {
         public Rtti.UTypeDesc VarType;
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]

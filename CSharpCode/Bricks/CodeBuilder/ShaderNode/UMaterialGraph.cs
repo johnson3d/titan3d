@@ -5,7 +5,7 @@ using EngineNS;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
-    public class UMaterialGraph : EGui.Controls.NodeGraph.NodeGraph
+    public partial class UMaterialGraph : EGui.Controls.NodeGraph.NodeGraph
     {
         public UShaderEditor ShaderEditor;
         uint CurSerialId = 0;

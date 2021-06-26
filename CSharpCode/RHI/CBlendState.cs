@@ -19,7 +19,7 @@ namespace EngineNS
 
 namespace EngineNS.RHI
 {
-    public class CBlendStateDesc : IO.BaseSerializer
+    public partial class CBlendStateDesc : IO.BaseSerializer
     {
         public IBlendStateDesc Desc;
         [Rtti.Meta]

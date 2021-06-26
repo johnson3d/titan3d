@@ -170,6 +170,7 @@ Global
 		codegen\NativeBinder\CodeGenCSharp.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		codegen\Property\Engine\EngineProperty.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		codegen\Rpc\Engine\EngineRPC.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		codegen\Serializer\Engine\EngineSerializer.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Base\Base.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Animation\Animation.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\AssemblyLoader\AssemblyLoader.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -222,13 +223,11 @@ Global
 		NativeCode\Base\Base.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Animation\Animation.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
-		NativeCode\Bricks\TcpClient\TcpClient.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\TextConverter\TextConverter.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Graphics\Mesh\Mesh.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Graphics\Pipeline\Pipeline.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\ImGui\ImGui.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Math\Math.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
-		NativeCode\Platform\Android\Android.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\RHI\OpenGL\OpenGL.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\RHI\RHI.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		3rd\native\iconv\iconv.vcxitems*{977204fe-461a-4786-b996-f125b5496c61}*SharedItemsImports = 9

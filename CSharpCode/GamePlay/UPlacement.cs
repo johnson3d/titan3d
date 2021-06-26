@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public class UPlacementBase : IO.ISerializer
+    public partial class UPlacementBase : IO.ISerializer
     {
         public UPlacementBase(Scene.UNode node)
         {
@@ -65,7 +65,7 @@ namespace EngineNS.GamePlay
         public Matrix AbsTransform = new Matrix();
         public Matrix AbsTransformInv = new Matrix();
     }
-    public class UPlacement : UPlacementBase
+    public partial class UPlacement : UPlacementBase
     {
         public UPlacement(Scene.UNode hostNode)
             : base(hostNode)

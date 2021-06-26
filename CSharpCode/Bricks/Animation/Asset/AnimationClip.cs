@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Animation
 {
-    public class UAnimationClip : IO.BaseSerializer, IAnimationAsset
+    public partial class UAnimationClip : IO.BaseSerializer, IAnimationAsset
     {
         Data.UAnimationData AnimationData = null;
         public Base.AnimHierarchy AnimatedHierarchy

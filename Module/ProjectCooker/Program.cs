@@ -47,6 +47,12 @@ namespace ProjectCooker
                             await exe.ExecuteCommand(args);
                         }
                         return;
+                    case "BuildSerializer":
+                        {
+                            var exe = new Command.UBuildSerializer();
+                            await exe.ExecuteCommand(args);
+                        }
+                        break;
                 }
                 EngineNS.UEngine.Instance.PostQuitMessage();
             };

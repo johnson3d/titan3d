@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder
 {
-    public abstract class ICodeGen
+    public class UCodeWriter
     {
         private int NumOfTab = 0;
         public int GetTabNum()
@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 }
             }
             result += code;
-            if(bNewLine)
+            if (bNewLine)
             {
                 result += "\n";
             }
@@ -70,7 +70,9 @@ namespace EngineNS.Bricks.CodeBuilder
             ClassCode += result;
             return result;
         }
-
+    }
+    public abstract class ICodeGen : UCodeWriter
+    {
         public abstract IGen GetGen(Type exprType);
 
         public void BuildClassCode(DefineClass kls)

@@ -22,7 +22,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
     }
 
-    public class UShaderEditor : Editor.IAssetEditor, IO.ISerializer, ITickable, Graphics.Pipeline.IRootForm
+    public partial class UShaderEditor : Editor.IAssetEditor, IO.ISerializer, ITickable, Graphics.Pipeline.IRootForm
     {
         public UShaderEditor()
         {

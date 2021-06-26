@@ -6,7 +6,7 @@ using System.Text;
 namespace EngineNS.Animation.Skeleton
 {
     [Rtti.Meta]
-    public class USkeletonAssetAMeta : IO.IAssetMeta
+    public partial class USkeletonAssetAMeta : IO.IAssetMeta
     {
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -20,7 +20,7 @@ namespace EngineNS.Animation.Skeleton
     }
     [Rtti.Meta]
     //[UFullSkeleton.Import]
-    public class USkeletonAsset :IO.BaseSerializer, IO.IAsset
+    public partial class USkeletonAsset :IO.BaseSerializer, IO.IAsset
     {
         [Rtti.Meta]
         public UFullSkeleton Skeleton { get; set; } = new UFullSkeleton();

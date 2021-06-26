@@ -11,7 +11,7 @@ namespace EngineNS.IO
         //第一个参数通常传入一个Root一类的对象，用于查找对象关系
         void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml);
     }
-    public class BaseSerializer : ISerializer
+    public partial class BaseSerializer : ISerializer
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
@@ -45,6 +45,7 @@ namespace EngineNS.IO
     }
     public class SerializerHelper
     {
+        public delegate void Delegate_ReadMetaVersion(EngineNS.IO.IReader ar, EngineNS.UTest.UTest_MetaObject hostObject);
         public static UInt64 WriteSkippable(IWriter ar)
         {
             var offset = ar.GetPosition();
@@ -127,6 +128,19 @@ namespace EngineNS.IO
         }
         public static void ReadMember(IReader ar, ISerializer obj, Rtti.UMetaVersion metaVersion = null)
         {
+            var srName = metaVersion.HostClass.ClassType.SystemType.FullName.Replace("+", "_CIC_") + "_Serializer";
+            //Type.GetType(utilityReader)
+            var utilityReader = Rtti.UTypeDesc.TypeOfFullName(srName);
+            if(utilityReader!=null)
+            {
+                var call = utilityReader.SystemType.GetMethod($"Read_{metaVersion.MetaHash}", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (call != null)
+                {
+                    call.Invoke(null, new object[] { ar, obj });
+                    return;
+                }
+            }
+            
             foreach (var i in metaVersion.Fields)
             {
                 var value = ReadObject(ar, i.FieldType.SystemType, obj);
@@ -376,7 +390,7 @@ namespace EngineNS.IO
                 var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeStr);
             }
         }
-        private static object ReadObject(IReader ar, Type t, object hostObject)
+        public static object ReadObject(IReader ar, Type t, object hostObject)
         {
             if (t.IsEnum)
             {

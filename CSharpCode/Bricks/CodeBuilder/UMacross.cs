@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder
 {
-    public class UMacrossAMeta : IO.IAssetMeta
+    public partial class UMacrossAMeta : IO.IAssetMeta
     {
         public override bool CanRefAssetType(IAssetMeta ameta)
         {
@@ -24,7 +24,7 @@ namespace EngineNS.Bricks.CodeBuilder
     [UMacross.MacrossCreate]
     [IO.AssetCreateMenu(MenuName = "Macross")]
     [Editor.UAssetEditor(EditorType = typeof(Bricks.CodeBuilder.MacrossNode.ClassGraph))]
-    public class UMacross : IO.IAsset
+    public partial class UMacross : IO.IAsset
     {
         public const string AssetExt = ".macross";
 

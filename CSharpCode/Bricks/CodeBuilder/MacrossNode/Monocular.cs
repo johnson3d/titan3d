@@ -5,12 +5,12 @@ using EngineNS.EGui.Controls.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public class Monocular : INodeExpr
+    public partial class Monocular : INodeExpr
     {
         public EGui.Controls.NodeGraph.PinIn Left { get; set; } = new EGui.Controls.NodeGraph.PinIn();
         public EGui.Controls.NodeGraph.PinOut Result { get; set; } = new EGui.Controls.NodeGraph.PinOut();
     }
-    public class TypeConverterVar : Monocular, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class TypeConverterVar : Monocular, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public static TypeConverterVar NewTypeConverterVar(Rtti.UClassMeta src, Rtti.UClassMeta tar)
         {

@@ -5,7 +5,7 @@ using EngineNS;
 
 namespace EngineNS.EGui.Controls.NodeGraph
 {
-    public class PinLinker : IO.ISerializer
+    public partial class PinLinker : IO.ISerializer
     {
         public class Pin
         {

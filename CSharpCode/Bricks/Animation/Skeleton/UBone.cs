@@ -20,7 +20,7 @@ namespace EngineNS.Animation.Skeleton
         }
         private int Value;
     }
-    public class UBoneDesc : IO.BaseSerializer, ILimbDesc
+    public partial class UBoneDesc : IO.BaseSerializer, ILimbDesc
     {
         public static UBoneDesc Create(IBoneDesc iBoneDesc)
         {
@@ -55,7 +55,7 @@ namespace EngineNS.Animation.Skeleton
         [Rtti.Meta]
         public EngineNS.Quaternion InvQuat { get; set; }
     }
-    class UBone : IO.BaseSerializer, ILimb
+    public partial class UBone : IO.BaseSerializer, ILimb
     {
         public UBone(UBoneDesc boneDesc)
         {

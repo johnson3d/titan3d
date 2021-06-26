@@ -65,7 +65,7 @@ namespace EngineNS.Bricks.CodeBuilder
     }
     //定义表达式
     [Rtti.Meta]
-    public class DefineClass : IExpression
+    public partial class DefineClass : IExpression
     {
         [Rtti.Meta]
         public string ClassName { get; set; } = "NewClass";
@@ -128,7 +128,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
     [Rtti.Meta]
-    public class DefineVar : IExpression
+    public partial class DefineVar : IExpression
     {
         [Rtti.Meta]
         public EVisitMode VisitMode { get; set; } = EVisitMode.Public;
@@ -171,7 +171,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public string InitValue { get; set; } = null;
     }
     [Rtti.Meta]
-    public class DefineFunction : IExpression
+    public partial class DefineFunction : IExpression
     {
         public bool IsFunctionDefineChanged
         {

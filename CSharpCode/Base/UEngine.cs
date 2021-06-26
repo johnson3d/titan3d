@@ -30,7 +30,7 @@ namespace EngineNS
         Cook,
     }
     [Rtti.Meta]
-    public class UEngineConfig
+    public partial class UEngineConfig
     {
         [Rtti.Meta]
         public int NumOfThreadPool { get; set; } = 3;
