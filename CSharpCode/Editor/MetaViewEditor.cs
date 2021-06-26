@@ -88,7 +88,6 @@ namespace EngineNS.Editor
                     meshNode.NodeData.Name = "Robot0";
                     meshNode.IsScaleChildren = false;
                     meshNode.IsCastShadow = true;
-                    meshNode.IsAcceptShadow = true;
 
                     var mesh1 = new Graphics.Mesh.UMesh();
 
@@ -98,7 +97,7 @@ namespace EngineNS.Editor
                     meshNode1.Parent = meshNode;
                     meshNode1.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent;
                     //meshNode1.Placement.Position = meshNode1.Placement.Position;
-
+                    meshNode1.IsCastShadow = true;
                     aabbTreeRoot = meshNode;
                 }
 

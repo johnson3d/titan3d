@@ -323,6 +323,11 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 if (i.Atoms == null)
                     continue;
 
+                if (i.HostNode != null)
+                {
+                    mBasePassShading.SetDisableShadow(!i.HostNode.IsAcceptShadow);                   
+                }
+                
                 for (int j = 0; j < i.Atoms.Length; j++)
                 {
                     {
