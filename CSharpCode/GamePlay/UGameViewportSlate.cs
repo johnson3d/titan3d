@@ -12,6 +12,16 @@ namespace EngineNS.GamePlay
         {
             CameraController = new Editor.Controller.EditorCameraController();
         }
+        CNativeString mNstrTitle = new CNativeString();
+        public override string Title 
+        {
+            get => base.Title;
+            set
+            {
+                base.Title = value;
+                mNstrTitle.SetText(value);
+            } 
+        }
         protected override void OnVieportClosed()
         {
             UEngine.Instance.EndPlayInEditor();
@@ -29,6 +39,7 @@ namespace EngineNS.GamePlay
             }
             IsDrawing = false;
             //CoreSDK.Print2Console2("aaa", true);
+
             bool bShow = ImGuiAPI.Begin(Title, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
             if (ImGuiAPI.IsWindowDocked())
             {

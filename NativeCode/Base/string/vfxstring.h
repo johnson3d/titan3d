@@ -15,8 +15,36 @@
 #pragma once
 
 #include "../BaseHead.h"
+
 #include <string>
 #include "../debug/vfxdebug.h"
+
+class TR_CLASS(SV_Dispose=delete self)
+	FNativeString
+{
+private:
+	std::string			mString;
+public:	
+	TR_CONSTRUCTOR(SV_NoBind=true)
+	FNativeString(const std::string & rh) {
+		mString = rh;
+	}
+	FNativeString() {
+	}
+	FNativeString(const char* rh) {
+		mString = rh;
+	}
+	~FNativeString() {
+	}
+
+	void SetText(const char* txt) {
+		mString = txt;
+	}
+	TR_FUNCTION(SV_NoStringConverter=true)
+	const char* GetText() const{
+		return mString.c_str();
+	}
+};
 
 typedef std::string			VStringA;
 typedef std::wstring		VStringW;
@@ -146,5 +174,6 @@ inline bool operator>=(const VNameString& lh, const char* rh)
 {
 	return strcmp(lh.GetString(), rh) >= 0;
 }
+
 
 #endif // end __VFX_STRING_H__

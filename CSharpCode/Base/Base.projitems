@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AuxPtrType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CNativeString.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\IStreaming.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\IAssemblyLoader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\UMacrossDebugger.cs" />

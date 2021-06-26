@@ -16,6 +16,7 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)ClrLogger.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ClrString.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FNativeString.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImDrawCmd.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImDrawData.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImDrawList.cpp2cs.cpp" />

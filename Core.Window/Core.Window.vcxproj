@@ -122,7 +122,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-	  <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -144,14 +144,13 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-	  <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(SolutionDir)CallTHT.bat
-$(SolutionDir)CS_Rpc_Engine.bat</Command>
+      <Command>$(SolutionDir)CallTHT.bat</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -172,7 +171,7 @@ $(SolutionDir)CS_Rpc_Engine.bat</Command>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-	  <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
@@ -198,7 +197,7 @@ $(SolutionDir)CS_Rpc_Engine.bat</Command>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-	  <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>

@@ -391,6 +391,7 @@ namespace CppWeaving.Cpp2CS
 
                 var ns = GetNamespace(j.TypeForDecl);
                 var name = j.Name;
+
                 RegClass(tu, j, ns, name);
             }
             foreach (var j in enumsDecls)

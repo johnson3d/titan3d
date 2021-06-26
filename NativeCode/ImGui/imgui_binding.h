@@ -132,7 +132,6 @@ public:
 		return ImGui::StyleColorsLight(dst);
 	}
 	// Windows
-	TR_FUNCTION(SV_NoStarToRef = p_open)
 	static bool          Begin(const char* name, bool* p_open, ImGuiWindowFlags_ flags)
 	{
 		return ImGui::Begin(name, p_open, flags);

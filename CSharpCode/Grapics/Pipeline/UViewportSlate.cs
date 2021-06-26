@@ -11,7 +11,7 @@ namespace EngineNS.Graphics.Pipeline
             if (regRoot)
                 Editor.UMainEditorApplication.RegRootForm(this);
         }
-        public string Title { get; set; } = "Game";
+        public virtual string Title { get; set; } = "Game";
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; }
