@@ -45,7 +45,7 @@ namespace EngineNS.IO
     }
     public class SerializerHelper
     {
-        public delegate void Delegate_ReadMetaVersion(EngineNS.IO.IReader ar, EngineNS.UTest.UTest_MetaObject hostObject);
+        public delegate void Delegate_ReadMetaVersion(EngineNS.IO.IReader ar, EngineNS.IO.ISerializer hostObject);
         public static UInt64 WriteSkippable(IWriter ar)
         {
             var offset = ar.GetPosition();
@@ -133,10 +133,12 @@ namespace EngineNS.IO
             var utilityReader = Rtti.UTypeDesc.TypeOfFullName(srName);
             if(utilityReader!=null)
             {
-                var call = utilityReader.SystemType.GetMethod($"Read_{metaVersion.MetaHash}", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                var call = utilityReader.SystemType.GetField($"mfn_Read_{metaVersion.MetaHash}", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                 if (call != null)
                 {
-                    call.Invoke(null, new object[] { ar, obj });
+                    //call.Invoke(null, new object[] { ar, obj });
+                    var dlgt = call.GetValue(null) as EngineNS.IO.SerializerHelper.Delegate_ReadMetaVersion;
+                    dlgt(ar, obj);
                     return;
                 }
             }

@@ -46,9 +46,10 @@ namespace ProjectCooker.Command
                         foreach (var j in i.Value.MetaVersions)
                         {
                             codeWriter.AddLine($"public static EngineNS.IO.SerializerHelper.Delegate_ReadMetaVersion mfn_Read_{j.Key} = Read_{j.Key};"); 
-                            codeWriter.AddLine($"public static void Read_{j.Key}(EngineNS.IO.IReader ar, {i.Value.ClassType.FullName.Replace('+', '.')} hostObject)");
+                            codeWriter.AddLine($"public static void Read_{j.Key}(EngineNS.IO.IReader ar, EngineNS.IO.ISerializer InHostObject)");
                             codeWriter.PushBrackets();
                             {
+                                codeWriter.AddLine($"var hostObject = ({i.Value.ClassType.FullName.Replace('+', '.')})InHostObject;");
                                 foreach (var k in j.Value.Fields)
                                 {
                                     if (k.FieldType.SystemType.GetInterface("ISerializer") != null)

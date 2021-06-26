@@ -9,7 +9,7 @@
     <OutputPath>..\..\binaries\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DefineConstants>TRACE;PWindow;UseSerializerCodeGen</DefineConstants>
+    <DefineConstants>TRACE;PWindow</DefineConstants>
     <SkipPostSharp>True</SkipPostSharp>
   </PropertyGroup>
 
