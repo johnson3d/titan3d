@@ -1,6 +1,7 @@
 #pragma once
 #include "IRenderResource.h"
 #include "../Math/v3dxColor4.h"
+#include "ISwapChain.h"
 
 NS_BEGIN
 
@@ -8,6 +9,7 @@ NS_BEGIN
 
 class IRenderTargetView;
 class IDepthStencilView;
+class ISwapChain;
 
 struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
 IFrameBuffersDesc
@@ -27,20 +29,20 @@ IFrameBuffers : public IRenderResource
 public:
 	IFrameBuffers();
 	~IFrameBuffers();
-	TR_FUNCTION()
 	virtual void BindRenderTargetView(UINT index, IRenderTargetView* rt);
-	TR_FUNCTION()
 	virtual void BindDepthStencilView(IDepthStencilView* ds);
-	TR_FUNCTION()
 	IRenderTargetView* GetRenderTargetView(UINT index) {
 		return mRenderTargets[index];
 	}
-	TR_FUNCTION()
 	IDepthStencilView* GetDepthStencilView() {
 		return m_pDepthStencilView;
 	}
+	void SetSwapChain(ISwapChain* swapchain) {
+		mSwapChain.StrongRef(swapchain);
+	}
 public:
 	IFrameBuffersDesc					mDesc;
+	AutoRef<ISwapChain>					mSwapChain;
 	IRenderTargetView*					mRenderTargets[MAX_MRT_NUM];
 	IDepthStencilView*					m_pDepthStencilView;
 };
@@ -63,26 +65,18 @@ FrameBufferStoreAction
 	StoreActionUnknown = 4
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 RenderPassDesc
 {
 	FrameBufferLoadAction mFBLoadAction_Color;
 	FrameBufferStoreAction mFBStoreAction_Color;
-	TR_MEMBER(SV_ReturnConverter=v3dVector4_t)
 	v3dxColor4 mFBClearColorRT0;
-	TR_MEMBER(SV_ReturnConverter = v3dVector4_t)
 	v3dxColor4 mFBClearColorRT1;
-	TR_MEMBER(SV_ReturnConverter = v3dVector4_t)
 	v3dxColor4 mFBClearColorRT2;
-	TR_MEMBER(SV_ReturnConverter = v3dVector4_t)
 	v3dxColor4 mFBClearColorRT3;
-	TR_MEMBER(SV_ReturnConverter = v3dVector4_t)
 	v3dxColor4 mFBClearColorRT4;
-	TR_MEMBER(SV_ReturnConverter = v3dVector4_t)
 	v3dxColor4 mFBClearColorRT5;
-	TR_MEMBER(SV_ReturnConverter = v3dVector4_t)
 	v3dxColor4 mFBClearColorRT6;
-	TR_MEMBER(SV_ReturnConverter = v3dVector4_t)
 	v3dxColor4 mFBClearColorRT7;
 
 	FrameBufferLoadAction mFBLoadAction_Depth;

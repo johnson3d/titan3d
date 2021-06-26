@@ -259,7 +259,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
     public class PinOut : NodePin
     {
     }
-    public class NodeBase : IO.ISerializer
+    public partial class NodeBase : IO.ISerializer
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {

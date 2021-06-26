@@ -221,8 +221,24 @@ namespace EngineNS.Rtti
         public void InitTypes()
         {
             var ass = AppDomain.CurrentDomain.GetAssemblies();
+            string[] TypeAssembies = {
+                "System.Private.CoreLib",
+                "Engine.Window",
+                "Engine.Console",
+            };
             foreach(var i in ass)
             {
+                bool find = false;
+                foreach(var j in TypeAssembies)
+                {
+                    if (i.GetName().Name == j)
+                    {
+                        find = true;
+                        break;
+                    }
+                }
+                if (find == false)
+                    continue;
                 AssemblyDesc desc;
                 ServiceManager manager;
                 RegAssembly(i, out manager, out desc);

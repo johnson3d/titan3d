@@ -38,7 +38,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
         public UInt32 HighLightColor { get; set; } = 0xFF0000FF;
         public float BezierPixelPerSegement { get; set; } = 10.0f;
     }
-    public class NodeGraph : IO.ISerializer
+    public partial class NodeGraph : IO.ISerializer
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }

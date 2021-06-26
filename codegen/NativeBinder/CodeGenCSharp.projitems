@@ -9,10 +9,14 @@
     <Import_RootNamespace>CodeGenCSharp</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ClrLogger.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClrString.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CONTAIN_TYPE.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EClrLogStringType.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ELevelTraceType.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ENUM_FRUSTUM_CORNER.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ENUM_FRUSTUM_PLANE.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FNativeString.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImDrawCmd.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImDrawData.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImDrawFlags_.cpp2cs.cs" />
@@ -218,6 +222,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ShaderReflector.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/SRRect.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/StencilOpDesc.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TcpClient.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TcpConnect.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TcpServer.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TcpServerManager.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TEX1D_ARRAY_SRV.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TEX1D_SRV.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TEX2DMS_ARRAY_SRV.cpp2cs.cs" />

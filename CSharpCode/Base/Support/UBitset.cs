@@ -80,7 +80,15 @@ namespace EngineNS.Support
         }
         public unsafe void SetValue<T>(T v) where T : unmanaged
         {
-            if (typeof(T) == typeof(sbyte))
+            if (typeof(T) == typeof(float))
+            {
+                SetF32(*(float*)&v);
+            }
+            else if (typeof(T) == typeof(double))
+            {
+                SetF64(*(double*)&v);
+            }
+            else if (typeof(T) == typeof(sbyte))
             {
                 SetI8(*(sbyte*)&v);
             }
@@ -146,7 +154,21 @@ namespace EngineNS.Support
         }
         public unsafe void GetValue<T>(ref T v) where T : unmanaged
         {
-            if (typeof(T) == typeof(sbyte))
+            if (typeof(T) == typeof(float))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(double))
+            {
+                fixed (T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
+            else if (typeof(T) == typeof(sbyte))
             {
                 fixed (T* p = &v)
                 {
@@ -245,17 +267,82 @@ namespace EngineNS.Support
                 }
             }
         }
+        public object ToObject()
+        {
+            switch (mValueType)
+            {
+                case EValueType.Unknown:
+                    return null;
+                case EValueType.ManagedHandle:
+                    return this.GCHandle.Target;
+                case EValueType.I8:
+                    return mI8Value;
+                case EValueType.I16:
+                    return mI16Value;
+                case EValueType.I32:
+                    return mI32Value;
+                case EValueType.I64:
+                    return mI64Value;
+                case EValueType.UI8:
+                    return mUI8Value;
+                case EValueType.UI16:
+                    return mUI16Value;
+                case EValueType.UI32:
+                    return mUI32Value;
+                case EValueType.UI64:
+                    return mUI64Value;
+                case EValueType.F32:
+                    return mF32Value;
+                case EValueType.F64:
+                    return mF64Value;
+                case EValueType.Name:
+                    return mNameString.GetString();
+                case EValueType.Struct:
+                    return mStruct.ToObject();
+                case EValueType.Ptr:
+                    return mPointer;
+                case EValueType.V2:
+                    return mV2;
+                case EValueType.V3:
+                    return mV3;
+                case EValueType.V4:
+                    return mV4;
+                default:
+                    return null;
+            }
+        }
         public struct FStructDesc : IDisposable
         {
             public IntPtr mStructPointer;
             public int mStructSize;
             public VNameString mTypeName;
+            public object ToObject()
+            {
+                unsafe
+                {
+                    var type = Rtti.UTypeDesc.TypeOf(mTypeName.GetString());
+                    var result = Rtti.UTypeDescManager.CreateInstance(type);
+                    System.Runtime.InteropServices.Marshal.PtrToStructure(mStructPointer, result);
+                    return result;
+                }
+            }
             public void SetStruct<T>(T v, [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
                 [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0) where T : unmanaged
             {
                 unsafe
                 {
                     mStructSize = sizeof(T);
+                    mStructPointer = (IntPtr)CoreSDK.Alloc((uint)mStructSize, sourceFilePath, sourceLineNumber);
+                    var typeStr = Rtti.UTypeDesc.TypeStr(typeof(T));
+                    mTypeName.SetString(typeStr);
+                }
+            }
+            public void SetStruct2<T>(T v, [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+                [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
+            {
+                unsafe
+                {
+                    mStructSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(T)); 
                     mStructPointer = (IntPtr)CoreSDK.Alloc((uint)mStructSize, sourceFilePath, sourceLineNumber);
                     var typeStr = Rtti.UTypeDesc.TypeStr(typeof(T));
                     mTypeName.SetString(typeStr);
@@ -509,6 +596,20 @@ namespace EngineNS.Support
     {
         public UAnyValue Value;
         public object RefObject;
+        public void SetValue<T>(T v) where T : unmanaged
+        {
+            Value.SetValue<T>(v);
+        }
+        public void SetValue(object v)
+        {
+            RefObject = v;
+        }
+        public object ToObject()
+        {
+            if (Value.ValueType == UAnyValue.EValueType.Unknown)
+                return RefObject;
+            return Value.ToObject();
+        }
         public void Dispose()
         {
             Value.Dispose();

@@ -6,6 +6,33 @@ namespace EngineNS.Editor.ShaderCompiler
 {
     public unsafe class UHLSLCompiler : AuxPtrType<IShaderConductor>
     {
+        static CoreSDK.FDelegate_FOnShaderTranslated OnShaderTranslated = OnShaderTranslatedImpl;
+        static void OnShaderTranslatedImpl(EngineNS.IShaderDesc arg0)
+        {
+            var glsl = arg0.GetGLCode();
+            if (glsl.Length > 0)
+            {
+                bool changed = false;
+                if (glsl.Contains("#error No extension available for FP16."))
+                {
+                    glsl = glsl.Replace("#error No extension available for Int16.", "#define float16_t float");
+                    changed = true;
+                }
+                if (glsl.Contains("#error No extension available for Int16."))
+                {
+                    glsl = glsl.Replace("#error No extension available for Int16.", "#define uint16_t uint");
+                    changed = true;
+                }
+                if (changed)
+                {
+                    arg0.SetGLCode(glsl);
+                }
+            }
+        }
+        static UHLSLCompiler()
+        {
+            CoreSDK.SetOnShaderTranslated(OnShaderTranslated);
+        }
         public UHLSLCompiler()
         {
             mCoreObject = IShaderConductor.CreateInstance();
@@ -68,21 +95,36 @@ namespace EngineNS.Editor.ShaderCompiler
         private Rtti.UTypeDesc MdfQueueType;
         public RHI.CShaderDesc CompileShader(string shader, string entry, EShaderType type, string sm,
             RName mtl, Type mdfType,
-            RHI.CShaderDefinitions defines, bool bDebugShader, bool bDxbc, bool bGlsl, bool bMetal)
+            RHI.CShaderDefinitions defines, bool bDebugShader)
         {
             RHI.CShaderDesc desc = new RHI.CShaderDesc(type);
             Material = mtl;
             MdfQueueType = Rtti.UTypeDesc.TypeOf(mdfType);
-            IShaderDefinitions defPtr = new IShaderDefinitions((void*)0);
-            if (defines != null)
-                defPtr = defines.mCoreObject;
-            var ok = mCoreObject.CompileShader(desc.mCoreObject, shader, entry, type, sm, defPtr,
-                        bDebugShader, bDxbc, bGlsl, bMetal);
+            //IShaderDefinitions defPtr = new IShaderDefinitions((void*)0);
+            unsafe
+            {
+                using (IShaderDefinitions defPtr = IShaderDefinitions.CreateInstance())
+                {
+                    if (defines != null)
+                    {
+                        defPtr.MergeDefinitions(defines.mCoreObject);
+                    }
 
-            if (ok == false)
-                return null;
+                    var cfg = UEngine.Instance.Config;
+                    if (cfg.CookGLSL)
+                    {
+                        defPtr.AddDefine("RHI_OGL", "1");
+                    }
 
-            return desc;
+                    var ok = mCoreObject.CompileShader(desc.mCoreObject, shader, entry, type, sm, defPtr,
+                                bDebugShader, cfg.CookDXBC, cfg.CookGLSL, cfg.CookMETAL);
+
+                    if (ok == false)
+                        return null;
+
+                    return desc;
+                }
+            }   
         }
     }
 }

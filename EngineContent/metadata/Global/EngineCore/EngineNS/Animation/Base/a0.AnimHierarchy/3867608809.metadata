@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3867608809 Type="EngineNS.Animation.Base.AnimHierarchy@EngineCore">
+  <Children Type="System.Collections.Generic.List&lt;EngineNS.Animation.Base.AnimHierarchy@EngineCore,&gt;@Unknown" Order="0" />
+  <Parent Type="EngineNS.Animation.Base.AnimHierarchy@EngineCore" Order="0" />
+  <Root Type="EngineNS.Animation.Base.AnimHierarchy@EngineCore" Order="0" />
+  <Value Type="EngineNS.Animation.Base.IAnimatableClassDesc@EngineCore" Order="0" />
+</Hash_3867608809>

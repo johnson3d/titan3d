@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.EGui.Controls
 {
-    public class ContentBrowser : Editor.IRootForm, EGui.IPanel
+    public class ContentBrowser : Graphics.Pipeline.IRootForm, EGui.IPanel
     {
         public ContentBrowser()
         {
@@ -242,7 +242,7 @@ namespace EngineNS.EGui.Controls
                     var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                     {
-                        var type = Rtti.UTypeDescManager.Instance.GetTypeFromString(ameta.TypeStr);
+                        var type = Rtti.UTypeDesc.TypeOf(ameta.TypeStr).SystemType;
                         if (type != null)
                         {
                             var attrs = type.GetCustomAttributes(typeof(Editor.UAssetEditorAttribute), false);

@@ -39,17 +39,17 @@ inline void FormatToGL(EPixelFormat fmt, GLint& internalFormat, GLint& format, G
 		return;
 	case PXF_R32_UINT:
 		internalFormat = GL_R32UI;
-		format = GL_R;
+		format = GL_RED;
 		type = GL_UNSIGNED_INT;
 		return;
 	case PXF_R32_SINT:
 		internalFormat = GL_R32I;
-		format = GL_R;
+		format = GL_RED;
 		type = GL_INT;
 		return;
 	case PXF_R32_FLOAT:
 		internalFormat = GL_R32F;
-		format = GL_R;
+		format = GL_RED;
 		type = GL_FLOAT;
 		return;
 	case PXF_R8G8B8A8_SINT:

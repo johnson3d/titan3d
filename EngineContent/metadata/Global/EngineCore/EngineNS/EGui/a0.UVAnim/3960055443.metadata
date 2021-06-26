@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3960055443 Type="EngineNS.EGui.UVAnim@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Color Type="System.UInt32@Unknown" Order="0" />
+  <Size Type="EngineNS.Vector2@EngineCore" Order="0" />
+  <TextureName Type="EngineNS.RName@EngineCore" Order="0" />
+  <UVCoord Type="EngineNS.Vector2@EngineCore" Order="0" />
+  <UVSize Type="EngineNS.Vector2@EngineCore" Order="0" />
+</Hash_3960055443>

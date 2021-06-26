@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
-    public class IBaseNode : EGui.Controls.NodeGraph.NodeBase
+    public partial class IBaseNode : EGui.Controls.NodeGraph.NodeBase
     {
         internal UMaterialGraph Graph;
         public float PreviewWidth = 0;

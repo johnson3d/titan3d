@@ -10,9 +10,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)INetConnect.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RPC\FPkgHeader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RPC\NetPacketParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RPC\URpcModule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RPC\UNetworkPackage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RPC\URpcAwaiter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RPC\URpcClass.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UTcpClient.cs" />
   </ItemGroup>
 </Project>

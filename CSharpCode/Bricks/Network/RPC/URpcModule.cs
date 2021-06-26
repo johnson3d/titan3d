@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 namespace EngineNS.Bricks.Network.RPC
 {
     [Flags]
-    public enum EPkgTypes : UInt32
+    public enum EPkgTypes : byte
     {
-        IsReturn = (1 << 0),
+        IsReturn = (1 << 0),//这个是系统用的flags，不允许写道Attribute上
+        WeakPkg = (1 << 1),
     }
     public enum ERunTarget : sbyte
     {
@@ -34,6 +35,7 @@ namespace EngineNS.Bricks.Network.RPC
     public class URpcMethodAttribute : Attribute
     {
         public UInt16 Index;
+        public EPkgTypes PkgFlags;
         public int Authority = 0;
         public bool ReturnISerializer;
         public bool ArgISerializer;
@@ -220,7 +222,7 @@ namespace EngineNS.UTest
         }
 
         const int RpcIndexStart = 100;
-        [URpcMethod(Index = RpcIndexStart + 0)]
+        [URpcMethod(Index = RpcIndexStart + 0, PkgFlags = EPkgTypes.WeakPkg)]
         public int TestRpc1(float arg, UCallContext context)
         {
             AutoGenProp1 = 1;
@@ -286,23 +288,36 @@ namespace EngineNS.UTest
         {
             Action action = async () =>
             {
-                var ret = await UTest_Rpc.TestRpc1(2.0f);
+                INetConnect pConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+                UTcpClient tcpClient = new UTcpClient();
+                var ok = await tcpClient.Connect("127.0.0.1", 5555, 1, 1000);
+                if (ok)
+                {
+                    pConnect = tcpClient;
+                }
+                else
+                {
+                    tcpClient = null;
+                }
+                var ret = await UTest_Rpc.TestRpc1(2.0f, 0, pConnect);
                 if (ret != 4)
                 {
                     return;
                 }
-                UTest_Rpc.TestRpc2("");
-                var ret3 = await UTest_Rpc.TestRpc3(1);
-                var ret4 = await UTest_Rpc.TestRpc4("2");
+                UTest_Rpc.TestRpc2("", 0, pConnect);
+                var ret3 = await UTest_Rpc.TestRpc3(1, 0, pConnect);
+                var ret4 = await UTest_Rpc.TestRpc4("2", 0, pConnect);
                 if (ret4 != "2")
                 {
                     return;
                 }
-                var ret5 = await UTest_Rpc.TestRpc5(Vector3.UnitXYZ);
-                var ret6 = await UTest_Rpc.TestRpc6(new TestRPCArgument() { AA = 8 });
-                var ret7 = await UTest_Rpc.TestRpc7(new TestUnmanagedStruct() { A = 8 });
+                var ret5 = await UTest_Rpc.TestRpc5(Vector3.UnitXYZ, 0, pConnect);
+                var ret6 = await UTest_Rpc.TestRpc6(new TestRPCArgument() { AA = 8 }, 0, pConnect);
+                var ret7 = await UTest_Rpc.TestRpc7(new TestUnmanagedStruct() { A = 8 }, 0, pConnect);
 
-                var base_ret7 = await URpcManager.TestBaseRpc1(5.0f);
+                var base_ret7 = await URpcManager.TestBaseRpc1(5.0f, 0, pConnect);
+
+                tcpClient?.Disconnect();
             };
             action();
         }

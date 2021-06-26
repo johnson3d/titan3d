@@ -329,6 +329,19 @@ namespace EngineNS.Thread.Async
             switch (target)
             {
                 case EAsyncTarget.TPools:
+                    {
+                        ThreadPool thread = null;
+                        int nMinTask = int.MaxValue;
+                        foreach (var i in ContextPools)
+                        {
+                            if (i.AsyncEvents.Count < nMinTask)
+                            {
+                                nMinTask = i.AsyncEvents.Count;
+                                thread = i;
+                            }
+                        }
+                        return thread;
+                    }
                     break;
                 default:
                     return UEngine.Instance.GetContext(target);

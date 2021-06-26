@@ -12,9 +12,6 @@ namespace EngineNS.Thread
         private static Profiler.TimeScope ScopeWaitTickLogic = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadMain), "WaitTickLogic");
         public override void Tick()
         {
-            if (UEngine.Instance.ThreadLogic.IsTicking)
-                return;
-
             BeforeFrame();
 
             RenderMT();
@@ -53,7 +50,8 @@ namespace EngineNS.Thread
 
             using (new Profiler.TimeScopeHelper(ScopeWaitTickLogic))
             {
-                UEngine.Instance.ThreadLogic.mLogicEnd.WaitOne();
+                System.Threading.WaitHandle.WaitAny(UEngine.Instance.ThreadLogic.LogicEndEvents);
+                //UEngine.Instance.ThreadLogic.mLogicEnd.WaitOne();
                 UEngine.Instance.ThreadLogic.mLogicEnd.Reset();
             }
         }

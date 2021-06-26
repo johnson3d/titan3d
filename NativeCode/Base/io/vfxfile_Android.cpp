@@ -1,6 +1,6 @@
 #include "../BaseHead.h"
 #include "vfxfile_Android.h"
-//#include "../../Platform/Android/PlatformAndroid.h"
+#include "../../Platform/Android/PlatformAndroid.h"
 #include "../thread/vfxthread.h"
 
 #define new VNEW
@@ -44,14 +44,13 @@ vBOOL VFile_Android::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 	if((nOpenFlags & 3) == modeRead)
 	{
 		if (GLostAssets.find(lpszFileName) != GLostAssets.end())
-			return FALSE;//����apk����Դ
+			return FALSE;
 	}
 
 	m_bCloseOnDelete = FALSE;
 	m_strFileName = lpszFileName;
 	//VStringA_MakeLower(m_strFileName);
 
-	// ���ȳ��Զ�ȡsd��Ŀ¼�ļ�
 	VStringA arg = "";
 	switch (nOpenFlags & 3)
 	{
@@ -78,9 +77,10 @@ vBOOL VFile_Android::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 	if (m_hFile == NULL)
 	{
 		//VFX_LTRACE(ELTT_info, "Begin Android Read Assets %s", lpszFileName);
-		auto jniEnv = EngineNS::PlatformAndroid::GetInstance()->mEnv;
-		auto assetManager = EngineNS::PlatformAndroid::GetInstance()->mAssetManager;
-		auto javaVM = EngineNS::PlatformAndroid::GetInstance()->mJavaVM;
+		auto androidPlatform = EngineNS::PlatformAndroid::GetInstance();
+		auto jniEnv = androidPlatform->mEnv;
+		auto assetManager = androidPlatform->mAssetManager;
+		auto javaVM = androidPlatform->mJavaVM;
 		if (jniEnv == NULL || assetManager == NULL)
 		{
 			GLostAssets[lpszFileName] = lpszFileName;
@@ -90,9 +90,6 @@ vBOOL VFile_Android::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 		
 		if (javaVM->AttachCurrentThread(&jniEnv, 0) == JNI_OK)
 		{
-			// û�ж�ȡ���ļ����ȡAPK��Assets����ļ�
-
-			// ת��Ϊ���·��
 			if (g_GetRelativeFileNameEvent == NULL)
 			{ 
 				GLostAssets[lpszFileName] = lpszFileName;
@@ -244,14 +241,4 @@ UINT_PTR VFile_Android::GetLength() const
 	}
 
 	return 0;
-}
-
-using namespace EngineNS;
-
-extern "C"
-{
-	VFX_API void SDK_PlatformAndroid_SetAssetsFileNameCB(FVFile_Android_GetRelativeFileName fun)
-	{
-		g_GetRelativeFileNameEvent = fun;
-	}
 }

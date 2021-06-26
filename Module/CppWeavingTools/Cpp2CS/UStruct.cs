@@ -32,6 +32,7 @@ namespace CppWeaving.Cpp2CS
 		}
 		public void WritePODStruct()
         {
+            AddLine($"#if defined(HasModule_{mClass.ModuleName})");
             ClangSharp.Interop.CXFile tfile;
             uint line, col, offset;
             mClass.Decl.Location.GetFileLocation(out tfile, out line, out col, out offset);
@@ -44,7 +45,9 @@ namespace CppWeaving.Cpp2CS
 				AddLine($"char MemData[StructSize];");
 			}
 			PopBrackets(true);
-		}
+            AddLine($"#endif//HasModule_{mClass.ModuleName}");
+            NewLine();
+        }
 		protected override void GenConstructor()
 		{
 			foreach (var i in mClass.Constructors) {
@@ -119,19 +122,57 @@ namespace CppWeaving.Cpp2CS
 		{
 			return ".cpp2cs.cs";
 		}
+        protected override void UserAttribute()
+        {
+            AddLine($"[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit, Size = {mClass.Decl.TypeForDecl.Handle.SizeOf}, Pack = {mClass.Decl.TypeForDecl.Handle.AlignOf})]");
+        }
         protected override void DefineLayout()
         {
-            AddLine($"private void* mPointer;");
-            AddLine($"public {mClass.Name}(void* p) {{ mPointer = p; }}");
-            AddLine($"public void UnsafeSetPointer(void* p) {{ mPointer = p; }}");
-            AddLine($"public IntPtr NativePointer {{ get => (IntPtr)mPointer; set => mPointer = value.ToPointer(); }}");
-            AddLine($"public {mClass.Name}* CppPointer {{ get => ({mClass.Name}*)mPointer; }}");
-            AddLine($"public bool IsValidPointer {{ get => mPointer != (void*)0; }}");
-
-            AddLine($"public static implicit operator {mClass.Name}* ({mClass.Name} v)");
-            PushBrackets();
+            AddLine($"#region StructLayout");
+            foreach (var i in mClass.Properties)
             {
-                AddLine($"return ({Name}*)v.mPointer;");
+                var field = i as UField;
+                AddLine($"[System.Runtime.InteropServices.FieldOffset({field.Offset / 8})]");
+                if (i.IsDelegate)
+                    AddLine($"public IntPtr m_{i.Name};");
+                else
+                {
+                    var retType = i.GetCsTypeName();
+                    if (i.IsTypeDef)
+                    {
+                        var dypeDef = USysClassManager.Instance.FindTypeDef(i.CxxName);
+                        if (dypeDef != null)
+                            retType = dypeDef;
+                    }
+                    AddLine($"public {retType} m_{i.Name};");
+                }
+            }
+            AddLine($"#endregion");
+
+            AddLine($"public IntPtr NativePointer {{ get => IntPtr.Zero; set {{}} }}");
+        }
+        protected override void BeginInvoke(UTypeBase member)
+        {
+            if (member == null)
+                return;
+
+            var func = member as UFunction;
+            if (func != null && func.IsStatic)
+            {
+                return;
+            }
+            AddLine($"fixed ({Name}* mPointer = &this)");
+            PushBrackets();
+        }
+        protected override void EndInvoke(UTypeBase member)
+        {
+            if (member == null)
+                return;
+
+            var func = member as UFunction;
+            if (func != null && func.IsStatic)
+            {
+                return;
             }
             PopBrackets();
         }
@@ -148,11 +189,16 @@ namespace CppWeaving.Cpp2CS
                     AddLine($"public void UnsafeCallConstructor()");
                 PushBrackets();
                 {
-                    var sdk_fun = $"TSDK_{mClass.VisitorPInvoke}_UnsafeCallConstructor_{i.FunctionHash}";
-                    if (i.Parameters.Count > 0)
-                        AddLine($"{sdk_fun}(mPointer, {i.GetParameterCalleeCs()});");
-                    else
-                        AddLine($"{sdk_fun}(mPointer);");
+                    AddLine($"fixed ({Name}* mPointer = &this)");
+                    PushBrackets();
+                    {
+                        var sdk_fun = $"TSDK_{mClass.VisitorPInvoke}_UnsafeCallConstructor_{i.FunctionHash}";
+                        if (i.Parameters.Count > 0)
+                            AddLine($"{sdk_fun}(mPointer, {i.GetParameterCalleeCs()});");
+                        else
+                            AddLine($"{sdk_fun}(mPointer);");
+                    }
+                    PopBrackets();
                 }
                 PopBrackets();
             }
@@ -161,9 +207,12 @@ namespace CppWeaving.Cpp2CS
             PushBrackets();
             {
                 var sdk_fun = $"TSDK_{mClass.VisitorPInvoke}_UnsafeCallDestructor";
-                BeginInvoke();
-                AddLine($"{sdk_fun}(mPointer);");
-                EndInvoke();
+                AddLine($"fixed ({Name}* mPointer = &this)");
+                PushBrackets();
+                {
+                    AddLine($"{sdk_fun}(mPointer);");
+                }
+                PopBrackets();
             }
             PopBrackets();
         }
@@ -182,6 +231,46 @@ namespace CppWeaving.Cpp2CS
             }
             UTypeManager.WritePInvokeAttribute(this, null);
             AddLine($"extern static void TSDK_{mClass.VisitorPInvoke}_UnsafeCallDestructor(void* self);");
+        }
+
+        protected override void GenCast()
+        {
+            if (mClass.BaseTypes.Count == 1)
+            {
+                var bType = mClass.BaseTypes[0];
+                AddLine($"public {bType.ToCsName()}* CastSuper()");
+                PushBrackets();
+                {
+                    var invoke = $"TSDK_{mClass.VisitorPInvoke}_CastTo_{bType.ToCppName().Replace("::", "_")}";
+                    BeginInvoke(bType);
+                    AddLine($"return {invoke}(mPointer);");
+                    EndInvoke(bType);
+                }
+                PopBrackets();
+
+                AddLine($"public {bType.ToCsName()}* NativeSuper");
+                PushBrackets();
+                {
+                    AddLine($"get {{ return CastSuper(); }}");
+                }
+                PopBrackets();
+                return;
+            }
+            else
+            {
+                foreach (var i in mClass.BaseTypes)
+                {
+                    AddLine($"public {i.ToCsName()}* CastTo_{i.ToCppName().Replace("::", "_")}()");
+                    PushBrackets();
+                    {
+                        var invoke = $"TSDK_{mClass.VisitorPInvoke}_CastTo_{i.ToCppName().Replace("::", "_")}";
+                        BeginInvoke(i);
+                        AddLine($"return {invoke}(mPointer);");
+                        EndInvoke(i);
+                    }
+                    PopBrackets();
+                }
+            }
         }
     }
 }

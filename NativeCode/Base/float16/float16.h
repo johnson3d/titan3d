@@ -252,9 +252,7 @@ private:
 // results if they are.
 //-------------------------------------------------------------------------
 
-#define PLATFORM_WINDOWS
-
-#if defined(PLATFORM_WINDOWS)
+#if defined(PLATFORM_WIN)
 
 #define FLOAT16_MIN	5.96046448e-08f	// Smallest positive float16
 

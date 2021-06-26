@@ -8,7 +8,7 @@
 #define PCH_H
 
 // 添加要在此处预编译的标头
-#include "framework.h"
+//#include "framework.h"
 #include "../NativeCode/Base/BaseHead.h"
 #include "../NativeCode/Base/CoreRtti.h"
 #include "../NativeCode/Base/CSharpAPI.h"

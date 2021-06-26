@@ -4,20 +4,21 @@ using SDL2;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public class UViewportSlate : IEventProcessor, Editor.IRootForm
+    public class UViewportSlate : IEventProcessor, IRootForm
     {
         public UViewportSlate(bool regRoot)
         {
             if (regRoot)
                 Editor.UMainEditorApplication.RegRootForm(this);
         }
-        public string Title { get; set; } = "Game";
-        public bool Visible { get; set; } = true;
+        public virtual string Title { get; set; } = "Game";
+        protected bool mVisible = true;
+        public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; }
-        public Vector2 ViewportPos { get; private set; }
-        public Vector2 WindowPos { get; private set; }
-        public Vector2 ClientMin { get; private set; }
-        public Vector2 ClientMax { get; private set; }
+        public Vector2 ViewportPos { get; protected set; }
+        public Vector2 WindowPos { get; protected set; }
+        public Vector2 ClientMin { get; protected set; }
+        public Vector2 ClientMax { get; protected set; }
         public Vector2 ClientSize
         {
             get
@@ -34,16 +35,16 @@ namespace EngineNS.Graphics.Pipeline
             tmp.Y = pos.Y - (int)(WindowPos.Y + ClientMin.Y - ViewportPos.Y);
             return tmp;
         }
-        private bool mClientChanged = false;
-        private bool mSizeChanged = false;
+        protected bool mClientChanged = false;
+        protected bool mSizeChanged = false;
         public bool IsValidClientArea()
         {
             return (ClientSize.X > 1 && ClientSize.Y > 1);
         }
-        public bool IsFocused { get; private set; }
-        public bool IsDrawing { get; private set; }
+        public bool IsFocused { get; protected set; }
+        public bool IsDrawing { get; protected set; }
 
-        private Graphics.Pipeline.UPresentWindow mPresentWindow;
+        protected Graphics.Pipeline.UPresentWindow mPresentWindow;
         public bool ShowCloseButton = false;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public virtual unsafe void OnDraw()
@@ -55,8 +56,7 @@ namespace EngineNS.Graphics.Pipeline
             bool bShow;
             if (ShowCloseButton)
             {
-                var visible = Visible;
-                bShow = ImGuiAPI.Begin(Title, ref visible, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
+                bShow = ImGuiAPI.Begin(Title, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
             }
             else
             {
@@ -139,6 +139,14 @@ namespace EngineNS.Graphics.Pipeline
                 mClientChanged = false;
                 mSizeChanged = false;
             }
+            if (mVisible == false)
+            {
+                OnVieportClosed();
+            }
+        }
+        protected virtual void OnVieportClosed()
+        {
+
         }
         protected virtual void OnClientChanged(bool bSizeChanged)
         {
@@ -175,18 +183,6 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     edtorPolicy.PickedProxiableManager.Selected(proxy);
                 }
-            }
-            if (proxy == null)
-            {
-                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
-                mainEditor.WorldViewportSlate.ShowBoundVolumes(false, null);
-                return;
-            }
-            var node = proxy as GamePlay.Scene.UNode;
-            if (node != null)
-            {
-                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
-                mainEditor.WorldViewportSlate.ShowBoundVolumes(true, node);
             }
         }
     }

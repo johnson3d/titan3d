@@ -25,38 +25,38 @@ namespace AssetImportAndExport
             {
                 get
                 {
-                    return mInner->NativeSuper.Name;
+                    return mInner->NativeSuper->Name;
                 }
             }
             public AssetImportAndExport.FBX.EFBXObjectType Type
             {
                 get
                 {
-                    return mInner->NativeSuper.Type;
+                    return mInner->NativeSuper->Type;
                 }
             }
             public float Scale
             {
                 get
                 {
-                    return mInner->NativeSuper.Scale;
+                    return mInner->NativeSuper->Scale;
                 }
                 set
                 {
                     var super = mInner->NativeSuper;
-                    super.Scale = value;
+                    super->Scale = value;
                 }
             }
             public bool Imported
             {
                 get
                 {
-                    return mInner->NativeSuper.Imported;
+                    return mInner->NativeSuper->Imported;
                 }
                 set
                 {
                     var super = mInner->NativeSuper;
-                    super.Imported = value;
+                    super->Imported = value;
                 }
             }
             public bool ReCalculateTangent

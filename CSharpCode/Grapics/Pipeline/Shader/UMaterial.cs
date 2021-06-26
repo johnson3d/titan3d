@@ -5,7 +5,7 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Shader
 {
     [Rtti.Meta]
-    public class UMaterialAMeta : IO.IAssetMeta
+    public partial class UMaterialAMeta : IO.IAssetMeta
     {
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {

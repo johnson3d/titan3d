@@ -6,7 +6,7 @@
 Texture2D SourceTexture;
 SamplerState Samp_SourceTexture;
 
-PS_INPUT VS_Main( VS_INPUT input )
+PS_INPUT VS_Main(VS_INPUT input)
 {
 	PS_INPUT output = (PS_INPUT)0;
 
@@ -31,7 +31,7 @@ struct PS_OUTPUT
 	half2 RT0 : SV_Target0;
 };
 
-PS_OUTPUT PS_Main( PS_INPUT input )
+PS_OUTPUT PS_Main(PS_INPUT input)
 {
 	PS_OUTPUT output = (PS_OUTPUT)0;
 
@@ -41,7 +41,7 @@ PS_OUTPUT PS_Main( PS_INPUT input )
 	half2 P2 = SourceTexture.Sample(Samp_SourceTexture, input.psCustomUV0.zw).rg;
 	half2 P3 = SourceTexture.Sample(Samp_SourceTexture, input.psCustomUV1.xy).rg;
 	half2 P4 = SourceTexture.Sample(Samp_SourceTexture, input.psCustomUV1.zw).rg;
-	
+
 	half2 P5 = SourceTexture.Sample(Samp_SourceTexture, input.psCustomUV2.xy).rg;
 	half2 P6 = SourceTexture.Sample(Samp_SourceTexture, input.psCustomUV2.zw).rg;
 	half2 P7 = SourceTexture.Sample(Samp_SourceTexture, input.psCustomUV3.xy).rg;
@@ -54,3 +54,5 @@ PS_OUTPUT PS_Main( PS_INPUT input )
 
 	return output;
 }
+
+///

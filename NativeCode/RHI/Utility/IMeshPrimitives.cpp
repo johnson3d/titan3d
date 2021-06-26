@@ -772,7 +772,7 @@ void IMeshDataProvider::Cleanup()
 
 vBOOL IMeshDataProvider::ToMesh(IRenderContext* rc, IMeshPrimitives* mesh)
 {
-	auto geom = mesh->GetGeomtryMesh();
+	//auto geom = mesh->GetGeomtryMesh();
 	UINT resSize = 0;
 	for (int i = 0; i < VST_Number; i++)
 	{

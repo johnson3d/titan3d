@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3909655120 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassMemberVar@EngineCore">
+  <DefClass Type="EngineNS.Bricks.CodeBuilder.DefineClass@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <Position Type="EngineNS.Vector2@EngineCore" Order="0" />
+  <MemberName Type="System.String@Unknown" Order="1" />
+</Hash_3909655120>

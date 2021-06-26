@@ -14,12 +14,14 @@ namespace CppWeaving
             ExpFlags.Add("TR_ENUM");
             ExpFlags.Add("TR_CALLBACK");
         }
+        public HppCollector.HppUnit Hpp;
         public ClangSharp.TranslationUnit mTransUnit;
 		public List<string> mUsings;
         public static List<string> ExpFlags = new List<string>();
-        public bool CreateTU(string file, List<string> includePath, List<string> macros)
+        public bool CreateTU(HppCollector.HppUnit file, List<string> includePath, List<string> macros)
         {
-            var allCode = System.IO.File.ReadAllText(file);
+            Hpp = file;
+            var allCode = System.IO.File.ReadAllText(file.File);
             bool findExp = false;
             foreach(var i in ExpFlags)
             {
@@ -52,7 +54,7 @@ namespace CppWeaving
                 args.Add($"-D{i}");
             }
             string[] DefaultClangCommandLineArgs = args.ToArray();
-            var translationUnit = ClangSharp.Interop.CXTranslationUnit.Parse(index, file, DefaultClangCommandLineArgs, Array.Empty<ClangSharp.Interop.CXUnsavedFile>(), DefaultTranslationUnitFlags);
+            var translationUnit = ClangSharp.Interop.CXTranslationUnit.Parse(index, file.File, DefaultClangCommandLineArgs, Array.Empty<ClangSharp.Interop.CXUnsavedFile>(), DefaultTranslationUnitFlags);
 
             if (translationUnit.NumDiagnostics != 0)
             {

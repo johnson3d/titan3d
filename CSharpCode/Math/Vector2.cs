@@ -130,7 +130,7 @@ namespace EngineNS
         {
             get { return mZero; }
         }
-        static Vector2 mZero = new Vector2(0, 0);
+        internal static Vector2 mZero = new Vector2(0, 0);
         [Rtti.Meta]
         public static Vector2 UnitX { get { return mUnitX; } }
         public static Vector2 mUnitX = new Vector2(1, 0);

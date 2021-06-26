@@ -5,23 +5,72 @@ using SDL2;
 
 namespace EngineNS.Graphics.Pipeline
 {
+    public interface IRootForm
+    {
+        bool Visible { get; set; }
+        void OnDraw();
+        uint DockId { get; set; }
+        ImGuiCond_ DockCond { get; set; }
+    }
     public class USlateApplication
     {
+        #region RootForms
+        private static List<IRootForm> AppendForms { get; } = new List<IRootForm>();
+        private static List<IRootForm> RootForms { get; } = new List<IRootForm>();
+        public static void RegRootForm(IRootForm form)
+        {
+            if (AppendForms.Contains(form))
+                return;
+            if (RootForms.Contains(form))
+                return;
+            AppendForms.Add(form);
+        }
+        public static void UnregRootForm(IRootForm form)
+        {
+            AppendForms.Remove(form);
+            RootForms.Remove(form);
+        }
+        public static void DrawRootForms()
+        {
+            foreach (var i in AppendForms)
+            {
+                RootForms.Add(i);
+            }
+            AppendForms.Clear();
+
+            foreach (var i in RootForms)
+            {
+                if (i.Visible == false)
+                    continue;
+                i.OnDraw();
+            }
+        }
+        public static void ClearRootForms()
+        {
+            AppendForms.Clear();
+            RootForms.Clear();
+        }
+        #endregion
+
         public UPresentWindow NativeWindow;
-        
+        public virtual EGui.Slate.UWorldViewportSlate GetWorldViewportSlate() { return null; }
+
         public IntPtr mImGuiContext;
         public EGui.UDockWindowSDL.UImDrawDataRHI mDrawData = new EGui.UDockWindowSDL.UImDrawDataRHI();
         
         bool[] MousePressed = new bool[3] { false, false, false };
         IntPtr[] MouseCursors = new IntPtr[(int)ImGuiMouseCursor_.ImGuiMouseCursor_COUNT];
 
-        public bool CreateNativeWindow(string title, int x, int y, int w, int h)
+        public bool CreateNativeWindow(UEngine engine, string title, int x, int y, int w, int h)
         {
             NativeWindow = new UPresentWindow();
             SDL.SDL_WindowFlags sdl_flags = 0;
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
-            sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN;
-            sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
+            if (engine.Config.SupportMultWindows)
+            {
+                sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN;
+                sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS;
+            }
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
             return NativeWindow.CreateNativeWindow(title, x, y, w, h, sdl_flags) != IntPtr.Zero;
         }
@@ -44,7 +93,8 @@ namespace EngineNS.Graphics.Pipeline
                 configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
                 //configFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
                 configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_DockingEnable;           // Enable Docking
-                configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+                if (UEngine.Instance.Config.SupportMultWindows)
+                    configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
                 //io.ConfigViewportsNoAutoMerge = true;
                 //io.ConfigViewportsNoTaskBarIcon = true;
                 io.ConfigFlags = configFlags;
@@ -109,35 +159,35 @@ namespace EngineNS.Graphics.Pipeline
 
             io.BackendPlatformName = "imgui_impl_sdl";
 
-            // Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_Tab] = (int)SDL.SDL_Scancode.SDL_SCANCODE_TAB;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_LeftArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_LEFT;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_RightArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_RIGHT;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_UpArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_UP;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_DownArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_DOWN;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_PageUp] = (int)SDL.SDL_Scancode.SDL_SCANCODE_PAGEUP;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_PageDown] = (int)SDL.SDL_Scancode.SDL_SCANCODE_PAGEDOWN;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_Home] = (int)SDL.SDL_Scancode.SDL_SCANCODE_HOME;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_End] = (int)SDL.SDL_Scancode.SDL_SCANCODE_END;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_Insert] = (int)SDL.SDL_Scancode.SDL_SCANCODE_INSERT;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_Delete] = (int)SDL.SDL_Scancode.SDL_SCANCODE_DELETE;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_Backspace] = (int)SDL.SDL_Scancode.SDL_SCANCODE_BACKSPACE;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_Space] = (int)SDL.SDL_Scancode.SDL_SCANCODE_SPACE;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_Enter] = (int)SDL.SDL_Scancode.SDL_SCANCODE_RETURN;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_Escape] = (int)SDL.SDL_Scancode.SDL_SCANCODE_ESCAPE;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_KeyPadEnter] = (int)SDL.SDL_Scancode.SDL_SCANCODE_KP_ENTER;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_A] = (int)SDL.SDL_Scancode.SDL_SCANCODE_A;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_C] = (int)SDL.SDL_Scancode.SDL_SCANCODE_C;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_V] = (int)SDL.SDL_Scancode.SDL_SCANCODE_V;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_X] = (int)SDL.SDL_Scancode.SDL_SCANCODE_X;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_Y] = (int)SDL.SDL_Scancode.SDL_SCANCODE_Y;
-            io.UnsafeAsLayout->KeyMap[(int)ImGuiKey_.ImGuiKey_Z] = (int)SDL.SDL_Scancode.SDL_SCANCODE_Z;
-
-            //ImGuiAPI.GetClipboardTextSetter(io.Ptr, GetClipboardTextFn);
-            //ImGuiAPI.SetClipboardTextSetter(io, SetClipboardTextFn);
             io.SetClipboardTextFn = EGui.UDockWindowSDL.ImGui_ImplSDL2_SetClipboardText;
             io.GetClipboardTextFn = EGui.UDockWindowSDL.ImGui_ImplSDL2_GetClipboardText;
             io.ClipboardUserData = (void*)0;
+
+            var pKeyMap = (int*)&io.UnsafeAsLayout->KeyMap;
+            // Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_Tab] = (int)SDL.SDL_Scancode.SDL_SCANCODE_TAB;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_LeftArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_LEFT;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_RightArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_RIGHT;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_UpArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_UP;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_DownArrow] = (int)SDL.SDL_Scancode.SDL_SCANCODE_DOWN;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_PageUp] = (int)SDL.SDL_Scancode.SDL_SCANCODE_PAGEUP;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_PageDown] = (int)SDL.SDL_Scancode.SDL_SCANCODE_PAGEDOWN;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_Home] = (int)SDL.SDL_Scancode.SDL_SCANCODE_HOME;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_End] = (int)SDL.SDL_Scancode.SDL_SCANCODE_END;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_Insert] = (int)SDL.SDL_Scancode.SDL_SCANCODE_INSERT;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_Delete] = (int)SDL.SDL_Scancode.SDL_SCANCODE_DELETE;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_Backspace] = (int)SDL.SDL_Scancode.SDL_SCANCODE_BACKSPACE;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_Space] = (int)SDL.SDL_Scancode.SDL_SCANCODE_SPACE;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_Enter] = (int)SDL.SDL_Scancode.SDL_SCANCODE_RETURN;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_Escape] = (int)SDL.SDL_Scancode.SDL_SCANCODE_ESCAPE;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_KeyPadEnter] = (int)SDL.SDL_Scancode.SDL_SCANCODE_KP_ENTER;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_A] = (int)SDL.SDL_Scancode.SDL_SCANCODE_A;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_C] = (int)SDL.SDL_Scancode.SDL_SCANCODE_C;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_V] = (int)SDL.SDL_Scancode.SDL_SCANCODE_V;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_X] = (int)SDL.SDL_Scancode.SDL_SCANCODE_X;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_Y] = (int)SDL.SDL_Scancode.SDL_SCANCODE_Y;
+            pKeyMap[(int)ImGuiKey_.ImGuiKey_Z] = (int)SDL.SDL_Scancode.SDL_SCANCODE_Z;
+
 
             //// Load mouse cursors
             MouseCursors[(int)ImGuiMouseCursor_.ImGuiMouseCursor_Arrow] = SDL.SDL_CreateSystemCursor(SDL.SDL_SystemCursor.SDL_SYSTEM_CURSOR_ARROW);
@@ -197,10 +247,10 @@ namespace EngineNS.Graphics.Pipeline
 
             int mx, my;
             var mouse_buttons = SDL.SDL_GetMouseState(out mx, out my);
-            var pIOStruct = io.UnsafeAsLayout;
-            pIOStruct->MouseDown[0] = (MousePressed[0] || (mouse_buttons & SDL.SDL_BUTTON(SDL.SDL_BUTTON_LEFT)) != 0);
-            pIOStruct->MouseDown[1] = (MousePressed[1] || (mouse_buttons & SDL.SDL_BUTTON(SDL.SDL_BUTTON_RIGHT)) != 0);
-            pIOStruct->MouseDown[2] = (MousePressed[2] || (mouse_buttons & SDL.SDL_BUTTON(SDL.SDL_BUTTON_MIDDLE)) != 0);
+            var mouseDown = (bool*)&io.UnsafeAsLayout->MouseDown;
+            mouseDown[0] = (MousePressed[0] || (mouse_buttons & SDL.SDL_BUTTON(SDL.SDL_BUTTON_LEFT)) != 0);
+            mouseDown[1] = (MousePressed[1] || (mouse_buttons & SDL.SDL_BUTTON(SDL.SDL_BUTTON_RIGHT)) != 0);
+            mouseDown[2] = (MousePressed[2] || (mouse_buttons & SDL.SDL_BUTTON(SDL.SDL_BUTTON_MIDDLE)) != 0);
             MousePressed[0] = MousePressed[1] = MousePressed[2] = false;
 
             if (g_MouseCanUseGlobalState)
@@ -303,8 +353,12 @@ namespace EngineNS.Graphics.Pipeline
                 ImGuiAPI.Render();
                 unsafe
                 {
-                    var draw_data = ImGuiAPI.GetDrawData();
-                    EGui.UDockWindowSDL.RenderImDrawData(ref *draw_data, NativeWindow.SwapChainBuffer, mDrawData);
+                    if (UEngine.Instance.Config.SupportMultWindows == false)
+                    {
+                        var draw_data = ImGuiAPI.GetDrawData();
+                        EGui.UDockWindowSDL.RenderImDrawData(ref *draw_data, NativeWindow.SwapChainBuffer, mDrawData);
+                        NativeWindow.SwapChain.mCoreObject.Present(0, 0);
+                    }
                 }
 
                 // Update and Render additional Platform Windows

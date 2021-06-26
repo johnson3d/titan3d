@@ -87,14 +87,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
             XndNode psNode = new XndNode();
             unsafe
             {
-                descAttr.UnsafeSetPointer(xnd.RootNode.mCoreObject.TryGetAttribute("Desc"));
-                if (descAttr.NativePointer == IntPtr.Zero)
+                descAttr = xnd.RootNode.mCoreObject.TryGetAttribute("Desc");
+                if (descAttr.IsValidPointer == false)
                     return null;
-                vsNode.UnsafeSetPointer(xnd.RootNode.mCoreObject.TryGetChildNode("VSCode"));
-                if (vsNode.NativePointer == IntPtr.Zero)
+                vsNode = xnd.RootNode.mCoreObject.TryGetChildNode("VSCode");
+                if (vsNode.IsValidPointer == false)
                     return null;
-                psNode.UnsafeSetPointer(xnd.RootNode.mCoreObject.TryGetChildNode("PSCode"));
-                if (psNode.NativePointer == IntPtr.Zero)
+                psNode = xnd.RootNode.mCoreObject.TryGetChildNode("PSCode");
+                if (psNode.IsValidPointer == false)
                     return null;
             }
             
@@ -138,11 +138,19 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (result == null)
                 return null;
 
-            var VertexShader = rc.CreateVertexShader(result.DescVS);
-            if (VertexShader == null)
-                return null;
-            var PixelShader = rc.CreatePixelShader(result.DescPS);
-            if (PixelShader == null)
+            RHI.CVertexShader VertexShader = null;
+            RHI.CPixelShader PixelShader = null;
+            bool created = await UEngine.Instance.EventPoster.Post(() =>
+            {
+                VertexShader = rc.CreateVertexShader(result.DescVS);
+                if (VertexShader == null)
+                    return false;
+                PixelShader = rc.CreatePixelShader(result.DescPS);
+                if (PixelShader == null)
+                    return false;
+                return true;
+            }, Thread.Async.EAsyncTarget.Render);
+            if (created == false)
                 return null;
 
             VertexShader.mCoreObject.NativeSuper.NativeSuper.SetDebugName($"VS:{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
@@ -157,11 +165,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 InputLayout = rc.CreateInputLayout(layoutDesc);
 
                 CoreSDK.IUnknown_Release(layoutDesc.NativePointer.ToPointer());
-            }
 
-            var progDesc = new IShaderProgramDesc();
-            unsafe
-            {
+                var progDesc = new IShaderProgramDesc();
+
                 progDesc.InputLayout = InputLayout.mCoreObject;
                 progDesc.VertexShader = VertexShader.mCoreObject;
                 progDesc.PixelShader = PixelShader.mCoreObject;
@@ -191,10 +197,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var defines = new RHI.CShaderDefinitions();
             shading.GetShaderDefines(permutationId, defines);
 
+            var cfg = UEngine.Instance.Config;
             result.DescVS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material.AssetName, mdf.GetType(), defines, true, true, false, false);
+                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material.AssetName, mdf.GetType(), defines, true);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (result.DescVS == null)
                 return null;
@@ -202,16 +209,24 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.DescPS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material.AssetName, mdf.GetType(), defines, true, true, false, false);
+                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material.AssetName, mdf.GetType(), defines, true);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (result.DescPS == null)
                 return null;
 
-            var VertexShader = rc.CreateVertexShader(result.DescVS);
-            if (VertexShader == null)
-                return null;
-            var PixelShader = rc.CreatePixelShader(result.DescPS);
-            if (PixelShader == null)
+            RHI.CVertexShader VertexShader = null;
+            RHI.CPixelShader PixelShader = null;
+            bool created = await UEngine.Instance.EventPoster.Post(() =>
+            {
+                VertexShader = rc.CreateVertexShader(result.DescVS);
+                if (VertexShader == null)
+                    return false;
+                PixelShader = rc.CreatePixelShader(result.DescPS);
+                if (PixelShader == null)
+                    return false;
+                return true;
+            }, Thread.Async.EAsyncTarget.Render);
+            if (created == false)
                 return null;
 
             RHI.CInputLayout InputLayout = null;
@@ -220,7 +235,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 uint inputStreams = 0;
                 mdf.mCoreObject.GetInputStreams(ref inputStreams);
                 var layoutDesc = new IInputLayoutDesc();
-                layoutDesc.UnsafeSetPointer(IMesh.CreateInputLayoutDesc(inputStreams));
+                layoutDesc = IMesh.CreateInputLayoutDesc(inputStreams);
                 layoutDesc.SetShaderDesc(result.DescVS.mCoreObject);
                 UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, layoutDesc);
                 InputLayout = rc.CreateInputLayout(layoutDesc);
@@ -266,7 +281,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var descVS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material.AssetName, mdfType.SystemType, defines, true, true, false, false);
+                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material.AssetName, mdfType.SystemType, defines, true);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (descVS == null)
                 return false;
@@ -274,7 +289,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var descPS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material.AssetName, mdfType.SystemType, defines, true, true, false, false);
+                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material.AssetName, mdfType.SystemType, defines, true);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (descPS == null)
                 return false;

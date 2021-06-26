@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.WorldSimulator.GOAP
 {
-    public class IItem
+    public partial class IItem
     {
         [Rtti.Meta]
         public virtual string Name
@@ -24,7 +24,7 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
         public T MaxValue;
         public T MinValue;
     }
-    public class IItemContain : IItem
+    public partial class IItemContain : IItem
     {
         public List<IItem> Items { get; } = new List<IItem>();
         [Rtti.Meta]
@@ -57,7 +57,7 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
         }
     }
 
-    public class IInventory
+    public partial class IInventory
     {
         public Dictionary<string, IItem> Items { get; } = new Dictionary<string, IItem>();
         [Rtti.Meta]

@@ -36,7 +36,6 @@ public:
 	std::vector<TextureBindInfo>		mTextures;
 	std::vector<SamplerBindInfo>		mSamplers;*/
 
-	GLuint								mVBSlotMapper[16];
 	vBOOL								mNoPSProfilering;
 public:
 	bool Init(IGLRenderContext* rc, const IShaderProgramDesc* desc);

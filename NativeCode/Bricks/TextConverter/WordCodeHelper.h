@@ -5,9 +5,7 @@
 #if defined(PLATFORM_WIN)
 #pragma warning(disable:4819)
 #include "../../../3rd/native/iconv/iconv.h"
-#elif defined(PLATFORM_DROID)
-#include "../../../3rd/native/iconv/iconv.h"
-#elif defined(PLATFORM_IOS)
+#else
 #include <iconv.h>
 #endif
 

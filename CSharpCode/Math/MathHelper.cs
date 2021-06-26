@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace EngineNS
 {
-    public class CustomConvert
+    public partial class CustomConvert
     {
         #region float
         [Rtti.Meta]
@@ -629,7 +629,7 @@ namespace EngineNS
         #endregion
     }
 
-    public class MathHelper
+    public partial class MathHelper
     {
         public const float V_PI = ((float)3.1415926535);
         [Rtti.Meta]
@@ -746,7 +746,6 @@ namespace EngineNS
                 return max;
             return value;
         }
-        [Rtti.Meta]
         public static T Clamp<T>(T value, T min, T max) where T : System.IComparable<T>
         {
             T result = value;

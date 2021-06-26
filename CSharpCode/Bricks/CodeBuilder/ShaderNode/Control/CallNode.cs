@@ -5,7 +5,7 @@ using System.Text;
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 {
     [Rtti.Meta]
-    public class HLSLMethod
+    public partial class HLSLMethod
     {
         [Rtti.Meta]
         [UserCallNode(CallNodeType = typeof(SampleLevel2DNode))]

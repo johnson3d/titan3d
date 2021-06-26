@@ -51,7 +51,8 @@ void IGLSwapChain::BindCurrent()
 		return;
 #if defined(PLATFORM_WIN)
 	wglMakeCurrent(mDC, rc->mContext);
-	GLCheck;
+	//wglMakeCurrent(mDC, (HGLRC)&rc->mContextAttributeList[0]);
+	//GLCheck;
 #else
 	eglMakeCurrent(rc->mEglDisplay, mEglSurface, mEglSurface, rc->mEglContext);
 	GLCheck;
@@ -62,6 +63,10 @@ void IGLSwapChain::Present(UINT SyncInterval, UINT Flags)
 {
 	AUTO_SAMP("Native.ISwapChain.Present");
 	
+	auto rc = mRenderContext.GetPtr();
+	if (rc == nullptr)
+		return;
+
 	BindCurrent();
 
 	/*auto rc = (IGLRenderContext*)mRenderContext.GetPtr();
@@ -77,10 +82,8 @@ void IGLSwapChain::Present(UINT SyncInterval, UINT Flags)
 	rc->SwapImmCmdList();*/
 #if defined(PLATFORM_WIN)
 	SwapBuffers(mDC);
+	//SwapBuffers(mDC);
 #else
-	auto rc = mRenderContext.GetPtr();
-	if (rc == nullptr)
-		return;
 	auto mEglDisplay = rc->mEglDisplay;
 	eglSwapBuffers(mEglDisplay, mEglSurface);
 #endif
@@ -224,16 +227,16 @@ bool IGLSwapChain::Init(IGLRenderContext* rc, const ISwapChainDesc* desc)
 
 	//const int iPixelFormatAttributeList[] =
 	//{
-	//	WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,                        // ���Ƶ�����
-	//	WGL_SUPPORT_OPENGL_ARB, GL_TRUE,                            // ֧��OpenGL
-	//	WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,        // Ӳ������
-	//	WGL_DOUBLE_BUFFER_ARB, GL_TRUE,                            // ˫����
-	//	WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,                    // RGBA
-	//	WGL_COLOR_BITS_ARB, 32,                                    // ��ɫλ��32
-	//	WGL_DEPTH_BITS_ARB, 24,                                    // ���λ��24
-	//	WGL_STENCIL_BITS_ARB, 8,                                    // ģ��λ��8
-	//	WGL_SWAP_METHOD_ARB, WGL_SWAP_EXCHANGE_ARB,                // ˫����swap��ʽֱ�ӽ���
-	//	WGL_SAMPLES_ARB, 4,                                // 4�������
+	//	WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+	//	WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+	//	WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
+	//	WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+	//	WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
+	//	WGL_COLOR_BITS_ARB, 32,
+	//	WGL_DEPTH_BITS_ARB, 24,
+	//	WGL_STENCIL_BITS_ARB, 8,
+	//	WGL_SWAP_METHOD_ARB, WGL_SWAP_EXCHANGE_ARB,
+	//	WGL_SAMPLES_ARB, 4,
 	//	0
 	//};
 
@@ -256,7 +259,7 @@ bool IGLSwapChain::Init(IGLRenderContext* rc, const ISwapChainDesc* desc)
 			ShowLastErrorMessage(error);
 		}
 #if defined _DEBUG
-		return false;//��Ҳ����֣�release���ﷵ��0��Ȼ����滹����ȷ
+		return false;
 #endif
 	}
 	::wglMakeCurrent(mDC, rc->mContext);

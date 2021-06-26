@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UCpuProfiler : IRootForm
+    public class UCpuProfiler : Graphics.Pipeline.IRootForm
     {
         public UCpuProfiler()
         {

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UWorldOutliner : UTreeNodeDrawer, IRootForm
+    public class UWorldOutliner : UTreeNodeDrawer, Graphics.Pipeline.IRootForm
     {
         GamePlay.UWorld mWorld;
         public UWorldOutliner()

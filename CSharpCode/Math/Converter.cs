@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS
 {
-    public class Converter
+    public partial class Converter
     {
         [Rtti.Meta]
         public static string ToString(float value)

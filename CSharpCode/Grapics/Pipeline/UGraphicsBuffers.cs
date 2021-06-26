@@ -30,7 +30,7 @@ namespace EngineNS.Graphics.Pipeline
         public RHI.CShaderResourceView DepthStencilSRV;
         public RHI.CShaderResourceView[] GBufferSRV;
         public RHI.CConstantBuffer PerViewportCBuffer;
-        public int SwapChainIndex = -1;
+        public int SwapChainIndex { get; set; } = -1;
         public void SureCBuffer(Shader.UEffect effect, string debugName)
         {
             if (effect.CBPerViewportIndex != 0xFFFFFFFF)
@@ -76,8 +76,12 @@ namespace EngineNS.Graphics.Pipeline
 
             GBufferSRV = new RHI.CShaderResourceView[NumOfGBuffer];
             var fbDesc = new IFrameBuffersDesc();
-            fbDesc.IsSwapChainBuffer = 1;
-            fbDesc.UseDSV = 1;
+            if (SwapChainIndex < 0)
+                fbDesc.IsSwapChainBuffer = 0;
+            else
+                fbDesc.IsSwapChainBuffer = 1;
+            if (dsFormat != EPixelFormat.PXF_UNKNOWN)
+                fbDesc.UseDSV = 1;
             FrameBuffers = rc.CreateFrameBuffers(ref fbDesc);
 
             if (dsFormat == EPixelFormat.PXF_UNKNOWN)

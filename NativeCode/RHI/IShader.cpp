@@ -124,7 +124,7 @@ UINT IShaderDesc::FindSamplerDesc(const char* name)
 void IShaderDesc::Save2Xnd(XndNode* node, DWORD platforms)
 {
 	UINT len = 0;
-	if (platforms&PLTF_Windows)
+	if (/*platforms & PLTF_Windows && */Codes.size() > 0)
 	{
 		auto dxbc = node->GetOrAddAttribute("DXBC", 0, 0);
 		dxbc->BeginWrite();
@@ -134,7 +134,7 @@ void IShaderDesc::Save2Xnd(XndNode* node, DWORD platforms)
 		dxbc->EndWrite();
 	}
 
-	if (platforms&PLTF_Android)
+	if (/*platforms & PLTF_Android && */Es300Code.size() > 0)
 	{
 		auto gles = node->GetOrAddAttribute("ES300", 0, 0);
 		gles->BeginWrite();
@@ -144,7 +144,7 @@ void IShaderDesc::Save2Xnd(XndNode* node, DWORD platforms)
 		gles->EndWrite();
 	}
 
-	if (platforms&PLTF_AppleIOS)
+	if (/*platforms&PLTF_AppleIOS && */MetalCode.size() > 0)
 	{
 		auto metal = node->GetOrAddAttribute("METAL", 0, 0);
 		metal->BeginWrite();

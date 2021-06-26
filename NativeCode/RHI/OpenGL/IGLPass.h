@@ -6,6 +6,17 @@ NS_BEGIN
 
 class IGLCommandList;
 
+class IGLGeometryMesh : public IGeometryMesh
+{
+public:
+	~IGLGeometryMesh()
+	{
+		mVertexArray.reset();
+	}
+	std::shared_ptr<GLSdk::GLBufferId>				mVertexArray;
+	virtual vBOOL ApplyGeometry(ICommandList* cmd, IDrawCall* pass, vBOOL bImm) override;
+};
+
 class IGLDrawCall : public IDrawCall
 {
 public:
@@ -39,8 +50,6 @@ public:
 	virtual vBOOL ApplyGeomtry(ICommandList* cmd, vBOOL bImmCBuffer) override;
 public:
 	bool Init(IRenderContext* rc, const IDrawCallDesc* desc);
-	std::shared_ptr<GLSdk::GLBufferId>				mVertexArray;
-	void ApplyVertexArray(IGLCommandList* cmd, vBOOL bImmCBuffer);
 };
 
 NS_END

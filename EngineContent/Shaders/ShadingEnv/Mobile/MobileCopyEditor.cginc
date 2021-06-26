@@ -42,6 +42,9 @@ PS_INPUT VS_Main(VS_INPUT input)
 
 	output.vPosition = float4(input.vPosition.xyz, 1.0f);
 	output.vUV = input.vUV;
+#if RHI_OGL==1
+	output.vUV.y = 1 - input.vUV.y;
+#endif
 	output.vLightMap.xy = gSunPosNDC.xy - input.vPosition.xy;
 	output.vLightMap.z = gSunPosNDC.z;
 	output.vLightMap.w = gSunPosNDC.w;

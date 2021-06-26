@@ -4,11 +4,11 @@ using System.Text;
 
 namespace EngineNS.Animation.Skeleton
 {
-    public class USocketDesc : IO.BaseSerializer, ILimbDesc
+    public partial class USocketDesc : IO.BaseSerializer, ILimbDesc
     {
         public VNameString Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
-    public class USocket : IO.BaseSerializer, ILimb
+    public partial class USocket : IO.BaseSerializer, ILimb
     {
         public USocket()
         {

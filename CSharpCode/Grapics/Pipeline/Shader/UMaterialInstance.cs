@@ -5,7 +5,7 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Shader
 {
     [Rtti.Meta]
-    public class UMaterialInstanceAMeta : IO.IAssetMeta
+    public partial class UMaterialInstanceAMeta : IO.IAssetMeta
     {
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -20,7 +20,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     [Rtti.Meta]
     [UMaterialInstance.MaterialInstanceImport]
     [IO.AssetCreateMenu(MenuName = "MaterialInstance")]
-    public class UMaterialInstance : UMaterial
+    public partial class UMaterialInstance : UMaterial
     {
         public new const string AssetExt = ".uminst";
 

@@ -66,23 +66,26 @@ MemStreamWriter : public IStreamWriter
 	UINT64					mBufferSize;
 	UINT64					mPosition;
 public:
-	TR_CONSTRUCTOR()
 	MemStreamWriter();
+	MemStreamWriter(UINT size);
 	~MemStreamWriter();
 
-	TR_FUNCTION()
-	void ResetStream(UINT64 size = 0);
-	TR_FUNCTION()
+	TR_FUNCTION(SV_SuppressGC = true)
+	void ResetBufferSize(UINT64 size = 0);
+	TR_FUNCTION(SV_SuppressGC = true)
 	inline void* GetDataPointer() {
 		return &mDataStream[0];
 	}
-	TR_FUNCTION()
+	TR_FUNCTION(SV_SuppressGC = true)
+	virtual UINT64 GetLength() const {
+		return mBufferSize;
+	}
+	TR_FUNCTION(SV_SuppressGC = true)
 	virtual UINT64 Tell() {
 		return mPosition;
 	}
-	TR_FUNCTION()
+	TR_FUNCTION(SV_SuppressGC = true)
 	virtual bool Seek(UINT64 offset);
-	TR_FUNCTION()
 	virtual void Write(const void* pSrc, UINT t);
 	template<typename _Type>
 	void Write(const _Type& v)
@@ -104,7 +107,6 @@ MemStreamReader : public IStreamReader
 	UINT64					mLength;
 	UINT64					mPosition;
 public:
-	TR_CONSTRUCTOR()
 	MemStreamReader()
 		: mProxyPointer(nullptr)
 		, mLength(0)
@@ -112,29 +114,32 @@ public:
 	{
 
 	}
-	TR_FUNCTION()
+	TR_FUNCTION(SV_SuppressGC = true)
 	void ProxyPointer(BYTE* ptr, UINT64 len)
 	{
 		mProxyPointer = ptr;
 		mLength = len;
 		mPosition = 0;
 	}
-	TR_FUNCTION()
 	void Cleanup()
 	{
 		mProxyPointer = nullptr;
 		mLength = 0;
 		mPosition = 0;
 	}
-	TR_FUNCTION()
+	TR_FUNCTION(SV_SuppressGC = true)
+	BYTE* GetPointer() {
+		return mProxyPointer;
+	}
+	TR_FUNCTION(SV_SuppressGC = true)
 	virtual UINT64 GetLength() const{
 		return mLength;
 	}
-	TR_FUNCTION()
+	TR_FUNCTION(SV_SuppressGC = true)
 	virtual UINT64 Tell() {
 		return mPosition;
 	}
-	TR_FUNCTION()
+	TR_FUNCTION(SV_SuppressGC = true)
 	virtual bool Seek(UINT64 offset) {
 		if (mPosition <= offset)
 		{
@@ -143,7 +148,6 @@ public:
 		mPosition = offset;
 		return true;
 	}
-	TR_FUNCTION()
 	virtual UINT Read(void* pSrc, UINT t);
 	template<typename _Type>
 	UINT Read(_Type& v)
@@ -156,7 +160,7 @@ public:
 		Read(&len, sizeof(len));
 		v.resize(len + 1);
 		Read(&v[0], len);
-		v[len] = NULL;
+		v[len] = '\0';
 	}
 };
 
@@ -169,10 +173,10 @@ public:
 	{
 
 	}
-	virtual size_t Tell() {
+	virtual UINT64 Tell() {
 		return mFile.GetPosition();
 	}
-	virtual bool Seek(size_t offset) {
+	virtual bool Seek(UINT64 offset) {
 		mFile.Seek(offset, VFile_Base::begin);
 		return true;
 	}
@@ -231,7 +235,7 @@ public:
 		Read(&len, sizeof(len));
 		v.resize(len + 1);
 		Read(&v[0], len);
-		v[len] = NULL;
+		v[len] = '\0';
 	}
 };
 

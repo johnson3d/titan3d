@@ -398,6 +398,24 @@ namespace EngineNS.GamePlay.Scene
         {
 
         }
+
+        #region GamePlay
+        public virtual void TickLogic()
+        {
+            if (OnTickLogic() == false)
+                return;
+
+            //foreach(var i in Children)
+            for (int i = 0; i < Children.Count; i++)
+            {
+                Children[i].TickLogic();
+            }
+        }
+        public virtual bool OnTickLogic()
+        {
+            return true;
+        }
+        #endregion
     }
     public partial class ULightWeightNodeBase : UNode
     {

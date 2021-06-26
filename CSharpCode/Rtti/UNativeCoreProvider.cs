@@ -16,6 +16,14 @@ namespace EngineNS.Rtti
         {
             return System.Runtime.InteropServices.GCHandle.FromIntPtr(ptr).Target as T;
         }
+        public unsafe static string MarshalPtrAnsi(void* ptr)
+        {
+            return System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)ptr);
+        }
+        public unsafe static string MarshalPtrAnsi(IntPtr ptr)
+        {
+            return System.Runtime.InteropServices.Marshal.PtrToStringAnsi(ptr);
+        }
         public static object BoxValue(ref Support.UAnyValue v)
         {
             switch (v.ValueType)

@@ -10,22 +10,35 @@ namespace CppWeaving
 	{
 		public Dictionary<string, string> WroteFiles = new Dictionary<string, string>();
 
-		public static string GetRegularPath(string path)
-		{
-			path = path.Replace('\\', '/');
+        public static string GetRegularPath(string path)
+        {
+            path = path.Replace('\\', '/');
 
-			var cur = path.IndexOf("/..");
-			while (cur >= 0) {
-				cur--;
-				var start = path.LastIndexOf('/', cur);
-				if (start < 0)
-					return null;
-				path = path.Remove(start, cur + 1 - start + 3);
-				cur = path.IndexOf("/..");
-			}
-			return path;
-		}
-        static string NormalizePath(string path, out bool error)
+            var cur = path.IndexOf("/..");
+            while (cur >= 0)
+            {
+                cur--;
+                var start = path.LastIndexOf('/', cur);
+                if (start < 0)
+                    return null;
+                path = path.Remove(start, cur + 1 - start + 3);
+                cur = path.IndexOf("/..");
+            }
+            return path;
+        }
+        public static string GetPureFileName(string path)
+        {
+            bool error;
+            path = NormalizePath(path, out error);
+            var pos1 = path.LastIndexOf('/');
+            var pos2 = path.LastIndexOf('.');
+            return path.Substring(pos1 + 1, pos2 - pos1 - 1);
+        }
+        public static string GetFileDirectory(string file)
+        {
+            return file.Substring(0, file.LastIndexOf("/") + 1);
+        }
+        public static string NormalizePath(string path, out bool error)
         {
             error = false;
 

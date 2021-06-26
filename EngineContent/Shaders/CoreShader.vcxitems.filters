@@ -34,6 +34,9 @@
     <Filter Include="ShadingEnv\Sys\pick">
       <UniqueIdentifier>{21b5ed54-bd34-4ae5-8049-d0b294a832e4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Slate">
+      <UniqueIdentifier>{d6631b02-db35-4779-9fd1-4990852451ae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -220,6 +223,12 @@
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Cluster.compute">
       <Filter>Compute\GpuDriven</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)slate\imgui-frag.hlsl">
+      <Filter>Slate</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)slate\imgui-vertex.hlsl">
+      <Filter>Slate</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

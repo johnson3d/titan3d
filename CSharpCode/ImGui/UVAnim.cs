@@ -5,7 +5,7 @@ using EngineNS;
 namespace EngineNS.EGui
 {
     [Rtti.Meta]
-    public class UVAnimAMeta : IO.IAssetMeta
+    public partial class UVAnimAMeta : IO.IAssetMeta
     {
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -20,7 +20,7 @@ namespace EngineNS.EGui
     [Rtti.Meta]
     [UVAnim.Import]
     [IO.AssetCreateMenu(MenuName = "UVAnim")]
-    public class UVAnim : IO.IAsset
+    public partial class UVAnim : IO.IAsset
     {
         public const string AssetExt = ".uvanim";
 

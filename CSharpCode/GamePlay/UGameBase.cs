@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public class IGameBase
+    public partial class IGameBase : ITickable
     {
         [Rtti.Meta]
         public virtual async System.Threading.Tasks.Task<bool> BeginPlay(UGameBase host)
@@ -21,6 +21,20 @@ namespace EngineNS.GamePlay
         public virtual void BeginDestroy(UGameBase host)
         {
 
+        }
+
+        public UGameViewportSlate WorldViewportSlate = null;
+        public virtual void TickLogic(int ellapse)
+        {
+            WorldViewportSlate?.TickLogic(ellapse);
+        }
+        public virtual void TickRender(int ellapse)
+        {
+            WorldViewportSlate?.TickRender(ellapse);
+        }
+        public virtual void TickSync(int ellapse)
+        {
+            WorldViewportSlate?.TickSync(ellapse);
         }
     }
     [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoMacrossCreate)]
