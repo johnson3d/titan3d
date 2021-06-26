@@ -29,6 +29,7 @@ namespace EngineNS.GamePlay
         public bool IsSetViewportPos = false;
         public Vector2 GameViewportPos;
         public Vector2 GameViewportSize;
+        //public static bool bMessageBox = false;
         public override unsafe void OnDraw()
         {
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
@@ -38,8 +39,8 @@ namespace EngineNS.GamePlay
                 ImGuiAPI.SetNextWindowSize(ref GameViewportSize, ImGuiCond_.ImGuiCond_Always);
             }
             IsDrawing = false;
+            //ClrLogger.SetMessageBox(bMessageBox);
             //CoreSDK.Print2Console2("aaa", true);
-
             bool bShow = ImGuiAPI.Begin(Title, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
             if (ImGuiAPI.IsWindowDocked())
             {

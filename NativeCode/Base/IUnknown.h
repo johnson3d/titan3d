@@ -66,15 +66,6 @@ public:
 	virtual ~VIUnknown();
 };
 
-struct VStringObject : public VIUnknown
-{
-	RTTI_DEF(VStringObject, 0x1af1368c5f65da55, true);
-	std::string		mText;
-	const char* GetTextString() {
-		return mText.c_str();
-	}
-};
-
 template<class T>
 class AutoRef
 {
@@ -307,29 +298,23 @@ IResourceState
 		mAccessTime = 0;
 		mResourceSize = 0;
 	}
-	TR_FUNCTION()
 	inline EStreamingState GetStreamState()
 	{
 		return mStreamState;
 	}
-	TR_FUNCTION()
 	inline void SetStreamState(EStreamingState state)
 	{
 		mStreamState = state;
 	}
-	TR_FUNCTION()
 	unsigned int GetResourceSize() const {
 		return mResourceSize;
 	}
-	TR_FUNCTION()
 	void SetResourceSize(unsigned int size) {
 		mResourceSize = size;
 	}
-	TR_FUNCTION()
 	INT64 GetAccessTime() const {
 		return mAccessTime;
 	}
-	TR_FUNCTION()
 	void SetAccessTime(INT64 t) {
 		mAccessTime = t;
 	}

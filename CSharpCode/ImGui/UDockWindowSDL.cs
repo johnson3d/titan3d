@@ -151,6 +151,7 @@ namespace EngineNS.EGui
 
         public class UImDrawDataRHI
         {
+            public IScissorRect ScissorRect = IScissorRect.CreateInstance();
             public RHI.CCommandList CmdList;
             public RenderPassDesc PassDesc = new RenderPassDesc();
             public RHI.CGeometryMesh GeomMesh;
@@ -188,6 +189,11 @@ namespace EngineNS.EGui
                 IndexBuffer = null;
                 GeomMesh?.Dispose();
                 GeomMesh = null;
+                if (ScissorRect.NativePointer != IntPtr.Zero)
+                {
+                    ScissorRect.NativeSuper.Release();
+                    ScissorRect.NativePointer = IntPtr.Zero;
+                }
             }
         }
         public unsafe static void RenderImDrawData(ref ImDrawData draw_data, Graphics.Pipeline.UGraphicsBuffers SwapChainBuffer, UImDrawDataRHI rhiData)
@@ -317,15 +323,13 @@ namespace EngineNS.EGui
                             }
                         }
 
-                        var scissor = IScissorRect.CreateInstance();
-                        scissor.SetRectNumber(1);
-                        scissor.SetSCRect(0,
+                        rhiData.ScissorRect.SetRectNumber(1);
+                        rhiData.ScissorRect.SetSCRect(0,
                             (int)(pcmd->ClipRect.X - clip_off.X),
                             (int)(pcmd->ClipRect.Y - clip_off.Y),
                             (int)(pcmd->ClipRect.Z - clip_off.X),
                             (int)(pcmd->ClipRect.W - clip_off.Y));
-                        drawCmd.SetScissorRect(scissor);
-                        CoreSDK.IUnknown_Release(scissor);
+                        drawCmd.SetScissorRect(rhiData.ScissorRect);
 
                         drawCmd.DrawIndexedPrimitive(EPrimitiveType.EPT_TriangleList, (uint)(vtx_offset + pcmd->VtxOffset), (uint)(idx_offset + pcmd->IdxOffset), pcmd->ElemCount / 3, 1);
                     }
