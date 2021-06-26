@@ -150,8 +150,7 @@
       <AdditionalDependencies>libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>$(SolutionDir)CallTHT.bat</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
