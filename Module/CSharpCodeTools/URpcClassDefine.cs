@@ -77,6 +77,16 @@ namespace CSharpCodeTools
                             }
                             PopBrackets();
 
+                            if (i.RetType != URpcMethod.EDataType.Void)
+                            {
+                                AddLine($"var retContext = UReturnAwaiter.CreateInstance();");
+                                AddLine($"if (NetConnect != null)");
+                                PushBrackets();
+                                {
+                                    AddLine($"retContext.Context.ConnectId = NetConnect.GetConnectId();");
+                                }
+                                PopBrackets();
+                            }
                             AddLine($"using (var writer = UMemWriter.CreateInstance())");
                             PushBrackets();
                             {
@@ -98,36 +108,28 @@ namespace CSharpCodeTools
 
                                 if (i.RetType != URpcMethod.EDataType.Void)
                                 {
-                                    AddLine($"var retContext = UReturnAwaiter.CreateInstance();");
-                                    AddLine($"if (NetConnect != null)");
-                                    PushBrackets();
-                                    {
-                                        AddLine($"retContext.Context.ConnectId = NetConnect.GetConnectId();");
-                                    }
-                                    PopBrackets();
                                     AddLine($"pkg.Write(retContext.Context);");
                                 }
 
                                 AddLine($"pkg.CoreWriter.SurePkgHeader();"); 
                                 AddLine($"NetConnect?.Send(ref pkg);");
-
-                                if (i.ReturnType != null)
-                                {
-                                    switch(i.RetType)
-                                    {
-                                        case URpcMethod.EDataType.Unmanaged:
-                                            AddLine($"return await URpcAwaiter.AwaitReturn<{i.GetNakedReturnType()}>(retContext);");
-                                            break;
-                                        case URpcMethod.EDataType.ISerializer:
-                                            AddLine($"return await URpcAwaiter.AwaitReturn_ISerializer<{i.GetNakedReturnType()}>(retContext);");
-                                            break;
-                                        case URpcMethod.EDataType.String:
-                                            AddLine($"return await URpcAwaiter.AwaitReturn_String(retContext);");
-                                            break;
-                                    }
-                                }
                             }
                             PopBrackets();
+                            if (i.ReturnType != null)
+                            {
+                                switch (i.RetType)
+                                {
+                                    case URpcMethod.EDataType.Unmanaged:
+                                        AddLine($"return await URpcAwaiter.AwaitReturn<{i.GetNakedReturnType()}>(retContext);");
+                                        break;
+                                    case URpcMethod.EDataType.ISerializer:
+                                        AddLine($"return await URpcAwaiter.AwaitReturn_ISerializer<{i.GetNakedReturnType()}>(retContext);");
+                                        break;
+                                    case URpcMethod.EDataType.String:
+                                        AddLine($"return await URpcAwaiter.AwaitReturn_String(retContext);");
+                                        break;
+                                }
+                            }
                         }
                         PopBrackets();
 
