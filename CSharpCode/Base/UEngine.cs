@@ -22,12 +22,13 @@ namespace EngineNS.Rtti
 
 namespace EngineNS
 {
-    public enum EPlayMode
+    public enum EPlayMode : int
     {
         Game,
         Editor,
         PlayerInEditor,
         Cook,
+        Server,
     }
     [Rtti.Meta]
     public partial class UEngineConfig

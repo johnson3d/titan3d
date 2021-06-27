@@ -321,14 +321,14 @@ HRESULT CoreProfiler::MovedReferences(ULONG cMovedObjectIDRanges, ObjectID* oldO
 }
 
 HRESULT CoreProfiler::ObjectAllocated(ObjectID objectId, ClassID classId) {
-	if (ClrLogger::bMessageBox)
-	{
-		::MessageBox(NULL, "ObjectAllocated", "block", MB_OK);
-	}
 	ModuleID module;
 	mdTypeDef type;
 	if (SUCCEEDED(_info->GetClassIDInfo(classId, &module, &type))) {
 		auto name = GetTypeName(type, module);
+		if (ClrLogger::bMessageBox)
+		{
+			::MessageBox(NULL, "ObjectAllocated", name, MB_OK);
+		}
 		ClrString info(name);
 		ClrLogger::PushLogInfo(EClrLogStringType::ObjectAlloc, info);
 	}
