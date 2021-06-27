@@ -215,8 +215,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     //    ImGuiAPI.TableSetupColumn(TName.FromString("Name").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
                     //    ImGuiAPI.TableSetupColumn(TName.FromString("Value").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
 
-                        //ImGuiAPI.Columns(2, "PGTable", true);
-                        OnDraw(this.Target);//, mCallstack);
+                    //ImGuiAPI.Columns(2, "PGTable", true);
+                    object newValue = null;
+                        OnDraw(this.Target, out newValue);//, mCallstack);
                         //ImGuiAPI.Columns(1, "", true);
                     //    ImGuiAPI.EndTable();
                     //}
@@ -234,7 +235,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 Vector2 size = Vector2.Zero;
                 if(ImGuiAPI.BeginChild($"{PGName}_Properties", ref size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
-                    OnDraw(this.Target);//, mCallstack);
+                    object newValue = null;
+                    OnDraw(this.Target, out newValue);//, mCallstack);
                 }
                 ImGuiAPI.EndChild();
             }
@@ -276,13 +278,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         static readonly ImGuiTableFlags_ mTabFlags = ImGuiTableFlags_.ImGuiTableFlags_BordersInner | ImGuiTableFlags_.ImGuiTableFlags_Resizable;// | ImGuiTableFlags_.ImGuiTableFlags_SizingFixedFit;
         public Rtti.UTypeDesc HideInheritDeclareType = null;
         Dictionary<object, Dictionary<string, CustomPropertyDescriptorCollection>> mDrawTargetDic = new Dictionary<object, Dictionary<string, CustomPropertyDescriptorCollection>>();
-        private unsafe void OnDraw(object target, bool isSubPropertyGrid = false)
+        private unsafe bool OnDraw(object target, out object targetNewValue, bool isSubPropertyGrid = false)
         {
+            targetNewValue = target;
             if (target == null)
-                return;
+                return false;
             if (this.GetType() == typeof(System.Type))
-                return;
-
+                return false;
+            bool retValue = false;
             //var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen;
             bool useCategory = true;
             Dictionary<string, CustomPropertyDescriptorCollection> propertiesDic;
@@ -460,7 +463,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 var changed = PGTypeEditorManager.Instance.ObjectWithCreateEditor.OnDraw(in itemEditorInfo, out newValue);
                                 PopPGEditorStyleValues();
                                 if (changed)
+                                {
                                     propDesc.SetValue(ref target, newValue);
+                                    if(propDesc.ParentIsValueType)
+                                    {
+                                        retVal = true;
+                                        targetNewValue = target;
+                                    }
+                                }
                                 if (retVal)
                                     ImGuiAPI.TreePop();
                             }
@@ -478,7 +488,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                             var changed = editorOnDraw.OnDraw(in itemEditorInfo, out newValue);
                                             PopPGEditorStyleValues();
                                             if (changed)
+                                            {
                                                 propDesc.SetValue(ref target, newValue);
+                                                if(propDesc.ParentIsValueType)
+                                                {
+                                                    retValue = true;
+                                                    targetNewValue = target;
+                                                }
+                                            }
                                         }
                                         catch (Exception ex)
                                         {
@@ -506,7 +523,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                             var changed = editorOnDraw.OnDraw(in itemEditorInfo, out newValue);
                                             PopPGEditorStyleValues();
                                             if (changed)
+                                            {
                                                 propDesc.SetValue(ref target, newValue);
+                                                if(propDesc.ParentIsValueType)
+                                                {
+                                                    retValue = true;
+                                                    targetNewValue = target;
+                                                }
+                                            }
                                         }
                                         catch (Exception ex)
                                         {
@@ -535,7 +559,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                     object newValue;
                                     var valueChanged = DrawPropertyGridItem(ref itemEditorInfo, out newValue);
                                     if (valueChanged)
+                                    {
                                         propDesc.SetValue(ref target, newValue);
+                                        if(propDesc.ParentIsValueType)
+                                        {
+                                            retValue = true;
+                                            targetNewValue = target;
+                                        }
+                                    }
 
                                     if (treeNodeRet)
                                         ImGuiAPI.TreePop();
@@ -572,6 +603,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             ImGuiAPI.PopStyleColor(1);
             ImGuiAPI.PopStyleVar(1);
+
+            return retValue;
         }
         static void PushPGEditorStyleValues()
         {
@@ -683,7 +716,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             //ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
                             //ImGuiAPI.TableSetColumnIndex(0);
                             //ImGuiAPI.EndTable();
-                            info.HostPropertyGrid.OnDraw(info.Value, true);
+                            valueChanged = info.HostPropertyGrid.OnDraw(info.Value, out newValue, true);
                             Vector2 outSize = Vector2.Zero;
                             //ImGuiAPI.BeginTable("PGTable", 2, mTabFlags, ref outSize, 0.0f);
                         }

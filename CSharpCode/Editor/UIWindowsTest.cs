@@ -52,7 +52,7 @@ namespace EngineNS.Editor
             0,1,2,3,4,5
         };
         [Category("Collections")]
-        public Dictionary<int, string> DicValue = new Dictionary<int, string>();
+        public Dictionary<int, string> DicValue { get; set; } = new Dictionary<int, string>();
         public Vector2 Vector2Value { get; set; } = new Vector2();
         public Vector3 Vector3Value { get; set; } = new Vector3();
         public Vector4 Vector4Value { get; set; } = new Vector4();
@@ -67,6 +67,12 @@ namespace EngineNS.Editor
         {
             //for(int i=0; i<5; i++)
             //    DicValue[i] = "A" + i;
+            DicValue[0] = "A";
+            DicValue[1] = "B";
+            DicValue[2] = "C";
+            DicValue[3] = "D";
+            DicValue[4] = "E";
+            DicValue[5] = "F";
         }
     }
 

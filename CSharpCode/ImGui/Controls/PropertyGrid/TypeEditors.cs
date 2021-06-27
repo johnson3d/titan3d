@@ -553,7 +553,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 //var sz = new Vector2(0, 0);
                 //ImGuiAPI.PushID(info.Name);
                 //ImGuiAPI.SameLine(0, -1);
-                ImGuiAPI.OpenPopupOnItemClick("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                //ImGuiAPI.OpenPopupOnItemClick("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                 //var pos = ImGuiAPI.GetItemRectMin();
                 //var size = ImGuiAPI.GetItemRectSize();
                 if (ImGuiAPI.ArrowButton("##OpenAddItemList", ImGuiDir_.ImGuiDir_Down))
@@ -577,6 +577,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                     ImGuiAPI.EndPopup();
                 }
+                ImGuiAPI.SameLine(0, -1);
+                ImGuiAPI.Text(info.Type.ToString());
                 //ImGuiAPI.PopID();
             }
             //ImGuiAPI.SameLine(0, -1);
@@ -620,6 +622,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.TableSetColumnIndex(0);
                 if (info.HostPropertyGrid.IsReadOnly == false)
                 {
+                    ImGuiAPI.Indent(5);
                     bool operated = false;
                     ImGuiAPI.PushID(TName.FromString2("##ListDel_", i.ToString()).ToString());
                     if (ImGuiAPI.Button("-", ref sz))
@@ -630,7 +633,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                     ImGuiAPI.PopID();
                     if (operated)
+                    {
+                        ImGuiAPI.Unindent(5);
                         return true;
+                    }
 
                     operated = false;
                     ImGuiAPI.SameLine(0, -1);
@@ -642,7 +648,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                     ImGuiAPI.PopID();
                     if (operated)
+                    {
+                        ImGuiAPI.Unindent(5);
                         return true;
+                    }
+                    ImGuiAPI.Unindent(5);
                     ImGuiAPI.SameLine(0, -1);
                 }
                 var flags = info.Flags;
@@ -693,17 +703,17 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             newValue = info.Value;
             if (info.HostPropertyGrid.IsReadOnly == false)
             {
-                ImGuiAPI.SameLine(0, -1);
-                var sz = new Vector2(0, 0);
-                ImGuiAPI.PushID(info.Name);
+                //ImGuiAPI.SameLine(0, -1);
+                //var sz = new Vector2(0, 0);
+                //ImGuiAPI.PushID(info.Name);
                 if (ImGuiAPI.ArrowButton("##OpenAddItemDict", ImGuiDir_.ImGuiDir_Down))
                 {
-                    ImGuiAPI.PopID();
+                    //ImGuiAPI.PopID();
                     ImGuiAPI.OpenPopup("AddDictElement", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                 }
                 else
                 {
-                    ImGuiAPI.PopID();
+                    //ImGuiAPI.PopID();
                 }
             }
 
@@ -737,16 +747,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
 
             ImGuiAPI.SameLine(0, -1);
-            var showChild = ImGuiAPI.TreeNode(info.Name, "");
-            ImGuiAPI.NextColumn();
+            //var showChild = ImGuiAPI.TreeNode(info.Name, "");
+            //ImGuiAPI.NextColumn();
             ImGuiAPI.Text(info.Type.ToString());
-            ImGuiAPI.NextColumn();
-            if (showChild)
+            //ImGuiAPI.NextColumn();
+            if (info.Expand)
             {
                 var dict = info.Value as System.Collections.IDictionary;
                 if (OnDictionary(in info, dict))
                     valueChanged = true;
-                ImGuiAPI.TreePop();
+                //ImGuiAPI.TreePop();
             }
 
             return valueChanged;
@@ -754,17 +764,33 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         private unsafe bool OnDictionary(in EditorInfo info, System.Collections.IDictionary dict)
         {
             bool itemValueChanged = false;
-            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;
             var sz = new Vector2(0, 0);
             var iter = dict.GetEnumerator();
             int idx = 0;
+            ImGuiTableRowData rowData = new ImGuiTableRowData()
+            {
+                IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
+                MinHeight = 0,
+                CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
+                CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
+                IndentImageWidth = info.HostPropertyGrid.Indent,
+                IndentTextureUVMin = Vector2.Zero,
+                IndentTextureUVMax = Vector2.UnitXY,
+                IndentColor = info.HostPropertyGrid.IndentColor,
+                HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
+                Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
+            };
+            Vector2 tempPadding = new Vector2(0, 0);
             while (iter.MoveNext())
             {
-                var name = iter.Key.ToString();
+                var name = "[" + idx.ToString() + "]";// iter.Key.ToString();
                 ImGuiAPI.AlignTextToFramePadding();
+                ImGuiAPI.TableNextRow(ref rowData);
+                ImGuiAPI.TableSetColumnIndex(0);
                 if (info.HostPropertyGrid.IsReadOnly == false)
                 {
                     bool operated = false;
+                    ImGuiAPI.Indent(5);
                     ImGuiAPI.PushID(TName.FromString2("##ListDel_", name).ToString());
                     if (ImGuiAPI.Button("-", ref sz))
                     {
@@ -773,12 +799,18 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         operated = true;
                     }
                     ImGuiAPI.PopID();
+                    ImGuiAPI.Unindent(5);
                     if (operated)
                         return true;
                     ImGuiAPI.SameLine(0, -1);
                 }
-                ImGuiAPI.TreeNodeEx(name, flags, name);
-                ImGuiAPI.SameLine(0, -1);
+                var flags = info.Flags;
+                if (PropertyGrid.IsLeafTreeNode(iter.Value, null))
+                    flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref tempPadding);
+                var treeNodeRet = ImGuiAPI.TreeNodeEx(name, flags, name);
+                ImGuiAPI.PopStyleVar(1);
+                ImGuiAPI.SameLine(0, 5);
                 var keyEditorInfo = new EditorInfo()
                 {
                     Name = iter.Key.ToString() + idx,
@@ -793,9 +825,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 {
                     dict[newKeyValue] = iter.Value;
                     dict.Remove(iter.Key);
+
+                    if (treeNodeRet)
+                        ImGuiAPI.TreePop();
+
                     return true;
                 }
-                ImGuiAPI.NextColumn();
+                //ImGuiAPI.NextColumn();
+                ImGuiAPI.TableSetColumnIndex(1);
                 ImGuiAPI.SetNextItemWidth(-1);
                 Rtti.UTypeDesc valueType = null;
                 if (iter.Value != null)
@@ -815,6 +852,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     dict[iter.Key] = newValue;
                     itemValueChanged = true;
                 }
+
+                if (treeNodeRet)
+                    ImGuiAPI.TreePop();
 
                 idx++;
             }
