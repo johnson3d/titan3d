@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controller\EditorCameraController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UCpuProfiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UInspector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\UMaterialInstanceEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UWorldOutliner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IAssetEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EditorAttribute.cs" />
