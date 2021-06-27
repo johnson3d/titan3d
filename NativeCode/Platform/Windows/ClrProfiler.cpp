@@ -329,8 +329,7 @@ HRESULT CoreProfiler::ObjectAllocated(ObjectID objectId, ClassID classId) {
 	mdTypeDef type;
 	if (SUCCEEDED(_info->GetClassIDInfo(classId, &module, &type))) {
 		auto name = GetTypeName(type, module);
-		ClrString info("Allocated object ");
-		info.Append(name);
+		ClrString info(name);
 		ClrLogger::PushLogInfo(EClrLogStringType::ObjectAlloc, info);
 	}
 	return S_OK;
@@ -338,7 +337,7 @@ HRESULT CoreProfiler::ObjectAllocated(ObjectID objectId, ClassID classId) {
 
 HRESULT CoreProfiler::ObjectsAllocatedByClass(ULONG cClassCount, ClassID* classIds, ULONG* cObjects) 
 {
-	ClrString info("ObjectsAllocatedByClass:");
+	ClrString info("");
 	for (ULONG i = 0; i < cClassCount; i++)
 	{
 		ModuleID module;
