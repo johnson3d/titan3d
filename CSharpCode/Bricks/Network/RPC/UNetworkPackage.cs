@@ -36,7 +36,7 @@ namespace EngineNS.Bricks.Network.RPC
             System.Diagnostics.Debug.Assert(Writer.Tell() < ushort.MaxValue);
             unsafe
             {
-                ((FPkgHeader*)Writer.GetDataPointer())->PackageSize = (ushort)Writer.Tell();
+                ((FPkgHeader*)Writer.GetPointer())->PackageSize = (ushort)Writer.Tell();
             }
         }
     }

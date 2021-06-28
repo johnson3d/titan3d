@@ -152,7 +152,7 @@ namespace EngineNS.IO
                 {
                     if (mCoreObject.Tell() == 0)
                         return null;
-                    return System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)mCoreObject.GetDataPointer(), (int)mCoreObject.Tell());
+                    return System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)mCoreObject.GetPointer(), (int)mCoreObject.Tell());
                 }
             }
         }

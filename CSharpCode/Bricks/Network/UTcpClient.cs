@@ -27,7 +27,7 @@ namespace EngineNS.Bricks.Network
                 return;
             unsafe
             {
-                mCoreObject.Send((sbyte*)pkg.CoreWriter.Writer.GetDataPointer(), (uint)pkg.CoreWriter.Writer.Tell());
+                mCoreObject.Send((sbyte*)pkg.CoreWriter.Writer.GetPointer(), (uint)pkg.CoreWriter.Writer.Tell());
             }
         }
         public void Disconnect()

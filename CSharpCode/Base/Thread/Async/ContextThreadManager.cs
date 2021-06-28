@@ -23,6 +23,7 @@ namespace EngineNS.Thread.Async
     {
         Normal,
         Semaphore,
+        JobSystem,
         AsyncIOEmpty,
         ParallelTasks,
         Delay,
@@ -35,7 +36,7 @@ namespace EngineNS.Thread.Async
         public ContextThread ContinueThread;
         public ContextThread AsyncTarget;
         
-        public ASyncSemaphore Tag = null;
+        public object Tag = null;
         public System.Exception ExceptionInfo = null;
         public System.Diagnostics.StackTrace CallStackTrace;
         public void Reset()
@@ -482,17 +483,24 @@ namespace EngineNS.Thread.Async
             await source.Task.AwaitPost(eh);
             smp = null;
         }
-        public async System.Threading.Tasks.Task AwaitAsyncIOEmpty()
+        public async System.Threading.Tasks.Task AwaitJobSystem(Async.IJobSystem smp)
         {
+            if (smp == null)
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "", $"AwaitSemaphore is null");
+                return;
+            }
             var eh = new PostEvent();
             eh.PostAction = null;
             eh.AsyncTarget = null;
             eh.ContinueThread = ContextThread.CurrentContext;
-            eh.AsyncType = EAsyncType.AsyncIOEmpty;
-            eh.Tag = null;
+            eh.AsyncType = EAsyncType.JobSystem;
+            eh.Tag = smp;
+            smp.PostEvent = eh;
 
             var source = new System.Threading.Tasks.TaskCompletionSource<object>();
             await source.Task.AwaitPost(eh);
+            smp = null;
         }
     }
 
@@ -585,14 +593,24 @@ namespace EngineNS.Thread.Async
                     break;
                 case EAsyncType.Semaphore:
                     {
-                        if (PEvent.Tag.GetCount() == 0)
+                        var smp = PEvent.Tag as ASyncSemaphore;
+                        if (smp.GetCount() == 0)
                         {
                             //EqueueContinue做了防止重复Enqueue的处理
                             //如果Release导致提前Enqueue了，这里就不会真的在入队列一次
                             //否则会出现已经完成的任务再转换的异常
                             //为什么这里还要入队一次，因为有低概率在Release的时候，PostEvent等待任务
                             //依然没有赋值好，这里做一次擦屁股的处理
-                            PEvent.Tag.EqueueContinue();
+                            smp.EqueueContinue();
+                        }
+                    }
+                    break;
+                case EAsyncType.JobSystem:
+                    {
+                        var smp = PEvent.Tag as Async.IJobSystem;
+                        if (smp.IsFinshed())
+                        {
+                            continuation();
                         }
                     }
                     break;

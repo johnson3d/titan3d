@@ -23,7 +23,7 @@ namespace EngineNS.Bricks.Network.RPC
         }
         private unsafe byte* GetPointer()
         {
-            return (byte*)Writer.GetDataPointer();
+            return (byte*)Writer.GetPointer();
         }
 
         private unsafe byte* AppendData(byte* pSrc, UInt32 count, ref UInt32 length)

@@ -29,7 +29,7 @@ namespace EngineNS.Bricks.Network
         {
             unsafe
             {
-                UEngine.Instance.RpcModule.NetPackageManager.PushPackage(pkg.CoreWriter.Writer.GetDataPointer(), (uint)pkg.CoreWriter.Writer.Tell(), this);
+                UEngine.Instance.RpcModule.NetPackageManager.PushPackage(pkg.CoreWriter.Writer.GetPointer(), (uint)pkg.CoreWriter.Writer.Tell(), this);
             }
         }
     }
@@ -60,7 +60,7 @@ namespace EngineNS.Bricks.Network
 
             foreach (var i in RcvPacakages)
             {
-                using (var reader = UMemReader.CreateInstance((byte*)i.Writer.GetDataPointer(), i.Writer.Tell()))
+                using (var reader = UMemReader.CreateInstance((byte*)i.Writer.GetPointer(), i.Writer.Tell()))
                 {
                     var pkg = new IO.AuxReader<UMemReader>(reader, null);
                     var pkgHeader = new RPC.FPkgHeader();

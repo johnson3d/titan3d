@@ -73,7 +73,7 @@ public:
 	TR_FUNCTION(SV_SuppressGC = true)
 	void ResetBufferSize(UINT64 size = 0);
 	TR_FUNCTION(SV_SuppressGC = true)
-	inline void* GetDataPointer() {
+	inline void* GetPointer() {
 		return &mDataStream[0];
 	}
 	TR_FUNCTION(SV_SuppressGC = true)
@@ -91,12 +91,6 @@ public:
 	void Write(const _Type& v)
 	{
 		return Write(&v, sizeof(_Type));
-	}
-	void Write(const std::string& v)
-	{
-		UINT len = (UINT)v.length();
-		Write(&len, sizeof(len));
-		Write(v.c_str(), len);
 	}
 };
 
@@ -154,14 +148,6 @@ public:
 	{
 		return Read(&v, sizeof(_Type));
 	}
-	void Read(std::string& v)
-	{
-		UINT len;
-		Read(&len, sizeof(len));
-		v.resize(len + 1);
-		Read(&v[0], len);
-		v[len] = '\0';
-	}
 };
 
 class FileStreamWriter : public IStreamWriter
@@ -188,12 +174,6 @@ public:
 	void Write(const _Type& v)
 	{
 		return Write(&v, sizeof(_Type));
-	}
-	void Write(const std::string& v)
-	{
-		UINT len = (UINT)v.length();
-		Write(&len, sizeof(len));
-		Write(v.c_str(), len);
 	}
 };
 
@@ -228,14 +208,6 @@ public:
 	UINT Read(_Type& v)
 	{
 		return Read(&v, sizeof(_Type));
-	}
-	void Read(std::string& v)
-	{
-		UINT len;
-		Read(&len, sizeof(len));
-		v.resize(len + 1);
-		Read(&v[0], len);
-		v[len] = '\0';
 	}
 };
 
