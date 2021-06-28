@@ -26,7 +26,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
     {
         public UShaderEditor()
         {
-            PreviewViewport = new UPreviewViewport(false);
+            PreviewViewport = new UPreviewViewport();
         }
         ~UShaderEditor()
         {
@@ -104,7 +104,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             MaterialPropGrid.IsReadOnly = true;
             MaterialPropGrid.SingleTarget = Material;
 
-            PreviewViewport.Title = "Preview";
+            PreviewViewport.Title = "MaterialPreview";
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileFSPolicy(), 0, 1);
 
             PreviewPropGrid.SingleTarget = PreviewViewport;
@@ -210,7 +210,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 {
                     PreviewViewport.DockId = PreviewDockId;
                     PreviewViewport.DockCond = ImGuiCond_.ImGuiCond_Always;
-                    PreviewViewport.ShowCloseButton = false;
+                    PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.Window;
                     PreviewViewport.OnDraw();
                 }
             }

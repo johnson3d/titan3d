@@ -81,6 +81,10 @@ namespace EngineNS.Editor
             {
                 if (OpenedEditors[i].Visible == false)
                 {
+                    if (CurrentActiveEditor == OpenedEditors[i])
+                    {
+                        CurrentActiveEditor = null;
+                    }
                     OpenedEditors[i].OnCloseEditor();
                     OpenedEditors.RemoveAt(i);
 

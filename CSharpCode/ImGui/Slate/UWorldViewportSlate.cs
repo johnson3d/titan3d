@@ -4,7 +4,7 @@ using SDL2;
 
 namespace EngineNS.EGui.Slate
 {
-    public class UWorldViewportSlate : Graphics.Pipeline.UViewportSlate
+    public class UWorldViewportSlate : Graphics.Pipeline.UViewportSlate, Graphics.Pipeline.IRootForm
     {
         public GamePlay.UWorld World { get; protected set; } = new GamePlay.UWorld();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
@@ -19,9 +19,9 @@ namespace EngineNS.EGui.Slate
 
         public Graphics.Pipeline.ICameraController CameraController;
         public UWorldViewportSlate(bool regRoot)
-            : base(regRoot)
         {
-
+            if (regRoot)
+                Editor.UMainEditorApplication.RegRootForm(this);
         }
         ~UWorldViewportSlate()
         {
