@@ -66,7 +66,7 @@ namespace EngineNS.RHI
     [Rtti.Meta]
     [CShaderResourceView.Import]
     [IO.AssetCreateMenu(MenuName = "Texture")]
-    public class CShaderResourceView : AuxPtrType<IShaderResourceView>, IO.IAsset, IO.IStreaming
+    public partial class CShaderResourceView : AuxPtrType<IShaderResourceView>, IO.IAsset, IO.IStreaming
     {
         public CShaderResourceView()
         {

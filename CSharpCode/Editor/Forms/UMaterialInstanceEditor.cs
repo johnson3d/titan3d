@@ -59,6 +59,7 @@ namespace EngineNS.Editor.Forms
         }
         public async Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
+            AssetName = name;
             Material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(name);
             if (Material == null)
                 return false;
@@ -111,8 +112,6 @@ namespace EngineNS.Editor.Forms
                 //var sz = new Vector2(-1);
                 //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
                 ImGuiAPI.Separator();
-                ImGuiAPI.Separator();
-                ImGuiAPI.Separator();
                 ImGuiAPI.Columns(2, null, true);
                 if (LeftWidth == 0)
                 {
@@ -157,10 +156,15 @@ namespace EngineNS.Editor.Forms
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
         {
-            if (ImGuiAPI.CollapsingHeader("MaterialProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+            var sz = new Vector2(-1);
+            if (ImGuiAPI.BeginChild("LeftView", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                MaterialPropGrid.OnDraw(true, false, false);
+                if (ImGuiAPI.CollapsingHeader("MaterialProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                {
+                    MaterialPropGrid.OnDraw(true, false, false);
+                }
             }
+            ImGuiAPI.EndChild();
         }
         protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
         {
