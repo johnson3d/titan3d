@@ -187,7 +187,7 @@ void XndHolder::SaveXnd(IStreamWriter& ar, XndNode* node)
 		auto attr = node->GetAttribute(i);
 		attr->mOffsetInResource = ar.Tell();
 		
-		ar.Write(attr->mMemWriter->GetDataPointer(), (UINT)attr->mMemWriter->Tell());
+		ar.Write(attr->mMemWriter->GetPointer(), (UINT)attr->mMemWriter->Tell());
 
 		attr->mAttrLength = (UINT)(ar.Tell() - attr->mOffsetInResource);
 	}

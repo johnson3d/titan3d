@@ -245,7 +245,7 @@ struct UEngineInclude : public ID3DInclude
 			return S_OK;
 		}
 
-		*ppData = ar->GetDataPointer();
+		*ppData = ar->GetPointer();
 		*pBytes = (UINT)ar->Tell();
 
 		auto dir = GetPath(root);
@@ -366,7 +366,7 @@ bool IShaderConductor::CompileShader(IShaderDesc* desc, const char* shader, cons
 		AutoPtr<UEngineInclude> engineInc(new UEngineInclude());
 		engineInc->ShaderConductor = this;
 		engineInc->Data2FileMap.insert(std::make_pair(nullptr, UEngineInclude::GetPath(shader)));
-		auto hr = D3DCompile(ar->GetDataPointer(), ar->Tell(), shader, pMacros, engineInc, entry, shaderTarget.c_str(), dwShaderFlags, 0, &pBlob, &pError);
+		auto hr = D3DCompile(ar->GetPointer(), ar->Tell(), shader, pMacros, engineInc, entry, shaderTarget.c_str(), dwShaderFlags, 0, &pBlob, &pError);
 		if (pError != NULL)
 		{
 			VFX_LTRACE(ELTT_Graphics, (char*)pError->GetBufferPointer());
@@ -442,7 +442,7 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, const char* hlsl, const ch
 	}
 
 	ShaderConductor::Compiler::SourceDesc src;
-	src.source = (const char*)ar->GetDataPointer();
+	src.source = (const char*)ar->GetPointer();
 	src.entryPoint = entry;
 	src.stage = stage;
 	src.fileName = hlsl;
@@ -451,7 +451,7 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, const char* hlsl, const ch
 		MemStreamWriter* ar_inc = GetShaderCodeStream((void*)includeName);
 		
 		if (ar_inc != nullptr)
-			return ShaderConductor::CreateBlob(ar_inc->GetDataPointer(), static_cast<uint32_t>(ar_inc->Tell()));
+			return ShaderConductor::CreateBlob(ar_inc->GetPointer(), static_cast<uint32_t>(ar_inc->Tell()));
 		else
 			return ShaderConductor::CreateBlob(nullptr, static_cast<uint32_t>(0));
 	};

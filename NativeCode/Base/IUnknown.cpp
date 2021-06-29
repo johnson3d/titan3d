@@ -16,8 +16,6 @@ FOnManagedObjectHolderDestroy IManagedObjectHolder::OnManagedObjectHolderDestroy
 
 StructImpl(FOnManagedObjectHolderDestroy)
 
-RTTI_IMPL(EngineNS::VStringObject, EngineNS::VIUnknown);
-
 vfxObjectLocker gDefaultObjectLocker;
 
 VIUnknown::VIUnknown()

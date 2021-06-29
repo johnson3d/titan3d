@@ -62,6 +62,12 @@ public:
 	}
 	static void StopClrLogger();
 
+	static bool bMessageBox;
+	static void SetMessageBox(bool b) {
+		bMessageBox = b;
+	}
+	static void ShowMessageBox(const char* info);
+
 	bool IsFull();
 	bool IsEmpty();
 	bool PopLog(ClrString* clrStr);

@@ -26,7 +26,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
     {
         public UShaderEditor()
         {
-            PreviewViewport = new UPreviewViewport(false);
+            PreviewViewport = new UPreviewViewport();
         }
         ~UShaderEditor()
         {
@@ -38,7 +38,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             PreviewViewport = null;
             MaterialPropGrid.SingleTarget = null;
         }
-        public bool Visible { get; set; } = true;
+        protected bool mVisible = true;
+        public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public Graphics.Pipeline.IRootForm GetRootForm()
@@ -104,7 +105,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             MaterialPropGrid.IsReadOnly = true;
             MaterialPropGrid.SingleTarget = Material;
 
-            PreviewViewport.Title = "Preview";
+            PreviewViewport.Title = "MaterialPreview";
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileFSPolicy(), 0, 1);
 
             PreviewPropGrid.SingleTarget = PreviewViewport;
@@ -164,7 +165,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(ref WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(Material.AssetName.Name, null, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            if (ImGuiAPI.Begin(Material.AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
                 if (ImGuiAPI.IsWindowDocked())
@@ -210,7 +211,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 {
                     PreviewViewport.DockId = PreviewDockId;
                     PreviewViewport.DockCond = ImGuiCond_.ImGuiCond_Always;
-                    PreviewViewport.ShowCloseButton = false;
+                    PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.Window;
                     PreviewViewport.OnDraw();
                 }
             }

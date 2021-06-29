@@ -12,6 +12,7 @@
 #define new VNEW
 
 VCritical			gClrLogLocker;
+bool ClrLogger::bMessageBox = false;
 
 ClrString::ClrString(const char* text)
 {
@@ -158,4 +159,9 @@ void ClrLogger::PushLog(EClrLogStringType type, const char* info)
 	}
 	mStrings[mEnd].mType = type;
 	mStrings[mEnd].SetText(info);
+}
+
+void ClrLogger::ShowMessageBox(const char* info)
+{
+	MessageBoxA(NULL, info, "ClrLogger", MB_OK);
 }

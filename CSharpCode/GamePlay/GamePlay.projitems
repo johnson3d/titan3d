@@ -9,6 +9,9 @@
     <Import_RootNamespace>EngineNS.GamePlay</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Action\UAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Action\UActionRecorder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Action\UPropertyUtility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UMeshNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UNode_Editor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UDirectionLight.cs" />

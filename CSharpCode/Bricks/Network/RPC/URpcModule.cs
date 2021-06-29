@@ -60,13 +60,33 @@ namespace EngineNS.Bricks.Network.RPC
     }
     public class UReturnAwaiter
     {
+        public class UReturnAwaiterAllocator : UPooledObject<UReturnAwaiter>
+        {
+            protected override bool OnObjectRelease(UReturnAwaiter obj)
+            {
+                obj.Reset();
+                return true;
+            }
+        }
+        static UReturnAwaiterAllocator mAllocator = new UReturnAwaiterAllocator();
         private static UInt32 CurrentId = 0;
         public static UReturnAwaiter CreateInstance()
         {
-            var result = new UReturnAwaiter();
+            //var result = new UReturnAwaiter();
+            var result = mAllocator.QueryObjectSync();
             result.Context.Handle = System.Threading.Interlocked.Increment(ref CurrentId);
             UEngine.Instance.RpcModule.PushReturnAwaiter(result);
             return result;
+        }
+        public static void DisposeInstance(UReturnAwaiter awt)
+        {
+            mAllocator.ReleaseObject(awt);
+        }
+        public void Reset()
+        {
+            RetCallBack = null;
+            Context.ConnectId = UInt16.MaxValue;
+            Context.Handle = 0;
         }
         public delegate void FReturnCallBack(ref IO.AuxReader<UMemReader> pkg, bool isTimeOut);
         public UReturnContext Context;
@@ -139,8 +159,14 @@ namespace EngineNS.Bricks.Network.RPC
                 {
                     ReturnAwaiters.Remove(handle);
                 }
+                else
+                {
+                    return;
+                }
             }
             awaiter?.RetCallBack(ref pkg, false);
+
+            UReturnAwaiter.DisposeInstance(awaiter);
         }
         public override async System.Threading.Tasks.Task<bool> Initialize(UEngine host)
         {
@@ -155,12 +181,7 @@ namespace EngineNS.Bricks.Network.RPC
         }
         public unsafe override void Tick(UEngine host)
         {
-            Test();
-        }
-        private unsafe void Test()
-        {
             NetPackageManager.Tick();
-            
         }
     }
 }
