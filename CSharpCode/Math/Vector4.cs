@@ -24,7 +24,6 @@ namespace EngineNS
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
                 newValue = info.Value;
-                var v = (Vector4)info.Value;
                 //var saved = v;
                 var index = ImGuiAPI.TableGetColumnIndex();
                 var width = ImGuiAPI.GetColumnWidth(index);
@@ -33,12 +32,21 @@ namespace EngineNS
                 //ImGuiAPI.InputFloat3(TName.FromString2("##", info.Name).ToString(), (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
                 var minValue = float.MinValue;
                 var maxValue = float.MaxValue;
-                var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 4, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                //ImGuiAPI.PopStyleVar(1);
-                if (changed)//(v != saved)
+                var multiValue = info.Value as EGui.Controls.PropertyGrid.PropertyMultiValue;
+                if (multiValue != null && multiValue.HasDifferentValue())
                 {
-                    newValue = v;
-                    return true;
+                    ImGuiAPI.Text(multiValue.MultiValueString);
+                }
+                else
+                {
+                    var v = (Vector4)info.Value;
+                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 4, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    //ImGuiAPI.PopStyleVar(1);
+                    if (changed)//(v != saved)
+                    {
+                        newValue = v;
+                        return true;
+                    }
                 }
                 return false;
             }

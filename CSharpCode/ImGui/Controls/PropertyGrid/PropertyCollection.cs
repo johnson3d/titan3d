@@ -51,6 +51,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 return CustomValueEditor.Provider.GetPropertyType(proIns).SystemType;
             }
+            else if (proIns is PropertyMultiValue)
+                return mPropertyType.SystemType;
             else if (proIns != null)
                 return proIns.GetType();
             return mPropertyType.SystemType;
@@ -108,6 +110,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             get;
             private set;
         }
+
+        PropertyMultiValue mMultiValue;
 
         #region UI
         public Vector2 RowRectMin;
@@ -216,16 +220,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return base.GetHashCode();
         }
 
-        public bool Add(CustomPropertyDescriptor propertyDesc)
-        {
-            if ((propertyDesc.Name != Name) || (propertyDesc.mPropertyType != mPropertyType))
-                return false;
-            //foreach(var pro in propertyDesc.Propertys)
-            //{
-            //    Propertys.Add(pro);
-            //}
-            return true;
-        }
+        //public bool Add(CustomPropertyDescriptor propertyDesc)
+        //{
+        //    if ((propertyDesc.Name != Name) || (propertyDesc.mPropertyType != mPropertyType))
+        //        return false;
+        //    //foreach(var pro in propertyDesc.Propertys)
+        //    //{
+        //    //    Propertys.Add(pro);
+        //    //}
+        //    return true;
+        //}
 
         object _ProGetValue(PropertyInfo pro, object objIns, bool useProvider)
         {
@@ -259,7 +263,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var enumerable = objIns as IEnumerable;
             if (enumerable != null)
             {
-                var multiVals = new PropertyMultiValue();
+                if(mMultiValue == null)
+                    mMultiValue = new PropertyMultiValue();
+                mMultiValue.Cleanup();
                 foreach(var elem in (IEnumerable)objIns)
                 {
                     var elemType = elem.GetType();
@@ -267,18 +273,17 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     if (propertyInfo != null)
                     {
                         var val = _ProGetValue(propertyInfo, elem, useProvider);
-                        multiVals.Values.Add(val);
+                        mMultiValue.Values.Add(val);
                     }
 
                     var fieldInfo = elemType.GetField(Name);
                     if (fieldInfo != null)
                     {
                         var val = _FieldGetValue(fieldInfo, elem, useProvider);
-                        multiVals.Values.Add(val);
+                        mMultiValue.Values.Add(val);
                     }
-
-                    return multiVals.GetValue();
                 }
+                return mMultiValue.GetValue();
             }
             else
             {
@@ -393,6 +398,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             IsBrowsable = default;
             DeclaringType = default;
             CustomValueEditor = default;
+            mMultiValue?.Cleanup();
 
             PropertyCollection.PropertyDescPool.ReleaseObject(this);
 
@@ -429,14 +435,18 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             protected set;
         } = new List<object>(10);
 
-        public void FinalCleanup()
+        string mMultiValueString = "---";
+        public string MultiValueString { get => mMultiValueString; }
+
+        public void Cleanup()
         {
+            Values.Clear();
         }
 
         public override string ToString()
         {
             if (HasDifferentValue())
-                return "---";
+                return mMultiValueString;
             return System.Convert.ToString(Values[0]);
         }
 
@@ -460,6 +470,47 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 return this;
             }
             return Values[0];
+        }
+        public void SetValue(object value)
+        {
+            for (int i = 0; i < Values.Count; i++)
+                Values[i] = value;
+        }
+
+        byte[] mTextBuffer = new byte[128];
+        bool mInvalidCast = false;
+        public unsafe bool Draw(string name, out object newOutValue, Func<string, object> castAction)
+        {
+            bool retValue = false;
+            newOutValue = null;
+            fixed (byte* pBuffer = &mTextBuffer[0])
+            {
+                var strPtr = System.Runtime.InteropServices.Marshal.StringToHGlobalAnsi(mMultiValueString);
+                var len = (uint)mMultiValueString.Length;
+                CoreSDK.SDK_StrCpy(pBuffer, strPtr.ToPointer(), len);
+                if (mInvalidCast)
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
+                var changed = ImGuiAPI.InputText(name, pBuffer, len, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+                if (mInvalidCast)
+                    ImGuiAPI.PopStyleColor(1);
+                if (changed)
+                {
+                    var newValue = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)pBuffer);
+                    try
+                    {
+                        newOutValue = castAction?.Invoke(newValue);
+                        mInvalidCast = false;
+                        retValue = true;
+                    }
+                    catch (System.Exception)
+                    {
+                        mInvalidCast = true;
+                        retValue = false;
+                    }
+                }
+                System.Runtime.InteropServices.Marshal.FreeHGlobal(strPtr);
+            }
+            return retValue;
         }
     }
 
@@ -631,13 +682,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 {
                     mProperties[i - 1] = mProperties[i];
                 }
-                if(mProperties[Count - 1] != null)
-                {
-                    mProperties[Count - 1].ReleaseObject();
-                    mProperties[Count - 1] = null;
-                }
-                Count--;
             }
+            if (mProperties[Count - 1] != null)
+            {
+                //mProperties[Count - 1].ReleaseObject();
+                mProperties[Count - 1] = null;
+            }
+            Count--;
         }
 
         public enum enSortType
@@ -752,7 +803,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 var idx = tempProperties.IndexOf(properties[i]);
                                 if (idx >= 0)
                                 {
-                                    properties[i].Add(tempProperties[idx]);
+                                    //properties[i].Add(tempProperties[idx]);
+                                    tempProperties.RemoveAt(idx);
                                 }
                                 else
                                     properties.RemoveAt(i);
@@ -779,7 +831,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 var idx = tempFields.IndexOf(fields[i]);
                                 if (idx >= 0)
                                 {
-                                    fields[i].Add(tempFields[idx]);
+                                    //fields[i].Add(tempFields[idx]);
+                                    tempProperties.RemoveAt(idx);
                                 }
                                 else
                                     fields.RemoveAt(i);

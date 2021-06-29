@@ -88,21 +88,29 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             TypeSlt.ExcludeSealed = ExcludeSealed;
             TypeSlt.ExcludeValueType = ExcludeValueType;
             TypeSlt.BaseType = BaseType;
-            var typeStr = info.Value as string;
-            TypeSlt.SelectedType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeStr);
-            if (TypeSlt.OnDraw(-1, 12))
+            var multiValue = info.Value as PropertyMultiValue;
+            if(multiValue != null && multiValue.HasDifferentValue())
             {
-                newValue = TypeSlt.SelectedType;
-                return true;
-                //foreach (var i in props)
-                //{
-                //    var v = TypeSlt.SelectedType;
-                //    prop.SetValue(ref target, v);
-                //    //foreach (var j in pg.TargetObjects)
-                //    //{
-                //    //    EGui.Controls.PropertyGrid.PropertyGrid.SetValue(pg, j, callstack, prop, target, v);
-                //    //}
-                //}
+                ImGuiAPI.Text(multiValue.MultiValueString);
+            }
+            else
+            {
+                var typeStr = info.Value.ToString();// as string;
+                TypeSlt.SelectedType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeStr);
+                if (TypeSlt.OnDraw(-1, 12))
+                {
+                    newValue = TypeSlt.SelectedType;
+                    return true;
+                    //foreach (var i in props)
+                    //{
+                    //    var v = TypeSlt.SelectedType;
+                    //    prop.SetValue(ref target, v);
+                    //    //foreach (var j in pg.TargetObjects)
+                    //    //{
+                    //    //    EGui.Controls.PropertyGrid.PropertyGrid.SetValue(pg, j, callstack, prop, target, v);
+                    //    //}
+                    //}
+                }
             }
             return false;
         }
@@ -201,8 +209,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var height = ImGuiAPI.GetFrameHeight();
             startPos.Y += (height - EGui.UIProxy.StyleConfig.Instance.PGColorBoxSize.Y - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y * 2) * 0.5f;
             var endPos = startPos + EGui.UIProxy.StyleConfig.Instance.PGColorBoxSize;
-            var drawCol = Color3.ToAbgr((Vector3)info.Value);
-            drawList.AddRectFilled(ref startPos, ref endPos, drawCol, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None);
+            var multiValue = info.Value as PropertyMultiValue;
+            if (multiValue != null && multiValue.HasDifferentValue())
+                drawList.AddRectFilledMultiColor(ref startPos, ref endPos, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000, 0xFFFFFFFF);
+            else
+            {
+                var drawCol = Color3.ToAbgr((Vector3)info.Value);
+                drawList.AddRectFilled(ref startPos, ref endPos, drawCol, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None);
+            }
             drawList.AddRect(ref startPos, ref endPos, EGui.UIProxy.StyleConfig.Instance.PGItemBorderNormalColor, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None, 1);
             bool hovered = false;
             bool held = false;
@@ -217,7 +231,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             if (ImGuiAPI.BeginPopup("colorPopup", ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 ImGuiColorEditFlags_ misc_flags = (mHDR ? ImGuiColorEditFlags_.ImGuiColorEditFlags_HDR : 0) | (mDragAndDrop ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoDragDrop) | (mAlphaHalfPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreviewHalf : (mAlphaPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreview : 0)) | (mOptionMenu ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoOptions);
-                var v = (Vector3)info.Value;
+                Vector3 v;
+                if(multiValue != null)
+                {
+                    if (multiValue.HasDifferentValue())
+                        v = Vector3.Zero;
+                    else
+                        v = (Vector3)multiValue.Values[0];
+                }
+                else
+                    v = (Vector3)info.Value;
                 var saved = v;
                 ImGuiAPI.ColorPicker3(TName.FromString2("##colorpicker_", info.Name).ToString(), (float*)&v,
                     misc_flags | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSmallPreview);
@@ -247,8 +270,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var height = ImGuiAPI.GetFrameHeight();
             startPos.Y += (height - EGui.UIProxy.StyleConfig.Instance.PGColorBoxSize.Y - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y * 2) * 0.5f;
             var endPos = startPos + EGui.UIProxy.StyleConfig.Instance.PGColorBoxSize;
-            var drawCol = Color4.ToAbgr((Vector4)info.Value);
-            drawList.AddRectFilled(ref startPos, ref endPos, drawCol, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None);
+            var multiValue = info.Value as PropertyMultiValue;
+            if (multiValue != null && multiValue.HasDifferentValue())
+                drawList.AddRectFilledMultiColor(ref startPos, ref endPos, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000, 0xFFFFFFFF);
+            else
+            {
+                var drawCol = Color4.ToAbgr((Vector4)info.Value);
+                drawList.AddRectFilled(ref startPos, ref endPos, drawCol, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None);
+            }
             drawList.AddRect(ref startPos, ref endPos, EGui.UIProxy.StyleConfig.Instance.PGItemBorderNormalColor, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None, 1);
             bool hovered = false;
             bool held = false;
@@ -263,7 +292,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             if (ImGuiAPI.BeginPopup("colorPopup", ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 ImGuiColorEditFlags_ misc_flags = (mHDR ? ImGuiColorEditFlags_.ImGuiColorEditFlags_HDR : 0) | (mDragAndDrop ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoDragDrop) | (mAlphaHalfPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreviewHalf : (mAlphaPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreview : 0)) | (mOptionMenu ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoOptions);
-                var v = (Vector4)info.Value;
+                Vector4 v;
+                if (multiValue != null)
+                {
+                    if (multiValue.HasDifferentValue())
+                        v = new Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+                    else
+                        v = (Vector4)multiValue.Values[0];
+                }
+                else
+                    v = (Vector4)info.Value;
                 var saved = v;
                 ImGuiAPI.ColorPicker4(TName.FromString2("##colorpicker_", info.Name).ToString(), (float*)&v,
                     misc_flags | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSmallPreview, (float*)0);
@@ -296,11 +334,17 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             startPos.Y += (height - boxSize.Y - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y * 2) * 0.5f;
             var endPos = startPos + boxSize;
             UInt32 drawCol;
-            if (IsABGR)
-                drawCol = (UInt32)info.Value;
+            var multiValue = info.Value as PropertyMultiValue;
+            if(multiValue != null && multiValue.HasDifferentValue())
+                drawList.AddRectFilledMultiColor(ref startPos, ref endPos, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000, 0xFFFFFFFF);
             else
-                drawCol = Color4.Argb2Abgr((UInt32)info.Value);
-            drawList.AddRectFilled(ref startPos, ref endPos, drawCol, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None);
+            {
+                if (IsABGR)
+                    drawCol = (UInt32)info.Value;
+                else
+                    drawCol = Color4.Argb2Abgr((UInt32)info.Value);
+                drawList.AddRectFilled(ref startPos, ref endPos, drawCol, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None);
+            }
             drawList.AddRect(ref startPos, ref endPos, EGui.UIProxy.StyleConfig.Instance.PGItemBorderNormalColor, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None, 1);
             bool hovered = false;
             bool held = false;
@@ -317,10 +361,20 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 mPopupOn = true;
                 ImGuiColorEditFlags_ misc_flags = (mHDR ? ImGuiColorEditFlags_.ImGuiColorEditFlags_HDR : 0) | (mDragAndDrop ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoDragDrop) | (mAlphaHalfPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreviewHalf : (mAlphaPreview ? ImGuiColorEditFlags_.ImGuiColorEditFlags_AlphaPreview : 0)) | (mOptionMenu ? 0 : ImGuiColorEditFlags_.ImGuiColorEditFlags_NoOptions);
                 Color4 v;
-                if (IsABGR)
-                    v = Color4.FromABGR((UInt32)info.Value);
+                UInt32 srcValue = 0xFF000000;
+                if(multiValue != null)
+                {
+                    if (!multiValue.HasDifferentValue())
+                        srcValue = (UInt32)multiValue.Values[0];
+                }
                 else
-                    v = new Color4((UInt32)info.Value);
+                {
+                    srcValue = (UInt32)info.Value;
+                }
+                if (IsABGR)
+                    v = Color4.FromABGR(srcValue);
+                else
+                    v = new Color4(srcValue);
                 var saved = v;
                 ImGuiAPI.ColorPicker4(TName.FromString2("##colorpicker_", info.Name).ToString(), (float*)&v,
                     misc_flags | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSmallPreview, (float*)0);

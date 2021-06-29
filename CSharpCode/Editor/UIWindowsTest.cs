@@ -9,6 +9,12 @@ namespace EngineNS.Editor
     {
         public bool BoolValue { get; set; }
     }
+    public class PropertyGridTestClass2
+    {
+        public UInt32 UInt32Value { get; set; } = 2;
+        public bool BoolValue { get; set; } = true;
+        public ValueType ValueType { get; set; }
+    }
     public class PropertyGridTestClass
     {
         public PropertyGridTestClass NewTest { get; set; }
@@ -499,7 +505,32 @@ namespace EngineNS.Editor
             inspector.SearchInfo = "Search Details";
             //inspector.Target = *viewPort;
             //inspector.Target = EGui.UIProxy.StyleConfig.Instance;
-            inspector.Target = new PropertyGridTestClass();//EGui.UIProxy.StyleConfig.Instance;
+            //inspector.Target = new PropertyGridTestClass();//EGui.UIProxy.StyleConfig.Instance;
+            inspector.Target = new object[] { new PropertyGridTestClass(),
+                new PropertyGridTestClass()
+                {
+                    BoolValue = true,
+                    SByteValue = 1,
+                    UInt16Value = 1,
+                    UInt32Value = 1,
+                    UInt64Value = 1,
+                    ByteValue = 1,
+                    Int16Value = 1,
+                    Int32Value = 1,
+                    Int64Value = 1,
+                    FloatValue = 1,
+                    DoubleValue = 1,
+                    StringValue = "abc",
+                    NEnumValue = PropertyGridTestClass.NormalEnum.EnumV3,
+                    FlagEnumValue = PropertyGridTestClass.FlagEnum.FEV2,
+                    Vector2Value = new Vector2(1, 0),
+                    Vector3Value = new Vector3(1, 0, 1),
+                    Vector4Value = new Vector4(1, 0, 1, 0),
+                    Color4Value = new Vector4(1, 0, 1, 0),
+                    Color3Value = new Vector3(1, 0, 1),
+                    Color = 0xFF00FF00,
+                }
+            };//EGui.UIProxy.StyleConfig.Instance;
             mPanels.Add(inspector);
             var contentBrowser = new ContentBrowser();
             contentBrowser.Initialize();

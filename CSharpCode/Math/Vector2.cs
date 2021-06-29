@@ -26,7 +26,6 @@ namespace EngineNS
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
                 newValue = info.Value;
-                var v = (Vector2)info.Value;
                 //var saved = v;
                 var index = ImGuiAPI.TableGetColumnIndex();
                 var width = ImGuiAPI.GetColumnWidth(index);
@@ -35,15 +34,26 @@ namespace EngineNS
                 //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
                 var minValue = float.MinValue;
                 var maxValue = float.MaxValue;
-                var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 2, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                //ImGuiAPI.InputFloat2(, (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
-                //ImGuiAPI.PopStyleVar(1);
-                if (changed)//(v != saved)
+                var name = TName.FromString2("##", info.Name).ToString();
+                var multiValue = info.Value as EGui.Controls.PropertyGrid.PropertyMultiValue;
+                bool retValue = false;
+                if (multiValue != null && multiValue.HasDifferentValue())
                 {
-                    newValue = v;
-                    return true;
+                    ImGuiAPI.Text(multiValue.MultiValueString);
                 }
-                return false;
+                else
+                {
+                    var v = (Vector2)info.Value;
+                    var changed = ImGuiAPI.DragScalarN2(name, ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 2, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    //ImGuiAPI.InputFloat2(, (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
+                    //ImGuiAPI.PopStyleVar(1);
+                    if (changed)//(v != saved)
+                    {
+                        newValue = v;
+                        retValue = true;
+                    }
+                }
+                return retValue;
             }
         }
         public override string ToString()

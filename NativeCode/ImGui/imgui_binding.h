@@ -1961,6 +1961,27 @@ public:
 
 		table->CellPaddingY = value;
 	}
+	static bool CheckBoxTristate(const char* label, int* v_tristate)
+	{
+		bool ret = false;
+		if (*v_tristate == -1)
+		{
+			ImGui::PushItemFlag(ImGuiItemFlags_MixedValue, true);
+			bool b = false;
+			ret = ImGui::Checkbox(label, &b);
+			if (ret)
+				*v_tristate = 1;
+			ImGui::PopItemFlag();
+		}
+		else
+		{
+			bool b = (*v_tristate != 0);
+			ret = ImGui::Checkbox(label, &b);
+			if (ret)
+				*v_tristate = (int)b;
+		}
+		return ret;
+	}
 };
 
 StructBegin(ImVec2, )

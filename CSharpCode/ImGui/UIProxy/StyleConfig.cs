@@ -73,6 +73,11 @@ namespace EngineNS.EGui.UIProxy
         [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ItemHightlightHoveredColor = 0xFFFFD26F;
 
+        [Rtti.Meta, Category("Common")]
+        [Controls.PropertyGrid.PGShowInPropertyGrid]
+        [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
+        public UInt32 ErrorStringColor = 0xFF0000FF;
+
         // Menu
         [Rtti.Meta, Category("Menu")]
         [Controls.PropertyGrid.PGShowInPropertyGrid]

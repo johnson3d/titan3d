@@ -51,20 +51,38 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
+            bool retValue = false;
             newValue = info.Value;
             ImGuiAPI.SetNextItemWidth(-1);
-            var v = (System.Convert.ToBoolean(info.Value));
-            var saved = v;
             ImGuiStyle* style = ImGuiAPI.GetStyle();
             var offsetY = (style->FramePadding.Y - EGui.UIProxy.StyleConfig.Instance.PGCheckboxFramePadding.Y);
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
             cursorPos.Y += offsetY;
             ImGuiAPI.SetCursorScreenPos(ref cursorPos);
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGCheckboxFramePadding);
-            ImGuiAPI.Checkbox(TName.FromString2("##", info.Name).ToString(), ref v);
-            newValue = v;
+            var name = TName.FromString2("##", info.Name).ToString();
+            var multiValue = info.Value as PropertyMultiValue;
+            if(multiValue != null)
+            {
+                int refVal = -1;
+                if(multiValue.HasDifferentValue())
+                    refVal = -1;
+                else
+                    refVal = (System.Convert.ToBoolean(multiValue.Values[0]))?1:0;
+
+                retValue = ImGuiAPI.CheckBoxTristate(name, ref refVal);
+                if(retValue)
+                    newValue = (refVal > 0) ? true : false;
+            }
+            else
+            {
+                var v = (System.Convert.ToBoolean(info.Value));
+                retValue = ImGuiAPI.Checkbox(name, ref v);
+                if(retValue)
+                    newValue = v;
+            }
             ImGuiAPI.PopStyleVar(1);
-            return (v != saved);
+            return retValue;
             //if (v != saved)
             //{
             //    prop.SetValue(ref target, v);
@@ -80,18 +98,33 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var index = ImGuiAPI.GetColumnIndex();//ImGuiAPI.TableGetColumnIndex();
             var width = ImGuiAPI.GetColumnWidth(index);
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
-            var v = System.Convert.ToSByte(info.Value);
-            //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
             var minValue = sbyte.MinValue;
             var maxValue = sbyte.MaxValue;
-            var changed = ImGuiAPI.DragScalar2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_S8, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-            //ImGuiAPI.PopStyleVar(1);
-            if (changed)
+            var name = TName.FromString2("##", info.Name).ToString();
+            var multiValue = info.Value as PropertyMultiValue;
+            bool retValue = false;
+            if(multiValue != null && multiValue.HasDifferentValue())
             {
-                newValue = v;
-                return true;
+                var changed = multiValue.Draw(name, out newValue, (str) =>
+                {
+                    return System.Convert.ToSByte(str);
+                });
+                if (changed)
+                {
+                    retValue = true;
+                }
             }
-            return false;
+            else
+            {
+                var v = System.Convert.ToSByte(info.Value);
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S8, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (changed)
+                {
+                    newValue = v;
+                    retValue = true;
+                }
+            }
+            return retValue;
         }
     }
     public class Int16Editor : PGCustomValueEditorAttribute
@@ -102,18 +135,31 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var index = ImGuiAPI.TableGetColumnIndex();
             var width = ImGuiAPI.GetColumnWidth(index);
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
-            var v = System.Convert.ToInt16(info.Value);
-            //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
             var minValue = Int16.MinValue;
             var maxValue = Int16.MaxValue;
-            var changed = ImGuiAPI.DragScalar2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_S16, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-            //ImGuiAPI.PopStyleVar(1);
-            if (changed)
+            var name = TName.FromString2("##", info.Name).ToString();
+            var multiValue = info.Value as PropertyMultiValue;
+            bool retValue = false;
+            if(multiValue != null && multiValue.HasDifferentValue())
             {
-                newValue = v;
-                return true;
+                var changed = multiValue.Draw(name, out newValue, (str) =>
+                {
+                    return System.Convert.ToInt16(str);
+                });
+                if (changed)
+                    retValue = true;
             }
-            return false;
+            else
+            {
+                var v = System.Convert.ToInt16(info.Value);
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S16, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (changed)
+                {
+                    newValue = v;
+                    retValue = true;
+                }
+            }
+            return retValue;
         }
     }
     public class Int32Editor : PGCustomValueEditorAttribute
@@ -124,18 +170,31 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var index = ImGuiAPI.TableGetColumnIndex();
             var width = ImGuiAPI.GetColumnWidth(index);
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
-            var v = System.Convert.ToInt32(info.Value);
-            //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
             var minValue = Int32.MinValue;
             var maxValue = Int32.MaxValue;
-            var changed = ImGuiAPI.DragScalar2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_S32, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-            //ImGuiAPI.PopStyleVar(1);
-            if (changed)
+            var name = TName.FromString2("##", info.Name).ToString();
+            var multiValue = info.Value as PropertyMultiValue;
+            bool retValue = false;
+            if(multiValue != null && multiValue.HasDifferentValue())
             {
-                newValue = v;
-                return true;
+                var changed = multiValue.Draw(name, out newValue, (str) =>
+                {
+                    return System.Convert.ToUInt32(str);
+                });
+                if (changed)
+                    retValue = true;
             }
-            return false;
+            else
+            {
+                var v = System.Convert.ToInt32(info.Value);
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S32, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (changed)
+                {
+                    newValue = v;
+                    retValue = true;
+                }
+            }
+            return retValue;
         }
     }
     public class Int64Editor : PGCustomValueEditorAttribute
@@ -146,18 +205,33 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var index = ImGuiAPI.TableGetColumnIndex();
             var width = ImGuiAPI.GetColumnWidth(index);
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
-            var v = System.Convert.ToInt64(info.Value);
-            //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
             var minValue = Int64.MinValue;
             var maxValue = Int64.MaxValue;
-            var changed = ImGuiAPI.DragScalar2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_S64, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-            //ImGuiAPI.PopStyleVar(1);
-            if (changed)
+            var name = TName.FromString2("##", info.Name).ToString();
+            var multiValue = info.Value as PropertyMultiValue;
+            bool retValue = false;
+            if(multiValue != null && multiValue.HasDifferentValue())
             {
-                newValue = v;
-                return true;
+                var changed = multiValue.Draw(name, out newValue, (str) =>
+                {
+                    return System.Convert.ToInt64(str);
+                });
+                if (changed)
+                {
+                    retValue = true;
+                }
             }
-            return false;
+            else
+            {
+                var v = System.Convert.ToInt64(info.Value);
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S64, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (changed)
+                {
+                    newValue = v;
+                    retValue = true;
+                }
+            }
+            return retValue;
         }
     }
     public class ByteEditor : PGCustomValueEditorAttribute
@@ -168,18 +242,33 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var index = ImGuiAPI.TableGetColumnIndex();
             var width = ImGuiAPI.GetColumnWidth(index);
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
-            var v = System.Convert.ToByte(info.Value);
-            //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
             var minValue = byte.MinValue;
             var maxValue = byte.MaxValue;
-            var changed = ImGuiAPI.DragScalar2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_U8, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-            //ImGuiAPI.PopStyleVar(1);
-            if (changed)
+            var name = TName.FromString2("##", info.Name).ToString();
+            var multiValue = info.Value as PropertyMultiValue;
+            bool retValue = false;
+            if (multiValue != null && multiValue.HasDifferentValue())
             {
-                newValue = v;
-                return true;
+                var changed = multiValue.Draw(name, out newValue, (str) =>
+                {
+                    return System.Convert.ToByte(str);
+                });
+                if (changed)
+                {
+                    retValue = true;
+                }
             }
-            return false;
+            else
+            {
+                var v = System.Convert.ToByte(info.Value);
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U8, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (changed)
+                {
+                    newValue = v;
+                    retValue = true;
+                }
+            }
+            return retValue;
         }
     }
     public class UInt16Editor : PGCustomValueEditorAttribute
@@ -190,18 +279,33 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var index = ImGuiAPI.TableGetColumnIndex();
             var width = ImGuiAPI.GetColumnWidth(index);
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
-            var v = System.Convert.ToUInt16(info.Value);
-            //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
             var minValue = UInt16.MinValue;
             var maxValue = UInt16.MaxValue;
-            var changed = ImGuiAPI.DragScalar2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_U16, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-            //ImGuiAPI.PopStyleVar(1);
-            if (changed)
+            var name = TName.FromString2("##", info.Name).ToString();
+            var multiValue = info.Value as PropertyMultiValue;
+            bool retValue = false;
+            if (multiValue != null && multiValue.HasDifferentValue())
             {
-                newValue = v;
-                return true;
+                var changed = multiValue.Draw(name, out newValue, (str) =>
+                {
+                    return System.Convert.ToUInt16(str);
+                });
+                if (changed)
+                {
+                    retValue = true;
+                }
             }
-            return false;
+            else
+            {
+                var v = System.Convert.ToUInt16(info.Value);
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U16, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (changed)
+                {
+                    newValue = v;
+                    retValue = true;
+                }
+            }
+            return retValue;
         }
     }
     public class UInt32Editor : PGCustomValueEditorAttribute
@@ -212,18 +316,34 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var index = ImGuiAPI.TableGetColumnIndex();
             var width = ImGuiAPI.GetColumnWidth(index);
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
-            var v = System.Convert.ToUInt32(info.Value);
             //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
             var minValue = UInt32.MinValue;
             var maxValue = UInt32.MaxValue;
-            var changed = ImGuiAPI.DragScalar2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_U32, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-            //ImGuiAPI.PopStyleVar(1);
-            if (changed)
+            var name = TName.FromString2("##", info.Name).ToString();
+            var multiValue = info.Value as PropertyMultiValue;
+            bool retValue = false;
+            if (multiValue != null && multiValue.HasDifferentValue())
             {
-                newValue = v;
-                return true;
+                var changed = multiValue.Draw(name, out newValue, (str) =>
+                {
+                    return System.Convert.ToUInt32(str);
+                });
+                if (changed)
+                {
+                    retValue = true;
+                }
             }
-            return false;
+            else
+            {
+                var v = System.Convert.ToUInt32(info.Value);
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U32, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (changed)
+                {
+                    newValue = v;
+                    retValue = true;
+                }
+            }
+            return retValue;
         }
     }
     public class UInt64Editor : PGCustomValueEditorAttribute
@@ -234,16 +354,31 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var index = ImGuiAPI.TableGetColumnIndex();
             var width = ImGuiAPI.GetColumnWidth(index);
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
-            var v = System.Convert.ToUInt64(info.Value);
-            //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
             var minValue = UInt64.MinValue;
             var maxValue = UInt64.MaxValue;
-            var changed = ImGuiAPI.DragScalar2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_U64, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-            //ImGuiAPI.PopStyleVar(1);
-            if (changed)
+            var name = TName.FromString2("##", info.Name).ToString();
+            var multiValue = info.Value as PropertyMultiValue;
+            bool retValue = false;
+            if (multiValue != null && multiValue.HasDifferentValue())
             {
-                newValue = v;
-                return true;
+                var changed = multiValue.Draw(name, out newValue, (str) =>
+                {
+                    return System.Convert.ToUInt64(str);
+                });
+                if (changed)
+                {
+                    retValue = true;
+                }
+            }
+            else
+            {
+                var v = System.Convert.ToUInt64(info.Value);
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U64, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (changed)
+                {
+                    newValue = v;
+                    return true;
+                }
             }
             return false;
         }
@@ -256,19 +391,33 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var index = ImGuiAPI.TableGetColumnIndex();
             var width = ImGuiAPI.GetColumnWidth(index);
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
-            var v = System.Convert.ToSingle(info.Value);
-            //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
-            //ImGuiAPI.InputFloat(TName.FromString2("##", info.Name).ToString(), ref v, 0.1f, 100.0f, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
             var minValue = float.MinValue;
             var maxValue = float.MaxValue;
-            var changed = ImGuiAPI.DragScalar2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, &v, 0.1f, &minValue, &maxValue, "%.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
-            //ImGuiAPI.PopStyleVar(1);
-            if (changed)
+            var name = TName.FromString2("##", info.Name).ToString();
+            var multiValue = info.Value as PropertyMultiValue;
+            bool retValue = false;
+            if (multiValue != null && multiValue.HasDifferentValue())
             {
-                newValue = v;
-                return true;
+                var changed = multiValue.Draw(name, out newValue, (str) =>
+                {
+                    return System.Convert.ToSingle(str);
+                });
+                if (changed)
+                {
+                    retValue = true;
+                }
             }
-            return false;
+            else
+            {
+                var v = System.Convert.ToSingle(info.Value);
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_Float, &v, 0.1f, &minValue, &maxValue, "%.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (changed)
+                {
+                    newValue = v;
+                    retValue = true;
+                }
+            }
+            return retValue;
         }
     }
     public class DoubleEditor : PGCustomValueEditorAttribute
@@ -279,19 +428,33 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var index = ImGuiAPI.TableGetColumnIndex();
             var width = ImGuiAPI.GetColumnWidth(index);
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
-            var v = System.Convert.ToDouble(info.Value);
-            //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
             var minValue = double.MinValue;
             var maxValue = double.MaxValue;
-            var changed = ImGuiAPI.DragScalar2(("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Double, &v, .1f, &minValue, &maxValue, "%.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
-            //ImGuiAPI.InputFloat(TName.FromString2("##", info.Name).ToString(), ref (*(float*)&v), 0.1f, 100.0f, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
-            //ImGuiAPI.PopStyleVar(1);
-            if (changed)
+            var name = ("##", info.Name).ToString();
+            var multiValue = info.Value as PropertyMultiValue;
+            bool retValue = false;
+            if (multiValue != null && multiValue.HasDifferentValue())
             {
-                newValue = v;
-                return true;
+                var changed = multiValue.Draw(name, out newValue, (str) =>
+                {
+                    return System.Convert.ToDouble(str);
+                });
+                if (changed)
+                {
+                    retValue = true;
+                }
             }
-            return false;
+            else
+            {
+                var v = System.Convert.ToDouble(info.Value);
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_Double, &v, .1f, &minValue, &maxValue, "%.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                if (changed)
+                {
+                    newValue = v;
+                    retValue = true;
+                }
+            }
+            return retValue;
         }
     }
     public class StringEditor : PGCustomValueEditorAttribute
@@ -305,21 +468,37 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var index = ImGuiAPI.TableGetColumnIndex();
             var width = ImGuiAPI.GetColumnWidth(index);
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
-            var v = info.Value as string;
-            var strPtr = System.Runtime.InteropServices.Marshal.StringToHGlobalAnsi(v);
-            fixed (byte* pBuffer = &TextBuffer[0])
+            var name = TName.FromString2("##", info.Name).ToString();
+            var multiValue = info.Value as PropertyMultiValue;
+            if(multiValue != null && multiValue.HasDifferentValue())
             {
-                CoreSDK.SDK_StrCpy(pBuffer, strPtr.ToPointer(), (uint)TextBuffer.Length);
-                //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
-                ImGuiAPI.InputText(TName.FromString2("##", info.Name).ToString(), pBuffer, (uint)TextBuffer.Length, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
-                //ImGuiAPI.PopStyleVar(1);
-                if (CoreSDK.SDK_StrCmp(pBuffer, strPtr.ToPointer()) != 0)
+                var changed = multiValue.Draw(name, out newValue, (str) =>
                 {
-                    newValue = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)pBuffer);
-                    valueChanged = true;
-                    //prop.SetValue(ref target, v);
+                    return str;
+                });
+                if(changed)
+                {
+                    return true;
                 }
-                System.Runtime.InteropServices.Marshal.FreeHGlobal(strPtr);
+            }
+            else
+            {
+                var v = info.Value as string;
+                var strPtr = System.Runtime.InteropServices.Marshal.StringToHGlobalAnsi(v);
+                fixed (byte* pBuffer = &TextBuffer[0])
+                {
+                    CoreSDK.SDK_StrCpy(pBuffer, strPtr.ToPointer(), (uint)TextBuffer.Length);
+                    //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
+                    ImGuiAPI.InputText(name, pBuffer, (uint)TextBuffer.Length, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+                    //ImGuiAPI.PopStyleVar(1);
+                    if (CoreSDK.SDK_StrCmp(pBuffer, strPtr.ToPointer()) != 0)
+                    {
+                        newValue = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)pBuffer);
+                        valueChanged = true;
+                        //prop.SetValue(ref target, v);
+                    }
+                    System.Runtime.InteropServices.Marshal.FreeHGlobal(strPtr);
+                }
             }
             return valueChanged;
         }
@@ -346,7 +525,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var width = ImGuiAPI.GetColumnWidth(index) - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X;
             var drawList = ImGuiAPI.GetWindowDrawList();
             ImGuiAPI.SetNextItemWidth(width);
-            var propertyType = info.Value.GetType();
+            var propertyType = info.Type.SystemType;
             var attrs1 = propertyType.GetCustomAttributes(typeof(System.FlagsAttribute), false);
 
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PopupColor);
@@ -362,7 +541,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var hovered = ImGuiAPI.IsMouseHoveringRectInCurrentWindow(ref cursorPos, ref endPos, true);
             if(hovered)
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.Instance.PGItemBorderHoveredColor);
-            var comboOpen = ImGuiAPI.BeginCombo(label, info.Value.ToString(), ImGuiComboFlags_.ImGuiComboFlags_None | ImGuiComboFlags_.ImGuiComboFlags_NoArrowButton);
+            string showValue = info.Value.ToString();
+            var multiValue = info.Value as PropertyMultiValue;
+            if(multiValue != null && multiValue.HasDifferentValue())
+            {
+                showValue = multiValue.MultiValueString;
+            }
+            var comboOpen = ImGuiAPI.BeginCombo(label, showValue, ImGuiComboFlags_.ImGuiComboFlags_None | ImGuiComboFlags_.ImGuiComboFlags_NoArrowButton);
             if (hovered)
                 ImGuiAPI.PopStyleColor(1);
             var itemSize = ImGuiAPI.GetItemRectSize();
@@ -376,7 +561,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 var sz = new Vector2(0, 0);
                 if (attrs1 != null && attrs1.Length > 0)
                 {
-                    var enumFlags = System.Convert.ToUInt32(info.Value);
+                    UInt32 enumFlags = 0;
+                    if(multiValue != null)
+                    {
+                        if (!multiValue.HasDifferentValue())
+                            enumFlags = System.Convert.ToUInt32(multiValue.Values[0]);
+                    }
+                    else
+                        enumFlags = System.Convert.ToUInt32(info.Value);
                     uint newFlags = 0;
                     for (int i = 0; i<members.Length; i++)
                     {
@@ -454,9 +646,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             bool valueChanged = false;
             newValue = info.Value;
-            if(newValue is PropertyMultiValue)
+            var multiValue = newValue as PropertyMultiValue;
+            if(multiValue != null)
             {
-                ImGuiAPI.Text(newValue.ToString());
+                ImGuiAPI.Text(multiValue.MultiValueString);
             }
             else
             {
@@ -547,50 +740,58 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             bool valueChanged = false;
             newValue = info.Value;
-            if (info.HostPropertyGrid.IsReadOnly == false)
+            var multiValue = newValue as PropertyMultiValue;
+            if(multiValue != null)
             {
-                //ImGuiAPI.SameLine(0, -1);
-                //var sz = new Vector2(0, 0);
-                //ImGuiAPI.PushID(info.Name);
-                //ImGuiAPI.SameLine(0, -1);
-                //ImGuiAPI.OpenPopupOnItemClick("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
-                //var pos = ImGuiAPI.GetItemRectMin();
-                //var size = ImGuiAPI.GetItemRectSize();
-                if (ImGuiAPI.ArrowButton("##OpenAddItemList", ImGuiDir_.ImGuiDir_Down))
+                ImGuiAPI.Text(multiValue.MultiValueString);
+            }
+            else
+            {
+                if (info.HostPropertyGrid.IsReadOnly == false)
                 {
-                    ImGuiAPI.OpenPopup("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                    //ImGuiAPI.SameLine(0, -1);
+                    //var sz = new Vector2(0, 0);
+                    //ImGuiAPI.PushID(info.Name);
+                    //ImGuiAPI.SameLine(0, -1);
+                    //ImGuiAPI.OpenPopupOnItemClick("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                    //var pos = ImGuiAPI.GetItemRectMin();
+                    //var size = ImGuiAPI.GetItemRectSize();
+                    if (ImGuiAPI.ArrowButton("##OpenAddItemList", ImGuiDir_.ImGuiDir_Down))
+                    {
+                        ImGuiAPI.OpenPopup("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                    }
+                    if (ImGuiAPI.BeginPopup("AddItem", ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                    {
+                        var dict = info.Value as System.Collections.IList;
+                        if (dict.GetType().GenericTypeArguments.Length == 1)
+                        {
+                            var listElementType = dict.GetType().GenericTypeArguments[0];
+                            var typeSlt = new EGui.Controls.TypeSelector();
+                            typeSlt.BaseType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(listElementType.FullName);
+                            typeSlt.OnDraw(150, 6);
+                            if (typeSlt.SelectedType != null)
+                            {
+                                var newItem = System.Activator.CreateInstance(listElementType);
+                                dict.Insert(dict.Count, newItem);
+                            }
+                        }
+                        ImGuiAPI.EndPopup();
+                    }
+                    ImGuiAPI.SameLine(0, -1);
+                    ImGuiAPI.Text(info.Type.ToString());
+                    //ImGuiAPI.PopID();
                 }
-                if (ImGuiAPI.BeginPopup("AddItem", ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                //ImGuiAPI.SameLine(0, -1);
+                //var showChild = ImGuiAPI.TreeNode(info.Name, "");
+                //ImGuiAPI.NextColumn();
+                //ImGuiAPI.Text(info.Type.ToString());
+                //ImGuiAPI.NextColumn();
+                if (info.Expand)
                 {
                     var dict = info.Value as System.Collections.IList;
-                    if (dict.GetType().GenericTypeArguments.Length == 1)
-                    {
-                        var listElementType = dict.GetType().GenericTypeArguments[0];
-                        var typeSlt = new EGui.Controls.TypeSelector();
-                        typeSlt.BaseType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(listElementType.FullName);
-                        typeSlt.OnDraw(150, 6);
-                        if (typeSlt.SelectedType != null)
-                        {
-                            var newItem = System.Activator.CreateInstance(listElementType);
-                            dict.Insert(dict.Count, newItem);
-                        }
-                    }
-                    ImGuiAPI.EndPopup();
+                    if (OnList(in info, dict))
+                        valueChanged = true;
                 }
-                ImGuiAPI.SameLine(0, -1);
-                ImGuiAPI.Text(info.Type.ToString());
-                //ImGuiAPI.PopID();
-            }
-            //ImGuiAPI.SameLine(0, -1);
-            //var showChild = ImGuiAPI.TreeNode(info.Name, "");
-            //ImGuiAPI.NextColumn();
-            //ImGuiAPI.Text(info.Type.ToString());
-            //ImGuiAPI.NextColumn();
-            if (info.Expand)
-            {
-                var dict = info.Value as System.Collections.IList;
-                if (OnList(in info, dict))
-                    valueChanged = true;
             }
             return valueChanged;
         }
@@ -701,62 +902,70 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             bool valueChanged = false;
             newValue = info.Value;
-            if (info.HostPropertyGrid.IsReadOnly == false)
+            var multiValue = newValue as PropertyMultiValue;
+            if(multiValue != null)
             {
-                //ImGuiAPI.SameLine(0, -1);
-                //var sz = new Vector2(0, 0);
-                //ImGuiAPI.PushID(info.Name);
-                if (ImGuiAPI.ArrowButton("##OpenAddItemDict", ImGuiDir_.ImGuiDir_Down))
-                {
-                    //ImGuiAPI.PopID();
-                    ImGuiAPI.OpenPopup("AddDictElement", ImGuiPopupFlags_.ImGuiPopupFlags_None);
-                }
-                else
-                {
-                    //ImGuiAPI.PopID();
-                }
+                ImGuiAPI.Text(multiValue.MultiValueString);
             }
-
+            else
             {
-                Rtti.UTypeDesc keyType = null, valueType = null;
-                var dict = info.Value as System.Collections.IDictionary;
-                if (dict.GetType().GenericTypeArguments.Length == 2)
+                if (info.HostPropertyGrid.IsReadOnly == false)
                 {
-                    keyType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(dict.GetType().GenericTypeArguments[0].FullName);
-                    valueType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(dict.GetType().GenericTypeArguments[1].FullName);
-                }
-                if (mKVCreator == null)
-                {
-                    mKVCreator = new KeyValueCreator();
-                }
-                if (mKVCreator.CtrlName != info.Name)
-                {
-                    mKVCreator.CtrlName = info.Name;
-                    mKVCreator.KeyTypeSlt.BaseType = keyType;
-                    mKVCreator.ValueTypeSlt.BaseType = valueType;
+                    //ImGuiAPI.SameLine(0, -1);
+                    //var sz = new Vector2(0, 0);
+                    //ImGuiAPI.PushID(info.Name);
+                    if (ImGuiAPI.ArrowButton("##OpenAddItemDict", ImGuiDir_.ImGuiDir_Down))
+                    {
+                        //ImGuiAPI.PopID();
+                        ImGuiAPI.OpenPopup("AddDictElement", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                    }
+                    else
+                    {
+                        //ImGuiAPI.PopID();
+                    }
                 }
 
-                var size = new Vector2(300, 500);
-                ImGuiAPI.SetNextWindowSize(ref size, ImGuiCond_.ImGuiCond_None);
-                mKVCreator.CreateFinished = false;
-                mKVCreator.OnDraw("AddDictElement");
-                if (mKVCreator.CreateFinished)
                 {
-                    dict[mKVCreator.KeyData] = mKVCreator.ValueData;
-                }
-            }
+                    Rtti.UTypeDesc keyType = null, valueType = null;
+                    var dict = info.Value as System.Collections.IDictionary;
+                    if (dict.GetType().GenericTypeArguments.Length == 2)
+                    {
+                        keyType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(dict.GetType().GenericTypeArguments[0].FullName);
+                        valueType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(dict.GetType().GenericTypeArguments[1].FullName);
+                    }
+                    if (mKVCreator == null)
+                    {
+                        mKVCreator = new KeyValueCreator();
+                    }
+                    if (mKVCreator.CtrlName != info.Name)
+                    {
+                        mKVCreator.CtrlName = info.Name;
+                        mKVCreator.KeyTypeSlt.BaseType = keyType;
+                        mKVCreator.ValueTypeSlt.BaseType = valueType;
+                    }
 
-            ImGuiAPI.SameLine(0, -1);
-            //var showChild = ImGuiAPI.TreeNode(info.Name, "");
-            //ImGuiAPI.NextColumn();
-            ImGuiAPI.Text(info.Type.ToString());
-            //ImGuiAPI.NextColumn();
-            if (info.Expand)
-            {
-                var dict = info.Value as System.Collections.IDictionary;
-                if (OnDictionary(in info, dict))
-                    valueChanged = true;
-                //ImGuiAPI.TreePop();
+                    var size = new Vector2(300, 500);
+                    ImGuiAPI.SetNextWindowSize(ref size, ImGuiCond_.ImGuiCond_None);
+                    mKVCreator.CreateFinished = false;
+                    mKVCreator.OnDraw("AddDictElement");
+                    if (mKVCreator.CreateFinished)
+                    {
+                        dict[mKVCreator.KeyData] = mKVCreator.ValueData;
+                    }
+                }
+
+                ImGuiAPI.SameLine(0, -1);
+                //var showChild = ImGuiAPI.TreeNode(info.Name, "");
+                //ImGuiAPI.NextColumn();
+                ImGuiAPI.Text(info.Type.ToString());
+                //ImGuiAPI.NextColumn();
+                if (info.Expand)
+                {
+                    var dict = info.Value as System.Collections.IDictionary;
+                    if (OnDictionary(in info, dict))
+                        valueChanged = true;
+                    //ImGuiAPI.TreePop();
+                }
             }
 
             return valueChanged;

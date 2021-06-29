@@ -194,7 +194,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
             if (bKeepColums == false)
             {
-                ImGuiAPI.Text($"{Target?.ToString()}");
+                //ImGuiAPI.Text($"{Target?.ToString()}");
                 OnDrawHeadBar(ref drawList);
                 ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGNormalFramePadding);
                 ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FrameBorderSize, EGui.UIProxy.StyleConfig.Instance.PGNormalFrameBorderSize);
@@ -394,7 +394,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 continue;
                             }
 
-                            var displayName = propDesc.GetDisplayName(propertyValue);
+                            var displayName = propDesc.GetDisplayName(target);
                             if (string.IsNullOrEmpty(displayName))
                                 continue;
                             if (!string.IsNullOrEmpty(FilterString) && !displayName.ToLower().Contains(FilterString))
@@ -666,11 +666,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 {
                     valueChanged = PGTypeEditorManager.Instance.ArrayEditor.OnDraw(in info, out newValue);
                 }
-                else if (info.Value is System.Collections.IList)
+                else if (info.Type.SystemType.GetInterface(typeof(System.Collections.IList).FullName) != null)
                 {
                     valueChanged = PGTypeEditorManager.Instance.ListEditor.OnDraw(in info, out newValue);
                 }
-                else if (info.Value is System.Collections.IDictionary)
+                else if (info.Type.SystemType.GetInterface(typeof(System.Collections.IDictionary).FullName) != null)
                 {
                     valueChanged = PGTypeEditorManager.Instance.DictionaryEditor.OnDraw(in info, out newValue);
                 }
