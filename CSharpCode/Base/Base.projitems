@@ -20,7 +20,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Support\CBlobObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\UNativeArray.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\CPerlin.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Support\UActionChain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\UBitset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\UNativeDictionary.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\Async\UJobSystem.cs" />

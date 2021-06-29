@@ -18,6 +18,7 @@ namespace EngineNS.Editor.Forms
         public Graphics.Pipeline.Shader.UMaterialInstance Material;
         public Bricks.CodeBuilder.ShaderNode.UPreviewViewport PreviewViewport = new Bricks.CodeBuilder.ShaderNode.UPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public UMaterialInstanceEditorRecorder ActionRecorder = new UMaterialInstanceEditorRecorder();
         public void Cleanup()
         {
             PreviewViewport?.Cleanup();
@@ -62,6 +63,9 @@ namespace EngineNS.Editor.Forms
             if (Material == null)
                 return false;
 
+            ActionRecorder.ClearRecords();
+            Material.ActionRecorder = ActionRecorder;
+
             PreviewViewport.Title = "MaterialInstancePreview";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileFSPolicy(), 0, 1);
@@ -72,6 +76,8 @@ namespace EngineNS.Editor.Forms
         }
         public void OnCloseEditor()
         {
+            Material.ActionRecorder = null;
+            ActionRecorder.ClearRecords();
             UEngine.Instance.TickableManager.RemoveTickable(this);
             Cleanup();
         }
@@ -101,6 +107,11 @@ namespace EngineNS.Editor.Forms
                 }
                 WindowPos = ImGuiAPI.GetWindowPos();
                 WindowSize = ImGuiAPI.GetWindowSize();
+                DrawToolBar();
+                //var sz = new Vector2(-1);
+                //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
+                ImGuiAPI.Separator();
+                ImGuiAPI.Separator();
                 ImGuiAPI.Separator();
                 ImGuiAPI.Columns(2, null, true);
                 if (LeftWidth == 0)
@@ -120,6 +131,29 @@ namespace EngineNS.Editor.Forms
                 ImGuiAPI.Columns(1, null, true);
             }
             ImGuiAPI.End();
+        }
+        protected unsafe void DrawToolBar()
+        {
+            var btSize = new Vector2(64, 64);
+            if (ImGuiAPI.Button("Save", ref btSize))
+            {
+                Material.SaveAssetTo(Material.AssetName);
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Button("Reload", ref btSize))
+            {
+                
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Button("Undo", ref btSize))
+            {
+                ActionRecorder.Undo();
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Button("Redo", ref btSize))
+            {
+                ActionRecorder.Redo();
+            }
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
         {
@@ -152,6 +186,30 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.TickSync(ellapse);
         }
         #endregion
+    }
+
+    public class UMaterialInstanceEditorRecorder : GamePlay.Action.UActionRecorder
+    {
+        public override GamePlay.Action.UAction CurrentAction
+        {
+            get
+            {
+                if (mCurrentAction == null)
+                {
+                    mCurrentAction = this.NewAction();
+                }
+                return mCurrentAction;
+            }
+            set => mCurrentAction = value;
+        }
+        public override void OnChanged(GamePlay.Action.UAction.UPropertyModifier modifier)
+        {
+            if (mCurrentAction != null)
+            {
+                mCurrentAction.Name = $"Set:{modifier.PropertyName}";
+            }
+            this.CloseAction();
+        }
     }
 }
 

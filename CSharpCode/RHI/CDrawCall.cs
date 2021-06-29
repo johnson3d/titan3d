@@ -70,6 +70,13 @@ namespace EngineNS.RHI
                 pipeline.BindGpuProgram(Effect.ShaderProgram.mCoreObject);
             }
 
+            if (Material.BlendState != null)
+                pipeline.BindBlendState(Material.BlendState.mCoreObject);
+            if (Material.DepthStencilState != null)
+                pipeline.BindDepthStencilState(Material.DepthStencilState.mCoreObject);
+            if (Material.RasterizerState != null)
+                pipeline.BindRasterizerState(Material.RasterizerState.mCoreObject);
+
             var textures = new IShaderResources(mCoreObject.GetShaderResources());
             for (int j = 0; j < Material.NumOfSRV; j++)
             {

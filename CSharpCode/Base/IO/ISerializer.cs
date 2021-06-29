@@ -146,8 +146,13 @@ namespace EngineNS.IO
             foreach (var i in metaVersion.Fields)
             {
                 var value = ReadObject(ar, i.FieldType.SystemType, obj);
-                if (i.PropInfo != null)
+                if (value != null && i.PropInfo != null)
                 {
+                    if (value.GetType() != i.PropInfo.PropertyType)
+                    {
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Serializer", $"ProperySet {i.FieldName}: {value.GetType().FullName}!={i.PropInfo.PropertyType.FullName}");
+                        continue;
+                    }
                     try
                     {
                         if (i.PropInfo.CanWrite && value != null)

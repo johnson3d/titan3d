@@ -148,7 +148,8 @@ namespace EngineNS.UTest
                 //jobSystem.Wait();
                 foreach (var i in jobSystem.JobThreads)
                 {
-                    UnitTestManager.TAssert(i.Jobs.Count == 0, "?");
+                    //UnitTestManager.TAssert(i.Jobs.Count == 0, "?");
+                    //这个断言还真不一定能保证，foreach 后才clear的
                 }
                 UnitTestManager.TAssert(this.NumSum == 1000, "?");
             };
