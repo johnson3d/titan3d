@@ -49,6 +49,7 @@ namespace EngineNS.Editor.Forms
         public float LeftWidth = 0;
         public Vector2 WindowSize = new Vector2(800, 600);
         public Vector2 ImageSize = new Vector2(512, 512);
+        public float ScaleFactor = 1.0f;
         private IntPtr TextureID;
         public unsafe void OnDraw()
         {
@@ -105,12 +106,24 @@ namespace EngineNS.Editor.Forms
             var sz = new Vector2(-1);
             if (ImGuiAPI.BeginChild("TextureView", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
+                if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows))
+                {
+                    if ( ImGuiAPI.GetIO().MouseWheel != 0)
+                    {
+                        ScaleFactor += ImGuiAPI.GetIO().MouseWheel * 0.1f;
+
+                        if (ScaleFactor <= 0.1f)
+                            ScaleFactor = 0.1f;
+                        if (ScaleFactor >= 3.0f)
+                            ScaleFactor = 3.0f;
+                    }
+                }
                 var pos = ImGuiAPI.GetWindowPos();
                 var drawlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
                 var uv1 = new Vector2(0, 0);
                 var uv2 = new Vector2(1, 1);
                 var min1 = ImGuiAPI.GetWindowContentRegionMin();
-                var max1 = min1 + ImageSize;
+                var max1 = min1 + ImageSize * ScaleFactor;
 
                 min1 = min1 + pos;
                 max1 = max1 + pos;
