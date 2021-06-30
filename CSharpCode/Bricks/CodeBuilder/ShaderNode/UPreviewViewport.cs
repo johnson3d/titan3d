@@ -7,8 +7,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
     public class UPreviewViewport : Graphics.Pipeline.UViewportSlate
     {
         public Editor.Controller.EditorCameraController CameraController = new Editor.Controller.EditorCameraController();
-        public UPreviewViewport(bool regRoot)
-            : base(regRoot)
+        public UPreviewViewport()
         {
 
         }
@@ -28,7 +27,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
         }
         IntPtr SnapshotPtr;
-        public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        public delegate System.Threading.Tasks.Task FOnInitialize(UPreviewViewport viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax);
+        public FOnInitialize OnInitialize = null;
+        protected async System.Threading.Tasks.Task Initialize_Default(UPreviewViewport viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
@@ -55,6 +56,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
+        }
+        public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        {
+            if (OnInitialize == null)
+            {
+                OnInitialize = this.Initialize_Default;
+            }
+            await OnInitialize(this, application, policy, zMin, zMax);
         }
         protected override void OnClientChanged(bool bSizeChanged)
         {

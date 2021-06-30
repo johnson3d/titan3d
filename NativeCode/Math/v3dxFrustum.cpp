@@ -12,7 +12,7 @@
 *********************************************************************/
 #include "v3dxFrustum.h"
 #include "v3dxPoly3.h"
-#include "../Base/vfxSampCounter.h"
+#include "../Base/vfxsampcounter.h"
 
 //#define new VNEW
 #if !defined(PLATFORM_WIN)

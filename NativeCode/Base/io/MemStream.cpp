@@ -13,10 +13,19 @@ MemStreamWriter::MemStreamWriter()
 
 MemStreamWriter::~MemStreamWriter()
 {
-	ResetStream(0);
+	Safe_DeleteArray(mDataStream);
+	mBufferSize = 0;
+	mPosition = 0;
 }
 
-void MemStreamWriter::ResetStream(size_t size)
+MemStreamWriter::MemStreamWriter(UINT size)
+{
+	mDataStream = new BYTE[size];
+	mBufferSize = size;
+	mPosition = 0;
+}
+
+void MemStreamWriter::ResetBufferSize(UINT64 size)
 {
 	Safe_DeleteArray(mDataStream);
 	if (size > 0)
@@ -27,7 +36,7 @@ void MemStreamWriter::ResetStream(size_t size)
 	mPosition = 0;
 }
 
-bool MemStreamWriter::Seek(size_t offset)
+bool MemStreamWriter::Seek(UINT64 offset)
 {
 	if (mBufferSize <= offset)
 	{

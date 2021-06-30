@@ -204,7 +204,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor);
                 ImGuiAPI.Separator();
 
-                UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.BaseRenderer.enFont.Font_13px);
+                UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_13px);
 
                 Vector2 size = Vector2.Zero;
                 if(ImGuiAPI.BeginChild($"{PGName}_Properties", ref size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
@@ -312,7 +312,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     //ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PGHeadColor);
                     ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FrameRounding, 0);
                     ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGCategoryPadding);
-                    UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.BaseRenderer.enFont.Font_Bold_13px);
+                    UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_Bold_13px);
 
                     if(isSubPropertyGrid)
                     {
@@ -695,46 +695,42 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                     else
                     {
-                        ImGuiAPI.Text(info.Type.ToString());
-                        ImGuiAPI.SameLine(0, 10);
-                        if (info.Type.IsValueType == false)
+                        //var multiValue = info.Value as PropertyMultiValue;
+                        //if (multiValue != null)
+                        //{
+                        //    ImGuiAPI.Text(multiValue.MultiValueString);
+                        //}
+                        //else
                         {
-                            var drawList = ImGuiAPI.GetWindowDrawList();
-                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Button, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGColor);
-                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonActive, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGActiveColor);
-                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonHovered, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGHoverColor);
-                            if (info.Readonly == false && info.HostPropertyGrid.mDelete.OnDraw(ref drawList))
+                            ImGuiAPI.Text(info.Type.ToString());
+                            ImGuiAPI.SameLine(0, 10);
+                            if (info.Type.IsValueType == false)
                             {
-                                newValue = null;
-                                valueChanged = true;
+                                var drawList = ImGuiAPI.GetWindowDrawList();
+                                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Button, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGColor);
+                                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonActive, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGActiveColor);
+                                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonHovered, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGHoverColor);
+                                if (info.Readonly == false && info.HostPropertyGrid.mDelete.OnDraw(ref drawList))
+                                {
+                                    newValue = null;
+                                    valueChanged = true;
+                                }
+                                ImGuiAPI.PopStyleColor(3);
                             }
-                            ImGuiAPI.PopStyleColor(3);
+                            if (info.Expand)
+                            {
+                                var multiValue = info.Value as PropertyMultiValue;
+                                if(multiValue != null)
+                                {
+                                    valueChanged = info.HostPropertyGrid.OnDraw(multiValue.Values, out newValue, true);
+                                    newValue = multiValue;
+                                }
+                                else
+                                    valueChanged = info.HostPropertyGrid.OnDraw(info.Value, out newValue, true);
+                            }
                         }
-                        //ImGuiAPI.NextColumn();
-                        if (info.Expand)
-                        {
-                            //ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
-                            //ImGuiAPI.TableSetColumnIndex(0);
-                            //ImGuiAPI.EndTable();
-                            valueChanged = info.HostPropertyGrid.OnDraw(info.Value, out newValue, true);
-                            Vector2 outSize = Vector2.Zero;
-                            //ImGuiAPI.BeginTable("PGTable", 2, mTabFlags, ref outSize, 0.0f);
-                        }
-                        //ImGuiAPI.NextColumn();
                     }
                 }
-
-                //var drawList = ImGuiAPI.GetWindowDrawList();
-                //var cursorPos = ImGuiAPI.GetCursorScreenPos();
-                //var columnWidth = ImGuiAPI.GetColumnWidth(ImGuiAPI.GetColumnIndex());
-                //var endPos = cursorPos + new Vector2(columnWidth, 0);
-                //drawList.AddLine(ref cursorPos, ref endPos, EGui.UIProxy.StyleConfig.Instance.SeparatorColor, 1);
-                //ImGuiAPI.NextColumn();
-                //cursorPos = ImGuiAPI.GetCursorScreenPos();
-                //columnWidth = ImGuiAPI.GetColumnWidth(ImGuiAPI.GetColumnIndex());
-                //endPos = cursorPos + new Vector2(columnWidth, 0);
-                //drawList.AddLine(ref cursorPos, ref endPos, EGui.UIProxy.StyleConfig.Instance.SeparatorColor, 1);
-                //ImGuiAPI.NextColumn();
             }
             catch
             {

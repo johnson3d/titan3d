@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1704111828 Type="EngineNS.RHI.CBlendStateDesc@EngineCore">
+  <AlphaToCoverageEnable Type="System.Int32@Unknown" Order="0" />
+  <IndependentBlendEnable Type="System.Int32@Unknown" Order="0" />
+  <RenderTarget0 Type="EngineNS.RenderTargetBlendDesc@EngineCore" Order="0" />
+  <RenderTarget1 Type="EngineNS.RenderTargetBlendDesc@EngineCore" Order="0" />
+  <RenderTarget2 Type="EngineNS.RenderTargetBlendDesc@EngineCore" Order="0" />
+  <RenderTarget3 Type="EngineNS.RenderTargetBlendDesc@EngineCore" Order="0" />
+  <RenderTarget4 Type="EngineNS.RenderTargetBlendDesc@EngineCore" Order="0" />
+  <RenderTarget5 Type="EngineNS.RenderTargetBlendDesc@EngineCore" Order="0" />
+  <RenderTarget6 Type="EngineNS.RenderTargetBlendDesc@EngineCore" Order="0" />
+  <RenderTarget7 Type="EngineNS.RenderTargetBlendDesc@EngineCore" Order="0" />
+</Hash_1704111828>

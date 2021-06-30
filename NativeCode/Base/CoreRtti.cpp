@@ -9,7 +9,7 @@ NS_BEGIN
 //
 //}
 
-static_assert(sizeof(bool)==1);
+static_assert(sizeof(bool)==1,"");
 
 AuxRttiStruct<void>		AuxRttiStruct<void>::Instance;
 AuxRttiStruct<bool>		AuxRttiStruct<bool>::Instance;
@@ -30,6 +30,20 @@ AuxRttiStruct<std::string>		AuxRttiStruct<std::string>::Instance;
 const char* EngineNSString = "EngineNS";
 const char* EngineNSStringEx = "EngineNS::";
 
+class What
+{
+	template<typename _Type>
+	_Type TestFFFF(void* a)
+	{
+		return _Type();
+	}
+	template<>
+	void TestFFFF<void>(void* a)
+	{
+
+	}
+};
+
 void RttiEnum::Init()
 {
 	RttiEnumManager::GetInstance()->RegEnumType(this->GetFullName().c_str(), this);
@@ -48,10 +62,10 @@ RttiEnumManager* RttiEnumManager::GetInstance()
 
 void RttiEnumManager::BuildRtti()
 {
-	for (auto i : AllEnumTyps)
+	/*for (auto i : AllEnumTyps)
 	{
 		
-	}
+	}*/
 }
 
 void RttiEnumManager::FinalCleanup()
@@ -69,7 +83,7 @@ RttiEnum* RttiEnumManager::FindEnum(const char* name)
 	return nullptr;
 }
 
-RttiStruct::MemberDesc* RttiStruct::PushMember(RttiStruct* type, unsigned int offset, unsigned int size, unsigned int arrayElements, const char* name, bool isPointer)
+MemberDesc* RttiStruct::PushMember(RttiStruct* type, unsigned int offset, unsigned int size, unsigned int arrayElements, const char* name, bool isPointer)
 {
 	MemberDesc desc;
 	desc.MemberType = type;
@@ -186,15 +200,15 @@ StructBegin(Test_ConstantVarDesc, EngineNS)
 	StructMember(TestString);
 	StructMember(Test);
 
-	StructMethod1(SetDirty, d);
+	//StructMethod1(SetDirty, d);
 	AppendMethodMetaInfo("M0", "SetDirty info");
 
-	StructMethod2(SetDirty2, d, c);
+	//StructMethod2(SetDirty2, d, c);
 
 	StructMethodEx1(TestSetDirty , void, std::string, d);
 	StructMethodEx2(TestSetDirty, void, std::string, d, int, c);
 
-	StructMethod2(TestStaticFunction, d, c);
+	//StructMethod2(TestStaticFunction, d, c);
 
 	StructConstructor0();
 	AppendConstructorMetaInfo("M0", "Test_ConstantVarDesc info");	
@@ -222,14 +236,14 @@ void TestReflection()
 	Test_ConstantVarDesc* tmp = (Test_ConstantVarDesc*)constructor->CreateInstance(createArgs);
 	method->Invoke(tmp, args, result);
 
-	const RttiStruct::MemberDesc* pMemberName = rtti->FindMember("Name");
+	auto pMemberName = rtti->FindMember("Name");
 	std::string tt = *pMemberName->GetValueAddress<std::string>(tmp);
 	std::string strTemp("bbb");
 	pMemberName->SetValue(tmp, &strTemp);
 
 	rtti->FindMember("TestString")->SetValue(tmp, (std::string*)nullptr);
 
-	const RttiStruct::MemberDesc* pMember = rtti->FindMember("Size");
+	auto pMember = rtti->FindMember("Size");
 	assert(pMember->MemberType->Name == "UInt32");
 	assert(pMember->Offset == 4);
 	assert(pMember->MemberName == "Size");

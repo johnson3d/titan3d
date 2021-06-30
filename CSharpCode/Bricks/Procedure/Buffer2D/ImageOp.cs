@@ -6,7 +6,7 @@ namespace EngineNS.Bricks.Procedure.Buffer2D
 {
     public class ImageOp
     {
-        internal Image mResultImage;
+        public Image mResultImage;
         public Image GetResultImage(Image value)
         {
             if (mResultImage == null || mResultImage.Width != value.Width || mResultImage.Height != value.Height)

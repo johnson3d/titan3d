@@ -23,6 +23,8 @@ namespace EngineNS
         {
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
+                this.Expandable = true;
+                bool retValue = false;
                 newValue = info.Value;
                 //var saved = v;
                 var index = ImGuiAPI.TableGetColumnIndex();
@@ -36,6 +38,11 @@ namespace EngineNS
                 if (multiValue != null && multiValue.HasDifferentValue())
                 {
                     ImGuiAPI.Text(multiValue.MultiValueString);
+                    if (multiValue.DrawVector<Vector2>(in info))
+                    {
+                        newValue = multiValue;
+                        retValue = true;
+                    }
                 }
                 else
                 {
@@ -45,10 +52,79 @@ namespace EngineNS
                     if (changed)//(v != saved)
                     {
                         newValue = v;
-                        return true;
+                        retValue = true;
+                    }
+
+                    if(OnDrawVectorValue<Vector4>(in info, ref v, ref v))
+                    {
+                        newValue = v;
+                        retValue = true;
                     }
                 }
-                return false;
+                return retValue;
+            }
+
+            public unsafe static bool OnDrawVectorValue<T>(in EditorInfo info, ref T v, ref T newValue) where T : unmanaged
+            {
+                bool retValue = false;
+                if (info.Expand)
+                {
+                    var minValue = float.MinValue;
+                    var maxValue = float.MaxValue;
+
+                    ImGuiTableRowData rowData = new ImGuiTableRowData()
+                    {
+                        IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
+                        MinHeight = 0,
+                        CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
+                        CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
+                        IndentImageWidth = info.HostPropertyGrid.Indent,
+                        IndentTextureUVMin = Vector2.Zero,
+                        IndentTextureUVMax = Vector2.UnitXY,
+                        IndentColor = info.HostPropertyGrid.IndentColor,
+                        HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
+                        Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
+                    };
+                    for (var dimIdx = 0; dimIdx < sizeof(T)/sizeof(float); dimIdx++)
+                    {
+                        ImGuiAPI.TableNextRow(ref rowData);
+                        ImGuiAPI.TableSetColumnIndex(0);
+                        ImGuiAPI.AlignTextToFramePadding();
+                        string dimName = "";
+                        switch (dimIdx)
+                        {
+                            case 0:
+                                dimName = "X";
+                                break;
+                            case 1:
+                                dimName = "Y";
+                                break;
+                            case 2:
+                                dimName = "Z";
+                                break;
+                            case 3:
+                                dimName = "W";
+                                break;
+                        }
+                        ImGuiAPI.Indent(15);
+                        ImGuiAPI.Text(dimName);
+                        ImGuiAPI.Unindent(15);
+                        ImGuiAPI.TableNextColumn();
+                        ImGuiAPI.SetNextItemWidth(-1);
+                        fixed (T* vPtr = &v)
+                        {
+                            var dimV = ((float*)vPtr)[dimIdx];
+                            var dimVChanged = ImGuiAPI.DragScalar2(dimName, ImGuiDataType_.ImGuiDataType_Float, &dimV, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                            if (dimVChanged)
+                            {
+                                ((float*)vPtr)[dimIdx] = dimV;
+                                newValue = v;
+                                retValue = true;
+                            }
+                        }
+                    }
+                }
+                return retValue;
             }
         }
         public override string ToString()

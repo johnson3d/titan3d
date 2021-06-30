@@ -328,7 +328,7 @@ namespace EngineNS.RHI
             {
                 if (tex2d == null)
                 {
-                    return this.mCoreObject.UpdateTexture2D(rc.mCoreObject.Ptr, (ITexture2D*)0);
+                    return this.mCoreObject.UpdateTexture2D(rc.mCoreObject, new ITexture2D((void*)0));
                 }
                 else
                 {
@@ -498,7 +498,7 @@ namespace EngineNS.RHI
             srvDesc.mFormat = tex2d.mCoreObject.mDesc.Format;
             unsafe
             {
-                srvDesc.m_pTexture2D = tex2d.mCoreObject.Ptr;
+                srvDesc.m_pTexture2D = tex2d.mCoreObject;
             }
             var result = rc.CreateShaderResourceView(ref srvDesc);
             result.PicDesc = desc;

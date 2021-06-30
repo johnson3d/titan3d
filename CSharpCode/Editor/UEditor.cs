@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace EngineNS.Editor
 {
     [Rtti.Meta]
-    public class UEditorConfig
+    public partial class UEditorConfig
     {
         [Rtti.Meta]
         public string GameProject { get; set; }

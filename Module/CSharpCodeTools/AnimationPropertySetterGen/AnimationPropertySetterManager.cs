@@ -9,7 +9,5 @@ namespace CSharpCodeTools.AnimationPropertySetterGen
     class UAnimationPropertySetterManager : UCodeManagerBase
     {
         public static UAnimationPropertySetterManager Instance = new UAnimationPropertySetterManager();
-        public Dictionary<string, AnimationPropertySetterClassDefine> ClassDefines = new Dictionary<string, AnimationPropertySetterClassDefine>();
-
     }
 }

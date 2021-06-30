@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.WorldSimulator.GOAP
 {
-    public class IActor
+    public partial class IActor
     {
         //角色可以进行的行为
         public Dictionary<string, IAction> Actions { get; } = new Dictionary<string, IAction>();

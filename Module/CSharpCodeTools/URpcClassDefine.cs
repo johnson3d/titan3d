@@ -13,6 +13,7 @@ namespace CSharpCodeTools
         public string ArgType;
         public string ArgName;
         public string ReturnType;
+        public string Flags;
         public bool IsAsync;
         public enum EDataType
         {
@@ -38,12 +39,11 @@ namespace CSharpCodeTools
     }
     class URpcClassDefine : UClassCodeBase
     {
-        public List<string> Usings = new List<string>();
         public string RunTarget;
         public string Executer;
         public List<URpcMethod> Methods = new List<URpcMethod>();
         
-        public void GenCode(string dir)
+        public override void  GenCode(string dir)
         {
             if (Methods.Count == 0)
                 return;
@@ -77,6 +77,16 @@ namespace CSharpCodeTools
                             }
                             PopBrackets();
 
+                            if (i.RetType != URpcMethod.EDataType.Void)
+                            {
+                                AddLine($"var retContext = UReturnAwaiter.CreateInstance();");
+                                AddLine($"if (NetConnect != null)");
+                                PushBrackets();
+                                {
+                                    AddLine($"retContext.Context.ConnectId = NetConnect.GetConnectId();");
+                                }
+                                PopBrackets();
+                            }
                             AddLine($"using (var writer = UMemWriter.CreateInstance())");
                             PushBrackets();
                             {
@@ -85,8 +95,12 @@ namespace CSharpCodeTools
                                 AddLine($"router.RunTarget = {this.RunTarget};");
                                 AddLine($"router.Executer = {this.Executer};");
                                 AddLine($"router.Index = ExeIndex;");
-                                AddLine($"EPkgTypes pkgTypes = 0;");
-                                AddLine($"pkg.Write(pkgTypes);");
+                                AddLine($"var pkgHeader = new FPkgHeader();");
+                                if (i.Flags != null)
+                                {
+                                    AddLine($"pkgHeader.PKGFlags = (byte){i.Flags};");
+                                }
+                                AddLine($"pkg.Write(pkgHeader);");
                                 AddLine($"pkg.Write(router);");
                                 AddLine($"UInt16 methodIndex = {i.Index};");
                                 AddLine($"pkg.Write(methodIndex);");
@@ -94,35 +108,28 @@ namespace CSharpCodeTools
 
                                 if (i.RetType != URpcMethod.EDataType.Void)
                                 {
-                                    AddLine($"var retContext = UReturnAwaiter.CreateInstance();");
-                                    AddLine($"if (NetConnect != null)");
-                                    PushBrackets();
-                                    {
-                                        AddLine($"retContext.Context.ConnectId = NetConnect.GetConnectId();");
-                                    }
-                                    PopBrackets();
                                     AddLine($"pkg.Write(retContext.Context);");
                                 }
 
+                                AddLine($"pkg.CoreWriter.SurePkgHeader();"); 
                                 AddLine($"NetConnect?.Send(ref pkg);");
-
-                                if (i.ReturnType != null)
-                                {
-                                    switch(i.RetType)
-                                    {
-                                        case URpcMethod.EDataType.Unmanaged:
-                                            AddLine($"return await URpcAwaiter.AwaitReturn<{i.GetNakedReturnType()}>(retContext);");
-                                            break;
-                                        case URpcMethod.EDataType.ISerializer:
-                                            AddLine($"return await URpcAwaiter.AwaitReturn_ISerializer<{i.GetNakedReturnType()}>(retContext);");
-                                            break;
-                                        case URpcMethod.EDataType.String:
-                                            AddLine($"return await URpcAwaiter.AwaitReturn_String(retContext);");
-                                            break;
-                                    }
-                                }
                             }
                             PopBrackets();
+                            if (i.ReturnType != null)
+                            {
+                                switch (i.RetType)
+                                {
+                                    case URpcMethod.EDataType.Unmanaged:
+                                        AddLine($"return await URpcAwaiter.AwaitReturn<{i.GetNakedReturnType()}>(retContext);");
+                                        break;
+                                    case URpcMethod.EDataType.ISerializer:
+                                        AddLine($"return await URpcAwaiter.AwaitReturn_ISerializer<{i.GetNakedReturnType()}>(retContext);");
+                                        break;
+                                    case URpcMethod.EDataType.String:
+                                        AddLine($"return await URpcAwaiter.AwaitReturn_String(retContext);");
+                                        break;
+                                }
+                            }
                         }
                         PopBrackets();
 
@@ -171,10 +178,12 @@ namespace CSharpCodeTools
                                 PushBrackets();
                                 {
                                     AddLine($"var pkg = new IO.AuxWriter<UMemWriter>(writer);");
-                                    AddLine($"EPkgTypes pkgTypes = EPkgTypes.IsReturn;");
-                                    AddLine($"pkg.Write(pkgTypes);");
+                                    AddLine($"var pkgHeader = new FPkgHeader();");
+                                    AddLine($"pkgHeader.SetHasReturn(true);");
+                                    AddLine($"pkg.Write(pkgHeader);");
                                     AddLine($"pkg.Write(retContext);");
                                     AddLine($"pkg.Write(ret);");
+                                    AddLine($"pkg.CoreWriter.SurePkgHeader();");
                                     AddLine($"context.NetConnect?.Send(ref pkg);");
                                 }
                                 PopBrackets();

@@ -436,6 +436,18 @@ VStringA  VTime::FormatGmt(LPCSTR pFormat) const
 	return szBuffer;
 }
 
+#if defined(PLATFORM_DROID)
+#include "vfxfile_Android.cpp"
+#define ViseFile VFile_Android
+#elif defined(PLATFORM_IOS)
+#include "vfxfile_IOS.cpp"
+#define ViseFile VFile_IOS
+#elif defined(PLATFORM_WIN)
+#define ViseFile VFile
+#else
+#define ViseFile VFile
+#endif
+
 #if !defined(PLATFORM_WIN)
 #pragma clang diagnostic pop
 #endif

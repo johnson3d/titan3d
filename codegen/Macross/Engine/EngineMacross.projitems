@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>ABE7123A-14D8-4045-8062-B6C0E9C3E46D</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>CodeGenCSharp</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UTickableManager.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.IGameBase.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Converter.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.CustomConvert.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.MathHelper.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UTest.UTest_MetaObject.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Profiler.Log.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IAction.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IActor.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IItem.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IItemContain.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IInventory.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.CodeBuilder.ShaderNode.Control.HLSLMethod.macross.cs" />
+  </ItemGroup>
+</Project>

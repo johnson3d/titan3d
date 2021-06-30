@@ -162,9 +162,8 @@ namespace CSharpCodeTools.Cs2Cpp
     }
     class UCs2CppClassDefine : UClassCodeBase
     {
-        public List<string> Usings = new List<string>();
         public List<UCppCallback> Callbacks = new List<UCppCallback>();
-        public void Build()
+        public override void Build()
         {
             for (int i = 0; i < Callbacks.Count; i++)
             {
@@ -175,7 +174,7 @@ namespace CSharpCodeTools.Cs2Cpp
                 }
             }
         }
-        public void GenCode(string dir)
+        public override void GenCode(string dir)
         {
             if (Callbacks.Count == 0)
                 return;

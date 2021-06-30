@@ -37,68 +37,68 @@ public:
 	TR_FUNCTION()
 	void BindConstBuffer(IRenderContext* rc, IConstantBuffer* cb);
 
-	TR_FUNCTION()
+	TR_FUNCTION(SV_SupressGC)
 	void PerspectiveFovLH(float fov, float width, float height, float zMin, float zMax);
-	TR_FUNCTION()
+	TR_FUNCTION(SV_SupressGC)
 	void MakeOrtho(float w, float h, float zn, float zf);
-	TR_FUNCTION()
+	TR_FUNCTION(SV_SupressGC)
 	void DoOrthoProjectionForShadow(float w, float h, float znear, float zfar, float TexelOffsetNdcX, float TexelOffsetNdcY);
-	TR_FUNCTION()
+	TR_FUNCTION(SV_SupressGC)
 	void LookAtLH(const v3dxVector3* eye, const v3dxVector3* lookAt, const v3dxVector3* up);
 
-	TR_FUNCTION()
+	TR_FUNCTION(SV_SupressGC)
 	vBOOL GetPickRay(v3dxVector3* pvPickRay, float x, float y, float sw, float sh);
 	
-	TR_FUNCTION()
+	TR_FUNCTION(SV_SupressGC)
 	v3dxFrustum* GetFrustum() {
 		return &mFrustum;
 	}
 
-	TR_FUNCTION(SV_ReturnConverter = v3dVector3_t)
+	TR_FUNCTION(SV_SupressGC)
 	v3dxVector3 GetPosition() const{
 		return mLogicData->mPosition;
 	}
-	TR_FUNCTION(SV_ReturnConverter = v3dVector3_t)
+	TR_FUNCTION(SV_SupressGC)
 	v3dxVector3 GetLookAt() const{
 		return mLogicData->mLookAt;
 	}
-	TR_FUNCTION(SV_ReturnConverter = v3dVector3_t)
+	TR_FUNCTION(SV_SupressGC)
 	v3dxVector3 GetDirection() const {
 		return mLogicData->mDirection;
 	}
-	TR_FUNCTION(SV_ReturnConverter = v3dVector3_t)
+	TR_FUNCTION(SV_SupressGC)
 	v3dxVector3 GetRight() const {
 		return mLogicData->mRight;
 	}
-	TR_FUNCTION(SV_ReturnConverter = v3dVector3_t)
+	TR_FUNCTION(SV_SupressGC)
 	v3dxVector3 GetUp() const {
 		return mLogicData->mUp;
 	}
-	TR_FUNCTION(SV_ReturnConverter = v3dMatrix4_t)
+	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetViewMatrix() const {
 		return mLogicData->mViewMatrix;
 	}
-	TR_FUNCTION(SV_ReturnConverter = v3dMatrix4_t)
+	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetViewInverse() const {
 		return mLogicData->mViewInverse;
 	}
-	TR_FUNCTION(SV_ReturnConverter = v3dMatrix4_t)
+	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetProjectionMatrix() const {
 		return mLogicData->mProjectionMatrix;
 	}
-	TR_FUNCTION(SV_ReturnConverter = v3dMatrix4_t)
+	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetProjectionInverse() const {
 		return mLogicData->mProjectionInverse;
 	}
-	TR_FUNCTION(SV_ReturnConverter = v3dMatrix4_t)
+	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetViewProjection() const {
 		return mLogicData->mViewProjection;
 	}
-	TR_FUNCTION(SV_ReturnConverter = v3dMatrix4_t)
+	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetViewProjectionInverse() const {
 		return mLogicData->mViewProjectionInverse;
 	}
-	TR_FUNCTION(SV_ReturnConverter = v3dMatrix4_t)
+	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetToViewPortMatrix() const {
 		return mLogicData->mToViewPortMatrix;
 	}

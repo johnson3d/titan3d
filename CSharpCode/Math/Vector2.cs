@@ -25,6 +25,7 @@ namespace EngineNS
         {
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
+                this.Expandable = true;
                 newValue = info.Value;
                 //var saved = v;
                 var index = ImGuiAPI.TableGetColumnIndex();
@@ -40,6 +41,11 @@ namespace EngineNS
                 if (multiValue != null && multiValue.HasDifferentValue())
                 {
                     ImGuiAPI.Text(multiValue.MultiValueString);
+                    if (multiValue.DrawVector<Vector2>(in info))
+                    {
+                        newValue = multiValue;
+                        retValue = true;
+                    }
                 }
                 else
                 {
@@ -48,6 +54,12 @@ namespace EngineNS
                     //ImGuiAPI.InputFloat2(, (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
                     //ImGuiAPI.PopStyleVar(1);
                     if (changed)//(v != saved)
+                    {
+                        newValue = v;
+                        retValue = true;
+                    }
+
+                    if (Vector4.Vector4EditorAttribute.OnDrawVectorValue<Vector2>(in info, ref v, ref v))
                     {
                         newValue = v;
                         retValue = true;
@@ -145,7 +157,7 @@ namespace EngineNS
         {
             get { return mZero; }
         }
-        static Vector2 mZero = new Vector2(0, 0);
+        internal static Vector2 mZero = new Vector2(0, 0);
         [Rtti.Meta]
         public static Vector2 UnitX { get { return mUnitX; } }
         public static Vector2 mUnitX = new Vector2(1, 0);

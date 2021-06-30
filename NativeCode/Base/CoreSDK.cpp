@@ -73,11 +73,13 @@ StructImpl(FOnNativeMemLeak)
 StructImpl(FCreateManagedObject);
 StructImpl(FFreeManagedObjectGCHandle);
 StructImpl(FGetManagedObjectFromGCHandle);
+StructImpl(FOnShaderTranslated);
 
 FWriteLogString CoreSDK::mWriteLogString = nullptr;
 FCreateManagedObject CoreSDK::CreateManagedObject = nullptr;
 FFreeManagedObjectGCHandle CoreSDK::FreeManagedObjectGCHandle = nullptr;
 FGetManagedObjectFromGCHandle CoreSDK::GetManagedObjectFromGCHandle = nullptr;
+FOnShaderTranslated CoreSDK::OnShaderTranslated = nullptr;
 
 void CoreSDK::StartNativeMemWatcher()
 {
@@ -119,13 +121,13 @@ void CoreSDK::UpdateEngineTick(INT64 tick)
 
 void CoreSDK::IUnknown_Release(void* unk)
 {
-	auto p = (IUnknown*)unk;
+	auto p = (VIUnknown*)unk;
 	Safe_Release(p);
 }
 
 int CoreSDK::IUnknown_AddRef(void* unk)
 {
-	auto p = (IUnknown*)unk;
+	auto p = (VIUnknown*)unk;
 	return p->AddRef();
 }
 
@@ -149,7 +151,7 @@ void CoreSDK::SDK_StrCpy(void* tar, const void* src, UINT tarSize)
 	if (strlen((const char*)src) >= tarSize)
 	{
 		memcpy((char*)tar, (const char*)src, (size_t)(tarSize - 1));
-		((char*)tar)[tarSize - 1] = NULL;
+		((char*)tar)[tarSize - 1] = '\0';
 	}
 	else
 	{

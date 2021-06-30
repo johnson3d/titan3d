@@ -29,14 +29,14 @@ void XndAttribute::EndRead()
 	mMemReader->Cleanup();
 }
 
-void XndAttribute::BeginWrite(size_t length)
+void XndAttribute::BeginWrite(UINT64 length)
 {
 	if (mMemWriter == nullptr)
 	{
 		auto p = new MemStreamWriter();
 		mMemWriter = AutoRef<MemStreamWriter>(p);
 	}
-	mMemWriter->ResetStream(length);
+	mMemWriter->ResetBufferSize(length);
 }
 
 void XndAttribute::EndWrite()
@@ -187,7 +187,7 @@ void XndHolder::SaveXnd(IStreamWriter& ar, XndNode* node)
 		auto attr = node->GetAttribute(i);
 		attr->mOffsetInResource = ar.Tell();
 		
-		ar.Write(attr->mMemWriter->GetDataPointer(), (UINT)attr->mMemWriter->Tell());
+		ar.Write(attr->mMemWriter->GetPointer(), (UINT)attr->mMemWriter->Tell());
 
 		attr->mAttrLength = (UINT)(ar.Tell() - attr->mOffsetInResource);
 	}

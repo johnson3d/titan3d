@@ -4,11 +4,11 @@ using System.Text;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UInspector : IRootForm, EGui.IPanel
+    public class UInspector : Graphics.Pipeline.IRootForm, EGui.IPanel
     {
         public UInspector()
         {
-            Editor.UMainEditorApplication.RegRootForm(this);
+            Graphics.Pipeline.USlateApplication.RegRootForm(this);
         }
         public bool Visible { get; set; } = true;
         public uint DockId { get => mPropertyGrid.DockId; set => mPropertyGrid.DockId = value; }

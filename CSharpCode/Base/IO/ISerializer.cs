@@ -11,7 +11,7 @@ namespace EngineNS.IO
         //第一个参数通常传入一个Root一类的对象，用于查找对象关系
         void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml);
     }
-    public class BaseSerializer : ISerializer
+    public partial class BaseSerializer : ISerializer
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
@@ -45,6 +45,7 @@ namespace EngineNS.IO
     }
     public class SerializerHelper
     {
+        public delegate void Delegate_ReadMetaVersion(EngineNS.IO.IReader ar, EngineNS.IO.ISerializer hostObject);
         public static UInt64 WriteSkippable(IWriter ar)
         {
             var offset = ar.GetPosition();
@@ -127,11 +128,31 @@ namespace EngineNS.IO
         }
         public static void ReadMember(IReader ar, ISerializer obj, Rtti.UMetaVersion metaVersion = null)
         {
+            var srName = metaVersion.HostClass.ClassType.SystemType.FullName.Replace("+", "_CIC_") + "_Serializer";
+            //Type.GetType(utilityReader)
+            var utilityReader = Rtti.UTypeDesc.TypeOfFullName(srName);
+            if(utilityReader!=null)
+            {
+                var call = utilityReader.SystemType.GetField($"mfn_Read_{metaVersion.MetaHash}", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (call != null)
+                {
+                    //call.Invoke(null, new object[] { ar, obj });
+                    var dlgt = call.GetValue(null) as EngineNS.IO.SerializerHelper.Delegate_ReadMetaVersion;
+                    dlgt(ar, obj);
+                    return;
+                }
+            }
+            
             foreach (var i in metaVersion.Fields)
             {
                 var value = ReadObject(ar, i.FieldType.SystemType, obj);
-                if (i.PropInfo != null)
+                if (value != null && i.PropInfo != null)
                 {
+                    if (value.GetType() != i.PropInfo.PropertyType)
+                    {
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Serializer", $"ProperySet {i.FieldName}: {value.GetType().FullName}!={i.PropInfo.PropertyType.FullName}");
+                        continue;
+                    }
                     try
                     {
                         if (i.PropInfo.CanWrite && value != null)
@@ -225,94 +246,24 @@ namespace EngineNS.IO
         }
         private static void WriteObject(IWriter ar, Type t, object obj)
         {
-            if (t == typeof(sbyte))
+            if (t.IsEnum)
             {
-                var v = (sbyte)obj;
+                var v = System.Convert.ToString(obj);
                 ar.Write(v);
             }
-            else if (t == typeof(Int16))
+            else if (t.IsValueType)
             {
-                var v = (Int16)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Int32))
-            {
-                var v = (Int32)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Int64))
-            {
-                var v = (Int64)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(byte))
-            {
-                var v = (byte)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(UInt16))
-            {
-                var v = (UInt16)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(UInt32))
-            {
-                var v = (UInt32)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(UInt64))
-            {
-                var v = (UInt64)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(float))
-            {
-                var v = (float)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(double))
-            {
-                var v = (double)obj;
-                ar.Write(v);
+                unsafe
+                {
+                    var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
+                    var pBuffer = stackalloc byte[size];
+                    System.Runtime.InteropServices.Marshal.StructureToPtr(obj, (IntPtr)pBuffer, false);
+                    ar.WritePtr(pBuffer, size);
+                }
             }
             else if (t == typeof(string))
             {
                 var v = (string)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Vector2))
-            {
-                var v = (Vector2)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Vector3))
-            {
-                var v = (Vector3)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Vector4))
-            {
-                var v = (Vector4)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Quaternion))
-            {
-                var v = (Quaternion)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Matrix))
-            {
-                var v = (Matrix)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Guid))
-            {
-                var v = (Guid)obj;
-                ar.Write(v);
-            }
-            else if (t == typeof(Hash64))
-            {
-                var v = (Hash64)obj;
                 ar.Write(v);
             }
             else if (t == typeof(RName))
@@ -333,22 +284,7 @@ namespace EngineNS.IO
             else if (t.GetInterface(nameof(ISerializer)) != null)
             {
                 Write(ar, obj as ISerializer, null);
-            }
-            else if (t.IsEnum)
-            {
-                var v = System.Convert.ToString(obj);
-                ar.Write(v);
-            }
-            else if (t.IsValueType)
-            {
-                unsafe
-                {
-                    var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
-                    var pBuffer = stackalloc byte[size];
-                    System.Runtime.InteropServices.Marshal.StructureToPtr(obj, (IntPtr)pBuffer, false);
-                    ar.WritePtr(pBuffer, size);
-                }
-            }
+            }            
             else if(obj is System.Collections.IList)
             {
                 var lst = obj as System.Collections.IList;
@@ -461,125 +397,28 @@ namespace EngineNS.IO
                 var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeStr);
             }
         }
-        private static object ReadObject(IReader ar, Type t, object hostObject)
+        public static object ReadObject(IReader ar, Type t, object hostObject)
         {
-            if (t == typeof(sbyte))
+            if (t.IsEnum)
             {
-                sbyte v;
+                string v;
                 ar.Read(out v);
-                return v;
+                return Support.TConvert.ToEnumValue(t, v);
             }
-            else if (t == typeof(Int16))
+            else if (t.IsValueType)
             {
-                Int16 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Int32))
-            {
-                Int32 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Int64))
-            {
-                Int64 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(byte))
-            {
-                byte v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(UInt16))
-            {
-                UInt16 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(UInt32))
-            {
-                UInt32 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(UInt64))
-            {
-                UInt64 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(float))
-            {
-                float v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(double))
-            {
-                double v;
-                ar.Read(out v);
-                return v;
+                unsafe
+                {
+                    var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
+                    var pBuffer = stackalloc byte[size];
+                    ar.ReadPtr(pBuffer, size);
+                    var v = System.Runtime.InteropServices.Marshal.PtrToStructure((IntPtr)pBuffer, t);
+                    return v;
+                }
             }
             else if (t == typeof(string))
             {
                 string v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Vector2))
-            {
-                Vector2 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Vector3))
-            {
-                Vector3 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Vector4))
-            {
-                Vector4 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Quaternion))
-            {
-                Quaternion v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Matrix))
-            {
-                Matrix v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Guid))
-            {
-                Guid v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(Hash64))
-            {
-                Hash64 v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(vBOOL))
-            {
-                int v;
-                ar.Read(out v);
-                return v;
-            }
-            else if (t == typeof(CppBool))
-            {
-                bool v;
                 ar.Read(out v);
                 return v;
             }
@@ -637,24 +476,7 @@ namespace EngineNS.IO
                     ar.Seek(savePos);
                     return null;
                 }
-            }
-            else if (t.IsEnum)
-            {
-                string v;
-                ar.Read(out v);
-                return Support.TConvert.ToEnumValue(t, v);
-            }
-            else if (t.IsValueType)
-            {
-                unsafe
-                {
-                    var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
-                    var pBuffer = stackalloc byte[size];
-                    ar.ReadPtr(pBuffer, size);
-                    var v = System.Runtime.InteropServices.Marshal.PtrToStructure((IntPtr)pBuffer, t);
-                    return v;
-                }
-            }
+            }            
             else if (t.GetInterface(nameof(System.Collections.IList)) != null)
             {
                 var lst = Rtti.UTypeDescManager.CreateInstance(t) as System.Collections.IList;
@@ -669,7 +491,7 @@ namespace EngineNS.IO
                     var skipPoint = GetSkipOffset(ar);
                     try
                     {
-                        var elemType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemTypeStr);
+                        var elemType = Rtti.UTypeDesc.TypeOf(elemTypeStr).SystemType;
                         if (elemType == null)
                         {
                             throw new IOException($"Read List: {elemTypeStr} is missing");
@@ -695,7 +517,7 @@ namespace EngineNS.IO
                         var skipPoint = GetSkipOffset(ar);
                         try
                         {
-                            var elemType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemTypeStr);
+                            var elemType = Rtti.UTypeDesc.TypeOf(elemTypeStr).SystemType;
                             if (elemType == null)
                             {
                                 throw new IOException($"Read List: {elemTypeStr} is missing");
@@ -731,10 +553,10 @@ namespace EngineNS.IO
                     var skipPoint = GetSkipOffset(ar);
                     try
                     {
-                        var elemKeyType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemKeyTypeStr);
+                        var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
                         if (elemKeyType == null)
                             throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
-                        var elemValueType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemValueTypeStr);
+                        var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;
                         if (elemValueType == null)
                             throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
                         for (int i = 0; i < count; i++)
@@ -757,7 +579,7 @@ namespace EngineNS.IO
                     var skipPoint = GetSkipOffset(ar);
                     try
                     {
-                        var elemKeyType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemKeyTypeStr);
+                        var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
                         if (elemKeyType == null)
                             throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
                         for (int i = 0; i < count; i++)
@@ -765,7 +587,7 @@ namespace EngineNS.IO
                             string elemValueTypeStr;
                             ar.Read(out elemValueTypeStr);
                             var skipPoint1 = GetSkipOffset(ar);
-                            var elemValueType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemValueTypeStr);
+                            var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;
                             if (elemValueType == null)
                                 throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
                             try
@@ -794,7 +616,7 @@ namespace EngineNS.IO
                     var skipPoint = GetSkipOffset(ar);
                     try
                     {
-                        var elemValueType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemValueTypeStr);
+                        var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;
                         if (elemValueType == null)
                             throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
 
@@ -805,7 +627,7 @@ namespace EngineNS.IO
                             var skipPoint1 = GetSkipOffset(ar);
                             try
                             {
-                                var elemKeyType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemKeyTypeStr);
+                                var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
                                 if (elemKeyType == null)
                                     throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
                                 var key = ReadObject(ar, elemKeyType, hostObject);
@@ -834,12 +656,12 @@ namespace EngineNS.IO
                         var skipPoint = GetSkipOffset(ar);
                         try
                         {
-                            var elemKeyType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemKeyTypeStr);
+                            var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
                             if (elemKeyType == null)
                                 throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
                             string elemValueTypeStr;
                             ar.Read(out elemValueTypeStr);
-                            var elemValueType = Rtti.UTypeDescManager.Instance.GetTypeFromString(elemValueTypeStr);
+                            var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;
                             if (elemValueType == null)
                                 throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
                             var key = ReadObject(ar, elemKeyType, hostObject);
@@ -977,7 +799,7 @@ namespace EngineNS.IO
                 obj = Support.TConvert.ToObject(obj.GetType(), node.GetAttribute("Value"));
                 return;
             }
-            var thisType = Rtti.UTypeDescManager.Instance.GetTypeFromString(thisTypeStr);
+            var thisType = Rtti.UTypeDesc.TypeOf(thisTypeStr).SystemType;
             if (obj == null && thisType == null)
                 return;
             if (obj == null)
@@ -1050,7 +872,7 @@ namespace EngineNS.IO
                         typeAttr = j.GetAttribute("Type");
                         if (!string.IsNullOrEmpty(typeAttr))
                         {
-                            var elemType = Rtti.UTypeDescManager.Instance.GetTypeFromString(typeAttr);
+                            var elemType = Rtti.UTypeDesc.TypeOf(typeAttr).SystemType;
                             if (elemType != null)
                                 keyType = elemType;
                         }
@@ -1106,7 +928,7 @@ namespace EngineNS.IO
                         typeAttr = key.GetAttribute("Type");
                         if (!string.IsNullOrEmpty(typeAttr))
                         {
-                            var kt = Rtti.UTypeDescManager.Instance.GetTypeFromString(typeAttr);
+                            var kt = Rtti.UTypeDesc.TypeOf(typeAttr).SystemType;
                             if (kt != null)
                                 keyType = kt;
                         }
@@ -1138,7 +960,7 @@ namespace EngineNS.IO
                         typeAttr = value.GetAttribute("Type");
                         if (!string.IsNullOrEmpty(typeAttr))
                         {
-                            var kt = Rtti.UTypeDescManager.Instance.GetTypeFromString(typeAttr);
+                            var kt = Rtti.UTypeDesc.TypeOf(typeAttr).SystemType;
                             if (kt != null)
                                 valueType = kt;
                         }
@@ -1191,7 +1013,7 @@ namespace EngineNS.UTest
 {
     [Rtti.Meta]
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public class UTest_MetaObject : EngineNS.IO.ISerializer
+    public partial class UTest_MetaObject : EngineNS.IO.ISerializer
     {
         [Rtti.Meta]
         public class TestSubClass : EngineNS.IO.ISerializer

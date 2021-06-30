@@ -29,14 +29,14 @@ void IStaticModifier::SetInputStreams(IMeshPrimitives* mesh, IVertexArray* vao)
 	vao->BindVertexBuffer(VST_Color, vb);
 }
 
-void IStaticModifier::GetInputStreams(DWORD& pOutStreams) 
+void IStaticModifier::GetInputStreams(UINT* pOutStreams) 
 {
-	pOutStreams |= ((1 << VST_Position) | (1 << VST_Normal) | (1 << VST_Tangent) | (1 << VST_UV) | (1 << VST_Color));
+	*pOutStreams |= ((1 << VST_Position) | (1 << VST_Normal) | (1 << VST_Tangent) | (1 << VST_UV) | (1 << VST_Color));
 }
 
-void IStaticModifier::GetProvideStreams(DWORD& pOutStreams) 
+void IStaticModifier::GetProvideStreams(UINT* pOutStreams)
 {
-	pOutStreams |= ((1 << VOT_Position) | (1 << VOT_Normal) | (1 << VOT_Tangent) | (1 << VOT_WorldPos) | (1 << VOT_UV) | (1 << VOT_Color));
+	*pOutStreams |= ((1 << VOT_Position) | (1 << VOT_Normal) | (1 << VOT_Tangent) | (1 << VOT_WorldPos) | (1 << VOT_UV) | (1 << VOT_Color));
 }
 
 NS_END

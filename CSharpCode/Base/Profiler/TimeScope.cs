@@ -139,7 +139,7 @@ namespace EngineNS.Profiler
                 return;
             unsafe
             {
-                mBeginTime = mCoreObject.Begin(TimeScopeManager.Instance.mCoreObject.CppPointer, bPushParent);
+                mBeginTime = mCoreObject.Begin(TimeScopeManager.Instance.mCoreObject, bPushParent);
             }
         }
         public void End()
@@ -148,7 +148,7 @@ namespace EngineNS.Profiler
                 return;
             unsafe
             {
-                mCoreObject.End(TimeScopeManager.Instance.mCoreObject.CppPointer, mBeginTime);
+                mCoreObject.End(TimeScopeManager.Instance.mCoreObject, mBeginTime);
             }
         }
     }

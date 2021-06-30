@@ -5,26 +5,16 @@ using SDL2;
 
 namespace EngineNS.Editor
 {
-    public class UMainEditorApplication : Graphics.Pipeline.USlateApplication, ITickable
+    public partial class UMainEditorApplication : Graphics.Pipeline.USlateApplication, ITickable
     {
         public UAssetEditorManager AssetEditorManager { get; } = new UAssetEditorManager();
-        public static List<IRootForm> RootForms { get; } = new List<IRootForm>();
-        public static void RegRootForm(IRootForm form)
-        {
-            if (RootForms.Contains(form))
-                return;
-            RootForms.Add(form);
-        }
-        public static void UnregRootForm(IRootForm form)
-        {
-            RootForms.Remove(form);
-        }
+        
         public UMainEditorApplication()
         {
             mCpuProfiler = new Editor.Forms.UCpuProfiler();            
             mMetaViewer = new Editor.MetaViewEditor();            
             mMainInspector = new Forms.UInspector();
-            WorldViewportSlate = new UWorldViewportSlate(true);            
+            WorldViewportSlate = new UEditorWorldViewportSlate(true);
             mWorldOutliner = new Editor.Forms.UWorldOutliner();
             
             mWorldOutliner.TestUWorldOutliner(this);
@@ -35,11 +25,15 @@ namespace EngineNS.Editor
         public Editor.Forms.UInspector mMainInspector;
         public Editor.MetaViewEditor mMetaViewer = null;
 
-        public UWorldViewportSlate WorldViewportSlate = null;
+        public UEditorWorldViewportSlate WorldViewportSlate = null;
+        public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
+        {
+            return WorldViewportSlate;
+        }
         public EGui.Controls.ContentBrowser ContentBrowser = new EGui.Controls.ContentBrowser();
         public override void Cleanup()
         {
-            RootForms.Clear();
+            Graphics.Pipeline.USlateApplication.ClearRootForms();
             UEngine.Instance?.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
@@ -87,7 +81,7 @@ namespace EngineNS.Editor
                 for (int i = 0; i < count; i++)
                 {
                     var pViewport = ImGuiAPI.PlatformIO_Viewports_Get(ImGuiAPI.GetPlatformIO(), i);
-                    var nativeWindow = pViewport->m_PlatformHandle;
+                    var nativeWindow = pViewport->PlatformHandle;
                     var flags = SDL.SDL_GetWindowFlags((IntPtr)nativeWindow);
                     if ((flags & (uint)SDL.SDL_WindowFlags.SDL_WINDOW_INPUT_FOCUS) != 0)
                     {
@@ -185,12 +179,7 @@ namespace EngineNS.Editor
 
                 WorldViewportSlate.DockId = CenterDockId;
 
-                foreach(var i in RootForms)
-                {
-                    if (i.Visible == false)
-                        continue;
-                    i.OnDraw();
-                }
+                DrawRootForms();
 
                 AssetEditorManager.OnDraw();
 
@@ -332,13 +321,5 @@ namespace EngineNS.Editor
             OnDrawSlate();
         }
         #endregion
-    }
-
-    public interface IRootForm
-    {
-        bool Visible { get; set; }
-        void OnDraw();
-        uint DockId { get; set; }
-        ImGuiCond_ DockCond { get; set; }
     }
 }

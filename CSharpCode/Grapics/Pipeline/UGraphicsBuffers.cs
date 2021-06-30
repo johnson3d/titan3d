@@ -30,7 +30,7 @@ namespace EngineNS.Graphics.Pipeline
         public RHI.CShaderResourceView DepthStencilSRV;
         public RHI.CShaderResourceView[] GBufferSRV;
         public RHI.CConstantBuffer PerViewportCBuffer;
-        public int SwapChainIndex = -1;
+        public int SwapChainIndex { get; set; } = -1;
         public void SureCBuffer(Shader.UEffect effect, string debugName)
         {
             if (effect.CBPerViewportIndex != 0xFFFFFFFF)
@@ -76,8 +76,12 @@ namespace EngineNS.Graphics.Pipeline
 
             GBufferSRV = new RHI.CShaderResourceView[NumOfGBuffer];
             var fbDesc = new IFrameBuffersDesc();
-            fbDesc.IsSwapChainBuffer = 1;
-            fbDesc.UseDSV = 1;
+            if (SwapChainIndex < 0)
+                fbDesc.IsSwapChainBuffer = 0;
+            else
+                fbDesc.IsSwapChainBuffer = 1;
+            if (dsFormat != EPixelFormat.PXF_UNKNOWN)
+                fbDesc.UseDSV = 1;
             FrameBuffers = rc.CreateFrameBuffers(ref fbDesc);
 
             if (dsFormat == EPixelFormat.PXF_UNKNOWN)
@@ -100,7 +104,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 dsvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
                 DepthStencilView = rc.CreateDepthRenderTargetView(ref dsvDesc);
-                FrameBuffers.mCoreObject.BindDepthStencilView(DepthStencilView.mCoreObject.Ptr);
+                FrameBuffers.mCoreObject.BindDepthStencilView(DepthStencilView.mCoreObject);
 
                 var srvDesc = new IShaderResourceViewDesc();
                 srvDesc.mFormat = dsFormat;
@@ -130,15 +134,15 @@ namespace EngineNS.Graphics.Pipeline
                 var texture2d = new ITexture2D(showTarget.CppPointer);
                 var tex2dDesc = texture2d.mDesc;
                 rtDesc.Format = tex2dDesc.Format;//EPixelFormat.PXF_B8G8R8A8_UNORM;
-                rtDesc.m_pTexture2D = showTarget.CppPointer;
+                rtDesc.m_pTexture2D = showTarget;
                 rtDesc.Width = tex2dDesc.Width;
                 rtDesc.Height = tex2dDesc.Height;
                 var SwapChainRT = rc.CreateRenderTargetView(ref rtDesc);
-                FrameBuffers.mCoreObject.BindRenderTargetView((uint)index, SwapChainRT.mCoreObject.Ptr);
+                FrameBuffers.mCoreObject.BindRenderTargetView((uint)index, SwapChainRT.mCoreObject);
 
                 var srvDesc = new IShaderResourceViewDesc();
                 srvDesc.mFormat = tex2dDesc.Format;
-                srvDesc.m_pTexture2D = showTarget.CppPointer;
+                srvDesc.m_pTexture2D = showTarget;
                 var SwapChainSRV = rc.CreateShaderResourceView(ref srvDesc);
                 GBufferSRV[index] = SwapChainSRV;
                 return true;
@@ -165,15 +169,15 @@ namespace EngineNS.Graphics.Pipeline
             {
                 rtDesc.SetDefault();
                 rtDesc.Format = format;
-                rtDesc.m_pTexture2D = showTarget.mCoreObject.Ptr;
+                rtDesc.m_pTexture2D = showTarget.mCoreObject;
                 rtDesc.Width = width;
                 rtDesc.Height = height;
                 var SwapChainRT = rc.CreateRenderTargetView(ref rtDesc);
-                FrameBuffers.mCoreObject.BindRenderTargetView((uint)index, SwapChainRT.mCoreObject.Ptr);
+                FrameBuffers.mCoreObject.BindRenderTargetView((uint)index, SwapChainRT.mCoreObject);
 
                 var srvDesc = new IShaderResourceViewDesc();
                 srvDesc.mFormat = format;
-                srvDesc.m_pTexture2D = showTarget.mCoreObject.Ptr;
+                srvDesc.m_pTexture2D = showTarget.mCoreObject;
                 var SwapChainSRV = rc.CreateShaderResourceView(ref srvDesc);
                 GBufferSRV[index] = SwapChainSRV;
                 return true;
@@ -201,11 +205,11 @@ namespace EngineNS.Graphics.Pipeline
                 dsvDesc.Format = desc.Format;
                 dsvDesc.Width = desc.Width;
                 dsvDesc.Height = desc.Height;
-                dsvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject.Ptr;
+                dsvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
 
                 DepthStencilView.Dispose();
                 DepthStencilView = rc.CreateDepthRenderTargetView(ref dsvDesc);
-                FrameBuffers.mCoreObject.BindDepthStencilView(DepthStencilView.mCoreObject.Ptr);
+                FrameBuffers.mCoreObject.BindDepthStencilView(DepthStencilView.mCoreObject);
 
                 DepthStencilSRV.Dispose();
                 var srvDesc = new IShaderResourceViewDesc();
@@ -235,15 +239,15 @@ namespace EngineNS.Graphics.Pipeline
                     var rtDesc = new IRenderTargetViewDesc();
                     rtDesc.SetDefault();
                     rtDesc.Format = desc.Format;
-                    rtDesc.m_pTexture2D = showTarget.mCoreObject.Ptr;
+                    rtDesc.m_pTexture2D = showTarget.mCoreObject;
                     rtDesc.Width = desc.Width;
                     rtDesc.Height = desc.Height;
                     var SwapChainRT = rc.CreateRenderTargetView(ref rtDesc);
-                    FrameBuffers.mCoreObject.BindRenderTargetView((uint)i, SwapChainRT.mCoreObject.Ptr);
+                    FrameBuffers.mCoreObject.BindRenderTargetView((uint)i, SwapChainRT.mCoreObject);
 
                     var srvDesc = new IShaderResourceViewDesc();
                     srvDesc.mFormat = desc.Format;
-                    srvDesc.m_pTexture2D = showTarget.mCoreObject.Ptr;
+                    srvDesc.m_pTexture2D = showTarget.mCoreObject;
                     var SwapChainSRV = rc.CreateShaderResourceView(ref srvDesc);
                     GBufferSRV[i].Dispose();
                     GBufferSRV[i] = SwapChainSRV;

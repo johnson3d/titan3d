@@ -15,7 +15,7 @@ namespace EngineNS
         {
             Dispose();
         }
-        public void Dispose()
+        public virtual void Dispose()
         {
             unsafe
             {

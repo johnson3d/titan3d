@@ -175,7 +175,7 @@ VStringA VStringA_FormatV(LPCSTR _format, ...)
 	memset(szBuffer, 0, sizeof(szBuffer));
 	va_list ap;
 	va_start(ap, _format);
-	try
+	//try
 	{
 #ifdef WIN32
 		_vsnprintf_s(szBuffer, MAX_BUFFLEN, MAX_BUFFLEN, _format, ap);
@@ -185,9 +185,9 @@ VStringA VStringA_FormatV(LPCSTR _format, ...)
 #endif
 
 	}
-	catch (...)
+	//catch (...)
 	{
-		return VStringA("");
+		//return VStringA("");
 	}
 	va_end(ap);
 	return VStringA(szBuffer);

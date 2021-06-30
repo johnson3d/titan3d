@@ -7,9 +7,9 @@ using System.Xml;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public class ClassGraph : IO.ISerializer, Editor.IAssetEditor, Editor.IRootForm
+    public partial class ClassGraph : IO.ISerializer, Editor.IAssetEditor, Graphics.Pipeline.IRootForm
     {
-        public Editor.IRootForm GetRootForm()
+        public Graphics.Pipeline.IRootForm GetRootForm()
         {
             return this;
         }

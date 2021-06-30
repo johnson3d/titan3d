@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Editor
 {
-    public class MetaViewEditor : IRootForm
+    public class MetaViewEditor : Graphics.Pipeline.IRootForm
     {
         public MetaViewEditor()
         {
@@ -48,13 +48,14 @@ namespace EngineNS.Editor
             {
                 GamePlay.Scene.UNode aabbTreeRoot = null;
 
-                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
-                var root = mainEditor.WorldViewportSlate.World.Root.FindFirstChild("DrawMeshNode");
+                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
+                var world = mainEditor.GetWorldViewportSlate().World;
+                var root = mainEditor.GetWorldViewportSlate().World.Root.FindFirstChild("DrawMeshNode");
                 if (root == null)
                 {
-                    var scene = mainEditor.WorldViewportSlate.World.Root.GetNearestParentScene();
+                    var scene = world.Root.GetNearestParentScene();
                     root = scene.NewNode(typeof(GamePlay.Scene.UNode), new GamePlay.Scene.UNodeData() { Name = "DrawMeshNode" }, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacementBase));
-                    root.Parent = mainEditor.WorldViewportSlate.World.Root;
+                    root.Parent = world.Root;
                 }
                 root.ClearChildren();
 
@@ -87,7 +88,6 @@ namespace EngineNS.Editor
                     meshNode.NodeData.Name = "Robot0";
                     meshNode.IsScaleChildren = false;
                     meshNode.IsCastShadow = true;
-                    meshNode.IsAcceptShadow = true;
 
                     var mesh1 = new Graphics.Mesh.UMesh();
 
@@ -97,7 +97,7 @@ namespace EngineNS.Editor
                     meshNode1.Parent = meshNode;
                     meshNode1.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent;
                     //meshNode1.Placement.Position = meshNode1.Placement.Position;
-
+                    meshNode1.IsCastShadow = true;
                     aabbTreeRoot = meshNode;
                 }
 
@@ -163,29 +163,46 @@ namespace EngineNS.Editor
                     trNode.IsAcceptShadow = true;
                 }
 
-                mainEditor.WorldViewportSlate.ShowBoundVolumes(true, null);
+                mainEditor.GetWorldViewportSlate().ShowBoundVolumes(true, null);
             }
         }
         async System.Threading.Tasks.Task DoTest2()
         {
             await Thread.AsyncDummyClass.DummyFunc();
-            var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current);
+            var kk = new Rtti.MetaAttribute();
+            System.GC.Collect();
+            //var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current);
 
-            UEngine.Instance.MacrossModule.ReloadAssembly(root + "/net5.0/GameProject.dll");
+            //UEngine.Instance.MacrossModule.ReloadAssembly(root + "/net5.0/GameProject.dll");
 
-            var typeDesc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName("utest.mt");
-            var ins = System.Activator.CreateInstance(typeDesc.SystemType);
-            var method = typeDesc.SystemType.GetMethod("Function_0");
-            method.Invoke(ins, null);
+            //var typeDesc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName("utest.mt");
+            //var ins = System.Activator.CreateInstance(typeDesc.SystemType);
+            //var method = typeDesc.SystemType.GetMethod("Function_0");
+            //method.Invoke(ins, null);
         }
         async System.Threading.Tasks.Task DoTest3()
         {
-            await UEngine.Instance.StartPlayInEditor(RName.GetRName("Demo0.mcrs"));
+            await UEngine.Instance.StartPlayInEditor(UEngine.Instance.GfxDevice.MainWindow, typeof(Graphics.Pipeline.Mobile.UMobileEditorFSPolicy), RName.GetRName("Demo0.mcrs"));
         }
         async System.Threading.Tasks.Task DoTest4()
         {
             await Thread.AsyncDummyClass.DummyFunc();
             UEngine.Instance.EndPlayInEditor();
+        }
+        async System.Threading.Tasks.Task MacrossRun()
+        {
+            await Thread.AsyncDummyClass.DummyFunc();
+            Macross.UMacrossDebugger.Instance.Run();
+        }
+        async System.Threading.Tasks.Task MacrossDisableAllBreaks()
+        {
+            await Thread.AsyncDummyClass.DummyFunc();
+            Macross.UMacrossDebugger.Instance.SetBreakStateAll(false);
+        }
+        async System.Threading.Tasks.Task MacrossEnableAllBreaks()
+        {
+            await Thread.AsyncDummyClass.DummyFunc();
+            Macross.UMacrossDebugger.Instance.SetBreakStateAll(true);
         }
         public unsafe void OnDraw()
         {
@@ -215,6 +232,18 @@ namespace EngineNS.Editor
                 if (ImGuiAPI.Button("EndPIE", ref sz))
                 {
                     var nu = DoTest4();
+                }
+                if (ImGuiAPI.Button("Macross GO!", ref sz))
+                {
+                    var nu = MacrossRun();
+                }
+                if (ImGuiAPI.Button("DisableAllBreaks", ref sz))
+                {
+                    var nu = MacrossDisableAllBreaks();
+                }
+                if (ImGuiAPI.Button("EnableAllBreaks", ref sz))
+                {
+                    var nu = MacrossEnableAllBreaks();
                 }
                 if (ImGuiAPI.CollapsingHeader("ClassView", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {

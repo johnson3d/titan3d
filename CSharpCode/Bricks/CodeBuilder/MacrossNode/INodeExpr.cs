@@ -5,7 +5,7 @@ using EngineNS.EGui.Controls.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public class INodeExpr : EGui.Controls.NodeGraph.NodeBase
+    public partial class INodeExpr : EGui.Controls.NodeGraph.NodeBase
     {
         public bool HasError = false;
         public GraphException CodeExcept;

@@ -377,10 +377,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 if (changed)
                 {
                     newValue = v;
-                    return true;
+                    retValue = true;
                 }
             }
-            return false;
+            return retValue;
         }
     }
     public class FloatEditor : PGCustomValueEditorAttribute
@@ -430,7 +430,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
             var minValue = double.MinValue;
             var maxValue = double.MaxValue;
-            var name = ("##", info.Name).ToString();
+            var name = TName.FromString2("##", info.Name).ToString();
             var multiValue = info.Value as PropertyMultiValue;
             bool retValue = false;
             if (multiValue != null && multiValue.HasDifferentValue())

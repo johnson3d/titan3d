@@ -22,6 +22,4 @@
     </Reference>
   </ItemGroup>
 
-  <Import Project="..\..\Macross\MacrossGenCSharp\MacrossGenCSharp.projitems" Label="Shared" />
-
 </Project>

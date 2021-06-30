@@ -26,7 +26,7 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)ImGuiFileDialog.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ImGuiFileDialogConfig.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)dirent.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)dirent_win.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui_filedialog.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)misc\freetype\imgui_freetype.h">
       <Filter>freetype</Filter>

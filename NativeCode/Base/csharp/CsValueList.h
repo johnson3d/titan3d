@@ -16,17 +16,14 @@ public:
 	UINT					mStride;
 	VArray<BYTE, BYTE>		mMemData;
 
-	TR_CONSTRUCTOR()
 	CsValueList()
 	{
 		mStride = 0;
 	}
-	TR_CONSTRUCTOR()
 	CsValueList(int stride);
 	~CsValueList();
-	TR_FUNCTION()
 	void SetCapacity(int capacity);
-	TR_FUNCTION()
+	void SetSize(int capacity);
 	UINT GetCount();
 	TR_FUNCTION(SV_NoStarToRef = ptr)
 	void AddValue(BYTE* ptr);
@@ -34,11 +31,8 @@ public:
 	void Append(CsValueList* src);
 	TR_FUNCTION(SV_NoStarToRef = src)
 	void AppendArray(BYTE* src, int count);
-	TR_FUNCTION()
 	void RemoveAt(UINT index);
-	TR_FUNCTION()
 	void Clear(vBOOL bFreeMemory);
-	TR_FUNCTION()
 	BYTE* GetAddressAt(UINT index);
 	TR_FUNCTION(SV_NoStarToRef = ptr)
 	void SetDatas(BYTE* ptr, int countOfObj);

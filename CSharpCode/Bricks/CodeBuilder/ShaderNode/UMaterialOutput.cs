@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
-    public class UMaterialOutput : IBaseNode
+    public partial class UMaterialOutput : IBaseNode
     {
         public static UMaterialOutput NewNode(UMaterialGraph graph)
         {

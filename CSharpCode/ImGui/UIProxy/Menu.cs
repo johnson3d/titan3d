@@ -112,7 +112,7 @@ namespace EngineNS.EGui.UIProxy
         public bool OnDraw(ref ImDrawList drawList)
         {
             ImGuiAPI.BeginGroup();
-            UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.BaseRenderer.enFont.Font_Bold_13px);
+            UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_Bold_13px);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.NamedMenuSeparatorColor);
             ImGuiAPI.Text(Name);
             ImGuiAPI.PopStyleColor(1);

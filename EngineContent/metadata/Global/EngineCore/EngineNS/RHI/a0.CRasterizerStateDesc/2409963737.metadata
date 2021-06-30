@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2409963737 Type="EngineNS.RHI.CRasterizerStateDesc@EngineCore">
+  <AntialiasedLineEnable Type="System.Int32@Unknown" Order="0" />
+  <CullMode Type="EngineNS.ECullMode@EngineCore" Order="0" />
+  <DepthBias Type="System.Int32@Unknown" Order="0" />
+  <DepthBiasClamp Type="System.Single@Unknown" Order="0" />
+  <DepthClipEnable Type="System.Int32@Unknown" Order="0" />
+  <FillMode Type="EngineNS.EFillMode@EngineCore" Order="0" />
+  <FrontCounterClockwise Type="System.Int32@Unknown" Order="0" />
+  <MultisampleEnable Type="System.Int32@Unknown" Order="0" />
+  <ScissorEnable Type="System.Int32@Unknown" Order="0" />
+  <SlopeScaledDepthBias Type="System.Single@Unknown" Order="0" />
+</Hash_2409963737>

@@ -5,7 +5,10 @@
 #define new VNEW
 
 NS_BEGIN
+
+template<>
 AuxRttiStruct<UAnyValue>		AuxRttiStruct<UAnyValue>::Instance;
+
 EngineNS::Rtti::UNativeCoreProvider GNativeCoreProvider;
 void UCs2CppBase::InitializeNativeCoreProvider()
 {

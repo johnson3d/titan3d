@@ -332,18 +332,41 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var enumerable = objIns as IEnumerable;
             if(enumerable != null)
             {
-                foreach(var elem in (IEnumerable)objIns)
+                var multiValue = value as PropertyMultiValue;
+                if(multiValue != null)
                 {
-                    var elemType = elem.GetType();
-                    var propertyInfo = elemType.GetProperty(Name);
-                    if(propertyInfo != null)
+                    int index = 0;
+                    foreach(var elem in (IEnumerable)objIns)
                     {
-                        _ProSetValue(propertyInfo, elem, value, useProvider);
+                        if (index >= multiValue.Values.Count)
+                            continue;
+
+                        var elemType = elem.GetType();
+                        var propertyInfo = elemType.GetProperty(Name);
+                        if (propertyInfo != null)
+                            _ProSetValue(propertyInfo, elem, multiValue.Values[index], useProvider);
+                        var fieldInfo = elemType.GetField(Name);
+                        if (fieldInfo != null)
+                            _FieldSetValue(fieldInfo, elem, multiValue.Values[index], useProvider);
+
+                        index++;
                     }
-                    var fieldInfo = elemType.GetField(Name);
-                    if(fieldInfo != null)
+                }
+                else
+                {
+                    foreach (var elem in (IEnumerable)objIns)
                     {
-                        _FieldSetValue(fieldInfo, elem, value, useProvider);
+                        var elemType = elem.GetType();
+                        var propertyInfo = elemType.GetProperty(Name);
+                        if (propertyInfo != null)
+                        {
+                            _ProSetValue(propertyInfo, elem, value, useProvider);
+                        }
+                        var fieldInfo = elemType.GetField(Name);
+                        if (fieldInfo != null)
+                        {
+                            _FieldSetValue(fieldInfo, elem, value, useProvider);
+                        }
                     }
                 }
             }
@@ -509,6 +532,121 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                 }
                 System.Runtime.InteropServices.Marshal.FreeHGlobal(strPtr);
+            }
+            return retValue;
+        }
+
+        public unsafe bool DrawVector<T>(in PGCustomValueEditorAttribute.EditorInfo info) where T : unmanaged
+        {
+            bool retValue = false;
+            var minValue = float.MinValue;
+            var maxValue = float.MaxValue;
+
+            if (info.Expand)
+            {
+                ImGuiTableRowData rowData = new ImGuiTableRowData()
+                {
+                    IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
+                    MinHeight = 0,
+                    CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
+                    CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
+                    IndentImageWidth = info.HostPropertyGrid.Indent,
+                    IndentTextureUVMin = Vector2.Zero,
+                    IndentTextureUVMax = Vector2.UnitXY,
+                    IndentColor = info.HostPropertyGrid.IndentColor,
+                    HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
+                    Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
+                };
+                Span<float> valueArray = stackalloc float[Values.Count];
+
+                for (var dimIdx = 0; dimIdx < sizeof(T)/sizeof(float); dimIdx++)
+                {
+                    bool valuesDifferent = false;
+                    float firstValue = 0;
+                    for (int i = 0; i < Values.Count; i++)
+                    {
+                        var v = (T)Values[i];
+                        valueArray[i] = ((float*)&v)[dimIdx];
+                        if (i == 0)
+                            firstValue = valueArray[i];
+                        else if (firstValue != valueArray[i])
+                            valuesDifferent = true;
+                    }
+
+                    ImGuiAPI.TableNextRow(ref rowData);
+                    ImGuiAPI.TableSetColumnIndex(0);
+                    ImGuiAPI.AlignTextToFramePadding();
+                    string dimName = "";
+                    switch (dimIdx)
+                    {
+                        case 0:
+                            dimName = "X";
+                            break;
+                        case 1:
+                            dimName = "Y";
+                            break;
+                        case 2:
+                            dimName = "Z";
+                            break;
+                        case 3:
+                            dimName = "W";
+                            break;
+                    }
+                    ImGuiAPI.Indent(15);
+                    ImGuiAPI.Text(dimName);
+                    ImGuiAPI.Unindent(15);
+                    ImGuiAPI.TableNextColumn();
+                    ImGuiAPI.SetNextItemWidth(-1);
+                    if (valuesDifferent)
+                    {
+#pragma warning disable CA2014
+                        Span<byte> textBuffer = stackalloc byte[8];
+#pragma warning restore CA2014
+                        var strPtr = System.Runtime.InteropServices.Marshal.StringToHGlobalAnsi(mMultiValueString);
+                        var len = (uint)mMultiValueString.Length;
+                        fixed (byte* pBuffer = &textBuffer[0])
+                        {
+                            CoreSDK.SDK_StrCpy(pBuffer, strPtr.ToPointer(), len);
+
+                            var changed = ImGuiAPI.InputText(dimName, pBuffer, len, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+                            if (changed)
+                            {
+                                var newValueStr = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)pBuffer);
+                                try
+                                {
+                                    var v = System.Convert.ToSingle(newValueStr);
+                                    for (int i = 0; i < Values.Count; i++)
+                                    {
+                                        var vv = (T)Values[i];
+                                        ((float*)&vv)[dimIdx] = v;
+                                        Values[i] = vv;
+                                    }
+                                    retValue = true;
+                                }
+                                catch (System.Exception)
+                                {
+                                    retValue = false;
+                                }
+                            }
+                        }
+                        System.Runtime.InteropServices.Marshal.FreeHGlobal(strPtr);
+                    }
+                    else
+                    {
+                        var v = valueArray[0];
+                        var changed = ImGuiAPI.DragScalar2(dimName, ImGuiDataType_.ImGuiDataType_Float, &v, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                        if (changed)
+                        {
+                            for (int i = 0; i < Values.Count; i++)
+                            {
+                                var vv = (T)Values[i];
+                                ((float*)&vv)[dimIdx] = v;
+                                Values[i] = vv;
+                            }
+                            retValue = true;
+                        }
+                    }
+                }
             }
             return retValue;
         }

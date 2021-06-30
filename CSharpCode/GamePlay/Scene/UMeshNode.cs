@@ -99,5 +99,16 @@ namespace EngineNS.GamePlay.Scene
                 return;
             mMesh.SetWorldMatrix(ref Placement.AbsTransform);
         }
+        static Macross.UMacrossStackFrame mLogicTickFrame = new Macross.UMacrossStackFrame();
+        static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
+        public override bool OnTickLogic()
+        {
+            using (var guard = new Macross.UMacrossStackGuard(mLogicTickFrame))
+            {
+                mTestBreak.TryBreak();
+            }
+                
+            return true;
+        }
     }
 }

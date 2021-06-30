@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ProjectCooker": {
+      "commandName": "Project",
+      "commandLineArgs": "ExeCmd=BuildSerializer DS_Port=5555 CookCfg=$(SolutionDir)content\\EngineConfigForCook.cfg Serializer_Path=$(SolutionDir)codegen\\Serializer\\Engine",
+      "workingDirectory": "..\\..\\binaries\\",
+      "nativeDebugging": true
+    }
+  }
+}

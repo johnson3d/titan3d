@@ -138,6 +138,7 @@ vBOOL IGLTexture2D::Map(ICommandList* cmd, int MipLevel, void** ppData, UINT* pR
 		return FALSE;
 	if (mGlesTexture2D->BufferId == 0)
 		return FALSE;
+	cmd = cmd->GetContext()->GetImmCommandList();
 	GLSdk* sdk = ((IGLCommandList*)cmd)->mCmdList;
 	sdk->BindBuffer(GL_PIXEL_PACK_BUFFER, mGlesTexture2D);
 	*pRowPitch = ((mDesc.Width * GetPixelByteWidth(mDesc.Format) + 3) / 4) * 4;
@@ -151,6 +152,7 @@ void IGLTexture2D::Unmap(ICommandList* cmd, int MipLevel)
 	if (mIsReadable == false)
 		return;
 
+	cmd = cmd->GetContext()->GetImmCommandList();
 	GLSdk* sdk = ((IGLCommandList*)cmd)->mCmdList;
 	GLboolean ret;
 	sdk->UnmapBuffer(&ret, GL_PIXEL_PACK_BUFFER);

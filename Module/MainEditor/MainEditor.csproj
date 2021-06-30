@@ -9,6 +9,7 @@
     <OutputPath>..\..\binaries\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
     <DefineConstants>TRACE;PWindow</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -20,5 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Engine.Window\Engine.Window.csproj" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 
 </Project>

@@ -27,7 +27,13 @@ UINT CsValueList::GetCount()
 void CsValueList::SetCapacity(int capacity)
 {
 	ASSERT(mStride != 0);
-	mMemData.InstantArray(mMemData.GetSize(), capacity, FALSE);
+	mMemData.InstantArray(mMemData.GetSize(), capacity * mStride, FALSE);
+}
+
+void CsValueList::SetSize(int capacity)
+{
+	ASSERT(mStride != 0);
+	mMemData.SetSize(capacity * mStride, capacity * mStride, FALSE);
 }
 
 void CsValueList::AddValue(BYTE* ptr)

@@ -319,14 +319,14 @@ namespace EngineNS.Editor
                 DockCond = ImGuiCond_.ImGuiCond_FirstUseEver,
             };
             meshEditor.Initialize();
-            mForms = new List<IRootForm>()
+            mForms = new List<Graphics.Pipeline.IRootForm>()
             {
                 meshEditor,
             };
         }
 
         List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
-        List<IRootForm> mForms = new List<IRootForm>();
+        List<Graphics.Pipeline.IRootForm> mForms = new List<Graphics.Pipeline.IRootForm>();
         //bool fileMenuOpen = false;
         //bool colorPushed = false;
         //bool hover = false;
@@ -403,7 +403,7 @@ namespace EngineNS.Editor
         }
     }
 
-    public class MeshEditor : IRootForm
+    public class MeshEditor : Graphics.Pipeline.IRootForm
     {
         bool mVisible = true;
         public bool Visible
@@ -529,6 +529,10 @@ namespace EngineNS.Editor
                     Color4Value = new Vector4(1, 0, 1, 0),
                     Color3Value = new Vector3(1, 0, 1),
                     Color = 0xFF00FF00,
+                    ValueType = new ValueType()
+                    {
+                        BoolValue = true,
+                    },
                 }
             };//EGui.UIProxy.StyleConfig.Instance;
             mPanels.Add(inspector);

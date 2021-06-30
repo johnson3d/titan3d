@@ -1162,41 +1162,34 @@ struct VConstructor4 : public RttiConstructor
 	}
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS&EngineNS.RttiStruct)
+struct RttiStruct;
+
+struct TR_CLASS(SV_NameSpace = EngineNS.RttiStruct, SV_ContainClass = RttiStruct, SV_UsingNS = EngineNS)
+MemberDesc: public RttiMetaInfo
+{
+	RttiStruct * MemberType;
+	unsigned int		Offset;
+	unsigned int		Size;
+	unsigned int		ArrayElements;
+	RttiNameString		MemberName;
+	bool				IsPointer;
+
+	template<typename T>
+	inline void SetValue(void* pThis, const T* v) const;
+	template<typename T>
+	inline T* GetValueAddress(void* pThis) const;
+};
+
+struct TR_CLASS(SV_NameSpace = EngineNS)
 RttiStruct : public RttiMetaInfo
 {
 	RttiStruct*					ParentStructType;
-	TR_MEMBER()
 	RttiNameString				Name;
-	TR_MEMBER()
 	RttiNameString				NameSpace;
-	TR_MEMBER()
 	unsigned int				Size;
-	TR_MEMBER()
 	RttiEnum*					EnumDesc;
-	TR_MEMBER()
 	bool						IsEnum;
-	struct TR_CLASS(SV_NameSpace = EngineNS.RttiStruct, SV_ContainClass = RttiStruct, SV_UsingNS = EngineNS)
-	MemberDesc : public RttiMetaInfo
-	{
-		TR_MEMBER()
-		RttiStruct*			MemberType;
-		TR_MEMBER()
-		unsigned int		Offset;
-		TR_MEMBER()
-		unsigned int		Size;
-		TR_MEMBER()
-		unsigned int		ArrayElements;
-		TR_MEMBER()
-		RttiNameString		MemberName;
-		TR_MEMBER()
-		bool				IsPointer;
-
-		template<typename T>
-		inline void SetValue(void* pThis, const T* v) const;
-		template<typename T>
-		inline T* GetValueAddress(void* pThis) const;
-	};
+	
 	std::vector<MemberDesc>			Members;
 	std::vector<RttiMethodBase*>	Methods;
 	std::vector<RttiConstructor*>	Constructors;
@@ -1910,7 +1903,7 @@ struct AuxRttiStruct<typename remove_all_ref_ptr<ns::Type>::type> : public RttiS
 	}\
 	virtual void Init() override\
 	{\
-		RttiStruct::MemberDesc* __current_member = nullptr;\
+		MemberDesc* __current_member = nullptr;\
 		RttiMethodBase* __current_method = nullptr;\
 		RttiConstructor* __current_constructor = nullptr;
 
@@ -2189,7 +2182,7 @@ AuxRttiStruct<typename remove_all_ref_ptr<Type>::type> AuxRttiStruct<typename re
 #define StructMethodEx12(...) 
 
 template<typename T>
-void RttiStruct::MemberDesc::SetValue(void* pThis, const T* v) const
+void MemberDesc::SetValue(void* pThis, const T* v) const
 {
 	if (AuxRttiStruct<typename remove_all_ref_ptr<T>::type>::Instance.IsA(MemberType) == false)
 	{
@@ -2205,7 +2198,7 @@ void RttiStruct::MemberDesc::SetValue(void* pThis, const T* v) const
 	}
 }
 template<typename T>
-T* RttiStruct::MemberDesc::GetValueAddress(void* pThis) const
+T* MemberDesc::GetValueAddress(void* pThis) const
 {
 	if (AuxRttiStruct<typename remove_all_ref_ptr<T>::type>::Instance.IsA(MemberType) == false)
 		return nullptr;

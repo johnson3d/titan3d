@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public class SequenceNode : INodeExpr
+    public partial class SequenceNode : INodeExpr
     {
         public SequenceNode()
         {
@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
     }
-    public class IfNode : INodeExpr
+    public partial class IfNode : INodeExpr
     {
         public IfNode()
         {
@@ -172,7 +172,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return ifOp;
         }
     }
-    public class ReturnNode : INodeExpr
+    public partial class ReturnNode : INodeExpr
     {
         public static ReturnNode NewReturnNode(FunctionGraph funGraph)
         {

@@ -5,7 +5,7 @@ using EngineNS.EGui.Controls.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public class FunctionStartNode : INodeExpr
+    public partial class FunctionStartNode : INodeExpr
     {
         public static FunctionStartNode NewStartNode(FunctionGraph graph)
         {
@@ -147,7 +147,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return null;
         }
     }
-    public class FunctionGraph : EGui.Controls.NodeGraph.NodeGraph
+    public partial class FunctionGraph : EGui.Controls.NodeGraph.NodeGraph
     {
         public static FunctionGraph NewGraph(ClassGraph kls, DefineFunction func = null)
         {

@@ -18,12 +18,12 @@ namespace EngineNS.Profiler
         [Description("严重")]
         Fatal,
     }
-    public unsafe class Log
+    public unsafe partial class Log
     {
         public delegate void Delegate_OnReportLog(ELogTag tag, string category, string format, params object[] args);
         public static event Delegate_OnReportLog OnReportLog;
         
-        private static FWriteLogString NativeLogger = NativeWriteLogString;
+        private static CoreSDK.FDelegate_FWriteLogString NativeLogger = NativeWriteLogString;
 #if PlatformIOS
         [ObjCRuntime.MonoPInvokeCallback(typeof(FDelegate_WriteLogString))]
 #endif

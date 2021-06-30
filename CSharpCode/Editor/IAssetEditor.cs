@@ -16,7 +16,7 @@ namespace EngineNS.Editor
         bool Visible { get; set; }
         void OnDraw();
         void OnEvent(ref SDL2.SDL.SDL_Event e);
-        IRootForm GetRootForm();
+        Graphics.Pipeline.IRootForm GetRootForm();
     }
     public class UAssetEditorManager
     {
@@ -81,6 +81,10 @@ namespace EngineNS.Editor
             {
                 if (OpenedEditors[i].Visible == false)
                 {
+                    if (CurrentActiveEditor == OpenedEditors[i])
+                    {
+                        CurrentActiveEditor = null;
+                    }
                     OpenedEditors[i].OnCloseEditor();
                     OpenedEditors.RemoveAt(i);
 

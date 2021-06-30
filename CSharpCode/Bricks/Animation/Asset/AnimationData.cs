@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Animation.Data
 {
-    public class UAnimationData : IO.BaseSerializer
+    public partial class UAnimationData : IO.BaseSerializer
     {
         [Rtti.Meta]
         public Base.AnimHierarchy AnimatedHierarchy { get; set; }

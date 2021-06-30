@@ -7,9 +7,17 @@
 #include "IGLSwapChain.h"
 #include "IGLShaderResourceView.h"
 #include "IGLFrameBuffers.h"
+#include "IGLSamplerState.h"
+#include "IGLShaderProgram.h"
+#include "IGLInputLayout.h"
+#include "IGLVertexShader.h"
+#include "IGLPixelShader.h"
+#include "IGLRenderPipeline.h"
+#include "../Utility/IMeshPrimitives.h"
+#include "../Utility/IGeometryMesh.h"
 
 #include "../../Base/vfxsampcounter.h"
-#include "../Utility/GraphicsProfiler.h"
+#include "Utility/GraphicsProfiler.h"
 
 #define new VNEW
 
@@ -129,6 +137,7 @@ void IGLCommandList::Commit(IRenderContext* pRHICtx)
 		mPipelineStat->mCmdCount = (UINT)mCmdList->mCommands.size();
 
 	{
+		GLSdk::ImmSDK->Execute();
 		mCmdList->Execute();
 	}
 	
@@ -246,6 +255,355 @@ void IGLCommandList::CSDispatch(UINT x, UINT y, UINT z)
 	mCmdList->ES31_DispatchCompute(x, y, z);
 }
 
+void IGLCommandList::PSSetShaderResource(UINT32 Index, IShaderResourceView* Texture)
+{
+	if (mCurrentState.TrySet_PSTextures(Index, Texture) == false)
+		return;
+
+	if (Texture == nullptr)
+		return;
+
+	Texture->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
+	if (Texture->GetResourceState()->GetStreamState() != SS_Valid)
+		return;
+
+	auto saved = GLSdk::CheckGLError;
+	GLSdk::CheckGLError = false;
+
+	auto sdk = mCmdList;
+	auto rTexture = (IGLShaderResourceView*)Texture;
+	if (Texture->mSrvDesc.ViewDimension == RESOURCE_DIMENSION_BUFFER)
+	{
+		GLenum target = GL_SHADER_STORAGE_BUFFER;// GL_UNIFORM_BUFFER;
+		auto pGpuBuffer = rTexture->mBuffer.UnsafeConvertTo<IGLGpuBuffer>();
+		sdk->BindBufferBase(target, Index, pGpuBuffer->mBufferId);
+	}
+	else
+	{
+		sdk->ActiveTexture(GL_TEXTURE0 + Index);
+
+		sdk->BindTexture2D(rTexture);
+		//sdk->BindTexture(GL_TEXTURE_2D, rTexture->mView);
+		sdk->Uniform1i(Index, Index);
+	}
+
+	GLSdk::CheckGLError = saved;
+}
+
+void IGLCommandList::PSSetSampler(UINT32 Index, ISamplerState* Sampler)
+{
+	auto sdk = mCmdList;
+
+	if (mCurrentState.TrySet_PSSampler(Index, Sampler) == false)
+	{
+		sdk->Uniform1i(Index, Index);
+		return;
+	}
+
+	auto glSamp = (IGLSamplerState*)Sampler;
+
+	sdk->BindSampler(Index, glSamp->mSampler);
+
+	sdk->Uniform1i(Index, Index);
+}
+
+void IGLCommandList::SetScissorRect(IScissorRect* sr)
+{
+	auto sdk = mCmdList;
+	if (sr == nullptr || sr->Rects.size() == 0)
+	{
+		sdk->Disable(GL_SCISSOR_TEST);
+		return;
+	}
+	sdk->Enable(GL_SCISSOR_TEST);
+	auto& rc = sr->Rects[0];
+	sdk->Scissor(rc.MinX, rc.MinY, rc.MaxX - rc.MinX, rc.MaxY - rc.MinY);
+}
+
+void IGLCommandList::SetVertexBuffer(UINT32 StreamIndex, IVertexBuffer* VertexBuffer, UINT32 Offset, UINT Stride)
+{
+	/*if (cmd->IsDoing() == false)
+			return;*/
+
+	auto sdk = mCmdList;
+
+	if (VertexBuffer == nullptr)
+	{
+		//sdk->DisableVertexAttribArray((GLuint)StreamIndex);
+		return;
+	}
+
+	if (mPipelineState == nullptr)
+		return;
+	auto gpuProgram = (IGLShaderProgram*)mPipelineState->GetGpuProgram();
+	if (gpuProgram == nullptr)
+		return;
+
+	auto glVB = (IGLVertexBuffer*)VertexBuffer;
+	sdk->BindVertexBuffer(glVB);
+	
+	auto layout = gpuProgram->GetInputLayout();
+	auto& vtxLayouts = layout->mDesc.Layouts;
+	for (size_t i = 0; i < vtxLayouts.size(); i++)
+	{
+		const auto& elem = vtxLayouts[i];
+		if (elem.GLAttribLocation == -1)
+			continue;
+		
+		if (elem.InputSlot == StreamIndex)
+		{
+			sdk->EnableVertexAttribArray((GLuint)elem.GLAttribLocation);
+			if (elem.IsInstanceData)
+				sdk->VertexAttribDivisor(elem.GLAttribLocation, 1);
+			else
+				sdk->VertexAttribDivisor(elem.GLAttribLocation, 0);
+
+			GLint size;
+			GLenum type;
+			GLboolean normolized;
+			bool isIntegerVertexAttrib;
+			FormatToGLElement(elem.Format, size, type, normolized, isIntegerVertexAttrib);
+			UINT_PTR ptrOffset = elem.AlignedByteOffset;
+			const GLvoid* pointer = (const GLvoid*)ptrOffset;
+			if (isIntegerVertexAttrib == TRUE)
+			{
+				sdk->VertexAttribIPointer(
+					elem.GLAttribLocation,// attribute
+					size,                  // size
+					type,           // type
+					Stride,//VertexBuffer->mDesc.Stride, // stride
+					pointer // array buffer offset
+				);
+			}
+			else
+			{
+				sdk->VertexAttribPointer(
+					elem.GLAttribLocation,// attribute
+					size,                  // size
+					type,           // type
+					normolized,           // normalized?
+					Stride,//VertexBuffer->mDesc.Stride, // stride
+					pointer // array buffer offset
+				);
+			}
+		}
+	}
+
+	//for (size_t i = 0; i < vtxLayouts.size(); i++)
+	//{
+	//	if (vtxLayouts[i].InputSlot == StreamIndex)
+	//	{
+	//		GLuint devStreamIndex = StreamIndex;
+	//		auto& mapper = ((IGLShaderProgram*)m_pGpuProgram)->mVBSlotMapper;
+	//		devStreamIndex = mapper[StreamIndex];
+	//		if (devStreamIndex == 0xFFFFFFFF)
+	//			continue;
+	//		auto glVB = (IGLVertexBuffer*)VertexBuffer;
+
+	//		sdk->BindVertexBuffer(glVB);
+	//		sdk->EnableVertexAttribArray((GLuint)devStreamIndex);
+
+	//		if (vtxLayouts[i].IsInstanceData)
+	//			sdk->VertexAttribDivisor(devStreamIndex, 1);
+	//		else
+	//			sdk->VertexAttribDivisor(devStreamIndex, 0);
+
+	//		GLint size;
+	//		GLenum type;
+	//		GLboolean normolized;
+	//		bool isIntegerVertexAttrib;
+	//		FormatToGLElement(vtxLayouts[i].Format, size, type, normolized, isIntegerVertexAttrib);
+	//		UINT_PTR ptrOffset = vtxLayouts[i].AlignedByteOffset;
+	//		const GLvoid* pointer = (const GLvoid*)ptrOffset;
+	//		if (isIntegerVertexAttrib == TRUE)
+	//		{
+	//			sdk->VertexAttribIPointer(
+	//				devStreamIndex,// attribute
+	//				size,                  // size
+	//				type,           // type
+	//				VertexBuffer->mDesc.Stride, // stride
+	//				pointer // array buffer offset
+	//			);
+	//		}
+	//		else
+	//		{
+	//			sdk->VertexAttribPointer(
+	//				devStreamIndex,// attribute
+	//				size,                  // size
+	//				type,           // type
+	//				normolized,           // normalized?
+	//				VertexBuffer->mDesc.Stride, // stride
+	//				pointer // array buffer offset
+	//			);
+	//		}
+	//	}
+	//}
+	//auto elem = layout->GetElement(StreamIndex);
+	//if (elem == nullptr)
+	//	return;
+	//glEnableVertexAttribArray(StreamIndex);
+	//GLCheck;
+	//glBindBuffer(GL_ARRAY_BUFFER, ((IGLVertexBuffer*)VertexBuffer)->mBuffer);
+	//GLCheck;
+	//GLint size;
+	//GLenum type;
+	//GLboolean normolized;
+	//FormatToGLElement(elem->Format, size, type, normolized);
+	//glVertexAttribPointer(
+	//	StreamIndex,// attribute
+	//	size,                  // size
+	//	type,           // type
+	//	normolized,           // normalized?
+	//	VertexBuffer->mDesc.Stride, // stride
+	//	(const void*)elem->AlignedByteOffset // array buffer offset
+	//);
+	//GLCheck;
+}
+
+void IGLCommandList::SetIndexBuffer(IIndexBuffer* IndexBuffer)
+{
+	/*if (cmd->IsDoing() == false)
+			return;*/
+
+	mIndexBuffer.StrongRef(IndexBuffer);
+	auto sdk = mCmdList;
+	sdk->BindIndexBuffer((IGLIndexBuffer*)IndexBuffer);
+	//sdk->BindBuffer(GL_ELEMENT_ARRAY_BUFFER, ((IGLIndexBuffer*)IndexBuffer)->mBuffer);
+}
+
+void IGLCommandList::DrawPrimitive(EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 NumPrimitives, UINT32 NumInstances)
+{
+	/*if (cmd->IsDoing() == false)
+			return;*/
+
+	auto sdk = mCmdList;
+	UINT count = 0;
+	auto dpType = PrimitiveTypeToGL(PrimitiveType, NumPrimitives, &count);
+	if (NumInstances == 1)
+		sdk->DrawArrays(dpType, BaseVertexIndex, count);
+	else
+		sdk->DrawArraysInstanced(dpType, BaseVertexIndex, count, NumInstances);
+}
+
+void IGLCommandList::DrawIndexedPrimitive(EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 StartIndex, UINT32 NumPrimitives, UINT32 NumInstances)
+{
+	/*if (cmd->IsDoing() == false)
+			return;*/
+
+	auto sdk = mCmdList;
+	UINT count = 0;
+	auto dpType = PrimitiveTypeToGL(PrimitiveType, NumPrimitives, &count);
+	auto ib = mIndexBuffer;
+	if (ib == nullptr)
+		return;
+	if (ib->mDesc.Type == IBT_Int16)
+	{
+		if (NumInstances == 1)
+			sdk->ES32_DrawElementsBaseVertex(dpType, count, GL_UNSIGNED_SHORT, (const GLvoid*)(StartIndex * sizeof(SHORT)), BaseVertexIndex);
+		else
+			sdk->ES32_DrawElementsInstancedBaseVertex(dpType, count, GL_UNSIGNED_SHORT, (const GLvoid*)(StartIndex * sizeof(SHORT)), NumInstances, BaseVertexIndex);
+	}
+	else
+	{
+		if (NumInstances == 1)
+			sdk->ES32_DrawElementsBaseVertex(dpType, count, GL_UNSIGNED_INT, (const GLvoid*)(StartIndex * sizeof(int)), BaseVertexIndex);
+		else
+			sdk->ES32_DrawElementsInstancedBaseVertex(dpType, count, GL_UNSIGNED_INT, (const GLvoid*)(StartIndex * sizeof(int)), NumInstances, BaseVertexIndex);
+	}
+}
+
+void IGLCommandList::DrawIndexedInstancedIndirect(EPrimitiveType PrimitiveType, IGpuBuffer* pBufferForArgs, UINT32 AlignedByteOffsetForArgs)
+{
+	ASSERT(IRenderContext::mChooseShaderModel > 3);
+	auto sdk = mCmdList;
+	UINT count = 0;
+	auto dpType = PrimitiveTypeToGL(PrimitiveType, 0, &count);
+	auto ib = mIndexBuffer;
+	if (ib == nullptr)
+		return;
+
+	auto pGLArgBuffer = (IGLGpuBuffer*)pBufferForArgs;
+	sdk->BindBuffer(GL_DRAW_INDIRECT_BUFFER, pGLArgBuffer->mBufferId);
+	if (ib->mDesc.Type == IBT_Int16)
+	{
+		sdk->ES31_DrawElementsIndirect(dpType, GL_UNSIGNED_SHORT, (void*)((size_t)AlignedByteOffsetForArgs));
+	}
+	else
+	{
+		sdk->ES31_DrawElementsIndirect(dpType, GL_UNSIGNED_INT, (void*)((size_t)AlignedByteOffsetForArgs));
+	}
+	sdk->BindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+}
+
+void IGLCommandList::IASetInputLayout(IInputLayout* pInputLayout)
+{
+
+}
+
+void IGLCommandList::VSSetShader(IVertexShader* pVertexShader, void** ppClassInstances, UINT NumClassInstances)
+{
+	auto program = (IGLShaderProgram*)mPipelineState->GetGpuProgram();
+	auto sdk = mCmdList;
+	auto glvs = (IGLVertexShader*)pVertexShader;
+	sdk->AttachShader(program->mProgram, glvs->mShader);
+	sdk->LinkProgram(program->mProgram, program);
+	sdk->UseProgram(program->mProgram, this);
+}
+
+void IGLCommandList::PSSetShader(IPixelShader* pPixelShader, void** ppClassInstances, UINT NumClassInstances)
+{
+	auto program = (IGLShaderProgram*)mPipelineState->GetGpuProgram();
+	auto sdk = mCmdList;
+	auto glps = (IGLPixelShader*)pPixelShader;
+	sdk->AttachShader(program->mProgram, glps->mShader);
+	sdk->LinkProgram(program->mProgram, program);
+	sdk->UseProgram(program->mProgram, this);
+}
+
+void IGLCommandList::SetViewport(IViewPort* vp)
+{
+	auto sdk = mCmdList;
+	sdk->Viewport((GLint)vp->TopLeftX, (GLint)vp->TopLeftY, (GLint)vp->Width, (GLint)vp->Height);
+
+	sdk->DepthRangef(vp->MinDepth, vp->MaxDepth);
+}
+
+void IGLCommandList::VSSetConstantBuffer(UINT32 Index, IConstantBuffer* CBuffer)
+{
+	/*if (cmd->IsDoing() == false)
+			return;*/
+
+	if (mCurrentState.TrySet_CBuffers(Index, CBuffer) == false)
+		return;
+
+	auto rCBuffer = (IGLConstantBuffer*)CBuffer;
+
+	auto sdk = mCmdList;
+	sdk->BindConstantBuffer(Index, rCBuffer);
+	//sdk->BindBufferBase(GL_UNIFORM_BUFFER, Index, rCBuffer->mBuffer);
+}
+
+void IGLCommandList::PSSetConstantBuffer(UINT32 Index, IConstantBuffer* CBuffer) 
+{
+	/*if (cmd->IsDoing() == false)
+			return;*/
+
+	/*auto rCBuffer = (IGLConstantBuffer*)CBuffer;
+	glUniformBlockBinding(((IGLShaderProgram*)m_pGpuProgram)->mProgram, rCBuffer->Desc.PSBindPoint, Index);
+	GLCheck;
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, Index, rCBuffer->mBuffer);
+	GLCheck;*/
+	//OpenGL UniformBuffer set in Program,VS has set first.
+}
+
+void IGLCommandList::SetRenderPipeline(IRenderPipeline* pipeline)
+{
+	mPipelineState.StrongRef(pipeline);
+	((IGLRenderPipeline*)pipeline)->ApplyState(this);
+	pipeline->GetGpuProgram()->ApplyShaders(this);	
+}
+
 vBOOL IGLCommandList::CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers)
 {
 	AutoRef<ITexture2D> srcTex2D;
@@ -274,6 +632,10 @@ vBOOL IGLCommandList::CreateReadableTexture2D(ITexture2D** ppTexture, IShaderRes
 	if (needCreateTexture)
 	{
 		pBufferId = std::shared_ptr<GLSdk::GLBufferId>(sdk->GenBufferId());
+		/*sdk->PushCommand([=]()->void
+		{
+			int xxx = 0;
+		}, nullptr);*/
 		sdk->BindBuffer(GL_PIXEL_PACK_BUFFER, pBufferId);
 		sdk->BufferData(GL_PIXEL_PACK_BUFFER, PboSize, 0, GL_STATIC_READ);
 		sdk->BindBuffer(GL_PIXEL_PACK_BUFFER, 0);

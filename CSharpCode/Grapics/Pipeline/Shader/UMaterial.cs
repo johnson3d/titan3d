@@ -5,7 +5,7 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Shader
 {
     [Rtti.Meta]
-    public class UMaterialAMeta : IO.IAssetMeta
+    public partial class UMaterialAMeta : IO.IAssetMeta
     {
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -418,6 +418,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 get => mValue;
                 set
                 {
+                    GamePlay.Action.UAction.OnChanged(HostMaterial, this, "Value", mValue, value);
                     mValue = value;
                     if (HostMaterial != null)
                         HostMaterial.SerialId++;
@@ -490,30 +491,26 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #region RHIResource
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public RHI.CConstantBuffer PerMaterialCBuffer { get; set; }
-        RHI.CRasterizerStateDesc mRasterizer = new RHI.CRasterizerStateDesc();
         [Rtti.Meta]
         //[EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true)]
-        public RHI.CRasterizerStateDesc Rasterizer
+        public IRasterizerStateDesc Rasterizer
         {
             get
             {
-                if (RasterizerState != null)
+                if (RasterizerState == null)
                 {
-                    mRasterizer.Desc = RasterizerState.Desc;
-                    return mRasterizer;
-                }
-                else
-                {
-                    var desc = new IRasterizerStateDesc();
+                    IRasterizerStateDesc desc = new IRasterizerStateDesc();
                     desc.SetDefault();
-                    mRasterizer.Desc = desc;
-                    return mRasterizer;
+                    return desc;
                 }
+                return RasterizerState.Desc;
             }
             set
             {
+                GamePlay.Action.UAction.OnChanged(this, this, "Rasterizer", Rasterizer, value);
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
-                RasterizerState = UEngine.Instance.GfxDevice.RasterizerStateManager.GetPipelineState(rc, ref value.Desc);
+                RasterizerState = UEngine.Instance.GfxDevice.RasterizerStateManager.GetPipelineState(rc, ref value);
+                SerialId++;
             }
         }
         protected RHI.CRasterizerState mRasterizerState;
@@ -523,29 +520,25 @@ namespace EngineNS.Graphics.Pipeline.Shader
             get => mRasterizerState;
             protected set => mRasterizerState = value;
         }
-        RHI.CDepthStencilStateDesc mDepthStencil = new RHI.CDepthStencilStateDesc();
         [Rtti.Meta]
-        public RHI.CDepthStencilStateDesc DepthStencil
+        public IDepthStencilStateDesc DepthStencil
         {
             get
             {
-                if (mDepthStencilState != null)
+                if (mDepthStencilState == null)
                 {
-                    mDepthStencil.Desc = mDepthStencilState.Desc;
-                    return mDepthStencil;
-                }
-                else
-                {
-                    var desc = new IDepthStencilStateDesc();
+                    IDepthStencilStateDesc desc = new IDepthStencilStateDesc();
                     desc.SetDefault();
-                    mDepthStencil.Desc = desc;
-                    return mDepthStencil;
+                    return desc;
                 }
+                return mDepthStencilState.Desc;
             }
             set
             {
+                GamePlay.Action.UAction.OnChanged(this, this, "DepthStencil", DepthStencil, value);
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
-                DepthStencilState = UEngine.Instance.GfxDevice.DepthStencilStateManager.GetPipelineState(rc, ref value.Desc);
+                DepthStencilState = UEngine.Instance.GfxDevice.DepthStencilStateManager.GetPipelineState(rc, ref value);
+                SerialId++;
             }
         }
         protected RHI.CDepthStencilState mDepthStencilState;
@@ -555,29 +548,25 @@ namespace EngineNS.Graphics.Pipeline.Shader
             get => mDepthStencilState;
             protected set => mDepthStencilState = value;
         }
-        public RHI.CBlendStateDesc mBlend = new RHI.CBlendStateDesc();
         [Rtti.Meta]
-        public RHI.CBlendStateDesc Blend
+        public IBlendStateDesc Blend
         {
             get
             {
-                if (BlendState != null)
+                if (BlendState == null)
                 {
-                    mBlend.Desc = BlendState.Desc;
-                    return mBlend;
-                }
-                else
-                {
-                    var desc = new IBlendStateDesc();
+                    IBlendStateDesc desc = new IBlendStateDesc();
                     desc.SetDefault();
-                    mBlend.Desc = desc;
-                    return mBlend;
+                    return desc;
                 }
+                return BlendState.Desc;
             }
             set
             {
+                GamePlay.Action.UAction.OnChanged(this, this, "Blend", Blend, value);
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
-                BlendState = UEngine.Instance.GfxDevice.BlendStateManager.GetPipelineState(rc, ref value.Desc);
+                BlendState = UEngine.Instance.GfxDevice.BlendStateManager.GetPipelineState(rc, ref value);
+                SerialId++;
             }
         }
         protected RHI.CBlendState mBlendState;

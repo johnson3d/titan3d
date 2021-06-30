@@ -14,6 +14,7 @@ LayoutElement
 	vBOOL IsInstanceData;
 	UINT InstanceDataStepRate;
 	VNameString SemanticName;
+	int GLAttribLocation;
 };
 
 struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
@@ -45,6 +46,7 @@ IInputLayoutDesc : public VIUnknown
 		elem.AlignedByteOffset = AlignedByteOffset;
 		elem.IsInstanceData = IsInstanceData;
 		elem.InstanceDataStepRate = InstanceDataStepRate;
+		elem.GLAttribLocation = -1;
 
 		Layouts.push_back(elem);
 	}
@@ -67,13 +69,12 @@ public:
 	IInputLayout();
 	~IInputLayout();
 
+	TR_MEMBER(SV_NoBind)
 	IInputLayoutDesc		mDesc;
 public:
-	TR_FUNCTION()
 	inline UINT GetElemNumber() const {
 		return (UINT)mDesc.Layouts.size();
 	}
-	TR_FUNCTION()
 	inline const LayoutElement* GetElement(UINT StreamIndex) const {
 		for (size_t i = 0; i < mDesc.Layouts.size(); i++)
 		{

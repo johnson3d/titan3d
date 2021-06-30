@@ -169,7 +169,7 @@ namespace EngineNS.IO
         LoadFailed,
     }
     [Rtti.Meta]
-    public class IAssetMeta
+    public partial class IAssetMeta
     {
         RName mAssetName;
         public void SetAssetName(RName rn)

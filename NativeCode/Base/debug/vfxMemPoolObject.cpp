@@ -343,7 +343,7 @@ namespace VTest
 		A(int a, int b)
 		{
 			Number = 1;
-			throw (int)1;
+			//throw (int)1;
 		}
 		~A()
 		{

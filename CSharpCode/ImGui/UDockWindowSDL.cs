@@ -35,34 +35,33 @@ namespace EngineNS.EGui
         {
             // Register platform interface (will be coupled with a renderer interface)
             var platform_io = ImGuiAPI.GetPlatformIO();
-            platform_io.Platform_CreateWindow = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_CreateWindow);
-            platform_io.Platform_DestroyWindow = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_DestroyWindow);
-            platform_io.Platform_ShowWindow = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_ShowWindow);
-            platform_io.Platform_SetWindowPos = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_SetWindowPos);
-            platform_io.Platform_GetWindowPos = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_GetWindowPos);
-            platform_io.Platform_SetWindowSize = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_SetWindowSize);
-            platform_io.Platform_GetWindowSize = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_GetWindowSize);
-            platform_io.Platform_SetWindowFocus = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_SetWindowFocus);
-            platform_io.Platform_GetWindowFocus = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_GetWindowFocus);
-            platform_io.Platform_GetWindowMinimized = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_GetWindowMinimized);
-            platform_io.Platform_SetWindowTitle = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_SetWindowTitle);
-            platform_io.Platform_RenderWindow = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_RenderWindow);
-            platform_io.Platform_SwapBuffers = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_SwapBuffers);
-            platform_io.Platform_SetWindowAlpha = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_ImplSDL2_SetWindowAlpha);
+            platform_io.Platform_CreateWindow = (ImGui_ImplSDL2_CreateWindow);
+            platform_io.Platform_DestroyWindow = (ImGui_ImplSDL2_DestroyWindow);
+            platform_io.Platform_ShowWindow = (ImGui_ImplSDL2_ShowWindow);
+            platform_io.Platform_SetWindowPos = (ImGui_ImplSDL2_SetWindowPos);
+            platform_io.Platform_GetWindowPos = (ImGui_ImplSDL2_GetWindowPos);
+            platform_io.Platform_SetWindowSize = (ImGui_ImplSDL2_SetWindowSize);
+            platform_io.Platform_GetWindowSize = (ImGui_ImplSDL2_GetWindowSize);
+            platform_io.Platform_SetWindowFocus = (ImGui_ImplSDL2_SetWindowFocus);
+            platform_io.Platform_GetWindowFocus = (ImGui_ImplSDL2_GetWindowFocus);
+            platform_io.Platform_GetWindowMinimized = (ImGui_ImplSDL2_GetWindowMinimized);
+            platform_io.Platform_SetWindowTitle = (ImGui_ImplSDL2_SetWindowTitle);
+            platform_io.Platform_RenderWindow = (ImGui_ImplSDL2_RenderWindow);
+            platform_io.Platform_SwapBuffers = (ImGui_ImplSDL2_SwapBuffers);
+            platform_io.Platform_SetWindowAlpha = (ImGui_ImplSDL2_SetWindowAlpha);
 
-            platform_io.Renderer_CreateWindow = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_Renderer_CreateWindow);
-            platform_io.Renderer_DestroyWindow = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_Renderer_DestroyWindow);
-            platform_io.Renderer_SetWindowSize = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_Renderer_SetWindowSize);
-            platform_io.Renderer_RenderWindow = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_Renderer_RenderWindow);
-            platform_io.Renderer_SwapBuffers = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ImGui_Renderer_SwapBuffers);
+            platform_io.Renderer_CreateWindow = (ImGui_Renderer_CreateWindow);
+            platform_io.Renderer_DestroyWindow = (ImGui_Renderer_DestroyWindow);
+            platform_io.Renderer_SetWindowSize = (ImGui_Renderer_SetWindowSize);
+            platform_io.Renderer_RenderWindow = (ImGui_Renderer_RenderWindow);
+            platform_io.Renderer_SwapBuffers = (ImGui_Renderer_SwapBuffers);
             
             //platform_io.Platform_CreateVkSurface = ImGui_ImplSDL2_CreateVkSurface;
 
             // SDL2 by default doesn't pass mouse clicks to the application when the click focused a window. This is getting in the way of our interactions and we disable that behavior.
             SDL.SDL_SetHint(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
         }
-        public unsafe delegate sbyte* Delegate_ImGui_ImplSDL2_GetClipboardText(void* dummy);
-        public static unsafe Delegate_ImGui_ImplSDL2_GetClipboardText ImGui_ImplSDL2_GetClipboardText = ImGui_ImplSDL2_GetClipboardText_Impl;
+        public static unsafe ImGuiIO.FDelegate_GetClipboardTextFn ImGui_ImplSDL2_GetClipboardText = ImGui_ImplSDL2_GetClipboardText_Impl;
         static unsafe sbyte* ImGui_ImplSDL2_GetClipboardText_Impl(void* dummy)
         {
             if (g_ClipboardTextData != IntPtr.Zero)
@@ -74,11 +73,10 @@ namespace EngineNS.EGui
             return (sbyte*)g_ClipboardTextData.ToPointer();
         }
         unsafe static IntPtr g_ClipboardTextData;
-        public unsafe delegate void Delegate_ImGui_ImplSDL2_SetClipboardText(void* dummy, string text);
-        public static unsafe Delegate_ImGui_ImplSDL2_SetClipboardText ImGui_ImplSDL2_SetClipboardText = ImGui_ImplSDL2_SetClipboardText_Impl;
-        static unsafe void ImGui_ImplSDL2_SetClipboardText_Impl(void* dummy, string text)
+        public static unsafe ImGuiIO.FDelegate_SetClipboardTextFn ImGui_ImplSDL2_SetClipboardText = ImGui_ImplSDL2_SetClipboardText_Impl;
+        static unsafe void ImGui_ImplSDL2_SetClipboardText_Impl(void* dummy, sbyte* text)
         {
-            SDL.SDL_SetClipboardText(text);
+            SDL.SDL_SetClipboardText(System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)text));
         }
         static bool[] g_MousePressed = new bool[]{ false, false, false };
         public static unsafe bool ImGui_ImplSDL2_ProcessEvent(ref SDL.SDL_Event ev)
@@ -104,7 +102,7 @@ namespace EngineNS.EGui
             case SDL.SDL_EventType.SDL_TEXTINPUT:
                 {
                     var text = ev.text;
-                    var pText = (sbyte*)text.text;
+                    var pText = (sbyte*)text.text;                        
                     io.AddInputCharactersUTF8(pText);
                     return true;
                 }
@@ -112,7 +110,7 @@ namespace EngineNS.EGui
             case SDL.SDL_EventType.SDL_KEYUP:
                 {
                     var key = (int)ev.key.keysym.scancode;
-                    bool * keysDown = (bool*)io.UnsafeAsLayout->KeysDown;
+                    bool * keysDown = (bool*)&io.UnsafeAsLayout->KeysDown;
                     //IM_ASSERT(key >= 0 && key<IM_ARRAYSIZE(io.KeysDown));
                     keysDown[key] = (ev.type == SDL.SDL_EventType.SDL_KEYDOWN);
                     io.KeyShift = ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_SHIFT) != 0);
@@ -153,8 +151,10 @@ namespace EngineNS.EGui
 
         public class UImDrawDataRHI
         {
+            public IScissorRect ScissorRect = IScissorRect.CreateInstance();
             public RHI.CCommandList CmdList;
             public RenderPassDesc PassDesc = new RenderPassDesc();
+            public RHI.CGeometryMesh GeomMesh;
             public RHI.CVertexBuffer VertexBuffer;
             public RHI.CIndexBuffer IndexBuffer;
             public Support.UNativeArray<ImDrawVert> DataVB = Support.UNativeArray<ImDrawVert>.CreateInstance();
@@ -173,6 +173,8 @@ namespace EngineNS.EGui
                 PassDesc.mFBLoadAction_Stencil = FrameBufferLoadAction.LoadActionDontCare;
                 PassDesc.mFBStoreAction_Stencil = FrameBufferStoreAction.StoreActionStore;
                 PassDesc.mStencilClearValue = 0u;
+
+                GeomMesh = UEngine.Instance.GfxDevice.RenderContext.CreateGeometryMesh();
                 return true;
             }
             public void Cleanup()
@@ -185,6 +187,13 @@ namespace EngineNS.EGui
                 VertexBuffer = null;
                 IndexBuffer?.Dispose();
                 IndexBuffer = null;
+                GeomMesh?.Dispose();
+                GeomMesh = null;
+                if (ScissorRect.NativePointer != IntPtr.Zero)
+                {
+                    ScissorRect.NativeSuper.Release();
+                    ScissorRect.NativePointer = IntPtr.Zero;
+                }
             }
         }
         public unsafe static void RenderImDrawData(ref ImDrawData draw_data, Graphics.Pipeline.UGraphicsBuffers SwapChainBuffer, UImDrawDataRHI rhiData)
@@ -204,9 +213,11 @@ namespace EngineNS.EGui
                 rhiData.VertexBuffer?.Dispose();
                 var vbDesc = new IVertexBufferDesc();
                 vbDesc.SetDefault();
+                vbDesc.Stride = (uint)sizeof(ImDrawVert);
                 vbDesc.CPUAccess = (UInt32)ECpuAccess.CAS_WRITE;
                 vbDesc.ByteWidth = (uint)(totalVBSize * 1.5f);
                 rhiData.VertexBuffer = rc.CreateVertexBuffer(ref vbDesc);
+                rhiData.GeomMesh.mCoreObject.BindVertexBuffer(EVertexSteamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
             }
 
             uint totalIBSize = (uint)(draw_data.TotalIdxCount * sizeof(ushort));
@@ -219,6 +230,7 @@ namespace EngineNS.EGui
                 ibDesc.ByteWidth = (uint)(totalIBSize * 1.5f);
                 ibDesc.Type = EIndexBufferType.IBT_Int16;
                 rhiData.IndexBuffer = rc.CreateIndexBuffer(ref ibDesc);
+                rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
             }
 
             rhiData.DataVB.Clear(false);
@@ -240,6 +252,9 @@ namespace EngineNS.EGui
             rhiData.IndexBuffer.mCoreObject.UpdateGPUBuffData(rhiData.CmdList.mCoreObject,
                 rhiData.DataIB.UnsafeAddressAt(0).ToPointer(), (uint)(indexOffsetInElements * sizeof(ushort)));
 
+            rhiData.GeomMesh.mCoreObject.BindVertexBuffer(EVertexSteamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
+            rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
+
             // Setup orthographic projection matrix into our constant buffer
             var io = ImGuiAPI.GetIO();
             float L = draw_data.DisplayPos.X;
@@ -254,7 +269,7 @@ namespace EngineNS.EGui
                 1.0f);
 
             var renderer = UEngine.Instance.GfxDevice.SlateRenderer;
-            renderer.FontCBuffer.mCoreObject.SetVarValuePtr(0, &mvp, sizeof(Matrix), 0);
+            renderer.FontCBuffer.mCoreObject.SetVarValuePtr(0, &mvp, sizeof(Matrix), 0);            
 
             var fb_scale = io.DisplayFramebufferScale;
             draw_data.ScaleClipRects(ref fb_scale);
@@ -268,8 +283,10 @@ namespace EngineNS.EGui
 
                 drawCmd.SetRenderPipeline(renderer.Pipeline.mCoreObject);
 
-                drawCmd.SetVertexBuffer(0, rhiData.VertexBuffer.mCoreObject, 0, (uint)sizeof(ImDrawVert));
-                drawCmd.SetIndexBuffer(rhiData.IndexBuffer.mCoreObject);
+                rhiData.GeomMesh.mCoreObject.ApplyGeometry(drawCmd, new IDrawCall(), 0);
+
+                //drawCmd.SetVertexBuffer(0, rhiData.VertexBuffer.mCoreObject, 0, (uint)sizeof(ImDrawVert));
+                //drawCmd.SetIndexBuffer(rhiData.IndexBuffer.mCoreObject);
                 drawCmd.SetViewport(SwapChainBuffer.ViewPort.mCoreObject);
                 drawCmd.PSSetSampler(0, renderer.SamplerState.mCoreObject);
                 drawCmd.VSSetConstantBuffer(0, renderer.FontCBuffer.mCoreObject);
@@ -284,7 +301,7 @@ namespace EngineNS.EGui
                     for (int cmd_i = 0; cmd_i < cmd_list.CmdBufferSize; cmd_i++)
                     {
                         ImDrawCmd* pcmd = &cmd_list.CmdBufferData[cmd_i];
-                        if (pcmd->UserCallback != IntPtr.Zero)
+                        if (pcmd->UserCallback != null)
                         {
                             throw new NotImplementedException();
                         }
@@ -301,20 +318,18 @@ namespace EngineNS.EGui
                                 {
                                     var rsv = handle.Target as RHI.CShaderResourceView;
                                     if (rsv != null)
-                                        drawCmd.PSSetShaderResource(0, rsv.mCoreObject.Ptr);
+                                        drawCmd.PSSetShaderResource(0, rsv.mCoreObject);
                                 }
                             }
                         }
 
-                        var scissor = IScissorRect.CreateInstance();
-                        scissor.SetRectNumber(1);
-                        scissor.SetSCRect(0,
+                        rhiData.ScissorRect.SetRectNumber(1);
+                        rhiData.ScissorRect.SetSCRect(0,
                             (int)(pcmd->ClipRect.X - clip_off.X),
                             (int)(pcmd->ClipRect.Y - clip_off.Y),
                             (int)(pcmd->ClipRect.Z - clip_off.X),
                             (int)(pcmd->ClipRect.W - clip_off.Y));
-                        drawCmd.SetScissorRect(scissor);
-                        CoreSDK.IUnknown_Release(scissor);
+                        drawCmd.SetScissorRect(rhiData.ScissorRect);
 
                         drawCmd.DrawIndexedPrimitive(EPrimitiveType.EPT_TriangleList, (uint)(vtx_offset + pcmd->VtxOffset), (uint)(idx_offset + pcmd->IdxOffset), pcmd->ElemCount / 3, 1);
                     }
@@ -326,16 +341,14 @@ namespace EngineNS.EGui
             }
             drawCmd.EndCommand();
 
-            drawCmd.SetScissorRect((IScissorRect*)0);
+            drawCmd.SetScissorRect(new IScissorRect((void*)0));
 
             drawCmd.Commit(rc.mCoreObject);
         }
 
         #region CallBack
         #region SDL
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_ImplSDL2_CreateWindow(ImGuiViewport* viewport);
-        unsafe static Delegate_ImGui_ImplSDL2_CreateWindow ImGui_ImplSDL2_CreateWindow = ImGui_ImplSDL2_CreateWindow_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Platform_CreateWindow ImGui_ImplSDL2_CreateWindow = ImGui_ImplSDL2_CreateWindow_Impl;
         static unsafe void ImGui_ImplSDL2_CreateWindow_Impl(ImGuiViewport* viewport)
         {
             SDL.SDL_WindowFlags sdl_flags = 0;
@@ -352,9 +365,7 @@ namespace EngineNS.EGui
             viewport->PlatformHandle = myWindow.Window.ToPointer();
             viewport->PlatformHandleRaw = myWindow.HWindow.ToPointer();
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_ImplSDL2_DestroyWindow(ImGuiViewport* viewport);
-        unsafe static Delegate_ImGui_ImplSDL2_DestroyWindow ImGui_ImplSDL2_DestroyWindow = ImGui_ImplSDL2_DestroyWindow_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Platform_DestroyWindow ImGui_ImplSDL2_DestroyWindow = ImGui_ImplSDL2_DestroyWindow_Impl;
         static unsafe void ImGui_ImplSDL2_DestroyWindow_Impl(ImGuiViewport* viewport)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -374,9 +385,7 @@ namespace EngineNS.EGui
 
             gcHandle.Free();
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_ImplSDL2_ShowWindow(ImGuiViewport* viewport);
-        unsafe static Delegate_ImGui_ImplSDL2_ShowWindow ImGui_ImplSDL2_ShowWindow = ImGui_ImplSDL2_ShowWindow_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Platform_ShowWindow ImGui_ImplSDL2_ShowWindow = ImGui_ImplSDL2_ShowWindow_Impl;
         unsafe static void ImGui_ImplSDL2_ShowWindow_Impl(ImGuiViewport* viewport)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -408,9 +417,7 @@ namespace EngineNS.EGui
 
             myWindow.ShowNativeWindow();
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_ImplSDL2_SetWindowPos(ImGuiViewport* viewport, Vector2 pos);
-        unsafe static Delegate_ImGui_ImplSDL2_SetWindowPos ImGui_ImplSDL2_SetWindowPos = ImGui_ImplSDL2_SetWindowPos_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Platform_SetWindowPos ImGui_ImplSDL2_SetWindowPos = ImGui_ImplSDL2_SetWindowPos_Impl;
         unsafe static void ImGui_ImplSDL2_SetWindowPos_Impl(ImGuiViewport* viewport, Vector2 pos)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -419,9 +426,7 @@ namespace EngineNS.EGui
             var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
             myWindow.SetWindowPosition((int)pos.X, (int)pos.Y);
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate Vector2 Delegate_ImGui_ImplSDL2_GetWindowPos(ImGuiViewport* viewport);
-        static unsafe Delegate_ImGui_ImplSDL2_GetWindowPos ImGui_ImplSDL2_GetWindowPos = ImGui_ImplSDL2_GetWindowPos_Impl;
+        static unsafe ImGuiPlatformIO.FDelegate_Platform_GetWindowPos ImGui_ImplSDL2_GetWindowPos = ImGui_ImplSDL2_GetWindowPos_Impl;
         unsafe static Vector2 ImGui_ImplSDL2_GetWindowPos_Impl(ImGuiViewport* viewport)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -430,9 +435,7 @@ namespace EngineNS.EGui
             var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
             return myWindow.GetWindowPosition();
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_ImplSDL2_SetWindowSize(ImGuiViewport* viewport, Vector2 size);
-        unsafe static Delegate_ImGui_ImplSDL2_SetWindowSize ImGui_ImplSDL2_SetWindowSize = ImGui_ImplSDL2_SetWindowSize_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Platform_SetWindowSize ImGui_ImplSDL2_SetWindowSize = ImGui_ImplSDL2_SetWindowSize_Impl;
         unsafe static void ImGui_ImplSDL2_SetWindowSize_Impl(ImGuiViewport* viewport, Vector2 size)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -441,9 +444,7 @@ namespace EngineNS.EGui
             var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
             myWindow.SetWindowSize((int)size.X, (int)size.Y);
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate Vector2 Delegate_ImGui_ImplSDL2_GetWindowSize(ImGuiViewport* viewport);
-        unsafe static Delegate_ImGui_ImplSDL2_GetWindowSize ImGui_ImplSDL2_GetWindowSize = ImGui_ImplSDL2_GetWindowSize_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Platform_GetWindowSize ImGui_ImplSDL2_GetWindowSize = ImGui_ImplSDL2_GetWindowSize_Impl;
         unsafe static Vector2 ImGui_ImplSDL2_GetWindowSize_Impl(ImGuiViewport* viewport)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -452,9 +453,7 @@ namespace EngineNS.EGui
             var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
             return myWindow.GetWindowSize();
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_ImplSDL2_SetWindowFocus(ImGuiViewport* viewport);
-        unsafe static Delegate_ImGui_ImplSDL2_SetWindowFocus ImGui_ImplSDL2_SetWindowFocus = ImGui_ImplSDL2_SetWindowFocus_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Platform_SetWindowFocus ImGui_ImplSDL2_SetWindowFocus = ImGui_ImplSDL2_SetWindowFocus_Impl;
         unsafe static void ImGui_ImplSDL2_SetWindowFocus_Impl(ImGuiViewport* viewport)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -463,9 +462,7 @@ namespace EngineNS.EGui
             var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
             myWindow.SetWindowFocus();
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate bool Delegate_ImGui_ImplSDL2_GetWindowFocus(ImGuiViewport* viewport);
-        unsafe static Delegate_ImGui_ImplSDL2_GetWindowFocus ImGui_ImplSDL2_GetWindowFocus = ImGui_ImplSDL2_GetWindowFocus_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Platform_GetWindowFocus ImGui_ImplSDL2_GetWindowFocus = ImGui_ImplSDL2_GetWindowFocus_Impl;
         unsafe static bool ImGui_ImplSDL2_GetWindowFocus_Impl(ImGuiViewport* viewport)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -474,9 +471,7 @@ namespace EngineNS.EGui
             var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
             return myWindow.GetWindowFocus();
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate bool Delegate_ImGui_ImplSDL2_GetWindowMinimized(ImGuiViewport* viewport);
-        unsafe static Delegate_ImGui_ImplSDL2_GetWindowMinimized ImGui_ImplSDL2_GetWindowMinimized = ImGui_ImplSDL2_GetWindowMinimized_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Platform_GetWindowMinimized ImGui_ImplSDL2_GetWindowMinimized = ImGui_ImplSDL2_GetWindowMinimized_Impl;
         unsafe static bool ImGui_ImplSDL2_GetWindowMinimized_Impl(ImGuiViewport* viewport)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -485,9 +480,7 @@ namespace EngineNS.EGui
             var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
             return myWindow.GetWindowMinimized();
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_ImplSDL2_SetWindowTitle(ImGuiViewport* viewport, sbyte* title);
-        unsafe static Delegate_ImGui_ImplSDL2_SetWindowTitle ImGui_ImplSDL2_SetWindowTitle = ImGui_ImplSDL2_SetWindowTitle_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Platform_SetWindowTitle ImGui_ImplSDL2_SetWindowTitle = ImGui_ImplSDL2_SetWindowTitle_Impl;
         unsafe static void ImGui_ImplSDL2_SetWindowTitle_Impl(ImGuiViewport* viewport, sbyte* title)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -496,9 +489,7 @@ namespace EngineNS.EGui
             var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
             myWindow.SetWindowTitle(System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)title));
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_ImplSDL2_RenderWindow(ImGuiViewport* viewport, void* dummy);
-        unsafe static Delegate_ImGui_ImplSDL2_RenderWindow ImGui_ImplSDL2_RenderWindow = ImGui_ImplSDL2_RenderWindow_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Platform_RenderWindow ImGui_ImplSDL2_RenderWindow = ImGui_ImplSDL2_RenderWindow_Impl;
         unsafe static void ImGui_ImplSDL2_RenderWindow_Impl(ImGuiViewport* viewport, void* dummy)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -506,9 +497,7 @@ namespace EngineNS.EGui
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
             var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_ImplSDL2_SwapBuffers(ImGuiViewport* viewport, void* dummy);
-        unsafe static Delegate_ImGui_ImplSDL2_SwapBuffers ImGui_ImplSDL2_SwapBuffers = ImGui_ImplSDL2_SwapBuffers_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Platform_SwapBuffers ImGui_ImplSDL2_SwapBuffers = ImGui_ImplSDL2_SwapBuffers_Impl;
         unsafe static void ImGui_ImplSDL2_SwapBuffers_Impl(ImGuiViewport* viewport, void* dummy)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -516,9 +505,7 @@ namespace EngineNS.EGui
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
             var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_ImplSDL2_SetWindowAlpha(ImGuiViewport* viewport, float alpha);
-        unsafe static Delegate_ImGui_ImplSDL2_SetWindowAlpha ImGui_ImplSDL2_SetWindowAlpha = ImGui_ImplSDL2_SetWindowAlpha_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Platform_SetWindowAlpha ImGui_ImplSDL2_SetWindowAlpha = ImGui_ImplSDL2_SetWindowAlpha_Impl;
         unsafe static void ImGui_ImplSDL2_SetWindowAlpha_Impl(ImGuiViewport* viewport, float alpha)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -543,9 +530,7 @@ namespace EngineNS.EGui
                 DrawData = null;
             }
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_Renderer_CreateWindow_Impl(ImGuiViewport* viewport);
-        unsafe static Delegate_ImGui_Renderer_CreateWindow_Impl ImGui_Renderer_CreateWindow = ImGui_Renderer_CreateWindow_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Renderer_CreateWindow ImGui_Renderer_CreateWindow = ImGui_Renderer_CreateWindow_Impl;
         unsafe static void ImGui_Renderer_CreateWindow_Impl(ImGuiViewport* viewport)
         {
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
@@ -562,9 +547,7 @@ namespace EngineNS.EGui
             vpData.PresentWindow.InitSwapChain(UEngine.Instance.GfxDevice.RenderContext);
             vpData.DrawData.InitializeGraphics();
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_Renderer_DestroyWindow_Impl(ImGuiViewport* viewport);
-        unsafe static Delegate_ImGui_Renderer_DestroyWindow_Impl ImGui_Renderer_DestroyWindow = ImGui_Renderer_DestroyWindow_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Renderer_DestroyWindow ImGui_Renderer_DestroyWindow = ImGui_Renderer_DestroyWindow_Impl;
         unsafe static void ImGui_Renderer_DestroyWindow_Impl(ImGuiViewport* viewport)
         {
             if ((IntPtr)viewport->RendererUserData == IntPtr.Zero)
@@ -575,9 +558,7 @@ namespace EngineNS.EGui
             gcHandle.Free();
             viewport->RendererUserData = IntPtr.Zero.ToPointer();
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_Renderer_SetWindowSize_Impl(ImGuiViewport* viewport, Vector2 size);
-        unsafe static Delegate_ImGui_Renderer_SetWindowSize_Impl ImGui_Renderer_SetWindowSize = ImGui_Renderer_SetWindowSize_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Renderer_SetWindowSize ImGui_Renderer_SetWindowSize = ImGui_Renderer_SetWindowSize_Impl;
         unsafe static void ImGui_Renderer_SetWindowSize_Impl(ImGuiViewport* viewport, Vector2 size)
         {
             if ((IntPtr)viewport->RendererUserData == IntPtr.Zero)
@@ -586,9 +567,7 @@ namespace EngineNS.EGui
             var vpData = gcHandle.Target as ViewportData;
             vpData.PresentWindow.OnResize(size.X, size.Y);
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_Renderer_RenderWindow(ImGuiViewport* viewport, void* dummy);
-        unsafe static Delegate_ImGui_Renderer_RenderWindow ImGui_Renderer_RenderWindow = ImGui_Renderer_RenderWindow_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Renderer_RenderWindow ImGui_Renderer_RenderWindow = ImGui_Renderer_RenderWindow_Impl;
         unsafe static void ImGui_Renderer_RenderWindow_Impl(ImGuiViewport* viewport, void* dummy)
         {
             if ((IntPtr)viewport->RendererUserData == IntPtr.Zero)
@@ -600,9 +579,7 @@ namespace EngineNS.EGui
             var draw_data = viewport->DrawData;
             RenderImDrawData(ref *draw_data, vpData.PresentWindow.SwapChainBuffer, vpData.DrawData);
         }
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void Delegate_ImGui_Renderer_SwapBuffers(ImGuiViewport* viewport, void* dummy);
-        unsafe static Delegate_ImGui_Renderer_SwapBuffers ImGui_Renderer_SwapBuffers = ImGui_Renderer_SwapBuffers_Impl;
+        unsafe static ImGuiPlatformIO.FDelegate_Renderer_SwapBuffers ImGui_Renderer_SwapBuffers = ImGui_Renderer_SwapBuffers_Impl;
         unsafe static void ImGui_Renderer_SwapBuffers_Impl(ImGuiViewport* viewport, void* dummy)
         {
             if ((IntPtr)viewport->RendererUserData == IntPtr.Zero)

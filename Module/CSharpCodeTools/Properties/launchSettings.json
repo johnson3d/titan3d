@@ -2,7 +2,7 @@
   "profiles": {
     "CSharpCodeTools": {
       "commandName": "Project",
-      "commandLineArgs": "F:\\TProject\\Rpc_Engine.txt mode=Cs2Cpp+Rpc+Prop"
+      "commandLineArgs": "$(SolutionDir)\\Rpc_Engine.txt mode=Cs2Cpp+Rpc+Prop+Macross"
     }
   }
 }

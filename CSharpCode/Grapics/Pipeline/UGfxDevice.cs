@@ -12,7 +12,7 @@ namespace EngineNS.Graphics.Pipeline
             if (SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING) == -1)
                 return false;
 
-            var wtType = Rtti.UTypeDescManager.Instance.GetTypeFromString(engine.Config.MainWindowType);
+            var wtType = Rtti.UTypeDesc.TypeOf(engine.Config.MainWindowType).SystemType;
             if (wtType == null)
             {
                 wtType = typeof(EngineNS.Editor.UMainEditorApplication);
@@ -20,20 +20,30 @@ namespace EngineNS.Graphics.Pipeline
             MainWindow = Rtti.UTypeDescManager.CreateInstance(wtType) as Graphics.Pipeline.USlateApplication;
             var winRect = engine.Config.MainWindow;
 
-            //if (false == MainWindow.CreateNativeWindow("T3D", (int)winRect.X, (int)winRect.Y, (int)winRect.Z, (int)winRect.W))
-            if (false == MainWindow.CreateNativeWindow("T3D", (int)winRect.X, (int)winRect.Y, (int)1, (int)1))
+            if(engine.Config.SupportMultWindows)
             {
-                return false;
-            }   
+                if (false == MainWindow.CreateNativeWindow(engine, "T3D", (int)winRect.X, (int)winRect.Y, (int)1, (int)1))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (false == MainWindow.CreateNativeWindow(engine, "T3D", (int)winRect.X, (int)winRect.Y, (int)winRect.Z, (int)winRect.W))
+                {
+                    return false;
+                }
+            }
+            
             if (InitGPU(engine.Config.AdaperId, engine.Config.RHIType, MainWindow.NativeWindow.HWindow, engine.Config.HasDebugLayer) == false)
             {
                 return false;
             }
 
-            SlateRenderer = new EGui.Slate.BaseRenderer();
+            SlateRenderer = new EGui.Slate.UBaseRenderer();
             SlateRenderer.Initialize(RName.GetRName("shaders/slate/imgui-vertex.hlsl", RName.ERNameType.Engine), RName.GetRName("shaders/slate/imgui-frag.hlsl", RName.ERNameType.Engine));
 
-            var rpType = Rtti.UTypeDescManager.Instance.GetTypeFromString(engine.Config.MainWindowRPolicy);
+            var rpType = Rtti.UTypeDesc.TypeOf(engine.Config.MainWindowRPolicy).SystemType;
             await MainWindow.InitializeApplication(RenderContext, rpType);
             MainWindow.OnResize(winRect.Z, winRect.W);
 
@@ -110,6 +120,7 @@ namespace EngineNS.Graphics.Pipeline
             RenderSystem.GetContextDesc(Adapter, ref rcDesc);
 
             rcDesc.CreateDebugLayer = bDebugLayer?1:0;
+            rcDesc.AppHandle = window.ToPointer();
             RenderContext = RenderSystem.CreateContext(ref rcDesc);
             if (RenderContext == null)
                 return false;
@@ -121,7 +132,7 @@ namespace EngineNS.Graphics.Pipeline
         public RHI.UTextureManager TextureManager { get; } = new RHI.UTextureManager();
         public Shader.UMaterialManager MaterialManager { get; private set; } = new Shader.UMaterialManager();
         public Shader.UMaterialInstanceManager MaterialInstanceManager { get; private set; } = new Shader.UMaterialInstanceManager();
-        public EGui.Slate.BaseRenderer SlateRenderer { get; private set; }
+        public EGui.Slate.UBaseRenderer SlateRenderer { get; private set; }
         public Graphics.Pipeline.Shader.UEffectManager EffectManager
         {
             get;

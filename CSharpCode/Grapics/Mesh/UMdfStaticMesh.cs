@@ -12,7 +12,7 @@ namespace EngineNS.Graphics.Mesh
             StaticModifier = new Mesh.Modifier.CStaticModifier();
             unsafe
             {
-                mCoreObject.PushModifier(StaticModifier.mCoreObject.CastToSuper().CppPointer);
+                mCoreObject.PushModifier(StaticModifier.mCoreObject.NativeSuper);
             }
 
             UpdateShaderCode();

@@ -24,14 +24,14 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
                     var RenderColor = new Color4(1, 1, 1, 1);
                     PerShadingCBuffer.SetValue(1, ref RenderColor);
                 }
-                drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject.Ptr);
+                drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject);
             }
         }
         public unsafe void OnDrawCall(RHI.CDrawCall drawcall, UCopy2DPolicy policy, Mesh.UMesh mesh)
         {
             var index = drawcall.mCoreObject.FindSRVIndex("SourceTexture");
 
-            drawcall.mCoreObject.BindSRVAll(index, policy.ViewPolicy.GetFinalShowRSV().mCoreObject.Ptr);
+            drawcall.mCoreObject.BindSRVAll(index, policy.ViewPolicy.GetFinalShowRSV().mCoreObject);
             //var rsv = mesh.Tag as RHI.CShaderResourceView;
             //if (rsv != null)
             //{
@@ -59,7 +59,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
                     var RenderColor = new Color4(1, 1, 1, 1);
                     PerShadingCBuffer.SetValue(1, ref RenderColor);
                 }
-                drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject.Ptr);
+                drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject);
             }
         }
     }

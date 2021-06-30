@@ -25,6 +25,8 @@ namespace EngineNS
         {
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
+                this.Expandable = true;
+                bool retValue = false;
                 newValue = info.Value;
                 //var saved = v;
                 var index = ImGuiAPI.TableGetColumnIndex();
@@ -37,6 +39,11 @@ namespace EngineNS
                 if (multiValue != null && multiValue.HasDifferentValue())
                 {
                     ImGuiAPI.Text(multiValue.MultiValueString);
+                    if (multiValue.DrawVector<Vector3>(in info))
+                    {
+                        newValue = multiValue;
+                        retValue = true;
+                    }
                 }
                 else
                 {
@@ -49,6 +56,13 @@ namespace EngineNS
                         newValue = v;
                         return true;
                     }
+
+                    if (Vector4.Vector4EditorAttribute.OnDrawVectorValue<Vector3>(in info, ref v, ref v))
+                    {
+                        newValue = v;
+                        retValue = true;
+                    }
+
                 }
                 return false;
             }

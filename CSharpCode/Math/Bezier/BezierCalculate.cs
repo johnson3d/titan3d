@@ -6,7 +6,7 @@ using System.Text;
 namespace EngineNS
 {
     [Rtti.Meta]
-    public class BezierPointBase : EngineNS.IO.ISerializer
+    public partial class BezierPointBase : EngineNS.IO.ISerializer
     {
         public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
         public void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }

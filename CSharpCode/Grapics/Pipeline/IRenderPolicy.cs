@@ -14,7 +14,9 @@ namespace EngineNS.Graphics.Pipeline
             Picked,
             Count,
         }
-        //[EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        //TagObject通常用来处理ShadingEnv.OnDrawCall的特殊参数设置
+        public object TagObject;
+        
         public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
         public List<Mesh.UMesh> VisibleMeshes = new List<Mesh.UMesh>();
         public virtual Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom) { return null; }

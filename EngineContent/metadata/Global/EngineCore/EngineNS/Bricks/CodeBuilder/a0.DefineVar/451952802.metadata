@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_451952802 Type="EngineNS.Bricks.CodeBuilder.DefineVar@EngineCore">
+  <DefType Type="System.String@Unknown" Order="0" />
+  <InitValue Type="System.String@Unknown" Order="0" />
+  <IsLocalVar Type="System.Boolean@Unknown" Order="0" />
+  <VarName Type="System.String@Unknown" Order="0" />
+  <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisitMode@EngineCore" Order="0" />
+</Hash_451952802>

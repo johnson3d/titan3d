@@ -14,7 +14,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)dirent.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)dirent_win.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imconfig.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)imgui.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ImGuiFileDialog.h" />

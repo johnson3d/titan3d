@@ -25,16 +25,22 @@ void IGLRenderPipeline::Cleanup()
 
 void IGLRenderPipeline::SetRasterizerState(ICommandList* cmd, IRasterizerState* State)
 {
+	if (State == nullptr)
+		return;
 	((IGLRasterizerState*)State)->ApplyStates( ((IGLCommandList*)cmd)->mCmdList );
 }
 
 void IGLRenderPipeline::SetDepthStencilState(ICommandList* cmd, IDepthStencilState* State)
 {
+	if (State == nullptr)
+		return;
 	((IGLDepthStencilState*)State)->ApplyStates( ((IGLCommandList*)cmd)->mCmdList );
 }
 
 void IGLRenderPipeline::SetBlendState(ICommandList* cmd, IBlendState* State)
 {
+	if (State == nullptr)
+		return;
 	((IGLBlendState*)State)->ApplyStates(((IGLCommandList*)cmd)->mCmdList );
 }
 

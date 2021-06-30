@@ -4,20 +4,16 @@ using SDL2;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public class UViewportSlate : IEventProcessor, Editor.IRootForm
+    public class UViewportSlate : IEventProcessor
     {
-        public UViewportSlate(bool regRoot)
-        {
-            if (regRoot)
-                Editor.UMainEditorApplication.RegRootForm(this);
-        }
-        public string Title { get; set; } = "Game";
-        public bool Visible { get; set; } = true;
+        public virtual string Title { get; set; } = "Game";
+        protected bool mVisible = true;
+        public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; }
-        public Vector2 ViewportPos { get; private set; }
-        public Vector2 WindowPos { get; private set; }
-        public Vector2 ClientMin { get; private set; }
-        public Vector2 ClientMax { get; private set; }
+        public Vector2 ViewportPos { get; protected set; }
+        public Vector2 WindowPos { get; protected set; }
+        public Vector2 ClientMin { get; protected set; }
+        public Vector2 ClientMax { get; protected set; }
         public Vector2 ClientSize
         {
             get
@@ -26,7 +22,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
-        public Graphics.Pipeline.IRenderPolicy RenderPolicy { get; protected set; }
+        public Graphics.Pipeline.IRenderPolicy RenderPolicy { get; set; }
         public Vector2 Window2Viewport(Vector2 pos)
         {//pos为真实窗口的坐标，返回ViewportSlate坐标
             Vector2 tmp;
@@ -34,33 +30,42 @@ namespace EngineNS.Graphics.Pipeline
             tmp.Y = pos.Y - (int)(WindowPos.Y + ClientMin.Y - ViewportPos.Y);
             return tmp;
         }
-        private bool mClientChanged = false;
-        private bool mSizeChanged = false;
+        protected bool mClientChanged = false;
+        protected bool mSizeChanged = false;
         public bool IsValidClientArea()
         {
             return (ClientSize.X > 1 && ClientSize.Y > 1);
         }
-        public bool IsFocused { get; private set; }
-        public bool IsDrawing { get; private set; }
+        public bool IsFocused { get; protected set; }
+        public bool IsDrawing { get; protected set; }
 
-        private Graphics.Pipeline.UPresentWindow mPresentWindow;
-        public bool ShowCloseButton = false;
+        protected Graphics.Pipeline.UPresentWindow mPresentWindow;
+        public enum EVieportType
+        {
+            Window,
+            WindowWithClose,            
+            ChildWindow,
+        }
+        public EVieportType VieportType { get; set; } = EVieportType.Window;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public virtual unsafe void OnDraw()
         {
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            var sz = new Vector2(100, 100);
+            var sz = new Vector2(-1);
             //ImGuiAPI.SetNextWindowSize(ref sz, ImGuiCond_.ImGuiCond_FirstUseEver);
             IsDrawing = false;
-            bool bShow;
-            if (ShowCloseButton)
+            bool bShow = false;
+            switch(VieportType)
             {
-                var visible = Visible;
-                bShow = ImGuiAPI.Begin(Title, ref visible, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
-            }
-            else
-            {
-                bShow = ImGuiAPI.Begin(Title, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
+                case EVieportType.Window:
+                    bShow = ImGuiAPI.Begin(Title, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
+                    break;
+                case EVieportType.WindowWithClose:
+                    bShow = ImGuiAPI.Begin(Title, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
+                    break;
+                case EVieportType.ChildWindow:
+                    bShow = ImGuiAPI.BeginChild(Title, ref sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
+                    break;
             }
             if (ImGuiAPI.IsWindowDocked())
             {
@@ -132,13 +137,31 @@ namespace EngineNS.Graphics.Pipeline
                 mPresentWindow?.UnregEventProcessor(this);
                 mPresentWindow = null;
             }
-            ImGuiAPI.End();
+            switch (VieportType)
+            {
+                case EVieportType.Window:
+                case EVieportType.WindowWithClose:
+                    ImGuiAPI.End();
+                    break;
+                case EVieportType.ChildWindow:
+                    ImGuiAPI.EndChild();
+                    break;
+            }
+            
             if (mClientChanged && IsValidClientArea())
             {
                 OnClientChanged(mSizeChanged);
                 mClientChanged = false;
                 mSizeChanged = false;
             }
+            if (mVisible == false)
+            {
+                OnVieportClosed();
+            }
+        }
+        protected virtual void OnVieportClosed()
+        {
+
         }
         protected virtual void OnClientChanged(bool bSizeChanged)
         {
@@ -175,18 +198,6 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     edtorPolicy.PickedProxiableManager.Selected(proxy);
                 }
-            }
-            if (proxy == null)
-            {
-                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
-                mainEditor.WorldViewportSlate.ShowBoundVolumes(false, null);
-                return;
-            }
-            var node = proxy as GamePlay.Scene.UNode;
-            if (node != null)
-            {
-                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
-                mainEditor.WorldViewportSlate.ShowBoundVolumes(true, node);
             }
         }
     }

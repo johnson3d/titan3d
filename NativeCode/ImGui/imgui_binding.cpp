@@ -22,7 +22,7 @@ StructImpl(Renderer_SetWindowSize)
 StructImpl(Renderer_RenderWindow)
 
 StructImpl(FGetClipboardTextFn)
-StructImpl(FSetClipboardTextFn)
+//StructImpl(FSetClipboardTextFn)
 
 //AuxRttiStruct<void __cdecl(struct ImGuiSizeCallbackData *)> AuxRttiStruct<void __cdecl(struct ImGuiSizeCallbackData *)>::Instance;
 //AuxRttiStruct<bool __cdecl(void *, int, char const * *)> AuxRttiStruct<bool __cdecl(void *, int, char const * *)>::Instance;
@@ -151,7 +151,11 @@ bool ImGuiAPI::TextInputComboBox(const char* id, void* buffer, UINT maxInputSize
 		{
 			if (ImGui::Selectable(items[i]))
 			{
+#if defined(PLATFORM_WIND)
 				strcpy_s((char*)buffer, strlen(items[i]), items[i]);
+#else
+				strcpy((char*)buffer, items[i]);
+#endif
 			}
 		}
 
@@ -160,7 +164,7 @@ bool ImGuiAPI::TextInputComboBox(const char* id, void* buffer, UINT maxInputSize
 	ImGui::PopID();
 
 	ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
-	ImGui::Text(id);
+	ImGui::Text("%s", id);
 
 	return ret;
 }
