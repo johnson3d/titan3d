@@ -12,9 +12,55 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //必须是TextureAsset
             return true;
         }
-        public override void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        System.Threading.Tasks.Task<RHI.CShaderResourceView> Task;
+        IntPtr SnapshotPtr;
+        public override unsafe void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
         {
             base.OnDraw(ref cmdlist, ref sz, ContentBrowser);
+            //if (SnapshotPtr == IntPtr.Zero)
+            //{
+            //    if (Task == null)
+            //    {
+            //        var rc = UEngine.Instance.GfxDevice.RenderContext;
+            //        Task = UEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
+            //    }
+            //    else if (Task.IsCompleted)
+            //    {
+            //        SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(Task.Result));
+            //        Task = null;
+            //    }
+            //}
+
+            //var start = ImGuiAPI.GetItemRectMin();
+            //var end = start + sz;
+
+            //var name = IO.FileManager.GetPureName(GetAssetName().Name);
+            //var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
+            //Vector2 tpos;
+            //tpos.Y = start.Y + sz.Y - tsz.Y;
+            //tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
+            //ImGuiAPI.PushClipRect(ref start, ref end, true);
+
+            //end.Y -= tsz.Y;
+            //var uv0 = new Vector2(0, 0);
+            //var uv1 = new Vector2(1, 1);
+            //if (SnapshotPtr != IntPtr.Zero)
+            //{
+            //    cmdlist.AddImage(SnapshotPtr.ToPointer(), ref start, ref end, ref uv0, ref uv1, 0xFFFFFFFF);
+            //}
+
+            //cmdlist.AddText(ref tpos, 0xFFFF00FF, name, null);
+            //ImGuiAPI.PopClipRect();
+        }
+        public override void OnShowIconTimout(int time)
+        {
+            if (SnapshotPtr != IntPtr.Zero)
+            {
+                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
+                handle.Free();
+                SnapshotPtr = IntPtr.Zero;
+                Task = null;
+            }
         }
     }
     [Rtti.Meta]

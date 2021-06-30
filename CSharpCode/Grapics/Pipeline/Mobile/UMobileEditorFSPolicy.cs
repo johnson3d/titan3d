@@ -194,13 +194,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             HitproxyPassDesc.mFBStoreAction_Stencil = FrameBufferStoreAction.StoreActionStore;
             HitproxyPassDesc.mStencilClearValue = 0u;
 
-            //mReadHitproxyFence = rc.CreateFence();
-            //unsafe
-            //{
-            //    var cmdlist = BasePass.DrawCmdList.mCoreObject;
-            //    cmdlist.Signal(mReadHitproxyFence.mCoreObject, 0);
-            //}
-
+            mReadHitproxyFence = rc.CreateFence();
+            
             await PickedProxiableManager.Initialize(this, x, y);
             await EditorFinalProcessor.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UEditorFinalShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_UNKNOWN, x, y);
 
@@ -280,8 +275,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             //drawcall.Effect.ShadingEnv
             base.OnDrawCall(shadingType, drawcall, mesh, atom);
         }
-        int DelayFrame = 0;
-        bool CanDrawHitproxy = false;
+        bool CanDrawHitproxy = true;
         public unsafe override void TickLogic()
         {
             var app = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
@@ -370,9 +364,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 {
                     cmdlist_hp.CreateReadableTexture2D(ppTexture, GHitproxyBuffers.GBufferSRV[0].mCoreObject, GHitproxyBuffers.FrameBuffers.mCoreObject);
                 }
-                //cmdlist_hp.Signal(mReadHitproxyFence.mCoreObject, 0);
+                cmdlist_hp.Signal(mReadHitproxyFence.mCoreObject, 0);
                 CanDrawHitproxy = false;
-                //DelayFrame = 0;
             }
 
             PickedProxiableManager.TickLogic(this);
@@ -393,30 +386,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             var cmdlist_hp = HitproxyPass.CommitCmdList.mCoreObject;
             cmdlist_hp.Commit(rc.mCoreObject);
 
-            DelayFrame++;
-            if (DelayFrame >= 10)
-            {
-                //if (mReadHitproxyFence.mCoreObject.IsCompletion())
-                {
-                    if (mReadableHitproxyTexture != (ITexture2D*)0)
-                    {
-                        void* pData;
-                        uint rowPitch;
-                        uint depthPitch;
-                        if (ReadableHitproxyTexture.Map(cmdlist_hp, 0, &pData, &rowPitch, &depthPitch) != 0)
-                        {
-                            lock (this)
-                            {
-                                ReadableHitproxyTexture.BuildImageBlob(mHitProxyData.mCoreObject, pData, rowPitch);
-                            }
-                            ReadableHitproxyTexture.Unmap(cmdlist_hp, 0);
-                        }
-                    }
-                }
-                DelayFrame = 0;
-                CanDrawHitproxy = true;
-            }
-
             PickedProxiableManager.TickRender(this);
             EditorFinalProcessor.TickRender();
         }
@@ -427,25 +396,21 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             {
                 mShadowMap.TickSync();
             }
-            DelayFrame++;
-            if (DelayFrame >= 10)
+
+            var cmdlist_hp = HitproxyPass.CommitCmdList.mCoreObject;
+            if (mReadHitproxyFence.mCoreObject.IsCompletion())
             {
-                var cmdlist_hp = HitproxyPass.CommitCmdList.mCoreObject;
-                //if (mReadHitproxyFence.mCoreObject.IsCompletion())
+                if (mReadableHitproxyTexture != (ITexture2D*)0)
                 {
-                    if (mReadableHitproxyTexture != (ITexture2D*)0)
+                    void* pData;
+                    uint rowPitch;
+                    uint depthPitch;
+                    if (ReadableHitproxyTexture.Map(cmdlist_hp, 0, &pData, &rowPitch, &depthPitch) != 0)
                     {
-                        void* pData;
-                        uint rowPitch;
-                        uint depthPitch;
-                        if (ReadableHitproxyTexture.Map(cmdlist_hp, 0, &pData, &rowPitch, &depthPitch) != 0)
-                        {
-                            ReadableHitproxyTexture.BuildImageBlob(mHitProxyData.mCoreObject, pData, rowPitch);
-                            ReadableHitproxyTexture.Unmap(cmdlist_hp, 0);
-                        }
+                        ReadableHitproxyTexture.BuildImageBlob(mHitProxyData.mCoreObject, pData, rowPitch);
+                        ReadableHitproxyTexture.Unmap(cmdlist_hp, 0);
                     }
                 }
-                DelayFrame = 0;
                 CanDrawHitproxy = true;
             }
 

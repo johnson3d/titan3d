@@ -62,6 +62,31 @@ namespace EngineNS.Graphics.Pipeline
                 PerFrameCBuffer.SetValue(PerFrameCBuffer.PerFrameIndexer.TimeSin, ref timeCos);
             }
         }
+        public delegate void Delegate_OnFenceCompetion(RHI.CFence fence);
+        private List<KeyValuePair<RHI.CFence, Delegate_OnFenceCompetion>> mQueryFences = new List<KeyValuePair<RHI.CFence, Delegate_OnFenceCompetion>>();
+        public void RegFenceQuery(RHI.CFence fence, Delegate_OnFenceCompetion cb)
+        {
+            lock (mQueryFences)
+            {
+                mQueryFences.Add(new KeyValuePair<RHI.CFence, Delegate_OnFenceCompetion>(fence, cb));
+            }
+        }
+        public void TickSync()
+        {
+            lock (mQueryFences)
+            {
+                for (int i = 0; i < mQueryFences.Count; i++)
+                {
+                    if (mQueryFences[i].Key.mCoreObject.IsCompletion())
+                    {
+                        var dlgt = mQueryFences[i].Value;
+                        dlgt(mQueryFences[i].Key);
+                        mQueryFences.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+        }
         public override void EndFrame(UEngine engine)
         {
             RenderContext?.mCoreObject.EndFrame();
