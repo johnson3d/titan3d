@@ -66,6 +66,25 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             xnd.SaveXnd(name.Address);
         }
+        public static bool ReloadXnd(UMaterialInstance material, UMaterialInstanceManager manager, IO.CXndNode node)
+        {
+            var attr = node.TryGetAttribute("MaterialInstance");
+            if (attr.NativePointer != IntPtr.Zero)
+            {
+                var ar = attr.GetReader(null);
+                try
+                {
+                    ar.ReadTo(material, null);
+                    material.SerialId++;
+                }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                }
+                attr.ReleaseReader(ref ar);
+            }
+            return true;
+        }
         public static UMaterialInstance LoadXnd(UMaterialInstanceManager manager, IO.CXndNode node)
         {
             IO.ISerializer result = null;
@@ -304,6 +323,53 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (Materials.TryGetValue(rn, out result))
                 return result;
             return null;
+        }
+        public async System.Threading.Tasks.Task<UMaterialInstance> CreateMaterialInstance(RName rn)
+        {
+            UMaterialInstance result;
+            result = await UEngine.Instance.EventPoster.Post(() =>
+            {
+                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                {
+                    if (xnd != null)
+                    {
+                        var material = UMaterialInstance.LoadXnd(this, xnd.RootNode);
+                        if (material == null)
+                            return null;
+
+                        material.AssetName = rn;
+                        return material;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+            return result;
+        }
+        public async System.Threading.Tasks.Task<bool> ReloadMaterialInstance(RName rn)
+        {
+            UMaterialInstance result;
+            if (Materials.TryGetValue(rn, out result)==false)
+                return true;
+
+            var ok = await UEngine.Instance.EventPoster.Post(() =>
+            {
+                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                {
+                    if (xnd != null)
+                    {
+                        return UMaterialInstance.ReloadXnd(result, this, xnd.RootNode);
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+
+            return ok;
         }
         public async System.Threading.Tasks.Task<UMaterialInstance> GetMaterialInstance(RName rn)
         {

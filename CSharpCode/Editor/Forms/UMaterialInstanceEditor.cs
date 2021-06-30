@@ -60,7 +60,7 @@ namespace EngineNS.Editor.Forms
         public async Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            Material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(name);
+            Material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(name);
             if (Material == null)
                 return false;
 
@@ -137,6 +137,7 @@ namespace EngineNS.Editor.Forms
             if (ImGuiAPI.Button("Save", ref btSize))
             {
                 Material.SaveAssetTo(Material.AssetName);
+                var unused = UEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Material.AssetName);
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Reload", ref btSize))

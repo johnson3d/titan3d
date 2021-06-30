@@ -197,7 +197,49 @@ namespace EngineNS.IO
             
             SerializerHelper.Read(this, v, metaVersion);
             //SerializerHelper.Read(this, out v, hostObject);
-        }        
+        }
+
+        public bool ReadTo(ISerializer v, object hostObject = null)
+        {
+            bool isNull;
+            this.Read(out isNull);
+            if (isNull)
+            {
+                v = null;
+                return false;
+            }
+            Hash64 typeHash;
+            this.Read(out typeHash);
+            uint versionHash;
+            this.Read(out versionHash);
+
+            var savePos = this.GetPosition();
+            uint ObjDataSize = 0;
+            this.Read(out ObjDataSize);
+            savePos += ObjDataSize;
+
+            var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeHash);
+            if (meta == null)
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost:{typeHash}");
+                throw new Exception($"Meta Type lost:{typeHash}");
+            }
+            Rtti.UMetaVersion metaVersion = meta.GetMetaVersion(versionHash);
+            if (metaVersion == null)
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost in direct:{meta.MetaDirectoryName}");
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"MetaVersion lost:{versionHash}");
+                throw new Exception($"MetaVersion lost:{versionHash}");
+            }
+            if (meta.ClassType.SystemType != v.GetType())
+                return false;
+            //v = Rtti.UTypeDescManager.CreateInstance(meta.ClassType.SystemType) as ISerializer;
+            v.OnPreRead(this.Tag, hostObject, false);
+
+            SerializerHelper.Read(this, v, metaVersion);
+            //SerializerHelper.Read(this, out v, hostObject);
+            return true;
+        }
     }
     public class CMemStreamReader : AuxPtrType<MemStreamReader>
     {
