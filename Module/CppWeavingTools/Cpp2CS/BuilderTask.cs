@@ -34,10 +34,6 @@ namespace CppWeaving.Cpp2CS
             });
             mThread.Start();
         }
-        public void Stop()
-        {
-            mRunning = false;
-        }
         public virtual void Proccess()
         {
             while (Tasks.Count > 0)

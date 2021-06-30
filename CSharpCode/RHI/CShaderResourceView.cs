@@ -362,6 +362,7 @@ namespace EngineNS.RHI
                 {
                     var writer = new StbImageWriteSharp.ImageWriter();
                     writer.WritePng(curImage.Data, curImage.Width, curImage.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+                    //writer.WriteJpg(curImage.Data, curImage.Width, curImage.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream, 100);
                     var pngData = memStream.ToArray();
                     var attr = new XndAttribute(pngMipsNode.GetOrAddAttribute($"PngMip{mipLevel}", 0, 0));
                     var ar = attr.GetWriter((ulong)memStream.Position);

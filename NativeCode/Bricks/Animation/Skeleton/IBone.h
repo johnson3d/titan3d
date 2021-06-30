@@ -48,7 +48,7 @@ namespace EngineNS
 		v3dxQuaternion		InvQuat;
 	};
 
-	class TR_CLASS(SV_Dispose = delete self)
+	class TR_CLASS(SV_Dispose = self->Release())
 		IBone : public VIUnknown
 	{
 	public:
