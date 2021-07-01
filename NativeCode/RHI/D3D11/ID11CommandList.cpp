@@ -64,7 +64,8 @@ void ID11CommandList::EndCommand()
 	Safe_Release(mCmdList);
 	mDeferredContext->FinishCommandList(FALSE, &mCmdList);
 #ifdef _DEBUG
-	if (mDebugName.length() > 0)
+	ASSERT(mCmdList != nullptr);
+	if (mCmdList != nullptr && mDebugName.length() > 0)
 	{
 		mCmdList->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)mDebugName.length(), mDebugName.c_str());
 	}

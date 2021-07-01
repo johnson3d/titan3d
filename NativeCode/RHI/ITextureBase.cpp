@@ -1,6 +1,7 @@
 #include "ITextureBase.h"
 #include "ICommandList.h"
 #include "IRenderSystem.h"
+#include "../../Base/float16/float16.h"
 
 #include "../../../3rd/native/Image.Shared/XImageDecoder.h"
 #include "../../../3rd/native/Image.Shared/XImageBuffer.h"
@@ -65,6 +66,38 @@ void ITexture2D::BuildImageBlob(IBlobObject* blob, void* pData, UINT RowPitch)
 					dst[j] = 0;
 				}
 			}*/
+			row += RowPitch;
+			dst += image.m_nStride;
+		}
+	}
+	else if (mDesc.Format == PXF_R16G16B16A16_FLOAT)
+	{
+		for (UINT i = 0; i < mDesc.Height; i++)
+		{
+			auto color = (float16*)row;
+			for (UINT j = 0; j < mDesc.Width; j++)
+			{
+				auto f1 = (float)color[j * 4];
+				auto f2 = (float)color[j * 4 + 1];
+				auto f3 = (float)color[j * 4 + 2];
+				auto f4 = (float)color[j * 4 + 3];
+				if(f1>1.0f)
+					dst[j * 4] = 255;
+				else
+					dst[j * 4] = (BYTE)(f1 * 255.0f);
+				if (f2 > 1.0f)
+					dst[j * 4] = 255;
+				else
+					dst[j * 4 + 1] = (BYTE)(f2 * 255.0f);
+				if (f3> 1.0f)
+					dst[j * 4] = 255;
+				else
+					dst[j * 4 + 2] = (BYTE)(f3 * 255.0f);
+				if (f4 > 1.0f)
+					dst[j * 4] = 255;
+				else
+					dst[j * 4 + 3] = (BYTE)(f4 * 255.0f);
+			}
 			row += RowPitch;
 			dst += image.m_nStride;
 		}

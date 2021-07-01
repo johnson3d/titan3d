@@ -50,7 +50,6 @@ namespace EngineNS.Editor.Forms
                 mesh.SetWorldMatrix(ref Matrix.mIdentity);
                 viewport.RenderPolicy.VisibleMeshes.Add(mesh);
             }
-
             //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SunLightDirection = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);
@@ -59,7 +58,8 @@ namespace EngineNS.Editor.Forms
         }
         public async Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
-            Material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(name);
+            AssetName = name;
+            Material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(name);
             if (Material == null)
                 return false;
 
@@ -68,7 +68,7 @@ namespace EngineNS.Editor.Forms
 
             PreviewViewport.Title = "MaterialInstancePreview";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileFSPolicy(), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy(), 0, 1);
 
             MaterialPropGrid.Target = Material;
             UEngine.Instance.TickableManager.AddTickable(this);
@@ -111,8 +111,6 @@ namespace EngineNS.Editor.Forms
                 //var sz = new Vector2(-1);
                 //ImGuiAPI.BeginChild("Client", ref sz, false, ImGuiWindowFlags_.)
                 ImGuiAPI.Separator();
-                ImGuiAPI.Separator();
-                ImGuiAPI.Separator();
                 ImGuiAPI.Columns(2, null, true);
                 if (LeftWidth == 0)
                 {
@@ -138,6 +136,9 @@ namespace EngineNS.Editor.Forms
             if (ImGuiAPI.Button("Save", ref btSize))
             {
                 Material.SaveAssetTo(Material.AssetName);
+                var unused = UEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Material.AssetName);
+
+                USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Reload", ref btSize))
@@ -157,10 +158,15 @@ namespace EngineNS.Editor.Forms
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
         {
-            if (ImGuiAPI.CollapsingHeader("MaterialProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+            var sz = new Vector2(-1);
+            if (ImGuiAPI.BeginChild("LeftView", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                MaterialPropGrid.OnDraw(true, false, false);
+                if (ImGuiAPI.CollapsingHeader("MaterialProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                {
+                    MaterialPropGrid.OnDraw(true, false, false);
+                }
             }
+            ImGuiAPI.EndChild();
         }
         protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
         {

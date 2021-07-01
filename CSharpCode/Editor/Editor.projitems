@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UCpuProfiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UInspector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UMaterialInstanceEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\UTextureViewer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UWorldOutliner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IAssetEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EditorAttribute.cs" />
@@ -25,5 +26,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)INodeUIProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UEditorWorldViewportSlate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)USnapshot.cs" />
   </ItemGroup>
 </Project>

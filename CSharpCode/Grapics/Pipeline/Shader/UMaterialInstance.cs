@@ -12,9 +12,65 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //必须是TextureAsset
             return true;
         }
-        public override void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        public override void ResetSnapshot()
         {
-            base.OnDraw(ref cmdlist, ref sz, ContentBrowser);
+            HasSnapshot = true;
+            OnShowIconTimout(0);
+        }
+        System.Threading.Tasks.Task<Editor.USnapshot> Task;
+        IntPtr SnapshotPtr;
+        public override unsafe void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        {
+            if (SnapshotPtr == IntPtr.Zero && HasSnapshot == true)
+            {
+                if (Task == null)
+                {
+                    Task = Editor.USnapshot.Load(GetAssetName().Address + ".snap");
+                }
+                else if (Task.IsCompleted)
+                {
+                    if (Task.Result == null)
+                    {
+                        HasSnapshot = false;
+                    }
+                    else
+                    {
+                        SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(Task.Result.mTextureRSV));
+                    }
+                    Task = null;
+                }
+            }
+
+            var start = ImGuiAPI.GetItemRectMin();
+            var end = start + sz;
+
+            var name = IO.FileManager.GetPureName(GetAssetName().Name);
+            var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
+            Vector2 tpos;
+            tpos.Y = start.Y + sz.Y - tsz.Y;
+            tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
+            ImGuiAPI.PushClipRect(ref start, ref end, true);
+
+            end.Y -= tsz.Y;
+            var uv0 = new Vector2(0, 0);
+            var uv1 = new Vector2(1, 1);
+            if (SnapshotPtr != IntPtr.Zero)
+            {
+                cmdlist.AddImage(SnapshotPtr.ToPointer(), ref start, ref end, ref uv0, ref uv1, 0xFFFFFFFF);
+            }
+
+            cmdlist.AddText(ref tpos, 0xFFFF00FF, name, null);
+            ImGuiAPI.PopClipRect();
+        }
+        public override void OnShowIconTimout(int time)
+        {
+            if (SnapshotPtr != IntPtr.Zero)
+            {
+                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
+                handle.Free();
+                SnapshotPtr = IntPtr.Zero;
+                Task = null;
+            }
         }
     }
     [Rtti.Meta]
@@ -65,6 +121,25 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
 
             xnd.SaveXnd(name.Address);
+        }
+        public static bool ReloadXnd(UMaterialInstance material, UMaterialInstanceManager manager, IO.CXndNode node)
+        {
+            var attr = node.TryGetAttribute("MaterialInstance");
+            if (attr.NativePointer != IntPtr.Zero)
+            {
+                var ar = attr.GetReader(null);
+                try
+                {
+                    ar.ReadTo(material, null);
+                    material.SerialId++;
+                }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                }
+                attr.ReleaseReader(ref ar);
+            }
+            return true;
         }
         public static UMaterialInstance LoadXnd(UMaterialInstanceManager manager, IO.CXndNode node)
         {
@@ -304,6 +379,53 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (Materials.TryGetValue(rn, out result))
                 return result;
             return null;
+        }
+        public async System.Threading.Tasks.Task<UMaterialInstance> CreateMaterialInstance(RName rn)
+        {
+            UMaterialInstance result;
+            result = await UEngine.Instance.EventPoster.Post(() =>
+            {
+                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                {
+                    if (xnd != null)
+                    {
+                        var material = UMaterialInstance.LoadXnd(this, xnd.RootNode);
+                        if (material == null)
+                            return null;
+
+                        material.AssetName = rn;
+                        return material;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+            return result;
+        }
+        public async System.Threading.Tasks.Task<bool> ReloadMaterialInstance(RName rn)
+        {
+            UMaterialInstance result;
+            if (Materials.TryGetValue(rn, out result)==false)
+                return true;
+
+            var ok = await UEngine.Instance.EventPoster.Post(() =>
+            {
+                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                {
+                    if (xnd != null)
+                    {
+                        return UMaterialInstance.ReloadXnd(result, this, xnd.RootNode);
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+
+            return ok;
         }
         public async System.Threading.Tasks.Task<UMaterialInstance> GetMaterialInstance(RName rn)
         {

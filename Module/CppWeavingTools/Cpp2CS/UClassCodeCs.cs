@@ -48,7 +48,7 @@ namespace CppWeaving.Cpp2CS
             }
 
             UserAttribute();
-            if (mClass.HasMeta(UProjectSettings.SV_Dispose))
+            if (mClass.HasMeta(UProjectSettings.SV_Dispose) && mClass.GetType() != typeof(UStruct))
             {
                 AddLine($"public unsafe partial struct {Name} : EngineNS.IPtrType, IDisposable");
             }

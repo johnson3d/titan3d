@@ -25,7 +25,7 @@ namespace MainEditor
             }
 #if PWindow
             var handle = GetConsoleWindow();
-            ShowWindow(handle, 1);
+            ShowWindow(handle, 0);
 #endif
 
             WeakReference wr = Main_Impl(args);

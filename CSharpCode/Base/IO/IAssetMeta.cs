@@ -172,6 +172,11 @@ namespace EngineNS.IO
     public partial class IAssetMeta
     {
         RName mAssetName;
+        public bool HasSnapshot { get; set; } = true;
+        public virtual void ResetSnapshot()
+        {
+            HasSnapshot = true;
+        }
         public void SetAssetName(RName rn)
         {
             mAssetName = rn;

@@ -25,7 +25,6 @@ namespace CppWeaving.Cpp2CS
         public System.Threading.Thread mThread;
         public Queue<IBuilderTask> Tasks = new Queue<IBuilderTask>();
         public static int NumOfTasks = 0;
-        private bool mRunning = true;
         public bool IsFinshed { get; private set; } = false;
         public void Start()
         {
@@ -34,10 +33,6 @@ namespace CppWeaving.Cpp2CS
                 this.Proccess();
             });
             mThread.Start();
-        }
-        public void Stop()
-        {
-            mRunning = false;
         }
         public virtual void Proccess()
         {

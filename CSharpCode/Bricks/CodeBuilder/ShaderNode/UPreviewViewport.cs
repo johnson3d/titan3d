@@ -174,11 +174,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 return;
             RenderPolicy?.TickRender();
         }
+        public Action AfterTickSync;
         public void TickSync(int ellapse)
         {
             if (IsDrawing == false)
                 return;
             RenderPolicy?.TickSync();
+            if (AfterTickSync != null)
+                AfterTickSync();
         }
     }
 }

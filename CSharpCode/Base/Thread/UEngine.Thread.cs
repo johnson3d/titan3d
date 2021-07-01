@@ -237,6 +237,7 @@ namespace EngineNS
             {
                 Profiler.Log.WriteException(ex);
             }
+            GfxDevice?.TickSync();
         }
         partial void DrawSlateWindow();
     }
