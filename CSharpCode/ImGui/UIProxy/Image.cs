@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.EGui.UIProxy
 {
-    public class ImageProxy : IUIProxyBase
+    public class ImageProxy : IUIProxyBase, IDisposable
     {
         public RName ImageFile;
         public Vector2 ImageSize = new Vector2(32, 32);
@@ -42,7 +42,18 @@ namespace EngineNS.EGui.UIProxy
         {
             ImageFile = imageFile;
         }
-
+        ~ImageProxy()
+        {
+            Dispose();
+        }
+        public void Dispose()
+        {
+            if (mImagePtr != IntPtr.Zero)
+            {
+                System.Runtime.InteropServices.GCHandle.FromIntPtr(mImagePtr).Free();
+                mImagePtr = IntPtr.Zero;
+            }
+        }
         public unsafe bool OnDraw(ref ImDrawList drawList)
         {
             if (ImageFile == null)
