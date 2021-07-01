@@ -38,7 +38,7 @@ namespace EngineNS
                 if (multiValue != null && multiValue.HasDifferentValue())
                 {
                     ImGuiAPI.Text(multiValue.MultiValueString);
-                    if (multiValue.DrawVector<Vector2>(in info))
+                    if (multiValue.DrawVector<Vector4>(in info))
                     {
                         newValue = multiValue;
                         retValue = true;

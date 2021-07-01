@@ -199,23 +199,25 @@ namespace EngineNS.Graphics.Pipeline
                 desc.Height = (uint)(y * scaleY);
 
                 var DepthStencilTexture = rc.CreateTexture2D(ref desc);
+                //if(DepthStencilTexture!=null)
+                {
+                    var dsvDesc = new IDepthStencilViewDesc();
+                    dsvDesc.SetDefault();
+                    dsvDesc.Format = desc.Format;
+                    dsvDesc.Width = desc.Width;
+                    dsvDesc.Height = desc.Height;
+                    dsvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
 
-                var dsvDesc = new IDepthStencilViewDesc();
-                dsvDesc.SetDefault();
-                dsvDesc.Format = desc.Format;
-                dsvDesc.Width = desc.Width;
-                dsvDesc.Height = desc.Height;
-                dsvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
+                    DepthStencilView.Dispose();
+                    DepthStencilView = rc.CreateDepthRenderTargetView(ref dsvDesc);
+                    FrameBuffers.mCoreObject.BindDepthStencilView(DepthStencilView.mCoreObject);
 
-                DepthStencilView.Dispose();
-                DepthStencilView = rc.CreateDepthRenderTargetView(ref dsvDesc);
-                FrameBuffers.mCoreObject.BindDepthStencilView(DepthStencilView.mCoreObject);
-
-                DepthStencilSRV.Dispose();
-                var srvDesc = new IShaderResourceViewDesc();
-                srvDesc.mFormat = desc.Format;
-                srvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
-                DepthStencilSRV = rc.CreateShaderResourceView(ref srvDesc);
+                    DepthStencilSRV.Dispose();
+                    var srvDesc = new IShaderResourceViewDesc();
+                    srvDesc.mFormat = desc.Format;
+                    srvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
+                    DepthStencilSRV = rc.CreateShaderResourceView(ref srvDesc);
+                }
             }
 
             if (GBufferSRV != null)

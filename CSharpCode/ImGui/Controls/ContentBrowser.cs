@@ -7,15 +7,21 @@ namespace EngineNS.EGui.Controls
 {
     public class ContentBrowser : Graphics.Pipeline.IRootForm, EGui.IPanel
     {
-        public ContentBrowser()
-        {
-            Editor.UMainEditorApplication.RegRootForm(this);
-        }
-        public int Index = 0;
         bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; } = uint.MaxValue;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
+
+        EGui.UIProxy.SearchBarProxy mSearchBar;
+
+        public string Name = "";
+        public bool CreateNewAssets = true;
+        public string ExtName = null;
+        public string FilterText = "";
+        public static IO.IAssetMeta GlobalSelectedAsset = null;
+        public IO.IAssetMeta SelectedAsset = null;
+        public Action<IO.IAssetMeta> ItemSelectedAction = null;
+
         public async Task<bool> Initialize()
         {
             await Thread.AsyncDummyClass.DummyFunc();
@@ -23,6 +29,9 @@ namespace EngineNS.EGui.Controls
             if (mCreateMenuItems.Count == 0)
                 OnTypeChanged();
 
+            mSearchBar = new UIProxy.SearchBarProxy();
+            mSearchBar.Initialize();
+            mSearchBar.InfoText = "Search Assets";
             Rtti.UTypeDescManager.Instance.OnTypeChanged += OnTypeChanged;
 
             return true;
@@ -135,18 +144,48 @@ namespace EngineNS.EGui.Controls
         public unsafe void DrawFiles(RName dir, Vector2 size)
         {
             var itemSize = new Vector2(80, 100);
+            var cmdlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
+            if (mSearchBar != null)
+            {
+                mSearchBar.Width = size.X;
+                if (mSearchBar.OnDraw(ref cmdlist))
+                    FilterText = mSearchBar.SearchText;
+            }
             if (ImGuiAPI.BeginChild("RightWindow", ref size, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
-                var cmdlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
+                ////////////////////////////////////////////////////////////
+                //var winPos = ImGuiAPI.GetWindowPos();
+                //var drawList = ImGuiAPI.GetForegroundDrawList();
+                //var viewPort = ImGuiAPI.GetWindowViewport();
+                //var min = ImGuiAPI.GetWindowContentRegionMin() + winPos;
+                //var max = ImGuiAPI.GetWindowContentRegionMax() + winPos;
+                ////////////////////////////////////////////////////////////
+
                 var width = ImGuiAPI.GetWindowContentRegionWidth();
                 var files = IO.FileManager.GetFiles(dir.Address, "*.ameta", false);
                 float curPos = 0;
-                foreach(var i in files)
+                for(int i=0; i<files.Length; i++)
                 {
-                    var name = IO.FileManager.GetLastestPathName(i.Substring(0, i.Length - 6));
+                    var file = files[i];
+                    var name = IO.FileManager.GetPureName(file);
+                    if (!string.IsNullOrEmpty(ExtName))
+                    {
+                        var ext = IO.FileManager.GetExtName(name);
+                        if (!string.Equals(ext, ExtName, StringComparison.OrdinalIgnoreCase))
+                            continue;
+                    }
+
+                    var filterName = IO.FileManager.GetPureName(name);
+                    if (!string.IsNullOrEmpty(FilterText))
+                    {
+                        if (filterName.Contains(FilterText, StringComparison.OrdinalIgnoreCase) == false)
+                            continue;
+                    }
+
                     var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType));
                     if (ameta == null)
                         continue;
+
                     DrawItem(ref cmdlist, ameta.Icon, ameta, ref itemSize);
                     curPos += itemSize.X + 2;
                     if (curPos + itemSize.X < width)
@@ -159,7 +198,11 @@ namespace EngineNS.EGui.Controls
                     }
                 }
 
-                if (ImGuiAPI.BeginPopupContextWindow("##ContentFilesMenuWindow", ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
+                ////////////////////////////////////////////////////////////
+                //drawList.AddRect(ref min, ref max, 0xFF0000FF, 0, ImDrawFlags_.ImDrawFlags_None, 1);
+                ////////////////////////////////////////////////////////////
+
+                if (CreateNewAssets && ImGuiAPI.BeginPopupContextWindow("##ContentFilesMenuWindow", ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
                 {
                     if (ImGuiAPI.BeginMenu("New Asset", true))
                     {
@@ -254,6 +297,12 @@ namespace EngineNS.EGui.Controls
                         }
                     }
                 }
+                if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                {
+                    GlobalSelectedAsset = ameta;
+                    SelectedAsset = ameta;
+                    ItemSelectedAction?.Invoke(ameta);
+                }
                 ameta.ShowIconTime = UEngine.Instance.CurrentTickCount;
                 ameta.OnDraw(ref cmdlist, ref sz, this);
             }
@@ -261,13 +310,20 @@ namespace EngineNS.EGui.Controls
         Vector2 LeftSize;
         Vector2 RightSize;
         public IO.IAssetCreateAttribute mAssetImporter;
+        public bool DrawInWindow = true;
         public unsafe void OnDraw()
         {
             if (Visible == false)
                 return;
 
-//            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin("ContentBrowser" + Index, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            //            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
+            var name = Name;
+            if (string.IsNullOrEmpty(name))
+                name = "ContentBrowser";
+            bool draw = true;
+            if(DrawInWindow)
+                draw = ImGuiAPI.Begin(name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar);
+            if(draw)
             {
 //                if (ImGuiAPI.IsWindowDocked())
 //                {
@@ -292,7 +348,8 @@ namespace EngineNS.EGui.Controls
 
                 ImGuiAPI.Columns(1, null, true);
             }
-            ImGuiAPI.End();
+            if(DrawInWindow)
+                ImGuiAPI.End();
 
             if (mAssetImporter != null)
                 mAssetImporter.OnDraw(this);

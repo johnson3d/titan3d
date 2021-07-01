@@ -42,6 +42,7 @@ namespace EngineNS.Editor
             await base.InitializeApplication(rc, rpType);
 
             await ContentBrowser.Initialize();
+            Editor.UMainEditorApplication.RegRootForm(ContentBrowser);
 
             var RenderPolicy = Rtti.UTypeDescManager.CreateInstance(rpType) as Graphics.Pipeline.IRenderPolicy;
             await WorldViewportSlate.Initialize(this, RenderPolicy, 0, 1);

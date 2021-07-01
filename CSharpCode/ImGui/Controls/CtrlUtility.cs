@@ -37,8 +37,14 @@ namespace EngineNS.EGui.Controls
         public static RName DrawRName(RName name, string ctrlId, string ext, bool ReadOnly)
         {
             int slt = 0;
-            ImGuiAPI.PushID(ctrlId);
+            //ImGuiAPI.PushID(ctrlId);
             var sz = new Vector2(0, 0);
+            ImGuiAPI.SetNextItemWidth(-1);
+            if (name == null)
+                ImGuiAPI.Text("null");
+            else
+                ImGuiAPI.Text(name.ToString());
+            ImGuiAPI.SameLine(0, -1);
             Vector2 SelectPos;
             if (ReadOnly==false)
             {
@@ -57,13 +63,8 @@ namespace EngineNS.EGui.Controls
                 {
                     slt = 3;
                 }
-                ImGuiAPI.SameLine(0, -1);
             }
-            ImGuiAPI.SetNextItemWidth(-1);
-            if (name == null)
-                ImGuiAPI.Text("null");
-            else
-                ImGuiAPI.Text(name.ToString());
+
 
             UAssetSelector.Instance.PopName = $"AssetSelector_{name?.ToString()}";
             switch (slt)
@@ -84,8 +85,9 @@ namespace EngineNS.EGui.Controls
             }
 
             bool isPopup = UAssetSelector.Instance.IsOpenPopup();
-            UAssetSelector.Instance.OnDraw();
-            ImGuiAPI.PopID();
+            var pos = ImGuiAPI.GetCursorScreenPos();
+            UAssetSelector.Instance.OnDraw(ref pos);
+            //ImGuiAPI.PopID();
             if (isPopup)
             {
                 if (UAssetSelector.Instance.SelectedAsset != null && UAssetSelector.Instance.SelectedAsset.GetAssetName() != name)

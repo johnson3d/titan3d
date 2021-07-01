@@ -68,6 +68,7 @@ namespace EngineNS.Editor
         public Vector3 Color3Value { get; set; } = new Vector3(1, 1, 1);
         [EGui.Controls.PropertyGrid.UByte4ToColor4PickerEditor]
         public UInt32 Color { get; set; } = 0xFFFFFFFF;
+        public RName RNameValue { get; set; }
 
         public PropertyGridTestClass()
         {

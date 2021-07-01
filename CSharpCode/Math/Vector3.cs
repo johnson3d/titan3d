@@ -54,7 +54,7 @@ namespace EngineNS
                     if (changed)//(v != saved)
                     {
                         newValue = v;
-                        return true;
+                        retValue = true;
                     }
 
                     if (Vector4.Vector4EditorAttribute.OnDrawVectorValue<Vector3>(in info, ref v, ref v))
@@ -64,7 +64,7 @@ namespace EngineNS
                     }
 
                 }
-                return false;
+                return retValue;
             }
         }
         public override string ToString()
