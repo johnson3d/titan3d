@@ -102,12 +102,13 @@ namespace EngineNS.EGui.Slate
 
             for(int i=0; i< mFontDataList.Count; ++i)
             {
+                mFontDataList[i].Dispose();
                 mFontDataList[i].FontSRV?.Dispose();
                 mFontDataList[i].FontSRV = null;
                 mFontDataList[i].FontTexture?.Dispose();
                 mFontDataList[i].FontTexture = null;
-                mFontDataList[i].Dispose();
             }
+            mFontDataList.Clear();
 
             FontCBuffer?.Dispose();
             FontCBuffer = null;
