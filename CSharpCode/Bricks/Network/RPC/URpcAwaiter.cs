@@ -45,7 +45,14 @@ namespace EngineNS.Bricks.Network.RPC
         {
             Waiter.RetCallBack = (ref IO.AuxReader<UMemReader> pkg, bool isTimeOut) =>
             {
-                pkg.Read(out Result);
+                if (isTimeOut)
+                {
+                    //throw Timeout exception : UReturnAwaiter & coneinuation;
+                }
+                else
+                {
+                    pkg.Read(out Result);
+                }
                 try
                 {
                     continuation();
@@ -90,7 +97,14 @@ namespace EngineNS.Bricks.Network.RPC
             Waiter.RetCallBack = (ref IO.AuxReader<UMemReader> pkg, bool isTimeOut) =>
             {
                 EngineNS.IO.ISerializer tmp;
-                pkg.Read(out tmp, null);
+                if (isTimeOut)
+                {
+                    tmp = null;//应该给一个错误的对象用来判断超时间
+                }
+                else
+                {
+                    pkg.Read(out tmp, null);
+                }
                 try
                 {
                     Result = (T)tmp;
@@ -135,7 +149,14 @@ namespace EngineNS.Bricks.Network.RPC
         {
             Waiter.RetCallBack = (ref IO.AuxReader<UMemReader> pkg, bool isTimeOut) =>
             {
-                pkg.Read(out Result);
+                if (isTimeOut)
+                {
+                    Result = "@RPC_TimeOut@";
+                }
+                else
+                {
+                    pkg.Read(out Result);
+                }
                 try
                 {
                     continuation();

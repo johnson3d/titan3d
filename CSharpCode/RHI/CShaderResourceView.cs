@@ -543,6 +543,63 @@ namespace EngineNS.RHI
             StreamingAssets.Clear();
         }
         List<RName> mWaitRemoves = new List<RName>();
+        public async System.Threading.Tasks.Task<CShaderResourceView> CreateTexture(string file)
+        {
+            if (EngineNS.IO.FileManager.FileExists(file)==false)
+                return null;
+            StbImageSharp.ImageResult image = await UEngine.Instance.EventPoster.Post(() =>
+            {
+                using (var memStream = new System.IO.FileStream(file, System.IO.FileMode.Open))
+                {
+                    return StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                }
+            }, Thread.Async.EAsyncTarget.AsyncIO);            
+            if(image==null)
+            {
+                return null;
+            }
+
+            var texDesc = new ITexture2DDesc();
+            texDesc.SetDefault();
+            texDesc.Width = (uint)image.Width;
+            texDesc.Height = (uint)image.Height;
+            texDesc.MipLevels = (uint)1;
+            uint pixelWidth = 4;
+            switch (image.Comp)
+            {
+                case StbImageSharp.ColorComponents.RedGreenBlueAlpha:
+                    texDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                    pixelWidth = 4;
+                    break;
+            }
+            unsafe
+            {
+                var data = new EngineNS.ImageInitData();
+                data.m_SysMemPitch = texDesc.m_Width * pixelWidth;
+                texDesc.InitData = &data;
+                fixed (byte* pData = &image.Data[0])
+                {
+                    data.m_pSysMem = pData;
+
+                    var rc = UEngine.Instance.GfxDevice.RenderContext;
+                    var texture2d = rc.CreateTexture2D(ref texDesc);
+
+                    var srvDesc = new IShaderResourceViewDesc();
+                    srvDesc.mFormat = texture2d.mCoreObject.mDesc.Format;
+                    unsafe
+                    {
+                        srvDesc.m_pTexture2D = texture2d.mCoreObject;
+                    }
+                    var result = rc.CreateShaderResourceView(ref srvDesc);
+                    //result.PicDesc.Desc = texDesc;
+                    //result.LevelOfDetail = mipLevel;
+                    //result.TargetLOD = mipLevel;
+                    //result.AssetName = rn;
+
+                    return result;
+                }
+            }
+        }
         public async System.Threading.Tasks.Task<CShaderResourceView> GetTexture(RName rn, int mipLevel = 1)
         {
             CShaderResourceView srv;

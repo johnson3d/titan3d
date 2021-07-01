@@ -57,7 +57,7 @@ bool ID11Texture2D::Init(ID11RenderContext* rc, const ITexture2DDesc* desc)
 	{
 		rc->mDevice->CreateTexture2D(&Tex2dDesc, nullptr, &m_pDX11Texture2D);
 	}
-	return true;
+	return m_pDX11Texture2D != nullptr;
 }
 
 bool ID11Texture2D::InitD11Texture2D(ID3D11Texture2D* pTex2d)

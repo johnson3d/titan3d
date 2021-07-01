@@ -50,7 +50,6 @@ namespace EngineNS.Editor.Forms
                 mesh.SetWorldMatrix(ref Matrix.mIdentity);
                 viewport.RenderPolicy.VisibleMeshes.Add(mesh);
             }
-
             //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SunLightDirection = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);
@@ -69,7 +68,7 @@ namespace EngineNS.Editor.Forms
 
             PreviewViewport.Title = "MaterialInstancePreview";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileFSPolicy(), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy(), 0, 1);
 
             MaterialPropGrid.SingleTarget = Material;
             UEngine.Instance.TickableManager.AddTickable(this);
@@ -138,6 +137,8 @@ namespace EngineNS.Editor.Forms
             {
                 Material.SaveAssetTo(Material.AssetName);
                 var unused = UEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Material.AssetName);
+
+                USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Reload", ref btSize))
