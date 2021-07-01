@@ -34,8 +34,9 @@ namespace EngineNS.Editor.Forms
             TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(name);
             if (TextureSRV == null)
                 return false;
+            TexturePropGrid.Initialize();
 
-            TexturePropGrid.SingleTarget = TextureSRV;
+            TexturePropGrid.Target = TextureSRV;
             ImageSize.X = TextureSRV.PicDesc.Width;
             ImageSize.Y = TextureSRV.PicDesc.Height;
 

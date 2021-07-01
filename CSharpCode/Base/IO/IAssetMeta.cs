@@ -42,6 +42,7 @@ namespace EngineNS.IO
             TypeSlt.BaseType = type;
             TypeSlt.SelectedType = type;
 
+            PGAsset.Initialize();
             mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType.SystemType) as IAsset;
             PGAsset.Target = mAsset;
         }
@@ -101,7 +102,7 @@ namespace EngineNS.IO
 
                     ImGuiAPI.Separator();
 
-                    PGAsset.OnDraw(false, false, false);
+                    PGAsset.OnDraw(false, true, false);
 
                     if (CheckAsset())
                     {

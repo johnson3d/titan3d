@@ -31,6 +31,8 @@ namespace EngineNS.Editor.Forms
         }
         protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Bricks.CodeBuilder.ShaderNode.UPreviewViewport viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
         {
+            MaterialPropGrid.Initialize();
+
             viewport.RenderPolicy = policy;
 
             await viewport.RenderPolicy.Initialize(1, 1);
@@ -50,6 +52,7 @@ namespace EngineNS.Editor.Forms
                 mesh.SetWorldMatrix(ref Matrix.mIdentity);
                 viewport.RenderPolicy.VisibleMeshes.Add(mesh);
             }
+            
             //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SunLightDirection = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);

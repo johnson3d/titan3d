@@ -106,7 +106,7 @@ namespace EngineNS.EGui.Slate
                 mFontDataList[i].FontSRV = null;
                 mFontDataList[i].FontTexture?.Dispose();
                 mFontDataList[i].FontTexture = null;
-                mFontDataList[i].SRCGCHandle.Free();
+                mFontDataList[i].Dispose();
             }
 
             FontCBuffer?.Dispose();
@@ -120,12 +120,43 @@ namespace EngineNS.EGui.Slate
             Font_13px        = 2,
         }
 
-        class FontDatas
+        class FontDatas : IDisposable
         {
+            ~FontDatas()
+            {
+                Dispose();
+                FontTexture = null;
+                mFontSRV = null;
+            }
+            public void Dispose()
+            {
+                if (SRCGCHandle != IntPtr.Zero)
+                {
+                    System.Runtime.InteropServices.GCHandle.FromIntPtr(SRCGCHandle).Free();
+                    mSRCGCHandle = IntPtr.Zero;
+                }
+            }
             public ImFont Font;
             public RHI.CTexture2D FontTexture;
-            public RHI.CShaderResourceView FontSRV;
-            public System.Runtime.InteropServices.GCHandle SRCGCHandle;
+            RHI.CShaderResourceView mFontSRV;
+            public RHI.CShaderResourceView FontSRV
+            {
+                get => mFontSRV;
+                set
+                {
+                    Dispose();
+                    mFontSRV = value;
+                    if (mFontSRV != null)
+                    {
+                        mSRCGCHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(mFontSRV));
+                    }
+                }
+            }
+            IntPtr mSRCGCHandle;
+            public IntPtr SRCGCHandle
+            {
+                get => mSRCGCHandle;
+            }
         }
         List<FontDatas> mFontDataList = new List<FontDatas>();
         public unsafe void RecreateFontDeviceTexture()
@@ -207,8 +238,7 @@ namespace EngineNS.EGui.Slate
             srvDesc.m_pTexture2D = fontData.FontTexture.mCoreObject;
             fontData.FontSRV = rc.CreateShaderResourceView(ref srvDesc);
 
-            var texId = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(fontData.FontSRV));
-            io.Fonts.SetTexID(texId.ToPointer());
+            io.Fonts.SetTexID(fontData.SRCGCHandle.ToPointer());
 
             io.Fonts.ClearTexData();
 

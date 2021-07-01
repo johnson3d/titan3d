@@ -125,11 +125,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
             if (bNewForm)
             {
-                if (ImGuiAPI.Begin($"{PGName}", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                //if (ImGuiAPI.Begin($"{PGName}", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                var sz = new Vector2(-1);
+                if (ImGuiAPI.BeginChild($"{PGName}", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     OnDrawContent(bShowReadOnly, bKeepColums);
                 }
-                ImGuiAPI.End();
+                ImGuiAPI.EndChild();
+                //ImGuiAPI.End();
             }
             else
             {

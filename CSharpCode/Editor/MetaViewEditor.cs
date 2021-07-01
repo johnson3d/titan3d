@@ -61,7 +61,9 @@ namespace EngineNS.Editor
 
                 var materials = new Graphics.Pipeline.Shader.UMaterialInstance[2];
                 materials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ddd.uminst"));
-                materials[1] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ddd.uminst"));
+                materials[1] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ground.uminst"));
+                //materials[1].UsedRSView[0].Value = RName.GetRName("UTest/texture/ground_01.srv");
+                //materials[1].SaveAssetTo(materials[1].AssetName);
                 if (materials[0] == null)
                     return;
                 var puppetMesh =await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(RName.GetRName("utest/mesh/puppet_low_ue4.vms"));
@@ -126,7 +128,8 @@ namespace EngineNS.Editor
                 var grid = Graphics.Mesh.CMeshDataProvider.MakeGridIndices(127, 127);
                 var gridMesh = grid.ToMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-                tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ddd.uminst"));
+                tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ground.uminst"));
+                //tMaterials[0].SaveAssetTo(tMaterials[1].AssetName);
                 ok = terrainMesh.Initialize(gridMesh, tMaterials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfTerrainMesh>.TypeDesc);
                 if (ok)
                 {
