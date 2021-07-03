@@ -284,5 +284,35 @@ namespace EngineNS.EGui.UIProxy
         [Controls.PropertyGrid.PGShowInPropertyGrid]
         [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 PGDeleteButtonBGActiveColor = 0xFF474793;
+
+        public unsafe void ResetStyle()
+        {
+            var style = ImGuiAPI.GetStyle();
+            style->Colors[(int)ImGuiCol_.ImGuiCol_Text] = new Vector4(0.75f, 0.75f, 0.75f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_WindowBg] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_TitleBgActive] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_TitleBg] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_Header] = new Vector4(0.15f, 0.73f, 1.00f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_HeaderActive] = new Vector4(0.15f, 0.73f, 1.00f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_HeaderHovered] = new Vector4(0.15f, 0.73f, 1.00f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_Tab] = new Vector4(0.08f, 0.08f, 0.08f, 0.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_TabHovered] = new Vector4(0.14f, 0.14f, 0.14f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_TabActive] = new Vector4(0.14f, 0.14f, 0.14f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_TabUnfocused] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_TabUnfocusedActive] = new Vector4(0.14f, 0.14f, 0.14f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_PopupBg] = new Vector4(0.22f, 0.22f, 0.22f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_MenuBarBg] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_DockingEmptyBg] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_Separator] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_SeparatorHovered] = new Vector4(0.22f, 0.22f, 0.22f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_SeparatorActive] = new Vector4(0.22f, 0.22f, 0.22f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_FrameBg] = new Vector4(0.06f, 0.06f, 0.06f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_FrameBgHovered] = new Vector4(0.06f, 0.06f, 0.06f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_FrameBgActive] = new Vector4(0.06f, 0.06f, 0.06f, 1.00f);
+            style->Colors[(int)ImGuiCol_.ImGuiCol_Header] = new Vector4(0.13f, 0.13f, 0.13f, 1.00f);
+            //style->WindowPadding = new Vector2(1, 0);
+            style->ChildBorderSize = 0.0f;
+            style->ScrollbarSize = 14.0f;
+        }
     }
 }

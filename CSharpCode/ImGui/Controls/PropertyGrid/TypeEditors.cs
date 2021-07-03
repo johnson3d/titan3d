@@ -716,6 +716,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         Readonly = false,
                         HostPropertyGrid = info.HostPropertyGrid,
                         Flags = info.Flags,
+                        Expand = treeNodeRet,
                     };
                     object newValue;
                     var changed = PropertyGrid.DrawPropertyGridItem(ref elementEditorInfo, out newValue);
@@ -877,6 +878,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         Readonly = false,
                         HostPropertyGrid = info.HostPropertyGrid,
                         Flags = info.Flags,
+                        Expand = treeNodeRet,
                     };
                     object newValue;
                     var changed = PropertyGrid.DrawPropertyGridItem(ref elementEditorInfo, out newValue);
@@ -1028,6 +1030,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     Readonly = false,
                     HostPropertyGrid = info.HostPropertyGrid,
                     Flags = info.Flags,
+                    Expand = treeNodeRet,
                 };
                 object newKeyValue;
                 if(PropertyGrid.DrawPropertyGridItem(ref keyEditorInfo, out newKeyValue))
@@ -1054,6 +1057,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     Readonly = false,
                     HostPropertyGrid = info.HostPropertyGrid,
                     Flags = info.Flags,
+                    Expand = treeNodeRet,
                 };
                 object newValue;
                 if(PropertyGrid.DrawPropertyGridItem(ref valueEditorInfo, out newValue))

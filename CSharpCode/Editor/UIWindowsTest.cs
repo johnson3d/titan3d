@@ -87,44 +87,6 @@ namespace EngineNS.Editor
     {
         public unsafe void Initialized()
         {
-            //var io = ImGuiAPI.GetIO();
-            //var size_pixels = 18.0f;
-            //ImFontConfig fontConfig = new ImFontConfig();
-            ////fontConfig.MergeMode = true;
-            ////var font = io.Fonts.AddFontDefault(&fontConfig);
-            //mDefaultFont = io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Medium.ttf", size_pixels, &fontConfig, io.Fonts.GetGlyphRangesDefault());
-            //////io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", size_pixels, &fontConfig, io.Fonts.GetGlyphRangesDefault());
-            //////io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", size_pixels, &fontConfig, io.Fonts.GetGlyphRangesChineseSimplifiedCommon());
-            //////io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", size_pixels, &fontConfig, io.Fonts.GetGlyphRangesDefault());
-            //io.Fonts.Build();
-
-            var style = ImGuiAPI.GetStyle();
-            style->Colors[(int)ImGuiCol_.ImGuiCol_Text] = new Vector4(0.75f, 0.75f, 0.75f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_WindowBg] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_TitleBgActive] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_TitleBg] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_Header] = new Vector4(0.15f, 0.73f, 1.00f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_HeaderActive] = new Vector4(0.15f, 0.73f, 1.00f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_HeaderHovered] = new Vector4(0.15f, 0.73f, 1.00f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_Tab] = new Vector4(0.08f, 0.08f, 0.08f, 0.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_TabHovered] = new Vector4(0.14f, 0.14f, 0.14f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_TabActive] = new Vector4(0.14f, 0.14f, 0.14f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_TabUnfocused] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_TabUnfocusedActive] = new Vector4(0.14f, 0.14f, 0.14f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_PopupBg] = new Vector4(0.22f, 0.22f, 0.22f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_MenuBarBg] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_DockingEmptyBg] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_Separator] = new Vector4(0.08f, 0.08f, 0.08f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_SeparatorHovered] = new Vector4(0.22f, 0.22f, 0.22f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_SeparatorActive] = new Vector4(0.22f, 0.22f, 0.22f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_FrameBg] = new Vector4(0.06f, 0.06f, 0.06f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_FrameBgHovered] = new Vector4(0.06f, 0.06f, 0.06f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_FrameBgActive] = new Vector4(0.06f, 0.06f, 0.06f, 1.00f);
-            style->Colors[(int)ImGuiCol_.ImGuiCol_Header] = new Vector4(0.13f, 0.13f, 0.13f, 1.00f);
-            //style->WindowPadding = new Vector2(1, 0);
-            style->ChildBorderSize = 0.0f;
-            style->ScrollbarSize = 14.0f;
-
             mMenuItems = new List<EGui.UIProxy.MenuItemProxy>()
             {
                 new EGui.UIProxy.MenuItemProxy()
@@ -502,6 +464,7 @@ namespace EngineNS.Editor
 
             var viewPort = ImGuiAPI.GetMainViewport();
             var inspector = new EGui.Controls.PropertyGrid.PropertyGrid();
+            inspector.PGName = "MeshEditor_PG";
             inspector.Initialize();
             inspector.SearchInfo = "Search Details";
             //inspector.Target = *viewPort;
@@ -594,13 +557,13 @@ namespace EngineNS.Editor
         public uint DockId { get; set; } = uint.MaxValue;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
-        EGui.UIProxy.ImageProxy image = new EGui.UIProxy.ImageProxy()
-        {
-            ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
-            ImageSize = new Vector2(320, 320),
-            UVMin = new Vector2(303.0f / 1024, 270.0f / 1024),
-            UVMax = new Vector2((303.0f + 32) / 1024, (270.0f + 32) / 1024),
-        };
+        //EGui.UIProxy.ImageProxy image = new EGui.UIProxy.ImageProxy()
+        //{
+        //    ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+        //    ImageSize = new Vector2(320, 320),
+        //    UVMin = new Vector2(303.0f / 1024, 270.0f / 1024),
+        //    UVMax = new Vector2((303.0f + 32) / 1024, (270.0f + 32) / 1024),
+        //};
 
         Vector2 uvMin = new Vector2(303.0f / 1024, 270.0f / 1024);
         Vector2 uvMax = new Vector2((303.0f + 32) / 1024, (270.0f + 32) / 1024);
@@ -608,10 +571,10 @@ namespace EngineNS.Editor
         {
             if(ImGuiAPI.Begin("Viewport", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                var drawList = ImGuiAPI.GetWindowDrawList();
-                image.UVMin = uvMin;
-                image.UVMax = uvMax;
-                image.OnDraw(ref drawList);
+            //    var drawList = ImGuiAPI.GetWindowDrawList();
+            //    image.UVMin = uvMin;
+            //    image.UVMax = uvMax;
+            //    image.OnDraw(ref drawList);
             }
             ImGuiAPI.End();
         }

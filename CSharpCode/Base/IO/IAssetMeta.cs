@@ -102,7 +102,7 @@ namespace EngineNS.IO
 
                     ImGuiAPI.Separator();
 
-                    PGAsset.OnDraw(false, true, false);
+                    PGAsset.OnDraw(false, false, false);
 
                     if (CheckAsset())
                     {

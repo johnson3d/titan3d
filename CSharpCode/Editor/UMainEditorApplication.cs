@@ -53,6 +53,7 @@ namespace EngineNS.Editor
 
             UEngine.Instance.TickableManager.AddTickable(this);
 
+            EGui.UIProxy.StyleConfig.Instance.ResetStyle();
             /////////////////////////////////
             mWinTest.Initialized();
             /////////////////////////////////

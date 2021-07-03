@@ -9,8 +9,8 @@
     <Import_RootNamespace>CodeGenCSharp</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Network.RPC.URpcManager.rpc.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Profiler.URpcProfiler.rpc.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Network.RPC.URpcManager.rpc.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UTest.UTest_Rpc.rpc.cs" />
   </ItemGroup>
 </Project>

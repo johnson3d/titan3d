@@ -125,18 +125,25 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
             if (bNewForm)
             {
-                //if (ImGuiAPI.Begin($"{PGName}", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-                var sz = new Vector2(-1);
-                if (ImGuiAPI.BeginChild($"{PGName}", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                if (ImGuiAPI.Begin($"{PGName}", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                //var sz = new Vector2(-1);
+                //if (ImGuiAPI.BeginChild($"{PGName}", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
-                    OnDrawContent(bShowReadOnly, bKeepColums);
+                    var winSize = ImGuiAPI.GetWindowSize();
+                    OnDrawContent(bShowReadOnly, in winSize, bKeepColums);
                 }
-                ImGuiAPI.EndChild();
-                //ImGuiAPI.End();
+                //ImGuiAPI.EndChild();
+                ImGuiAPI.End();
             }
             else
             {
-                OnDrawContent(bShowReadOnly, bKeepColums);
+                var winSize = ImGuiAPI.GetWindowSize();
+                var sz = new Vector2(-1);
+                if(ImGuiAPI.BeginChild($"{PGName}", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                {
+                    OnDrawContent(bShowReadOnly, in winSize, bKeepColums);
+                }
+                ImGuiAPI.EndChild();
             }
         }
 
@@ -174,12 +181,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             ImGuiAPI.EndGroup();
         }
-        private void OnDrawContent(bool bShowReadOnly, bool bKeepColums = false)
+        private void OnDrawContent(bool bShowReadOnly, in Vector2 winSize, bool bKeepColums = false)
         {
             var drawList = ImGuiAPI.GetWindowDrawList();
-            var posMin = ImGuiAPI.GetWindowPos();
-            var posMax = posMin + ImGuiAPI.GetWindowSize();
-            drawList.AddRectFilled(ref posMin, ref posMax, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
+            var posMin = ImGuiAPI.GetCursorPos(); //ImGuiAPI.GetWindowPos();
+            var posMax = posMin + winSize;// ImGuiAPI.GetWindowSize();
+            //drawList.AddRectFilled(ref posMin, ref posMax, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
 
             if (ImGuiAPI.IsWindowDocked())
             {
