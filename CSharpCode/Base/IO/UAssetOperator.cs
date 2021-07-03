@@ -68,7 +68,9 @@ namespace EngineNS.IO
             {
                 var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(i.Source);
                 IAsset asset = await ameta.LoadAsset();
-                
+
+                asset.SaveAssetTo(new RName(i.TargetPath, i.TargetType));
+
                 var nameSets = RName.RNameManager.Instance.mNameSets[(int)i.Source.RNameType];
                 nameSets.Remove(i.Source.Name);
                 i.Source.Name = i.TargetPath;
@@ -76,7 +78,6 @@ namespace EngineNS.IO
                 nameSets.Add(i.Source.Name, i.Source);
 
                 ameta.SaveAMeta();
-                asset.SaveAssetTo(ameta.GetAssetName());
             }
             foreach (var i in mDirtyAssets)
             {
