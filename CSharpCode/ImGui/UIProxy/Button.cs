@@ -43,6 +43,15 @@ namespace EngineNS.EGui.UIProxy
 
         ImageProxy mImage = new ImageProxy();
 
+        public void Cleanup()
+        {
+            mImage?.Dispose();
+        }
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await mImage.Initialize();
+            return true;
+        }
         public unsafe bool OnDraw(ref ImDrawList drawList)
         {
             bool retValue = false;

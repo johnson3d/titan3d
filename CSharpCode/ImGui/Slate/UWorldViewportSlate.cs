@@ -40,6 +40,11 @@ namespace EngineNS.EGui.Slate
             RenderPolicy?.Cleanup();
             RenderPolicy = null;
         }
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return true;
+        }
         public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;

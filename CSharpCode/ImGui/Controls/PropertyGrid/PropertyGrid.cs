@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using EngineNS;
 
 namespace EngineNS.EGui.Controls.PropertyGrid
@@ -63,6 +64,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             newValue = default;
             return false;
         }
+        public virtual async Task<bool> Initialize() 
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return true;
+        }
+        public virtual void Cleanup() { }
     }
     public class PGTypeEditorAttribute : PGCustomValueEditorAttribute
     {
@@ -134,11 +141,31 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public virtual object GetValue(object arg) { return null; }
     }
 
-    public class PGTypeEditorManager
+    public class PGTypeEditorManager : UModule<UEngine>
     {
-        public static PGTypeEditorManager Instance { get; } = new PGTypeEditorManager();
+        public PGTypeEditorManager()
+        {
+        }
 
-        private PGTypeEditorManager()
+        public override void Cleanup(UEngine host)
+        {
+            Cleanup();
+            base.Cleanup(host);
+        }
+        public void Cleanup()
+        {
+            ObjectWithCreateEditor.Cleanup();
+            EnumEditor.Cleanup();
+            ArrayEditor.Cleanup();
+            ListEditor.Cleanup();
+            DictionaryEditor.Cleanup();
+            foreach(var typeEditor in mTypeEditors.Values)
+            {
+                typeEditor.Cleanup();
+            }
+        }
+
+        public override async Task<bool> Initialize(UEngine host)
         {
             RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(bool)), new BoolEditor());
             RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(int)), new Int32Editor());
@@ -152,13 +179,25 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(float)), new FloatEditor());
             RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(double)), new DoubleEditor());
             RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(string)), new StringEditor());
+
+            ObjectWithCreateEditor = new ObjectWithCreateEditor();
+            await ObjectWithCreateEditor.Initialize();
+            EnumEditor = new EnumEditor();
+            await EnumEditor.Initialize();
+            ArrayEditor = new ArrayEditor();
+            await ArrayEditor.Initialize();
+            ListEditor = new ListEditor();
+            await ListEditor.Initialize();
+            DictionaryEditor = new DictionaryEditor();
+            await DictionaryEditor.Initialize();
+            return await base.Initialize(host);
         }
 
-        public ObjectWithCreateEditor ObjectWithCreateEditor = new ObjectWithCreateEditor();
-        public EnumEditor EnumEditor = new EnumEditor();
-        public ArrayEditor ArrayEditor = new ArrayEditor();
-        public ListEditor ListEditor = new ListEditor();
-        public DictionaryEditor DictionaryEditor = new DictionaryEditor();
+        public ObjectWithCreateEditor ObjectWithCreateEditor;
+        public EnumEditor EnumEditor;
+        public ArrayEditor ArrayEditor;
+        public ListEditor ListEditor;
+        public DictionaryEditor DictionaryEditor;
 
         Dictionary<Rtti.UTypeDesc, PGCustomValueEditorAttribute> mTypeEditors = new Dictionary<Rtti.UTypeDesc, PGCustomValueEditorAttribute>();
         public PGCustomValueEditorAttribute GetEditorType(Rtti.UTypeDesc type)
@@ -392,5 +431,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 mPopupOn = false;
             return valueChanged;
         }
+    }
+}
+
+namespace EngineNS
+{
+    public partial class UEngine
+    {
+        public EngineNS.EGui.Controls.PropertyGrid.PGTypeEditorManager PGTypeEditorManagerInstance { get; } = new EGui.Controls.PropertyGrid.PGTypeEditorManager();
     }
 }

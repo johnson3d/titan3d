@@ -46,6 +46,16 @@ namespace EngineNS.EGui.UIProxy
         {
             Dispose();
         }
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            // 图片加载不放到初始化里是为了不绘制就不加载
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return true;
+        }
+        public void Cleanup()
+        {
+            Dispose();
+        }
         public void Dispose()
         {
             if (mImagePtr != IntPtr.Zero)

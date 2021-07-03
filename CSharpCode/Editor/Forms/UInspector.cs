@@ -17,9 +17,14 @@ namespace EngineNS.Editor.Forms
         protected EGui.Controls.PropertyGrid.PropertyGrid mPropertyGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid PropertyGrid { get => mPropertyGrid; }
         
-        public void Initialize()
+        public void Cleanup()
         {
-            mPropertyGrid.Initialize();
+            mPropertyGrid.Cleanup();
+        }
+
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            return await mPropertyGrid.Initialize();
         }
         
         public unsafe void OnDraw()

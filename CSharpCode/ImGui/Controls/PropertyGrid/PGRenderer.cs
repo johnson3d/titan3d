@@ -28,7 +28,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             set;
         } = "Property Grid";
         //byte[] TextBuffer = new byte[1024 * 4];
-        List<KeyValuePair<object, System.Reflection.PropertyInfo>> mCallstack = new List<KeyValuePair<object, System.Reflection.PropertyInfo>>();
+        //List<KeyValuePair<object, System.Reflection.PropertyInfo>> mCallstack = new List<KeyValuePair<object, System.Reflection.PropertyInfo>>();
 
         public string SearchInfo
         {
@@ -65,51 +65,90 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         EGui.UIProxy.ImageButtonProxy mDelete;
         public EGui.UIProxy.ImageProxy IndentDec;
         EGui.UIProxy.ImageProxy mDropShadowDec;
-        public void Initialize()
+
+        public void Cleanup()
         {
-            mSearchBar = new UIProxy.SearchBarProxy();
-            mSearchBar.Initialize();
-            mSearchBar.InfoText = "Search Details";
-            mOpenInPropertyMatrix = new UIProxy.ImageButtonProxy()
+            mSearchBar?.Cleanup();
+            mSearchBar = null;
+            mOpenInPropertyMatrix?.Cleanup();
+            mOpenInPropertyMatrix = null;
+            mConfig?.Cleanup();
+            mConfig = null;
+            mDelete?.Cleanup();
+            mDelete = null;
+            IndentDec?.Dispose();
+            IndentDec = null;
+            mDropShadowDec?.Dispose();
+            mDrawTargetDic = null;
+        }
+
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+
+            if(mSearchBar == null)
             {
-                ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
-                Size = new Vector2(20, 20),
-                UVMin = new Vector2(521.0f/1024, 4.0f/1024),
-                UVMax = new Vector2(537.0f/1024, 20.0f/1024),
-                ImageSize = new Vector2(16, 16),
-            };
-            mConfig = new UIProxy.ImageButtonProxy()
+                mSearchBar = new UIProxy.SearchBarProxy();
+                mSearchBar.Initialize();
+                mSearchBar.InfoText = "Search Details";
+            }
+            if(mOpenInPropertyMatrix == null)
             {
-                ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
-                Size = new Vector2(20, 20),
-                UVMin = new Vector2(3.0f / 1024, 691.0f / 1024),
-                UVMax = new Vector2(19.0f / 1024, 707.0f / 1024),
-                ImageSize = new Vector2(16, 16),
-            };
-            mDelete = new UIProxy.ImageButtonProxy()
+                mOpenInPropertyMatrix = new UIProxy.ImageButtonProxy()
+                {
+                    ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                    Size = new Vector2(20, 20),
+                    UVMin = new Vector2(521.0f / 1024, 4.0f / 1024),
+                    UVMax = new Vector2(537.0f / 1024, 20.0f / 1024),
+                    ImageSize = new Vector2(16, 16),
+                };
+            }
+            if(mConfig == null)
             {
-                ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
-                Size = new Vector2(33, 0),
-                UVMin = new Vector2(539.0f / 1024, 21.0f / 1024),
-                UVMax = new Vector2(555.0f / 1024, 37.0f / 1024),
-                ImageSize = new Vector2(16, 16),
-                ShowBG = true,
-                ImageColor = 0xFFFFFFFF,
-            };
-            IndentDec = new UIProxy.ImageProxy()
+                mConfig = new UIProxy.ImageButtonProxy()
+                {
+                    ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                    Size = new Vector2(20, 20),
+                    UVMin = new Vector2(3.0f / 1024, 691.0f / 1024),
+                    UVMax = new Vector2(19.0f / 1024, 707.0f / 1024),
+                    ImageSize = new Vector2(16, 16),
+                };
+            }
+            if(mDelete == null)
             {
-                ImageFile = RName.GetRName("icons/indentdec.srv", RName.ERNameType.Engine),
-                ImageSize = new Vector2(32, 2),
-                UVMin = Vector2.Zero,
-                UVMax = Vector2.UnitXY,
-            };
-            mDropShadowDec = new UIProxy.ImageProxy()
+                mDelete = new UIProxy.ImageButtonProxy()
+                {
+                    ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                    Size = new Vector2(33, 0),
+                    UVMin = new Vector2(539.0f / 1024, 21.0f / 1024),
+                    UVMax = new Vector2(555.0f / 1024, 37.0f / 1024),
+                    ImageSize = new Vector2(16, 16),
+                    ShowBG = true,
+                    ImageColor = 0xFFFFFFFF,
+                };
+            }
+            if(IndentDec == null)
             {
-                ImageFile = RName.GetRName("icons/shadowtop.srv", RName.ERNameType.Engine),
-                ImageSize = new Vector2(32, 2),
-                UVMin = Vector2.Zero,
-                UVMax = Vector2.UnitXY,
-            };
+                IndentDec = new UIProxy.ImageProxy()
+                {
+                    ImageFile = RName.GetRName("icons/indentdec.srv", RName.ERNameType.Engine),
+                    ImageSize = new Vector2(32, 2),
+                    UVMin = Vector2.Zero,
+                    UVMax = Vector2.UnitXY,
+                };
+            }
+            if(mDropShadowDec == null)
+            {
+                mDropShadowDec = new UIProxy.ImageProxy()
+                {
+                    ImageFile = RName.GetRName("icons/shadowtop.srv", RName.ERNameType.Engine),
+                    ImageSize = new Vector2(32, 2),
+                    UVMin = Vector2.Zero,
+                    UVMax = Vector2.UnitXY,
+                };
+            }
+
+            return true;
         }
         
         public void OnDraw()
@@ -120,8 +159,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             if (Visible == false)
                 return;
-            mCallstack.Clear();
-            mCallstack.Add(new KeyValuePair<object, System.Reflection.PropertyInfo>(null, null));
+            //mCallstack.Clear();
+            //mCallstack.Add(new KeyValuePair<object, System.Reflection.PropertyInfo>(null, null));
 
             if (bNewForm)
             {
@@ -129,19 +168,21 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 //var sz = new Vector2(-1);
                 //if (ImGuiAPI.BeginChild($"{PGName}", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
+                    var winPos = ImGuiAPI.GetWindowPos();
                     var winSize = ImGuiAPI.GetWindowSize();
-                    OnDrawContent(bShowReadOnly, in winSize, bKeepColums);
+                    OnDrawContent(bShowReadOnly, in winPos, in winSize, bKeepColums);
                 }
                 //ImGuiAPI.EndChild();
                 ImGuiAPI.End();
             }
             else
             {
+                var winPos = ImGuiAPI.GetWindowPos();
                 var winSize = ImGuiAPI.GetWindowSize();
                 var sz = new Vector2(-1);
                 if(ImGuiAPI.BeginChild($"{PGName}", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
-                    OnDrawContent(bShowReadOnly, in winSize, bKeepColums);
+                    OnDrawContent(bShowReadOnly, in winPos, in winSize, bKeepColums);
                 }
                 ImGuiAPI.EndChild();
             }
@@ -181,12 +222,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             ImGuiAPI.EndGroup();
         }
-        private void OnDrawContent(bool bShowReadOnly, in Vector2 winSize, bool bKeepColums = false)
+        private void OnDrawContent(bool bShowReadOnly, in Vector2 drawPos, in Vector2 drawSize, bool bKeepColums = false)
         {
             var drawList = ImGuiAPI.GetWindowDrawList();
-            var posMin = ImGuiAPI.GetCursorPos(); //ImGuiAPI.GetWindowPos();
-            var posMax = posMin + winSize;// ImGuiAPI.GetWindowSize();
-            //drawList.AddRectFilled(ref posMin, ref posMax, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
+            var posMin = drawPos;//ImGuiAPI.GetCursorPos(); //ImGuiAPI.GetWindowPos();
+            var posMax = posMin + drawSize;// ImGuiAPI.GetWindowSize();
+            drawList.AddRectFilled(ref posMin, ref posMax, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
 
             if (ImGuiAPI.IsWindowDocked())
             {
@@ -470,7 +511,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 ImGuiAPI.TableSetColumnIndex(1);
                                 //ImGuiAPI.GotoColumns(1);
                                 PushPGEditorStyleValues();
-                                var changed = PGTypeEditorManager.Instance.ObjectWithCreateEditor.OnDraw(in itemEditorInfo, out newValue);
+                                var changed = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ObjectWithCreateEditor.OnDraw(in itemEditorInfo, out newValue);
                                 PopPGEditorStyleValues();
                                 if (changed)
                                 {
@@ -635,7 +676,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             if(typeDesc == null)
                 typeDesc = Rtti.UTypeDesc.TypeOf(value.GetType());
-            var editor = PGTypeEditorManager.Instance.GetEditorType(typeDesc);
+            var editor = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.GetEditorType(typeDesc);
             if (editor != null)
                 return !editor.Expandable;
             if (typeDesc.SystemType.IsEnum)
@@ -662,27 +703,27 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 if (info.Value == null && CanNewObject(info.Type))
                 {
-                    valueChanged = PGTypeEditorManager.Instance.ObjectWithCreateEditor.OnDraw(in info, out newValue);
+                    valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ObjectWithCreateEditor.OnDraw(in info, out newValue);
                 }
-                else if (PGTypeEditorManager.Instance.DrawTypeEditor(in info, out newValue, out valueChanged))
+                else if (EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.DrawTypeEditor(in info, out newValue, out valueChanged))
                 {
                     //return valueChanged;
                 }
                 else if (info.Type.IsEnum)
                 {
-                    valueChanged = PGTypeEditorManager.Instance.EnumEditor.OnDraw(in info, out newValue);
+                    valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.EnumEditor.OnDraw(in info, out newValue);
                 }
                 else if (info.Type.IsArray)
                 {
-                    valueChanged = PGTypeEditorManager.Instance.ArrayEditor.OnDraw(in info, out newValue);
+                    valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ArrayEditor.OnDraw(in info, out newValue);
                 }
                 else if (info.Type.SystemType.GetInterface(typeof(System.Collections.IList).FullName) != null)
                 {
-                    valueChanged = PGTypeEditorManager.Instance.ListEditor.OnDraw(in info, out newValue);
+                    valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ListEditor.OnDraw(in info, out newValue);
                 }
                 else if (info.Type.SystemType.GetInterface(typeof(System.Collections.IDictionary).FullName) != null)
                 {
-                    valueChanged = PGTypeEditorManager.Instance.DictionaryEditor.OnDraw(in info, out newValue);
+                    valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.DictionaryEditor.OnDraw(in info, out newValue);
                 }
                 else
                 {

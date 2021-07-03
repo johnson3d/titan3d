@@ -13,7 +13,13 @@ namespace EngineNS.EGui.UIProxy
         ImageProxy mIcon;
         bool mFocused = false;
 
-        public void Initialize()
+        public void Cleanup()
+        {
+            mIcon?.Dispose();
+            mIcon = null;
+        }
+
+        public async System.Threading.Tasks.Task<bool> Initialize()
         {
             mIcon = new ImageProxy()
             {
@@ -22,6 +28,8 @@ namespace EngineNS.EGui.UIProxy
                 UVMin = new Vector2(3.0f/1024, 655.0f/1024),
                 UVMax = new Vector2(19.0f/1024, 671.0f/1024),
             };
+            await mIcon.Initialize();
+            return true;
         }
 
         public unsafe bool OnDraw(ref ImDrawList drawList)

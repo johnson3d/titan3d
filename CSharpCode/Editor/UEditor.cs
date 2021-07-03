@@ -16,6 +16,11 @@ namespace EngineNS.Editor
     {
         public UEditorConfig Config { get; set; } = new UEditorConfig();
 
+        public override void Cleanup(UEngine host)
+        {
+            base.Cleanup(host);
+        }
+
         public override async Task<bool> Initialize(UEngine host)
         {
             var cfgFile = host.FileManager.GetRoot(IO.FileManager.ERootDir.Editor) + "EditorConfig.cfg";

@@ -24,6 +24,10 @@ namespace EngineNS.Editor.Forms
                 TextureID = IntPtr.Zero;
             }
         }
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            return await TexturePropGrid.Initialize();
+        }
         public Graphics.Pipeline.IRootForm GetRootForm()
         {
             return this;
@@ -34,7 +38,6 @@ namespace EngineNS.Editor.Forms
             TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(name);
             if (TextureSRV == null)
                 return false;
-            TexturePropGrid.Initialize();
 
             TexturePropGrid.Target = TextureSRV;
             ImageSize.X = TextureSRV.PicDesc.Width;

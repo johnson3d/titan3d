@@ -38,6 +38,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             PreviewViewport = null;
             MaterialPropGrid.Target = null;
         }
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return true;
+        }
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; }

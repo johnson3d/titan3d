@@ -35,6 +35,7 @@ namespace EngineNS.Editor
         {
             Graphics.Pipeline.USlateApplication.ClearRootForms();
             UEngine.Instance?.TickableManager.RemoveTickable(this);
+            mWinTest.Cleanup();
             base.Cleanup();
         }
         public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, Type rpType)
@@ -56,6 +57,7 @@ namespace EngineNS.Editor
             EGui.UIProxy.StyleConfig.Instance.ResetStyle();
             /////////////////////////////////
             mWinTest.Initialized();
+            //Editor.UMainEditorApplication.RegRootForm(mWinTest);
             /////////////////////////////////
 
             return true;
@@ -182,10 +184,9 @@ namespace EngineNS.Editor
                 WorldViewportSlate.DockId = CenterDockId;
 
                 DrawRootForms();
+                mWinTest.OnDraw();
 
                 AssetEditorManager.OnDraw();
-
-                mWinTest.OnDraw();
             }
             catch
             {

@@ -10,6 +10,18 @@ namespace EngineNS.Windows
         {
             Editor.UMainEditorApplication.RegRootForm(this);
         }
+
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return true;
+        }
+
+        public void Cleanup()
+        {
+
+        }
+
         public bool Visible { get; set; } = true;
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;

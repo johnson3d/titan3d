@@ -17,6 +17,7 @@ namespace EngineNS.Editor
         void OnDraw();
         void OnEvent(ref SDL2.SDL.SDL_Event e);
         Graphics.Pipeline.IRootForm GetRootForm();
+        System.Threading.Tasks.Task<bool> Initialize();
     }
     public class UAssetEditorManager
     {
@@ -37,6 +38,8 @@ namespace EngineNS.Editor
             {
                 editor = Rtti.UTypeDescManager.CreateInstance(editorType) as IAssetEditor;
                 editor.AssetName = name;
+                if (await editor.Initialize() == false)
+                    return;
                 OpenedEditors.Add(editor);
             }
             var ok = await editor.OpenEditor(mainEditor, name, arg);

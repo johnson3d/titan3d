@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using EngineNS;
 
 namespace EngineNS.EGui
@@ -11,6 +12,8 @@ namespace EngineNS.EGui
         void OnDraw();
         uint DockId { get; set; }
         ImGuiCond_ DockCond { get; set; }
+        Task<bool> Initialize();
+        void Cleanup();
     }
     public class UIFormBase
     {
