@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EngineNS.Editor
 {
@@ -85,8 +86,18 @@ namespace EngineNS.Editor
 
     public class UIWindowsTest
     {
-        public unsafe void Initialized()
+        public void Cleanup()
         {
+            for(int i=0; i<mForms.Count; i++)
+            {
+                mForms[i].Cleanup();
+            }
+        }
+
+        public async void Initialized()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+
             mMenuItems = new List<EGui.UIProxy.MenuItemProxy>()
             {
                 new EGui.UIProxy.MenuItemProxy()
@@ -387,123 +398,137 @@ namespace EngineNS.Editor
 
         EGui.UIProxy.Toolbar mToolbar;
 
-        public unsafe void Initialize()
+        public void Cleanup()
         {
-            mToolbar = new EGui.UIProxy.Toolbar();
-            mToolbar.AddToolbarItems(
-                new EGui.UIProxy.ToolbarIconButtonProxy()
-                {
-                    Name = "Save",
-                    Icon = new EGui.UIProxy.ImageProxy()
-                    {
-                        ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
-                        ImageSize = new Vector2(20, 20),
-                        UVMin = new Vector2(3.0f / 1024, 4.0f / 1024),
-                        UVMax = new Vector2(23.0f / 1024, 24.0f / 1024),
-                    },
-                    Action = ()=>
-                    {
+            for(int i=0; i<mPanels.Count; i++)
+            {
+                mPanels[i].Cleanup();
+            }
+        }
 
-                    },
-                },
-                new EGui.UIProxy.ToolbarIconButtonProxy()
-                {
-                    Name = "Browse",
-                    Icon = new EGui.UIProxy.ImageProxy()
-                    {
-                        ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
-                        ImageSize = new Vector2(20, 20),
-                        UVMin = new Vector2(414.0f / 1024, 3.0f / 1024),
-                        UVMax = new Vector2(434.0f / 1024, 23.0f / 1024),
-                    },
-                    Action = ()=>
-                    {
+        public async Task<bool> Initialize()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
 
-                    },
-                },
-                new EGui.UIProxy.ToolbarSeparator(),
-                new EGui.UIProxy.ToolbarIconButtonProxy()
-                {
-                    Name = "Reimport Base Mesh",
-                    Icon = new EGui.UIProxy.ImageProxy()
+            unsafe
+            {
+                mToolbar = new EGui.UIProxy.Toolbar();
+                mToolbar.AddToolbarItems(
+                    new EGui.UIProxy.ToolbarIconButtonProxy()
                     {
-                        ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
-                        ImageSize = new Vector2(20, 20),
-                        UVMin = new Vector2(437.0f / 1024, 3.0f / 1024),
-                        UVMax = new Vector2(457.0f / 1024, 23.0f / 1024),
-                    },
-                    Action = ()=>
-                    {
+                        Name = "Save",
+                        Icon = new EGui.UIProxy.ImageProxy()
+                        {
+                            ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                            ImageSize = new Vector2(20, 20),
+                            UVMin = new Vector2(3.0f / 1024, 4.0f / 1024),
+                            UVMax = new Vector2(23.0f / 1024, 24.0f / 1024),
+                        },
+                        Action = () =>
+                        {
 
+                        },
                     },
-                },
-                new EGui.UIProxy.ToolbarSeparator(),
-                new EGui.UIProxy.ToolbarIconButtonProxy()
-                {
-                    Name = "Collision",
-                    Icon = new EGui.UIProxy.ImageProxy()
+                    new EGui.UIProxy.ToolbarIconButtonProxy()
                     {
-                        ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
-                        ImageSize = new Vector2(20, 20),
-                        UVMin = new Vector2(459.0f / 1024, 4.0f / 1024),
-                        UVMax = new Vector2(479.0f / 1024, 24.0f / 1024),
-                    },
-                },
-                new EGui.UIProxy.ToolbarIconButtonProxy()
-                {
-                    Name = "UV",
-                    Icon = new EGui.UIProxy.ImageProxy()
-                    {
-                        ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
-                        ImageSize = new Vector2(20, 20),
-                        UVMin = new Vector2(481.0f / 1024, 4.0f / 1024),
-                        UVMax = new Vector2(501.0f / 1024, 24.0f / 1024),
-                    },
-                }
-            );
+                        Name = "Browse",
+                        Icon = new EGui.UIProxy.ImageProxy()
+                        {
+                            ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                            ImageSize = new Vector2(20, 20),
+                            UVMin = new Vector2(414.0f / 1024, 3.0f / 1024),
+                            UVMax = new Vector2(434.0f / 1024, 23.0f / 1024),
+                        },
+                        Action = () =>
+                        {
 
-            var viewPort = ImGuiAPI.GetMainViewport();
-            var inspector = new EGui.Controls.PropertyGrid.PropertyGrid();
-            inspector.PGName = "MeshEditor_PG";
-            inspector.Initialize();
-            inspector.SearchInfo = "Search Details";
-            //inspector.Target = *viewPort;
-            //inspector.Target = EGui.UIProxy.StyleConfig.Instance;
-            //inspector.Target = new PropertyGridTestClass();//EGui.UIProxy.StyleConfig.Instance;
-            inspector.Target = new object[] { new PropertyGridTestClass(),
-                new PropertyGridTestClass()
-                {
-                    BoolValue = true,
-                    SByteValue = 1,
-                    UInt16Value = 1,
-                    UInt32Value = 1,
-                    UInt64Value = 1,
-                    ByteValue = 1,
-                    Int16Value = 1,
-                    Int32Value = 1,
-                    Int64Value = 1,
-                    FloatValue = 1,
-                    DoubleValue = 1,
-                    StringValue = "abc",
-                    NEnumValue = PropertyGridTestClass.NormalEnum.EnumV3,
-                    FlagEnumValue = PropertyGridTestClass.FlagEnum.FEV2,
-                    Vector2Value = new Vector2(1, 0),
-                    Vector3Value = new Vector3(1, 0, 1),
-                    Vector4Value = new Vector4(1, 0, 1, 0),
-                    Color4Value = new Vector4(1, 0, 1, 0),
-                    Color3Value = new Vector3(1, 0, 1),
-                    Color = 0xFF00FF00,
-                    ValueType = new ValueType()
+                        },
+                    },
+                    new EGui.UIProxy.ToolbarSeparator(),
+                    new EGui.UIProxy.ToolbarIconButtonProxy()
+                    {
+                        Name = "Reimport Base Mesh",
+                        Icon = new EGui.UIProxy.ImageProxy()
+                        {
+                            ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                            ImageSize = new Vector2(20, 20),
+                            UVMin = new Vector2(437.0f / 1024, 3.0f / 1024),
+                            UVMax = new Vector2(457.0f / 1024, 23.0f / 1024),
+                        },
+                        Action = () =>
+                        {
+
+                        },
+                    },
+                    new EGui.UIProxy.ToolbarSeparator(),
+                    new EGui.UIProxy.ToolbarIconButtonProxy()
+                    {
+                        Name = "Collision",
+                        Icon = new EGui.UIProxy.ImageProxy()
+                        {
+                            ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                            ImageSize = new Vector2(20, 20),
+                            UVMin = new Vector2(459.0f / 1024, 4.0f / 1024),
+                            UVMax = new Vector2(479.0f / 1024, 24.0f / 1024),
+                        },
+                    },
+                    new EGui.UIProxy.ToolbarIconButtonProxy()
+                    {
+                        Name = "UV",
+                        Icon = new EGui.UIProxy.ImageProxy()
+                        {
+                            ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                            ImageSize = new Vector2(20, 20),
+                            UVMin = new Vector2(481.0f / 1024, 4.0f / 1024),
+                            UVMax = new Vector2(501.0f / 1024, 24.0f / 1024),
+                        },
+                    }
+                );
+
+                //var viewPort = ImGuiAPI.GetMainViewport();
+                var inspector = new EGui.Controls.PropertyGrid.PropertyGrid();
+                inspector.PGName = "MeshEditor_PG";
+                inspector.Initialize();
+                inspector.SearchInfo = "Search Details";
+                //inspector.Target = *viewPort;
+                //inspector.Target = EGui.UIProxy.StyleConfig.Instance;
+                inspector.Target = new PropertyGridTestClass();//EGui.UIProxy.StyleConfig.Instance;
+                /*inspector.Target = new object[] { new PropertyGridTestClass(),
+                    new PropertyGridTestClass()
                     {
                         BoolValue = true,
-                    },
-                }
-            };//EGui.UIProxy.StyleConfig.Instance;
-            mPanels.Add(inspector);
-            var contentBrowser = new ContentBrowser();
-            contentBrowser.Initialize();
-            mPanels.Add(contentBrowser);
-            mPanels.Add(new ViewportPanel());
+                        SByteValue = 1,
+                        UInt16Value = 1,
+                        UInt32Value = 1,
+                        UInt64Value = 1,
+                        ByteValue = 1,
+                        Int16Value = 1,
+                        Int32Value = 1,
+                        Int64Value = 1,
+                        FloatValue = 1,
+                        DoubleValue = 1,
+                        StringValue = "abc",
+                        NEnumValue = PropertyGridTestClass.NormalEnum.EnumV3,
+                        FlagEnumValue = PropertyGridTestClass.FlagEnum.FEV2,
+                        Vector2Value = new Vector2(1, 0),
+                        Vector3Value = new Vector3(1, 0, 1),
+                        Vector4Value = new Vector4(1, 0, 1, 0),
+                        Color4Value = new Vector4(1, 0, 1, 0),
+                        Color3Value = new Vector3(1, 0, 1),
+                        Color = 0xFF00FF00,
+                        ValueType = new ValueType()
+                        {
+                            BoolValue = true,
+                        },
+                    }
+                };//EGui.UIProxy.StyleConfig.Instance;*/
+                mPanels.Add(inspector);
+                var contentBrowser = new ContentBrowser();
+                contentBrowser.Initialize();
+                mPanels.Add(contentBrowser);
+                mPanels.Add(new ViewportPanel());
+            }
+            return true;
         }
 
         UInt32 mPanelDockId;
@@ -565,6 +590,13 @@ namespace EngineNS.Editor
         //    UVMax = new Vector2((303.0f + 32) / 1024, (270.0f + 32) / 1024),
         //};
 
+        public void Cleanup() { }
+        public async Task<bool> Initialize() 
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return true; 
+        }
+
         Vector2 uvMin = new Vector2(303.0f / 1024, 270.0f / 1024);
         Vector2 uvMax = new Vector2((303.0f + 32) / 1024, (270.0f + 32) / 1024);
         public void OnDraw()
@@ -589,8 +621,15 @@ namespace EngineNS.Editor
 
         EGui.UIProxy.Toolbar mToolbar;
 
-        public void Initialize()
+        public void Cleanup()
         {
+            mToolbar.Cleanup();
+        }
+
+        public async Task<bool> Initialize()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+
             mToolbar = new EGui.UIProxy.Toolbar();
             mToolbar.AddToolbarItems(
                 new EGui.UIProxy.ToolbarIconButtonProxy()
@@ -639,6 +678,8 @@ namespace EngineNS.Editor
                     },
                 }
             );
+
+            return true;
         }
 
         public void OnDraw()

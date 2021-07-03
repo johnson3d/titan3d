@@ -18,6 +18,19 @@ namespace EngineNS.EGui.UIProxy
             get => StyleConfig.Instance.ToolbarHeight;
         }
 
+        public void Cleanup()
+        {
+            for(int i=0; i<ToolbarItems.Count; i++)
+            {
+                ToolbarItems[i].Cleanup();
+            }
+        }
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return true;
+        }
+
         public void AddToolbarItems(params IToolbarItem[] items)
         {
             ToolbarItems.AddRange(items);
@@ -60,6 +73,17 @@ namespace EngineNS.EGui.UIProxy
 
         bool isMouseDown = false;
         bool isMouseHover = false;
+
+        public void Cleanup()
+        {
+            Icon?.Dispose();
+            Icon = null;
+        }
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return true;
+        }
 
         public bool OnDraw(ref ImDrawList drawList)
         {
@@ -138,6 +162,13 @@ namespace EngineNS.EGui.UIProxy
     {
         public float NextItemOffset => 0;
         public float NextItemSpacing => StyleConfig.Instance.ToolbarSeparatorThickness + StyleConfig.Instance.ItemSpacing.X * 2;
+
+        public void Cleanup() { }
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return true;
+        }
 
         public bool OnDraw(ref ImDrawList drawList)
         {

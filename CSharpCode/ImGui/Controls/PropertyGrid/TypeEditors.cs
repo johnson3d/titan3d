@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EngineNS.EGui.Controls.PropertyGrid
 {
@@ -8,7 +9,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     {
         EngineNS.EGui.UIProxy.ImageButtonProxy mImageButton;
 
-        public ObjectWithCreateEditor()
+        public override async Task<bool> Initialize()
         {
             mImageButton = new UIProxy.ImageButtonProxy()
             {
@@ -20,6 +21,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ShowBG = true,
                 ImageColor = 0xFFFFFFFF,
             };
+            await mImageButton.Initialize();
+            return await base.Initialize();
         }
 
         public override bool OnDraw(in EditorInfo info, out object newValue)
@@ -459,8 +462,6 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     }
     public class StringEditor : PGCustomValueEditorAttribute
     {
-        byte[] TextBuffer = new byte[1024 * 4];
-
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
             bool valueChanged = false;
@@ -485,11 +486,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 var v = info.Value as string;
                 var strPtr = System.Runtime.InteropServices.Marshal.StringToHGlobalAnsi(v);
-                fixed (byte* pBuffer = &TextBuffer[0])
+                Span<byte> textBuffer = stackalloc byte[1024 * 4];
+                fixed (byte* pBuffer = &textBuffer[0])
                 {
-                    CoreSDK.SDK_StrCpy(pBuffer, strPtr.ToPointer(), (uint)TextBuffer.Length);
+                    CoreSDK.SDK_StrCpy(pBuffer, strPtr.ToPointer(), (uint)textBuffer.Length);
                     //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
-                    ImGuiAPI.InputText(name, pBuffer, (uint)TextBuffer.Length, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+                    ImGuiAPI.InputText(name, pBuffer, (uint)textBuffer.Length, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
                     //ImGuiAPI.PopStyleVar(1);
                     if (CoreSDK.SDK_StrCmp(pBuffer, strPtr.ToPointer()) != 0)
                     {
@@ -506,7 +508,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     public class EnumEditor : PGCustomValueEditorAttribute
     {
         EGui.UIProxy.ImageProxy mImage;
-        public EnumEditor()
+
+        public override async Task<bool> Initialize()
         {
             mImage = new UIProxy.ImageProxy()
             {
@@ -515,6 +518,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 UVMin = new Vector2(543.0f / 1024, 3.0f / 1024),
                 UVMax = new Vector2(559.0f / 1024, 19.0f / 1024),
             };
+            await mImage.Initialize();
+            return await base.Initialize();
+        }
+
+        public override void Cleanup()
+        {
+            mImage?.Dispose();
+            base.Cleanup();
         }
 
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)

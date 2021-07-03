@@ -18,6 +18,20 @@ namespace EngineNS.EGui.UIProxy
 
         public List<IUIProxyBase> SubMenus;
 
+        public void Cleanup()
+        {
+            Icon?.Dispose();
+            for(int i=0; i<SubMenus.Count; i++)
+            {
+                SubMenus[i].Cleanup();
+            }
+        }
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return true;
+        }
+
         public bool OnDraw(ref ImDrawList drawList)
         {
             bool retValue = false;
@@ -108,6 +122,16 @@ namespace EngineNS.EGui.UIProxy
     {
         public string Name = "Unknow";
         public float Thickness = 1.0f;
+
+        public void Cleanup()
+        {
+
+        }
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return true;
+        }
 
         public bool OnDraw(ref ImDrawList drawList)
         {

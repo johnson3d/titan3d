@@ -9,6 +9,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     public partial class ClassGraph : IO.ISerializer, Editor.IAssetEditor, Graphics.Pipeline.IRootForm
     {
+        public void Cleanup()
+        {
+
+        }
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return true;
+        }
         public Graphics.Pipeline.IRootForm GetRootForm()
         {
             return this;

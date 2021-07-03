@@ -25,14 +25,17 @@ namespace EngineNS.Editor.Forms
             PreviewViewport = null;
             MaterialPropGrid.Target = null;
         }
+        public async System.Threading.Tasks.Task<bool> Initialize()
+        {
+            await MaterialPropGrid.Initialize();
+            return true;
+        }
         public IRootForm GetRootForm()
         {
             return this;
         }
         protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Bricks.CodeBuilder.ShaderNode.UPreviewViewport viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
         {
-            MaterialPropGrid.Initialize();
-
             viewport.RenderPolicy = policy;
 
             await viewport.RenderPolicy.Initialize(1, 1);

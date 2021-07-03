@@ -11,6 +11,8 @@ namespace EngineNS.Graphics.Pipeline
         void OnDraw();
         uint DockId { get; set; }
         ImGuiCond_ DockCond { get; set; }
+        Task<bool> Initialize();
+        void Cleanup();
     }
     public class USlateApplication
     {

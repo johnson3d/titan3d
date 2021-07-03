@@ -22,6 +22,11 @@ namespace EngineNS.EGui.Controls
         public IO.IAssetMeta SelectedAsset = null;
         public Action<IO.IAssetMeta> ItemSelectedAction = null;
 
+        public void Cleanup()
+        {
+            mSearchBar?.Cleanup();
+        }
+
         public async Task<bool> Initialize()
         {
             await Thread.AsyncDummyClass.DummyFunc();
@@ -36,6 +41,8 @@ namespace EngineNS.EGui.Controls
 
             return true;
         }
+
+
 
         struct stMenuItem
         {
