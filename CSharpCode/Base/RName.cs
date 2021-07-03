@@ -152,7 +152,7 @@ namespace EngineNS
         internal class RNameManager
         {
             public static RNameManager Instance = new RNameManager();
-            Dictionary<string, RName>[] mNameSets = null;
+            internal Dictionary<string, RName>[] mNameSets = null;
             public RNameManager()
             {
                 mNameSets = new Dictionary<string, RName>[(int)ERNameType.Count];
