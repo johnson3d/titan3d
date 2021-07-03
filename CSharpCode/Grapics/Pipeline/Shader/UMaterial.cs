@@ -346,7 +346,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 HostMaterial = hostObject as UMaterial;
             }
             UMaterial HostMaterial;
-            [Rtti.Meta]
+            [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
             public string Name { get; set; }
             RName mValue;
             [Rtti.Meta]

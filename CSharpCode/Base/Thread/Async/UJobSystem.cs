@@ -127,9 +127,10 @@ namespace EngineNS.UTest
     public class UTest_UJobSystem
     {
         public int NumSum = 0;
+        static Action action;
         public void UnitTestEntrance()
         {
-            Action action = async () =>
+            action = async () =>
             {
                 var jobSystem = new Thread.Async.UJobSystem<UTestJob>();
                 for (int i = 0; i < 1000; i++)
@@ -152,6 +153,7 @@ namespace EngineNS.UTest
                     //这个断言还真不一定能保证，foreach 后才clear的
                 }
                 UnitTestManager.TAssert(this.NumSum == 1000, "?");
+                action = null;
             };
             action();
         }
