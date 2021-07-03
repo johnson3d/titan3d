@@ -174,6 +174,15 @@ namespace EngineNS.IO
     {
         RName mAssetName;
         public bool HasSnapshot { get; set; } = true;
+        public virtual async System.Threading.Tasks.Task<IAsset> LoadAsset()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return null;
+        }
+        public virtual void DeleteAsset(string name, RName.ERNameType type)
+        {
+
+        }
         public virtual void ResetSnapshot()
         {
             HasSnapshot = true;

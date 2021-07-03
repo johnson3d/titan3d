@@ -9,16 +9,25 @@ namespace EngineNS.IO
         public struct UAssetModifier
         {
             public RName Source;
+            public string SourcePath;
+            public RName.ERNameType SourceType;
             public string TargetPath;
             public RName.ERNameType TargetType;
         }
         public List<UAssetModifier> Modifiers { get; set; } = new List<UAssetModifier>();
         public Dictionary<RName, IAsset> mDirtyAssets = new Dictionary<RName, IAsset>();
-        public void AddModifier(UAssetModifier mdf)
+        public void AddModifier(RName source, string targetPath, RName.ERNameType targetType)
         {
-            
+            UAssetModifier mdf = new UAssetModifier();
+            mdf.Source = source;
+            mdf.SourcePath = source.Name;
+            mdf.SourceType = source.RNameType;
+            mdf.TargetPath = targetPath;
+            mdf.TargetType = targetType;
+
+            Modifiers.Add(mdf);
         }
-        public void Execute()
+        public async System.Threading.Tasks.Task Execute()
         {
             foreach (var i in Modifiers)
             {
@@ -28,28 +37,39 @@ namespace EngineNS.IO
                     System.Diagnostics.Debug.Assert(false);
                     continue;
                 }
-                i.Source.Name = i.TargetPath;
-                i.Source.RNameType = i.TargetType;
                 foreach (var j in ameta.RefAssetRNames)
                 {
                     if (mDirtyAssets.ContainsKey(j))
                         continue;
-                    IAsset dirtyAsset = null;
+
+                    var ameta_dirty = UEngine.Instance.AssetMetaManager.GetAssetMeta(j);
+
+                    IAsset dirtyAsset = await ameta_dirty.LoadAsset();
                     mDirtyAssets.Add(j, dirtyAsset);
                 }
-                IAsset asset = null;// ameta.GetAssetName();
-                asset.SaveAssetTo(ameta.GetAssetName());
-                //IO.FileManager.DeleteAsset
             }
             foreach (var i in Modifiers)
             {
+                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(i.Source);
+                IAsset asset = await ameta.LoadAsset();
+                
                 var nameSets = RName.RNameManager.Instance.mNameSets[(int)i.Source.RNameType];
                 nameSets.Remove(i.Source.Name);
+                i.Source.Name = i.TargetPath;
+                i.Source.RNameType = i.TargetType;
                 nameSets.Add(i.Source.Name, i.Source);
+
+                ameta.SaveAMeta();
+                asset.SaveAssetTo(ameta.GetAssetName());
             }
             foreach (var i in mDirtyAssets)
             {
                 i.Value.SaveAssetTo(i.Key);
+            }
+            foreach (var i in Modifiers)
+            {
+                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(i.Source);
+                ameta.DeleteAsset(i.SourcePath, i.SourceType);
             }
         }
     }
