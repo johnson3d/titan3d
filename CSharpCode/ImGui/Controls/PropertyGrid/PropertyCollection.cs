@@ -502,7 +502,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
         byte[] mTextBuffer = new byte[128];
         bool mInvalidCast = false;
-        public unsafe bool Draw(string name, out object newOutValue, Func<string, object> castAction)
+        public unsafe bool Draw(string name, out object newOutValue, bool readOnly, Func<string, object> castAction)
         {
             bool retValue = false;
             newOutValue = null;
@@ -514,6 +514,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 if (mInvalidCast)
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
                 var changed = ImGuiAPI.InputText(name, pBuffer, len, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+                changed = changed && !readOnly;
                 if (mInvalidCast)
                     ImGuiAPI.PopStyleColor(1);
                 if (changed)

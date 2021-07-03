@@ -14,7 +14,7 @@ namespace EngineNS
             {
                 newValue = info.Value;
                 var name = info.Value as RName;
-                var newName = EGui.Controls.CtrlUtility.DrawRName(name, info.Name, FilterExts, ReadOnly);
+                var newName = EGui.Controls.CtrlUtility.DrawRName(name, info.Name, FilterExts, info.Readonly);
                 if (newName != name)
                 {
                     newValue = newName;

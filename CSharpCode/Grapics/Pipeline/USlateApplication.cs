@@ -49,7 +49,11 @@ namespace EngineNS.Graphics.Pipeline
         }
         public static void ClearRootForms()
         {
+            for (int i = 0; i < AppendForms.Count; i++)
+                AppendForms[i].Cleanup();
             AppendForms.Clear();
+            for (int i = 0; i < RootForms.Count; i++)
+                RootForms[i].Cleanup();
             RootForms.Clear();
         }
         #endregion

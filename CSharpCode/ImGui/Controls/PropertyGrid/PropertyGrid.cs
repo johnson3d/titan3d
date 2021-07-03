@@ -260,7 +260,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool hovered = false;
             bool held = false;
             var click = ImGuiAPI.ButtonBehavior(ref startPos, ref endPos, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
-            if (mPopupOn == false && click)
+            if (mPopupOn == false && click && !info.Readonly)
             {
                 var pos = startPos + new Vector2(0, EGui.UIProxy.StyleConfig.Instance.PGColorBoxSize.Y);
                 var pivot = Vector2.Zero;
@@ -321,7 +321,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool hovered = false;
             bool held = false;
             var click = ImGuiAPI.ButtonBehavior(ref startPos, ref endPos, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
-            if (mPopupOn == false && click)
+            if (mPopupOn == false && click && !info.Readonly)
             {
                 var pos = startPos + new Vector2(0, EGui.UIProxy.StyleConfig.Instance.PGColorBoxSize.Y);
                 var pivot = Vector2.Zero;
@@ -388,7 +388,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool hovered = false;
             bool held = false;
             var click = ImGuiAPI.ButtonBehavior(ref startPos, ref endPos, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
-            if(mPopupOn == false && click)
+            if(mPopupOn == false && click && !info.Readonly)
             {
                 var pos = startPos + new Vector2(0, EGui.UIProxy.StyleConfig.Instance.PGColorBoxSize.Y);
                 var pivot = Vector2.Zero;

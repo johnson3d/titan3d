@@ -47,7 +47,7 @@ namespace EngineNS.EGui.UIEditor.Elements
                 ImGuiAPI.SetNextItemWidth(-1);
                 if (ImGuiAPI.BeginCombo(TName.FromString2("##PropName_", info.Name).ToString(), info.Value?.ToString(), ImGuiComboFlags_.ImGuiComboFlags_None))
                 {
-                    if (ImGuiAPI.Selectable(info.Name, true, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, ref sz))
+                    if (ImGuiAPI.Selectable(info.Name, true, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, ref sz) && !info.Readonly)
                     {
                         newValue = info.Name;
                         valueChanged = true;

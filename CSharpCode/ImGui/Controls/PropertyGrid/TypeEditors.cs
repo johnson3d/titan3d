@@ -29,7 +29,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             bool valueChanged = false;
             newValue = info.Value;
-            if (!info.Type.SystemType.IsSubclassOf(typeof(System.Array)) && info.Readonly == false)
+            if (info.Readonly)
+                ImGuiAPI.Text("null");
+            else if (!info.Type.SystemType.IsSubclassOf(typeof(System.Array)) && info.Readonly == false)
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 var index = ImGuiAPI.TableGetColumnIndex();
@@ -62,7 +64,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
             cursorPos.Y += offsetY;
             ImGuiAPI.SetCursorScreenPos(ref cursorPos);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGCheckboxFramePadding);
+            //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGCheckboxFramePadding);
             var name = TName.FromString2("##", info.Name).ToString();
             var multiValue = info.Value as PropertyMultiValue;
             if(multiValue != null)
@@ -73,18 +75,18 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 else
                     refVal = (System.Convert.ToBoolean(multiValue.Values[0]))?1:0;
 
-                retValue = ImGuiAPI.CheckBoxTristate(name, ref refVal);
+                retValue = EGui.UIProxy.CheckBox.DrawCheckBoxTristate(name, ref refVal, info.Readonly);//ImGuiAPI.CheckBoxTristate(name, ref refVal) && !info.Readonly;
                 if(retValue)
                     newValue = (refVal > 0) ? true : false;
             }
             else
             {
                 var v = (System.Convert.ToBoolean(info.Value));
-                retValue = ImGuiAPI.Checkbox(name, ref v);
+                retValue = EGui.UIProxy.CheckBox.DrawCheckBox(name, ref v, info.Readonly);//ImGuiAPI.Checkbox(name, ref v) && !info.Readonly;
                 if(retValue)
                     newValue = v;
             }
-            ImGuiAPI.PopStyleVar(1);
+            //ImGuiAPI.PopStyleVar(1);
             return retValue;
             //if (v != saved)
             //{
@@ -108,7 +110,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool retValue = false;
             if(multiValue != null && multiValue.HasDifferentValue())
             {
-                var changed = multiValue.Draw(name, out newValue, (str) =>
+                var changed = multiValue.Draw(name, out newValue, info.Readonly, (str) =>
                 {
                     return System.Convert.ToSByte(str);
                 });
@@ -121,7 +123,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 var v = System.Convert.ToSByte(info.Value);
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S8, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (changed)
+                if (changed && !info.Readonly)
                 {
                     newValue = v;
                     retValue = true;
@@ -145,7 +147,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool retValue = false;
             if(multiValue != null && multiValue.HasDifferentValue())
             {
-                var changed = multiValue.Draw(name, out newValue, (str) =>
+                var changed = multiValue.Draw(name, out newValue, info.Readonly, (str) =>
                 {
                     return System.Convert.ToInt16(str);
                 });
@@ -156,7 +158,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 var v = System.Convert.ToInt16(info.Value);
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S16, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (changed)
+                if (!info.Readonly && changed)
                 {
                     newValue = v;
                     retValue = true;
@@ -180,7 +182,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool retValue = false;
             if(multiValue != null && multiValue.HasDifferentValue())
             {
-                var changed = multiValue.Draw(name, out newValue, (str) =>
+                var changed = multiValue.Draw(name, out newValue, info.Readonly, (str) =>
                 {
                     return System.Convert.ToUInt32(str);
                 });
@@ -191,7 +193,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 var v = System.Convert.ToInt32(info.Value);
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S32, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (changed)
+                if (!info.Readonly && changed)
                 {
                     newValue = v;
                     retValue = true;
@@ -215,7 +217,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool retValue = false;
             if(multiValue != null && multiValue.HasDifferentValue())
             {
-                var changed = multiValue.Draw(name, out newValue, (str) =>
+                var changed = multiValue.Draw(name, out newValue, info.Readonly, (str) =>
                 {
                     return System.Convert.ToInt64(str);
                 });
@@ -228,7 +230,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 var v = System.Convert.ToInt64(info.Value);
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S64, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (changed)
+                if (!info.Readonly && changed)
                 {
                     newValue = v;
                     retValue = true;
@@ -252,7 +254,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool retValue = false;
             if (multiValue != null && multiValue.HasDifferentValue())
             {
-                var changed = multiValue.Draw(name, out newValue, (str) =>
+                var changed = multiValue.Draw(name, out newValue, info.Readonly, (str) =>
                 {
                     return System.Convert.ToByte(str);
                 });
@@ -265,7 +267,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 var v = System.Convert.ToByte(info.Value);
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U8, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (changed)
+                if (!info.Readonly && changed)
                 {
                     newValue = v;
                     retValue = true;
@@ -289,7 +291,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool retValue = false;
             if (multiValue != null && multiValue.HasDifferentValue())
             {
-                var changed = multiValue.Draw(name, out newValue, (str) =>
+                var changed = multiValue.Draw(name, out newValue, info.Readonly, (str) =>
                 {
                     return System.Convert.ToUInt16(str);
                 });
@@ -302,7 +304,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 var v = System.Convert.ToUInt16(info.Value);
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U16, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (changed)
+                if (!info.Readonly && changed)
                 {
                     newValue = v;
                     retValue = true;
@@ -327,7 +329,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool retValue = false;
             if (multiValue != null && multiValue.HasDifferentValue())
             {
-                var changed = multiValue.Draw(name, out newValue, (str) =>
+                var changed = multiValue.Draw(name, out newValue, info.Readonly, (str) =>
                 {
                     return System.Convert.ToUInt32(str);
                 });
@@ -340,7 +342,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 var v = System.Convert.ToUInt32(info.Value);
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U32, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (changed)
+                if (!info.Readonly && changed)
                 {
                     newValue = v;
                     retValue = true;
@@ -364,7 +366,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool retValue = false;
             if (multiValue != null && multiValue.HasDifferentValue())
             {
-                var changed = multiValue.Draw(name, out newValue, (str) =>
+                var changed = multiValue.Draw(name, out newValue, info.Readonly, (str) =>
                 {
                     return System.Convert.ToUInt64(str);
                 });
@@ -377,7 +379,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 var v = System.Convert.ToUInt64(info.Value);
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U64, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (changed)
+                if (!info.Readonly && changed)
                 {
                     newValue = v;
                     retValue = true;
@@ -401,7 +403,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool retValue = false;
             if (multiValue != null && multiValue.HasDifferentValue())
             {
-                var changed = multiValue.Draw(name, out newValue, (str) =>
+                var changed = multiValue.Draw(name, out newValue, info.Readonly, (str) =>
                 {
                     return System.Convert.ToSingle(str);
                 });
@@ -414,7 +416,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 var v = System.Convert.ToSingle(info.Value);
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_Float, &v, 0.1f, &minValue, &maxValue, "%.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (changed)
+                if (!info.Readonly && changed)
                 {
                     newValue = v;
                     retValue = true;
@@ -438,7 +440,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             bool retValue = false;
             if (multiValue != null && multiValue.HasDifferentValue())
             {
-                var changed = multiValue.Draw(name, out newValue, (str) =>
+                var changed = multiValue.Draw(name, out newValue, info.Readonly, (str) =>
                 {
                     return System.Convert.ToDouble(str);
                 });
@@ -451,7 +453,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 var v = System.Convert.ToDouble(info.Value);
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_Double, &v, .1f, &minValue, &maxValue, "%.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (changed)
+                if (!info.Readonly && changed)
                 {
                     newValue = v;
                     retValue = true;
@@ -473,7 +475,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var multiValue = info.Value as PropertyMultiValue;
             if(multiValue != null && multiValue.HasDifferentValue())
             {
-                var changed = multiValue.Draw(name, out newValue, (str) =>
+                var changed = multiValue.Draw(name, out newValue, info.Readonly, (str) =>
                 {
                     return str;
                 });
@@ -491,9 +493,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 {
                     CoreSDK.SDK_StrCpy(pBuffer, strPtr.ToPointer(), (uint)textBuffer.Length);
                     //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
-                    ImGuiAPI.InputText(name, pBuffer, (uint)textBuffer.Length, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+                    var changed = ImGuiAPI.InputText(name, pBuffer, (uint)textBuffer.Length, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
                     //ImGuiAPI.PopStyleVar(1);
-                    if (CoreSDK.SDK_StrCmp(pBuffer, strPtr.ToPointer()) != 0)
+                    //if (CoreSDK.SDK_StrCmp(pBuffer, strPtr.ToPointer()) != 0 && !info.Readonly)
+                    if(changed && !info.Readonly)
                     {
                         newValue = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)pBuffer);
                         valueChanged = true;
@@ -607,7 +610,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             newFlags &= ~v;
                         }
                     }
-                    if (newFlags != enumFlags)
+                    if (newFlags != enumFlags && !info.Readonly)
                     {
                         newValue = System.Enum.ToObject(propertyType, newFlags);
                         valueChanged = true;
@@ -634,7 +637,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         if (members[j] == info.Value.ToString())
                             ImGuiAPI.PopStyleColor(3);
                     }
-                    if (item_current_idx >= 0)
+                    if (item_current_idx >= 0 && !info.Readonly)
                     {
                         newValue = (int)values.GetValue(item_current_idx);
                         valueChanged = true;
@@ -724,14 +727,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         Name = info.Name + i,
                         Type = vtype,
                         Value = obj,
-                        Readonly = false,
+                        Readonly = info.Readonly,
                         HostPropertyGrid = info.HostPropertyGrid,
                         Flags = info.Flags,
                         Expand = treeNodeRet,
                     };
                     object newValue;
                     var changed = PropertyGrid.DrawPropertyGridItem(ref elementEditorInfo, out newValue);
-                    if (changed)
+                    if (changed && !info.Readonly)
                     {
                         lst.SetValue(newValue, i);
                         valueChanged = true;
@@ -759,7 +762,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             else
             {
-                if (info.HostPropertyGrid.IsReadOnly == false)
+                if (info.Readonly == false)
                 {
                     //ImGuiAPI.SameLine(0, -1);
                     //var sz = new Vector2(0, 0);
@@ -790,9 +793,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         ImGuiAPI.EndPopup();
                     }
                     ImGuiAPI.SameLine(0, -1);
-                    ImGuiAPI.Text(info.Type.ToString());
                     //ImGuiAPI.PopID();
                 }
+                ImGuiAPI.Text(info.Type.ToString());
                 //ImGuiAPI.SameLine(0, -1);
                 //var showChild = ImGuiAPI.TreeNode(info.Name, "");
                 //ImGuiAPI.NextColumn();
@@ -886,14 +889,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         Name = info.Name + i,
                         Type = Rtti.UTypeDesc.TypeOf(obj.GetType()),
                         Value = obj,
-                        Readonly = false,
+                        Readonly = info.Readonly,
                         HostPropertyGrid = info.HostPropertyGrid,
                         Flags = info.Flags,
                         Expand = treeNodeRet,
                     };
                     object newValue;
                     var changed = PropertyGrid.DrawPropertyGridItem(ref elementEditorInfo, out newValue);
-                    if (changed)
+                    if (changed && !info.Readonly)
                     {
                         lst[i] = newValue;
                         itemChanged = true;
@@ -922,7 +925,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             else
             {
-                if (info.HostPropertyGrid.IsReadOnly == false)
+                if (info.Readonly == false)
                 {
                     //ImGuiAPI.SameLine(0, -1);
                     //var sz = new Vector2(0, 0);
@@ -936,6 +939,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     {
                         //ImGuiAPI.PopID();
                     }
+                    ImGuiAPI.SameLine(0, -1);
                 }
 
                 {
@@ -967,7 +971,6 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                 }
 
-                ImGuiAPI.SameLine(0, -1);
                 //var showChild = ImGuiAPI.TreeNode(info.Name, "");
                 //ImGuiAPI.NextColumn();
                 ImGuiAPI.Text(info.Type.ToString());
@@ -1038,7 +1041,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     Name = iter.Key.ToString() + idx,
                     Type = Rtti.UTypeDesc.TypeOf(iter.Key.GetType()),
                     Value = iter.Key,
-                    Readonly = false,
+                    Readonly = info.Readonly,
                     HostPropertyGrid = info.HostPropertyGrid,
                     Flags = info.Flags,
                     Expand = treeNodeRet,
@@ -1065,13 +1068,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     Name = iter.Value.ToString() + idx,
                     Type = valueType,
                     Value = iter.Value,
-                    Readonly = false,
+                    Readonly = info.Readonly,
                     HostPropertyGrid = info.HostPropertyGrid,
                     Flags = info.Flags,
                     Expand = treeNodeRet,
                 };
                 object newValue;
-                if(PropertyGrid.DrawPropertyGridItem(ref valueEditorInfo, out newValue))
+                if(PropertyGrid.DrawPropertyGridItem(ref valueEditorInfo, out newValue) && !info.Readonly)
                 {
                     dict[iter.Key] = newValue;
                     itemValueChanged = true;

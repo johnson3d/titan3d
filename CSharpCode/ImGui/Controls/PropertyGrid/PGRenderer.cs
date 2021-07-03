@@ -89,7 +89,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             if(mSearchBar == null)
             {
                 mSearchBar = new UIProxy.SearchBarProxy();
-                mSearchBar.Initialize();
+                await mSearchBar.Initialize();
                 mSearchBar.InfoText = "Search Details";
             }
             if(mOpenInPropertyMatrix == null)
@@ -153,7 +153,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         
         public void OnDraw()
         {
-            OnDraw(false, true, false);
+            OnDraw(true, true, false);
         }
         public void OnDraw(bool bShowReadOnly, bool bNewForm/*=true*/, bool bKeepColums/*=false*/)
         {
@@ -240,7 +240,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 //    ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanAvailWidth);
                 //ImGuiAPI.CheckboxFlags("IsReadOnly", ref base_flags, (int)ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Framed);
                 //ImGuiAPI.CheckboxFlags("IsReadOnly1", ref base_flags, (int)ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_FramePadding);
-                ImGuiAPI.Checkbox("IsReadOnly", ref IsReadOnly);
+                //ImGuiAPI.Checkbox("IsReadOnly", ref IsReadOnly);
+                EGui.UIProxy.CheckBox.DrawCheckBox("IsReadOnly", ref IsReadOnly, false);
             }
 
             if (bKeepColums == false)
@@ -464,7 +465,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 Type = showTypeDesc,
                                 Value = propertyValue,
                                 ObjectInstance = target,
-                                Readonly = isReadonly,
+                                Readonly = IsReadOnly? true : isReadonly,
                                 Expand = false,
                                 HostPropertyGrid = this,
                                 Flags = flags,

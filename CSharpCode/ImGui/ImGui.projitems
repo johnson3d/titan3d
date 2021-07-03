@@ -38,6 +38,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UIEditor\FormStructureEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Base.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Button.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIProxy\CheckBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Image.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Menu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\SearchBar.cs" />

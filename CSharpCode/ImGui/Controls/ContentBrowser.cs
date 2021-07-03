@@ -35,7 +35,7 @@ namespace EngineNS.EGui.Controls
                 OnTypeChanged();
 
             mSearchBar = new UIProxy.SearchBarProxy();
-            mSearchBar.Initialize();
+            await mSearchBar.Initialize();
             mSearchBar.InfoText = "Search Assets";
             Rtti.UTypeDescManager.Instance.OnTypeChanged += OnTypeChanged;
 

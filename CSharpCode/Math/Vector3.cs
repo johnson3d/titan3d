@@ -39,7 +39,7 @@ namespace EngineNS
                 if (multiValue != null && multiValue.HasDifferentValue())
                 {
                     ImGuiAPI.Text(multiValue.MultiValueString);
-                    if (multiValue.DrawVector<Vector3>(in info))
+                    if (multiValue.DrawVector<Vector3>(in info) && !info.Readonly)
                     {
                         newValue = multiValue;
                         retValue = true;
@@ -51,13 +51,13 @@ namespace EngineNS
                     var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 3, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     //ImGuiAPI.InputFloat3(TName.FromString2("##", info.Name).ToString(), (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
                     //ImGuiAPI.PopStyleVar(1);
-                    if (changed)//(v != saved)
+                    if (changed && !info.Readonly)//(v != saved)
                     {
                         newValue = v;
                         retValue = true;
                     }
 
-                    if (Vector4.Vector4EditorAttribute.OnDrawVectorValue<Vector3>(in info, ref v, ref v))
+                    if (Vector4.Vector4EditorAttribute.OnDrawVectorValue<Vector3>(in info, ref v, ref v) && !info.Readonly)
                     {
                         newValue = v;
                         retValue = true;

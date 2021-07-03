@@ -292,7 +292,7 @@ namespace EngineNS.Editor
             {
                 DockCond = ImGuiCond_.ImGuiCond_FirstUseEver,
             };
-            meshEditor.Initialize();
+            await meshEditor.Initialize();
             mForms = new List<Graphics.Pipeline.IRootForm>()
             {
                 meshEditor,
@@ -484,11 +484,11 @@ namespace EngineNS.Editor
                         },
                     }
                 );
-
+            }
                 //var viewPort = ImGuiAPI.GetMainViewport();
                 var inspector = new EGui.Controls.PropertyGrid.PropertyGrid();
                 inspector.PGName = "MeshEditor_PG";
-                inspector.Initialize();
+                await inspector.Initialize();
                 inspector.SearchInfo = "Search Details";
                 //inspector.Target = *viewPort;
                 //inspector.Target = EGui.UIProxy.StyleConfig.Instance;
@@ -524,10 +524,10 @@ namespace EngineNS.Editor
                 };//EGui.UIProxy.StyleConfig.Instance;*/
                 mPanels.Add(inspector);
                 var contentBrowser = new ContentBrowser();
-                contentBrowser.Initialize();
+                await contentBrowser.Initialize();
                 mPanels.Add(contentBrowser);
                 mPanels.Add(new ViewportPanel());
-            }
+
             return true;
         }
 
