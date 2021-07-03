@@ -7,6 +7,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
     [Rtti.Meta]
     public partial class UMaterialAMeta : IO.IAssetMeta
     {
+        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        {
+            return await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(GetAssetName());
+        }
+        public override void DeleteAsset(string name, RName.ERNameType type)
+        {
+            var address = RName.GetAddress(type, name);
+            IO.FileManager.DeleteFile(address);
+            IO.FileManager.DeleteFile(address + ".ameta");
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset

@@ -7,6 +7,10 @@ namespace EngineNS.Graphics.Mesh
     [Rtti.Meta]
     public class CMeshPrimitivesAMeta : IO.IAssetMeta
     {
+        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        {
+            return await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset

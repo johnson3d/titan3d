@@ -120,21 +120,23 @@ namespace EngineNS
             else
                 return Name.CompareTo(other.Name);
         }
-        private void ChangeAddressWithRNameType()
+        public static string GetAddress(ERNameType type, string name)
         {
-            switch (mRNameType)
+            switch (type)
             {
                 case ERNameType.Engine:
-                    mAddress = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + Name;
-                    break;
+                    return UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + name;
                 case ERNameType.Game:
-                    mAddress = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game) + Name;
-                    break;
+                    return UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game) + name;
                 default:
                     {
-                        break;
+                        return null;
                     }
             }
+        }
+        private void ChangeAddressWithRNameType()
+        {
+            mAddress = GetAddress(mRNameType, Name);
             RNameHashValue = (Name + RNameType.ToString()).GetHashCode();
         }
         public override int GetHashCode()

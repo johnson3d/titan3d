@@ -7,6 +7,10 @@ namespace EngineNS.RHI
     [Rtti.Meta]
     public class CShaderResourceViewAMeta : IO.IAssetMeta
     {
+        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        {
+            return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
+        }
         System.Threading.Tasks.Task<CShaderResourceView> Task;
         IntPtr SnapshotPtr;
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
@@ -286,6 +290,7 @@ namespace EngineNS.RHI
         {
             //这里需要存盘的情况很少，正常来说srb是Image导入的时候生成的，不是保存出来的
             //mCoreObject.Save2Xnd()
+            //IO.FileManager.CopyFile(, name.Address);
         }
         [Rtti.Meta]
         public RName AssetName

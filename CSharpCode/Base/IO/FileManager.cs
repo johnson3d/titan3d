@@ -122,7 +122,18 @@ namespace EngineNS.IO
         {
             return System.IO.Directory.CreateDirectory(path);
         }
-
+        public static void DeleteDirectory(string path)
+        {
+            System.IO.Directory.Delete(path);
+        }
+        public static void DeleteFile(string path)
+        {
+            System.IO.File.Delete(path);
+        }
+        public static void CopyFile(string src, string tar)
+        {
+            System.IO.File.Copy(src, tar);
+        }
         public static string GetRelativePath(string absoluteSourcePath, string absoluteTargetPath)
         {
             if (!System.IO.Path.IsPathRooted(absoluteSourcePath))

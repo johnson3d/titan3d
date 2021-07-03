@@ -16,8 +16,23 @@ namespace EngineNS.IO
         }
         public List<UAssetModifier> Modifiers { get; set; } = new List<UAssetModifier>();
         public Dictionary<RName, IAsset> mDirtyAssets = new Dictionary<RName, IAsset>();
-        public void AddModifier(RName source, string targetPath, RName.ERNameType targetType)
+        public bool AddModifier(RName source, string targetPath, RName.ERNameType targetType)
         {
+            foreach(var i in Modifiers)
+            {
+                if (i.Source == source)
+                    return false;
+            }
+
+            if (source.Name == targetPath && source.RNameType == targetType)
+                return false;
+
+            var address = RName.GetAddress(targetType, targetPath) + ".ameta";
+            if (IO.FileManager.FileExists(address))
+            {//不支持覆盖
+                return false;
+            }
+
             UAssetModifier mdf = new UAssetModifier();
             mdf.Source = source;
             mdf.SourcePath = source.Name;
@@ -26,6 +41,7 @@ namespace EngineNS.IO
             mdf.TargetType = targetType;
 
             Modifiers.Add(mdf);
+            return true;
         }
         public async System.Threading.Tasks.Task Execute()
         {
@@ -71,6 +87,8 @@ namespace EngineNS.IO
                 var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(i.Source);
                 ameta.DeleteAsset(i.SourcePath, i.SourceType);
             }
+            Modifiers.Clear();
+            mDirtyAssets.Clear();
         }
     }
 }
