@@ -153,7 +153,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         
         public void OnDraw()
         {
-            OnDraw(true, true, false);
+            OnDraw(false, true, false);
         }
         public void OnDraw(bool bShowReadOnly, bool bNewForm/*=true*/, bool bKeepColums/*=false*/)
         {

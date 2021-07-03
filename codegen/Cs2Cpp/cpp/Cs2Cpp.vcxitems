@@ -14,7 +14,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS.Rtti.UNativeCoreProvider.cs2cpp.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS.UTest.UTestCs2CppBuilder.cs2cpp.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS.Rtti.UNativeCoreProvider.cs2cpp.cpp" />
   </ItemGroup>
 </Project>
