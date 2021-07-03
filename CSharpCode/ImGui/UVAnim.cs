@@ -7,6 +7,11 @@ namespace EngineNS.EGui
     [Rtti.Meta]
     public partial class UVAnimAMeta : IO.IAssetMeta
     {
+        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        {
+            await Thread.AsyncDummyClass.DummyFunc();
+            return null;
+        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset

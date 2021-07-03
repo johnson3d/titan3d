@@ -174,6 +174,18 @@ namespace EngineNS.IO
     {
         RName mAssetName;
         public bool HasSnapshot { get; set; } = true;
+        public virtual async System.Threading.Tasks.Task<IAsset> LoadAsset()
+        {
+            System.Diagnostics.Debug.Assert(false);
+            await Thread.AsyncDummyClass.DummyFunc();
+            return null;
+        }
+        public virtual void DeleteAsset(string name, RName.ERNameType type)
+        {
+            var address = RName.GetAddress(type, name);
+            IO.FileManager.DeleteFile(address);
+            IO.FileManager.DeleteFile(address + ".ameta");
+        }
         public virtual void ResetSnapshot()
         {
             HasSnapshot = true;

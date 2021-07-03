@@ -9,6 +9,17 @@ namespace EngineNS.Bricks.CodeBuilder
 {
     public partial class UMacrossAMeta : IO.IAssetMeta
     {
+        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        {
+            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            return null;
+        }
+        public override void DeleteAsset(string name, RName.ERNameType type)
+        {
+            var address = RName.GetAddress(type, name);
+            IO.FileManager.DeleteDirectory(address);
+            IO.FileManager.DeleteFile(address + ".ameta");
+        }
         public override bool CanRefAssetType(IAssetMeta ameta)
         {
             // macross可以引用所有类型的资源

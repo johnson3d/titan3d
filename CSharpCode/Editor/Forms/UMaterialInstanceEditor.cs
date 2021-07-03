@@ -19,11 +19,18 @@ namespace EngineNS.Editor.Forms
         public Bricks.CodeBuilder.ShaderNode.UPreviewViewport PreviewViewport = new Bricks.CodeBuilder.ShaderNode.UPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public UMaterialInstanceEditorRecorder ActionRecorder = new UMaterialInstanceEditorRecorder();
+        ~UMaterialInstanceEditor()
+        {
+            Cleanup();
+        }
         public void Cleanup()
         {
+            Material = null;
             PreviewViewport?.Cleanup();
             PreviewViewport = null;
             MaterialPropGrid.Target = null;
+            ActionRecorder?.ClearRecords();
+            ActionRecorder = null;
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {

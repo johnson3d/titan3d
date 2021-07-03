@@ -39,8 +39,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxFrustum.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VNameString.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/BigStackBuffer.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/BUFFER_SRV.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/BUFFEREX_SRV.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/BUFFER_SRV.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ConstantVarDesc.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/CoreSDK.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/CsDictionaryImpl.cpp2cs.cpp" />
@@ -86,6 +86,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IMeshDataProvider.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IMeshPrimitives.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiAPI.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiTableRowData.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiViewportDataSDL2.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IModifier.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IPartialSkeleton.cpp2cs.cpp" />
@@ -166,10 +167,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TcpServerManager.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEX1D_ARRAY_SRV.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEX1D_SRV.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEX2D_ARRAY_SRV.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEX2D_SRV.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEX2DMS_ARRAY_SRV.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEX2DMS_SRV.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEX2D_ARRAY_SRV.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEX2D_SRV.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEX3D_SRV.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEXCUBE_ARRAY_SRV.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/TEXCUBE_SRV.cpp2cs.cpp" />
@@ -181,7 +182,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/XndElement.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/XndHolder.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/XndNode.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiTableRowData.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImGui/ImGuiFileDialog.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXFactory.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXFileImportDesc.cpp2cs.cpp" />
