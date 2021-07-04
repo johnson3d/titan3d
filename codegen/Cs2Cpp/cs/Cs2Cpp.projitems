@@ -9,7 +9,7 @@
     <Import_RootNamespace>CodeGenCSharp</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UTest.UTestCs2CppBuilder.cs2cpp.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Rtti.UNativeCoreProvider.cs2cpp.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UTest.UTestCs2CppBuilder.cs2cpp.cs" />
   </ItemGroup>
 </Project>
