@@ -16,7 +16,7 @@ namespace EngineNS.Editor
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await PGMember.Initialize();
             return true;
         }
         public bool Visible { get; set; } = true;
