@@ -143,7 +143,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             PreviewViewport.Title = "MaterialPreview";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileFSPolicy(), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy(), 0, 1);
 
             await PreviewPropGrid.Initialize();
             PreviewPropGrid.Target = PreviewViewport;
