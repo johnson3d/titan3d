@@ -77,6 +77,34 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         #endregion
         #region IAssetEditor
         bool IsStarting = false;
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Bricks.CodeBuilder.ShaderNode.UPreviewViewport viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        {
+            viewport.RenderPolicy = policy;
+
+            await viewport.RenderPolicy.Initialize(1, 1);
+
+            viewport.CameraController.Camera = viewport.RenderPolicy.GBuffers.Camera;
+
+            var materials = new Graphics.Pipeline.Shader.UMaterial[1];
+            materials[0] = Material;
+            if (materials[0] == null)
+                return;
+            var mesh = new Graphics.Mesh.UMesh();
+            var rect = Graphics.Mesh.CMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
+            var rectMesh = rect.ToMesh();
+            var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            if (ok)
+            {
+                mesh.SetWorldMatrix(ref Matrix.mIdentity);
+                viewport.RenderPolicy.VisibleMeshes.Add(mesh);
+            }
+
+            //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
+            //this.RenderPolicy.GBuffers.SunLightDirection = new Vector3(1, 1, 1);
+            //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);
+            //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
+            //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
+        }
         public async System.Threading.Tasks.Task<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             if (IsStarting)
@@ -107,12 +135,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             AssetName = name;
             IsStarting = false;
 
+            await NodePropGrid.Initialize();
+
+            await MaterialPropGrid.Initialize();
             MaterialPropGrid.IsReadOnly = true;
             MaterialPropGrid.Target = Material;
 
             PreviewViewport.Title = "MaterialPreview";
+            PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileFSPolicy(), 0, 1);
 
+            await PreviewPropGrid.Initialize();
             PreviewPropGrid.Target = PreviewViewport;
 
             UEngine.Instance.TickableManager.AddTickable(this);
@@ -234,6 +267,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 Material.GraphXMLString = xmlText;
                 Material.HLSLCode = GenHLSLCode();
                 Material.SaveAssetTo(Material.AssetName);
+
+                Editor.USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Load", ref btSize))
