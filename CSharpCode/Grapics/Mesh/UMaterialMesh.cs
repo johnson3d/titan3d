@@ -203,7 +203,7 @@ namespace EngineNS.Graphics.Mesh
                         ImGuiAPI.NextColumn();
                         ImGuiAPI.SetNextItemWidth(-1);
                         var old = materials[i]?.AssetName;
-                        var rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterialInstance.AssetExt, info.Readonly);
+                        var rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterialInstance.AssetExt, info.Readonly, null);
                         if (rn != old)
                         {
                             if (umesh.AssetState != IO.EAssetState.Loading)

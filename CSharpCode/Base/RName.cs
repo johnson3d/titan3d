@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EngineNS
 {
@@ -10,11 +11,34 @@ namespace EngineNS
         public class PGRNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
             public string FilterExts;
+            EGui.UIProxy.ImageProxy mSnap;
+            RName oldValue;
+            public override async Task<bool> Initialize()
+            {
+                mSnap = new EGui.UIProxy.ImageProxy()
+                {
+                    ImageSize = new Vector2(32, 32),
+                    UVMin = new Vector2(0, 0),
+                    UVMax = new Vector2(1, 1),
+                };
+                return await base.Initialize();
+            }
+            public override void Cleanup()
+            {
+                mSnap?.Cleanup();
+                base.Cleanup();
+            }
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
                 newValue = info.Value;
                 var name = info.Value as RName;
-                var newName = EGui.Controls.CtrlUtility.DrawRName(name, info.Name, FilterExts, info.Readonly);
+                if(oldValue != name)
+                {
+                    mSnap.Dispose();
+                    mSnap.ImageFile = name;
+                    oldValue = name;
+                }
+                var newName = EGui.Controls.CtrlUtility.DrawRName(name, info.Name, FilterExts, info.Readonly, mSnap);
                 if (newName != name)
                 {
                     newValue = newName;

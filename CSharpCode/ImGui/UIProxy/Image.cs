@@ -15,7 +15,7 @@ namespace EngineNS.EGui.UIProxy
 
         System.Threading.Tasks.Task<RHI.CShaderResourceView> mTask;
         IntPtr mImagePtr;
-        public unsafe void* GetImagePtrPointer()
+        public unsafe IntPtr GetImagePtrPointer()
         {
             if (mImagePtr == IntPtr.Zero)
             {
@@ -31,7 +31,7 @@ namespace EngineNS.EGui.UIProxy
                 }
             }
 
-            return mImagePtr.ToPointer();
+            return mImagePtr;
         }
 
         public ImageProxy()

@@ -74,7 +74,7 @@ namespace EngineNS
 
                     ImGuiTableRowData rowData = new ImGuiTableRowData()
                     {
-                        IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
+                        IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer().ToPointer(),
                         MinHeight = 0,
                         CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
                         CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
