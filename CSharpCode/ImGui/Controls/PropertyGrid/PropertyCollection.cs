@@ -141,6 +141,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 if(att is PGCustomValueEditorAttribute)
                 {
                     var tAtt = att as PGCustomValueEditorAttribute;
+                    if (!tAtt.Initialized)
+                        _ = tAtt.Initialize();
                     IsBrowsable = !tAtt.HideInPG;
                     mIsReadonly = tAtt.ReadOnly;
                     CustomValueEditor = tAtt;
@@ -547,7 +549,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 ImGuiTableRowData rowData = new ImGuiTableRowData()
                 {
-                    IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
+                    IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer().ToPointer(),
                     MinHeight = 0,
                     CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
                     CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,

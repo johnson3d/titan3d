@@ -32,7 +32,7 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public unsafe bool OnDraw(ref ImDrawList drawList)
+        public unsafe bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
         {
             bool retValue = false;
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref StyleConfig.Instance.PGSearchBoxFramePadding);

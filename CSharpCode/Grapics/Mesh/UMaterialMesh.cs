@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EngineNS.Graphics.Mesh
 {
@@ -190,13 +191,28 @@ namespace EngineNS.Graphics.Mesh
 
         public class PGMaterialsAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
+            RName.PGRNameAttribute mRNameEditor;
+
             public PGMaterialsAttribute()
             {
                 FullRedraw = true;
             }
+            public override async Task<bool> Initialize()
+            {
+                mRNameEditor = new RName.PGRNameAttribute();
+                await mRNameEditor.Initialize();
+                return await base.Initialize();
+            }
+            public override void Cleanup()
+            {
+                mRNameEditor?.Cleanup();
+                base.Cleanup();
+            }
             public override bool OnDraw(in EditorInfo info, out object newValue)
             {
                 newValue = info.Value;
+                if (mRNameEditor == null)
+                    return false;
                 var umesh = info.ObjectInstance as UMaterialMesh;
                 ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;
                 var materials = info.Value as Pipeline.Shader.UMaterial[];
@@ -220,11 +236,17 @@ namespace EngineNS.Graphics.Mesh
                         RName rn;
                         if(materials[i] is Pipeline.Shader.UMaterialInstance)
                         {
-                            rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterialInstance.AssetExt, info.Readonly);
+                            mRNameEditor.FilterExts = Pipeline.Shader.UMaterialInstance.AssetExt;
+                            mRNameEditor.OnDraw(in info, out newValue);
+                            rn = (RName)newValue;
+                            //rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterialInstance.AssetExt, info.Readonly, null);
                         }
                         else
                         {
-                            rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterial.AssetExt, info.Readonly);
+                            mRNameEditor.FilterExts = Pipeline.Shader.UMaterial.AssetExt;
+                            mRNameEditor.OnDraw(in info, out newValue);
+                            rn = (RName)newValue;
+                            //rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterial.AssetExt, info.Readonly, null);
                         }
                         if (rn != old)
                         {

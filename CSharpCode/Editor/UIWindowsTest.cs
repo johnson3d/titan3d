@@ -81,6 +81,8 @@ namespace EngineNS.Editor
             DicValue[3] = "D";
             DicValue[4] = "E";
             DicValue[5] = "F";
+
+            RNameValue = RName.GetRName("UTest/ground.uminst");
         }
     }
 
@@ -331,7 +333,7 @@ namespace EngineNS.Editor
                     var drawList = ImGuiAPI.GetWindowDrawList();
                     for (int i=0; i<mMenuItems.Count; i++)
                     {
-                        mMenuItems[i].OnDraw(ref drawList);
+                        mMenuItems[i].OnDraw(ref drawList, ref Support.UAnyPointer.Default);
                     }
                     ImGuiAPI.EndMenuBar();
                 }
@@ -541,7 +543,7 @@ namespace EngineNS.Editor
             {
 
                 var drawList = ImGuiAPI.GetWindowDrawList();
-                mToolbar.OnDraw(ref drawList);
+                mToolbar.OnDraw(ref drawList, ref Support.UAnyPointer.Default);
 
                 var winPosMin = ImGuiAPI.GetWindowContentRegionMin() + new Vector2(0, mToolbar.ToolbarHeight);
                 var winPosMax = ImGuiAPI.GetWindowContentRegionMax();
@@ -687,7 +689,7 @@ namespace EngineNS.Editor
             if (ImGuiAPI.Begin("Content Browser", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
-                mToolbar.OnDraw(ref drawList);
+                mToolbar.OnDraw(ref drawList, ref Support.UAnyPointer.Default);
 
                 var winPosMin = ImGuiAPI.GetWindowContentRegionMin() + new Vector2(0, mToolbar.ToolbarHeight);
                 var winPosMax = ImGuiAPI.GetWindowContentRegionMax();

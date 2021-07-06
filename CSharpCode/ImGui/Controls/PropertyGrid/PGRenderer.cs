@@ -197,7 +197,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 var indentValue = 8.0f;
                 mSearchBar.Width = winWidth - indentValue * 2 - mOpenInPropertyMatrix.Size.X - mOpenInPropertyMatrix.Size.Y - 8 * 2;
                 ImGuiAPI.Indent(indentValue);
-                mSearchBar.OnDraw(ref drawList);
+                mSearchBar.OnDraw(ref drawList, ref Support.UAnyPointer.Default);
                 ImGuiAPI.Unindent(indentValue);
             }
             if (mOpenInPropertyMatrix != null)
@@ -208,7 +208,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 Vector2 offset = Vector2.Zero;
                 curPos += new Vector2(0, (size.Y - mOpenInPropertyMatrix.Size.Y) * 0.5f);
                 ImGuiAPI.SetCursorScreenPos(ref curPos);
-                mOpenInPropertyMatrix.OnDraw(ref drawList);
+                mOpenInPropertyMatrix.OnDraw(ref drawList, ref Support.UAnyPointer.Default);
             }
             if (mConfig != null)
             {
@@ -218,7 +218,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 Vector2 offset = Vector2.Zero;
                 curPos += new Vector2(0, (size.Y - mOpenInPropertyMatrix.Size.Y) * 0.5f);
                 ImGuiAPI.SetCursorScreenPos(ref curPos);
-                mConfig.OnDraw(ref drawList);
+                mConfig.OnDraw(ref drawList, ref Support.UAnyPointer.Default);
             }
             ImGuiAPI.EndGroup();
         }
@@ -370,7 +370,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     {
                         ImGuiTableRowData rowData = new ImGuiTableRowData()
                         {
-                            IndentTextureId = IndentDec.GetImagePtrPointer(),
+                            IndentTextureId = IndentDec.GetImagePtrPointer().ToPointer(),
                             MinHeight = 0,
                             CellPaddingYEnd = EndRowPadding,
                             CellPaddingYBegin = 0,
@@ -473,7 +473,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             };
                             ImGuiTableRowData rowData = new ImGuiTableRowData()
                             {
-                                IndentTextureId = IndentDec.GetImagePtrPointer(),
+                                IndentTextureId = IndentDec.GetImagePtrPointer().ToPointer(),
                                 MinHeight = 0,
                                 CellPaddingYEnd = EndRowPadding,
                                 CellPaddingYBegin = BeginRowPadding,
@@ -637,7 +637,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     {
                         ImGuiTableRowData rowData = new ImGuiTableRowData()
                         {
-                            IndentTextureId = IndentDec.GetImagePtrPointer(),
+                            IndentTextureId = IndentDec.GetImagePtrPointer().ToPointer(),
                             MinHeight = 0,
                             CellPaddingYEnd = EndRowPadding,
                             CellPaddingYBegin = BeginRowPadding,
@@ -762,7 +762,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Button, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGColor);
                                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonActive, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGActiveColor);
                                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonHovered, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGHoverColor);
-                                if (info.Readonly == false && info.HostPropertyGrid.mDelete.OnDraw(ref drawList))
+                                if (info.Readonly == false && info.HostPropertyGrid.mDelete.OnDraw(ref drawList, ref Support.UAnyPointer.Default))
                                 {
                                     newValue = null;
                                     valueChanged = true;

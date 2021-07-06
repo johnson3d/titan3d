@@ -40,7 +40,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Button, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGColor);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonActive, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGActiveColor);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonHovered, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGHoverColor);
-                if (mImageButton.OnDraw(ref drawList))
+                if (mImageButton.OnDraw(ref drawList, ref Support.UAnyPointer.Default))
                 {
                     newValue = System.Activator.CreateInstance(info.Type.SystemType);
                     valueChanged = true;
@@ -511,146 +511,142 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     public class EnumEditor : PGCustomValueEditorAttribute
     {
         EGui.UIProxy.ImageProxy mImage;
-
+        EGui.UIProxy.ComboBox mComboBox;
+        class DrawData
+        {
+            public Rtti.UTypeDesc Type;
+            public object Value;
+            public object NewValue;
+            public bool Readonly;
+            public bool ValueChanged;
+        }
+        [System.ThreadStatic]
+        DrawData mDrawData = new DrawData();
         public override async Task<bool> Initialize()
         {
-            mImage = new UIProxy.ImageProxy()
+            mComboBox = new UIProxy.ComboBox()
             {
-                ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
-                ImageSize = new Vector2(16, 16),
-                UVMin = new Vector2(543.0f / 1024, 3.0f / 1024),
-                UVMax = new Vector2(559.0f / 1024, 19.0f / 1024),
+                ComboOpenAction = ComboOpenAction,
             };
-            await mImage.Initialize();
+            await mComboBox.Initialize();
+
             return await base.Initialize();
         }
 
         public override void Cleanup()
         {
-            mImage?.Dispose();
+            mComboBox?.Cleanup();
             base.Cleanup();
         }
 
-        public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
+        unsafe void ComboOpenAction(ref Support.UAnyPointer drawData)
         {
-            bool valueChanged = false;
-            newValue = info.Value;
-            var index = ImGuiAPI.TableGetColumnIndex();
-            var width = ImGuiAPI.GetColumnWidth(index) - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X;
-            var drawList = ImGuiAPI.GetWindowDrawList();
-            ImGuiAPI.SetNextItemWidth(width);
-            var propertyType = info.Type.SystemType;
-            var attrs1 = propertyType.GetCustomAttributes(typeof(System.FlagsAttribute), false);
+            var data = drawData.RefObject as DrawData;
+            var propertyType = data.Type.SystemType;
 
-            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PopupColor);
-            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, EGui.UIProxy.StyleConfig.Instance.PopupColor);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, ref EGui.UIProxy.StyleConfig.Instance.PopupWindowsPadding);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, ref EGui.UIProxy.StyleConfig.Instance.PopupItemSpacing);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_PopupBorderSize, EGui.UIProxy.StyleConfig.Instance.PopupBordersize);
-            var style = ImGuiAPI.GetStyle();
-            var cursorPos = ImGuiAPI.GetCursorScreenPos();
-            var label = TName.FromString2("##", info.Name).ToString();
-            var label_size = ImGuiAPI.CalcTextSize(label, true, -1);
-            var endPos = cursorPos + new Vector2(width + ((label_size.X > 0.0f) ? (style->ItemInnerSpacing.X + label_size.X) : 0.0f), label_size.Y + style->FramePadding.Y * 2.0f);
-            var hovered = ImGuiAPI.IsMouseHoveringRectInCurrentWindow(ref cursorPos, ref endPos, true);
-            if(hovered)
-                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.Instance.PGItemBorderHoveredColor);
-            string showValue = info.Value.ToString();
-            var multiValue = info.Value as PropertyMultiValue;
-            if(multiValue != null && multiValue.HasDifferentValue())
+            int item_current_idx = -1;
+            var members = data.Type.SystemType.GetEnumNames();
+            var values = data.Type.SystemType.GetEnumValues();
+            var sz = new Vector2(0, 0);
+            var attrs = propertyType.GetCustomAttributes(typeof(System.FlagsAttribute), false);
+            if (attrs != null && attrs.Length > 0)
             {
-                showValue = multiValue.MultiValueString;
-            }
-            var comboOpen = ImGuiAPI.BeginCombo(label, showValue, ImGuiComboFlags_.ImGuiComboFlags_None | ImGuiComboFlags_.ImGuiComboFlags_NoArrowButton);
-            if (hovered)
-                ImGuiAPI.PopStyleColor(1);
-            var itemSize = ImGuiAPI.GetItemRectSize();
-            var pos = cursorPos + new Vector2(itemSize.X - mImage.ImageSize.X - style->FramePadding.X, style->FramePadding.Y * 0.5f);// cursorPos + new Vector2(0, fontSize * 0.134f * 0.5f);// + new Vector2(itemRectMax.X - mImage.ImageSize.X, fontSize * 0.134f * 0.5f);
-            mImage.OnDraw(ref drawList, ref pos);
-            if (comboOpen)
-            {
-                int item_current_idx = -1;
-                var members = info.Type.SystemType.GetEnumNames();
-                var values = info.Type.SystemType.GetEnumValues();
-                var sz = new Vector2(0, 0);
-                if (attrs1 != null && attrs1.Length > 0)
+                UInt32 enumFlags = 0;
+                var multiValue = data.Value as PropertyMultiValue;
+                if (multiValue != null)
                 {
-                    UInt32 enumFlags = 0;
-                    if(multiValue != null)
-                    {
-                        if (!multiValue.HasDifferentValue())
-                            enumFlags = System.Convert.ToUInt32(multiValue.Values[0]);
-                    }
-                    else
-                        enumFlags = System.Convert.ToUInt32(info.Value);
-                    uint newFlags = 0;
-                    for (int i = 0; i<members.Length; i++)
-                    {
-                        var m = values.GetValue(i).ToString();
-                        var e_v = System.Enum.Parse(propertyType, m);
-                        var v = System.Convert.ToUInt32(e_v);
-                        var bSelected = (((enumFlags & v) == v) ? true : false);
-                        bool bStylePushed = false;
-                        if(bSelected)
-                        {
-                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PopupHoverColor);
-                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextHoveredColor);
-                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.ItemHightlightHoveredColor);
-                            bStylePushed = true;
-                        }
-                        ImGuiAPI.Selectable(members[i], ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_DontClosePopups, ref sz);
-                        if (bStylePushed)
-                            ImGuiAPI.PopStyleColor(3);
-                        if (bSelected)
-                        {
-                            newFlags |= v;
-                        }
-                        else
-                        {
-                            newFlags &= ~v;
-                        }
-                    }
-                    if (newFlags != enumFlags && !info.Readonly)
-                    {
-                        newValue = System.Enum.ToObject(propertyType, newFlags);
-                        valueChanged = true;
-                        //    prop.SetValue(ref target, newFlags);
-                    }
+                    if (!multiValue.HasDifferentValue())
+                        enumFlags = System.Convert.ToUInt32(multiValue.Values[0]);
                 }
                 else
+                    enumFlags = System.Convert.ToUInt32(data.Value);
+                uint newFlags = 0;
+                for (int i = 0; i < members.Length; i++)
                 {
-                    for (int j = 0; j < members.Length; j++)
+                    var m = values.GetValue(i).ToString();
+                    var e_v = System.Enum.Parse(propertyType, m);
+                    var v = System.Convert.ToUInt32(e_v);
+                    var bSelected = (((enumFlags & v) == v) ? true : false);
+                    bool bStylePushed = false;
+                    if (bSelected)
                     {
-                        var bSelected = true;
-                        if (members[j] == info.Value.ToString())
-                        {
-                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PopupHoverColor);
-                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextHoveredColor);
-                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.ItemHightlightHoveredColor);
-                        }
-
-                        if (ImGuiAPI.Selectable(members[j], ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, ref sz))
-                        {
-                            item_current_idx = j;
-                        }
-
-                        if (members[j] == info.Value.ToString())
-                            ImGuiAPI.PopStyleColor(3);
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PopupHoverColor);
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextHoveredColor);
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.ItemHightlightHoveredColor);
+                        bStylePushed = true;
                     }
-                    if (item_current_idx >= 0 && !info.Readonly)
+                    ImGuiAPI.Selectable(members[i], ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_DontClosePopups, ref sz);
+                    if (bStylePushed)
+                        ImGuiAPI.PopStyleColor(3);
+                    if (bSelected)
                     {
-                        newValue = (int)values.GetValue(item_current_idx);
-                        valueChanged = true;
-                        //prop.SetValue(ref target, v);
+                        newFlags |= v;
+                    }
+                    else
+                    {
+                        newFlags &= ~v;
                     }
                 }
-
-                ImGuiAPI.EndCombo();
+                if (newFlags != enumFlags && !data.Readonly)
+                {
+                    data.NewValue = System.Enum.ToObject(propertyType, newFlags);
+                    data.ValueChanged = true;
+                    //    prop.SetValue(ref target, newFlags);
+                }
             }
-            ImGuiAPI.PopStyleColor(2);
-            ImGuiAPI.PopStyleVar(3);
+            else
+            {
+                for (int j = 0; j < members.Length; j++)
+                {
+                    var bSelected = true;
+                    if (members[j] == data.Value.ToString())
+                    {
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PopupHoverColor);
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextHoveredColor);
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.ItemHightlightHoveredColor);
+                    }
 
-            return valueChanged;
+                    if (ImGuiAPI.Selectable(members[j], ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, ref sz))
+                    {
+                        item_current_idx = j;
+                    }
+
+                    if (members[j] == data.Value.ToString())
+                        ImGuiAPI.PopStyleColor(3);
+                }
+                if (item_current_idx >= 0 && !data.Readonly)
+                {
+                    data.NewValue = (int)values.GetValue(item_current_idx);
+                    data.ValueChanged = true;
+                    //prop.SetValue(ref target, v);
+                }
+            }
+        }
+        public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
+        {
+            newValue = info.Value;
+            if (mComboBox == null)
+                return false;
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            var index = ImGuiAPI.TableGetColumnIndex();
+            mComboBox.Flags = ImGuiComboFlags_.ImGuiComboFlags_None | ImGuiComboFlags_.ImGuiComboFlags_NoArrowButton;
+            mComboBox.Width = ImGuiAPI.GetColumnWidth(index) - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X;
+            mComboBox.Name = TName.FromString2("##", info.Name).ToString();
+            mComboBox.PreviewValue = info.Value.ToString();
+
+            mDrawData.Type = info.Type;
+            mDrawData.Value = info.Value;
+            mDrawData.NewValue = info.Value;
+            mDrawData.Readonly = info.Readonly;
+            mDrawData.ValueChanged = false;
+            Support.UAnyPointer anyPointer = new Support.UAnyPointer();
+            anyPointer.RefObject = mDrawData;
+            var winSize = new Vector2(mComboBox.Width, -1);
+            ImGuiAPI.SetNextWindowSize(ref winSize, ImGuiCond_.ImGuiCond_Always);
+            mComboBox.OnDraw(ref drawList, ref anyPointer);
+            newValue = mDrawData.NewValue;
+
+            return mDrawData.ValueChanged;
         }
     }
 
@@ -687,7 +683,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var sz = new Vector2(0, 0);
             ImGuiTableRowData rowData = new ImGuiTableRowData()
             {
-                IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
+                IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer().ToPointer(),
                 MinHeight = 0,
                 CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
                 CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
@@ -817,7 +813,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var sz = new Vector2(0, 0);
             ImGuiTableRowData rowData = new ImGuiTableRowData()
             {
-                IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
+                IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer().ToPointer(),
                 MinHeight = 0,
                 CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
                 CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
@@ -994,7 +990,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             int idx = 0;
             ImGuiTableRowData rowData = new ImGuiTableRowData()
             {
-                IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
+                IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer().ToPointer(),
                 MinHeight = 0,
                 CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
                 CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,

@@ -152,6 +152,12 @@ namespace EngineNS.Support
                 CoreSDK.MemoryCopy(tar, (void*)p, (uint)size);
             }
         }
+        public unsafe IntPtr GetStructPointer()
+        {
+            if (ValueType != EValueType.Struct)
+                return IntPtr.Zero;
+            return mStruct.mStructPointer;
+        }
         public unsafe void GetValue<T>(ref T v) where T : unmanaged
         {
             if (typeof(T) == typeof(float))
@@ -596,6 +602,9 @@ namespace EngineNS.Support
     {
         public UAnyValue Value;
         public object RefObject;
+
+        public static UAnyPointer Default = new UAnyPointer();
+
         public void SetValue<T>(T v) where T : unmanaged
         {
             Value.SetValue<T>(v);

@@ -34,76 +34,83 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.PopTextWrapPos();
             ImGuiAPI.EndTooltip();
         }
-        public static RName DrawRName(RName name, string ctrlId, string ext, bool ReadOnly)
-        {
-            int slt = 0;
-            //ImGuiAPI.PushID(ctrlId);
-            var sz = new Vector2(0, 0);
-            ImGuiAPI.SetNextItemWidth(-1);
-            if (name == null)
-                ImGuiAPI.Text("null");
-            else
-                ImGuiAPI.Text(name.ToString());
-            ImGuiAPI.SameLine(0, -1);
-            Vector2 SelectPos;
-            if (ReadOnly==false)
-            {
-                if (ImGuiAPI.Button("+", ref sz))
-                {
-                    slt = 1;
-                    SelectPos = ImGuiAPI.GetItemRectMin();
-                }
-                ImGuiAPI.SameLine(0, -1);
-                if (ImGuiAPI.Button("-", ref sz))
-                {
-                    slt = 2;
-                }
-                ImGuiAPI.SameLine(0, -1);
-                if (ImGuiAPI.Button("*", ref sz))
-                {
-                    slt = 3;
-                }
-            }
+        //public static RName DrawRName(RName name, string ctrlId, string ext, bool ReadOnly, in EGui.UIProxy.ImageProxy snap)
+        //{
+        //    var drawList = ImGuiAPI.GetWindowDrawList();
+        //    var cursorPos = ImGuiAPI.GetCursorScreenPos();
+        //    ImGuiAPI.BeginGroup();
+        //    snap?.OnDraw(ref drawList, ref Support.UAnyPointer.Default);
+
+        //    ImGuiAPI.EndGroup();
+
+        //    int slt = 0;
+        //    //ImGuiAPI.PushID(ctrlId);
+        //    var sz = new Vector2(0, 0);
+        //    ImGuiAPI.SetNextItemWidth(-1);
+        //    if (name == null)
+        //        ImGuiAPI.Text("null");
+        //    else
+        //        ImGuiAPI.Text(name.ToString());
+        //    ImGuiAPI.SameLine(0, -1);
+        //    Vector2 SelectPos;
+        //    if (ReadOnly==false)
+        //    {
+        //        if (ImGuiAPI.Button("+", ref sz))
+        //        {
+        //            slt = 1;
+        //            SelectPos = ImGuiAPI.GetItemRectMin();
+        //        }
+        //        ImGuiAPI.SameLine(0, -1);
+        //        if (ImGuiAPI.Button("-", ref sz))
+        //        {
+        //            slt = 2;
+        //        }
+        //        ImGuiAPI.SameLine(0, -1);
+        //        if (ImGuiAPI.Button("*", ref sz))
+        //        {
+        //            slt = 3;
+        //        }
+        //    }
 
 
-            UAssetSelector.Instance.PopName = $"AssetSelector_{name?.ToString()}";
-            switch (slt)
-            {
-                case 0:
-                    break;
-                case 1://+
-                    {
-                        UAssetSelector.Instance.ExtName = ext;
-                        UAssetSelector.Instance.SelectedAsset = null;
-                        UAssetSelector.Instance.OpenPopup();
-                    }
-                    break;
-                case 2://-
-                    break;
-                case 3://*
-                    break;
-            }
+        //    UAssetSelector.Instance.PopName = $"AssetSelector_{name?.ToString()}";
+        //    switch (slt)
+        //    {
+        //        case 0:
+        //            break;
+        //        case 1://+
+        //            {
+        //                UAssetSelector.Instance.ExtName = ext;
+        //                UAssetSelector.Instance.SelectedAsset = null;
+        //                UAssetSelector.Instance.OpenPopup();
+        //            }
+        //            break;
+        //        case 2://-
+        //            break;
+        //        case 3://*
+        //            break;
+        //    }
 
-            bool isPopup = UAssetSelector.Instance.IsOpenPopup();
-            var pos = ImGuiAPI.GetCursorScreenPos();
-            UAssetSelector.Instance.OnDraw(ref pos);
-            //ImGuiAPI.PopID();
-            if (isPopup)
-            {
-                if (UAssetSelector.Instance.SelectedAsset != null && UAssetSelector.Instance.SelectedAsset.GetAssetName() != name)
-                {
-                    return UAssetSelector.Instance.SelectedAsset.GetAssetName();
-                }
-            }
+        //    bool isPopup = UAssetSelector.Instance.IsOpenPopup();
+        //    var pos = ImGuiAPI.GetCursorScreenPos();
+        //    UAssetSelector.Instance.OnDraw(ref pos);
+        //    //ImGuiAPI.PopID();
+        //    if (isPopup)
+        //    {
+        //        if (UAssetSelector.Instance.SelectedAsset != null && UAssetSelector.Instance.SelectedAsset.GetAssetName() != name)
+        //        {
+        //            return UAssetSelector.Instance.SelectedAsset.GetAssetName();
+        //        }
+        //    }
 
-            switch (slt)
-            {
-                case 2://-
-                    return null;
-                case 3://*
-                    break;
-            }
-            return name;
-        }
+        //    switch (slt)
+        //    {
+        //        case 2://-
+        //            return null;
+        //        case 3://*
+        //            break;
+        //    }
+        //    return name;
+        //}
     }
 }
