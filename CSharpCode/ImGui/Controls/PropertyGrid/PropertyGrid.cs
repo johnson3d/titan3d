@@ -41,6 +41,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public bool UserDraw = true;
         protected bool FullRedraw = false;
         public bool Expandable = false;
+        public bool Initialized { get; private set; } = false;
         public bool IsFullRedraw
         {
             get => FullRedraw;
@@ -67,6 +68,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public virtual async Task<bool> Initialize() 
         {
             await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            Initialized = true;
             return true;
         }
         public virtual void Cleanup() { }

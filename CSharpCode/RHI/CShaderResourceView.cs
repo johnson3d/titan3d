@@ -20,20 +20,6 @@ namespace EngineNS.RHI
         }
         public unsafe override void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
         {
-            if (SnapshotPtr == IntPtr.Zero)
-            {
-                if (Task == null)
-                {
-                    var rc = UEngine.Instance.GfxDevice.RenderContext;
-                    Task = UEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
-                }
-                else if(Task.IsCompleted)
-                {
-                    SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(Task.Result));
-                    Task = null;
-                }
-            }
-
             var start = ImGuiAPI.GetItemRectMin();
             var end = start + sz;
 
@@ -45,12 +31,7 @@ namespace EngineNS.RHI
             ImGuiAPI.PushClipRect(ref start, ref end, true);
 
             end.Y -= tsz.Y;
-            var uv0 = new Vector2(0, 0);
-            var uv1 = new Vector2(1, 1);
-            if (SnapshotPtr != IntPtr.Zero)
-            {
-                cmdlist.AddImage(SnapshotPtr.ToPointer(), ref start, ref end, ref uv0, ref uv1, 0xFFFFFFFF);
-            }
+            OnDrawSnapshot(in cmdlist, ref start, ref end);
 
             cmdlist.AddText(ref tpos, 0xFFFF00FF, name, null);
             ImGuiAPI.PopClipRect();
@@ -64,6 +45,29 @@ namespace EngineNS.RHI
                 handle.Free();
                 SnapshotPtr = IntPtr.Zero;
                 Task = null;
+            }
+        }
+
+        public unsafe override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        {
+            if (SnapshotPtr == IntPtr.Zero)
+            {
+                if (Task == null)
+                {
+                    var rc = UEngine.Instance.GfxDevice.RenderContext;
+                    Task = UEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
+                }
+                else if (Task.IsCompleted)
+                {
+                    SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(Task.Result));
+                    Task = null;
+                }
+            }
+            if (SnapshotPtr != IntPtr.Zero)
+            {
+                var uv0 = new Vector2(0, 0);
+                var uv1 = new Vector2(1, 1);
+                cmdlist.AddImage(SnapshotPtr.ToPointer(), ref start, ref end, ref uv0, ref uv1, 0xFFFFFFFF);
             }
         }
     }

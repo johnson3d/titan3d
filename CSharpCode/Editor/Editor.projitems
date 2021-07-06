@@ -13,6 +13,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UCpuProfiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UInspector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UMaterialInstanceEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\UMeshEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\UMeshPrimitiveEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UTextureViewer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UWorldOutliner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IAssetEditor.cs" />

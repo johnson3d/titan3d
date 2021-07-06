@@ -99,6 +99,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 viewport.RenderPolicy.VisibleMeshes.Add(mesh);
             }
 
+            var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+            float radius = aabb.GetMaxSide();
+            BoundingSphere sphere;
+            sphere.Center = aabb.GetCenter();
+            sphere.Radius = radius;
+            policy.GBuffers.Camera.AutoZoom(ref sphere);
             //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SunLightDirection = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);

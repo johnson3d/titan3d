@@ -34,8 +34,15 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.PopTextWrapPos();
             ImGuiAPI.EndTooltip();
         }
-        public static RName DrawRName(RName name, string ctrlId, string ext, bool ReadOnly)
+        public static RName DrawRName(RName name, string ctrlId, string ext, bool ReadOnly, in EGui.UIProxy.ImageProxy snap)
         {
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            var cursorPos = ImGuiAPI.GetCursorScreenPos();
+            ImGuiAPI.BeginGroup();
+            snap?.OnDraw(ref drawList, ref Support.UAnyPointer.Default);
+
+            ImGuiAPI.EndGroup();
+
             int slt = 0;
             //ImGuiAPI.PushID(ctrlId);
             var sz = new Vector2(0, 0);

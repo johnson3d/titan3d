@@ -8,6 +8,6 @@ namespace EngineNS.EGui.UIProxy
     {
         void Cleanup();
         System.Threading.Tasks.Task<bool> Initialize();
-        bool OnDraw(ref ImDrawList drawList);
+        bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData);
     }
 }

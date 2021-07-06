@@ -40,7 +40,7 @@ namespace EngineNS.EGui.UIProxy
             ToolbarItems.Remove(item);
         }
 
-        public bool OnDraw(ref ImDrawList drawList)
+        public bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
         {
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
             var windowWidth = ImGuiAPI.GetWindowWidth();
@@ -53,7 +53,7 @@ namespace EngineNS.EGui.UIProxy
             {
                 ImGuiAPI.SameLine(itemOffset, itemSpacing);
                 //ImGuiAPI.SameLine(0, -1);
-                ToolbarItems[i].OnDraw(ref drawList);
+                ToolbarItems[i].OnDraw(ref drawList, ref drawData);
                 itemOffset = ToolbarItems[i].NextItemOffset;
                 itemSpacing = ToolbarItems[i].NextItemSpacing;
             }
@@ -85,7 +85,7 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public bool OnDraw(ref ImDrawList drawList)
+        public bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
         {
             bool retValue = false;
             ImGuiAPI.BeginGroup(); 
@@ -170,7 +170,7 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public bool OnDraw(ref ImDrawList drawList)
+        public bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
         {
             var cursorScrPos = ImGuiAPI.GetCursorScreenPos();
             cursorScrPos.X += StyleConfig.Instance.ToolbarSeparatorThickness * 0.5f;

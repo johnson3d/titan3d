@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Mesh
     [Rtti.Meta]
     [CMeshPrimitives.Import]
     [IO.AssetCreateMenu(MenuName = "Mesh")]
-    public class CMeshPrimitives : AuxPtrType<IMeshPrimitives>, IO.IAsset
+    public partial class CMeshPrimitives : AuxPtrType<IMeshPrimitives>, IO.IAsset
     {
         public const string AssetExt = ".vms";
 

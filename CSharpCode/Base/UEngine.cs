@@ -56,7 +56,7 @@ namespace EngineNS
         [Rtti.Meta]
         public string MainWindowRPolicy { get; set; }// = Rtti.TypeManager.Instance.GetTypeStringFromType(typeof(Graphics.Pipeline.Mobile.UMobileFSPolicy));
         [Rtti.Meta]
-        public string RpcRootType { get; set; } = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(EngineNS.UTest.UTest_Rpc));
+        public string RpcRootType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.UTest.UTest_Rpc));
         [Rtti.Meta]
         public bool CookDXBC { get; set; } = true;
         [Rtti.Meta]
@@ -65,6 +65,10 @@ namespace EngineNS
         public bool CookGLSL { get; set; } = false;
         [Rtti.Meta]
         public bool CookMETAL { get; set; } = false;
+        [Rtti.Meta]
+        public RName DefaultMaterial { get; set; }// = RName.GetRName("UTest/ttt.material");
+        [Rtti.Meta]
+        public RName DefaultMaterialInstance { get; set; }// = RName.GetRName("UTest/box_wite.uminst");
     }
     public partial class UEngine : UModuleHost<UEngine>
     {
@@ -132,6 +136,10 @@ namespace EngineNS
             {
                 Config = new UEngineConfig();
                 Config.DefaultTexture = RName.GetRName("texture/checkboard.txpic", RName.ERNameType.Engine);
+                Config.DefaultMaterial = RName.GetRName("material/SysDft.material", RName.ERNameType.Engine);
+                Config.DefaultMaterialInstance = RName.GetRName("material/box_wite.uminst", RName.ERNameType.Game);
+                Config.MainWindowType = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Editor.UMainEditorApplication));
+                Config.MainWindowRPolicy = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Pipeline.Mobile.UMobileEditorFSPolicy));
                 IO.FileManager.SaveObjectToXml(cfgFile, Config);
             }
 

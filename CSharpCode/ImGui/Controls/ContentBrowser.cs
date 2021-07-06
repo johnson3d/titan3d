@@ -155,7 +155,7 @@ namespace EngineNS.EGui.Controls
             if (mSearchBar != null)
             {
                 mSearchBar.Width = size.X;
-                if (mSearchBar.OnDraw(ref cmdlist))
+                if (mSearchBar.OnDraw(ref cmdlist, ref Support.UAnyPointer.Default))
                     FilterText = mSearchBar.SearchText;
             }
             if (ImGuiAPI.BeginChild("RightWindow", ref size, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
