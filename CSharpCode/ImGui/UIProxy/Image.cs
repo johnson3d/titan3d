@@ -68,6 +68,10 @@ namespace EngineNS.EGui.UIProxy
         }
         public void Dispose()
         {
+            if (mTask != null)
+            {
+                mTask = null;
+            }
             if (mImagePtr != IntPtr.Zero)
             {
                 System.Runtime.InteropServices.GCHandle.FromIntPtr(mImagePtr).Free();

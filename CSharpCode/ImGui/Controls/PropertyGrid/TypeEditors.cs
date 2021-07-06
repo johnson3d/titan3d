@@ -510,7 +510,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     }
     public class EnumEditor : PGCustomValueEditorAttribute
     {
-        EGui.UIProxy.ImageProxy mImage;
+        //EGui.UIProxy.ImageProxy mImage;
         EGui.UIProxy.ComboBox mComboBox;
         class DrawData
         {
@@ -536,6 +536,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public override void Cleanup()
         {
             mComboBox?.Cleanup();
+            mComboBox = null;
             base.Cleanup();
         }
 

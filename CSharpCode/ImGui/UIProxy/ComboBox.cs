@@ -19,6 +19,7 @@ namespace EngineNS.EGui.UIProxy
         public void Cleanup()
         {
             mImage?.Cleanup();
+            mImage = null;
         }
         public async Task<bool> Initialize()
         {

@@ -82,7 +82,7 @@ namespace EngineNS.Editor
             DicValue[4] = "E";
             DicValue[5] = "F";
 
-            RNameValue = RName.GetRName("UTest/ground.uminst");
+            //RNameValue = RName.GetRName("UTest/ground.uminst");
         }
     }
 
