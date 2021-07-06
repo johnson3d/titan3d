@@ -9,10 +9,10 @@ namespace EngineNS.EGui.UIProxy
     {
         public string Name;
         public string PreviewValue;
-        public ImGuiComboFlags_ Flags;
-        public float Width;
+        public ImGuiComboFlags_ Flags = ImGuiComboFlags_.ImGuiComboFlags_None | ImGuiComboFlags_.ImGuiComboFlags_NoArrowButton;
+        public float Width = -1;
 
-        public delegate void Delegate_ComboOpenAction(ref IUIProxyDrawData data);
+        public delegate void Delegate_ComboOpenAction(ref Support.UAnyPointer data);
         public Delegate_ComboOpenAction ComboOpenAction;
 
         ImageProxy mImage;
@@ -22,12 +22,19 @@ namespace EngineNS.EGui.UIProxy
         }
         public async Task<bool> Initialize()
         {
-            mImage = new ImageProxy();
+            mImage = new ImageProxy()
+            {
+                ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                ImageSize = new Vector2(16, 16),
+                UVMin = new Vector2(543.0f / 1024, 3.0f / 1024),
+                UVMax = new Vector2(559.0f / 1024, 19.0f / 1024),
+            };
             return await mImage.Initialize();
         }
-        public unsafe bool OnDraw(ref ImDrawList drawList, ref IUIProxyDrawData drawData)
+        public unsafe bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
         {
             var style = ImGuiAPI.GetStyle();
+            ImGuiAPI.SetNextItemWidth(Width);
 
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PopupColor);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, EGui.UIProxy.StyleConfig.Instance.PopupColor);
@@ -36,8 +43,12 @@ namespace EngineNS.EGui.UIProxy
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_PopupBorderSize, EGui.UIProxy.StyleConfig.Instance.PopupBordersize);
 
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
-            var nameSize = ImGuiAPI.CalcTextSize(Name, true, -1);
-            var endPos = cursorPos + new Vector2(Width + ((nameSize.X > 0.0f) ? (style->ItemInnerSpacing.X + nameSize.X) : 0.0f), nameSize.Y + style->FramePadding.Y * 2.0f);
+            var endPos = cursorPos;
+            if(!string.IsNullOrEmpty(Name))
+            {
+                var nameSize = ImGuiAPI.CalcTextSize(Name, true, -1);
+                endPos = cursorPos + new Vector2(Width + ((nameSize.X > 0.0f) ? (style->ItemInnerSpacing.X + nameSize.X) : 0.0f), nameSize.Y + style->FramePadding.Y * 2.0f);
+            }
             var hovered = ImGuiAPI.IsMouseHoveringRectInCurrentWindow(ref cursorPos, ref endPos, true);
             if (hovered)
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.Instance.PGItemBorderHoveredColor);

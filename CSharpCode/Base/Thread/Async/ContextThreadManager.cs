@@ -343,11 +343,9 @@ namespace EngineNS.Thread.Async
                         }
                         return thread;
                     }
-                    break;
                 default:
                     return UEngine.Instance.GetContext(target);
             }
-            return ctx;
         }
         public void RunOn<T>(FAsyncPostEvent<T> evt, EAsyncTarget target = EAsyncTarget.AsyncIO)
         {

@@ -42,7 +42,7 @@ namespace EngineNS.IO
             TypeSlt.BaseType = type;
             TypeSlt.SelectedType = type;
 
-            _ = PGAsset.Initialize();
+            var noused = PGAsset.Initialize();
             mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType.SystemType) as IAsset;
             PGAsset.Target = mAsset;
         }
@@ -189,6 +189,8 @@ namespace EngineNS.IO
         public virtual void ResetSnapshot()
         {
             HasSnapshot = true;
+
+            OnShowIconTimout(0);
         }
         public void SetAssetName(RName rn)
         {
@@ -209,23 +211,82 @@ namespace EngineNS.IO
             return true;
         }
         //在ContentBrowser里面渲染Asset信息
-        public unsafe virtual void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        //public unsafe virtual void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        //{
+        //    var start = ImGuiAPI.GetItemRectMin();
+        //    var end = start + sz;
+        //    //icon.OnDraw(ref cmdlist, ref start, ref end);
+        //    var name = IO.FileManager.GetPureName(mAssetName.Name);
+        //    var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
+        //    Vector2 tpos;
+        //    tpos.Y = start.Y + sz.Y - tsz.Y;
+        //    tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
+        //    ImGuiAPI.PushClipRect(&start, &end, true);
+        //    cmdlist.AddText(&tpos, 0xFFFF00FF, name, null);
+        //    ImGuiAPI.PopClipRect();
+        //}
+        //public virtual void OnShowIconTimout(int time)
+        //{
+
+        //}
+        System.Threading.Tasks.Task<Editor.USnapshot> Task;
+        IntPtr SnapshotPtr;
+        public virtual unsafe void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
         {
             var start = ImGuiAPI.GetItemRectMin();
             var end = start + sz;
-            //icon.OnDraw(ref cmdlist, ref start, ref end);
-            var name = IO.FileManager.GetPureName(mAssetName.Name);
+
+            var name = IO.FileManager.GetPureName(GetAssetName().Name);
             var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
             Vector2 tpos;
             tpos.Y = start.Y + sz.Y - tsz.Y;
             tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
-            ImGuiAPI.PushClipRect(&start, &end, true);
-            cmdlist.AddText(&tpos, 0xFFFF00FF, name, null);
+            ImGuiAPI.PushClipRect(ref start, ref end, true);
+
+            end.Y -= tsz.Y;
+            OnDrawSnapshot(in cmdlist, ref start, ref end);
+
+            cmdlist.AddText(ref tpos, 0xFFFF00FF, name, null);
             ImGuiAPI.PopClipRect();
         }
         public virtual void OnShowIconTimout(int time)
         {
+            if (SnapshotPtr != IntPtr.Zero)
+            {
+                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
+                handle.Free();
+                SnapshotPtr = IntPtr.Zero;
+                Task = null;
+            }
+        }
+        public unsafe virtual void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        {
+            if (SnapshotPtr == IntPtr.Zero && HasSnapshot == true)
+            {
+                if (Task == null)
+                {
+                    Task = Editor.USnapshot.Load(GetAssetName().Address + ".snap");
+                }
+                else if (Task.IsCompleted)
+                {
+                    if (Task.Result == null)
+                    {
+                        HasSnapshot = false;
+                    }
+                    else
+                    {
+                        SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(Task.Result.mTextureRSV));
+                    }
+                    Task = null;
+                }
+            }
 
+            if (SnapshotPtr != IntPtr.Zero)
+            {
+                var uv0 = new Vector2(0, 0);
+                var uv1 = new Vector2(1, 1);
+                cmdlist.AddImage(SnapshotPtr.ToPointer(), ref start, ref end, ref uv0, ref uv1, 0xFFFFFFFF);
+            }
         }
         [Rtti.Meta]
         public EGui.UVAnim Icon

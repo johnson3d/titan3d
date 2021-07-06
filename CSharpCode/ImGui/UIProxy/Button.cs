@@ -52,7 +52,7 @@ namespace EngineNS.EGui.UIProxy
             await mImage.Initialize();
             return true;
         }
-        public unsafe bool OnDraw(ref ImDrawList drawList)
+        public unsafe bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
         {
             bool retValue = false;
             var rectStart = ImGuiAPI.GetCursorScreenPos();

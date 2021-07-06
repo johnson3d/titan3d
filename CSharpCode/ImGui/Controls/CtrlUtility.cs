@@ -37,9 +37,10 @@ namespace EngineNS.EGui.Controls
         public static RName DrawRName(RName name, string ctrlId, string ext, bool ReadOnly, in EGui.UIProxy.ImageProxy snap)
         {
             var drawList = ImGuiAPI.GetWindowDrawList();
-
+            var cursorPos = ImGuiAPI.GetCursorScreenPos();
             ImGuiAPI.BeginGroup();
-            snap?.OnDraw(ref drawList);
+            snap?.OnDraw(ref drawList, ref Support.UAnyPointer.Default);
+
             ImGuiAPI.EndGroup();
 
             int slt = 0;

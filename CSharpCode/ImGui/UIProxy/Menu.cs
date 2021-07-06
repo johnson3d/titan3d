@@ -32,7 +32,7 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public bool OnDraw(ref ImDrawList drawList)
+        public bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
         {
             bool retValue = false;
             //ImGuiAPI.BeginGroup();
@@ -57,7 +57,7 @@ namespace EngineNS.EGui.UIProxy
             }
             if(Icon != null)
             {
-                Icon.OnDraw(ref drawList);
+                Icon.OnDraw(ref drawList, ref drawData);
                 var posX = ImGuiAPI.GetCursorPosX();
                 posX += Icon.ImageSize.X + StyleConfig.Instance.ItemSpacing.X;
                 ImGuiAPI.SetCursorPosX(posX);
@@ -99,7 +99,7 @@ namespace EngineNS.EGui.UIProxy
                     var subMenuDraweList = ImGuiAPI.GetWindowDrawList();
                     for (int i = 0; i < this.SubMenus.Count; i++)
                     {
-                        this.SubMenus[i].OnDraw(ref subMenuDraweList);
+                        this.SubMenus[i].OnDraw(ref subMenuDraweList, ref drawData);
                     }
                 }
 
@@ -133,7 +133,7 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public bool OnDraw(ref ImDrawList drawList)
+        public bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
         {
             ImGuiAPI.BeginGroup();
             UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_Bold_13px);

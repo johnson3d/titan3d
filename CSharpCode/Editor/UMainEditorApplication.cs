@@ -45,6 +45,8 @@ namespace EngineNS.Editor
             await ContentBrowser.Initialize();
             Editor.UMainEditorApplication.RegRootForm(ContentBrowser);
 
+            await mMetaViewer.Initialize();
+
             var RenderPolicy = Rtti.UTypeDescManager.CreateInstance(rpType) as Graphics.Pipeline.IRenderPolicy;
             await WorldViewportSlate.Initialize(this, RenderPolicy, 0, 1);
 

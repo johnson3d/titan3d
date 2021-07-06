@@ -11,37 +11,118 @@ namespace EngineNS
         public class PGRNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
             public string FilterExts;
-            EGui.UIProxy.ImageProxy mSnap;
-            RName oldValue;
+            EGui.UIProxy.ComboBox mComboBox;
+            EGui.Controls.ContentBrowser mContentBrowser;
+
+            class DrawData
+            {
+                public RName NewValue;
+            }
+            [System.ThreadStatic]
+            DrawData mDrawData = new DrawData();
+
+            public float MaxWidth = -1;
+            public float MinWidth = -1;
             public override async Task<bool> Initialize()
             {
-                mSnap = new EGui.UIProxy.ImageProxy()
+                mComboBox = new EGui.UIProxy.ComboBox()
                 {
-                    ImageSize = new Vector2(32, 32),
-                    UVMin = new Vector2(0, 0),
-                    UVMax = new Vector2(1, 1),
+                    ComboOpenAction = ComboOpenAction
                 };
+                await mComboBox.Initialize();
+                mContentBrowser = new EGui.Controls.ContentBrowser()
+                {
+                    DrawInWindow = false,
+                    CreateNewAssets = false,
+                    ItemSelectedAction = (asset)=>
+                    {
+                        ImGuiAPI.CloseCurrentPopup();
+                    },
+                };
+                await mContentBrowser.Initialize();
                 return await base.Initialize();
+            }
+            ~PGRNameAttribute()
+            {
+                Cleanup();
             }
             public override void Cleanup()
             {
-                mSnap?.Cleanup();
+                mComboBox?.Cleanup();
                 base.Cleanup();
+            }
+            void ComboOpenAction(ref Support.UAnyPointer data)
+            {
+                mContentBrowser.OnDraw();
             }
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
                 newValue = info.Value;
+
                 var name = info.Value as RName;
-                if(oldValue != name)
+                mDrawData.NewValue = name;
+                //var newName = EGui.Controls.CtrlUtility.DrawRName(name, info.Name, FilterExts, info.Readonly, mSnap);
+
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                var cursorPos = ImGuiAPI.GetCursorScreenPos();
+                ImGuiAPI.BeginGroup();
+
+                var snapSize = new Vector2(64, 64);
+                var snapEnd = cursorPos + snapSize;
+                var assetMeta = UEngine.Instance.AssetMetaManager.GetAssetMeta(name);
+                assetMeta?.OnDrawSnapshot(in drawList, ref cursorPos, ref snapEnd);
+
+                var preViewStr = "null";
+                if (name != null)
+                    preViewStr = name.ToString();
+                var textSize = ImGuiAPI.CalcTextSize(preViewStr, false, 0);
+                var preViewStrDrawPos = cursorPos + new Vector2(snapSize.X + 8, 0);
+                ImGuiAPI.SetCursorScreenPos(ref preViewStrDrawPos);
+                Support.UAnyPointer anyPt = new Support.UAnyPointer()
                 {
-                    mSnap.Dispose();
-                    mSnap.ImageFile = name;
-                    oldValue = name;
+                    RefObject = mDrawData,
+                };
+                var index = ImGuiAPI.TableGetColumnIndex();
+                mComboBox.Flags = ImGuiComboFlags_.ImGuiComboFlags_None | ImGuiComboFlags_.ImGuiComboFlags_NoArrowButton | ImGuiComboFlags_.ImGuiComboFlags_HeightLarge;
+                mComboBox.Width = ImGuiAPI.GetColumnWidth(index) - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X;
+                mComboBox.Name = TName.FromString2("##", info.Name).ToString();
+                mComboBox.PreviewValue = preViewStr;
+                var contentBrowserSize = new Vector2(500, 600);
+                ImGuiAPI.SetNextWindowSize(ref contentBrowserSize, ImGuiCond_.ImGuiCond_Always);
+                mContentBrowser.ExtName = FilterExts;
+                mContentBrowser.SelectedAsset = null;
+                mComboBox.OnDraw(ref drawList, ref anyPt);
+                if(mContentBrowser.SelectedAsset != null && mContentBrowser.SelectedAsset.GetAssetName() != name)
+                {
+                    mDrawData.NewValue = mContentBrowser.SelectedAsset.GetAssetName();
                 }
-                var newName = EGui.Controls.CtrlUtility.DrawRName(name, info.Name, FilterExts, info.Readonly, mSnap);
-                if (newName != name)
+                var pos = ImGuiAPI.GetCursorScreenPos();
+                pos.X += snapSize.X + 8;
+                ImGuiAPI.SetCursorScreenPos(ref pos);
+                if (info.Readonly)
                 {
-                    newValue = newName;
+                    Vector4 color = new Vector4(0.5f, 0.5f, 0.5f, 1.0f);
+                    ImGuiAPI.TextColored(ref color, "readonly");
+                }
+                else
+                {
+                    var sz = new Vector2(0, 0);
+                    if (ImGuiAPI.Button("<", ref sz))
+                    {
+                        mDrawData.NewValue = EGui.Controls.ContentBrowser.GlobalSelectedAsset.GetAssetName();
+                    }
+                    ImGuiAPI.SameLine(0, 8);
+                    if (ImGuiAPI.Button("-", ref sz))
+                    {
+                        mDrawData.NewValue = null;
+                    }
+                }
+
+                ImGuiAPI.EndGroup();
+
+                if (mDrawData.NewValue != name)
+                {
+                    newValue = mDrawData.NewValue;
                     return true;
                 }
                 return false;

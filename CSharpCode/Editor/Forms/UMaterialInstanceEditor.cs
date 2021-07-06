@@ -62,7 +62,13 @@ namespace EngineNS.Editor.Forms
                 mesh.SetWorldMatrix(ref Matrix.mIdentity);
                 viewport.RenderPolicy.VisibleMeshes.Add(mesh);
             }
-            
+
+            var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+            float radius = aabb.GetMaxSide();
+            BoundingSphere sphere;
+            sphere.Center = aabb.GetCenter();
+            sphere.Radius = radius;
+            policy.GBuffers.Camera.AutoZoom(ref sphere);
             //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SunLightDirection = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);
@@ -79,7 +85,7 @@ namespace EngineNS.Editor.Forms
             ActionRecorder.ClearRecords();
             Material.ActionRecorder = ActionRecorder;
 
-            PreviewViewport.Title = "MaterialInstancePreview";
+            PreviewViewport.Title = $"Material:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy(), 0, 1);
 

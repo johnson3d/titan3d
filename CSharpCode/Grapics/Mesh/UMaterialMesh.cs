@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EngineNS.Graphics.Mesh
 {
@@ -24,7 +25,7 @@ namespace EngineNS.Graphics.Mesh
     [Rtti.Meta]
     [UMaterialMesh.Import]
     [IO.AssetCreateMenu(MenuName = "MaterialMesh")]
-    public class UMaterialMesh : IO.ISerializer, IO.IAsset
+    public partial class UMaterialMesh : IO.ISerializer, IO.IAsset
     {
         public const string AssetExt = ".ums";
 
@@ -131,6 +132,20 @@ namespace EngineNS.Graphics.Mesh
                 return null;
             }
         }
+        public static bool ReloadXnd(UMaterialMesh mesh, UMaterialMeshManager manager, IO.CXndNode node)
+        {
+            unsafe
+            {
+                var attr = node.TryGetAttribute("MaterialMesh");
+                if ((IntPtr)attr.CppPointer != IntPtr.Zero)
+                {
+                    var ar = attr.GetReader(manager);
+                    ar.ReadTo(mesh, null);
+                    attr.ReleaseReader(ref ar);
+                }
+                return true;
+            }
+        }
         [RName.PGRName(FilterExts = CMeshPrimitives.AssetExt)]
         public RName MeshName
         {
@@ -176,16 +191,31 @@ namespace EngineNS.Graphics.Mesh
 
         public class PGMaterialsAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
+            RName.PGRNameAttribute mRNameEditor;
+
             public PGMaterialsAttribute()
             {
                 FullRedraw = true;
             }
+            public override async Task<bool> Initialize()
+            {
+                mRNameEditor = new RName.PGRNameAttribute();
+                await mRNameEditor.Initialize();
+                return await base.Initialize();
+            }
+            public override void Cleanup()
+            {
+                mRNameEditor?.Cleanup();
+                base.Cleanup();
+            }
             public override bool OnDraw(in EditorInfo info, out object newValue)
             {
                 newValue = info.Value;
+                if (mRNameEditor == null)
+                    return false;
                 var umesh = info.ObjectInstance as UMaterialMesh;
                 ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;
-                var materials = info.Value as Pipeline.Shader.UMaterialInstance[];
+                var materials = info.Value as Pipeline.Shader.UMaterial[];
 
                 ImGuiAPI.GotoColumns(0);
                 ImGuiAPI.SameLine(0, -1);
@@ -203,7 +233,21 @@ namespace EngineNS.Graphics.Mesh
                         ImGuiAPI.NextColumn();
                         ImGuiAPI.SetNextItemWidth(-1);
                         var old = materials[i]?.AssetName;
-                        var rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterialInstance.AssetExt, info.Readonly, null);
+                        RName rn;
+                        if(materials[i] is Pipeline.Shader.UMaterialInstance)
+                        {
+                            mRNameEditor.FilterExts = Pipeline.Shader.UMaterialInstance.AssetExt;
+                            mRNameEditor.OnDraw(in info, out newValue);
+                            rn = (RName)newValue;
+                            //rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterialInstance.AssetExt, info.Readonly, null);
+                        }
+                        else
+                        {
+                            mRNameEditor.FilterExts = Pipeline.Shader.UMaterial.AssetExt;
+                            mRNameEditor.OnDraw(in info, out newValue);
+                            rn = (RName)newValue;
+                            //rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterial.AssetExt, info.Readonly, null);
+                        }
                         if (rn != old)
                         {
                             if (umesh.AssetState != IO.EAssetState.Loading)
@@ -212,7 +256,15 @@ namespace EngineNS.Graphics.Mesh
                                 int IndexOfMaterial = i;
                                 System.Action exec = async () =>
                                 {
-                                    materials[IndexOfMaterial] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
+                                    if (rn.ExtName == Pipeline.Shader.UMaterialInstance.AssetExt)
+                                    {
+                                        materials[IndexOfMaterial] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
+                                    }
+                                    else if (rn.ExtName == Pipeline.Shader.UMaterial.AssetExt)
+                                    {
+                                        materials[IndexOfMaterial] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
+                                    }
+                                    
                                     umesh.AssetState = IO.EAssetState.LoadFinished;
                                 };
                                 exec();
@@ -289,6 +341,51 @@ namespace EngineNS.Graphics.Mesh
     public class UMaterialMeshManager
     {
         public Dictionary<RName, UMaterialMesh> Meshes { get; } = new Dictionary<RName, UMaterialMesh>();
+        public async System.Threading.Tasks.Task<UMaterialMesh> CreateMaterialMesh(RName name)
+        {
+            var result = await UEngine.Instance.EventPoster.Post(() =>
+            {
+                using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
+                {
+                    if (xnd != null)
+                    {
+                        var mesh = UMaterialMesh.LoadXnd(this, xnd.RootNode);
+                        if (mesh == null)
+                            return null;
+
+                        return mesh;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+            return result;
+        }
+        public async System.Threading.Tasks.Task<bool> ReloadMaterialMesh(RName rn)
+        {
+            UMaterialMesh result;
+            if (Meshes.TryGetValue(rn, out result) == false)
+                return true;
+
+            var ok = await UEngine.Instance.EventPoster.Post(() =>
+            {
+                using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+                {
+                    if (xnd != null)
+                    {
+                        return UMaterialMesh.ReloadXnd(result, this, xnd.RootNode);
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+
+            return ok;
+        }
         public async System.Threading.Tasks.Task<UMaterialMesh> GetMaterialMesh(RName name)
         {
             UMaterialMesh result;

@@ -4,6 +4,7 @@ using System.Text;
 
 namespace EngineNS.EGui.Controls
 {
+    [Obsolete]
     public class UAssetSelector
     {
         public static UAssetSelector Instance = new UAssetSelector();

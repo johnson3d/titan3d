@@ -6,7 +6,17 @@ namespace EngineNS.EGui.UIProxy
 {
     public class ImageProxy : IUIProxyBase, IDisposable
     {
-        public RName ImageFile;
+        RName mImageFile;
+        public RName ImageFile
+        {
+            get => mImageFile;
+            set
+            {
+                if(mImageFile != value)
+                    Dispose();
+                mImageFile = value;
+            }
+        }
         public Vector2 ImageSize = new Vector2(32, 32);
         public Vector2 UVMin = new Vector2(0, 0);
         public Vector2 UVMax = new Vector2(1, 1);
@@ -64,7 +74,7 @@ namespace EngineNS.EGui.UIProxy
                 mImagePtr = IntPtr.Zero;
             }
         }
-        public unsafe bool OnDraw(ref ImDrawList drawList)
+        public unsafe bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
         {
             if (ImageFile == null)
                 return false;
