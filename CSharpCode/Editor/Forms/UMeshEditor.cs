@@ -1,13 +1,10 @@
-﻿using EngineNS.Graphics.Pipeline;
-using SDL2;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+using SDL2;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UMaterialInstanceEditor : Editor.IAssetEditor, ITickable, Graphics.Pipeline.IRootForm
+    public class UMeshEditor : Editor.IAssetEditor, ITickable, Graphics.Pipeline.IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -15,29 +12,26 @@ namespace EngineNS.Editor.Forms
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
-        public Graphics.Pipeline.Shader.UMaterialInstance Material;
+        public Graphics.Mesh.UMaterialMesh Mesh;
         public Bricks.CodeBuilder.ShaderNode.UPreviewViewport PreviewViewport = new Bricks.CodeBuilder.ShaderNode.UPreviewViewport();
-        public EGui.Controls.PropertyGrid.PropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public UMaterialInstanceEditorRecorder ActionRecorder = new UMaterialInstanceEditorRecorder();
-        ~UMaterialInstanceEditor()
+        public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        ~UMeshEditor()
         {
             Cleanup();
         }
         public void Cleanup()
         {
-            Material = null;
+            Mesh = null;
             PreviewViewport?.Cleanup();
             PreviewViewport = null;
-            MaterialPropGrid.Target = null;
-            ActionRecorder?.ClearRecords();
-            ActionRecorder = null;
+            MeshPropGrid.Target = null;
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await MaterialPropGrid.Initialize();
+            await MeshPropGrid.Initialize();
             return true;
         }
-        public IRootForm GetRootForm()
+        public Graphics.Pipeline.IRootForm GetRootForm()
         {
             return this;
         }
@@ -49,14 +43,9 @@ namespace EngineNS.Editor.Forms
 
             viewport.CameraController.Camera = viewport.RenderPolicy.GBuffers.Camera;
 
-            var materials = new Graphics.Pipeline.Shader.UMaterial[1];
-            materials[0] = Material;
-            if (materials[0] == null)
-                return;
             var mesh = new Graphics.Mesh.UMesh();
-            var rect = Graphics.Mesh.CMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
-            var rectMesh = rect.ToMesh();
-            var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+
+            var ok = mesh.Initialize(Mesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
                 mesh.SetWorldMatrix(ref Matrix.mIdentity);
@@ -69,34 +58,24 @@ namespace EngineNS.Editor.Forms
             sphere.Center = aabb.GetCenter();
             sphere.Radius = radius;
             policy.GBuffers.Camera.AutoZoom(ref sphere);
-            //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
-            //this.RenderPolicy.GBuffers.SunLightDirection = new Vector3(1, 1, 1);
-            //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);
-            //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
-            //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
         }
-        public async Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
+        public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            Material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(name);
-            if (Material == null)
+            Mesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.CreateMaterialMesh(name);
+            if (Mesh == null)
                 return false;
 
-            ActionRecorder.ClearRecords();
-            Material.ActionRecorder = ActionRecorder;
-
-            PreviewViewport.Title = $"Material:{name}";
+            PreviewViewport.Title = $"MaterialMesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy(), 0, 1);
 
-            MaterialPropGrid.Target = Material;
+            MeshPropGrid.Target = Mesh;
             UEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
         public void OnCloseEditor()
         {
-            Material.ActionRecorder = null;
-            ActionRecorder.ClearRecords();
             UEngine.Instance.TickableManager.RemoveTickable(this);
             Cleanup();
         }
@@ -105,13 +84,13 @@ namespace EngineNS.Editor.Forms
         public Vector2 WindowSize = new Vector2(800, 600);
         public unsafe void OnDraw()
         {
-            if (Visible == false || Material == null)
+            if (Visible == false || Mesh == null)
                 return;
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(ref WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(Material.AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            if (ImGuiAPI.Begin(Mesh.AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
                 if (ImGuiAPI.IsWindowDocked())
@@ -154,25 +133,25 @@ namespace EngineNS.Editor.Forms
             var btSize = new Vector2(64, 64);
             if (ImGuiAPI.Button("Save", ref btSize))
             {
-                Material.SaveAssetTo(Material.AssetName);
-                var unused = UEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Material.AssetName);
+                Mesh.SaveAssetTo(Mesh.AssetName);
+                var unused = UEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(Mesh.AssetName);
 
-                USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                USnapshot.Save(Mesh.AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Reload", ref btSize))
             {
-                
+
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Undo", ref btSize))
             {
-                ActionRecorder.Undo();
+
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Redo", ref btSize))
             {
-                ActionRecorder.Redo();
+
             }
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
@@ -180,16 +159,16 @@ namespace EngineNS.Editor.Forms
             var sz = new Vector2(-1);
             if (ImGuiAPI.BeginChild("LeftView", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                if (ImGuiAPI.CollapsingHeader("MaterialProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader("MeshProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
-                    MaterialPropGrid.OnDraw(true, false, false);
+                    MeshPropGrid.OnDraw(true, false, false);
                 }
             }
             ImGuiAPI.EndChild();
         }
         protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
         {
-            PreviewViewport.VieportType = UViewportSlate.EVieportType.ChildWindow;            
+            PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.ChildWindow;
             PreviewViewport.OnDraw();
         }
 
@@ -212,36 +191,13 @@ namespace EngineNS.Editor.Forms
         }
         #endregion
     }
-
-    public class UMaterialInstanceEditorRecorder : GamePlay.Action.UActionRecorder
-    {
-        public override GamePlay.Action.UAction CurrentAction
-        {
-            get
-            {
-                if (mCurrentAction == null)
-                {
-                    mCurrentAction = this.NewAction();
-                }
-                return mCurrentAction;
-            }
-            set => mCurrentAction = value;
-        }
-        public override void OnChanged(GamePlay.Action.UAction.UPropertyModifier modifier)
-        {
-            if (mCurrentAction != null)
-            {
-                mCurrentAction.Name = $"Set:{modifier.PropertyName}";
-            }
-            this.CloseAction();
-        }
-    }
 }
 
-namespace EngineNS.Graphics.Pipeline.Shader
+namespace EngineNS.Graphics.Mesh
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UMaterialInstanceEditor))]
-    public partial class UMaterialInstance
+    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UMeshEditor))]
+    public partial class UMaterialMesh
     {
+        
     }
 }

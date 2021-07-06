@@ -38,6 +38,13 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
+        public void AutoZoom(ref BoundingSphere sphere)
+        {
+            var dist = (sphere.Radius) / (float)Math.Sin((float)this.mCoreObject.mFov);
+            var eye = sphere.Center - this.mCoreObject.GetDirection() * dist;
+            var up = this.mCoreObject.GetUp();
+            mCoreObject.LookAtLH(ref eye, ref sphere.Center, ref up);
+        }
     }
 
     public enum ECameraAxis

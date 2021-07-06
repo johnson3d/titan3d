@@ -42,7 +42,7 @@ namespace EngineNS.IO
             TypeSlt.BaseType = type;
             TypeSlt.SelectedType = type;
 
-            PGAsset.Initialize();
+            var noused = PGAsset.Initialize();
             mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType.SystemType) as IAsset;
             PGAsset.Target = mAsset;
         }
