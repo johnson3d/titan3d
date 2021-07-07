@@ -326,7 +326,6 @@ namespace EngineNS.Thread.Async
         }
         public ContextThread GetContext(EAsyncTarget target)
         {
-            ContextThread ctx = null;
             switch (target)
             {
                 case EAsyncTarget.TPools:

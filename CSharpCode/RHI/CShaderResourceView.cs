@@ -11,8 +11,7 @@ namespace EngineNS.RHI
         {
             return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
         }
-        System.Threading.Tasks.Task<CShaderResourceView> Task;
-        IntPtr SnapshotPtr;
+        System.Threading.Tasks.Task<CShaderResourceView> SnapTask;
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset
@@ -44,7 +43,7 @@ namespace EngineNS.RHI
                 var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
                 handle.Free();
                 SnapshotPtr = IntPtr.Zero;
-                Task = null;
+                SnapTask = null;
             }
         }
 
@@ -52,15 +51,15 @@ namespace EngineNS.RHI
         {
             if (SnapshotPtr == IntPtr.Zero)
             {
-                if (Task == null)
+                if (SnapTask == null)
                 {
                     var rc = UEngine.Instance.GfxDevice.RenderContext;
-                    Task = UEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
+                    SnapTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
                 }
-                else if (Task.IsCompleted)
+                else if (SnapTask.IsCompleted)
                 {
-                    SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(Task.Result));
-                    Task = null;
+                    SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(SnapTask.Result));
+                    SnapTask = null;
                 }
             }
             if (SnapshotPtr != IntPtr.Zero)

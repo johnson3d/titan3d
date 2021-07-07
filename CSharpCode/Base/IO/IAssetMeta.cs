@@ -230,7 +230,7 @@ namespace EngineNS.IO
 
         //}
         internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
-        IntPtr SnapshotPtr;
+        internal IntPtr SnapshotPtr;
         public virtual unsafe void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
         {
             var start = ImGuiAPI.GetItemRectMin();
