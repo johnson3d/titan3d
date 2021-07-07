@@ -171,7 +171,7 @@ namespace EngineNS.Graphics.Mesh
             }
         }
         CMeshPrimitives mMesh;
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public CMeshPrimitives Mesh
         {
             get => mMesh;
@@ -322,7 +322,7 @@ namespace EngineNS.Graphics.Mesh
             get;
             private set;
         }
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
         public class TSaveData : IO.BaseSerializer
         {
@@ -332,7 +332,7 @@ namespace EngineNS.Graphics.Mesh
             public List<RName> Materials { get; } = new List<RName>();
         }
         [Rtti.Meta(Order = 1)]
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public TSaveData SaveData
         {
             get
