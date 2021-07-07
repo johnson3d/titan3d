@@ -53,6 +53,13 @@ namespace EngineNS.Graphics.Mesh
             System.Threading.Tasks.Task TaskBuildDrawCall = null;
             public unsafe virtual RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, UMesh mesh, int atom, Pipeline.IRenderPolicy policy, Pipeline.IRenderPolicy.EShadingType shadingType)
             {
+                if (Material != mesh.MaterialMesh.Materials[atom])
+                {
+                    Material = mesh.MaterialMesh.Materials[atom];
+                    TargetViews.Clear();
+                    TargetViews = null;
+                    TaskBuildDrawCall = null;
+                }
                 //每个TargetView都要对应一个DrawCall数组
                 ViewDrawCalls drawCalls = null;
                 if (TargetViews == null)

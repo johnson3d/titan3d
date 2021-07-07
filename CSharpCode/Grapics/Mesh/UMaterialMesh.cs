@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -147,6 +148,7 @@ namespace EngineNS.Graphics.Mesh
             }
         }
         [RName.PGRName(FilterExts = CMeshPrimitives.AssetExt)]
+        [ReadOnly(true)]
         public RName MeshName
         {
             get
@@ -195,7 +197,7 @@ namespace EngineNS.Graphics.Mesh
 
             public PGMaterialsAttribute()
             {
-                FullRedraw = true;
+                FullRedraw = false;
             }
             public override async Task<bool> Initialize()
             {
@@ -210,72 +212,108 @@ namespace EngineNS.Graphics.Mesh
             }
             public override bool OnDraw(in EditorInfo info, out object newValue)
             {
+                bool valueChanged = false;
                 newValue = info.Value;
-                if (mRNameEditor == null)
-                    return false;
-                var umesh = info.ObjectInstance as UMaterialMesh;
-                ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;
-                var materials = info.Value as Pipeline.Shader.UMaterial[];
-
-                ImGuiAPI.GotoColumns(0);
-                ImGuiAPI.SameLine(0, -1);
-                var showChild = ImGuiAPI.TreeNode(info.Name, "");
-                ImGuiAPI.NextColumn();
-                ImGuiAPI.Text(materials.Length.ToString());
-                ImGuiAPI.NextColumn();
-                if (showChild)
+                var multiValue = newValue as EGui.Controls.PropertyGrid.PropertyMultiValue;
+                if (multiValue != null)
                 {
-                    for (int i = 0; i < materials.Length; i++)
+                    ImGuiAPI.Text(multiValue.MultiValueString);
+                }
+                else
+                {
+                    ImGuiAPI.Text(info.Type.ToString());
+                    var lst = info.Value as Pipeline.Shader.UMaterial[];
+                    Expandable = lst.Length > 0;
+                    if (info.Expand)
                     {
-                        var name = i.ToString();
-                        ImGuiAPI.AlignTextToFramePadding();
-                        ImGuiAPI.TreeNodeEx(name, flags, name);
-                        ImGuiAPI.NextColumn();
-                        ImGuiAPI.SetNextItemWidth(-1);
-                        var old = materials[i]?.AssetName;
-                        RName rn;
-                        if(materials[i] is Pipeline.Shader.UMaterialInstance)
+                        if (OnArray(info, lst))
                         {
-                            mRNameEditor.FilterExts = Pipeline.Shader.UMaterialInstance.AssetExt;
-                            mRNameEditor.OnDraw(in info, out newValue);
-                            rn = (RName)newValue;
-                            //rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterialInstance.AssetExt, info.Readonly, null);
+                            valueChanged = true;
                         }
-                        else
-                        {
-                            mRNameEditor.FilterExts = Pipeline.Shader.UMaterial.AssetExt;
-                            mRNameEditor.OnDraw(in info, out newValue);
-                            rn = (RName)newValue;
-                            //rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterial.AssetExt, info.Readonly, null);
-                        }
-                        if (rn != old)
-                        {
-                            if (umesh.AssetState != IO.EAssetState.Loading)
-                            {
-                                umesh.AssetState = IO.EAssetState.Loading;
-                                int IndexOfMaterial = i;
-                                System.Action exec = async () =>
-                                {
-                                    if (rn.ExtName == Pipeline.Shader.UMaterialInstance.AssetExt)
-                                    {
-                                        materials[IndexOfMaterial] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
-                                    }
-                                    else if (rn.ExtName == Pipeline.Shader.UMaterial.AssetExt)
-                                    {
-                                        materials[IndexOfMaterial] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
-                                    }
-                                    
-                                    umesh.AssetState = IO.EAssetState.LoadFinished;
-                                };
-                                exec();
-                            }
-                        }
-                        ImGuiAPI.NextColumn();
                     }
-                    ImGuiAPI.TreePop();
                 }
 
-                return false;
+                return valueChanged;
+            }
+            private bool OnArray(EditorInfo info, Pipeline.Shader.UMaterial[] materials)
+            {
+                bool valueChanged = false;
+                var sz = new Vector2(0, 0);
+                ImGuiTableRowData rowData;
+                unsafe
+                {
+                    rowData = new ImGuiTableRowData()
+                    {
+                        IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer().ToPointer(),
+                        MinHeight = 0,
+                        CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
+                        CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
+                        IndentImageWidth = info.HostPropertyGrid.Indent,
+                        IndentTextureUVMin = Vector2.Zero,
+                        IndentTextureUVMax = Vector2.UnitXY,
+                        IndentColor = info.HostPropertyGrid.IndentColor,
+                        HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
+                        Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
+                    };
+                }
+                var umesh = info.ObjectInstance as UMaterialMesh;
+                ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None;
+                for (int i = 0; i < materials.Length; i++)
+                {
+                    ImGuiAPI.TableNextRow(ref rowData);
+
+                    var name = i.ToString();
+                    ImGuiAPI.TableSetColumnIndex(0);
+                    ImGuiAPI.AlignTextToFramePadding();
+                    var treeNodeRet = ImGuiAPI.TreeNodeEx(name, flags | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf, name);
+                    ImGuiAPI.TableNextColumn();
+                    ImGuiAPI.SetNextItemWidth(-1);
+                    var old = materials[i]?.AssetName;
+                    RName rn;
+                    if (materials[i] is Pipeline.Shader.UMaterialInstance)
+                    {
+                        mRNameEditor.FilterExts = Pipeline.Shader.UMaterialInstance.AssetExt;
+                        object newValue;
+                        info.Value = materials[i].AssetName;
+                        mRNameEditor.OnDraw(in info, out newValue);
+                        rn = (RName)newValue;
+                        //rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterialInstance.AssetExt, info.Readonly, null);
+                    }
+                    else
+                    {
+                        mRNameEditor.FilterExts = Pipeline.Shader.UMaterial.AssetExt;
+                        object newValue;
+                        info.Value = materials[i].AssetName;
+                        mRNameEditor.OnDraw(in info, out newValue);
+                        rn = (RName)newValue;
+                        //rn = EGui.Controls.CtrlUtility.DrawRName(old, name, Pipeline.Shader.UMaterial.AssetExt, info.Readonly, null);
+                    }
+                    if (rn != old)
+                    {
+                        if (umesh.AssetState != IO.EAssetState.Loading)
+                        {
+                            umesh.AssetState = IO.EAssetState.Loading;
+                            int IndexOfMaterial = i;
+                            System.Action exec = async () =>
+                            {
+                                if (rn.ExtName == Pipeline.Shader.UMaterialInstance.AssetExt)
+                                {
+                                    materials[IndexOfMaterial] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
+                                }
+                                else if (rn.ExtName == Pipeline.Shader.UMaterial.AssetExt)
+                                {
+                                    materials[IndexOfMaterial] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
+                                }
+                                umesh.AssetState = IO.EAssetState.LoadFinished;
+                                var mesh = (UMaterialMesh)info.HostPropertyGrid.Target;
+                            };
+                            exec();
+                        }
+                    }
+                    if (treeNodeRet)
+                        ImGuiAPI.TreePop();
+                }
+                return valueChanged;
             }
         }
         [PGMaterials]

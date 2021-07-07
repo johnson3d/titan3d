@@ -531,8 +531,18 @@ namespace EngineNS.Thread.Async
             //{
             //    int xxx = 0;
             //}
-            ContinueAction();
-            FinishedContinue = true;
+            try
+            {
+                ContinueAction();
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
+            finally
+            {
+                FinishedContinue = true;
+            }
         }
         public TaskAwaiter(System.Threading.Tasks.Task task, PostEvent pe)
         {

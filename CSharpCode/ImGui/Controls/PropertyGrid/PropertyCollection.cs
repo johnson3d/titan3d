@@ -421,7 +421,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             Category = default;
             ParentIsValueType = default;
             IsBrowsable = default;
-            DeclaringType = default;
+            DeclaringType = default;            
+            CustomValueEditor?.Cleanup();
             CustomValueEditor = default;
             mMultiValue?.Cleanup();
 

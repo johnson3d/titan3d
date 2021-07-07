@@ -21,61 +21,61 @@ namespace EngineNS.Graphics.Pipeline.Shader
             HasSnapshot = true;
             OnShowIconTimout(0);
         }
-        System.Threading.Tasks.Task<Editor.USnapshot> Task;
-        IntPtr SnapshotPtr;
-        public override unsafe void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
-        {
-            if (SnapshotPtr == IntPtr.Zero && HasSnapshot == true)
-            {
-                if (Task == null)
-                {
-                    Task = Editor.USnapshot.Load(GetAssetName().Address + ".snap");
-                }
-                else if (Task.IsCompleted)
-                {
-                    if (Task.Result == null)
-                    {
-                        HasSnapshot = false;
-                    }
-                    else
-                    {
-                        SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(Task.Result.mTextureRSV));
-                    }
-                    Task = null;
-                }
-            }
+        //System.Threading.Tasks.Task<Editor.USnapshot> Task;
+        //IntPtr SnapshotPtr;
+        //public override unsafe void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        //{
+        //    if (SnapshotPtr == IntPtr.Zero && HasSnapshot == true)
+        //    {
+        //        if (Task == null)
+        //        {
+        //            Task = Editor.USnapshot.Load(GetAssetName().Address + ".snap");
+        //        }
+        //        else if (Task.IsCompleted)
+        //        {
+        //            if (Task.Result == null)
+        //            {
+        //                HasSnapshot = false;
+        //            }
+        //            else
+        //            {
+        //                SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(Task.Result.mTextureRSV));
+        //            }
+        //            Task = null;
+        //        }
+        //    }
 
-            var start = ImGuiAPI.GetItemRectMin();
-            var end = start + sz;
+        //    var start = ImGuiAPI.GetItemRectMin();
+        //    var end = start + sz;
 
-            var name = IO.FileManager.GetPureName(GetAssetName().Name);
-            var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
-            Vector2 tpos;
-            tpos.Y = start.Y + sz.Y - tsz.Y;
-            tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
-            ImGuiAPI.PushClipRect(ref start, ref end, true);
+        //    var name = IO.FileManager.GetPureName(GetAssetName().Name);
+        //    var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
+        //    Vector2 tpos;
+        //    tpos.Y = start.Y + sz.Y - tsz.Y;
+        //    tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
+        //    ImGuiAPI.PushClipRect(ref start, ref end, true);
 
-            end.Y -= tsz.Y;
-            var uv0 = new Vector2(0, 0);
-            var uv1 = new Vector2(1, 1);
-            if (SnapshotPtr != IntPtr.Zero)
-            {
-                cmdlist.AddImage(SnapshotPtr.ToPointer(), ref start, ref end, ref uv0, ref uv1, 0xFFFFFFFF);
-            }
+        //    end.Y -= tsz.Y;
+        //    var uv0 = new Vector2(0, 0);
+        //    var uv1 = new Vector2(1, 1);
+        //    if (SnapshotPtr != IntPtr.Zero)
+        //    {
+        //        cmdlist.AddImage(SnapshotPtr.ToPointer(), ref start, ref end, ref uv0, ref uv1, 0xFFFFFFFF);
+        //    }
 
-            cmdlist.AddText(ref tpos, 0xFFFF00FF, name, null);
-            ImGuiAPI.PopClipRect();
-        }
-        public override void OnShowIconTimout(int time)
-        {
-            if (SnapshotPtr != IntPtr.Zero)
-            {
-                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
-                handle.Free();
-                SnapshotPtr = IntPtr.Zero;
-                Task = null;
-            }
-        }
+        //    cmdlist.AddText(ref tpos, 0xFFFF00FF, name, null);
+        //    ImGuiAPI.PopClipRect();
+        //}
+        //public override void OnShowIconTimout(int time)
+        //{
+        //    if (SnapshotPtr != IntPtr.Zero)
+        //    {
+        //        var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
+        //        handle.Free();
+        //        SnapshotPtr = IntPtr.Zero;
+        //        Task = null;
+        //    }
+        //}
     }
     [Rtti.Meta]
     [UMaterialInstance.MaterialInstanceImport]
