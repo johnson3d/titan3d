@@ -35,6 +35,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             mCoreObject = IMdfQueue.CreateInstance();
         }
+        public virtual void CopyFrom(UMdfQueue mdf)
+        {
+
+        }
         public RName CodeName { get; set; }
         public IO.CMemStreamWriter DefineCode { get; protected set; }
         public IO.CMemStreamWriter SourceCode { get; protected set; }

@@ -39,6 +39,39 @@ namespace EngineNS.GamePlay.Scene
                 mMesh.IsDrawHitproxy = false;
             }
         }
+        public override bool IsAcceptShadow
+        {
+            get
+            {
+                return base.IsAcceptShadow;
+            }
+            set
+            {
+                base.IsAcceptShadow = value;
+                if (value == false)
+                {
+                    if (mMesh.MdfQueue.GetType() == typeof(Graphics.Mesh.UMdfStaticMesh))
+                    {
+                        mMesh.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfStaticMesh_NoShadow));
+                    }
+                    else if (mMesh.MdfQueue.GetType() == typeof(Graphics.Mesh.UMdfTerrainMesh))
+                    {
+                        mMesh.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfTerrainMesh_NoShadow));
+                    }
+                }
+                else
+                {
+                    if (mMesh.MdfQueue.GetType() == typeof(Graphics.Mesh.UMdfStaticMesh_NoShadow))
+                    {
+                        mMesh.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfStaticMesh));
+                    }
+                    else if (mMesh.MdfQueue.GetType() == typeof(Graphics.Mesh.UMdfTerrainMesh_NoShadow))
+                    {
+                        mMesh.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfTerrainMesh));
+                    }
+                }
+            }
+        }
         public static UMeshNode AddMeshNode(UNode parent, UNodeData data, Type placementType, Graphics.Mesh.UMesh mesh, Vector3 pos, Vector3 scale, Quaternion quat)
         {
             return AddMeshNode(parent, data, placementType, mesh, ref pos, ref scale, ref quat);

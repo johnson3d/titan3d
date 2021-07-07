@@ -163,6 +163,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 layoutDesc.SetShaderDesc(result.DescVS.mCoreObject);
                 UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, layoutDesc);
                 InputLayout = rc.CreateInputLayout(layoutDesc);
+                if (InputLayout == null)
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                }
 
                 CoreSDK.IUnknown_Release(layoutDesc.NativePointer.ToPointer());
 

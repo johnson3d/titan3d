@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Graphics.Mesh
@@ -48,7 +49,12 @@ namespace EngineNS.Graphics.Mesh
 
                 //甚至我们可以放一个cbuffer在这里处理PerMesh&&PerView的变量: CameraPositionInModel
             }
-
+            public void ResetDrawCalls()
+            {
+                TargetViews.Clear();
+                TargetViews = null;
+                TaskBuildDrawCall = null;
+            }
             public List<ViewDrawCalls> TargetViews;
             System.Threading.Tasks.Task TaskBuildDrawCall = null;
             public unsafe virtual RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, UMesh mesh, int atom, Pipeline.IRenderPolicy policy, Pipeline.IRenderPolicy.EShadingType shadingType)
@@ -56,9 +62,7 @@ namespace EngineNS.Graphics.Mesh
                 if (Material != mesh.MaterialMesh.Materials[atom])
                 {
                     Material = mesh.MaterialMesh.Materials[atom];
-                    TargetViews.Clear();
-                    TargetViews = null;
-                    TaskBuildDrawCall = null;
+                    ResetDrawCalls();
                 }
                 //每个TargetView都要对应一个DrawCall数组
                 ViewDrawCalls drawCalls = null;
@@ -254,6 +258,33 @@ namespace EngineNS.Graphics.Mesh
             }
         }
         public UAtom[] Atoms;
+        [ReadOnly(true)]
+        public string MdfQueueType
+        {
+            get
+            {
+                return Rtti.UTypeDesc.TypeStr(this.MdfQueue.GetType());
+            }
+            set
+            {
+                SetMdfQueueType(Rtti.UTypeDesc.TypeOf(value));
+            }
+        }
+        private bool SetMdfQueueType(Rtti.UTypeDesc mdfQueueType)
+        {
+            var mdf = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.UMdfQueue;
+            if (mdf == null)
+                return false;
+
+            mdf.CopyFrom(MdfQueue);
+            MdfQueue = mdf;
+
+            for (int i = 0; i < Atoms.Length; i++)
+            {
+                Atoms[i].ResetDrawCalls();
+            }
+            return true;
+        }
         public bool Initialize(UMaterialMesh materialMesh, Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
             if (atomType == null)
