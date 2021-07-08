@@ -88,8 +88,35 @@ namespace EngineNS.Animation.Asset
                 animHDic.Add(hash, animHierarchy);
             }
             //construct hierarchy
+            System.Diagnostics.Debug.Assert(animHDic.Count == animElements.Count);
             Base.AnimHierarchy Root = null;
-
+            bool rootCheck= false;
+            for(int i = 0; i< animElements.Count; ++i)
+            {
+                Base.AnimHierarchy parent = null;
+                var hasParent = animHDic.TryGetValue(animElements[i].Desc.ParentHash, out parent);
+                if(hasParent)
+                {
+                    Base.AnimHierarchy child = null;
+                    var isExist = animHDic.TryGetValue(animElements[i].Desc.NameHash, out child);
+                    if(isExist)
+                    {
+                        parent.Children.Add(child);
+                        child.Parent = parent;
+                    }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.Assert(!rootCheck);
+                    rootCheck = true;
+                    Base.AnimHierarchy root = null;
+                    var isExist = animHDic.TryGetValue(animElements[i].Desc.NameHash, out root);
+                    if (isExist)
+                    {
+                        Root = root;
+                    }
+                }
+            }
 
             animChunk.AnimatedHierarchy = Root;
             

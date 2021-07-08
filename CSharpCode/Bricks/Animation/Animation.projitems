@@ -10,13 +10,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Base\AnimatableObjectHierarchy.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationAsset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\IAnimationAsset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationClip.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\AnimationCurve.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationChunk.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\AnimHierarchy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Curve.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Animatable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pipeline\Command\IAnimationCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pipeline\AnimationPipeline.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pipeline\Command\PropertiesSettingCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\AnimationClipPlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\AnimationBlendSpacePlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\IAnimationPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pose\CBonePose.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pose\CSkeletonPose.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pose\ULimbPose.cs" />
