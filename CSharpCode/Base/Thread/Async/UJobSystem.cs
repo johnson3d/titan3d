@@ -126,36 +126,40 @@ namespace EngineNS.UTest
     [UTest.UTest]
     public class UTest_UJobSystem
     {
+        public static bool IsFinal = false;
+        ~UTest_UJobSystem()
+        {
+            NumSum = 0;
+            IsFinal = true;
+        }
         public int NumSum = 0;
-        static Action action;
         public void UnitTestEntrance()
         {
-            action = async () =>
+            var noused = AsyncTest();
+        }
+        public async System.Threading.Tasks.Task AsyncTest()
+        {
+            var jobSystem = new Thread.Async.UJobSystem<UTestJob>();
+            for (int i = 0; i < 1000; i++)
             {
-                var jobSystem = new Thread.Async.UJobSystem<UTestJob>();
-                for (int i = 0; i < 1000; i++)
-                {
-                    var job = new UTestJob();
-                    job.Data = this;
-                    jobSystem.AddJob(ref job);
-                }
-                jobSystem.OnFinished = (jobSystem) =>
-                {
-                    UnitTestManager.TAssert(this.NumSum == 1000, "?");
-                };
-                jobSystem.StartJobs();
-
-                await jobSystem.Await();
-                //jobSystem.Wait();
-                foreach (var i in jobSystem.JobThreads)
-                {
-                    //UnitTestManager.TAssert(i.Jobs.Count == 0, "?");
-                    //这个断言还真不一定能保证，foreach 后才clear的
-                }
+                var job = new UTestJob();
+                job.Data = this;
+                jobSystem.AddJob(ref job);
+            }
+            jobSystem.OnFinished = (jobSystem) =>
+            {
                 UnitTestManager.TAssert(this.NumSum == 1000, "?");
-                action = null;
             };
-            action();
+            jobSystem.StartJobs();
+
+            //await jobSystem.Await();
+            jobSystem.Wait();
+            foreach (var i in jobSystem.JobThreads)
+            {
+                //UnitTestManager.TAssert(i.Jobs.Count == 0, "?");
+                //这个断言还真不一定能保证，foreach 后才clear的
+            }
+            UnitTestManager.TAssert(this.NumSum == 1000, "?");
         }
     }
 }

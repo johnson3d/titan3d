@@ -34,4 +34,29 @@ namespace EngineNS.Graphics.Mesh
             SourceCode.SetText(codeBuilder.ClassCode);
         }
     }
+
+    public class UMdfStaticMesh_NoShadow : UMdfStaticMesh
+    {
+        public UMdfStaticMesh_NoShadow()
+        {
+
+        }
+        protected override void UpdateShaderCode()
+        {
+            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)");
+            codeBuilder.PushBrackets();
+            {
+
+            }
+            codeBuilder.PopBrackets();
+
+            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION");
+            codeBuilder.AddLine("#undef ENV_DISABLE_SHADOW");
+            codeBuilder.AddLine("#define ENV_DISABLE_SHADOW 1");
+
+            SourceCode = new IO.CMemStreamWriter();
+            SourceCode.SetText(codeBuilder.ClassCode);
+        }
+    }
 }

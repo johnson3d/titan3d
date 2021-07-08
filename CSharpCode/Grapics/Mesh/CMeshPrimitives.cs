@@ -33,11 +33,14 @@ namespace EngineNS.Graphics.Mesh
         {
             ~ImportAttribute()
             {
-                mFileDialog.Dispose();
+                Cleanup();
+            }
+            public void Cleanup()
+            {
+                
             }
             string mSourceFile;
             AssetImportAndExport.FBX.FBXImporter mFBXImporter; //for now we only have one file to import
-            ImGui.ImGuiFileDialog mFileDialog = ImGui.ImGuiFileDialog.CreateInstance();
             //EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
             public override void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
             {
@@ -49,6 +52,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import MeshPrimitives", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                var mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
                 var visible = true;
                 if (ImGuiAPI.BeginPopupModal($"Import MeshPrimitives", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {

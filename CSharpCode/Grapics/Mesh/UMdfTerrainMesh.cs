@@ -85,5 +85,46 @@ namespace EngineNS.Graphics.Mesh
                 drawcall.mCoreObject.BindCBufferAll(cbIndex, TerrainCBuffer.mCoreObject);
             }
         }
+
+        public override void CopyFrom(Pipeline.Shader.UMdfQueue mdf)
+        {
+            var curMdf = mdf as UMdfTerrainMesh;
+            if (curMdf != null)
+            {
+                GridSize = curMdf.GridSize;
+                HeightStep = curMdf.HeightStep;
+                HeightMapRSV = curMdf.HeightMapRSV;
+                TerrainCBuffer = curMdf.TerrainCBuffer;
+            }
+        }
+    }
+    public class UMdfTerrainMesh_NoShadow : UMdfTerrainMesh
+    {
+        protected override void UpdateShaderCode()
+        {
+            {
+                var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+
+                codeBuilder.AddLine("#ifndef _UMdfTerrainMesh_INC_");
+                codeBuilder.AddLine("#define _UMdfTerrainMesh_INC_");
+                codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/shadingenv/mobile/heightmap.cginc", RName.ERNameType.Engine).Address}\"");
+
+                //codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)");
+                //codeBuilder.PushBrackets();
+                //{
+                //    codeBuilder.AddLine("DoTerrainModifierVS(output, input);");
+                //}
+                //codeBuilder.PopBrackets();
+
+                //codeBuilder.AddLine("#define MDFQUEUE_FUNCTION");
+
+                codeBuilder.AddLine("#endif");
+                codeBuilder.AddLine("#undef ENV_DISABLE_SHADOW");
+                codeBuilder.AddLine("#define ENV_DISABLE_SHADOW 1");
+
+                SourceCode = new IO.CMemStreamWriter();
+                SourceCode.SetText(codeBuilder.ClassCode);
+            }
+        }
     }
 }

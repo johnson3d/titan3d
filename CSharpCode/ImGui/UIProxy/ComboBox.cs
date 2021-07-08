@@ -9,30 +9,35 @@ namespace EngineNS.EGui.UIProxy
     {
         public string Name;
         public string PreviewValue;
-        public ImGuiComboFlags_ Flags = ImGuiComboFlags_.ImGuiComboFlags_None | ImGuiComboFlags_.ImGuiComboFlags_NoArrowButton;
+        public ImGuiComboFlags_ Flags = ImGuiComboFlags_.ImGuiComboFlags_None;
         public float Width = -1;
 
         public delegate void Delegate_ComboOpenAction(ref Support.UAnyPointer data);
         public Delegate_ComboOpenAction ComboOpenAction;
 
-        ImageProxy mImage;
+        //ImageProxy mImage;
         public void Cleanup()
         {
-            mImage?.Cleanup();
+            //mImage?.Cleanup();
+            //mImage = null;
         }
         public async Task<bool> Initialize()
         {
-            mImage = new ImageProxy()
-            {
-                ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
-                ImageSize = new Vector2(16, 16),
-                UVMin = new Vector2(543.0f / 1024, 3.0f / 1024),
-                UVMax = new Vector2(559.0f / 1024, 19.0f / 1024),
-            };
-            return await mImage.Initialize();
+            //mImage = new ImageProxy()
+            //{
+            //    ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+            //    ImageSize = new Vector2(16, 16),
+            //    UVMin = new Vector2(543.0f / 1024, 3.0f / 1024),
+            //    UVMax = new Vector2(559.0f / 1024, 19.0f / 1024),
+            //};
+            //return await mImage.Initialize();
+            await Thread.AsyncDummyClass.DummyFunc();
+            return true;
         }
         public unsafe bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
         {
+            //if (mImage == null)
+            //    return false;
             var style = ImGuiAPI.GetStyle();
             ImGuiAPI.SetNextItemWidth(Width);
 
@@ -56,8 +61,8 @@ namespace EngineNS.EGui.UIProxy
             if(hovered)
                 ImGuiAPI.PopStyleColor(1);
             var itemSize = ImGuiAPI.GetItemRectSize();
-            var pos = cursorPos + new Vector2(itemSize.X - mImage.ImageSize.X - style->FramePadding.X, style->FramePadding.Y * 0.5f);// cursorPos + new Vector2(0, fontSize * 0.134f * 0.5f);// + new Vector2(itemRectMax.X - mImage.ImageSize.X, fontSize * 0.134f * 0.5f);
-            mImage.OnDraw(ref drawList, ref pos);
+            //var pos = cursorPos + new Vector2(itemSize.X - mImage.ImageSize.X - style->FramePadding.X, style->FramePadding.Y * 0.5f);// cursorPos + new Vector2(0, fontSize * 0.134f * 0.5f);// + new Vector2(itemRectMax.X - mImage.ImageSize.X, fontSize * 0.134f * 0.5f);
+            //mImage.OnDraw(ref drawList, ref pos);
 
             if(comboOpen)
             {

@@ -163,6 +163,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 layoutDesc.SetShaderDesc(result.DescVS.mCoreObject);
                 UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, layoutDesc);
                 InputLayout = rc.CreateInputLayout(layoutDesc);
+                if (InputLayout == null)
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                }
 
                 CoreSDK.IUnknown_Release(layoutDesc.NativePointer.ToPointer());
 
@@ -315,8 +319,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                 var layoutDesc = IMesh.CreateInputLayoutDesc(inputSteams);
                 layoutDesc.SetShaderDesc(DescVS.mCoreObject);
-                UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, *layoutDesc.CppPointer);
-                InputLayout = rc.CreateInputLayout(*layoutDesc.CppPointer);                
+                UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, layoutDesc);
+                InputLayout = rc.CreateInputLayout(layoutDesc);                
                 CoreSDK.IUnknown_Release(layoutDesc);
 
                 Desc.InputStreams = inputSteams;

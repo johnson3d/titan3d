@@ -229,8 +229,8 @@ namespace EngineNS.IO
         //{
 
         //}
-        System.Threading.Tasks.Task<Editor.USnapshot> Task;
-        IntPtr SnapshotPtr;
+        internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
+        internal IntPtr SnapshotPtr;
         public virtual unsafe void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
         {
             var start = ImGuiAPI.GetItemRectMin();
@@ -315,10 +315,19 @@ namespace EngineNS.IO
         {
             foreach (var i in Assets)
             {
+                if (i.Value.Task != null)
+                {
+                    var srv = i.Value.Task.Result.mTextureRSV;
+                    srv.Dispose();
+                    i.Value.Task.Result.mTextureRSV = null;
+                    i.Value.Task = null;
+                }
                 i.Value.OnShowIconTimout(-1);
                 i.Value.ShowIconTime = 0;
             }
             Assets.Clear();
+
+            RNameAssets.Clear();
         }
         public Dictionary<Guid, IAssetMeta> Assets { get; } = new Dictionary<Guid, IAssetMeta>();
         public Dictionary<RName, IAssetMeta> RNameAssets { get; } = new Dictionary<RName, IAssetMeta>();

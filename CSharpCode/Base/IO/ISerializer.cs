@@ -128,6 +128,7 @@ namespace EngineNS.IO
         }
         public static void ReadMember(IReader ar, ISerializer obj, Rtti.UMetaVersion metaVersion = null)
         {
+#if UseSerializerCodeGen
             var srName = metaVersion.HostClass.ClassType.SystemType.FullName.Replace("+", "_CIC_") + "_Serializer";
             //Type.GetType(utilityReader)
             var utilityReader = Rtti.UTypeDesc.TypeOfFullName(srName);
@@ -142,7 +143,7 @@ namespace EngineNS.IO
                     return;
                 }
             }
-            
+#endif
             foreach (var i in metaVersion.Fields)
             {
                 var value = ReadObject(ar, i.FieldType.SystemType, obj);

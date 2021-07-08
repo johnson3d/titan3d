@@ -79,7 +79,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public bool IsCastShadow
+        public virtual bool IsCastShadow
         {
             get
             {
@@ -97,7 +97,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public bool IsAcceptShadow
+        public virtual bool IsAcceptShadow
         {
             get
             {

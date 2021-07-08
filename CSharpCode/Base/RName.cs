@@ -58,7 +58,7 @@ namespace EngineNS
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
                 newValue = info.Value;
-
+                
                 var name = info.Value as RName;
                 mDrawData.NewValue = name;
                 //var newName = EGui.Controls.CtrlUtility.DrawRName(name, info.Name, FilterExts, info.Readonly, mSnap);

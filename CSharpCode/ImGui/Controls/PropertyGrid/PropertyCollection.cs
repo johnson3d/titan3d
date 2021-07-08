@@ -421,7 +421,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             Category = default;
             ParentIsValueType = default;
             IsBrowsable = default;
-            DeclaringType = default;
+            DeclaringType = default;            
+            CustomValueEditor?.Cleanup();
             CustomValueEditor = default;
             mMultiValue?.Cleanup();
 
@@ -723,11 +724,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 {
                     if (pro.ComponentType != ins.SystemType)
                         continue;
-                    if (!pro.IsBrowsable)
-                        continue;
                 }
                 var proDesc = PropertyCollection.PropertyDescPool.QueryObjectSync(); //new CustomPropertyDescriptor(objIns, ins, pro, parentIsValueType);
                 proDesc.InitValue(objIns, ins, pro, parentIsValueType);
+                if(!proDesc.IsBrowsable)
+                {
+                    proDesc.ReleaseObject();
+                    continue;
+                }
                 mProperties[count] = proDesc;
                 count++;
             }

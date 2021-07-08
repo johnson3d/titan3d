@@ -171,6 +171,7 @@ namespace EngineNS.Editor
                     //mainEditor.WorldViewportSlate.RenderPolicy.VisibleMeshes.Add(terrainMesh);
                     //mainEditor.WorldViewportSlate.World.Root.AddMesh(terrainMesh, Vector3.Zero, Vector3.UnitXYZ, Quaternion.Identity);
                     var trNode = GamePlay.Scene.UMeshNode.AddMeshNode(root, new GamePlay.Scene.UNodeData(), typeof(GamePlay.UPlacement), terrainMesh, Vector3.Zero, new Vector3(1.0f), Quaternion.Identity);
+                    trNode.NodeData.Name = "TerrainGen";
                     trNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                     trNode.IsAcceptShadow = true;
                 }
