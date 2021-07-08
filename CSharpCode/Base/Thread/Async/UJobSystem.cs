@@ -126,6 +126,12 @@ namespace EngineNS.UTest
     [UTest.UTest]
     public class UTest_UJobSystem
     {
+        public static bool IsFinal = false;
+        ~UTest_UJobSystem()
+        {
+            NumSum = 0;
+            IsFinal = true;
+        }
         public int NumSum = 0;
         public void UnitTestEntrance()
         {
@@ -146,8 +152,8 @@ namespace EngineNS.UTest
             };
             jobSystem.StartJobs();
 
-            await jobSystem.Await();
-            //jobSystem.Wait();
+            //await jobSystem.Await();
+            jobSystem.Wait();
             foreach (var i in jobSystem.JobThreads)
             {
                 //UnitTestManager.TAssert(i.Jobs.Count == 0, "?");

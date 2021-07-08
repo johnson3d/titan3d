@@ -119,6 +119,43 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 assignOp.Right = expr;
                 Function.Body.PushExpr(assignOp);
             }
+            if (Metallic.HasLinker())
+            {
+                var linker = funGraph.FindInLinkerSingle(Metallic);
+                var exprNode = linker.OutNode as IBaseNode;
+                var expr = exprNode.GetExpr(funGraph, cGen, linker.Out, false) as OpExpress;
+                var assignOp = new AssignOp();
+                var setExpr = new HardCodeOp();
+                setExpr.Code = "mtl.mMetallic";
+                assignOp.Left = setExpr;
+                assignOp.Right = expr;
+                Function.Body.PushExpr(assignOp);
+            }
+            if (Rough.HasLinker())
+            {
+                var linker = funGraph.FindInLinkerSingle(Rough);
+                var exprNode = linker.OutNode as IBaseNode;
+                var expr = exprNode.GetExpr(funGraph, cGen, linker.Out, false) as OpExpress;
+                var assignOp = new AssignOp();
+                var setExpr = new HardCodeOp();
+                setExpr.Code = "mtl.mRough";
+                assignOp.Left = setExpr;
+                assignOp.Right = expr;
+                Function.Body.PushExpr(assignOp);
+            }
+            if (Alpha.HasLinker())
+            {
+                var linker = funGraph.FindInLinkerSingle(Alpha);
+                var exprNode = linker.OutNode as IBaseNode;
+                var expr = exprNode.GetExpr(funGraph, cGen, linker.Out, false) as OpExpress;
+                var assignOp = new AssignOp();
+                var setExpr = new HardCodeOp();
+                setExpr.Code = "mtl.mAlpha";
+                assignOp.Left = setExpr;
+                assignOp.Right = expr;
+                Function.Body.PushExpr(assignOp);
+            }
+
             return Function;
         }
 

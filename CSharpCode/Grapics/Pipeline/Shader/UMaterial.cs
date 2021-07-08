@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
@@ -106,6 +106,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         protected Hash160 mMaterialHash;
         [Rtti.Meta]
+        [Browsable(false)]
         public virtual Hash160 MaterialHash
         {
             get
@@ -125,6 +126,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return mMaterialHash;
         }
         internal uint mSerialId = 0;
+        [Browsable(false)]
         public virtual uint SerialId
         {
             get => mSerialId;
@@ -313,7 +315,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             string uniformVarsCode = "";
             foreach (var i in this.UsedUniformVars)
             {
-                uniformVarsCode += $"{i.VarType} {i.Name};//{i.Value}";
+                uniformVarsCode += $"{i.VarType} {i.Name};";
             }
             DefineCode.SetText(uniformVarsCode);
 
@@ -326,14 +328,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         #region Data
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public string GraphXMLString
         {
             get;
             set;
         }
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public string HLSLCode
         {
             get;
@@ -364,6 +366,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         protected List<NameRNamePair> mUsedRSView = new List<NameRNamePair>();
         [Rtti.Meta]
+        [Category("Variable")]
         public List<NameRNamePair> UsedRSView { get => mUsedRSView; }
         protected NameRNamePair FindSRV(string name)
         {
@@ -437,6 +440,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         protected List<NameValuePair> mUsedUniformVars = new List<NameValuePair>();
         [Rtti.Meta]
+        [Category("Variable")]
         public List<NameValuePair> UsedUniformVars { get => mUsedUniformVars; }
         public NameValuePair FindVar(string name)
         {
@@ -499,10 +503,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #endregion
 
         #region RHIResource
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public RHI.CConstantBuffer PerMaterialCBuffer { get; set; }
         [Rtti.Meta]
-        //[EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true)]
+        [Category("State")]
         public IRasterizerStateDesc Rasterizer
         {
             get
@@ -524,13 +528,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         protected RHI.CRasterizerState mRasterizerState;
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public virtual RHI.CRasterizerState RasterizerState
         {
             get => mRasterizerState;
             protected set => mRasterizerState = value;
         }
         [Rtti.Meta]
+        [Category("State")]
         public IDepthStencilStateDesc DepthStencil
         {
             get
@@ -552,13 +557,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         protected RHI.CDepthStencilState mDepthStencilState;
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public virtual RHI.CDepthStencilState DepthStencilState
         {
             get => mDepthStencilState;
             protected set => mDepthStencilState = value;
         }
         [Rtti.Meta]
+        [Category("State")]
         public IBlendStateDesc Blend
         {
             get
@@ -580,7 +586,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         protected RHI.CBlendState mBlendState;
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        [Browsable(false)]
         public virtual RHI.CBlendState BlendState
         {
             get => mBlendState;

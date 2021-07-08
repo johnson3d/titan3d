@@ -155,6 +155,7 @@ namespace EngineNS.Editor.Forms
             if (ImGuiAPI.Button("Save", ref btSize))
             {
                 Material.SaveAssetTo(Material.AssetName);
+                Material.SerialId++;
                 var unused = UEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Material.AssetName);
 
                 USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());

@@ -523,13 +523,7 @@ namespace EngineNS.Thread.Async
         }
         public void DoContinueAction()
         {
-            //var t1 = Support.Time.HighPrecision_GetTickCount();
-            //ContinueAction();
-            //var t2 = Support.Time.HighPrecision_GetTickCount();
-            //if(CEngine.Instance.EventPoster.IsThread(EAsyncTarget.Logic) && t2-t1>10000)
-            //{
-            //    int xxx = 0;
-            //}
+            long t1 = Support.Time.HighPrecision_GetTickCount();
             try
             {
                 ContinueAction();
@@ -541,6 +535,11 @@ namespace EngineNS.Thread.Async
             finally
             {
                 FinishedContinue = true;
+                var t2 = Support.Time.HighPrecision_GetTickCount();
+                if (t2 - t1 > 10000)
+                {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Performance", $"Continue({t2 - t1}): {this.PEvent.PostAction?.Target?.ToString()}");
+                }
             }
         }
         public TaskAwaiter(System.Threading.Tasks.Task task, PostEvent pe)

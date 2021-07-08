@@ -145,7 +145,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
                     return;
 
                 var newType = nodeExpr.GetOutPinType(oPin);
-                if (LeftType.SystemType != newType)
+                if (LeftType != null && LeftType.SystemType != newType)
                 {//类型改变，所有输入输出都需要断开
                     this.ParentGraph.RemoveLinkedOut(this.Result);
                     this.ParentGraph.RemoveLinkedIn(this.Right);
