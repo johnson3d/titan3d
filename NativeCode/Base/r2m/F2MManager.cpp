@@ -4,7 +4,7 @@
 
 NS_BEGIN
 
-F2MManager F2MManager::Instance;
+F2MManager* F2MManager::Instance = nullptr;
 
 //////////////////////////////////////////////////////////////////////////
 extern "C"  void vfxMemory_SetDebugInfo(void* memory, LPCSTR info);

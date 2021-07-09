@@ -69,6 +69,17 @@ namespace EngineNS.Rtti
         public bool IsEnum => SystemType.IsEnum;
         public bool IsArray => SystemType.IsArray;
         string mTypeString;
+        public static System.Reflection.FieldInfo GetField(System.Type type, string name)
+        {
+            var fld = type.GetField(name);
+            if (fld != null)
+                return fld;
+
+            type = type.BaseType;
+            if (type == null)
+                return null;
+            return GetField(type, name);
+        }
         public string TypeString
         {
             get
@@ -203,7 +214,7 @@ namespace EngineNS.Rtti
         [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.IUnknown)]
         extern unsafe static object SDK_Core_GetObjectFromPointer(void* ptr);
         #endregion
-        public static object CreateInstance(Rtti.UTypeDesc t, object[] args = null)
+        public static object CreateInstance(Rtti.UTypeDesc t, params object[] args)
         {
             return CreateInstance(t.SystemType, args);
         }
@@ -214,6 +225,10 @@ namespace EngineNS.Rtti
             
             try
             {
+                if (t.IsPrimitive == false && args == null && t.GetConstructor(new Type[] { }) == null)
+                {
+                    return System.Runtime.Serialization.FormatterServices.GetUninitializedObject(t);
+                }
                 var result = System.Activator.CreateInstance(t, args);
 
                 if (result != null)

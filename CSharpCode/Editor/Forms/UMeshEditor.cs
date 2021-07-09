@@ -35,13 +35,13 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Bricks.CodeBuilder.ShaderNode.UPreviewViewport viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
             await viewport.RenderPolicy.Initialize(1, 1);
 
-            viewport.CameraController.Camera = viewport.RenderPolicy.GBuffers.Camera;
+            (viewport as Bricks.CodeBuilder.ShaderNode.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GBuffers.Camera;
 
             var mesh = new Graphics.Mesh.UMesh();
 
@@ -67,7 +67,7 @@ namespace EngineNS.Editor.Forms
                 return false;
 
             PreviewViewport.Title = $"MaterialMesh:{name}";
-            PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
+            PreviewViewport.OnInitialize = Initialize_PreviewMesh;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy(), 0, 1);
 
             MeshPropGrid.Target = Mesh;

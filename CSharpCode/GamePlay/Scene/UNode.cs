@@ -10,7 +10,8 @@ namespace EngineNS.GamePlay.Scene
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
         public int GetStructSize()
         {
-            return System.Runtime.InteropServices.Marshal.SizeOf(this.GetType());
+            //return System.Runtime.InteropServices.Marshal.SizeOf(this.GetType());
+            return 1024;
         }
         public UNode Host { get; set; }
         [Rtti.Meta(Order = 0)]

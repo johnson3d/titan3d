@@ -27,9 +27,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
         }
         IntPtr SnapshotPtr;
-        public delegate System.Threading.Tasks.Task FOnInitialize(UPreviewViewport viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax);
-        public FOnInitialize OnInitialize = null;
-        protected async System.Threading.Tasks.Task Initialize_Default(UPreviewViewport viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        
+        protected async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
@@ -57,7 +56,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
         }
-        public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
         {
             if (OnInitialize == null)
             {

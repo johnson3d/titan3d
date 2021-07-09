@@ -10,7 +10,10 @@ namespace EngineNS.GamePlay
         {
             HostNode = node;
         }
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
+        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) 
+        {
+            HostNode = tagObject as Scene.UNode;
+        }
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
         public virtual Vector3 Position
         {

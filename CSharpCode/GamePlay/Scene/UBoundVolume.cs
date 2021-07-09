@@ -17,7 +17,10 @@ namespace EngineNS.GamePlay.Scene
         {
             HostNode = node;
         }
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
+        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+            HostNode = tagObject as UNode;
+        }
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
         public UNode HostNode { get; private set; } = null;
         public BoundingBox mLocalAABB;
@@ -62,7 +65,7 @@ namespace EngineNS.GamePlay.Scene
             : base(node)
         {
 
-        }
+        }        
         public Vector3 mExtent = new Vector3(1,1,1);        
         protected override void OnVolumeChanged()
         {

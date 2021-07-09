@@ -12,7 +12,7 @@ class F2MManager
 
 	std::vector<VPakFile*>	mMountPaks;
 public:
-	static F2MManager Instance;
+	static F2MManager* Instance;
 	F2MManager();
 	~F2MManager();
 

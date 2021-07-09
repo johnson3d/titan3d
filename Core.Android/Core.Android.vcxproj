@@ -109,6 +109,7 @@
     <Import Project="..\codegen\Cs2Cpp\cpp\Cs2Cpp.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Platform\Android\Android.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\TcpClient\TcpClient.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\FreeType\FreeType.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
@@ -140,10 +141,11 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -153,9 +155,10 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -165,10 +168,11 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -178,9 +182,10 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -190,10 +195,11 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;PTR_64;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -203,9 +209,10 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;PTR_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -215,10 +222,11 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -228,9 +236,10 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>

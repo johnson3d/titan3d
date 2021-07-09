@@ -34,6 +34,7 @@ namespace EngineNS.IO
         protected string mName;
         protected EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
         protected EGui.Controls.TypeSelector TypeSlt = new EGui.Controls.TypeSelector();
+        protected System.Threading.Tasks.Task<bool> PGAssetInitTask;
         public override void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
         {
             ExtName = ext;
@@ -42,7 +43,7 @@ namespace EngineNS.IO
             TypeSlt.BaseType = type;
             TypeSlt.SelectedType = type;
 
-            var noused = PGAsset.Initialize();
+            PGAssetInitTask = PGAsset.Initialize();
             mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType.SystemType) as IAsset;
             PGAsset.Target = mAsset;
         }
@@ -102,7 +103,14 @@ namespace EngineNS.IO
 
                     ImGuiAPI.Separator();
 
-                    PGAsset.OnDraw(false, false, false);
+                    if (PGAssetInitTask != null && !PGAssetInitTask.IsCompleted)
+                    {
+                    }
+                    else
+                    {
+                        PGAsset.OnDraw(false, false, false);
+                        PGAssetInitTask = null;
+                    }
 
                     if (CheckAsset())
                     {

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using SDL2;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UMeshPrimitiveEditor : Editor.IAssetEditor, ITickable, Graphics.Pipeline.IRootForm
+    public class USceneEditor : Editor.IAssetEditor, ITickable, Graphics.Pipeline.IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -13,70 +12,51 @@ namespace EngineNS.Editor.Forms
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
-        public Graphics.Mesh.CMeshPrimitives Mesh;
-        public Bricks.CodeBuilder.ShaderNode.UPreviewViewport PreviewViewport = new Bricks.CodeBuilder.ShaderNode.UPreviewViewport();
-        public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        ~UMeshPrimitiveEditor()
+        public GamePlay.Scene.UScene Scene;
+        public EngineNS.EGui.Slate.UWorldViewportSlate PreviewViewport = new EngineNS.EGui.Slate.UWorldViewportSlate();
+        public EGui.Controls.PropertyGrid.PropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();        
+        ~USceneEditor()
         {
             Cleanup();
         }
         public void Cleanup()
         {
-            Mesh = null;
+            Scene = null;
             PreviewViewport?.Cleanup();
             PreviewViewport = null;
-            MeshPropGrid.Target = null;
+            ScenePropGrid.Target = null;
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await MeshPropGrid.Initialize();
+            await ScenePropGrid.Initialize();
             return true;
         }
         public Graphics.Pipeline.IRootForm GetRootForm()
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
             await viewport.RenderPolicy.Initialize(1, 1);
 
-            (viewport as Bricks.CodeBuilder.ShaderNode.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GBuffers.Camera;
+            (viewport as EGui.Slate.UWorldViewportSlate).CameraController.Camera = viewport.RenderPolicy.GBuffers.Camera;
 
-            var materials = new Graphics.Pipeline.Shader.UMaterial[Mesh.mCoreObject.GetAtomNumber()];
-            for (int i = 0; i < materials.Length; i++)
-            {
-                materials[i] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(UEngine.Instance.Config.DefaultMaterial);
-            }
-            var mesh = new Graphics.Mesh.UMesh();
-            
-            var ok = mesh.Initialize(Mesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-            if (ok)
-            {
-                mesh.SetWorldMatrix(ref Matrix.mIdentity);
-                viewport.RenderPolicy.VisibleMeshes.Add(mesh);
-            }
-
-            var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
-            float radius = aabb.GetMaxSide();
-            BoundingSphere sphere;
-            sphere.Center = aabb.GetCenter();
-            sphere.Radius = radius;
-            policy.GBuffers.Camera.AutoZoom(ref sphere);
+            Scene.Parent = PreviewViewport.World.Root;
         }
         public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(name);
-            if (Mesh == null)
+            Scene = await UEngine.Instance.SceneManager.GetScene(name);
+            if (Scene == null)
                 return false;
 
-            PreviewViewport.Title = $"Mesh:{name}";
-            PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
+            PreviewViewport.Title = $"Scene:{name}";
+            PreviewViewport.OnInitialize = Initialize_PreviewScene;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy(), 0, 1);
 
-            MeshPropGrid.Target = Mesh;
+            ScenePropGrid.Target = Scene;
             UEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
@@ -90,13 +70,13 @@ namespace EngineNS.Editor.Forms
         public Vector2 WindowSize = new Vector2(800, 600);
         public unsafe void OnDraw()
         {
-            if (Visible == false || Mesh == null)
+            if (Visible == false || Scene == null)
                 return;
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(ref WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(Mesh.AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            if (ImGuiAPI.Begin(AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
                 if (ImGuiAPI.IsWindowDocked())
@@ -139,10 +119,9 @@ namespace EngineNS.Editor.Forms
             var btSize = new Vector2(64, 64);
             if (ImGuiAPI.Button("Save", ref btSize))
             {
-                //Mesh.SaveAssetTo(Mesh.AssetName);
-                //var unused = UEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Mesh.AssetName);
-
-                USnapshot.Save(Mesh.AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                Scene.SaveAssetTo(AssetName);
+                
+                //USnapshot.Save(AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Reload", ref btSize))
@@ -152,12 +131,12 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Undo", ref btSize))
             {
-                
+
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Redo", ref btSize))
             {
-                
+
             }
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
@@ -167,7 +146,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (ImGuiAPI.CollapsingHeader("MeshProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
-                    MeshPropGrid.OnDraw(true, false, false);
+                    ScenePropGrid.OnDraw(true, false, false);
                 }
             }
             ImGuiAPI.EndChild();
@@ -199,10 +178,10 @@ namespace EngineNS.Editor.Forms
     }
 }
 
-namespace EngineNS.Graphics.Mesh
+namespace EngineNS.GamePlay.Scene
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UMeshPrimitiveEditor))]
-    public partial class CMeshPrimitives
+    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.USceneEditor))]
+    public partial class UScene
     {
     }
 }

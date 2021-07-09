@@ -194,7 +194,7 @@ vBOOL  VFile::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 	if (GFileOpenNumber > 100)
 	{
 		VFX_LTRACE(ELTT_Resource, "Try Close Openning Files Begin(%d)\n", GFileOpenNumber);
-		EngineNS::F2MManager::Instance.TryReleaseFile();
+		EngineNS::F2MManager::Instance->TryReleaseFile();
 		VFX_LTRACE(ELTT_Resource, "Try Close Openning Files End(%d)\n", GFileOpenNumber);
 	}
 

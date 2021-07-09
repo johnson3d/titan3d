@@ -109,6 +109,7 @@ namespace EngineNS
         }
         public bool PreInitEngine(string cfgFile=null)
         {
+            CoreSDK.InitF2MManager();
             NativeMemory.BeginProfiler();
 
             var t1 = Support.Time.HighPrecision_GetTickCount();
@@ -215,6 +216,7 @@ namespace EngineNS
             EngineNS.Profiler.Log.FinalLogger();
 
             EngineNS.UCs2CppBase.FinalCleanupNativeCoreProvider();
+            CoreSDK.FinalF2MManager();
             mInstance = null;
         }
     }

@@ -4,7 +4,7 @@ using SDL2;
 
 namespace EngineNS.EGui.Slate
 {
-    public class UWorldViewportSlate : Graphics.Pipeline.UViewportSlate, Graphics.Pipeline.IRootForm
+    public class UWorldViewportSlate : Graphics.Pipeline.UViewportSlate
     {
         public GamePlay.UWorld World { get; protected set; } = new GamePlay.UWorld();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
@@ -17,11 +17,10 @@ namespace EngineNS.EGui.Slate
         public Graphics.Pipeline.UDrawBuffers Copy2SwapChainPass = new Graphics.Pipeline.UDrawBuffers();
         public RenderPassDesc SwapChainPassDesc = new RenderPassDesc();
 
-        public Graphics.Pipeline.ICameraController CameraController;
-        public UWorldViewportSlate(bool regRoot)
+        public Graphics.Pipeline.ICameraController CameraController { get; set; }
+        public UWorldViewportSlate()
         {
-            if (regRoot)
-                Editor.UMainEditorApplication.RegRootForm(this);
+            CameraController = new Editor.Controller.EditorCameraController();
         }
         ~UWorldViewportSlate()
         {
@@ -45,13 +44,21 @@ namespace EngineNS.EGui.Slate
             await EngineNS.Thread.AsyncDummyClass.DummyFunc();
             return true;
         }
-        public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        public async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
             await RenderPolicy.Initialize(1, 1);
 
             CameraController.Camera = RenderPolicy.GBuffers.Camera;
+        }
+        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        {
+            if (OnInitialize == null)
+            {
+                OnInitialize = this.Initialize_Default;
+            }
+            await OnInitialize(this, application, policy, zMin, zMax);
         }
         protected override void OnClientChanged(bool bSizeChanged)
         {

@@ -72,12 +72,11 @@ namespace EngineNS.EGui.Controls
             {
                 foreach(var typeDesc in service.Types.Values)
                 {
-                    var atts = typeDesc.SystemType.GetCustomAttributes(typeof(IO.AssetCreateMenuAttribute), true);
+                    var atts = typeDesc.SystemType.GetCustomAttributes(typeof(IO.AssetCreateMenuAttribute), false);
                     if (atts.Length == 0)
                         continue;
 
-                    var assetExtField = typeDesc.SystemType.GetField("AssetExt");
-                    
+                    var assetExtField = Rtti.UTypeDesc.GetField(typeDesc.SystemType, "AssetExt");                    
                     var menuItem = new stMenuItem()
                     {
                         Label = ((IO.AssetCreateMenuAttribute)atts[0]).MenuName,
