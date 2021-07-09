@@ -265,51 +265,64 @@ namespace EngineNS.GamePlay.Scene
         {
             get { return NodeData.BoundVolume; }
         }
-        public unsafe void SaveXndNode(UScene scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
+        public const uint NodeDescAttributeFlags = 1;
+        public unsafe void SaveChildNode(UScene scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
         {
-            if (NodeData != null)
-            {
-                var dataAttr = new EngineNS.XndAttribute(xnd.NewAttribute("NodeData", 1, 0));
-                node.AddAttribute(dataAttr);
-                var attrProxy = new EngineNS.IO.XndAttributeWriter(dataAttr);
-
-                var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.XndAttributeWriter>(attrProxy);
-                dataAttr.BeginWrite((ulong)NodeData.GetStructSize() * 2);
-                ar.Write(NodeData);
-                dataAttr.EndWrite();
-            }
-
             foreach(var i in Children)
             {
                 var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(i.GetType());
-                var nd = new EngineNS.XndNode(xnd.NewNode(typeStr, 1, 0));
-                node.AddNode(nd);
-                SaveXndNode(scene, xnd, nd);
+                using (var nd = xnd.NewNode(typeStr, 1, 0))
+                {
+                    node.AddNode(nd);
+
+                    if (i.NodeData != null)
+                    {
+                        using (var dataAttr = xnd.NewAttribute("NodeData", 1, NodeDescAttributeFlags))
+                        {
+                            var attrProxy = new EngineNS.IO.XndAttributeWriter(dataAttr);
+
+                            var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.XndAttributeWriter>(attrProxy);
+                            dataAttr.BeginWrite((ulong)NodeData.GetStructSize() * 2);
+                            ar.Write(NodeData);
+                            dataAttr.EndWrite();
+
+                            nd.AddAttribute(dataAttr);
+                        }   
+                    }
+                    i.SaveChildNode(scene, xnd, nd);
+                }   
             }
         }
-        public unsafe bool LoadXndNode(UScene scene, EngineNS.XndNode node)
+        public unsafe bool LoadChildNode(UScene scene, EngineNS.XndNode node)
         {
-            var dataAttr = node.FindFirstAttribute("NodeData");
-            if (dataAttr.NativePointer != IntPtr.Zero)
-            {
-                var attr = new EngineNS.XndAttribute(dataAttr);
-                var ar = attr.GetReader(scene);
-                IO.ISerializer data;
-                ar.Read(out data, this);
-                attr.ReleaseReader(ref ar);
-
-                NodeData = data as UNodeData;
-            }
-            
             for(uint i = 0; i < node.GetNumOfNode(); i++)
             {
-                var cld = new EngineNS.XndNode(node.GetNode(i));
+                var cld = node.GetNode(i);
                 var cldTypeStr = cld.NativeSuper.Name;
-                var nd = scene.NewNode(cldTypeStr, null, EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-                if (LoadXndNode(scene, cld))
+                var nd = scene.NewNode(cldTypeStr, null, EBoundVolumeType.Box, typeof(GamePlay.UPlacementBase));
+                Children.Add(nd);
+
+                var attr = cld.FindFirstAttributeByFlags(NodeDescAttributeFlags);
+                if (attr.NativePointer != IntPtr.Zero)
                 {
-                    Children.Add(nd);
+                    var ar = attr.GetReader(scene);
+                    IO.ISerializer data = null;
+                    try
+                    {
+                        ar.Tag = nd;
+                        ar.Read(out data, this);
+                        nd.NodeData = data as UNodeData;
+                    }
+                    catch(Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"Scene({scene.AssetName}): Node({nd.NodeData?.Name}) load failed");
+                    }
+                    ar.Tag = null;
+                    attr.ReleaseReader(ref ar);
                 }
+
+                nd.LoadChildNode(scene, cld);
             }
             return true;
         }

@@ -127,7 +127,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
 
-            SaveXndNode(this, xnd.mCoreObject, node.mCoreObject);
+            SaveChildNode(this, xnd.mCoreObject, node.mCoreObject);
 
             xndHolder.SaveXnd(name.Address);
         }
@@ -149,21 +149,24 @@ namespace EngineNS.GamePlay.Scene
                 var ar = descAttr.GetReader(null);
                 ar.Tag = scene;
                 IO.ISerializer desc = nodeData;
-                ar.ReadTo(desc, scene);
+                try
+                {
+                    ar.ReadTo(desc, scene);
+                }
+                catch(Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"SceneData({scene.AssetName}): load failed");
+                }
                 ar.Tag = null;
                 descAttr.ReleaseReader(ref ar);
 
                 scene.AssetName = name;
-                if (scene.LoadSceneImpl(xnd.RootNode) == false)
+                if (scene.LoadChildNode(scene, xnd.RootNode.mCoreObject) == false)
                     return null;
                 return scene;
             }   
         }
-        private unsafe bool LoadSceneImpl(IO.CXndNode rootNode)
-        {
-            return LoadXndNode(this, rootNode.mCoreObject);
-        }
-
         public IO.IAssetMeta CreateAMeta()
         {
             var result = new USceneAMeta();
