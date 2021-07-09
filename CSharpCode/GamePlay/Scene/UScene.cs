@@ -46,6 +46,10 @@ namespace EngineNS.GamePlay.Scene
         {
             
         }
+        ~UScene()
+        {
+            UEngine.Instance?.SceneManager.UnloadScene(this.AssetName);
+        }
         int PrevAllocId = 0;
         private UNode[] ContainNodes = new UNode[UInt16.MaxValue];
         public void AllocId(UNode node)
@@ -232,6 +236,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public void UnloadScene(RName name)
         {
+            if (name == null)
+                return;
             Scenes.Remove(name);
         }
     }

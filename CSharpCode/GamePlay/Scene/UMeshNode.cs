@@ -6,6 +6,15 @@ namespace EngineNS.GamePlay.Scene
 {
     public partial class UMeshNode : UNode
     {
+        public class UMeshNodeData : UNodeData
+        {
+            [Rtti.Meta]
+            public RName MeshName { get; set; }
+            [Rtti.Meta]
+            public string MdfQueueType { get; set; }
+            [Rtti.Meta]
+            public string AtomType { get; set; }
+        }
         public UMeshNode(UNodeData data, EBoundVolumeType bvType, Type placementType)
             : base(data, bvType, placementType)
         {
@@ -118,9 +127,50 @@ namespace EngineNS.GamePlay.Scene
                 }
                 else
                     BoundVolume.LocalAABB.InitEmptyBox();
+
+                var meshData = NodeData as UMeshNodeData;
+                if (meshData != null)
+                {
+                    meshData.MeshName = mMesh.MaterialMesh.AssetName;
+                    meshData.MdfQueueType = mMesh.MdfQueueType;
+                    meshData.AtomType = Rtti.UTypeDesc.TypeStr(mMesh.Atoms[0].GetType());
+                }
                 UpdateAABB();
                 Parent?.UpdateAABB();
             }
+        }
+        public override void OnNodeLoaded()
+        {
+            var meshData = NodeData as UMeshNodeData;
+            if (meshData == null || meshData.MeshName == null)
+            {
+                System.Action action = async () =>
+                {
+                    var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
+                    var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
+                    materials1[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(UEngine.Instance.Config.DefaultMaterialInstance);
+                    var colorVar = materials1[0].FindVar("clr4_0");
+                    if (colorVar != null)
+                    {
+                        colorVar.Value = "1,0,1,1";
+                    }
+                    mMesh = new Graphics.Mesh.UMesh();
+                    mMesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                };
+                action();
+                return;
+            }
+
+            System.Action action1 = async () =>
+            {
+                var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
+                if (materialMesh != null)
+                {
+                    mMesh = new Graphics.Mesh.UMesh();
+                    mMesh.Initialize(materialMesh, Rtti.UTypeDesc.TypeOf(meshData.MdfQueueType), Rtti.UTypeDesc.TypeOf(meshData.AtomType));
+                }
+            };
+            action1();
         }
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {

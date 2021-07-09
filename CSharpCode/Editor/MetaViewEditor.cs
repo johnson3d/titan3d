@@ -93,13 +93,13 @@ namespace EngineNS.Editor
 
             //var ok = mesh.Initialize(puppetMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             //var ok = mesh.Initialize(materialMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-            var ok = mesh.Initialize(materialMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(materialMesh, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
             if (ok)
             {
                 //var trans = Matrix.Scaling(0.01f);
                 //mesh.SetWorldMatrix(ref trans);// Matrix.mIdentity);
 
-                var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(root, new GamePlay.Scene.UNodeData(), typeof(GamePlay.UPlacement), mesh, new Vector3(5, 5, 5), new Vector3(0.01f), Quaternion.Identity);
+                var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, new Vector3(5, 5, 5), new Vector3(0.01f), Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "Robot0";
                 meshNode.IsScaleChildren = false;
@@ -108,12 +108,16 @@ namespace EngineNS.Editor
                 var mesh1 = new Graphics.Mesh.UMesh();
 
                 mesh1.Initialize(puppetMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-                var meshNode1 = GamePlay.Scene.UMeshNode.AddMeshNode(meshNode, new GamePlay.Scene.UNodeData(), typeof(GamePlay.UPlacement), mesh1, new Vector3(3, 3, 3), new Vector3(0.01f), Quaternion.RotationAxis(Vector3.UnitY, (float)Math.PI / 4));// Quaternion.Identity);
+                var meshNode1 = GamePlay.Scene.UMeshNode.AddMeshNode(meshNode, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh1, new Vector3(3, 3, 3), new Vector3(0.01f), Quaternion.RotationAxis(Vector3.UnitY, (float)Math.PI / 4));// Quaternion.Identity);
                 meshNode1.NodeData.Name = "Robot1";
                 meshNode1.Parent = meshNode;
                 meshNode1.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent;
                 //meshNode1.Placement.Position = meshNode1.Placement.Position;
                 meshNode1.IsCastShadow = true;
+
+                (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).MeshName = RName.GetRName("utest/mesh/puppet_low_ue4.ums");
+                (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfStaticMesh));
+                (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).AtomType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMesh.UAtom));
             }
 
             var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
@@ -131,7 +135,7 @@ namespace EngineNS.Editor
                 {
                     //var trans = Matrix.Scaling(1);
                     //mesh.SetWorldMatrix(ref trans);
-                    var boxNode = GamePlay.Scene.UMeshNode.AddMeshNode(root, new GamePlay.Scene.UNodeData(), typeof(GamePlay.UPlacement), mesh2, Vector3.Zero, new Vector3(1.0f), Quaternion.Identity);
+                    var boxNode = GamePlay.Scene.UMeshNode.AddMeshNode(root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh2, Vector3.Zero, new Vector3(1.0f), Quaternion.Identity);
                     boxNode.NodeData.Name = "BoxNode";
                     boxNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 }

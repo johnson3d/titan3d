@@ -288,8 +288,8 @@ namespace EngineNS.Graphics.Mesh
         public bool Initialize(UMaterialMesh materialMesh, Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
             if (atomType == null)
-                atomType = Rtti.UTypeDescGetter<UAtom>.TypeDesc;
-            if (atomType != Rtti.UTypeDescGetter<UAtom>.TypeDesc && atomType.SystemType.IsSubclassOf(typeof(UAtom)) == false)
+                atomType = Rtti.UTypeDesc.TypeOf(typeof(UAtom));
+            if (atomType != Rtti.UTypeDesc.TypeOf(typeof(UAtom)) && atomType.SystemType.IsSubclassOf(typeof(UAtom)) == false)
                 return false;
             MaterialMesh = materialMesh;
 
@@ -309,8 +309,8 @@ namespace EngineNS.Graphics.Mesh
         public async System.Threading.Tasks.Task<bool> Initialize(RName materialMesh, Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
             if (atomType == null)
-                atomType = Rtti.UTypeDescGetter<UAtom>.TypeDesc;
-            if (atomType != Rtti.UTypeDescGetter<UAtom>.TypeDesc && atomType.SystemType.IsSubclassOf(typeof(UAtom)) == false)
+                atomType = Rtti.UTypeDesc.TypeOf(typeof(UAtom));
+            if (atomType != Rtti.UTypeDesc.TypeOf(typeof(UAtom)) && atomType.SystemType.IsSubclassOf(typeof(UAtom)) == false)
                 return false;
             MaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(materialMesh);
             if (MaterialMesh == null)
@@ -333,8 +333,8 @@ namespace EngineNS.Graphics.Mesh
             Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
             if (atomType == null)
-                atomType = Rtti.UTypeDescGetter<UAtom>.TypeDesc;
-            if (atomType != Rtti.UTypeDescGetter<UAtom>.TypeDesc && atomType.SystemType.IsSubclassOf(typeof(UAtom)) == false)
+                atomType = Rtti.UTypeDesc.TypeOf(typeof(UAtom));
+            if (atomType != Rtti.UTypeDesc.TypeOf(typeof(UAtom)) && atomType.SystemType.IsSubclassOf(typeof(UAtom)) == false)
                 return false;
 
             MaterialMesh = new UMaterialMesh();

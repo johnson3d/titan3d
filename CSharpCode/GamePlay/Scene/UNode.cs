@@ -119,37 +119,43 @@ namespace EngineNS.GamePlay.Scene
         public UNode(UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             NodeData = data;
-            var args = new object[] { this };
-            NodeData.Placement = Rtti.UTypeDescManager.CreateInstance(placementType, args) as UPlacementBase;
-            switch (bvType)
-            {
-                case EBoundVolumeType.None:
-                    {
-                        NodeData.BoundVolume = null;
-                    }
-                    break;
-                case EBoundVolumeType.Box:
-                    {
-                        var boxBV = new UBoxBV(this);
-                        boxBV.LocalAABB = new BoundingBox(Vector3.Zero);
-                        NodeData.BoundVolume = boxBV;
-                    }
-                    break;
-                case EBoundVolumeType.Sphere:
-                    {
-                        var sphereBV = new USphereBV(this);
-                        sphereBV.Center = Vector3.Zero;
-                        sphereBV.Radius = 1;
-                        NodeData.BoundVolume = sphereBV;
-                    }
-                    break;
-            }
-
-            Placement.SetTransform(ref Transform.Identity);
-            UpdateAABB();
-            UpdateAbsTransform();
-
             SetStyle(ENodeStyles.VisibleMeshProvider);
+            
+            if (NodeData!=null)
+            {
+                if (NodeData.Placement == null)
+                {
+                    var args = new object[] { this };
+                    NodeData.Placement = Rtti.UTypeDescManager.CreateInstance(placementType, args) as UPlacementBase;
+                    switch (bvType)
+                    {
+                        case EBoundVolumeType.None:
+                            {
+                                NodeData.BoundVolume = null;
+                            }
+                            break;
+                        case EBoundVolumeType.Box:
+                            {
+                                var boxBV = new UBoxBV(this);
+                                boxBV.LocalAABB = new BoundingBox(Vector3.Zero);
+                                NodeData.BoundVolume = boxBV;
+                            }
+                            break;
+                        case EBoundVolumeType.Sphere:
+                            {
+                                var sphereBV = new USphereBV(this);
+                                sphereBV.Center = Vector3.Zero;
+                                sphereBV.Radius = 1;
+                                NodeData.BoundVolume = sphereBV;
+                            }
+                            break;
+                    }
+
+                    Placement.SetTransform(ref Transform.Identity);
+                }
+                UpdateAABB();
+                UpdateAbsTransform();
+            }
         }
         UInt32 mId = UInt32.MaxValue;
         public UInt32 Id
@@ -255,35 +261,40 @@ namespace EngineNS.GamePlay.Scene
                 {
                     mNodeData.Host = this;
                 }
+                if (Placement != null)
+                {
+                    UpdateAABB();
+                    UpdateAbsTransform();
+                }
             }
         }
         public UPlacementBase Placement
         {
-            get { return NodeData.Placement; }
+            get { return NodeData?.Placement; }
         }
         public UBoundVolume BoundVolume
         {
-            get { return NodeData.BoundVolume; }
+            get { return NodeData?.BoundVolume; }
         }
         public const uint NodeDescAttributeFlags = 1;
         public unsafe void SaveChildNode(UScene scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
         {
             foreach(var i in Children)
             {
-                var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(i.GetType());
+                var typeStr = Rtti.UTypeDesc.TypeStr(i.GetType());
                 using (var nd = xnd.NewNode(typeStr, 1, 0))
                 {
                     node.AddNode(nd);
 
                     if (i.NodeData != null)
                     {
-                        using (var dataAttr = xnd.NewAttribute("NodeData", 1, NodeDescAttributeFlags))
+                        using (var dataAttr = xnd.NewAttribute(Rtti.UTypeDesc.TypeStr(i.NodeData.GetType()), 1, NodeDescAttributeFlags))
                         {
                             var attrProxy = new EngineNS.IO.XndAttributeWriter(dataAttr);
 
                             var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.XndAttributeWriter>(attrProxy);
                             dataAttr.BeginWrite((ulong)NodeData.GetStructSize() * 2);
-                            ar.Write(NodeData);
+                            ar.Write(i.NodeData);
                             dataAttr.EndWrite();
 
                             nd.AddAttribute(dataAttr);
@@ -299,29 +310,33 @@ namespace EngineNS.GamePlay.Scene
             {
                 var cld = node.GetNode(i);
                 var cldTypeStr = cld.NativeSuper.Name;
-                var nd = scene.NewNode(cldTypeStr, null, EBoundVolumeType.Box, typeof(GamePlay.UPlacementBase));
-                Children.Add(nd);
-
+                
                 var attr = cld.FindFirstAttributeByFlags(NodeDescAttributeFlags);
-                if (attr.NativePointer != IntPtr.Zero)
+                if (attr.NativePointer == IntPtr.Zero)
                 {
-                    var ar = attr.GetReader(scene);
-                    IO.ISerializer data = null;
-                    try
-                    {
-                        ar.Tag = nd;
-                        ar.Read(out data, this);
-                        nd.NodeData = data as UNodeData;
-                    }
-                    catch(Exception ex)
-                    {
-                        Profiler.Log.WriteException(ex);
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"Scene({scene.AssetName}): Node({nd.NodeData?.Name}) load failed");
-                    }
-                    ar.Tag = null;
-                    attr.ReleaseReader(ref ar);
+                    continue;
                 }
+                UNodeData nodeData = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(attr.Name)) as UNodeData;
+                var nd = scene.NewNode(cldTypeStr, nodeData, EBoundVolumeType.Box, typeof(GamePlay.UPlacementBase));
+                var ar = attr.GetReader(scene);
+                IO.ISerializer data = nodeData;
+                try
+                {
+                    ar.Tag = nd;
+                    ar.ReadTo(data, this);
+                    nd.NodeData = data as UNodeData;
 
+                    nd.OnNodeLoaded();
+                }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"Scene({scene.AssetName}): Node({nd.NodeData?.Name}) load failed");
+                }
+                ar.Tag = null;
+                attr.ReleaseReader(ref ar);
+
+                Children.Add(nd);
                 nd.LoadChildNode(scene, cld);
             }
             return true;
@@ -355,6 +370,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public void UpdateAbsTransform()
         {
+            if (NodeData == null)
+                return;
             if (Parent == null)
             {
                 Placement.AbsTransform = Placement.Transform;
@@ -381,6 +398,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public void UpdateAABB()
         {
+            if (NodeData == null)
+                return;
             if (BoundVolume != null && BoundVolume.mLocalAABB.IsEmpty() == false)
             {
                 //BoundingBox.Transform(ref BoundVolume.mLocalAABB, ref Placement.AbsTransform, out AABB);

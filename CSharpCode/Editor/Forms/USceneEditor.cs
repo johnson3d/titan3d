@@ -114,12 +114,18 @@ namespace EngineNS.Editor.Forms
             }
             ImGuiAPI.End();
         }
-        protected unsafe void DrawToolBar()
+        protected void DrawToolBar()
         {
             var btSize = new Vector2(64, 64);
             if (ImGuiAPI.Button("Save", ref btSize))
             {
-                Scene.SaveAssetTo(AssetName);
+                Action action = async () =>
+                {
+                    Scene.ClearChildren();
+                    await EngineNS.Editor.MetaViewEditor.TestCreateScene(Scene);
+                    Scene.SaveAssetTo(AssetName);
+                };
+                action();
                 
                 //USnapshot.Save(AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
