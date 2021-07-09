@@ -156,6 +156,9 @@ namespace EngineNS.GamePlay.Scene
                     }
                     mMesh = new Graphics.Mesh.UMesh();
                     mMesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                    
+                    UpdateAABB();
+                    UpdateAbsTransform();
                 };
                 action();
                 return;
@@ -168,6 +171,9 @@ namespace EngineNS.GamePlay.Scene
                 {
                     mMesh = new Graphics.Mesh.UMesh();
                     mMesh.Initialize(materialMesh, Rtti.UTypeDesc.TypeOf(meshData.MdfQueueType), Rtti.UTypeDesc.TypeOf(meshData.AtomType));
+
+                    UpdateAABB();
+                    UpdateAbsTransform();
                 }
             };
             action1();

@@ -123,7 +123,7 @@ namespace EngineNS.GamePlay.Scene
             
             if (NodeData!=null)
             {
-                if (NodeData.Placement == null)
+                if (NodeData.Placement == null && placementType != null)
                 {
                     var args = new object[] { this };
                     NodeData.Placement = Rtti.UTypeDescManager.CreateInstance(placementType, args) as UPlacementBase;
@@ -317,7 +317,7 @@ namespace EngineNS.GamePlay.Scene
                     continue;
                 }
                 UNodeData nodeData = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(attr.Name)) as UNodeData;
-                var nd = scene.NewNode(cldTypeStr, nodeData, EBoundVolumeType.Box, typeof(GamePlay.UPlacementBase));
+                var nd = scene.NewNode(cldTypeStr, nodeData, EBoundVolumeType.None, null);
                 var ar = attr.GetReader(scene);
                 IO.ISerializer data = nodeData;
                 try
@@ -370,7 +370,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public void UpdateAbsTransform()
         {
-            if (NodeData == null)
+            if (NodeData == null || Placement == null)
                 return;
             if (Parent == null)
             {
@@ -398,7 +398,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public void UpdateAABB()
         {
-            if (NodeData == null)
+            if (NodeData == null || BoundVolume == null || Placement == null)
                 return;
             if (BoundVolume != null && BoundVolume.mLocalAABB.IsEmpty() == false)
             {

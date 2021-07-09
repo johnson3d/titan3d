@@ -80,6 +80,13 @@ namespace EngineNS.Rtti
                 return null;
             return GetField(type, name);
         }
+        public static bool CanCast(System.Type from, System.Type to)
+        {
+            if (from == to)
+                return true;
+
+            return from.IsSubclassOf(to);
+        }
         public string TypeString
         {
             get

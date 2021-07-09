@@ -149,7 +149,7 @@ namespace EngineNS.IO
                 var value = ReadObject(ar, i.FieldType.SystemType, obj);
                 if (value != null && i.PropInfo != null)
                 {
-                    if (value.GetType() != i.PropInfo.PropertyType)
+                    if (Rtti.UTypeDesc.CanCast(value.GetType(), i.PropInfo.PropertyType) == false)
                     {
                         Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Serializer", $"ProperySet {i.FieldName}: {value.GetType().FullName}!={i.PropInfo.PropertyType.FullName}");
                         continue;
