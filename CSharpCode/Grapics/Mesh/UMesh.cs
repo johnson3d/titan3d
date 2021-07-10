@@ -82,13 +82,13 @@ namespace EngineNS.Graphics.Mesh
                     {
                         Pipeline.UGraphicsBuffers.UTargetViewIdentifier identifier;
                         if (TargetViews[i].TargetView.TryGetTarget(out identifier) == false)
-                        {
+                        {//多开的窗口已经关闭
                             TargetViews.RemoveAt(i);
                             i--;
                             continue;
                         }
                         else if (identifier == targetView.TargetViewIdentifier)
-                        {//多开的窗口已经关闭
+                        {
                             drawCalls = TargetViews[i];
                             break;
                         }

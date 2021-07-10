@@ -145,6 +145,7 @@ namespace EngineNS.GamePlay.Scene
         {
             base.OnNodeLoaded();
 
+            UpdateAbsTransform();
             var meshData = NodeData as UMeshNodeData;
             if (meshData == null || meshData.MeshName == null)
             {
@@ -158,29 +159,28 @@ namespace EngineNS.GamePlay.Scene
                     {
                         colorVar.Value = "1,0,1,1";
                     }
-                    mMesh = new Graphics.Mesh.UMesh();
-                    mMesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-                    
-                    UpdateAABB();
-                    UpdateAbsTransform();
+                    var mesh = new Graphics.Mesh.UMesh();
+                    mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                    Mesh = mesh;
                 };
                 action();
                 return;
             }
-
-            System.Action action1 = async () =>
+            else
             {
-                var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
-                if (materialMesh != null)
+                System.Action action = async () =>
                 {
-                    mMesh = new Graphics.Mesh.UMesh();
-                    mMesh.Initialize(materialMesh, Rtti.UTypeDesc.TypeOf(meshData.MdfQueueType), Rtti.UTypeDesc.TypeOf(meshData.AtomType));
+                    var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
+                    if (materialMesh != null)
+                    {
+                        var mesh = new Graphics.Mesh.UMesh();
+                        mesh.Initialize(materialMesh, Rtti.UTypeDesc.TypeOf(meshData.MdfQueueType), Rtti.UTypeDesc.TypeOf(meshData.AtomType));
 
-                    UpdateAABB();
-                    UpdateAbsTransform();
-                }
-            };
-            action1();
+                        Mesh = mesh;
+                    }
+                };
+                action();
+            }
         }
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {

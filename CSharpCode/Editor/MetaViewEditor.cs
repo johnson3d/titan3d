@@ -107,7 +107,7 @@ namespace EngineNS.Editor
 
                 var mesh1 = new Graphics.Mesh.UMesh();
 
-                mesh1.Initialize(puppetMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                mesh1.Initialize(puppetMesh, materials, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
                 var meshNode1 = GamePlay.Scene.UMeshNode.AddMeshNode(meshNode, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh1, new Vector3(3, 3, 3), new Vector3(0.01f), Quaternion.RotationAxis(Vector3.UnitY, (float)Math.PI / 4));// Quaternion.Identity);
                 meshNode1.NodeData.Name = "Robot1";
                 meshNode1.Parent = meshNode;
@@ -130,7 +130,7 @@ namespace EngineNS.Editor
                 {
                     colorVar.Value = "1,0,1,1";
                 }
-                ok = mesh2.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                ok = mesh2.Initialize(cookedMesh, materials1, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
                 if (ok)
                 {
                     //var trans = Matrix.Scaling(1);
@@ -147,7 +147,7 @@ namespace EngineNS.Editor
             var tMaterials = new Graphics.Pipeline.Shader.UMaterialInstance[1];
             tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ground.uminst"));
             //tMaterials[0].SaveAssetTo(tMaterials[1].AssetName);
-            ok = terrainMesh.Initialize(gridMesh, tMaterials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfTerrainMesh>.TypeDesc);
+            ok = terrainMesh.Initialize(gridMesh, tMaterials, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfTerrainMesh)));
             if (ok)
             {
                 //var trAttach = new Graphics.Pipeline.Mobile.UBasePassTerrain.UTerrainAttachment();

@@ -6,13 +6,31 @@ namespace EngineNS.Editor.Forms
 {
     public class USceneEditor : Editor.IAssetEditor, ITickable, Graphics.Pipeline.IRootForm
     {
+        public class USceneEditorViewport : EGui.Slate.UWorldViewportSlate
+        {
+            protected override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
+            {
+                base.OnHitproxySelected(proxy);
+
+                if (proxy == null)
+                {
+                    this.ShowBoundVolumes(false, null);
+                    return;
+                }
+                var node = proxy as GamePlay.Scene.UNode;
+                if (node != null)
+                {
+                    this.ShowBoundVolumes(true, node);
+                }
+            }
+        }
         public class USceneEditorOutliner : UWorldOutliner
         {
             public USceneEditorOutliner(bool regRoot)
                 : base(regRoot)
             {
 
-            }
+            }            
             protected override void OnNodeUI_LClick(INodeUIProvider provider)
             {
                 base.OnNodeUI_LClick(provider);
@@ -25,7 +43,7 @@ namespace EngineNS.Editor.Forms
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public GamePlay.Scene.UScene Scene;
-        public EGui.Slate.UWorldViewportSlate PreviewViewport = new EGui.Slate.UWorldViewportSlate();
+        public USceneEditorViewport PreviewViewport = new USceneEditorViewport();
         public USceneEditorOutliner mWorldOutliner = new USceneEditorOutliner(false);
         public EGui.Controls.PropertyGrid.PropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();        
         ~USceneEditor()

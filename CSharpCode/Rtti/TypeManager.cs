@@ -98,7 +98,7 @@ namespace EngineNS.Rtti
         }
         public static UTypeDesc TypeDescOf<T>()
         {
-            return TypeOfFullName(typeof(T).FullName);
+            return TypeOf(typeof(T));
         }
         public static UTypeDesc TypeOf(string typeStr)
         {

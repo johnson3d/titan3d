@@ -62,11 +62,11 @@ namespace EngineNS
             }
             else
             {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+                for (int i = 0; i < 10; i++)
+                {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                }
             }
         }
         private WeakReference EndPlayInEditor_Impl()
