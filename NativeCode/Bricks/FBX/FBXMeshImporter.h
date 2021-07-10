@@ -120,8 +120,8 @@ namespace AssetImportAndExport
 		class BoneCluster
 		{
 			public:
-				IBone* Bone;
-				FbxCluster* FBXCluster;
+				IBone* Bone = nullptr;
+				FbxCluster* FBXCluster = nullptr;
 		};
 
 
@@ -153,12 +153,12 @@ namespace AssetImportAndExport
 				//v3dxMatrix4 ComputeTotalMatrix(FbxNode* Node, FbxScene* scene);
 				void RecursionCalculateBone(FbxNode* boneNode, const std::vector<BoneCluster>& boneClusters, EngineNS::IPartialSkeleton* skeleton);
 			protected:
-				EngineNS::IMeshPrimitives* mMeshPrimitives;
-				EngineNS::IPartialSkeleton* mPartialSkeleton;
+				EngineNS::IMeshPrimitives* mMeshPrimitives = nullptr;
+				EngineNS::IPartialSkeleton* mPartialSkeleton = nullptr;
 				//EngineNS::ISkinModifier* mSkinModifier;
 			protected:
 				UINT mMeshIndex = -1;
-				FBXImporter* mHostFBXImporter;
+				FBXImporter* mHostFBXImporter = nullptr;
 				bool HasProcessed = false;
 		};
 
@@ -172,7 +172,7 @@ namespace AssetImportAndExport
 			bool IsIndex32() { return IndexCount() > 65535 ? true : false; }
 			int IndexCount() { return (int)VertexIndices.size(); }
 			int VertexCount() { return (int)Vertexs.size(); }
-			int PolyCount;
+			int PolyCount = 0;
 			std::vector<std::vector<UINT>> VertexSkinIndex;
 			std::vector<std::vector<float>> VertexSkinWeight;
 			std::vector<int> PolyIndices;

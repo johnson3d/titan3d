@@ -45,6 +45,7 @@ namespace EngineNS.Graphics.Mesh
             public override void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
             {
                 mDir = dir;
+                var noused = PGAsset.Initialize();
                 //mDesc.Desc.SetDefault();
                 //PGAsset.SingleTarget = mDesc;
             }
@@ -139,9 +140,11 @@ namespace EngineNS.Graphics.Mesh
                 {
                     using (var meshImporter = mFBXImporter.CreateMeshImporter(i))
                     {
+                        var meshDesc = mFBXImporter.GetFBXMeshDescs(i);
+                        var meshName = meshDesc->NativeSuper->Name;
                         meshImporter.Process(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
                         var mesh = meshImporter.GetMeshPrimitives();
-                        var rn = RName.GetRName(mDir.Name + mName + CMeshPrimitives.AssetExt);
+                        var rn = RName.GetRName(mDir.Name + meshName + CMeshPrimitives.AssetExt);
                         var xnd = new IO.CXndHolder("CMeshPrimitives", 0, 0);
                         mesh.Save2Xnd(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, xnd.RootNode.mCoreObject);
                         xnd.SaveXnd(rn.Address);
@@ -155,17 +158,20 @@ namespace EngineNS.Graphics.Mesh
                         UEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
                         var partialSkeleton = meshImporter.GetPartialSkeleton();
-                        Animation.Skeleton.USkeletonAsset ska = new Animation.Skeleton.USkeletonAsset();
-                        ska.Skeleton.MergeWith(partialSkeleton);
-                        rn = RName.GetRName(mDir.Name + mName + Animation.Skeleton.USkeletonAsset.AssetExt);
-                        ska.SaveAssetTo(rn);
-                        var sktameta = new Animation.Skeleton.USkeletonAssetAMeta();
-                        sktameta.SetAssetName(rn);
-                        sktameta.AssetId = Guid.NewGuid();
-                        sktameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(Animation.Skeleton.USkeletonAssetAMeta));
-                        sktameta.Description = $"This is a {typeof(Animation.Skeleton.USkeletonAssetAMeta).FullName}\n";
-                        sktameta.SaveAMeta();
-                        UEngine.Instance.AssetMetaManager.RegAsset(sktameta);
+                        if (partialSkeleton.IsValidPointer)
+                        {
+                            Animation.Skeleton.USkeletonAsset ska = new Animation.Skeleton.USkeletonAsset();
+                            ska.Skeleton.MergeWith(partialSkeleton);
+                            rn = RName.GetRName(mDir.Name + meshName + Animation.Skeleton.USkeletonAsset.AssetExt);
+                            ska.SaveAssetTo(rn);
+                            var sktameta = new Animation.Skeleton.USkeletonAssetAMeta();
+                            sktameta.SetAssetName(rn);
+                            sktameta.AssetId = Guid.NewGuid();
+                            sktameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(Animation.Skeleton.USkeletonAssetAMeta));
+                            sktameta.Description = $"This is a {typeof(Animation.Skeleton.USkeletonAssetAMeta).FullName}\n";
+                            sktameta.SaveAMeta();
+                            UEngine.Instance.AssetMetaManager.RegAsset(sktameta);
+                        }
 
                         mesh.NativeSuper.Release();
                     }

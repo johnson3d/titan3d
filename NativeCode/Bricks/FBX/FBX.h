@@ -70,10 +70,10 @@ namespace AssetImportAndExport::FBX
 			FBXNode = nullptr;
 		}
 	public:
-		const char* Name;
-		EFBXObjectType Type;
-		float Scale;
-		bool Imported;
+		const char* Name = nullptr;
+		EFBXObjectType Type = EFBXObjectType::FOT_Unknown;
+		float Scale = 1.f;
+		bool Imported = true;
 	public:
 		FbxNode* GetFBXNode() const { return FBXNode; }
 	protected:

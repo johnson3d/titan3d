@@ -29,13 +29,13 @@ namespace AssetImportAndExport
 
 		protected:
 			std::string mFilename;
-			FBXFileImportDesc* mFBXFileImportDesc;
+			FBXFileImportDesc* mFBXFileImportDesc = nullptr;
 			bool CheckValided = false;
 
 		public:
 			fbxsdk::FbxManager* GetFBXSdkManager() { return mFBXSdkManager; }
 		protected:
-			fbxsdk::FbxManager* mFBXSdkManager;
+			fbxsdk::FbxManager* mFBXSdkManager = nullptr;
 		};
 
 	}
