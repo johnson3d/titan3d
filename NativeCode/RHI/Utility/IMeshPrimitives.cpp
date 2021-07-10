@@ -282,19 +282,22 @@ void IMeshPrimitives::Save2Xnd(IRenderContext* rc, XndNode* pNode)
 		pAttr->EndWrite();
 	}
 
-	XndNode* node = pNode->GetOrAddNode("PartialSkeleton", 0, 0);
+	if (mPartialSkeleton)
 	{
-		XndAttribute* boneNumAttr = node->GetOrAddAttribute("BoneNum", 0, 0);
-		boneNumAttr->BeginWrite();
-		boneNumAttr->Write(mPartialSkeleton->GetBonesNum());
-		boneNumAttr->EndWrite();
-		XndAttribute* descAttr = node->GetOrAddAttribute("BoneDescs", 0, 0);
-		descAttr->BeginWrite();
-		for (int i = 0; i < mPartialSkeleton->GetBonesNum(); ++i)
+		XndNode* node = pNode->GetOrAddNode("PartialSkeleton", 0, 0);
 		{
-			descAttr->Write(mPartialSkeleton->GetBones()[i]->Desc);
+			XndAttribute* boneNumAttr = node->GetOrAddAttribute("BoneNum", 0, 0);
+			boneNumAttr->BeginWrite();
+			boneNumAttr->Write(mPartialSkeleton->GetBonesNum());
+			boneNumAttr->EndWrite();
+			XndAttribute* descAttr = node->GetOrAddAttribute("BoneDescs", 0, 0);
+			descAttr->BeginWrite();
+			for (int i = 0; i < mPartialSkeleton->GetBonesNum(); ++i)
+			{
+				descAttr->Write(mPartialSkeleton->GetBones()[i]->Desc);
+			}
+			descAttr->EndWrite();
 		}
-		descAttr->EndWrite();
 	}
 }
 
