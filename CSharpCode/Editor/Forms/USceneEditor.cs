@@ -6,6 +6,18 @@ namespace EngineNS.Editor.Forms
 {
     public class USceneEditor : Editor.IAssetEditor, ITickable, Graphics.Pipeline.IRootForm
     {
+        public class USceneEditorOutliner : UWorldOutliner
+        {
+            public USceneEditorOutliner(bool regRoot)
+                : base(regRoot)
+            {
+
+            }
+            protected override void OnNodeUI_LClick(INodeUIProvider provider)
+            {
+                base.OnNodeUI_LClick(provider);
+            }
+        }
         public RName AssetName { get; set; }
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
@@ -13,7 +25,8 @@ namespace EngineNS.Editor.Forms
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public GamePlay.Scene.UScene Scene;
-        public EngineNS.EGui.Slate.UWorldViewportSlate PreviewViewport = new EngineNS.EGui.Slate.UWorldViewportSlate();
+        public EGui.Slate.UWorldViewportSlate PreviewViewport = new EGui.Slate.UWorldViewportSlate();
+        public USceneEditorOutliner mWorldOutliner = new USceneEditorOutliner(false);
         public EGui.Controls.PropertyGrid.PropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();        
         ~USceneEditor()
         {
@@ -57,6 +70,10 @@ namespace EngineNS.Editor.Forms
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy(), 0, 1);
 
             ScenePropGrid.Target = Scene;
+
+            mWorldOutliner.mWorld = PreviewViewport.World;
+            mWorldOutliner.Title = $"Outliner:{name}";
+
             UEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
@@ -150,10 +167,11 @@ namespace EngineNS.Editor.Forms
             var sz = new Vector2(-1);
             if (ImGuiAPI.BeginChild("LeftView", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                if (ImGuiAPI.CollapsingHeader("MeshProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     ScenePropGrid.OnDraw(true, false, false);
                 }
+                mWorldOutliner.DrawAsChildWindow(ref sz);
             }
             ImGuiAPI.EndChild();
         }

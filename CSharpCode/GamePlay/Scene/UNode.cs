@@ -14,6 +14,8 @@ namespace EngineNS.GamePlay.Scene
             return 1024;
         }
         public UNode Host { get; set; }
+        [Rtti.Meta]
+        public UNode.ENodeStyles NodeStyles { get; set; } = 0;
         [Rtti.Meta(Order = 0)]
         public string Name { get; set; }
         UBoundVolume mBoundVolume;
@@ -48,8 +50,22 @@ namespace EngineNS.GamePlay.Scene
             CastShadow = (1 << 5),
             AcceptShadow = (1 << 6),
         }
-        [Rtti.Meta]
-        public ENodeStyles NodeStyles { get; set; } = 0;
+        public ENodeStyles NodeStyles 
+        {
+            get
+            {
+                if (NodeData == null)
+                    return (ENodeStyles)0;
+                return NodeData.NodeStyles;
+            }
+            set
+            {
+                if (NodeData != null)
+                {
+                    NodeData.NodeStyles = value;
+                }
+            }
+        }
         public bool HasStyle(ENodeStyles style)
         {
             return (NodeStyles & style) == style;
@@ -336,14 +352,18 @@ namespace EngineNS.GamePlay.Scene
                 ar.Tag = null;
                 attr.ReleaseReader(ref ar);
 
-                Children.Add(nd);
+                nd.Parent = this;
                 nd.LoadChildNode(scene, cld);
             }
             return true;
         }
         public virtual void OnNodeLoaded()
         {
-
+            
+        }
+        public virtual void OnSceneLoaded()
+        {
+            this.HitproxyType = this.HitproxyType;
         }
         public delegate bool FOnVisitNode(UNode node, object arg);
         public bool DFS_VisitNodeTree(FOnVisitNode visitor, object arg)

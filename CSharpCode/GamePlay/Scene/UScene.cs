@@ -168,6 +168,12 @@ namespace EngineNS.GamePlay.Scene
                 scene.AssetName = name;
                 if (scene.LoadChildNode(scene, xnd.RootNode.mCoreObject) == false)
                     return null;
+
+                scene.DFS_VisitNodeTree((UNode inNode, object inArg) =>
+                {
+                    inNode.OnSceneLoaded();
+                    return false;
+                }, null);
                 return scene;
             }   
         }
