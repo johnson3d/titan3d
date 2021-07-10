@@ -1,6 +1,7 @@
 #include "CoreSDK.h"
 #include "IUnknown.h"
 #include "debug/vfxmemory.h"
+#include "r2m/F2MManager.h"
 
 
 #define new VNEW
@@ -80,6 +81,16 @@ FCreateManagedObject CoreSDK::CreateManagedObject = nullptr;
 FFreeManagedObjectGCHandle CoreSDK::FreeManagedObjectGCHandle = nullptr;
 FGetManagedObjectFromGCHandle CoreSDK::GetManagedObjectFromGCHandle = nullptr;
 FOnShaderTranslated CoreSDK::OnShaderTranslated = nullptr;
+
+void CoreSDK::InitF2MManager()
+{
+	F2MManager::Instance = new F2MManager();
+}
+
+void CoreSDK::FinalF2MManager()
+{
+	Safe_Delete(F2MManager::Instance);
+}
 
 void CoreSDK::StartNativeMemWatcher()
 {

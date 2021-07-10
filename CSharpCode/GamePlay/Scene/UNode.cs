@@ -10,7 +10,8 @@ namespace EngineNS.GamePlay.Scene
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
         public int GetStructSize()
         {
-            return System.Runtime.InteropServices.Marshal.SizeOf(this.GetType());
+            //return System.Runtime.InteropServices.Marshal.SizeOf(this.GetType());
+            return 1024;
         }
         public UNode Host { get; set; }
         [Rtti.Meta(Order = 0)]
@@ -118,37 +119,43 @@ namespace EngineNS.GamePlay.Scene
         public UNode(UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             NodeData = data;
-            var args = new object[] { this };
-            NodeData.Placement = Rtti.UTypeDescManager.CreateInstance(placementType, args) as UPlacementBase;
-            switch (bvType)
-            {
-                case EBoundVolumeType.None:
-                    {
-                        NodeData.BoundVolume = null;
-                    }
-                    break;
-                case EBoundVolumeType.Box:
-                    {
-                        var boxBV = new UBoxBV(this);
-                        boxBV.LocalAABB = new BoundingBox(Vector3.Zero);
-                        NodeData.BoundVolume = boxBV;
-                    }
-                    break;
-                case EBoundVolumeType.Sphere:
-                    {
-                        var sphereBV = new USphereBV(this);
-                        sphereBV.Center = Vector3.Zero;
-                        sphereBV.Radius = 1;
-                        NodeData.BoundVolume = sphereBV;
-                    }
-                    break;
-            }
-
-            Placement.SetTransform(ref Transform.Identity);
-            UpdateAABB();
-            UpdateAbsTransform();
-
             SetStyle(ENodeStyles.VisibleMeshProvider);
+            
+            if (NodeData!=null)
+            {
+                if (NodeData.Placement == null && placementType != null)
+                {
+                    var args = new object[] { this };
+                    NodeData.Placement = Rtti.UTypeDescManager.CreateInstance(placementType, args) as UPlacementBase;
+                    switch (bvType)
+                    {
+                        case EBoundVolumeType.None:
+                            {
+                                NodeData.BoundVolume = null;
+                            }
+                            break;
+                        case EBoundVolumeType.Box:
+                            {
+                                var boxBV = new UBoxBV(this);
+                                boxBV.LocalAABB = new BoundingBox(Vector3.Zero);
+                                NodeData.BoundVolume = boxBV;
+                            }
+                            break;
+                        case EBoundVolumeType.Sphere:
+                            {
+                                var sphereBV = new USphereBV(this);
+                                sphereBV.Center = Vector3.Zero;
+                                sphereBV.Radius = 1;
+                                NodeData.BoundVolume = sphereBV;
+                            }
+                            break;
+                    }
+
+                    Placement.SetTransform(ref Transform.Identity);
+                }
+                UpdateAABB();
+                UpdateAbsTransform();
+            }
         }
         UInt32 mId = UInt32.MaxValue;
         public UInt32 Id
@@ -254,61 +261,83 @@ namespace EngineNS.GamePlay.Scene
                 {
                     mNodeData.Host = this;
                 }
+                if (Placement != null)
+                {
+                    UpdateAABB();
+                    UpdateAbsTransform();
+                }
             }
         }
         public UPlacementBase Placement
         {
-            get { return NodeData.Placement; }
+            get { return NodeData?.Placement; }
         }
         public UBoundVolume BoundVolume
         {
-            get { return NodeData.BoundVolume; }
+            get { return NodeData?.BoundVolume; }
         }
-        public unsafe void SaveXndNode(UScene scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
+        public const uint NodeDescAttributeFlags = 1;
+        public unsafe void SaveChildNode(UScene scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
         {
-            if (NodeData != null)
-            {
-                var dataAttr = new EngineNS.XndAttribute(xnd.NewAttribute("NodeData", 1, 0));
-                node.AddAttribute(dataAttr);
-                var attrProxy = new EngineNS.IO.XndAttributeWriter(dataAttr);
-
-                var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.XndAttributeWriter>(attrProxy);
-                dataAttr.BeginWrite((ulong)NodeData.GetStructSize() * 2);
-                ar.Write(NodeData);
-                dataAttr.EndWrite();
-            }
-
             foreach(var i in Children)
             {
-                var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(i.GetType());
-                var nd = new EngineNS.XndNode(xnd.NewNode(typeStr, 1, 0));
-                node.AddNode(nd);
-                SaveXndNode(scene, xnd, nd);
+                var typeStr = Rtti.UTypeDesc.TypeStr(i.GetType());
+                using (var nd = xnd.NewNode(typeStr, 1, 0))
+                {
+                    node.AddNode(nd);
+
+                    if (i.NodeData != null)
+                    {
+                        using (var dataAttr = xnd.NewAttribute(Rtti.UTypeDesc.TypeStr(i.NodeData.GetType()), 1, NodeDescAttributeFlags))
+                        {
+                            var attrProxy = new EngineNS.IO.XndAttributeWriter(dataAttr);
+
+                            var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.XndAttributeWriter>(attrProxy);
+                            dataAttr.BeginWrite((ulong)NodeData.GetStructSize() * 2);
+                            ar.Write(i.NodeData);
+                            dataAttr.EndWrite();
+
+                            nd.AddAttribute(dataAttr);
+                        }   
+                    }
+                    i.SaveChildNode(scene, xnd, nd);
+                }   
             }
         }
-        public unsafe bool LoadXndNode(UScene scene, EngineNS.XndNode node)
+        public unsafe bool LoadChildNode(UScene scene, EngineNS.XndNode node)
         {
-            var dataAttr = node.FindFirstAttribute("NodeData");
-            if (dataAttr.NativePointer != IntPtr.Zero)
-            {
-                var attr = new EngineNS.XndAttribute(dataAttr);
-                var ar = attr.GetReader(scene);
-                IO.ISerializer data;
-                ar.Read(out data, this);
-                attr.ReleaseReader(ref ar);
-
-                NodeData = data as UNodeData;
-            }
-            
             for(uint i = 0; i < node.GetNumOfNode(); i++)
             {
-                var cld = new EngineNS.XndNode(node.GetNode(i));
+                var cld = node.GetNode(i);
                 var cldTypeStr = cld.NativeSuper.Name;
-                var nd = scene.NewNode(cldTypeStr, null, EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-                if (LoadXndNode(scene, cld))
+                
+                var attr = cld.FindFirstAttributeByFlags(NodeDescAttributeFlags);
+                if (attr.NativePointer == IntPtr.Zero)
                 {
-                    Children.Add(nd);
+                    continue;
                 }
+                UNodeData nodeData = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(attr.Name)) as UNodeData;
+                var nd = scene.NewNode(cldTypeStr, nodeData, EBoundVolumeType.None, null);
+                var ar = attr.GetReader(scene);
+                IO.ISerializer data = nodeData;
+                try
+                {
+                    ar.Tag = nd;
+                    ar.ReadTo(data, this);
+                    nd.NodeData = data as UNodeData;
+
+                    nd.OnNodeLoaded();
+                }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"Scene({scene.AssetName}): Node({nd.NodeData?.Name}) load failed");
+                }
+                ar.Tag = null;
+                attr.ReleaseReader(ref ar);
+
+                Children.Add(nd);
+                nd.LoadChildNode(scene, cld);
             }
             return true;
         }
@@ -341,6 +370,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public void UpdateAbsTransform()
         {
+            if (NodeData == null || Placement == null)
+                return;
             if (Parent == null)
             {
                 Placement.AbsTransform = Placement.Transform;
@@ -367,6 +398,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public void UpdateAABB()
         {
+            if (NodeData == null || BoundVolume == null || Placement == null)
+                return;
             if (BoundVolume != null && BoundVolume.mLocalAABB.IsEmpty() == false)
             {
                 //BoundingBox.Transform(ref BoundVolume.mLocalAABB, ref Placement.AbsTransform, out AABB);

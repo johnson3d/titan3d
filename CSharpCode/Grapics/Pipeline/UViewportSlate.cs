@@ -200,5 +200,14 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
+        public delegate System.Threading.Tasks.Task FOnInitialize(UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax);
+        public FOnInitialize OnInitialize = null;
+        public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        {
+            if (OnInitialize != null)
+            {
+                await OnInitialize(this, application, policy, zMin, zMax);
+            }
+        }
     }
 }

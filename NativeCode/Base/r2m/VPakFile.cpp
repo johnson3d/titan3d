@@ -116,18 +116,18 @@ vBOOL VPakFile::MountPak(const char* mountPoint, int order)
 	mMountOrder = order;
 	mMountPoint = mountPoint;
 	this->AddRef();
-	F2MManager::Instance.mMountPaks.push_back(this);
-	_vfxQSort(&F2MManager::Instance.mMountPaks[0], F2MManager::Instance.mMountPaks.size(), MountOrderCmp());
+	F2MManager::Instance->mMountPaks.push_back(this);
+	_vfxQSort(&F2MManager::Instance->mMountPaks[0], F2MManager::Instance->mMountPaks.size(), MountOrderCmp());
 	return TRUE;
 }
 
 vBOOL VPakFile::UnMountPak()
 {
-	for (auto i = F2MManager::Instance.mMountPaks.begin(); i != F2MManager::Instance.mMountPaks.end(); i++)
+	for (auto i = F2MManager::Instance->mMountPaks.begin(); i != F2MManager::Instance->mMountPaks.end(); i++)
 	{
 		if (*i == this)
 		{
-			F2MManager::Instance.mMountPaks.erase(i);
+			F2MManager::Instance->mMountPaks.erase(i);
 			this->Release();
 			return TRUE;
 		}

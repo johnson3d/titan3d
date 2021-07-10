@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 
 namespace EngineNS.GamePlay
 {
-    public class UGameViewportSlate : EngineNS.EGui.Slate.UWorldViewportSlate
+    public class UGameViewportSlate : EngineNS.EGui.Slate.UWorldViewportSlate, Graphics.Pipeline.IRootForm
     {
         public UGameViewportSlate(bool regRoot)
-            : base(regRoot)
         {
+            if (regRoot)
+                Editor.UMainEditorApplication.RegRootForm(this);
             CameraController = new Editor.Controller.EditorCameraController();
         }
         CNativeString mNstrTitle = new CNativeString();

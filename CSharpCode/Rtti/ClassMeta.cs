@@ -802,7 +802,7 @@ namespace EngineNS.Rtti
                     if (mMetas.TryGetValue(metaName, out kls) == false)
                     {
                         var root = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Engine, IO.FileManager.ESystemDir.MetaData);
-                        if (kls.ClassType.Assembly.IsGameModule)
+                        if (j.Value.Assembly.IsGameModule)
                             root = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Game, IO.FileManager.ESystemDir.MetaData);
 
                         kls = new UClassMeta(j.Value);

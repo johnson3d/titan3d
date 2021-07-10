@@ -24,6 +24,11 @@ namespace EngineNS.IO
         {
             mCoreObject = XndHolder.CreateInstance();
         }
+        public override void Dispose()
+        {
+            mCoreObject.TryReleaseHolder();
+            base.Dispose();
+        }
         public XndAttribute NewAttribute(string name, UInt32 ver, UInt32 flags)
         {
             unsafe

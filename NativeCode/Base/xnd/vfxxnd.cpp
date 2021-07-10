@@ -102,7 +102,7 @@ bool XndHolder::LoadXnd(const char* file)
 	mResource = nullptr;
 
 	{
-		mResource = AutoRef<VRes2Memory>(F2MManager::Instance.GetF2M(file)); 
+		mResource = AutoRef<VRes2Memory>(F2MManager::Instance->GetF2M(file)); 
 		if (mResource == nullptr)
 			return false;
 		UINT64 length = (UINT64)mResource->Length();

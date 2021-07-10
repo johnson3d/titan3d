@@ -82,7 +82,10 @@ __memory_init::~__memory_init()
 	if (OnMemoryFinal != nullptr)
 		OnMemoryFinal();
 	
-	EngineNS::F2MManager::Instance.Cleanup();
+	if (EngineNS::F2MManager::Instance != nullptr)
+	{
+		EngineNS::F2MManager::Instance->Cleanup();
+	}
 	
 	VMem::MemPoolManager::GetInstance()->FinalCleanup();
 	vfxMTLockerManager::Instance.Cleanup();
