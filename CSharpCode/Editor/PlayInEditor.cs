@@ -60,6 +60,14 @@ namespace EngineNS
             {
                 Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Core", "EndPIE: GameInstance is alive");
             }
+            else
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
         }
         private WeakReference EndPlayInEditor_Impl()
         {

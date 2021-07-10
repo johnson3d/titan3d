@@ -20,7 +20,7 @@ namespace EngineNS.GamePlay
         [Rtti.Meta]
         public virtual void BeginDestroy(UGameBase host)
         {
-
+            Editor.UMainEditorApplication.UnregRootForm(WorldViewportSlate);
         }
 
         public UGameViewportSlate WorldViewportSlate = null;
