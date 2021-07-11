@@ -43,6 +43,12 @@ namespace MainEditor
         }
         static WeakReference Main_Impl(string[] args)
         {
+            int IsProfiling = 0;
+            var ev1 = Environment.GetEnvironmentVariable("CORECLR_ENABLE_PROFILING");
+            if (ev1 != null)
+            {
+                IsProfiling = int.Parse(ev1);
+            }
             var cfg = FindArgument(args, "config=");
             Console.WriteLine($"Config={cfg}");
             
@@ -53,20 +59,23 @@ namespace MainEditor
                 if (EngineNS.UEngine.Instance.Tick() == false)
                     break;
                 //System.GC.Collect();
-                ClrString clrStr = new ClrString();
-                int num = 0;
-                var ok = ClrLogger.PopLogInfo(ref clrStr);
-                while (ok)
+                if (IsProfiling == 1)
                 {
-                    if (clrStr.mType == EClrLogStringType.ObjectAlloc)
+                    ClrString clrStr = new ClrString();
+                    int num = 0;
+                    var ok = ClrLogger.PopLogInfo(ref clrStr);
+                    while (ok)
                     {
-                        num++;
-                        unsafe
+                        if (clrStr.mType == EClrLogStringType.ObjectAlloc)
                         {
-                            EngineNS.CoreSDK.Print2Console((sbyte*)&clrStr.m_mString, true);
+                            num++;
+                            unsafe
+                            {
+                                EngineNS.CoreSDK.Print2Console((sbyte*)&clrStr.m_mString, true);
+                            }
                         }
+                        ok = ClrLogger.PopLogInfo(ref clrStr);
                     }
-                    ok = ClrLogger.PopLogInfo(ref clrStr);
                 }
             }
             
