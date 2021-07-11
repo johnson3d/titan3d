@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
 
 namespace EngineNS.GamePlay.Scene
 {
@@ -9,11 +9,39 @@ namespace EngineNS.GamePlay.Scene
         public class UMeshNodeData : UNodeData
         {
             [Rtti.Meta]
+            [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
             public RName MeshName { get; set; }
             [Rtti.Meta]
+            [ReadOnly(true)]
             public string MdfQueueType { get; set; }
             [Rtti.Meta]
+            [ReadOnly(true)]
             public string AtomType { get; set; }
+
+            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Pipeline.Shader.UMdfQueue))]
+            public Rtti.UTypeDesc MdfQueue
+            {
+                get
+                {
+                    return Rtti.UTypeDesc.TypeOf(MdfQueueType);
+                }
+                set
+                {
+                    MdfQueueType = Rtti.UTypeDesc.TypeStr(value);
+                }
+            }
+            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Mesh.UMesh.UAtom))]
+            public Rtti.UTypeDesc Atom
+            {
+                get
+                {
+                    return Rtti.UTypeDesc.TypeOf(AtomType);
+                }
+                set
+                {
+                    AtomType = Rtti.UTypeDesc.TypeStr(value);
+                }
+            }
         }
         public UMeshNode(UNodeData data, EBoundVolumeType bvType, Type placementType)
             : base(data, bvType, placementType)

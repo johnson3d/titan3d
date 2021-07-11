@@ -69,7 +69,7 @@ namespace EngineNS.Bricks.CodeBuilder
     {
         [Rtti.Meta]
         public string ClassName { get; set; } = "NewClass";
-        [DefineVar.PropDefTypeEditor(ExcludeValueType = true, ExcludeSealed = true, AssemblyFilter = "EngineCore")]
+        [DefineVar.PropDefTypeEditor(typeof(void), ExcludeValueType = true, ExcludeSealed = true, AssemblyFilter = "EngineCore")]
         [Rtti.Meta]
         public string SuperClassName { get; set; } = null;
         [Rtti.Meta]
@@ -136,6 +136,11 @@ namespace EngineNS.Bricks.CodeBuilder
         public bool IsLocalVar { get; set; } = true;
         public class PropDefTypeEditor : EGui.Controls.PropertyGrid.PGTypeEditorAttribute
         {
+            public PropDefTypeEditor(System.Type baseType)
+                : base(baseType)
+            {
+
+            }
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
                 newValue = info.Value;
@@ -159,7 +164,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 return false;
             }
         }
-        [PropDefTypeEditor()]
+        [PropDefTypeEditor(typeof(void))]
         [Rtti.Meta]
         public string DefType { get; set; } = typeof(int).FullName;
         [Rtti.Meta]
@@ -176,7 +181,7 @@ namespace EngineNS.Bricks.CodeBuilder
             set;
         } = false;
         public EVisitMode VisitMode { get; set; } = EVisitMode.Public;
-        [DefineVar.PropDefTypeEditor()]
+        [DefineVar.PropDefTypeEditor(typeof(void))]
         [Rtti.Meta]
         public string ReturnType { get; set; }
         [Rtti.Meta]

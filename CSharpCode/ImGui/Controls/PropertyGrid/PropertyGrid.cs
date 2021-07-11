@@ -79,18 +79,18 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public bool ExcludeSealed = false;
         public bool ExcludeValueType = false;
         public Rtti.UTypeDesc BaseType;
-        public PGTypeEditorAttribute()
+        public PGTypeEditorAttribute(System.Type baseType)
         {
-            BaseType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(void).FullName);
+            BaseType = Rtti.UTypeDesc.TypeOf(baseType);
         }
         protected static EGui.Controls.TypeSelector TypeSlt = new EGui.Controls.TypeSelector();
         public override bool OnDraw(in EditorInfo info, out object newValue)
         {
             newValue = info.Value;
             var sz = new Vector2(0, 0);
-            var bindType = EGui.UIEditor.EditableFormData.Instance.CurrentForm.BindType;
-            if (bindType == null)
-                return false;
+            //var bindType = EGui.UIEditor.EditableFormData.Instance.CurrentForm.BindType;
+            //if (bindType == null)
+            //    return false;
             //var props = bindType.SystemType.GetProperties();
             ImGuiAPI.SetNextItemWidth(-1);
             TypeSlt.AssemblyFilter = AssemblyFilter;
