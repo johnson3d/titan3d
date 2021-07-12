@@ -449,7 +449,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ParentIsValueType = proDesc.ParentIsValueType;
             IsBrowsable = proDesc.IsBrowsable;
             DeclaringType = proDesc.DeclaringType;
+            CustomValueEditor?.Cleanup();
             CustomValueEditor = proDesc.CustomValueEditor;
+            var noUse = CustomValueEditor?.Initialize();
         }
     }
 

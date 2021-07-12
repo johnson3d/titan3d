@@ -41,8 +41,27 @@ namespace EngineNS.EGui.Controls
 
             return true;
         }
-
-
+        Task SureBarTask = null;
+        internal void SureSearchBar()
+        {
+            if (SureBarTask!=null && SureBarTask.IsCompleted==false)
+            {
+                return;
+            }
+            if (mSearchBar == null)
+            {
+                if (SureBarTask == null)
+                {
+                    mSearchBar = new UIProxy.SearchBarProxy();
+                    SureBarTask = mSearchBar.Initialize();
+                    mSearchBar.InfoText = "Search Assets";
+                }
+                else if(SureBarTask.IsCompleted)
+                {
+                    SureBarTask = null;
+                }
+            }
+        }
 
         struct stMenuItem
         {
@@ -156,6 +175,10 @@ namespace EngineNS.EGui.Controls
                 mSearchBar.Width = size.X;
                 if (mSearchBar.OnDraw(ref cmdlist, ref Support.UAnyPointer.Default))
                     FilterText = mSearchBar.SearchText;
+            }
+            else
+            {
+                SureSearchBar();
             }
             if (ImGuiAPI.BeginChild("RightWindow", ref size, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {

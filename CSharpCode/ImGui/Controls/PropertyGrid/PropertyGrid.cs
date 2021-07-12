@@ -42,6 +42,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         protected bool FullRedraw = false;
         public bool Expandable = false;
         public bool Initialized { get; private set; } = false;
+        public int RefCount = 0;
         public bool IsFullRedraw
         {
             get => FullRedraw;
@@ -65,13 +66,27 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             newValue = default;
             return false;
         }
-        public virtual async Task<bool> Initialize() 
+        public async Task<bool> Initialize() 
+        {
+            RefCount++;
+            return await Initialize_Override();
+        }
+        protected virtual async Task<bool> Initialize_Override()
         {
             await EngineNS.Thread.AsyncDummyClass.DummyFunc();
             Initialized = true;
             return true;
         }
-        public virtual void Cleanup() { }
+        public void Cleanup()
+        {
+            RefCount--;
+            if (RefCount <= 0)
+                Cleanup_Override();
+        }
+        protected virtual void Cleanup_Override()
+        {
+
+        }
     }
     public class PGTypeEditorAttribute : PGCustomValueEditorAttribute
     {

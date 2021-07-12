@@ -199,16 +199,16 @@ namespace EngineNS.Graphics.Mesh
             {
                 FullRedraw = false;
             }
-            public override async Task<bool> Initialize()
+            protected override async Task<bool> Initialize_Override()
             {
                 mRNameEditor = new RName.PGRNameAttribute();
                 await mRNameEditor.Initialize();
-                return await base.Initialize();
+                return await base.Initialize_Override();
             }
-            public override void Cleanup()
+            protected override void Cleanup_Override()
             {
                 mRNameEditor?.Cleanup();
-                base.Cleanup();
+                base.Cleanup_Override();
             }
             public override bool OnDraw(in EditorInfo info, out object newValue)
             {

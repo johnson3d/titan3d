@@ -9,7 +9,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     {
         EngineNS.EGui.UIProxy.ImageButtonProxy mImageButton;
 
-        public override async Task<bool> Initialize()
+        protected override async Task<bool> Initialize_Override()
         {
             mImageButton = new UIProxy.ImageButtonProxy()
             {
@@ -22,7 +22,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImageColor = 0xFFFFFFFF,
             };
             await mImageButton.Initialize();
-            return await base.Initialize();
+            return await base.Initialize_Override();
         }
 
         public override bool OnDraw(in EditorInfo info, out object newValue)
@@ -522,7 +522,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
         [System.ThreadStatic]
         DrawData mDrawData = new DrawData();
-        public override async Task<bool> Initialize()
+        protected override async Task<bool> Initialize_Override()
         {
             mComboBox = new UIProxy.ComboBox()
             {
@@ -530,14 +530,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             };
             await mComboBox.Initialize();
 
-            return await base.Initialize();
+            return await base.Initialize_Override();
         }
 
-        public override void Cleanup()
+        protected override void Cleanup_Override()
         {
             mComboBox?.Cleanup();
             mComboBox = null;
-            base.Cleanup();
+            base.Cleanup_Override();
         }
 
         unsafe void ComboOpenAction(ref Support.UAnyPointer drawData)

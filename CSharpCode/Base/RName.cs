@@ -23,7 +23,7 @@ namespace EngineNS
 
             public float MaxWidth = -1;
             public float MinWidth = -1;
-            public override async Task<bool> Initialize()
+            protected override async Task<bool> Initialize_Override()
             {
                 mComboBox = new EGui.UIProxy.ComboBox()
                 {
@@ -40,16 +40,17 @@ namespace EngineNS
                     },
                 };
                 await mContentBrowser.Initialize();
-                return await base.Initialize();
+                return await base.Initialize_Override();
             }
             ~PGRNameAttribute()
             {
                 Cleanup();
             }
-            public override void Cleanup()
+            protected override void Cleanup_Override()
             {
+                mContentBrowser?.Cleanup();
                 mComboBox?.Cleanup();
-                base.Cleanup();
+                base.Cleanup_Override();
             }
             void ComboOpenAction(ref Support.UAnyPointer data)
             {

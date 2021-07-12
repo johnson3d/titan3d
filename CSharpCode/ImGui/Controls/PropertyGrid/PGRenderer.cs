@@ -79,7 +79,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             IndentDec?.Dispose();
             IndentDec = null;
             mDropShadowDec?.Dispose();
-            mDrawTargetDic = null;
+            foreach(var tag in mDrawTargetDic.Values)
+            {
+                foreach(var proDesc in tag.Values)
+                    proDesc.Cleanup();
+            }
+            mDrawTargetDic.Clear();
         }
 
         public async System.Threading.Tasks.Task<bool> Initialize()
