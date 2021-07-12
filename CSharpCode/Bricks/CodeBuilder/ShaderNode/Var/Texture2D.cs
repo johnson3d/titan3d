@@ -88,6 +88,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             Graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<VarNode>.TypeDesc;
         }
+        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        {
+            var Var = new OpUseVar(this.Name, false);
+            return Var;
+        }
     }
     public class Texture2DArray : VarNode
     {
