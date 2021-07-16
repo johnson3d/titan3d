@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CCamera.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UHitproxyShading.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\URenderGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\USceenSpaceProcessor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\UCascadedShadowMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\UShadowMap.cs" />
