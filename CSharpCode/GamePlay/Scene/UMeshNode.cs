@@ -31,6 +31,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public override void OnHitProxyChanged()
         {
+            if (mMesh == null)
+                return;
             if (this.HitProxy == null)
             {
                 mMesh.IsDrawHitproxy = false;
@@ -141,6 +143,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public override void OnNodeLoaded()
         {
+            base.OnNodeLoaded();
+
             var meshData = NodeData as UMeshNodeData;
             if (meshData == null || meshData.MeshName == null)
             {

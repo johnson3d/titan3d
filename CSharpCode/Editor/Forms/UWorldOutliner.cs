@@ -6,10 +6,11 @@ namespace EngineNS.Editor.Forms
 {
     public class UWorldOutliner : UTreeNodeDrawer, Graphics.Pipeline.IRootForm
     {
-        GamePlay.UWorld mWorld;
-        public UWorldOutliner()
+        public GamePlay.UWorld mWorld;
+        public UWorldOutliner(bool regRoot = true)
         {
-            Editor.UMainEditorApplication.RegRootForm(this);
+            if (regRoot)
+                Editor.UMainEditorApplication.RegRootForm(this);
         }
 
         public void Cleanup()
@@ -21,6 +22,7 @@ namespace EngineNS.Editor.Forms
             await EngineNS.Thread.AsyncDummyClass.DummyFunc();
             return true;
         }
+        public string Title { get; set; } = "WorldOutliner";
         public bool Visible { get; set; } = true;
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
@@ -47,20 +49,38 @@ namespace EngineNS.Editor.Forms
             node.Parent = curNode;
             node.Placement.Position = Vector3.UnitXYZ * 2;
         }
-        public unsafe void OnDraw()
+        public unsafe void DrawAsChildWindow(ref Vector2 size)
         {
-            if (Visible == false)
-                return;
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin("WorldOutliner", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (ImGuiAPI.BeginChild(Title, ref size, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.IsWindowDocked())
                 {
                     DockId = ImGuiAPI.GetWindowDockID();
                 }
-                if (mWorld == null)
-                    return;
-                DrawTree(mWorld.Root, 0);
+                if (mWorld != null)
+                {
+                    DrawTree(mWorld.Root, 0);
+                }
+            }
+            if (OnDrawMenu != null)
+                OnDrawMenu();
+            ImGuiAPI.EndChild();
+        }
+        public unsafe void OnDraw()
+        {
+            if (Visible == false)
+                return;
+            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
+            if (ImGuiAPI.Begin(Title, null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                if (ImGuiAPI.IsWindowDocked())
+                {
+                    DockId = ImGuiAPI.GetWindowDockID();
+                }
+                if (mWorld != null)
+                {
+                    DrawTree(mWorld.Root, 0);
+                }
             }
             if (OnDrawMenu != null)
                 OnDrawMenu();

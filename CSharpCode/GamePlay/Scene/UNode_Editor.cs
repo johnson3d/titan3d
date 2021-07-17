@@ -45,8 +45,11 @@ namespace EngineNS.GamePlay.Scene
                     break;
                 case Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent:
                     UEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(this);
-                    HitProxy = Parent.HitProxy;
-                    SetHitProxySubTree(Parent.HitProxy);
+                    if (Parent != null)
+                    {
+                        HitProxy = Parent.HitProxy;
+                        SetHitProxySubTree(Parent.HitProxy);
+                    }
                     break;
             }
         }
