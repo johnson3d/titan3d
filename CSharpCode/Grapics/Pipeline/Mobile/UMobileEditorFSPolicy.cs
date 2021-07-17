@@ -56,7 +56,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             var gpuProgram = drawcall.Effect.ShaderProgram;
             var index = drawcall.mCoreObject.FindSRVIndex("gBaseSceneView");
-            drawcall.mCoreObject.BindSRVAll(index, Manager.GBuffers.GBufferSRV[0].mCoreObject);
+            drawcall.mCoreObject.BindSRVAll(index, Manager.GetBasePassNode().GBuffers.GBufferSRV[0].mCoreObject);
             //drawcall.mCoreObject.BindSRVAll(index, Manager.InputShaderResourceViews[0].SRV.mCoreObject);
 
             index = drawcall.mCoreObject.FindSRVIndex("gPickedTex");
@@ -207,7 +207,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             {
                 mShadowMapNode.TickLogic(app.GetWorldViewportSlate().World, this, true);
 
-                var cBuffer = GBuffers.PerViewportCBuffer;
+                var cBuffer = BasePassNode.GBuffers.PerViewportCBuffer;
                 if (cBuffer != null)
                 {
                     cBuffer.SetValue(cBuffer.PerViewportIndexer.gFadeParam, ref mShadowMapNode.mFadeParam);
@@ -280,8 +280,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             PickHollowNode?.TickSync();
 
             EditorFinalNode.TickSync();
-
-            GBuffers?.Camera?.mCoreObject.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
         }
     }
 }

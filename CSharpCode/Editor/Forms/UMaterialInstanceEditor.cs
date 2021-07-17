@@ -47,7 +47,7 @@ namespace EngineNS.Editor.Forms
 
             await viewport.RenderPolicy.Initialize(1, 1);
 
-            (viewport as Bricks.CodeBuilder.ShaderNode.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GBuffers.Camera;
+            (viewport as Bricks.CodeBuilder.ShaderNode.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GetBasePassNode().GBuffers.Camera;
 
             var materials = new Graphics.Pipeline.Shader.UMaterial[1];
             materials[0] = Material;
@@ -68,7 +68,7 @@ namespace EngineNS.Editor.Forms
             BoundingSphere sphere;
             sphere.Center = aabb.GetCenter();
             sphere.Radius = radius;
-            policy.GBuffers.Camera.AutoZoom(ref sphere);
+            policy.GetBasePassNode().GBuffers.Camera.AutoZoom(ref sphere);
             //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SunLightDirection = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);

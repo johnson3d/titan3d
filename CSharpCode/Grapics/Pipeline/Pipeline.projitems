@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CCamera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\UBasePassNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UHitproxyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickedProxiableManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickBlurNode.cs" />

@@ -142,13 +142,12 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             CodeName = RName.GetRName("shaders/ShadingEnv/Mobile/MobileOpaque.cginc", RName.ERNameType.Engine);
         }
     }
-
-    public class UBasePassNode : Common.URenderGraphNode
+    public class UMobileBasePassNode : Common.UBasePassNode
     {
         public UBasePassOpaque mBasePassShading;
         public UPassDrawBuffers BasePass = new UPassDrawBuffers();
         public RenderPassDesc PassDesc = new RenderPassDesc();
-        public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
+        
         public async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
         {
             await Thread.AsyncDummyClass.DummyFunc();

@@ -6,18 +6,15 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 {
     public class UMobileFSPolicy : IRenderPolicy
     {
-        public override UGraphicsBuffers GBuffers 
-        {
-            get
-            {
-                return BasePassNode.GBuffers;
-            }
+        public override Common.UBasePassNode GetBasePassNode() 
+        { 
+            return BasePassNode; 
         }
-        public UBasePassNode BasePassNode = new UBasePassNode();
+        public UMobileBasePassNode BasePassNode = new UMobileBasePassNode();
         public RHI.CShaderResourceView EnvMapSRV;
         public override RHI.CShaderResourceView GetFinalShowRSV()
         {
-            return GBuffers.GBufferSRV[0];
+            return BasePassNode.GBuffers.GBufferSRV[0];
         }
 
         public override async System.Threading.Tasks.Task Initialize(float x, float y)

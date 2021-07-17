@@ -72,7 +72,7 @@ namespace EngineNS.Editor.Forms
 
             await viewport.RenderPolicy.Initialize(1, 1);
 
-            (viewport as EGui.Slate.UWorldViewportSlate).CameraController.Camera = viewport.RenderPolicy.GBuffers.Camera;
+            (viewport as EGui.Slate.UWorldViewportSlate).CameraController.Camera = viewport.RenderPolicy.GetBasePassNode().GBuffers.Camera;
 
             Scene.Parent = PreviewViewport.World.Root;
         }

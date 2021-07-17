@@ -31,8 +31,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             PickedBuffer.SwapChainIndex = -1;
             PickedBuffer.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
             PickedBuffer.CreateGBuffer(0, EPixelFormat.PXF_R16G16_FLOAT, (uint)x, (uint)y);
-            PickedBuffer.TargetViewIdentifier = policy.GBuffers.TargetViewIdentifier;
-            PickedBuffer.Camera = policy.GBuffers.Camera;
+            PickedBuffer.TargetViewIdentifier = policy.GetBasePassNode().GBuffers.TargetViewIdentifier;
+            PickedBuffer.Camera = policy.GetBasePassNode().GBuffers.Camera;
 
             PassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionClear;
             PassDesc.mFBStoreAction_Color = FrameBufferStoreAction.StoreActionStore;

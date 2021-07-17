@@ -41,7 +41,7 @@ namespace EngineNS.Editor.Forms
 
             await viewport.RenderPolicy.Initialize(1, 1);
 
-            (viewport as Bricks.CodeBuilder.ShaderNode.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GBuffers.Camera;
+            (viewport as Bricks.CodeBuilder.ShaderNode.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GetBasePassNode().GBuffers.Camera;
 
             var mesh = new Graphics.Mesh.UMesh();
 
@@ -57,7 +57,7 @@ namespace EngineNS.Editor.Forms
             BoundingSphere sphere;
             sphere.Center = aabb.GetCenter();
             sphere.Radius = radius;
-            policy.GBuffers.Camera.AutoZoom(ref sphere);
+            policy.GetBasePassNode().GBuffers.Camera.AutoZoom(ref sphere);
         }
         public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {

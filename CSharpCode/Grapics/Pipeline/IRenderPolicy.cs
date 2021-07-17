@@ -17,8 +17,8 @@ namespace EngineNS.Graphics.Pipeline
         //TagObject通常用来处理ShadingEnv.OnDrawCall的特殊参数设置
         //public Common.URenderGraphNode TagObject;
         public object TagObject;
-
-        public virtual UGraphicsBuffers GBuffers { get; }
+        public virtual Common.UBasePassNode GetBasePassNode() { return null; }
+        //public virtual UGraphicsBuffers GBuffers { get; }
         public List<Mesh.UMesh> VisibleMeshes = new List<Mesh.UMesh>();
         public virtual Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom) { return null; }
         public virtual void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom) 

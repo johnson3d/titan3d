@@ -34,7 +34,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             await RenderPolicy.Initialize(1, 1);
 
-            CameraController.Camera = RenderPolicy.GBuffers.Camera;
+            CameraController.Camera = RenderPolicy.GetBasePassNode().GBuffers.Camera;
 
             var materials = new Graphics.Pipeline.Shader.UMaterial[1];
             materials[0] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("utest/ttt.material"));

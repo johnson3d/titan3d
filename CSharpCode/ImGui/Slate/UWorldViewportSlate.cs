@@ -50,7 +50,7 @@ namespace EngineNS.EGui.Slate
 
             await RenderPolicy.Initialize(1, 1);
 
-            CameraController.Camera = RenderPolicy.GBuffers.Camera;
+            CameraController.Camera = RenderPolicy.GetBasePassNode().GBuffers.Camera;
         }
         public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
         {
@@ -186,7 +186,7 @@ namespace EngineNS.EGui.Slate
             }
 
             mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
-            mVisParameter.CullCamera = RenderPolicy.GBuffers.Camera;
+            mVisParameter.CullCamera = RenderPolicy.GetBasePassNode().GBuffers.Camera;
             World.GatherVisibleMeshes(mVisParameter);
 
             if (mWorldBoundShapes != null)

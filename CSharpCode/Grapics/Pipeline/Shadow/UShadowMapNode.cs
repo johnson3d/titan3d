@@ -115,7 +115,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         {
             mDirLightDirection = world.DirectionLight.mDirection;
 
-            var ViewerCamera = policy.GBuffers.Camera;
+            var ViewerCamera = policy.GetBasePassNode().GBuffers.Camera;
             //calculate viewer camera frustum bounding sphere and shadow camera data;
             float HalfFoV = ViewerCamera.mCoreObject.mFov * 0.5f;
             float zNear = ViewerCamera.mCoreObject.mZNear;
