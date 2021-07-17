@@ -36,7 +36,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>();
             EnvMapSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/default_envmap.srv"));
-            mBasePassShading.EnvMapSRV = EnvMapSRV;
+            //mBasePassShading.EnvMapSRV = EnvMapSRV;
         }
         public override void OnResize(float x, float y)
         {

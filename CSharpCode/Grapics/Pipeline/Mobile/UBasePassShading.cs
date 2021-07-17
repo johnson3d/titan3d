@@ -8,8 +8,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 {
     public class UBasePassShading : Shader.UShadingEnv
     {
-        public RHI.CShaderResourceView EnvMapSRV;
-        public RHI.CShaderResourceView mShadowMapSRV;
         public UBasePassShading()
         {
             var disable_AO = new MacroDefine();//0
@@ -118,20 +116,22 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             var indexer = GetVarIndexer(drawcall);
 
-            if (EnvMapSRV != null)
+            var mobilePolicy = policy as Mobile.UMobileEditorFSPolicy;
+
+            if (mobilePolicy.EnvMapSRV != null)
             {
-                drawcall.mCoreObject.BindSRVAll(indexer.gEnvMap, EnvMapSRV.mCoreObject);
+                drawcall.mCoreObject.BindSRVAll(indexer.gEnvMap, mobilePolicy.EnvMapSRV.mCoreObject);
 
                 if (PerShadingCBuffer != null)
                 {
-                    float gEnvMapMaxMipLevel = EnvMapSRV.PicDesc.MipLevel - 1;
+                    float gEnvMapMaxMipLevel = mobilePolicy.EnvMapSRV.PicDesc.MipLevel - 1;
                     PerShadingCBuffer.SetValue(indexer.gEnvMapMaxMipLevel, ref gEnvMapMaxMipLevel);
                 }
             }
 
-            if (mShadowMapSRV != null)
+            if (mobilePolicy.mShadowMapNode.GBuffers.DepthStencilSRV != null)
             {
-                drawcall.mCoreObject.BindSRVAll(indexer.gShadowMap, mShadowMapSRV.mCoreObject);
+                drawcall.mCoreObject.BindSRVAll(indexer.gShadowMap, mobilePolicy.mShadowMapNode.GBuffers.DepthStencilSRV.mCoreObject);
             }
         }
     }
@@ -143,76 +143,33 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
     }
 
-    //public class UBasePassTerrain : UBasePassShading
-    //{
-    //    public UBasePassTerrain()
-    //    {
-    //        CodeName = RName.GetRName("shaders/ShadingEnv/Mobile/heightmap.cginc", RName.ERNameType.Engine);
-    //    }
-    //    public class UTerrainAttachment : Mesh.UMesh.UMeshAttachment
-    //    {
-    //        public override UShadingEnv GetPassShading(IRenderPolicy.EShadingType type, UMesh mesh)
-    //        {
-    //            switch (type)
-    //            {
-    //                case Pipeline.IRenderPolicy.EShadingType.BasePass:
-    //                    return UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassTerrain>();
-    //            }
-    //            return null;
-    //        }
-    //        public RHI.CShaderResourceView HeightMapRSV { get; set; }
-    //    }
-    //    public class TerrainVarIndexer : UBasePassShading.VarIndexer
-    //    {
-    //        [RHI.CShaderProgram.ShaderVar(VarType = "Texture")]
-    //        public uint HeightMapTexture;
-    //        [RHI.CShaderProgram.ShaderVar(VarType = "Var", CBuffer = "cbPerShadingEnv")]
-    //        public int StartPosition;
-    //        [RHI.CShaderProgram.ShaderVar(VarType = "Var", CBuffer = "cbPerShadingEnv")]
-    //        public int GridSize;
-    //        [RHI.CShaderProgram.ShaderVar(VarType = "Var", CBuffer = "cbPerShadingEnv")]
-    //        public int HeightStep;
-    //        [RHI.CShaderProgram.ShaderVar(VarType = "Var", CBuffer = "cbPerShadingEnv")]
-    //        public int UVStep;
-    //    }
-    //    protected override VarIndexer GetVarIndexer(RHI.CDrawCall drawcall)
-    //    {
-    //        VarIndexer indexer = (VarIndexer)drawcall.Effect.TagObject;
-    //        if (drawcall.Effect.TagObject == null)
-    //        {
-    //            indexer = new TerrainVarIndexer();
-    //            indexer.UpdateIndex(drawcall.Effect.ShaderProgram);
-    //            drawcall.Effect.TagObject = indexer;
-    //        }
-    //        return indexer;
-    //    }
-    //    public static float GridSize = 1.0f;
-    //    public static float HeightStep = 0.01f;
-    //    public override void OnBuildDrawCall(RHI.CDrawCall drawcall)
-    //    {
-    //        base.OnBuildDrawCall(drawcall);
-    //        var indexer = GetVarIndexer(drawcall) as TerrainVarIndexer;
-    //        if (indexer.cbPerShadingEnv != 0xFFFFFFFF && PerShadingCBuffer != null)
-    //        {
-    //            PerShadingCBuffer.SetValue(indexer.GridSize, ref GridSize);
-    //            PerShadingCBuffer.SetValue(indexer.HeightStep, ref HeightStep);
-    //            Vector2 uvStep = new Vector2(1.0f / 128.0f); 
-    //            PerShadingCBuffer.SetValue(indexer.UVStep, ref uvStep);
-    //            Vector3 startPosition = new Vector3(0);
-    //            PerShadingCBuffer.SetValue(indexer.StartPosition, ref startPosition);
-    //        }
-    //    }
-    //    public unsafe override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, UMobileFSPolicy policy, Mesh.UMesh mesh)
-    //    {
-    //        base.OnDrawCall(shadingType, drawcall, policy, mesh);
-    //        var indexer = GetVarIndexer(drawcall) as TerrainVarIndexer;
+    public class UBasePassNode : Common.URenderGraphNode
+    {
+        public UBasePassOpaque mBasePassShading;
+        public UPassDrawBuffers BasePass = new UPassDrawBuffers();
+        public RenderPassDesc PassDesc = new RenderPassDesc();
+        public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
+        public virtual void Cleanup()
+        {
+            GBuffers?.Cleanup();
+            GBuffers = null;
+        }
+        public virtual void OnResize(float x, float y)
+        {
+        }
+        public virtual void TickLogic(IRenderPolicy policy)
+        {
 
-    //        var terrainAttachement = mesh.Tag as UTerrainAttachment;
+        }
+        public virtual void TickRender(IRenderPolicy policy)
+        {
 
-    //        if (terrainAttachement.HeightMapRSV != null)
-    //            drawcall.mCoreObject.BindSRVAll(indexer.HeightMapTexture, terrainAttachement.HeightMapRSV.mCoreObject);
-    //    }
-    //}
+        }
+        public virtual void TickSync(IRenderPolicy policy)
+        {
+
+        }
+    }
 }
 
 namespace EngineNS.UTest

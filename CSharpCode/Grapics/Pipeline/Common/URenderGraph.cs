@@ -36,10 +36,10 @@ namespace EngineNS.Graphics.Pipeline.Common
     {
         public Thread.Async.IJobSystem JobSystem { get; set; }
         public Thread.Async.EJobState JobState { get; set; }
-        public URenderGraphBuffer[] InputGpuBuffers { get; }
-        public URenderGraphSRV[] InputShaderResourceViews { get; }
-        public URenderGraphBuffer[] OutputGpuBuffers { get; }
-        public URenderGraphSRV[] OutputShaderResourceViews { get; }
+        public URenderGraphBuffer[] InputGpuBuffers { get; set; }
+        public URenderGraphSRV[] InputShaderResourceViews { get; set; }
+        public URenderGraphBuffer[] OutputGpuBuffers { get; set; }
+        public URenderGraphSRV[] OutputShaderResourceViews { get; set; }
         public virtual void DoWork()
         {
 

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class USceenSpaceProcessor
+    public class USceenSpaceNode : URenderGraphNode
     {
         public Graphics.Mesh.UMesh ScreenMesh;
         public Shader.CommanShading.UBasePassPolicy ScreenDrawPolicy;

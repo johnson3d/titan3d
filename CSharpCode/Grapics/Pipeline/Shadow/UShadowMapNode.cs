@@ -11,7 +11,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/SSM.cginc", RName.ERNameType.Engine);
         }
     }
-    public class UShadowMap
+    public class UShadowMapNode : Shader.UShadingEnv
     {
         public GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
         public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
