@@ -26,8 +26,8 @@ namespace EngineNS.EGui.Controls
         }
         public string ExtName
         {
-            get => mContentBrowser.ExtName;
-            set => mContentBrowser.ExtName = value;
+            get => mContentBrowser.ExtNames;
+            set => mContentBrowser.ExtNames = value;
         }
         ContentBrowser mContentBrowser;
         public UAssetSelector()

@@ -16,7 +16,7 @@ namespace EngineNS.EGui.Controls
 
         public string Name = "";
         public bool CreateNewAssets = true;
-        public string ExtName = null;
+        public string ExtNames = null;
         public string FilterText = "";
         public static IO.IAssetMeta GlobalSelectedAsset = null;
         public IO.IAssetMeta SelectedAsset = null;
@@ -174,10 +174,20 @@ namespace EngineNS.EGui.Controls
                 {
                     var file = files[i];
                     var name = IO.FileManager.GetPureName(file);
-                    if (!string.IsNullOrEmpty(ExtName))
+                    if (!string.IsNullOrEmpty(ExtNames))
                     {
+                        var splits = ExtNames.Split(',');
                         var ext = IO.FileManager.GetExtName(name);
-                        if (!string.Equals(ext, ExtName, StringComparison.OrdinalIgnoreCase))
+                        bool find = false;
+                        for(int extIdx = 0; extIdx < splits.Length; extIdx++)
+                        {
+                            if (string.Equals(ext, splits[extIdx], StringComparison.OrdinalIgnoreCase))
+                            {
+                                find = true;
+                                break;
+                            }
+                        }
+                        if (!find)
                             continue;
                     }
 
