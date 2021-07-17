@@ -149,6 +149,30 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public UPassDrawBuffers BasePass = new UPassDrawBuffers();
         public RenderPassDesc PassDesc = new RenderPassDesc();
         public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
+        public async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
+        {
+            await Thread.AsyncDummyClass.DummyFunc();
+
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            BasePass.Initialize(rc);
+
+            GBuffers.SwapChainIndex = -1;
+            GBuffers.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
+            GBuffers.CreateGBuffer(0, EPixelFormat.PXF_R16G16B16A16_FLOAT, (uint)x, (uint)y);
+            GBuffers.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
+
+            PassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionClear;
+            PassDesc.mFBStoreAction_Color = FrameBufferStoreAction.StoreActionStore;
+            PassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
+            PassDesc.mFBLoadAction_Depth = FrameBufferLoadAction.LoadActionClear;
+            PassDesc.mFBStoreAction_Depth = FrameBufferStoreAction.StoreActionStore;
+            PassDesc.mDepthClearValue = 1.0f;
+            PassDesc.mFBLoadAction_Stencil = FrameBufferLoadAction.LoadActionClear;
+            PassDesc.mFBStoreAction_Stencil = FrameBufferStoreAction.StoreActionStore;
+            PassDesc.mStencilClearValue = 0u;
+
+            mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>();
+        }
         public virtual void Cleanup()
         {
             GBuffers?.Cleanup();
@@ -156,18 +180,51 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public virtual void OnResize(float x, float y)
         {
+            if (GBuffers != null)
+            {
+                GBuffers.OnResize(x, y);
+            }
         }
         public virtual void TickLogic(IRenderPolicy policy)
         {
+            BasePass.ClearMeshDrawPassArray();
+            BasePass.SetViewport(GBuffers.ViewPort);
 
+            foreach (var i in policy.VisibleMeshes)
+            {
+                if (i.Atoms == null)
+                    continue;
+
+                if (i.HostNode != null)
+                {
+                    mBasePassShading.SetDisableShadow(!i.HostNode.IsAcceptShadow);
+                }
+
+                for (int j = 0; j < i.Atoms.Length; j++)
+                {
+                    var drawcall = i.GetDrawCall(GBuffers, j, policy, IRenderPolicy.EShadingType.BasePass);
+                    if (drawcall != null)
+                    {
+                        GBuffers.SureCBuffer(drawcall.Effect, "UMobileEditorFSPolicy");
+                        drawcall.BindGBuffer(GBuffers);
+
+                        var layer = i.Atoms[j].Material.RenderLayer;
+                        BasePass.PushDrawCall(layer, drawcall);
+                    }
+                }
+            }
+
+            BasePass.BuildRenderPass(ref PassDesc, GBuffers.FrameBuffers);
         }
         public virtual void TickRender(IRenderPolicy policy)
         {
-
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            BasePass.Commit(rc);
         }
         public virtual void TickSync(IRenderPolicy policy)
         {
-
+            BasePass.SwapBuffer();
+            GBuffers?.Camera?.mCoreObject.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
         }
     }
 }

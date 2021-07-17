@@ -135,8 +135,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             EditorFinalNode.ScreenDrawPolicy.TagObject = this;
 
             mShadowMapNode.Initialize(x, y);
-
-            //mBasePassShading.mShadowMapSRV = mShadowMap.GBuffers.DepthStencilSRV;
         }
         public override void OnResize(float x, float y)
         {
@@ -186,7 +184,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                                 break;
                         }
                     }
-                    return mBasePassShading;
+                    return BasePassNode.mBasePassShading;
                 case EShadingType.DepthPass:
                     return mShadowMapNode.mShadowShading;
                 case EShadingType.HitproxyPass:
@@ -231,34 +229,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 }
             }
 
-            BasePass.ClearMeshDrawPassArray();
-            BasePass.SetViewport(GBuffers.ViewPort);
-
-            foreach (var i in VisibleMeshes)
-            {
-                if (i.Atoms == null)
-                    continue;
-
-                if (i.HostNode != null)
-                {
-                    mBasePassShading.SetDisableShadow(!i.HostNode.IsAcceptShadow);                   
-                }
-                
-                for (int j = 0; j < i.Atoms.Length; j++)
-                {
-                    var drawcall = i.GetDrawCall(GBuffers, j, this, EShadingType.BasePass);
-                    if (drawcall != null)
-                    {
-                        GBuffers.SureCBuffer(drawcall.Effect, "UMobileEditorFSPolicy");
-                        drawcall.BindGBuffer(GBuffers);
-
-                        var layer = i.Atoms[j].Material.RenderLayer;
-                        BasePass.PushDrawCall(layer, drawcall);
-                    }
-                }
-            }
-
-            BasePass.BuildRenderPass(ref PassDesc, GBuffers.FrameBuffers);
+            BasePassNode.TickLogic(this);
 
             HitproxyNode.TickLogic(this);
 
@@ -278,8 +249,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 mShadowMapNode.TickRender();
             }
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Commit(rc);
+            BasePassNode.TickRender(this);
 
             HitproxyNode.TickRender(this);
 
@@ -299,7 +269,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 mShadowMapNode.TickSync();
             }
 
-            BasePass.SwapBuffer();
+            BasePassNode.TickSync(this);
 
             HitproxyNode.TickSync(this);
 

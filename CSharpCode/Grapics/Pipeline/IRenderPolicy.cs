@@ -18,7 +18,7 @@ namespace EngineNS.Graphics.Pipeline
         //public Common.URenderGraphNode TagObject;
         public object TagObject;
 
-        public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
+        public virtual UGraphicsBuffers GBuffers { get; }
         public List<Mesh.UMesh> VisibleMeshes = new List<Mesh.UMesh>();
         public virtual Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom) { return null; }
         public virtual void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom) 
@@ -33,8 +33,6 @@ namespace EngineNS.Graphics.Pipeline
         public virtual void Cleanup()
         {
             VisibleMeshes.Clear();
-            GBuffers?.Cleanup();
-            GBuffers = null;
         }
         public virtual void TickLogic()
         {
