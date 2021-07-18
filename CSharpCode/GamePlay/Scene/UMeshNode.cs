@@ -231,5 +231,26 @@ namespace EngineNS.GamePlay.Scene
                 
             return true;
         }
+
+        Graphics.Mesh.CMeshDataProvider mMeshDataProvider;
+        public Graphics.Mesh.CMeshDataProvider MeshDataProvider
+        {
+            get => mMeshDataProvider;
+            set => mMeshDataProvider = value;
+        }
+        public unsafe override bool OnLineCheckTriangle(in Vector3 start, in Vector3 end, ref VHitResult result)
+        {
+            if (mMeshDataProvider == null)
+                return false;
+
+            fixed(Vector3* pStart = &start)
+            fixed (Vector3* pEnd = &end)
+            fixed (VHitResult* pResult = &result)
+            {
+                if (-1 != mMeshDataProvider.mCoreObject.IntersectTriangle(pStart, pEnd, pResult))
+                    return true;
+                return false;
+            }
+        }
     }
 }

@@ -7,6 +7,8 @@
 #include "../IDrawCall.h"
 #include "../../Bricks/Animation/Skeleton/IPartialSkeleton.h"
 
+struct VHitResult;
+
 NS_BEGIN
 
 class XndAttribute;
@@ -34,6 +36,7 @@ public:
 	vBOOL LoadXnd(IRenderContext* rc, const char* name, XndHolder* xnd, bool isLoad);
 	TR_FUNCTION()
 	void Save2Xnd(IRenderContext* rc, XndNode* node);
+
 	vBOOL RefreshResource(IRenderContext* rc, const char* name, XndNode* node);
 	virtual void InvalidateResource() override;
 	virtual vBOOL RestoreResource() override;
@@ -135,6 +138,8 @@ public:
 	TR_FUNCTION()
 	vBOOL Init(DWORD streams, EIndexBufferType ibType, int atom);
 
+	vBOOL LoadFromMeshPrimitive(XndHolder* xnd, DWORD streams);
+	
 	TR_FUNCTION()
 	void GetAABB(v3dxBox3* box) {
 		*box = mAABB;
@@ -175,7 +180,7 @@ public:
 	TR_FUNCTION()
 	vBOOL GetAtomTriangle(UINT atom, UINT index, UINT* vA, UINT* vB, UINT* vC);
 	TR_FUNCTION()
-	int IntersectTriangle(const v3dxVector3* vStart, const v3dxVector3* vEnd, float* dist);
+	int IntersectTriangle(const v3dxVector3* vStart, const v3dxVector3* vEnd, VHitResult* result);
 	TR_FUNCTION()
 	void* GetVertexPtr(EVertexSteamType stream, UINT index);
 

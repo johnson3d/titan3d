@@ -37,6 +37,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)ImGuiViewport.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImGuiWindowClass.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxFrustum.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VHitResult.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)VNameString.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/BigStackBuffer.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/BUFFEREX_SRV.cpp2cs.cpp" />

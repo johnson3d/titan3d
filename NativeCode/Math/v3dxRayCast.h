@@ -5,21 +5,21 @@
 
 #pragma pack(push,1)
 
-struct VHitResult
+struct TR_CLASS(SV_LayoutStruct = 8)
+VHitResult
 {
-	DWORD HitFlags;
-	DWORD GroupData;
+	v3dxVector3 Position;
+	UINT HitFlags;
+
+	v3dxVector3 Normal;	
+	UINT GroupData;
 	
-	DWORD Reserved;
-	float Distance;
-	
-	int FaceId;
 	float U;
 	float V;
 	
-	v3dxVector3 Position;
-	v3dxVector3 Normal;
-	
+	float Distance;	
+	int FaceId;
+
 	void* ExtData;
 };
 

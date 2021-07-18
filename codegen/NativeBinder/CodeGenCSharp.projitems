@@ -68,6 +68,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiWindowClass.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiWindowFlags_.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)v3dxFrustum.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VHitResult.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VNameString.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/BigStackBuffer.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/BUFFEREX_SRV.cpp2cs.cs" />
