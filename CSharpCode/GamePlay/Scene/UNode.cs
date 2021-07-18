@@ -445,6 +445,46 @@ namespace EngineNS.GamePlay.Scene
                 Parent.UpdateAABB();
             }
         }
+        public bool LineCheck(in Vector3 start, in Vector3 end, ref VHitResult result)
+        {
+            float Near, Far;
+            Vector3 vNear = new Vector3();
+            Vector3 vFar = new Vector3();
+            var localStart = Vector3.TransformCoordinate(start, Placement.AbsTransformInv);
+            var localEnd = Vector3.TransformCoordinate(end, Placement.AbsTransformInv);
+            unsafe
+            {
+                fixed(BoundingBox* pBox = &AABB)
+                {
+                    var dir = localEnd - localStart;
+                    if (IDllImportApi.v3dxLineIntersectBox3(&Near, &vNear, &Far, &vFar, &localStart, &dir, pBox) == 0)
+                    {
+                        return false;
+                    }
+                    if (OnLineCheckTriangle(in start, in end, ref result))
+                    {
+                        //result.Position = Vector3.TransformCoordinate(vNear, Placement.AbsTransform);
+                        return true;
+                    }
+                    else
+                    {
+                        foreach (var i in Children)
+                        {
+                            if (i.LineCheck(in start, in end, ref result) == true)
+                            {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                }
+            }
+        }
+        public virtual bool OnLineCheckTriangle(in Vector3 start, in Vector3 end, ref VHitResult result)
+        {
+            //todo: perface test            
+            return false;
+        }
         #endregion
 
         public virtual void OnGatherVisibleMeshes(UWorld.UVisParameter rp)

@@ -111,6 +111,7 @@ namespace EngineNS.RHI
             {
                 mDir = dir;
                 mDesc.Desc.SetDefault();
+                var noused = PGAsset.Initialize();
                 PGAsset.Target = mDesc;
             }
             public override unsafe void OnDraw(EGui.Controls.ContentBrowser ContentBrowser)
@@ -610,6 +611,8 @@ namespace EngineNS.RHI
         }
         public async System.Threading.Tasks.Task<CShaderResourceView> GetTexture(RName rn, int mipLevel = 1)
         {
+            if (rn == null)
+                return null;
             CShaderResourceView srv;
             IO.IStreaming result;
             if (StreamingAssets.TryGetValue(rn, out result))
@@ -636,6 +639,8 @@ namespace EngineNS.RHI
         }
         public CShaderResourceView TryGetTexture(RName rn)
         {
+            if (rn == null)
+                return null;
             CShaderResourceView srv;
             IO.IStreaming result;
             if (StreamingAssets.TryGetValue(rn, out result))

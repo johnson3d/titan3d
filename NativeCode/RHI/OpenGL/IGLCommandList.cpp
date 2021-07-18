@@ -48,7 +48,7 @@ void IGLCommandList::EndCommand()
 	ICommandList::EndCommand();
 }
 
-void IGLCommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer)
+void IGLCommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer, const char* debugName)
 {
 	if (pRenderPassDesc == nullptr)
 		return;

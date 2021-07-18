@@ -14,7 +14,7 @@ namespace EngineNS.Editor.Forms
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public Graphics.Mesh.CMeshPrimitives Mesh;
-        public Bricks.CodeBuilder.ShaderNode.UPreviewViewport PreviewViewport = new Bricks.CodeBuilder.ShaderNode.UPreviewViewport();
+        public Editor.UPreviewViewport PreviewViewport = new Editor.UPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~UMeshPrimitiveEditor()
         {
@@ -42,7 +42,7 @@ namespace EngineNS.Editor.Forms
 
             await viewport.RenderPolicy.Initialize(1, 1);
 
-            (viewport as Bricks.CodeBuilder.ShaderNode.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GBuffers.Camera;
+            (viewport as Editor.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GetBasePassNode().GBuffers.Camera;
 
             var materials = new Graphics.Pipeline.Shader.UMaterial[Mesh.mCoreObject.GetAtomNumber()];
             for (int i = 0; i < materials.Length; i++)
@@ -54,8 +54,11 @@ namespace EngineNS.Editor.Forms
             var ok = mesh.Initialize(Mesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
-                mesh.SetWorldMatrix(ref Matrix.mIdentity);
-                viewport.RenderPolicy.VisibleMeshes.Add(mesh);
+                var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, Vector3.Zero, Vector3.One, Quaternion.Identity);
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.NodeData.Name = "PreviewObject";
+                meshNode.IsScaleChildren = false;
+                meshNode.IsCastShadow = true;
             }
 
             var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
@@ -63,7 +66,7 @@ namespace EngineNS.Editor.Forms
             BoundingSphere sphere;
             sphere.Center = aabb.GetCenter();
             sphere.Radius = radius;
-            policy.GBuffers.Camera.AutoZoom(ref sphere);
+            policy.GetBasePassNode().GBuffers.Camera.AutoZoom(ref sphere);
         }
         public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {

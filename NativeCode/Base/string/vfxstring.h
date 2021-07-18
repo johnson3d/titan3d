@@ -83,6 +83,32 @@ public:
 		}
 		return elems;
 	}
+
+	static std::string wstrtostr(const std::wstring& wstr)
+	{
+		std::setlocale(LC_CTYPE, "");
+		const wchar_t* wcstr = wstr.c_str();
+		std::size_t wcstrlen = std::wcstombs(nullptr, wcstr, 0) + 1;
+		char* cstr = new char[wcstrlen];
+		std::memset(cstr, 0, wcstrlen);
+		std::wcstombs(cstr, wcstr, wcstrlen);
+		std::string str(cstr);
+		delete[]cstr;
+		return str;
+	}
+
+	static std::wstring strtowstr(const std::string& str)
+	{
+		std::setlocale(LC_CTYPE, "");
+		const char* cstr = str.c_str();
+		std::size_t cstrlen = std::mbstowcs(nullptr, cstr, 0) + 1;
+		wchar_t* wcstr = new wchar_t[cstrlen];
+		std::wmemset(wcstr, 0, cstrlen);
+		std::mbstowcs(wcstr, cstr, cstrlen);
+		std::wstring wstr(wcstr);
+		delete[]wcstr;
+		return wstr;
+	}
 };
 
 

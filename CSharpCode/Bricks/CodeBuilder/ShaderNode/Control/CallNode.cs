@@ -25,7 +25,16 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             sin = (float)Math.Sin(x);
             cos = (float)Math.Cos(x);
         }
-        
+        [Rtti.Meta]
+        public static void Max(float v1, float v2, out float ret)
+        {
+            ret = Math.Max(v1, v2);
+        }
+        [Rtti.Meta]
+        public static void Min(float v1, float v2, out float ret)
+        {
+            ret = Math.Min(v1, v2);
+        }
     }
     public class UserCallNodeAttribute : Attribute
     {

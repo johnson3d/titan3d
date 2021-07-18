@@ -4,6 +4,7 @@
 #include "../IShaderResourceView.h"
 #include "../../Base/thread/vfxthread.h"
 #include "../../Base/xnd/vfxxnd.h"
+#include "../../Math/v3dxRayCast.h"
 
 #define new VNEW
 
@@ -891,6 +892,11 @@ vBOOL IMeshDataProvider::Init(DWORD streams, EIndexBufferType ibType, int atom)
 	return TRUE;
 }
 
+vBOOL IMeshDataProvider::LoadFromMeshPrimitive(XndHolder* xnd, DWORD streams)
+{
+	return FALSE;
+}
+
 UINT IMeshDataProvider::GetVertexNumber() const
 {
 	return VertexNumber;
@@ -1022,7 +1028,7 @@ vBOOL IMeshDataProvider::GetTriangle(int index, UINT* vA, UINT* vB, UINT* vC)
 	}
 }
 
-int IMeshDataProvider::IntersectTriangle(const v3dxVector3* vStart, const v3dxVector3* vEnd, float* closedDist)
+int IMeshDataProvider::IntersectTriangle(const v3dxVector3* vStart, const v3dxVector3* vEnd, VHitResult* result)
 {
 	auto pPos = (v3dxVector3*)mVertexBuffers[VST_Position]->GetData();
 	v3dxVector3 dir = *vEnd - *vStart;
@@ -1031,7 +1037,7 @@ int IMeshDataProvider::IntersectTriangle(const v3dxVector3* vStart, const v3dxVe
 	case EngineNS::IBT_Int16:
 	{
 		int triangle = -1;
-		*closedDist = FLT_MAX;
+		float closedDist = FLT_MAX;
 		auto pIndices = (USHORT*)IndexBuffer->GetData();
 		int count = IndexBuffer->GetSize() / (sizeof(USHORT)*3);
 		for (int i = 0; i < count; i++)
@@ -1042,10 +1048,16 @@ int IMeshDataProvider::IntersectTriangle(const v3dxVector3* vStart, const v3dxVe
 			float u, v, dist;
 			if (v3dxIntersectTri(&pPos[ia], &pPos[ib], &pPos[ic], vStart, &dir, &u, &v, &dist))
 			{
-				if (dist < *closedDist)
+				if (dist < closedDist)
 				{
-					*closedDist = dist;
+					closedDist = dist;
 					triangle = i;
+					result->Distance = dist;
+					result->FaceId = i;
+					result->Position = (*vStart) + dir * dist;
+					v3dxCalcNormal(&result->Normal, &pPos[ia], &pPos[ib], &pPos[ic]);
+					result->U = u;
+					result->V = v;
 				}
 			}
 		}
@@ -1054,7 +1066,7 @@ int IMeshDataProvider::IntersectTriangle(const v3dxVector3* vStart, const v3dxVe
 	case EngineNS::IBT_Int32:
 	{
 		int triangle = -1;
-		*closedDist = FLT_MAX;
+		float closedDist = FLT_MAX;
 		auto pIndices = (int*)IndexBuffer->GetData();
 		int count = IndexBuffer->GetSize() / (sizeof(int) * 3);
 		for (int i = 0; i < count; i++)
@@ -1065,10 +1077,16 @@ int IMeshDataProvider::IntersectTriangle(const v3dxVector3* vStart, const v3dxVe
 			float u, v, dist;
 			if (v3dxIntersectTri(&pPos[ia], &pPos[ib], &pPos[ic], vStart, &dir, &u, &v, &dist))
 			{
-				if (dist < *closedDist)
+				if (dist < closedDist)
 				{
-					*closedDist = dist;
+					closedDist = dist;
 					triangle = i;
+					result->Distance = dist;
+					result->FaceId = i;
+					result->Position = (*vStart) + dir * dist;
+					v3dxCalcNormal(&result->Normal, &pPos[ia], &pPos[ib], &pPos[ic]);
+					result->U = u;
+					result->V = v;
 				}
 			}
 		}

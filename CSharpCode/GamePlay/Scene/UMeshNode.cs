@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
 
 namespace EngineNS.GamePlay.Scene
 {
@@ -9,11 +9,39 @@ namespace EngineNS.GamePlay.Scene
         public class UMeshNodeData : UNodeData
         {
             [Rtti.Meta]
+            [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
             public RName MeshName { get; set; }
             [Rtti.Meta]
+            [ReadOnly(true)]
             public string MdfQueueType { get; set; }
             [Rtti.Meta]
+            [ReadOnly(true)]
             public string AtomType { get; set; }
+
+            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Pipeline.Shader.UMdfQueue))]
+            public Rtti.UTypeDesc MdfQueue
+            {
+                get
+                {
+                    return Rtti.UTypeDesc.TypeOf(MdfQueueType);
+                }
+                set
+                {
+                    MdfQueueType = Rtti.UTypeDesc.TypeStr(value);
+                }
+            }
+            [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Mesh.UMesh.UAtom))]
+            public Rtti.UTypeDesc Atom
+            {
+                get
+                {
+                    return Rtti.UTypeDesc.TypeOf(AtomType);
+                }
+                set
+                {
+                    AtomType = Rtti.UTypeDesc.TypeStr(value);
+                }
+            }
         }
         public UMeshNode(UNodeData data, EBoundVolumeType bvType, Type placementType)
             : base(data, bvType, placementType)
@@ -145,6 +173,7 @@ namespace EngineNS.GamePlay.Scene
         {
             base.OnNodeLoaded();
 
+            UpdateAbsTransform();
             var meshData = NodeData as UMeshNodeData;
             if (meshData == null || meshData.MeshName == null)
             {
@@ -158,29 +187,28 @@ namespace EngineNS.GamePlay.Scene
                     {
                         colorVar.Value = "1,0,1,1";
                     }
-                    mMesh = new Graphics.Mesh.UMesh();
-                    mMesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-                    
-                    UpdateAABB();
-                    UpdateAbsTransform();
+                    var mesh = new Graphics.Mesh.UMesh();
+                    mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                    Mesh = mesh;
                 };
                 action();
                 return;
             }
-
-            System.Action action1 = async () =>
+            else
             {
-                var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
-                if (materialMesh != null)
+                System.Action action = async () =>
                 {
-                    mMesh = new Graphics.Mesh.UMesh();
-                    mMesh.Initialize(materialMesh, Rtti.UTypeDesc.TypeOf(meshData.MdfQueueType), Rtti.UTypeDesc.TypeOf(meshData.AtomType));
+                    var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
+                    if (materialMesh != null)
+                    {
+                        var mesh = new Graphics.Mesh.UMesh();
+                        mesh.Initialize(materialMesh, Rtti.UTypeDesc.TypeOf(meshData.MdfQueueType), Rtti.UTypeDesc.TypeOf(meshData.AtomType));
 
-                    UpdateAABB();
-                    UpdateAbsTransform();
-                }
-            };
-            action1();
+                        Mesh = mesh;
+                    }
+                };
+                action();
+            }
         }
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {
@@ -202,6 +230,27 @@ namespace EngineNS.GamePlay.Scene
             }
                 
             return true;
+        }
+
+        Graphics.Mesh.CMeshDataProvider mMeshDataProvider;
+        public Graphics.Mesh.CMeshDataProvider MeshDataProvider
+        {
+            get => mMeshDataProvider;
+            set => mMeshDataProvider = value;
+        }
+        public unsafe override bool OnLineCheckTriangle(in Vector3 start, in Vector3 end, ref VHitResult result)
+        {
+            if (mMeshDataProvider == null)
+                return false;
+
+            fixed(Vector3* pStart = &start)
+            fixed (Vector3* pEnd = &end)
+            fixed (VHitResult* pResult = &result)
+            {
+                if (-1 != mMeshDataProvider.mCoreObject.IntersectTriangle(pStart, pEnd, pResult))
+                    return true;
+                return false;
+            }
         }
     }
 }

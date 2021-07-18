@@ -42,6 +42,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         protected bool FullRedraw = false;
         public bool Expandable = false;
         public bool Initialized { get; private set; } = false;
+        public int RefCount = 0;
         public bool IsFullRedraw
         {
             get => FullRedraw;
@@ -65,13 +66,27 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             newValue = default;
             return false;
         }
-        public virtual async Task<bool> Initialize() 
+        public async Task<bool> Initialize() 
+        {
+            RefCount++;
+            return await Initialize_Override();
+        }
+        protected virtual async Task<bool> Initialize_Override()
         {
             await EngineNS.Thread.AsyncDummyClass.DummyFunc();
             Initialized = true;
             return true;
         }
-        public virtual void Cleanup() { }
+        public void Cleanup()
+        {
+            RefCount--;
+            if (RefCount <= 0)
+                Cleanup_Override();
+        }
+        protected virtual void Cleanup_Override()
+        {
+
+        }
     }
     public class PGTypeEditorAttribute : PGCustomValueEditorAttribute
     {
@@ -79,18 +94,18 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public bool ExcludeSealed = false;
         public bool ExcludeValueType = false;
         public Rtti.UTypeDesc BaseType;
-        public PGTypeEditorAttribute()
+        public PGTypeEditorAttribute(System.Type baseType)
         {
-            BaseType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(void).FullName);
+            BaseType = Rtti.UTypeDesc.TypeOf(baseType);
         }
         protected static EGui.Controls.TypeSelector TypeSlt = new EGui.Controls.TypeSelector();
         public override bool OnDraw(in EditorInfo info, out object newValue)
         {
             newValue = info.Value;
             var sz = new Vector2(0, 0);
-            var bindType = EGui.UIEditor.EditableFormData.Instance.CurrentForm.BindType;
-            if (bindType == null)
-                return false;
+            //var bindType = EGui.UIEditor.EditableFormData.Instance.CurrentForm.BindType;
+            //if (bindType == null)
+            //    return false;
             //var props = bindType.SystemType.GetProperties();
             ImGuiAPI.SetNextItemWidth(-1);
             TypeSlt.AssemblyFilter = AssemblyFilter;

@@ -25,7 +25,7 @@ void INullCommandList::EndCommand()
 	ICommandList::EndCommand();
 }
 
-void INullCommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer)
+void INullCommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer, const char* debugName)
 {
 
 }

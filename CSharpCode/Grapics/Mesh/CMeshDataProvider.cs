@@ -357,6 +357,77 @@ namespace EngineNS.Graphics.Mesh
 
             return meshBuilder;
         }
+        public static float Lerp(float start, float end, float factor)
+        {
+            return start + factor * (end - start);
+        }
+        public static CMeshDataProvider MakePlane(RHI.CRenderContext rc, Vector2 uvMin, Vector2 uvMax, UInt32 tileCount = 10)
+        {//reference:DrawGridline
+            CMeshDataProvider meshBuilder = new Graphics.Mesh.CMeshDataProvider();
+            var builder = meshBuilder.mCoreObject;
+            uint streams = (uint)((1 << (int)EVertexSteamType.VST_Position) |
+                (1 << (int)EVertexSteamType.VST_Normal) |
+                (1 << (int)EVertexSteamType.VST_Color) |
+                (1 << (int)EVertexSteamType.VST_UV));
+            builder.Init(streams, EIndexBufferType.IBT_Int32, 1);
+
+            var dpDesc = new DrawPrimitiveDesc();
+            dpDesc.SetDefault();
+            dpDesc.NumPrimitives = tileCount * tileCount * 2;
+            builder.PushAtomLOD(0, ref dpDesc);
+
+            using (var posArray = Support.UNativeArray<Vector3>.CreateInstance())
+            using (var normalArray = Support.UNativeArray<Vector3>.CreateInstance())
+            using (var tangentArray = Support.UNativeArray<Vector4>.CreateInstance())
+            using (var uvArray = Support.UNativeArray<Vector2>.CreateInstance())
+            using (var indexArray = Support.UNativeArray<UInt32>.CreateInstance())
+            {
+                // -> tileCount * tileCount * 2 triangles
+                float Step = 2.0f / tileCount;
+                for (Int32 y = 0; y < tileCount; ++y)
+                {
+                    // implemented this way to avoid cracks, could be optimized
+                    float z0 = y * Step - 1.0f;
+                    float z1 = (y + 1) * Step - 1.0f;
+
+                    float V0 = Lerp(uvMin.Y, uvMax.Y, z0 * 0.5f + 0.5f);
+                    float V1 = Lerp(uvMin.Y, uvMax.Y, z1 * 0.5f + 0.5f);
+
+                    for (Int32 x = 0; x < tileCount; ++x)
+                    {
+                        // implemented this way to avoid cracks, could be optimized
+                        float x0 = x * Step - 1.0f;
+                        float x1 = (x + 1) * Step - 1.0f;
+
+                        float U0 = Lerp(uvMin.X, uvMax.X, x0 * 0.5f + 0.5f);
+                        float U1 = Lerp(uvMin.X, uvMax.X, x1 * 0.5f + 0.5f);
+
+                        // Calculate verts for a face pointing down Z
+                        var pos = new Vector3(x0, 0, z0);
+                        var nor = new Vector3(0, 1, 0);
+                        var uv = new Vector2(U0, V0);
+                        builder.AddVertex(ref pos, ref nor, ref uv, 0xFFFFFFFF);
+                        pos = new Vector3(x0, 0, z1);
+                        nor = new Vector3(0, 1, 0);
+                        uv = new Vector2(U0, V1);
+                        builder.AddVertex(ref pos, ref nor, ref uv, 0xFFFFFFFF);
+                        pos = new Vector3(x1, 0, z1);
+                        nor = new Vector3(0, 1, 0);
+                        uv = new Vector2(U1, V1);
+                        builder.AddVertex(ref pos, ref nor, ref uv, 0xFFFFFFFF);
+                        pos = new Vector3(x1, 0, z0);
+                        nor = new Vector3(0, 1, 0);
+                        uv = new Vector2(U1, V0);
+                        builder.AddVertex(ref pos, ref nor, ref uv, 0xFFFFFFFF);
+
+                        UInt32 Index = (UInt32)((x + y * tileCount) * 4);
+                        builder.AddTriangle(Index + 0, Index + 1, Index + 2);
+                        builder.AddTriangle(Index + 0, Index + 2, Index + 3);
+                    }
+                }
+            }
+            return meshBuilder;
+        }
     }
 }
 

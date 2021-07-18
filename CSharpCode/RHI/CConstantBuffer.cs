@@ -30,6 +30,8 @@ namespace EngineNS.RHI
             public int FogDensity;// = 1.57;
             public int mSkyLightColor;
             public int mGroundLightColor;
+            public int gEnvMapMaxMipLevel;
+            public int gEyeEnvMapMaxMipLevel;
 
             public int gDirLightColor_Intensity;
             public int gDirLightDirection_Leak;

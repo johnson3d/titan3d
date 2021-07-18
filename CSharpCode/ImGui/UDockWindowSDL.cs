@@ -279,7 +279,7 @@ namespace EngineNS.EGui
             unsafe
             {
                 renderer.FontCBuffer.mCoreObject.UpdateDrawPass(drawCmd, 1);
-                drawCmd.BeginRenderPass(ref rhiData.PassDesc, SwapChainBuffer.FrameBuffers.mCoreObject);
+                drawCmd.BeginRenderPass(ref rhiData.PassDesc, SwapChainBuffer.FrameBuffers.mCoreObject, "ImGui");
 
                 drawCmd.SetRenderPipeline(renderer.Pipeline.mCoreObject);
 

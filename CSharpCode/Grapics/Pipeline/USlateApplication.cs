@@ -34,17 +34,17 @@ namespace EngineNS.Graphics.Pipeline
         }
         public static void DrawRootForms()
         {
-            foreach (var i in AppendForms)
+            if (AppendForms.Count > 0)
             {
-                RootForms.Add(i);
+                RootForms.AddRange(AppendForms);
+                AppendForms.Clear();
             }
-            AppendForms.Clear();
 
-            foreach (var i in RootForms)
+            for (int i = 0; i < RootForms.Count; i++)
             {
-                if (i.Visible == false)
+                if (RootForms[i].Visible == false)
                     continue;
-                i.OnDraw();
+                RootForms[i].OnDraw();
             }
         }
         public static void ClearRootForms()

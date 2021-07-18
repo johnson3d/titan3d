@@ -38,9 +38,10 @@ ID11RenderContext::ID11RenderContext()
 {
 	mDevice = nullptr;
 	mD3dDebug = nullptr;
-	mFeatureLevel = D3D_FEATURE_LEVEL_11_0;
+	mFeatureLevel = D3D_FEATURE_LEVEL_11_1;
 	mImmCmdList = nullptr;
 	mHardwareContext = nullptr;
+	mDefinedAnnotation = nullptr;
 	//mDXGIDevice = nullptr;
 	mSystem = nullptr;
 
@@ -52,6 +53,7 @@ ID11RenderContext::~ID11RenderContext()
 {
 	DefaultRenderContext = nullptr;
 
+	Safe_Release(mDefinedAnnotation);
 	Safe_Release(mHardwareContext);
 	Safe_Release(mImmCmdList);
 
@@ -101,6 +103,11 @@ bool ID11RenderContext::Init(ID11RenderSystem* sys, const IRenderContextDesc* de
 	if (SUCCEEDED(hr))
 	{
 		
+	}
+	hr = mHardwareContext->QueryInterface(__uuidof(ID3DUserDefinedAnnotation), reinterpret_cast<void**>(&mDefinedAnnotation));
+	if (SUCCEEDED(hr))
+	{
+		VFX_LTRACE(ELTT_Graphics, "ID3DUserDefinedAnnotation Query failed:%d\r\n", hr); 
 	}
 	return true;
 }

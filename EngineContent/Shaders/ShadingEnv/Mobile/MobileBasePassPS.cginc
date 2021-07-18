@@ -10,16 +10,6 @@ SamplerState Samp_gEyeEnvMap;
 Texture2D		gShadowMap;
 SamplerState	Samp_gShadowMap;
 
-cbuffer cbPerShadingEnv : register(b4)
-{
-	float gEnvMapMaxMipLevel;
-	float gEyeEnvMapMaxMipLevel;
-
-#ifdef PerShadingEnvVarDefine
-	PerShadingEnvVarDefine
-#endif
-}
-
 struct PS_OUTPUT
 {
 	half4 RT0 : SV_Target0;

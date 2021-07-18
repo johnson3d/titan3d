@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using SDL2;
 
-namespace EngineNS.Bricks.CodeBuilder.ShaderNode
+namespace EngineNS.Editor
 {
     public class UPreviewViewport : Graphics.Pipeline.UViewportSlate
     {
@@ -34,7 +34,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             await RenderPolicy.Initialize(1, 1);
 
-            CameraController.Camera = RenderPolicy.GBuffers.Camera;
+            CameraController.Camera = RenderPolicy.GetBasePassNode().GBuffers.Camera;
 
             var materials = new Graphics.Pipeline.Shader.UMaterial[1];
             materials[0] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("utest/ttt.material"));
@@ -46,8 +46,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
-                mesh.SetWorldMatrix(ref Matrix.mIdentity);
-                RenderPolicy.VisibleMeshes.Add(mesh);
+                var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, Vector3.Zero, Vector3.One, Quaternion.Identity);
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.NodeData.Name = "PreviewObject";
+                meshNode.IsScaleChildren = false;
+                meshNode.IsCastShadow = true;
             }
 
             //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
@@ -138,34 +141,46 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             return true;
         }
         #endregion
-        public void TickLogic(int ellapse)
+        protected virtual void TickOnFocus()
         {
-            if (IsDrawing == false)
-                return;
-            if (this.IsFocused)
+            float step = (UEngine.Instance.ElapseTickCount * 0.001f) * CameraMoveSpeed;
+            var keyboards = UEngine.Instance.EventProcessorManager.Keyboards;
+            if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_W])
             {
-                var keyboards = UEngine.Instance.EventProcessorManager.Keyboards;
-                float step = (UEngine.Instance.ElapseTickCount * 0.001f) * CameraMoveSpeed;
-                if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_W])
-                {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, step);
-                }
-                else if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_S])
-                {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, -step);
-                }
-
-                if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_A])
-                {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, step);
-                }
-                else if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_D])
-                {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, -step);
-                }
+                CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, step, true);
+            }
+            else if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_S])
+            {
+                CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, -step, true);
             }
 
-            RenderPolicy?.TickLogic();
+            if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_A])
+            {
+                CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, step, true);
+            }
+            else if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_D])
+            {
+                CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, -step, true);
+            }
+        }
+        GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
+        public void TickLogic(int ellapse)
+        {
+            World.TickLogic();
+
+            if (IsDrawing == false)
+                return;
+
+            if (this.IsFocused)
+            {
+                TickOnFocus();
+            }
+
+            mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
+            mVisParameter.CullCamera = RenderPolicy.GetBasePassNode().GBuffers.Camera;
+            World.GatherVisibleMeshes(mVisParameter);
+
+            RenderPolicy?.TickLogic(World);
         }
         public void TickRender(int ellapse)
         {

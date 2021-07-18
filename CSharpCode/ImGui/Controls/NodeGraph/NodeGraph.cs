@@ -581,8 +581,11 @@ namespace EngineNS.EGui.Controls.NodeGraph
             }
             else
             {
-                var v0 = View2WorldSpace(ref mousePosVP, ref WorldDragPos);
-                ViewPortPosition = WorldDragPos - (v0 - ViewPortDragPos);
+                if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows))
+                {
+                    var v0 = View2WorldSpace(ref mousePosVP, ref WorldDragPos);
+                    ViewPortPosition = WorldDragPos - (v0 - ViewPortDragPos);
+                }
             }
             DraggingViewPort = true;
 

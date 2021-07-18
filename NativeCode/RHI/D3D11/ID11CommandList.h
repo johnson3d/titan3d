@@ -22,7 +22,7 @@ public:
 	virtual void ClearMRT(const std::pair<BYTE, DWORD>* ClearColors, int ColorNum,
 		vBOOL bClearDepth, float Depth, vBOOL bClearStencil, UINT32 Stencil) override;*/
 	
-	virtual void BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer) override;
+	virtual void BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer, const char* debugName) override;
 	//virtual void BuildRenderPass(vBOOL bImmCBuffer, UINT* limitter, IPass** ppPass) override;
 	virtual void EndRenderPass() override;
 	

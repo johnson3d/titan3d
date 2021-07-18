@@ -33,7 +33,7 @@ void IVKCommandList::EndCommand()
 	ICommandList::EndCommand();
 }
 
-void IVKCommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer)
+void IVKCommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer, const char* debugName)
 {
 
 }

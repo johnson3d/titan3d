@@ -26,7 +26,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
     {
         public UShaderEditor()
         {
-            PreviewViewport = new UPreviewViewport();
+            PreviewViewport = new Editor.UPreviewViewport();
         }
         ~UShaderEditor()
         {
@@ -83,7 +83,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             await viewport.RenderPolicy.Initialize(1, 1);
 
-            (viewport as Bricks.CodeBuilder.ShaderNode.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GBuffers.Camera;
+            (viewport as Editor.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GetBasePassNode().GBuffers.Camera;
 
             var materials = new Graphics.Pipeline.Shader.UMaterial[1];
             materials[0] = Material;
@@ -95,8 +95,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
-                mesh.SetWorldMatrix(ref Matrix.mIdentity);
-                viewport.RenderPolicy.VisibleMeshes.Add(mesh);
+                //mesh.SetWorldMatrix(ref Matrix.mIdentity);
+                //viewport.RenderPolicy.VisibleMeshes.Add(mesh);
+
+                var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, Vector3.Zero, Vector3.One, Quaternion.Identity);
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.NodeData.Name = "PreviewObject";
+                meshNode.IsScaleChildren = false;
+                meshNode.IsCastShadow = true;
             }
 
             var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
@@ -104,7 +110,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             BoundingSphere sphere;
             sphere.Center = aabb.GetCenter();
             sphere.Radius = radius;
-            policy.GBuffers.Camera.AutoZoom(ref sphere);
+            policy.GetBasePassNode().GBuffers.Camera.AutoZoom(ref sphere);
             //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SunLightDirection = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);
@@ -195,7 +201,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid PreviewPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public UPreviewViewport PreviewViewport;
+        public Editor.UPreviewViewport PreviewViewport;
         #region DrawUI
         public unsafe void OnDraw()
         {

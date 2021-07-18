@@ -100,7 +100,7 @@ protected:
 	//1 dp=> 1 pass;
 	std::vector<IDrawCall*>		mPassArray;
 
-	std::string					mDebugName;
+	std::wstring				mDebugName;
 public:
 	AutoRef<IPipelineStat>		mPipelineStat;
 	AutoRef<GraphicsProfiler>	mProfiler;
@@ -121,165 +121,123 @@ public:
 		return mPipelineStat;
 	}
 
-	TR_FUNCTION()
 	virtual void BeginCommand() = 0;
-	TR_FUNCTION()
 	virtual void EndCommand() = 0;
 
-	TR_FUNCTION()
 	void ClearMeshDrawPassArray();
 
-	TR_FUNCTION()
 	UINT GetPassNumber() const {
 		return (UINT)mPassArray.size();
 	}
 
-	TR_FUNCTION()
 	void SetPassBuiltCallBack(FOnPassBuilt fun) {
 		OnPassBuilt = fun;
 	}
 
-	TR_FUNCTION()
-	const char* GetDebugName() const{
-		return mDebugName.c_str();
-	}
-	TR_FUNCTION()
-	void SetDebugName(const char* name) {
-		mDebugName = name;
-	}
+	void SetDebugName(const char* name);
 	
 	/*virtual void SetRenderTargets(IFrameBuffers* FrameBuffers) = 0;
 
 	virtual void ClearMRT(const std::pair<BYTE,DWORD>* ClearColors, int ColorNum,
 		vBOOL bClearDepth, float Depth, vBOOL bClearStencil, UINT32 Stencil) = 0;*/
 	
-	TR_FUNCTION()
-	virtual void BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer) = 0;
-	TR_FUNCTION()
+	virtual void BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer, const char* debugName = nullptr) = 0;
 	virtual void BuildRenderPass(vBOOL bImmCBuffer);
-	TR_FUNCTION()
 	virtual void EndRenderPass() = 0;
 
-	TR_FUNCTION()
 	virtual void Blit2DefaultFrameBuffer(IFrameBuffers* FrameBuffers, int dstWidth, int dstHeight) {}
 
-	TR_FUNCTION()
 	void PushDrawCall(IDrawCall* Pass);
 
-	TR_FUNCTION()
 	virtual void Commit(IRenderContext* pRHICtx) = 0;
 
-	TR_FUNCTION()
 	void SetGraphicsProfiler(GraphicsProfiler* profiler);
 
-	TR_FUNCTION()
 	virtual void SetRasterizerState(IRasterizerState* State){}
-	TR_FUNCTION()
 	virtual void SetDepthStencilState(IDepthStencilState* State) {}
 	TR_FUNCTION(SV_NoStarToRef = blendFactor)
 	virtual void SetBlendState(IBlendState* State, float* blendFactor, UINT samplerMask) {}
 
-	TR_FUNCTION()
 	virtual void SetComputeShader(IComputeShader* ComputerShader)
 	{
 		ASSERT(false);
 	}
-	TR_FUNCTION()
 	virtual void CSSetShaderResource(UINT32 Index, IShaderResourceView* Texture)
 	{
 		ASSERT(false);
 	}
-	TR_FUNCTION()
 	virtual void CSSetUnorderedAccessView(UINT32 Index, IUnorderedAccessView* view, const UINT *pUAVInitialCounts)
 	{
 		ASSERT(false);
 	}
-	TR_FUNCTION()
 	virtual void CSSetConstantBuffer(UINT32 Index, IConstantBuffer* cbuffer)
 	{
 		ASSERT(false);
 	}
-	TR_FUNCTION()
 	virtual void CSDispatch(UINT x, UINT y, UINT z)
 	{
 		ASSERT(false);
 	}
-	TR_FUNCTION()
 	virtual void PSSetShaderResource(UINT32 Index, IShaderResourceView* Texture)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void PSSetSampler(UINT32 Index, ISamplerState* Sampler)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void SetScissorRect(IScissorRect* sr)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void SetVertexBuffer(UINT32 StreamIndex, IVertexBuffer* VertexBuffer, UINT32 Offset, UINT Stride)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void SetIndexBuffer(IIndexBuffer* IndexBuffer)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 NumPrimitives, UINT32 NumInstances)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void DrawIndexedPrimitive(EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 StartIndex, UINT32 NumPrimitives, UINT32 NumInstances)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void DrawIndexedInstancedIndirect(EPrimitiveType PrimitiveType, IGpuBuffer* pBufferForArgs, UINT32 AlignedByteOffsetForArgs)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void IASetInputLayout(IInputLayout* pInputLayout)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void VSSetShader(IVertexShader* pVertexShader, void** ppClassInstances, UINT NumClassInstances)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void PSSetShader(IPixelShader* pPixelShader, void** ppClassInstances, UINT NumClassInstances)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void SetViewport(IViewPort* vp)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void VSSetConstantBuffer(UINT32 Index, IConstantBuffer* CBuffer)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void PSSetConstantBuffer(UINT32 Index, IConstantBuffer* CBuffer)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void SetRenderPipeline(IRenderPipeline* pipeline)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual vBOOL CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers) = 0;
 
 	virtual void Signal(IFence* fence, int value){}

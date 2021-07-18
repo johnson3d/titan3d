@@ -4,9 +4,16 @@ using System.Text;
 
 namespace EngineNS.Thread.Async
 {
+    public enum EJobState
+    { 
+        WaitStart,
+        Working,
+        Finished,
+    }
     public interface IJob
     {
         IJobSystem JobSystem { get; set; }
+        EJobState JobState { get; set; }
         void DoWork();
     }
     public interface IJobThread
@@ -35,8 +42,19 @@ namespace EngineNS.Thread.Async
         {
             for (int i = 0; i < Jobs.Count; i++)
             {
-                Jobs[i].DoWork();
-                Jobs[i].JobSystem.ReleaseTask();
+                try
+                {
+                    Jobs[i].DoWork();
+                    Jobs[i].JobState = EJobState.Finished;
+                }
+                catch(Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                }
+                finally
+                {
+                    Jobs[i].JobSystem.ReleaseTask();
+                }
             }
             Jobs.Clear();
         }
@@ -90,6 +108,7 @@ namespace EngineNS.Thread.Async
             System.Threading.Interlocked.Increment(ref NumOfRemainTasks);
             var thread = GetJobThread();
             thread.Jobs.Add(job);
+            job.JobState = EJobState.Working;
         }
         public System.Action<IJobSystem> OnFinished;
         public void StartJobs()
@@ -117,6 +136,7 @@ namespace EngineNS.UTest
     public struct UTestJob : Thread.Async.IJob
     {
         public Thread.Async.IJobSystem JobSystem { get; set; }
+        public Thread.Async.EJobState JobState { get; set; }
         public UTest_UJobSystem Data;
         public void DoWork()
         {

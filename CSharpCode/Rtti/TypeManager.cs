@@ -96,9 +96,9 @@ namespace EngineNS.Rtti
                 return mTypeString;
             }
         }
-        public static UTypeDesc TypeDescOf<T>()
+        public static UTypeDesc TypeOf<T>()
         {
-            return TypeOfFullName(typeof(T).FullName);
+            return TypeOf(typeof(T));
         }
         public static UTypeDesc TypeOf(string typeStr)
         {
@@ -139,7 +139,6 @@ namespace EngineNS.Rtti
             return SystemType.ToString();
         }
     }
-
     public struct UTypeDescGetter<T>
     {
         static UTypeDesc mTypeDesc;
@@ -148,7 +147,7 @@ namespace EngineNS.Rtti
             get
             {
                 if (mTypeDesc == null)
-                    mTypeDesc = UTypeDesc.TypeDescOf<T>();
+                    mTypeDesc = UTypeDesc.TypeOf<T>();
                 return mTypeDesc;
             }
         }

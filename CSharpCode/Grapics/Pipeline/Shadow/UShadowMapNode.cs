@@ -11,7 +11,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/SSM.cginc", RName.ERNameType.Engine);
         }
     }
-    public class UShadowMap
+    public class UShadowMapNode : Common.URenderGraphNode
     {
         public GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
         public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
@@ -41,20 +41,21 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         private Vector3[] mSSM_FrustumVtx = new Vector3[8];
         public UShadowShading mShadowShading;
 
-        public void Initialize(float x, float y)
+        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat fmt, EPixelFormat dsFmt, float x, float y, string debugName)
         {
+            await Thread.AsyncDummyClass.DummyFunc();
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            mShadowShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UShadowShading>();
+            mShadowShading = shading as UShadowShading;
 
             GBuffers.SwapChainIndex = -1;
-            GBuffers.Initialize(0, EPixelFormat.PXF_D16_UNORM, (uint)x, (uint)y);
+            GBuffers.Initialize(0, dsFmt, (uint)x, (uint)y);
             //GBuffers.CreateGBuffer(0, EPixelFormat.PXF_UNKNOWN, (uint)x, (uint)y);            
             GBuffers.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
             GBuffers.OnResize(mInnerResolutionY, mInnerResolutionY);
 
             BasePass = new UDrawBuffers();
-            BasePass.Initialize(rc);
+            BasePass.Initialize(rc, debugName);
 
             var TempClearColor = new Color4();
             //TempClearColor.Red = 1.0f;
@@ -111,11 +112,11 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         {
             return X < Min ? Min : X < Max ? X : Max;
         }
-        public unsafe void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
         {
             mDirLightDirection = world.DirectionLight.mDirection;
 
-            var ViewerCamera = policy.GBuffers.Camera;
+            var ViewerCamera = policy.GetBasePassNode().GBuffers.Camera;
             //calculate viewer camera frustum bounding sphere and shadow camera data;
             float HalfFoV = ViewerCamera.mCoreObject.mFov * 0.5f;
             float zNear = ViewerCamera.mCoreObject.mZNear;
@@ -233,21 +234,21 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
             cmdlist.BeginCommand();
             if (bClear)
-                cmdlist.BeginRenderPass(ref PassDesc, GBuffers.FrameBuffers.mCoreObject);
+                cmdlist.BeginRenderPass(ref PassDesc, GBuffers.FrameBuffers.mCoreObject, "ShadowDepth");
             else
-                cmdlist.BeginRenderPass((RenderPassDesc*)0, GBuffers.FrameBuffers.mCoreObject);
+                cmdlist.BeginRenderPass((RenderPassDesc*)0, GBuffers.FrameBuffers.mCoreObject, "ShadowDepth");
             cmdlist.BuildRenderPass(0);
             cmdlist.EndRenderPass();
             cmdlist.EndCommand();
         }
 
-        public unsafe void TickRender()
+        public override unsafe void TickRender()
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var cmdlist = BasePass.CommitCmdList.mCoreObject;
             cmdlist.Commit(rc.mCoreObject);
         }
-        public void TickSync()
+        public override void TickSync()
         {
             BasePass.SwapBuffer();
             GBuffers?.Camera?.mCoreObject.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
