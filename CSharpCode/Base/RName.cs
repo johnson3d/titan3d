@@ -10,7 +10,7 @@ namespace EngineNS
     {
         public class PGRNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
-            public string FilterExts;
+            public string FilterExts;   // "ext1" / "ext1,ext2"
             EGui.UIProxy.ComboBox mComboBox;
             EGui.Controls.ContentBrowser mContentBrowser;
 
@@ -90,7 +90,7 @@ namespace EngineNS
                 mComboBox.PreviewValue = preViewStr;
                 var contentBrowserSize = new Vector2(500, 600);
                 ImGuiAPI.SetNextWindowSize(ref contentBrowserSize, ImGuiCond_.ImGuiCond_Always);
-                mContentBrowser.ExtName = FilterExts;
+                mContentBrowser.ExtNames = FilterExts;
                 mContentBrowser.SelectedAsset = null;
                 mComboBox.OnDraw(ref drawList, ref anyPt);
                 if(mContentBrowser.SelectedAsset != null && mContentBrowser.SelectedAsset.GetAssetName() != name)

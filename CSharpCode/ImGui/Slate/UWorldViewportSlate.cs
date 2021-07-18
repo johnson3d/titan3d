@@ -16,6 +16,8 @@ namespace EngineNS.EGui.Slate
         public Graphics.Pipeline.UDrawBuffers Copy2SwapChainPass = new Graphics.Pipeline.UDrawBuffers();
         public RenderPassDesc SwapChainPassDesc = new RenderPassDesc();
 
+        GamePlay.UAxis mAxis;
+
         public Graphics.Pipeline.ICameraController CameraController { get; set; }
         public UWorldViewportSlate()
         {
@@ -58,6 +60,9 @@ namespace EngineNS.EGui.Slate
                 OnInitialize = this.Initialize_Default;
             }
             await OnInitialize(this, application, policy, zMin, zMax);
+
+            mAxis = new GamePlay.UAxis();
+            await mAxis.Initialize(this.World);
         }
         protected override void OnClientChanged(bool bSizeChanged)
         {
@@ -100,6 +105,7 @@ namespace EngineNS.EGui.Slate
         public float CameraMouseWheelSpeed { get; set; } = 1.0f;
         public unsafe override bool OnEvent(ref SDL.SDL_Event e)
         {
+            mAxis?.OnEvent(this, in e);
             var keyboards = UEngine.Instance.EventProcessorManager.Keyboards;
             if (e.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
             {

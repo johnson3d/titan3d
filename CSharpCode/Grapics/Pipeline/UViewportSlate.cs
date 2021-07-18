@@ -180,6 +180,10 @@ namespace EngineNS.Graphics.Pipeline
                     OnHitproxySelected(hitObj);
                 }
             }
+            else if(e.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
+            {
+
+            }
             return true;
         }
         protected virtual IntPtr GetShowTexture()

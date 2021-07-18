@@ -617,7 +617,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 }
                 if (item_current_idx >= 0 && !data.Readonly)
                 {
-                    data.NewValue = (int)values.GetValue(item_current_idx);
+                    data.NewValue = values.GetValue(item_current_idx);
                     data.ValueChanged = true;
                     //prop.SetValue(ref target, v);
                 }
