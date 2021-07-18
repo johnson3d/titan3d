@@ -13,7 +13,7 @@ namespace EngineNS.Editor.Forms
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public Graphics.Mesh.UMaterialMesh Mesh;
-        public Bricks.CodeBuilder.ShaderNode.UPreviewViewport PreviewViewport = new Bricks.CodeBuilder.ShaderNode.UPreviewViewport();
+        public Editor.UPreviewViewport PreviewViewport = new Editor.UPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~UMeshEditor()
         {
@@ -41,15 +41,18 @@ namespace EngineNS.Editor.Forms
 
             await viewport.RenderPolicy.Initialize(1, 1);
 
-            (viewport as Bricks.CodeBuilder.ShaderNode.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GetBasePassNode().GBuffers.Camera;
+            (viewport as Editor.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GetBasePassNode().GBuffers.Camera;
 
             var mesh = new Graphics.Mesh.UMesh();
 
             var ok = mesh.Initialize(Mesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
-                mesh.SetWorldMatrix(ref Matrix.mIdentity);
-                viewport.RenderPolicy.VisibleMeshes.Add(mesh);
+                var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, Vector3.Zero, Vector3.One, Quaternion.Identity);
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.NodeData.Name = "PreviewObject";
+                meshNode.IsScaleChildren = false;
+                meshNode.IsCastShadow = true;
             }
 
             var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;

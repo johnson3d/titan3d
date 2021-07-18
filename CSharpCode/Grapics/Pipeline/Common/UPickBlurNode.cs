@@ -38,9 +38,6 @@ namespace EngineNS.Graphics.Pipeline.Common
     }    
     public class UPickBlurNode : USceenSpaceNode
     {
-        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
-        {
-            await base.Initialize(policy, shading, rtFmt, dsFmt, x, y);
-        }
+        
     }
 }

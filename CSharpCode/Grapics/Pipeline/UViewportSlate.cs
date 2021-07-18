@@ -6,6 +6,7 @@ namespace EngineNS.Graphics.Pipeline
 {
     public class UViewportSlate : IEventProcessor
     {
+        public GamePlay.UWorld World { get; protected set; } = new GamePlay.UWorld();
         public virtual string Title { get; set; } = "Game";
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }

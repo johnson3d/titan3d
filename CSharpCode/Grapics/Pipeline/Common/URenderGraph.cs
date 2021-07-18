@@ -32,7 +32,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public URenderGraphNode OutputNode;
         public string OutputPinName { get; set; }
     }
-    public class URenderGraphNode : Thread.Async.IJob
+    public class URenderGraphNode
     {
         public Thread.Async.IJobSystem JobSystem { get; set; }
         public Thread.Async.EJobState JobState { get; set; }
@@ -40,30 +40,22 @@ namespace EngineNS.Graphics.Pipeline.Common
         public URenderGraphSRV[] InputShaderResourceViews { get; set; }
         public URenderGraphBuffer[] OutputGpuBuffers { get; set; }
         public URenderGraphSRV[] OutputShaderResourceViews { get; set; }
-        public virtual void DoWork()
+
+        public virtual async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat fmt, EPixelFormat dsFmt, float x, float y, string debugName)
+        {
+            await Thread.AsyncDummyClass.DummyFunc();
+        }
+        public virtual void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
         {
 
         }
-        public bool IsDependencyCompleted
+        public virtual void TickRender()
         {
-            get
-            {
-                foreach (var i in InputGpuBuffers)
-                {
-                    if (i.OutputNode != null && i.OutputNode.JobState == Thread.Async.EJobState.Working)
-                    {
-                        return false;
-                    }
-                }
-                foreach (var i in InputShaderResourceViews)
-                {
-                    if (i.OutputNode != null && i.OutputNode.JobState == Thread.Async.EJobState.Working)
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
+
+        }
+        public virtual void TickSync()
+        {
+
         }
     }
     public class URenderGraph

@@ -31,17 +31,24 @@ cbuffer cbPerViewport : register( b1 )
 	
 	float2 gDepthBiasAndZFarRcp;
 	float2 gFadeParam;
+
 	float4 gShadowMapSizeAndRcp;
+
 	matrix gViewer2ShadowMtx[1];
+
 	matrix gViewer2ShadowMtxArrayEditor[4];
-	float4 gCsmDistanceArray;
-	float4 gShadowTransitionScaleArrayEditor;
 	
-	float gShadowTransitionScale;
-	float gShadowDistance;
+	float4 gCsmDistanceArray;
+
+	float4 gShadowTransitionScaleArrayEditor;
 	
 	float4 gSunPosNDC;
 	float4 gAoParam;//radius_platform_bias_dark;
+
+	float gShadowTransitionScale;
+	float gShadowDistance;
+	float gEnvMapMaxMipLevel;
+	float gEyeEnvMapMaxMipLevel;
 
 	float4 PointLightPos_RadiusInv[MaxPointLightNumber];
 	float4 PointLightColor_Intensity[MaxPointLightNumber];

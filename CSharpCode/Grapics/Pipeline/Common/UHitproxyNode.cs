@@ -107,18 +107,18 @@ namespace EngineNS.Graphics.Pipeline.Common
         public RenderPassDesc HitproxyPassDesc = new RenderPassDesc();
         private RHI.CFence mReadHitproxyFence;
         bool CanDrawHitproxy = true;
-        public async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, float x, float y)
+        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat fmt, EPixelFormat dsFmt, float x, float y, string debugName)
         {
             await Thread.AsyncDummyClass.DummyFunc();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            HitproxyPass.Initialize(rc);
+            HitproxyPass.Initialize(rc, debugName);
 
-            mHitproxyShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Common.UHitproxyShading>();
+            mHitproxyShading = shading as Common.UHitproxyShading;
 
             GHitproxyBuffers.SwapChainIndex = -1;
-            GHitproxyBuffers.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
-            GHitproxyBuffers.CreateGBuffer(0, EPixelFormat.PXF_R8G8B8A8_UNORM, (uint)x, (uint)y);
+            GHitproxyBuffers.Initialize(1, dsFmt, (uint)x, (uint)y);
+            GHitproxyBuffers.CreateGBuffer(0, fmt, (uint)x, (uint)y);
             GHitproxyBuffers.TargetViewIdentifier = policy.GetBasePassNode().GBuffers.TargetViewIdentifier;
             GHitproxyBuffers.Camera = policy.GetBasePassNode().GBuffers.Camera;
             HitproxyPassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionClear;
@@ -154,7 +154,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 GHitproxyBuffers.OnResize(x, y);
             }
         }
-        public unsafe void TickLogic(IRenderPolicy policy)
+        public override unsafe void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
         {
             if (CanDrawHitproxy == false)
                 return;
@@ -183,7 +183,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
 
             cmdlist_hp.BeginCommand();
-            cmdlist_hp.BeginRenderPass(ref HitproxyPassDesc, GHitproxyBuffers.FrameBuffers.mCoreObject);
+            cmdlist_hp.BeginRenderPass(ref HitproxyPassDesc, GHitproxyBuffers.FrameBuffers.mCoreObject, "Hitproxy");
             cmdlist_hp.BuildRenderPass(0);
             cmdlist_hp.EndRenderPass();
             cmdlist_hp.EndCommand();

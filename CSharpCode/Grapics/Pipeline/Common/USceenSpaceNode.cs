@@ -16,11 +16,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             GBuffers?.Cleanup();
             GBuffers = null;
         }
-        public virtual async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
+        public string DebugName;
+        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y, string debugName)
         {
             ScreenDrawPolicy = new Shader.CommanShading.UBasePassPolicy();
             await ScreenDrawPolicy.Initialize(x, y);
             ScreenDrawPolicy.mBasePassShading = shading;
+            ScreenDrawPolicy.TagObject = policy;
 
             GBuffers.SwapChainIndex = -1;
             GBuffers.Initialize(1, dsFmt, (uint)x, (uint)y);
@@ -28,7 +30,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             GBuffers.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc);
+            BasePass.Initialize(rc, debugName);
+            DebugName = debugName;
 
             PassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionDontCare;
             PassDesc.mFBStoreAction_Color = FrameBufferStoreAction.StoreActionStore;
@@ -63,12 +66,12 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             var cmdlist = BasePass.DrawCmdList.mCoreObject;
             cmdlist.BeginCommand();
-            cmdlist.BeginRenderPass(ref PassDesc, GBuffers.FrameBuffers.mCoreObject);
+            cmdlist.BeginRenderPass(ref PassDesc, GBuffers.FrameBuffers.mCoreObject, "ClearScreen");
             cmdlist.BuildRenderPass(0);
             cmdlist.EndRenderPass();
             cmdlist.EndCommand();
         }
-        public unsafe void TickLogic()
+        public override unsafe void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
         {
             var cmdlist = BasePass.DrawCmdList.mCoreObject;
             if (ScreenMesh != null)
@@ -105,18 +108,18 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
             cmdlist.BeginCommand();
-            cmdlist.BeginRenderPass(ref PassDesc, GBuffers.FrameBuffers.mCoreObject);
+            cmdlist.BeginRenderPass(ref PassDesc, GBuffers.FrameBuffers.mCoreObject, DebugName);
             cmdlist.BuildRenderPass(0);
             cmdlist.EndRenderPass();
             cmdlist.EndCommand();
         }
-        public unsafe void TickRender()
+        public override unsafe void TickRender()
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var cmdlist = BasePass.CommitCmdList.mCoreObject;
             cmdlist.Commit(rc.mCoreObject);
         }
-        public unsafe void TickSync()
+        public override unsafe void TickSync()
         {
             BasePass.SwapBuffer();
         }

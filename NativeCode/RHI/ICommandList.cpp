@@ -56,6 +56,11 @@ AutoRef<IRenderContext> ICommandList::GetContext()
 	return mRHIContext.GetPtr();
 }
 
+void ICommandList::SetDebugName(const char* name) 
+{
+	mDebugName = StringHelper::strtowstr(name);
+}
+
 void ICommandList::BeginCommand()
 {
 	this->mCurrentState.Reset();

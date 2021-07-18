@@ -6,6 +6,27 @@ namespace EngineNS.Graphics.Pipeline.Shader
 {
     public class UShadingEnv
     {
+        public UShadingEnv()
+        {
+            var flds = this.GetType().GetFields();
+            foreach (var i in flds)
+            {
+                if (i.DeclaringType == typeof(UShadingEnv))
+                    continue;
+                if (i.DeclaringType == typeof(object))
+                    continue;
+                System.Diagnostics.Debug.Assert(false);
+            }
+            var props = this.GetType().GetProperties();
+            foreach (var i in props)
+            {
+                if (i.DeclaringType == typeof(UShadingEnv))
+                    continue;
+                if (i.DeclaringType == typeof(object))
+                    continue;
+                System.Diagnostics.Debug.Assert(false);
+            }
+        }
         public override string ToString()
         {
             string result = "";
@@ -19,6 +40,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public virtual void OnBuildDrawCall(RHI.CDrawCall drawcall) { }
         public uint CurrentPermutationId { get; set; } = 0;
         public RName CodeName { get; set; }
+        public RHI.CConstantBuffer PerShadingCBuffer;
+        public List<string> mMacroValues = new List<string>();
         public class MacroDefine
         {
             public int BitStart = 0;

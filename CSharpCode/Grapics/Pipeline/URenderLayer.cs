@@ -7,11 +7,12 @@ namespace EngineNS.Graphics.Pipeline
     public class UDrawBuffers
     {
         private RHI.CCommandList[] mCmdLists = new RHI.CCommandList[2];
-        public void Initialize(RHI.CRenderContext rc)
+        public void Initialize(RHI.CRenderContext rc, string debugName)
         {
             var desc = new ICommandListDesc();
             mCmdLists[0] = rc.CreateCommandList(ref desc);
             mCmdLists[1] = rc.CreateCommandList(ref desc);
+            SetDebugName(debugName);
         }
         public void SetPipelineStat(RHI.CPipelineStat stat)
         {
@@ -60,13 +61,13 @@ namespace EngineNS.Graphics.Pipeline
     {
         public RHI.CPipelineStat mPipelineStat;
         public UDrawBuffers[] PassBuffers = new UDrawBuffers[(int)ERenderLayer.RL_Num];
-        public void Initialize(RHI.CRenderContext rc)
+        public void Initialize(RHI.CRenderContext rc, string debugName)
         {
             mPipelineStat = new RHI.CPipelineStat();
             for (ERenderLayer i = ERenderLayer.RL_Opaque; i < ERenderLayer.RL_Num; i++)
             {
                 PassBuffers[(int)i] = new UDrawBuffers();
-                PassBuffers[(int)i].Initialize(rc);
+                PassBuffers[(int)i].Initialize(rc, debugName);
                 PassBuffers[(int)i].SetPipelineStat(mPipelineStat);
             }
         }
@@ -96,13 +97,13 @@ namespace EngineNS.Graphics.Pipeline
                 cmdlist.BeginCommand();
                 if (i == ERenderLayer.RL_Opaque)
                 {
-                    cmdlist.BeginRenderPass(ref passDesc, frameBuffers.mCoreObject);
+                    cmdlist.BeginRenderPass(ref passDesc, frameBuffers.mCoreObject, "DrawOpaque");
                 }
                 else
                 {
                     if (cmdlist.GetPassNumber() == 0)
                         continue;
-                    cmdlist.BeginRenderPass((RenderPassDesc*)0, frameBuffers.mCoreObject);
+                    cmdlist.BeginRenderPass((RenderPassDesc*)0, frameBuffers.mCoreObject, i.ToString());
                 }
                 //IDrawCall* tmp = (IDrawCall*)0;
                 cmdlist.BuildRenderPass(0);

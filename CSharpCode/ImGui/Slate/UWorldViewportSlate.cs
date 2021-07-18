@@ -6,7 +6,6 @@ namespace EngineNS.EGui.Slate
 {
     public class UWorldViewportSlate : Graphics.Pipeline.UViewportSlate
     {
-        public GamePlay.UWorld World { get; protected set; } = new GamePlay.UWorld();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
         public Graphics.Pipeline.Shader.CommanShading.UCopy2DPolicy Draw2ViewportPolicy { get; } = new Graphics.Pipeline.Shader.CommanShading.UCopy2DPolicy();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
@@ -194,7 +193,7 @@ namespace EngineNS.EGui.Slate
                 RenderPolicy.VisibleMeshes.AddRange(mWorldBoundShapes);
             }
 
-            RenderPolicy?.TickLogic();
+            RenderPolicy?.TickLogic(World);
         }
         public unsafe void TickRender(int ellapse)
         {

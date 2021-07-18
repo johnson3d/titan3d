@@ -14,7 +14,7 @@ public:
 	virtual void BeginCommand() override;
 	virtual void EndCommand() override;
 
-	virtual void BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer) override;
+	virtual void BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer, const char* debugName) override;
 	//virtual void BuildRenderPass(vBOOL bImmCBuffer, UINT* limitter, IPass** ppPass) override;
 	virtual void EndRenderPass() override;
 

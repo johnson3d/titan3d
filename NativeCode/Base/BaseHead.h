@@ -102,6 +102,9 @@ typedef int	vBOOL;
 #include <cmath>
 #include <algorithm>
 #include <assert.h>
+#include <clocale>	/// std::setlocale
+#include <cstdlib>	/// std::wcstombs, std::mbstowcs
+
 
 #define ENGINENS_BUFFER_SIZE 65536
 

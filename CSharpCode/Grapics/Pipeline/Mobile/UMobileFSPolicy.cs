@@ -11,6 +11,25 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             return BasePassNode; 
         }
         public UMobileBasePassNode BasePassNode = new UMobileBasePassNode();
+        public Shadow.UShadowMapNode mShadowMapNode = new Shadow.UShadowMapNode();
+        [RName.PGRName(FilterExts = RHI.CShaderResourceView.AssetExt)]
+        public RName EnvMap
+        {
+            get
+            {
+                if (EnvMapSRV == null)
+                    return null;
+                return EnvMapSRV.AssetName;
+            }
+            set
+            {
+                Action action = async () =>
+                {
+                    EnvMapSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+                };
+                action();
+            }
+        }
         public RHI.CShaderResourceView EnvMapSRV;
         public override RHI.CShaderResourceView GetFinalShowRSV()
         {
@@ -19,7 +38,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
         public override async System.Threading.Tasks.Task Initialize(float x, float y)
         {
-            await BasePassNode.Initialize(this, null, EPixelFormat.PXF_R16G16B16A16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y);
+            await BasePassNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>(), EPixelFormat.PXF_R16G16B16A16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y);
             
             EnvMapSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/default_envmap.srv"));
         }
@@ -49,9 +68,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             if (shadingType == EShadingType.BasePass)
                 BasePassNode.mBasePassShading.OnDrawCall(shadingType, drawcall, this, mesh);
         }
-        public unsafe override void TickLogic()
+        public unsafe override void TickLogic(GamePlay.UWorld world)
         {
-            BasePassNode.TickLogic(this);
+            BasePassNode.TickLogic(world, this, true);
         }
         public unsafe override void TickRender()
         {

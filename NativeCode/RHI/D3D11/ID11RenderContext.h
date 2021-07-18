@@ -73,6 +73,7 @@ public:
 
 	VCritical						mHWContextLocker;
 	ID3D11DeviceContext*			mHardwareContext;
+	ID3DUserDefinedAnnotation*		mDefinedAnnotation;
 
 	//IDXGIDevice*					mDXGIDevice;
 	ID11RenderSystem*				mSystem;

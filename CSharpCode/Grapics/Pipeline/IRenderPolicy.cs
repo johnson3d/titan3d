@@ -18,8 +18,10 @@ namespace EngineNS.Graphics.Pipeline
         //public Common.URenderGraphNode TagObject;
         public object TagObject;
         public virtual Common.UBasePassNode GetBasePassNode() { return null; }
-        //public virtual UGraphicsBuffers GBuffers { get; }
+        
+        public Common.UPickedProxiableManager PickedProxiableManager { get; protected set; } = new Common.UPickedProxiableManager();
         public List<Mesh.UMesh> VisibleMeshes = new List<Mesh.UMesh>();
+        
         public virtual Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom) { return null; }
         public virtual void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom) 
         {
@@ -34,7 +36,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             VisibleMeshes.Clear();
         }
-        public virtual void TickLogic()
+        public virtual void TickLogic(GamePlay.UWorld world)
         {
 
         }

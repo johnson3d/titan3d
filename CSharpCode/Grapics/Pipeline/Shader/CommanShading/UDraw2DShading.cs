@@ -10,7 +10,6 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         {
             CodeName = RName.GetRName("shaders/shadingenv/sys/copy2d.shadingenv", RName.ERNameType.Engine);
         }
-        public RHI.CConstantBuffer PerShadingCBuffer;
         public unsafe override void OnBuildDrawCall(RHI.CDrawCall drawcall)
         {
             var gpuProgram = drawcall.Effect.ShaderProgram;
@@ -45,7 +44,6 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         {
             CodeName = RName.GetRName("shaders/shadingenv/sys/rect2d.shadingenv", RName.ERNameType.Engine);
         }
-        public RHI.CConstantBuffer PerShadingCBuffer;
         public unsafe override void OnBuildDrawCall(RHI.CDrawCall drawcall)
         {
             var gpuProgram = drawcall.Effect.ShaderProgram;

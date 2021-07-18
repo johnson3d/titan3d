@@ -19,18 +19,18 @@ namespace EngineNS.Graphics.Pipeline.Common
         public UDrawBuffers BasePass = new UDrawBuffers();
         public RenderPassDesc PassDesc = new RenderPassDesc();
 
-        public async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, float x, float y)
+        public async override System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat fmt, EPixelFormat dsFmt, float x, float y, string debugName)
         {
             await Thread.AsyncDummyClass.DummyFunc();
-            PickedShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickSetupShading>();
+            PickedShading = shading as UPickSetupShading;
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc);
+            BasePass.Initialize(rc, debugName);
             BasePass.SetDebugName("UPickedProxiableManager");
 
             PickedBuffer.SwapChainIndex = -1;
-            PickedBuffer.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)x, (uint)y);
-            PickedBuffer.CreateGBuffer(0, EPixelFormat.PXF_R16G16_FLOAT, (uint)x, (uint)y);
+            PickedBuffer.Initialize(1, dsFmt, (uint)x, (uint)y);
+            PickedBuffer.CreateGBuffer(0, fmt, (uint)x, (uint)y);
             PickedBuffer.TargetViewIdentifier = policy.GetBasePassNode().GBuffers.TargetViewIdentifier;
             PickedBuffer.Camera = policy.GetBasePassNode().GBuffers.Camera;
 
@@ -43,6 +43,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             PassDesc.mFBLoadAction_Stencil = FrameBufferLoadAction.LoadActionClear;
             PassDesc.mFBStoreAction_Stencil = FrameBufferStoreAction.StoreActionStore;
             PassDesc.mStencilClearValue = 0u;
+
+            PickedManager = policy.PickedProxiableManager;
         }
         public unsafe void Cleanup()
         {
@@ -55,7 +57,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 PickedBuffer.OnResize(x, y);
         }
         List<Mesh.UMesh> mPickedMeshes = new List<Mesh.UMesh>();
-        public unsafe void TickLogic(IRenderPolicy policy)
+        public override unsafe void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
         {
             var cmdlist = BasePass.DrawCmdList.mCoreObject;
             cmdlist.ClearMeshDrawPassArray();
@@ -88,7 +90,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
 
             cmdlist.BeginCommand();
-            cmdlist.BeginRenderPass(ref PassDesc, PickedBuffer.FrameBuffers.mCoreObject);
+            cmdlist.BeginRenderPass(ref PassDesc, PickedBuffer.FrameBuffers.mCoreObject, "Picked");
             cmdlist.BuildRenderPass(0);
             cmdlist.EndRenderPass();
             cmdlist.EndCommand();

@@ -37,7 +37,7 @@ namespace EngineNS.Graphics.Pipeline
             scDesc.WindowHandle = HWindow.ToPointer();
             SwapChain = UEngine.Instance.GfxDevice.RenderContext.CreateSwapChain(ref scDesc);
 
-            SwapChainPass.Initialize(rc);
+            SwapChainPass.Initialize(rc, "PresentSwapChain");
 
             SwapChainBuffer.SwapChainIndex = 0;
             SwapChainBuffer.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)w, (uint)h);
@@ -92,7 +92,7 @@ namespace EngineNS.Graphics.Pipeline
             cmdlist.BeginCommand();
             unsafe
             {
-                cmdlist.BeginRenderPass(ref SwapChainPassDesc, SwapChainBuffer.FrameBuffers.mCoreObject);
+                cmdlist.BeginRenderPass(ref SwapChainPassDesc, SwapChainBuffer.FrameBuffers.mCoreObject, "PresentSwapChain");
                 cmdlist.BuildRenderPass(0);
                 cmdlist.EndRenderPass();
             }

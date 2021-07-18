@@ -43,7 +43,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             UpdatePermutation(mMacroValues);
         }
-        List<string> mMacroValues = new List<string>();
         public unsafe override void OnBuildDrawCall(RHI.CDrawCall drawcall)
         {
         }
@@ -82,9 +81,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             OutputShaderResourceViews[0] = new Common.URenderGraphSRV();
             OutputShaderResourceViews[0].Name = "Final";
         }
-        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
+        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y, string debugName)
         {
-            await base.Initialize(policy, shading, rtFmt, dsFmt, x, y);
+            await base.Initialize(policy, shading, rtFmt, dsFmt, x, y, debugName);
 
             OutputShaderResourceViews[0].SRV = GBuffers.GBufferSRV[0];
         }
@@ -97,7 +96,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
 
         #region GetHitproxy
-        public Common.UPickedProxiableManager PickedProxiableManager { get; protected set; } = new Common.UPickedProxiableManager();
         public IProxiable GetHitproxy(UInt32 MouseX, UInt32 MouseY)
         {
             return HitproxyNode.GetHitproxy(MouseX, MouseY);
@@ -109,7 +107,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         #endregion
 
-        public Shadow.UShadowMapNode mShadowMapNode = new Shadow.UShadowMapNode();
         public UEditorFinalNode EditorFinalNode = new UEditorFinalNode();
         public Common.UHitproxyNode HitproxyNode = new Common.UHitproxyNode();
         public Common.UPickedNode PickedNode = new Common.UPickedNode();
@@ -118,27 +115,25 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
         public override async System.Threading.Tasks.Task Initialize(float x, float y)
         {
-            await base.Initialize(x, y);
+            EnvMapSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/default_envmap.srv"));
 
-            await HitproxyNode.Initialize(this, x, y);
+            await BasePassNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>(), EPixelFormat.PXF_R16G16B16A16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y);
 
-            PickedNode.PickedManager = PickedProxiableManager;
-            await PickedNode.Initialize(this, x, y);
+            await HitproxyNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UHitproxyShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "Hitproxy");
 
-            await PickBlurNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickBlurShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y);
-            PickBlurNode.ScreenDrawPolicy.TagObject = this;
+            await PickedNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickSetupShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "PickedNode");
 
-            await PickHollowNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickHollowShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y);
-            PickHollowNode.ScreenDrawPolicy.TagObject = this;
-
-            await EditorFinalNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UEditorFinalShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_UNKNOWN, x, y);
-            EditorFinalNode.ScreenDrawPolicy.TagObject = this;
-
-            mShadowMapNode.Initialize(x, y);
+            await PickBlurNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickBlurShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y, "PickBlur");
+            
+            await PickHollowNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickHollowShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y, "PickHollow");
+            
+            await EditorFinalNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UEditorFinalShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_UNKNOWN, x, y, "EditorFinal");
+            
+            await mShadowMapNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>(), EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_D16_UNORM, x, y, "ShadowDepth");
         }
         public override void OnResize(float x, float y)
         {
-            base.OnResize(x, y);
+            BasePassNode.OnResize(x, y);
 
             HitproxyNode?.OnResize(x, y);
 
@@ -167,7 +162,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             EditorFinalNode?.Cleanup();
             EditorFinalNode = null;
 
-            HitproxyNode.Cleanup();
+            HitproxyNode?.Cleanup();
+            HitproxyNode = null;
 
             base.Cleanup();
         }
@@ -200,58 +196,29 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             //drawcall.Effect.ShadingEnv
             base.OnDrawCall(shadingType, drawcall, mesh, atom);
         }
-        public unsafe override void TickLogic()
+        public unsafe override void TickLogic(GamePlay.UWorld world)
         {
-            var app = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
-            if (app != null)
-            {
-                mShadowMapNode.TickLogic(app.GetWorldViewportSlate().World, this, true);
+            mShadowMapNode?.TickLogic(world, this, true);
+            
+            BasePassNode?.TickLogic(world, this, true);
 
-                var cBuffer = BasePassNode.GBuffers.PerViewportCBuffer;
-                if (cBuffer != null)
-                {
-                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gFadeParam, ref mShadowMapNode.mFadeParam);
-                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowTransitionScale, ref mShadowMapNode.mShadowTransitionScale);
-                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowMapSizeAndRcp, ref mShadowMapNode.mShadowMapSizeAndRcp);
-                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gViewer2ShadowMtx, ref mShadowMapNode.mViewer2ShadowMtx);
-                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowDistance, ref mShadowMapNode.mShadowDistance);
+            HitproxyNode?.TickLogic(world, this, true);
 
-                    var dirLight = app.GetWorldViewportSlate().World.DirectionLight;
-                    //dirLight.mDirection = MathHelper.RandomDirection();
-                    var dir = dirLight.mDirection;
-                    var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
-                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightDirection_Leak, ref gDirLightDirection_Leak);
-                    var gDirLightColor_Intensity = new Vector4(dirLight.mSunLightColor.X, dirLight.mSunLightColor.Y, dirLight.mSunLightColor.Z, dirLight.mSunLightIntensity);
-                    cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightColor_Intensity, ref gDirLightColor_Intensity);
+            PickedNode?.TickLogic(world, this, true);
 
-                    cBuffer.SetValue(cBuffer.PerViewportIndexer.mSkyLightColor, ref dirLight.mSkyLightColor);
-                    cBuffer.SetValue(cBuffer.PerViewportIndexer.mGroundLightColor, ref dirLight.mGroundLightColor);
-                }
-            }
+            PickBlurNode?.TickLogic(world, this, true);
 
-            BasePassNode.TickLogic(this);
+            PickHollowNode?.TickLogic(world, this, true);
 
-            HitproxyNode.TickLogic(this);
-
-            PickedNode?.TickLogic(this);
-
-            PickBlurNode?.TickLogic();
-
-            PickHollowNode?.TickLogic();
-
-            EditorFinalNode?.TickLogic();
+            EditorFinalNode?.TickLogic(world, this, true);
         }
         public unsafe override void TickRender()
         {
-            var app = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
-            if (app != null)
-            {
-                mShadowMapNode.TickRender();
-            }
+            mShadowMapNode?.TickRender();
 
-            BasePassNode.TickRender(this);
+            BasePassNode?.TickRender(this);
 
-            HitproxyNode.TickRender(this);
+            HitproxyNode?.TickRender(this);
 
             PickedNode?.TickRender(this);
             
@@ -263,15 +230,11 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickSync()
         {
-            var app = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
-            if (app != null)
-            {
-                mShadowMapNode.TickSync();
-            }
+            mShadowMapNode?.TickSync();
 
-            BasePassNode.TickSync(this);
+            BasePassNode?.TickSync(this);
 
-            HitproxyNode.TickSync(this);
+            HitproxyNode?.TickSync(this);
 
             PickedNode?.TickSync(this);
 
@@ -279,7 +242,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             PickHollowNode?.TickSync();
 
-            EditorFinalNode.TickSync();
+            EditorFinalNode?.TickSync();
         }
     }
 }

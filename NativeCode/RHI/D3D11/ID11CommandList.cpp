@@ -62,6 +62,7 @@ void ID11CommandList::BeginCommand()
 void ID11CommandList::EndCommand()
 {
 	Safe_Release(mCmdList);
+	
 	mDeferredContext->FinishCommandList(FALSE, &mCmdList);
 #ifdef _DEBUG
 	ASSERT(mCmdList != nullptr);
@@ -74,10 +75,11 @@ void ID11CommandList::EndCommand()
 	ICommandList::EndCommand();
 }
 
-void ID11CommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer)
+void ID11CommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer, const char* debugName)
 {
 	if (pRenderPassDesc == nullptr)
 		return;
+
 	if (mProfiler != nullptr && mProfiler->mNoPixelWrite)
 	{
 		pFrameBuffer = mProfiler->mOnePixelFB;
@@ -199,7 +201,18 @@ void ID11CommandList::Commit(IRenderContext* pRHICtx)
 		VAutoLock(((ID11RenderContext*)pRHICtx)->mHWContextLocker);
 		auto context = ((ID11RenderContext*)pRHICtx)->mHardwareContext;
 		
+		auto anno = GetContext().UnsafeConvertTo<ID11RenderContext>()->mDefinedAnnotation;
+		if (anno != nullptr)
+		{
+			anno->BeginEvent(mDebugName.c_str());
+		}
+
 		context->ExecuteCommandList(mCmdList, FALSE);
+
+		if (anno != nullptr)
+		{
+			anno->EndEvent();
+		}
 
 		for (auto& i : mSignals)
 		{
