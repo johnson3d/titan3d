@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Player\AnimationBlendSpacePlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\IAnimationPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pose\CBonePose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pose\Control\IPoseControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pose\CSkeletonPose.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pose\ULimbPose.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pose\USkeletonPose.cs" />
@@ -40,6 +41,5 @@
     <Folder Include="$(MSBuildThisFileDirectory)Asset\" />
     <Folder Include="$(MSBuildThisFileDirectory)Macross\" />
     <Folder Include="$(MSBuildThisFileDirectory)StateMachine\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Pose\Control\" />
   </ItemGroup>
 </Project>

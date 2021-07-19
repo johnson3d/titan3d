@@ -9,6 +9,7 @@ namespace EngineNS.Graphics.Mesh
     {
         public partial class ImportAttribute : IO.CommonCreateAttribute
         {
+            AssetImportAndExport.FBX.FBXImporter mFBXImporter; //for now we only have one file to import
             public unsafe partial void FBXCreateCreateDraw(ContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)

@@ -32,7 +32,6 @@ namespace EngineNS.Graphics.Mesh
                 mFileDialog.Dispose();
             }
             string mSourceFile;
-            AssetImportAndExport.FBX.FBXImporter mFBXImporter; //for now we only have one file to import
             ImGui.ImGuiFileDialog mFileDialog = ImGui.ImGuiFileDialog.CreateInstance();
             //EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
             public override void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
