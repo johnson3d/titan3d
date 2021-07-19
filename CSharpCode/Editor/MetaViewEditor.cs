@@ -89,17 +89,12 @@ namespace EngineNS.Editor
                 materialMesh.SaveAssetTo(RName.GetRName("utest/mesh/puppet_low_ue4.ums"));
             }
 
-            var mesh = new Graphics.Mesh.UMesh();
-
-            //var ok = mesh.Initialize(puppetMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-            //var ok = mesh.Initialize(materialMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-            var ok = mesh.Initialize(materialMesh, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
-            if (ok)
+            
             {
-                //var trans = Matrix.Scaling(0.01f);
-                //mesh.SetWorldMatrix(ref trans);// Matrix.mIdentity);
-
-                var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, new Vector3(5, 5, 5), new Vector3(0.01f), Quaternion.Identity);
+                var meshData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
+                meshData.MeshName = RName.GetRName("utest/mesh/puppet_low_ue4.ums");
+                meshData.CollideName = RName.GetRName("utest/mesh/puppet_low_ue4.vms");
+                var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(root, meshData, typeof(GamePlay.UPlacement), new Vector3(5, 5, 5), new Vector3(0.01f), Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "Robot0";
                 meshNode.IsScaleChildren = false;
@@ -130,8 +125,8 @@ namespace EngineNS.Editor
                 {
                     colorVar.Value = "1,0,1,1";
                 }
-                ok = mesh2.Initialize(cookedMesh, materials1, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
-                if (ok)
+                var ok1 = mesh2.Initialize(cookedMesh, materials1, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
+                if (ok1)
                 {
                     //var trans = Matrix.Scaling(1);
                     //mesh.SetWorldMatrix(ref trans);
@@ -147,7 +142,7 @@ namespace EngineNS.Editor
             var tMaterials = new Graphics.Pipeline.Shader.UMaterialInstance[1];
             tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ground.uminst"));
             //tMaterials[0].SaveAssetTo(tMaterials[1].AssetName);
-            ok = terrainMesh.Initialize(gridMesh, tMaterials, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfTerrainMesh)));
+            var ok = terrainMesh.Initialize(gridMesh, tMaterials, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfTerrainMesh)));
             if (ok)
             {
                 //var trAttach = new Graphics.Pipeline.Mobile.UBasePassTerrain.UTerrainAttachment();

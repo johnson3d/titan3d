@@ -1909,24 +1909,31 @@ extern "C"
 	{
 		pOut->identity();
 
-		pRotation->toRotationMatrix(*pOut);
+		if (pRotation != nullptr)
+		{
+			pRotation->toRotationMatrix(*pOut);
+		}
 
-		pOut->m[0][0] *= pScaling->x;
-		pOut->m[0][1] *= pScaling->x;
-		pOut->m[0][2] *= pScaling->x;
+		if (pScaling != nullptr)
+		{
+			pOut->m[0][0] *= pScaling->x;
+			pOut->m[0][1] *= pScaling->x;
+			pOut->m[0][2] *= pScaling->x;
 
-		pOut->m[1][0] *= pScaling->y;
-		pOut->m[1][1] *= pScaling->y;
-		pOut->m[1][2] *= pScaling->y;
+			pOut->m[1][0] *= pScaling->y;
+			pOut->m[1][1] *= pScaling->y;
+			pOut->m[1][2] *= pScaling->y;
 
-		pOut->m[2][0] *= pScaling->z;
-		pOut->m[2][1] *= pScaling->z;
-		pOut->m[2][2] *= pScaling->z;
-
-		pOut->m[3][0] = pTranslation->x;
-		pOut->m[3][1] = pTranslation->y;
-		pOut->m[3][2] = pTranslation->z;
-
+			pOut->m[2][0] *= pScaling->z;
+			pOut->m[2][1] *= pScaling->z;
+			pOut->m[2][2] *= pScaling->z;
+		}
+		if (pTranslation != nullptr)
+		{
+			pOut->m[3][0] = pTranslation->x;
+			pOut->m[3][1] = pTranslation->y;
+			pOut->m[3][2] = pTranslation->z;
+		}
 		return pOut;
 	}
 

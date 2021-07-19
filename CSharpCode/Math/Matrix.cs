@@ -1973,6 +1973,15 @@ namespace EngineNS
             }
             return result;
         }
+        public static Matrix Transformation(Quaternion rotation, Vector3 translation)
+        {
+            Matrix result;
+            unsafe
+            {
+                IDllImportApi.v3dxMatrixTransformationOrigin((Matrix*)&result, (Vector3*)0, (Quaternion*)&rotation, (Vector3*)&translation);
+            }
+            return result;
+        }
         /// <summary>
         /// 变换矩阵
         /// </summary>

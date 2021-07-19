@@ -28,5 +28,29 @@ namespace EngineNS.Editor
                 this.ShowBoundVolumes(true, node);
             }
         }
+        protected override void OnMouseUp(ref SDL.SDL_Event e)
+        {
+            //test
+            if (e.button.button == SDL.SDL_BUTTON_LEFT)
+            {
+                var root = World.Root.FindFirstChild("DrawMeshNode");
+                if (root == null)
+                    return;
+                Vector3 ray = new Vector3();
+                float sw = Viewport.mCoreObject.Width;
+                float sh = Viewport.mCoreObject.Height;
+                var mouse = Window2Viewport(new Vector2((float)e.button.x, (float)e.button.y));
+                if (0 != CameraController.Camera.mCoreObject.GetPickRay(ref ray, mouse.X, mouse.Y, sw, sh))
+                {
+                    var pos = CameraController.Camera.mCoreObject.GetPosition();
+                    var end = pos + ray * 1000.0f;
+                    VHitResult hit = new VHitResult();
+                    if (root.LineCheck(in pos, in end, ref hit))
+                    {
+                        Console.WriteLine(hit.Distance);
+                    }
+                }
+            }
+        }
     }
 }

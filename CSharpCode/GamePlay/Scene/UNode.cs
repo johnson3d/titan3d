@@ -395,23 +395,14 @@ namespace EngineNS.GamePlay.Scene
             if (Parent == null)
             {
                 Placement.AbsTransform = Placement.Transform;
-                Placement.AbsTransformInv = Matrix.Invert(ref Placement.AbsTransform);
+                Placement.AbsTransformInv = Matrix.Invert(ref Placement.mAbsTransform);
                 OnAbsTransformChanged();
                 return;
             }
             else
             {
-                if (Parent.IsScaleChildren)
-                {
-                    Placement.AbsTransform = Placement.Transform * Parent.Placement.AbsTransform;
-                }
-                else
-                {
-                    var noScaleTM = Parent.Placement.AbsTransform;
-                    noScaleTM.NoScale();
-                    Placement.AbsTransform = Placement.Transform * noScaleTM;
-                }
-                Placement.AbsTransformInv = Matrix.Invert(ref Placement.AbsTransform);
+                Placement.AbsTransform = Placement.Transform * Parent.Placement.AbsTransform;                
+                Placement.AbsTransformInv = Matrix.Invert(ref Placement.mAbsTransform);
                 OnAbsTransformChanged();
                 Parent.UpdateAbsTransform();
             }
@@ -450,14 +441,16 @@ namespace EngineNS.GamePlay.Scene
             float Near, Far;
             Vector3 vNear = new Vector3();
             Vector3 vFar = new Vector3();
-            var localStart = Vector3.TransformCoordinate(start, Placement.AbsTransformInv);
-            var localEnd = Vector3.TransformCoordinate(end, Placement.AbsTransformInv);
+            var invMatrix = Placement.AbsTransformInv;
+            //invMatrix.NoScale();
+            var localStart = Vector3.TransformCoordinate(start, invMatrix);
+            var localEnd = Vector3.TransformCoordinate(end, invMatrix);
             unsafe
             {
                 fixed(BoundingBox* pBox = &AABB)
                 {
                     var dir = localEnd - localStart;
-                    if (IDllImportApi.v3dxLineIntersectBox3(&Near, &vNear, &Far, &vFar, &localStart, &dir, pBox) == 0)
+                    if (AABB.IsEmpty()==false && IDllImportApi.v3dxLineIntersectBox3(&Near, &vNear, &Far, &vFar, &localStart, &dir, pBox) == 0)
                     {
                         return false;
                     }

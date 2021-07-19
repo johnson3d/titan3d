@@ -418,6 +418,8 @@ namespace EngineNS.Graphics.Mesh
         }
         public async System.Threading.Tasks.Task<UMaterialMesh> GetMaterialMesh(RName name)
         {
+            if (name == null)
+                return null;
             UMaterialMesh result;
             if (Meshes.TryGetValue(name, out result))
                 return result;

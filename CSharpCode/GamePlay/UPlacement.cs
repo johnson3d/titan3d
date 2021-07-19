@@ -65,8 +65,22 @@ namespace EngineNS.GamePlay
         }
         
         public Scene.UNode HostNode { get; private set; }
-        public Matrix AbsTransform = new Matrix();
+        public Matrix mAbsTransform = Matrix.Identity;
+        public virtual Matrix AbsTransform
+        {
+            get
+            {
+                return mAbsTransform;
+            }
+            set
+            {
+                mAbsTransform = value;
+
+                AbsTransformWithScale = value;
+            }
+        }
         public Matrix AbsTransformInv = new Matrix();
+        public Matrix AbsTransformWithScale = new Matrix();
     }
     public partial class UPlacement : UPlacementBase
     {
@@ -122,10 +136,33 @@ namespace EngineNS.GamePlay
                 return mTransform;
             }
         }
-        
+        public override Matrix AbsTransform
+        {
+            get
+            {
+                return mAbsTransform;
+            }
+            set
+            {
+                mAbsTransform = value;
+
+                AbsTransformWithScale = value;
+                AbsTransformWithScale.M11 = value.M11 * Scale.X;
+                AbsTransformWithScale.M12 = value.M12 * Scale.X;
+                AbsTransformWithScale.M13 = value.M13 * Scale.X;
+
+                AbsTransformWithScale.M21 = value.M21 * Scale.Y;
+                AbsTransformWithScale.M22 = value.M22 * Scale.Y;
+                AbsTransformWithScale.M23 = value.M23 * Scale.Y;
+
+                AbsTransformWithScale.M31 = value.M31 * Scale.Z;
+                AbsTransformWithScale.M32 = value.M32 * Scale.Z;
+                AbsTransformWithScale.M33 = value.M33 * Scale.Z;
+            }
+        }
         private void UpdateData()
         {
-            mTransform = Matrix.Transformation(mTransformData.mScale, mTransformData.mQuat, mTransformData.mPosition);
+            mTransform = Matrix.Transformation(mTransformData.mQuat, mTransformData.mPosition);
             HostNode.UpdateAbsTransform();
             HostNode.UpdateAABB();
             if (HostNode.Parent != null)

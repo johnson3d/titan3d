@@ -230,6 +230,45 @@ namespace EngineNS.Graphics.Mesh
                 return result;
             }
         }
+
+        private CMeshDataProvider mMeshDataProvider;
+        public async System.Threading.Tasks.Task LoadMeshDataProvider()
+        {
+            if (mMeshDataProvider != null || AssetName == null)
+                return;
+
+            if (mMeshDataProvider == null)
+            {
+                var result = await UEngine.Instance.EventPoster.Post(() =>
+                {
+                    using (var xnd = IO.CXndHolder.LoadXnd(AssetName.Address))
+                    {
+                        if (xnd != null)
+                        {
+                            var tmp = new CMeshDataProvider();
+
+                            var ok = tmp.mCoreObject.LoadFromMeshPrimitive(xnd.RootNode.mCoreObject, EVertexSteamType.VST_FullMask);
+                            if (ok == 0)
+                                return false;
+
+                            mMeshDataProvider = tmp;
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }, Thread.Async.EAsyncTarget.AsyncIO);
+            }
+        }
+        public CMeshDataProvider MeshDataProvider 
+        { 
+            get
+            {
+                return mMeshDataProvider;
+            }
+        }
     }
     public class UMeshPrimitiveManager
     {
