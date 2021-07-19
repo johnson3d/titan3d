@@ -1214,9 +1214,10 @@ int IMeshDataProvider::IntersectTriangle(const v3dxVector3* scale, const v3dxVec
 {
 	auto start = *vStart;
 	auto end = *vEnd;
+	v3dxVector3 rcqScale;
 	if (scale != nullptr)
 	{
-		v3dxVector3 rcqScale(1.0f / scale->x, 1.0f / scale->y, 1.0f / scale->z);
+		rcqScale = v3dxVector3(1.0f / scale->x, 1.0f / scale->y, 1.0f / scale->z);
 		start *= rcqScale;
 		end *= rcqScale;
 	}
@@ -1255,8 +1256,13 @@ int IMeshDataProvider::IntersectTriangle(const v3dxVector3* scale, const v3dxVec
 						triangle = i;
 						result->Distance = dist;
 						result->FaceId = i;
-						result->Position = (*vStart) + dir * dist;
-						v3dxCalcNormal(&result->Normal, &vA, &vB, &vC);
+						result->Position = start + dir * dist;
+						if (scale != nullptr)
+						{
+							result->Position *= (*scale);
+							result->Distance = sqrt(v3dxCalSquareDistance(&result->Position, vStart));
+						}
+						v3dxCalcNormal(&result->Normal, &vA, &vB, &vC, TRUE);
 						result->U = u;
 						result->V = v;
 					}
@@ -1295,8 +1301,13 @@ int IMeshDataProvider::IntersectTriangle(const v3dxVector3* scale, const v3dxVec
 						triangle = i;
 						result->Distance = dist;
 						result->FaceId = i;
-						result->Position = (*vStart) + dir * dist;
-						v3dxCalcNormal(&result->Normal, &vA, &vB, &vC);
+						result->Position = start + dir * dist;
+						if (scale != nullptr)
+						{
+							result->Position *= (*scale);
+							result->Distance = sqrt(v3dxCalSquareDistance(&result->Position, vStart));
+						}
+						v3dxCalcNormal(&result->Normal, &vA, &vB, &vC, TRUE);
 						result->U = u;
 						result->V = v;
 					}

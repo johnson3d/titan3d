@@ -454,7 +454,8 @@ namespace EngineNS.GamePlay.Scene
                     }
                     if (OnLineCheckTriangle(in localStart, in localEnd, ref result))
                     {
-                        //result.Position = Vector3.TransformCoordinate(vNear, Placement.AbsTransform);
+                        result.Position = Vector3.TransformCoordinate(result.Position, Placement.AbsTransform);
+                        result.Normal = Vector3.TransformNormal(result.Normal, Placement.AbsTransform);
                         return true;
                     }
                     else
