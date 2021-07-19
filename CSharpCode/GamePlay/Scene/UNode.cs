@@ -441,10 +441,8 @@ namespace EngineNS.GamePlay.Scene
             float Near, Far;
             Vector3 vNear = new Vector3();
             Vector3 vFar = new Vector3();
-            var invMatrix = Placement.AbsTransformInv;
-            //invMatrix.NoScale();
-            var localStart = Vector3.TransformCoordinate(start, invMatrix);
-            var localEnd = Vector3.TransformCoordinate(end, invMatrix);
+            var localStart = Vector3.TransformCoordinate(start, Placement.AbsTransformInv);
+            var localEnd = Vector3.TransformCoordinate(end, Placement.AbsTransformInv);
             unsafe
             {
                 fixed(BoundingBox* pBox = &AABB)
@@ -454,7 +452,7 @@ namespace EngineNS.GamePlay.Scene
                     {
                         return false;
                     }
-                    if (OnLineCheckTriangle(in start, in end, ref result))
+                    if (OnLineCheckTriangle(in localStart, in localEnd, ref result))
                     {
                         //result.Position = Vector3.TransformCoordinate(vNear, Placement.AbsTransform);
                         return true;

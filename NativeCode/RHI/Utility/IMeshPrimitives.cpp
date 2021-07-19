@@ -1212,8 +1212,16 @@ vBOOL IMeshDataProvider::GetTriangle(int index, UINT* vA, UINT* vB, UINT* vC)
 
 int IMeshDataProvider::IntersectTriangle(const v3dxVector3* scale, const v3dxVector3* vStart, const v3dxVector3* vEnd, VHitResult* result)
 {
+	auto start = *vStart;
+	auto end = *vEnd;
+	if (scale != nullptr)
+	{
+		v3dxVector3 rcqScale(1.0f / scale->x, 1.0f / scale->y, 1.0f / scale->z);
+		start *= rcqScale;
+		end *= rcqScale;
+	}
 	auto pPos = (v3dxVector3*)mVertexBuffers[VST_Position]->GetData();
-	v3dxVector3 dir = *vEnd - *vStart;
+	v3dxVector3 dir = end - start;
 	switch (IBType)
 	{
 		case EngineNS::IBT_Int16:
@@ -1231,15 +1239,15 @@ int IMeshDataProvider::IntersectTriangle(const v3dxVector3* scale, const v3dxVec
 				auto vA = pPos[ia];
 				auto vB = pPos[ib];
 				auto vC = pPos[ic];
-				if (scale != nullptr)
+				/*if (scale != nullptr)
 				{
 					vA *= (*scale);
 					vB *= (*scale);
 					vC *= (*scale);
-				}
+				}*/
 				
 				float u, v, dist;
-				if (v3dxIntersectTri(&vA, &vB, &vC, vStart, &dir, &u, &v, &dist))
+				if (v3dxIntersectTri(&vA, &vB, &vC, &start, &dir, &u, &v, &dist))
 				{
 					if (dist < closedDist)
 					{
@@ -1271,15 +1279,15 @@ int IMeshDataProvider::IntersectTriangle(const v3dxVector3* scale, const v3dxVec
 				auto vA = pPos[ia];
 				auto vB = pPos[ib];
 				auto vC = pPos[ic];
-				if (scale != nullptr)
+				/*if (scale != nullptr)
 				{
 					vA *= (*scale);
 					vB *= (*scale);
 					vC *= (*scale);
-				}
+				}*/
 
 				float u, v, dist;
-				if (v3dxIntersectTri(&vA, &vB, &vC, vStart, &dir, &u, &v, &dist))
+				if (v3dxIntersectTri(&vA, &vB, &vC, &start, &dir, &u, &v, &dist))
 				{
 					if (dist < closedDist)
 					{
