@@ -157,10 +157,6 @@ namespace CppWeaving.Cpp2CS
             var methods = Decl.Methods;
             foreach (var i in methods)
             {
-                if(i.Name == "GetGlyphRangesDefault")
-                {
-                    int xx = 0;
-                }
                 if (IsIgnoreFunction(i, Decl))
                     continue;
 
@@ -189,6 +185,7 @@ namespace CppWeaving.Cpp2CS
                     arg.BuildMetaInfo(j.Attrs);
                     arg.Name = j.Name;
                     arg.PropertyType = UTypeManager.Instance.FindType(j.Type.Handle);
+                    arg.IsConst = j.Type.Handle.Spelling.ToString().StartsWith("const ");
                     arg.IsDelegate = arg.PropertyType is UDelegate;
                     arg.NumOfTypePointer = UTypeManager.GetPointerNumOfType(j.Type.Handle, out arg.IsReference);
                     arg.MarshalType = UTypeManager.GetMeta(j.Attrs, UProjectSettings.SV_Marshal);

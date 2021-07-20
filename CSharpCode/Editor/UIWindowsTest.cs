@@ -316,17 +316,17 @@ namespace EngineNS.Editor
 
             mMainDockId = ImGuiAPI.GetID("MainDocker");
             var mainPos = new Vector2(0);
-            ImGuiAPI.SetNextWindowPos(ref mainPos, ImGuiCond_.ImGuiCond_FirstUseEver, ref mainPos);
+            ImGuiAPI.SetNextWindowPos(in mainPos, ImGuiCond_.ImGuiCond_FirstUseEver, in mainPos);
             var wSize = new Vector2(1290, 800);
-            ImGuiAPI.SetNextWindowSize(ref wSize, ImGuiCond_.ImGuiCond_FirstUseEver);
+            ImGuiAPI.SetNextWindowSize(in wSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             bool visible = true;
             if (ImGuiAPI.Begin("UI Test", ref visible, 
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
             {
 
                 // Menu
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.TopMenuFramePadding);
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, ref EGui.UIProxy.StyleConfig.Instance.TopMenuItemSpacing);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in EGui.UIProxy.StyleConfig.Instance.TopMenuFramePadding);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, in EGui.UIProxy.StyleConfig.Instance.TopMenuItemSpacing);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, EGui.UIProxy.StyleConfig.Instance.MenuBG);
                 if (ImGuiAPI.BeginMenuBar())
                 {
@@ -343,8 +343,8 @@ namespace EngineNS.Editor
                 ImGuiAPI.PopStyleVar(2);
                 ImGuiAPI.PopStyleColor(1);
 
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, ref EGui.UIProxy.StyleConfig.Instance.WindowPadding);
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.MainTabFramePadding);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, in EGui.UIProxy.StyleConfig.Instance.WindowPadding);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in EGui.UIProxy.StyleConfig.Instance.MainTabFramePadding);
                 //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, ref EGui.UIProxy.StyleConfig.Instance.TopMenuWindowPadding);
 
                 var size = new Vector2(0, 0);
@@ -352,7 +352,7 @@ namespace EngineNS.Editor
                 {
                     //TabItemFlagsOverrideSet = ImGuiTabItemFlags_.ImGuiTabItemFlags_Leading
                 };
-                ImGuiAPI.DockSpace(mMainDockId, ref size, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, ref dockClass);
+                ImGuiAPI.DockSpace(mMainDockId, in size, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, in dockClass);
                 for (int i = 0; i < mForms.Count; ++i)
                 {
                     if (mForms[i].DockId == uint.MaxValue)
@@ -551,15 +551,15 @@ namespace EngineNS.Editor
                 var winPos = ImGuiAPI.GetWindowPos();
                 winPos.Y += ImGuiAPI.GetWindowSize().Y - contentSize.Y;
                 var pivot = Vector2.Zero;
-                ImGuiAPI.SetNextWindowPos(ref winPos, ImGuiCond_.ImGuiCond_Always, ref pivot);
-                if(ImGuiAPI.BeginChild("MeshEDDockChild", ref contentSize, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                ImGuiAPI.SetNextWindowPos(in winPos, ImGuiCond_.ImGuiCond_Always, in pivot);
+                if(ImGuiAPI.BeginChild("MeshEDDockChild", in contentSize, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
-                    ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, ref EGui.UIProxy.StyleConfig.Instance.WindowPadding);
-                    ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.MainTabFramePadding);
+                    ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, in EGui.UIProxy.StyleConfig.Instance.WindowPadding);
+                    ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in EGui.UIProxy.StyleConfig.Instance.MainTabFramePadding);
 
                     var size = new Vector2(0, 0);
                     ImGuiWindowClass centerDockClass = new ImGuiWindowClass();
-                    ImGuiAPI.DockSpace(mPanelDockId, ref size, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, ref centerDockClass);
+                    ImGuiAPI.DockSpace(mPanelDockId, in size, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, in centerDockClass);
 
                     for(int i=0; i<mPanels.Count; ++i)
                     {
@@ -698,13 +698,13 @@ namespace EngineNS.Editor
                 var winPos = ImGuiAPI.GetWindowPos();
                 winPos.Y += ImGuiAPI.GetWindowSize().Y - contentSize.Y;
                 var pivot = Vector2.Zero;
-                ImGuiAPI.SetNextWindowPos(ref winPos, ImGuiCond_.ImGuiCond_Always, ref pivot);
-                if (ImGuiAPI.BeginChild("Content Browser Child", ref contentSize, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                ImGuiAPI.SetNextWindowPos(in winPos, ImGuiCond_.ImGuiCond_Always, in pivot);
+                if (ImGuiAPI.BeginChild("Content Browser Child", in contentSize, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var childDrawList = ImGuiAPI.GetWindowDrawList();
                     var posMin = ImGuiAPI.GetWindowPos();
                     var posMax = posMin + ImGuiAPI.GetWindowSize();
-                    childDrawList.AddRectFilled(ref posMin, ref posMax, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 1, ImDrawFlags_.ImDrawFlags_None);
+                    childDrawList.AddRectFilled(in posMin, in posMax, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 1, ImDrawFlags_.ImDrawFlags_None);
                 }
                 ImGuiAPI.EndChild();
             }

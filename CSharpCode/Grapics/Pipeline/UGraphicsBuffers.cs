@@ -115,7 +115,7 @@ namespace EngineNS.Graphics.Pipeline
             Camera = new CCamera();
             Camera.mCoreObject.PerspectiveFovLH(3.14f / 4f, width, height, 0.3f, 1000.0f);
             var eyePos = new Vector3(0, 0, -10);
-            Camera.mCoreObject.LookAtLH(ref eyePos, ref Vector3.Zero, ref Vector3.Up);
+            Camera.mCoreObject.LookAtLH(in eyePos, in Vector3.Zero, in Vector3.Up);
 
             UpdateViewportCBuffer();
         }

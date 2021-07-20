@@ -86,7 +86,7 @@ namespace EngineNS.EGui
         public UInt32 Color { get; set; } = 0xFFFFFFFF;
         public void OnDraw(ref ImDrawList cmdlist, ref Vector2 rectMin, ref Vector2 rectMax)
         {
-            cmdlist.AddRectFilled(ref rectMin, ref rectMax, Color, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
+            cmdlist.AddRectFilled(in rectMin, in rectMax, Color, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
         }
     }
 }

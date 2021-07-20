@@ -469,7 +469,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
 
             var ScaledNodeSize = NodeSize * fScale;
             this.Size = NodeSize;
-            ImGuiAPI.SetNextWindowSize(ref ScaledNodeSize, ImGuiCond_.ImGuiCond_None);
+            ImGuiAPI.SetNextWindowSize(in ScaledNodeSize, ImGuiCond_.ImGuiCond_None);
             var drawPosition = DrawPosition;
             //if(Visible)
             {
@@ -497,7 +497,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                 rectMin.X = rectMax.X;
                 rectMin.Y -= styles.IconOffset.Y * fScale;
                 nameSize = ImGuiAPI.CalcTextSize(Name, false, -1.0f);
-                cmdlist.AddText(ref rectMin, styles.TitleTextColor, Name, null);
+                cmdlist.AddText(in rectMin, styles.TitleTextColor, Name, null);
 
                 lineY += lineHeight;
 
@@ -525,13 +525,13 @@ namespace EngineNS.EGui.Controls.NodeGraph
                                     Inputs[i].Offset = (rectMin - drawPosition) / ParentGraph.ScaleFactor;
                                     nameSize = ImGuiAPI.CalcTextSize(Inputs[i].Name, false, -1.0f);
                                     rectMin.X = rectMax.X;
-                                    cmdlist.AddText(ref rectMin, styles.PinTextColor, Inputs[i].Name, null);
+                                    cmdlist.AddText(in rectMin, styles.PinTextColor, Inputs[i].Name, null);
 
                                     if (Inputs[i].EditValue != null)
                                     {
                                         var ctrlPos = new Vector2(rectMax.X + nameSize.X + styles.PinSpacing, rectMin.Y);
                                         ctrlPos -= ImGuiAPI.GetWindowPos();
-                                        ImGuiAPI.SetCursorPos(ref ctrlPos);
+                                        ImGuiAPI.SetCursorPos(in ctrlPos);
                                         Inputs[i].EditValue.OnDraw(this, i, styles, fScale);
                                     }
 
@@ -556,7 +556,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                                     Outputs[i].Offset = (rectMin - drawPosition)/ParentGraph.ScaleFactor;
                                     nameSize = ImGuiAPI.CalcTextSize(Outputs[i].Name, false, -1.0f);
                                     rectMin.X -= nameSize.X;
-                                    cmdlist.AddText(ref rectMin, 0xFFFFFF00, Outputs[i].Name, null);
+                                    cmdlist.AddText(in rectMin, 0xFFFFFF00, Outputs[i].Name, null);
 
                                     SetIfBigger(ref lineHeight, inIcon.Size.Y * fScale);
                                     SetIfBigger(ref lineHeight, nameSize.Y);
@@ -579,7 +579,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
 
                 if (Selected)
                 {
-                    cmdlist.AddRect(ref drawPosition, ref NodeMax, styles.SelectedColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2);
+                    cmdlist.AddRect(in drawPosition, in NodeMax, styles.SelectedColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2);
                 }
                 ImGuiAPI.SetWindowFontScale(1.0f);
             }

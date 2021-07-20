@@ -89,7 +89,7 @@ namespace EngineNS
         /// <param name="value1">旋转四元数</param>
         /// <param name="value2">旋转四元数</param>
         /// <returns>如果两个对象相等返回true，否则返回false</returns>
-	    public static bool Equals(ref Quaternion value1, ref Quaternion value2)
+	    public static bool Equals(in Quaternion value1, in Quaternion value2)
         {
             bool reX = (Math.Abs(value1.X - value2.X) < CoreDefine.Epsilon);
             bool reY = (Math.Abs(value1.Y - value2.Y) < CoreDefine.Epsilon);

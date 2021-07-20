@@ -45,7 +45,7 @@ namespace EngineNS.EGui.UIProxy
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
             var windowWidth = ImGuiAPI.GetWindowWidth();
             var rectMax = cursorPos + new Vector2(windowWidth, EGui.UIProxy.StyleConfig.Instance.ToolbarHeight);
-            drawList.AddRectFilled(ref cursorPos, ref rectMax, EGui.UIProxy.StyleConfig.Instance.ToolbarBG, 0.0f, ImDrawFlags_.ImDrawFlags_None);
+            drawList.AddRectFilled(in cursorPos, in rectMax, EGui.UIProxy.StyleConfig.Instance.ToolbarBG, 0.0f, ImDrawFlags_.ImDrawFlags_None);
             float itemOffset = 0;
             float itemSpacing = -1;
             ImGuiAPI.BeginGroup();
@@ -113,7 +113,7 @@ namespace EngineNS.EGui.UIProxy
 
             var textSize = ImGuiAPI.CalcTextSize(Name, false, -1);
             tempScrPos.Y = cursorScrPos.Y + (StyleConfig.Instance.ToolbarHeight - textSize.Y) * 0.5f + clickDelta;
-            ImGuiAPI.SetCursorScreenPos(ref tempScrPos);
+            ImGuiAPI.SetCursorScreenPos(in tempScrPos);
             hitRectMin.X = System.Math.Min(hitRectMin.X, tempScrPos.X);
             hitRectMin.Y = System.Math.Min(hitRectMin.Y, tempScrPos.Y);
             hitRectMax.X = System.Math.Max(hitRectMax.X, tempScrPos.X + textSize.X);
@@ -121,23 +121,23 @@ namespace EngineNS.EGui.UIProxy
             if(isMouseDown)
             {
                 var pressColor = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor_Press);
-                ImGuiAPI.TextColored(ref pressColor, Name);
+                ImGuiAPI.TextColored(in pressColor, Name);
                 if(Icon != null)
-                    Icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(ref pressColor);
+                    Icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in pressColor);
             }
             else if(isMouseHover)
             {
                 var hoverColor = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor_Hover);
-                ImGuiAPI.TextColored(ref hoverColor, Name);
+                ImGuiAPI.TextColored(in hoverColor, Name);
                 if(Icon != null)
-                    Icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(ref hoverColor);
+                    Icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in hoverColor);
             }
             else
             {
                 var textColor = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor);
-                ImGuiAPI.TextColored(ref textColor, Name);
+                ImGuiAPI.TextColored(in textColor, Name);
                 if (Icon != null)
-                    Icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(ref textColor);
+                    Icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in textColor);
             }
             ImGuiAPI.EndGroup();
             if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) && isMouseHover)
@@ -149,7 +149,7 @@ namespace EngineNS.EGui.UIProxy
             else
                 isMouseDown = false;
 
-            if (ImGuiAPI.IsMouseHoveringRect(ref hitRectMin, ref hitRectMax, true))
+            if (ImGuiAPI.IsMouseHoveringRect(in hitRectMin, in hitRectMax, true))
                 isMouseHover = true;
             else
                 isMouseHover = false;
@@ -175,7 +175,7 @@ namespace EngineNS.EGui.UIProxy
             var cursorScrPos = ImGuiAPI.GetCursorScreenPos();
             cursorScrPos.X += StyleConfig.Instance.ToolbarSeparatorThickness * 0.5f;
             var maxPos = cursorScrPos + new Vector2(0, StyleConfig.Instance.ToolbarHeight);
-            drawList.AddLine(ref cursorScrPos, ref maxPos, StyleConfig.Instance.SeparatorColor, StyleConfig.Instance.ToolbarSeparatorThickness);
+            drawList.AddLine(in cursorScrPos, in maxPos, StyleConfig.Instance.SeparatorColor, StyleConfig.Instance.ToolbarSeparatorThickness);
             return true;
         }
     }

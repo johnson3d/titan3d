@@ -413,7 +413,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                 CheckNodeVisible();
                 ProcEventState(styles);
                 GraphViewSize = ImGuiAPI.GetWindowContentRegionMax() - ImGuiAPI.GetWindowContentRegionMin();
-                if (ImGuiAPI.BeginChild("ContentWindow", ref GraphViewSize, false, 
+                if (ImGuiAPI.BeginChild("ContentWindow", in GraphViewSize, false, 
                     ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
                 {
                     var cmdlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
@@ -427,7 +427,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                         var min = mMenuShowPin.DrawPosition;
                         Vector2 max;
                         max = min + mMenuShowPin.GetIconSize(styles, ScaleFactor);
-                        cmdlist.AddRect(ref min, ref max, styles.HighLightColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2);
+                        cmdlist.AddRect(in min, in max, styles.HighLightColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2);
                     }
                     foreach (var i in Linkers)
                     {
@@ -801,7 +801,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                 return false;
             bool isPinIn = pin.GetType() == typeof(PinIn);
             Vector2 GraphMenuSize = new Vector2(-1, -1);
-            ImGuiAPI.SetNextWindowSize(ref GraphMenuSize, ImGuiCond_.ImGuiCond_None);
+            ImGuiAPI.SetNextWindowSize(in GraphMenuSize, ImGuiCond_.ImGuiCond_None);
             if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
             {
                 if (ImGuiAPI.BeginMenu("Delete Linkers", true))
@@ -842,7 +842,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                     ImGuiAPI.EndMenu();
                 }
                 var btSize = new Vector2(-1, 0);
-                if (ImGuiAPI.Button("Break All", ref btSize))
+                if (ImGuiAPI.Button("Break All", in btSize))
                 {
                     if (isPinIn)
                     {
@@ -854,7 +854,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                     }
                     mMenuType = EMenuType.None;
                 }
-                if (ImGuiAPI.Button("Close Menu", ref btSize))
+                if (ImGuiAPI.Button("Close Menu", in btSize))
                 {
                     mMenuType = EMenuType.None;
                 }
@@ -874,7 +874,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
             if (node == null)
                 return false;
             Vector2 GraphMenuSize = new Vector2(-1, -1);
-            ImGuiAPI.SetNextWindowSize(ref GraphMenuSize, ImGuiCond_.ImGuiCond_None);
+            ImGuiAPI.SetNextWindowSize(in GraphMenuSize, ImGuiCond_.ImGuiCond_None);
             if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
             {
                 var btSize = new Vector2(-1, 0);
@@ -887,7 +887,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                     }
                     ImGuiAPI.EndMenu();
                 }
-                if (ImGuiAPI.Button("Close Menu", ref btSize))
+                if (ImGuiAPI.Button("Close Menu", in btSize))
                 {
                     mMenuType = EMenuType.None;
                 }
@@ -902,7 +902,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
         protected virtual bool ShowGraphMenu(NodeGraphStyles styles)
         {
             Vector2 GraphMenuSize = new Vector2(-1, -1);
-            ImGuiAPI.SetNextWindowSize(ref GraphMenuSize, ImGuiCond_.ImGuiCond_None);
+            ImGuiAPI.SetNextWindowSize(in GraphMenuSize, ImGuiCond_.ImGuiCond_None);
             if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
             {
                 var posMenu = ImGuiAPI.GetWindowPos();
@@ -912,7 +912,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                     ShowAddNode(posMenu);
                     ImGuiAPI.EndMenu();
                 }
-                if (ImGuiAPI.Button("Close Menu", ref btSize))
+                if (ImGuiAPI.Button("Close Menu", in btSize))
                 {
                     mMenuType = EMenuType.None;
                 }

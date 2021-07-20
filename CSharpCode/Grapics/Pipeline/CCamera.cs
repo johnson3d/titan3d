@@ -43,7 +43,7 @@ namespace EngineNS.Graphics.Pipeline
             var dist = (sphere.Radius) / (float)Math.Sin((float)this.mCoreObject.mFov);
             var eye = sphere.Center - this.mCoreObject.GetDirection() * dist;
             var up = this.mCoreObject.GetUp();
-            mCoreObject.LookAtLH(ref eye, ref sphere.Center, ref up);
+            mCoreObject.LookAtLH(in eye, in sphere.Center, in up);
         }
     }
 

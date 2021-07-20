@@ -272,7 +272,7 @@ namespace EngineNS.EGui
             renderer.FontCBuffer.mCoreObject.SetVarValuePtr(0, &mvp, sizeof(Matrix), 0);            
 
             var fb_scale = io.DisplayFramebufferScale;
-            draw_data.ScaleClipRects(ref fb_scale);
+            draw_data.ScaleClipRects(in fb_scale);
 
             var drawCmd = rhiData.CmdList.mCoreObject;
             drawCmd.BeginCommand();

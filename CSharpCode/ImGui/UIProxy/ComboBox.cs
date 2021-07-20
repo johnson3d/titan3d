@@ -43,8 +43,8 @@ namespace EngineNS.EGui.UIProxy
 
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PopupColor);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_PopupBg, EGui.UIProxy.StyleConfig.Instance.PopupColor);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, ref EGui.UIProxy.StyleConfig.Instance.PopupWindowsPadding);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, ref EGui.UIProxy.StyleConfig.Instance.PopupItemSpacing);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, in EGui.UIProxy.StyleConfig.Instance.PopupWindowsPadding);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, in EGui.UIProxy.StyleConfig.Instance.PopupItemSpacing);
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_PopupBorderSize, EGui.UIProxy.StyleConfig.Instance.PopupBordersize);
 
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
@@ -54,7 +54,7 @@ namespace EngineNS.EGui.UIProxy
                 var nameSize = ImGuiAPI.CalcTextSize(Name, true, -1);
                 endPos = cursorPos + new Vector2(Width + ((nameSize.X > 0.0f) ? (style->ItemInnerSpacing.X + nameSize.X) : 0.0f), nameSize.Y + style->FramePadding.Y * 2.0f);
             }
-            var hovered = ImGuiAPI.IsMouseHoveringRectInCurrentWindow(ref cursorPos, ref endPos, true);
+            var hovered = ImGuiAPI.IsMouseHoveringRectInCurrentWindow(in cursorPos, in endPos, true);
             if (hovered)
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.Instance.PGItemBorderHoveredColor);
             var comboOpen = ImGuiAPI.BeginCombo(Name, PreviewValue, Flags);

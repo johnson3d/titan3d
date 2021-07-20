@@ -234,7 +234,14 @@ namespace CppWeaving.Cpp2CS
                         argType = dypeDef;
                 }
                 if (IsRefConvertType(j)) {
-					argType = $" ref {j.PropertyType.ToCsName()}";
+					if (j.IsConst)
+					{
+						argType = $" in {j.PropertyType.ToCsName()}";
+					}
+                    else
+                    {
+						argType = $" ref {j.PropertyType.ToCsName()}";
+					}
 				}
 				result += $"{argType} {j.Name}";
 			}

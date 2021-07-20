@@ -139,17 +139,7 @@ public:
 
 	 inline static void Transform(v3dxPlane3& result, const v3dxPlane3& plane, const v3dxMatrix4& transformationInverse)
 	 {
-		 float x = plane.m_vNormal.x;
-		 float y = plane.m_vNormal.y;
-		 float z = plane.m_vNormal.z;
-		 float d = plane.m_fDD;
-
-		 //transformation.inverse();
-		 const v3dxMatrix4& transformation = transformationInverse;
-		 result.m_vNormal.x = (((x * transformation.m11) + (y * transformation.m12)) + (z * transformation.m13)) + (d * transformation.m14);
-		 result.m_vNormal.y = (((x * transformation.m21) + (y * transformation.m22)) + (z * transformation.m23)) + (d * transformation.m24);
-		 result.m_vNormal.z = (((x * transformation.m31) + (y * transformation.m32)) + (z * transformation.m33)) + (d * transformation.m34);
-		 result.m_fDD = (((x * transformation.m41) + (y * transformation.m42)) + (z * transformation.m43)) + (d * transformation.m44);
+		 v3dxPlaneTransform(&result, &plane, &transformationInverse);
 	 }
 };
 

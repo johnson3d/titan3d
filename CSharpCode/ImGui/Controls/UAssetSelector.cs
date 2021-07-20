@@ -59,8 +59,8 @@ namespace EngineNS.EGui.Controls
         {
             var pivot = Vector2.Zero;
             var size = new Vector2(500, 300);
-            ImGuiAPI.SetNextWindowPos(ref pos, ImGuiCond_.ImGuiCond_Always, ref pivot);
-            ImGuiAPI.SetNextWindowSize(ref size, ImGuiCond_.ImGuiCond_Always);
+            ImGuiAPI.SetNextWindowPos(in pos, ImGuiCond_.ImGuiCond_Always, in pivot);
+            ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_Always);
             if (ImGuiAPI.BeginPopup(PopName, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
                 mContentBrowser.OnDraw();

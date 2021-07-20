@@ -23,6 +23,11 @@ namespace EngineNS
         [Rtti.Meta]
         public float D;
 
+        public float A { get => Normal.X; }
+        public float B { get => Normal.Y; }
+        public float C { get => Normal.Z; }
+
+
         #region Equal Override
         /// <summary>
         /// 转换成String类型
@@ -238,19 +243,14 @@ namespace EngineNS
         /// <param name="transformation">转换矩阵</param>
         /// <returns>返回转换后的平面</returns>
         [Rtti.Meta]
-        public static Plane Transform( Plane plane, Matrix transformation )
+        public static Plane Transform( Plane plane, Matrix transformation)
 	    {
 		    Plane result;
-		    float x = plane.Normal.X;
-		    float y = plane.Normal.Y;
-		    float z = plane.Normal.Z;
-		    float d = plane.D;
 
-		    transformation.Inverse();
-		    result.Normal.X = (((x * transformation.M11) + (y * transformation.M12)) + (z * transformation.M13)) + (d * transformation.M14);
-		    result.Normal.Y = (((x * transformation.M21) + (y * transformation.M22)) + (z * transformation.M23)) + (d * transformation.M24);
-		    result.Normal.Z = (((x * transformation.M31) + (y * transformation.M32)) + (z * transformation.M33)) + (d * transformation.M34);
-		    result.D		= (((x * transformation.M41) + (y * transformation.M42)) + (z * transformation.M43)) + (d * transformation.M44);
+            result.Normal.X = transformation.M11 * plane.Normal.X + transformation.M21 * plane.Normal.Y + transformation.M31 * plane.Normal.Z + transformation.M41 * plane.D;
+            result.Normal.Y = transformation.M12 * plane.Normal.X + transformation.M22 * plane.Normal.Y + transformation.M32 * plane.Normal.Z + transformation.M42 * plane.D;
+            result.Normal.Z = transformation.M13 * plane.Normal.X + transformation.M23 * plane.Normal.Y + transformation.M33 * plane.Normal.Z + transformation.M43 * plane.D;
+            result.D = transformation.M14 * plane.Normal.X + transformation.M24 * plane.Normal.Y + transformation.M34 * plane.Normal.Z + transformation.M44 * plane.D;
 
 		    return result;
 	    }

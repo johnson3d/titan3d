@@ -230,7 +230,7 @@ namespace EngineNS.Graphics.Mesh
 
             for (int i = 0; i < 8; i++)
             {
-                builder.AddVertex(ref pPos[i], ref Vector3.UnitY, ref Vector2.mUnitXY, color);
+                builder.AddVertex(in pPos[i], in Vector3.UnitY, in Vector2.mUnitXY, color);
             }
 
             for (int i = 0; i < dpDesc.NumPrimitives; i++)
@@ -302,7 +302,7 @@ namespace EngineNS.Graphics.Mesh
                 var nor = new Vector3(0, 0, -1);
                 for (int i = 0; i < 4; i++)
                 {   
-                    builder.AddVertex(ref vbPos[i], ref nor, ref vbUV[i], 0xFFFFFFFF);
+                    builder.AddVertex(in vbPos[i], in nor, in vbUV[i], 0xFFFFFFFF);
                 }
 
                 for (int i = 0; i < dpDesc.NumPrimitives; i++)
@@ -353,7 +353,7 @@ namespace EngineNS.Graphics.Mesh
             var dpDesc = new DrawPrimitiveDesc();
             dpDesc.SetDefault();
             dpDesc.NumPrimitives = (uint)indexer.Count / 3;
-            builder.PushAtomLOD(0, ref dpDesc);
+            builder.PushAtomLOD(0, in dpDesc);
 
             return meshBuilder;
         }
@@ -374,7 +374,7 @@ namespace EngineNS.Graphics.Mesh
             var dpDesc = new DrawPrimitiveDesc();
             dpDesc.SetDefault();
             dpDesc.NumPrimitives = tileCount * tileCount * 2;
-            builder.PushAtomLOD(0, ref dpDesc);
+            builder.PushAtomLOD(0, in dpDesc);
 
             using (var posArray = Support.UNativeArray<Vector3>.CreateInstance())
             using (var normalArray = Support.UNativeArray<Vector3>.CreateInstance())
@@ -406,19 +406,19 @@ namespace EngineNS.Graphics.Mesh
                         var pos = new Vector3(x0, 0, z0);
                         var nor = new Vector3(0, 1, 0);
                         var uv = new Vector2(U0, V0);
-                        builder.AddVertex(ref pos, ref nor, ref uv, 0xFFFFFFFF);
+                        builder.AddVertex(in pos, in nor, in uv, 0xFFFFFFFF);
                         pos = new Vector3(x0, 0, z1);
                         nor = new Vector3(0, 1, 0);
                         uv = new Vector2(U0, V1);
-                        builder.AddVertex(ref pos, ref nor, ref uv, 0xFFFFFFFF);
+                        builder.AddVertex(in pos, in nor, in uv, 0xFFFFFFFF);
                         pos = new Vector3(x1, 0, z1);
                         nor = new Vector3(0, 1, 0);
                         uv = new Vector2(U1, V1);
-                        builder.AddVertex(ref pos, ref nor, ref uv, 0xFFFFFFFF);
+                        builder.AddVertex(in pos, in nor, in uv, 0xFFFFFFFF);
                         pos = new Vector3(x1, 0, z0);
                         nor = new Vector3(0, 1, 0);
                         uv = new Vector2(U1, V0);
-                        builder.AddVertex(ref pos, ref nor, ref uv, 0xFFFFFFFF);
+                        builder.AddVertex(in pos, in nor, in uv, 0xFFFFFFFF);
 
                         UInt32 Index = (UInt32)((x + y * tileCount) * 4);
                         builder.AddTriangle(Index + 0, Index + 1, Index + 2);

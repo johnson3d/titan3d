@@ -20,7 +20,7 @@ namespace EngineNS.GamePlay
         }        
         public override void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
         {
-            base.OnGatherVisibleMeshes(rp);
+            //base.OnGatherVisibleMeshes(rp);
         }
     }
 
@@ -68,9 +68,12 @@ namespace EngineNS.GamePlay
             else
             {
                 var frustom = rp.CullCamera.mCoreObject.GetFrustum();
-                type = frustom->whichContainTypeFast(ref node.AABB, ref node.Placement.AbsTransformInv, 1);
+                var absAABB = BoundingBox.Transform(in node.AABB, in node.Placement.mAbsTransform);
+                type = frustom->whichContainTypeFast(in absAABB, 1);
+                //这里还没想明白，把Frustum的6个平面变换到AABB所在坐标为啥不行
+                //type = frustom->whichContainTypeFast(ref node.AABB, ref node.Placement.AbsTransformInv, 1);
             }
-            switch(type)
+            switch (type)
             {
                 case CONTAIN_TYPE.CONTAIN_TEST_OUTER:
                     break;
@@ -98,6 +101,7 @@ namespace EngineNS.GamePlay
             return false;
         }
         #endregion
+
         #region DebugAssist
         
         public void GatherBoundShapes(List<Graphics.Mesh.UMesh> boundVolumes, Scene.UNode node = null)
@@ -125,9 +129,7 @@ namespace EngineNS.GamePlay
                 return false;
             }
             mesh2.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-            var noScaleTM = node.Placement.AbsTransform;
-            noScaleTM.NoScale();
-            mesh2.SetWorldMatrix(ref noScaleTM);
+            mesh2.SetWorldMatrix(ref node.Placement.mAbsTransform);
 
             bvs.Add(mesh2);
 

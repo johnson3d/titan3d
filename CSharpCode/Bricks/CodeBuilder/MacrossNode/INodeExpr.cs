@@ -111,7 +111,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 var nameSize = ImGuiAPI.CalcTextSize("Error", false, -1.0f);
                 var drawPos = this.DrawPosition + ScaledNodeSize * 0.5f - nameSize * 0.5f;
-                cmdlist.AddText(ref drawPos, 0xFF0000FF, "Error", null);
+                cmdlist.AddText(in drawPos, 0xFF0000FF, "Error", null);
             }
         }
     }

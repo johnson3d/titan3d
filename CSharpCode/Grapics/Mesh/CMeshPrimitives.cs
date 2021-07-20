@@ -58,7 +58,7 @@ namespace EngineNS.Graphics.Mesh
                 if (ImGuiAPI.BeginPopupModal($"Import MeshPrimitives", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var sz = new Vector2(-1, 0);
-                    if (ImGuiAPI.Button("Select FBX", ref sz))
+                    if (ImGuiAPI.Button("Select FBX", in sz))
                     {
                         mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".FBX,.fbx", ".");
                     }
@@ -84,12 +84,12 @@ namespace EngineNS.Graphics.Mesh
                     if (eErrorType != enErrorType.None)
                     {
                         var clr = new Vector4(1, 0, 0, 1);
-                        ImGuiAPI.TextColored(ref clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
                     }
                     else
                     {
                         var clr = new Vector4(1, 1, 1, 1);
-                        ImGuiAPI.TextColored(ref clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
                     }
                     ImGuiAPI.Separator();
 
@@ -115,7 +115,7 @@ namespace EngineNS.Graphics.Mesh
                     sz = new Vector2(0, 0);
                     if (eErrorType == enErrorType.None)
                     {
-                        if (ImGuiAPI.Button("Create Asset", ref sz))
+                        if (ImGuiAPI.Button("Create Asset", in sz))
                         {
                             if (ImportMesh())
                             {
@@ -125,7 +125,7 @@ namespace EngineNS.Graphics.Mesh
                         }
                         ImGuiAPI.SameLine(0, 20);
                     }
-                    if (ImGuiAPI.Button("Cancel", ref sz))
+                    if (ImGuiAPI.Button("Cancel", in sz))
                     {
                         ImGuiAPI.CloseCurrentPopup();
                         ContentBrowser.mAssetImporter = null;

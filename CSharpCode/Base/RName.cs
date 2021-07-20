@@ -78,7 +78,7 @@ namespace EngineNS
                     preViewStr = name.ToString();
                 var textSize = ImGuiAPI.CalcTextSize(preViewStr, false, 0);
                 var preViewStrDrawPos = cursorPos + new Vector2(snapSize.X + 8, 0);
-                ImGuiAPI.SetCursorScreenPos(ref preViewStrDrawPos);
+                ImGuiAPI.SetCursorScreenPos(in preViewStrDrawPos);
                 Support.UAnyPointer anyPt = new Support.UAnyPointer()
                 {
                     RefObject = mDrawData,
@@ -89,7 +89,7 @@ namespace EngineNS
                 mComboBox.Name = TName.FromString2("##", info.Name).ToString();
                 mComboBox.PreviewValue = preViewStr;
                 var contentBrowserSize = new Vector2(500, 600);
-                ImGuiAPI.SetNextWindowSize(ref contentBrowserSize, ImGuiCond_.ImGuiCond_Always);
+                ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Always);
                 mContentBrowser.ExtNames = FilterExts;
                 mContentBrowser.SelectedAsset = null;
                 mComboBox.OnDraw(ref drawList, ref anyPt);
@@ -99,21 +99,21 @@ namespace EngineNS
                 }
                 var pos = ImGuiAPI.GetCursorScreenPos();
                 pos.X += snapSize.X + 8;
-                ImGuiAPI.SetCursorScreenPos(ref pos);
+                ImGuiAPI.SetCursorScreenPos(in pos);
                 if (info.Readonly)
                 {
                     Vector4 color = new Vector4(0.5f, 0.5f, 0.5f, 1.0f);
-                    ImGuiAPI.TextColored(ref color, "readonly");
+                    ImGuiAPI.TextColored(in color, "readonly");
                 }
                 else
                 {
                     var sz = new Vector2(0, 0);
-                    if (ImGuiAPI.Button("<", ref sz))
+                    if (ImGuiAPI.Button("<", in sz))
                     {
                         mDrawData.NewValue = EGui.Controls.ContentBrowser.GlobalSelectedAsset.GetAssetName();
                     }
                     ImGuiAPI.SameLine(0, 8);
-                    if (ImGuiAPI.Button("-", ref sz))
+                    if (ImGuiAPI.Button("-", in sz))
                     {
                         mDrawData.NewValue = null;
                     }

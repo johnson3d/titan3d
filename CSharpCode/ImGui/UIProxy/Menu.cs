@@ -47,12 +47,12 @@ namespace EngineNS.EGui.UIProxy
             if (this.IsTopMenuItem)
             {
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, StyleConfig.Instance.MenuHeaderColor);
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref StyleConfig.Instance.TopMenuFramePadding);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in StyleConfig.Instance.TopMenuFramePadding);
             }
             else
             {
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref StyleConfig.Instance.MenuItemFramePadding);
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, ref StyleConfig.Instance.MenuItemSpacing);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in StyleConfig.Instance.MenuItemFramePadding);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, in StyleConfig.Instance.MenuItemSpacing);
                 ImGuiAPI.Indent(StyleConfig.Instance.MenuItemIndent);
             }
             if(Icon != null)
@@ -146,7 +146,7 @@ namespace EngineNS.EGui.UIProxy
             var itemSize = ImGuiAPI.GetItemRectSize();
             var start = new Vector2(cursorPos.X, cursorPos.Y + itemSize.Y * 0.5f);
             var end = new Vector2(start.X + winWidth - itemSize.X - StyleConfig.Instance.WindowPadding.X * 2 - StyleConfig.Instance.ItemSpacing.X, start.Y);
-            drawList.AddLine(ref start, ref end, StyleConfig.Instance.NamedMenuSeparatorColor, Thickness);
+            drawList.AddLine(in start, in end, StyleConfig.Instance.NamedMenuSeparatorColor, Thickness);
             UEngine.Instance.GfxDevice.SlateRenderer.PopFont();
             ImGuiAPI.EndGroup();
             return true;

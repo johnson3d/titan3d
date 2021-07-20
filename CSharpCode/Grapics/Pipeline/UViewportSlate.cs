@@ -65,7 +65,7 @@ namespace EngineNS.Graphics.Pipeline
                     bShow = ImGuiAPI.Begin(Title, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
                     break;
                 case EVieportType.ChildWindow:
-                    bShow = ImGuiAPI.BeginChild(Title, ref sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
+                    bShow = ImGuiAPI.BeginChild(Title, in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
                     break;
             }
             if (ImGuiAPI.IsWindowDocked())
@@ -128,7 +128,7 @@ namespace EngineNS.Graphics.Pipeline
                     {
                         min = min + pos;
                         max = max + pos;
-                        drawlist.AddImage(showTexture.ToPointer(), ref min, ref max, ref uv1, ref uv2, 0xFFFFFFFF);
+                        drawlist.AddImage(showTexture.ToPointer(), in min, in max, in uv1, in uv2, 0xFFFFFFFF);
                     }
                 }
             }

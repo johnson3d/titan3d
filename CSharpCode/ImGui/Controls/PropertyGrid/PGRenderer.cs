@@ -185,7 +185,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 var winPos = ImGuiAPI.GetWindowPos();
                 var winSize = ImGuiAPI.GetWindowSize();
                 var sz = new Vector2(-1);
-                if(ImGuiAPI.BeginChild($"{PGName}", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                if(ImGuiAPI.BeginChild($"{PGName}", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     OnDrawContent(bShowReadOnly, in winPos, in winSize, bKeepColums);
                 }
@@ -212,7 +212,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 var curPos = ImGuiAPI.GetCursorScreenPos();
                 Vector2 offset = Vector2.Zero;
                 curPos += new Vector2(0, (size.Y - mOpenInPropertyMatrix.Size.Y) * 0.5f);
-                ImGuiAPI.SetCursorScreenPos(ref curPos);
+                ImGuiAPI.SetCursorScreenPos(in curPos);
                 mOpenInPropertyMatrix.OnDraw(ref drawList, ref Support.UAnyPointer.Default);
             }
             if (mConfig != null)
@@ -222,7 +222,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 var curPos = ImGuiAPI.GetCursorScreenPos();
                 Vector2 offset = Vector2.Zero;
                 curPos += new Vector2(0, (size.Y - mOpenInPropertyMatrix.Size.Y) * 0.5f);
-                ImGuiAPI.SetCursorScreenPos(ref curPos);
+                ImGuiAPI.SetCursorScreenPos(in curPos);
                 mConfig.OnDraw(ref drawList, ref Support.UAnyPointer.Default);
             }
             ImGuiAPI.EndGroup();
@@ -232,7 +232,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var drawList = ImGuiAPI.GetWindowDrawList();
             var posMin = drawPos;//ImGuiAPI.GetCursorPos(); //ImGuiAPI.GetWindowPos();
             var posMax = posMin + drawSize;// ImGuiAPI.GetWindowSize();
-            drawList.AddRectFilled(ref posMin, ref posMax, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
+            drawList.AddRectFilled(in posMin, in posMax, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
 
             if (ImGuiAPI.IsWindowDocked())
             {
@@ -253,10 +253,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 //ImGuiAPI.Text($"{Target?.ToString()}");
                 OnDrawHeadBar(ref drawList);
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGNormalFramePadding);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in EGui.UIProxy.StyleConfig.Instance.PGNormalFramePadding);
                 ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FrameBorderSize, EGui.UIProxy.StyleConfig.Instance.PGNormalFrameBorderSize);
                 ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FrameRounding, EGui.UIProxy.StyleConfig.Instance.PGNormalFrameRounding);
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, ref EGui.UIProxy.StyleConfig.Instance.PGNormalItemSpacing);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, in EGui.UIProxy.StyleConfig.Instance.PGNormalItemSpacing);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor);
                 ImGuiAPI.Separator();
@@ -264,7 +264,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_13px);
 
                 Vector2 size = Vector2.Zero;
-                if(ImGuiAPI.BeginChild($"{PGName}_Properties", ref size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                if(ImGuiAPI.BeginChild($"{PGName}_Properties", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     Vector2 outerSize = Vector2.Zero;
                     //if (ImGuiAPI.BeginTable("PGTable", 2, mTabFlags, ref outerSize, 0.0f))
@@ -290,7 +290,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 Vector2 size = Vector2.Zero;
-                if(ImGuiAPI.BeginChild($"{PGName}_Properties", ref size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                if(ImGuiAPI.BeginChild($"{PGName}_Properties", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     object newValue = null;
                     OnDraw(this.Target, out newValue);//, mCallstack);
@@ -316,7 +316,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var frameHeight = ImGuiAPI.GetFrameHeight();
             var textSize = ImGuiAPI.CalcTextSize(displayName, false, -1);
             var itemNamePadding = new Vector2(0, (frameHeight - textSize.Y - UIProxy.StyleConfig.Instance.PGCellPadding.Y * 2) * 0.5f);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref itemNamePadding);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in itemNamePadding);
             ImGuiAPI.AlignTextToFramePadding();
             var treeNodeRet = ImGuiAPI.TreeNodeEx(displayName, flags, displayName);
             itemEditorInfo.Expand = treeNodeRet && ((flags & ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf) == 0);
@@ -352,7 +352,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 mDrawTargetDic[target] = propertiesDic;
             }
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_TableBorderLight, EGui.UIProxy.StyleConfig.Instance.PGCellBorderInnerColor);
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_CellPadding, ref EGui.UIProxy.StyleConfig.Instance.PGCellPadding);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_CellPadding, in EGui.UIProxy.StyleConfig.Instance.PGCellPadding);
             var workRectMin = ImGuiAPI.GetWindowContentRegionMin();
             var workRectMax = ImGuiAPI.GetWindowContentRegionMax();
             var drawList = ImGuiAPI.GetWindowDrawList();
@@ -368,7 +368,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.Instance.PGItemBorderNormalColor);
                     //ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PGHeadColor);
                     ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FrameRounding, 0);
-                    ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGCategoryPadding);
+                    ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in EGui.UIProxy.StyleConfig.Instance.PGCategoryPadding);
                     UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_Bold_13px);
 
                     if(isSubPropertyGrid)
@@ -386,7 +386,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                             Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
                         };
-                        ImGuiAPI.TableNextRow_FirstColumn(ref rowData);
+                        ImGuiAPI.TableNextRow_FirstColumn(in rowData);
                         //ImGuiAPI.TableSetCellPaddingY(0);
                         ////ImGuiAPI.TableNextRow_NoCellPaddingY(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
                         //ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
@@ -411,7 +411,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 if(!isSubPropertyGrid)
                 {
                     Vector2 outerSize = Vector2.Zero;
-                    tableBegin = ImGuiAPI.BeginTable("PGTable", 2, mTabFlags, ref outerSize, 0.0f);
+                    tableBegin = ImGuiAPI.BeginTable("PGTable", 2, mTabFlags, in outerSize, 0.0f);
                     if(tableBegin)
                     {
                         ImGuiAPI.TableSetupColumn(TName.FromString("Name").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
@@ -489,7 +489,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                                 Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
                             };
-                            ImGuiAPI.TableNextRow(ref rowData);
+                            ImGuiAPI.TableNextRow(in rowData);
                             EndRowPadding = EGui.UIProxy.StyleConfig.Instance.PGCellPadding.Y;
 
                             float y = 0;
@@ -653,7 +653,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                             Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
                         };
-                        ImGuiAPI.TableNextRow(ref rowData);
+                        ImGuiAPI.TableNextRow(in rowData);
                         ImGuiAPI.EndTable();
                     }
                 }
@@ -665,7 +665,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
         static void PushPGEditorStyleValues()
         {
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
         }
         static void PopPGEditorStyleValues()
         {

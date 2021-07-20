@@ -27,12 +27,12 @@ namespace EngineNS.RHI
             Vector2 tpos;
             tpos.Y = start.Y + sz.Y - tsz.Y;
             tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
-            ImGuiAPI.PushClipRect(ref start, ref end, true);
+            ImGuiAPI.PushClipRect(in start, in end, true);
 
             end.Y -= tsz.Y;
             OnDrawSnapshot(in cmdlist, ref start, ref end);
 
-            cmdlist.AddText(ref tpos, 0xFFFF00FF, name, null);
+            cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
             ImGuiAPI.PopClipRect();
 
         }
@@ -66,7 +66,7 @@ namespace EngineNS.RHI
             {
                 var uv0 = new Vector2(0, 0);
                 var uv1 = new Vector2(1, 1);
-                cmdlist.AddImage(SnapshotPtr.ToPointer(), ref start, ref end, ref uv0, ref uv1, 0xFFFFFFFF);
+                cmdlist.AddImage(SnapshotPtr.ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
             }
         }
     }
@@ -122,7 +122,7 @@ namespace EngineNS.RHI
                 if (ImGuiAPI.BeginPopupModal($"Import SRV", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var sz = new Vector2(-1, 0);
-                    if (ImGuiAPI.Button("Select Image", ref sz))
+                    if (ImGuiAPI.Button("Select Image", in sz))
                     {
                         mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".png,.jpg,.bmp,.tga", "."); 
                     }
@@ -164,12 +164,12 @@ namespace EngineNS.RHI
                     if (bFileExisting)
                     {
                         var clr = new Vector4(1, 0, 0, 1);
-                        ImGuiAPI.TextColored(ref clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
                     }
                     else
                     {
                         var clr = new Vector4(1, 1, 1, 1);
-                        ImGuiAPI.TextColored(ref clr, $"Source:{mSourceFile}");
+                        ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
                     }
                     ImGuiAPI.Separator();
 
@@ -193,7 +193,7 @@ namespace EngineNS.RHI
                     sz = new Vector2(0, 0);
                     if (bFileExisting == false)
                     {
-                        if (ImGuiAPI.Button("Create Asset", ref sz))
+                        if (ImGuiAPI.Button("Create Asset", in sz))
                         {
                             if (ImportImage())
                             {
@@ -203,7 +203,7 @@ namespace EngineNS.RHI
                         }
                         ImGuiAPI.SameLine(0, 20);
                     }
-                    if (ImGuiAPI.Button("Cancel", ref sz))
+                    if (ImGuiAPI.Button("Cancel", in sz))
                     {
                         ImGuiAPI.CloseCurrentPopup();
                         ContentBrowser.mAssetImporter = null;

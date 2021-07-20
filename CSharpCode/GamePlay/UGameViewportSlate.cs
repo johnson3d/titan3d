@@ -36,8 +36,8 @@ namespace EngineNS.GamePlay
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             if (IsSetViewportPos)
             {
-                ImGuiAPI.SetNextWindowPos(ref GameViewportPos, ImGuiCond_.ImGuiCond_Always, ref Vector2.mZero);
-                ImGuiAPI.SetNextWindowSize(ref GameViewportSize, ImGuiCond_.ImGuiCond_Always);
+                ImGuiAPI.SetNextWindowPos(in GameViewportPos, ImGuiCond_.ImGuiCond_Always, in Vector2.mZero);
+                ImGuiAPI.SetNextWindowSize(in GameViewportSize, ImGuiCond_.ImGuiCond_Always);
             }
             IsDrawing = false;
             //ClrLogger.SetMessageBox(bMessageBox);
@@ -103,7 +103,7 @@ namespace EngineNS.GamePlay
                     {
                         min = min + pos;
                         max = max + pos;
-                        drawlist.AddImage(showTexture.ToPointer(), ref min, ref max, ref uv1, ref uv2, 0xFFFFFFFF);
+                        drawlist.AddImage(showTexture.ToPointer(), in min, in max, in uv1, in uv2, 0xFFFFFFFF);
                     }
                 }
             }

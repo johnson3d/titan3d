@@ -249,12 +249,12 @@ namespace EngineNS.IO
             Vector2 tpos;
             tpos.Y = start.Y + sz.Y - tsz.Y;
             tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
-            ImGuiAPI.PushClipRect(ref start, ref end, true);
+            ImGuiAPI.PushClipRect(in start, in end, true);
 
             end.Y -= tsz.Y;
             OnDrawSnapshot(in cmdlist, ref start, ref end);
 
-            cmdlist.AddText(ref tpos, 0xFFFF00FF, name, null);
+            cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
             ImGuiAPI.PopClipRect();
         }
         public virtual void OnShowIconTimout(int time)
@@ -293,7 +293,7 @@ namespace EngineNS.IO
             {
                 var uv0 = new Vector2(0, 0);
                 var uv1 = new Vector2(1, 1);
-                cmdlist.AddImage(SnapshotPtr.ToPointer(), ref start, ref end, ref uv0, ref uv1, 0xFFFFFFFF);
+                cmdlist.AddImage(SnapshotPtr.ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
             }
         }
         [Rtti.Meta]

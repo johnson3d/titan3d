@@ -87,7 +87,7 @@ namespace EngineNS
                     };
                     for (var dimIdx = 0; dimIdx < sizeof(T)/sizeof(float); dimIdx++)
                     {
-                        ImGuiAPI.TableNextRow(ref rowData);
+                        ImGuiAPI.TableNextRow(in rowData);
                         ImGuiAPI.TableSetColumnIndex(0);
                         ImGuiAPI.AlignTextToFramePadding();
                         string dimName = "";

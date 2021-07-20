@@ -42,10 +42,10 @@ namespace EngineNS.EGui.UIEditor
                 if (ImGuiAPI.Begin($"Structures", pVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var clientSize = ImGuiAPI.GetWindowContentRegionMax() - ImGuiAPI.GetWindowContentRegionMin();
-                    if (ImGuiAPI.BeginChild("ContentWindow", ref clientSize, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                    if (ImGuiAPI.BeginChild("ContentWindow", in clientSize, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                     {
                         var sz = new Vector2(0, 0);
-                        if(ImGuiAPI.Button("GenCode", ref sz))
+                        if(ImGuiAPI.Button("GenCode", in sz))
                         {
                             EditableFormData.Instance.CurrentForm.GenCode();
                         }

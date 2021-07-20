@@ -80,7 +80,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                 thinkness = Out.Link.LineThinkness;
             else if (In.Link != null)
                 thinkness = In.Link.LineThinkness;
-            cmdlist.AddBezierCubic(ref p1, ref p2, ref p3, ref p4, lineColor, thinkness, num_segs);
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, lineColor, thinkness, num_segs);
         }
         public class TSaveData : IO.BaseSerializer
         {
@@ -183,9 +183,9 @@ namespace EngineNS.EGui.Controls.NodeGraph
                 var min = HoverPin.DrawPosition;
                 Vector2 max;
                 max = min + HoverPin.GetIconSize(styles, graph.ScaleFactor);
-                cmdlist.AddRect(ref min, ref max, styles.HighLightColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2);
+                cmdlist.AddRect(in min, in max, styles.HighLightColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2);
             }
-            cmdlist.AddBezierCubic(ref p1, ref p2, ref p3, ref p4, styles.LinkerColor, 3, 30);
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, styles.LinkerColor, 3, 30);
         }
     }
 }

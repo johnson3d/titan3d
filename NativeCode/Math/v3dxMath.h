@@ -1207,6 +1207,10 @@ extern "C"
 			FLOAT *pU,                       // Barycentric Hit Coordinates
 			FLOAT *pV,                       // Barycentric Hit Coordinates
 			FLOAT *pDist);                   // Ray-Intersection Parameter Distance
+
+	 VFX_API v3dxPlane3* WINAPI v3dxPlaneTransform(v3dxPlane3* pout,
+		 const v3dxPlane3* pplane,
+		 const v3dxMatrix4* pm);
 }
 
 #endif//endif __V3DXMATH__H__

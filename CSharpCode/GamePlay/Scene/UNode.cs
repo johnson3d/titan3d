@@ -401,7 +401,14 @@ namespace EngineNS.GamePlay.Scene
             }
             else
             {
-                Placement.AbsTransform = Placement.Transform * Parent.Placement.AbsTransform;                
+                if(Placement.IsIdentity)
+                {
+                    Placement.AbsTransform = Parent.Placement.AbsTransform;
+                }
+                else
+                {
+                    Placement.AbsTransform = Placement.Transform * Parent.Placement.AbsTransform;
+                }
                 Placement.AbsTransformInv = Matrix.Invert(ref Placement.mAbsTransform);
                 OnAbsTransformChanged();
                 Parent.UpdateAbsTransform();
@@ -423,13 +430,28 @@ namespace EngineNS.GamePlay.Scene
                 AABB.InitEmptyBox();
             }
             foreach (var i in Children)
-            {
-                BoundingBox tmp;
-                //BoundingBox.Transform(ref i.AABB, ref i.Placement.AbsTransform, out tmp);
-                var cldTrans = i.Placement.Transform;
-                cldTrans.NoScale();
-                BoundingBox.Transform(ref i.AABB, ref cldTrans, out tmp);
-                AABB = BoundingBox.Merge(AABB, tmp);
+            {   
+                if (i.Placement.IsIdentity == false)
+                {
+                    var uplc = i.Placement as UPlacement;
+                    if (uplc != null)
+                    {
+                        BoundingBox tmp;
+                        BoundingBox.Transform(in i.AABB, in uplc.mTransform, out tmp);
+                        AABB = BoundingBox.Merge(AABB, tmp);
+                    }
+                    else
+                    {
+                        BoundingBox tmp;
+                        var trans = i.Placement.Transform;
+                        BoundingBox.Transform(in i.AABB, in trans, out tmp);
+                        AABB = BoundingBox.Merge(AABB, tmp);
+                    }
+                }
+                else
+                {
+                    AABB = BoundingBox.Merge(AABB, i.AABB);
+                }
             }
             if (Parent != null)
             {
@@ -448,7 +470,7 @@ namespace EngineNS.GamePlay.Scene
                 fixed(BoundingBox* pBox = &AABB)
                 {
                     var dir = localEnd - localStart;
-                    if (AABB.IsEmpty()==false && IDllImportApi.v3dxLineIntersectBox3(&Near, &vNear, &Far, &vFar, &localStart, &dir, pBox) == 0)
+                    if (/*AABB.IsEmpty()==false && */IDllImportApi.v3dxLineIntersectBox3(&Near, &vNear, &Far, &vFar, &localStart, &dir, pBox) == 0)
                     {
                         return false;
                     }

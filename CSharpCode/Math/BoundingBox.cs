@@ -531,18 +531,18 @@ namespace EngineNS
         /// <param name="value1">包围盒对象1</param>
         /// <param name="value2">包围盒对象2</param>
         /// <returns>如果相同返回true，否则返回false</returns>
-        public static bool Equals(ref BoundingBox value1, ref BoundingBox value2)
+        public static bool Equals(in BoundingBox value1, in BoundingBox value2)
 	    {
 		    return ( value1.Minimum == value2.Minimum && value1.Maximum == value2.Maximum );
 	    }
-        public static BoundingBox Transform(ref BoundingBox srcBox, ref Matrix matrix)
+        public static BoundingBox Transform(in BoundingBox srcBox, in Matrix matrix)
         {
             BoundingBox result;
-            Transform(ref srcBox, ref matrix, out result);
+            Transform(in srcBox, in matrix, out result);
             return result;
         }
         //http://dev.theomader.com/transform-bounding-boxes/
-        public static void Transform(ref BoundingBox srcBox, ref Matrix matrix, out BoundingBox result)
+        public static void Transform(in BoundingBox srcBox, in Matrix matrix, out BoundingBox result)
         {
             var right = matrix.Right;
             var up = matrix.Up;

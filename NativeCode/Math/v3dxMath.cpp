@@ -2282,4 +2282,19 @@ extern "C"
 	{
 		v3dxMatrix4Mul(pOut, mat1, mat2);
 	}
+
+	VFX_API v3dxPlane3* WINAPI v3dxPlaneTransform(v3dxPlane3* pout,
+		const v3dxPlane3* pplane,
+		const v3dxMatrix4* pm
+	)
+	{//https://doxygen.reactos.org/de/d57/dll_2directx_2wine_2d3dx9__36_2math_8c.html#abd38e717074a81bef44bcfe057f96f0c
+		const v3dxPlane3& plane = *pplane;
+
+		pout->m_vNormal.x = pm->m[0][0] * plane.m_vNormal.x + pm->m[1][0] * plane.m_vNormal.y + pm->m[2][0] * plane.m_vNormal.z + pm->m[3][0] * plane.m_fDD;
+		pout->m_vNormal.y = pm->m[0][1] * plane.m_vNormal.x + pm->m[1][1] * plane.m_vNormal.y + pm->m[2][1] * plane.m_vNormal.z + pm->m[3][1] * plane.m_fDD;
+		pout->m_vNormal.z = pm->m[0][2] * plane.m_vNormal.x + pm->m[1][2] * plane.m_vNormal.y + pm->m[2][2] * plane.m_vNormal.z + pm->m[3][2] * plane.m_fDD;
+		pout->m_fDD = pm->m[0][3] * plane.m_vNormal.x + pm->m[1][3] * plane.m_vNormal.y + pm->m[2][3] * plane.m_vNormal.z + pm->m[3][3] * plane.m_fDD;
+		pout->normalize();
+		return pout;
+	}
 }

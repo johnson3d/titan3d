@@ -136,9 +136,9 @@ namespace EngineNS.Editor
             try
             {
                 var mainPos = new Vector2(0);
-                ImGuiAPI.SetNextWindowPos(ref mainPos, ImGuiCond_.ImGuiCond_FirstUseEver, ref mainPos);
+                ImGuiAPI.SetNextWindowPos(in mainPos, ImGuiCond_.ImGuiCond_FirstUseEver, in mainPos);
                 var wsz = new Vector2(1290, 800);
-                ImGuiAPI.SetNextWindowSize(ref wsz, ImGuiCond_.ImGuiCond_FirstUseEver);
+                ImGuiAPI.SetNextWindowSize(in wsz, ImGuiCond_.ImGuiCond_FirstUseEver);
                 if (ImGuiAPI.Begin("T3D CoreEditor", ref IsVisible, //ImGuiWindowFlags_.ImGuiWindowFlags_NoMove |
                     //ImGuiWindowFlags_.ImGuiWindowFlags_NoResize |
                     ImGuiWindowFlags_.ImGuiWindowFlags_NoCollapse |
@@ -201,7 +201,7 @@ namespace EngineNS.Editor
                 // Here we just want to make the demo initial state a bit more friendly!
                 var pos = new Vector2(650, 20);
                 var pivot = new Vector2(0, 0);
-                ImGuiAPI.SetNextWindowPos(ref pos, ImGuiCond_.ImGuiCond_FirstUseEver, ref pivot);
+                ImGuiAPI.SetNextWindowPos(in pos, ImGuiCond_.ImGuiCond_FirstUseEver, in pivot);
                 ImGuiAPI.ShowDemoWindow(ref _showDemoWindow);
             }
         }
@@ -259,20 +259,20 @@ namespace EngineNS.Editor
         private void DrawToolBar()
         {
             var btSize = new Vector2(64, 64);
-            ImGuiAPI.Button("New", ref btSize);
+            ImGuiAPI.Button("New", in btSize);
             ImGuiAPI.SameLine(0, -1);
-            ImGuiAPI.Button("Save", ref btSize);
+            ImGuiAPI.Button("Save", in btSize);
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
         {
             var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("LeftWindow", ref size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
                 var winClass = new ImGuiWindowClass();
                 winClass.UnsafeCallConstructor();
                 var sz = new Vector2(0.0f, 0.0f);
-                ImGuiAPI.DockSpace(LeftDockId, ref sz, dockspace_flags, ref winClass);
+                ImGuiAPI.DockSpace(LeftDockId, in sz, dockspace_flags, in winClass);
                 winClass.UnsafeCallDestructor();
             }
             ImGuiAPI.EndChild();
@@ -280,7 +280,7 @@ namespace EngineNS.Editor
         protected unsafe void DrawCenter(ref Vector2 min, ref Vector2 max)
         {
             var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("CenterWindow", ref size, false, 
+            if (ImGuiAPI.BeginChild("CenterWindow", in size, false, 
                 ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
@@ -297,13 +297,13 @@ namespace EngineNS.Editor
         protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
         {
             var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("RightWindow", ref size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
                 var winClass = new ImGuiWindowClass();
                 winClass.UnsafeCallConstructor();
                 var sz = new Vector2(0.0f, 0.0f);
-                ImGuiAPI.DockSpace(RightDockId, ref sz, dockspace_flags, ref winClass);
+                ImGuiAPI.DockSpace(RightDockId, in sz, dockspace_flags, in winClass);
                 winClass.UnsafeCallDestructor();
             }
             ImGuiAPI.EndChild();

@@ -15,7 +15,7 @@ namespace EngineNS.Animation.Skeleton
                 for (int i = 0; i < partialSkeleton.GetBonesNum(); ++i)
                 {
                     var index = new IndexInSkeleton(i);
-                    var bonePtr = partialSkeleton.GetBone(ref index);
+                    var bonePtr = partialSkeleton.GetBone(in index);
                     var bone = CBone.Create(new IBone(bonePtr));
                     skeleton.mBones.Add(bone);
                     skeleton.mBonesDic.Add(bone.Desc.NameHash, bone);

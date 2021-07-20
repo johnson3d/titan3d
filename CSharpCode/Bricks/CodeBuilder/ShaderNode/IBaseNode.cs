@@ -37,7 +37,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var nodeMin = start;
             var nodeMax = nodeMin + new Vector2(ScaledNodeSize.X, nameSize.Y);
             TitleImage.OnDraw(ref cmdlist, ref nodeMin, ref nodeMax);
-            cmdlist.AddText(ref nodeMin, Icon.Color, GetTitleName(), null);
+            cmdlist.AddText(in nodeMin, Icon.Color, GetTitleName(), null);
 
             nodeMax = nodeMin + ScaledNodeSize;
             nodeMin.Y += nameSize.Y;
@@ -72,7 +72,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
                     nameSize = ImGuiAPI.CalcTextSize(Inputs[i].Name, false, -1.0f);
                     rectMin.X -= nameSize.X;
-                    cmdlist.AddText(ref rectMin, Icon.Color, Inputs[i].Name, null);
+                    cmdlist.AddText(in rectMin, Icon.Color, Inputs[i].Name, null);
 
                     SetIfBigger(ref lineHeight, inIcon.Size.Y * fScale);
                     if (Inputs[i].Link != null)
@@ -94,7 +94,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     Outputs[i].Offset = (rectMin - start) / ParentGraph.ScaleFactor;
 
                     rectMin.X = rectMax.X;
-                    cmdlist.AddText(ref rectMin, Icon.Color, Outputs[i].Name, null);
+                    cmdlist.AddText(in rectMin, Icon.Color, Outputs[i].Name, null);
 
                     SetIfBigger(ref lineHeight, inIcon.Size.Y * fScale);
                     if (Outputs[i].Link != null)
@@ -107,7 +107,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             if (Selected)
             {
-                cmdlist.AddRect(ref start, ref nodeMax, styles.SelectedColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2);
+                cmdlist.AddRect(in start, in nodeMax, styles.SelectedColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2);
             }
             ImGuiAPI.SetWindowFontScale(1.0f);
         }

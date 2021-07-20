@@ -55,7 +55,7 @@ namespace EngineNS.Editor.Forms
                                 mRpcProfilerData = Profiler.URpcProfiler.GetProfilerData(i);
                             }
 
-                            if (ImGuiAPI.BeginTable("TimeScope", 5, ImGuiTableFlags_.ImGuiTableFlags_Resizable, ref size, 0.0f))
+                            if (ImGuiAPI.BeginTable("TimeScope", 5, ImGuiTableFlags_.ImGuiTableFlags_Resizable, in size, 0.0f))
                             {
                                 ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
                                 ImGuiAPI.TableSetColumnIndex(0);
@@ -106,19 +106,19 @@ namespace EngineNS.Editor.Forms
                                     Vector4 clr = new Vector4(1, 0, 1, 1);
                                     if (j.Parent != "null")
                                     {
-                                        ImGuiAPI.TextColored(ref clr, j.Parent);
+                                        ImGuiAPI.TextColored(in clr, j.Parent);
                                         var min = ImGuiAPI.GetItemRectMin();
                                         var max = ImGuiAPI.GetItemRectMax();
                                         min.Y = max.Y;
                                         var cmdlist = ImGuiAPI.GetWindowDrawList();
-                                        cmdlist.AddLine(ref min, ref max, 0xFFFF00FF, 1);
+                                        cmdlist.AddLine(in min, in max, 0xFFFF00FF, 1);
                                         if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                                         {
                                             Console.WriteLine("Jump to parent");
                                         }
                                     }
                                     else
-                                        ImGuiAPI.TextColored(ref clr, "null");
+                                        ImGuiAPI.TextColored(in clr, "null");
                                     if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
                                     {
                                         PopItemMenu(i, j, "Parent");

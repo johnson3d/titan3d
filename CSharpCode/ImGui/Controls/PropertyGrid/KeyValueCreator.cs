@@ -60,7 +60,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                 ImGuiAPI.Separator();
                 var sz = new Vector2(-1, 0);
-                if (ImGuiAPI.Button("AddItem", ref sz))
+                if (ImGuiAPI.Button("AddItem", in sz))
                 {
                     if (KeyData != null && ValueData != null)
                     {

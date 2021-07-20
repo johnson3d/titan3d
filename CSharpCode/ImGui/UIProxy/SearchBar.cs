@@ -35,7 +35,7 @@ namespace EngineNS.EGui.UIProxy
         public unsafe bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
         {
             bool retValue = false;
-            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref StyleConfig.Instance.PGSearchBoxFramePadding);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in StyleConfig.Instance.PGSearchBoxFramePadding);
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FrameBorderSize, 1.0f);
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FrameRounding, 12.0f);
              
@@ -66,7 +66,7 @@ namespace EngineNS.EGui.UIProxy
             {
                 var textSize = ImGuiAPI.CalcTextSize(InfoText, false, 0);
                 var pos = new Vector2(itemMin.X + StyleConfig.Instance.PGSearchBoxFramePadding.X, itemMin.Y + (itemMax.Y - itemMin.Y - textSize.Y) * 0.5f);
-                drawList.AddText(ref pos, StyleConfig.Instance.PGSearchBoxInfoTextColor, InfoText, null);
+                drawList.AddText(in pos, StyleConfig.Instance.PGSearchBoxInfoTextColor, InfoText, null);
             }
             buffer.DestroyMe();
 

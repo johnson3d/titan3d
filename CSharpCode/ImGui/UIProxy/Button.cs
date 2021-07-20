@@ -62,12 +62,12 @@ namespace EngineNS.EGui.UIProxy
             var size = ImGuiAPI.CalcItemSize(ref mSize, ImageSize.X + style->FramePadding.X * 2.0f, ImageSize.Y + style->FramePadding.Y * 2.0f);
             var rectEnd = rectStart + size;
 
-            ImGuiAPI.ItemSize(ref size, style->FramePadding.Y);
-            if (!ImGuiAPI.ItemAdd(ref rectStart, ref rectEnd, id, 0))
+            ImGuiAPI.ItemSize(in size, style->FramePadding.Y);
+            if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
                 return false;
 
             bool hovered = false, held = false;
-            var pressed = ImGuiAPI.ButtonBehavior(ref rectStart, ref rectEnd, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
             if (pressed)
                 mImage.Color = ImageActiveColor;
             else if (hovered)

@@ -38,13 +38,13 @@ namespace EngineNS.Support
             UAnyValue tValue = new UAnyValue();
             tKey.SetValue<K>(key);
             tValue.SetValue<V>(value);
-            return mCoreObject.Add(ref tKey, ref tValue);
+            return mCoreObject.Add(in tKey, in tValue);
         }
         public void Remove(K key)
         {
             UAnyValue tKey = new UAnyValue();
             tKey.SetValue<K>(key);
-            mCoreObject.Remove(ref tKey);
+            mCoreObject.Remove(in tKey);
         }
         public void Clear()
         {
@@ -56,7 +56,7 @@ namespace EngineNS.Support
             UAnyValue tKey = new UAnyValue();
             tKey.SetValue<K>(key);
             UAnyValue tValue = new UAnyValue();
-            var ret = mCoreObject.Find(ref tKey, ref tValue);
+            var ret = mCoreObject.Find(in tKey, ref tValue);
             if (ret == false)
                 return false;
 

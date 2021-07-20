@@ -218,7 +218,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
                 LeftWidth = ImGuiAPI.GetColumnWidth(0);
                 var szLeft = new Vector2(LeftWidth, cltMax.Y - cltMin.Y);
-                if (ImGuiAPI.BeginChild("LeftWin", ref szLeft, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                if (ImGuiAPI.BeginChild("LeftWin", in szLeft, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                 {
                     OnLeftWindow();
                     OnDrawMenuLeftWindow();
@@ -228,7 +228,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 var colWidth = ImGuiAPI.GetColumnWidth(1);
                 var szRight = new Vector2(colWidth, cltMax.Y - cltMin.Y);
-                if (ImGuiAPI.BeginChild("RightWin", ref szRight, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                if (ImGuiAPI.BeginChild("RightWin", in szRight, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                 {
                     OnRightWindow();
                 }
@@ -282,7 +282,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 var sz = new Vector2(-1, 0);
                 //ImGuiAPI.SetNextItemWidth(-1);
-                if (ImGuiAPI.Button("GenCode", ref sz))
+                if (ImGuiAPI.Button("GenCode", in sz))
                 {
                     GenerateCode();
                     CompileCode();
@@ -393,7 +393,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public void DrawFunctionGraph(FunctionGraph func, Vector2 size)
         {
-            if (ImGuiAPI.BeginChild("Function", ref size, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
+            if (ImGuiAPI.BeginChild("Function", in size, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
             {
                 func.OnDraw(null, false);
             }

@@ -63,7 +63,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var offsetY = (style->FramePadding.Y - EGui.UIProxy.StyleConfig.Instance.PGCheckboxFramePadding.Y);
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
             cursorPos.Y += offsetY;
-            ImGuiAPI.SetCursorScreenPos(ref cursorPos);
+            ImGuiAPI.SetCursorScreenPos(in cursorPos);
             //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGCheckboxFramePadding);
             var name = TName.FromString2("##", info.Name).ToString();
             var multiValue = info.Value as PropertyMultiValue;
@@ -576,7 +576,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.ItemHightlightHoveredColor);
                         bStylePushed = true;
                     }
-                    ImGuiAPI.Selectable(members[i], ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_DontClosePopups, ref sz);
+                    ImGuiAPI.Selectable(members[i], ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_DontClosePopups, in sz);
                     if (bStylePushed)
                         ImGuiAPI.PopStyleColor(3);
                     if (bSelected)
@@ -607,7 +607,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.ItemHightlightHoveredColor);
                     }
 
-                    if (ImGuiAPI.Selectable(members[j], ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, ref sz))
+                    if (ImGuiAPI.Selectable(members[j], ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in sz))
                     {
                         item_current_idx = j;
                     }
@@ -643,7 +643,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             Support.UAnyPointer anyPointer = new Support.UAnyPointer();
             anyPointer.RefObject = mDrawData;
             var winSize = new Vector2(mComboBox.Width, -1);
-            ImGuiAPI.SetNextWindowSize(ref winSize, ImGuiCond_.ImGuiCond_Always);
+            ImGuiAPI.SetNextWindowSize(in winSize, ImGuiCond_.ImGuiCond_Always);
             mComboBox.OnDraw(ref drawList, ref anyPointer);
             newValue = mDrawData.NewValue;
 
@@ -697,7 +697,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             };
             for (int i = 0; i < lst.Length; i++)
             {
-                ImGuiAPI.TableNextRow(ref rowData);
+                ImGuiAPI.TableNextRow(in rowData);
 
                 var name = "[" + i.ToString() + "]";
                 var obj = lst.GetValue(i);
@@ -831,14 +831,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 var obj = lst[i];
 
                 ImGuiAPI.AlignTextToFramePadding();
-                ImGuiAPI.TableNextRow(ref rowData);
+                ImGuiAPI.TableNextRow(in rowData);
                 ImGuiAPI.TableSetColumnIndex(0);
                 if (info.HostPropertyGrid.IsReadOnly == false)
                 {
                     ImGuiAPI.Indent(5);
                     bool operated = false;
                     ImGuiAPI.PushID(TName.FromString2("##ListDel_", i.ToString()).ToString());
-                    if (ImGuiAPI.Button("-", ref sz))
+                    if (ImGuiAPI.Button("-", in sz))
                     {
                         //removeList.Add(i);
                         lst.RemoveAt(i);
@@ -854,7 +854,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     operated = false;
                     ImGuiAPI.SameLine(0, -1);
                     ImGuiAPI.PushID(TName.FromString2("##ListAdd_", i.ToString()).ToString());
-                    if (ImGuiAPI.Button("+", ref sz))
+                    if (ImGuiAPI.Button("+", in sz))
                     {
                         //addList.Add(new KeyValuePair<int, object>(i, obj));
                         lst.Insert(i, obj);
@@ -959,7 +959,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
 
                     var size = new Vector2(300, 500);
-                    ImGuiAPI.SetNextWindowSize(ref size, ImGuiCond_.ImGuiCond_None);
+                    ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_None);
                     mKVCreator.CreateFinished = false;
                     mKVCreator.OnDraw("AddDictElement");
                     if (mKVCreator.CreateFinished)
@@ -1007,14 +1007,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 var name = "[" + idx.ToString() + "]";// iter.Key.ToString();
                 ImGuiAPI.AlignTextToFramePadding();
-                ImGuiAPI.TableNextRow(ref rowData);
+                ImGuiAPI.TableNextRow(in rowData);
                 ImGuiAPI.TableSetColumnIndex(0);
                 if (info.HostPropertyGrid.IsReadOnly == false)
                 {
                     bool operated = false;
                     ImGuiAPI.Indent(5);
                     ImGuiAPI.PushID(TName.FromString2("##ListDel_", name).ToString());
-                    if (ImGuiAPI.Button("-", ref sz))
+                    if (ImGuiAPI.Button("-", in sz))
                     {
                         //removeList.Add(iter.Key);
                         dict.Remove(iter.Key);
@@ -1029,7 +1029,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 var flags = info.Flags;
                 if (PropertyGrid.IsLeafTreeNode(iter.Value, null))
                     flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref tempPadding);
+                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in tempPadding);
                 var treeNodeRet = ImGuiAPI.TreeNodeEx(name, flags, name);
                 ImGuiAPI.PopStyleVar(1);
                 ImGuiAPI.SameLine(0, 5);

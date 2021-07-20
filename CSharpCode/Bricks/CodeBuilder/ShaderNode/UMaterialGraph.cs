@@ -248,7 +248,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
             Vector2 p = new Vector2(O.X + (int)(length * Math.Cos(angle)), O.Y - (int)(length * Math.Sin(angle)));
 
-            cmdlist.AddLine(ref O, ref p, 0xFFFFFFFF, width);
+            cmdlist.AddLine(in O, in p, 0xFFFFFFFF, width);
 
             Tree(ref p, angle + Math.PI / 18 * (0.9f + mRand.NextDouble() * 0.2), length * 0.8 * (0.9f + mRand.NextDouble() * 0.2), width * 0.8f, ref cmdlist);
             Tree(ref p, angle - Math.PI / 18 * (0.9f + mRand.NextDouble() * 0.2), length * 0.8 * (0.9f + mRand.NextDouble() * 0.2), width * 0.8f, ref cmdlist);

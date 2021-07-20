@@ -164,27 +164,27 @@ namespace EngineNS
         /// (1,1,1)向量
         /// </summary>
         [Rtti.Meta]
-        public static Vector3 UnitXYZ = new Vector3(1, 1, 1);
+        public readonly static Vector3 UnitXYZ = new Vector3(1, 1, 1);
         /// <summary>
         /// 零向量
         /// </summary>
         [Rtti.Meta]
-        public static Vector3 Zero = new Vector3(0, 0, 0);
+        public readonly static Vector3 Zero = new Vector3(0, 0, 0);
         /// <summary>
         /// X轴的单位向量
         /// </summary>
         [Rtti.Meta]
-        public static Vector3 UnitX = new Vector3(1, 0, 0);
+        public readonly static Vector3 UnitX = new Vector3(1, 0, 0);
         /// <summary>
         /// Y轴的单位向量
         /// </summary>
         [Rtti.Meta]
-        public static Vector3 UnitY = new Vector3(0, 1, 0);
+        public readonly static Vector3 UnitY = new Vector3(0, 1, 0);
         /// <summary>
         /// Z轴的单位向量
         /// </summary>
         [Rtti.Meta]
-        public static Vector3 UnitZ = new Vector3(0, 0, 1);
+        public readonly static Vector3 UnitZ = new Vector3(0, 0, 1);
         
         public static Vector3 One = new Vector3(1f, 1f, 1f);
         public static Vector3 Up = new Vector3(0f, 1f, 0f);
@@ -1735,7 +1735,7 @@ namespace EngineNS
         /// <param name="value1">Vector3对象</param>
         /// <param name="value2">Vector3对象</param>
         /// <returns>如果两个向量相等返回true，否则返回false</returns>
-        public static bool Equals( ref Vector3 value1, ref Vector3 value2 )
+        public static bool Equals( in Vector3 value1, in Vector3 value2 )
         {
             bool reX = (Math.Abs(value1.X - value2.X) < CoreDefine.Epsilon);
             bool reY = (Math.Abs(value1.Y - value2.Y) < CoreDefine.Epsilon);

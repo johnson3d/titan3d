@@ -213,7 +213,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             bool drawing = true;
             var pivot = new Vector2(0);
-            ImGuiAPI.SetNextWindowSize(ref WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
+            ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             if (ImGuiAPI.Begin(Material.AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
@@ -269,7 +269,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         protected unsafe void DrawToolBar()
         {
             var btSize = new Vector2(64, 64);
-            if (ImGuiAPI.Button("Save", ref btSize))
+            if (ImGuiAPI.Button("Save", in btSize))
             {
                 var xml = new System.Xml.XmlDocument();
                 var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
@@ -283,7 +283,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 Editor.USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Load", ref btSize))
+            if (ImGuiAPI.Button("Load", in btSize))
             {
                 MaterialOutput = null;
                 MaterialGraph.ResetGraph();
@@ -292,7 +292,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Compile", ref btSize))
+            if (ImGuiAPI.Button("Compile", in btSize))
             {
                 System.Diagnostics.Trace.Write(GenHLSLCode());
             }
@@ -304,14 +304,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 PreviewDockId = ImGuiAPI.GetID($"{AssetName}");
 
             var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("LeftWindow", ref size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
                 var winClass = new ImGuiWindowClass();
                 winClass.UnsafeCallConstructor();
                 var sz = ImGuiAPI.GetWindowSize();
                 sz.Y = sz.X;
-                ImGuiAPI.DockSpace(PreviewDockId, ref sz, dockspace_flags, ref winClass);
+                ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
                 if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     NodePropGrid.OnDraw(true, false, false);
@@ -331,7 +331,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
         {
             var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("RightWindow", ref size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 MaterialGraph.OnDraw(null, false);
             }

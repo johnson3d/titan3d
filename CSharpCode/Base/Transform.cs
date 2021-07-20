@@ -64,6 +64,27 @@ namespace EngineNS
             tmp.mQuat = quat;
             return tmp;
         }
+        public const float ScaleEpsilon = 0.000001f;
+        public bool HasScale
+        {
+            get
+            {
+                return Vector3.Equals(in mScale, in Vector3.One) == false;
+            }
+        }
+        public bool IsIdentity
+        {
+            get
+            {
+                if (Vector3.Equals(in mScale, in Vector3.One) == false)
+                    return false;
+                if (Vector3.Equals(in mPosition, in Vector3.Zero) == false)
+                    return false;
+                if (Quaternion.Equals(in mQuat, in Quaternion.mIdentity) == false)
+                    return false;
+                return true;
+            }
+        }
         public Vector3 mPosition;
         public Vector3 mScale;//为了Hierarchical计算方便，我们设定mScale在Transform中只影响本节点而不传递，如果需要整体放缩，在Node上新增一个ScaleMatrix
         public Quaternion mQuat;

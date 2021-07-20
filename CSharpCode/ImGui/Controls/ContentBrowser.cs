@@ -113,7 +113,7 @@ namespace EngineNS.EGui.Controls
         public RName CurrentDir;
         public void DrawDirectories(RName root, Vector2 size)
         {
-            if (ImGuiAPI.BeginChild("LeftWindow", ref size, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+            if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
                 ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow;
                 if (root == CurrentDir)
@@ -180,7 +180,7 @@ namespace EngineNS.EGui.Controls
             {
                 SureSearchBar();
             }
-            if (ImGuiAPI.BeginChild("RightWindow", ref size, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+            if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
                 ////////////////////////////////////////////////////////////
                 //var winPos = ImGuiAPI.GetWindowPos();
@@ -312,7 +312,7 @@ namespace EngineNS.EGui.Controls
         }
         private void DrawItem(ref ImDrawList cmdlist, UVAnim icon, IO.IAssetMeta ameta, ref Vector2 sz)
         {
-            ImGuiAPI.Selectable($"##{ameta.GetAssetName().Name}", false, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, ref sz);
+            ImGuiAPI.Selectable($"##{ameta.GetAssetName().Name}", false, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in sz);
             if (ImGuiAPI.IsItemVisible())
             {
                 if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))

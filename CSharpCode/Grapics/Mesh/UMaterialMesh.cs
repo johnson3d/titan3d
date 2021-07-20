@@ -263,7 +263,7 @@ namespace EngineNS.Graphics.Mesh
                 ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None;
                 for (int i = 0; i < materials.Length; i++)
                 {
-                    ImGuiAPI.TableNextRow(ref rowData);
+                    ImGuiAPI.TableNextRow(in rowData);
 
                     var name = i.ToString();
                     ImGuiAPI.TableSetColumnIndex(0);

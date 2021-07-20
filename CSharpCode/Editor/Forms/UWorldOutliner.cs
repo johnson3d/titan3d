@@ -49,7 +49,7 @@ namespace EngineNS.Editor.Forms
         }
         public unsafe void DrawAsChildWindow(ref Vector2 size)
         {
-            if (ImGuiAPI.BeginChild(Title, ref size, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (ImGuiAPI.BeginChild(Title, in size, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.IsWindowDocked())
                 {

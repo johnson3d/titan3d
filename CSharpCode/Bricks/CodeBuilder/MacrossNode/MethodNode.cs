@@ -458,8 +458,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             var pivot = new Vector2(0, 0);
             var size = new Vector2(300, 500);
-            ImGuiAPI.SetNextWindowPos(ref pos, ImGuiCond_.ImGuiCond_None, ref pivot);
-            ImGuiAPI.SetNextWindowSize(ref size, ImGuiCond_.ImGuiCond_None);
+            ImGuiAPI.SetNextWindowPos(in pos, ImGuiCond_.ImGuiCond_None, in pivot);
+            ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_None);
             if (ImGuiAPI.BeginPopup("MethodSelector", ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
                 OnDrawTree();

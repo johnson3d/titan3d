@@ -166,7 +166,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             Vector3 ShadowCameraPos = FrustumSphereCenter - mDirLightDirection * (FrustumSphereRadius + mShadowCameraOffset);
 
             var shadowCamera = GBuffers.Camera.mCoreObject;
-            shadowCamera.LookAtLH(ref ShadowCameraPos, ref FrustumSphereCenter, ref Vector3.UnitY);
+            shadowCamera.LookAtLH(in ShadowCameraPos, in FrustumSphereCenter, in Vector3.UnitY);
             float FrustumSphereDiameter = FrustumSphereRadius * 2.0f;
             float ShadowCameraZFar = mShadowCameraOffset + FrustumSphereDiameter;
             float ShadowCameraZNear = 0.0f;

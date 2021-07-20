@@ -40,7 +40,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CSwapChain();
-                result.mCoreObject = mCoreObject.CreateSwapChain(ref desc);
+                result.mCoreObject = mCoreObject.CreateSwapChain(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -51,7 +51,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CCommandList();
-                result.mCoreObject = mCoreObject.CreateCommandList(ref desc);
+                result.mCoreObject = mCoreObject.CreateCommandList(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -74,7 +74,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CRenderPipeline();
-                result.mCoreObject = mCoreObject.CreateRenderPipeline(ref desc);
+                result.mCoreObject = mCoreObject.CreateRenderPipeline(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -85,7 +85,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CVertexBuffer();
-                result.mCoreObject = mCoreObject.CreateVertexBuffer(ref desc);
+                result.mCoreObject = mCoreObject.CreateVertexBuffer(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -96,7 +96,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CIndexBuffer();
-                result.mCoreObject = mCoreObject.CreateIndexBuffer(ref desc);
+                result.mCoreObject = mCoreObject.CreateIndexBuffer(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -129,7 +129,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CIndexBuffer();
-                result.mCoreObject = mCoreObject.CreateIndexBufferFromBuffer(ref desc, pBuffer.mCoreObject);
+                result.mCoreObject = mCoreObject.CreateIndexBufferFromBuffer(in desc, pBuffer.mCoreObject);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -140,7 +140,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CVertexBuffer();
-                result.mCoreObject = mCoreObject.CreateVertexBufferFromBuffer(ref desc, pBuffer.mCoreObject);
+                result.mCoreObject = mCoreObject.CreateVertexBufferFromBuffer(in desc, pBuffer.mCoreObject);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -151,7 +151,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CFrameBuffers();
-                result.mCoreObject = mCoreObject.CreateFrameBuffers(ref desc);
+                result.mCoreObject = mCoreObject.CreateFrameBuffers(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -162,7 +162,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CRenderTargetView();
-                result.mCoreObject = mCoreObject.CreateRenderTargetView(ref desc);
+                result.mCoreObject = mCoreObject.CreateRenderTargetView(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -173,7 +173,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CDepthStencilView();
-                result.mCoreObject = mCoreObject.CreateDepthRenderTargetView(ref desc);
+                result.mCoreObject = mCoreObject.CreateDepthRenderTargetView(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -184,7 +184,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CTexture2D();
-                result.mCoreObject = mCoreObject.CreateTexture2D(ref desc);
+                result.mCoreObject = mCoreObject.CreateTexture2D(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -195,7 +195,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CShaderResourceView();
-                result.mCoreObject = mCoreObject.CreateShaderResourceView(ref desc);
+                result.mCoreObject = mCoreObject.CreateShaderResourceView(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -206,7 +206,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CGpuBuffer();
-                result.mCoreObject = mCoreObject.CreateGpuBuffer(ref desc, pInitData.ToPointer());
+                result.mCoreObject = mCoreObject.CreateGpuBuffer(in desc, pInitData.ToPointer());
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -217,7 +217,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CShaderResourceView();
-                result.mCoreObject = mCoreObject.CreateShaderResourceViewFromBuffer(pBuffer.mCoreObject, ref desc);
+                result.mCoreObject = mCoreObject.CreateShaderResourceViewFromBuffer(pBuffer.mCoreObject, in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -228,7 +228,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CUnorderedAccessView();
-                result.mCoreObject = mCoreObject.CreateUnorderedAccessView(pBuffer.mCoreObject, ref desc);
+                result.mCoreObject = mCoreObject.CreateUnorderedAccessView(pBuffer.mCoreObject, in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -250,7 +250,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CSamplerState();
-                result.mCoreObject = mCoreObject.CreateSamplerState(ref desc);
+                result.mCoreObject = mCoreObject.CreateSamplerState(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -261,7 +261,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CRasterizerState();
-                result.mCoreObject = mCoreObject.CreateRasterizerState(ref desc);
+                result.mCoreObject = mCoreObject.CreateRasterizerState(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -272,7 +272,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CDepthStencilState();
-                result.mCoreObject = mCoreObject.CreateDepthStencilState(ref desc);
+                result.mCoreObject = mCoreObject.CreateDepthStencilState(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -283,7 +283,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CBlendState();
-                result.mCoreObject = mCoreObject.CreateBlendState(ref desc);
+                result.mCoreObject = mCoreObject.CreateBlendState(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
@@ -294,7 +294,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CShaderProgram();
-                result.mCoreObject = mCoreObject.CreateShaderProgram(ref desc);
+                result.mCoreObject = mCoreObject.CreateShaderProgram(in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;

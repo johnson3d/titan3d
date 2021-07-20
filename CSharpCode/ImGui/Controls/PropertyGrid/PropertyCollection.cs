@@ -579,7 +579,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             valuesDifferent = true;
                     }
 
-                    ImGuiAPI.TableNextRow(ref rowData);
+                    ImGuiAPI.TableNextRow(in rowData);
                     ImGuiAPI.TableSetColumnIndex(0);
                     ImGuiAPI.AlignTextToFramePadding();
                     string dimName = "";

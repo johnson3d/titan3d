@@ -10,7 +10,7 @@ namespace EngineNS.GamePlay
         {
             HostNode = node;
         }
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) 
+        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             HostNode = tagObject as Scene.UNode;
         }
@@ -25,7 +25,7 @@ namespace EngineNS.GamePlay
             {
             }
         }
-        public virtual Vector3 Scale 
+        public virtual Vector3 Scale
         {
             get
             {
@@ -54,7 +54,14 @@ namespace EngineNS.GamePlay
                 return Matrix.Identity;
             }
         }
-
+        public virtual bool IsIdentity
+        {
+            get { return true; }
+        }
+        public virtual bool HasScale
+        {
+            get { return false; }
+        }
         public virtual void SetTransform(ref Vector3 pos, ref Vector3 scale, ref Quaternion quat)
         {
             
@@ -88,8 +95,13 @@ namespace EngineNS.GamePlay
             : base(hostNode)
         {
             mTransformData.InitData();
+            mIsIdentity = true;
         }
-
+        protected bool mIsIdentity;
+        public override bool IsIdentity
+        {
+            get { return mIsIdentity; }
+        }
         Transform mTransformData;
         [Rtti.Meta(Order = 0)]
         public Transform TransformData
@@ -128,6 +140,10 @@ namespace EngineNS.GamePlay
                 UpdateData();
             }
         }
+        public override bool HasScale
+        {
+            get { return mTransformData.HasScale; }
+        }
         public Matrix mTransform = new Matrix();
         public override Matrix Transform
         {
@@ -163,6 +179,7 @@ namespace EngineNS.GamePlay
         private void UpdateData()
         {
             mTransform = Matrix.Transformation(mTransformData.mQuat, mTransformData.mPosition);
+            mIsIdentity = mTransformData.IsIdentity;
             HostNode.UpdateAbsTransform();
             HostNode.UpdateAABB();
             if (HostNode.Parent != null)

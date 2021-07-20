@@ -102,8 +102,8 @@ namespace EngineNS.EGui.Controls
             size.X += ImGuiAPI.GetItemRectSize().X;
             size.Y += 5 + (size.Y * showMaxItems);
             var pivot = new Vector2(0, 0);
-            ImGuiAPI.SetNextWindowPos(ref pos, ImGuiCond_.ImGuiCond_None, ref pivot);
-            ImGuiAPI.SetNextWindowSize(ref size, ImGuiCond_.ImGuiCond_None);
+            ImGuiAPI.SetNextWindowPos(in pos, ImGuiCond_.ImGuiCond_None, in pivot);
+            ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_None);
             if (ImGuiAPI.BeginPopup("combobox", ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
                 buffer = BigStackBuffer.CreateInstance(256);
@@ -123,7 +123,7 @@ namespace EngineNS.EGui.Controls
                         if (mShowTypes[j].FullName.Contains(mFilterText) == false)
                             continue;
 
-                        if (ImGuiAPI.Selectable(mShowTypes[j].Name, ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, ref sz))
+                        if (ImGuiAPI.Selectable(mShowTypes[j].Name, ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in sz))
                         {
                             bChanged = (mSelectedType != mShowTypes[j]);
                             mSelectedType = mShowTypes[j];
@@ -138,7 +138,7 @@ namespace EngineNS.EGui.Controls
                 {
                     for (int j = 0; j < mShowTypes.Count; j++)
                     {
-                        if (ImGuiAPI.Selectable(mShowTypes[j].Name, ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, ref sz))
+                        if (ImGuiAPI.Selectable(mShowTypes[j].Name, ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in sz))
                         {
                             bChanged = (mSelectedType != mShowTypes[j]);
                             mSelectedType = mShowTypes[j];

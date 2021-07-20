@@ -230,31 +230,31 @@ namespace EngineNS.Editor
                     DockId = ImGuiAPI.GetWindowDockID();
                 }
                 var sz = new Vector2(-1, 0);
-                if (ImGuiAPI.Button("DoTest", ref sz))
+                if (ImGuiAPI.Button("DoTest", in sz))
                 {
                     var nu = DoTest();
                 }
-                if (ImGuiAPI.Button("DoTest2", ref sz))
+                if (ImGuiAPI.Button("DoTest2", in sz))
                 {
                     var nu = DoTest2();
                 }
-                if (ImGuiAPI.Button("StartPIE", ref sz))
+                if (ImGuiAPI.Button("StartPIE", in sz))
                 {
                     var nu = DoTest3();
                 }
-                if (ImGuiAPI.Button("EndPIE", ref sz))
+                if (ImGuiAPI.Button("EndPIE", in sz))
                 {
                     var nu = DoTest4();
                 }
-                if (ImGuiAPI.Button("Macross GO!", ref sz))
+                if (ImGuiAPI.Button("Macross GO!", in sz))
                 {
                     var nu = MacrossRun();
                 }
-                if (ImGuiAPI.Button("DisableAllBreaks", ref sz))
+                if (ImGuiAPI.Button("DisableAllBreaks", in sz))
                 {
                     var nu = MacrossDisableAllBreaks();
                 }
-                if (ImGuiAPI.Button("EnableAllBreaks", ref sz))
+                if (ImGuiAPI.Button("EnableAllBreaks", in sz))
                 {
                     var nu = MacrossEnableAllBreaks();
                 }

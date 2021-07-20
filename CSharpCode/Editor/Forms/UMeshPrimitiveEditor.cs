@@ -97,7 +97,7 @@ namespace EngineNS.Editor.Forms
                 return;
 
             var pivot = new Vector2(0);
-            ImGuiAPI.SetNextWindowSize(ref WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
+            ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             if (ImGuiAPI.Begin(Mesh.AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
@@ -140,7 +140,7 @@ namespace EngineNS.Editor.Forms
         protected unsafe void DrawToolBar()
         {
             var btSize = new Vector2(64, 64);
-            if (ImGuiAPI.Button("Save", ref btSize))
+            if (ImGuiAPI.Button("Save", in btSize))
             {
                 //Mesh.SaveAssetTo(Mesh.AssetName);
                 //var unused = UEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Mesh.AssetName);
@@ -148,17 +148,17 @@ namespace EngineNS.Editor.Forms
                 USnapshot.Save(Mesh.AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Reload", ref btSize))
+            if (ImGuiAPI.Button("Reload", in btSize))
             {
 
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Undo", ref btSize))
+            if (ImGuiAPI.Button("Undo", in btSize))
             {
                 
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Redo", ref btSize))
+            if (ImGuiAPI.Button("Redo", in btSize))
             {
                 
             }
@@ -166,7 +166,7 @@ namespace EngineNS.Editor.Forms
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
         {
             var sz = new Vector2(-1);
-            if (ImGuiAPI.BeginChild("LeftView", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (ImGuiAPI.BeginChild("LeftView", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.CollapsingHeader("MeshProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {

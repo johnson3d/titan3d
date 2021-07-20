@@ -61,7 +61,7 @@ namespace EngineNS.Editor.Forms
                 return;
 
             var pivot = new Vector2(0);
-            ImGuiAPI.SetNextWindowSize(ref WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
+            ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             if (ImGuiAPI.Begin(TextureSRV.AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
@@ -99,7 +99,7 @@ namespace EngineNS.Editor.Forms
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
         {
             var sz = new Vector2(-1);
-            if (ImGuiAPI.BeginChild("LeftView", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (ImGuiAPI.BeginChild("LeftView", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 TexturePropGrid.OnDraw(true, false, false);
             }
@@ -108,7 +108,7 @@ namespace EngineNS.Editor.Forms
         protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
         {
             var sz = new Vector2(-1);
-            if (ImGuiAPI.BeginChild("TextureView", ref sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (ImGuiAPI.BeginChild("TextureView", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows))
                 {
@@ -131,7 +131,7 @@ namespace EngineNS.Editor.Forms
 
                 min1 = min1 + pos;
                 max1 = max1 + pos;
-                drawlist.AddImage(TextureID.ToPointer(), ref min1, ref max1, ref uv1, ref uv2, 0xFFFFFFFF);
+                drawlist.AddImage(TextureID.ToPointer(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
             }
             ImGuiAPI.EndChild();
         }

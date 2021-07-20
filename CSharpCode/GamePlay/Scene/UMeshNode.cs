@@ -49,7 +49,8 @@ namespace EngineNS.GamePlay.Scene
         public UMeshNode(UNodeData data, EBoundVolumeType bvType, Type placementType)
             : base(data, bvType, placementType)
         {
-            this.SetStyle(ENodeStyles.VisibleMeshProvider | ENodeStyles.VisibleFollowParent);
+            //this.SetStyle(ENodeStyles.VisibleMeshProvider | ENodeStyles.VisibleFollowParent);
+            this.SetStyle(ENodeStyles.VisibleMeshProvider);
         }
         public override void GetDrawMesh(List<Graphics.Mesh.UMesh> meshes)
         {
@@ -277,9 +278,17 @@ namespace EngineNS.GamePlay.Scene
             fixed (Vector3* pEnd = &end)
             fixed (VHitResult* pResult = &result)
             {
-                Vector3 scale = Placement.Scale;
-                if (-1 != mMeshDataProvider.mCoreObject.IntersectTriangle(&scale, pStart, pEnd, pResult))
-                    return true;
+                if (Placement.HasScale)
+                {
+                    Vector3 scale = Placement.Scale;
+                    if (-1 != mMeshDataProvider.mCoreObject.IntersectTriangle(&scale, pStart, pEnd, pResult))
+                        return true;
+                }
+                else
+                {
+                    if (-1 != mMeshDataProvider.mCoreObject.IntersectTriangle((Vector3*)0, pStart, pEnd, pResult))
+                        return true;
+                }
                 return false;
             }
         }

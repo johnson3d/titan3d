@@ -380,7 +380,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             var visible = true;
             Vector2 sz = new Vector2(300, 600);
-            ImGuiAPI.SetNextWindowSize(ref sz, ImGuiCond_.ImGuiCond_None);
+            ImGuiAPI.SetNextWindowSize(in sz, ImGuiCond_.ImGuiCond_None);
             if (ImGuiAPI.Begin("Slate", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
 

@@ -99,9 +99,9 @@ namespace EngineNS.EGui.UIProxy
 
             var startPos = ImGuiAPI.GetCursorScreenPos();
             var endPos = startPos + ImageSize;
-            ImGuiAPI.PushClipRect(ref startPos, ref endPos, IntersectWithCurrentClipRect);
+            ImGuiAPI.PushClipRect(in startPos, in endPos, IntersectWithCurrentClipRect);
             if(mImagePtr != IntPtr.Zero)
-                drawList.AddImage(mImagePtr.ToPointer(), ref startPos, ref endPos, ref UVMin, ref UVMax, Color);
+                drawList.AddImage(mImagePtr.ToPointer(), in startPos, in endPos, in UVMin, in UVMax, Color);
             ImGuiAPI.PopClipRect();
             return true;
         }
@@ -125,9 +125,9 @@ namespace EngineNS.EGui.UIProxy
             }
 
             var endPos = pos + ImageSize;
-            ImGuiAPI.PushClipRect(ref pos, ref endPos, IntersectWithCurrentClipRect);
+            ImGuiAPI.PushClipRect(in pos, in endPos, IntersectWithCurrentClipRect);
             if (mImagePtr != IntPtr.Zero)
-                drawList.AddImage(mImagePtr.ToPointer(), ref pos, ref endPos, ref UVMin, ref UVMax, Color);
+                drawList.AddImage(mImagePtr.ToPointer(), in pos, in endPos, in UVMin, in UVMax, Color);
             ImGuiAPI.PopClipRect();
         }
     }
