@@ -30,10 +30,18 @@ namespace EngineNS.Animation
             public List<Keyframe> KeyFramesList { get; set; }
             public bool AddKeyframeBack(ref Keyframe keyframe)
             {
-                return true;
+                //should check time and sort by  time
+                if (!KeyFramesList.Contains(keyframe))
+                {
+                    KeyFramesList.Add(keyframe);
+                    return true;
+                }
+                return false;
             }
             public bool InsertKeyframe(uint index, ref Keyframe keyframe)
             {
+                //should check time and sort by  time
+                KeyFramesList.Insert((int)index, keyframe);
                 return true;
             }
 

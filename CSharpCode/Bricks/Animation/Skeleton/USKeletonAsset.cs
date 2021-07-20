@@ -14,7 +14,6 @@ namespace EngineNS.Animation.Skeleton
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
-            //必须是TextureAsset
             return true;
         }
         public override void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
@@ -47,6 +46,7 @@ namespace EngineNS.Animation.Skeleton
 
         public void SaveAssetTo(RName name)
         {
+            AssetName = name;
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             var xnd = new IO.CXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("SkeletonAsset", 0, 0))
