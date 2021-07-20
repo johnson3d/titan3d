@@ -12,11 +12,14 @@ namespace EngineNS.GamePlay.Scene
             [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
             public RName MeshName { get; set; }
             [Rtti.Meta]
-            [ReadOnly(true)]
-            public string MdfQueueType { get; set; }
+            [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
+            public RName CollideName { get; set; }
             [Rtti.Meta]
             [ReadOnly(true)]
-            public string AtomType { get; set; }
+            public string MdfQueueType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfStaticMesh));
+            [Rtti.Meta]
+            [ReadOnly(true)]
+            public string AtomType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMesh.UAtom));
 
             [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Pipeline.Shader.UMdfQueue))]
             public Rtti.UTypeDesc MdfQueue
@@ -46,7 +49,6 @@ namespace EngineNS.GamePlay.Scene
         public UMeshNode(UNodeData data, EBoundVolumeType bvType, Type placementType)
             : base(data, bvType, placementType)
         {
-            this.SetStyle(ENodeStyles.VisibleMeshProvider | ENodeStyles.VisibleFollowParent);
         }
         public override void GetDrawMesh(List<Graphics.Mesh.UMesh> meshes)
         {
@@ -128,6 +130,33 @@ namespace EngineNS.GamePlay.Scene
             
             meshNode.Placement.SetTransform(ref pos, ref scale, ref quat);
 
+            return meshNode;
+        }
+        public static async System.Threading.Tasks.Task<UMeshNode> AddMeshNode(UNode parent, UNodeData data, Type placementType, Vector3 pos, Vector3 scale, Quaternion quat)
+        {
+            var meshData = data as UMeshNodeData;
+            var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
+            if (materialMesh == null)
+                return null;
+            var mesh = new Graphics.Mesh.UMesh();
+            
+            var ok = mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
+            if (ok == false)
+                return null;
+
+            var meshNode = AddMeshNode(parent, data, placementType, mesh, ref pos, ref scale, ref quat);
+            if (meshData.CollideName != null)
+            {
+                var collideMesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(meshData.CollideName);
+                if (collideMesh != null)
+                {
+                    if (collideMesh.MeshDataProvider == null)
+                    {
+                        await collideMesh.LoadMeshDataProvider();
+                    }
+                    meshNode.mMeshDataProvider = collideMesh.MeshDataProvider;
+                }
+            }
             return meshNode;
         }
         public UBoxBV GetBoxBV()
@@ -218,7 +247,7 @@ namespace EngineNS.GamePlay.Scene
         {
             if (mMesh == null)
                 return;
-            mMesh.SetWorldMatrix(ref Placement.AbsTransform);
+            mMesh.SetWorldMatrix(ref Placement.AbsTransformWithScale);
         }
         static Macross.UMacrossStackFrame mLogicTickFrame = new Macross.UMacrossStackFrame();
         static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
@@ -247,7 +276,8 @@ namespace EngineNS.GamePlay.Scene
             fixed (Vector3* pEnd = &end)
             fixed (VHitResult* pResult = &result)
             {
-                if (-1 != mMeshDataProvider.mCoreObject.IntersectTriangle(pStart, pEnd, pResult))
+                Vector3 scale = Placement.Scale;
+                if (-1 != mMeshDataProvider.mCoreObject.IntersectTriangle(&scale, pStart, pEnd, pResult))
                     return true;
                 return false;
             }

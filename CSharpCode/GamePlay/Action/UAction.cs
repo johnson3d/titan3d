@@ -48,14 +48,14 @@ namespace EngineNS.GamePlay.Action
         {
             foreach (var i in ModifyStack)
             {
-                i.HostObject.GetType().GetProperty(i.PropertyName).SetValue(i.HostObject, i.OldValue);
+                i.HostObject.GetType().GetProperty(i.PropertyName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(i.HostObject, i.OldValue);
             }
         }
         public void Redo()
         {
             foreach (var i in ModifyStack)
             {
-                i.HostObject.GetType().GetProperty(i.PropertyName).SetValue(i.HostObject, i.NewValue);
+                i.HostObject.GetType().GetProperty(i.PropertyName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(i.HostObject, i.NewValue);
             }
         }
     }

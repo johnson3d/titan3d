@@ -49,6 +49,11 @@ namespace EngineNS.GamePlay.Scene
             ScaleChildren = (1 << 4),
             CastShadow = (1 << 5),
             AcceptShadow = (1 << 6),
+            HideBoundShape = (1 << 7),
+            NoPickedDraw = (1 << 8),
+            SelfInvisible = (1 << 9),
+            ChildrenInvisible = (1 << 10),
+            Invisible = SelfInvisible | ChildrenInvisible,
         }
         public ENodeStyles NodeStyles 
         {
@@ -135,8 +140,7 @@ namespace EngineNS.GamePlay.Scene
         public UNode(UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             NodeData = data;
-            SetStyle(ENodeStyles.VisibleMeshProvider);
-            
+
             if (NodeData!=null)
             {
                 if (NodeData.Placement == null && placementType != null)
@@ -368,15 +372,18 @@ namespace EngineNS.GamePlay.Scene
         public delegate bool FOnVisitNode(UNode node, object arg);
         public bool DFS_VisitNodeTree(FOnVisitNode visitor, object arg)
         {
-            if (visitor(this, arg))
+            if (visitor(this, arg) && !HasStyle(ENodeStyles.SelfInvisible))
             {
                 return true;
             }
-            foreach(var i in Children)
+            if(!HasStyle(ENodeStyles.ChildrenInvisible))
             {
-                if (i.DFS_VisitNodeTree(visitor, arg))
+                foreach (var i in Children)
                 {
-                    return true;
+                    if (i.DFS_VisitNodeTree(visitor, arg))
+                    {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -395,25 +402,24 @@ namespace EngineNS.GamePlay.Scene
             if (Parent == null)
             {
                 Placement.AbsTransform = Placement.Transform;
-                Placement.AbsTransformInv = Matrix.Invert(ref Placement.AbsTransform);
+                Placement.AbsTransformInv = Matrix.Invert(ref Placement.mAbsTransform);
                 OnAbsTransformChanged();
                 return;
             }
             else
             {
-                if (Parent.IsScaleChildren)
-                {
-                    Placement.AbsTransform = Placement.Transform * Parent.Placement.AbsTransform;
-                }
-                else
-                {
-                    var noScaleTM = Parent.Placement.AbsTransform;
-                    noScaleTM.NoScale();
-                    Placement.AbsTransform = Placement.Transform * noScaleTM;
-                }
-                Placement.AbsTransformInv = Matrix.Invert(ref Placement.AbsTransform);
+                Placement.AbsTransform = Placement.Transform * Parent.Placement.AbsTransform;                
+                Placement.AbsTransformInv = Matrix.Invert(ref Placement.mAbsTransform);
                 OnAbsTransformChanged();
-                Parent.UpdateAbsTransform();
+                //Parent.UpdateAbsTransform();
+                UpdateChildrenAbsTransform();
+            }
+        }
+        public void UpdateChildrenAbsTransform()
+        {
+            foreach (var i in Children)
+            {
+                i.UpdateAbsTransform();
             }
         }
         public void UpdateAABB()
@@ -457,13 +463,14 @@ namespace EngineNS.GamePlay.Scene
                 fixed(BoundingBox* pBox = &AABB)
                 {
                     var dir = localEnd - localStart;
-                    if (IDllImportApi.v3dxLineIntersectBox3(&Near, &vNear, &Far, &vFar, &localStart, &dir, pBox) == 0)
+                    if (AABB.IsEmpty()==false && IDllImportApi.v3dxLineIntersectBox3(&Near, &vNear, &Far, &vFar, &localStart, &dir, pBox) == 0)
                     {
                         return false;
                     }
-                    if (OnLineCheckTriangle(in start, in end, ref result))
+                    if (OnLineCheckTriangle(in localStart, in localEnd, ref result))
                     {
-                        //result.Position = Vector3.TransformCoordinate(vNear, Placement.AbsTransform);
+                        result.Position = Vector3.TransformCoordinate(result.Position, Placement.AbsTransform);
+                        result.Normal = Vector3.TransformNormal(result.Normal, Placement.AbsTransform);
                         return true;
                     }
                     else

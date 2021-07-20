@@ -102,6 +102,7 @@ namespace EngineNS.Graphics.Mesh
                         TargetViews.Add(drawCalls);
                     }
                 }
+                System.Diagnostics.Debug.Assert(policy != null);
                 if (drawCalls.Policy != policy)
                 {//渲染策略改变
                     if (TaskBuildDrawCall == null)
@@ -114,12 +115,16 @@ namespace EngineNS.Graphics.Mesh
                 if (TaskBuildDrawCall != null)
                 {
                     if (TaskBuildDrawCall.IsCompleted)
+                    {
                         TaskBuildDrawCall = null;
+                    }
                     else
                         return null;
                 }
 
                 var result = drawCalls.DrawCalls[(int)shadingType];
+                if (result == null)
+                    return null;
 
                 //检查shading切换参数或者材质HLSL被编辑器修改
                 result.CheckPermutation(Material.ParentMaterial, mesh.MdfQueue);
@@ -146,7 +151,7 @@ namespace EngineNS.Graphics.Mesh
                     if (shading != null)
                     {
                         var drawcall = await UEngine.Instance.GfxDevice.RenderContext.CreateDrawCall(shading, Material.ParentMaterial, mesh.MdfQueue);
-                        if (drawcall.Effect == null)
+                        if (drawcall == null || drawcall.Effect == null)
                             continue;
                         #region Textures
                         unsafe

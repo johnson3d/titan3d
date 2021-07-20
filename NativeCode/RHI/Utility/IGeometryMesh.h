@@ -8,7 +8,7 @@
 NS_BEGIN
 
 enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-EVertexSteamType
+EVertexSteamType : UINT32
 {
 	VST_Position,
 	VST_Normal,
@@ -27,6 +27,7 @@ EVertexSteamType
 	VST_F4_2,
 	VST_F4_3,//16
 	VST_Number,
+	VST_FullMask = 0xffffffff,
 };
 
 enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)

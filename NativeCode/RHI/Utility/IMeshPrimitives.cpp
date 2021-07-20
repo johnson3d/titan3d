@@ -892,9 +892,191 @@ vBOOL IMeshDataProvider::Init(DWORD streams, EIndexBufferType ibType, int atom)
 	return TRUE;
 }
 
-vBOOL IMeshDataProvider::LoadFromMeshPrimitive(XndHolder* xnd, DWORD streams)
+void IMeshDataProvider::LoadVB(XndAttribute* pAttr, UINT stride, EVertexSteamType stream)
 {
-	return FALSE;
+	pAttr->BeginRead();
+	UINT uVert, uKey, uStride;
+	pAttr->Read(uStride);
+	if (stride != uStride)
+	{
+		ASSERT(false);
+	}
+	pAttr->Read(uVert);
+	pAttr->Read(uKey);
+	TimeKeys tkeys;
+	tkeys.Load(*pAttr);
+	//int ByteWidth = uStride * uKey * uVert;
+	int ByteWidth = uStride * 1 * uVert;
+	BYTE* data = new BYTE[ByteWidth];
+	pAttr->Read(data, ByteWidth);
+	pAttr->EndRead();
+
+	Safe_Release(mVertexBuffers[stream]);
+	mVertexBuffers[stream] = new IBlobObject();
+	mVertexBuffers[stream]->PushData(data, ByteWidth);
+	delete[] data;
+}
+
+vBOOL IMeshDataProvider::LoadFromMeshPrimitive(XndNode* pNode, EVertexSteamType streams)
+{
+	IMeshPrimitives::VModelDesc mDesc;
+	XndAttribute* pAttr = pNode->TryGetAttribute("HeadAttrib");
+	if (pAttr)
+	{
+		pAttr->BeginRead();
+		pAttr->Read(mDesc);
+		pAttr->Read(mAABB);
+		pAttr->EndRead();
+		VertexNumber = mDesc.VertexNumber;
+		PrimitiveNumber = mDesc.PolyNumber;
+	}
+	else
+	{
+		return FALSE;
+	}
+	pAttr = pNode->TryGetAttribute("RenderAtom");
+	if (pAttr)
+	{
+		mAtoms.clear();
+		mAtoms.resize(mDesc.AtomNumber);
+		pAttr->BeginRead();
+		for (size_t i = 0; i < mDesc.AtomNumber; i++)
+		{
+			DrawPrimitiveDesc dpDesc;
+			pAttr->Read(dpDesc.PrimitiveType);
+			if (dpDesc.PrimitiveType != EPT_TriangleList)
+				return FALSE;
+			UINT uLodLevel;
+			pAttr->Read(uLodLevel);
+			for (UINT j = 0; j < uLodLevel; j++)
+			{
+				pAttr->Read(dpDesc.StartIndex);
+				pAttr->Read(dpDesc.NumPrimitives);
+				mAtoms[i].push_back(dpDesc);
+			}
+		}
+		pAttr->EndRead();
+	}
+	else
+	{
+		return FALSE;
+	}
+
+	Safe_Release(IndexBuffer);
+	IndexBuffer = new IBlobObject();
+	pAttr = pNode->TryGetAttribute("Indices");
+	if (pAttr)
+	{
+		pAttr->BeginRead();
+
+		IIndexBufferDesc desc;
+		desc.CPUAccess = 0;
+
+		UINT count;
+		pAttr->Read(count);
+		vBOOL bFormatIndex32;
+		pAttr->Read(bFormatIndex32);
+		if (bFormatIndex32)
+			IBType = IBT_Int32;
+		else
+			IBType = IBT_Int16;
+		desc.ByteWidth = count * ((bFormatIndex32) ? sizeof(DWORD) : sizeof(WORD));
+		desc.Type = bFormatIndex32 ? IBT_Int32 : IBT_Int16;
+
+		BYTE* data = new BYTE[desc.ByteWidth];
+		pAttr->Read(data, desc.ByteWidth);
+
+		pAttr->EndRead();
+
+		IndexBuffer->PushData(data, desc.ByteWidth);
+		Safe_DeleteArray(data);
+	}
+	else
+	{
+		return FALSE;
+	}
+
+	if (streams & (1<<VST_Position))
+	{
+		pAttr = pNode->TryGetAttribute("Position");
+		if (pAttr)
+		{
+			LoadVB(pAttr, sizeof(v3dxVector3), VST_Position);
+		}
+	}
+	if (streams & (1<<VST_Normal))
+	{
+		pAttr = pNode->TryGetAttribute("Normal");
+		if (pAttr)
+		{
+			LoadVB(pAttr, sizeof(v3dxVector3), VST_Normal);
+		}
+	}
+	if (streams & (1<<VST_Tangent))
+	{
+		pAttr = pNode->TryGetAttribute("Tangent");
+		if (pAttr)
+		{
+			LoadVB(pAttr, sizeof(v3dVector4_t), VST_Tangent);
+		}
+	}
+	if (streams & (1<<VST_UV))
+	{
+		pAttr = pNode->TryGetAttribute("DiffuseUV");
+		if (pAttr)
+		{
+			LoadVB(pAttr, sizeof(v3dxVector2), VST_UV);
+		}
+	}
+	if (streams & (1<<VST_LightMap))
+	{
+		pAttr = pNode->TryGetAttribute("LightMapUV");
+		if (pAttr)
+		{
+			LoadVB(pAttr, sizeof(v3dxVector2), VST_LightMap);
+		}
+	}
+	if (streams & (1<<VST_Color))
+	{
+		pAttr = pNode->TryGetAttribute("VertexColor");
+		if (pAttr)
+		{
+			LoadVB(pAttr, sizeof(DWORD), VST_Color);
+		}
+	}
+	if (streams & (1<<VST_SkinIndex))
+	{
+		pAttr = pNode->TryGetAttribute("BlendIndex");
+		if (pAttr)
+		{
+			LoadVB(pAttr, sizeof(DWORD), VST_SkinIndex);
+		}
+	}
+	if (streams & (1<<VST_SkinWeight))
+	{
+		pAttr = pNode->TryGetAttribute("BlendWeight");
+		if (pAttr)
+		{
+			LoadVB(pAttr, sizeof(v3dVector4_t), VST_SkinWeight);
+		}
+	}
+	if (streams & (1<<VST_TerrainIndex))
+	{
+		pAttr = pNode->TryGetAttribute("Fix_VIDTerrain");
+		if (pAttr)
+		{
+			LoadVB(pAttr, sizeof(DWORD), VST_TerrainIndex);
+		}
+	}
+	if (streams & (1<<VST_TerrainGradient))
+	{
+		pAttr = pNode->TryGetAttribute("TerrainGradient");
+		if (pAttr)
+		{
+			LoadVB(pAttr, sizeof(DWORD), VST_TerrainGradient);
+		}
+	}
+	return TRUE;
 }
 
 UINT IMeshDataProvider::GetVertexNumber() const
@@ -1028,70 +1210,111 @@ vBOOL IMeshDataProvider::GetTriangle(int index, UINT* vA, UINT* vB, UINT* vC)
 	}
 }
 
-int IMeshDataProvider::IntersectTriangle(const v3dxVector3* vStart, const v3dxVector3* vEnd, VHitResult* result)
+int IMeshDataProvider::IntersectTriangle(const v3dxVector3* scale, const v3dxVector3* vStart, const v3dxVector3* vEnd, VHitResult* result)
 {
+	auto start = *vStart;
+	auto end = *vEnd;
+	v3dxVector3 rcqScale;
+	if (scale != nullptr)
+	{
+		rcqScale = v3dxVector3(1.0f / scale->x, 1.0f / scale->y, 1.0f / scale->z);
+		start *= rcqScale;
+		end *= rcqScale;
+	}
 	auto pPos = (v3dxVector3*)mVertexBuffers[VST_Position]->GetData();
-	v3dxVector3 dir = *vEnd - *vStart;
+	v3dxVector3 dir = end - start;
 	switch (IBType)
 	{
-	case EngineNS::IBT_Int16:
-	{
-		int triangle = -1;
-		float closedDist = FLT_MAX;
-		auto pIndices = (USHORT*)IndexBuffer->GetData();
-		int count = IndexBuffer->GetSize() / (sizeof(USHORT)*3);
-		for (int i = 0; i < count; i++)
+		case EngineNS::IBT_Int16:
 		{
-			auto ia = pIndices[i * 3 + 0];
-			auto ib = pIndices[i * 3 + 1];
-			auto ic = pIndices[i * 3 + 2];
-			float u, v, dist;
-			if (v3dxIntersectTri(&pPos[ia], &pPos[ib], &pPos[ic], vStart, &dir, &u, &v, &dist))
+			int triangle = -1;
+			float closedDist = FLT_MAX;
+			auto pIndices = (USHORT*)IndexBuffer->GetData();
+			int count = IndexBuffer->GetSize() / (sizeof(USHORT)*3);
+			for (int i = 0; i < count; i++)
 			{
-				if (dist < closedDist)
+				auto ia = pIndices[i * 3 + 0];
+				auto ib = pIndices[i * 3 + 1];
+				auto ic = pIndices[i * 3 + 2];
+
+				auto vA = pPos[ia];
+				auto vB = pPos[ib];
+				auto vC = pPos[ic];
+				/*if (scale != nullptr)
 				{
-					closedDist = dist;
-					triangle = i;
-					result->Distance = dist;
-					result->FaceId = i;
-					result->Position = (*vStart) + dir * dist;
-					v3dxCalcNormal(&result->Normal, &pPos[ia], &pPos[ib], &pPos[ic]);
-					result->U = u;
-					result->V = v;
+					vA *= (*scale);
+					vB *= (*scale);
+					vC *= (*scale);
+				}*/
+				
+				float u, v, dist;
+				if (v3dxIntersectTri(&vA, &vB, &vC, &start, &dir, &u, &v, &dist))
+				{
+					if (dist < closedDist)
+					{
+						closedDist = dist;
+						triangle = i;
+						result->Distance = dist;
+						result->FaceId = i;
+						result->Position = start + dir * dist;
+						if (scale != nullptr)
+						{
+							result->Position *= (*scale);
+							result->Distance = sqrt(v3dxCalSquareDistance(&result->Position, vStart));
+						}
+						v3dxCalcNormal(&result->Normal, &vA, &vB, &vC, TRUE);
+						result->U = u;
+						result->V = v;
+					}
 				}
 			}
+			return triangle;
 		}
-		return triangle;
-	}
-	case EngineNS::IBT_Int32:
-	{
-		int triangle = -1;
-		float closedDist = FLT_MAX;
-		auto pIndices = (int*)IndexBuffer->GetData();
-		int count = IndexBuffer->GetSize() / (sizeof(int) * 3);
-		for (int i = 0; i < count; i++)
+		case EngineNS::IBT_Int32:
 		{
-			auto ia = pIndices[i * 3 + 0];
-			auto ib = pIndices[i * 3 + 1];
-			auto ic = pIndices[i * 3 + 2];
-			float u, v, dist;
-			if (v3dxIntersectTri(&pPos[ia], &pPos[ib], &pPos[ic], vStart, &dir, &u, &v, &dist))
+			int triangle = -1;
+			float closedDist = FLT_MAX;
+			auto pIndices = (int*)IndexBuffer->GetData();
+			int count = IndexBuffer->GetSize() / (sizeof(int) * 3);
+			for (int i = 0; i < count; i++)
 			{
-				if (dist < closedDist)
+				auto ia = pIndices[i * 3 + 0];
+				auto ib = pIndices[i * 3 + 1];
+				auto ic = pIndices[i * 3 + 2];
+
+				auto vA = pPos[ia];
+				auto vB = pPos[ib];
+				auto vC = pPos[ic];
+				/*if (scale != nullptr)
 				{
-					closedDist = dist;
-					triangle = i;
-					result->Distance = dist;
-					result->FaceId = i;
-					result->Position = (*vStart) + dir * dist;
-					v3dxCalcNormal(&result->Normal, &pPos[ia], &pPos[ib], &pPos[ic]);
-					result->U = u;
-					result->V = v;
+					vA *= (*scale);
+					vB *= (*scale);
+					vC *= (*scale);
+				}*/
+
+				float u, v, dist;
+				if (v3dxIntersectTri(&vA, &vB, &vC, &start, &dir, &u, &v, &dist))
+				{
+					if (dist < closedDist)
+					{
+						closedDist = dist;
+						triangle = i;
+						result->Distance = dist;
+						result->FaceId = i;
+						result->Position = start + dir * dist;
+						if (scale != nullptr)
+						{
+							result->Position *= (*scale);
+							result->Distance = sqrt(v3dxCalSquareDistance(&result->Position, vStart));
+						}
+						v3dxCalcNormal(&result->Normal, &vA, &vB, &vC, TRUE);
+						result->U = u;
+						result->V = v;
+					}
 				}
 			}
+			return triangle;
 		}
-		return triangle;
-	}
 	default:
 		break;
 	}

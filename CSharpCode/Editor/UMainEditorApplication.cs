@@ -17,7 +17,7 @@ namespace EngineNS.Editor
             WorldViewportSlate = new UEditorWorldViewportSlate(true);
             mWorldOutliner = new Editor.Forms.UWorldOutliner();
             
-            mWorldOutliner.TestUWorldOutliner(this);
+            //mWorldOutliner.TestUWorldOutliner(this);
         }
         private bool IsVisible = true;
         public Editor.Forms.UWorldOutliner mWorldOutliner;

@@ -22,6 +22,15 @@ IMeshPrimitives : public VIUnknown
 {
 	friend IMeshDataProvider;
 public:
+	struct VModelDesc
+	{
+		DWORD				Flags;
+		DWORD				UnUsed;
+		UINT				VertexNumber;
+		UINT				GeoTabeNumber;
+		UINT				PolyNumber;
+		UINT				AtomNumber;
+	};
 	RTTI_DEF(IMeshPrimitives, 0x159b85ee5b0e52b1, true);
 	TR_CONSTRUCTOR()
 	IMeshPrimitives();
@@ -92,15 +101,6 @@ protected:
 
 	TObjectHandle<IRenderContext>	mContext;
 	AutoRef<XndHolder>		mXnd;
-	struct VModelDesc
-	{
-		DWORD				Flags;
-		DWORD				UnUsed;
-		UINT				VertexNumber;
-		UINT				GeoTabeNumber;
-		UINT				PolyNumber;
-		UINT				AtomNumber;
-	};
 	VModelDesc				mDesc;
 	v3dxBox3				mAABB;
 	TR_MEMBER(SV_NoBind)
@@ -138,7 +138,7 @@ public:
 	TR_FUNCTION()
 	vBOOL Init(DWORD streams, EIndexBufferType ibType, int atom);
 
-	vBOOL LoadFromMeshPrimitive(XndHolder* xnd, DWORD streams);
+	vBOOL LoadFromMeshPrimitive(XndNode* pNode, EVertexSteamType streams);
 	
 	TR_FUNCTION()
 	void GetAABB(v3dxBox3* box) {
@@ -180,7 +180,7 @@ public:
 	TR_FUNCTION()
 	vBOOL GetAtomTriangle(UINT atom, UINT index, UINT* vA, UINT* vB, UINT* vC);
 	TR_FUNCTION()
-	int IntersectTriangle(const v3dxVector3* vStart, const v3dxVector3* vEnd, VHitResult* result);
+	int IntersectTriangle(const v3dxVector3* scale, const v3dxVector3* vStart, const v3dxVector3* vEnd, VHitResult* result);
 	TR_FUNCTION()
 	void* GetVertexPtr(EVertexSteamType stream, UINT index);
 
@@ -196,6 +196,9 @@ public:
 
 	TR_FUNCTION()
 	vBOOL ToMesh(IRenderContext* rc, IMeshPrimitives* mesh);
+
+private:
+	void LoadVB(XndAttribute* pAttr, UINT stride, EVertexSteamType stream);
 };
 
 NS_END

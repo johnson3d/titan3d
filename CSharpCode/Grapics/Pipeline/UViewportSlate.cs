@@ -172,6 +172,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP)
             {
+                OnMouseUp(ref e);
                 var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.Mobile.UMobileEditorFSPolicy;
                 if (edtorPolicy != null)
                 {
@@ -180,11 +181,19 @@ namespace EngineNS.Graphics.Pipeline
                     OnHitproxySelected(hitObj);
                 }
             }
-            else if(e.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
+            else if(e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN)
             {
-
+                OnMouseDown(ref e);
             }
             return true;
+        }
+        protected virtual void OnMouseUp(ref SDL.SDL_Event e)
+        {
+
+        }
+        protected virtual void OnMouseDown(ref SDL.SDL_Event e)
+        {
+
         }
         protected virtual IntPtr GetShowTexture()
         {

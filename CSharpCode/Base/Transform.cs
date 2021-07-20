@@ -65,7 +65,7 @@ namespace EngineNS
             return tmp;
         }
         public Vector3 mPosition;
-        public Vector3 mScale;
+        public Vector3 mScale;//为了Hierarchical计算方便，我们设定mScale在Transform中只影响本节点而不传递，如果需要整体放缩，在Node上新增一个ScaleMatrix
         public Quaternion mQuat;
 
         public Vector3 Position { get => mPosition; set => mPosition = value; }

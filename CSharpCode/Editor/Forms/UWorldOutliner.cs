@@ -27,9 +27,7 @@ namespace EngineNS.Editor.Forms
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public void TestUWorldOutliner(UMainEditorApplication application)
-        {
-            mWorld = application.WorldViewportSlate.World;
-            
+        {            
             var scene = new GamePlay.Scene.UScene(new GamePlay.Scene.USceneData() { Name = "TestScene" });
             scene.Parent = mWorld.Root;
 
@@ -76,6 +74,10 @@ namespace EngineNS.Editor.Forms
                 if (ImGuiAPI.IsWindowDocked())
                 {
                     DockId = ImGuiAPI.GetWindowDockID();
+                }
+                if (mWorld == null)
+                {
+                    mWorld = (UEngine.Instance.GfxDevice.MainWindow as UMainEditorApplication)?.WorldViewportSlate.World;
                 }
                 if (mWorld != null)
                 {

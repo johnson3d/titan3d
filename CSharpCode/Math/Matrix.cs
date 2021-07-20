@@ -1973,6 +1973,15 @@ namespace EngineNS
             }
             return result;
         }
+        public static Matrix Transformation(Quaternion rotation, Vector3 translation)
+        {
+            Matrix result;
+            unsafe
+            {
+                IDllImportApi.v3dxMatrixTransformationOrigin((Matrix*)&result, (Vector3*)0, (Quaternion*)&rotation, (Vector3*)&translation);
+            }
+            return result;
+        }
         /// <summary>
         /// 变换矩阵
         /// </summary>
@@ -1988,6 +1997,20 @@ namespace EngineNS
                 fixed (Matrix* pinResult = &result)
                 {
                     IDllImportApi.v3dxMatrixTransformationOrigin(pinResult, (Vector3*)&scaling, (Quaternion*)&rotation, (Vector3*)&translation);
+                }
+            }
+            return result;
+        }
+        public static Matrix Transformation(ref Vector3 scaling, ref Quaternion rotation, ref Vector3 translation, out Matrix result)
+        {
+            unsafe
+            {
+                fixed(Vector3* pinScaling = &scaling)
+                fixed(Quaternion* pinRot = &rotation)
+                fixed(Vector3* pinTrans = &translation)
+                fixed (Matrix* pinResult = &result)
+                {
+                    IDllImportApi.v3dxMatrixTransformationOrigin(pinResult, pinScaling, pinRot, pinTrans);
                 }
             }
             return result;

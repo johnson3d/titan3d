@@ -54,10 +54,6 @@ namespace EngineNS.GamePlay
         }
         private unsafe bool OnVisitNode_GatherVisibleMeshes(Scene.UNode node, object arg)
         {
-            if (node.HasStyle(Scene.UNode.ENodeStyles.VisibleMeshProvider) == false)
-            {
-                return false;
-            }
             var rp = arg as UVisParameter;
             
             CONTAIN_TYPE type;
@@ -79,10 +75,14 @@ namespace EngineNS.GamePlay
                     break;
                 case CONTAIN_TYPE.CONTAIN_TEST_REFER:
                     {
-                        node.OnGatherVisibleMeshes(rp);
-                        foreach (var i in node.Children)
+                        if(!node.HasStyle(Scene.UNode.ENodeStyles.SelfInvisible))
+                            node.OnGatherVisibleMeshes(rp);
+                        if (!node.HasStyle(Scene.UNode.ENodeStyles.ChildrenInvisible))
                         {
-                            OnVisitNode_GatherVisibleMeshes(i, arg);
+                            foreach (var i in node.Children)
+                            {
+                                OnVisitNode_GatherVisibleMeshes(i, arg);
+                            }
                         }
                     }
                     break;
@@ -109,6 +109,9 @@ namespace EngineNS.GamePlay
         Scene.UNode.FOnVisitNode mOnVisitNode_GatherBoundShapes;
         private unsafe bool OnVisitNode_GatherBoundShapes(Scene.UNode node, object arg)
         {
+            if (node.HasStyle(Scene.UNode.ENodeStyles.HideBoundShape))
+                return false;
+
             var bvs = arg as List<Graphics.Mesh.UMesh>;
 
             ref var aabb = ref node.AABB;
