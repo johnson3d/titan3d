@@ -10,6 +10,7 @@ namespace EngineNS.Editor
         INodeUIProvider GetChildUI(int index);
         string NodeName { get; }
         bool Selected { get; set; }
+        bool DrawNode(UTreeNodeDrawer tree, int index);
     }
     public class UTreeNodeDrawer
     {
@@ -42,7 +43,8 @@ namespace EngineNS.Editor
         }
         protected virtual bool OnDrawNode(INodeUIProvider provider, int index)
         {
-            return ImGuiAPI.TreeNode(index.ToString(), provider.NodeName);
+            return provider.DrawNode(this, index);
+            //return ImGuiAPI.TreeNode(index.ToString(), provider.NodeName);
         }
         protected virtual void AfterNodeShow(INodeUIProvider provider, int index)
         {
@@ -78,6 +80,16 @@ namespace EngineNS.GamePlay.Scene
         public Editor.INodeUIProvider GetChildUI(int index)
         {
             return Children[index];
+        }
+        public virtual bool DrawNode(Editor.UTreeNodeDrawer tree, int index)
+        {
+            ImGuiTreeNodeFlags_ flags = 0;
+            if (this.Selected)
+                flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
+            var ret = ImGuiAPI.TreeNodeEx(index.ToString(), flags, "");
+            ImGuiAPI.SameLine(0, -3);
+            ImGuiAPI.Text(NodeName);
+            return ret;
         }
     }
 }

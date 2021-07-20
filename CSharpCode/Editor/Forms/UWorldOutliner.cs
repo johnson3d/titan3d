@@ -142,13 +142,14 @@ namespace EngineNS.Editor.Forms
         }
         protected override bool OnDrawNode(INodeUIProvider provider, int index)
         {
-            ImGuiTreeNodeFlags_ flags = 0;
-            if (provider.Selected)
-                flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
-            var ret = ImGuiAPI.TreeNodeEx(index.ToString(), flags, "");
-            ImGuiAPI.SameLine(0, -3);
-            ImGuiAPI.Text(provider.NodeName);
-            return ret;
+            return provider.DrawNode(this, index);
+            //ImGuiTreeNodeFlags_ flags = 0;
+            //if (provider.Selected)
+            //    flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
+            //var ret = ImGuiAPI.TreeNodeEx(index.ToString(), flags, "");
+            //ImGuiAPI.SameLine(0, -3);
+            //ImGuiAPI.Text(provider.NodeName);
+            //return ret;
         }
         System.Action OnDrawMenu = null;
         bool mNodeMenuShow = false;
