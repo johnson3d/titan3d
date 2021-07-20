@@ -49,8 +49,7 @@ namespace EngineNS.GamePlay.Scene
         public UMeshNode(UNodeData data, EBoundVolumeType bvType, Type placementType)
             : base(data, bvType, placementType)
         {
-            //this.SetStyle(ENodeStyles.VisibleMeshProvider | ENodeStyles.VisibleFollowParent);
-            this.SetStyle(ENodeStyles.VisibleMeshProvider);
+			//this.SetStyle(ENodeStyles.VisibleMeshProvider);
         }
         public override void GetDrawMesh(List<Graphics.Mesh.UMesh> meshes)
         {

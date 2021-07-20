@@ -1,10 +1,11 @@
-﻿using System;
+﻿using EngineNS.GamePlay.Action;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public partial class UAxis
+    public partial class UAxis : GamePlay.Action.IActionRecordable
     {
         public readonly static RName mAxisMaterial_Focus = RName.GetRName(@"axis\axis_focus_matins.uminst", RName.ERNameType.Game);
         public readonly static RName mAxisMaterial_Face_Focus = RName.GetRName(@"axis\axis_face_focus_matins.uminst", RName.ERNameType.Game);
@@ -119,7 +120,6 @@ namespace EngineNS.GamePlay
         class AxisData
         {
             public Scene.UMeshNode MeshNode;
-            public Matrix OffsetMatrix;
             public enAxisType AxisType;
             Graphics.Pipeline.Shader.UMaterial[] NormalMaterials;
             Graphics.Pipeline.Shader.UMaterial[] FocusMaterials;
@@ -337,6 +337,7 @@ namespace EngineNS.GamePlay
                 }
 
                 MeshNode = (Scene.UMeshNode)world.Root.NewNode(typeof(Scene.UMeshNode), meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                MeshNode.SetStyle(Scene.UNode.ENodeStyles.HideBoundShape | Scene.UNode.ENodeStyles.NoPickedDraw);
                 if(axisMesh != null)
                 {
                     MeshNode.Mesh = axisMesh;
@@ -351,18 +352,83 @@ namespace EngineNS.GamePlay
         }
         List<AxisData> mAxisMeshDatas = new List<AxisData>();
 
+        #region CenterAxis
+        BoundingBox mEdgeAxisBB = BoundingBox.EmptyBox();
+        BoundingBox mEdgeAxisOrigionBBBeforeCenterOperation;
+        Transform mAxisOrigionTransformBeforeCenterOperation;
+        bool mCenterAxisMode = false;
+        public bool CenterAxisMode
+        {
+            get => mCenterAxisMode;
+            set
+            {
+                mCenterAxisMode = value;
+                switch(mAxisOperationType)
+                {
+                    case enAxisOperationType.Edge:
+                        {
+                            mEdgeAxisOrigionBBBeforeCenterOperation = mEdgeAxisBB;
+                            UpdateEdgeBB();
+                            UpdateEdgeAxisTransform();
+                        }
+                        break;
+                    default:
+                        {
+                            if(mRootNode != null)
+                            {
+                                if (mCenterAxisMode)
+                                {
+                                    mAxisOrigionTransformBeforeCenterOperation = ((UPlacement)mRootNode.Placement).TransformData;
+                                    CenterAxisOperation();
+                                }
+                                else
+                                {
+                                    mRootNode.Placement.SetTransform(ref mAxisOrigionTransformBeforeCenterOperation);
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+
+        public UActionRecorder ActionRecorder 
+        { 
+            get; 
+            set;
+        }
+
+        void CenterAxisOperation()
+        {
+            if (mRootNode == null)
+                return;
+            var camera = mCameraController.Camera;
+            mRootNode.Placement.Position = camera.mCoreObject.GetPosition() + camera.mCoreObject.GetDirection() * 10;
+        }
+        void UpdateEdgeBB()
+        {
+            throw new InvalidOperationException("未实现");
+        }
+        void UpdateEdgeAxisTransform()
+        {
+            throw new InvalidOperationException("未实现");
+        }
+        #endregion
+
         GamePlay.UWorld mHostWorld;
         Scene.UNode mRootNode;
         bool mInitialized = false;
+        Graphics.Pipeline.ICameraController mCameraController;
 
-        public async System.Threading.Tasks.Task Initialize(GamePlay.UWorld world)
+        public async System.Threading.Tasks.Task Initialize(GamePlay.UWorld world, Graphics.Pipeline.ICameraController cameraController)
         {
             if (world == mHostWorld && mInitialized)
                 return;
 
             mHostWorld = world;
+            mCameraController = cameraController;
 
-            for(var i=enAxisType.AxisStart; i<=enAxisType.AxisEnd; i++)
+            for (var i=enAxisType.AxisStart; i<=enAxisType.AxisEnd; i++)
             {
                 var axisData = new AxisData();
                 await axisData.Initialize(i, mHostWorld);
@@ -380,11 +446,54 @@ namespace EngineNS.GamePlay
             /////////////////////////////////////
         }
 
-        GamePlay.Scene.UNode[] mOperationNodes;
-        public void SetOperationNodes(params GamePlay.Scene.UNode[] nodes)
+        class SelectedNodeData
         {
-            mOperationNodes = nodes;
-            // 更新位置
+            public GamePlay.Scene.UNode Node;
+            public Transform StartTransform = Transform.Identity;
+        }
+        List<SelectedNodeData> mSelectedNodes;
+        List<SelectedNodeData> SelectedNodes
+        {
+            get => mSelectedNodes;
+            set
+            {
+                GamePlay.Action.UAction.OnChanged(this, this, "SelectedNodes", mSelectedNodes, value);
+                mSelectedNodes = value;
+            }
+        }
+        public void SetSelectedNodes(params GamePlay.Scene.UNode[] nodes)
+        {
+            if (nodes != null)
+            {
+                var tempNodes = new List<SelectedNodeData>(nodes.Length);
+
+                Vector3 axisPos = Vector3.Zero;
+                for (int i = 0; i < nodes.Length; i++)
+                {
+                    if (nodes[i] == null)
+                        continue;
+                    var nodeData = new SelectedNodeData()
+                    {
+                        Node = nodes[i],
+                    };
+                    tempNodes.Add(nodeData);
+
+                    axisPos += nodes[i].Placement.Position;
+                }
+                if(tempNodes.Count == 0)
+                {
+                    mRootNode.SetStyle(Scene.UNode.ENodeStyles.Invisible);
+                }
+                else
+                {
+                    SelectedNodes = tempNodes;
+                    axisPos = axisPos / nodes.Length;
+                    mRootNode.Placement.Position = axisPos;
+                    mRootNode.UnsetStyle(Scene.UNode.ENodeStyles.Invisible);
+                }
+            }
+            else
+                SelectedNodes = null;
         }
 
         public void SetAxisOperationType(enAxisOperationType type)
@@ -406,41 +515,413 @@ namespace EngineNS.GamePlay
             }
         }
 
+        bool mCtrlKeyIsDown = false;
+        bool mShiftKeyIsDown = false;
+        bool mAltKeyIsDown = false;
         public void OnEvent(Graphics.Pipeline.UViewportSlate viewport, in SDL2.SDL.SDL_Event e)
         {
-            if (e.type == SDL2.SDL.SDL_EventType.SDL_MOUSEMOTION)
+            switch(e.type)
             {
-                var edtorPolicy = viewport.RenderPolicy as Graphics.Pipeline.Mobile.UMobileEditorFSPolicy;
-                if (edtorPolicy != null)
-                {
-                    var pos = viewport.Window2Viewport(new Vector2((float)e.motion.x, (float)e.motion.y));
-                    var hitObj = edtorPolicy.GetHitproxy((uint)pos.X, (uint)pos.Y);
-                    if(hitObj != null)
+                case SDL2.SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
                     {
-                        switch (mAxisOperationType)
+                        mFirstTransAxis = true;
+                        if(e.button.button == SDL2.SDL.SDL_BUTTON_LEFT && mCurrentAxisType != enAxisType.Null)
                         {
-                            case enAxisOperationType.Move:
-                                {
-                                    for (int i = (int)enAxisType.Move_Start; i < (int)enAxisType.Move_End; i++)
-                                    {
-                                        if (mAxisMeshDatas[i].MeshNode.HitProxy.ProxyId == hitObj.HitProxy.ProxyId)
-                                            mAxisMeshDatas[i].Focused = true;
-                                        else
-                                            mAxisMeshDatas[i].Focused = false;
-                                    }
-                                }
-                                break;
+                            StartTransAxis(viewport, e);
                         }
                     }
-                    else
+                    break;
+                case SDL2.SDL.SDL_EventType.SDL_MOUSEMOTION:
                     {
-                        for(int i=(int)enAxisType.AxisStart; i<(int)enAxisType.AxisEnd; i++)
+                        if(!mIsTransAxisOperation)
                         {
-                            mAxisMeshDatas[i].Focused = false;
+                            var edtorPolicy = viewport.RenderPolicy as Graphics.Pipeline.Mobile.UMobileEditorFSPolicy;
+                            if (edtorPolicy != null)
+                            {
+                                var pos = viewport.Window2Viewport(new Vector2((float)e.motion.x, (float)e.motion.y));
+                                var hitObj = edtorPolicy.GetHitproxy((uint)pos.X, (uint)pos.Y);
+                                if (hitObj != null)
+                                {
+                                    switch (mAxisOperationType)
+                                    {
+                                        case enAxisOperationType.Move:
+                                            {
+                                                for (int i = (int)enAxisType.Move_Start; i < (int)enAxisType.Move_End; i++)
+                                                {
+                                                    if (mAxisMeshDatas[i].MeshNode.HitProxy.ProxyId == hitObj.HitProxy.ProxyId)
+                                                    {
+                                                        mAxisMeshDatas[i].Focused = true;
+                                                        mCurrentAxisType = mAxisMeshDatas[i].AxisType;
+                                                    }
+                                                    else
+                                                        mAxisMeshDatas[i].Focused = false;
+                                                }
+                                            }
+                                            break;
+                                    }
+                                }
+                                else
+                                {
+                                    for (int i = (int)enAxisType.AxisStart; i < (int)enAxisType.AxisEnd; i++)
+                                    {
+                                        mAxisMeshDatas[i].Focused = false;
+                                    }
+                                    mCurrentAxisType = enAxisType.Null;
+                                }
+                            }
                         }
+
+                        if (e.button.button == SDL2.SDL.SDL_BUTTON_LEFT)
+                        {
+                            var noUse = TransAxis(new Vector2(e.motion.x, e.motion.y));
+                        }
+                    }
+                    break;
+                case SDL2.SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
+                    {
+                        if (e.button.button == SDL2.SDL.SDL_BUTTON_LEFT)
+                            EndTransAxis();
+                    }
+                    break;
+                case SDL2.SDL.SDL_EventType.SDL_KEYDOWN:
+                    {
+                        if (e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_LCTRL || e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_RCTRL)
+                            mCtrlKeyIsDown = true;
+                        if (e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_LSHIFT || e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_RSHIFT)
+                            mShiftKeyIsDown = true;
+                        if (e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_LALT || e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_RALT)
+                            mAltKeyIsDown = true;
+                    }
+                    break;
+                case SDL2.SDL.SDL_EventType.SDL_KEYUP:
+                    {
+                        if (e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_LCTRL || e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_RCTRL)
+                            mCtrlKeyIsDown = false;
+                        if (e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_LSHIFT || e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_RSHIFT)
+                            mShiftKeyIsDown = false;
+                        if (e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_LALT || e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_RALT)
+                            mAltKeyIsDown = false;
+                    }
+                    break;
+            }
+
+        }
+
+        Plane mCheckPlane = new Plane();
+        unsafe bool PickPlanePos(Graphics.Pipeline.UViewportSlate viewport, int x, int y, in EngineNS.Vector3 planePos, in EngineNS.Vector3 planeNormal, out EngineNS.Vector3 resultPos)
+        {
+            resultPos = EngineNS.Vector3.Zero;
+            EngineNS.Vector3 pickRay = -EngineNS.Vector3.UnitY;
+            var camera = mCameraController.Camera.mCoreObject;
+            var pos = viewport.Window2Viewport(new Vector2(x, y));
+            var pickResult = camera.GetPickRay(ref pickRay, x, y, viewport.ClientSize.X, viewport.ClientSize.Y);
+            if (pickResult <= 0)
+                return false;
+            var start = camera.GetPosition();
+
+            mCheckPlane.Normal = planeNormal;
+            mCheckPlane.D = -EngineNS.Vector3.Dot(planePos, planeNormal);
+            var end = start + pickRay * 10000;
+            fixed (Plane* pPlane = &mCheckPlane)
+            fixed (Vector3* pHitPos = &resultPos)
+            {
+                if ((IntPtr)IDllImportApi.v3dxPlaneIntersectLine(pHitPos, pPlane, &start, &end) == IntPtr.Zero)
+                    return false;
+            }
+
+            return true;
+        }
+
+        Transform mStartTransAxisWorldTransform;
+        Transform mCurrentAxisStartTransform;
+        BoundingBox mStartEdgeBB;
+        Vector3 mMouseStartLocation;
+        Vector3 mMouseTransOffset;
+        Vector3 mMouseStartScreenLocation;
+        bool mIsTransAxisOperation = false;
+        void StartTransAxis(Graphics.Pipeline.UViewportSlate viewport, in SDL2.SDL.SDL_Event e)
+        {
+            if (!mInitialized)
+                return;
+            if (mCurrentAxisType == enAxisType.Null)
+                return;
+
+            mIsTransAxisOperation = true;
+
+            switch (mAxisOperationType)
+            {
+                case enAxisOperationType.Edge:
+                    {
+                        if (CenterAxisMode)
+                            mStartEdgeBB = mEdgeAxisOrigionBBBeforeCenterOperation;
+                        else
+                            mStartEdgeBB = mEdgeAxisBB;
+
+                        mCurrentAxisStartTransform = ((UPlacement)mRootNode.Placement).TransformData;
+                        // XXX
+                    }
+                    break;
+                default:
+                    {
+                        if (CenterAxisMode)
+                            mStartTransAxisWorldTransform = mAxisOrigionTransformBeforeCenterOperation;
+                        else
+                            mStartTransAxisWorldTransform = ((UPlacement)mRootNode.Placement).TransformData;
+
+                        mCurrentAxisStartTransform = ((UPlacement)mRootNode.Placement).TransformData;
+                    }
+                    break;
+            }
+
+            var startWorldMat = Matrix.Transformation(mStartTransAxisWorldTransform.mScale, mStartTransAxisWorldTransform.mQuat, mStartTransAxisWorldTransform.mPosition);
+
+            // 计算鼠标在3D空间中的点击位置
+            Vector3 planeAxis = Vector3.UnitY;
+            var cameraDirection = mCameraController.Camera.mCoreObject.GetDirection();
+            switch(mCurrentAxisType)
+            {
+                case enAxisType.Move_X:
+                case enAxisType.Scale_X:
+                    {
+                        Vector3 transAxis;
+                        Vector3.TransformNormal(in Vector3.UnitX, in startWorldMat, out transAxis);
+                        var tempNormal = Vector3.Cross(transAxis, cameraDirection);
+                        tempNormal.Normalize();
+                        planeAxis = Vector3.Cross(transAxis, tempNormal);
+                        planeAxis.Normalize();
+                    }
+                    break;
+                case enAxisType.Move_Line_XY:
+                case enAxisType.Move_Plane_XY:
+                case enAxisType.Rot_Line_XY:
+                case enAxisType.Rot_Plane_XY:
+                case enAxisType.Scale_Line_XY:
+                case enAxisType.Scale_Plane_XY:
+                    {
+                        EngineNS.Vector3.TransformNormal(in EngineNS.Vector3.UnitZ, in startWorldMat, out planeAxis);
+                    }
+                    break;
+                case enAxisType.Move_Y:
+                case enAxisType.Scale_Y:
+                    {
+                        EngineNS.Vector3 transAxis;
+                        EngineNS.Vector3.TransformNormal(in EngineNS.Vector3.UnitY, in startWorldMat, out transAxis);
+                        var tempNormal = EngineNS.Vector3.Cross(transAxis, cameraDirection);
+                        tempNormal.Normalize();
+                        planeAxis = EngineNS.Vector3.Cross(transAxis, tempNormal);
+                        planeAxis.Normalize();
+                    }
+                    break;
+                case enAxisType.Move_Line_XZ:
+                case enAxisType.Move_Plane_XZ:
+                case enAxisType.Rot_Line_XZ:
+                case enAxisType.Rot_Plane_XZ:
+                case enAxisType.Scale_Line_XZ:
+                case enAxisType.Scale_Plane_XZ:
+                    {
+                        EngineNS.Vector3.TransformNormal(in EngineNS.Vector3.UnitY, in startWorldMat, out planeAxis);
+                    }
+                    break;
+                case enAxisType.Move_Z:
+                case enAxisType.Scale_Z:
+                    {
+                        EngineNS.Vector3 transAxis;
+                        EngineNS.Vector3.TransformNormal(in EngineNS.Vector3.UnitZ, in startWorldMat, out transAxis);
+                        var tempNormal = EngineNS.Vector3.Cross(transAxis, cameraDirection);
+                        tempNormal.Normalize();
+                        planeAxis = EngineNS.Vector3.Cross(transAxis, tempNormal);
+                        planeAxis.Normalize();
+                    }
+                    break;
+                case enAxisType.Move_Line_YZ:
+                case enAxisType.Move_Plane_YZ:
+                case enAxisType.Rot_Line_YZ:
+                case enAxisType.Rot_Plane_YZ:
+                case enAxisType.Scale_Line_YZ:
+                case enAxisType.Scale_Plane_YZ:
+                    {
+                        EngineNS.Vector3.TransformNormal(in EngineNS.Vector3.UnitX, in startWorldMat, out planeAxis);
+                    }
+                    break;
+                case enAxisType.Scale_XYZ:
+                    {
+                        planeAxis = -cameraDirection;
+                    }
+                    break;
+                case enAxisType.Edge_X_Min:
+                case enAxisType.Edge_X_MinPlane:
+                case enAxisType.Edge_X_Max:
+                case enAxisType.Edge_X_MaxPlane:
+                    {
+                        EngineNS.Vector3 transAxis;
+                        EngineNS.Vector3.TransformNormal(in EngineNS.Vector3.UnitX, in startWorldMat, out transAxis);
+                        var tempNormal = EngineNS.Vector3.Cross(transAxis, cameraDirection);
+                        tempNormal.Normalize();
+                        planeAxis = EngineNS.Vector3.Cross(transAxis, tempNormal);
+                        planeAxis.Normalize();
+                    }
+                    break;
+                case enAxisType.Edge_Y_Min:
+                case enAxisType.Edge_Y_MinPlane:
+                case enAxisType.Edge_Y_Max:
+                case enAxisType.Edge_Y_MaxPlane:
+                    {
+                        EngineNS.Vector3 transAxis;
+                        EngineNS.Vector3.TransformNormal(in EngineNS.Vector3.UnitY, in startWorldMat, out transAxis);
+                        var tempNormal = EngineNS.Vector3.Cross(transAxis, cameraDirection);
+                        tempNormal.Normalize();
+                        planeAxis = EngineNS.Vector3.Cross(transAxis, tempNormal);
+                        planeAxis.Normalize();
+                    }
+                    break;
+                case enAxisType.Edge_Z_Min:
+                case enAxisType.Edge_Z_MinPlane:
+                case enAxisType.Edge_Z_Max:
+                case enAxisType.Edge_Z_MaxPlane:
+                    {
+                        EngineNS.Vector3 transAxis;
+                        EngineNS.Vector3.TransformNormal(in EngineNS.Vector3.UnitZ, in startWorldMat, out transAxis);
+                        var tempNormal = EngineNS.Vector3.Cross(transAxis, cameraDirection);
+                        tempNormal.Normalize();
+                        planeAxis = EngineNS.Vector3.Cross(transAxis, tempNormal);
+                        planeAxis.Normalize();
+                    }
+                    break;
+            }
+
+            mMouseStartScreenLocation = new Vector3(e.motion.x, e.motion.y, 0.0f);
+            PickPlanePos(viewport, e.motion.x, e.motion.y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
+            mMouseTransOffset = mMouseStartLocation - mCurrentAxisStartTransform.mPosition;
+
+            if(mSelectedNodes != null)
+            {
+                for (int i = 0; i < mSelectedNodes.Count; i++)
+                {
+                    mSelectedNodes[i].StartTransform = ((UPlacement)mSelectedNodes[i].Node.Placement).TransformData;
+                }
+            }
+        }
+
+        bool mFirstTransAxis = false;
+        async System.Threading.Tasks.Task TransAxis(Vector2 newMouseLoc)
+        {
+            if (!mInitialized)
+                return;
+            if (!mIsTransAxisOperation)
+                return;
+
+            if(mFirstTransAxis)
+            {
+                if(mShiftKeyIsDown)
+                {
+                    // todo: 复制
+                    await Thread.AsyncDummyClass.DummyFunc();
+                }
+                mFirstTransAxis = false;
+            }
+
+            var startTransMat = Matrix.Transformation(mStartTransAxisWorldTransform.Scale, mStartTransAxisWorldTransform.Quat, mStartTransAxisWorldTransform.Position);
+
+            switch(mCurrentAxisType)
+            {
+                case enAxisType.Move_X:
+                    {
+                        Vector3 transAxis;
+                        Vector3.TransformNormal(in Vector3.UnitX, in startTransMat, out transAxis);
+                        MoveWithAxis(in newMouseLoc, transAxis);
+                    }
+                    break;
+                case enAxisType.Move_Y:
+                    {
+                        Vector3 transAxis;
+                        Vector3.TransformNormal(in Vector3.UnitY, in startTransMat, out transAxis);
+                        MoveWithAxis(in newMouseLoc, transAxis);
+                    }
+                    break;
+                case enAxisType.Move_Z:
+                    {
+                        Vector3 transAxis;
+                        Vector3.TransformNormal(in Vector3.UnitZ, in startTransMat, out transAxis);
+                        MoveWithAxis(in newMouseLoc, transAxis);
+                    }
+                    break;
+            }
+        }
+        void MoveWithAxis(in Vector2 newMouseLoc, in Vector3 transAxisDir)
+        {
+            transAxisDir.Normalize();
+            var camera = mCameraController.Camera.mCoreObject;
+            if(camera.mIsOrtho)
+            {
+                throw new InvalidOperationException("没实现");
+            }
+            else
+            {
+                var c2vMat = camera.GetToViewPortMatrix();
+                Vector3 screenAxisLoc;
+                Vector3.TransformCoordinate(ref mCurrentAxisStartTransform.mPosition, ref c2vMat, out screenAxisLoc);
+                screenAxisLoc.Z = 0;
+                var tag = transAxisDir + mMouseStartLocation;
+                Vector3 screenTag;
+                Vector3.TransformCoordinate(ref tag, ref c2vMat, out screenTag);
+                screenTag.Z = 0;
+                var screenAxisDir = screenTag - screenAxisLoc;
+                screenAxisDir.Normalize();
+
+                var camRight = camera.GetRight();
+                camRight.Normalize();
+                var deltaPos = mCurrentAxisStartTransform.mPosition + camRight;
+                Vector3 screenDeltaPos;
+                Vector3.TransformCoordinate(ref deltaPos, ref c2vMat, out screenDeltaPos);
+                screenDeltaPos.Z = 0;
+                var deltaLen = (screenDeltaPos - screenAxisLoc).Length() * (mCurrentAxisStartTransform.mPosition - camera.GetPosition()).LengthSquared();
+
+                var len = (float)(EngineNS.Vector3.Dot(new EngineNS.Vector3(newMouseLoc.X, newMouseLoc.Y, 0) - mMouseStartScreenLocation, screenAxisDir) * 0.000006 * deltaLen);
+
+                var trans = transAxisDir * len;
+                var mat = EngineNS.Matrix.Translate(trans);
+                if (CenterAxisMode)
+                {
+                    Matrix startTransAxisMat;
+                    Matrix.Transformation(ref mStartTransAxisWorldTransform.mScale, ref mStartTransAxisWorldTransform.mQuat, ref mStartTransAxisWorldTransform.mPosition, out startTransAxisMat);
+                    var axisOrigionTransBeforeCenterMat = startTransAxisMat * mat;
+                    axisOrigionTransBeforeCenterMat.Decompose(out mAxisOrigionTransformBeforeCenterOperation.mScale, out mAxisOrigionTransformBeforeCenterOperation.mQuat, out mAxisOrigionTransformBeforeCenterOperation.mPosition);
+
+                    mRootNode.Placement.Position = trans + mCurrentAxisStartTransform.Position;
+                }
+                else
+                {
+                    mRootNode.Placement.Position = trans + mStartTransAxisWorldTransform.Position;
+                }
+
+                if(mSelectedNodes != null)
+                {
+                    for (int i = 0; i < mSelectedNodes.Count; i++)
+                    {
+                        var data = mSelectedNodes[i];
+                        Matrix startTransMatrix;
+                        Matrix.Transformation(ref data.StartTransform.mScale, ref data.StartTransform.mQuat, ref data.StartTransform.mPosition, out startTransMatrix);
+
+                        var transMat = startTransMatrix * mat;
+                        if (data.Node.Parent != null)
+                        {
+                            transMat = transMat * data.Node.Parent.Placement.AbsTransformInv;
+                        }
+                        Vector3 pos, scale;
+                        Quaternion rot;
+                        transMat.Decompose(out scale, out rot, out pos);
+                        data.Node.Placement.Position = pos;
+                        data.Node.Placement.Quat = rot;
+                        data.Node.Placement.Scale = scale;
                     }
                 }
             }
+        }
+        void EndTransAxis()
+        {
+            if (!mInitialized)
+                return;
+            mIsTransAxisOperation = false;
         }
     }
 }

@@ -536,10 +536,6 @@ extern "C"
 	VFX_API float v3dxArea3 (const v3dVector3_t *a, const v3dVector3_t *b,
 								 const v3dVector3_t *c)
 	{
-		//�˴�����������ļ��������Ӧ��
-		//û����2�����Գ�������ƽ���ı�������������������������⣬
-		//����˵���н��Ǹ��Ƕ�
-		//�������������Ҫ��abs * 0.5
 		v3dxVector3 v1;
 		v3dxVec3Sub( &v1 , b , a );
 		v3dxVector3 v2;
@@ -548,7 +544,6 @@ extern "C"
 				(v1.y * v2.x + v1.x * v2.z + v1.z * v2.y));
 	}
 
-	//�����߶κ������εĽ���
 	VFX_API vBOOL v3dxLineIntersectPlane(
 						 FLOAT *pfT,
 						 v3dxVector3 *pvPoint,
@@ -573,7 +568,7 @@ extern "C"
 	
 		fFromT = v3dxVec3Dot(pvLength, &vNormal);
 		if( !bDoubleFace && fFromT < 0.f )
-			return FALSE; //����
+			return FALSE; //
 	
 		v3dxVector3 vFromA;
 		vFromA = *pvA - *pvFrom;

@@ -119,6 +119,14 @@ namespace EngineNS
                                                                  EngineNS.Vector3* pvFrom,
                                                                  EngineNS.Vector3* pvDir,
                                                                  EngineNS.BoundingBox* pBox);
-
+        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
+        public unsafe extern static vBOOL v3dxLineIntersectPlane(float* pfT,
+                                                                 Vector3* pvPoint,
+                                                                 Vector3* pvFrom,
+                                                                 Vector3* pvLength,
+                                                                 Vector3* pvA,
+                                                                 Vector3* pvB,
+                                                                 Vector3* pvC,
+                                                                 vBOOL bDoubleFace);
     }
 }

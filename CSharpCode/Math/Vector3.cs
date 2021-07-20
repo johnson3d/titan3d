@@ -1328,7 +1328,7 @@ namespace EngineNS
         /// <param name="transform">转换矩阵</param>
         /// <param name="result">转换后的向量</param>
         [Rtti.Meta]
-        public static void TransformNormal(ref Vector3 normal, ref Matrix transform, out Vector3 result)
+        public static void TransformNormal(in Vector3 normal, in Matrix transform, out Vector3 result)
         {
             result.X = ((normal.X * transform.M11) + (normal.Y * transform.M21)) + (normal.Z * transform.M31);
             result.Y = ((normal.X * transform.M12) + (normal.Y * transform.M22)) + (normal.Z * transform.M32);

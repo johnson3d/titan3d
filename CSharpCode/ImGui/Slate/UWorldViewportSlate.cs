@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EngineNS.Graphics.Pipeline;
 using SDL2;
 
 namespace EngineNS.EGui.Slate
@@ -62,7 +63,7 @@ namespace EngineNS.EGui.Slate
             await OnInitialize(this, application, policy, zMin, zMax);
 
             mAxis = new GamePlay.UAxis();
-            await mAxis.Initialize(this.World);
+            await mAxis.Initialize(this.World, CameraController);
         }
         protected override void OnClientChanged(bool bSizeChanged)
         {
@@ -120,7 +121,7 @@ namespace EngineNS.EGui.Slate
                 else if (e.button.button == SDL.SDL_BUTTON_MIDDLE)
                 {
                     CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.motion.x - mPreMousePt.X) * 0.01f, true);
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.motion.y - mPreMousePt.Y) * 0.01f, true);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.motion.y - mPreMousePt.Y) * -0.01f, true);
                 }
                 else if (e.button.button == SDL.SDL_BUTTON_X1)
                 {
@@ -229,5 +230,12 @@ namespace EngineNS.EGui.Slate
             }
         }
         #endregion
+
+        protected override void OnHitproxySelected(IProxiable proxy)
+        {
+            base.OnHitproxySelected(proxy);
+            var node = proxy as GamePlay.Scene.UNode;
+            mAxis.SetSelectedNodes(node);
+        }
     }
 }
