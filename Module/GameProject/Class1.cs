@@ -99,7 +99,6 @@ namespace GameProject
                     var meshNode = EngineNS.GamePlay.Scene.UMeshNode.AddMeshNode(root, new EngineNS.GamePlay.Scene.UNodeData(), typeof(EngineNS.GamePlay.UPlacement), mesh, new Vector3(5, 5, 5), new Vector3(0.01f), Quaternion.Identity);
                     meshNode.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                     meshNode.NodeData.Name = "Robot0";
-                    meshNode.IsScaleChildren = false;
                     meshNode.IsCastShadow = true;
                     meshNode.IsAcceptShadow = true;
 

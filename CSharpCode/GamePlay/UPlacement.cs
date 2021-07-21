@@ -89,6 +89,72 @@ namespace EngineNS.GamePlay
         public Matrix AbsTransformInv = new Matrix();
         public Matrix AbsTransformWithScale = new Matrix();
     }
+
+    public partial class UScalePlacement : UPlacementBase
+    {
+        public UScalePlacement(Scene.UNode hostNode)
+            : base(hostNode)
+        {   
+        }
+        Vector3 mScale = Vector3.UnitXYZ;
+        public override Vector3 Scale
+        {
+            get => mScale;
+            set
+            {
+                mScale = value;
+                UpdateData();
+            }
+        }
+        public override bool HasScale
+        {
+            get { return true; }
+        }
+        public override bool IsIdentity
+        {
+            get { return false; }
+        }
+        void UpdateData()
+        {
+            mTransform = Matrix.Scaling(mScale);
+            HostNode.UpdateAbsTransform();
+            HostNode.UpdateAABB();
+            if (HostNode.Parent != null)
+                HostNode.Parent.UpdateAABB();
+        }
+        public Matrix mTransform = new Matrix();
+        public override Matrix Transform
+        {
+            get
+            {
+                return mTransform;
+            }
+        }
+        public override Matrix AbsTransform
+        {
+            get
+            {
+                return mAbsTransform;
+            }
+            set
+            {
+                AbsTransformWithScale = value;
+                AbsTransformWithScale.M11 = value.M11 * Scale.X;
+                AbsTransformWithScale.M12 = value.M12 * Scale.X;
+                AbsTransformWithScale.M13 = value.M13 * Scale.X;
+
+                AbsTransformWithScale.M21 = value.M21 * Scale.Y;
+                AbsTransformWithScale.M22 = value.M22 * Scale.Y;
+                AbsTransformWithScale.M23 = value.M23 * Scale.Y;
+
+                AbsTransformWithScale.M31 = value.M31 * Scale.Z;
+                AbsTransformWithScale.M32 = value.M32 * Scale.Z;
+                AbsTransformWithScale.M33 = value.M33 * Scale.Z;
+                
+                mAbsTransform = AbsTransformWithScale;
+            }
+        }
+    }
     public partial class UPlacement : UPlacementBase
     {
         public UPlacement(Scene.UNode hostNode)

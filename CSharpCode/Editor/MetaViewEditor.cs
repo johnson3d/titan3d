@@ -97,7 +97,6 @@ namespace EngineNS.Editor
                 var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(root, meshData, typeof(GamePlay.UPlacement), new Vector3(5, 5, 5), new Vector3(0.01f), Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "Robot0";
-                meshNode.IsScaleChildren = false;
                 meshNode.IsCastShadow = true;
 
                 var mesh1 = new Graphics.Mesh.UMesh();

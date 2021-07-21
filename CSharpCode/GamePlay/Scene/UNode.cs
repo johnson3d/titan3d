@@ -43,10 +43,10 @@ namespace EngineNS.GamePlay.Scene
         [Flags]
         public enum ENodeStyles
         {
-            VisibleMeshProvider = (1 << 0),
+            VisibleMeshProvider = (1 << 0),//deprecated
             VisibleFollowParent = (1 << 1),
             HitproxyMasks = (1 << 2) | (1 << 3),//value: 0,1,2 NoProxy,RootProxy,FollowProxy
-            ScaleChildren = (1 << 4),
+            //ScaleChildren = (1 << 4),//deprecated,通过专门的ScaleChildren Node 和Placement来做
             CastShadow = (1 << 5),
             AcceptShadow = (1 << 6),
             HideBoundShape = (1 << 7),
@@ -82,24 +82,6 @@ namespace EngineNS.GamePlay.Scene
         public void UnsetStyle(ENodeStyles style)
         {
             NodeStyles &= ~style;
-        }
-        public bool IsScaleChildren
-        {
-            get
-            {
-                return HasStyle(ENodeStyles.ScaleChildren);
-            }
-            set
-            {
-                if (value)
-                {
-                    SetStyle(ENodeStyles.ScaleChildren);
-                }
-                else
-                {
-                    UnsetStyle(ENodeStyles.ScaleChildren);
-                }
-            }
         }
         public virtual bool IsCastShadow
         {

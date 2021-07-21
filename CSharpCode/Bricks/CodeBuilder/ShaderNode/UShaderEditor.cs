@@ -101,7 +101,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, Vector3.Zero, Vector3.One, Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "PreviewObject";
-                meshNode.IsScaleChildren = false;
                 meshNode.IsCastShadow = true;
             }
 
@@ -153,11 +152,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             MaterialPropGrid.IsReadOnly = true;
             MaterialPropGrid.Target = Material;
 
-            PreviewViewport.Title = "MaterialPreview";
+            PreviewViewport.Title = $"MaterialPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
             await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy(), 0, 1);
 
             await PreviewPropGrid.Initialize();
+            PreviewPropGrid.PGName = $"PGMaterialPreview:{AssetName}";
             PreviewPropGrid.Target = PreviewViewport;
 
             UEngine.Instance.TickableManager.AddTickable(this);
