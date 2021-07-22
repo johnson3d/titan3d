@@ -184,9 +184,16 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/XndHolder.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/XndNode.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImGui/ImGuiFileDialog.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXAnimCurve.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXAnimCurveDesc.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXAnimElement.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXAnimElementDesc.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXAnimImportDesc.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXAnimImporter.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXFactory.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXFileImportDesc.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXImporter.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXKAnimKeyFrame.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXMeshImportDesc.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXMeshImporter.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)AssetImportAndExport/FBX/FBXObjectImportDesc.cpp2cs.cpp" />
