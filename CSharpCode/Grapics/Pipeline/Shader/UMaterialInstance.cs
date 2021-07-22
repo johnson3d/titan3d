@@ -292,7 +292,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 {
                     ParentMaterialSerialId = ParentMaterial.SerialId;
                     mSerialId++;
-                    this.SaveAssetTo(this.AssetName);
+                    if (this.AssetName != null)
+                        this.SaveAssetTo(this.AssetName);
                 }
                 return mSerialId;
             }

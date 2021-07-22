@@ -174,6 +174,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 assignOp.Right = expr;
                 Function.Body.PushExpr(assignOp);
             }
+            if (AlphaTest.HasLinker())
+            {
+                var linker = funGraph.FindInLinkerSingle(AlphaTest);
+                var exprNode = linker.OutNode as IBaseNode;
+                var expr = exprNode.GetExpr(funGraph, cGen, linker.Out, false) as OpExpress;
+                var assignOp = new AssignOp();
+                var setExpr = new HardCodeOp();
+                setExpr.Code = "mtl.mAlphaTest";
+                assignOp.Left = setExpr;
+                assignOp.Right = expr;
+                Function.Body.PushExpr(assignOp);
+            }
 
             return Function;
         }
