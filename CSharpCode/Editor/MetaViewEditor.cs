@@ -177,6 +177,11 @@ namespace EngineNS.Editor
                 trNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 trNode.IsAcceptShadow = true;
             }
+
+            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(root);
+
+            var app = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
+            gridNode.ViewportSlate = app.GetWorldViewportSlate();
         }
         async System.Threading.Tasks.Task DoTest2()
         {

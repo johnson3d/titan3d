@@ -239,7 +239,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             set;
         } = ERenderLayer.RL_Opaque;
         [Rtti.Meta]
-        public bool AlphaTest { get; set; } = false;
+        public bool AlphaTest
+        {
+            get;
+            set;
+        } = false;
         internal virtual void UpdateShaderCode(bool EmptyMaterial)
         {
             var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();

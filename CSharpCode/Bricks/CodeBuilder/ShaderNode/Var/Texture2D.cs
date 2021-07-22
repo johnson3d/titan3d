@@ -11,6 +11,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public EGui.Controls.NodeGraph.PinOut OutTex { get; set; } = new EGui.Controls.NodeGraph.PinOut();
         [Rtti.Meta]
         [RName.PGRName(FilterExts = RHI.CShaderResourceView.AssetExt)]
+        [System.ComponentModel.Browsable(false)]
         public RName AssetName
         {
             get

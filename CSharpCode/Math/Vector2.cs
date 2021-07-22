@@ -157,21 +157,30 @@ namespace EngineNS
         {
             get { return mZero; }
         }
-        internal static Vector2 mZero = new Vector2(0, 0);
+        public readonly static Vector2 mZero = new Vector2(0, 0);
+        public readonly static Vector2 One = new Vector2(1, 1);
         [Rtti.Meta]
         public static Vector2 UnitX { get { return mUnitX; } }
-        public static Vector2 mUnitX = new Vector2(1, 0);
+        public readonly static Vector2 mUnitX = new Vector2(1, 0);
         [Rtti.Meta]
         public static Vector2 UnitY { get{ return mUnitY; } }
-        public static Vector2 mUnitY = new Vector2(0, 1);
+        public readonly static Vector2 mUnitY = new Vector2(0, 1);
         [Rtti.Meta]
         public static Vector2 UnitXY { get { return mUnitXY; } }
-        public static Vector2 mUnitXY = new Vector2(1, 1);
+        public readonly static Vector2 mUnitXY = new Vector2(1, 1);
         [Rtti.Meta]
-        public static Vector2 InvUnitXY { get { return InvmUnitXY; } }
-        public static Vector2 InvmUnitXY = new Vector2(-1, -1);
+        public readonly static Vector2 InvmUnitXY = new Vector2(-1, -1);
         [Rtti.Meta]
-        public static int SizeInBytes { get{ return System.Runtime.InteropServices.Marshal.SizeOf(typeof(Vector2)); } }
+        public static int SizeInBytes 
+        { 
+            get
+            {
+                unsafe
+                {
+                    return sizeof(Vector2);
+                }
+            }
+        }
 
         #region Equal Override
         /// <summary>

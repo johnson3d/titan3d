@@ -116,6 +116,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return null;
         }
         #endregion        
+        public static UMaterialInstance CreateMaterialInstance(UMaterial mtl)
+        {
+            var result = new UMaterialInstance();
+            result.ParentMaterial = mtl;
+            result.AssetState = IO.EAssetState.LoadFinished;
+            result.SerialId++;
+
+            return result;
+        }
         [Browsable(false)]
         public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
         public class TSaveData : IO.BaseSerializer

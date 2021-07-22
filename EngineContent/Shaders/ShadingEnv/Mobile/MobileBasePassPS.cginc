@@ -331,7 +331,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		output.RT0 = half4(BaseShading, PerPixelViewerDistance * rcp((half)gZFar));
 
 		//output.RT0.rgb = mtl.mAlbedo;
-		output.RT0.a = 1;
+		//output.RT0.a = Alpha;
 				
 		//output.RT0 = half4(BaseShading, PerPixelViewerDistance);
 		//output.RT1 = half4(N * 0.5h + 0.5h, 1.0h);
