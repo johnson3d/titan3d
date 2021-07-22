@@ -11,7 +11,8 @@ namespace EngineNS.Animation.Base
     {
         public Rtti.UTypeDesc ClassType
         {
-            get { return Rtti.UTypeDesc.TypeOf(TypeStr.ToString()); }
+            get { return Rtti.UTypeDesc.TypeOf(TypeStr.GetString()); }
+            set { TypeStr =VNameString.FromString(value.TypeString); }
         }
         private VNameString mTypeStr;
         [Rtti.Meta]
@@ -22,22 +23,20 @@ namespace EngineNS.Animation.Base
         public VNameString Name { get => mName; set => mName = value; }
 
         [Rtti.Meta]
-        public List<IAnimatablePropertyDesc> Properties { get; set; }
+        public List<IAnimatablePropertyDesc> Properties { get; set; } = new List<IAnimatablePropertyDesc>();
 
         public AnimatableObjectClassDesc()
         {
-            unsafe
-            {
-                //mTypeStr = VNameString.CreateInstance();
-                //mName = VNameString.CreateInstance();
-            }
+            mTypeStr = new VNameString();
+            mName = new VNameString();
         }
     }
     public class AnimatableObjectPropertyDesc : IO.BaseSerializer, IAnimatablePropertyDesc
     {
         public Rtti.UTypeDesc ClassType
         {
-            get { return Rtti.UTypeDesc.TypeOf(TypeStr.ToString()); }
+            get { return Rtti.UTypeDesc.TypeOf(TypeStr.GetString()); }
+            set { TypeStr = VNameString.FromString(value.TypeString); }
         }
         private VNameString mTypeStr;
         [Rtti.Meta]
@@ -46,8 +45,8 @@ namespace EngineNS.Animation.Base
         private VNameString mName;
         [Rtti.Meta]
         public VNameString Name { get => mName; set => mName = value; }
-        private int mCurveIndex = -1;
+        private Guid mCurveId = Guid.Empty;
         [Rtti.Meta]
-        public int CurveIndex { get => mCurveIndex; set => mCurveIndex = value; }
+        public Guid CurveId { get => mCurveId; set => mCurveId = value; }
     }
 }

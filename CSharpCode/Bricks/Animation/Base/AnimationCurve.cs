@@ -15,11 +15,13 @@ namespace EngineNS.Animation
         // curve can be a asset 
         public interface ICurve //: IO.IAsset
         {
-
+            Guid Id { get; set; }
         }
 
         public class Vector3Curve : IO.BaseSerializer, ICurve
         {
+            [Rtti.Meta]
+            public Guid Id { get; set; } = Guid.NewGuid();
             [Rtti.Meta]
             public Curve XCurve { get;set; } = null;
             [Rtti.Meta]
@@ -47,6 +49,8 @@ namespace EngineNS.Animation
         }
         public class FloatCurve : IO.BaseSerializer, ICurve
         {
+            [Rtti.Meta]
+            public Guid Id { get; set; } = Guid.NewGuid();
             [Rtti.Meta]
             public Curve Curve { get; set; } = null;
 

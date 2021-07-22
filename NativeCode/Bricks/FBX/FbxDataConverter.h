@@ -5,11 +5,11 @@
 #include "v3dxQuaternion.h"
 #include "v3dxMatrix4.h"
 #include "v3dxColor4.h"
-class FbxDataConverter
+class FBXDataConverter
 {
 public:
-	FbxDataConverter();
-	~FbxDataConverter();
+	FBXDataConverter();
+	~FBXDataConverter();
 public:
 	static void SetJointPostConversionMatrix(FbxAMatrix ConversionMatrix) { JointPostConversionMatrix = ConversionMatrix; }
 	static const FbxAMatrix &GetJointPostConversionMatrix() { return JointPostConversionMatrix; }

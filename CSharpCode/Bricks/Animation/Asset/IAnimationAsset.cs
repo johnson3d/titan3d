@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EngineNS.Animation
+namespace EngineNS.Animation.Asset
 {
-    public interface IAnimationAsset
+    public interface IAnimationAsset : IO.IAsset
     {
 
     }

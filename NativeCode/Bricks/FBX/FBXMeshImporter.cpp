@@ -1,5 +1,5 @@
 #include "FBXMeshImporter.h"
-#include "FbxDataConverter.h"
+#include "FBXDataConverter.h"
 #include "../../NativeCode/RHI/IDrawCall.h"
 #include "../../Base/CoreSDK.h"
 #include "../Animation/Skeleton/IBone.h"
@@ -219,7 +219,7 @@ namespace AssetImportAndExport
 			{
 				TotalMatrix = Geometry * gMatrix * scaleMatrix;
 			}
-			result = FbxDataConverter::ConvertMatrix(TotalMatrix);
+			result = FBXDataConverter::ConvertMatrix(TotalMatrix);
 			return result;
 		}
 
@@ -227,7 +227,7 @@ namespace AssetImportAndExport
 		{
 			if (boneNode == NULL)
 				return false;
-			auto  name = FbxDataConverter::ConvertToStdString(boneNode->GetName());
+			auto  name = FBXDataConverter::ConvertToStdString(boneNode->GetName());
 			FbxNodeAttribute* attr = boneNode->GetNodeAttribute();
 			if (attr == NULL)
 				return false;
@@ -241,7 +241,7 @@ namespace AssetImportAndExport
 		{
 			if (boneNode == NULL)
 				return true;
-			auto  name = FbxDataConverter::ConvertToStdString(boneNode->GetName());
+			auto  name = FBXDataConverter::ConvertToStdString(boneNode->GetName());
 			FbxNodeAttribute* attr = boneNode->GetNodeAttribute();
 			if (attr == NULL && name == "RootNode")
 				return true;
@@ -250,7 +250,7 @@ namespace AssetImportAndExport
 		}
 		FbxNode* GetSkeletonRootNode(FbxNode* boneNode)
 		{
-			auto  name = FbxDataConverter::ConvertToStdString(boneNode->GetName());
+			auto  name = FBXDataConverter::ConvertToStdString(boneNode->GetName());
 			FbxNodeAttribute* attr = boneNode->GetNodeAttribute();
 			FbxNodeAttribute::EType attType = attr->GetAttributeType();
 			if (attType == FbxNodeAttribute::eSkeleton || attType == FbxNodeAttribute::eNull)
@@ -594,7 +594,7 @@ namespace AssetImportAndExport
 			float* skinWeightsStream = new float[4 * renderVertexCount];
 
 			mMeshPrimitives = new IMeshPrimitives();
-			mMeshPrimitives->Init(rc, meshDesc->Name, meshDesc->RenderAtom);
+			mMeshPrimitives->Init(rc, meshDesc->Name.GetString(), meshDesc->RenderAtom);
 
 			if (meshDesc->HaveSkin)
 			{
@@ -614,7 +614,7 @@ namespace AssetImportAndExport
 								bool illegalScale = false;
 								FbxCluster* cluster = skin->GetCluster(clusterIndex);
 								FbxNode* link = cluster->GetLink();
-								auto boneName = FbxDataConverter::ConvertToStdString(link->GetName());
+								auto boneName = FBXDataConverter::ConvertToStdString(link->GetName());
 								auto lclR = link->LclRotation.Get();
 								auto lclT = link->LclTranslation.Get();
 								auto lclS = link->LclScaling.Get();
@@ -651,7 +651,7 @@ namespace AssetImportAndExport
 								auto scaleT = mat.GetT() * meshDesc->Scale * mHostFBXImporter->GetFileImportDesc()->ScaleFactor;
 								mat.SetT(scaleT);
 
-								auto v3dMat = FbxDataConverter::ConvertMatrix(mat);
+								auto v3dMat = FBXDataConverter::ConvertMatrix(mat);
 								IBoneDesc_SetBindMatrix(boneDesc, v3dMat);
 								//if (fbxBone->GetSkeletonType() != FbxSkeleton::eRoot)
 								{
@@ -663,7 +663,7 @@ namespace AssetImportAndExport
 										{
 											if (parentAttr->GetAttributeType() == FbxNodeAttribute::eSkeleton || parentAttr->GetAttributeType() == FbxNodeAttribute::eNull)
 											{
-												auto parentNodeName = FbxDataConverter::ConvertToStdString(parentNode->GetName());
+												auto parentNodeName = FBXDataConverter::ConvertToStdString(parentNode->GetName());
 												IBoneDesc_SetParent(boneDesc, parentNodeName.c_str());
 											}
 										}
@@ -692,7 +692,7 @@ namespace AssetImportAndExport
 								FbxNode* link = cluster->GetLink();
 								auto root = GetSkeletonRootNode(link);
 								RecursionCalculateBone(root, BoneClusters, mPartialSkeleton);
-								auto rootName = FbxDataConverter::ConvertToStdString(root->GetName());
+								auto rootName = FBXDataConverter::ConvertToStdString(root->GetName());
 								mPartialSkeleton->SetRoot(rootName.c_str());
 							}
 
@@ -890,7 +890,7 @@ namespace AssetImportAndExport
 		{
 			if (boneNode == NULL)
 				return;
-			auto boneName = FbxDataConverter::ConvertToStdString(boneNode->GetName());
+			auto boneName = FBXDataConverter::ConvertToStdString(boneNode->GetName());
 			auto r = boneNode->LclRotation.Get();
 			auto t = boneNode->LclTranslation.Get();
 			auto s = boneNode->LclScaling.Get();
@@ -932,7 +932,7 @@ namespace AssetImportAndExport
 						{
 							if (parentAttr->GetAttributeType() == FbxNodeAttribute::eSkeleton || parentAttr->GetAttributeType() == FbxNodeAttribute::eNull)
 							{
-								auto parentNodeName = FbxDataConverter::ConvertToStdString(parentNode->GetName());
+								auto parentNodeName = FBXDataConverter::ConvertToStdString(parentNode->GetName());
 								IBoneDesc_SetParent(boneDesc, parentNodeName.c_str());
 							}
 						}
@@ -986,7 +986,7 @@ namespace AssetImportAndExport
 						{
 							auto polyIndex = PolyIndices[i];
 							int ctrlPointIndex = mesh->GetPolygonVertex(polyIndex, j);
-							auto pos = FbxDataConverter::ConvertPos(controlPoints[ctrlPointIndex]);
+							auto pos = FBXDataConverter::ConvertPos(controlPoints[ctrlPointIndex]);
 							pos = pos * TotalMatrix;
 							MeshVertex aVertex;
 							aVertex.Postion = pos /** meshImportOption->Scale*/;
@@ -1051,7 +1051,7 @@ namespace AssetImportAndExport
 									auto polyIndex = PolyIndices[i];
 									int ctrlPointIndex = mesh->GetPolygonVertex(polyIndex, j);
 									currentVertexColor = GetLayerElementValue<FbxColor>((FbxLayerElementTemplate<FbxColor>*)pVertexColorElement, ctrlPointIndex);
-									vertexColor = FbxDataConverter::ConvertColor(currentVertexColor);
+									vertexColor = FBXDataConverter::ConvertColor(currentVertexColor);
 									MeshVertex& vertex = pAssetVertexs[vertexCount];
 									vertex.Color = vertexColor;
 									vertexCount++;
@@ -1075,7 +1075,7 @@ namespace AssetImportAndExport
 									}
 									currentVertexColor = pVertexColorElement->GetDirectArray().GetAt(colorIndex);*/
 									currentVertexColor = GetLayerElementValue<FbxColor>((FbxLayerElementTemplate<FbxColor>*)pVertexColorElement, vertexIndex);
-									vertexColor = FbxDataConverter::ConvertColor(currentVertexColor);
+									vertexColor = FBXDataConverter::ConvertColor(currentVertexColor);
 									MeshVertex& vertex = pAssetVertexs[vertexCount];
 									vertex.Color = vertexColor;
 									vertexCount++;
@@ -1125,7 +1125,7 @@ namespace AssetImportAndExport
 									auto polyIndex = PolyIndices[i];
 									int ctrlPointIndex = mesh->GetPolygonVertex(polyIndex, j);
 									currentNormal = GetLayerElementValue<FbxVector4>((FbxLayerElementTemplate<FbxVector4>*)pNormalElement, ctrlPointIndex);
-									normal = FbxDataConverter::ConvertDir(currentNormal);
+									normal = FBXDataConverter::ConvertDir(currentNormal);
 									normal = normal * TotalMatrixForNormal;
 									normal.normalize();
 									if (!IsVectorValid(normal))
@@ -1152,7 +1152,7 @@ namespace AssetImportAndExport
 									auto polyIndex = PolyIndices[i];
 									int ctrlPointIndex = mesh->GetPolygonVertex(polyIndex, j);
 									bool result = mesh->GetPolygonVertexNormal(polyIndex, j, currentNormal);
-									normal = FbxDataConverter::ConvertDir(currentNormal);
+									normal = FBXDataConverter::ConvertDir(currentNormal);
 									normal = normal * TotalMatrixForNormal;
 									normal.normalize();
 									if (!IsVectorValid(normal))
@@ -1214,7 +1214,7 @@ namespace AssetImportAndExport
 									auto polyIndex = PolyIndices[i];
 									int ctrlPointIndex = mesh->GetPolygonVertex(polyIndex, j);
 									currentTangent = GetLayerElementValue<FbxVector4>((FbxLayerElementTemplate<FbxVector4>*)pTangentElement, ctrlPointIndex);
-									tangent = FbxDataConverter::ConvertDir(currentTangent);
+									tangent = FBXDataConverter::ConvertDir(currentTangent);
 									tangent = tangent * TotalMatrixForNormal;
 									tangent.normalize();
 									if (tangent == vertex.Normal)
@@ -1250,7 +1250,7 @@ namespace AssetImportAndExport
 									auto polyIndex = PolyIndices[i];
 									auto vertexIndex = polyIndex * VERTEX_STRIDE + j;
 									currentTangent = GetLayerElementValue<FbxVector4>((FbxLayerElementTemplate<FbxVector4>*)pTangentElement, vertexIndex);
-									tangent = FbxDataConverter::ConvertDir(currentTangent);
+									tangent = FBXDataConverter::ConvertDir(currentTangent);
 									tangent = tangent * TotalMatrixForNormal;
 									tangent.normalize();
 
@@ -1317,7 +1317,7 @@ namespace AssetImportAndExport
 									auto polyIndex = PolyIndices[i];
 									int ctrlPointIndex = mesh->GetPolygonVertex(polyIndex, j);
 									currentBinNormal = GetLayerElementValue<FbxVector4>((FbxLayerElementTemplate<FbxVector4>*)pBinNormalElement, ctrlPointIndex);
-									binNormal = FbxDataConverter::ConvertDir(currentBinNormal);
+									binNormal = FBXDataConverter::ConvertDir(currentBinNormal);
 									binNormal = binNormal * TotalMatrixForNormal;
 									binNormal.normalize();
 									if (!IsVectorValid(binNormal))
@@ -1344,7 +1344,7 @@ namespace AssetImportAndExport
 									auto polyIndex = PolyIndices[i];
 									auto vertexIndex = polyIndex * VERTEX_STRIDE + j;
 									currentBinNormal = GetLayerElementValue<FbxVector4>((FbxLayerElementTemplate<FbxVector4>*)pBinNormalElement, vertexIndex);
-									binNormal = FbxDataConverter::ConvertDir(currentBinNormal);
+									binNormal = FBXDataConverter::ConvertDir(currentBinNormal);
 									binNormal = binNormal * TotalMatrixForNormal;
 									binNormal.normalize();
 
@@ -1422,7 +1422,7 @@ namespace AssetImportAndExport
 										auto polyIndex = PolyIndices[i];
 										int ctrlPointIndex = mesh->GetPolygonVertex(polyIndex, j);
 										currentUV = GetLayerElementValue<FbxVector2>((FbxLayerElementTemplate<FbxVector2>*)pUVElement, ctrlPointIndex);
-										UV = FbxDataConverter::ConvertUV(currentUV);
+										UV = FBXDataConverter::ConvertUV(currentUV);
 										MeshVertex& vertex = pAssetVertexs[vertexCount];
 										if (uvIndex == 0)
 											vertex.UV = UV;
@@ -1444,7 +1444,7 @@ namespace AssetImportAndExport
 										bool lUnmappedUV;
 										auto polyIndex = PolyIndices[i];
 										bool result = mesh->GetPolygonVertexUV(polyIndex, j, lUVName, currentUV, lUnmappedUV);
-										UV = FbxDataConverter::ConvertUV(currentUV);
+										UV = FBXDataConverter::ConvertUV(currentUV);
 										MeshVertex& vertex = pAssetVertexs[vertexCount];
 										if (uvIndex == 0)
 											vertex.UV = UV;
@@ -1853,7 +1853,7 @@ namespace AssetImportAndExport
 							{
 								FbxCluster* cluster = skin->GetCluster(clusterIndex);
 								FbxNode* link = cluster->GetLink();
-								auto boneName = FbxDataConverter::ConvertToStdString(link->GetName());
+								auto boneName = FBXDataConverter::ConvertToStdString(link->GetName());
 								auto lclR = link->LclRotation.Get();
 								auto lclT = link->LclTranslation.Get();
 								auto lclS = link->LclScaling.Get();

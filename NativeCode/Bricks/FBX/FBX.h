@@ -2,6 +2,7 @@
 #include "../../RHI/PreHead.h"
 #include "fbxsdk.h"
 #include "../../Base/CoreSDK.h"
+#include "../../Base/String/vfxstring.h"
 
 using namespace EngineNS;
 
@@ -51,88 +52,7 @@ namespace AssetImportAndExport::FBX
 			SU_Custom,
 	};
 
-
-	struct TR_CLASS(SV_LayoutStruct = 8)
-		FBXObjectImportDesc
-	{
-		friend class FBXImporter;
-	public:
-		FBXObjectImportDesc()
-		{
-			Name = nullptr;
-			Type = FOT_Unknown;
-			Scale = 1.f;
-			Imported = true;
-		}
-		~FBXObjectImportDesc()
-		{
-			Safe_DeleteArray<const char>(Name);
-			FBXNode = nullptr;
-		}
-	public:
-		const char* Name = nullptr;
-		EFBXObjectType Type = EFBXObjectType::FOT_Unknown;
-		float Scale = 1.f;
-		bool Imported = true;
-	public:
-		FbxNode* GetFBXNode() const { return FBXNode; }
-	protected:
-		FbxNode* FBXNode;
-	};
-
-	struct TR_CLASS(SV_LayoutStruct = 8)
-		FBXMeshImportDesc :public FBXObjectImportDesc
-	{
-	public:
-		bool ReCalculateTangent;
-		bool AsCollision;
-		bool AsLocalSpace;
-		bool HaveSkin;
-		bool AsStaticMesh;
-		UINT RenderAtom;
-		bool TransformVertexToAbsolute;
-		bool BakePivotInVertex;
-	};
-
-	struct TR_CLASS(SV_Dispose = delete self)
-		FBXFileImportDesc
-	{
-		friend class FBXImporter;
-	public:
-		FBXFileImportDesc()
-		{
-			FileName = nullptr;
-			Creater = nullptr;
-			FileSystemUnit = SU_cm;
-			ConvertSceneUnit = false;
-			ScaleFactor = 1.f;
-			MeshNum = 0;
-			Meshes = nullptr;
-		};
-		~FBXFileImportDesc()
-		{
-			Safe_DeleteArray<const char>(FileName);
-			Safe_DeleteArray<const char>(Creater);
-			for (UINT i = 0; i < MeshNum; ++i)
-			{
-				Safe_Delete<FBXMeshImportDesc>(Meshes[i]);
-			}
-			Safe_DeleteArray<FBXMeshImportDesc*>(Meshes);
-		}
-	public:
-		const char* FileName;
-		const char* Creater;
-		SystemUnit FileSystemUnit;
-		bool ConvertSceneUnit;
-		float ScaleFactor;
-		UINT MeshNum;
-		UINT AnimNum;
-	protected:
-		//FBXObjectImportDesc** Objects;
-		FBXMeshImportDesc** Meshes;
-
-	};
-	
+	class FBXImporter;
 	class TR_CLASS(SV_Dispose = delete self)
 	FBXFactory
 	{
