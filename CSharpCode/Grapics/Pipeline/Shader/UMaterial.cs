@@ -367,6 +367,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         HostMaterial.SerialId++;
                 }
             }
+            public NameRNamePair Clone(UMaterial mtl)
+            {
+                var result = new NameRNamePair();
+                result.HostMaterial = mtl;
+                result.Name = Name;
+                result.mValue = mValue;
+                return result;
+            }
         }
         protected List<NameRNamePair> mUsedRSView = new List<NameRNamePair>();
         [Rtti.Meta]
@@ -440,6 +448,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     if (HostMaterial != null)
                         HostMaterial.SerialId++;
                 }
+            }
+            public NameValuePair Clone(UMaterial mtl)
+            {
+                var result = new NameValuePair();
+                result.HostMaterial = mtl;
+                result.VarType = VarType;
+                result.Name = Name;
+                result.mValue = mValue;
+                return result;
             }
         }
         protected List<NameValuePair> mUsedUniformVars = new List<NameValuePair>();

@@ -121,8 +121,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var result = new UMaterialInstance();
             result.ParentMaterial = mtl;
             result.AssetState = IO.EAssetState.LoadFinished;
-            result.SerialId++;
+            
+            foreach (var i in mtl.UsedRSView)
+            {
+                result.UsedRSView.Add(i.Clone(result));
+            }
 
+            foreach (var i in mtl.UsedUniformVars)
+            {
+                result.UsedUniformVars.Add(i.Clone(result));
+            }
+
+            result.SerialId++;
             return result;
         }
         [Browsable(false)]
