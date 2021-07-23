@@ -67,7 +67,7 @@ namespace EngineNS.Graphics.Pipeline
             for (ERenderLayer i = ERenderLayer.RL_Opaque; i < ERenderLayer.RL_Num; i++)
             {
                 PassBuffers[(int)i] = new UDrawBuffers();
-                PassBuffers[(int)i].Initialize(rc, debugName);
+                PassBuffers[(int)i].Initialize(rc, $"{debugName}:{i.ToString()}");
                 PassBuffers[(int)i].SetPipelineStat(mPipelineStat);
             }
         }
@@ -97,15 +97,12 @@ namespace EngineNS.Graphics.Pipeline
                 cmdlist.BeginCommand();
                 if (i == ERenderLayer.RL_Opaque)
                 {
-                    cmdlist.BeginRenderPass(ref passDesc, frameBuffers.mCoreObject, "DrawOpaque");
+                    cmdlist.BeginRenderPass(ref passDesc, frameBuffers.mCoreObject, i.ToString());
                 }
                 else
                 {
-                    if (cmdlist.GetPassNumber() == 0)
-                        continue;
                     cmdlist.BeginRenderPass((RenderPassDesc*)0, frameBuffers.mCoreObject, i.ToString());
                 }
-                //IDrawCall* tmp = (IDrawCall*)0;
                 cmdlist.BuildRenderPass(0);
                 cmdlist.EndRenderPass();
                 cmdlist.EndCommand();
@@ -120,8 +117,8 @@ namespace EngineNS.Graphics.Pipeline
                 for (ERenderLayer i = ERenderLayer.RL_Opaque; i < ERenderLayer.RL_Num; i++)
                 {
                     var cmdlist = PassBuffers[(int)i].CommitCmdList.mCoreObject;
-                    if (cmdlist.GetPassNumber() == 0 && i != ERenderLayer.RL_Opaque)
-                        continue;
+                    //if (cmdlist.GetPassNumber() == 0 && i != ERenderLayer.RL_Opaque)
+                    //    continue;
                     cmdlist.Commit(rc.mCoreObject);
                 }
             }

@@ -70,6 +70,7 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileBasePassPS.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileCopyEditor.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileOpaque.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileTranslucent.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\copy2d.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\NoPixelShader.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\HitProxy.cginc" />

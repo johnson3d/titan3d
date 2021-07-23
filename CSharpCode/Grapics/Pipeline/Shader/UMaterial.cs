@@ -232,12 +232,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
             get; 
             set; 
         } = ELightingMode.Stand;
+        protected ERenderLayer mRenderLayer = ERenderLayer.RL_Opaque;
         [Rtti.Meta]
         public ERenderLayer RenderLayer
         {
-            get;
-            set;
-        } = ERenderLayer.RL_Opaque;
+            get => mRenderLayer;
+            set
+            {
+                mRenderLayer = value;
+                SerialId++;
+            }
+        }
         [Rtti.Meta]
         public bool AlphaTest
         {

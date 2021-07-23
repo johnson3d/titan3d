@@ -66,7 +66,17 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             base.OnDrawCall(shadingType, drawcall, mesh, atom);
             if (shadingType == EShadingType.BasePass)
-                BasePassNode.mBasePassShading.OnDrawCall(shadingType, drawcall, this, mesh);
+            {
+                switch (mesh.Atoms[atom].Material.RenderLayer)
+                {
+                    case ERenderLayer.RL_Translucent:
+                        BasePassNode.mTranslucentShading.OnDrawCall(shadingType, drawcall, this, mesh);
+                        return;
+                    default:
+                        BasePassNode.mBasePassShading.OnDrawCall(shadingType, drawcall, this, mesh);
+                        return;
+                }
+            }
         }
         public unsafe override void TickLogic(GamePlay.UWorld world)
         {

@@ -40,6 +40,7 @@ namespace EngineNS.Graphics.Mesh
         public UMeshAttachment Tag { get; set; }
         public class UAtom
         {
+            public uint SerialId;
             public Pipeline.Shader.UMaterial Material;
             public class ViewDrawCalls
             {
@@ -51,7 +52,7 @@ namespace EngineNS.Graphics.Mesh
             }
             public void ResetDrawCalls()
             {
-                TargetViews.Clear();
+                TargetViews?.Clear();
                 TargetViews = null;
                 TaskBuildDrawCall = null;
             }
@@ -59,9 +60,10 @@ namespace EngineNS.Graphics.Mesh
             System.Threading.Tasks.Task TaskBuildDrawCall = null;
             public unsafe virtual RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, UMesh mesh, int atom, Pipeline.IRenderPolicy policy, Pipeline.IRenderPolicy.EShadingType shadingType)
             {
-                if (Material != mesh.MaterialMesh.Materials[atom])
+                if (Material != mesh.MaterialMesh.Materials[atom] || Material.SerialId != SerialId)
                 {
                     Material = mesh.MaterialMesh.Materials[atom];
+                    SerialId = Material.SerialId;
                     ResetDrawCalls();
                 }
                 //每个TargetView都要对应一个DrawCall数组
@@ -129,13 +131,13 @@ namespace EngineNS.Graphics.Mesh
                 //检查shading切换参数或者材质HLSL被编辑器修改
                 result.CheckPermutation(Material.ParentMaterial, mesh.MdfQueue);
                 //检查材质参数被修改
-                if (result.CheckMaterialParameters(Material))
-                {
-                    if (result.Effect.CBPerMeshIndex != 0xFFFFFFFF)
-                    {
-                        result.mCoreObject.BindCBufferAll(result.Effect.CBPerMeshIndex, mesh.PerMeshCBuffer.mCoreObject);
-                    }
-                }
+                //if (result.CheckMaterialParameters(Material))
+                //{
+                //    if (result.Effect.CBPerMeshIndex != 0xFFFFFFFF)
+                //    {
+                //        result.mCoreObject.BindCBufferAll(result.Effect.CBPerMeshIndex, mesh.PerMeshCBuffer.mCoreObject);
+                //    }
+                //}
                 
                 policy.OnDrawCall(shadingType, result, mesh, atom);
                 return result;
