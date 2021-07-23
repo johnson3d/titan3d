@@ -45,24 +45,16 @@ namespace EngineNS.IO
         }
         public async System.Threading.Tasks.Task Execute()
         {
+            mDirtyAssets.Clear();
             foreach (var i in Modifiers)
             {
                 var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(i.Source);
-                if(i.Source!= ameta.GetAssetName())
+                if (i.Source != ameta.GetAssetName())
                 {
                     System.Diagnostics.Debug.Assert(false);
                     continue;
                 }
-                foreach (var j in ameta.RefAssetRNames)
-                {
-                    if (mDirtyAssets.ContainsKey(j))
-                        continue;
-
-                    var ameta_dirty = UEngine.Instance.AssetMetaManager.GetAssetMeta(j);
-
-                    IAsset dirtyAsset = await ameta_dirty.LoadAsset();
-                    mDirtyAssets.Add(j, dirtyAsset);
-                }
+                await UEngine.Instance.AssetMetaManager.GetAssetHolder(ameta, mDirtyAssets);
             }
             foreach (var i in Modifiers)
             {
@@ -71,11 +63,20 @@ namespace EngineNS.IO
 
                 asset.SaveAssetTo(new RName(i.TargetPath, i.TargetType));
 
+                var src = i.Source.Address;
+                UEngine.Instance.AssetMetaManager.RemoveAMeta(ameta);
                 var nameSets = RName.RNameManager.Instance.mNameSets[(int)i.Source.RNameType];
                 nameSets.Remove(i.Source.Name);
                 i.Source.Name = i.TargetPath;
                 i.Source.RNameType = i.TargetType;
-                nameSets.Add(i.Source.Name, i.Source);
+                var tarNameSets = RName.RNameManager.Instance.mNameSets[(int)i.Source.RNameType];
+                tarNameSets.Add(i.Source.Name, i.Source);
+                var tar = i.Source.Address;
+
+                UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
+                if (IO.FileManager.FileExists(src + ".snap"))
+                    IO.FileManager.CopyFile(src + ".snap", tar + ".snap");
 
                 ameta.SaveAMeta();
             }
@@ -90,6 +91,32 @@ namespace EngineNS.IO
             }
             Modifiers.Clear();
             mDirtyAssets.Clear();
+        }
+    }
+}
+
+namespace EngineNS.UTest
+{
+    [UTest.UTest]
+    public class UTest_UAssetOperator
+    {
+        public void UnitTestEntrance()
+        {
+            Action action = async () =>
+            {
+                var assetOp = new IO.UAssetOperator();
+                var rn = RName.GetRName(@"axis\axis_focus_matins.uminst", RName.ERNameType.Game);
+                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
+                if (ameta != null)
+                {
+                    assetOp.AddModifier(rn, @"material\axis\axis_focus_matins.uminst", RName.ERNameType.Engine);
+                    await assetOp.Execute();
+
+                    assetOp.AddModifier(rn, @"axis\axis_focus_matins.uminst", RName.ERNameType.Game);
+                    await assetOp.Execute();
+                }
+            };
+            //action();
         }
     }
 }

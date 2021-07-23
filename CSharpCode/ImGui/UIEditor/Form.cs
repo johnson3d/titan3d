@@ -341,7 +341,7 @@ namespace EngineNS.EGui.UIEditor
                 var kls = cr.CompiledAssembly.GetType($"{NameSpace}.{Name}");
                 if (kls != null)
                 {
-                    EditableFormData.Instance.EditorDrawForm = System.Activator.CreateInstance(kls) as UIFormBase;
+                    EditableFormData.Instance.EditorDrawForm = Rtti.UTypeDescManager.CreateInstance(kls) as UIFormBase;
                     EditableFormData.Instance.EditorDrawForm.BindTarget = this;
                 }
             }

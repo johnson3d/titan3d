@@ -193,7 +193,7 @@ namespace EngineNS.Editor
             //UEngine.Instance.MacrossModule.ReloadAssembly(root + "/net5.0/GameProject.dll");
 
             //var typeDesc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName("utest.mt");
-            //var ins = System.Activator.CreateInstance(typeDesc.SystemType);
+            //var ins = Rtti.UTypeDescManager.CreateInstance(typeDesc.SystemType);
             //var method = typeDesc.SystemType.GetMethod("Function_0");
             //method.Invoke(ins, null);
         }

@@ -244,6 +244,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             get;
             set;
         } = false;
+        [Rtti.Meta]
+        public List<string> UserDefines { get; set; } = new List<string>();
         internal virtual void UpdateShaderCode(bool EmptyMaterial)
         {
             var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
@@ -311,6 +313,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (AlphaTest)
             {
                 codeBuilder.AddLine("#define ALPHA_TEST");
+            }
+
+            if (UserDefines != null)
+            {
+                foreach (var i in UserDefines)
+                {
+                    codeBuilder.AddLine($"#define {i}");
+                }
             }
 
             codeBuilder.AddLine("#endif//_Material_H_");

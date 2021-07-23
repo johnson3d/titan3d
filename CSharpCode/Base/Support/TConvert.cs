@@ -299,7 +299,7 @@ namespace EngineNS.Support
                 }
                 else
                 {
-                    var result = System.Activator.CreateInstance(type);
+                    var result = Rtti.UTypeDescManager.CreateInstance(type);
                     var attrs = type.GetCustomAttributes(typeof(TypeConverterAttributeBase), true);
                     if (attrs.Length != 0)
                     {
@@ -311,7 +311,7 @@ namespace EngineNS.Support
             }
             catch
             {
-                return System.Activator.CreateInstance(type);
+                return Rtti.UTypeDescManager.CreateInstance(type);
             }
         }
     }
