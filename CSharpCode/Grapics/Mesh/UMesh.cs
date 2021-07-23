@@ -258,7 +258,7 @@ namespace EngineNS.Graphics.Mesh
                         #endregion
 
                         shading.OnBuildDrawCall(drawcall);
-                        drawcall.MaterialSerialId = Material.SerialId;
+                        //drawcall.MaterialSerialId = Material.SerialId;
                         drawCalls[(int)i] = drawcall;
                     }
                 }
