@@ -93,19 +93,26 @@ namespace EngineNS.Graphics.Pipeline
         {
             for (ERenderLayer i = ERenderLayer.RL_Opaque; i < ERenderLayer.RL_Num; i++)
             {
+                PassBuffers[(int)i].DrawCmdList.PassNumber = PassBuffers[(int)i].DrawCmdList.mCoreObject.GetPassNumber();
                 var cmdlist = PassBuffers[(int)i].DrawCmdList.mCoreObject;
                 cmdlist.BeginCommand();
                 if (i == ERenderLayer.RL_Opaque)
                 {
                     cmdlist.BeginRenderPass(ref passDesc, frameBuffers.mCoreObject, i.ToString());
+                    cmdlist.BuildRenderPass(0);
+                    cmdlist.EndRenderPass();
+                    cmdlist.EndCommand();
                 }
                 else
                 {
-                    cmdlist.BeginRenderPass((RenderPassDesc*)0, frameBuffers.mCoreObject, i.ToString());
+                    if (PassBuffers[(int)i].DrawCmdList.PassNumber > 0)
+                    {
+                        cmdlist.BeginRenderPass((RenderPassDesc*)0, frameBuffers.mCoreObject, i.ToString());
+                        cmdlist.BuildRenderPass(0);
+                        cmdlist.EndRenderPass();
+                        cmdlist.EndCommand();
+                    }
                 }
-                cmdlist.BuildRenderPass(0);
-                cmdlist.EndRenderPass();
-                cmdlist.EndCommand();
             }
 
             var num = mPipelineStat.mCoreObject.mDrawCall;
@@ -117,8 +124,8 @@ namespace EngineNS.Graphics.Pipeline
                 for (ERenderLayer i = ERenderLayer.RL_Opaque; i < ERenderLayer.RL_Num; i++)
                 {
                     var cmdlist = PassBuffers[(int)i].CommitCmdList.mCoreObject;
-                    //if (cmdlist.GetPassNumber() == 0 && i != ERenderLayer.RL_Opaque)
-                    //    continue;
+                    if (PassBuffers[(int)i].CommitCmdList.PassNumber == 0 && i != ERenderLayer.RL_Opaque)
+                        continue;
                     cmdlist.Commit(rc.mCoreObject);
                 }
             }

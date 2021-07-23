@@ -6,6 +6,7 @@ namespace EngineNS.RHI
 {
     public class CCommandList : AuxPtrType<ICommandList>
     {
+        public uint PassNumber;
     }
 
     public class CPipelineStat : AuxPtrType<IPipelineStat>
