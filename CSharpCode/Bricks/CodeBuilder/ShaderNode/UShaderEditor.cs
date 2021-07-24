@@ -101,6 +101,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, Vector3.Zero, Vector3.One, Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "PreviewObject";
+                meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = true;
             }
 
@@ -122,8 +123,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 return false;
 
             MaterialGraph.ShaderEditor = this;
+            MaterialGraph.ResetGraph();
             IsStarting = true;
-            Material = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(name);
+            Material = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(name);
+            //Material = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(name);
             if (Material == null)
             {
                 IsStarting = false;
@@ -266,38 +269,50 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 }
             }
         }
-        protected unsafe void DrawToolBar()
+        protected void DrawToolBar()
         {
             var btSize = new Vector2(64, 64);
             if (ImGuiAPI.Button("Save", in btSize))
             {
+                var noused = Save();
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Button("Compile", in btSize))
+            {
+                System.Diagnostics.Trace.Write(GenHLSLCode());
+
                 var xml = new System.Xml.XmlDocument();
                 var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
                 xml.AppendChild(xmlRoot);
                 IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
                 var xmlText = IO.FileManager.GetXmlText(xml);
                 Material.GraphXMLString = xmlText;
+                Material.UpdateShaderCode(false);
                 Material.HLSLCode = GenHLSLCode();
-                Material.SaveAssetTo(Material.AssetName);
-
-                Editor.USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
-            }
-            ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Load", in btSize))
-            {
-                MaterialOutput = null;
-                MaterialGraph.ResetGraph();
-                var xml = IO.FileManager.LoadXmlFromString(Material.GraphXMLString);
-                object pThis = this;
-                IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
-            }
-            ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Compile", in btSize))
-            {
-                System.Diagnostics.Trace.Write(GenHLSLCode());
+                Material.SerialId++;
             }
         }
         uint PreviewDockId = 0;
+        private async System.Threading.Tasks.Task Save()
+        {
+            var xml = new System.Xml.XmlDocument();
+            var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
+            xml.AppendChild(xmlRoot);
+            IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
+            var xmlText = IO.FileManager.GetXmlText(xml);
+            Material.GraphXMLString = xmlText;
+            Material.UpdateShaderCode(false);
+            Material.HLSLCode = GenHLSLCode();
+            Material.SaveAssetTo(Material.AssetName);
+            Material.SerialId++;
+
+            Editor.USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+
+            if (await UEngine.Instance.GfxDevice.MaterialManager.ReloadMaterial(Material.AssetName))
+            {
+                
+            }
+        }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
         {
             if (PreviewDockId == 0)

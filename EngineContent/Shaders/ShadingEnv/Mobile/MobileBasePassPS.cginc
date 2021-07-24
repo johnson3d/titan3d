@@ -114,7 +114,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		}
 	#endif//MODE_EDITOR
 
-#if ENV_DISABLE_SHADOW == 1
+#if DISABLE_SHADOW_MDFQUEUE == 1 || DISABLE_SHADOW_ALL == 1
 		ShadowValue = 1.0h;
 #endif//#if ENV_DISABLE_SHADOW == 1
 

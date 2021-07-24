@@ -51,6 +51,7 @@ namespace EngineNS.Editor.Forms
                 var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, Vector3.Zero, Vector3.One, Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "PreviewObject";
+                meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = true;
             }
 

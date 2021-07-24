@@ -97,6 +97,7 @@ namespace EngineNS.Editor
                 var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(root, meshData, typeof(GamePlay.UPlacement), new Vector3(5, 5, 5), new Vector3(0.01f), Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "Robot0";
+                meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = true;
 
                 var mesh1 = new Graphics.Mesh.UMesh();
@@ -107,6 +108,7 @@ namespace EngineNS.Editor
                 meshNode1.Parent = meshNode;
                 meshNode1.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent;
                 //meshNode1.Placement.Position = meshNode1.Placement.Position;
+                meshNode1.IsAcceptShadow = false;
                 meshNode1.IsCastShadow = true;
 
                 (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).MeshName = RName.GetRName("utest/mesh/puppet_low_ue4.ums");

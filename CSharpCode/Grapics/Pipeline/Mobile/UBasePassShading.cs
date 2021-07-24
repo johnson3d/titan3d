@@ -23,7 +23,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             MacroDefines.Add(disable_PointLights);
 
             var disable_Shadow = new MacroDefine();//2
-            disable_Shadow.Name = "ENV_DISABLE_SHADOW";
+            disable_Shadow.Name = "DISABLE_SHADOW_ALL";
             disable_Shadow.Values.Add("0");
             disable_Shadow.Values.Add("1");
             MacroDefines.Add(disable_Shadow);
@@ -204,11 +204,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             {
                 if (i.Atoms == null)
                     continue;
-
-                if (i.HostNode != null)
-                {
-                    mBasePassShading.SetDisableShadow(!i.HostNode.IsAcceptShadow);
-                }
 
                 for (int j = 0; j < i.Atoms.Length; j++)
                 {

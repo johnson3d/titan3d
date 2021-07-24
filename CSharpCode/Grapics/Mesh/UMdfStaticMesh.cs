@@ -52,8 +52,7 @@ namespace EngineNS.Graphics.Mesh
             codeBuilder.PopBrackets();
 
             codeBuilder.AddLine("#define MDFQUEUE_FUNCTION");
-            codeBuilder.AddLine("#undef ENV_DISABLE_SHADOW");
-            codeBuilder.AddLine("#define ENV_DISABLE_SHADOW 1");
+            codeBuilder.AddLine("#define DISABLE_SHADOW_MDFQUEUE 1");
 
             SourceCode = new IO.CMemStreamWriter();
             SourceCode.SetText(codeBuilder.ClassCode);

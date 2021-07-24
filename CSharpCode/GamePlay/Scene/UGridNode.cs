@@ -27,7 +27,7 @@ namespace EngineNS.GamePlay.Scene
             var gridMesh = new Graphics.Mesh.UMesh();
             var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
             tMaterials[0] = materialInstance;
-            var ok = gridMesh.Initialize(mesh, tMaterials, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
+            var ok = gridMesh.Initialize(mesh, tMaterials, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh_NoShadow)));
             if (ok == false)
                 return null;
 
@@ -38,6 +38,8 @@ namespace EngineNS.GamePlay.Scene
             meshNode.Mesh = gridMesh;
             meshNode.Parent = parent;
             meshNode.mGridlineMaterial = materialInstance;
+            meshNode.IsAcceptShadow = false;
+            meshNode.IsCastShadow = false;
             meshNode.SetStyle(ENodeStyles.VisibleFollowParent);
 
             return meshNode;
@@ -84,11 +86,11 @@ namespace EngineNS.GamePlay.Scene
             ObjectToWorld.SetTrans(new Vector3(mPreCameraPos.X, 0, mPreCameraPos.Z));
 
             // good enough to avoid the AMD artifacts, horizon still appears to be a line
-            float Radii = 100000;
+            float Radii = 1000;
             if (bIsPerspective)
             {
                 // the higher we get the larger we make the geometry to give the illusion of an infinite grid while maintains the precision nearby
-                Radii *= System.Math.Max(1.0f, System.Math.Abs(mPreCameraPos.Y) / 1000.0f);
+                Radii *= System.Math.Max(1.0f, System.Math.Abs(mPreCameraPos.Y) / 10.0f);
             }
 
             var UVMid = UVCameraPos * WorldToUVScale;

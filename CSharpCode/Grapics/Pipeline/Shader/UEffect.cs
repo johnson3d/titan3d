@@ -36,6 +36,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             public string ShadingType { get; set; }
             [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public uint InputStreams { get; set; }
+
+            public Hash160 EffectHash;
         }
         public UEffectDesc Desc { get; set; } = new UEffectDesc();
         public RHI.CShaderProgram ShaderProgram { get; private set; }
@@ -78,66 +80,66 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var path = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Cache, IO.FileManager.ESystemDir.Effect);
             var file = path + hash.ToString() + UEffect.AssetExt;
 
-            var xnd = IO.CXndHolder.LoadXnd(file);
-            if (xnd == null)
-                return null;
-
-            XndAttribute descAttr = new XndAttribute();
-            XndNode vsNode = new XndNode();
-            XndNode psNode = new XndNode();
-            unsafe
+            UEffect result = null;
+            using (var xnd = IO.CXndHolder.LoadXnd(file))
             {
-                descAttr = xnd.RootNode.mCoreObject.TryGetAttribute("Desc");
-                if (descAttr.IsValidPointer == false)
-                    return null;
-                vsNode = xnd.RootNode.mCoreObject.TryGetChildNode("VSCode");
-                if (vsNode.IsValidPointer == false)
-                    return null;
-                psNode = xnd.RootNode.mCoreObject.TryGetChildNode("PSCode");
-                if (psNode.IsValidPointer == false)
-                    return null;
-            }
-            
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-
-            var result = await UEngine.Instance.EventPoster.Post(() =>
-            {
-                var effect = new UEffect();
-                IO.ISerializer desc;
-                var ar = descAttr.GetReader(effect);
-                IO.SerializerHelper.Read(ar, out desc, effect);
-                descAttr.ReleaseReader(ref ar);
-                var effectDesc = desc as UEffectDesc;
-                if (effectDesc == null)
+                if (xnd == null)
                     return null;
 
-                var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shading.CodeName);
-                if (shadingCode.CodeHash != effectDesc.CodeHash ||
-                        material.GetHash() != effectDesc.MaterialHash ||
-                        mdf.GetHash() != effectDesc.MdfQueueHash)
-                {
-                    xnd.mCoreObject.TryReleaseHolder();
-                    xnd.Dispose();
-                    return null;
-                }
-
-                effect.Desc = effectDesc;
-
+                XndAttribute descAttr = new XndAttribute();
+                XndNode vsNode = new XndNode();
+                XndNode psNode = new XndNode();
                 unsafe
                 {
-                    effect.DescVS = new RHI.CShaderDesc(EShaderType.EST_VertexShader);
-                    if (effect.DescVS.mCoreObject.LoadXnd(vsNode) == 0)
+                    descAttr = xnd.RootNode.mCoreObject.TryGetAttribute("Desc");
+                    if (descAttr.IsValidPointer == false)
                         return null;
-                    effect.DescPS = new RHI.CShaderDesc(EShaderType.EST_PixelShader);
-                    if (effect.DescPS.mCoreObject.LoadXnd(psNode) == 0)
+                    vsNode = xnd.RootNode.mCoreObject.TryGetChildNode("VSCode");
+                    if (vsNode.IsValidPointer == false)
+                        return null;
+                    psNode = xnd.RootNode.mCoreObject.TryGetChildNode("PSCode");
+                    if (psNode.IsValidPointer == false)
                         return null;
                 }
-                return effect;
-            }, Thread.Async.EAsyncTarget.AsyncIO);
 
-            if (result == null)
-                return null;
+                result = await UEngine.Instance.EventPoster.Post(() =>
+                {
+                    var effect = new UEffect();
+                    IO.ISerializer desc;
+                    var ar = descAttr.GetReader(effect);
+                    IO.SerializerHelper.Read(ar, out desc, effect);
+                    descAttr.ReleaseReader(ref ar);
+                    var effectDesc = desc as UEffectDesc;
+                    if (effectDesc == null)
+                        return null;
 
+                    var shadingCode = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCode(shading.CodeName);
+                    if (shadingCode.CodeHash != effectDesc.CodeHash ||
+                            material.GetHash() != effectDesc.MaterialHash ||
+                            mdf.GetHash() != effectDesc.MdfQueueHash)
+                    {
+                        return null;
+                    }
+
+                    effect.Desc = effectDesc;
+
+                    unsafe
+                    {
+                        effect.DescVS = new RHI.CShaderDesc(EShaderType.EST_VertexShader);
+                        if (effect.DescVS.mCoreObject.LoadXnd(vsNode) == 0)
+                            return null;
+                        effect.DescPS = new RHI.CShaderDesc(EShaderType.EST_PixelShader);
+                        if (effect.DescPS.mCoreObject.LoadXnd(psNode) == 0)
+                            return null;
+                    }
+                    return effect;
+                }, Thread.Async.EAsyncTarget.AsyncIO);
+
+                if (result == null)
+                    return null;
+            }
+
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
             RHI.CVertexShader VertexShader = null;
             RHI.CPixelShader PixelShader = null;
             bool created = await UEngine.Instance.EventPoster.Post(() =>
@@ -181,6 +183,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (await LinkShaders(result) == false)
                 return null;
 
+            result.Desc.EffectHash = hash;
             result.ShadingEnv = shading;
             return result;
         }
@@ -205,7 +208,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.DescVS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material.AssetName, mdf.GetType(), defines, true);
+                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material, mdf.GetType(), defines, true);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (result.DescVS == null)
                 return null;
@@ -213,7 +216,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.DescPS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material.AssetName, mdf.GetType(), defines, true);
+                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material, mdf.GetType(), defines, true);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (result.DescPS == null)
                 return null;
@@ -258,14 +261,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             return result;
         }
-        public async System.Threading.Tasks.Task<bool> RefreshEffect()
+        public async System.Threading.Tasks.Task<bool> RefreshEffect(UMaterial material)
         {
+            {
+                var path = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Cache, IO.FileManager.ESystemDir.Effect);
+                var file = path + this.Desc.EffectHash.ToString() + UEffect.AssetExt;
+                if (IO.FileManager.FileExists(file))
+                    IO.FileManager.DeleteFile(file);
+            }
+
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            var material = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(this.Desc.MaterialName);
-            if (material == null)
-                return false;
-            
             var defines = new RHI.CShaderDefinitions();
             var type = Rtti.UTypeDescManager.Instance.GetTypeFromString(Desc.ShadingType);
             if (type == null)
@@ -285,7 +291,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var descVS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material.AssetName, mdfType.SystemType, defines, true);
+                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material, mdfType.SystemType, defines, true);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (descVS == null)
                 return false;
@@ -293,7 +299,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var descPS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material.AssetName, mdfType.SystemType, defines, true);
+                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material, mdfType.SystemType, defines, true);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (descPS == null)
                 return false;
@@ -391,19 +397,26 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             return null;
         }
-        public Hash160 GetShaderHash(UShadingEnv shading, UMaterial material, UMdfQueue mdf)
+        public static Hash160 GetShaderHash(UShadingEnv shading, UMaterial material, UMdfQueue mdf)
         {
             return Hash160.CreateHash160($"{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
         }
         public async System.Threading.Tasks.Task<UEffect> GetEffect(UShadingEnv shading, UMaterial material, UMdfQueue mdf)
         {
+            UEffect result = null;
+            if (material.IsEditingMaterial)
+            {
+                result = await UEffect.CreateEffect(shading, shading.CurrentPermutationId, material, mdf);
+                return result;
+            }
+
             var hash = GetShaderHash(shading, material, mdf);
-            var result = TryGetEffect(hash);
+            result = TryGetEffect(hash);
             if (result != null)
             {
                 if (result.Desc.MaterialHash != material.MaterialHash)
                 {
-                    await result.RefreshEffect();
+                    await result.RefreshEffect(material);
                 }
                 return result;
             }
@@ -423,6 +436,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
 
             result = await UEffect.CreateEffect(shading, shading.CurrentPermutationId, material, mdf);
+            result.Desc.EffectHash = hash;
             if (result != null)
             {
                 result.Desc.PermutationId = shading.CurrentPermutationId;

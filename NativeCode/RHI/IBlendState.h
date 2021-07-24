@@ -4,7 +4,7 @@
 
 NS_BEGIN
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+enum TR_ENUM(SV_EnumNoFlags = true)
 EBlend
 {
 	BLD_ZERO = 1,
@@ -26,7 +26,7 @@ EBlend
 	BLD_INV_SRC1_ALPHA = 19
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+enum TR_ENUM(SV_EnumNoFlags = true)
 EBlendOp
 {
 	BLDOP_ADD = 1,
