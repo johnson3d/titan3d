@@ -253,6 +253,26 @@ namespace EngineNS.Editor
                     }
                     ImGuiAPI.EndMenu();
                 }
+                if (ImGuiAPI.BeginMenu("View", true))
+                {
+                    var check = this.WorldViewportSlate.RenderPolicy.DisableShadow;
+                    ImGuiAPI.Checkbox("##DisableShadow", ref check);
+                    ImGuiAPI.SameLine(0, -1);
+                    if (ImGuiAPI.MenuItem("DisableShadow", null, false, true))
+                    {
+                        this.WorldViewportSlate.RenderPolicy.DisableShadow = !check;
+                    }
+
+                    check = this.WorldViewportSlate.RenderPolicy.DisableAO;
+                    ImGuiAPI.Checkbox("##DisableAO", ref check);
+                    ImGuiAPI.SameLine(0, -1);
+                    if (ImGuiAPI.MenuItem("DisableAO", null, false, true))
+                    {
+                        this.WorldViewportSlate.RenderPolicy.DisableAO = !check;
+                    }
+
+                    ImGuiAPI.EndMenu();
+                }
                 ImGuiAPI.EndMenuBar();
             }
         }

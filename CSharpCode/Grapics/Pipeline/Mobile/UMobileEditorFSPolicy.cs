@@ -43,6 +43,26 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             UpdatePermutation(mMacroValues);
         }
+        public void SetDisableAO(bool value)
+        {
+            mMacroValues[0] = value ? "1" : "0";
+            UpdatePermutation(mMacroValues);
+        }
+        public void SetDisableSunShaft(bool value)
+        {
+            mMacroValues[1] = value ? "1" : "0";
+            UpdatePermutation(mMacroValues);
+        }
+        public void SetDisableBloom(bool value)
+        {
+            mMacroValues[2] = value ? "1" : "0";
+            UpdatePermutation(mMacroValues);
+        }
+        public void SetDisableHDR(bool value)
+        {
+            mMacroValues[3] = value ? "1" : "0";
+            UpdatePermutation(mMacroValues);
+        }
         public unsafe override void OnBuildDrawCall(RHI.CDrawCall drawcall)
         {
         }
@@ -94,7 +114,19 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             return EditorFinalNode.GBuffers.GBufferSRV[0];
         }
-
+        public override bool DisableAO
+        {
+            get => mDisableAO;
+            set
+            {
+                mDisableAO = value;
+                var finalShading = EditorFinalNode.ScreenDrawPolicy.mBasePassShading as UEditorFinalShading;
+                if (finalShading != null)
+                {
+                    finalShading.SetDisableAO(value);
+                }
+            }
+        }
         #region GetHitproxy
         public IProxiable GetHitproxy(UInt32 MouseX, UInt32 MouseY)
         {
@@ -202,8 +234,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickLogic(GamePlay.UWorld world)
         {
-            mShadowMapNode?.TickLogic(world, this, true);
-            
+            if (this.DisableShadow == false)
+                mShadowMapNode?.TickLogic(world, this, true);
+
             BasePassNode?.TickLogic(world, this, true);
 
             HitproxyNode?.TickLogic(world, this, true);
@@ -218,7 +251,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickRender()
         {
-            mShadowMapNode?.TickRender();
+            if (this.DisableShadow == false)
+                mShadowMapNode?.TickRender();
 
             BasePassNode?.TickRender(this);
 
@@ -234,7 +268,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickSync()
         {
-            mShadowMapNode?.TickSync();
+            if (this.DisableShadow == false)
+                mShadowMapNode?.TickSync();
 
             BasePassNode?.TickSync(this);
 
