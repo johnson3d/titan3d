@@ -116,6 +116,25 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return null;
         }
         #endregion        
+        public static UMaterialInstance CreateMaterialInstance(UMaterial mtl)
+        {
+            var result = new UMaterialInstance();
+            result.ParentMaterial = mtl;
+            result.AssetState = IO.EAssetState.LoadFinished;
+            
+            foreach (var i in mtl.UsedRSView)
+            {
+                result.UsedRSView.Add(i.Clone(result));
+            }
+
+            foreach (var i in mtl.UsedUniformVars)
+            {
+                result.UsedUniformVars.Add(i.Clone(result));
+            }
+
+            result.SerialId++;
+            return result;
+        }
         [Browsable(false)]
         public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
         public class TSaveData : IO.BaseSerializer
@@ -273,7 +292,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 {
                     ParentMaterialSerialId = ParentMaterial.SerialId;
                     mSerialId++;
-                    this.SaveAssetTo(this.AssetName);
+                    if (this.AssetName != null)
+                        this.SaveAssetTo(this.AssetName);
                 }
                 return mSerialId;
             }

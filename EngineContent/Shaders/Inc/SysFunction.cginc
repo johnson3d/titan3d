@@ -150,12 +150,12 @@ void Lerp( half v1, half v2, half s , out half ret )
 	ret = (half)lerp(v1, v2,s);
 }
 
-void Lerp2D( half2 v1, half2 v2, half s , out half2 ret )
+void Lerp2D( half2 v1, half2 v2, half2 s , out half2 ret )
 {
 	ret = (half2)lerp(v1, v2,s);
 }
 
-void Lerp3D( half3 v1, half3 v2, half s , out half3 ret )
+void Lerp3D( half3 v1, half3 v2, half3 s , out half3 ret )
 {
 	ret = (half3)lerp(v1, v2,s);
 }

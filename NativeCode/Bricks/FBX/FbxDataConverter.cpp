@@ -1,22 +1,22 @@
-#include "FbxDataConverter.h"
+#include "FBXDataConverter.h"
 #include "string/vfxstring.h"
 
 
-FbxDataConverter::FbxDataConverter()
+FBXDataConverter::FBXDataConverter()
 {
 }
 
 
-FbxDataConverter::~FbxDataConverter()
+FBXDataConverter::~FBXDataConverter()
 {
 }
 
-FbxAMatrix FbxDataConverter::JointPostConversionMatrix;
-FbxAMatrix FbxDataConverter::AxisConversionMatrix;
-FbxAMatrix FbxDataConverter::AxisConversionMatrixInv;
+FbxAMatrix FBXDataConverter::JointPostConversionMatrix;
+FbxAMatrix FBXDataConverter::AxisConversionMatrix;
+FbxAMatrix FBXDataConverter::AxisConversionMatrixInv;
 
 
-v3dxVector2 FbxDataConverter::ConvertUV(const FbxVector2& Vector)
+v3dxVector2 FBXDataConverter::ConvertUV(const FbxVector2& Vector)
 {
 	v3dxVector2 Out;
 	Out.x = static_cast<float>(Vector[0]);
@@ -24,7 +24,7 @@ v3dxVector2 FbxDataConverter::ConvertUV(const FbxVector2& Vector)
 	return Out;
 }
 
-v3dxVector3 FbxDataConverter::ConvertPos(const FbxVector4& Vector)
+v3dxVector3 FBXDataConverter::ConvertPos(const FbxVector4& Vector)
 {
 	v3dxVector3 Out;
 	//Out[0] = (float)Vector[0];
@@ -37,7 +37,7 @@ v3dxVector3 FbxDataConverter::ConvertPos(const FbxVector4& Vector)
 	return Out;
 }
 
-v3dxVector3 FbxDataConverter::ConvertPos(const v3dxVector3& Vector)
+v3dxVector3 FBXDataConverter::ConvertPos(const v3dxVector3& Vector)
 {
 	v3dxVector3 Out;
 	Out[0] = (float)Vector[0];
@@ -46,7 +46,7 @@ v3dxVector3 FbxDataConverter::ConvertPos(const v3dxVector3& Vector)
 	return Out;
 }
 
-v3dxVector3 FbxDataConverter::ConvertDir(const FbxVector4& Vector)
+v3dxVector3 FBXDataConverter::ConvertDir(const FbxVector4& Vector)
 {
 	v3dxVector3 Out;
 	//Out[0] = (float)Vector[0];
@@ -59,7 +59,7 @@ v3dxVector3 FbxDataConverter::ConvertDir(const FbxVector4& Vector)
 }
 
 
-v3dxVector3 FbxDataConverter::ConvertDir(const v3dxVector3& Vector)
+v3dxVector3 FBXDataConverter::ConvertDir(const v3dxVector3& Vector)
 {
 	v3dxVector3 Out;
 	Out[0] = (float)Vector[0];
@@ -68,7 +68,7 @@ v3dxVector3 FbxDataConverter::ConvertDir(const v3dxVector3& Vector)
 	return Out;
 }
 
-v3dxVector3 FbxDataConverter::ConvertEuler(const FbxDouble3& Euler)
+v3dxVector3 FBXDataConverter::ConvertEuler(const FbxDouble3& Euler)
 {
 	//it's wrong
 	/*v3dxVector3 Out;
@@ -80,7 +80,7 @@ v3dxVector3 FbxDataConverter::ConvertEuler(const FbxDouble3& Euler)
 }
 
 
-v3dxVector3 FbxDataConverter::ConvertScale(const FbxDouble3& Vector)
+v3dxVector3 FBXDataConverter::ConvertScale(const FbxDouble3& Vector)
 {
 	v3dxVector3 Out;
 	Out[0] = (float)Vector[0];
@@ -90,7 +90,7 @@ v3dxVector3 FbxDataConverter::ConvertScale(const FbxDouble3& Vector)
 }
 
 
-v3dxVector3 FbxDataConverter::ConvertScale(const FbxVector4& Vector)
+v3dxVector3 FBXDataConverter::ConvertScale(const FbxVector4& Vector)
 {
 	v3dxVector3 Out;
 	Out[0] = (float)Vector[0];
@@ -100,7 +100,7 @@ v3dxVector3 FbxDataConverter::ConvertScale(const FbxVector4& Vector)
 }
 
 
-v3dxVector3 FbxDataConverter::ConvertScale(const v3dxVector3& Vector)
+v3dxVector3 FBXDataConverter::ConvertScale(const v3dxVector3& Vector)
 {
 	v3dxVector3 Out;
 	Out[0] = (float)Vector[0];
@@ -134,7 +134,7 @@ v3dxVector3 FbxDataConverter::ConvertScale(const v3dxVector3& Vector)
 //-------------------------------------------------------------------------
 //
 //-------------------------------------------------------------------------
-v3dxQuaternion FbxDataConverter::ConvertQuat(const FbxQuaternion& Quaternion)
+v3dxQuaternion FBXDataConverter::ConvertQuat(const FbxQuaternion& Quaternion)
 {
 	v3dxQuaternion quat;
 	quat.x = -(float)Quaternion[0];
@@ -148,7 +148,7 @@ v3dxQuaternion FbxDataConverter::ConvertQuat(const FbxQuaternion& Quaternion)
 //-------------------------------------------------------------------------
 //
 //-------------------------------------------------------------------------
-float FbxDataConverter::ConvertDist(const FbxDouble& Distance)
+float FBXDataConverter::ConvertDist(const FbxDouble& Distance)
 {
 	float Out;
 	Out = (float)Distance;
@@ -170,7 +170,7 @@ float FbxDataConverter::ConvertDist(const FbxDouble& Distance)
 //	return Out;
 //}
 
-v3dxMatrix4 FbxDataConverter::ConvertMatrix(const FbxAMatrix& Matrix)
+v3dxMatrix4 FBXDataConverter::ConvertMatrix(const FbxAMatrix& Matrix)
 {
 	v3dxQuaternion flipRot = ConvertQuat(Matrix.GetQ());
 	v3dxVector3 rot;
@@ -182,7 +182,7 @@ v3dxMatrix4 FbxDataConverter::ConvertMatrix(const FbxAMatrix& Matrix)
 	return result;
 }
 
-v3dxColor4 FbxDataConverter::ConvertColor(const FbxDouble3& Color)
+v3dxColor4 FBXDataConverter::ConvertColor(const FbxDouble3& Color)
 {
 	//Fbx is in linear color space
 	v3dxColor4 SRGBColor = v3dxColor4((float)Color[0], (float)Color[1], (float)Color[2]);
@@ -190,13 +190,13 @@ v3dxColor4 FbxDataConverter::ConvertColor(const FbxDouble3& Color)
 }
 
 
-v3dxColor4 FbxDataConverter::ConvertColor(const FbxColor& Color)
+v3dxColor4 FBXDataConverter::ConvertColor(const FbxColor& Color)
 {
 	v3dxColor4 SRGBColor = v3dxColor4((float)Color.mRed, (float)Color.mGreen, (float)Color.mBlue, (float)Color.mAlpha);
 	return SRGBColor;
 }
 
-FbxVector4 FbxDataConverter::ConvertToFbxPos(const v3dxVector3& Vector)
+FbxVector4 FBXDataConverter::ConvertToFbxPos(const v3dxVector3& Vector)
 {
 	FbxVector4 Out;
 	Out[0] = Vector[0];
@@ -206,7 +206,7 @@ FbxVector4 FbxDataConverter::ConvertToFbxPos(const v3dxVector3& Vector)
 	return Out;
 }
 
-FbxVector4 FbxDataConverter::ConvertToFbxRot(const v3dxVector3& Vector)
+FbxVector4 FBXDataConverter::ConvertToFbxRot(const v3dxVector3& Vector)
 {
 	FbxVector4 Out;
 	Out[0] = Vector[0];
@@ -216,7 +216,7 @@ FbxVector4 FbxDataConverter::ConvertToFbxRot(const v3dxVector3& Vector)
 	return Out;
 }
 
-FbxVector4 FbxDataConverter::ConvertToFbxScale(const v3dxVector3& Vector)
+FbxVector4 FBXDataConverter::ConvertToFbxScale(const v3dxVector3& Vector)
 {
 	FbxVector4 Out;
 	Out[0] = Vector[0];
@@ -226,7 +226,7 @@ FbxVector4 FbxDataConverter::ConvertToFbxScale(const v3dxVector3& Vector)
 	return Out;
 }
 
-FbxDouble3 FbxDataConverter::ConvertToFbxColor(const v3dxColor4& Color)
+FbxDouble3 FBXDataConverter::ConvertToFbxColor(const v3dxColor4& Color)
 {
 	//Fbx is in linear color space
 	v3dxColor4 FbxLinearColor(Color);
@@ -238,7 +238,7 @@ FbxDouble3 FbxDataConverter::ConvertToFbxColor(const v3dxColor4& Color)
 	return Out;
 }
 
-FbxString FbxDataConverter::ConvertToFbxString(const std::string& stdString)
+FbxString FBXDataConverter::ConvertToFbxString(const std::string& stdString)
 {
 	FbxString retStr = "";
 	char * newStr = NULL;
@@ -247,7 +247,7 @@ FbxString FbxDataConverter::ConvertToFbxString(const std::string& stdString)
 	return retStr;
 }
 
-FbxString FbxDataConverter::ConvertToFbxString(const char* string)
+FbxString FBXDataConverter::ConvertToFbxString(const char* string)
 {
 	FbxString retStr = "";
 	char * newStr = NULL;
@@ -256,13 +256,13 @@ FbxString FbxDataConverter::ConvertToFbxString(const char* string)
 	return retStr;
 }
 
-std::string FbxDataConverter::ConvertToStdString(const FbxString& fbxString)
+std::string FBXDataConverter::ConvertToStdString(const FbxString& fbxString)
 {
 	std::string retStr(VStringA_Utf82Gbk(fbxString.Buffer()).c_str());
 	return retStr;
 }
 
-std::string FbxDataConverter::ConvertToStdString(const char* string)
+std::string FBXDataConverter::ConvertToStdString(const char* string)
 {
 	std::string retStr (VStringA_Utf82Gbk(string).c_str());
 	return retStr;

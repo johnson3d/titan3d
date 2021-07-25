@@ -207,6 +207,9 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\SSM.cginc">
       <Filter>ShadingEnv\Sys</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileTranslucent.cginc">
+      <Filter>ShadingEnv\Mobile</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

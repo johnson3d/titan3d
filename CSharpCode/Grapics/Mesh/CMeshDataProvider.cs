@@ -361,7 +361,7 @@ namespace EngineNS.Graphics.Mesh
         {
             return start + factor * (end - start);
         }
-        public static CMeshDataProvider MakePlane(RHI.CRenderContext rc, Vector2 uvMin, Vector2 uvMax, UInt32 tileCount = 10)
+        public static CMeshDataProvider MakeGridPlane(RHI.CRenderContext rc, Vector2 uvMin, Vector2 uvMax, UInt32 tileCount = 10)
         {//reference:DrawGridline
             CMeshDataProvider meshBuilder = new Graphics.Mesh.CMeshDataProvider();
             var builder = meshBuilder.mCoreObject;
@@ -405,19 +405,23 @@ namespace EngineNS.Graphics.Mesh
                         // Calculate verts for a face pointing down Z
                         var pos = new Vector3(x0, 0, z0);
                         var nor = new Vector3(0, 1, 0);
-                        var uv = new Vector2(U0, V0);
+                        //var uv = new Vector2(U0, V0);
+                        var uv = new Vector2(x0, z0);
                         builder.AddVertex(in pos, in nor, in uv, 0xFFFFFFFF);
                         pos = new Vector3(x0, 0, z1);
                         nor = new Vector3(0, 1, 0);
-                        uv = new Vector2(U0, V1);
+                        //uv = new Vector2(U0, V1);
+                        uv = new Vector2(x0, z1);
                         builder.AddVertex(in pos, in nor, in uv, 0xFFFFFFFF);
                         pos = new Vector3(x1, 0, z1);
                         nor = new Vector3(0, 1, 0);
-                        uv = new Vector2(U1, V1);
+                        //uv = new Vector2(U1, V1);
+                        uv = new Vector2(x1, z1);
                         builder.AddVertex(in pos, in nor, in uv, 0xFFFFFFFF);
                         pos = new Vector3(x1, 0, z0);
                         nor = new Vector3(0, 1, 0);
-                        uv = new Vector2(U1, V0);
+                        //uv = new Vector2(U1, V0);
+                        uv = new Vector2(x1, z0);
                         builder.AddVertex(in pos, in nor, in uv, 0xFFFFFFFF);
 
                         UInt32 Index = (UInt32)((x + y * tileCount) * 4);

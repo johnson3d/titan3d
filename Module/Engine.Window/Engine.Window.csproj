@@ -75,6 +75,7 @@
   <Import Project="..\..\CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\WorldSimulator\WorldSimulator.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\TcpServer\TcpServer.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\SourceControl\SourceControl.projitems" Label="Shared" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9.0" />

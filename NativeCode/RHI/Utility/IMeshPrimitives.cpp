@@ -357,21 +357,27 @@ vBOOL IMeshPrimitives::LoadXnd(IRenderContext* rc, const char* name, XndHolder* 
 	if(node)
 	{
 		XndAttribute* boneNumAttr = node->TryGetAttribute("BoneNum");
-		boneNumAttr->BeginRead();
-		int boneNum = 0;
-		boneNumAttr->Read(boneNum);
-		boneNumAttr->EndRead();
-		XndAttribute* descAttr = node->GetOrAddAttribute("BoneDescs", 0, 0);
-		descAttr->BeginRead();
-		mPartialSkeleton = new IPartialSkeleton();
-		for (int i = 0; i < mPartialSkeleton->GetBonesNum(); ++i)
+		if (boneNumAttr)
 		{
-			IBoneDesc boneDesc;
-			descAttr->Read(boneDesc);
-			mPartialSkeleton->AddBone(new IBone(boneDesc));
+			boneNumAttr->BeginRead();
+			int boneNum = 0;
+			boneNumAttr->Read(boneNum);
+			boneNumAttr->EndRead();
+			XndAttribute* descAttr = node->TryGetAttribute("BoneDescs");
+			if (descAttr)
+			{
+				descAttr->BeginRead();
+				mPartialSkeleton = new IPartialSkeleton();
+				for (int i = 0; i < mPartialSkeleton->GetBonesNum(); ++i)
+				{
+					IBoneDesc boneDesc;
+					descAttr->Read(boneDesc);
+					mPartialSkeleton->AddBone(new IBone(boneDesc));
+				}
+				mPartialSkeleton->RefreshHierarchy();
+				descAttr->EndRead();
+			}
 		}
-		mPartialSkeleton->RefreshHierarchy();
-		descAttr->EndRead();
 	}
 
 

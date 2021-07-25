@@ -159,10 +159,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Windows", "NativeCode\Platf
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FreeType", "3rd\native\FreeType\FreeType.vcxitems", "{B6C92324-224E-420B-8D99-343A9CDE08AE}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SourceControl", "CSharpCode\Bricks\SourceControl\SourceControl.shproj", "{0A8D5418-F687-45BA-B720-EF5F18EF7A7F}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		EngineConfig.vcxitems*{009d7483-131d-43de-bcbe-56f21fecadcf}*SharedItemsImports = 9
 		CSharpCode\Grapics\Pipeline\Pipeline.projitems*{09a701b1-eb1f-41c3-bd63-1b3823894da2}*SharedItemsImports = 13
+		CSharpCode\Bricks\SourceControl\SourceControl.projitems*{0a8d5418-f687-45ba-b720-ef5f18ef7a7f}*SharedItemsImports = 13
 		CSharpCode\Editor\Editor.projitems*{0b1a3442-4420-414f-aa79-15575e9f8885}*SharedItemsImports = 13
 		CSharpCode\Bricks\CodeBuilder\CodeBuilder.projitems*{0b90fed7-a3e5-4169-9532-6aa4e9f89001}*SharedItemsImports = 13
 		3rd\csharp\StbImageSharp\StbImageSharp.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -184,6 +187,7 @@ Global
 		CSharpCode\Bricks\Network\Network.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Plugins\Plugins.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Procedure\Procedure.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\SourceControl\SourceControl.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\TcpServer\TcpServer.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\WorldSimulator\WorldSimulator.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Editor\Editor.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -588,6 +592,7 @@ Global
 		{2D94AEAF-8C89-4373-9987-79259902BDBA} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{A8CA4BE8-8F39-4696-AB3B-265F4294DE5B} = {5DF48BD8-2DD5-4225-B211-929683D01CB7}
 		{B6C92324-224E-420B-8D99-343A9CDE08AE} = {892AFF4D-69EA-4061-8F59-320A21A0814A}
+		{0A8D5418-F687-45BA-B720-EF5F18EF7A7F} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}

@@ -27,6 +27,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Albedo.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();            
             this.AddPinIn(Albedo);
 
+            Emissive.Name = "Emissive ";
+            Emissive.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinIn(Emissive);
+
             Normal.Name = "Normal ";
             Normal.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(Normal);
@@ -49,7 +53,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public EGui.Controls.NodeGraph.PinIn Albedo { get; set; } = new EGui.Controls.NodeGraph.PinIn();
+
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public EGui.Controls.NodeGraph.PinIn Emissive { get; set; } = new EGui.Controls.NodeGraph.PinIn();[EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public EGui.Controls.NodeGraph.PinIn Normal { get; set; } = new EGui.Controls.NodeGraph.PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public EGui.Controls.NodeGraph.PinIn Metallic { get; set; } = new EGui.Controls.NodeGraph.PinIn();
@@ -68,7 +74,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var type = nodeExpr.GetOutPinType(oPin);
 
             if (iPin == Albedo ||
-                iPin == Normal)
+                iPin == Emissive ||
+                iPin == Normal )
             {
                 if (type != typeof(Vector3))
                     return false;
@@ -103,6 +110,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 var assignOp = new AssignOp();
                 var setExpr = new HardCodeOp();
                 setExpr.Code = "mtl.mAlbedo";
+                assignOp.Left = setExpr;
+                assignOp.Right = expr;
+                Function.Body.PushExpr(assignOp);
+            }
+            if (Emissive.HasLinker())
+            {
+                var linker = funGraph.FindInLinkerSingle(Emissive);
+                var exprNode = linker.OutNode as IBaseNode;
+                var expr = exprNode.GetExpr(funGraph, cGen, linker.Out, false) as OpExpress;
+                var assignOp = new AssignOp();
+                var setExpr = new HardCodeOp();
+                setExpr.Code = "mtl.mEmissive";
                 assignOp.Left = setExpr;
                 assignOp.Right = expr;
                 Function.Body.PushExpr(assignOp);
@@ -151,6 +170,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 var assignOp = new AssignOp();
                 var setExpr = new HardCodeOp();
                 setExpr.Code = "mtl.mAlpha";
+                assignOp.Left = setExpr;
+                assignOp.Right = expr;
+                Function.Body.PushExpr(assignOp);
+            }
+            if (AlphaTest.HasLinker())
+            {
+                var linker = funGraph.FindInLinkerSingle(AlphaTest);
+                var exprNode = linker.OutNode as IBaseNode;
+                var expr = exprNode.GetExpr(funGraph, cGen, linker.Out, false) as OpExpress;
+                var assignOp = new AssignOp();
+                var setExpr = new HardCodeOp();
+                setExpr.Code = "mtl.mAlphaTest";
                 assignOp.Left = setExpr;
                 assignOp.Right = expr;
                 Function.Body.PushExpr(assignOp);

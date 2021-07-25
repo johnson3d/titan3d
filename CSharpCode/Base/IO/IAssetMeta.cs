@@ -193,6 +193,10 @@ namespace EngineNS.IO
             var address = RName.GetAddress(type, name);
             IO.FileManager.DeleteFile(address);
             IO.FileManager.DeleteFile(address + ".ameta");
+            if (IO.FileManager.FileExists(address + ".snap"))
+            {
+                IO.FileManager.DeleteFile(address + ".snap");
+            }
         }
         public virtual void ResetSnapshot()
         {
@@ -339,6 +343,11 @@ namespace EngineNS.IO
         }
         public Dictionary<Guid, IAssetMeta> Assets { get; } = new Dictionary<Guid, IAssetMeta>();
         public Dictionary<RName, IAssetMeta> RNameAssets { get; } = new Dictionary<RName, IAssetMeta>();
+        public void RemoveAMeta(IAssetMeta ameta)
+        {
+            Assets.Remove(ameta.AssetId);
+            RNameAssets.Remove(ameta.GetAssetName());
+        }
         public IAssetMeta GetAssetMeta(Guid id)
         {
             IAssetMeta result;
@@ -470,7 +479,24 @@ namespace EngineNS.IO
                 }
             }
         }
-
+        public async System.Threading.Tasks.Task GetAssetHolder(IAssetMeta ameta, Dictionary<RName, IAsset> holders)
+        {
+            foreach (var i in Assets)
+            {
+                if (i.Value.CanRefAssetType(ameta) == false)
+                    continue;
+                var name = i.Value.GetAssetName();
+                if (holders.ContainsKey(name))
+                {
+                    continue;
+                }
+                if (i.Value.RefAssetRNames.Contains(ameta.GetAssetName()))
+                {
+                    var ast = await i.Value.LoadAsset();
+                    holders.Add(name, ast);
+                }
+            }
+        }
         public long LastestCheckTime = 0;
         public void EditorCheckShowIconTimeout()
         {

@@ -49,12 +49,11 @@ namespace EngineNS.Editor.ShaderCompiler
             RName rn = null;
             if (file.EndsWith("/Material"))
             {
-                rn = Material;
+                return Material.SourceCode.mCoreObject.CppPointer;
             }
             else if (file.EndsWith("/MaterialVar"))
             {
-                rn = Material;
-                isVar = true;
+                return Material.DefineCode.mCoreObject.CppPointer;
             }
             else if (file.EndsWith("/MdfQueue"))
             {
@@ -91,10 +90,10 @@ namespace EngineNS.Editor.ShaderCompiler
             }
             return (MemStreamWriter*)0;
         }
-        private RName Material;
+        private Graphics.Pipeline.Shader.UMaterial Material;
         private Rtti.UTypeDesc MdfQueueType;
         public RHI.CShaderDesc CompileShader(string shader, string entry, EShaderType type, string sm,
-            RName mtl, Type mdfType,
+            Graphics.Pipeline.Shader.UMaterial mtl, Type mdfType,
             RHI.CShaderDefinitions defines, bool bDebugShader)
         {
             RHI.CShaderDesc desc = new RHI.CShaderDesc(type);

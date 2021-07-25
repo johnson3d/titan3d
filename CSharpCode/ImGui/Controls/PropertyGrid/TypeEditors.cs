@@ -42,7 +42,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonHovered, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGHoverColor);
                 if (mImageButton.OnDraw(ref drawList, ref Support.UAnyPointer.Default))
                 {
-                    newValue = System.Activator.CreateInstance(info.Type.SystemType);
+                    newValue = Rtti.UTypeDescManager.CreateInstance(info.Type.SystemType);
                     valueChanged = true;
                     //prop.SetValue(ref target, v);
                 }
@@ -783,7 +783,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             typeSlt.OnDraw(150, 6);
                             if (typeSlt.SelectedType != null)
                             {
-                                var newItem = System.Activator.CreateInstance(listElementType);
+                                var newItem = Rtti.UTypeDescManager.CreateInstance(listElementType);
                                 dict.Insert(dict.Count, newItem);
                             }
                         }

@@ -77,9 +77,6 @@ void ID11CommandList::EndCommand()
 
 void ID11CommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer, const char* debugName)
 {
-	if (pRenderPassDesc == nullptr)
-		return;
-
 	if (mProfiler != nullptr && mProfiler->mNoPixelWrite)
 	{
 		pFrameBuffer = mProfiler->mOnePixelFB;
@@ -141,7 +138,10 @@ void ID11CommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuf
 		}
 	}
 
-	
+	if (pRenderPassDesc == nullptr)
+	{
+		return;
+	}
 
 	v3dxColor4 RTVClearColorArray[MAX_MRT_NUM] = {
 		pRenderPassDesc->mFBClearColorRT0,

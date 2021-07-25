@@ -37,7 +37,7 @@ namespace EngineNS.Animation.Skeleton
 
         public CBone FindBone(VNameString name)
         {
-            return FindBoneByNameHash(UniHash.APHash(name.ToString()));
+            return FindBoneByNameHash(UniHash.APHash(name.GetString()));
         }
         public CBone FindBoneByNameHash(uint boneNameHashId)
         {

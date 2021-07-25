@@ -9,7 +9,7 @@ namespace EngineNS.RHI
         public Graphics.Pipeline.Shader.UEffect Effect { get; private set; }
         public object TagObject { get; set; }
         private uint PermutationId;
-        internal uint MaterialSerialId = 0;
+        //internal uint MaterialSerialId = 0;
         private bool IsUpdating = false;
         public void CheckPermutation(Graphics.Pipeline.Shader.UMaterial material, Graphics.Pipeline.Shader.UMdfQueue mdf)
         {
@@ -53,9 +53,10 @@ namespace EngineNS.RHI
         }
         public unsafe bool CheckMaterialParameters(Graphics.Pipeline.Shader.UMaterial Material)
         {
-            if (MaterialSerialId == Material.SerialId)
-                return false;
-            MaterialSerialId = Material.SerialId;
+            //if (MaterialSerialId == Material.SerialId)
+            //    return false;
+            //MaterialSerialId = Material.SerialId;
+            // 这里不应该被调用了，全部再UAtom上记录了材质版本变化
             //强制刷一下GpuProgram，避免出现Material刷新后，后续MaterialInstance的CheckPermutation不能正确绑定
             var pipeline = new IRenderPipeline(mCoreObject.GetPipeline());
             if (pipeline.NativePointer == IntPtr.Zero)

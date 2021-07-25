@@ -35,6 +35,24 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         {
             ret = Math.Min(v1, v2);
         }
+        [Rtti.Meta]
+        public static void Lerp(float v1, float v2, float s, out float ret)
+        {
+            ret = v1 + s * (v2 - v1);
+        }
+        [Rtti.Meta]
+        public static void Lerp2D(Vector2 v1, Vector2 v2, Vector2 s, out Vector2 ret)
+        {
+            ret.X = v1.X + s.X * (v2.X - v1.X);
+            ret.Y = v1.Y + s.Y * (v2.Y - v1.Y);
+        }
+        [Rtti.Meta]
+        public static void Lerp3D(Vector3 v1, Vector3 v2, Vector3 s, out Vector3 ret)
+        {
+            ret.X = v1.X + s.X * (v2.X - v1.X);
+            ret.Y = v1.Y + s.Y * (v2.Y - v1.Y);
+            ret.Z = v1.Z + s.Z * (v2.Z - v1.Z);
+        }
     }
     public class UserCallNodeAttribute : Attribute
     {

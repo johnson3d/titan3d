@@ -72,6 +72,8 @@ namespace EngineNS.IO
         }
         public void SaveXnd(string file)
         {
+            var path = IO.FileManager.GetParentPathName(file);
+            IO.FileManager.SureDirectory(path);
             mCoreObject.SaveXnd(file);
         }
         CXndNode mRootNode;

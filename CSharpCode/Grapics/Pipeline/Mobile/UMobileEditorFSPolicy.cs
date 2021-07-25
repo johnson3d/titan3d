@@ -176,6 +176,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     {
                         switch(mesh.Atoms[atom].Material.RenderLayer)
                         {
+                            case ERenderLayer.RL_Opaque:
+                                return BasePassNode.mBasePassShading;
+                            case ERenderLayer.RL_Translucent:
+                                return BasePassNode.mTranslucentShading;
                             default:
                                 break;
                         }

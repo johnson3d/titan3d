@@ -377,6 +377,9 @@ namespace EngineNS.EGui.Controls
                 LeftSize.Y = cltMax.Y - cltMin.Y;
 
                 DrawDirectories(RName.GetRName("", RName.ERNameType.Game), LeftSize);
+
+                DrawDirectories(RName.GetRName("", RName.ERNameType.Engine), LeftSize);
+
                 ImGuiAPI.NextColumn();
 
                 RightSize.X = ImGuiAPI.GetColumnWidth(1);

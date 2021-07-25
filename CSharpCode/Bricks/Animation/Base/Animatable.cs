@@ -18,6 +18,7 @@ namespace EngineNS.Animation.Animatable
 
     public interface IPropertySetter
     {
+        public AnimatablePropertyDesc Desc { get; set; }
         public void SetAnimatableObject(IAnimatable obj);
         public void SetValue(Curve.ICurve curve, float time);
     }
@@ -110,6 +111,8 @@ namespace EngineNS
         {
             public TestObject AnimatableObject { get; set; }
             public Vector3 AnimatableObjectProperty { get; set; }
+            public Animatable.AnimatablePropertyDesc Desc { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
             public void SetAnimatableObject(Animatable.IAnimatable obj)
             {
                 AnimatableObject = (TestObject)obj;

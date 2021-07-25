@@ -38,7 +38,7 @@ namespace EngineNS.UTest
                     if (attrs.Length == 0)
                         continue;
                     var ut = attrs[0] as UTestAttribute;
-                    var obj = System.Activator.CreateInstance(j);
+                    var obj = Rtti.UTypeDescManager.CreateInstance(j);
                     var mtd = j.GetMethod("UnitTestEntrance");
                     if (mtd != null)
                     {
