@@ -693,7 +693,6 @@ namespace EngineNS.GamePlay
                     Quaternion.Identity);
                 mPlaneNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
                 mPlaneNode.NodeData.Name = "AxisDebugPlane";
-                mPlaneNode.IsScaleChildren = false;
                 mPlaneNode.IsCastShadow = false;
                 mPlaneNode.Parent = mHostWorld.Root;
             }
@@ -715,7 +714,6 @@ namespace EngineNS.GamePlay
                     Quaternion.Identity);
                 mPointNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
                 mPointNode.NodeData.Name = "AxisDebugPoint";
-                mPointNode.IsScaleChildren = false;
                 mPointNode.IsCastShadow = false;
                 mPointNode.Parent = mHostWorld.Root;
             }
@@ -835,7 +833,7 @@ namespace EngineNS.GamePlay
         bool mAltKeyIsDown = false;
         public void OnEvent(Graphics.Pipeline.UViewportSlate viewport, in SDL2.SDL.SDL_Event e)
         {
-            //if(!mRootNode.HasStyle(Scene.UNode.ENodeStyles.Invisible))
+            //if (!mRootNode.HasStyle(Scene.UNode.ENodeStyles.Invisible))
             //{
             //    var camPos = mCameraController.Camera.mCoreObject.GetPosition();
             //    mRootNode.Placement.Scale = (mRootNode.Placement.Position - camPos).Length() * 0.1f * Vector3.UnitXYZ;
