@@ -72,6 +72,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)csharp\CsDictionary.cpp">
       <Filter>csharp</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)kmeans\kmeans.cpp">
+      <Filter>kmeans</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)BaseHead.h" />
@@ -182,6 +185,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)csharp\CsDictionary.h">
       <Filter>csharp</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)kmeans\kmeans.h">
+      <Filter>kmeans</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="io">
@@ -216,6 +222,9 @@
     </Filter>
     <Filter Include="perlin">
       <UniqueIdentifier>{ef094c94-0b2f-4493-980d-1c758ea26bed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="kmeans">
+      <UniqueIdentifier>{11e9b859-a849-4906-9e67-aaecf9a02d9a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

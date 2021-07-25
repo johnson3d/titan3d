@@ -10,6 +10,24 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         { 
             return BasePassNode; 
         }
+        public override bool DisableShadow
+        {
+            get => mDisableShadow;
+            set
+            {
+                mDisableShadow = value;
+                BasePassNode.mBasePassShading.SetDisableShadow(value);
+            }
+        }
+        public override bool DisableAO
+        {
+            get => mDisableAO;
+            set
+            {
+                mDisableAO = value;
+                BasePassNode.mBasePassShading.SetDisableAO(value);
+            }
+        }
         public UMobileBasePassNode BasePassNode = new UMobileBasePassNode();
         public Shadow.UShadowMapNode mShadowMapNode = new Shadow.UShadowMapNode();
         [RName.PGRName(FilterExts = RHI.CShaderResourceView.AssetExt)]
