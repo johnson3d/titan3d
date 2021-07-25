@@ -240,8 +240,11 @@ namespace EngineNS.GamePlay
                 AbsTransformWithScale.M31 = value.M31 * Scale.Z;
                 AbsTransformWithScale.M32 = value.M32 * Scale.Z;
                 AbsTransformWithScale.M33 = value.M33 * Scale.Z;
+
+                mAbsTransform = InheritScale ? AbsTransformWithScale : value;
             }
         }
+        public bool InheritScale = false;
         private void UpdateData()
         {
             mTransform = Matrix.Transformation(mTransformData.mQuat, mTransformData.mPosition);

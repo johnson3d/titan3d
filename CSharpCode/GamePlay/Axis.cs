@@ -615,6 +615,7 @@ namespace EngineNS.GamePlay
 
         GamePlay.UWorld mHostWorld;
         UAxisNode mRootNode;
+        float mRootNodeScaleValue = 1.0f;
         Scene.UMeshNode mRotArrowAssetNode;
         bool mInitialized = false;
         Graphics.Pipeline.ICameraController mCameraController;
@@ -643,6 +644,7 @@ namespace EngineNS.GamePlay
             mRootNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
             mRootNode.IsCastShadow = false;
             mRootNode.Parent = world.Root;
+            ((GamePlay.UPlacement)mRootNode.Placement).InheritScale = true;
 
             var rotArrowAssetMat = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
             var rotArrowAssetMesh = new Graphics.Mesh.UMesh();
@@ -833,11 +835,12 @@ namespace EngineNS.GamePlay
         bool mAltKeyIsDown = false;
         public void OnEvent(Graphics.Pipeline.UViewportSlate viewport, in SDL2.SDL.SDL_Event e)
         {
-            //if (!mRootNode.HasStyle(Scene.UNode.ENodeStyles.Invisible))
-            //{
-            //    var camPos = mCameraController.Camera.mCoreObject.GetPosition();
-            //    mRootNode.Placement.Scale = (mRootNode.Placement.Position - camPos).Length() * 0.1f * Vector3.UnitXYZ;
-            //}
+            if (!mRootNode.HasStyle(Scene.UNode.ENodeStyles.Invisible))
+            {
+                var camPos = mCameraController.Camera.mCoreObject.GetPosition();
+                mRootNodeScaleValue = (mRootNode.Placement.Position - camPos).Length() * 0.1f;
+                mRootNode.Placement.Scale = mRootNodeScaleValue * Vector3.UnitXYZ;
+            }
             switch (e.type)
             {
                 case SDL2.SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
@@ -1379,7 +1382,7 @@ namespace EngineNS.GamePlay
                 screenDeltaPos.Z = 0;
                 var s2vDelta = camRight.Length() / (screenDeltaPos - screenAxisLoc).Length();
                 var lenInScreen = Vector3.Dot((new Vector3(newMouseLoc.X, newMouseLoc.Y, 0) - mMouseStartScreenLocation), screenAxisDir);
-                var len = lenInScreen * s2vDelta;
+                var len = lenInScreen * s2vDelta / mRootNodeScaleValue;
 
                 #region Debug
                 //mPlaneNode.Placement.Scale = new Vector3(len, 1, 1);
@@ -1555,7 +1558,7 @@ namespace EngineNS.GamePlay
                 screenDeltaPos.Z = 0;
                 var s2vDelta = camRight.Length() / (screenDeltaPos - screenAxisLoc).Length();
                 var lenInScreen = Vector3.Dot((new Vector3(newMouseLoc.X, newMouseLoc.Y, 0) - mMouseStartScreenLocation), screenAxisDir);
-                var len = lenInScreen * s2vDelta;
+                var len = lenInScreen * s2vDelta / mRootNodeScaleValue;
 
                 if(mSelectedNodes != null)
                 {
