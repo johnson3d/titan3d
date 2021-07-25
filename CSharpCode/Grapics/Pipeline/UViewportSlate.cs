@@ -89,7 +89,7 @@ namespace EngineNS.Graphics.Pipeline
                     }
                 }
                 IsDrawing = true;
-                IsFocused = ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_None);
+                IsFocused = ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows);
                 var pos = ImGuiAPI.GetWindowPos();
                 ViewportPos = ImGuiAPI.GetWindowViewport()->Pos;
                 if (pos != WindowPos)
