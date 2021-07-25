@@ -204,6 +204,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IVertexBufferDesc.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IVertexShader.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IViewPort.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/KMeamsVector3.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/LayoutElement.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/MacroDefine.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/MemberDesc.cpp2cs.cs" />

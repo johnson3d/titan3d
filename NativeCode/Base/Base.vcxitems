@@ -41,6 +41,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)io\vfxfile_Android.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)io\vfxfile_IOS.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IUnknown.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)kmeans\kmeans.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)perlin\perlin.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)r2m\F2MManager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)r2m\file_2_memory.h" />
@@ -78,6 +79,7 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)IUnknown.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)kmeans\kmeans.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)perlin\perlin.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)r2m\F2MManager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)r2m\file_2_memory.cpp" />

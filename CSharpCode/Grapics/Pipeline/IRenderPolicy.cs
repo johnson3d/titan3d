@@ -18,7 +18,21 @@ namespace EngineNS.Graphics.Pipeline
         //public Common.URenderGraphNode TagObject;
         public object TagObject;
         public virtual Common.UBasePassNode GetBasePassNode() { return null; }
-        
+        protected bool mDisableShadow;
+        public virtual bool DisableShadow
+        {
+            get => mDisableShadow;
+            set => mDisableShadow = value;
+        }
+        protected bool mDisableAO;
+        public virtual bool DisableAO
+        {
+            get => mDisableAO;
+            set
+            {
+                mDisableAO = value;
+            }
+        }
         public Common.UPickedProxiableManager PickedProxiableManager { get; protected set; } = new Common.UPickedProxiableManager();
         public List<Mesh.UMesh> VisibleMeshes = new List<Mesh.UMesh>();
         

@@ -51,6 +51,9 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         private unsafe UInt32 GetHitProxyIDImpl(UInt32 MouseX, UInt32 MouseY)
         {
+            MouseX = (UInt32)((float)MouseX * ScaleFactor);
+            MouseY = (UInt32)((float)MouseY * ScaleFactor);
+
             if (mReadableHitproxyTexture == (ITexture2D*)0)
                 return 0;
 
@@ -107,6 +110,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public RenderPassDesc HitproxyPassDesc = new RenderPassDesc();
         private RHI.CFence mReadHitproxyFence;
         bool CanDrawHitproxy = true;
+        public float ScaleFactor { get; set; } = 0.25f;
         public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat fmt, EPixelFormat dsFmt, float x, float y, string debugName)
         {
             await Thread.AsyncDummyClass.DummyFunc();
@@ -151,7 +155,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             if (GHitproxyBuffers != null)
             {
-                GHitproxyBuffers.OnResize(x, y);
+                GHitproxyBuffers.OnResize(x * ScaleFactor, y * ScaleFactor);
             }
         }
         public override unsafe void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)

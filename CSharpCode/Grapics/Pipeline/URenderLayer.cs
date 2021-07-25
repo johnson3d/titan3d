@@ -46,12 +46,9 @@ namespace EngineNS.Graphics.Pipeline
     public enum ERenderLayer : sbyte
     {
         RL_Opaque,
-        RL_CustomOpaque,
         RL_Translucent,
-        RL_CustomTranslucent,
         //for editor to use;this layer should always be the last layer to send to renderer;
         RL_Gizmos,
-        RL_Shadow,
         RL_Sky,
 
         RL_Num,
@@ -81,12 +78,9 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void SetViewport(RHI.CViewPort vp)
         {
-            unsafe
+            for (ERenderLayer i = ERenderLayer.RL_Opaque; i < ERenderLayer.RL_Num; i++)
             {
-                for (ERenderLayer i = ERenderLayer.RL_Opaque; i < ERenderLayer.RL_Num; i++)
-                {
-                    PassBuffers[(int)i].DrawCmdList.mCoreObject.SetViewport(vp.mCoreObject);
-                }
+                PassBuffers[(int)i].DrawCmdList.mCoreObject.SetViewport(vp.mCoreObject);
             }
         }
         public unsafe void BuildRenderPass(ref RenderPassDesc passDesc, RHI.CFrameBuffers frameBuffers)
