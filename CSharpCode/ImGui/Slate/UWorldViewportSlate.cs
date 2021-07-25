@@ -152,7 +152,8 @@ namespace EngineNS.EGui.Slate
             }
             else
             {
-                return base.OnEvent(ref e);
+                if(e.type != SDL.SDL_EventType.SDL_MOUSEBUTTONUP || mAxis.CurrentAxisType == GamePlay.UAxis.enAxisType.Null)
+                    return base.OnEvent(ref e);
             }
             return true;
         }
@@ -236,6 +237,11 @@ namespace EngineNS.EGui.Slate
             base.OnHitproxySelected(proxy);
             var node = proxy as GamePlay.Scene.UNode;
             mAxis.SetSelectedNodes(node);
+        }
+
+        public override void OnDrawViewportUI(in Vector2 startDrawPos)
+        {
+            mAxis.OnDrawUI(startDrawPos);
         }
     }
 }

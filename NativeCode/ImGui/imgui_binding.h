@@ -1987,6 +1987,8 @@ public:
 		}
 		return ret;
 	}
+
+	static bool ToggleButton(const char* label, bool* v, const ImVec2* size_arg, ImGuiButtonFlags flags);
 };
 
 StructBegin(ImVec2, )

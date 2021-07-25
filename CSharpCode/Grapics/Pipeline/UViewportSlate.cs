@@ -49,6 +49,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public EVieportType VieportType { get; set; } = EVieportType.Window;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
+        public virtual void OnDrawViewportUI(in Vector2 startDrawPos) { }
         public virtual unsafe void OnDraw()
         {
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
@@ -104,7 +105,7 @@ namespace EngineNS.Graphics.Pipeline
                     sz.X++;
                     sz.Y++;
                 }
-                ImGuiAPI.InvisibleButton("ViewportClient", &sz, ImGuiButtonFlags_.ImGuiButtonFlags_None);
+                var curPos = ImGuiAPI.GetCursorScreenPos();
                 if (min != ClientMin || max != ClientMax)
                 {
                     mClientChanged = true;
@@ -130,6 +131,12 @@ namespace EngineNS.Graphics.Pipeline
                         max = max + pos;
                         drawlist.AddImage(showTexture.ToPointer(), in min, in max, in uv1, in uv2, 0xFFFFFFFF);
                     }
+                }
+
+                if(ImGuiAPI.BeginChild("ViewportClient", in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                {
+                    OnDrawViewportUI(in curPos);
+                    ImGuiAPI.EndChild();
                 }
             }
             else
@@ -173,12 +180,15 @@ namespace EngineNS.Graphics.Pipeline
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP)
             {
                 OnMouseUp(ref e);
-                var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.Mobile.UMobileEditorFSPolicy;
-                if (edtorPolicy != null)
+                if(e.button.button == SDL.SDL_BUTTON_LEFT)
                 {
-                    var pos = Window2Viewport(new Vector2((float)e.motion.x, (float)e.motion.y));
-                    var hitObj = edtorPolicy.GetHitproxy((uint)pos.X, (uint)pos.Y);
-                    OnHitproxySelected(hitObj);
+                    var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.Mobile.UMobileEditorFSPolicy;
+                    if (edtorPolicy != null)
+                    {
+                        var pos = Window2Viewport(new Vector2((float)e.motion.x, (float)e.motion.y));
+                        var hitObj = edtorPolicy.GetHitproxy((uint)pos.X, (uint)pos.Y);
+                        OnHitproxySelected(hitObj);
+                    }
                 }
             }
             else if(e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN)

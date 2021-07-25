@@ -439,5 +439,47 @@ void ImGuiAPI::TableNextRow_FirstColumn(const ImGuiTableRowData* rowData)
 	ImGui::TableSetColumnIndex(0);
 	table->CellPaddingY = cellPaddingYStore;
 }
+bool ImGuiAPI::ToggleButton(const char* label, bool* v, const ImVec2* size_arg, ImGuiButtonFlags flags)
+{
+	ImGuiWindow* window = ImGui::GetCurrentWindow();
+	if (window->SkipItems)
+		return false;
+
+	ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+	const ImGuiID id = window->GetID(label);
+	const ImVec2 label_size = ImGui::CalcTextSize(label, NULL, true);
+
+	ImVec2 pos = window->DC.CursorPos;
+	if ((flags & ImGuiButtonFlags_AlignTextBaseLine) && style.FramePadding.y < window->DC.CurrLineTextBaseOffset)
+		pos.y += window->DC.CurrLineTextBaseOffset - style.FramePadding.y;
+	ImVec2 size = ImGui::CalcItemSize(*size_arg, label_size.x + style.FramePadding.x * 2.0f, label_size.y + style.FramePadding.y * 2.0f);
+
+	const ImRect bb(pos, pos + size);
+	ImGui::ItemSize(size, style.FramePadding.y);
+	if (!ImGui::ItemAdd(bb, id))
+		return false;
+
+	if (g.CurrentItemFlags & ImGuiItemFlags_ButtonRepeat)
+		flags |= ImGuiButtonFlags_Repeat;
+	bool hovered, held;
+	bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, flags);
+	if (pressed)
+	{
+		*v = !(*v);
+		ImGui::MarkItemEdited(id);
+	}
+
+	const ImU32 col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : (*v)? ImGuiCol_ButtonActive : ImGuiCol_Button);
+	ImGui::RenderNavHighlight(bb, id);
+	ImGui::RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
+
+	if (g.LogEnabled)
+		ImGui::LogSetNextTextDecoration("[", "]");
+	ImGui::RenderTextClipped(bb.Min + style.FramePadding, bb.Max - style.FramePadding, label, NULL, &label_size, style.ButtonTextAlign, &bb);
+
+	IMGUI_TEST_ENGINE_ITEM_INFO(id, label, window->DC.LastItemStatusFlags);
+	return pressed;
+}
 NS_END
 

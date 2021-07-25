@@ -428,6 +428,67 @@ namespace EngineNS.Graphics.Mesh
             }
             return meshBuilder;
         }
+
+        public static unsafe CMeshDataProvider MakePlane(float width, float length)
+        {
+            var meshBuilder = new Graphics.Mesh.CMeshDataProvider();
+            var builder = meshBuilder.mCoreObject;
+            uint streams = (uint)((1 << (int)EVertexSteamType.VST_Position) |
+                (1 << (int)EVertexSteamType.VST_Normal) |
+                (1 << (int)EVertexSteamType.VST_Color) |
+                (1 << (int)EVertexSteamType.VST_UV));
+            builder.Init(streams, EIndexBufferType.IBT_Int16, 1);
+
+            var halfWidth = width * 0.5f;
+            var halfLength = length * 0.5f;
+            var aabb = new BoundingBox(-halfWidth, -0.0001f, -halfLength, halfWidth, 0.0001f, halfLength);
+            builder.SetAABB(ref aabb);
+
+            var dpDesc = new DrawPrimitiveDesc();
+            dpDesc.SetDefault();
+            dpDesc.NumPrimitives = 2;
+
+            var pPos = stackalloc Vector3[4];
+            // 创建Position
+            {
+                pPos[0].SetValue(-halfWidth, 0, -halfLength);
+                pPos[1].SetValue(-halfWidth, 0, halfLength);
+                pPos[2].SetValue(halfWidth, 0, halfLength);
+                pPos[3].SetValue(halfWidth, 0, -halfLength);
+            }
+            var vNor = stackalloc Vector3[4];
+            // 创建Normal
+            for(int i=0; i<4; i++)
+            {
+                vNor[i] = Vector3.Up;
+            }
+            var vUV = stackalloc Vector2[4];
+            // 创建UV
+            {
+                vUV[0] = new Vector2(0, 1);
+                vUV[1] = new Vector2(0, 0);
+                vUV[2] = new Vector2(1, 0);
+                vUV[3] = new Vector2(1, 1);
+            }
+            // 索引
+            UInt16[] pIndex = new UInt16[6];
+            pIndex[0] = 0;
+            pIndex[1] = 1;
+            pIndex[2] = 2;
+            pIndex[3] = 0;
+            pIndex[4] = 2;
+            pIndex[5] = 3;
+            for(int i=0; i<4; i++)
+            {
+                builder.AddVertex(&pPos[i], &vNor[i], &vUV[i], 0xFFFFFFFF);
+            }
+            for(int i=0; i<dpDesc.NumPrimitives; i++)
+            {
+                builder.AddTriangle(pIndex[i * 3], pIndex[i * 3 + 1], pIndex[i * 3 + 2]);
+            }
+            builder.PushAtomLOD(0, &dpDesc);
+            return meshBuilder;
+        }
     }
 }
 
