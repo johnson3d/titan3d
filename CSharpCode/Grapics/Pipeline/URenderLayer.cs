@@ -47,9 +47,10 @@ namespace EngineNS.Graphics.Pipeline
     {
         RL_Opaque,
         RL_Translucent,
+        RL_Sky,
         //for editor to use;this layer should always be the last layer to send to renderer;
         RL_Gizmos,
-        RL_Sky,
+        RL_TranslucentGizmos,
 
         RL_Num,
     }
@@ -83,43 +84,108 @@ namespace EngineNS.Graphics.Pipeline
                 PassBuffers[(int)i].DrawCmdList.mCoreObject.SetViewport(vp.mCoreObject);
             }
         }
-        public unsafe void BuildRenderPass(ref RenderPassDesc passDesc, RHI.CFrameBuffers frameBuffers)
+        public unsafe void BuildRenderPass(ref RenderPassDesc passDesc, RHI.CFrameBuffers frameBuffers, ref RenderPassDesc gizmosPassDesc, RHI.CFrameBuffers gizmosFrameBuffers)
         {
-            for (ERenderLayer i = ERenderLayer.RL_Opaque; i < ERenderLayer.RL_Num; i++)
+            PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList.mCoreObject.GetPassNumber();
+            PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.mCoreObject.GetPassNumber();
+            PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.mCoreObject.GetPassNumber();
+            PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList.mCoreObject.GetPassNumber();
+            PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.mCoreObject.GetPassNumber();
             {
-                PassBuffers[(int)i].DrawCmdList.PassNumber = PassBuffers[(int)i].DrawCmdList.mCoreObject.GetPassNumber();
-                var cmdlist = PassBuffers[(int)i].DrawCmdList.mCoreObject;
-                cmdlist.BeginCommand();
-                if (i == ERenderLayer.RL_Opaque)
+                var cmdlist = PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList.mCoreObject;
+
+                cmdlist.BeginRenderPass(ref passDesc, frameBuffers.mCoreObject, ERenderLayer.RL_Opaque.ToString());
+                cmdlist.BuildRenderPass(0);
+                cmdlist.EndRenderPass();
+                cmdlist.EndCommand();
+            }
+
+            {
+                if (PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.PassNumber > 0)
                 {
-                    cmdlist.BeginRenderPass(ref passDesc, frameBuffers.mCoreObject, i.ToString());
+                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.mCoreObject;
+
+                    cmdlist.BeginRenderPass((RenderPassDesc*)0, frameBuffers.mCoreObject, ERenderLayer.RL_Translucent.ToString());
+                    cmdlist.BuildRenderPass(0);
+                    cmdlist.EndRenderPass();
+                    cmdlist.EndCommand();
+                }   
+            }
+
+            {
+                if (PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.PassNumber > 0)
+                {
+                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.mCoreObject;
+
+                    cmdlist.BeginRenderPass((RenderPassDesc*)0, frameBuffers.mCoreObject, ERenderLayer.RL_Sky.ToString());
                     cmdlist.BuildRenderPass(0);
                     cmdlist.EndRenderPass();
                     cmdlist.EndCommand();
                 }
-                else
+            }
+            
+            {
+                if (PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList.PassNumber > 0 || 
+                    PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.PassNumber > 0)
                 {
-                    if (PassBuffers[(int)i].DrawCmdList.PassNumber > 0)
-                    {
-                        cmdlist.BeginRenderPass((RenderPassDesc*)0, frameBuffers.mCoreObject, i.ToString());
-                        cmdlist.BuildRenderPass(0);
-                        cmdlist.EndRenderPass();
-                        cmdlist.EndCommand();
-                    }
-                }
+                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList.mCoreObject;
+
+                    cmdlist.BeginRenderPass(ref gizmosPassDesc, gizmosFrameBuffers.mCoreObject, ERenderLayer.RL_Gizmos.ToString());
+                    cmdlist.BuildRenderPass(0);
+                    cmdlist.EndRenderPass();
+                    cmdlist.EndCommand();
+                }   
             }
 
+            {
+                if (PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.PassNumber > 0)
+                {
+                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.mCoreObject;
+
+                    cmdlist.BeginRenderPass((RenderPassDesc*)0, gizmosFrameBuffers.mCoreObject, ERenderLayer.RL_TranslucentGizmos.ToString());
+                    cmdlist.BuildRenderPass(0);
+                    cmdlist.EndRenderPass();
+                    cmdlist.EndCommand();
+                }
+            }
             var num = mPipelineStat.mCoreObject.mDrawCall;
         }
         public void Commit(RHI.CRenderContext rc)
         {
-            unsafe
             {
-                for (ERenderLayer i = ERenderLayer.RL_Opaque; i < ERenderLayer.RL_Num; i++)
+                var cmdlist = PassBuffers[(int)ERenderLayer.RL_Opaque].CommitCmdList.mCoreObject;
+                cmdlist.Commit(rc.mCoreObject);
+            }
+
+            {
+                if (PassBuffers[(int)ERenderLayer.RL_Translucent].CommitCmdList.PassNumber > 0)
                 {
-                    var cmdlist = PassBuffers[(int)i].CommitCmdList.mCoreObject;
-                    if (PassBuffers[(int)i].CommitCmdList.PassNumber == 0 && i != ERenderLayer.RL_Opaque)
-                        continue;
+                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_Translucent].CommitCmdList.mCoreObject;
+                    cmdlist.Commit(rc.mCoreObject);
+                }
+            }
+
+            {
+                if (PassBuffers[(int)ERenderLayer.RL_Sky].CommitCmdList.PassNumber > 0)
+                {
+                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_Sky].CommitCmdList.mCoreObject;
+                    cmdlist.Commit(rc.mCoreObject);
+                }
+            }
+
+            {
+                if (PassBuffers[(int)ERenderLayer.RL_Gizmos].CommitCmdList.PassNumber > 0 ||
+                    PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].CommitCmdList.PassNumber > 0)
+                {
+                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_Gizmos].CommitCmdList.mCoreObject;
+                    cmdlist.Commit(rc.mCoreObject);
+                }
+            }
+
+            {
+                if (PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].CommitCmdList.PassNumber > 0)
+                {
+                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].CommitCmdList.mCoreObject;
                     cmdlist.Commit(rc.mCoreObject);
                 }
             }

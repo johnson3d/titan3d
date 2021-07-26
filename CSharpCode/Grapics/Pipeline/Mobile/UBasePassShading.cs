@@ -131,7 +131,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public UBasePassTranslucent mTranslucentShading;
         public UPassDrawBuffers BasePass = new UPassDrawBuffers();
         public RenderPassDesc PassDesc = new RenderPassDesc();
-        
+        public RenderPassDesc GizmosPassDesc = new RenderPassDesc();
+
         public async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y)
         {
             await Thread.AsyncDummyClass.DummyFunc();
@@ -144,6 +145,12 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             GBuffers.CreateGBuffer(0, rtFmt, (uint)x, (uint)y);
             GBuffers.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
 
+            GGizmosBuffers.SwapChainIndex = -1;
+            GGizmosBuffers.Initialize(1, dsFmt, (uint)x, (uint)y);
+            GGizmosBuffers.SetGBuffer(0, GBuffers.GBufferSRV[0], true);
+            GGizmosBuffers.TargetViewIdentifier = GBuffers.TargetViewIdentifier;
+            GGizmosBuffers.Camera = GBuffers.Camera;
+
             PassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionClear;
             PassDesc.mFBStoreAction_Color = FrameBufferStoreAction.StoreActionStore;
             PassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
@@ -154,6 +161,16 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             PassDesc.mFBStoreAction_Stencil = FrameBufferStoreAction.StoreActionStore;
             PassDesc.mStencilClearValue = 0u;
 
+            GizmosPassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionDontCare;
+            GizmosPassDesc.mFBStoreAction_Color = FrameBufferStoreAction.StoreActionDontCare;
+            GizmosPassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
+            GizmosPassDesc.mFBLoadAction_Depth = FrameBufferLoadAction.LoadActionClear;
+            GizmosPassDesc.mFBStoreAction_Depth = FrameBufferStoreAction.StoreActionStore;
+            GizmosPassDesc.mDepthClearValue = 1.0f;
+            GizmosPassDesc.mFBLoadAction_Stencil = FrameBufferLoadAction.LoadActionClear;
+            GizmosPassDesc.mFBStoreAction_Stencil = FrameBufferStoreAction.StoreActionStore;
+            GizmosPassDesc.mStencilClearValue = 0u;
+
             mBasePassShading = shading as Pipeline.Mobile.UBasePassOpaque;
             mTranslucentShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassTranslucent>();
         }
@@ -161,6 +178,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             GBuffers?.Cleanup();
             GBuffers = null;
+
+            GGizmosBuffers?.Cleanup();
+            GGizmosBuffers = null;
         }
         public virtual void OnResize(float x, float y)
         {
@@ -168,33 +188,43 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             {
                 GBuffers.OnResize(x, y);
             }
+            if (GGizmosBuffers != null)
+            {
+                GGizmosBuffers.SetGBuffer(0, GBuffers.GBufferSRV[0], true);
+                GGizmosBuffers.OnResize(x, y);
+            }
+        }
+        private void SetCBuffer(GamePlay.UWorld world, RHI.CConstantBuffer cBuffer, UMobileFSPolicy mobilePolicy)
+        {
+            cBuffer.SetValue(cBuffer.PerViewportIndexer.gFadeParam, ref mobilePolicy.mShadowMapNode.mFadeParam);
+            cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowTransitionScale, ref mobilePolicy.mShadowMapNode.mShadowTransitionScale);
+            cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowMapSizeAndRcp, ref mobilePolicy.mShadowMapNode.mShadowMapSizeAndRcp);
+            cBuffer.SetValue(cBuffer.PerViewportIndexer.gViewer2ShadowMtx, ref mobilePolicy.mShadowMapNode.mViewer2ShadowMtx);
+            cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowDistance, ref mobilePolicy.mShadowMapNode.mShadowDistance);
+
+            var dirLight = world.DirectionLight;
+            //dirLight.mDirection = MathHelper.RandomDirection();
+            var dir = dirLight.mDirection;
+            var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
+            cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightDirection_Leak, ref gDirLightDirection_Leak);
+            var gDirLightColor_Intensity = new Vector4(dirLight.mSunLightColor.X, dirLight.mSunLightColor.Y, dirLight.mSunLightColor.Z, dirLight.mSunLightIntensity);
+            cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightColor_Intensity, ref gDirLightColor_Intensity);
+
+            cBuffer.SetValue(cBuffer.PerViewportIndexer.mSkyLightColor, ref dirLight.mSkyLightColor);
+            cBuffer.SetValue(cBuffer.PerViewportIndexer.mGroundLightColor, ref dirLight.mGroundLightColor);
+
+            float EnvMapMaxMipLevel = 1.0f;
+            cBuffer.SetValue(cBuffer.PerViewportIndexer.gEnvMapMaxMipLevel, ref EnvMapMaxMipLevel);
+            cBuffer.SetValue(cBuffer.PerViewportIndexer.gEyeEnvMapMaxMipLevel, ref EnvMapMaxMipLevel);
         }
         public override void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
         {
             var mobilePolicy = policy as UMobileFSPolicy;
             var cBuffer = GBuffers.PerViewportCBuffer;
-            if (mobilePolicy != null && cBuffer != null)
+            if (mobilePolicy != null)
             {
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gFadeParam, ref mobilePolicy.mShadowMapNode.mFadeParam);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowTransitionScale, ref mobilePolicy.mShadowMapNode.mShadowTransitionScale);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowMapSizeAndRcp, ref mobilePolicy.mShadowMapNode.mShadowMapSizeAndRcp);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gViewer2ShadowMtx, ref mobilePolicy.mShadowMapNode.mViewer2ShadowMtx);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowDistance, ref mobilePolicy.mShadowMapNode.mShadowDistance);
-
-                var dirLight = world.DirectionLight;
-                //dirLight.mDirection = MathHelper.RandomDirection();
-                var dir = dirLight.mDirection;
-                var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightDirection_Leak, ref gDirLightDirection_Leak);
-                var gDirLightColor_Intensity = new Vector4(dirLight.mSunLightColor.X, dirLight.mSunLightColor.Y, dirLight.mSunLightColor.Z, dirLight.mSunLightIntensity);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightColor_Intensity, ref gDirLightColor_Intensity);
-
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.mSkyLightColor, ref dirLight.mSkyLightColor);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.mGroundLightColor, ref dirLight.mGroundLightColor);
-
-                float EnvMapMaxMipLevel = 1.0f;
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gEnvMapMaxMipLevel, ref EnvMapMaxMipLevel);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gEyeEnvMapMaxMipLevel, ref EnvMapMaxMipLevel);
+                if (cBuffer != null)
+                    SetCBuffer(world, cBuffer, mobilePolicy);
             }
 
             BasePass.ClearMeshDrawPassArray();
@@ -212,6 +242,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     {
                         GBuffers.SureCBuffer(drawcall.Effect, "UMobileEditorFSPolicy");
                         drawcall.BindGBuffer(GBuffers);
+                        //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
 
                         var layer = i.Atoms[j].Material.RenderLayer;
                         BasePass.PushDrawCall(layer, drawcall);
@@ -219,7 +250,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 }
             }
 
-            BasePass.BuildRenderPass(ref PassDesc, GBuffers.FrameBuffers);
+            BasePass.BuildRenderPass(ref PassDesc, GBuffers.FrameBuffers, ref GizmosPassDesc, GGizmosBuffers.FrameBuffers);
         }
         public virtual void TickRender(IRenderPolicy policy)
         {

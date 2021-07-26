@@ -17,6 +17,10 @@ namespace EngineNS.Graphics.Mesh
 
             UpdateShaderCode();
         }
+        public override System.Type GetBaseMdfQueue()
+        {
+            return typeof(UMdfStaticMesh);
+        }
         protected override void UpdateShaderCode()
         {
             var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();

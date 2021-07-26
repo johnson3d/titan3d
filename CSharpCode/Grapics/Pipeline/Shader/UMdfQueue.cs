@@ -35,6 +35,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             mCoreObject = IMdfQueue.CreateInstance();
         }
+        public virtual System.Type GetBaseMdfQueue()
+        {
+            return null;
+        }
         public virtual void CopyFrom(UMdfQueue mdf)
         {
 
@@ -63,6 +67,36 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public virtual void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
         {
 
+        }
+    }
+
+    public class UMdfQueueManager
+    {
+        public static Rtti.UTypeDesc GetMdfQueuePermutationType(System.Type baseType, bool acceptShadow)
+        {
+            if (baseType == typeof(Mesh.UMdfStaticMesh))
+            {
+                if (acceptShadow)
+                {
+                    return Rtti.UTypeDescGetter<Mesh.UMdfStaticMesh>.TypeDesc;
+                }
+                else
+                {
+                    return Rtti.UTypeDescGetter<Mesh.UMdfStaticMesh_NoShadow>.TypeDesc;
+                }
+            }
+            else if (baseType == typeof(Mesh.UMdfTerrainMesh))
+            {
+                if (acceptShadow)
+                {
+                    return Rtti.UTypeDescGetter<Mesh.UMdfTerrainMesh>.TypeDesc;
+                }
+                else
+                {
+                    return Rtti.UTypeDescGetter<Mesh.UMdfTerrainMesh_NoShadow>.TypeDesc;
+                }
+            }
+            return null;
         }
     }
 }

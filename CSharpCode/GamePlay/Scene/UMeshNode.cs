@@ -90,28 +90,10 @@ namespace EngineNS.GamePlay.Scene
             set
             {
                 base.IsAcceptShadow = value;
-                if (value == false)
-                {
-                    if (mMesh.MdfQueue.GetType() == typeof(Graphics.Mesh.UMdfStaticMesh))
-                    {
-                        mMesh.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfStaticMesh_NoShadow));
-                    }
-                    else if (mMesh.MdfQueue.GetType() == typeof(Graphics.Mesh.UMdfTerrainMesh))
-                    {
-                        mMesh.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfTerrainMesh_NoShadow));
-                    }
-                }
-                else
-                {
-                    if (mMesh.MdfQueue.GetType() == typeof(Graphics.Mesh.UMdfStaticMesh_NoShadow))
-                    {
-                        mMesh.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfStaticMesh));
-                    }
-                    else if (mMesh.MdfQueue.GetType() == typeof(Graphics.Mesh.UMdfTerrainMesh_NoShadow))
-                    {
-                        mMesh.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfTerrainMesh));
-                    }
-                }
+                if (mMesh == null)
+                    return;
+                var mdfQueueType = Graphics.Pipeline.Shader.UMdfQueueManager.GetMdfQueuePermutationType(mMesh.MdfQueue.GetBaseMdfQueue(), value);
+                mMesh.SetMdfQueueType(mdfQueueType);
             }
         }
         public static UMeshNode AddMeshNode(UNode parent, UNodeData data, Type placementType, Graphics.Mesh.UMesh mesh, Vector3 pos, Vector3 scale, Quaternion quat)
@@ -218,7 +200,10 @@ namespace EngineNS.GamePlay.Scene
                         colorVar.Value = "1,0,1,1";
                     }
                     var mesh = new Graphics.Mesh.UMesh();
-                    mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                    if(this.IsAcceptShadow)
+                        mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                    else
+                        mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh_NoShadow>.TypeDesc);
                     Mesh = mesh;
                 };
                 action();
@@ -235,6 +220,7 @@ namespace EngineNS.GamePlay.Scene
                         mesh.Initialize(materialMesh, Rtti.UTypeDesc.TypeOf(meshData.MdfQueueType), Rtti.UTypeDesc.TypeOf(meshData.AtomType));
 
                         Mesh = mesh;
+                        this.IsAcceptShadow = this.IsAcceptShadow;
                     }
                 };
                 action();

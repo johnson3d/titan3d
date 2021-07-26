@@ -26,7 +26,6 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
         }
-        UInt32 mHitCheckRegion = 2;
         private Int32 Clamp(Int32 ValueIn, Int32 MinValue, Int32 MaxValue)
         {
             return ValueIn < MinValue ? MinValue : ValueIn < MaxValue ? ValueIn : MaxValue;
@@ -49,6 +48,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
         }
+        private const UInt32 mHitCheckRegion = 2;
+        private const UInt32 mCheckRegionSamplePointCount = 25;
+        private const UInt32 mCheckRegionCenter = 13;
+        private UInt32[] mHitProxyIdArray = new UInt32[mCheckRegionSamplePointCount];
         private unsafe UInt32 GetHitProxyIDImpl(UInt32 MouseX, UInt32 MouseY)
         {
             MouseX = (UInt32)((float)MouseX * ScaleFactor);
@@ -94,10 +97,22 @@ namespace EngineNS.Graphics.Pipeline.Common
                     IntColor* TempHitProxyIdCache = &HitProxyIdArray[PointY * pBitmapDesc->Width];
                     for (Int32 PointX = RegionMinX; PointX < RegionMaxX; PointX++)
                     {
-                        var hitId = UHitProxy.ConvertCpuTexColorToHitProxyId(TempHitProxyIdCache[PointX]);
-                        if (hitId != 0)
-                            return hitId;
+                        mHitProxyIdArray[HitProxyArrayIdx] = UHitProxy.ConvertCpuTexColorToHitProxyId(TempHitProxyIdCache[PointX]);
                         HitProxyArrayIdx++;
+                    }
+                }
+                if (mHitProxyIdArray[mCheckRegionCenter] != 0)
+                {
+                    return mHitProxyIdArray[mCheckRegionCenter];
+                }
+                else
+                {
+                    for (UInt32 idx = 0; idx < mCheckRegionSamplePointCount; idx++)
+                    {
+                        if (mHitProxyIdArray[idx] != 0)
+                        {
+                            return mHitProxyIdArray[idx];
+                        }
                     }
                 }
             }
@@ -110,7 +125,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public RenderPassDesc HitproxyPassDesc = new RenderPassDesc();
         private RHI.CFence mReadHitproxyFence;
         bool CanDrawHitproxy = true;
-        public float ScaleFactor { get; set; } = 0.25f;
+        public float ScaleFactor { get; set; } = 0.5f;
         public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat fmt, EPixelFormat dsFmt, float x, float y, string debugName)
         {
             await Thread.AsyncDummyClass.DummyFunc();

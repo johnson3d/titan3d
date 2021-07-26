@@ -212,6 +212,12 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                                 return BasePassNode.mBasePassShading;
                             case ERenderLayer.RL_Translucent:
                                 return BasePassNode.mTranslucentShading;
+                            case ERenderLayer.RL_Sky:
+                                return BasePassNode.mBasePassShading;
+                            case ERenderLayer.RL_Gizmos:
+                                return BasePassNode.mBasePassShading;
+                            case ERenderLayer.RL_TranslucentGizmos:
+                                return BasePassNode.mTranslucentShading;
                             default:
                                 break;
                         }

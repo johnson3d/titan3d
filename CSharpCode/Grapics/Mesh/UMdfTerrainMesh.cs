@@ -12,6 +12,10 @@ namespace EngineNS.Graphics.Mesh
         {
             UpdateShaderCode();
         }
+        public override System.Type GetBaseMdfQueue()
+        {
+            return typeof(UMdfTerrainMesh);
+        }
         public float GridSize = 1.0f;
         public float HeightStep = 0.01f;
         public RHI.CShaderResourceView HeightMapRSV { get; set; }

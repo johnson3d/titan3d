@@ -277,7 +277,7 @@ namespace EngineNS.Graphics.Mesh
                 SetMdfQueueType(Rtti.UTypeDesc.TypeOf(value));
             }
         }
-        private bool SetMdfQueueType(Rtti.UTypeDesc mdfQueueType)
+        internal bool SetMdfQueueType(Rtti.UTypeDesc mdfQueueType)
         {
             var mdf = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.UMdfQueue;
             if (mdf == null)

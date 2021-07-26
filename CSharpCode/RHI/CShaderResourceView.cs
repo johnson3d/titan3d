@@ -83,6 +83,7 @@ namespace EngineNS.RHI
         {
             System.Threading.Interlocked.Decrement(ref NumOfInstance);
         }
+        public object TagObject;
         public static int NumOfInstance = 0;
         public const string AssetExt = ".srv";
 

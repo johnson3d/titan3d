@@ -29,6 +29,11 @@ namespace EngineNS.Graphics.Pipeline
         public RHI.CDepthStencilView DepthStencilView;
         public RHI.CShaderResourceView DepthStencilSRV;
         public RHI.CShaderResourceView[] GBufferSRV;
+        public struct RenderTargetDesc
+        {
+            public bool DontResize;
+        }
+        public RenderTargetDesc[] RTDesc;
         public RHI.CConstantBuffer PerViewportCBuffer;
         public int SwapChainIndex { get; set; } = -1;
         public void SureCBuffer(Shader.UEffect effect, string debugName)
@@ -75,6 +80,7 @@ namespace EngineNS.Graphics.Pipeline
             ViewPort.mCoreObject.MaxDepth = 1;
 
             GBufferSRV = new RHI.CShaderResourceView[NumOfGBuffer];
+            RTDesc = new RenderTargetDesc[NumOfGBuffer];
             var fbDesc = new IFrameBuffersDesc();
             if (SwapChainIndex < 0)
                 fbDesc.IsSwapChainBuffer = 0;
@@ -131,8 +137,7 @@ namespace EngineNS.Graphics.Pipeline
             rtDesc.SetDefault();
             unsafe
             {
-                var texture2d = new ITexture2D(showTarget.CppPointer);
-                var tex2dDesc = texture2d.mDesc;
+                var tex2dDesc = showTarget.mDesc;
                 rtDesc.Format = tex2dDesc.Format;//EPixelFormat.PXF_B8G8R8A8_UNORM;
                 rtDesc.m_pTexture2D = showTarget;
                 rtDesc.Width = tex2dDesc.Width;
@@ -147,6 +152,32 @@ namespace EngineNS.Graphics.Pipeline
                 GBufferSRV[index] = SwapChainSRV;
                 return true;
             }
+        }
+        public bool SetGBuffer(int index, RHI.CShaderResourceView srv, bool dontResize = true)
+        {
+            if (GBufferSRV == null || index >= GBufferSRV.Length || index < 0)
+                return false;
+
+            GBufferSRV[index]?.Dispose();
+            GBufferSRV[index] = srv;
+            RTDesc[index].DontResize = dontResize;
+
+            unsafe
+            {
+                var rc = UEngine.Instance.GfxDevice.RenderContext;
+                var rtDesc = new IRenderTargetViewDesc();
+                rtDesc.SetDefault();
+                var texture2d = srv.mCoreObject.GetTexture2D();
+                var tex2dDesc = texture2d.mDesc;
+                rtDesc.Format = tex2dDesc.Format;
+                rtDesc.m_pTexture2D = texture2d;
+                rtDesc.Width = tex2dDesc.Width;
+                rtDesc.Height = tex2dDesc.Height;
+                var rTarget = rc.CreateRenderTargetView(ref rtDesc);
+                FrameBuffers.mCoreObject.BindRenderTargetView((uint)index, rTarget.mCoreObject);
+            }
+            
+            return true;
         }
         public bool CreateGBuffer(int index, EPixelFormat format, uint width, uint height)
         {
@@ -225,6 +256,8 @@ namespace EngineNS.Graphics.Pipeline
                 for (int i = 0; i < GBufferSRV.Length; i++)
                 {
                     if (GBufferSRV[i] == null)
+                        continue;
+                    if (RTDesc[i].DontResize)
                         continue;
                     if (SwapChainIndex == i)
                         continue;
