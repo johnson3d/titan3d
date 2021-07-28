@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.CMeshPrimitivesAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="4afab4dc-6dd0-450a-8dba-fa8a1f99b857" />
+  <AssetId Type="System.Guid@Unknown" Value="f3d77c75-b225-4f1f-a8ee-8b8a2b86ac47" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.CMeshPrimitives&#xA;" />
   <Icon Type="EngineNS.EGui.UVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
