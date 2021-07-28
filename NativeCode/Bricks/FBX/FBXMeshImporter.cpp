@@ -167,18 +167,18 @@ namespace AssetImportAndExport
 			auto gMatrix = CalculateGlobalTransform(Node);
 
 			FbxAMatrix locMatrix;
-			locMatrix.SetT(locTranslation);
 			locMatrix.SetR(locRotation);
+			locMatrix.SetT(locTranslation);
 			locMatrix.SetS(locScaling);
 			FbxAMatrix Geometry;
+			Geometry.SetIdentity();
 			FbxVector4 Translation, Rotation, Scaling;
 			Translation = Node->GetGeometricTranslation(FbxNode::eSourcePivot);
 			Rotation = Node->GetGeometricRotation(FbxNode::eSourcePivot);
 			Scaling = Node->GetGeometricScaling(FbxNode::eSourcePivot);
-			Geometry.SetT(Translation * fileImportOption->ScaleFactor * option->Scale);
 			Geometry.SetR(Rotation);
+			Geometry.SetT(Translation * fileImportOption->ScaleFactor * option->Scale);
 			Geometry.SetS(Scaling);
-			Geometry = Geometry;
 			//For Single Matrix situation, obtain transfrom matrix from eDESTINATION_SET, which include pivot offsets and pre/post rotations.
 			//FbxAMatrix& GlobalTransform = scene->GetAnimationEvaluator()->GetNodeGlobalTransform(Node);
 			FbxAMatrix& GlobalTransform = Node->EvaluateGlobalTransform();
@@ -217,7 +217,7 @@ namespace AssetImportAndExport
 			}
 			else
 			{
-				TotalMatrix = Geometry * gMatrix * scaleMatrix;
+				TotalMatrix =  gMatrix * Geometry * scaleMatrix;
 			}
 			result = FBXDataConverter::ConvertMatrix(TotalMatrix);
 			return result;
@@ -987,6 +987,8 @@ namespace AssetImportAndExport
 							auto polyIndex = PolyIndices[i];
 							int ctrlPointIndex = mesh->GetPolygonVertex(polyIndex, j);
 							auto pos = FBXDataConverter::ConvertPos(controlPoints[ctrlPointIndex]);
+							auto trans = TotalMatrix.getTrans();
+							//TotalMatrix.setTrans(v3dxVector3::ZERO);
 							pos = pos * TotalMatrix;
 							MeshVertex aVertex;
 							aVertex.Postion = pos /** meshImportOption->Scale*/;
