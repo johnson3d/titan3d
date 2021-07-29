@@ -300,6 +300,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             set
             {
                 mSerialId = value;
+                if (PerMaterialCBuffer != null)
+                    this.UpdateUniformVars(PerMaterialCBuffer);
             }
         }
         #region RHIResource        

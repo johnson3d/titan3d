@@ -366,5 +366,27 @@ namespace EngineNS.RHI
                 return result;
             }
         }
+        public CShaderDesc CreateShaderDesc(RName shader, string entry, EShaderType type, CShaderDefinitions defines)
+        {
+            string sm = "5_0";
+            switch (type)
+            {
+                case EShaderType.EST_ComputeShader:
+                    sm = "5_0";
+                    if (ShaderModel == 3)
+                    {
+                        return null;
+                    }
+                    break;
+                case EShaderType.EST_VertexShader:
+                    sm = "5_0";
+                    break;
+                case EShaderType.EST_PixelShader:
+                    sm = "5_0";
+                    break;
+            }
+            var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
+            return compilier.CompileShader(shader.Address, entry, type, sm, null, null, defines, true);
+        }
     }
 }

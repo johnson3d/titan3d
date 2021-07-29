@@ -80,6 +80,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/CsValueList.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/DrawPrimitiveDesc.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EAddressMode.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EBindFlag.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EBindFlags.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EBlend.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EBlendOp.cpp2cs.cs" />
@@ -106,6 +107,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EStencilOp.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EStreamingState.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ETCFormat.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EUAVBufferFlag.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EVertexShaderOutType.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EVertexSteamType.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FCsDictionaryIterator.cpp2cs.cs" />

@@ -100,6 +100,7 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\extractID.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Cluster.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VirtualTexture.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\VXGI\VoxelAllocator.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)slate\imgui-frag.hlsl" />
     <FxCompile Include="$(MSBuildThisFileDirectory)slate\imgui-vertex.hlsl" />
   </ItemGroup>

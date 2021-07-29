@@ -63,6 +63,14 @@ EDimensionUAV
 struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8, SV_Manual)
 IUnorderedAccessViewDesc
 {
+	void ToDefault()
+	{
+		Format = EPixelFormat::PXF_UNKNOWN;
+		ViewDimension = EDimensionUAV::UAV_DIMENSION_BUFFER;
+		//MiscFlags = (UInt32)EResourceMiscFlag.BUFFER_STRUCTURED;
+		Buffer.FirstElement = 0;
+		//Buffer.NumElements = descBuf.ByteWidth / descBuf.StructureByteStride;
+	}
 	EPixelFormat Format;
 	EDimensionUAV ViewDimension;
 	union
@@ -105,6 +113,29 @@ EResourceMiscFlag
 	TILE_POOL = 0x20000,
 	TILED = 0x40000,
 	HW_PROTECTED = 0x80000
+};
+
+enum TR_ENUM() 
+EUAVBufferFlag
+{
+	UAV_FLAG_RAW = 0x1,
+	UAV_FLAG_APPEND = 0x2,
+	UAV_FLAG_COUNTER = 0x4
+};
+
+enum TR_ENUM() 
+EBindFlag
+{
+	BIND_VERTEX_BUFFER = 0x1L,
+	BIND_INDEX_BUFFER = 0x2L,
+	BIND_CONSTANT_BUFFER = 0x4L,
+	BIND_SHADER_RESOURCE = 0x8L,
+	BIND_STREAM_OUTPUT = 0x10L,
+	BIND_RENDER_TARGET = 0x20L,
+	BIND_DEPTH_STENCIL = 0x40L,
+	BIND_UNORDERED_ACCESS = 0x80L,
+	BIND_DECODER = 0x200L,
+	BIND_VIDEO_ENCODER = 0x400L
 };
 
 struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)

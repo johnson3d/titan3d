@@ -145,6 +145,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public Common.UPickBlurNode PickBlurNode = new Common.UPickBlurNode();
         public Common.UPickHollowNode PickHollowNode = new Common.UPickHollowNode();
 
+
+        //for test
+        Bricks.VXGI.UVoxelsNode VoxelsNode = new Bricks.VXGI.UVoxelsNode();
+
         public override async System.Threading.Tasks.Task Initialize(float x, float y)
         {
             EnvMapSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/default_envmap.srv"));
@@ -162,6 +166,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             await EditorFinalNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UEditorFinalShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_UNKNOWN, x, y, "EditorFinal");
             
             await mShadowMapNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>(), EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_D16_UNORM, x, y, "ShadowDepth");
+
+            await VoxelsNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_D16_UNORM, x, y, "VoxelsNode");
         }
         public override void OnResize(float x, float y)
         {
@@ -196,6 +202,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             HitproxyNode?.Cleanup();
             HitproxyNode = null;
+
+            VoxelsNode?.Cleanup();
+            VoxelsNode = null;
 
             base.Cleanup();
         }
@@ -254,6 +263,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             PickHollowNode?.TickLogic(world, this, true);
 
             EditorFinalNode?.TickLogic(world, this, true);
+
+            VoxelsNode?.TickLogic(world, this, true);
         }
         public unsafe override void TickRender()
         {
@@ -271,6 +282,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             PickHollowNode?.TickRender();
 
             EditorFinalNode?.TickRender();
+
+            VoxelsNode?.TickRender(this);
         }
         public unsafe override void TickSync()
         {
@@ -288,6 +301,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             PickHollowNode?.TickSync();
 
             EditorFinalNode?.TickSync();
+
+            VoxelsNode?.TickSync(this);
         }
     }
 }

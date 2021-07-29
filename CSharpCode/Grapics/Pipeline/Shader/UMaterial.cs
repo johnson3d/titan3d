@@ -135,6 +135,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             set
             {
                 mSerialId = value;
+                if (PerMaterialCBuffer != null)
+                    this.UpdateUniformVars(PerMaterialCBuffer);
             }
         }
         public class MaterialImportAttribute : IO.CommonCreateAttribute
