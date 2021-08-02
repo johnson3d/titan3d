@@ -4,56 +4,6 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 {
-    [Rtti.Meta]
-    public partial class HLSLMethod
-    {
-        [Rtti.Meta]
-        [UserCallNode(CallNodeType = typeof(SampleLevel2DNode))]
-        public static Vector4 SampleLevel2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float level, out Vector3 rgb)
-        {
-            rgb = new Vector3();
-            return new Vector4();
-        }
-        [Rtti.Meta]
-        public static void Clamp(float x, float min, float max, out float ret)
-        {
-            ret = 0;
-        }
-        [Rtti.Meta]
-        public static void SinCos(float x, out float sin, out float cos)
-        {
-            sin = (float)Math.Sin(x);
-            cos = (float)Math.Cos(x);
-        }
-        [Rtti.Meta]
-        public static void Max(float v1, float v2, out float ret)
-        {
-            ret = Math.Max(v1, v2);
-        }
-        [Rtti.Meta]
-        public static void Min(float v1, float v2, out float ret)
-        {
-            ret = Math.Min(v1, v2);
-        }
-        [Rtti.Meta]
-        public static void Lerp(float v1, float v2, float s, out float ret)
-        {
-            ret = v1 + s * (v2 - v1);
-        }
-        [Rtti.Meta]
-        public static void Lerp2D(Vector2 v1, Vector2 v2, Vector2 s, out Vector2 ret)
-        {
-            ret.X = v1.X + s.X * (v2.X - v1.X);
-            ret.Y = v1.Y + s.Y * (v2.Y - v1.Y);
-        }
-        [Rtti.Meta]
-        public static void Lerp3D(Vector3 v1, Vector3 v2, Vector3 s, out Vector3 ret)
-        {
-            ret.X = v1.X + s.X * (v2.X - v1.X);
-            ret.Y = v1.Y + s.Y * (v2.Y - v1.Y);
-            ret.Z = v1.Z + s.Z * (v2.Z - v1.Z);
-        }
-    }
     public class UserCallNodeAttribute : Attribute
     {
         public Type CallNodeType;
@@ -365,6 +315,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 {
                     var argNode = links[0].OutNode as IBaseNode;
                     argExpr = argNode.GetExpr(funGraph, cGen, links[0].Out, true) as OpExpress;
+                    if (argExpr == null)
+                        throw new GraphException(this, Arguments[i], $"argExpr = null:{Arguments[i].Name}");
                 }
                 else if (links.Count == 0)
                 {
@@ -390,98 +342,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             funGraph.ShaderEditor.MaterialOutput.Function.AddLocalVar(retVar);
 
             return new OpUseDefinedVar(retVar);
-        }
-    }
-
-    public class SampleLevel2DNode : CallNode
-    {
-        public SampleLevel2DNode()
-        {
-            PreviewWidth = 100;
-            TextureVarName = $"Texture_{(uint)NodeId.GetHashCode()}";
-        }
-        ~SampleLevel2DNode()
-        {
-            if (SnapshotPtr != IntPtr.Zero)
-            {
-                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
-                handle.Free();
-                SnapshotPtr = IntPtr.Zero;
-            }
-        }
-        [Rtti.Meta]
-        public string TextureVarName { get; set; }
-        [Rtti.Meta]
-        [RName.PGRName(FilterExts = RHI.CShaderResourceView.AssetExt)]
-        public RName AssetName
-        {
-            get
-            {
-                if (TextureSRV == null)
-                    return null;
-                return TextureSRV.AssetName;
-            }
-            set
-            {
-                if (SnapshotPtr != IntPtr.Zero)
-                {
-                    var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
-                    handle.Free();
-                    SnapshotPtr = IntPtr.Zero;
-                }
-                if (value == null)
-                {
-                    TextureSRV = null;
-                    return;
-                }
-                System.Action exec = async () =>
-                {
-                    TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
-                };
-                exec();
-            }
-        }
-        private RHI.CShaderResourceView TextureSRV;
-        IntPtr SnapshotPtr;
-        public unsafe override void OnPreviewDraw(ref Vector2 prevStart, ref Vector2 prevEnd)
-        {
-            if (TextureSRV == null)
-                return;
-
-            var cmdlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
-
-            if (SnapshotPtr == IntPtr.Zero)
-            {
-                SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(TextureSRV));
-            }
-
-            var uv0 = new Vector2(0, 0);
-            var uv1 = new Vector2(1, 1);
-            unsafe
-            {
-                cmdlist.AddImage(SnapshotPtr.ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-            }
-        }
-        protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
-        {
-            if (Method.Parameters[i].ParamInfo.Name == "texture")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = TextureVarName;
-                return new OpUseDefinedVar(retVar);
-            }
-            else if (Method.Parameters[i].ParamInfo.Name == "uv")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = "input.vUV";
-                return new OpUseDefinedVar(retVar);
-            }
-
-            return base.OnNoneLinkedParameter(funGraph, cGen, i);
         }
     }
 }

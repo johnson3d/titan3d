@@ -77,6 +77,9 @@ namespace EngineNS.Editor.Forms
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
+
+            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World.Root);
+            gridNode.ViewportSlate = this.PreviewViewport;
         }
         public async Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {

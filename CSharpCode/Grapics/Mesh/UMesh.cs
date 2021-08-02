@@ -208,6 +208,20 @@ namespace EngineNS.Graphics.Mesh
                                 }
                             }
                             drawcall.mCoreObject.BindShaderSamplers(samplers.mCoreObject);
+
+                            // renwind modified: debug code set globalSamplerState
+                            //var splDesc = new ISamplerStateDesc();
+                            //splDesc.SetDefault();
+                            //splDesc.Filter = ESamplerFilter.SPF_MIN_MAG_MIP_LINEAR;
+                            //splDesc.AddressU = EAddressMode.ADM_WRAP;
+                            //splDesc.AddressV = EAddressMode.ADM_WRAP;
+                            //splDesc.AddressW = EAddressMode.ADM_WRAP;
+                            //splDesc.MipLODBias = 0;
+                            //splDesc.MaxAnisotropy = 0;
+                            //splDesc.CmpMode = EComparisionMode.CMP_ALWAYS;
+                            //var rc = UEngine.Instance.GfxDevice.RenderContext;
+                            //var SamplerState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(rc, ref splDesc);
+                            //samplers.mCoreObject.PSBindSampler(0, SamplerState.mCoreObject);
                         }
                         #endregion
 

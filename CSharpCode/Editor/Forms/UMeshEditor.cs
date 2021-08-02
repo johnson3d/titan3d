@@ -61,6 +61,9 @@ namespace EngineNS.Editor.Forms
             sphere.Center = aabb.GetCenter();
             sphere.Radius = radius;
             policy.GetBasePassNode().GBuffers.Camera.AutoZoom(ref sphere);
+
+            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World.Root);
+            gridNode.ViewportSlate = this.PreviewViewport;
         }
         public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {

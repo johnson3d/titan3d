@@ -389,6 +389,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
         {
 
         }
+        public Vector2 GraphViewPosition;
         public Vector2 GraphViewSize;
         //private bool mMouseHoverContentWindow = false;
         public virtual void OnDraw(NodeGraphStyles styles = null, bool bNewForm = true)
@@ -416,6 +417,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                 if (ImGuiAPI.BeginChild("ContentWindow", in GraphViewSize, false, 
                     ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
                 {
+                    GraphViewPosition = ImGuiAPI.GetWindowPos();
                     var cmdlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
                     foreach (var i in Nodes)
                     {
@@ -528,7 +530,9 @@ namespace EngineNS.EGui.Controls.NodeGraph
 
                 var NewPos = View2WorldSpace(ref center);
 
-                ViewPortPosition = ViewPortPosition - (NewPos - OldPos);
+                var offset = NewPos - OldPos;
+                if (offset.Length() < 10000.0f)
+                    ViewPortPosition = ViewPortPosition - (offset);
             }
             else if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Middle))
             {
@@ -584,7 +588,10 @@ namespace EngineNS.EGui.Controls.NodeGraph
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows))
                 {
                     var v0 = View2WorldSpace(ref mousePosVP, ref WorldDragPos);
-                    ViewPortPosition = WorldDragPos - (v0 - ViewPortDragPos);
+
+                    var offset = v0 - ViewPortDragPos;
+                    if (offset.Length() < 10000.0f)
+                        ViewPortPosition = WorldDragPos - (offset);
                 }
             }
             DraggingViewPort = true;
@@ -906,6 +913,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
             if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
             {
                 var posMenu = ImGuiAPI.GetWindowPos();
+                posMenu -= GraphViewPosition;
                 var btSize = new Vector2(-1, 0);
                 if (ImGuiAPI.BeginMenu("Add Node", true))
                 {

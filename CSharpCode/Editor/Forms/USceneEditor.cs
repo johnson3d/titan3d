@@ -75,6 +75,9 @@ namespace EngineNS.Editor.Forms
             (viewport as EGui.Slate.UWorldViewportSlate).CameraController.Camera = viewport.RenderPolicy.GetBasePassNode().GBuffers.Camera;
 
             Scene.Parent = PreviewViewport.World.Root;
+
+            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World.Root);
+            gridNode.ViewportSlate = this.PreviewViewport;
         }
         public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {

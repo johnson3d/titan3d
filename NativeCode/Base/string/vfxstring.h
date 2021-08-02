@@ -186,10 +186,14 @@ inline bool operator!=(const VNameString& lh, const VNameString& rh)
 }
 inline bool operator==(const VNameString& lh, const char* rh)
 {
+	if (rh == nullptr)
+		return false;
 	return strcmp(lh.GetString(), rh) == 0;
 }
 inline bool operator!=(const VNameString& lh, const char* rh)
 {
+	if (rh == nullptr)
+		return false;
 	return strcmp(lh.GetString(), rh) != 0;
 }
 inline bool operator<=(const VNameString& lh, const char* rh)

@@ -127,6 +127,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 result.UsedRSView.Add(i.Clone(result));
             }
 
+            foreach (var i in mtl.UsedSamplerStates)
+            {
+                result.UsedSamplerStates.Add(i.Clone(result));
+            }
+
             foreach (var i in mtl.UsedUniformVars)
             {
                 result.UsedUniformVars.Add(i.Clone(result));

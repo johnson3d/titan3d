@@ -116,6 +116,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
+
+            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World.Root);
+            gridNode.ViewportSlate = this.PreviewViewport;
         }
         public async System.Threading.Tasks.Task<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
@@ -360,6 +363,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             Material.UsedRSView.Clear();
             Material.UsedUniformVars.Clear();
+            Material.UsedSamplerStates.Clear();
             foreach (IBaseNode node in MaterialGraph.Nodes)
             {
                 node.PreGenExpr();
@@ -391,6 +395,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     tmp.Value = texNode.AssetName;
                     Material.UsedRSView.Add(tmp);
                 }
+                else if (type == typeof(Var.SamplerState))
+                {
+                    var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+                    tmp.Name = node.Name;
+                    var sampNode = node as Var.SamplerState;
+                    tmp.Value = sampNode.Desc;
+                    Material.UsedSamplerStates.Add(tmp);
+                }
                 else if (type == typeof(Control.SampleLevel2DNode))
                 {
                     var texNode = node as Control.SampleLevel2DNode;
@@ -399,8 +411,22 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     {
                         var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
                         tmp.Name = texNode.TextureVarName;
-                        tmp.Value = texNode.AssetName;
-                        Material.UsedRSView.Add(tmp);
+                        if (Material.FindSRV(tmp.Name) == null)
+                        {
+                            tmp.Value = texNode.AssetName;
+                            Material.UsedRSView.Add(tmp);
+                        }
+                    }
+                    var samplerPinIn = texNode.FindPinIn("sampler");
+                    if (samplerPinIn.HasLinker() == false)
+                    {
+                        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+                        tmp.Name = "Samp_"+ texNode.TextureVarName;
+                        if (Material.FindSampler(tmp.Name) == null)
+                        {
+                            tmp.Value = texNode.Sampler;
+                            Material.UsedSamplerStates.Add(tmp);
+                        }
                     }
                 }
             }

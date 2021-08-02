@@ -86,11 +86,11 @@ namespace EngineNS.GamePlay.Scene
             ObjectToWorld.SetTrans(new Vector3(mPreCameraPos.X, 0, mPreCameraPos.Z));
 
             // good enough to avoid the AMD artifacts, horizon still appears to be a line
-            float Radii = 1000;
+            float Radii = 100000;
             if (bIsPerspective)
             {
                 // the higher we get the larger we make the geometry to give the illusion of an infinite grid while maintains the precision nearby
-                Radii *= System.Math.Max(1.0f, System.Math.Abs(mPreCameraPos.Y) / 10.0f);
+                Radii *= System.Math.Max(1.0f, System.Math.Abs(mPreCameraPos.Y) / 1000.0f);
             }
 
             var UVMid = UVCameraPos * WorldToUVScale;

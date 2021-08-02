@@ -21,10 +21,19 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             OutSampler.Name = "sampler";
             OutSampler.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutSampler);
+
+            mDesc.SetDefault();
         }
         public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
         {
             return VarType.SystemType;
+        }
+        ISamplerStateDesc mDesc;
+        public ISamplerStateDesc Desc { get => mDesc; set => mDesc = value; }
+        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, EGui.Controls.NodeGraph.PinOut oPin, bool bTakeResult)
+        {
+            var Var = new OpUseVar(this.Name, false);
+            return Var;
         }
     }
 }

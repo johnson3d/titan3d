@@ -359,7 +359,7 @@ bool IShader::GetSamplerBindInfo(UINT Index, TSBindInfo* info) const
 {
 	if (mDesc == nullptr || mDesc->Reflector == nullptr)
 		return false;
-	if (Index >= mDesc->Reflector->mTexBindInfoArray.size())
+	if (Index >= mDesc->Reflector->mSamplerBindInfoArray.size())
 		return false;
 	*info = mDesc->Reflector->mSamplerBindInfoArray[Index];
 	return true;

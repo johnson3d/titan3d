@@ -435,7 +435,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         for (int i = 0; i < collection.Count; i++)
                         {
                             var propDesc = collection[i];
-                            if (HideInheritDeclareType != null)
+                            if (HideInheritDeclareType != null && target == this.Target)
                             {
                                 if (propDesc.DeclaringType.SystemType.IsSubclassOf(HideInheritDeclareType.SystemType) == false)
                                     continue;

@@ -291,6 +291,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 codeBuilder.AddLine($"Texture2D {i.Name};");
             }
 
+            foreach (var i in this.UsedSamplerStates)
+            {
+                codeBuilder.AddLine($"SamplerState {i.Name};");
+            }
+
             codeBuilder.AddLine("void DO_VS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)");
             codeBuilder.PushBrackets();
             codeBuilder.PopBrackets();
@@ -374,6 +379,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public IO.CMemStreamWriter SourceCode { get; } = new IO.CMemStreamWriter();
 
         #region Data
+        
+        #region Code&Graph
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
         [Browsable(false)]
         public string GraphXMLString
@@ -393,6 +400,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 MaterialHash = GetHash();
             }
         }
+        #endregion
+        #region Texture
         public class NameRNamePair : IO.BaseSerializer
         {
             public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
@@ -400,7 +409,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 HostMaterial = hostObject as UMaterial;
             }
             UMaterial HostMaterial;
-            [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+            [Rtti.Meta()]
             public string Name { get; set; }
             RName mValue;
             [Rtti.Meta]
@@ -428,7 +437,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         [Rtti.Meta]
         [Category("Variable")]
         public List<NameRNamePair> UsedRSView { get => mUsedRSView; }
-        protected NameRNamePair FindSRV(string name)
+        public NameRNamePair FindSRV(string name)
         {
             foreach (var i in mUsedRSView)
             {
@@ -458,21 +467,70 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return UEngine.Instance.GfxDevice.TextureManager.TryGetTexture(UsedRSView[index].Value);
         }
+        #endregion
+        #region Sampler
+        public class NameSamplerStateDescPair : IO.BaseSerializer
+        {
+            public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
+            {
+                HostMaterial = hostObject as UMaterial;
+            }
+            UMaterial HostMaterial;
+            [Rtti.Meta()]
+            public string Name { get; set; }
+            internal ISamplerStateDesc mValue;
+            [Rtti.Meta]
+            public ISamplerStateDesc Value
+            {
+                get => mValue;
+                set
+                {
+                    mValue = value;
+                    if (HostMaterial != null)
+                        HostMaterial.SerialId++;
+                }
+            }
+            public NameSamplerStateDescPair Clone(UMaterial mtl)
+            {
+                var result = new NameSamplerStateDescPair();
+                result.HostMaterial = mtl;
+                result.Name = Name;
+                result.mValue = mValue;
+                return result;
+            }
+        }
+        List<NameSamplerStateDescPair> mUsedSamplerStates = new List<NameSamplerStateDescPair>();
+        [Rtti.Meta]
+        [Category("Variable")]
+        public List<NameSamplerStateDescPair> UsedSamplerStates { get => mUsedSamplerStates; }
         public int NumOfSampler
         {
             get
             {
-                return 0;
+                return mUsedSamplerStates.Count;
             }
         }
         public string GetNameOfSampler(int index)
         {
-            return "";
+            if (index < 0 || index >= mUsedSamplerStates.Count)
+                return null;
+            return mUsedSamplerStates[index].Name;
         }
         public RHI.CSamplerState GetSampler(int index)
         {
+            return UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, ref mUsedSamplerStates[index].mValue);
+        }
+        public NameSamplerStateDescPair FindSampler(string name)
+        {
+            foreach (var i in mUsedSamplerStates)
+            {
+                if (i.Name == name)
+                    return i;
+            }
             return null;
         }
+        #endregion
+        #region UniformVar
         public class NameValuePair : IO.BaseSerializer
         {
             public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
@@ -569,6 +627,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
             }
         }
+        #endregion
+
         #endregion
 
         #region RHIResource
