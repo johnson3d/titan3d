@@ -72,6 +72,9 @@
   <Import Project="..\..\CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\WorldSimulator\WorldSimulator.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\TcpServer\TcpServer.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\VXGI\VXGI.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\PhysicsCore\PhysicsCore.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\SourceControl\SourceControl.projitems" Label="Shared" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9.0" />
@@ -79,6 +82,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.9.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="3.9.0" />
     <PackageReference Include="Mono.Cecil" Version="0.11.3" />
+    <PackageReference Include="MvsSln" Version="2.6.0" />
     <PackageReference Include="NPOI" Version="2.5.2" />
     <PackageReference Include="ppy.SDL2-CS" Version="1.0.82" />
     <PackageReference Include="RIPEMD160" Version="1.0.1" />

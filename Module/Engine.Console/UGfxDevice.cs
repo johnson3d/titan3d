@@ -11,7 +11,7 @@ namespace EngineNS.Graphics.Pipeline
         public override async System.Threading.Tasks.Task<bool> Initialize(UEngine engine)
         {
             await EngineNS.Thread.AsyncDummyClass.DummyFunc();
-            if (InitGPU(engine.Config.AdaperId, ERHIType.RHT_VirtualDevice, IntPtr.Zero, engine.Config.HasDebugLayer) == false)
+            if (await InitGPU(engine, 0, ERHIType.RHT_VirtualDevice, IntPtr.Zero, engine.Config.HasDebugLayer) == false)
             {
                 return false;
             }

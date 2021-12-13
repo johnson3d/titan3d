@@ -93,6 +93,7 @@ namespace CppWeaving.Cpp2CS
 
 			RegClass("v3dxVector2", new USystemTypeStruct() { CppName = "v3dxVector2", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
 			RegClass("v3dxVector3", new USystemTypeStruct() { CppName = "v3dxVector3", CSName = "EngineNS.Vector3", RetPodName = "v3dVector3_t" });
+			RegClass("v3dxDVector3", new USystemTypeStruct() { CppName = "v3dxDVector3", CSName = "EngineNS.DVector3", RetPodName = "v3dDVector3_t" });
 			RegClass("v3dxQuaternion", new USystemTypeStruct() { CppName = "v3dxQuaternion", CSName = "EngineNS.Quaternion", RetPodName = "v3dVector4_t" });
 			RegClass("v3dxColor4", new USystemTypeStruct() { CppName = "v3dxColor4", CSName = "EngineNS.Color4", RetPodName = "v3dVector4_t" }); 
 			RegClass("v3dxBox3", new USystemTypeStruct() { CppName = "v3dxBox3", CSName = "EngineNS.BoundingBox", RetPodName = "v3dBox3_t" });
@@ -101,7 +102,6 @@ namespace CppWeaving.Cpp2CS
 			RegClass("ImGuiPlatformIO.ImVec2_t", new USystemTypeStruct() { CppName = "ImGuiPlatformIO::ImVec2_t", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
 			RegClass("ImVec4", new USystemTypeStruct() { CppName = "ImVec4", CSName = "EngineNS.Vector4", RetPodName = "v3dVector4_t" });
 			RegClass("EngineNS.UAnyValue", new USystemTypeStruct() { CppName = "EngineNS::UAnyValue", CSName = "EngineNS.Support.UAnyValue", RetPodName = "EngineNS::UAnyValue_t" });
-			RegClass("EngineNS.v3dxIndexInSkeleton", new USystemTypeStruct() { CppName = "EngineNS::v3dxIndexInSkeleton", CSName = "EngineNS.Animation.Skeleton.IndexInSkeleton", RetPodName = "EngineNS::v3dxIndexInSkeleton_t" });
 			RegClass("ImWchar16", new USystemTypeStruct() { CppName = "ImWchar", CSName = "Wchar16", RetPodName = "ImWchar16" });
 			RegClass("ImWchar32", new USystemTypeStruct() { CppName = "ImWchar", CSName = "Wchar32", RetPodName = "ImWchar32" });
 

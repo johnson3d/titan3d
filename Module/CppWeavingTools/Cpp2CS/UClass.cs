@@ -179,6 +179,7 @@ namespace CppWeaving.Cpp2CS
                 }
                 tmp.Name = i.Name;
                 tmp.IsStatic = i.IsStatic;
+                tmp.IsVirtual = i.IsVirtual;
                 foreach (var j in i.Parameters)
                 {
                     var arg = new UProperty();
@@ -240,6 +241,98 @@ namespace CppWeaving.Cpp2CS
                     if (tmp.CheckTypes() == false)
                         continue;
                     Functions.Add(tmp);
+                }
+            }
+
+            if (this.HasMeta(UProjectSettings.SV_BaseFunction))
+            {
+                foreach (var bs in Decl.Bases)
+                {
+                    var bsd = bs.Referenced as ClangSharp.CXXRecordDecl;
+                    if (bsd == null)
+                        continue;
+                    foreach (var i in bsd.Methods)
+                    {
+                        if (IsIgnoreFunction(i, bsd))
+                            continue;
+
+                        if (CheckTypes(i) == false)
+                            continue;
+
+                        var tmp = new UFunction();
+                        tmp.BuildMetaInfo(i.Attrs);
+                        switch (i.Access)
+                        {
+                            case ClangSharp.Interop.CX_CXXAccessSpecifier.CX_CXXPublic:
+                                tmp.Access = EAccess.Public;
+                                break;
+                            case ClangSharp.Interop.CX_CXXAccessSpecifier.CX_CXXProtected:
+                                tmp.Access = EAccess.Protected;
+                                break;
+                            case ClangSharp.Interop.CX_CXXAccessSpecifier.CX_CXXPrivate:
+                                tmp.Access = EAccess.Private;
+                                break;
+                        }
+                        tmp.Name = i.Name;
+                        tmp.IsStatic = i.IsStatic;
+                        foreach (var j in i.Parameters)
+                        {
+                            var arg = new UProperty();
+                            arg.BuildMetaInfo(j.Attrs);
+                            arg.Name = j.Name;
+                            arg.PropertyType = UTypeManager.Instance.FindType(j.Type.Handle);
+                            arg.IsConst = j.Type.Handle.Spelling.ToString().StartsWith("const ");
+                            arg.IsDelegate = arg.PropertyType is UDelegate;
+                            arg.NumOfTypePointer = UTypeManager.GetPointerNumOfType(j.Type.Handle, out arg.IsReference);
+                            arg.MarshalType = UTypeManager.GetMeta(j.Attrs, UProjectSettings.SV_Marshal);
+                            arg.NumOfElement = (int)j.Type.Handle.ArraySize;
+                            arg.IsTypeDef = j.Type.Kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef;
+
+                            if (arg.IsDelegate)
+                            {
+                                var funcDef = j.Type.PointeeType as ClangSharp.FunctionProtoType;
+                                arg.CxxName = funcDef.AsString;
+                                var pos = arg.CxxName.IndexOf('(');
+                                arg.CxxName = arg.CxxName.Insert(pos, $"(*{arg.Name})");
+                            }
+                            else
+                            {
+                                arg.CxxName = j.Type.AsString;
+                            }
+                            tmp.Parameters.Add(arg);
+                        }
+
+                        if (i.Name == bsd.Name)
+                        {
+                            
+                        }
+                        else
+                        {
+                            var ret = new UProperty();
+                            ret.PropertyType = UTypeManager.Instance.FindType(i.ReturnType.Handle);
+                            ret.NumOfTypePointer = UTypeManager.GetPointerNumOfType(i.ReturnType.Handle, out ret.IsReference);
+                            ret.IsDelegate = ret.PropertyType is UDelegate;
+                            //ret.Name = "Function_Ret";
+
+                            if (ret.IsDelegate)
+                            {
+                                var funcDef = i.ReturnType.PointeeType as ClangSharp.FunctionProtoType;
+                                ret.CxxName = funcDef.AsString;
+                                var pos = ret.CxxName.IndexOf('(');
+                                ret.CxxName = ret.CxxName.Insert(pos, $"(*Function_Ret)");
+                            }
+                            else
+                            {
+                                ret.CxxName = i.ReturnType.AsString;
+                            }
+                            tmp.ReturnType = ret;
+                            tmp.UpdateFunctionHash(i);
+
+                            if (tmp.CheckTypes() == false)
+                                continue;
+                            Functions.Add(tmp);
+                        }
+                    }
                 }
             }
         }

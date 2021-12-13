@@ -70,6 +70,7 @@
     <Import Project="..\NativeCode\Graphics\Pipeline\Pipeline.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Graphics\Mesh\Mesh.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\FBX\FBX.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\RenderDoc\RenderDoc.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\iconv\iconv.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\TextConverter\TextConverter.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Animation\Animation.vcxitems" Label="Shared" />
@@ -77,6 +78,12 @@
     <Import Project="..\NativeCode\Bricks\TcpServer\TcpServer.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Platform\Windows\Windows.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\FreeType\FreeType.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\MeshOptimizer\MeshOptimizer.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\MeshSimplify\MeshSimplify.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\Terrain\Terrain.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\RHI\Vulkan\Vulkan.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\Particle\Particle.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -113,7 +120,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;WIN32;_DEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;WIN32;_DEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -134,12 +141,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;_DEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PTR_64;_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;_DEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -147,8 +154,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;..\3rd\native\PhysX-4.1\physx\Lib\windows\debug;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;spirv-cross-c-shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>$(SolutionDir)CallTHT.bat</Command>
@@ -162,7 +169,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;WIN32;NDEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;WIN32;NDEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -187,12 +194,12 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NDEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PTR_64;_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;NDEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>c:\aaa;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;c:\aaa;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -202,8 +209,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/ShaderConductor/Lib/Release;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;..\3rd\native\PhysX-4.1\physx\Lib\windows\release;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;spirv-cross-c-shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>$(SolutionDir)CallTHT.bat

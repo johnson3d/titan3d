@@ -10,6 +10,7 @@ namespace CppWeaving.Cpp2CS
 	{
 		public EAccess Access;
 		public bool IsStatic;
+		public bool IsVirtual;
 		public UProperty ReturnType;
 		public List<UProperty> Parameters = new List<UProperty>();
 		public uint FunctionHash;
@@ -137,10 +138,6 @@ namespace CppWeaving.Cpp2CS
 								argType = "string";
 							}
 						}
-						else
-                        {
-							int xxx = 0;
-                        }
                         if (j.IsTypeDef)
                         {
                             var dypeDef = USysClassManager.Instance.FindTypeDef(j.CxxName);

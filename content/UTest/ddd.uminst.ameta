@@ -2,12 +2,18 @@
 <Root Type="EngineNS.Graphics.Pipeline.Shader.UMaterialInstanceAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="da21bb21-134c-4d00-bdbb-00459e7a91c1" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterialInstance&#xA;Hahah" />
-  <Icon Type="EngineNS.EGui.UVAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="2">
+      <e_0 Value="0,0,1,1" />
+      <e_1 Value="0,0,1,1" />
+    </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
     <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
     <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Value="Game,utest/taxi.srv,d6b2c4d5-f2de-4225-bf01-a82fb9e2144d" />
+  </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" />
 </Root>

@@ -11,6 +11,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DefineConstants>TRACE;PWindow</DefineConstants>
     <SkipPostSharp>True</SkipPostSharp>
+    <NoWarn>1701;1702;1998</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -18,6 +19,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DefineConstants>TRACE;PWindow</DefineConstants>
+    <NoWarn>1701;1702;1998</NoWarn>
   </PropertyGroup>
 
   <Import Project="..\..\CSharpCode\Base\Base.projitems" Label="Shared" />
@@ -77,16 +79,21 @@
   <Import Project="..\..\CSharpCode\Bricks\TcpServer\TcpServer.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\SourceControl\SourceControl.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\VXGI\VXGI.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\PhysicsCore\PhysicsCore.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\ProjectGen\ProjectGen.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Terrain\Terrain.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Input\Input.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\VirtualTexture\VirtualTexture.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Particle\Particle.projitems" Label="Shared" />
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.9.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.9.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.0.0-3.final" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.0.0-3.final" />
     <PackageReference Include="Mono.Cecil" Version="0.11.4" />
     <PackageReference Include="NPOI" Version="2.5.2" />
     <PackageReference Include="ppy.SDL2-CS" Version="1.0.82" />
     <PackageReference Include="RIPEMD160" Version="1.0.1" />
+    <PackageReference Include="SkiaSharp" Version="2.88.0-preview.61" />
     <PackageReference Include="System.CodeDom" Version="5.0.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>

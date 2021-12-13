@@ -105,7 +105,7 @@ namespace ProjectCooker.Command
                 }
             }
 
-            var ametaPath = ameta.GetAssetName().Address + ".ameta";
+            var ametaPath = ameta.GetAssetName().Address + IO.IAssetMeta.MetaExt;
             ameta.SetAssetName(tar);
             ameta.SaveAMeta();
             System.IO.File.Delete(ametaPath);

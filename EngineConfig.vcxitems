@@ -19,5 +19,7 @@
     <None Include="$(MSBuildThisFileDirectory)content\EngineConfig.cfg" />
     <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForCook.cfg" />
     <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForGL.cfg" />
+    <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForVK.cfg" />
+    <None Include="$(MSBuildThisFileDirectory)content\SlateApp.cfg" />
   </ItemGroup>
 </Project>

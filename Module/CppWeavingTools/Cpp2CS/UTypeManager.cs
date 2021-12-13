@@ -86,12 +86,20 @@ namespace CppWeaving.Cpp2CS
             var t = decl.UnderlyingType.PointeeType as ClangSharp.FunctionProtoType;
             if (t == null)
                 return;
-            var fullname = ns + "." + name;
-            if (string.IsNullOrEmpty(ns))
+            //var fullname = ns + "." + name;
+            //if (string.IsNullOrEmpty(ns))
+            //{
+            //    fullname = name;
+            //}
+            //fullname = fullname.Replace("::", ".");
+
+            var nakedType = UTypeManager.GetNakedType(t.Handle);
+            if (nakedType.kind != ClangSharp.Interop.CXTypeKind.CXType_FunctionProto)
             {
-                fullname = name;
+                return;
             }
-            fullname = fullname.Replace("::", ".");
+            var fullname = GetFullName(nakedType);
+
             lock (DelegateTypes)
             {
                 UDelegate tmp;
@@ -323,7 +331,7 @@ namespace CppWeaving.Cpp2CS
             {
                 return null;
             }
-            var fullname = GetFullName(t);
+            var fullname = GetFullName(nakedType);
 
             UDelegate kls;
             if (DelegateTypes.TryGetValue(fullname, out kls))
@@ -342,6 +350,17 @@ namespace CppWeaving.Cpp2CS
             while (cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Pointer || cur.kind == ClangSharp.Interop.CXTypeKind.CXType_LValueReference)
             {
                 cur = cur.PointeeType;
+            }
+            if (cur.ToString() == "size_t")
+            {//size_t是特殊的，相当于指针位宽，有变化
+                return cur;
+            }
+            else
+            {
+                while (cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef || cur.kind == ClangSharp.Interop.CXTypeKind.CXType_Elaborated)
+                {
+                    cur = cur.Desugar;
+                }
             }
             cur = cur.Desugar;
             if (cur.NumElements > 0)

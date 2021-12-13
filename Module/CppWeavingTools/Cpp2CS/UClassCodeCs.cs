@@ -89,10 +89,91 @@ namespace CppWeaving.Cpp2CS
             }
             PopBrackets();
 
+            if (mClass.HasMeta(UProjectSettings.SV_CSImplement))
+            {
+                GenInheritable();
+            }
+
             if (!string.IsNullOrEmpty(mClass.Namespace))
             {
                 PopBrackets();
             }
+        }
+        protected void GenInheritable()
+        {
+            AddLine($"public unsafe abstract partial class I_{Name} : AuxPtrType<{Name}>");
+            PushBrackets();
+            {
+                AddLine($"const string ModuleNC = {UProjectSettings.ModuleNC};");
+                AddLine($"static I_{Name}()");
+                PushBrackets();
+                {
+                    foreach (var i in mClass.Functions)
+                    {
+                        if (i.IsVirtual == false)
+                        {
+                            continue;
+                        }
+                        if (i.HasMeta(UProjectSettings.SV_CSImplement) == false)
+                        {
+                            continue;
+                        }
+                        AddLine($"TSDK_Set_CSImpl_{i.Name}_{i.FunctionHash}(csfn_{i.Name});");
+                    }
+                }
+                PopBrackets();
+                foreach (var i in mClass.Functions)
+                {
+                    if (i.IsVirtual == false)
+                    {
+                        continue;
+                    }
+                    if (i.HasMeta(UProjectSettings.SV_CSImplement) == false)
+                    {
+                        continue;
+                    }
+                    string marshalReturn = null;
+                    bool pointerTypeWrapper = false;
+                    if (i.ReturnType.NumOfTypePointer == 1 && i.ReturnType.PropertyType.ClassType == UTypeBase.EClassType.PointerType)
+                    {
+                        pointerTypeWrapper = true;
+                    }
+                    var retTypeStr = i.ReturnType.GetCsTypeName();
+                    if (pointerTypeWrapper)
+                    {
+                        retTypeStr = i.ReturnType.PropertyType.ToCsName();
+                    }
+                    else
+                    {
+                        if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
+                        {
+                            if (retTypeStr == "sbyte*")
+                            {
+                                retTypeStr = "string";
+                                marshalReturn = $"EngineNS.Rtti.UNativeCoreProvider.MarshalPtrAnsi";
+                            }
+                        }
+                    }
+                    string retStr = "return ";
+                    if (retTypeStr == "void")
+                        retStr = "";
+                    
+                    AddLine($"private delegate {retTypeStr} CSImpl_{i.Name}(IntPtr self, {i.GetParameterDefineCs()});");
+                    UTypeManager.WritePInvokeAttribute(this, i);
+                    AddLine($"private extern static void TSDK_Set_CSImpl_{i.Name}_{i.FunctionHash}(CSImpl_{i.Name} fn);");
+                    AddLine($"private static CSImpl_{i.Name} csfn_{i.Name} = csfn_imp_{i.Name};");
+                    AddLine($"private static {retTypeStr} csfn_imp_{i.Name}(IntPtr self, {i.GetParameterDefineCs()})");
+                    PushBrackets();
+                    {
+                        AddLine($"var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(self);");
+                        AddLine($"var pThis = handle.Target as I_{Name};");
+                        AddLine($"{retStr}pThis.{i.Name}({i.GetParameterCalleeCs()});");
+                    }
+                    PopBrackets();
+                    AddLine($"{GetAccessDefine(i.Access)} abstract {retTypeStr} {i.Name}({i.GetParameterDefineCs()});");
+                }
+            }
+            PopBrackets();
         }
         protected virtual void UserAttribute()
         {

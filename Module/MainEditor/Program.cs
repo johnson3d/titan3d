@@ -35,10 +35,19 @@ namespace MainEditor
                 System.GC.WaitForPendingFinalizers();
             }
 
-            while(EngineNS.RHI.CShaderResourceView.NumOfInstance>0)
+            int GCTimes = 0;
+            while (EngineNS.RHI.CShaderResourceView.NumOfInstance > 0)
             {
+                if (GCTimes >= 20)
+                {
+                    Console.WriteLine($"CSV.NumOfInstance = {EngineNS.RHI.CShaderResourceView.NumOfInstance}/{EngineNS.RHI.CShaderResourceView.NumOfGCHandle}");
+                    System.Diagnostics.Trace.WriteLine($"CSV.NumOfInstance = {EngineNS.RHI.CShaderResourceView.NumOfInstance}/{EngineNS.RHI.CShaderResourceView.NumOfGCHandle}");
+                    //Thread.Sleep(1000 * 30);
+                    break;
+                }
                 System.GC.Collect();
                 System.GC.WaitForPendingFinalizers();
+                GCTimes++;
             }
         }
         static WeakReference Main_Impl(string[] args)
