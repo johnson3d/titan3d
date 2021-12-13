@@ -80,6 +80,18 @@ namespace ShaderConductor
         NumShadingLanguages,
     };
 
+    enum class ShaderResourceType : uint32_t
+    {
+        ConstantBuffer,
+        Parameter,
+        Texture,
+        Sampler,
+        ShaderResourceView,
+        UnorderedAccessView,
+
+        NumShaderResourceType,
+    };
+
     struct MacroDefine
     {
         const char* name;
@@ -89,14 +101,230 @@ namespace ShaderConductor
     class SC_API Blob
     {
     public:
-        virtual ~Blob();
+        Blob() noexcept;
+        Blob(const void* data, uint32_t size);
+        Blob(const Blob& other);
+        Blob(Blob&& other) noexcept;
+        ~Blob() noexcept;
 
-        virtual const void* Data() const = 0;
-        virtual uint32_t Size() const = 0;
+        Blob& operator=(const Blob& other);
+        Blob& operator=(Blob&& other) noexcept;
+
+        void Reset();
+        void Reset(const void* data, uint32_t size);
+
+        const void* Data() const noexcept;
+        uint32_t Size() const noexcept;
+
+    private:
+        class BlobImpl;
+        BlobImpl* m_impl = nullptr;
     };
 
-    SC_API Blob* CreateBlob(const void* data, uint32_t size);
-    SC_API void DestroyBlob(Blob* blob);
+    class SC_API Reflection
+    {
+    public:
+        class ReflectionImpl;
+
+        struct ResourceDesc
+        {
+            char name[256];          // Name of the resource
+            ShaderResourceType type; // Type of resource (e.g. texture, cbuffer, etc.)
+            uint32_t bindPoint;      // Starting bind point
+            uint32_t bindCount;      // Number of contiguous bind points (for arrays)
+        };
+
+        enum class VariableType
+        {
+            Bool,
+            Int,
+            Uint,
+            Float,
+
+            Half,
+            Int16,
+            Uint16,
+        };
+
+        struct VariableTypeDesc
+        {
+            char name[256];
+            VariableType type;
+            uint32_t rows;          // Number of rows (for matrices, 1 for other numeric, 0 if not applicable)
+            uint32_t columns;       // Number of columns (for vectors & matrices, 1 for other numeric, 0 if not applicable)
+            uint32_t elements;      // Number of elements (0 if not an array)
+            uint32_t elementStride;
+        };
+
+        struct VariableDesc
+        {
+            char name[256];
+            VariableTypeDesc type;
+            uint32_t startOffset; // Offset in cbuffer
+            uint32_t size;        // Size of the variable
+        };
+
+        enum class ComponentMask : uint8_t
+        {
+            X = 0x1U,
+            Y = 0x2U,
+            Z = 0x4U,
+            W = 0x8U,
+        };
+
+        struct SignatureParameterDesc
+        {
+            char semantic[256];
+            uint32_t semanticIndex;
+            uint32_t location;
+            VariableType componentType;
+            ComponentMask mask;
+        };
+
+        enum class PrimitiveTopology
+        {
+            Undefined,
+            Points,
+            Lines,
+            LineStrip,
+            Triangles,
+            TriangleStrip,
+
+            Lines_Adj,
+            LineStrip_Adj,
+            Triangles_Adj,
+            TriangleStrip_Adj,
+
+            Patches_1_CtrlPoint,
+            Patches_2_CtrlPoint,
+            Patches_3_CtrlPoint,
+            Patches_4_CtrlPoint,
+            Patches_5_CtrlPoint,
+            Patches_6_CtrlPoint,
+            Patches_7_CtrlPoint,
+            Patches_8_CtrlPoint,
+            Patches_9_CtrlPoint,
+            Patches_10_CtrlPoint,
+            Patches_11_CtrlPoint,
+            Patches_12_CtrlPoint,
+            Patches_13_CtrlPoint,
+            Patches_14_CtrlPoint,
+            Patches_15_CtrlPoint,
+            Patches_16_CtrlPoint,
+            Patches_17_CtrlPoint,
+            Patches_18_CtrlPoint,
+            Patches_19_CtrlPoint,
+            Patches_20_CtrlPoint,
+            Patches_21_CtrlPoint,
+            Patches_22_CtrlPoint,
+            Patches_23_CtrlPoint,
+            Patches_24_CtrlPoint,
+            Patches_25_CtrlPoint,
+            Patches_26_CtrlPoint,
+            Patches_27_CtrlPoint,
+            Patches_28_CtrlPoint,
+            Patches_29_CtrlPoint,
+            Patches_30_CtrlPoint,
+            Patches_31_CtrlPoint,
+            Patches_32_CtrlPoint,
+        };
+
+        enum class TessellatorOutputPrimitive
+        {
+            Undefined,
+            Point,
+            Line,
+            Triangle_CW,
+            Triangle_CCW,
+        };
+
+        enum class TessellatorPartitioning
+        {
+            Undefined,
+            Integer,
+            Pow2,
+            Fractional_Odd = 3,
+            Fractional_Even = 4,
+        };
+
+        enum class TessellatorDomain
+        {
+            Undefined,
+            Line,
+            Triangle,
+            Quad,
+        };
+
+        class SC_API ConstantBuffer
+        {
+        public:
+            class ConstantBufferImpl;
+
+        public:
+            ConstantBuffer() noexcept;
+            ConstantBuffer(const ConstantBuffer& other);
+            ConstantBuffer(ConstantBuffer&& other) noexcept;
+            ~ConstantBuffer() noexcept;
+
+            ConstantBuffer& operator=(const ConstantBuffer& other);
+            ConstantBuffer& operator=(ConstantBuffer&& other) noexcept;
+
+            bool Valid() const noexcept;
+
+            const char* Name() const noexcept;
+            uint32_t Size() const noexcept;
+
+            uint32_t NumVariables() const noexcept;
+            const VariableDesc& VariableByIndex(uint32_t index) const;
+            const VariableDesc& VariableByName(const char* name) const;
+
+        private:
+            ConstantBufferImpl* m_impl = nullptr;
+        };
+
+    public:
+        Reflection() noexcept;
+        Reflection(const Reflection& other);
+        Reflection(Reflection&& other) noexcept;
+        ~Reflection() noexcept;
+
+        Reflection& operator=(const Reflection& other);
+        Reflection& operator=(Reflection&& other) noexcept;
+
+        bool Valid() const noexcept;
+
+        uint32_t NumResources() const noexcept;
+        const ResourceDesc& ResourceByIndex(uint32_t index) const;
+        const ResourceDesc& ResourceByName(const char* name) const;
+
+        const ConstantBuffer& ConstantBufferByIndex(uint32_t index) const;
+        const ConstantBuffer& ConstantBufferByName(const char* name) const;
+
+        uint32_t NumInputParameters() const noexcept;
+        const SignatureParameterDesc& InputParameter(uint32_t index) const;
+        uint32_t NumOutputParameters() const noexcept;
+        const SignatureParameterDesc& OutputParameter(uint32_t index) const;
+
+        PrimitiveTopology GSHSInputPrimitive() const noexcept;
+        PrimitiveTopology GSOutputTopology() const noexcept;
+        uint32_t GSMaxNumOutputVertices() const noexcept;
+        uint32_t GSInstanceCount() const noexcept;
+
+        TessellatorOutputPrimitive HSOutputPrimitive() const noexcept;
+        TessellatorPartitioning HSPartitioning() const noexcept;
+
+        TessellatorDomain HSDSTessellatorDomain() const noexcept;
+        uint32_t HSDSNumPatchConstantParameters() const noexcept;
+        const SignatureParameterDesc& HSDSPatchConstantParameter(uint32_t index) const;
+        uint32_t HSDSNumConrolPoints() const noexcept;
+
+        uint32_t CSBlockSizeX() const noexcept;
+        uint32_t CSBlockSizeY() const noexcept;
+        uint32_t CSBlockSizeZ() const noexcept;
+
+    private:
+        ReflectionImpl* m_impl = nullptr;
+    };
 
     class SC_API Compiler
     {
@@ -141,23 +369,24 @@ namespace ShaderConductor
             ShaderStage stage;
             const MacroDefine* defines;
             uint32_t numDefines;
-            std::function<Blob*(const char* includeName)> loadIncludeCallback;
+            std::function<Blob(const char* includeName)> loadIncludeCallback;
         };
 
         struct Options
         {
-            bool packMatricesInRowMajor = true; // Experimental: Decide how a matrix get packed
-            bool enable16bitTypes = false;      // Enable 16-bit types, such as half, uint16_t. Requires shader model 6.2+
-            bool enableDebugInfo = false;       // Embed debug info into the binary
-            bool disableOptimizations = false;  // Force to turn off optimizations. Ignore optimizationLevel below.
+            bool packMatricesInRowMajor = true;          // Experimental: Decide how a matrix get packed
+            bool enable16bitTypes = false;               // Enable 16-bit types, such as half, uint16_t. Requires shader model 6.2+
+            bool enableDebugInfo = false;                // Embed debug info into the binary
+            bool disableOptimizations = false;           // Force to turn off optimizations. Ignore optimizationLevel below.
+            bool inheritCombinedSamplerBindings = false; // If textures and samplers are combined, inherit the binding of the texture
 
             int optimizationLevel = 3; // 0 to 3, no optimization to most optimization
             ShaderModel shaderModel = {6, 0};
 
-            int shiftAllTexturesBindings;
-            int shiftAllSamplersBindings;
-            int shiftAllCBuffersBindings;
-            int shiftAllUABuffersBindings;
+            int shiftAllTexturesBindings = 0;
+            int shiftAllSamplersBindings = 0;
+            int shiftAllCBuffersBindings = 0;
+            int shiftAllUABuffersBindings = 0;
         };
 
         struct TargetDesc
@@ -169,11 +398,13 @@ namespace ShaderConductor
 
         struct ResultDesc
         {
-            Blob* target;
+            Blob target;
             bool isText;
 
-            Blob* errorWarningMsg;
+            Blob errorWarningMsg;
             bool hasError;
+
+            Reflection reflection;
         };
 
         struct DisassembleDesc
@@ -186,7 +417,7 @@ namespace ShaderConductor
         struct ModuleDesc
         {
             const char* name;
-            Blob* target;
+            Blob target;
         };
 
         struct LinkDesc
@@ -208,6 +439,16 @@ namespace ShaderConductor
         static bool LinkSupport();
         static ResultDesc Link(const LinkDesc& modules, const Options& options, const TargetDesc& target);
     };
+
+    inline Reflection::ComponentMask& operator|=(Reflection::ComponentMask& lhs, Reflection::ComponentMask rhs)
+    {
+        lhs = static_cast<Reflection::ComponentMask>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
+        return lhs;
+    }
+    inline constexpr Reflection::ComponentMask operator|(Reflection::ComponentMask lhs, Reflection::ComponentMask rhs)
+    {
+        return static_cast<Reflection::ComponentMask>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
+    }
 } // namespace ShaderConductor
 
 #endif // SHADER_CONDUCTOR_HPP

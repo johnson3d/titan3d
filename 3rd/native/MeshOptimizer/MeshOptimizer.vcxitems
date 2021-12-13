@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{538bd5cb-f288-41e8-bdb6-a8c2e72c630d}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)allocator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)clusterizer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)indexcodec.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)indexgenerator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)overdrawanalyzer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)overdrawoptimizer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)simplifier.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)spatialorder.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)stripifier.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)vcacheanalyzer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)vcacheoptimizer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)vertexcodec.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)vertexfilter.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)vfetchanalyzer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)vfetchoptimizer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)meshoptimizer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)LICENSE.md" />
+  </ItemGroup>
+</Project>
