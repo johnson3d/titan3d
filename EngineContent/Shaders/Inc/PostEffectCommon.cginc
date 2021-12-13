@@ -17,8 +17,6 @@ half CalcVignettePS(half2 VSData, half Intensity)
 	return Cos4Angle;
 }
 
-
-
 half2 CircleSampler(half SliceCount, half Start, half Offset)
 {
 	half radian = (3.141592h * 2.0h * (1.0h / SliceCount)) * (Start + Offset);
@@ -55,7 +53,7 @@ half3 ACESMobile_HQ(half3 LinearColor)
 		{-0.11141, -0.10423, 1.22232}
 	};
 
-	float3 Oc = mul(LinearColor, ACESInputMtx);
+	half3 Oc = (half3)mul(LinearColor, ACESInputMtx);
 	return (half3)saturate(
 			mul((float3)RRT_ODT(Oc), 
 			ACESOutputMtx));
@@ -81,40 +79,6 @@ half3 ReconstructPosWS(float2 uv, float w, matrix ViewPrjInvMtx, float LinearDep
 	float4 PosCS = float4(uv.x * 2.0f - 1.0f, (1.0f - uv.y * 2.0f) * platform_uv_flag, LinearDepth, 1.0f) * w;
 	float4 PosWS = mul(PosCS, ViewPrjInvMtx);
 	return half3(PosWS.xyz);
-}
-
-/** Reverses all the 32 bits. */
-uint ReverseBits32( uint bits )
-{
-#if SM5_PROFILE || COMPILER_METAL
-	return reversebits( bits );
-#else
-	bits = ( bits << 16) | ( bits >> 16);
-	bits = ( (bits & 0x00ff00ff) << 8 ) | ( (bits & 0xff00ff00) >> 8 );
-	bits = ( (bits & 0x0f0f0f0f) << 4 ) | ( (bits & 0xf0f0f0f0) >> 4 );
-	bits = ( (bits & 0x33333333) << 2 ) | ( (bits & 0xcccccccc) >> 2 );
-	bits = ( (bits & 0x55555555) << 1 ) | ( (bits & 0xaaaaaaaa) >> 1 );
-	return bits;
-#endif
-}
-
-/** Reverses all the <BitCount> lowest significant bits. */
-uint ReverseBitsN(uint Bitfield, const uint BitCount)
-{
-	return ReverseBits32(Bitfield) >> (32 - BitCount);
-}
-
-float2 Hammersley2d(uint idx, uint num) 
-{
-	uint bits = idx;
-	bits = (bits << 16u) | (bits >> 16u);
-	bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
-	bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
-	bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
-	bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
-	const float radicalInverse_VdC = float(bits) * 2.3283064365386963e-10; // / 0x100000000
-
-	return float2(float(idx) / float(num), radicalInverse_VdC);
 }
 
 float3 CaclUniformHemispherePoint(float2 uv) 

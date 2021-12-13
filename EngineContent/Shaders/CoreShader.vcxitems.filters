@@ -40,28 +40,37 @@
     <Filter Include="Compute\VXGI">
       <UniqueIdentifier>{712ca324-80dd-419a-bbad-c5c2c0189aef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Deprecated">
+      <UniqueIdentifier>{238a4f6f-2f51-46a4-8297-0cd21906895f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Compute\ScreenSpace">
+      <UniqueIdentifier>{ee68111c-9e4c-4a7c-a3bb-0be586fa6485}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ShadingEnv\Sys\screenspace">
+      <UniqueIdentifier>{3331b81c-1423-4ce4-ac88-d83a2c09b1d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Bricks">
+      <UniqueIdentifier>{b1a20e48-7f64-413f-967d-e818b11e52b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Bricks\Particle">
+      <UniqueIdentifier>{8b33271d-5d00-47ba-a8da-a80ff6c64ee0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
       <Filter>Material</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.code">
+    <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.cginc">
       <Filter>Modifier</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.var">
       <Filter>Modifier</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.code">
+    <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.cginc">
       <Filter>Modifier</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.var">
       <Filter>Modifier</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)DSBase2RT.shadingenv">
-      <Filter>ShadingEnv\Deffered</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)DSDirLighting.shadingenv">
-      <Filter>ShadingEnv\Deffered</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Font.shadingenv">
       <Filter>ShadingEnv\Sys</Filter>
@@ -69,48 +78,15 @@
     <None Include="$(MSBuildThisFileDirectory)FSBase.shadingenv">
       <Filter>ShadingEnv\Sys</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Gizmos.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)HitProxy.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)HitProxyAxis.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomDS.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomSetUp.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomUS.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileCopy.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileTranslucent.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)Snapshot.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileCopy.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaque.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaqueNPR.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileOutlineNPR.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileTranslucent.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)UFOMobileTranslucentNPR.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)SSM.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileCustomTranslucent.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.code">
+    <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.cginc">
       <Filter>Modifier</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.var">
       <Filter>Modifier</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileSky.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)SceneCapture.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\NoPixelShader.shadingenv">
       <Filter>ShadingEnv\Sys</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)MobileCopyEditor.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)PickedBlurH.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)PickedBlurV.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)PickedHollow.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)PickedSetUp.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomBlurH.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileBloomBlurV.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileOpaqueEditor.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileCustomTranslucentEditor.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileSunShaftMask.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileSunShaftBlur.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileAoMask.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileAoBlurH.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)MobileAoBlurV.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\MergeInstance.shadingenv">
       <Filter>Compute\GpuDriven</Filter>
     </None>
@@ -213,6 +189,147 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileTranslucent.cginc">
       <Filter>ShadingEnv\Mobile</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Compute\VXGI\VxDebugModifier.cginc">
+      <Filter>Compute\VXGI</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredBasePassPS.cginc">
+      <Filter>ShadingEnv\Deffered</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredCommon.cginc">
+      <Filter>ShadingEnv\Deffered</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredDirLighting.cginc">
+      <Filter>ShadingEnv\Deffered</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredOpaque.cginc">
+      <Filter>ShadingEnv\Deffered</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Gizmos.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)HitProxy.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)HitProxyAxis.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileAoBlurH.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileAoBlurV.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileAoMask.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileBloomBlurH.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileBloomBlurV.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileBloomDS.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileBloomSetUp.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileBloomUS.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileCopy.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileCopyEditor.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileCustomTranslucent.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileCustomTranslucentEditor.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileOpaqueEditor.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileSky.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileSunShaftBlur.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileSunShaftMask.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)MobileTranslucent.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)PickedBlurH.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)PickedBlurV.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)PickedHollow.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)PickedSetUp.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)SceneCapture.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Snapshot.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)SSM.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)UFOMobileCopy.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaque.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaqueNPR.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)UFOMobileOutlineNPR.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)UFOMobileTranslucent.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)UFOMobileTranslucentNPR.shadingenv">
+      <Filter>Deprecated</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DummyShading.cginc">
+      <Filter>ShadingEnv</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredTranslucent.cginc">
+      <Filter>ShadingEnv\Deffered</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\GpuSceneCommon.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\screenspace\hdr.cginc">
+      <Filter>ShadingEnv\Sys\screenspace</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\MonteCarlo.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Modifier\TerrainCDLOD.cginc">
+      <Filter>Modifier</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)slate\SlateGUI.cginc">
+      <Filter>Slate</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\NebulaParticle.cginc">
+      <Filter>Bricks\Particle</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\ParticleCommon.cginc">
+      <Filter>Bricks\Particle</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
@@ -230,14 +347,35 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Cluster.compute">
       <Filter>Compute\GpuDriven</Filter>
     </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)slate\imgui-frag.hlsl">
-      <Filter>Slate</Filter>
-    </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)slate\imgui-vertex.hlsl">
-      <Filter>Slate</Filter>
-    </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\VXGI\VoxelAllocator.compute">
       <Filter>Compute\VXGI</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\VXGI\VoxelInject.compute">
+      <Filter>Compute\VXGI</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\VXGI\VXGICommon.compute">
+      <Filter>Compute\VXGI</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\VXGI\VxVisualDebugger.compute">
+      <Filter>Compute\VXGI</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Hzb.compute">
+      <Filter>Compute\GpuDriven</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\Tiling.compute">
+      <Filter>Compute\ScreenSpace</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\AvgBrightness.compute">
+      <Filter>Compute\ScreenSpace</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\Particle.compute">
+      <Filter>Bricks\Particle</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitShape.compute">
+      <Filter>Bricks\Particle</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\Effectors.compute">
+      <Filter>Bricks\Particle</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

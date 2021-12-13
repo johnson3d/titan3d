@@ -1,18 +1,20 @@
 #ifndef _MobileBasePassPS_H_
 #define _MobileBasePassPS_H_
 
-Texture2D gEnvMap;
-SamplerState Samp_gEnvMap;
+Texture2D gEnvMap DX_NOBIND;
+SamplerState Samp_gEnvMap DX_NOBIND;
 
-Texture2D gEyeEnvMap;
-SamplerState Samp_gEyeEnvMap;
+Texture2D gEyeEnvMap DX_NOBIND;
+SamplerState Samp_gEyeEnvMap DX_NOBIND;
 
-Texture2D		gShadowMap;
-SamplerState	Samp_gShadowMap;
+Texture2D		gShadowMap DX_NOBIND;
+SamplerState	Samp_gShadowMap DX_NOBIND;
+
+StructuredBuffer<FTileData> TilingBuffer DX_NOBIND;
 
 struct PS_OUTPUT
 {
-	half4 RT0 : SV_Target0;
+	float4 RT0 : SV_Target0;
 };
 
 PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
@@ -26,6 +28,10 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 #define DO_PS_MATERIAL DoDefaultPSMaterial
 #endif
 		DO_PS_MATERIAL(input, mtl);
+
+#ifdef MDFQUEUE_FUNCTION_PS
+		MdfQueueDoModifiersPS(input, mtl);
+#endif
 	}
 
 	half AoOffsetEncoded = 0.0h;
@@ -303,7 +309,22 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		
 		//point light part;
 #if ENV_DISABLE_POINTLIGHTS == 0
-		BaseShading += MultiPbrPointLightMobile(input, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
+		//BaseShading += MultiPbrPointLightMobile(input, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
+		if (true)
+		{
+			float2 uv = input.psCustomUV0.xy;
+			/*uv.x = saturate( (input.vPosition.x + 1.0f) * 0.5f );
+			uv.y = saturate( (1.0f - input.vPosition.y) * 0.5f );*/
+			float2 tileIdxF = (uv.xy * gViewportSizeAndRcp.xy) / TileSize;
+			uint2 tileIdx = (uint2)tileIdxF;
+			uint indexOfTile = GetTileIndex(tileIdx.x, tileIdx.y);
+			for (int i = 0; i < TilingBuffer[indexOfTile].NumPointLight; i++)
+			{
+				uint lightIndex = TilingBuffer[indexOfTile].PointLights[i];
+				FPointLight light = GpuScene_PointLights[lightIndex];
+				BaseShading += PointLightShading(light, WorldPos, V, N, OptDiffShading, OptSpecShading, Roughness);
+			}
+		}
 #endif//#if ENV_DISABLE_POINTLIGHTS == 0
 
 #endif//#ifdef MTL_ID_SKIN

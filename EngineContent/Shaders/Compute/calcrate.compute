@@ -2,7 +2,7 @@ struct BufType
 {
 	uint count;
 };
-RWStructuredBuffer<BufType> BufferOut : register(u0);
+RWStructuredBuffer<BufType> BufferOut DX_BIND_U(0);
 
 cbuffer CaptureEnv
 {
@@ -12,7 +12,7 @@ struct BufType1
 {
 	uint ratePack;
 };
-RWStructuredBuffer<BufType1> BufferOut1 : register(u1);
+RWStructuredBuffer<BufType1> BufferOut1 DX_BIND_U(1);
 
 [numthreads(1, 1, 1)]
 void CSMain1(uint3 id : SV_DispatchThreadID)

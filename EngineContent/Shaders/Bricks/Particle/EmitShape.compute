@@ -1,0 +1,73 @@
+#ifndef _PARTICLE_EMITSHAPE_H_
+#define _PARTICLE_EMITSHAPE_H_
+
+void UShapeBox_UpdateLocation(uint3 id, in UShapeBox shape, inout FParticle particle)
+{
+    float4 rdValue = RandomFloat4BySeed3(particle); //RandomFloat4(id.x);
+    float3 dir = normalize(rdValue.xyz);
+    float3 offset = (float3)0;
+    if (shape.Thinness >= 1.0f)
+    {
+        offset = dir * shape.HalfExtent;
+    }
+    else
+    {
+        switch (((uint)(rdValue.w * 65535)) % 6)
+        {
+        case 0://x
+        {
+            offset.x = shape.HalfExtent.x - (shape.Thinness * rdValue.x) * shape.HalfExtent.x;
+            offset.y = rdValue.y * shape.HalfExtent.y;
+            offset.z = rdValue.z * shape.HalfExtent.z;
+        }
+        break;
+        case 1://-x
+        {
+            offset.x = -shape.HalfExtent.x + (shape.Thinness * rdValue.x) * shape.HalfExtent.x;
+            offset.y = rdValue.y * shape.HalfExtent.y;
+            offset.z = rdValue.z * shape.HalfExtent.z;
+        }
+        break;
+        case 2://y
+        {
+            offset.y = shape.HalfExtent.y - (shape.Thinness * rdValue.y) * shape.HalfExtent.y;
+            offset.x = rdValue.x * shape.HalfExtent.x;
+            offset.z = rdValue.z * shape.HalfExtent.z;
+        }
+        break;
+        case 3://-y
+        {
+            offset.y = -shape.HalfExtent.y + (shape.Thinness * rdValue.y) * shape.HalfExtent.y;
+            offset.x = rdValue.x * shape.HalfExtent.x;
+            offset.z = rdValue.z * shape.HalfExtent.z;
+        }
+        break;
+        case 4://z
+        {
+            offset.z = shape.HalfExtent.z - (shape.Thinness * rdValue.z) * shape.HalfExtent.z;
+            offset.x = rdValue.x * shape.HalfExtent.x;
+            offset.y = rdValue.y * shape.HalfExtent.y;
+        }
+        break;
+        case 5://-z
+        {
+            offset.z = -shape.HalfExtent.z + (shape.Thinness * rdValue.z) * shape.HalfExtent.z;
+            offset.x = rdValue.x * shape.HalfExtent.x;
+            offset.y = rdValue.y * shape.HalfExtent.y;
+        }
+        break;
+        }
+    }
+    particle.Location = shape.Center + offset;
+}
+
+void UShapeSphere_UpdateLocation(uint3 id, in UShapeSphere shape,  inout FParticle particle)
+{
+    float4 rdValue = RandomFloat4BySeed2(particle);
+	float3 dir = normalize(rdValue.xyz);
+	float3 offset;     
+	offset = dir * (shape.Radius - shape.Radius * (shape.Thinness * rdValue.w));
+    particle.Location = shape.Center + offset;
+}
+
+#endif//#ifndef _PARTICLE_EMITSHAPE_H_

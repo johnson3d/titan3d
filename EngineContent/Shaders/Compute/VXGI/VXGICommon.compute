@@ -1,0 +1,90 @@
+#ifndef _VXGIComon_Compute_H_
+#define _VXGIComon_Compute_H_
+
+#include "../../Inc/VertexLayout.cginc"
+#include "../../Inc/GpuSceneCommon.cginc"
+#include "../../Inc/MonteCarlo.cginc"
+
+#define VxDescStructSize 2
+
+#define VxGroupStride (VxGroupCubeSide*VxGroupCubeSide*VxGroupCubeSide*VxDescStructSize)
+
+int GetVxOffsetInGroup(int x, int y, int z)
+{
+	return (VxGroupCubeSide * VxGroupCubeSide) * y + VxGroupCubeSide * z + x;
+}
+
+uint PackColor(float3 color, uint material)
+{
+	return (uint)(color.x * 256) | ((uint)(color.y * 256) << 8) | ((uint)((color.z / 256.0f) * 256) << 16) | (material << 24);
+}
+
+uint GetMaterial(uint data)
+{
+	return (data >> 24);
+}
+
+half3 GetColor(uint data)
+{
+	half r = (half)(data & 0xFF) / 255.0h;
+	half g = (half)((data >> 8) & 0xFF) / 255.0h;
+	half b = (half)((data >> 16) & 0xFF) / 255.0h;
+	return half3(r, g, b);
+}
+
+RWStructuredBuffer<uint> VxPool DX_NOBIND;//: register(u1);
+RWStructuredBuffer<int> VxAllocator DX_NOBIND;//register(u2);
+RWStructuredBuffer<int> VxScene DX_NOBIND;//register(u3);
+
+cbuffer cbGBufferDesc DX_NOBIND// : register(b10)
+{
+	float3		VxStartPosition;
+	int			VxDebugger_IndexCountPerInstance; 
+
+	float2		GBufferSize;
+	float2		ReconstructPosArg;
+
+	uint3		EraseVxStart;
+	uint		cbGBufferDesc_Pad0;
+}
+
+int3 GetVoxelFromPosition(float3 pos)
+{
+	float3 locPos = (pos - VxStartPosition) / VxSize;
+	return (int3)locPos.xyz;
+}
+
+int3 GetVxGroupFromVoxelIndexer(int3 vxIdx)
+{
+	return vxIdx / VxGroupCubeSide;
+}
+
+int GetVxGroupInScene(uint3 idx)
+{
+	return idx.y * (VxSceneX * VxSceneZ) + idx.z * VxSceneX + idx.x;
+}
+
+
+float3 ReconstructPosViewSpace(float2 uv, float w, matrix PrjInvMtx, float depth, float platform_uv_flag)
+{
+	float4 PosCS = float4(uv.x * 2.0f - 1.0f, (1.0f - uv.y * 2.0f) * platform_uv_flag, depth, 1.0f) * w;
+	float4 PosVS = mul(PosCS, PrjInvMtx);
+	return PosVS.xyz;
+}
+
+float3 ReconstructPosWorldSpace(float2 uv, float w, matrix ViewPrjInvMtx, float depth, float platform_uv_flag)
+{
+	float4 PosCS = float4(uv.x * 2.0f - 1.0f, (1.0f - uv.y * 2.0f) * platform_uv_flag, depth, 1.0f) * w;
+	float4 PosWS = mul(PosCS, ViewPrjInvMtx);
+	return PosWS.xyz;
+}
+
+float3 ReconstructPosWorldSpace2(float2 uv, float w, matrix ViewPrjInvMtx, float platform_uv_flag)
+{
+	float depth =  ReconstructPosArg.x + ReconstructPosArg.y / w;
+	float4 PosCS = float4(uv.x * 2.0f - 1.0f, (1.0f - uv.y * 2.0f) * platform_uv_flag, depth, 1.0f) * w;
+	float4 PosWS = mul(PosCS, ViewPrjInvMtx);
+	return PosWS.xyz;
+}
+
+#endif//_VXGIComon_Compute_H_

@@ -1,0 +1,91 @@
+#ifndef _AVGBRIGHTNESS_H_
+#define _AVGBRIGHTNESS_H_
+#include "../../Inc/VertexLayout.cginc"
+#include "../../Inc/GpuSceneCommon.cginc"
+
+Texture2D<float4> TargetBuffer;
+
+#define GroupSize DispatchX * DispatchY
+#define GroupDivider 255 * GroupSize
+groupshared float CachedGroupColors[GroupSize];
+groupshared uint NumOfValidPixel = 0;
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_SetupAvgBrightness(uint3 id : SV_DispatchThreadID,
+	uint3 GroupId : SV_GroupID,
+	uint3 GroupThreadId : SV_GroupThreadID,
+	uint GroupIndex : SV_GroupIndex)
+{
+	if (GroupIndex != 0)
+		return;
+	if (GpuSceneDesc[0].AverageColorDivider != 0)
+	{
+		GpuSceneDesc[0].ScreenAverageBrightness = ((float)GpuSceneDesc[0].ScreenAverageColorI / (float)(GpuSceneDesc[0].AverageColorDivider));
+	}
+	else
+	{
+		GpuSceneDesc[0].ScreenAverageBrightness = 0.5f;
+	}
+
+	GpuSceneDesc[0].EyeAdapterTime += ElapsedTime;
+	if (GpuSceneDesc[0].EyeAdapterTime >= EyeAdapterTimeRange)
+	{
+		GpuSceneDesc[0].EyeAdapterTime = 0;
+		GpuSceneDesc[0].PrevScreenAverageBrightness = GpuSceneDesc[0].ScreenAverageBrightness;
+	}
+	GpuSceneDesc[0].EyeAdapter = lerp(GpuSceneDesc[0].PrevScreenAverageBrightness, GpuSceneDesc[0].ScreenAverageBrightness, GpuSceneDesc[0].EyeAdapterTime / EyeAdapterTimeRange);
+	GpuSceneDesc[0].ScreenAverageColorI = 0;
+	GpuSceneDesc[0].AverageColorDivider = 0;
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_CountAvgBrightness(uint3 id : SV_DispatchThreadID,
+	uint3 GroupId : SV_GroupID,
+	uint3 GroupThreadId : SV_GroupThreadID,
+	uint GroupIndex : SV_GroupIndex)
+{
+	if (all(GroupThreadId.xy == 0))
+	{
+		NumOfValidPixel = 0;
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	uint2 texSize;
+	TargetBuffer.GetDimensions(texSize.x, texSize.y);
+
+	uint groupIndex = GroupThreadId.y * DispatchX + GroupThreadId.x;
+	if (all(id.xy < texSize))
+	{	
+		CachedGroupColors[groupIndex] = CalcLuminanceYCbCr(sRGB2Linear((half3)TargetBuffer[id.xy].rgb));
+		uint oldValue;
+		InterlockedAdd(NumOfValidPixel, 1, oldValue);
+	}
+	else
+	{
+		CachedGroupColors[groupIndex] = (float)0;
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	[unroll]
+	for (uint s = 1; s < GroupSize; s *= 2)
+	{
+		uint index = 2 * s * GroupIndex;
+		if (index < GroupSize)
+			CachedGroupColors[index] += CachedGroupColors[index + s];
+		GroupMemoryBarrierWithGroupSync();
+	}
+	
+	if (GroupIndex == 0)
+	{
+		uint iRgb = (uint)(CachedGroupColors[0] * (float)GroupDivider / (float)NumOfValidPixel);
+
+		uint oldValue;
+		InterlockedAdd(GpuSceneDesc[0].ScreenAverageColorI, iRgb, oldValue);
+		
+		InterlockedAdd(GpuSceneDesc[0].AverageColorDivider, GroupDivider, oldValue);
+
+		//GpuSceneDesc[0].ScreenAverageColorF += CachedGroupColors[0].rgb;
+	}
+}
+
+#endif//#ifndef _AVGBRIGHTNESS_H_

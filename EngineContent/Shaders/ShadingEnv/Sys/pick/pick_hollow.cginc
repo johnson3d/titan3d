@@ -6,11 +6,11 @@
 #include "Material"
 #include "MdfQueue"
 
-Texture2D gPickedSetUpTex;
-SamplerState Samp_gPickedSetUp;
+Texture2D gPickedSetUpTex DX_NOBIND;
+SamplerState Samp_gPickedSetUpTex DX_NOBIND;
 
-Texture2D gPickedBlurTex;
-SamplerState Samp_gPickedBlur;
+Texture2D gPickedBlurTex DX_NOBIND;
+SamplerState Samp_gPickedBlurTex DX_NOBIND;
 
 PS_INPUT VS_Main(VS_INPUT input)
 {
@@ -24,7 +24,7 @@ PS_INPUT VS_Main(VS_INPUT input)
 
 struct PS_OUTPUT
 {
-	half2 RT0 : SV_Target0;
+	float2 RT0 : SV_Target0;
 };
 
 PS_OUTPUT PS_Main(PS_INPUT input)
@@ -32,8 +32,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	PS_OUTPUT output = (PS_OUTPUT)0;
 
 	float2 uv = input.vUV;
-	float2 BaseData = gPickedSetUpTex.Sample(Samp_gPickedSetUp, uv).rg;
-	float2 BlurredData = gPickedBlurTex.Sample(Samp_gPickedBlur, uv).rg;
+	float2 BaseData = gPickedSetUpTex.Sample(Samp_gPickedSetUpTex, uv).rg;
+	float2 BlurredData = gPickedBlurTex.Sample(Samp_gPickedBlurTex, uv).rg;
 
 	half2 Ifinal = half2(0.0h, 0.0h);
 	/*if (BaseData.g - BlurredData.g > min(max(Pow2(100.0h * BaseData.g), 0.1h), 40.0h) * rcp((half)gZFar))
@@ -54,7 +54,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		Ifinal = half2(1.0h, BlurredData.g);
 	}
 
-	output.RT0 = Ifinal;
+	output.RT0 = (float2)Ifinal;
 
 	return output;
 }

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_2289969549 Type="EngineNS.Animation.Base.AnimatableObjectClassDesc@EngineCore">
-  <Name Type="VNameString@EngineCore" Order="0" />
-  <Properties Type="System.Collections.Generic.List&lt;EngineNS.Animation.Base.IAnimatablePropertyDesc@EngineCore,&gt;@Unknown" Order="0" />
-  <TypeStr Type="VNameString@EngineCore" Order="0" />
-</Hash_2289969549>

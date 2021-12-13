@@ -61,9 +61,9 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	}
 
 #ifdef ALPHA_TEST
-	half Alpha = mtl.mAlpha;
-	half AlphaTestThreshold = mtl.mAlphaTest;
-	clip(Alpha - AlphaTestThreshold);
+	//half Alpha = mtl.mAlpha;
+	//half AlphaTestThreshold = mtl.mAlphaTest;
+	clip(mtl.mAlpha - mtl.mAlphaTest);
 #endif 
 
 	//output.RT0 = half4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -71,4 +71,4 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	return output;
 }
 
-#endif
+#endif//#ifndef _SSM_

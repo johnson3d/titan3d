@@ -9,8 +9,8 @@ MDFQUEUE_FUNCTION
 #if ENV_USEVTF == 1
 #include "VertexShaderVTF.cginc"
 #else
-StructuredBuffer<MeshInstanceData> MeshInstanceArray: register(t13);
-StructuredBuffer<MeshVertex> AllVertexArray: register(t14);
+StructuredBuffer<MeshInstanceData> MeshInstanceArray DX_BIND_T(13);
+StructuredBuffer<MeshVertex> AllVertexArray DX_BIND_T(14);
 //RWStructuredBuffer<uint> DrawFaceArray : register(u3);
 
 MeshVertex GetVertexData(uint index)

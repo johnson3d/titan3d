@@ -62,7 +62,7 @@ PS_INPUT VS_Main(VS_INPUT input)
 
 struct PS_OUTPUT
 {
-	half4 RT0 : SV_Target0;
+	float4 RT0 : SV_Target0;
 };
 
 PS_OUTPUT PS_Main(PS_INPUT input)

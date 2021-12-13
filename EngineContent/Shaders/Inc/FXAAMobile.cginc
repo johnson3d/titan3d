@@ -342,7 +342,7 @@ FxaaHalf4 FxaaMobilePS(
 	posM.x = FxaaUV.x;
 	posM.y = FxaaUV.y;
 
-	FxaaHalf4 rgbyM = FxaaTexTop(tex, posM);
+	FxaaHalf4 rgbyM = (FxaaHalf4)FxaaTexTop(tex, posM);
 #if (FXAA_GREEN_AS_LUMA == 0)
 #define lumaM rgbyM.w
 #else

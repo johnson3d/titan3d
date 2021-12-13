@@ -20,6 +20,8 @@ MDFQUEUE_FUNCTION
 PS_INPUT VS_Main(VS_INPUT input)
 {
 	PS_INPUT output = (PS_INPUT)0;
+	Default_VSInput2PSInput(output, input);
+
 #if defined(MDF_INSTANCING)
 	output.PointLightIndices = PointLightIndices;
 	output.SpecialData.x = PointLightNum;
@@ -32,17 +34,9 @@ PS_INPUT VS_Main(VS_INPUT input)
 		MdfQueueDoModifiers(output, input);
 #endif
 
-#ifndef DO_VSInput_To_PSInput
-#define DO_VSInput_To_PSInput Default_VSInput2PSInput
-#endif
-
-		DO_VSInput_To_PSInput(output, input);
-
-#ifndef DO_VS_MATERIAL
-#define DO_VS_MATERIAL DoDefaultVSMaterial
-#endif
-
+#ifdef DO_VS_MATERIAL
 		DO_VS_MATERIAL(output, mtl);
+#endif
 	}
 
 	output.vPosition.xyz += mtl.mVertexOffset;
@@ -59,7 +53,7 @@ PS_INPUT VS_Main(VS_INPUT input)
 
 struct PS_OUTPUT
 {
-	half4 RT0 : SV_Target0;
+	float4 RT0 : SV_Target0;
 };
 
 PS_OUTPUT PS_Main(PS_INPUT input)
@@ -73,28 +67,36 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #define DO_PS_MATERIAL DoDefaultPSMaterial
 #endif
 		DO_PS_MATERIAL(input, mtl);
+
+#ifdef MDFQUEUE_FUNCTION_PS
+		MdfQueueDoModifiersPS(input, mtl);
+#endif
 	}
 
+	half Alpha = (half)mtl.mAlpha;
+	half AlphaTestThreshold = (half)mtl.mAlphaTest;
+
 #ifdef ALPHA_TEST
-	clip((half)mtl.mAlpha - (half)mtl.mAlphaTest);
+	clip(Alpha - AlphaTestThreshold);
 #endif // AlphaTest
 
 	{
-		half3 Albedo = sRGB2Linear((half3)mtl.mAlbedo);
-		half3 N = normalize((half3)mtl.mNormal);
+		half3 Emissive = (half3)mtl.mEmissive;
+		half3 BaseShading = half3(0.0h, 0.0h, 0.0h);
+		half3 Albedo = (half3)mtl.mAlbedo;
+
+		/*half3 N = normalize((half3)mtl.mNormal);
 		half Metallic = (half)mtl.mMetallic;
 		half Roughness = 1.0h - (half)mtl.mRough;
 		half AbsSpecular = (half)mtl.mAbsSpecular;
-		half3 Emissive = (half3)mtl.mEmissive;
+		
 		half Alpha = (half)mtl.mAlpha;
 		half Transmit = (half)mtl.mTransmit;
 		half3 SubAlbedo = sRGB2Linear((half3)mtl.mSubAlbedo);
 		
-		half3 BaseShading = half3(0.0h, 0.0h, 0.0h);
-
 		half3 WorldPos = (half3)input.vWorldPos;
 		half3 L = -(half3)normalize(gDirLightDirection_Leak.xyz);
-		half3 V = (half3)normalize(CameraPosition - WorldPos);
+		half3 V = (half3)normalize(CameraPosition - WorldPos);*/
 
 #ifdef MTL_ID_UNLIT
 		BaseShading = Albedo;
@@ -106,7 +108,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		BaseShading += Emissive;
 
 		BaseShading.b = (half)floor(BaseShading.b * AO_M);
-		output.RT0 = half4(BaseShading, Alpha);
+		output.RT0.rgb = BaseShading;
+		output.RT0.a = Alpha;
 	}
 
 	return output;

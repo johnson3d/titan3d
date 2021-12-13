@@ -3,8 +3,24 @@
 /*=============================================================================
 	Random.ush: A pseudo-random number generator.
 =============================================================================*/
+#ifndef _RANDOM_H_
+#define _RANDOM_H_
 
-#pragma once
+uint rand_lcg(uint rng_state)
+{
+	// LCG values from Numerical Recipes
+	rng_state = 1664525 * rng_state + 1013904223;
+	return rng_state;
+}
+
+uint rand_xorshift(uint rng_state)
+{
+	// Xorshift algorithm from George Marsaglia's paper
+	rng_state ^= (rng_state << 13);
+	rng_state ^= (rng_state >> 17);
+	rng_state ^= (rng_state << 5);
+	return rng_state;
+}
 
 // @param xy should be a integer position (e.g. pixel position on the screen), repeats each 128x128 pixels
 // similar to a texture lookup but is only ALU
@@ -221,7 +237,8 @@ uint2 ScrambleTEA(uint2 v, uint IterationCount = 3)
 	uint z = v[1];
 	uint sum = 0;
 	
-	UNROLL for(uint i = 0; i < IterationCount; ++i)
+	[unroll]
+	for(uint i = 0; i < IterationCount; ++i)
 	{
 		sum += 0x9e3779b9;
 		y += ((z << 4u) + k[0]) ^ (z + sum) ^ ((z >> 5u) + k[1]);
@@ -492,96 +509,98 @@ float ValueNoise3D_ALU(float3 v, bool bTiling, float RepeatSize)
 // @param bTiling = repeat noise pattern
 // @param RepeatSize = integer units before tiling in each dimension
 // @return random number in the range -1 .. 1
-float GradientNoise3D_TEX(float3 v, bool bTiling, float RepeatSize)
-{
-	bTiling = true;
-	float3 fv = frac(v);
-	float3 iv0 = NoiseTileWrap(floor(v), bTiling, RepeatSize);
-	float3 iv1 = NoiseTileWrap(iv0 + 1, bTiling, RepeatSize);
 
-	const int2 ZShear = int2(17, 89);
-	
-	float2 OffsetA = iv0.z * ZShear;
-	float2 OffsetB = OffsetA + ZShear;	// non-tiling, use relative offset
-	if (bTiling)						// tiling, have to compute from wrapped coordinates
-	{
-		OffsetB = iv1.z * ZShear;
-	}
-
-	// Texture size scale factor
-	float ts = 1 / 128.0f;
-
-	// texture coordinates for iv0.xy, as offset for both z slices
-	float2 TexA0 = (iv0.xy + OffsetA + 0.5f) * ts;
-	float2 TexB0 = (iv0.xy + OffsetB + 0.5f) * ts;
-
-	// texture coordinates for iv1.xy, as offset for both z slices
-	float2 TexA1 = TexA0 + ts;	// for non-tiling, can compute relative to existing coordinates
-	float2 TexB1 = TexB0 + ts;
-	if (bTiling)				// for tiling, need to compute from wrapped coordinates
-	{
-		TexA1 = (iv1.xy + OffsetA + 0.5f) * ts;
-		TexB1 = (iv1.xy + OffsetB + 0.5f) * ts;
-	}
-
-
-	// can be optimized to 1 or 2 texture lookups (4 or 8 channel encoded in 8, 16 or 32 bit)
-	float3 A = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexA0.x, TexA0.y), 0).xyz * 2 - 1;
-	float3 B = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexA1.x, TexA0.y), 0).xyz * 2 - 1;
-	float3 C = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexA0.x, TexA1.y), 0).xyz * 2 - 1;
-	float3 D = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexA1.x, TexA1.y), 0).xyz * 2 - 1;
-	float3 E = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexB0.x, TexB0.y), 0).xyz * 2 - 1;
-	float3 F = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexB1.x, TexB0.y), 0).xyz * 2 - 1;
-	float3 G = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexB0.x, TexB1.y), 0).xyz * 2 - 1;
-	float3 H = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexB1.x, TexB1.y), 0).xyz * 2 - 1;
-
-	float a = dot(A, fv - float3(0, 0, 0));
-	float b = dot(B, fv - float3(1, 0, 0));
-	float c = dot(C, fv - float3(0, 1, 0));
-	float d = dot(D, fv - float3(1, 1, 0));
-	float e = dot(E, fv - float3(0, 0, 1));
-	float f = dot(F, fv - float3(1, 0, 1));
-	float g = dot(G, fv - float3(0, 1, 1));
-	float h = dot(H, fv - float3(1, 1, 1));
-
-	float3 Weights = PerlinRamp(frac(float4(fv, 0))).xyz;
-	
-	float i = lerp(lerp(a, b, Weights.x), lerp(c, d, Weights.x), Weights.y);
-	float j = lerp(lerp(e, f, Weights.x), lerp(g, h, Weights.x), Weights.y);
-
-	return lerp(i, j, Weights.z);
-}
+//float GradientNoise3D_TEX(float3 v, bool bTiling, float RepeatSize)
+//{
+//	bTiling = true;
+//	float3 fv = frac(v);
+//	float3 iv0 = NoiseTileWrap(floor(v), bTiling, RepeatSize);
+//	float3 iv1 = NoiseTileWrap(iv0 + 1, bTiling, RepeatSize);
+//
+//	const int2 ZShear = int2(17, 89);
+//	
+//	float2 OffsetA = iv0.z * ZShear;
+//	float2 OffsetB = OffsetA + ZShear;	// non-tiling, use relative offset
+//	if (bTiling)						// tiling, have to compute from wrapped coordinates
+//	{
+//		OffsetB = iv1.z * ZShear;
+//	}
+//
+//	// Texture size scale factor
+//	float ts = 1 / 128.0f;
+//
+//	// texture coordinates for iv0.xy, as offset for both z slices
+//	float2 TexA0 = (iv0.xy + OffsetA + 0.5f) * ts;
+//	float2 TexB0 = (iv0.xy + OffsetB + 0.5f) * ts;
+//
+//	// texture coordinates for iv1.xy, as offset for both z slices
+//	float2 TexA1 = TexA0 + ts;	// for non-tiling, can compute relative to existing coordinates
+//	float2 TexB1 = TexB0 + ts;
+//	if (bTiling)				// for tiling, need to compute from wrapped coordinates
+//	{
+//		TexA1 = (iv1.xy + OffsetA + 0.5f) * ts;
+//		TexB1 = (iv1.xy + OffsetB + 0.5f) * ts;
+//	}
+//
+//
+//	// can be optimized to 1 or 2 texture lookups (4 or 8 channel encoded in 8, 16 or 32 bit)
+//	float3 A = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexA0.x, TexA0.y), 0).xyz * 2 - 1;
+//	float3 B = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexA1.x, TexA0.y), 0).xyz * 2 - 1;
+//	float3 C = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexA0.x, TexA1.y), 0).xyz * 2 - 1;
+//	float3 D = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexA1.x, TexA1.y), 0).xyz * 2 - 1;
+//	float3 E = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexB0.x, TexB0.y), 0).xyz * 2 - 1;
+//	float3 F = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexB1.x, TexB0.y), 0).xyz * 2 - 1;
+//	float3 G = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexB0.x, TexB1.y), 0).xyz * 2 - 1;
+//	float3 H = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, float2(TexB1.x, TexB1.y), 0).xyz * 2 - 1;
+//
+//	float a = dot(A, fv - float3(0, 0, 0));
+//	float b = dot(B, fv - float3(1, 0, 0));
+//	float c = dot(C, fv - float3(0, 1, 0));
+//	float d = dot(D, fv - float3(1, 1, 0));
+//	float e = dot(E, fv - float3(0, 0, 1));
+//	float f = dot(F, fv - float3(1, 0, 1));
+//	float g = dot(G, fv - float3(0, 1, 1));
+//	float h = dot(H, fv - float3(1, 1, 1));
+//
+//	float3 Weights = PerlinRamp(frac(float4(fv, 0))).xyz;
+//	
+//	float i = lerp(lerp(a, b, Weights.x), lerp(c, d, Weights.x), Weights.y);
+//	float j = lerp(lerp(e, f, Weights.x), lerp(g, h, Weights.x), Weights.y);
+//
+//	return lerp(i, j, Weights.z);
+//}
 
 // @return random number in the range -1 .. 1
 // scalar: 6 frac, 31 mul/mad, 15 add, 
-float FastGradientPerlinNoise3D_TEX(float3 xyz)
-{
-	// needs to be the same value when creating the PerlinNoise3D texture
-	float Extent = 16;
 
-	// last texel replicated and needed for filtering
-	// scalar: 3 frac, 6 mul
-	xyz = frac(xyz / (Extent - 1)) * (Extent - 1);
-
-	// scalar: 3 frac
-	float3 uvw = frac(xyz);
-	// = floor(xyz);
-	// scalar: 3 add
-	float3 p0 = xyz - uvw;
-//	float3 f = pow(uvw, 2) * 3.0f - pow(uvw, 3) * 2.0f;	// original perlin hermite (ok when used without bump mapping)
-	// scalar: 2*3 add 5*3 mul
-	float3 f = PerlinRamp(float4(uvw, 0)).xyz;	// new, better with continues second derivative for bump mapping
-	// scalar: 3 add
-	float3 p = p0 + f;
-	// scalar: 3 mad
-	float4 NoiseSample = Texture3DSampleLevel(View.PerlinNoise3DTexture, View.PerlinNoise3DTextureSampler, p / Extent + 0.5f / Extent, 0);		// +0.5f to get rid of bilinear offset
-
-	// reconstruct from 8bit (using mad with 2 constants and dot4 was same instruction count)
-	// scalar: 4 mad, 3 mul, 3 add 
-	float3 n = NoiseSample.xyz * 255.0f / 127.0f - 1.0f;
-	float d = NoiseSample.w * 255.f - 127;
-	return dot(xyz, n) - d;
-}
+//float FastGradientPerlinNoise3D_TEX(float3 xyz)
+//{
+//	// needs to be the same value when creating the PerlinNoise3D texture
+//	float Extent = 16;
+//
+//	// last texel replicated and needed for filtering
+//	// scalar: 3 frac, 6 mul
+//	xyz = frac(xyz / (Extent - 1)) * (Extent - 1);
+//
+//	// scalar: 3 frac
+//	float3 uvw = frac(xyz);
+//	// = floor(xyz);
+//	// scalar: 3 add
+//	float3 p0 = xyz - uvw;
+////	float3 f = pow(uvw, 2) * 3.0f - pow(uvw, 3) * 2.0f;	// original perlin hermite (ok when used without bump mapping)
+//	// scalar: 2*3 add 5*3 mul
+//	float3 f = PerlinRamp(float4(uvw, 0)).xyz;	// new, better with continues second derivative for bump mapping
+//	// scalar: 3 add
+//	float3 p = p0 + f;
+//	// scalar: 3 mad
+//	float4 NoiseSample = Texture3DSampleLevel(View.PerlinNoise3DTexture, View.PerlinNoise3DTextureSampler, p / Extent + 0.5f / Extent, 0);		// +0.5f to get rid of bilinear offset
+//
+//	// reconstruct from 8bit (using mad with 2 constants and dot4 was same instruction count)
+//	// scalar: 4 mad, 3 mul, 3 add 
+//	float3 n = NoiseSample.xyz * 255.0f / 127.0f - 1.0f;
+//	float d = NoiseSample.w * 255.f - 127;
+//	return dot(xyz, n) - d;
+//}
 
 
 // 3D jitter offset within a voronoi noise cell
@@ -643,11 +662,14 @@ float4 VoronoiNoise3D_ALU(float3 v, int Quality, bool bTiling, float RepeatSize,
 	// quality level 3: do a 3x3x3 search
 	if (Quality == 3)
 	{
-		UNROLL for (offset.x = -1; offset.x <= 1; ++offset.x)
+		[unroll]
+		for (offset.x = -1; offset.x <= 1; ++offset.x)
 		{
-			UNROLL for (offset.y = -1; offset.y <= 1; ++offset.y)
+			[unroll]
+			for (offset.y = -1; offset.y <= 1; ++offset.y)
 			{
-				UNROLL for (offset.z = -1; offset.z <= 1; ++offset.z)
+				[unroll]
+				for (offset.z = -1; offset.z <= 1; ++offset.z)
 				{
 					p = offset + VoronoiCornerSample(NoiseTileWrap(iv2 + offset, bTiling, RepeatSize), Quality);
 					mindist = VoronoiCompare(mindist, iv2 + p, fv2 - p, bDistanceOnly);
@@ -659,11 +681,14 @@ float4 VoronoiNoise3D_ALU(float3 v, int Quality, bool bTiling, float RepeatSize,
 	// everybody else searches a base 2x2x2 neighborhood
 	else
 	{
-		UNROLL_N(3) for (offset.x = 0; offset.x <= 1; ++offset.x)
+		[unroll(3)]
+		for (offset.x = 0; offset.x <= 1; ++offset.x)
 		{
-			UNROLL_N(3) for (offset.y = 0; offset.y <= 1; ++offset.y)
+			[unroll(3)]
+			for (offset.y = 0; offset.y <= 1; ++offset.y)
 			{
-				UNROLL_N(3) for (offset.z = 0; offset.z <= 1; ++offset.z)
+				[unroll(3)]
+				for (offset.z = 0; offset.z <= 1; ++offset.z)
 				{
 					p = offset + VoronoiCornerSample(NoiseTileWrap(iv + offset, bTiling, RepeatSize), Quality);
 					mindist = VoronoiCompare(mindist, iv + p, fv - p, bDistanceOnly);
@@ -683,11 +708,14 @@ float4 VoronoiNoise3D_ALU(float3 v, int Quality, bool bTiling, float RepeatSize,
 	// quality level 4: add extra sets of four cells in each direction
 	if (Quality >= 4)
 	{
-		UNROLL_N(3) for (offset.x = -1; offset.x <= 2; offset.x += 3)
+		[unroll(3)]
+		for (offset.x = -1; offset.x <= 2; offset.x += 3)
 		{
-			UNROLL_N(3) for (offset.y = 0; offset.y <= 1; ++offset.y)
+			[unroll(3)]
+			for (offset.y = 0; offset.y <= 1; ++offset.y)
 			{
-				UNROLL_N(3) for (offset.z = 0; offset.z <= 1; ++offset.z)
+				[unroll(3)]
+				for (offset.z = 0; offset.z <= 1; ++offset.z)
 				{
 					// along x axis
 					p = offset.xyz + VoronoiCornerSample(NoiseTileWrap(iv + offset.xyz, bTiling, RepeatSize), Quality);
@@ -771,24 +799,24 @@ float4 ComputeSimplexWeights3D(float3 OrthogonalPos, out float3 PosA, out float3
 	return ret;
 }
 
-float2 GetPerlinNoiseGradientTextureAt(float2 v)
-{
-	float2 TexA = (v.xy + 0.5f) / 128.0f;
-
-	// todo: storing random 2d unit vectors would be better
-	float3 p = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, TexA, 0).xyz * 2 - 1;
-	return normalize(p.xy + p.z * 0.33f);
-}
-
-float3 GetPerlinNoiseGradientTextureAt(float3 v)
-{
-	const float2 ZShear = float2(17.0f, 89.0f);
-
-	float2 OffsetA = v.z * ZShear;
-	float2 TexA = (v.xy + OffsetA + 0.5f) / 128.0f;
-
-	return Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, TexA , 0).xyz * 2 - 1;
-}
+//float2 GetPerlinNoiseGradientTextureAt(float2 v)
+//{
+//	float2 TexA = (v.xy + 0.5f) / 128.0f;
+//
+//	// todo: storing random 2d unit vectors would be better
+//	float3 p = Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, TexA, 0).xyz * 2 - 1;
+//	return normalize(p.xy + p.z * 0.33f);
+//}
+//
+//float3 GetPerlinNoiseGradientTextureAt(float3 v)
+//{
+//	const float2 ZShear = float2(17.0f, 89.0f);
+//
+//	float2 OffsetA = v.z * ZShear;
+//	float2 TexA = (v.xy + OffsetA + 0.5f) / 128.0f;
+//
+//	return Texture2DSampleLevel(View.PerlinNoiseGradientTexture, View.PerlinNoiseGradientTextureSampler, TexA , 0).xyz * 2 - 1;
+//}
 
 float2 SkewSimplex(float2 In)
 {
@@ -810,83 +838,86 @@ float3 UnSkewSimplex(float3 In)
 // filtered 3D gradient simple noise (few texture lookups, high quality)
 // @param v >0
 // @return random number in the range -1 .. 1
-float GradientSimplexNoise2D_TEX(float2 EvalPos)
-{
-	float2 OrthogonalPos = SkewSimplex(EvalPos);
 
-	float2 PosA, PosB, PosC, PosD;
-	float3 Weights = ComputeSimplexWeights2D(OrthogonalPos, PosA, PosB, PosC);
-
-	// can be optimized to 1 or 2 texture lookups (4 or 8 channel encoded in 32 bit)
-	float2 A = GetPerlinNoiseGradientTextureAt(PosA);
-	float2 B = GetPerlinNoiseGradientTextureAt(PosB);
-	float2 C = GetPerlinNoiseGradientTextureAt(PosC);
-
-	PosA = UnSkewSimplex(PosA);
-	PosB = UnSkewSimplex(PosB);
-	PosC = UnSkewSimplex(PosC);
-
-	float DistanceWeight;
-
-	DistanceWeight = saturate(0.5f - length2(EvalPos - PosA));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
-	float a = dot(A, EvalPos - PosA) * DistanceWeight;
-	DistanceWeight = saturate(0.5f - length2(EvalPos - PosB));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
-	float b = dot(B, EvalPos - PosB) * DistanceWeight;
-	DistanceWeight = saturate(0.5f - length2(EvalPos - PosC));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
-	float c = dot(C, EvalPos - PosC) * DistanceWeight;
-	
-	return 70 * (a + b + c);
-}
+//float GradientSimplexNoise2D_TEX(float2 EvalPos)
+//{
+//	float2 OrthogonalPos = SkewSimplex(EvalPos);
+//
+//	float2 PosA, PosB, PosC, PosD;
+//	float3 Weights = ComputeSimplexWeights2D(OrthogonalPos, PosA, PosB, PosC);
+//
+//	// can be optimized to 1 or 2 texture lookups (4 or 8 channel encoded in 32 bit)
+//	float2 A = GetPerlinNoiseGradientTextureAt(PosA);
+//	float2 B = GetPerlinNoiseGradientTextureAt(PosB);
+//	float2 C = GetPerlinNoiseGradientTextureAt(PosC);
+//
+//	PosA = UnSkewSimplex(PosA);
+//	PosB = UnSkewSimplex(PosB);
+//	PosC = UnSkewSimplex(PosC);
+//
+//	float DistanceWeight;
+//
+//	DistanceWeight = saturate(0.5f - length2(EvalPos - PosA));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
+//	float a = dot(A, EvalPos - PosA) * DistanceWeight;
+//	DistanceWeight = saturate(0.5f - length2(EvalPos - PosB));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
+//	float b = dot(B, EvalPos - PosB) * DistanceWeight;
+//	DistanceWeight = saturate(0.5f - length2(EvalPos - PosC));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
+//	float c = dot(C, EvalPos - PosC) * DistanceWeight;
+//	
+//	return 70 * (a + b + c);
+//}
 
 
 
 // filtered 3D gradient simple noise (few texture lookups, high quality)
 // @param v >0
 // @return random number in the range -1 .. 1
-float SimplexNoise3D_TEX(float3 EvalPos)
-{
-	float3 OrthogonalPos = SkewSimplex(EvalPos);
 
-	float3 PosA, PosB, PosC, PosD;
-	float4 Weights = ComputeSimplexWeights3D(OrthogonalPos, PosA, PosB, PosC, PosD);
-
-	// can be optimized to 1 or 2 texture lookups (4 or 8 channel encoded in 32 bit)
-	float3 A = GetPerlinNoiseGradientTextureAt(PosA);
-	float3 B = GetPerlinNoiseGradientTextureAt(PosB);
-	float3 C = GetPerlinNoiseGradientTextureAt(PosC);
-	float3 D = GetPerlinNoiseGradientTextureAt(PosD);
-	
-	PosA = UnSkewSimplex(PosA);
-	PosB = UnSkewSimplex(PosB);
-	PosC = UnSkewSimplex(PosC);
-	PosD = UnSkewSimplex(PosD);
-
-	float DistanceWeight;
-
-	DistanceWeight = saturate(0.6f - length2(EvalPos - PosA));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
-	float a = dot(A, EvalPos - PosA) * DistanceWeight;
-	DistanceWeight = saturate(0.6f - length2(EvalPos - PosB));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
-	float b = dot(B, EvalPos - PosB) * DistanceWeight;
-	DistanceWeight = saturate(0.6f - length2(EvalPos - PosC));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
-	float c = dot(C, EvalPos - PosC) * DistanceWeight;
-	DistanceWeight = saturate(0.6f - length2(EvalPos - PosD));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
-	float d = dot(D, EvalPos - PosD) * DistanceWeight;
-
-	return 32 * (a + b + c + d);
-}
-
-
-float VolumeRaymarch(float3 posPixelWS, float3 posCameraWS)
-{
-	float ret = 0;
-	int cnt = 60;
-
-	LOOP for(int i=0; i < cnt; ++i)
-	{
-		ret += saturate(FastGradientPerlinNoise3D_TEX(lerp(posPixelWS, posCameraWS, i/(float)cnt) * 0.01) - 0.2f);
-	}
-
-	return ret / cnt * (length(posPixelWS - posCameraWS) * 0.001f );
-}
+//float SimplexNoise3D_TEX(float3 EvalPos)
+//{
+//	float3 OrthogonalPos = SkewSimplex(EvalPos);
+//
+//	float3 PosA, PosB, PosC, PosD;
+//	float4 Weights = ComputeSimplexWeights3D(OrthogonalPos, PosA, PosB, PosC, PosD);
+//
+//	// can be optimized to 1 or 2 texture lookups (4 or 8 channel encoded in 32 bit)
+//	float3 A = GetPerlinNoiseGradientTextureAt(PosA);
+//	float3 B = GetPerlinNoiseGradientTextureAt(PosB);
+//	float3 C = GetPerlinNoiseGradientTextureAt(PosC);
+//	float3 D = GetPerlinNoiseGradientTextureAt(PosD);
+//	
+//	PosA = UnSkewSimplex(PosA);
+//	PosB = UnSkewSimplex(PosB);
+//	PosC = UnSkewSimplex(PosC);
+//	PosD = UnSkewSimplex(PosD);
+//
+//	float DistanceWeight;
+//
+//	DistanceWeight = saturate(0.6f - length2(EvalPos - PosA));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
+//	float a = dot(A, EvalPos - PosA) * DistanceWeight;
+//	DistanceWeight = saturate(0.6f - length2(EvalPos - PosB));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
+//	float b = dot(B, EvalPos - PosB) * DistanceWeight;
+//	DistanceWeight = saturate(0.6f - length2(EvalPos - PosC));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
+//	float c = dot(C, EvalPos - PosC) * DistanceWeight;
+//	DistanceWeight = saturate(0.6f - length2(EvalPos - PosD));	DistanceWeight *= DistanceWeight; DistanceWeight *= DistanceWeight;
+//	float d = dot(D, EvalPos - PosD) * DistanceWeight;
+//
+//	return 32 * (a + b + c + d);
+//}
 
 
+//float VolumeRaymarch(float3 posPixelWS, float3 posCameraWS)
+//{
+//	float ret = 0;
+//	int cnt = 60;
+//
+//	LOOP for(int i=0; i < cnt; ++i)
+//	{
+//		ret += saturate(FastGradientPerlinNoise3D_TEX(lerp(posPixelWS, posCameraWS, i/(float)cnt) * 0.01) - 0.2f);
+//	}
+//
+//	return ret / cnt * (length(posPixelWS - posCameraWS) * 0.001f );
+//}
+
+
+#endif//_RANDOM_H_

@@ -6,19 +6,19 @@ struct ShadowFilterData
 {
 	Texture2D		mShadowMap;
 	SamplerState	mShadowMapSampler;
-	half					mViewer2ShadowDepth;
-	float4				mShadowMapSizeAndRcp;
-	half					mShadowTransitionScale;
+	half			mViewer2ShadowDepth;
+	float4			mShadowMapSizeAndRcp;
+	half			mShadowTransitionScale;
 };
 
 half4 CalcShadowValue(half4 ShadowmapDepth, ShadowFilterData SFD)
 {
-		return saturate((ShadowmapDepth - SFD.mViewer2ShadowDepth) * SFD.mShadowTransitionScale + 1.0h);
+	return saturate((ShadowmapDepth - SFD.mViewer2ShadowDepth) * SFD.mShadowTransitionScale + 1.0h);
 }
 
 half CalcShadowValue(half ShadowmapDepth, ShadowFilterData SFD)
 {
-		return saturate((ShadowmapDepth - SFD.mViewer2ShadowDepth) * SFD.mShadowTransitionScale + 1.0h);
+	return saturate((ShadowmapDepth - SFD.mViewer2ShadowDepth) * SFD.mShadowTransitionScale + 1.0h);
 }
 
 half4 Fetch4SMValuePerRow(half2 TexelPos, half VerticalOffset, ShadowFilterData SFD)

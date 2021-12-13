@@ -1,0 +1,57 @@
+#ifndef _HZB_H_
+#define _HZB_H_
+
+Texture2D<float2> DepthBuffer;
+
+RWTexture2D<float2> SrcBuffer;
+RWTexture2D<float2> DstBuffer;
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_Setup(uint3 id : SV_DispatchThreadID,
+	uint3 GroupId : SV_GroupID,
+	uint3 GroupThreadId : SV_GroupThreadID,
+	uint GroupIndex : SV_GroupIndex)
+{
+	uint2 texSize;
+	DstBuffer.GetDimensions(texSize.x, texSize.y);
+	if (any(id.xy > texSize))
+		return;
+
+	float d1 = DepthBuffer[id.xy * 2].r;
+	float d2 = DepthBuffer[id.xy * 2 + int2(0, 1)].r;
+	float d3 = DepthBuffer[id.xy * 2 + int2(1, 0)].r;
+	float d4 = DepthBuffer[id.xy * 2 + int2(1, 1)].r;
+	float2 value;
+	value.r = min(min(d1, d2), min(d3, d4));
+	value.g = max(max(d1, d2), max(d3, d4));
+	DstBuffer[id.xy] = value;
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_DownSample(uint3 id : SV_DispatchThreadID,
+	uint3 GroupId : SV_GroupID,
+	uint3 GroupThreadId : SV_GroupThreadID,
+	uint GroupIndex : SV_GroupIndex)
+{
+	uint2 texSize;
+	DstBuffer.GetDimensions(texSize.x, texSize.y);
+	if (any(id.xy > texSize))
+		return;
+
+	float d1 = SrcBuffer[id.xy * 2].r;
+	float d2 = d1;
+	if (texSize.x > 1)
+		d2 = SrcBuffer[id.xy * 2 + int2(0, 1)].r;
+	float d3 = d1;
+	if (texSize.y > 1)
+		d3 = SrcBuffer[id.xy * 2 + int2(1, 0)].r;
+	float d4 = d1;
+	if (texSize.x > 1 && texSize.y > 1)
+		d4 = SrcBuffer[id.xy * 2 + int2(1, 1)].r;
+	float2 value;
+	value.r = min(min(d1, d2), min(d3, d4));
+	value.g = max(max(d1, d2), max(d3, d4));
+	DstBuffer[id.xy] = value;
+}
+
+#endif //#ifndef _HZB_H_

@@ -1,7 +1,7 @@
-Texture2D<float4> gVertexTexture : register(t14);
+Texture2D<float4> gVertexTexture DX_BIND_T(14);
 SamplerState Samp_gVertexTexture;
 
-Texture2D<float4> gInstanceDataTexture : register(t13);
+Texture2D<float4> gInstanceDataTexture DX_BIND_T(13);
 SamplerState Samp_gInstanceDataTexture;
 
 #define VertexStride 3u

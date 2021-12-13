@@ -9,14 +9,14 @@ struct DrawArgs
 	uint StartInstanceLocation;
 };
 
-RWStructuredBuffer<MeshInstanceData> MeshInstanceArray : register(u1);
-RWStructuredBuffer<MeshCluster> ClusterArray : register(u2);
-RWStructuredBuffer<uint> StaticSceneAllFaces : register(u3);
+RWStructuredBuffer<MeshInstanceData> MeshInstanceArray DX_BIND_U(1);
+RWStructuredBuffer<MeshCluster> ClusterArray DX_BIND_U(2);
+RWStructuredBuffer<uint> StaticSceneAllFaces DX_BIND_U(3);
 
 //RWStructuredBuffer<uint> StaticSceneDrawFaces : register(u4);
-RWByteAddressBuffer StaticSceneDrawFaces : register(u4);
+RWByteAddressBuffer StaticSceneDrawFaces DX_BIND_U(4);
 //RWStructuredBuffer<DrawArgs> IndirectDrawArgs : register(u5);
-RWByteAddressBuffer IndirectDrawArgs : register(u5);
+RWByteAddressBuffer IndirectDrawArgs DX_BIND_U(5);
 
 bool TestBit(uint2 InBits, int index)
 {

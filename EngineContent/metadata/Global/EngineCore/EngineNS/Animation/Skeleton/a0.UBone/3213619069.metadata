@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_3213619069 Type="EngineNS.Animation.Skeleton.UBone@EngineCore">
-  <Children Type="System.Collections.Generic.List&lt;EngineNS.Animation.Skeleton.ILimb@EngineCore,&gt;@Unknown" Order="0" />
-  <Desc Type="EngineNS.Animation.Skeleton.ILimbDesc@EngineCore" Order="0" />
-</Hash_3213619069>

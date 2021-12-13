@@ -52,14 +52,14 @@ PS_INPUT VS_Main(VS_INPUT input)
 
 struct PS_OUTPUT
 {
-	half2 RT0 : SV_Target0;
+	float2 RT0 : SV_Target0;
 };
 
 PS_OUTPUT PS_Main(PS_INPUT input)
 {
 	PS_OUTPUT output = (PS_OUTPUT)0;
-	half PerPixelViewerDistance = (half)input.psCustomUV0.w;
-	output.RT0 = half2((half)1.0h, PerPixelViewerDistance * rcp((half)gZFar));
+	float PerPixelViewerDistance = input.psCustomUV0.w;
+	output.RT0 = float2(1.0f, PerPixelViewerDistance * rcp(gZFar));
 
 	return output;
 }

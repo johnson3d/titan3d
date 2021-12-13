@@ -3,15 +3,15 @@
 #include "Material"
 #include "MdfQueue"
 
-cbuffer cbPerShadingEnv : register(b4)
+cbuffer cbPerShadingEnv DX_NOBIND//: register(b4)
 {
 	matrix RenderMatrix;
 	float4 RenderColor;
 	float RenderOpacity;
 }
 
-Texture2D SourceTexture;
-SamplerState Samp_SourceTexture;
+Texture2D SourceTexture DX_NOBIND;
+SamplerState Samp_SourceTexture DX_NOBIND;
 
 #ifdef MDFQUEUE_FUNCTION
 	MDFQUEUE_FUNCTION

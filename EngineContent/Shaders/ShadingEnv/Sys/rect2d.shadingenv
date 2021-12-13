@@ -3,7 +3,7 @@
 #include "Material"
 #include "MdfQueue"
 
-cbuffer cbPerShadingEnv : register(b4)
+cbuffer cbPerShadingEnv DX_NOBIND// : register(b4)
 {
 	matrix RenderMatrix;
 	float4 RenderColor;

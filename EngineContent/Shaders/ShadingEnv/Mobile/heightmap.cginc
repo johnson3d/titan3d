@@ -7,8 +7,11 @@ cbuffer cbPerTerrain
 	float UVStep;
 };
 
-Texture2D		HeightMapTexture;
-SamplerState	Samp_HeightMapTexture;
+Texture2D		HeightMapTexture DX_NOBIND;
+SamplerState	Samp_HeightMapTexture DX_NOBIND;
+
+Texture2D		NormalMapTexture DX_NOBIND;
+SamplerState	Samp_NormalMapTexture DX_NOBIND;
 
 half3 GetPosition(half x, half z, out half2 uv, out half3 nor)
 {
@@ -31,6 +34,8 @@ half3 GetPosition(half x, half z, out half2 uv, out half3 nor)
 	pos.y = altInfo.r * HeightStep;;
 	pos.x = x * GridSize;
 	pos.z = z * GridSize;
+
+	//nor = NormalMapTexture.SampleLevel(Samp_NormalMapTexture, uv.xy, 0).xyz;
 
 	pos += StartPosition;
 	return pos;

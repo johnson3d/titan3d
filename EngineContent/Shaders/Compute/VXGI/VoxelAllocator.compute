@@ -1,26 +1,9 @@
-struct FVoxel
-{
-	uint		Diffuse;
-	uint		NormalAndAlpha;
-};
+#include "VXGICommon.compute"
 
-struct FVoxelGroup
+int GetIndexOfAllocator(uint3 id)
 {
-	FVoxel		Voxels[4][4][4];
-};
-
-struct FVxGroupId
-{
-	uint		Index;
-};
-
-RWStructuredBuffer<FVoxelGroup> VxPool : register(u1);
-RWStructuredBuffer<FVxGroupId> VxAllocator : register(u2);
-RWStructuredBuffer<FVxGroupId> VxScene : register(u3);
-
-uint GetIndexOfAllocator(uint3 id)
-{
-	return id.y * (64 * 64) + id.z * 64 + id.x;
+	//return id.y * (64 * 64) + id.z * 64 + id.x;
+	return id.x;
 }
 
 uint AllocVxGroup()
@@ -28,20 +11,33 @@ uint AllocVxGroup()
 	return 0;
 }
 
-[numthreads(32, 32, 1)]
+[numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_SetupVxAllocator(uint3 id : SV_DispatchThreadID)
 {
-	uint idx = GetIndexOfAllocator(id);
-	VxAllocator[idx].Index = -1;
+	int idx = GetIndexOfAllocator(id);
+	VxAllocator[idx] = idx;
+	GpuSceneDesc[0].FreeGroupIndex = 0;
+
+	int vxGroupAddress = idx * VxGroupStride;
+
+	for (int i = 0; i < VxGroupCubeSide; i++)
+	{
+		for (int j = 0; j < VxGroupCubeSide; j++)
+		{
+			for (int k = 0; k < VxGroupCubeSide; k++)
+			{
+				int offset = GetVxOffsetInGroup(i, j, k) * VxDescStructSize;
+				VxPool[vxGroupAddress + offset + 0] = 0;
+				VxPool[vxGroupAddress + offset + 1] = 0;
+			}
+		}
+	}
 }
 
-uint GetIndexOfScene(uint3 id)
-{
-	return id.y * (256 * 256) + id.z * 256 + id.x;
-}
-[numthreads(32, 32, 1)]
+[numthreads(DispatchX, DispatchY, DispatchZ)]
 void CS_SetupVxScene(uint3 id : SV_DispatchThreadID)
 {
-	uint idx = GetIndexOfScene(id);
-	VxScene[idx].Index = -1;
+	int idx = GetVxGroupInScene(id);
+	VxScene[idx] = -1;
 }
+//

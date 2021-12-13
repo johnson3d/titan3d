@@ -8,6 +8,7 @@
 #include "../../Inc/FogCommon.cginc"
 #include "../../Inc/MixUtility.cginc"
 #include "../../Inc/SysFunction.cginc"
+#include "../../Inc/GpuSceneCommon.cginc"
 
 #include "Material"
 #include "MdfQueue"
@@ -43,7 +44,9 @@ PS_INPUT VS_Main(VS_INPUT input)
 #endif
 	output.vPosition = mul(float4(output.vWorldPos, 1), ViewPrjMtx);
 	
-	//output.psCustomUV0.xy = float2(output.vPosition.xy / output.vPosition.w) * float2(0.5f, -0.5f) + float2(0.5f, 0.5f);
+#if ENV_DISABLE_POINTLIGHTS == 0
+	output.psCustomUV0.xy = float2(output.vPosition.xy / output.vPosition.w) * float2(0.5f, -0.5f) + float2(0.5f, 0.5f);
+#endif
 	//output.psCustomUV0.z = float(output.vPosition.z / output.vPosition.w);
 	output.psCustomUV0.w = output.vPosition.w;
 

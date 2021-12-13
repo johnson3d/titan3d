@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.RHI.CShaderResourceViewAMeta@EngineCore">
+  <AssetId Type="System.Guid@mscorlib" Value="092dd21c-4707-4e69-9cb5-c9c6bb6a2c4b" />
+  <Description Type="System.String@mscorlib" Value="This is a EngineNS.RHI.CShaderResourceView&#xA;" />
+  <Icon Type="EngineNS.EGui.UVAnim@EngineCore">
+    <Color Type="System.UInt32@mscorlib" Value="4294967295" />
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@mscorlib" Count="0" />
+  <TypeStr Type="System.String@mscorlib" Value="EngineNS.RHI.CShaderResourceView@EngineCore" />
+</Root>

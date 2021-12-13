@@ -1,0 +1,11 @@
+#ifndef _PARTICLE_EFFECTORS_H_
+#define _PARTICLE_EFFECTORS_H_
+
+void Accelerated_EffectorExecute(uint3 id, inout FParticle particle, Accelerated_EffectorParameters parameter)
+{
+	float rdValue = RandomFloatBySeedSignedUnit(particle);// RandomFloat4(id.x);
+	//rdValue = 0;
+	particle.Location += parameter.Acceleration * ParticleElapsedTime * (1.0f + rdValue * 2.5f);
+}
+
+#endif//#ifndef _PARTICLE_EFFECTORS_H_

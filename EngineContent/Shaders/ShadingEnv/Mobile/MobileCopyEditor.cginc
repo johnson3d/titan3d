@@ -9,6 +9,7 @@
 #include "../../Inc/MixUtility.cginc"
 #include "../../Inc/SysFunction.cginc"
 #include "../../Inc/PostEffectCommon.cginc"
+#include "../../Inc/GpuSceneCommon.cginc"
 
 #include "MdfQueue"
 
@@ -18,23 +19,23 @@
 
 #include "../../Inc/FXAAMobile.cginc"
 
-Texture2D gBaseSceneView;
-SamplerState Samp_gBaseSceneView;
+Texture2D gBaseSceneView DX_NOBIND;
+SamplerState Samp_gBaseSceneView DX_NOBIND;
 
-Texture2D gBloomTex;
-SamplerState Samp_gBloomTex;
+Texture2D gBloomTex DX_NOBIND;
+SamplerState Samp_gBloomTex DX_NOBIND;
 
-Texture2D gPickedTex;
-SamplerState Samp_gPickedTex;
+Texture2D gPickedTex DX_NOBIND;
+SamplerState Samp_gPickedTex DX_NOBIND;
 
-Texture2D gVignette;
-SamplerState Samp_gVignette;
+Texture2D GVignette DX_NOBIND;
+SamplerState Samp_GVignette DX_NOBIND;
 
-Texture2D gSunShaft;
-SamplerState Samp_gSunShaft;
+Texture2D gSunShaft DX_NOBIND;
+SamplerState Samp_gSunShaft DX_NOBIND;
 
-Texture2D gMobileAoTex;
-SamplerState Samp_gMobileAoTex;
+Texture2D gMobileAoTex DX_NOBIND;
+SamplerState Samp_gMobileAoTex DX_NOBIND;
 
 PS_INPUT VS_Main(VS_INPUT input)
 {
@@ -42,7 +43,7 @@ PS_INPUT VS_Main(VS_INPUT input)
 
 	output.vPosition = float4(input.vPosition.xyz, 1.0f);
 	output.vUV = input.vUV;
-#if RHI_OGL==1
+#if RHI_TYPE == RHI_GL
 	output.vUV.y = 1 - input.vUV.y;
 #endif
 	output.vLightMap.xy = gSunPosNDC.xy - input.vPosition.xy;
@@ -55,7 +56,7 @@ PS_INPUT VS_Main(VS_INPUT input)
 
 struct PS_OUTPUT
 {
-	half4 RT0 : SV_Target0;
+	float4 RT0 : SV_Target0;
 };
 
 PS_OUTPUT PS_Main(PS_INPUT input)
@@ -114,7 +115,6 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		half SunBloomAtten8 = Pow4(SunBloomAtten2);
 		half3 SunBloomColor = SunShaftM.g * DirLightColor * half3(SunBloomAtten2, SunBloomAtten8, Pow2(SunBloomAtten8));
 		Color = (half3(1.0h, 1.0h, 1.0h) - SunBloomColor) * Color + SunBloomColor * 1.25h;
-
 	}
 	else
 	{
@@ -135,7 +135,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	half LumHdr = CalcLuminanceYCbCr(Color);
 	half VignetteWeight = max(1.0h - LumHdr, 0.0h);
 	//half VignetteMask =1.0h - CalcVignettePS(input.vLightMap.xy, 0.5h);
-	half VignetteMask = 1.0h - gVignette.Sample(Samp_gVignette, input.vUV.xy).r;
+	half VignetteMask = 1.0h - GVignette.Sample(Samp_GVignette, input.vUV.xy).r;
 	Color = (1.0h - VignetteMask * VignetteWeight) * Color;
 
 	Color = ACESMobile_HQ(Color);

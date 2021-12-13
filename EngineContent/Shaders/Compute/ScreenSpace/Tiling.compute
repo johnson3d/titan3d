@@ -1,0 +1,97 @@
+#ifndef _SCREEN_TILING_H_
+#define _SCREEN_TILING_H_
+#include "../../Inc/VertexLayout.cginc"
+#include "../../Inc/GpuSceneCommon.cginc"
+
+Texture2D<float2> DepthBuffer;
+RWStructuredBuffer<FTileData> DstBuffer;
+
+void PushLight(int tileIdx, uint lightIndex)
+{
+	/*int oldValue = DstBuffer[tileIdx].NumPointLight;
+	uint idx0 = oldValue / 8;
+	uint remainder0 = oldValue % 8;
+	uint idx1 = remainder0 / 2;
+	uint remainder1 = remainder0 % 2;
+
+	if (remainder1 == 0)
+	{
+		DstBuffer[tileIdx].PointLights[idx0][idx1] = lightIndex;
+	}
+	else
+	{
+		DstBuffer[tileIdx].PointLights[idx0][idx1] = DstBuffer[tileIdx].PointLights[idx0][idx1] | ((lightIndex & 0xffff) << 16);
+	}
+	DstBuffer[tileIdx].NumPointLight++;*/
+
+	int oldValue = DstBuffer[tileIdx].NumPointLight;
+	if (oldValue >= MaxNumOfPointLight)
+	{
+		return;
+	}
+	DstBuffer[tileIdx].PointLights[oldValue] = lightIndex;
+	DstBuffer[tileIdx].NumPointLight++;
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_SetupTileData(uint3 id : SV_DispatchThreadID,
+	uint3 GroupId : SV_GroupID,
+	uint3 GroupThreadId : SV_GroupThreadID,
+	uint GroupIndex : SV_GroupIndex)
+{
+	uint2 texSize;
+	DepthBuffer.GetDimensions(texSize.x, texSize.y);
+	float2 texSizeF = (float2)texSize;
+	
+	float3 boxmin = float3(BIG_FLOAT, BIG_FLOAT, BIG_FLOAT);
+	float3 boxmax = float3(-BIG_FLOAT, -BIG_FLOAT, -BIG_FLOAT);
+	uint2 startPixel = id.xy * TileSize;
+	uint2 offset = uint2(0, 0);;
+	for (int i = 0; i < TileSize; i++)
+	{
+		offset.y = i;
+		for (int j = 0; j < TileSize; j++)
+		{
+			offset.x = j;
+			uint2 pixel = startPixel.xy + offset;
+			if (any(pixel >= texSize))
+				continue;
+			float d = DepthBuffer[pixel.xy].r;
+			if (d == 1.0f)
+				continue;
+			float2 uv = ((float2)pixel.xy) / texSizeF.xy;
+			float3 pos = GetWorldPositionFromDepthValue(uv, d).xyz;
+			MergeAABB(boxmin, boxmax, pos);
+		}
+	}
+
+	uint tileIdx = GetTileIndex(id.x, id.y);
+	//DstBuffer[tileIdx].NumPointLight = 0;
+	DstBuffer[tileIdx].BoxMin = boxmin;
+	DstBuffer[tileIdx].BoxMax = boxmax;
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_PushLightToTileData(uint3 id : SV_DispatchThreadID,
+	uint3 GroupId : SV_GroupID,
+	uint3 GroupThreadId : SV_GroupThreadID,
+	uint GroupIndex : SV_GroupIndex)
+{
+	if (any(id.xy >= TileNum))
+		return;
+	uint tileIdx = GetTileIndex(id.x, id.y);
+	float3 boxmin = DstBuffer[tileIdx].BoxMin;
+	float3 boxmax = DstBuffer[tileIdx].BoxMax;
+	DstBuffer[tileIdx].NumPointLight = 0;
+	for (uint i = 0; i < LightNum; i++)
+	{
+		FPointLight light = GpuScene_PointLights[i];
+		float distSq;
+		if (Overlap_AABB_Sphere(boxmin, boxmax, light.PositionAndRadius.xyz, light.PositionAndRadius.w * light.PositionAndRadius.w, distSq))
+		{
+			PushLight(tileIdx, i);
+		}
+	}
+}
+
+#endif//#ifndef _SCREEN_TILING_H_

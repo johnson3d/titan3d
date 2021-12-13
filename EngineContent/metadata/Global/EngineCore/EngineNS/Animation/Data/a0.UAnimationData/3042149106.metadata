@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_3042149106 Type="EngineNS.Animation.Data.UAnimationData@EngineCore">
-  <AnimatedHierarchy Type="EngineNS.Animation.Base.AnimHierarchy@EngineCore" Order="0" />
-  <AnimCurvesList Type="System.Collections.Generic.List&lt;EngineNS.Animation.Curve.ICurve@EngineCore,&gt;@Unknown" Order="0" />
-</Hash_3042149106>

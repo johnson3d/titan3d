@@ -1,0 +1,260 @@
+#ifndef _PARTICLE_H_
+#define _PARTICLE_H_
+
+#include "NebulaModifierDefine"
+
+#include "ParticleCommon.cginc"
+#include "EmitShape.compute"
+void DoParticleEmitShape(uint3 id, inout FParticle cur, uint shapeIndex);
+void OnInitParticle(uint3 id, inout FParticle particle);
+void OnDeadParticle(uint3 id, inout FParticle particle);
+void DoParticleEffectors(uint3 id, inout FParticle particle);
+void DoUpdateSystem();
+
+RWStructuredBuffer<FParticle>	bfParticles;
+RWByteAddressBuffer				bfFreeParticles;
+RWByteAddressBuffer				bfTempReturnParticles;
+RWByteAddressBuffer				bfCurAlives;
+RWByteAddressBuffer				bfBackendAlives;
+
+RWByteAddressBuffer				bfDispatchArg;
+RWByteAddressBuffer				bfDrawArg;
+
+groupshared int GroupRunParticleNumber = 0;
+
+void BufferPushBack(RWByteAddressBuffer buffer, int value)
+{
+	int Count = 0;
+	buffer.InterlockedAdd(0, 1, Count);
+	buffer.Store(Count * 4 + BufferHeadSize, value);
+}
+
+void ClearBuffer(RWByteAddressBuffer buffer)
+{
+	buffer.Store(0, 0);
+}
+//int BufferPopBack(RWByteAddressBuffer buffer)
+//{
+//	int Count = 0;
+//	buffer.InterlockedAdd(0, -1, Count);
+//	//return buffer.Load((Count - 1) * 4 + 4 * 4);
+//	return buffer.Load(Count * 4 + BufferHeadSize);
+//}
+
+int GetBufferCount(ByteAddressBuffer buffer)
+{
+	return buffer.Load(0);
+}
+
+int GetBufferCount(RWByteAddressBuffer buffer)
+{
+	return buffer.Load(0);
+}
+
+int GetBufferValue(RWByteAddressBuffer buffer, int index)
+{
+	return buffer.Load(BufferHeadSize + index * 4);
+}
+
+int GetBufferValue(ByteAddressBuffer buffer, int index)
+{
+	return buffer.Load(BufferHeadSize + index * 4);
+}
+
+void SetBufferValue(RWByteAddressBuffer buffer, int index, int value)
+{
+	buffer.Store(BufferHeadSize + index * 4, value);
+}
+
+int BufferAppend(RWByteAddressBuffer buffer, int num)
+{
+	int Index = 0;
+	buffer.InterlockedAdd(0, num, Index);
+	return Index;
+}
+
+int BufferTrim(RWByteAddressBuffer buffer, int num)
+{
+	int Index = 0;
+	buffer.InterlockedAdd(0, -num, Index);
+	if (Index < 0)
+	{
+		buffer.InterlockedAdd(0, num, Index);
+		return -1;
+	}
+	else
+	{
+		return Index;
+	}
+}
+
+void SpawnParticle(uint3 id, uint num, uint flags, float life)
+{
+	int SrcIndexId = BufferTrim(bfFreeParticles, num);
+	if (SrcIndexId < 0)
+		return;
+	SrcIndexId = SrcIndexId - 1 - num + (BufferHeadSize / 4);
+	int DstIndexId = BufferAppend(bfBackendAlives, num);
+	DstIndexId += (BufferHeadSize / 4);
+	for (uint i = 0; i < num; i++)
+	{
+		id.x += i;
+		uint index = bfFreeParticles.Load((SrcIndexId + i) * 4);
+		bfBackendAlives.Store((DstIndexId + i) * 4, index);
+
+		bfParticles[index].Life = life;
+		bfParticles[index].Flags = flags;
+
+		if (IsParticleEmitShape(bfParticles[index]))
+		{
+			uint shapeIndex = GetParticleData(bfParticles[index].Flags);// % (uint)EmitterShapes.Count;
+			DoParticleEmitShape(id, bfParticles[index], shapeIndex);
+		}
+
+		OnInitParticle(id, bfParticles[index]);		
+	}
+}
+
+uint NebulaRoundup(uint num, uint width)
+{
+	uint remain = num % width;
+	if (remain == 0)
+		return num / width;
+	else
+		return num / width + 1;
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_Particle_Update(uint3 id : SV_DispatchThreadID,
+	uint3 GroupId : SV_GroupID,
+	uint3 GroupThreadId : SV_GroupThreadID,
+	uint GroupIndex : SV_GroupIndex)
+{
+	if (GroupIndex == 0)
+	{
+		GroupRunParticleNumber = 0;
+	}
+	GroupMemoryBarrierWithGroupSync();
+	if (id.x == 0)
+	{
+		DoUpdateSystem();
+	}
+
+	int tmpCount;
+	uint CountOfAlive = GetBufferCount(bfCurAlives);
+	if (id.x < CountOfAlive)
+	{
+		int idx = GetBufferValue(bfCurAlives, id.x);
+		FParticle inst = bfParticles[idx];
+		inst.Life -= ParticleElapsedTime;
+
+		if (inst.Life <= 0)
+		{
+			BufferPushBack(bfTempReturnParticles, idx);
+			OnDeadParticle(id, inst);
+		}
+		else
+		{
+			BufferPushBack(bfBackendAlives, idx);
+			DoParticleEffectors(id, inst);
+			bfParticles[idx] = inst;
+		}
+		InterlockedAdd(GroupRunParticleNumber, 1, tmpCount);
+	}
+
+	GroupMemoryBarrierWithGroupSync();
+	if (GroupIndex == 0)
+	{
+		uint finishedThread;
+		bfCurAlives.InterlockedAdd(1 * 4, GroupRunParticleNumber, finishedThread);
+
+		if (finishedThread + GroupRunParticleNumber == CountOfAlive)
+		{
+			bfCurAlives.Store(1 * 4, 0);
+			uint num = GetBufferCount(bfBackendAlives);
+			bfDrawArg.Store(0, Draw_IndexCountPerInstance);
+			bfDrawArg.Store(1 * 4, num);
+			bfDrawArg.Store(2 * 4, Draw_StartIndexLocation);
+			bfDrawArg.Store(3 * 4, Draw_BaseVertexLocation);
+			bfDrawArg.Store(4 * 4, Draw_StartInstanceLocation);
+
+			//num = ROUNDUP(num, DispatchX);
+			num = NebulaRoundup(num + 1, DispatchX);
+			bfDispatchArg.Store(0, num);//dispatchx
+			bfDispatchArg.Store(1 * 4, 1);//dispatchy
+			bfDispatchArg.Store(2 * 4, 1);//dispatchz
+
+			ClearBuffer(bfCurAlives);
+			uint returnCount = GetBufferCount(bfTempReturnParticles);
+			uint freeCount = GetBufferCount(bfFreeParticles);
+			bfFreeParticles.Store(0, freeCount + returnCount);
+			freeCount += BufferHeadSize / 4 - 1;
+			for (uint i = 0; i < returnCount; i++)
+			{//parallel ?
+				int tmp = bfTempReturnParticles.Load(BufferHeadSize + i * 4);
+				bfFreeParticles.Store((freeCount + i) * 4, tmp);
+			}
+			ClearBuffer(bfTempReturnParticles);
+		}
+	}
+}
+
+[numthreads(1, 1, 1)]
+void CS_Particle_SetupParameters(uint3 id : SV_DispatchThreadID,
+	uint3 GroupId : SV_GroupID,
+	uint3 GroupThreadId : SV_GroupThreadID,
+	uint GroupIndex : SV_GroupIndex)
+{
+	uint num = GetBufferCount(bfBackendAlives);
+	bfDrawArg.Store(0, Draw_IndexCountPerInstance);
+	bfDrawArg.Store(1, num);
+	bfDrawArg.Store(2, Draw_StartIndexLocation);
+	bfDrawArg.Store(3, Draw_BaseVertexLocation);
+	bfDrawArg.Store(4, Draw_StartInstanceLocation);
+
+	num = ROUNDUP(num, DispatchX);
+	bfDispatchArg.Store(0, num);//dispatchx
+	bfDispatchArg.Store(1, 1);//dispatchy
+	bfDispatchArg.Store(2, 1);//dispatchz
+	
+	ClearBuffer(bfCurAlives);
+}
+
+#include "NebulaModifier"
+
+#ifndef USER_EMITSHAPE
+void DoParticleEmitShape(uint3 id, inout FParticle particle, uint shapeIndex)
+{
+
+}
+#endif
+
+#ifndef USER_PARTICLE_INITIALIZE
+void OnInitParticle(uint3 id, inout FParticle particle)
+{
+
+}
+#endif
+
+#ifndef USER_PARTICLE_FINALIZE
+void OnDeadParticle(uint3 id, inout FParticle particle)
+{
+
+}
+#endif
+
+#ifndef USER_PARTICLE_DOEFFECTORS
+void DoParticleEffectors(uint3 id, inout FParticle particle)
+{
+
+}
+#endif
+
+#ifndef USER_PARTICLE_UPDATESYS
+void DoUpdateSystem()
+{
+
+}
+#endif
+
+#endif//#ifndef _PARTICLE_H_

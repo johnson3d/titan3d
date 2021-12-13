@@ -9,6 +9,27 @@ float4 SampleLevel2D(Texture2D tex, SamplerState samp, float2 uv, float level, o
 	return clr;
 }
 
+float4 Sample2D(Texture2D tex, SamplerState samp, float2 uv, out float3 outRgb)
+{
+	float4 clr = tex.Sample(samp, uv);
+	outRgb = clr.rgb;
+	return clr;
+}
+
+float4 SampleArrayLevel2D(Texture2DArray tex, SamplerState samp, float2 uv, int arrayIndex, float level, out float3 outRgb)
+{
+	float4 clr = tex.SampleLevel(samp, float3(uv.xy, arrayIndex), level);
+	outRgb = clr.rgb;
+	return clr;
+}
+
+float4 SampleArray2D(Texture2DArray tex, SamplerState samp, float2 uv, int arrayIndex, out float3 outRgb)
+{
+	float4 clr = tex.Sample(samp, float3(uv.xy, arrayIndex));
+	outRgb = clr.rgb;
+	return clr;
+}
+
 float MipLevel(float2 uv, float SUB_TEXTURE_SIZE, float SUB_TEXTURE_MIPCOUNT)
 {
 	float2 dx = ddx(uv * SUB_TEXTURE_SIZE);
@@ -206,7 +227,7 @@ void SubUV( half index, half frameCount, half2 uv, out half2 finalUV )
 void UnpackNormal( half3 packedNormal, out half3 normal )
 {
 	normal = packedNormal.xyz * 2 - 1;
-	// normalmap�洢�ķ����������ǳ���Z�ģ� ����ת���ɳ���y
+	
 	//normal = half3( temp.x, temp.z, temp.y );
 }
 
@@ -234,25 +255,24 @@ void Distortion( float4 localPos, float4 localNorm, float4 viewPos, float4 projP
 	// ���㵱ǰ��������ĻTexture�ϵ�uv����
 	float2 screenPos;
 	ScreenPos(projPos, screenPos);
-	distortionUV = screenPos + distortionOffset * distortion; // �Ŷ�uv
+	distortionUV = screenPos + distortionOffset * distortion; 
 }
 
-void Distortion2( float4 localPos, float4 localNorm, float4 viewPos, float4 projPos, float strength, float transparency, float distortionOffset, out  float4 distortionColor) 
-{
-	float3 localViewDir = normalize(CameraPositionInModel - localPos.xyz);
-	float NdotV = dot(localNorm.xyz, localViewDir);
-	float depth = viewPos.z + 1;
-
-	float distortion = abs((NdotV / depth)*strength);
-
-	// ���㵱ǰ��������ĻTexture�ϵ�uv����
-	float2 screenPos;
-	ScreenPos(projPos, screenPos);
-	float2 distortionUV = screenPos + distortionOffset * distortion; // �Ŷ�uv
-
-	distortionColor.rgb = PreFrameBuffer.Sample(SampPreFrameBuffer,distortionUV).rgb;
-	distortionColor.a = distortion / transparency;
-}
+//void Distortion2( float4 localPos, float4 localNorm, float4 viewPos, float4 projPos, float strength, float transparency, float distortionOffset, out  float4 distortionColor) 
+//{
+//	float3 localViewDir = normalize(CameraPositionInModel - localPos.xyz);
+//	float NdotV = dot(localNorm.xyz, localViewDir);
+//	float depth = viewPos.z + 1;
+//
+//	float distortion = abs((NdotV / depth)*strength);
+//
+//	float2 screenPos;
+//	ScreenPos(projPos, screenPos);
+//	float2 distortionUV = screenPos + distortionOffset * distortion; 
+//
+//	distortionColor.rgb = PreFrameBuffer.Sample(SampPreFrameBuffer,distortionUV).rgb;
+//	distortionColor.a = distortion / transparency;
+//}
 
 float4	CalcWorldPosition(float4 PosProj, float vDepth)
 {
@@ -268,17 +288,17 @@ float4	CalcWorldPosition(float4 PosProj, float vDepth)
 	return VPos;
 }
 
-void PreFrameWorldYBias(float4 projPos, out float worldYBias)
-{
-	float2 screenPos;
-	ScreenPos(projPos, screenPos);
-	float sceneDepth = PreFrameDepth.Sample(SampPreFrameDepth, screenPos).r;
-
-	float3 worldPos1 = mul(projPos, ViewPrjInvMtx).xyz;
-	float3 worldPos2 = CalcWorldPosition(projPos, sceneDepth).xyz;
-
-	worldYBias = worldPos1.y - worldPos2.y; // ��ǰ����ͳ�����worldY��}
-}
+//void PreFrameWorldYBias(float4 projPos, out float worldYBias)
+//{
+//	float2 screenPos;
+//	ScreenPos(projPos, screenPos);
+//	float sceneDepth = PreFrameDepth.Sample(SampPreFrameDepth, screenPos).r;
+//
+//	float3 worldPos1 = mul(projPos, ViewPrjInvMtx).xyz;
+//	float3 worldPos2 = CalcWorldPosition(projPos, sceneDepth).xyz;
+//
+//	worldYBias = worldPos1.y - worldPos2.y;
+//}
 
 float4	CalcViewPosition(float4 PosProj, float vDepth)
 {
@@ -294,70 +314,70 @@ float4	CalcViewPosition(float4 PosProj, float vDepth)
 	return VPos;
 }
 
-void PreFrameDepthBias(float4 projPos, out float depthBias)
-{
-  float2 screenPos;
-  ScreenPos(projPos, screenPos);
-  float sceneDepth = PreFrameDepth.Sample(SampPreFrameDepth, screenPos).x;
+//void PreFrameDepthBias(float4 projPos, out float depthBias)
+//{
+//  float2 screenPos;
+//  ScreenPos(projPos, screenPos);
+//  float sceneDepth = PreFrameDepth.Sample(SampPreFrameDepth, screenPos).x;
+//
+//  float3 viewPos1 = mul(projPos, PrjInvMtx).xyz;
+//
+//#if defined(GLES)
+//  sceneDepth = sceneDepth * 2 - 1;
+//#endif
+//  float3 viewPos2 = CalcViewPosition(projPos, sceneDepth).xyz;
+//
+//  depthBias = viewPos1.z - viewPos2.z;
+//}
 
-  float3 viewPos1 = mul(projPos, PrjInvMtx).xyz;
-
-#if defined(GLES)
-  sceneDepth = sceneDepth * 2 - 1;
-#endif
-  float3 viewPos2 = CalcViewPosition(projPos, sceneDepth).xyz;
-
-  depthBias = viewPos1.z - viewPos2.z;
-}
 
 
+//void ZDisableDepthBiasAlpha(float4 projPos, float alpha, float dist, out float outAlpha)
+//{
+//	float depthBias = 0;
+//	PreFrameDepthBias(projPos, depthBias);
+//
+//	outAlpha = 0;
+//	if(depthBias<=dist)
+//	{
+//		outAlpha = alpha;
+//	}
+//}
 
-void ZDisableDepthBiasAlpha(float4 projPos, float alpha, float dist, out float outAlpha)
-{
-	float depthBias = 0;
-	PreFrameDepthBias(projPos, depthBias);
-
-	outAlpha = 0;
-	if(depthBias<=dist)
-	{
-		outAlpha = alpha;
-	}
-}
-
-void DepthBiasAlpha( float4 projPos, float alphaDistance, out float alpha )
-{
-	/*
-	alpha = 1;
-	float depthBias = 0;
-	PreFrameDepthBias(projPos, depthBias);
-
-	if(depthBias>=0)
-	{
-		alpha = 1;
-	}
-	else
-	{
-		alpha = smoothstep(0, 1, abs(depthBias) / alphaDistance);
-	}
-	*/
-
-	float depthBias = 0;
-	PreFrameDepthBias(projPos, depthBias);
-	depthBias = abs(depthBias);
-	float s = alphaDistance - depthBias;
-	if( s <= 0 )
-	{
-		alpha = 1.0f;
-	}
-	else
-	{
-		if(alphaDistance == 0)
-			alpha = 1.0f;
-		else
-			alpha = lerp(0.0f, 1.0f, depthBias / alphaDistance);
-	}
-
-}
+//void DepthBiasAlpha( float4 projPos, float alphaDistance, out float alpha )
+//{
+//	/*
+//	alpha = 1;
+//	float depthBias = 0;
+//	PreFrameDepthBias(projPos, depthBias);
+//
+//	if(depthBias>=0)
+//	{
+//		alpha = 1;
+//	}
+//	else
+//	{
+//		alpha = smoothstep(0, 1, abs(depthBias) / alphaDistance);
+//	}
+//	*/
+//
+//	float depthBias = 0;
+//	PreFrameDepthBias(projPos, depthBias);
+//	depthBias = abs(depthBias);
+//	float s = alphaDistance - depthBias;
+//	if( s <= 0 )
+//	{
+//		alpha = 1.0f;
+//	}
+//	else
+//	{
+//		if(alphaDistance == 0)
+//			alpha = 1.0f;
+//		else
+//			alpha = lerp(0.0f, 1.0f, depthBias / alphaDistance);
+//	}
+//
+//}
 
 void Panner(float2 uv, float time, float2 speed, float2 scale, out float2 outUV)
 {

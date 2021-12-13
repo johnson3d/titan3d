@@ -1,0 +1,37 @@
+#define MDF_INSTANCING 
+
+float3 InstancingRotateVec(in float3 inPos, in float4 inQuat)
+{
+	float3 uv = cross(inQuat.xyz, inPos);
+	float3 uuv = cross(inQuat.xyz, uv);
+	uv = uv * (2.0f * inQuat.w);
+	uuv *= 2.0f;
+	
+	return inPos + uv + uuv;
+}
+
+void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
+{
+#if HW_VS_STRUCTUREBUFFER
+	VSInstantData InstData = VSInstantDataArray[vert.vInstanceId];
+	vert.vPosition = mul(float4(vert.vPosition.xyz, 1), InstData.WorldMatrix).xyz;
+	vert.vNormal = normalize(mul(float4(vert.vNormal.xyz, 0), InstData.WorldMatrix).xyz);
+	vert.vTangent.xyz = normalize(mul(float4(vert.vTangent.xyz, 0), InstData.WorldMatrix).xyz);
+	vsOut.vWorldPos = vert.vPosition;
+
+	vsOut.SpecialData.x = vert.vInstanceId;
+#else
+	float3 Pos = vert.vInstPos.xyz + InstancingRotateVec(vert.vPosition * vert.vInstScale.xyz, vert.vInstQuat);
+	
+	vert.vPosition.xyz = Pos;
+	vert.vNormal.xyz = InstancingRotateVec(vert.vNormal.xyz, vert.vInstQuat);
+	
+	vsOut.SpecialData.x = vert.vInstScale.w;
+
+	for(int i=0;i<vert.vInstScale.w;i++)
+	{
+		uint lightIndex = vert.vF4_1[i];
+		vsOut.PointLightIndices[i] = (uint)lightIndex;
+	}
+#endif
+}

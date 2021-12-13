@@ -1,9 +1,11 @@
 #ifndef __VARBASE_PERVIEWPORT_SHADERINC__
 #define __VARBASE_PERVIEWPORT_SHADERINC__
+#include "GlobalDefine.cginc"
+
 #include "../Inc/LightCommon.cginc"
 #include "../Inc/Math.cginc"
 
-cbuffer cbPerViewport : register( b1 )
+VK_BIND(1) cbuffer cbPerViewport DX_BIND_B(1)
 {	
 	float2 ViewportPos; // leftup position
 	float mDirLightSpecularIntensity;

@@ -5,7 +5,7 @@
 #define CubeFace_NY 4
 #define CubeFace_NZ 5
 
-cbuffer cbMeshBatch : register(b10)
+cbuffer cbMeshBatch DX_BIND_B(10)
 {
 	float4 GpuDrivenCameraPlanes[6];
 

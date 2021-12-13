@@ -14,6 +14,8 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\NebulaParticle.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\ParticleCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerCamera.cginc" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerFrame.cginc" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerMaterial.cginc" />
@@ -22,8 +24,7 @@
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\GpuDrivenDataDef.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\MergeInstance.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VertexShaderVTF.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)DSBase2RT.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)DSDirLighting.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)Compute\VXGI\VxDebugModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Font.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)FSBase.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Gizmos.shadingenv" />
@@ -34,9 +35,11 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\CommonLightFunc.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\FXAAMobile.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\GlobalDefine.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\GpuSceneCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\LightCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Math.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\MixUtility.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\MonteCarlo.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\PerlinNoise.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\PostEffectCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Inc\Random.cginc" />
@@ -59,13 +62,20 @@
     <None Include="$(MSBuildThisFileDirectory)MobileOpaqueEditor.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileSky.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileTranslucent.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.code" />
+    <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.var" />
+    <None Include="$(MSBuildThisFileDirectory)Modifier\TerrainCDLOD.cginc" />
     <None Include="$(MSBuildThisFileDirectory)PickedBlurH.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)PickedBlurV.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)PickedHollow.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)PickedSetUp.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)SceneCapture.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredBasePassPS.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredCommon.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredDirLighting.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredOpaque.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredTranslucent.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DummyShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\heightmap.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileBasePassPS.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileCopyEditor.cginc" />
@@ -78,16 +88,18 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_hollow.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\pick\pick_setup.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\rect2d.shadingenv" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\screenspace\hdr.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\SSM.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)slate\SlateGUI.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Snapshot.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)SSM.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileSunShaftBlur.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileSunShaftMask.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)UFOMobileCopy.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaque.shadingenv" />
-    <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.code" />
+    <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.var" />
-    <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.code" />
+    <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.var" />
     <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaqueNPR.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)UFOMobileOutlineNPR.shadingenv" />
@@ -95,13 +107,20 @@
     <None Include="$(MSBuildThisFileDirectory)UFOMobileTranslucentNPR.shadingenv" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\Effectors.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\EmitShape.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\Particle.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\clearid.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\extractID.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Cluster.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Hzb.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\VirtualTexture.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\AvgBrightness.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\Tiling.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\VXGI\VoxelInject.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\VXGI\VoxelAllocator.compute" />
-    <FxCompile Include="$(MSBuildThisFileDirectory)slate\imgui-frag.hlsl" />
-    <FxCompile Include="$(MSBuildThisFileDirectory)slate\imgui-vertex.hlsl" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\VXGI\VXGICommon.compute" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\VXGI\VxVisualDebugger.compute" />
   </ItemGroup>
 </Project>

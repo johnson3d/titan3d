@@ -321,9 +321,9 @@ struct PbrPointLight
 };
 #define MaxPointLightNumber		128
 
-half3 PbrPointLightMobile(PbrPointLight light, half3 WorldPos, half3 V, half3 N, half3 OptDiffShading, half3 OptSpecShading, half Roughness)
+half3 PbrPointLightMobile(PbrPointLight light, float3 WorldPos, half3 V, half3 N, half3 OptDiffShading, half3 OptSpecShading, half Roughness)
 {
-	half3 Lp = (half3)light.PointLightPos_RadiusInv.xyz - WorldPos;
+	half3 Lp = (half3)(light.PointLightPos_RadiusInv.xyz - WorldPos);
 	half DistSqr = dot(Lp, Lp);
 
 	half AttenPL = rcp(DistSqr + 1.0h);

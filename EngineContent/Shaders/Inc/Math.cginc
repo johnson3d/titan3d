@@ -6,7 +6,9 @@
 #define ECCd 1.0h //Pi/Pi
 #define AO_M 255.0h
 #define MAX_POINT_LIGHT_PER_OBJ 4
+#define BIG_FLOAT 1000000.0f
 
+#define ROUNDUP(x,n) ((x+(n-1))&(~(n-1)))
 
 half3 sRGB2Linear(half3 sRGBColor)
 {
@@ -79,9 +81,89 @@ half3 EyeNoise(half2 seed)
 	return frac(sin(dot(seed.xy, half2(34.483h, 89.637h))) * half3(29156.4765h, 38273.5639h, 47843.7546h));
 }
 
+half4 RGBMEncode(half3 color, half range) 
+{
+	if (all(color == 0))
+	{
+		return (half4)0;
+	}
+	half4 rgbm;
+	color /= range;
+	rgbm.a = clamp(max(max(color.r, color.g), max(color.b, 1e-6)), 0.0, 1.0);
+	rgbm.a = ceil(rgbm.a * 255.0) / 255.0;
+	rgbm.rgb = color / rgbm.a;
+	return rgbm;
+}
+
+half3 RGBMDecode(half4 rgbm, half range) {
+	return range * rgbm.rgb * rgbm.a;
+}
+
+
+void MergeAABB(inout float3 boxmin, inout float3 boxmax, float3 pos)
+{
+	boxmin = min(boxmin, pos);
+	boxmax = max(boxmax, pos);
+}
+
+bool Overlap_AABB_Sphere(float3 boxmin, float3 boxmax, float3 center, float radiusSq, out float distSq)
+{
+	float3 clamped = clamp(center, boxmin, boxmax);
+	float3 a = center - clamped;
+	distSq = dot(a, a);
+
+	bool ret = (distSq <= radiusSq);
+	return ret;
+}
+
+bool Contain_AABB_Point(float3 boxmin, float3 boxmax, float3 pos)
+{
+	if (any(pos > boxmax) || any(pos < boxmin))
+		return false;
+	return true;
+}
+
 //half InverseDepth(half Depth)
 //{
 //	return 1.0h - Depth;
 //}
+
+// Clamp the base, so it's never <= 0.0f (INF/NaN).
+
+#define POW_CLAMP 0.000001f
+float ClampedPow(float X, float Y)
+{
+	return pow(max(abs(X), POW_CLAMP), Y);
+}
+
+uint ReverseBits32(uint bits)
+{
+#if ShaderModel >= 5
+	return reversebits(bits);
+#else
+	bits = (bits << 16) | (bits >> 16);
+	bits = ((bits & 0x00ff00ff) << 8) | ((bits & 0xff00ff00) >> 8);
+	bits = ((bits & 0x0f0f0f0f) << 4) | ((bits & 0xf0f0f0f0) >> 4);
+	bits = ((bits & 0x33333333) << 2) | ((bits & 0xcccccccc) >> 2);
+	bits = ((bits & 0x55555555) << 1) | ((bits & 0xaaaaaaaa) >> 1);
+	return bits;
+#endif
+}
+
+/** Reverses all the <BitCount> lowest significant bits. */
+uint ReverseBitsN(uint Bitfield, const uint BitCount)
+{
+	return ReverseBits32(Bitfield) >> (32 - BitCount);
+}
+
+float3 QuatRotatePosition(in float3 inPos, in float4 inQuat)
+{
+	float3 uv = cross(inQuat.xyz, inPos);
+	float3 uuv = cross(inQuat.xyz, uv);
+	uv = uv * (2.0f * inQuat.w);
+	uuv *= 2.0f;
+
+	return inPos + uv + uuv;
+}
 
 #endif
