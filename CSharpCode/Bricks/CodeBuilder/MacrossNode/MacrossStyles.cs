@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,12 +9,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public uint BGColor = 0x80808080;
 
         public static MacrossStyles Instance = new MacrossStyles();
-        public EGui.UVAnim FunctionIcon = new EGui.UVAnim(0xFF00FF00, 25);
+        public EGui.UUvAnim FunctionIcon = new EGui.UUvAnim(0xFF00FF00, 25);
         public uint FunctionTitleColor = 0xFF204020;
         public uint FunctionBGColor = 0x80808080;
 
-        public EGui.UVAnim MemberIcon = new EGui.UVAnim(0xFF0000FF, 25);
-        public EGui.UVAnim LocalVarIcon = new EGui.UVAnim(0xFF0080FF, 25);
+        public EGui.UUvAnim MemberIcon = new EGui.UUvAnim(0xFF0000FF, 25);
+        public EGui.UUvAnim LocalVarIcon = new EGui.UUvAnim(0xFF0080FF, 25);
         public uint VarTitleColor = 0xFF204040;
         public uint VarBGColor = 0x80808080;
 

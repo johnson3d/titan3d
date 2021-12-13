@@ -17,7 +17,7 @@ namespace EngineNS.Graphics.Pipeline
         public bool IsCreatedByImGui = false;
         public RHI.CSwapChain SwapChain { get; set; }
         public UGraphicsBuffers SwapChainBuffer = new UGraphicsBuffers();
-        public RenderPassDesc SwapChainPassDesc = new RenderPassDesc();
+        public RHI.CRenderPass SwapChainRenderPass;
         public UDrawBuffers SwapChainPass = new UDrawBuffers();
         public override async System.Threading.Tasks.Task<bool> Initialize(string title, int x, int y, int w, int h)
         {
@@ -39,20 +39,38 @@ namespace EngineNS.Graphics.Pipeline
 
             SwapChainPass.Initialize(rc, "PresentSwapChain");
 
-            SwapChainBuffer.SwapChainIndex = 0;
-            SwapChainBuffer.Initialize(1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)w, (uint)h);
-            SwapChainBuffer.CreateGBuffer(0, SwapChain.mCoreObject.GetTexture2D());
-            SwapChainBuffer.FrameBuffers.mCoreObject.SetSwapChain(SwapChain.mCoreObject);
+            var SwapChainPassDesc = new IRenderPassDesc();
+            unsafe
+            {
+                SwapChainPassDesc.NumOfMRT = 1;
+                SwapChainPassDesc.AttachmentMRTs[0].IsSwapChain = 1;
+                SwapChainPassDesc.AttachmentMRTs[0].Format = SwapChain.mCoreObject.GetBackBuffer(0).mTextureDesc.Format;
+                SwapChainPassDesc.AttachmentMRTs[0].Samples = 1;
+                SwapChainPassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionClear;
+                SwapChainPassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
+                SwapChainPassDesc.m_AttachmentDepthStencil.Format = EPixelFormat.PXF_D24_UNORM_S8_UINT;
+                SwapChainPassDesc.m_AttachmentDepthStencil.Samples = 1;
+                SwapChainPassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
+                SwapChainPassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
+                SwapChainPassDesc.m_AttachmentDepthStencil.StencilLoadAction = FrameBufferLoadAction.LoadActionClear;
+                SwapChainPassDesc.m_AttachmentDepthStencil.StencilStoreAction = FrameBufferStoreAction.StoreActionStore;
+                //SwapChainPassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
+                //SwapChainPassDesc.mDepthClearValue = 1.0f;
+                //SwapChainPassDesc.mStencilClearValue = 0u;
+            }
+            SwapChainRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in SwapChainPassDesc);
 
-            SwapChainPassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionClear;
-            SwapChainPassDesc.mFBStoreAction_Color = FrameBufferStoreAction.StoreActionStore;
-            SwapChainPassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
-            SwapChainPassDesc.mFBLoadAction_Depth = FrameBufferLoadAction.LoadActionClear;
-            SwapChainPassDesc.mFBStoreAction_Depth = FrameBufferStoreAction.StoreActionStore;
-            SwapChainPassDesc.mDepthClearValue = 1.0f;
-            SwapChainPassDesc.mFBLoadAction_Stencil = FrameBufferLoadAction.LoadActionClear;
-            SwapChainPassDesc.mFBStoreAction_Stencil = FrameBufferStoreAction.StoreActionStore;
-            SwapChainPassDesc.mStencilClearValue = 0u;
+            SwapChainBuffer.Initialize(SwapChainRenderPass, null, 1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)w, (uint)h);
+            SwapChainBuffer.BindSwapChain(0, SwapChain);
+            SwapChainBuffer.UpdateFrameBuffers(w, h);
+        }
+        public EPixelFormat GetSwapchainFormat()
+        {
+            return SwapChain.mCoreObject.GetBackBuffer(0).mTextureDesc.Format;
+        }
+        public EPixelFormat GetSwapchainDSFormat()
+        {
+            return EPixelFormat.PXF_D24_UNORM_S8_UINT;
         }
         public virtual async System.Threading.Tasks.Task<bool> InitializeGraphics(RHI.CRenderContext rc, Type rpType)
         {
@@ -76,27 +94,31 @@ namespace EngineNS.Graphics.Pipeline
 
             if (SwapChainBuffer != null)
             {
-                SwapChainBuffer.SwapChainIndex = 0;
                 SwapChainBuffer.OnResize(x, y);
                 
                 if (SwapChain != null)
                 {
-                    SwapChainBuffer.CreateGBuffer(0, SwapChain.mCoreObject.GetTexture2D());
-                    SwapChainBuffer.FrameBuffers.mCoreObject.SetSwapChain(SwapChain.mCoreObject);
+                    SwapChainBuffer.BindSwapChain(0, SwapChain);
+                    SwapChainBuffer.UpdateFrameBuffers(x, y);
                 }
             }
         }
         public virtual void TickLogic(int ellapse)
         {
             var cmdlist = SwapChainPass.DrawCmdList.mCoreObject;
-            cmdlist.BeginCommand();
-            unsafe
+            if (cmdlist.BeginCommand())
             {
-                cmdlist.BeginRenderPass(ref SwapChainPassDesc, SwapChainBuffer.FrameBuffers.mCoreObject, "PresentSwapChain");
-                cmdlist.BuildRenderPass(0);
-                cmdlist.EndRenderPass();
+                var passClears = new IRenderPassClears();
+                passClears.SetDefault();
+                passClears.SetClearColor(0, new Color4(1, 0, 0, 0));
+
+                if (cmdlist.BeginRenderPass(SwapChainBuffer.FrameBuffers.mCoreObject, in passClears, "PresentSwapChain"))
+                {
+                    cmdlist.BuildRenderPass(0);
+                    cmdlist.EndRenderPass();
+                }
+                cmdlist.EndCommand();
             }
-            cmdlist.EndCommand();
         }
         public unsafe virtual void TickRender(int ellapse)
         {

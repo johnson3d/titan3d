@@ -1,0 +1,10 @@
+{
+  "Name": "Procedure",
+  "Path": "CSharpCode/Bricks/Procedure",
+  "FullName": "CSharpCode/Bricks/Procedure/Procedure.brick",
+  "SharedProjects": [
+    "CSharpCode/Editor/Editor.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

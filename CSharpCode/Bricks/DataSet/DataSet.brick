@@ -1,0 +1,16 @@
+{
+  "Name": "DataSet",
+  "Path": "CSharpCode/Bricks/DataSet",
+  "FullName": "CSharpCode/Bricks/DataSet/DataSet.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/Rtti/Rtti.brick"
+  ],
+  "Nugets": [
+    {
+      "Name": "NPOI",
+      "Version": "2.5.2"
+    }
+  ],
+  "DllModules": []
+}

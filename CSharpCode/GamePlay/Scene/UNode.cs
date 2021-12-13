@@ -4,16 +4,13 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
-    public class UNodeData : IO.ISerializer
+    public class UNodeData : IO.BaseSerializer
     {
-        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-        public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
         public int GetStructSize()
         {
             //return System.Runtime.InteropServices.Marshal.SizeOf(this.GetType());
             return 1024;
         }
-        public UNode Host { get; set; }
         [Rtti.Meta]
         public UNode.ENodeStyles NodeStyles { get; set; } = 0;
         [Rtti.Meta(Order = 0)]
@@ -33,26 +30,86 @@ namespace EngineNS.GamePlay.Scene
             set
             {
                 mPlacement = value;
-                Host?.UpdateAbsTransform();
-                Host?.UpdateAABB();
             }
-        }        
+        }
+
+        public bool HasStyle(UNode.ENodeStyles style)
+        {
+            return (NodeStyles & style) == style;
+        }
+        public void SetStyle(UNode.ENodeStyles style)
+        {
+            NodeStyles |= style;
+        }
+        public void UnsetStyle(UNode.ENodeStyles style)
+        {
+            NodeStyles &= ~style;
+        }
     }
     public partial class UNode
     {
+        public virtual async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        {
+            NodeData = data;
+
+            if (NodeData != null)
+            {
+                if (NodeData.Placement == null && placementType != null)
+                {
+                    var args = new object[] { this };
+                    NodeData.Placement = Rtti.UTypeDescManager.CreateInstance(placementType, args) as UPlacementBase;
+                    switch (bvType)
+                    {
+                        case EBoundVolumeType.None:
+                            {
+                                NodeData.BoundVolume = null;
+                            }
+                            break;
+                        case EBoundVolumeType.Box:
+                            {
+                                var boxBV = new UBoxBV(this);
+                                boxBV.LocalAABB = new BoundingBox(Vector3.Zero);
+                                NodeData.BoundVolume = boxBV;
+                            }
+                            break;
+                        case EBoundVolumeType.Sphere:
+                            {
+                                var sphereBV = new USphereBV(this);
+                                sphereBV.Center = Vector3.Zero;
+                                sphereBV.Radius = 1;
+                                NodeData.BoundVolume = sphereBV;
+                            }
+                            break;
+                    }
+
+                    Placement.SetTransform(in FTransform.Identity);
+                }
+                UpdateAABB();
+                UpdateAbsTransform();
+            }
+
+            return true;
+        }
+        public void GetWorldSpaceBoundingBox(out DBoundingBox outVal)
+        {
+            //var matrix = this.Placement.AbsTransform.ToMatrixNoScale();
+            //BoundingBox.Transform(in AABB, in matrix, out outVal);            
+            DBoundingBox.TransformNoScale(in AABB, in Placement.AbsTransform, out outVal);
+        }
         [Flags]
         public enum ENodeStyles
         {
             VisibleMeshProvider = (1 << 0),//deprecated
             VisibleFollowParent = (1 << 1),
             HitproxyMasks = (1 << 2) | (1 << 3),//value: 0,1,2 NoProxy,RootProxy,FollowProxy
-            //ScaleChildren = (1 << 4),//deprecated,通过专门的ScaleChildren Node 和Placement来做
+            DiscardAABB = (1<<4),
             CastShadow = (1 << 5),
             AcceptShadow = (1 << 6),
             HideBoundShape = (1 << 7),
             NoPickedDraw = (1 << 8),
             SelfInvisible = (1 << 9),
             ChildrenInvisible = (1 << 10),
+            SceneManaged = (1<<11),
             Invisible = SelfInvisible | ChildrenInvisible,
         }
         public ENodeStyles NodeStyles 
@@ -71,6 +128,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
+        #region Styles
         public bool HasStyle(ENodeStyles style)
         {
             return (NodeStyles & style) == style;
@@ -119,51 +177,44 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public UNode(UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public virtual bool IsSceneManaged
         {
-            NodeData = data;
-
-            if (NodeData!=null)
+            get
             {
-                if (NodeData.Placement == null && placementType != null)
+                return HasStyle(ENodeStyles.SceneManaged);
+            }
+            set
+            {
+                if (value)
                 {
-                    var args = new object[] { this };
-                    NodeData.Placement = Rtti.UTypeDescManager.CreateInstance(placementType, args) as UPlacementBase;
-                    switch (bvType)
+                    SetStyle(ENodeStyles.SceneManaged);
+                    if(this.SceneId == UInt32.MaxValue)
                     {
-                        case EBoundVolumeType.None:
-                            {
-                                NodeData.BoundVolume = null;
-                            }
-                            break;
-                        case EBoundVolumeType.Box:
-                            {
-                                var boxBV = new UBoxBV(this);
-                                boxBV.LocalAABB = new BoundingBox(Vector3.Zero);
-                                NodeData.BoundVolume = boxBV;
-                            }
-                            break;
-                        case EBoundVolumeType.Sphere:
-                            {
-                                var sphereBV = new USphereBV(this);
-                                sphereBV.Center = Vector3.Zero;
-                                sphereBV.Radius = 1;
-                                NodeData.BoundVolume = sphereBV;
-                            }
-                            break;
+                        ParentScene?.AllocId(this);
                     }
-
-                    Placement.SetTransform(ref Transform.Identity);
                 }
-                UpdateAABB();
-                UpdateAbsTransform();
+                else
+                {
+                    UnsetStyle(ENodeStyles.SceneManaged);
+                    if (this.SceneId != UInt32.MaxValue)
+                    {
+                        ParentScene?.FreeId(this);
+                    }
+                }
             }
         }
-        UInt32 mId = UInt32.MaxValue;
-        public UInt32 Id
+        #endregion
+        
+        #region BaseFields
+        public virtual bool IsSceneManagedType()
         {
-            get => mId;
-            internal set => mId = value;
+            return false;
+        }
+        
+        public virtual UInt32 SceneId
+        {
+            get => UInt32.MaxValue;
+            internal set { }
         }
         public virtual string NodeName
         {
@@ -173,7 +224,7 @@ namespace EngineNS.GamePlay.Scene
                 {
                     return mNodeData.Name;
                 }
-                return mId.ToString();
+                return SceneId.ToString();
             }
         }
         protected UNode mParent;
@@ -184,23 +235,28 @@ namespace EngineNS.GamePlay.Scene
             {
                 if (mParent == value)
                     return;
+                var oldScene = GetNearestParentScene();
 
                 if (mParent != null)
                 {
                     mParent.Children.Remove(this);
-                }
+                }                
                 mParent = value;
-                var newScene = GetNearestParentScene();
-                if (newScene != ParentScene)
-                {//切换了UScene，重新在新的UScene中分配一个ID
-                    ParentScene?.FreeId(this);
-                    ParentScene = newScene;
-                    ParentScene?.AllocId(this);
-                }
                 if (mParent != null)
                 {
                     if (mParent.Children.Contains(this) == false)
                         mParent.Children.Add(this);
+                }
+
+                var newScene = GetNearestParentScene();
+                if (oldScene != newScene)
+                {
+                    if (IsSceneManagedType() && IsSceneManaged)
+                    {
+                        oldScene?.FreeId(this);
+                        newScene?.AllocId(this);
+                    }
+                    ParentSceneChanged(oldScene, newScene);
                 }
 
                 if (Placement != null)
@@ -209,16 +265,80 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
+        public UScene ParentScene
+        {
+            get
+            {
+                return GetNearestParentScene();
+            }
+        }
+        public UWorld GetWorld()
+        {
+            var scene = ParentScene;
+            if (scene != null)
+                return scene.World;
+            return null;
+        }
+        public List<UNode> Children { get; } = new List<UNode>();
+        UNodeData mNodeData = null;
+        public UNodeData NodeData
+        {
+            get => mNodeData;
+            set
+            {
+                mNodeData = value;
+                if (Placement != null)
+                {
+                    UpdateAABB();
+                    UpdateAbsTransform();
+                }
+            }
+        }
+        public DVector3 Location
+        {
+            get
+            {
+                return Placement.AbsTransform.Position;
+            }
+        }
+        public UPlacementBase Placement
+        {
+            get { return NodeData?.Placement; }
+        }
+        public UBoundVolume BoundVolume
+        {
+            get { return NodeData?.BoundVolume; }
+        }
+        public DBoundingBox AABB;//包含Child的AABB
+        #endregion
+
+        #region Virtual Interface
+        private void ParentSceneChanged(UScene prev, UScene cur)
+        {
+            OnParentSceneChanged(prev, cur);
+            foreach(var i in Children)
+            {
+                i.ParentSceneChanged(prev, cur);
+            }
+        }
+        protected virtual void OnParentSceneChanged(UScene prev, UScene cur)
+        {
+
+        }
+        public virtual void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        {
+            if (rp.VisibleNodes != null)
+            {
+                rp.VisibleNodes.Add(this);
+            }
+        }
+        #endregion
+
+        #region Link
         private void UnsafeNullParent()
         {
             ParentScene?.FreeId(this);
-            ParentScene = null;
             mParent = null;
-        }
-        public UScene ParentScene
-        {
-            get;
-            set;
         }
         public void ClearChildren()
         {
@@ -247,37 +367,28 @@ namespace EngineNS.GamePlay.Scene
             else
                 return null;
         }
-        public List<UNode> Children { get; } = new List<UNode>();
-        UNodeData mNodeData = null;
-        public UNodeData NodeData
+        public delegate bool FOnVisitNode(UNode node, object arg);
+        public bool DFS_VisitNodeTree(FOnVisitNode visitor, object arg)
         {
-            get=>mNodeData;
-            set
+            if (!HasStyle(ENodeStyles.SelfInvisible) && visitor(this, arg))
             {
-                if (mNodeData != null)
+                return true;
+            }
+            if (!HasStyle(ENodeStyles.ChildrenInvisible))
+            {
+                foreach (var i in Children)
                 {
-                    mNodeData.Host = null;
-                }
-                mNodeData = value;
-                if (mNodeData != null)
-                {
-                    mNodeData.Host = this;
-                }
-                if (Placement != null)
-                {
-                    UpdateAABB();
-                    UpdateAbsTransform();
+                    if (i.DFS_VisitNodeTree(visitor, arg))
+                    {
+                        return true;
+                    }
                 }
             }
+            return false;
         }
-        public UPlacementBase Placement
-        {
-            get { return NodeData?.Placement; }
-        }
-        public UBoundVolume BoundVolume
-        {
-            get { return NodeData?.BoundVolume; }
-        }
+        #endregion
+
+        #region Save&Load
         public const uint NodeDescAttributeFlags = 1;
         public unsafe void SaveChildNode(UScene scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
         {
@@ -306,7 +417,7 @@ namespace EngineNS.GamePlay.Scene
                 }   
             }
         }
-        public unsafe bool LoadChildNode(UScene scene, EngineNS.XndNode node)
+        public async System.Threading.Tasks.Task<bool> LoadChildNode(GamePlay.UWorld world, UScene scene, EngineNS.XndNode node)
         {
             for(uint i = 0; i < node.GetNumOfNode(); i++)
             {
@@ -319,7 +430,7 @@ namespace EngineNS.GamePlay.Scene
                     continue;
                 }
                 UNodeData nodeData = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(attr.Name)) as UNodeData;
-                var nd = scene.NewNode(cldTypeStr, nodeData, EBoundVolumeType.None, null);
+                var nd = await scene.NewNode(world, cldTypeStr, nodeData, EBoundVolumeType.None, null);
                 var ar = attr.GetReader(scene);
                 IO.ISerializer data = nodeData;
                 try
@@ -339,7 +450,7 @@ namespace EngineNS.GamePlay.Scene
                 attr.ReleaseReader(ref ar);
 
                 nd.Parent = this;
-                nd.LoadChildNode(scene, cld);
+                await nd.LoadChildNode(world, scene, cld);
             }
             return true;
         }
@@ -351,28 +462,9 @@ namespace EngineNS.GamePlay.Scene
         {
             this.HitproxyType = this.HitproxyType;
         }
-        public delegate bool FOnVisitNode(UNode node, object arg);
-        public bool DFS_VisitNodeTree(FOnVisitNode visitor, object arg)
-        {
-            if (visitor(this, arg) && !HasStyle(ENodeStyles.SelfInvisible))
-            {
-                return true;
-            }
-            if(!HasStyle(ENodeStyles.ChildrenInvisible))
-            {
-                foreach (var i in Children)
-                {
-                    if (i.DFS_VisitNodeTree(visitor, arg))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
+        #endregion
 
         #region Hierarchical Collide
-        public BoundingBox AABB;//包含Child的AABB
         protected virtual void OnAbsTransformChanged()
         {
 
@@ -383,10 +475,10 @@ namespace EngineNS.GamePlay.Scene
                 return;
             if (Parent == null)
             {
-                Placement.AbsTransform = Placement.Transform;
-                Placement.AbsTransformInv = Matrix.Invert(ref Placement.mAbsTransform);
+                Placement.AbsTransform = Placement.TransformData;
+                //var matrix = Placement.AbsTransform.ToMatrixNoScale();
+                //Placement.AbsTransformInv = Matrix.Invert(in matrix);
                 OnAbsTransformChanged();
-                return;
             }
             else
             {
@@ -396,13 +488,22 @@ namespace EngineNS.GamePlay.Scene
                 }
                 else
                 {
-                    Placement.AbsTransform = Placement.Transform * Parent.Placement.AbsTransform;
+                    var transform = Placement.TransformData;
+                    if (Parent.Placement.InheritScale)
+                    {
+                        FTransform.Multiply(out Placement.AbsTransform, in transform, in Parent.Placement.AbsTransform);
+                    }
+                    else
+                    {
+                        FTransform.MultiplyNoParentScale(out Placement.AbsTransform, in transform, in Parent.Placement.AbsTransform);
+                    }
+                    //Placement.AbsTransform = Placement.TransformData Transform * Parent.Placement.AbsTransform;
                 }
-                Placement.AbsTransformInv = Matrix.Invert(ref Placement.mAbsTransform);
+                //var matrix = Placement.AbsTransform.ToMatrixNoScale();
+                //Placement.AbsTransformInv = Matrix.Invert(in matrix);
                 OnAbsTransformChanged();
-                //Parent.UpdateAbsTransform();
-                UpdateChildrenAbsTransform();
             }
+            UpdateChildrenAbsTransform();
         }
         public void UpdateChildrenAbsTransform()
         {
@@ -415,10 +516,10 @@ namespace EngineNS.GamePlay.Scene
         {
             if (NodeData == null || BoundVolume == null || Placement == null)
                 return;
-            if (BoundVolume != null && BoundVolume.mLocalAABB.IsEmpty() == false)
+            if (BoundVolume != null && BoundVolume.mLocalAABB.IsEmpty() == false && HasStyle(ENodeStyles.DiscardAABB) == false)
             {
                 //BoundingBox.Transform(ref BoundVolume.mLocalAABB, ref Placement.AbsTransform, out AABB);
-                AABB = BoundVolume.mLocalAABB;
+                AABB.FromSingle(in BoundVolume.mLocalAABB);
                 AABB.Maximum = AABB.Maximum * Placement.Scale;
                 AABB.Minimum = AABB.Minimum * Placement.Scale;
             }
@@ -427,27 +528,34 @@ namespace EngineNS.GamePlay.Scene
                 AABB.InitEmptyBox();
             }
             foreach (var i in Children)
-            {   
+            {
+                if (i.HasStyle(ENodeStyles.DiscardAABB))
+                    continue;
                 if (i.Placement.IsIdentity == false)
                 {
                     var uplc = i.Placement as UPlacement;
                     if (uplc != null)
                     {
-                        BoundingBox tmp;
-                        BoundingBox.Transform(in i.AABB, in uplc.mTransform, out tmp);
-                        AABB = BoundingBox.Merge(AABB, tmp);
+                        DBoundingBox tmp;
+                        //var matrix = uplc.TransformData.ToMatrixNoScale();
+                        var matrix = uplc.TransformData;
+                        DBoundingBox.TransformNoScale(in i.AABB, in matrix, out tmp);
+                        //BoundingBox.Transform(in i.AABB, in uplc.mTransform, out tmp);
+                        AABB = DBoundingBox.Merge(AABB, tmp);
                     }
                     else
                     {
-                        BoundingBox tmp;
-                        var trans = i.Placement.Transform;
-                        BoundingBox.Transform(in i.AABB, in trans, out tmp);
-                        AABB = BoundingBox.Merge(AABB, tmp);
+                        DBoundingBox tmp;
+                        //var trans = i.Placement.TransformData;
+                        //var trans = i.Placement.TransformData.ToMatrixNoScale();
+                        var trans = i.Placement.TransformData;
+                        DBoundingBox.TransformNoScale(in i.AABB, in trans, out tmp);
+                        AABB = DBoundingBox.Merge(AABB, tmp);
                     }
                 }
                 else
                 {
-                    AABB = BoundingBox.Merge(AABB, i.AABB);
+                    AABB = DBoundingBox.Merge(AABB, i.AABB);
                 }
             }
             if (Parent != null)
@@ -455,17 +563,26 @@ namespace EngineNS.GamePlay.Scene
                 Parent.UpdateAABB();
             }
         }
-        public bool LineCheck(in Vector3 start, in Vector3 end, ref VHitResult result)
+        public bool LineCheck(in DVector3 start, in DVector3 end, ref VHitResult result)
         {
             float Near, Far;
-            Vector3 vNear = new Vector3();
-            Vector3 vFar = new Vector3();
-            var localStart = Vector3.TransformCoordinate(start, Placement.AbsTransformInv);
-            var localEnd = Vector3.TransformCoordinate(end, Placement.AbsTransformInv);
+            var vNear = new Vector3();
+            var vFar = new Vector3();
+            var localStart = Placement.AbsTransform.InverseTransformPositionNoScale(in start).ToSingleVector3();
+            var localEnd = Placement.AbsTransform.InverseTransformPositionNoScale(in end).ToSingleVector3();
+            //var localStart = Vector3.TransformCoordinate(start, Placement.AbsTransformInv);
+            //var localEnd = Vector3.TransformCoordinate(end, Placement.AbsTransformInv);
+            //if (!Vector3.Equals(in localStart1, in localStart, 0.001f) ||
+            //    !Vector3.Equals(in localEnd1, in localEnd, 0.001f))
+            //{
+            //    int xxx = 0;
+            //}
             unsafe
             {
-                fixed(BoundingBox* pBox = &AABB)
+                var aabb = AABB.ToSingleAABB();
+                //fixed (BoundingBox* pBox = &AABB)
                 {
+                    BoundingBox* pBox = &aabb;
                     var dir = localEnd - localStart;
                     if (/*AABB.IsEmpty()==false && */IDllImportApi.v3dxLineIntersectBox3(&Near, &vNear, &Far, &vFar, &localStart, &dir, pBox) == 0)
                     {
@@ -473,8 +590,10 @@ namespace EngineNS.GamePlay.Scene
                     }
                     if (OnLineCheckTriangle(in localStart, in localEnd, ref result))
                     {
-                        result.Position = Vector3.TransformCoordinate(result.Position, Placement.AbsTransform);
-                        result.Normal = Vector3.TransformNormal(result.Normal, Placement.AbsTransform);
+                        result.Position = Placement.AbsTransform.TransformPositionNoScale(result.m_Position.AsDVector()).ToSingleVector3();
+                        result.Normal = Placement.AbsTransform.TransformVector3(in result.m_Normal);
+                        //result.Position = Vector3.TransformCoordinate(result.Position, Placement.AbsTransform);
+                        //result.Normal = Vector3.TransformNormal(result.Normal, Placement.AbsTransform);
                         return true;
                     }
                     else
@@ -498,35 +617,46 @@ namespace EngineNS.GamePlay.Scene
         }
         #endregion
 
-        public virtual void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
-        {
-
-        }
-
         #region GamePlay
-        public virtual void TickLogic()
+        public virtual void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
         {
-            if (OnTickLogic() == false)
+            if (OnTickLogic(world, policy) == false)
                 return;
 
             //foreach(var i in Children)
             for (int i = 0; i < Children.Count; i++)
             {
-                Children[i].TickLogic();
+                Children[i].TickLogic(world, policy);
             }
         }
-        public virtual bool OnTickLogic()
+        public virtual bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
         {
             return true;
         }
         #endregion
     }
+    public partial class USceneActorNode : UNode
+    {
+        UInt32 mSceneId = UInt32.MaxValue;
+        public override UInt32 SceneId
+        {
+            get => mSceneId;
+            internal set => mSceneId = value;
+        }
+        public override bool IsSceneManagedType()
+        {
+            return true;
+        }
+    }
     public partial class ULightWeightNodeBase : UNode
     {
-        public ULightWeightNodeBase(UNodeData data, EBoundVolumeType bvType, Type placementType)
-            : base(data, bvType, placementType)
+        public override bool IsSceneManagedType()
         {
-
+            return false;
+        }
+        public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)            
+        {
+            return await base.InitializeNode(world, data, bvType, placementType);
         }
         public override UNode Parent
         {
@@ -535,21 +665,12 @@ namespace EngineNS.GamePlay.Scene
                 if (mParent == value)
                     return;
                 var newScene = value.GetNearestParentScene();
-                if (newScene != ParentScene)
+                if (ParentScene != null && newScene != ParentScene)
                 {
                     Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "UNode", $"{GetType().FullName}:{NodeName} cann't move to another UScene");
                     return;
                 }
-                if (mParent != null)
-                {
-                    mParent.Children.Remove(this);
-                }                
-                mParent = value;
-                if (mParent != null)
-                {
-                    if (mParent.Children.Contains(this) == false)
-                        mParent.Children.Add(this);
-                }
+                base.Parent = value;
             } 
         }
     }

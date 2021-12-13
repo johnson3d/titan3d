@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using EngineNS.EGui.Controls.NodeGraph;
+using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
@@ -34,6 +35,21 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             set
             {
                 this.Name = value;
+            }
+        }
+        public override void OnMaterialEditorGenCode(Bricks.CodeBuilder.HLSL.UHLSLGen gen, UMaterial Material)
+        {
+            var varNode = this;
+            if (varNode.IsUniform)
+            {
+                var type = this.GetType();
+                var valueProp = type.GetProperty("Value");
+                var value = valueProp.GetValue(this, null);
+                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameValuePair();
+                tmp.VarType = gen.GetTypeString(varNode.VarType.SystemType);
+                tmp.Name = this.Name;
+                tmp.Value = value.ToString();
+                Material.UsedUniformVars.Add(tmp);
             }
         }
         protected virtual void OnAsUniform(bool isUniform)

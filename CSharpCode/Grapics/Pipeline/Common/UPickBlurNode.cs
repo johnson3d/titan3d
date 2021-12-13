@@ -10,7 +10,12 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/pick/pick_blur.cginc", RName.ERNameType.Engine);
         }
-        public unsafe override void OnBuildDrawCall(RHI.CDrawCall drawcall)
+        public override EVertexSteamType[] GetNeedStreams()
+        {
+            return new EVertexSteamType[] { EVertexSteamType.VST_Position,
+                EVertexSteamType.VST_UV,};
+        }
+        public unsafe override void OnBuildDrawCall(IRenderPolicy policy, RHI.CDrawCall drawcall)
         {
             //var cbIndex = drawcall.mCoreObject.FindCBufferIndex("cbPerShadingEnv");
             //if (cbIndex != 0xFFFFFFFF)
@@ -29,11 +34,18 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
 
-            var Manager = policy.TagObject as Mobile.UMobileEditorFSPolicy;
+            var Manager = policy.TagObject as IRenderPolicy;
+
+            var pickNode = Manager.QueryNode("PickedNode") as Common.UPickedNode;
 
             var gpuProgram = drawcall.Effect.ShaderProgram;
-            var index = drawcall.mCoreObject.FindSRVIndex("SourceTexture");
-            drawcall.mCoreObject.BindSRVAll(index, Manager.PickedNode.PickedBuffer.GBufferSRV[0].mCoreObject);
+            var index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "SourceTexture");
+            if (!CoreSDK.IsNullPointer(index))
+                drawcall.mCoreObject.BindShaderSrv(index, pickNode.PickedBuffer.GetGBufferSRV(0).mCoreObject);
+
+            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_SourceTexture");
+            if (!CoreSDK.IsNullPointer(index))
+                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
         }
     }    
     public class UPickBlurNode : USceenSpaceNode

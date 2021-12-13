@@ -10,25 +10,32 @@ namespace EngineNS.EGui.UIProxy
         public string InfoText;
         public float Width = 60;
 
-        ImageProxy mIcon;
+        //ImageProxy mIcon;
         bool mFocused = false;
 
         public void Cleanup()
         {
-            mIcon?.Dispose();
-            mIcon = null;
+            //mIcon?.Dispose();
+            //mIcon = null;
         }
+
+        static string SearchBarIconKey = "SearchBarIcon";
 
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            mIcon = new ImageProxy()
+            if(UEngine.Instance.UIManager[SearchBarIconKey] == null)
             {
-                ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
-                ImageSize = new Vector2(16, 16),
-                UVMin = new Vector2(3.0f/1024, 655.0f/1024),
-                UVMax = new Vector2(19.0f/1024, 671.0f/1024),
-            };
-            await mIcon.Initialize();
+                var icon = new ImageProxy()
+                {
+                    ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                    ImageSize = new Vector2(16, 16),
+                    UVMin = new Vector2(3.0f / 1024, 655.0f / 1024),
+                    UVMax = new Vector2(19.0f / 1024, 671.0f / 1024),
+                };
+                await icon.Initialize();
+                UEngine.Instance.UIManager[SearchBarIconKey] = icon;
+            }
+
             return true;
         }
 
@@ -51,10 +58,11 @@ namespace EngineNS.EGui.UIProxy
 
             var itemMin = ImGuiAPI.GetItemRectMin();
             var itemMax = ImGuiAPI.GetItemRectMax();
-            if (mIcon != null)
+            var icon = UEngine.Instance.UIManager[SearchBarIconKey] as ImageProxy;
+            if (icon != null)
             {
-                var pos = new Vector2(itemMin.X + 6, itemMin.Y + (itemMax.Y - itemMin.Y - mIcon.ImageSize.Y) * 0.5f);
-                mIcon.OnDraw(ref drawList, ref pos);
+                var pos = new Vector2(itemMin.X + 6, itemMin.Y + (itemMax.Y - itemMin.Y - icon.ImageSize.Y) * 0.5f);
+                icon.OnDraw(ref drawList, ref pos);
             }
 
             if (mFocused)

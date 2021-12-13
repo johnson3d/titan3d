@@ -15,13 +15,17 @@ namespace EngineNS.Editor.Forms
 
         public RHI.CShaderResourceView TextureSRV;
         public EGui.Controls.PropertyGrid.PropertyGrid TexturePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        ~UTextureViewer()
+        {
+            Cleanup();
+        }
         public void Cleanup()
         {
-            if (TextureID != IntPtr.Zero)
+            TexturePropGrid.Target = null;
+            if (TextureSRV != null)
             {
-                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(TextureID);
-                handle.Free();
-                TextureID = IntPtr.Zero;
+                TextureSRV.FreeTextureHandle();
+                TextureSRV = null;
             }
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
@@ -42,8 +46,6 @@ namespace EngineNS.Editor.Forms
             TexturePropGrid.Target = TextureSRV;
             ImageSize.X = TextureSRV.PicDesc.Width;
             ImageSize.Y = TextureSRV.PicDesc.Height;
-
-            TextureID = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(TextureSRV));
             return true;
         }
         public void OnCloseEditor()
@@ -54,7 +56,6 @@ namespace EngineNS.Editor.Forms
         public Vector2 WindowSize = new Vector2(800, 600);
         public Vector2 ImageSize = new Vector2(512, 512);
         public float ScaleFactor = 1.0f;
-        private IntPtr TextureID;
         public unsafe void OnDraw()
         {
             if (Visible == false || TextureSRV == null)
@@ -94,7 +95,34 @@ namespace EngineNS.Editor.Forms
         }
         protected void DrawToolBar()
         {
+            var btSize = new Vector2(64, 64);
+            if (ImGuiAPI.Button("Mipmap", in btSize))
+            {
+                StbImageSharp.ImageResult image;
 
+                using (var xnd = IO.CXndHolder.LoadXnd(AssetName.Address))
+                {
+                    var pngAttr = xnd.RootNode.TryGetAttribute("Png");
+
+                    var ar = pngAttr.GetReader(null);
+                    byte[] data;
+                    ar.ReadNoSize(out data, (int)pngAttr.GetReaderLength());
+                    pngAttr.ReleaseReader(ref ar);
+
+                    using (var memStream = new System.IO.MemoryStream(data, false))
+                    {
+                        image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                        if (image == null)
+                            return;
+                    }
+                }
+
+                using (var xnd = new IO.CXndHolder("CShaderResourceView", 0, 0))
+                {
+                    RHI.CShaderResourceView.SaveTexture(xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);
+                    xnd.SaveXnd(AssetName.Address);
+                }
+            }
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
         {
@@ -131,7 +159,7 @@ namespace EngineNS.Editor.Forms
 
                 min1 = min1 + pos;
                 max1 = max1 + pos;
-                drawlist.AddImage(TextureID.ToPointer(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
+                drawlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
             }
             ImGuiAPI.EndChild();
         }

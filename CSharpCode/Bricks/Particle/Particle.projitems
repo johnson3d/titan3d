@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>d15c508d-f0bb-4843-8b50-38728b79bba9</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.Particle</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Particle.brick" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\UParticleEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\UParticleGraph.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\UParticleNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Simple\USimpleNebula.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UEffector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UEmitter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UNebulaNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UNebulaParticle.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UNebulaShaderManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UParticleGraphNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UParticleMdfQueue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UShape.cs" />
+  </ItemGroup>
+</Project>

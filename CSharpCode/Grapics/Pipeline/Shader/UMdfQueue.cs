@@ -4,13 +4,15 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
-    public class UMdfQueue : AuxPtrType<IMdfQueue>, IShaderCodeProvider
+    public abstract class UMdfQueue : AuxPtrType<IMdfQueue>, IShaderCodeProvider
     {
+        public object MdfDatas;
         public override string ToString()
         {
-            string result = $"Var: {DefineCode?.AsText}\n";
-            result += $"Code: {SourceCode.AsText}\n";
-            return result;
+            return Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            //string result = $"Var: {DefineCode?.AsText}\n";
+            //result += $"Code: {SourceCode.AsText}\n";
+            //return result;
         }
         protected Hash160 mMdfQueueHash;
         public virtual Hash160 MdfQueueHash
@@ -35,10 +37,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             mCoreObject = IMdfQueue.CreateInstance();
         }
-        public virtual System.Type GetBaseMdfQueue()
-        {
-            return null;
-        }
+        public abstract EVertexSteamType[] GetNeedStreams();
+        //{
+        //    return new EVertexSteamType[] { EVertexSteamType.VST_Position, };
+        //}
         public virtual void CopyFrom(UMdfQueue mdf)
         {
 
@@ -50,53 +52,23 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
 
         }
-        public virtual RHI.CInputLayout GetInputLayout(RHI.CShaderDesc vsDesc)
-        {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            uint inputStreams = 0;
-            mCoreObject.GetInputStreams(ref inputStreams);
-            unsafe
-            {
-                var layoutDesc = IMesh.CreateInputLayoutDesc(inputStreams);
-                layoutDesc.SetShaderDesc(vsDesc.mCoreObject);
-                var ret = UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, *layoutDesc.CppPointer);
-                CoreSDK.IUnknown_Release(layoutDesc);
-                return ret;
-            }
-        }
+        
         public virtual void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
         {
 
         }
+
+        public virtual Rtti.UTypeDesc GetPermutation(List<string> features)
+        {
+            return Rtti.UTypeDesc.TypeOf(this.GetType());
+        }
     }
 
-    public class UMdfQueueManager
+    public class UMdf_Shadow
     {
-        public static Rtti.UTypeDesc GetMdfQueuePermutationType(System.Type baseType, bool acceptShadow)
-        {
-            if (baseType == typeof(Mesh.UMdfStaticMesh))
-            {
-                if (acceptShadow)
-                {
-                    return Rtti.UTypeDescGetter<Mesh.UMdfStaticMesh>.TypeDesc;
-                }
-                else
-                {
-                    return Rtti.UTypeDescGetter<Mesh.UMdfStaticMesh_NoShadow>.TypeDesc;
-                }
-            }
-            else if (baseType == typeof(Mesh.UMdfTerrainMesh))
-            {
-                if (acceptShadow)
-                {
-                    return Rtti.UTypeDescGetter<Mesh.UMdfTerrainMesh>.TypeDesc;
-                }
-                else
-                {
-                    return Rtti.UTypeDescGetter<Mesh.UMdfTerrainMesh_NoShadow>.TypeDesc;
-                }
-            }
-            return null;
-        }
+    }
+    public class UMdf_NoShadow
+    {
+
     }
 }

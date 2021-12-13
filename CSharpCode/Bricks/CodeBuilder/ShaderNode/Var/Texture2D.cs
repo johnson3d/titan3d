@@ -1,4 +1,5 @@
 ﻿using EngineNS.EGui.Controls.NodeGraph;
+using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,12 +23,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             }
             set
             {
-                if (SnapshotPtr != IntPtr.Zero)
-                {
-                    var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
-                    handle.Free();
-                    SnapshotPtr = IntPtr.Zero;
-                }
                 System.Action exec = async () =>
                 {
                     TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
@@ -36,7 +31,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             }
         }
         private RHI.CShaderResourceView TextureSRV;
-        IntPtr SnapshotPtr;
         public Texture2D()
         {
             VarType = Rtti.UTypeDescGetter<Texture2D>.TypeDesc;
@@ -53,12 +47,15 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
         ~Texture2D()
         {
-            if (SnapshotPtr != IntPtr.Zero)
-            {
-                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
-                handle.Free();
-                SnapshotPtr = IntPtr.Zero;
-            }
+            
+        }
+        public override void OnMaterialEditorGenCode(Bricks.CodeBuilder.HLSL.UHLSLGen gen, UMaterial Material)
+        {
+            var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+            tmp.Name = this.Name;
+            var texNode = this;
+            tmp.Value = texNode.AssetName;
+            Material.UsedRSView.Add(tmp);
         }
         public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
         {
@@ -71,16 +68,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             var cmdlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
 
-            if (SnapshotPtr == IntPtr.Zero)
-            {
-                SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(TextureSRV));
-            }
-
             var uv0 = new Vector2(0, 0);
             var uv1 = new Vector2(1, 1);
             unsafe
             {
-                cmdlist.AddImage(SnapshotPtr.ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
+                cmdlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             }
         }
         public override void OnLClicked(NodePin clickedPin)

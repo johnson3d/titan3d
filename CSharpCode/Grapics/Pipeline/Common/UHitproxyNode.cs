@@ -10,6 +10,10 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/pick/HitProxy.cginc", RName.ERNameType.Engine);
         }
+        public override EVertexSteamType[] GetNeedStreams()
+        {
+            return new EVertexSteamType[] { EVertexSteamType.VST_Position};
+        }
     }
     public class UHitproxyNode : URenderGraphNode
     {
@@ -120,9 +124,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         #endregion
         public UGraphicsBuffers GHitproxyBuffers { get; protected set; } = new UGraphicsBuffers();
+        public UGraphicsBuffers GGizmosBuffers { get; protected set; } = new UGraphicsBuffers();
         public Common.UHitproxyShading mHitproxyShading;
-        public UDrawBuffers HitproxyPass = new UDrawBuffers();
-        public RenderPassDesc HitproxyPassDesc = new RenderPassDesc();
+        public UPassDrawBuffers HitproxyPass = new UPassDrawBuffers();
+        public RHI.CRenderPass HitproxyRenderPass;
+        public RHI.CRenderPass GizmosRenderPass;
         private RHI.CFence mReadHitproxyFence;
         bool CanDrawHitproxy = true;
         public float ScaleFactor { get; set; } = 0.5f;
@@ -133,22 +139,57 @@ namespace EngineNS.Graphics.Pipeline.Common
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             HitproxyPass.Initialize(rc, debugName);
 
+            var HitproxyPassDesc = new IRenderPassDesc();
+            unsafe
+            {
+                HitproxyPassDesc.NumOfMRT = 1;
+                HitproxyPassDesc.AttachmentMRTs[0].Format = fmt;
+                HitproxyPassDesc.AttachmentMRTs[0].Samples = 1;
+                HitproxyPassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionClear;
+                HitproxyPassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
+                HitproxyPassDesc.m_AttachmentDepthStencil.Format = dsFmt;
+                HitproxyPassDesc.m_AttachmentDepthStencil.Samples = 1;
+                HitproxyPassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
+                HitproxyPassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
+                HitproxyPassDesc.m_AttachmentDepthStencil.StencilLoadAction = FrameBufferLoadAction.LoadActionClear;
+                HitproxyPassDesc.m_AttachmentDepthStencil.StencilStoreAction = FrameBufferStoreAction.StoreActionStore;
+                //HitproxyPassDesc.mFBClearColorRT0 = new Color4(0, 0, 0, 0);
+                //HitproxyPassDesc.mDepthClearValue = 1.0f;
+                //HitproxyPassDesc.mStencilClearValue = 0u;
+            }            
+            HitproxyRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in HitproxyPassDesc);
+
+            var GizmosPassDesc = new IRenderPassDesc();
+            unsafe
+            {
+                GizmosPassDesc.NumOfMRT = 1;
+                GizmosPassDesc.AttachmentMRTs[0].Format = fmt;
+                GizmosPassDesc.AttachmentMRTs[0].Samples = 1;
+                GizmosPassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionClear;
+                GizmosPassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
+                GizmosPassDesc.m_AttachmentDepthStencil.Format = dsFmt;
+                GizmosPassDesc.m_AttachmentDepthStencil.Samples = 1;
+                GizmosPassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
+                GizmosPassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
+                GizmosPassDesc.m_AttachmentDepthStencil.StencilLoadAction = FrameBufferLoadAction.LoadActionClear;
+                GizmosPassDesc.m_AttachmentDepthStencil.StencilStoreAction = FrameBufferStoreAction.StoreActionStore;
+                //GizmosPassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
+                //GizmosPassDesc.mDepthClearValue = 1.0f;
+                //GizmosPassDesc.mStencilClearValue = 0u;
+            }
+            GizmosRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in GizmosPassDesc);
+
             mHitproxyShading = shading as Common.UHitproxyShading;
 
-            GHitproxyBuffers.SwapChainIndex = -1;
-            GHitproxyBuffers.Initialize(1, dsFmt, (uint)x, (uint)y);
+            GHitproxyBuffers.Initialize(HitproxyRenderPass, policy.Camera, 1, dsFmt, (uint)x, (uint)y);
             GHitproxyBuffers.CreateGBuffer(0, fmt, (uint)x, (uint)y);
             GHitproxyBuffers.TargetViewIdentifier = policy.GetBasePassNode().GBuffers.TargetViewIdentifier;
-            GHitproxyBuffers.Camera = policy.GetBasePassNode().GBuffers.Camera;
-            HitproxyPassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionClear;
-            HitproxyPassDesc.mFBStoreAction_Color = FrameBufferStoreAction.StoreActionStore;
-            HitproxyPassDesc.mFBClearColorRT0 = new Color4(0, 0, 0, 0);
-            HitproxyPassDesc.mFBLoadAction_Depth = FrameBufferLoadAction.LoadActionClear;
-            HitproxyPassDesc.mFBStoreAction_Depth = FrameBufferStoreAction.StoreActionStore;
-            HitproxyPassDesc.mDepthClearValue = 1.0f;
-            HitproxyPassDesc.mFBLoadAction_Stencil = FrameBufferLoadAction.LoadActionClear;
-            HitproxyPassDesc.mFBStoreAction_Stencil = FrameBufferStoreAction.StoreActionStore;
-            HitproxyPassDesc.mStencilClearValue = 0u;
+            GHitproxyBuffers.UpdateFrameBuffers(x, y);
+
+            GGizmosBuffers.Initialize(GizmosRenderPass, policy.Camera, 1, dsFmt, (uint)x, (uint)y);
+            GGizmosBuffers.SetGBuffer(0, GHitproxyBuffers.GetGBufferSRV(0), true);
+            GGizmosBuffers.TargetViewIdentifier = GHitproxyBuffers.TargetViewIdentifier;
+            GGizmosBuffers.UpdateFrameBuffers(x, y);
 
             mReadHitproxyFence = rc.CreateFence();
         }
@@ -165,21 +206,29 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             GHitproxyBuffers?.Cleanup();
             GHitproxyBuffers = null;
+
+            GGizmosBuffers?.Cleanup();
+            GGizmosBuffers = null;
         }
-        public void OnResize(float x, float y)
+        public override void OnResize(IRenderPolicy policy, float x, float y)
         {
             if (GHitproxyBuffers != null)
             {
                 GHitproxyBuffers.OnResize(x * ScaleFactor, y * ScaleFactor);
+            }
+            if (GGizmosBuffers != null)
+            {
+                GGizmosBuffers.SetGBuffer(0, GHitproxyBuffers.GetGBufferSRV(0), true);
+                GGizmosBuffers.OnResize(x, y);
             }
         }
         public override unsafe void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
         {
             if (CanDrawHitproxy == false)
                 return;
-            var cmdlist_hp = HitproxyPass.DrawCmdList.mCoreObject;
-            cmdlist_hp.ClearMeshDrawPassArray();
-            cmdlist_hp.SetViewport(GHitproxyBuffers.ViewPort.mCoreObject);
+            
+            HitproxyPass.ClearMeshDrawPassArray();
+            HitproxyPass.SetViewport(GHitproxyBuffers.ViewPort);
             foreach (var i in policy.VisibleMeshes)
             {
                 if (i.Atoms == null)
@@ -189,41 +238,40 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     for (int j = 0; j < i.Atoms.Length; j++)
                     {
-                        var hpDrawcall = i.GetDrawCall(GHitproxyBuffers, j, policy, IRenderPolicy.EShadingType.HitproxyPass);
+                        var hpDrawcall = i.GetDrawCall(GHitproxyBuffers, j, policy, IRenderPolicy.EShadingType.HitproxyPass, this);
                         if (hpDrawcall != null)
                         {
-                            GHitproxyBuffers.SureCBuffer(hpDrawcall.Effect, "UMobileEditorFSPolicy.HitproxyBuffers");
                             hpDrawcall.BindGBuffer(GHitproxyBuffers);
 
-                            cmdlist_hp.PushDrawCall(hpDrawcall.mCoreObject);
+                            var layer = i.Atoms[j].Material.RenderLayer;
+                            HitproxyPass.PushDrawCall(layer, hpDrawcall);
                         }
                     }
                 }   
             }
 
-            cmdlist_hp.BeginCommand();
-            cmdlist_hp.BeginRenderPass(ref HitproxyPassDesc, GHitproxyBuffers.FrameBuffers.mCoreObject, "Hitproxy");
-            cmdlist_hp.BuildRenderPass(0);
-            cmdlist_hp.EndRenderPass();
-            cmdlist_hp.EndCommand();
+            var passClears = new IRenderPassClears();
+            passClears.SetDefault();
+            passClears.SetClearColor(0, new Color4(0, 0, 0, 0));
+            HitproxyPass.BuildRenderPass(in passClears, GHitproxyBuffers.FrameBuffers, GGizmosBuffers.FrameBuffers);
 
+            var cmdlist_hp = HitproxyPass.PassBuffers[0].DrawCmdList.mCoreObject;
             fixed (ITexture2D** ppTexture = &mReadableHitproxyTexture)
             {
-                cmdlist_hp.CreateReadableTexture2D(ppTexture, GHitproxyBuffers.GBufferSRV[0].mCoreObject, GHitproxyBuffers.FrameBuffers.mCoreObject);
+                cmdlist_hp.CreateReadableTexture2D(ppTexture, GHitproxyBuffers.GetGBufferSRV(0).mCoreObject, GHitproxyBuffers.FrameBuffers.mCoreObject);
             }
             cmdlist_hp.Signal(mReadHitproxyFence.mCoreObject, 0);
             CanDrawHitproxy = false;
         }
-        public unsafe void TickRender(IRenderPolicy policy)
+        public unsafe override void TickRender(IRenderPolicy policy)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            var cmdlist_hp = HitproxyPass.CommitCmdList.mCoreObject;
-            cmdlist_hp.Commit(rc.mCoreObject);
+            HitproxyPass.Commit(rc);
         }
-        public unsafe void TickSync(IRenderPolicy policy)
+        public unsafe override void TickSync(IRenderPolicy policy)
         {
-            var cmdlist_hp = HitproxyPass.CommitCmdList.mCoreObject;
+            var cmdlist_hp = HitproxyPass.PassBuffers[0].CommitCmdList.mCoreObject;
             if (mReadHitproxyFence.mCoreObject.IsCompletion())
             {
                 if (mReadableHitproxyTexture != (ITexture2D*)0)
@@ -231,10 +279,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                     void* pData;
                     uint rowPitch;
                     uint depthPitch;
-                    if (ReadableHitproxyTexture.Map(cmdlist_hp, 0, &pData, &rowPitch, &depthPitch) != 0)
+                    if (ReadableHitproxyTexture.MapMipmap(cmdlist_hp, 0, &pData, &rowPitch, &depthPitch) != 0)
                     {
                         ReadableHitproxyTexture.BuildImageBlob(mHitProxyData.mCoreObject, pData, rowPitch);
-                        ReadableHitproxyTexture.Unmap(cmdlist_hp, 0);
+                        ReadableHitproxyTexture.UnmapMipmap(cmdlist_hp, 0);
                     }
                 }
                 CanDrawHitproxy = true;

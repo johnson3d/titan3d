@@ -12,4 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Buffer2D\Image.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Buffer2D\ImageOp.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Procedure.brick" />
+  </ItemGroup>
 </Project>

@@ -26,27 +26,6 @@ namespace EngineNS.Editor.Forms
         public bool Visible { get; set; } = true;
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-        public void TestUWorldOutliner(UMainEditorApplication application)
-        {            
-            var scene = new GamePlay.Scene.UScene(new GamePlay.Scene.USceneData() { Name = "TestScene" });
-            scene.Parent = mWorld.Root;
-
-            var node = scene.NewNode(typeof(GamePlay.Scene.UNode), new GamePlay.Scene.UNodeData() { Name = "n1" }, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-            node.Parent = scene;
-            node.Placement.Position = Vector3.UnitXYZ;
-
-            node = scene.NewNode(typeof(GamePlay.Scene.UNode), new GamePlay.Scene.UNodeData() { Name = "n2" }, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-            node.Parent = scene;
-            node.Placement.Position = Vector3.UnitXYZ * 2;
-
-            var curNode = node;
-            node = scene.NewNode(typeof(GamePlay.Scene.UNode), new GamePlay.Scene.UNodeData() { Name = "n3" }, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-            node.Parent = curNode;
-            node.Placement.Position = Vector3.UnitXYZ;
-            node = scene.NewNode(typeof(GamePlay.Scene.UNode), new GamePlay.Scene.UNodeData() { Name = "n4" }, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-            node.Parent = curNode;
-            node.Placement.Position = Vector3.UnitXYZ * 2;
-        }
         public unsafe void DrawAsChildWindow(ref Vector2 size)
         {
             if (ImGuiAPI.BeginChild(Title, in size, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
@@ -163,7 +142,7 @@ namespace EngineNS.Editor.Forms
                 return;
             }
             var scene = provider as GamePlay.Scene.UScene;
-            OnDrawMenu = () =>
+            OnDrawMenu = async () =>
             {
                 if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
                 {
@@ -175,16 +154,22 @@ namespace EngineNS.Editor.Forms
                         var subClasses = meta.SubClasses;
                         if (ImGuiAPI.MenuItem(meta.ClassType.FullName, null, false, true))
                         {
-                            var newNode = node.ParentScene.NewNode(meta.ClassType.TypeString, new GamePlay.Scene.UNodeData(), GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-                            newNode.NodeData.Name = $"Node_{newNode.Id}";
+                            var ntype = Rtti.UTypeDesc.TypeOf(meta.ClassType.TypeString);
+                            var newNode = Rtti.UTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.USceneActorNode;
+                            await newNode.InitializeNode(mWorld, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                            //var newNode = await node.ParentScene.NewNode(mWorld, meta.ClassType.TypeString, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                            newNode.NodeData.Name = $"Node_{newNode.SceneId}";
                             newNode.Parent = node;
                         }
                         foreach (var i in subClasses)
                         {
                             if (ImGuiAPI.MenuItem(i.ClassType.FullName, null, false, true))
                             {
-                                var newNode = node.ParentScene.NewNode(meta.ClassType.TypeString, new GamePlay.Scene.UNodeData(), GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-                                newNode.NodeData.Name = $"Node_{newNode.Id}";
+                                var ntype = Rtti.UTypeDesc.TypeOf(i.ClassType.TypeString);
+                                var newNode = Rtti.UTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.USceneActorNode;
+                                await newNode.InitializeNode(mWorld, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                                //var newNode = await node.ParentScene.NewNode(mWorld, i.ClassType.TypeString, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                                newNode.NodeData.Name = $"Node_{newNode.SceneId}";
                                 newNode.Parent = node;
                             }
                         }
@@ -216,6 +201,7 @@ namespace EngineNS.Editor.Forms
             if (appliction == null)
                 return;
             appliction.mMainInspector.PropertyGrid.Target = provider;
+            appliction.WorldViewportSlate.OnHitproxySelected((GamePlay.Scene.UNode)provider);
         }
     }
 }

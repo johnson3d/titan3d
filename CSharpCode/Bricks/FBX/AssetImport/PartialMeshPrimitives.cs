@@ -1,4 +1,5 @@
-﻿using EngineNS.EGui.Controls;
+﻿
+using EngineNS.EGui.Controls;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -78,11 +79,9 @@ namespace EngineNS.Graphics.Mesh
                     {
                         if (ImGuiAPI.Button("Create Asset", in sz))
                         {
-                            if (FBXImportMesh())
-                            {
-                                ImGuiAPI.CloseCurrentPopup();
-                                ContentBrowser.mAssetImporter = null;
-                            }
+                            var task = FBXImportMesh();
+                            ImGuiAPI.CloseCurrentPopup();
+                            ContentBrowser.mAssetImporter = null;
                         }
                         ImGuiAPI.SameLine(0, 20);
                     }
@@ -95,52 +94,113 @@ namespace EngineNS.Graphics.Mesh
                 }
             }
 
-            private unsafe bool FBXImportMesh()
+            private async System.Threading.Tasks.Task<bool> FBXImportMesh()
             {
                 var fileDesc = mFBXImporter.GetFileImportDesc();
                 for (uint i = 0; i < fileDesc.MeshNum; ++i)
                 {
                     using (var meshImporter = mFBXImporter.CreateMeshImporter(i))
                     {
-                        var meshDesc = mFBXImporter.GetFBXMeshDescs(i);
-                        var meshName = meshDesc->NativeSuper->Name.Text;
                         meshImporter.Process(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
-                        var mesh = meshImporter.GetMeshPrimitives();
-                        var rn = RName.GetRName(mDir.Name + meshName + CMeshPrimitives.AssetExt);
-                        var xnd = new IO.CXndHolder("CMeshPrimitives", 0, 0);
-                        mesh.Save2Xnd(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, xnd.RootNode.mCoreObject);
-                        xnd.SaveXnd(rn.Address);
-
-                        var ameta = new CMeshPrimitivesAMeta();
-                        ameta.SetAssetName(rn);
-                        ameta.AssetId = Guid.NewGuid();
-                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(CMeshPrimitives));
-                        ameta.Description = $"This is a {typeof(CMeshPrimitives).FullName}\n";
-                        ameta.SaveAMeta();
-                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
-
-                        var partialSkeleton = meshImporter.GetPartialSkeleton();
-                        if (partialSkeleton.IsValidPointer)
+                        string meshName = "";
+                        bool hasSkin = false;
+                        unsafe
                         {
-                            Animation.Skeleton.USkeletonAsset ska = new Animation.Skeleton.USkeletonAsset();
-                            ska.Skeleton.MergeWith(partialSkeleton);
-                            rn = RName.GetRName(mDir.Name + meshName + Animation.Skeleton.USkeletonAsset.AssetExt);
-                            ska.SaveAssetTo(rn);
-                            var sktameta = new Animation.Skeleton.USkeletonAssetAMeta();
-                            sktameta.SetAssetName(rn);
-                            sktameta.AssetId = Guid.NewGuid();
-                            sktameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(Animation.Skeleton.USkeletonAssetAMeta));
-                            sktameta.Description = $"This is a {typeof(Animation.Skeleton.USkeletonAssetAMeta).FullName}\n";
-                            sktameta.SaveAMeta();
-                            UEngine.Instance.AssetMetaManager.RegAsset(sktameta);
+                            var meshDesc = mFBXImporter.GetFBXMeshDescs(i);
+                            meshName = meshDesc->NativeSuper->Name.Text;
+                            hasSkin = meshDesc->HaveSkin;
                         }
-
-                        mesh.NativeSuper.Release();
+                        System.Diagnostics.Debug.Assert(!string.IsNullOrEmpty(meshName));
+                        if (hasSkin)
+                        {
+                            var rn = RName.GetRName(mDir.Name + meshName + Animation.Asset.USkeletonAsset.AssetExt);
+                            var fbxSkeletonDesc = meshImporter.GetSkeletonDesc();
+                            await CreateOrMergeSkeleton(rn, fbxSkeletonDesc);
+                        }
+                        {
+                            var rn = RName.GetRName(mDir.Name + meshName + CMeshPrimitives.AssetExt, mDir.RNameType);
+                            CreateMesh(rn, meshImporter.GetMeshPrimitives(), hasSkin, meshImporter.GetSkeletonDesc());
+                        }
                     }
                 }
                 mFBXImporter.Dispose();
                 return true;
             }
+
+            private async System.Threading.Tasks.Task CreateOrMergeSkeleton(RName skeletonAsset, AssetImportAndExport.FBX.FBXSkeletonDesc fBXSkeletonDesc)
+            {
+                var ska = await EngineNS.UEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(skeletonAsset);
+                if (ska == null)
+                {
+                    Animation.Asset.USkeletonAsset newAsset = new Animation.Asset.USkeletonAsset();
+                    newAsset.Skeleton = AssetImportAndExport.FBX.FBXMeshImportUtility.CreateSkinSkeleton(fBXSkeletonDesc);
+
+                    newAsset.SaveAssetTo(skeletonAsset);
+                    var sktameta = new Animation.Asset.USkeletonAssetAMeta();
+                    sktameta.SetAssetName(skeletonAsset);
+                    sktameta.AssetId = Guid.NewGuid();
+                    sktameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(Animation.Asset.USkeletonAssetAMeta));
+                    sktameta.Description = $"This is a {typeof(Animation.Asset.USkeletonAssetAMeta).FullName}\n";
+                    sktameta.SaveAMeta();
+                    UEngine.Instance.AssetMetaManager.RegAsset(sktameta);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                }
+            }
+            private void CreateMesh(RName name, IMeshPrimitives meshPrimitives, bool hasSkin, AssetImportAndExport.FBX.FBXSkeletonDesc fbxSkeletonDesc)
+            {
+                var cMeshPrimitives = new CMeshPrimitives(meshPrimitives);
+                if (hasSkin)
+                {
+                    cMeshPrimitives.PartialSkeleton = AssetImportAndExport.FBX.FBXMeshImportUtility.CreateSkinSkeleton(fbxSkeletonDesc);
+                }
+                cMeshPrimitives.SaveAssetTo(name);
+
+                var ameta = new CMeshPrimitivesAMeta();
+                ameta.SetAssetName(name);
+                ameta.AssetId = Guid.NewGuid();
+                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(CMeshPrimitives));
+                ameta.Description = $"This is a {typeof(CMeshPrimitives).FullName}\n";
+                ameta.SaveAMeta();
+                UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+            }
+        }
+    }
+}
+
+namespace AssetImportAndExport.FBX
+{
+    using EngineNS.Animation.SkeletonAnimation.Skeleton;
+    using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
+
+    public static class FBXMeshImportUtility
+    {
+        public static USkinSkeleton CreateSkinSkeleton(FBXSkeletonDesc fbxSkeletonDesc)
+        {
+            var skinSkeleton = new USkinSkeleton();
+            for (int i = 0; i < fbxSkeletonDesc.GetBoneDescsNum(); ++i)
+            {
+                var fbxBoneDesc = fbxSkeletonDesc.GetBoneDesc(i);
+
+                UBoneDesc desc = new UBoneDesc();
+                desc.Name = fbxBoneDesc.m_Name.Text;
+                desc.NameHash = fbxBoneDesc.m_NameHash;
+                desc.ParentName = fbxBoneDesc.m_ParentName.Text;
+                desc.ParentHash = fbxBoneDesc.m_ParentHash;
+                desc.InitMatrix = fbxBoneDesc.m_InitMatrix;
+                desc.InvInitMatrix = fbxBoneDesc.m_InvInitMatrix;
+                desc.InvPos = fbxBoneDesc.m_InvPos;
+                desc.InvQuat = fbxBoneDesc.m_InvQuat;
+                desc.InvScale = fbxBoneDesc.m_InvScale;
+
+                UBone bone = new UBone(desc);
+                skinSkeleton.AddLimb(bone);
+            }
+
+            skinSkeleton.ConstructHierarchy();
+            return skinSkeleton;          
         }
     }
 }

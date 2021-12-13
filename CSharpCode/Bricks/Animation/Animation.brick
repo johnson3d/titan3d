@@ -1,0 +1,10 @@
+{
+  "Name": "Animation",
+  "Path": "CSharpCode/Bricks/Animation",
+  "FullName": "CSharpCode/Bricks/Animation.brick",
+  "SharedProjects": [
+    "CSharpCode/Graphics/Graphics.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

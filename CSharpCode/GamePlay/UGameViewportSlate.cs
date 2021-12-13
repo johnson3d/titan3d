@@ -28,16 +28,16 @@ namespace EngineNS.GamePlay
             UEngine.Instance.EndPlayInEditor();
         }
         public bool IsSetViewportPos = false;
-        public Vector2 GameViewportPos;
-        public Vector2 GameViewportSize;
+        public Vector2 GameViewportPos = new Vector2(0,0);
+        public Vector2 GameViewportSize = new Vector2(800, 600);
         //public static bool bMessageBox = false;
         public override unsafe void OnDraw()
         {
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (IsSetViewportPos)
+            //if (IsSetViewportPos)
             {
-                ImGuiAPI.SetNextWindowPos(in GameViewportPos, ImGuiCond_.ImGuiCond_Always, in Vector2.mZero);
-                ImGuiAPI.SetNextWindowSize(in GameViewportSize, ImGuiCond_.ImGuiCond_Always);
+                ImGuiAPI.SetNextWindowPos(in GameViewportPos, ImGuiCond_.ImGuiCond_FirstUseEver, in Vector2.Zero);
+                ImGuiAPI.SetNextWindowSize(in GameViewportSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             }
             IsDrawing = false;
             //ClrLogger.SetMessageBox(bMessageBox);
@@ -103,7 +103,7 @@ namespace EngineNS.GamePlay
                     {
                         min = min + pos;
                         max = max + pos;
-                        drawlist.AddImage(showTexture.ToPointer(), in min, in max, in uv1, in uv2, 0xFFFFFFFF);
+                        drawlist.AddImage(showTexture.ToPointer(), in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);
                     }
                 }
             }

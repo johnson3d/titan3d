@@ -80,25 +80,41 @@ namespace EngineNS.Editor
         }
         public void OnDraw()
         {
+            var wr = OnDrawImpl();
+
+            if (wr != null)
+            {
+                int count = 5;
+                while (wr.IsAlive && count>0)
+                {
+                    System.GC.Collect();
+                    System.GC.WaitForPendingFinalizers();
+                    count--;
+                }
+            }
+        }
+        private WeakReference OnDrawImpl()
+        {
+            WeakReference wr = null;
             for (int i = 0; i < OpenedEditors.Count; i++)
             {
-                if (OpenedEditors[i].Visible == false)
+                if (wr == null && OpenedEditors[i].Visible == false)
                 {
                     if (CurrentActiveEditor == OpenedEditors[i])
                     {
                         CurrentActiveEditor = null;
                     }
+                    wr = new WeakReference(OpenedEditors[i]);
                     OpenedEditors[i].OnCloseEditor();
                     OpenedEditors.RemoveAt(i);
-
                     i--;
-                    System.GC.Collect();
                 }
                 else
                 {
                     OpenedEditors[i].OnDraw();
                 }
             }
+            return wr;
         }
     }
 }

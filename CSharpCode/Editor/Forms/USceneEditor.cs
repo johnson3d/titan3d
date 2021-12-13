@@ -8,7 +8,7 @@ namespace EngineNS.Editor.Forms
     {
         public class USceneEditorViewport : EGui.Slate.UWorldViewportSlate
         {
-            protected override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
+            public override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
             {
                 base.OnHitproxySelected(proxy);
 
@@ -45,7 +45,7 @@ namespace EngineNS.Editor.Forms
         public GamePlay.Scene.UScene Scene;
         public USceneEditorViewport PreviewViewport = new USceneEditorViewport();
         public USceneEditorOutliner mWorldOutliner = new USceneEditorOutliner(false);
-        public EGui.Controls.PropertyGrid.PropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();        
+        public EGui.Controls.PropertyGrid.PropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~USceneEditor()
         {
             Cleanup();
@@ -70,25 +70,27 @@ namespace EngineNS.Editor.Forms
         {
             viewport.RenderPolicy = policy;
 
-            await viewport.RenderPolicy.Initialize(1, 1);
+            await viewport.RenderPolicy.Initialize(null, 1, 1);
 
-            (viewport as EGui.Slate.UWorldViewportSlate).CameraController.Camera = viewport.RenderPolicy.GetBasePassNode().GBuffers.Camera;
+            await viewport.World.InitWorld();
+
+            (viewport as EGui.Slate.UWorldViewportSlate).CameraController.ControlCamera(viewport.RenderPolicy.Camera);
 
             Scene.Parent = PreviewViewport.World.Root;
 
-            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World.Root);
+            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
         }
         public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
-            AssetName = name;
-            Scene = await UEngine.Instance.SceneManager.GetScene(name);
-            if (Scene == null)
-                return false;
-
             PreviewViewport.Title = $"Scene:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy(), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+
+            AssetName = name;
+            Scene = await UEngine.Instance.SceneManager.GetScene(PreviewViewport.World, name);
+            if (Scene == null)
+                return false;
 
             ScenePropGrid.Target = Scene;
 
@@ -160,7 +162,7 @@ namespace EngineNS.Editor.Forms
                 Action action = async () =>
                 {
                     Scene.ClearChildren();
-                    await EngineNS.Editor.MetaViewEditor.TestCreateScene(Scene);
+                    await EngineNS.Editor.UMetaViewEditor.TestCreateScene(PreviewViewport.World, Scene);
                     Scene.SaveAssetTo(AssetName);
                 };
                 action();

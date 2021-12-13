@@ -14,10 +14,43 @@ namespace EngineNS
         public byte W;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct Int32_2
+    public struct Int32_2 : IEquatable<Int32_2>
     {
         public int x;
         public int y;
+        public Int32_2(int InX, int InY)
+        {
+            x = InX;
+            y = InY;
+        }
+        public override bool Equals(object value)
+        {
+            if (value == null)
+                return false;
+
+            if (value.GetType() != GetType())
+                return false;
+
+            return Equals((Int32_2)(value));
+        }
+        public override int GetHashCode()
+        {
+            return x + y;
+        }
+        public bool Equals(Int32_2 other)
+        {
+            if (x == other.x && y == other.y)
+                return true;
+            return false;
+        }
+        public static bool operator ==(in Int32_2 left, in Int32_2 right)
+        {
+            return left.Equals(right);
+        }
+        public static bool operator !=(in Int32_2 left, in Int32_2 right)
+        {
+            return !left.Equals(right);
+        }
     }
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct Int32_3
@@ -43,9 +76,54 @@ namespace EngineNS
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct UInt32_3
     {
+        public UInt32_3(uint InX, uint InY, uint InZ)
+        {
+            x = InX;
+            y = InY;
+            z = InZ;
+        }
         public UInt32 x;
         public UInt32 y;
         public UInt32 z;
+        public UInt32 MaxSide()
+        {
+            if (x >= y)
+            {
+                if (y >= z)
+                {
+                    return x;
+                }
+                else
+                {
+                    if (x >= z)
+                        return x;
+                    else
+                        return z;
+                }
+            }
+            else
+            {
+                if (y >= z)
+                {
+                    return y;
+                }
+                else
+                {
+                    if (x >= z)
+                        return y;
+                    else
+                        return z;
+                }
+            }
+        }
+        public bool AnyNotZero()
+        {
+            return (x > 0) || (y > 0) || (z > 0);
+        }
+        public void SetZero()
+        {
+            x = y = z = 0;
+        }
     }
 
     [StructLayout(LayoutKind.Explicit, Pack = 4)]

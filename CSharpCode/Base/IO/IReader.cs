@@ -30,6 +30,8 @@ namespace EngineNS.IO
         void Read(out string v);
         void Read(out byte[] v);
         void Read(out VNameString v);
+        void Read(out RName v);
+
         void Read<T>(out T v) where T : unmanaged;
     }
 
@@ -119,7 +121,14 @@ namespace EngineNS.IO
                 v.Index = VNameString.GetIndexFromString(text);
             }
         }
-
+        public void Read(out RName v)
+        {
+            RName.ERNameType type;
+            Read(out type);
+            string name;
+            Read(out name);
+            v = RName.GetRName(name, type);
+        }
         public void ReadBigSize(out byte[] v)
         {
             unsafe
@@ -188,7 +197,7 @@ namespace EngineNS.IO
             Rtti.UMetaVersion metaVersion = meta.GetMetaVersion(versionHash);
             if (metaVersion == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost in direct:{meta.MetaDirectoryName}");
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost in direct:{meta.ClassMetaName}");
                 Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"MetaVersion lost:{versionHash}");
                 throw new Exception($"MetaVersion lost:{versionHash}");
             }
@@ -227,7 +236,7 @@ namespace EngineNS.IO
             Rtti.UMetaVersion metaVersion = meta.GetMetaVersion(versionHash);
             if (metaVersion == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost in direct:{meta.MetaDirectoryName}");
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost in direct:{meta.ClassMetaName}");
                 Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"MetaVersion lost:{versionHash}");
                 throw new Exception($"MetaVersion lost:{versionHash}");
             }

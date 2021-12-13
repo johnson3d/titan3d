@@ -295,6 +295,26 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
         {
             return $"{expr.DefType} {expr.VarName}";
         }
+        public string GenAsArgument(DefineFunctionParam expr, CSGen cgen)
+        {
+            string opStr = "";
+            switch(expr.OpType)
+            {
+                case DefineFunctionParam.enOpType.In:
+                    opStr = "in ";
+                    break;
+                case DefineFunctionParam.enOpType.Out:
+                    opStr = "out ";
+                    break;
+                case DefineFunctionParam.enOpType.Ref:
+                    opStr = "ref ";
+                    break;
+            }
+            string paramsStr = "";
+            if (expr.IsParamArray)
+                paramsStr = "params ";
+            return $"{opStr}{paramsStr}{expr.DefType} {expr.VarName}";
+        }
     }
     public class DefineFunctionGen : ExprGen
     {
@@ -302,13 +322,14 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
         {
             var csGen = (CSGen)cgen;
             var expr = (DefineFunction)src;
+            var overrideStr = expr.IsOverride ? " override" : "";
             if (expr.ReturnType == "System.Void")
             {
-                cgen.AppendCode($"{CSGen.GetVisitMode(expr.VisitMode)} void {expr.Name}(", true, false);
+                cgen.AppendCode($"{CSGen.GetVisitMode(expr.VisitMode)}{overrideStr} void {expr.Name}(", true, false);
             }
             else
             {
-                cgen.AppendCode($"{CSGen.GetVisitMode(expr.VisitMode)} {expr.ReturnType} {expr.Name}(", true, false);
+                cgen.AppendCode($"{CSGen.GetVisitMode(expr.VisitMode)}{overrideStr} {expr.ReturnType} {expr.Name}(", true, false);
             }
             for (int i = 0; i < expr.Arguments.Count; i++)
             {

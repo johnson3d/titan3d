@@ -23,6 +23,8 @@ namespace EngineNS.IO
             Engine,
             Editor,
             Cache,
+            EngineSource,
+            GameSource,
             Count,
         }
         public enum ESystemDir
@@ -122,9 +124,9 @@ namespace EngineNS.IO
         {
             return System.IO.Directory.CreateDirectory(path);
         }
-        public static void DeleteDirectory(string path)
+        public static void DeleteDirectory(string path, bool recursive = true)
         {
-            System.IO.Directory.Delete(path);
+            System.IO.Directory.Delete(path, recursive);
         }
         public static void DeleteFile(string path)
         {
@@ -222,6 +224,8 @@ namespace EngineNS.IO
         {
             var filename = EngineNS.IO.FileManager.GetLastestPathName(str);
             var pos = filename.LastIndexOf('.');
+            if (pos < 0)
+                return "";
             return filename.Substring(pos, filename.Length - pos);
         }
         public static string RemoveExtName(string str)

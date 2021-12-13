@@ -26,36 +26,55 @@ namespace EngineNS.Graphics.Pipeline
         public CCamera Camera { get; set; }
         public RHI.CViewPort ViewPort = new RHI.CViewPort();
         public RHI.CFrameBuffers FrameBuffers;
+        public bool IsCreatedDepthStencil = true;
         public RHI.CDepthStencilView DepthStencilView;
-        public RHI.CShaderResourceView DepthStencilSRV;
-        public RHI.CShaderResourceView[] GBufferSRV;
+        private RHI.CShaderResourceView DepthStencilSRV;
+        private RHI.CShaderResourceView[] GBufferSRV;
+        public RHI.CShaderResourceView GetDepthStencilSRV()
+        {
+            return DepthStencilSRV;
+        }
+        public RHI.CShaderResourceView GetGBufferSRV(int index)
+        {
+            if (GBufferSRV == null)
+                return null;
+            if (index >= GBufferSRV.Length)
+                return null;
+            return GBufferSRV[index];
+        }
         public struct RenderTargetDesc
         {
-            public bool DontResize;
+            public uint Width;
+            public uint Height;
+            public bool IsWeakRef;
         }
         public RenderTargetDesc[] RTDesc;
-        public RHI.CConstantBuffer PerViewportCBuffer;
-        public int SwapChainIndex { get; set; } = -1;
-        public void SureCBuffer(Shader.UEffect effect, string debugName)
+        RHI.CConstantBuffer mPerViewportCBuffer;
+        public RHI.CConstantBuffer PerViewportCBuffer
         {
-            if (effect.CBPerViewportIndex != 0xFFFFFFFF)
+            get
             {
-                var gpuProgram = effect.ShaderProgram;
-                if (PerViewportCBuffer == null)
+                if (mPerViewportCBuffer == null)
                 {
-                    PerViewportCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(gpuProgram, effect.CBPerViewportIndex);
-                    PerViewportCBuffer.mCoreObject.NativeSuper.SetDebugName($"{debugName}: Viewport");
+                    var effect = UEngine.Instance.GfxDevice.EffectManager.DummyEffect;
+                    mPerViewportCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(effect.ShaderProgram, effect.CBPerViewportIndex);
+                    PerViewportCBuffer.mCoreObject.NativeSuper.SetDebugName($"Viewport");
                     UpdateViewportCBuffer();
                 }
+                return mPerViewportCBuffer;
             }
-            Camera.SureCBuffer(effect, debugName);
         }
         public void Cleanup()
         {
             FrameBuffers?.Dispose();
             FrameBuffers = null;
-            DepthStencilView?.Dispose();
+            if (IsCreatedDepthStencil)
+            {
+                DepthStencilView?.Dispose();
+                DepthStencilSRV?.Dispose();
+            }
             DepthStencilView = null;
+            DepthStencilSRV = null;
 
             if (GBufferSRV != null)
             {
@@ -66,7 +85,7 @@ namespace EngineNS.Graphics.Pipeline
                 GBufferSRV = null;
             }
         }
-        public virtual void Initialize(int NumOfGBuffer, EPixelFormat dsFormat, uint width, uint height)
+        public virtual void Initialize(RHI.CRenderPass renderPass, CCamera camera, int NumOfGBuffer, EPixelFormat dsFormat, uint width, uint height, uint dsMipLevels = 1, uint dsRtv = 0)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             FrameBuffers?.Dispose();
@@ -82,48 +101,75 @@ namespace EngineNS.Graphics.Pipeline
             GBufferSRV = new RHI.CShaderResourceView[NumOfGBuffer];
             RTDesc = new RenderTargetDesc[NumOfGBuffer];
             var fbDesc = new IFrameBuffersDesc();
-            if (SwapChainIndex < 0)
-                fbDesc.IsSwapChainBuffer = 0;
-            else
-                fbDesc.IsSwapChainBuffer = 1;
+            fbDesc.RenderPass = renderPass.mCoreObject;
+            FrameBuffers = rc.CreateFrameBuffers(ref fbDesc);
             if (dsFormat != EPixelFormat.PXF_UNKNOWN)
-                fbDesc.UseDSV = 1;
+            {
+                if (false == CreateDepthStencilBuffer(dsFormat, width, height, dsMipLevels, dsRtv))
+                {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Graphics", $"CreateDepthStencilBuffer failed: Format->{dsFormat}, MipLevels->{dsMipLevels}");
+                    return;
+                }
+            }
+            Camera = camera;
+            if (Camera != null)
+                Camera.mCoreObject.PerspectiveFovLH(3.14f / 4f, width, height, 0.3f, 1000.0f);
+
+            //UpdateFrameBuffers();
+            UpdateViewportCBuffer();
+        }
+        public virtual void Initialize(RHI.CRenderPass renderPass, CCamera camera, int NumOfGBuffer, RHI.CDepthStencilView depthStencilView, RHI.CShaderResourceView depthStencilSRV, uint width, uint height)
+        {
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            FrameBuffers?.Dispose();
+            DepthStencilView?.Dispose();
+
+            ViewPort.mCoreObject.TopLeftX = 0;
+            ViewPort.mCoreObject.TopLeftY = 0;
+            ViewPort.mCoreObject.Width = (float)width;
+            ViewPort.mCoreObject.Height = (float)height;
+            ViewPort.mCoreObject.MinDepth = 0;
+            ViewPort.mCoreObject.MaxDepth = 1;
+
+            GBufferSRV = new RHI.CShaderResourceView[NumOfGBuffer];
+            RTDesc = new RenderTargetDesc[NumOfGBuffer];
+            var fbDesc = new IFrameBuffersDesc();
+            fbDesc.RenderPass = renderPass.mCoreObject;
             FrameBuffers = rc.CreateFrameBuffers(ref fbDesc);
 
-            if (dsFormat == EPixelFormat.PXF_UNKNOWN)
-                return;
+            IsCreatedDepthStencil = false;
+            DepthStencilSRV = depthStencilSRV;
+            DepthStencilView = depthStencilView;
 
-            var dsTexDesc = new ITexture2DDesc();
-            dsTexDesc.SetDefault();
-            dsTexDesc.Width = width;
-            dsTexDesc.Height = height;
-            dsTexDesc.Format = dsFormat;// EPixelFormat.PXF_D24_UNORM_S8_UINT;
-            dsTexDesc.BindFlags = (UInt32)(EBindFlags.BF_SHADER_RES | EBindFlags.BF_DEPTH_STENCIL);
-            var DepthStencilTexture = rc.CreateTexture2D(ref dsTexDesc);
-
-            var dsvDesc = new IDepthStencilViewDesc();
-            dsvDesc.SetDefault();
-            dsvDesc.Format = dsFormat;
-            dsvDesc.Width = width;
-            dsvDesc.Height = height;
-            unsafe
+            if (depthStencilView != null)
             {
-                dsvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
-                DepthStencilView = rc.CreateDepthRenderTargetView(ref dsvDesc);
                 FrameBuffers.mCoreObject.BindDepthStencilView(DepthStencilView.mCoreObject);
-
-                var srvDesc = new IShaderResourceViewDesc();
-                srvDesc.mFormat = dsFormat;
-                srvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
-                DepthStencilSRV = rc.CreateShaderResourceView(ref srvDesc);
             }
 
-            Camera = new CCamera();
-            Camera.mCoreObject.PerspectiveFovLH(3.14f / 4f, width, height, 0.3f, 1000.0f);
-            var eyePos = new Vector3(0, 0, -10);
-            Camera.mCoreObject.LookAtLH(in eyePos, in Vector3.Zero, in Vector3.Up);
+            Camera = camera;
+            if (camera != null)
+                Camera.mCoreObject.PerspectiveFovLH(3.14f / 4f, width, height, 0.3f, 1000.0f);
 
             UpdateViewportCBuffer();
+        }
+        public bool UpdateFrameBuffers(float width, float height)
+        {
+            return FrameBuffers.mCoreObject.UpdateFrameBuffers(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, width, height);
+        }
+        public RHI.CSwapChain SwapChain;
+        public int SwapChainIndex
+        {
+            get
+            {
+                if (FrameBuffers == null)
+                    return -1;
+                return FrameBuffers.mCoreObject.mSwapChainIndex;
+            }
+        }
+        public bool BindSwapChain(int index, RHI.CSwapChain swapchain)
+        {
+            FrameBuffers.mCoreObject.BindSwapChain((uint)index, swapchain.mCoreObject);
+            return true;
         }
         public bool CreateGBuffer(int index, ITexture2D showTarget)
         {
@@ -134,52 +180,72 @@ namespace EngineNS.Graphics.Pipeline
             GBufferSRV[index]?.Dispose();
 
             var rtDesc = new IRenderTargetViewDesc();
-            rtDesc.SetDefault();
+            rtDesc.SetTexture2D();
             unsafe
             {
-                var tex2dDesc = showTarget.mDesc;
+                var tex2dDesc = showTarget.mTextureDesc;
                 rtDesc.Format = tex2dDesc.Format;//EPixelFormat.PXF_B8G8R8A8_UNORM;
-                rtDesc.m_pTexture2D = showTarget;
+                rtDesc.mGpuBuffer = showTarget.NativeSuper;
                 rtDesc.Width = tex2dDesc.Width;
                 rtDesc.Height = tex2dDesc.Height;
                 var SwapChainRT = rc.CreateRenderTargetView(ref rtDesc);
                 FrameBuffers.mCoreObject.BindRenderTargetView((uint)index, SwapChainRT.mCoreObject);
 
                 var srvDesc = new IShaderResourceViewDesc();
-                srvDesc.mFormat = tex2dDesc.Format;
-                srvDesc.m_pTexture2D = showTarget;
-                var SwapChainSRV = rc.CreateShaderResourceView(ref srvDesc);
+                srvDesc.SetTexture2D();
+                srvDesc.Type = ESrvType.ST_Texture2D;
+                srvDesc.Format = tex2dDesc.Format;
+                srvDesc.mGpuBuffer = showTarget.NativeSuper;
+                srvDesc.Texture2D.MipLevels = 1;
+                var SwapChainSRV = rc.CreateShaderResourceView(in srvDesc);
                 GBufferSRV[index] = SwapChainSRV;
-                return true;
+
+                RTDesc[index].Width = rtDesc.Width;
+                RTDesc[index].Height = rtDesc.Height;
             }
+            return true;
         }
-        public bool SetGBuffer(int index, RHI.CShaderResourceView srv, bool dontResize = true)
+        public bool SetGBuffer(int index, RHI.CShaderResourceView srv, bool IsWeakRef = true)
         {
             if (GBufferSRV == null || index >= GBufferSRV.Length || index < 0)
                 return false;
 
-            GBufferSRV[index]?.Dispose();
+            if (RTDesc[index].IsWeakRef == false)
+                GBufferSRV[index]?.Dispose();
             GBufferSRV[index] = srv;
-            RTDesc[index].DontResize = dontResize;
-
             unsafe
             {
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
                 var rtDesc = new IRenderTargetViewDesc();
-                rtDesc.SetDefault();
-                var texture2d = srv.mCoreObject.GetTexture2D();
-                var tex2dDesc = texture2d.mDesc;
-                rtDesc.Format = tex2dDesc.Format;
-                rtDesc.m_pTexture2D = texture2d;
-                rtDesc.Width = tex2dDesc.Width;
-                rtDesc.Height = tex2dDesc.Height;
+                rtDesc.SetTexture2D();
+                var texture2d = srv.mCoreObject.GetGpuBuffer();
+                
+                rtDesc.Format = srv.mCoreObject.mSrvDesc.Format;
+                rtDesc.mGpuBuffer = texture2d;
+                rtDesc.Width = (uint)srv.mCoreObject.mTxDesc.Width; //tex2dDesc.Width;
+                rtDesc.Height = (uint)srv.mCoreObject.mTxDesc.Height; //tex2dDesc.Height;
                 var rTarget = rc.CreateRenderTargetView(ref rtDesc);
                 FrameBuffers.mCoreObject.BindRenderTargetView((uint)index, rTarget.mCoreObject);
+
+                RTDesc[index].IsWeakRef = IsWeakRef;
+                RTDesc[index].Width = rtDesc.Width;
+                RTDesc[index].Height = rtDesc.Height;
             }
-            
+
             return true;
         }
-        public bool CreateGBuffer(int index, EPixelFormat format, uint width, uint height)
+        public void SetDepthStencilBuffer(RHI.CDepthStencilView depthStencilView, RHI.CShaderResourceView depthStencilSRV)
+        {
+            IsCreatedDepthStencil = false;
+            DepthStencilSRV = depthStencilSRV;
+            DepthStencilView = depthStencilView;
+
+            if (FrameBuffers != null && depthStencilView != null)
+            {
+                FrameBuffers.mCoreObject.BindDepthStencilView(DepthStencilView.mCoreObject);
+            }
+        }
+        public bool CreateGBuffer(int index, EPixelFormat format, uint width, uint height, uint mipLevels = 1, uint rtv = 0)
         {
             if (GBufferSRV == null || index >= GBufferSRV.Length || index < 0)
                 return false;
@@ -189,52 +255,145 @@ namespace EngineNS.Graphics.Pipeline
 
             var dsTexDesc = new ITexture2DDesc();
             dsTexDesc.SetDefault();
+            dsTexDesc.MipLevels = mipLevels;
             dsTexDesc.Width = width;
             dsTexDesc.Height = height;
             dsTexDesc.Format = format;
-            dsTexDesc.BindFlags = (UInt32)(EBindFlags.BF_SHADER_RES | EBindFlags.BF_RENDER_TARGET);
-            var showTarget = rc.CreateTexture2D(ref dsTexDesc);
+            dsTexDesc.BindFlags = (UInt32)(EBindFlags.BF_SHADER_RES | EBindFlags.BF_RENDER_TARGET | EBindFlags.BF_UNORDERED_ACCESS);
+            var showTarget = rc.CreateTexture2D(in dsTexDesc);
 
             var rtDesc = new IRenderTargetViewDesc();
             unsafe
             {
-                rtDesc.SetDefault();
+                rtDesc.SetTexture2D();
+                rtDesc.Type = ERtvType.RTV_Texture2D;
                 rtDesc.Format = format;
-                rtDesc.m_pTexture2D = showTarget.mCoreObject;
+                rtDesc.mGpuBuffer = showTarget.mCoreObject.NativeSuper;
                 rtDesc.Width = width;
                 rtDesc.Height = height;
-                var SwapChainRT = rc.CreateRenderTargetView(ref rtDesc);
-                FrameBuffers.mCoreObject.BindRenderTargetView((uint)index, SwapChainRT.mCoreObject);
+                rtDesc.Texture2D.MipSlice = rtv;
+                var rt = rc.CreateRenderTargetView(ref rtDesc);
+                FrameBuffers.mCoreObject.BindRenderTargetView((uint)index, rt.mCoreObject);
 
                 var srvDesc = new IShaderResourceViewDesc();
-                srvDesc.mFormat = format;
-                srvDesc.m_pTexture2D = showTarget.mCoreObject;
-                var SwapChainSRV = rc.CreateShaderResourceView(ref srvDesc);
-                GBufferSRV[index] = SwapChainSRV;
-                return true;
+                srvDesc.SetTexture2D();
+                srvDesc.Type = ESrvType.ST_Texture2D;
+                srvDesc.Format = format;
+                srvDesc.mGpuBuffer = showTarget.mCoreObject.NativeSuper;
+                srvDesc.Texture2D.MipLevels = mipLevels;
+                var srv = rc.CreateShaderResourceView(in srvDesc);
+                GBufferSRV[index] = srv;
+
+                RTDesc[index].Width = rtDesc.Width;
+                RTDesc[index].Height = rtDesc.Height;
             }
+            return true;
+        }
+        public bool CreateDepthStencilBuffer(EPixelFormat dsFormat, uint width, uint height, uint mipLevels = 1, uint rtv = 0)
+        {                
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            DepthStencilView?.Dispose();
+            DepthStencilSRV?.Dispose();
+
+            var dsTexDesc = new ITexture2DDesc();
+            dsTexDesc.SetDefault();
+            dsTexDesc.Width = width;
+            dsTexDesc.Height = height;
+            switch (dsFormat)
+            {
+                case EPixelFormat.PXF_D24_UNORM_S8_UINT:
+                    dsTexDesc.Format = EPixelFormat.PXF_R24G8_TYPELESS;
+                    break;
+                case EPixelFormat.PXF_D32_FLOAT:
+                    dsTexDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
+                    break;
+                case EPixelFormat.PXF_D16_UNORM:
+                    dsTexDesc.Format = EPixelFormat.PXF_R16_TYPELESS;
+                    break;
+                case EPixelFormat.PXF_UNKNOWN:
+                    dsTexDesc.Format = EPixelFormat.PXF_R16_TYPELESS;
+                    break;
+                default:
+                    dsTexDesc.Format = dsFormat;
+                    break;
+            }
+            dsTexDesc.BindFlags = (UInt32)(EBindFlags.BF_SHADER_RES | EBindFlags.BF_DEPTH_STENCIL);// | EBindFlags.BF_UNORDERED_ACCESS);
+            dsTexDesc.MipLevels = mipLevels;
+            var DepthStencilTexture = rc.CreateTexture2D(in dsTexDesc);
+            if (DepthStencilTexture == null)
+                return false;
+
+            var dsvDesc = new IDepthStencilViewDesc();
+            dsvDesc.SetDefault();
+            dsvDesc.Format = dsFormat;
+            dsvDesc.Width = width;
+            dsvDesc.Height = height;
+            dsvDesc.MipLevel = rtv;
+            unsafe
+            {
+                dsvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
+                DepthStencilView = rc.CreateDepthRenderTargetView(ref dsvDesc);
+                if (DepthStencilView == null)
+                    return false;
+                FrameBuffers.mCoreObject.BindDepthStencilView(DepthStencilView.mCoreObject);
+
+                var srvDesc = new IShaderResourceViewDesc();
+                srvDesc.SetTexture2D();
+                srvDesc.Type = ESrvType.ST_Texture2D;
+                srvDesc.Format = dsFormat;
+                srvDesc.ViewDimension = SRV_DIMENSION.SRV_DIMENSION_TEXTURE2D;
+                srvDesc.Texture2D.MipLevels = mipLevels;
+                srvDesc.Texture2D.MostDetailedMip = 0;
+                srvDesc.mGpuBuffer = DepthStencilTexture.mCoreObject.NativeSuper;
+                DepthStencilSRV = rc.CreateShaderResourceView(in srvDesc);
+                if (DepthStencilSRV == null)
+                    return false;
+            }
+            return true;
+        }
+        public RHI.CUnorderedAccessView CreateUAV(int index, uint mipmap = 0)
+        {
+            var srv = GBufferSRV[index];
+            var desc = new IUnorderedAccessViewDesc();
+            desc.SetTexture2D();
+            desc.Format = srv.mCoreObject.mSrvDesc.Format;
+            desc.Texture2D.MipSlice = mipmap;
+
+            return UEngine.Instance.GfxDevice.RenderContext.CreateUnorderedAccessView(GBufferSRV[index].mCoreObject.GetGpuBuffer(), in desc);
         }
         public unsafe void OnResize(float x, float y)
         {
+            if (x < 1.0f)
+                x = 1.0f;
+            if (y < 1.0f)
+                y = 1.0f;
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             if (rc == null)
                 return;
 
-            if (DepthStencilView != null)
+            if (IsCreatedDepthStencil && DepthStencilSRV != null)
             {
                 var tex = new ITexture2D(DepthStencilView.mCoreObject.GetTexture2D());
-                var desc = tex.mDesc;
+                var desc = tex.mTextureDesc;
                 var scaleX = (float)desc.Width / ViewPort.mCoreObject.Width;
                 var scaleY = (float)desc.Height / ViewPort.mCoreObject.Height;
                 desc.Width = (uint)(x * scaleX);
+                if (desc.Width == 0)
+                {
+                    desc.Width = 1;
+                }
                 desc.Height = (uint)(y * scaleY);
+                if (desc.Height == 0)
+                {
+                    desc.Height = 1;
+                }
 
-                var DepthStencilTexture = rc.CreateTexture2D(ref desc);
+                var DepthStencilTexture = rc.CreateTexture2D(in desc);
                 //if(DepthStencilTexture!=null)
                 {
                     var dsvDesc = new IDepthStencilViewDesc();
                     dsvDesc.SetDefault();
-                    dsvDesc.Format = desc.Format;
+                    dsvDesc.Format = DepthStencilSRV.mCoreObject.mSrvDesc.Format;
                     dsvDesc.Width = desc.Width;
                     dsvDesc.Height = desc.Height;
                     dsvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
@@ -243,11 +402,14 @@ namespace EngineNS.Graphics.Pipeline
                     DepthStencilView = rc.CreateDepthRenderTargetView(ref dsvDesc);
                     FrameBuffers.mCoreObject.BindDepthStencilView(DepthStencilView.mCoreObject);
 
-                    DepthStencilSRV.Dispose();
                     var srvDesc = new IShaderResourceViewDesc();
-                    srvDesc.mFormat = desc.Format;
-                    srvDesc.m_pTexture2D = DepthStencilTexture.mCoreObject;
-                    DepthStencilSRV = rc.CreateShaderResourceView(ref srvDesc);
+                    srvDesc.SetTexture2D();
+                    srvDesc.Type = ESrvType.ST_Texture2D;
+                    srvDesc.Format = DepthStencilSRV.mCoreObject.mSrvDesc.Format;
+                    srvDesc.mGpuBuffer = DepthStencilTexture.mCoreObject.NativeSuper;
+                    srvDesc.Texture2D.MipLevels = 1;
+                    DepthStencilSRV.Dispose();
+                    DepthStencilSRV = rc.CreateShaderResourceView(in srvDesc);
                 }
             }
 
@@ -257,35 +419,49 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     if (GBufferSRV[i] == null)
                         continue;
-                    if (RTDesc[i].DontResize)
+                    if (RTDesc[i].IsWeakRef)
                         continue;
                     if (SwapChainIndex == i)
                         continue;
 
-                    var tex = new ITexture2D(GBufferSRV[i].mCoreObject.GetTexture2D());
-                    var desc = tex.mDesc;
+                    var tex = new ITexture2D(GBufferSRV[i].mCoreObject.GetGpuBuffer());
+                    var desc = tex.mTextureDesc;
                     var scaleX = (float)desc.Width / ViewPort.mCoreObject.Width;
                     var scaleY = (float)desc.Height / ViewPort.mCoreObject.Height;
                     desc.Width = (uint)(x * scaleX);
+                    if (desc.Width == 0)
+                    {
+                        desc.Width = 1;
+                    }
                     desc.Height = (uint)(y * scaleY);
+                    if (desc.Height == 0)
+                    {
+                        desc.Height = 1;
+                    }
 
-                    var showTarget = rc.CreateTexture2D(ref desc);
+                    var showTarget = rc.CreateTexture2D(in desc);
 
                     var rtDesc = new IRenderTargetViewDesc();
-                    rtDesc.SetDefault();
+                    rtDesc.SetTexture2D();
+                    rtDesc.Type = ERtvType.RTV_Texture2D;
                     rtDesc.Format = desc.Format;
-                    rtDesc.m_pTexture2D = showTarget.mCoreObject;
+                    rtDesc.mGpuBuffer = showTarget.mCoreObject.NativeSuper;
                     rtDesc.Width = desc.Width;
                     rtDesc.Height = desc.Height;
                     var SwapChainRT = rc.CreateRenderTargetView(ref rtDesc);
                     FrameBuffers.mCoreObject.BindRenderTargetView((uint)i, SwapChainRT.mCoreObject);
 
                     var srvDesc = new IShaderResourceViewDesc();
-                    srvDesc.mFormat = desc.Format;
-                    srvDesc.m_pTexture2D = showTarget.mCoreObject;
-                    var SwapChainSRV = rc.CreateShaderResourceView(ref srvDesc);
+                    srvDesc.SetTexture2D();
+                    srvDesc.Type = ESrvType.ST_Texture2D;
+                    srvDesc.Format = desc.Format;
+                    srvDesc.mGpuBuffer = showTarget.mCoreObject.NativeSuper;
+                    srvDesc.Texture2D.MipLevels = 1;
+                    var SwapChainSRV = rc.CreateShaderResourceView(in srvDesc);
                     GBufferSRV[i].Dispose();
                     GBufferSRV[i] = SwapChainSRV;
+                    RTDesc[i].Width = desc.Width;
+                    RTDesc[i].Height = desc.Height;
                 }
             }
 
@@ -295,6 +471,7 @@ namespace EngineNS.Graphics.Pipeline
             if (Camera != null)
                 Camera.mCoreObject.PerspectiveFovLH(3.14f / 4f, x, y, Camera.mCoreObject.mZNear, Camera.mCoreObject.mZFar);
 
+            UpdateFrameBuffers(x, y);
             UpdateViewportCBuffer();
         }
         public void UpdateViewportCBuffer()
@@ -306,7 +483,7 @@ namespace EngineNS.Graphics.Pipeline
                     var indexer = PerViewportCBuffer.PerViewportIndexer;
 
                     Vector4 gViewportSizeAndRcp = new Vector4(ViewPort.mCoreObject.Width, ViewPort.mCoreObject.Height, 1 / ViewPort.mCoreObject.Width, 1 / ViewPort.mCoreObject.Height);
-                    PerViewportCBuffer.SetValue(indexer.gViewportSizeAndRcp, ref gViewportSizeAndRcp);
+                    PerViewportCBuffer.SetValue(indexer.gViewportSizeAndRcp, in gViewportSizeAndRcp);
                 }
             }
         }
@@ -323,9 +500,9 @@ namespace EngineNS.RHI
             unsafe
             {
                 if (GBuffers.PerViewportCBuffer != null)
-                    mCoreObject.BindCBufferAll(Effect.CBPerViewportIndex, GBuffers.PerViewportCBuffer.mCoreObject);
+                    mCoreObject.BindShaderCBuffer(Effect.CBPerViewportIndex, GBuffers.PerViewportCBuffer.mCoreObject);
                 if (GBuffers.Camera.PerCameraCBuffer != null)
-                    mCoreObject.BindCBufferAll(Effect.CBPerCameraIndex, GBuffers.Camera.PerCameraCBuffer.mCoreObject);
+                    mCoreObject.BindShaderCBuffer(Effect.CBPerCameraIndex, GBuffers.Camera.PerCameraCBuffer.mCoreObject);
             }
         }
     }

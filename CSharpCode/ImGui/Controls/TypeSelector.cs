@@ -83,14 +83,15 @@ namespace EngineNS.EGui.Controls
             var textSize = ImGuiAPI.CalcTextSize(mSelectedType?.Name, false, -1);
             var buffer = BigStackBuffer.CreateInstance(256);
             buffer.SetText(mSelectedType?.Name);
-            ImGuiAPI.SetNextItemWidth(itemWidth - textSize.Y);
+            float arrowBtnWidth = 30 + UIProxy.StyleConfig.Instance.ItemSpacing.X;
+            ImGuiAPI.SetNextItemWidth(itemWidth - arrowBtnWidth);
             ImGuiAPI.InputText("##in", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_ReadOnly, null, (void*)0);
             buffer.DestroyMe();
 
             ImGuiAPI.OpenPopupOnItemClick("combobox", ImGuiPopupFlags_.ImGuiPopupFlags_None);
             var pos = ImGuiAPI.GetItemRectMin();
             var size = ImGuiAPI.GetItemRectSize();
-            ImGuiAPI.SameLine(0, 0);
+            ImGuiAPI.SameLine(0, UIProxy.StyleConfig.Instance.ItemSpacing.X);
             if (ImGuiAPI.ArrowButton("##openCombo", ImGuiDir_.ImGuiDir_Down))
             {
                 ImGuiAPI.OpenPopup("combobox", ImGuiPopupFlags_.ImGuiPopupFlags_None);

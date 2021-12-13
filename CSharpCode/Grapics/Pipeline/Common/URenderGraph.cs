@@ -45,15 +45,27 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             await Thread.AsyncDummyClass.DummyFunc();
         }
+        public virtual void OnResize(IRenderPolicy policy, float x, float y)
+        {
+
+        }
+        public virtual void BeginTickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
+        {
+
+        }
+        public virtual void EndTickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
+        {
+
+        }
         public virtual void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
         {
 
         }
-        public virtual void TickRender()
+        public virtual void TickRender(IRenderPolicy policy)
         {
 
         }
-        public virtual void TickSync()
+        public virtual void TickSync(IRenderPolicy policy)
         {
 
         }

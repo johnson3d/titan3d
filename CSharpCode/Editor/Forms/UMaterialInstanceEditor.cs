@@ -45,9 +45,11 @@ namespace EngineNS.Editor.Forms
         {
             viewport.RenderPolicy = policy;
 
-            await viewport.RenderPolicy.Initialize(1, 1);
+            await viewport.RenderPolicy.Initialize(null, 1, 1);
 
-            (viewport as Editor.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GetBasePassNode().GBuffers.Camera;
+            await viewport.World.InitWorld();
+
+            (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.Camera);
 
             var materials = new Graphics.Pipeline.Shader.UMaterial[1];
             materials[0] = Material;
@@ -59,7 +61,8 @@ namespace EngineNS.Editor.Forms
             var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
-                var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, Vector3.Zero, Vector3.One, Quaternion.Identity);
+                var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh,
+                    DVector3.Zero, Vector3.One, Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "PreviewObject";
                 meshNode.IsAcceptShadow = false;
@@ -78,7 +81,7 @@ namespace EngineNS.Editor.Forms
             //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
 
-            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World.Root);
+            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
         }
         public async Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
@@ -93,7 +96,7 @@ namespace EngineNS.Editor.Forms
 
             PreviewViewport.Title = $"Material:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy(), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
 
             MaterialPropGrid.Target = Material;
             UEngine.Instance.TickableManager.AddTickable(this);

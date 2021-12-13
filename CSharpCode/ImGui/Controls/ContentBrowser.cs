@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace EngineNS.EGui.Controls
@@ -24,20 +25,32 @@ namespace EngineNS.EGui.Controls
 
         public void Cleanup()
         {
+            GlobalSelectedAsset = null;
             mSearchBar?.Cleanup();
+            mSearchBar = null;
         }
 
         public async Task<bool> Initialize()
         {
             await Thread.AsyncDummyClass.DummyFunc();
 
-            if (mCreateMenuItems.Count == 0)
+            if(mNewAssetMenuItem == null)
+            {
+                mNewAssetMenuItem = new UIProxy.MenuItemProxy()
+                {
+                    MenuName = "New Asset",
+                };
+                await mNewAssetMenuItem.Initialize();
+
                 OnTypeChanged();
+            }
 
             mSearchBar = new UIProxy.SearchBarProxy();
             await mSearchBar.Initialize();
             mSearchBar.InfoText = "Search Assets";
-            Rtti.UTypeDescManager.Instance.OnTypeChanged += OnTypeChanged;
+            //Rtti.UTypeDescManager.Instance.OnTypeChanged += OnTypeChanged;
+
+            InitializeDirContextMenu();
 
             return true;
         }
@@ -63,29 +76,10 @@ namespace EngineNS.EGui.Controls
             }
         }
 
-        struct stMenuItem
-        {
-            public Rtti.UTypeDesc TypeDesc;
-            public string Label;
-            public string Shortcut;
-            public string AssetExt;
-            public bool Selected;
-            public bool Enabled;
-
-            public void Reset()
-            {
-                TypeDesc = null;
-                Label = "Unknow";
-                Shortcut = null;
-                AssetExt = null;
-                Selected = false;
-                Enabled = true;
-            }
-        }
-        List<stMenuItem> mCreateMenuItems = new List<stMenuItem>();
+        EGui.UIProxy.MenuItemProxy mNewAssetMenuItem;
         void OnTypeChanged()
         {
-            mCreateMenuItems.Clear();
+            mNewAssetMenuItem.CleanupSubMenus();
 
             foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
             {
@@ -95,21 +89,37 @@ namespace EngineNS.EGui.Controls
                     if (atts.Length == 0)
                         continue;
 
-                    var assetExtField = Rtti.UTypeDesc.GetField(typeDesc.SystemType, "AssetExt");                    
-                    var menuItem = new stMenuItem()
+                    var assetExtField = Rtti.UTypeDesc.GetField(typeDesc.SystemType, "AssetExt");
+                    mNewAssetMenuItem.SubMenus.Add(new EGui.UIProxy.MenuItemProxy()
                     {
-                        Label = ((IO.AssetCreateMenuAttribute)atts[0]).MenuName,
+                        MenuName = ((IO.AssetCreateMenuAttribute)atts[0]).MenuName,
                         Shortcut = ((IO.AssetCreateMenuAttribute)atts[0]).Shortcut,
-                        Selected = false,
-                        Enabled = true,
-                        TypeDesc = typeDesc,
-                        AssetExt = (string)assetExtField.GetValue(null),
-                    };
-                    mCreateMenuItems.Add(menuItem);
+                        Action = (proxy, data)=>
+                        {
+                            mAssetImporter = UEngine.Instance.AssetMetaManager.ImportAsset(CurrentDir, typeDesc, (string)assetExtField.GetValue(null));
+                        }
+                    });
                 }
             }
         }
-
+        void DrawDirContextMenu(string path)
+        {
+            if (ImGuiAPI.BeginPopupContextItem(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
+            {
+                if (mDirContextMenu != null)
+                {
+                    Support.UAnyPointer menuData = new Support.UAnyPointer();
+                    menuData.RefObject = path;
+                    menuData.Value.SetStruct<stDirMenuData>(new stDirMenuData());
+                    var drawList = ImGuiAPI.GetWindowDrawList();
+                    for (int i = 0; i < mDirContextMenu.Count; i++)
+                    {
+                        mDirContextMenu[i].OnDraw(ref drawList, ref menuData);
+                    }
+                }
+                ImGuiAPI.EndPopup();
+            }
+        }
         public RName CurrentDir;
         public void DrawDirectories(RName root, Vector2 size)
         {
@@ -118,7 +128,9 @@ namespace EngineNS.EGui.Controls
                 ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow;
                 if (root == CurrentDir)
                     flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Framed;
-                if (ImGuiAPI.TreeNodeEx(root.RNameType.ToString(), flags))
+                var treeNodeResult = ImGuiAPI.TreeNodeEx(root.RNameType.ToString(), flags);
+                DrawDirContextMenu(root.Address);
+                if (treeNodeResult)
                 {
                     if (ImGuiAPI.IsItemActivated())
                     {
@@ -135,6 +147,71 @@ namespace EngineNS.EGui.Controls
             }
             ImGuiAPI.EndChild();
         }
+        struct stDirMenuData
+        {
+        }
+        List<UIProxy.MenuItemProxy> mDirContextMenu;
+        void InitializeDirContextMenu()
+        {
+            mDirContextMenu = new List<UIProxy.MenuItemProxy>()
+            {
+                new UIProxy.MenuItemProxy()
+                {
+                    MenuName = "Browser",
+                    Action = (item, data)=>
+                    {
+                        var psi = new System.Diagnostics.ProcessStartInfo("Explorer.exe");
+                        psi.Arguments = "/e,/select," + data.RefObject.ToString().Replace("/", "\\");
+                        System.Diagnostics.Process.Start(psi);
+                    },
+                },
+                new UIProxy.MenuItemProxy()
+                {
+                    MenuName = "Create Folder",
+                    Action = (item, data)=>
+                    {
+                        mCreateFolderDir = data.RefObject.ToString();
+                    },
+                },
+            };
+        }
+        string mCreateFolderDir = null;
+        string mNewFolderName = "NewFolder";
+        void DrawCreateFolderDialog(string keyName)
+        {
+            if (string.IsNullOrEmpty(mCreateFolderDir))
+                return;
+
+            var pos = ImGuiAPI.GetWindowPos();
+            var min = ImGuiAPI.GetWindowContentRegionMin();
+            var max = ImGuiAPI.GetWindowContentRegionMax();
+            var pivot = new Vector2(0.5f, 0.5f);
+            ImGuiAPI.SetNextWindowPos((min + max) * 0.5f + pos, ImGuiCond_.ImGuiCond_Appearing, in pivot);
+
+            var result = EGui.UIProxy.SingleInputDialog.Draw(keyName, "Folder Name:", ref mNewFolderName, (val) =>
+            {
+                if (string.IsNullOrEmpty(val))
+                    return "Empty folder name";
+                if (!Regex.IsMatch(val, @"^[a-zA-Z0-9\\_]+$"))
+                    return "Invalid folder name!";
+                if (IO.FileManager.DirectoryExists(mCreateFolderDir + mNewFolderName))
+                    return $"Directory {mNewFolderName} is exist";
+
+                return null;
+            });
+            switch(result)
+            {
+                case UIProxy.SingleInputDialog.enResult.OK:
+                    IO.FileManager.CreateDirectory(mCreateFolderDir + mNewFolderName);
+                    mNewFolderName = "NewFolder";
+                    mCreateFolderDir = null;
+                    break;
+                case UIProxy.SingleInputDialog.enResult.Cancel:
+                    mCreateFolderDir = null;
+                    mNewFolderName = "NewFolder";
+                    break;
+            }
+        }
         private void DrawTree(RName.ERNameType type, string parentDir, string dirName)
         {
             ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow;
@@ -142,17 +219,22 @@ namespace EngineNS.EGui.Controls
             var rn = RName.GetRName(nextParent, type);
             if (rn == CurrentDir)
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Framed;
-            
-            if (ImGuiAPI.TreeNodeEx(dirName, flags))
+
+            var treeNodeResult = ImGuiAPI.TreeNodeEx(dirName, flags);
+            var path = RName.GetRName(nextParent, type).Address;
+            DrawDirContextMenu(path);
+            if (treeNodeResult)
             {   
                 if (ImGuiAPI.IsItemActivated())
                 {
                     CurrentDir = rn;
                 }
-                var path = RName.GetRName(nextParent, type).Address;
+
                 var dirs = IO.FileManager.GetDirectories(path, "*.*", false);
                 foreach(var i in dirs)
                 {
+                    if(IO.FileManager.FileExists(i + IO.IAssetMeta.MetaExt))
+                        continue;
                     var nextDirName = IO.FileManager.GetRelativePath(path, i);
                     DrawTree(type, nextParent, nextDirName);
                 }
@@ -191,7 +273,7 @@ namespace EngineNS.EGui.Controls
                 ////////////////////////////////////////////////////////////
 
                 var width = ImGuiAPI.GetWindowContentRegionWidth();
-                var files = IO.FileManager.GetFiles(dir.Address, "*.ameta", false);
+                var files = IO.FileManager.GetFiles(dir.Address, "*" + IO.IAssetMeta.MetaExt, false);
                 float curPos = 0;
                 for(int i=0; i<files.Length; i++)
                 {
@@ -243,74 +325,16 @@ namespace EngineNS.EGui.Controls
 
                 if (CreateNewAssets && ImGuiAPI.BeginPopupContextWindow("##ContentFilesMenuWindow", ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
                 {
-                    if (ImGuiAPI.BeginMenu("New Asset", true))
-                    {
-                        //if (ImGuiAPI.MenuItem($"Texture", null, false, true))
-                        //{
-                        //    if (CurrentDir != null)
-                        //    {
-                        //        mAssetImporter = IO.UAssetMetaManager.Instance.ImportAsset(CurrentDir,
-                        //            Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(RHI.CShaderResourceView).FullName), IO.UAssetMetaManager.AssetType.CShaderResourceView);
-                        //    }
-                        //}
-                        //if (ImGuiAPI.MenuItem($"UVAnim", null, false, true))
-                        //{
-                        //    if (CurrentDir != null)
-                        //    {
-                        //        mAssetImporter = IO.UAssetMetaManager.Instance.ImportAsset(CurrentDir,
-                        //            Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(UVAnim).FullName), IO.UAssetMetaManager.AssetType.UVAnim);
-                        //    }
-                        //}
-                        //if (ImGuiAPI.MenuItem($"Material", null, false, true))
-                        //{
-                        //    if (CurrentDir != null)
-                        //    {
-                        //        mAssetImporter = IO.UAssetMetaManager.Instance.ImportAsset(CurrentDir,
-                        //            Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Graphics.Pipeline.Shader.UMaterial).FullName), IO.UAssetMetaManager.AssetType.UMaterial);
-                        //    }
-                        //}
-                        //if (ImGuiAPI.MenuItem($"MaterialInstance", null, false, true))
-                        //{
-                        //    if (CurrentDir != null)
-                        //    {
-                        //        mAssetImporter = IO.UAssetMetaManager.Instance.ImportAsset(CurrentDir,
-                        //            Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Graphics.Pipeline.Shader.UMaterialInstance).FullName), IO.UAssetMetaManager.AssetType.UMaterialInstance);
-                        //    }
-                        //}
-                        //if (ImGuiAPI.MenuItem($"Mesh", null, false, true))
-                        //{
-                        //    if (CurrentDir != null)
-                        //    {
-                        //        mAssetImporter = IO.UAssetMetaManager.Instance.ImportAsset(CurrentDir,
-                        //            Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Graphics.Mesh.CMeshPrimitives).FullName), IO.UAssetMetaManager.AssetType.CMeshPrimitives);
-                        //    }
-                        //}
-                        //if (ImGuiAPI.MenuItem($"MaterialMesh", null, false, true))
-                        //{
-                        //    if (CurrentDir != null)
-                        //    {
-                        //        mAssetImporter = IO.UAssetMetaManager.Instance.ImportAsset(CurrentDir,
-                        //            Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Graphics.Mesh.UMaterialMesh).FullName), IO.UAssetMetaManager.AssetType.UMaterialMesh);
-                        //    }
-                        //}
+                    var drawList = ImGuiAPI.GetWindowDrawList();
+                    var menuData = new Support.UAnyPointer();
 
-                        for(int i=0; i<mCreateMenuItems.Count; ++i)
-                        {
-                            if(ImGuiAPI.MenuItem(mCreateMenuItems[i].Label, mCreateMenuItems[i].Shortcut, mCreateMenuItems[i].Selected, mCreateMenuItems[i].Enabled))
-                            {
-                                mAssetImporter = UEngine.Instance.AssetMetaManager.ImportAsset(CurrentDir, mCreateMenuItems[i].TypeDesc, mCreateMenuItems[i].AssetExt);
-                            }
-                        }
-
-                        //----------------------------------------------------
-                        ImGuiAPI.EndMenu();
-                    }
+                    mNewAssetMenuItem.OnDraw(ref drawList, ref menuData);
                     ImGuiAPI.EndPopup();
                 }
             }
             ImGuiAPI.EndChild();
         }
-        private void DrawItem(ref ImDrawList cmdlist, UVAnim icon, IO.IAssetMeta ameta, ref Vector2 sz)
+        private void DrawItem(ref ImDrawList cmdlist, UUvAnim icon, IO.IAssetMeta ameta, ref Vector2 sz)
         {
             ImGuiAPI.Selectable($"##{ameta.GetAssetName().Name}", false, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in sz);
             if (ImGuiAPI.IsItemVisible())
@@ -389,12 +413,34 @@ namespace EngineNS.EGui.Controls
                 ImGuiAPI.NextColumn();
 
                 ImGuiAPI.Columns(1, null, true);
+
+                if (!string.IsNullOrEmpty(mCreateFolderDir))
+                {
+                    var pathName = IO.FileManager.GetLastestPathName(mCreateFolderDir);
+                    if(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game) == mCreateFolderDir)
+                    {
+                        pathName = "Game";
+                    }
+                    else if(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) == mCreateFolderDir)
+                    {
+                        pathName = "Engine";
+                    }
+                    else if(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Editor) == mCreateFolderDir)
+                    {
+                        pathName = "Editor";
+                    }
+                    var keyName = $"Create Folder in {pathName}";
+                    EGui.UIProxy.SingleInputDialog.Open(keyName);
+                    DrawCreateFolderDialog(keyName);
+                }
+
             }
-            if(DrawInWindow)
+            if (DrawInWindow)
                 ImGuiAPI.End();
 
             if (mAssetImporter != null)
                 mAssetImporter.OnDraw(this);
+
         }
     }
 }

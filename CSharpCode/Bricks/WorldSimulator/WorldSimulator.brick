@@ -1,0 +1,11 @@
+{
+  "Name": "WorldSimulator",
+  "Path": "CSharpCode/Bricks/WorldSimulator",
+  "FullName": "CSharpCode/Bricks/WorldSimulator/WorldSimulator.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/Rtti/Rtti.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

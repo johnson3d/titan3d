@@ -4,6 +4,7 @@ using System.Text;
 
 namespace EngineNS
 {
+    //[Rtti.UStructAttrubte(ReadSize = 268 - 4)]
     public unsafe partial struct IBlendStateDesc
     {
         const int SizeOfBlendDesc = 32;//sizeof(EngineNS.RenderTargetBlendDesc);

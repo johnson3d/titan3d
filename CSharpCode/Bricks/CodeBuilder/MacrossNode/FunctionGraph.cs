@@ -153,6 +153,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             var result = new FunctionGraph();
             result.MacrossEditor = kls;
+            result.Initialize();
             //result.FunctionName = funName;
             //if (result.Function == null)
             //    return null;
@@ -167,6 +168,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 result.AddNode(result.StartNode);
             }
             return result;
+        }
+        protected override void Initialize()
+        {
+            base.Initialize();
         }
         public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
@@ -220,7 +225,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override string ToString()
         {
-            return $"{Function.Name}";
+            var preStr = Function.IsOverride ? "[O] " : "    ";
+            return $"{preStr}{Function.Name}";
         }
         public bool VisibleInClassGraphTables = false;
         [Rtti.Meta]
@@ -526,7 +532,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mMethodSelector.mSltMember = null;
             mMethodSelector.mSltField = null;
             mMethodSelector.mSltMethod = null;
-            mMethodSelector.OnDrawTree();if (mMethodSelector.mSltMember != null)
+            mMethodSelector.OnDrawTree();
+            if (mMethodSelector.mSltMember != null)
             {
                 mMenuType = EMenuType.None;
             }

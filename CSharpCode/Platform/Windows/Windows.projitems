@@ -13,4 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UClrProfiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UExcelOperator.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Windows.brick" />
+  </ItemGroup>
 </Project>

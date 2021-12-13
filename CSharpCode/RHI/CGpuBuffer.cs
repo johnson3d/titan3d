@@ -31,6 +31,7 @@ namespace EngineNS
                 System.Diagnostics.Debug.Assert((!(isCpuWritable && isGpuWritable)));
             }
             MiscFlags = (UInt32)EResourceMiscFlag.BUFFER_STRUCTURED;
+            Type = EGpuBufferType.GBT_UavBuffer;
         }
     }
 }

@@ -84,17 +84,75 @@ namespace EngineNS.Graphics.Pipeline
                 PassBuffers[(int)i].DrawCmdList.mCoreObject.SetViewport(vp.mCoreObject);
             }
         }
-        public unsafe void BuildRenderPass(ref RenderPassDesc passDesc, RHI.CFrameBuffers frameBuffers, ref RenderPassDesc gizmosPassDesc, RHI.CFrameBuffers gizmosFrameBuffers)
+        public unsafe void BuildTranslucentRenderPass(in IRenderPassClears passClear, RHI.CFrameBuffers frameBuffers, RHI.CFrameBuffers gizmosFrameBuffers)
+        {
+            PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.mCoreObject.GetPassNumber();
+            PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.mCoreObject.GetPassNumber();
+            PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList.mCoreObject.GetPassNumber();
+            PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.mCoreObject.GetPassNumber();
+
+            {
+                if (PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.PassNumber > 0)
+                {
+                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.mCoreObject;                    
+                    cmdlist.BeginRenderPass(frameBuffers.mCoreObject, in passClear, ERenderLayer.RL_Translucent.ToString());
+                    cmdlist.BuildRenderPass(0);
+                    cmdlist.EndRenderPass();
+                    cmdlist.EndCommand();
+                }
+            }
+
+            {
+                if (PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.PassNumber > 0)
+                {
+                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.mCoreObject;
+
+                    cmdlist.BeginRenderPass(frameBuffers.mCoreObject, (IRenderPassClears*)0, ERenderLayer.RL_Sky.ToString());
+                    cmdlist.BuildRenderPass(0);
+                    cmdlist.EndRenderPass();
+                    cmdlist.EndCommand();
+                }
+            }
+
+            {
+                if (PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList.PassNumber > 0 ||
+                    PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.PassNumber > 0)
+                {
+                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList.mCoreObject;
+
+                    cmdlist.BeginRenderPass(gizmosFrameBuffers.mCoreObject, in passClear, ERenderLayer.RL_Gizmos.ToString());
+                    cmdlist.BuildRenderPass(0);
+                    cmdlist.EndRenderPass();
+                    cmdlist.EndCommand();
+                }
+            }
+
+            {
+                if (PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.PassNumber > 0)
+                {
+                    var cmdlist = PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.mCoreObject;
+
+                    cmdlist.BeginRenderPass(gizmosFrameBuffers.mCoreObject, (IRenderPassClears*)0, ERenderLayer.RL_TranslucentGizmos.ToString());
+                    cmdlist.BuildRenderPass(0);
+                    cmdlist.EndRenderPass();
+                    cmdlist.EndCommand();
+                }
+            }
+            var num = mPipelineStat.mCoreObject.mDrawCall;
+        }
+        public unsafe void BuildRenderPass(in IRenderPassClears passClear, RHI.CFrameBuffers frameBuffers, RHI.CFrameBuffers gizmosFrameBuffers)
         {
             PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList.mCoreObject.GetPassNumber();
             PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.mCoreObject.GetPassNumber();
             PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.mCoreObject.GetPassNumber();
             PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList.mCoreObject.GetPassNumber();
             PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.PassNumber = PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.mCoreObject.GetPassNumber();
+
             {
                 var cmdlist = PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList.mCoreObject;
 
-                cmdlist.BeginRenderPass(ref passDesc, frameBuffers.mCoreObject, ERenderLayer.RL_Opaque.ToString());
+                cmdlist.BeginCommand();
+                cmdlist.BeginRenderPass(frameBuffers.mCoreObject, in passClear, ERenderLayer.RL_Opaque.ToString());
                 cmdlist.BuildRenderPass(0);
                 cmdlist.EndRenderPass();
                 cmdlist.EndCommand();
@@ -105,7 +163,8 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     var cmdlist = PassBuffers[(int)ERenderLayer.RL_Translucent].DrawCmdList.mCoreObject;
 
-                    cmdlist.BeginRenderPass((RenderPassDesc*)0, frameBuffers.mCoreObject, ERenderLayer.RL_Translucent.ToString());
+                    cmdlist.BeginCommand();
+                    cmdlist.BeginRenderPass(frameBuffers.mCoreObject, (IRenderPassClears*)0, ERenderLayer.RL_Translucent.ToString());
                     cmdlist.BuildRenderPass(0);
                     cmdlist.EndRenderPass();
                     cmdlist.EndCommand();
@@ -117,7 +176,8 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     var cmdlist = PassBuffers[(int)ERenderLayer.RL_Sky].DrawCmdList.mCoreObject;
 
-                    cmdlist.BeginRenderPass((RenderPassDesc*)0, frameBuffers.mCoreObject, ERenderLayer.RL_Sky.ToString());
+                    cmdlist.BeginCommand();
+                    cmdlist.BeginRenderPass(frameBuffers.mCoreObject, (IRenderPassClears*)0, ERenderLayer.RL_Sky.ToString());
                     cmdlist.BuildRenderPass(0);
                     cmdlist.EndRenderPass();
                     cmdlist.EndCommand();
@@ -130,7 +190,8 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     var cmdlist = PassBuffers[(int)ERenderLayer.RL_Gizmos].DrawCmdList.mCoreObject;
 
-                    cmdlist.BeginRenderPass(ref gizmosPassDesc, gizmosFrameBuffers.mCoreObject, ERenderLayer.RL_Gizmos.ToString());
+                    cmdlist.BeginCommand();
+                    cmdlist.BeginRenderPass(gizmosFrameBuffers.mCoreObject, in passClear, ERenderLayer.RL_Gizmos.ToString());
                     cmdlist.BuildRenderPass(0);
                     cmdlist.EndRenderPass();
                     cmdlist.EndCommand();
@@ -142,7 +203,8 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     var cmdlist = PassBuffers[(int)ERenderLayer.RL_TranslucentGizmos].DrawCmdList.mCoreObject;
 
-                    cmdlist.BeginRenderPass((RenderPassDesc*)0, gizmosFrameBuffers.mCoreObject, ERenderLayer.RL_TranslucentGizmos.ToString());
+                    cmdlist.BeginCommand();
+                    cmdlist.BeginRenderPass(gizmosFrameBuffers.mCoreObject, (IRenderPassClears*)0, ERenderLayer.RL_TranslucentGizmos.ToString());
                     cmdlist.BuildRenderPass(0);
                     cmdlist.EndRenderPass();
                     cmdlist.EndCommand();

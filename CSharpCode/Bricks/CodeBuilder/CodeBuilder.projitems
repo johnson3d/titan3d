@@ -46,4 +46,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UMacross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UMacrossManager.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)CodeBuilder.brick" />
+  </ItemGroup>
 </Project>

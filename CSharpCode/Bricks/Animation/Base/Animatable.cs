@@ -6,43 +6,181 @@ using System.Threading.Tasks;
 namespace EngineNS.Animation.Animatable
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class AnimatablePropertyAttribute :Attribute
+    public class AnimatablePropertyAttribute : Attribute
     {
 
     }
     //the class which can be animatable
     public interface IAnimatable
     {
+        //for now we use this, maybe refactoring in next version by make a bind system like serialize
+        public string Name { get; }
+    }
 
+    public class IAnimatableClassBindingAttribute : Attribute
+    {
+        public virtual void Binding(IAnimatable animatableObject, Base.UAnimHierarchy animHierarchy, Asset.UAnimationClip animationClip, ref UAnimationPropertiesSetter animationPropertiesSetter)
+        {
+
+        }
+    }
+
+    public class CommonAnimatableBingAttribute : IAnimatableClassBindingAttribute
+    {
+        //AnimatableObject
+        //  |-AnimatableProperty
+        //  |-AnimatableObject
+        //  |   |-AnimatableProperty
+        //  |   |-AnimatableProperty
+        //  |       |-AnimatableObject
+        //  |           |-AnimatableProperty
+        //  |-AnimatableObject
+        //  |   |-AnimatableProperty
+        //  |   |-List<AnimatableObject>
+
+        public override void Binding(IAnimatable animatableObject, Base.UAnimHierarchy animHierarchy, Asset.UAnimationClip animationClip, ref UAnimationPropertiesSetter animationPropertiesSetter)
+        {
+            System.Diagnostics.Debug.Assert(animHierarchy != null);
+            var objType = Rtti.UTypeDesc.TypeOfFullName(animatableObject.GetType().FullName);
+            if(objType == animHierarchy.Node.ClassType)
+            {
+                // 是否考虑全属性匹配？
+                var properties = objType.SystemType.GetProperties();
+
+                for (int i = 0; i < properties.Length; ++i)
+                {
+                    var property = properties[i];
+                    var atts = property.GetCustomAttributes(typeof(Animatable.AnimatablePropertyAttribute), true);
+                    if (atts.Length > 0)
+                    {
+                        if (property.PropertyType.IsGenericType)
+                        {
+                            if (property.PropertyType.GetInterface("IList") != null)
+                            {
+                                var genericArguments = property.PropertyType.GetGenericArguments();
+                                var list = property.GetValue(animatableObject) as IEnumerable<Object>;
+                                System.Diagnostics.Debug.Assert(list != null);
+                                foreach (var arg in list)
+                                {
+                                    System.Diagnostics.Debug.Assert(arg is IAnimatable);
+                                    var child = arg as IAnimatable;
+                                    foreach(var childInAnimHierarchy in animHierarchy.Children)
+                                    {
+                                        if(child.Name == childInAnimHierarchy.Node.Name)
+                                        {
+                                            Binding(child, childInAnimHierarchy, animationClip, ref animationPropertiesSetter);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if (property.GetType() != typeof(Animatable.IAnimatable))
+                        {
+                            var propertyObject = property.GetValue(animatableObject);
+                            for (int j = 0; j < animHierarchy.Node.Properties.Count; ++j)
+                            {
+                                var hierarchyNodePropertyDesc = animHierarchy.Node.Properties[j];
+                                if (property.Name == hierarchyNodePropertyDesc.Name
+                                    && property.PropertyType == hierarchyNodePropertyDesc.ClassType.SystemType)
+                                {
+                                    Animatable.UAnimatablePropertyDesc desc = new Animatable.UAnimatablePropertyDesc();
+                                    desc.ClassType = objType;
+                                    desc.PropertyType = hierarchyNodePropertyDesc.ClassType;
+                                    desc.PropertyName = hierarchyNodePropertyDesc.Name;
+                                    var func = UEngine.Instance.AnimatablePropertySetterModule.CreateInstance(desc);
+                                    func.AssignObject(animatableObject);
+                                    Curve.ICurve curve = null;
+                                    var isExsit = animationClip.AnimCurvesList.TryGetValue(hierarchyNodePropertyDesc.CurveId, out curve);
+                                    if (isExsit)
+                                    {
+                                        animationPropertiesSetter.PropertySetFuncMapping.Add(func, animationClip.AnimCurvesList[hierarchyNodePropertyDesc.CurveId]);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.Assert(false);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                //在Properties里面找
+                var properties = objType.SystemType.GetProperties();
+                foreach(var property in properties)
+                {
+                    if(property.PropertyType == animHierarchy.Node.ClassType.SystemType 
+                        ||property.PropertyType.IsAssignableTo(animHierarchy.Node.ClassType.SystemType)
+                        || property.PropertyType.IsAssignableFrom(animHierarchy.Node.ClassType.SystemType))
+                    {
+                        Binding(property.GetValue(animatableObject) as IAnimatable, animHierarchy, animationClip, ref animationPropertiesSetter);
+                    }
+                }
+            }
+        }
     }
 
     public interface IPropertySetter
     {
-        public AnimatablePropertyDesc Desc { get; set; }
-        public void SetAnimatableObject(IAnimatable obj);
-        public void SetValue(Curve.ICurve curve, float time);
+        public void AssignObject(IAnimatable obj);
+        public void SetProperty(Curve.ICurve curve, float time);
     }
-    public class AnimatablePropertyDesc
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class PropertyTypeAssignAttribute : Attribute
+    {
+        public Type PropertyType { get;}
+        public PropertyTypeAssignAttribute(Type type)
+        {
+            PropertyType = type;
+        }
+    }
+    [AttributeUsage(AttributeTargets.Class)]
+    public class PropertyNameAssignAttribute : Attribute
+    {
+        public string PropertyName { get; }
+        public PropertyNameAssignAttribute(string name)
+        {
+            PropertyName = name;
+        }
+    }
+    public class UAnimatablePropertyDesc
     {
         public Rtti.UTypeDesc ClassType { get; set; } = new Rtti.UTypeDesc();
         public Rtti.UTypeDesc PropertyType { get; set; } = new Rtti.UTypeDesc();
+        public string PropertyName { get; set; }
         public override bool Equals(object obj)
         {
-            if (!(obj is AnimatablePropertyDesc))
+            if (!(obj is UAnimatablePropertyDesc))
                 return false;
-            var other = (AnimatablePropertyDesc)obj;
-            return ClassType == other.ClassType && PropertyType == other.PropertyType;
+            var other = (UAnimatablePropertyDesc)obj;
+            return ClassType == other.ClassType && PropertyType == other.PropertyType && PropertyName == other.PropertyName;
         }
         public override int GetHashCode()
         {
-            return ClassType.GetHashCode() + PropertyType.GetHashCode();
+            return ClassType.GetHashCode() + PropertyType.GetHashCode() + PropertyName.GetHashCode();
+        }
+    }
+
+    public class UAnimationPropertiesSetter
+    {
+        public Dictionary<Animatable.IPropertySetter, Curve.ICurve> PropertySetFuncMapping { get; set; } = new Dictionary<Animatable.IPropertySetter, Curve.ICurve>();
+        public void Evaluate(float time)
+        {
+            var it = PropertySetFuncMapping.GetEnumerator();
+            while (it.MoveNext())
+            {
+                it.Current.Key.SetProperty(it.Current.Value, time);
+            }
         }
     }
 
     public partial class UPropertySetterModule : EngineNS.UModule<EngineNS.UEngine>
     {
         //maybe can use hashcode to replace the AnimatablePropertyDesc as the key
-        Dictionary<AnimatablePropertyDesc, Rtti.UTypeDesc> ObjectPropertySetFuncDic { get; set; } = new Dictionary<AnimatablePropertyDesc, Rtti.UTypeDesc>();
+        Dictionary<UAnimatablePropertyDesc, Rtti.UTypeDesc> ObjectPropertySetFuncDic { get; set; } = new Dictionary<UAnimatablePropertyDesc, Rtti.UTypeDesc>();
         bool bInitialized = false;
         public override Task<bool> Initialize(UEngine host)
         {
@@ -52,11 +190,26 @@ namespace EngineNS.Animation.Animatable
                 {
                     if (j.Value.SystemType.IsAssignableTo(typeof(IPropertySetter)) && !j.Value.SystemType.IsInterface)
                     {
+                        UAnimatablePropertyDesc desc = Rtti.UTypeDescManager.CreateInstance(typeof(UAnimatablePropertyDesc)) as UAnimatablePropertyDesc;
+                        
                         var obj = j.Value.SystemType.GetProperty("AnimatableObject");
-                        var property = j.Value.SystemType.GetProperty("AnimatableObjectProperty");
-                        AnimatablePropertyDesc desc = Rtti.UTypeDescManager.CreateInstance(typeof(AnimatablePropertyDesc)) as AnimatablePropertyDesc;
+                        {
+                            var assignAttrs = j.Value.SystemType.GetCustomAttributes(typeof(PropertyNameAssignAttribute), true);
+                            if (assignAttrs.Length > 0)
+                            {
+                                var assign = assignAttrs[0] as PropertyNameAssignAttribute;
+                                desc.PropertyName = assign.PropertyName;
+                            }
+                        }
+                        {
+                            var assignAttrs = j.Value.SystemType.GetCustomAttributes(typeof(PropertyTypeAssignAttribute), true);
+                            if (assignAttrs.Length > 0)
+                            {
+                                var assign = assignAttrs[0] as PropertyTypeAssignAttribute;
+                                desc.PropertyType = Rtti.UTypeDesc.TypeOf(assign.PropertyType);
+                            }
+                        }
                         desc.ClassType = Rtti.UTypeDesc.TypeOfFullName(obj.PropertyType.FullName);
-                        desc.PropertyType = Rtti.UTypeDesc.TypeOfFullName(property.PropertyType.FullName);
                         ObjectPropertySetFuncDic.Add(desc, j.Value);
                     }
                 }
@@ -85,9 +238,9 @@ namespace EngineNS.Animation.Animatable
         }
         public UPropertySetterModule()
         {
-            
+
         }
-        public IPropertySetter CreateInstance(AnimatablePropertyDesc objProperty)
+        public IPropertySetter CreateInstance(UAnimatablePropertyDesc objProperty)
         {
             Rtti.UTypeDesc type;
             if (ObjectPropertySetFuncDic.TryGetValue(objProperty, out type))
@@ -97,7 +250,7 @@ namespace EngineNS.Animation.Animatable
             System.Diagnostics.Debug.Assert(false);
             return null;
 
-            
+
         }
     }
 
@@ -105,33 +258,49 @@ namespace EngineNS.Animation.Animatable
 
 namespace EngineNS
 {
-    namespace Animation
+    namespace Animation.SkeletonAnimation
     {
-        public class TestObjectPosSetter : Animatable.IPropertySetter
+        [Animatable.PropertyTypeAssign(typeof(Vector3))]
+        [Animatable.PropertyNameAssign("Position")]
+        public class UBonePosePositionSetter : Animatable.IPropertySetter
         {
-            public TestObject AnimatableObject { get; set; }
-            public Vector3 AnimatableObjectProperty { get; set; }
-            public Animatable.AnimatablePropertyDesc Desc { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public AnimatablePose.UAnimatableBonePose AnimatableObject { get; set; }
 
-            public void SetAnimatableObject(Animatable.IAnimatable obj)
+
+            public void AssignObject(Animatable.IAnimatable obj)
             {
-                AnimatableObject = (TestObject)obj;
+                AnimatableObject = (AnimatablePose.UAnimatableBonePose)obj;
             }
 
-            public void SetValue(Curve.ICurve curve, float time)
+            public void SetProperty(Curve.ICurve curve, float time)
             {
-                AnimatableObject.Pos = ((Curve.Vector3Curve)curve).Evaluate(time);
+                AnimatableObject.Position = curve.Evaluate(time).Vector3Value;
             }
         }
+
+        [Animatable.PropertyTypeAssign(typeof(Vector3))]
+        [Animatable.PropertyNameAssign("Rotation")]
+        public class UBonePoseRotationSetter : Animatable.IPropertySetter
+        {
+            public AnimatablePose.UAnimatableBonePose AnimatableObject { get; set; }
+    
+
+            public void AssignObject(Animatable.IAnimatable obj)
+            {
+                AnimatableObject = (AnimatablePose.UAnimatableBonePose)obj;
+            }
+
+            public void SetProperty(Curve.ICurve curve, float time)
+            {
+                AnimatableObject.Rotation = curve.Evaluate(time).Vector3Value;
+            }
+        }
+       
     }
+
+
     partial class UEngine
     {
         public Animation.Animatable.UPropertySetterModule AnimatablePropertySetterModule { get; } = new Animation.Animatable.UPropertySetterModule();
-    }
-
-    public class TestObject : Animation.Animatable.IAnimatable
-    {
-        [EngineNS.Animation.Animatable.AnimatableProperty]
-        public Vector3 Pos { get; set; }
     }
 }

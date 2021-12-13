@@ -9,14 +9,122 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     public partial class ClassGraph : IO.ISerializer, Editor.IAssetEditor, Graphics.Pipeline.IRootForm
     {
+        public ClassGraph()
+        {
+            mNewMethodMenuState.Reset();
+            mOverrideMenuState.Reset();
+        }
         public void Cleanup()
         {
 
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            InitializeManMenu();
+            await PGMember.Initialize();
+            InitializeToolbar();
             return true;
+        }
+
+        List<EGui.UIProxy.MenuItemProxy> mOverrideMethodMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
+        void InitializeOverrideMethodList()
+        {
+            if (string.IsNullOrEmpty(DefClass.SuperClassName))
+                return;
+            var superClass = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(DefClass.SuperClassName);
+            if (superClass == null)
+                return;
+
+            mOverrideMethodMenuItems.Clear();
+            var methods = superClass.SystemType.GetMethods();
+            for(int i=0; i<methods.Length; i++)
+            {
+                if (!methods[i].IsVirtual)
+                    continue;
+
+                var method = methods[i];
+                var menuItem = new EGui.UIProxy.MenuItemProxy();
+                menuItem.MenuName = method.Name + "(";
+                var parameters = method.GetParameters();
+                for(int paramIdx = 0; paramIdx < parameters.Length; paramIdx++)
+                {
+                    menuItem.MenuName += parameters[paramIdx].ParameterType.Name + ",";
+                }
+                menuItem.MenuName = menuItem.MenuName.TrimEnd(',');
+                menuItem.MenuName += ")";
+
+                menuItem.Action = (proxy, data) =>
+                {
+                    var f = new DefineFunction();
+                    f.IsOverride = true;
+                    f.ReturnType = method.ReturnType.FullName;
+                    f.Name = method.Name;
+                    f.Arguments = new List<DefineFunctionParam>(parameters.Length);
+                    for(int paramIdx = 0; paramIdx < parameters.Length; paramIdx++)
+                    {
+                        var parameter = parameters[paramIdx];
+                        var argument = new DefineFunctionParam()
+                        {
+                            VarName = parameter.Name,
+                        };
+                        argument.DefType = parameter.ParameterType.FullName.TrimEnd('&');
+                        if (parameter.IsIn)
+                            argument.OpType = DefineFunctionParam.enOpType.In;
+                        else if (parameter.IsOut)
+                            argument.OpType = DefineFunctionParam.enOpType.Out;
+                        else if (parameter.ParameterType.IsByRef)
+                            argument.OpType = DefineFunctionParam.enOpType.Ref;
+                        if (parameter.HasDefaultValue && parameter.DefaultValue != null)
+                            argument.InitValue = parameter.DefaultValue.ToString();
+                        if (parameter.GetCustomAttributes(typeof(ParamArrayAttribute), false).Length > 0)
+                            argument.IsParamArray = true;
+                        f.Arguments.Add(argument);
+                    }
+                    DefClass.Functions.Add(f);
+
+                    var func = FunctionGraph.NewGraph(this, f);
+                    Functions.Add(func);
+                };
+
+                mOverrideMethodMenuItems.Add(menuItem);
+            }
+        }
+
+        EGui.UIProxy.Toolbar mToolbar = new EGui.UIProxy.Toolbar();
+        void InitializeToolbar()
+        {
+            mToolbar.AddToolbarItems(
+                new EGui.UIProxy.ToolbarIconButtonProxy()
+                {
+                    Name = "Save",
+                    Action = () =>
+                    {
+                        //SaveClassGraph(RName.GetRName("UTest/class_graph.xml"));
+                        SaveClassGraph(AssetName);
+                        GenerateCode();
+                        CompileCode();
+                    }
+                },
+                new EGui.UIProxy.ToolbarSeparator(),
+                new EGui.UIProxy.ToolbarIconButtonProxy()
+                {
+                    Name = "GenCode",
+                    Action = () =>
+                    {
+                        GenerateCode();
+                        CompileCode();
+                    }
+                },
+                new EGui.UIProxy.ToolbarSeparator(),
+                new EGui.UIProxy.ToolbarIconButtonProxy()
+                {
+                    Name = "ClassSettings",
+                    Action = ()=>
+                    {
+                        PGMember.Target = DefClass;
+                    }
+                }
+            );
         }
         public Graphics.Pipeline.IRootForm GetRootForm()
         {
@@ -62,7 +170,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 funcXml.AppendChild(funcXmlRoot);
                 IO.SerializerHelper.WriteObjectMetaFields(funcXml, funcXmlRoot, Functions[i]);
                 var funcXmlText = IO.FileManager.GetXmlText(funcXml);
-                IO.FileManager.WriteAllText($"{rn.Address}/{Functions[i].Function.Name}_{(uint)Functions[i].FunctionName.GetHashCode()}.func", funcXmlText);
+                IO.FileManager.WriteAllText($"{rn.Address}/{Functions[i].Function.Name}.func", funcXmlText);
             }
 
             //LoadClassGraph(rn);
@@ -105,6 +213,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     }
                 }
             }
+
+            InitializeOverrideMethodList();
         }
         public string GenerateCode()
         {
@@ -165,27 +275,50 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public void OnDrawMainMenu()
+        List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
+        void InitializeManMenu()
+        {
+            mMenuItems = new List<EGui.UIProxy.MenuItemProxy>()
+            {
+                new EGui.UIProxy.MenuItemProxy()
+                {
+                    MenuName = "File",
+                    IsTopMenuItem = true,
+                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+                    {
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "Reload",
+                            Action = (item, data)=>
+                            {
+                                //LoadClassGraph(RName.GetRName("UTest/class_graph.xml"));
+                                LoadClassGraph(AssetName);
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "Save",
+                            Action = (item, data)=>
+                            {
+                                //SaveClassGraph(RName.GetRName("UTest/class_graph.xml"));
+                                SaveClassGraph(AssetName);
+                                GenerateCode();
+                                CompileCode();
+                            },
+                        },
+                    },
+                }
+            };
+        }
+
+        void OnDrawMainMenu()
         {
             if (ImGuiAPI.BeginMenuBar())
             {
-                if (ImGuiAPI.BeginMenu("File", true))
-                {
-                    if (ImGuiAPI.MenuItem("Reload", null, false, true))
-                    {
-                        //LoadClassGraph(RName.GetRName("UTest/class_graph.xml"));
-                        LoadClassGraph(AssetName);
-                    }
-                    if (ImGuiAPI.MenuItem("Save", null, false, true))
-                    {
-                        //SaveClassGraph(RName.GetRName("UTest/class_graph.xml"));
-                        SaveClassGraph(AssetName);
-                        GenerateCode();
-                        CompileCode();
-                    }
-                    ImGuiAPI.Separator();
-                    ImGuiAPI.EndMenu();
-                }
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                for (int i = 0; i < mMenuItems.Count; i++)
+                    mMenuItems[i].OnDraw(ref drawList, ref Support.UAnyPointer.Default);
+
                 ImGuiAPI.EndMenuBar();
             }
         }
@@ -194,6 +327,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             if (ImGuiAPI.Begin($"Macross:{IO.FileManager.GetPureName(AssetName!=null? AssetName.Name :"NoName")}", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None| ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
             {
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                mToolbar.OnDraw(ref drawList, ref Support.UAnyPointer.Default);
+
                 if (ImGuiAPI.IsWindowDocked())
                 {
                     DockId = ImGuiAPI.GetWindowDockID();
@@ -207,27 +343,24 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 OnDrawMainMenu();
 
-                var cltMin = ImGuiAPI.GetWindowContentRegionMin();
-                var cltMax = ImGuiAPI.GetWindowContentRegionMax();
-
                 ImGuiAPI.Columns(2, null, true);
                 if (bFirstDraw)
                 {
                     ImGuiAPI.SetColumnWidth(0, LeftWidth);
                     bFirstDraw = false;
                 }
+                var curPos = ImGuiAPI.GetCursorScreenPos();
                 LeftWidth = ImGuiAPI.GetColumnWidth(0);
-                var szLeft = new Vector2(LeftWidth, cltMax.Y - cltMin.Y);
+                var szLeft = new Vector2(LeftWidth, 0);
                 if (ImGuiAPI.BeginChild("LeftWin", in szLeft, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                 {
                     OnLeftWindow();
-                    OnDrawMenuLeftWindow();
                 }
                 ImGuiAPI.EndChild();
                 ImGuiAPI.NextColumn();
 
                 var colWidth = ImGuiAPI.GetColumnWidth(1);
-                var szRight = new Vector2(colWidth, cltMax.Y - cltMin.Y);
+                var szRight = new Vector2(colWidth, 0);
                 if (ImGuiAPI.BeginChild("RightWin", in szRight, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                 {
                     OnRightWindow();
@@ -245,75 +378,71 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 DraggingMember = null;
             }
         }
-        public enum EMenuType
-        {
-            None,
-            Member,
-            Method,
-        }
-        private void OnDrawMenuLeftWindow()
-        {
-            if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
-            {
-                bool isShow = false;
-                switch (mMenuType)
-                {
-                    case EMenuType.Member:
-                        isShow = LeftWinDrawMenu_Member(); 
-                        break;
-                    case EMenuType.Method:
-                        isShow = LeftWinDrawMenu_Method();
-                        break;
-                    default:
-                        break;
-                }
-                ImGuiAPI.EndPopup();
-                if (isShow == false)
-                {
-                    mMenuType = EMenuType.None;
-                }
-            }
-        }
-        EMenuType mMenuType = EMenuType.None;
+        EGui.UIProxy.MenuItemProxy.MenuState mNewMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
+        EGui.UIProxy.MenuItemProxy.MenuState mOverrideMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected unsafe void OnLeftWindow()
         {
-            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;
+            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;// | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
             if (ImGuiAPI.CollapsingHeader("ClassView", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
             {
+                Vector2 buttonSize = new Vector2(16, 16);
+                float buttonOffset = 16;
                 var sz = new Vector2(-1, 0);
                 //ImGuiAPI.SetNextItemWidth(-1);
-                if (ImGuiAPI.Button("GenCode", in sz))
+                var regionSize = ImGuiAPI.GetContentRegionAvail();
+
+                var membersTreeNodeResult = ImGuiAPI.TreeNodeEx("Members", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap);
+                ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
+                if(EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
                 {
-                    GenerateCode();
-                    CompileCode();
-                }
-                if (ImGuiAPI.TreeNode("ClassSettings"))
-                {
-                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    var num = 0;
+                    while (true)
                     {
-                        PGMember.Target = DefClass;
+                        bool bFind = false;
+                        for (int i = 0; i < DefClass.Members.Count; i++)
+                        {
+                            if (DefClass.Members[i].VarName == $"Member_{num}")
+                            {
+                                num++;
+                                bFind = true;
+                                break;
+                            }
+                        }
+                        if (!bFind)
+                            break;
                     }
-                    ImGuiAPI.TreePop();
+
+                    var mb = new DefineVar();
+                    mb.DefType = typeof(int).FullName;
+                    mb.VarName = $"Member_{num}";
+                    mb.IsLocalVar = false;
+                    DefClass.Members.Add(mb);
                 }
-                if (ImGuiAPI.TreeNode("Members"))
+                if (membersTreeNodeResult)
                 {
-                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
-                    {
-                        mMenuType = EMenuType.Member;
-                    }
                     if (DraggingMember != null && IsDraggingMember == false && ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Left, 10))
                     {
                         IsDraggingMember = true;
                     }
-                    foreach (var i in DefClass.Members)
+                    var memRegionSize = ImGuiAPI.GetContentRegionAvail();
+                    for(int i=0; i<DefClass.Members.Count; i++)
                     {
-                        if (ImGuiAPI.TreeNodeEx(i.VarName, flags))
+                        var mem = DefClass.Members[i];
+                        var memberTreeNodeResult = ImGuiAPI.TreeNodeEx(mem.VarName, flags);
+                        var memberTreeNodeClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+                        ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
+                        if(EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "mem_X_" + i))
                         {
-                            if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                            // todo: 引用删除警告
+                            DefClass.Members.Remove(mem);
+                            break;
+                        }
+                        if (memberTreeNodeResult)
+                        {
+                            if (memberTreeNodeClicked)
                             {
-                                PGMember.Target = i;
-                                mMenuType = EMenuType.None;
-                                DraggingMember = MemberVar.NewMemberVar(DefClass, i.VarName);
+                                PGMember.Target = mem;
+                                DraggingMember = MemberVar.NewMemberVar(DefClass, mem.VarName);
                                 DraggingMember.Graph = this;
                                 IsDraggingMember = false;
                             }
@@ -321,31 +450,98 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     }
                     ImGuiAPI.TreePop();
                 }
-                if (ImGuiAPI.TreeNode("Methods"))
+                var methodsTreeNodeResult = ImGuiAPI.TreeNodeEx("Methods", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap);
+                ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
+                if(EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
                 {
-                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                    ImGuiAPI.OpenPopup("MacrossMethodSelectPopup", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                }
+                if(ImGuiAPI.BeginPopup("MacrossMethodSelectPopup", ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                {
+                    var drawList = ImGuiAPI.GetWindowDrawList();
+                    var menuData = new Support.UAnyPointer();
+                    if(EGui.UIProxy.MenuItemProxy.MenuItem("New Method", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
                     {
-                        mMenuType = EMenuType.Method;
-                    }
-                    foreach(var i in Functions)
-                    {
-                        if (ImGuiAPI.TreeNodeEx(i.ToString(), flags))
+                        var num = 0;
+                        while(true)
                         {
-                            if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                            bool bFind = false;
+                            for (int i = 0; i < DefClass.Functions.Count; i++)
                             {
-                                if (OpenFunctions.Contains(i) == false)
+                                if (DefClass.Functions[i].Name == $"Method_{num}")
                                 {
-                                    i.VisibleInClassGraphTables = true;
-                                    OpenFunctions.Add(i);
+                                    num++;
+                                    bFind = true;
+                                    break;
                                 }
                             }
-                            else if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                            if (!bFind)
+                                break;
+                        }
+
+                        var f = new DefineFunction();
+                        f.ReturnType = typeof(void).FullName;
+                        f.Name = $"Method_{num}";
+                        DefClass.Functions.Add(f);
+
+                        var func = FunctionGraph.NewGraph(this, f);
+                        Functions.Add(func);
+                    }
+                    if (EGui.UIProxy.MenuItemProxy.BeginMenuItem("Override Method", null, null, ref drawList, ref menuData, ref mOverrideMenuState))
+                    {
+                        for(int i=0; i < mOverrideMethodMenuItems.Count; i++)
+                        {
+                            mOverrideMethodMenuItems[i].OnDraw(ref drawList, ref menuData);
+                        }
+                        EGui.UIProxy.MenuItemProxy.EndMenuItem();
+                    }
+
+                    ImGuiAPI.EndPopup();
+                }
+                if (methodsTreeNodeResult)
+                {
+                    var funcRegionSize = ImGuiAPI.GetContentRegionAvail();
+                    for(int i=Functions.Count - 1; i>=0; i--)
+                    {
+                        var func = Functions[i];
+                        var funcTreeNodeResult = ImGuiAPI.TreeNodeEx(func.ToString(), flags);
+                        ImGuiAPI.SameLine(0, EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X);
+                        var funcTreeNodeDoubleClicked = ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+                        var funcTreeNodeIsItemClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+                        ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
+                        var keyName = $"Delete func {func.Function.Name}?";
+                        if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "func_X_" + i))
+                        {
+                            EGui.UIProxy.MessageBox.Open(keyName);
+                            break;
+                        }
+                        EGui.UIProxy.MessageBox.Draw(keyName, $"Are you sure to delete {func.Function.Name}?", EGui.UIProxy.MessageBox.EButtonType.YesNo,
+                        () =>
+                        {
+                            if (AssetName != null)
+                                IO.FileManager.DeleteFile($"{AssetName.Address}/{func.Function.Name}.func");
+                            Functions.Remove(func);
+                            DefClass.Functions.Remove(func.Function);
+                        }, null);
+
+                        if (funcTreeNodeResult)
+                        {
+                            if (funcTreeNodeDoubleClicked)
                             {
-                                PGMember.Target = i.Function;
-                                mMenuType = EMenuType.None;
+                                if (OpenFunctions.Contains(func) == false)
+                                {
+                                    func.VisibleInClassGraphTables = true;
+                                    OpenFunctions.Add(func);
+                                }
+                            }
+                            else if (funcTreeNodeIsItemClicked)
+                            {
+                                PGMember.Target = func.Function;
                             }
                         }
                     }
+
+
                     ImGuiAPI.TreePop();
                 }
             }
@@ -400,51 +596,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             ImGuiAPI.EndChild();
         }
 
-        #region Menu
-        bool LeftWinDrawMenu_Member()
-        {
-            if (mMenuType == EMenuType.None)
-                return false;
-            //ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;
-            if (ImGuiAPI.BeginMenu("Member", true))
-            {
-                if (ImGuiAPI.MenuItem($"Add Member", null, false, true))
-                {
-                    var mb = new DefineVar();
-                    mb.DefType = typeof(int).FullName;
-                    mb.VarName = $"Member_{DefClass.Members.Count}";
-                    mb.IsLocalVar = false;
-                    DefClass.Members.Add(mb);
-                    mMenuType = EMenuType.None;
-                }
-                ImGuiAPI.EndMenu();
-            }
-            return true;
-        }
-        bool LeftWinDrawMenu_Method()
-        {
-            if (mMenuType == EMenuType.None)
-                return false;
-            //ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;
-            if (ImGuiAPI.BeginMenu("Method", true))
-            {
-                if (ImGuiAPI.MenuItem($"Add Method", null, false, true))
-                {
-                    var f = new DefineFunction();
-                    f.ReturnType = typeof(void).FullName;
-                    f.Name = $"Function_{Functions.Count}";
-                    DefClass.Functions.Add(f);
-
-                    var func = FunctionGraph.NewGraph(this, f);
-                    Functions.Add(func);
-
-                    mMenuType = EMenuType.None;
-                }
-                ImGuiAPI.EndMenu();
-            }
-            return true;
-        }
-
         public async Task<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             LoadClassGraph(AssetName);
@@ -462,7 +613,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
 
         }
-        #endregion
     }
 }
 

@@ -34,7 +34,10 @@ namespace EngineNS
             {
                 if (i.IsModuleRun(UEngine.Instance.PlayMode) == false)
                     continue;
-                await i.Initialize(host);
+                if(false == await i.Initialize(host))
+                {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Engine", $"Module {i.GetType()} init failed");
+                }
             }
         }
         protected void TickModules()

@@ -12,7 +12,6 @@ namespace EngineNS
         {
             public string FilterExts;   // "ext1" / "ext1,ext2"
             EGui.UIProxy.ComboBox mComboBox;
-            EGui.Controls.ContentBrowser mContentBrowser;
 
             class DrawData
             {
@@ -30,16 +29,7 @@ namespace EngineNS
                     ComboOpenAction = ComboOpenAction
                 };
                 await mComboBox.Initialize();
-                mContentBrowser = new EGui.Controls.ContentBrowser()
-                {
-                    DrawInWindow = false,
-                    CreateNewAssets = false,
-                    ItemSelectedAction = (asset)=>
-                    {
-                        ImGuiAPI.CloseCurrentPopup();
-                    },
-                };
-                await mContentBrowser.Initialize();
+                
                 return await base.Initialize_Override();
             }
             ~PGRNameAttribute()
@@ -48,13 +38,12 @@ namespace EngineNS
             }
             protected override void Cleanup_Override()
             {
-                mContentBrowser?.Cleanup();
                 mComboBox?.Cleanup();
                 base.Cleanup_Override();
             }
             void ComboOpenAction(ref Support.UAnyPointer data)
             {
-                mContentBrowser.OnDraw();
+                UEngine.Instance.EditorInstance.RNamePopupContentBrowser.OnDraw();
             }
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
@@ -90,12 +79,13 @@ namespace EngineNS
                 mComboBox.PreviewValue = preViewStr;
                 var contentBrowserSize = new Vector2(500, 600);
                 ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Always);
-                mContentBrowser.ExtNames = FilterExts;
-                mContentBrowser.SelectedAsset = null;
+                UEngine.Instance.EditorInstance.RNamePopupContentBrowser.ExtNames = FilterExts;
+                UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset = null;
                 mComboBox.OnDraw(ref drawList, ref anyPt);
-                if(mContentBrowser.SelectedAsset != null && mContentBrowser.SelectedAsset.GetAssetName() != name)
+                if(UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset != null &&
+                    UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset.GetAssetName() != name)
                 {
-                    mDrawData.NewValue = mContentBrowser.SelectedAsset.GetAssetName();
+                    mDrawData.NewValue = UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset.GetAssetName();
                 }
                 var pos = ImGuiAPI.GetCursorScreenPos();
                 pos.X += snapSize.X + 8;

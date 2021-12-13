@@ -11,4 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)UPluginLoader.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Plugins.brick" />
+  </ItemGroup>
 </Project>

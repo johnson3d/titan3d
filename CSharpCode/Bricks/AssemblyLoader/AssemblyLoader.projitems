@@ -11,4 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ULoadContext.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)AssemblyLoader.brick" />
+  </ItemGroup>
 </Project>

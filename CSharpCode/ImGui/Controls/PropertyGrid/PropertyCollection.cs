@@ -541,6 +541,120 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             return retValue;
         }
+        public unsafe bool DrawDVector<T>(in PGCustomValueEditorAttribute.EditorInfo info) where T : unmanaged
+        {
+            bool retValue = false;
+            var minValue = double.MinValue;
+            var maxValue = double.MaxValue;
+
+            if (info.Expand)
+            {
+                ImGuiTableRowData rowData = new ImGuiTableRowData()
+                {
+                    IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer().ToPointer(),
+                    MinHeight = 0,
+                    CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
+                    CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
+                    IndentImageWidth = info.HostPropertyGrid.Indent,
+                    IndentTextureUVMin = Vector2.Zero,
+                    IndentTextureUVMax = Vector2.UnitXY,
+                    IndentColor = info.HostPropertyGrid.IndentColor,
+                    HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
+                    Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
+                };
+                Span<double> valueArray = stackalloc double[Values.Count];
+
+                for (var dimIdx = 0; dimIdx < sizeof(T) / sizeof(double); dimIdx++)
+                {
+                    bool valuesDifferent = false;
+                    double firstValue = 0;
+                    for (int i = 0; i < Values.Count; i++)
+                    {
+                        var v = (T)Values[i];
+                        valueArray[i] = ((double*)&v)[dimIdx];
+                        if (i == 0)
+                            firstValue = valueArray[i];
+                        else if (firstValue != valueArray[i])
+                            valuesDifferent = true;
+                    }
+
+                    ImGuiAPI.TableNextRow(in rowData);
+                    ImGuiAPI.TableSetColumnIndex(0);
+                    ImGuiAPI.AlignTextToFramePadding();
+                    string dimName = "";
+                    switch (dimIdx)
+                    {
+                        case 0:
+                            dimName = "X";
+                            break;
+                        case 1:
+                            dimName = "Y";
+                            break;
+                        case 2:
+                            dimName = "Z";
+                            break;
+                        case 3:
+                            dimName = "W";
+                            break;
+                    }
+                    ImGuiAPI.Indent(15);
+                    ImGuiAPI.Text(dimName);
+                    ImGuiAPI.Unindent(15);
+                    ImGuiAPI.TableNextColumn();
+                    ImGuiAPI.SetNextItemWidth(-1);
+                    if (valuesDifferent)
+                    {
+#pragma warning disable CA2014
+                        Span<byte> textBuffer = stackalloc byte[8];
+#pragma warning restore CA2014
+                        var strPtr = System.Runtime.InteropServices.Marshal.StringToHGlobalAnsi(mMultiValueString);
+                        var len = (uint)mMultiValueString.Length;
+                        fixed (byte* pBuffer = &textBuffer[0])
+                        {
+                            CoreSDK.SDK_StrCpy(pBuffer, strPtr.ToPointer(), len);
+
+                            var changed = ImGuiAPI.InputText(dimName, pBuffer, len, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+                            if (changed)
+                            {
+                                var newValueStr = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)pBuffer);
+                                try
+                                {
+                                    var v = System.Convert.ToDouble(newValueStr);
+                                    for (int i = 0; i < Values.Count; i++)
+                                    {
+                                        var vv = (T)Values[i];
+                                        ((double*)&vv)[dimIdx] = v;
+                                        Values[i] = vv;
+                                    }
+                                    retValue = true;
+                                }
+                                catch (System.Exception)
+                                {
+                                    retValue = false;
+                                }
+                            }
+                        }
+                        System.Runtime.InteropServices.Marshal.FreeHGlobal(strPtr);
+                    }
+                    else
+                    {
+                        var v = valueArray[0];
+                        var changed = ImGuiAPI.DragScalar2(dimName, ImGuiDataType_.ImGuiDataType_Double, &v, 0.1f, &minValue, &maxValue, "%0.6lf", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                        if (changed)
+                        {
+                            for (int i = 0; i < Values.Count; i++)
+                            {
+                                var vv = (T)Values[i];
+                                ((double*)&vv)[dimIdx] = v;
+                                Values[i] = vv;
+                            }
+                            retValue = true;
+                        }
+                    }
+                }
+            }
+            return retValue;
+        }
 
         public unsafe bool DrawVector<T>(in PGCustomValueEditorAttribute.EditorInfo info) where T : unmanaged
         {

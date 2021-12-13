@@ -153,11 +153,7 @@ namespace EngineNS
 		        }
 	        }
         }
-        public static Vector2 Zero
-        {
-            get { return mZero; }
-        }
-        public readonly static Vector2 mZero = new Vector2(0, 0);
+        public readonly static Vector2 Zero = new Vector2(0, 0);
         public readonly static Vector2 One = new Vector2(1, 1);
         [Rtti.Meta]
         public static Vector2 UnitX { get { return mUnitX; } }
@@ -515,7 +511,7 @@ namespace EngineNS
         /// <param name="max">二维坐标点的最大值</param>
         /// <param name="result">计算后的坐标</param>
         [Rtti.Meta]
-        public static void Clamp( ref Vector2 value, ref Vector2 min, ref Vector2 max, out Vector2 result )
+        public static void Clamp( in Vector2 value, in Vector2 min, in Vector2 max, out Vector2 result )
 	    {
 		    float x = value.X;
 		    x = (x > max.X) ? max.X : x;
@@ -1131,5 +1127,42 @@ namespace EngineNS
             return !left.Equals(right);
 		    //return !Equals( left, right );
 	    }
+
+        public static bool Intersects(in Vector2 minbox, in Vector2 maxbox, in Vector2 center, float radius)
+        {
+            Vector2 clamped;
+
+            Vector2.Clamp(in center, in minbox, in maxbox, out clamped);
+
+            float x = center.X - clamped.X;
+            float y = center.Y - clamped.Y;
+
+            float dist = (x * x) + (y * y);
+            var ret = (dist <= (radius * radius));
+
+            return ret;
+        }
+    }
+
+    public struct DVector2
+    {
+        public double X;
+        public double Y;
+        public DVector2(double x, double y)
+        {
+            X = x;
+            Y = y;
+        }
+        public Vector2 AsSingleVector()
+        {
+            return new Vector2((float)X, (float)Y);
+        }
+        public static DVector2 operator +(DVector2 left, DVector2 right)
+        {
+            DVector2 result;
+            result.X = left.X + right.X;
+            result.Y = left.Y + right.Y;
+            return result;
+        }
     }
 }

@@ -57,6 +57,7 @@ namespace EngineNS.EGui.UIProxy
                 itemOffset = ToolbarItems[i].NextItemOffset;
                 itemSpacing = ToolbarItems[i].NextItemSpacing;
             }
+            ImGuiAPI.SetCursorScreenPos(in rectMax);
             ImGuiAPI.EndGroup();
             return true;
         }
@@ -88,8 +89,8 @@ namespace EngineNS.EGui.UIProxy
         public bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
         {
             bool retValue = false;
-            ImGuiAPI.BeginGroup(); 
             var cursorScrPos = ImGuiAPI.GetCursorScreenPos();
+            ImGuiAPI.BeginGroup(); 
             var tempScrPos = cursorScrPos;
             var clickDelta = 0.0f;
             if(isMouseDown)

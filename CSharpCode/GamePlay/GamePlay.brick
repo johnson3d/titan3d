@@ -1,0 +1,15 @@
+{
+  "Name": "GamePlay",
+  "Path": "CSharpCode/GamePlay",
+  "FullName": "CSharpCode/GamePlay/GamePlay.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/RHI/RHI.brick",
+    "CSharpCode/Rtti/Rtti.brick",
+    "CSharpCode/Graphics/Mesh/Mesh.brick",
+    "CSharpCode/Graphics/Pipeline/Pipeline.brick",
+    "CSharpCode/Bricks/PhysicsCore/PhysicsCore.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

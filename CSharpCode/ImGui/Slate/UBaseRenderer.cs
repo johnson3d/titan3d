@@ -6,78 +6,29 @@ namespace EngineNS.EGui.Slate
 {
     public class UBaseRenderer
     {
-        public RHI.CRenderPipeline Pipeline;
+        public Graphics.Pipeline.Shader.UEffect SlateEffect;
+
+        public RHI.CInputLayout InputLayout;
         public RHI.CSamplerState SamplerState;
-        public RHI.CConstantBuffer FontCBuffer;
         public RHI.CTexture2D FontTexture;
         public RHI.CShaderResourceView FontSRV;
-        public unsafe virtual void Initialize(RName vs, RName ps)
+        public async System.Threading.Tasks.Task Initialize()
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            var shaderCompiler = new Editor.ShaderCompiler.UHLSLCompiler();
-            var vsDesc = shaderCompiler.CompileShader(vs.Address, "VS", EShaderType.EST_VertexShader, "5_0", null, null, null, true);
-
-            var VertexShader = rc.CreateVertexShader(vsDesc);
-
-            shaderCompiler = new Editor.ShaderCompiler.UHLSLCompiler();
-            var psDesc = shaderCompiler.CompileShader(ps.Address, "FS", EShaderType.EST_PixelShader, "5_0", null, null, null, true);
-            if (psDesc == null)
-                return;
-            var PixelShader = rc.CreatePixelShader(psDesc);
+            SlateEffect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                UEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.USlateGUIShading>(),
+                UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
 
             var iptDesc = new RHI.CInputLayoutDesc();
-            iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
-            iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
-            iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
-            iptDesc.mCoreObject.SetShaderDesc(vsDesc.mCoreObject);
-            var InputLayout = UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc.mCoreObject);
-
-            var spDesc = new IShaderProgramDesc();
-            spDesc.InputLayout = InputLayout.mCoreObject;
-            spDesc.VertexShader = VertexShader.mCoreObject;
-            spDesc.PixelShader = PixelShader.mCoreObject;
-            var ShaderProgram = rc.CreateShaderProgram(ref spDesc);
-            ShaderProgram.mCoreObject.LinkShaders(rc.mCoreObject);
-
-            var cbIndex = ShaderProgram.mCoreObject.FindCBuffer("ProjectionMatrixBuffer");
-            FontCBuffer = rc.CreateConstantBuffer(ShaderProgram, cbIndex);
-
-            var rstDesc = new IRasterizerStateDesc();
-            rstDesc.SetDefault();
-            rstDesc.ScissorEnable = 1;
-            rstDesc.FillMode = EFillMode.FMD_SOLID;
-            rstDesc.CullMode = ECullMode.CMD_NONE;
-            var RasterizerState = UEngine.Instance.GfxDevice.RasterizerStateManager.GetPipelineState(rc, ref rstDesc);
-
-            var dssDesc = new IDepthStencilStateDesc();
-            dssDesc.SetDefault();
-            dssDesc.DepthFunc = EComparisionMode.CMP_ALWAYS;
-            var DepthStencilState = UEngine.Instance.GfxDevice.DepthStencilStateManager.GetPipelineState(rc, ref dssDesc);
-
-            var bldDesc = new IBlendStateDesc();
-            bldDesc.SetDefault();
-            EngineNS.RenderTargetBlendDesc* pRenderTarget = bldDesc.RenderTarget;
-            pRenderTarget[0].SetDefault();
-            pRenderTarget[0].SrcBlendAlpha = EBlend.BLD_INV_SRC_ALPHA;
-            pRenderTarget[0].DestBlendAlpha = EBlend.BLD_ONE;
-            pRenderTarget[0].BlendEnable = 1;
-            var BlendState = UEngine.Instance.GfxDevice.BlendStateManager.GetPipelineState(rc, ref bldDesc);
-
-            var sdProgDesc = new IShaderProgramDesc();
-            sdProgDesc.InputLayout = InputLayout.mCoreObject;
-            sdProgDesc.VertexShader = VertexShader.mCoreObject;
-            sdProgDesc.PixelShader = PixelShader.mCoreObject;
-            var gpuProgram = rc.CreateShaderProgram(ref sdProgDesc);
-            gpuProgram.mCoreObject.LinkShaders(rc.mCoreObject);
-
-            var pipelineDesc = new IRenderPipelineDesc();
-            pipelineDesc.SetDefault();
-            pipelineDesc.Blend = BlendState.mCoreObject;
-            pipelineDesc.GpuProgram = gpuProgram.mCoreObject;
-            pipelineDesc.Rasterizer = RasterizerState.mCoreObject;
-            pipelineDesc.DepthStencil = DepthStencilState.mCoreObject;
-            Pipeline = rc.CreateRenderPipeline(ref pipelineDesc);
+            unsafe
+            {
+                iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
+                iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
+                iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
+                iptDesc.SetShaderDesc(SlateEffect.ShaderProgram);
+            }
+            InputLayout = UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc.mCoreObject);
 
             var splDesc = new ISamplerStateDesc();
             splDesc.SetDefault();
@@ -88,12 +39,11 @@ namespace EngineNS.EGui.Slate
             splDesc.MipLODBias = 0;
             splDesc.MaxAnisotropy = 0;
             splDesc.CmpMode = EComparisionMode.CMP_ALWAYS;
-            SamplerState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(rc, ref splDesc);
+            SamplerState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(rc, in splDesc);
+
         }
         public void Cleanup()
         {
-            Pipeline?.Dispose();
-            Pipeline = null;
             SamplerState = null;
             FontSRV?.Dispose();
             FontSRV = null;
@@ -109,16 +59,14 @@ namespace EngineNS.EGui.Slate
                 mFontDataList[i].FontTexture = null;
             }
             mFontDataList.Clear();
-
-            FontCBuffer?.Dispose();
-            FontCBuffer = null;
         }
 
         public enum enFont
         {
             Font_15px        = 0,
-            Font_Bold_13px   = 1,
-            Font_13px        = 2,
+            Font_Bold_13px,
+            Font_13px,
+            Font_Icon,
         }
 
         class FontDatas : IDisposable
@@ -208,9 +156,20 @@ namespace EngineNS.EGui.Slate
             //CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", 13.0f, &fontConfig, io.Fonts.GetGlyphRangesDefault());
             CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", 13.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
             CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", 13.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
+            
+            //ImFontConfig fontConfig = new ImFontConfig();
+            //fontConfig.UnsafeCallConstructor();
+            //fontConfig.MergeMode = true;
+            ushort* iconRange = stackalloc ushort[3];
+            iconRange[0] = 0xe005;
+            iconRange[1] = 0xf8ff;
+            iconRange[2] = 0;
+            //CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, &fontConfig, iconRange);
+            CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, (ImFontConfig*)0, iconRange);
+            //fontConfig.UnsafeCallDestructor();
         }
 
-        unsafe void CreateFontTexture(string absFontFile, float size_pixels, ImFontConfig* fontConfig, Wchar16* glyph_ranges)
+        unsafe void CreateFontTexture(string absFontFile, float size_pixels, ImFontConfig* fontConfig, ushort* glyph_ranges)
         {
             var fontData = new FontDatas();
 
@@ -232,12 +191,15 @@ namespace EngineNS.EGui.Slate
             txDesc.MipLevels = 1;
             txDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
             txDesc.InitData = &initData;
-            fontData.FontTexture = rc.CreateTexture2D(ref txDesc);
+            fontData.FontTexture = rc.CreateTexture2D(in txDesc);
 
             var srvDesc = new IShaderResourceViewDesc();
-            srvDesc.mFormat = txDesc.Format;
-            srvDesc.m_pTexture2D = fontData.FontTexture.mCoreObject;
-            fontData.FontSRV = rc.CreateShaderResourceView(ref srvDesc);
+            srvDesc.SetTexture2D();
+            srvDesc.Type = ESrvType.ST_Texture2D;
+            srvDesc.Format = txDesc.Format;
+            srvDesc.mGpuBuffer = fontData.FontTexture.mCoreObject.NativeSuper;
+            srvDesc.Texture2D.MipLevels = 1;
+            fontData.FontSRV = rc.CreateShaderResourceView(in srvDesc);
 
             io.Fonts.SetTexID(fontData.SRCGCHandle.ToPointer());
 

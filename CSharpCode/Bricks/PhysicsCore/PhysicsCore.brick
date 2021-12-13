@@ -1,0 +1,11 @@
+{
+  "Name": "PhysicsCore",
+  "Path": "CSharpCode/Bricks/PhysicsCore",
+  "FullName": "CSharpCode/Bricks/PhysicsCore/PhysicsCore.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/Rtti/Rtti.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

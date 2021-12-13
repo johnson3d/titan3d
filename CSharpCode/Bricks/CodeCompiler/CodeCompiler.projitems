@@ -12,4 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CSharpCompiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SharedProjectGenerator.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)CodeCompiler.brick" />
+  </ItemGroup>
 </Project>

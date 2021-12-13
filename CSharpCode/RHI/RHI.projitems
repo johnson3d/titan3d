@@ -35,10 +35,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)CSwapChain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CTexture2D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CUnorderedAccessView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CVertexArray.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CVertexBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CVertexShader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CViewPort.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Native\ISRVDesc.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Native\IUnorderedAccessViewDesc.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)RHI.brick" />
   </ItemGroup>
 </Project>

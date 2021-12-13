@@ -40,11 +40,17 @@
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Button.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\CheckBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\ComboBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Dialog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Image.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Menu.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIProxy\MessageBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\SearchBar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\StyleConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Toolbar.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UUvAnimEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UVAnim.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)ImGui.brick" />
   </ItemGroup>
 </Project>

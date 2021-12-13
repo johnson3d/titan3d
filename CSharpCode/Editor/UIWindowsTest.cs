@@ -123,7 +123,7 @@ namespace EngineNS.Editor
                                 UVMin = new Vector2(140.0f/1024, 265.0f/1024),
                                 UVMax = new Vector2(156.0f/1024, 281.0f/1024),
                             },
-                            Action = ()=>
+                            Action = (item, data)=>
                             {
                                 var files = IO.FileManager.GetFiles(@"I:\titan3d\icons", "*.*");
                                 var tagDir = RName.GetRName("icons", RName.ERNameType.Engine);

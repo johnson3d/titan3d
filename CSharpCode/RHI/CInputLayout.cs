@@ -10,6 +10,10 @@ namespace EngineNS.RHI
         {
             mCoreObject = IInputLayoutDesc.CreateInstance();
         }
+        public void SetShaderDesc(CShaderProgram prog)
+        {
+            mCoreObject.SetShaderDesc(prog.mCoreObject.GetVertexShader().NativeSuper.GetDesc());
+        }
     }
     public class CInputLayout : AuxPtrType<IInputLayout>
     {

@@ -21,6 +21,10 @@ namespace EngineNS
         {
             IUnknown_Release(unk.ToPointer());
         }
+        public unsafe static bool IsNullPointer<T>(T* ptr) where T : unmanaged
+        {
+            return ptr == (T*)0;
+        }
     }
     public unsafe partial struct BigStackBuffer : IDisposable
     {
@@ -51,7 +55,7 @@ public unsafe partial struct VNameString
     {
         get
         {
-            return GetString();
+            return c_str();
         }
     }
 }

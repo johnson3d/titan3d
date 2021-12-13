@@ -1,0 +1,11 @@
+{
+  "Name": "Plugins",
+  "Path": "CSharpCode/Bricks/Plugins",
+  "FullName": "CSharpCode/Bricks/Plugins/Plugins.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/Rtti/Rtti.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

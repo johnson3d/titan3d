@@ -164,7 +164,7 @@ namespace EngineNS
     {
         public List<IEventProcessor> Processors { get; } = new List<IEventProcessor>();
         private List<IEventProcessor> WaitRemoved { get; } = new List<IEventProcessor>();
-        public bool[] Keyboards = new bool[(int)SDL.SDL_Scancode.SDL_NUM_SCANCODES];
+        
         public void RegProcessor(IEventProcessor ep)
         {
             lock (this)
@@ -181,60 +181,36 @@ namespace EngineNS
                 WaitRemoved.Add(ep);
             }
         }
-        public int Tick(UEngine engine)
+        public void TickSDLEvent(SDL.SDL_Event evt)
         {
-            SDL.SDL_Event evt;
-            while (SDL.SDL_PollEvent(out evt) != 0)
+            var targetWindow = SDL.SDL_GetWindowFromID(evt.window.windowID);
+
+            if (targetWindow != IntPtr.Zero)
             {
-                unsafe
+                var pHandle = SDL.SDL_GetWindowData(targetWindow, "UNativeWindow");
+                if (pHandle != IntPtr.Zero)
                 {
-                    if (ImGuiAPI.GetCurrentContext() != (void*)0)
-                        EGui.UDockWindowSDL.ImGui_ImplSDL2_ProcessEvent(ref evt);
-                }
-
-                if (evt.type == SDL.SDL_EventType.SDL_QUIT)
-                {
-                    return -1;
-                }
-                else if(evt.type == SDL.SDL_EventType.SDL_KEYDOWN)
-                {
-                    Keyboards[(int)evt.key.keysym.scancode] = true;
-                }
-                else if (evt.type == SDL.SDL_EventType.SDL_KEYUP)
-                {
-                    Keyboards[(int)evt.key.keysym.scancode] = false;
-                }
-
-                var targetWindow = SDL.SDL_GetWindowFromID(evt.window.windowID);
-
-                if (targetWindow != IntPtr.Zero)
-                {
-                    var pHandle = SDL.SDL_GetWindowData(targetWindow, "UNativeWindow");
-                    if (pHandle != IntPtr.Zero)
+                    var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(pHandle);
+                    var presentWindow = handle.Target as Graphics.Pipeline.UPresentWindow;
+                    if (presentWindow != null)
                     {
-                        var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(pHandle);
-                        var presentWindow = handle.Target as Graphics.Pipeline.UPresentWindow;
-                        if (presentWindow != null)
-                        {
-                            presentWindow.OnEvent(ref evt);
-                        }
+                        presentWindow.OnEvent(ref evt);
                     }
-                }
-                for (int i = 0; i < Processors.Count; i++)
-                {
-                    if (Processors[i].OnEvent(ref evt) == false)
-                        break;
-                }
-                lock (this)
-                {
-                    foreach (var i in WaitRemoved)
-                    {
-                        Processors.Remove(i);
-                    }
-                    WaitRemoved.Clear();
                 }
             }
-            return 0;
+            for (int i = 0; i < Processors.Count; i++)
+            {
+                if (Processors[i].OnEvent(ref evt) == false)
+                    break;
+            }
+            lock (this)
+            {
+                foreach (var i in WaitRemoved)
+                {
+                    Processors.Remove(i);
+                }
+                WaitRemoved.Clear();
+            }
         }
     }
 }

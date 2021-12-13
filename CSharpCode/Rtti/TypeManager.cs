@@ -68,6 +68,7 @@ namespace EngineNS.Rtti
         public bool IsValueType => SystemType.IsValueType;
         public bool IsEnum => SystemType.IsEnum;
         public bool IsArray => SystemType.IsArray;
+        public bool IsSealed => SystemType.IsSealed;
         string mTypeString;
         public static System.Reflection.FieldInfo GetField(System.Type type, string name)
         {
@@ -85,7 +86,8 @@ namespace EngineNS.Rtti
             if (from == to)
                 return true;
 
-            return from.IsSubclassOf(to);
+            //return from.IsSubclassOf(to);
+            return from.IsAssignableTo(to);
         }
         public string TypeString
         {

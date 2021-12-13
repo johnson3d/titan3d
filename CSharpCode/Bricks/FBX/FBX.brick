@@ -1,0 +1,11 @@
+{
+  "Name": "FBX",
+  "Path": "CSharpCode/Bricks/FBX",
+  "FullName": "CSharpCode/Bricks/FBX/FBX.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/Rtti/Rtti.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

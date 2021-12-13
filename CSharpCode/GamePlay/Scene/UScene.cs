@@ -7,6 +7,10 @@ namespace EngineNS.GamePlay.Scene
     [Rtti.Meta]
     public class USceneAMeta : IO.IAssetMeta
     {
+        public override string GetAssetExtType()
+        {
+            return UScene.AssetExt;
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
@@ -15,6 +19,11 @@ namespace EngineNS.GamePlay.Scene
         {
             //必须是TextureAsset
             return true;
+        }
+        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        {
+            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+            cmdlist.AddText(in start, 0xFFFFFFFF, "scene", null);
         }
     }
     public class USceneData : UNodeData
@@ -41,77 +50,104 @@ namespace EngineNS.GamePlay.Scene
                 PGAsset.Target = mAsset;
             }
         }
-        public UScene(UNodeData data)
-            : base(data, EBoundVolumeType.Box, typeof(UPlacement))
+        public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
-            
+            if (data == null)
+            {
+                data = new USceneData();
+            }
+            if (await base.InitializeNode(world, data, bvType, placementType) == false)
+                return false;
+
+            //ParentScene = GetNearestParentScene();
+
+            var task = mMemberTickables.InitializeMembers(this);
+            return true;
+        }
+        public UScene()
+        {
+            mMemberTickables.CollectMembers(this);
         }
         ~UScene()
         {
             UEngine.Instance?.SceneManager.UnloadScene(this.AssetName);
         }
-        int PrevAllocId = 0;
-        private UNode[] ContainNodes = new UNode[UInt16.MaxValue];
-        public void AllocId(UNode node)
+        public USceneData SceneData
         {
-            if (node is ULightWeightNodeBase)
-                return;
-            for (int i = PrevAllocId; i < ContainNodes.Length; i++)
-            {
-                if (ContainNodes[i] == null)
-                {
-                    ContainNodes[i] = node;
-                    node.Id = (UInt32)i;
-                    node.ParentScene = this;
-                    PrevAllocId = i;
-                    return;
-                }
-            }
-            for (int i = 0; i < ContainNodes.Length; i++)
-            {
-                if(ContainNodes[i]==null)
-                {
-                    ContainNodes[i] = node;
-                    node.Id = (UInt32)i;
-                    node.ParentScene = this;
-                    PrevAllocId = i;
-                    return;
-                }
-            }
-            System.Diagnostics.Debug.Assert(false);
-        }
-        public void FreeId(UNode node)
-        {
-            if (node is ULightWeightNodeBase)
-                return;
-            if (node.Id >= UInt16.MaxValue)
-                return;
-            ContainNodes[node.Id] = null;
-            node.Id = UInt32.MaxValue;
-        }
-        public UNode NewNode(string nodeType, UNodeData data, EBoundVolumeType bvType, Type placementType)
-        {
-            var ntype = Rtti.UTypeDesc.TypeOf(nodeType);
-            return NewNode(ntype.SystemType, data, bvType, placementType);
-        }
-        public UNode NewNode(Type nodeType, UNodeData data, EBoundVolumeType bvType, Type placementType)
-        {
-            var args = new object[] { data, bvType, placementType };
-            var node = Rtti.UTypeDescManager.CreateInstance(nodeType, args) as UNode;
-            if (node != null)
-            {
-                AllocId(node);
-            }
-            return node;
-        }
-        public USceneData SceneData 
-        { 
             get
             {
                 return NodeData as USceneData;
             }
         }
-
+        public UWorld World;
+        #region Allocator
+        int PrevAllocId = 0;
+        private UNode[] ContainNodes = new UNode[UInt16.MaxValue];
+        public void AllocId(UNode node)
+        {
+            lock (ContainNodes)
+            {
+                if (node is ULightWeightNodeBase)
+                    return;
+                for (int i = PrevAllocId; i < ContainNodes.Length; i++)
+                {
+                    if (ContainNodes[i] == null)
+                    {
+                        ContainNodes[i] = node;
+                        node.SceneId = (UInt32)i;
+                        PrevAllocId = i;
+                        return;
+                    }
+                }
+                for (int i = 0; i < ContainNodes.Length; i++)
+                {
+                    if (ContainNodes[i] == null)
+                    {
+                        ContainNodes[i] = node;
+                        node.SceneId = (UInt32)i;
+                        PrevAllocId = i;
+                        return;
+                    }
+                }
+                System.Diagnostics.Debug.Assert(false);
+            }
+        }
+        public void FreeId(UNode node)
+        {
+            if (node is ULightWeightNodeBase)
+                return;
+            lock (ContainNodes)
+            {
+                if (node.SceneId >= UInt16.MaxValue)
+                    return;
+                System.Diagnostics.Debug.Assert(ContainNodes[node.SceneId] == node);
+                ContainNodes[node.SceneId] = null;
+                node.SceneId = UInt32.MaxValue;
+            }
+        }
+        public async System.Threading.Tasks.Task<USceneActorNode> NewNode(GamePlay.UWorld world, string nodeType, UNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
+        {
+            var ntype = Rtti.UTypeDesc.TypeOf(nodeType);
+            return await NewNode(world, ntype.SystemType, data, bvType, placementType, false);
+        }
+        public async System.Threading.Tasks.Task<USceneActorNode> NewNodeSimple(GamePlay.UWorld world, Type nodeType, UNodeData data, bool isSceneManaged = false)
+        {
+            return await NewNode(world, nodeType, data, EBoundVolumeType.Box, typeof(GamePlay.UPlacement), isSceneManaged);
+        }
+        public async System.Threading.Tasks.Task<USceneActorNode> NewNode(GamePlay.UWorld world, Type nodeType, UNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
+        {
+            var node = Rtti.UTypeDescManager.CreateInstance(nodeType) as USceneActorNode;
+            if (node != null)
+            {
+                if (await node.InitializeNode(world, data, bvType, placementType) == false)
+                    return null;
+                node.IsSceneManaged = isSceneManaged;
+            }
+            return node;
+        }
+        #endregion
+        
+        #region IAsset
         public RName AssetName { get; set; }
         public const uint SceneDescAttributeFlags = 1;
         public void SaveAssetTo(RName name)
@@ -135,7 +171,7 @@ namespace EngineNS.GamePlay.Scene
 
             xndHolder.SaveXnd(name.Address);
         }
-        internal unsafe static UScene LoadScene(RName name)
+        internal static async System.Threading.Tasks.Task<UScene> LoadScene(GamePlay.UWorld world, RName name)
         {
             using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
             {
@@ -149,6 +185,7 @@ namespace EngineNS.GamePlay.Scene
                 UScene scene = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(xnd.RootNode.Name), nodeData) as UScene;
                 if (scene == null)
                     return null;
+                scene.World = world;
 
                 var ar = descAttr.GetReader(null);
                 ar.Tag = scene;
@@ -166,7 +203,7 @@ namespace EngineNS.GamePlay.Scene
                 descAttr.ReleaseReader(ref ar);
 
                 scene.AssetName = name;
-                if (scene.LoadChildNode(scene, xnd.RootNode.mCoreObject) == false)
+                if (await scene.LoadChildNode(world, scene, xnd.RootNode.mCoreObject) == false)
                     return null;
 
                 scene.DFS_VisitNodeTree((UNode inNode, object inArg) =>
@@ -192,6 +229,14 @@ namespace EngineNS.GamePlay.Scene
         {
             ameta.RefAssetRNames.Clear();
         }
+        #endregion
+
+        UMemberTickables mMemberTickables = new UMemberTickables();
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
+        {
+            mMemberTickables.TickLogic(this, UEngine.Instance.ElapseTickCount);
+            return true;
+        }
     }
 
     public class USceneManager : UModule<UEngine>
@@ -201,7 +246,7 @@ namespace EngineNS.GamePlay.Scene
             Scenes.Clear();
         }
         public Dictionary<RName, WeakReference<UScene>> Scenes { get; } = new Dictionary<RName, WeakReference<UScene>>();
-        public async System.Threading.Tasks.Task<UScene> GetScene(RName name)
+        public async System.Threading.Tasks.Task<UScene> GetScene(GamePlay.UWorld world, RName name)
         {
             UScene scene;
             WeakReference<UScene> result;
@@ -218,10 +263,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
 
-            scene = await UEngine.Instance.EventPoster.Post(() =>
-            {
-                return UScene.LoadScene(name);
-            }, Thread.Async.EAsyncTarget.AsyncIO);
+            scene = await UScene.LoadScene(world, name);
             if (scene == null)
                 return null;
 

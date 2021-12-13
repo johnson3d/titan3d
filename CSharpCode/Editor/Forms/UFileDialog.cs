@@ -23,6 +23,15 @@ namespace EngineNS.Editor
     public partial class UEditor
     {
         public Forms.UFileDialog FileDialog { get; set; } = new Forms.UFileDialog();
+        public EGui.Controls.ContentBrowser RNamePopupContentBrowser = new EGui.Controls.ContentBrowser()
+        {
+            DrawInWindow = false,
+            CreateNewAssets = false,
+            ItemSelectedAction = (asset) =>
+            {
+                ImGuiAPI.CloseCurrentPopup();
+            },
+        };
     }
 }
 

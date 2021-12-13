@@ -21,7 +21,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
         public EFlowMode FlowMode { get; set; } = EFlowMode.Horizon;
         public class PinStyle
         {
-            public UVAnim Image { get; set; } = new UVAnim();
+            public UUvAnim Image { get; set; } = new UUvAnim();
             public float Offset { get; set; } = 3;
         }
         public PinStyle PinInStyle { get; set; } = new PinStyle();
@@ -82,6 +82,24 @@ namespace EngineNS.EGui.Controls.NodeGraph
         {
             get => true;
         }
+
+        protected virtual void Initialize()
+        {
+            InitializeCommonMenu();
+        }
+
+        List<EGui.UIProxy.MenuItemProxy> mMenuItems;
+        void InitializeCommonMenu()
+        {
+            mMenuItems = new List<EGui.UIProxy.MenuItemProxy>()
+            {
+                new EGui.UIProxy.MenuItemProxy()
+                {
+                    MenuName = ""
+                },
+            };
+        }
+
         protected LinkingLine LinkingOp = new LinkingLine();
         public void AddLink(NodeBase OutNode, string OutPin, NodeBase InNode, string InPin, bool bCallLinked = true)
         {
@@ -894,10 +912,6 @@ namespace EngineNS.EGui.Controls.NodeGraph
                     }
                     ImGuiAPI.EndMenu();
                 }
-                if (ImGuiAPI.Button("Close Menu", in btSize))
-                {
-                    mMenuType = EMenuType.None;
-                }
                 ImGuiAPI.EndPopup();
                 return true;
             }
@@ -919,10 +933,6 @@ namespace EngineNS.EGui.Controls.NodeGraph
                 {
                     ShowAddNode(posMenu);
                     ImGuiAPI.EndMenu();
-                }
-                if (ImGuiAPI.Button("Close Menu", in btSize))
-                {
-                    mMenuType = EMenuType.None;
                 }
 
                 OnAppendGraphMenuContent(posMenu);

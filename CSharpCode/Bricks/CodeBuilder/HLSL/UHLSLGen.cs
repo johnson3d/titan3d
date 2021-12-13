@@ -182,8 +182,26 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
                 return "float4";
             else if (t == typeof(Matrix))
                 return "matrix";
+            else if (t == typeof(int))
+                return "int";
+            else if (t == typeof(Int32_2))
+                return "int2";
+            else if (t == typeof(Int32_3))
+                return "int3";
+            else if (t == typeof(Int32_4))
+                return "int4";
+            else if (t == typeof(uint))
+                return "uint";
+            else if (t == typeof(UInt32_2))
+                return "uint2";
+            else if (t == typeof(UInt32_3))
+                return "uint3";
+            else if (t == typeof(UInt32_4))
+                return "uint4";
             else if (t == typeof(EngineNS.Bricks.CodeBuilder.ShaderNode.Var.Texture2D))
                 return "Texture2D";
+            else if (t == typeof(EngineNS.Bricks.CodeBuilder.ShaderNode.Var.Texture2DArray))
+                return "Texture2DArray";
             else if (t == typeof(EngineNS.Bricks.CodeBuilder.ShaderNode.Var.SamplerState))
                 return "SamplerState";
             return t.FullName;

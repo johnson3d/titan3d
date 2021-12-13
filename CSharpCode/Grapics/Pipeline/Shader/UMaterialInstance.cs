@@ -7,6 +7,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
     [Rtti.Meta]
     public partial class UMaterialInstanceAMeta : IO.IAssetMeta
     {
+        public override string GetAssetExtType()
+        {
+            return UMaterialInstance.AssetExt;
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(GetAssetName());
@@ -14,7 +18,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset
-            return true;
+            if (ameta.GetAssetExtType() == RHI.CShaderResourceView.AssetExt)
+                return true;
+            return false;
+        }
+        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        {
+            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+            cmdlist.AddText(in start, 0xFFFFFFFF, "MInst", null);
         }
         public override void ResetSnapshot()
         {
@@ -53,12 +64,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
-        public override void UpdateAMetaReferences(IO.IAssetMeta ameta)
-        {
-            ameta.RefAssetRNames.Clear();
-        }
         public override void SaveAssetTo(RName name)
         {
+            var ameta = this.GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta();
+            }
+
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             var xnd = new IO.CXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("MaterialInstance", 0, 0))
@@ -344,6 +358,26 @@ namespace EngineNS.Graphics.Pipeline.Shader
     }
     public class UMaterialInstanceManager
     {
+        UMaterialInstance mWireColorMateria;
+        public UMaterialInstance WireColorMateria
+        {
+            get
+            {
+                return mWireColorMateria;
+            }
+        }
+        public async System.Threading.Tasks.Task<bool> Initialize(UEngine engine)
+        {
+            await Thread.AsyncDummyClass.DummyFunc();
+
+            mWireColorMateria = await CreateMaterialInstance(engine.Config.DefaultMaterialInstance);
+            var rast = mWireColorMateria.Rasterizer;
+            rast.FillMode = EFillMode.FMD_WIREFRAME;
+            rast.CullMode = ECullMode.CMD_NONE;
+            mWireColorMateria.Rasterizer = rast;
+            mWireColorMateria.RenderLayer = ERenderLayer.RL_Translucent;
+            return true;
+        }
         public void Cleanup()
         {
             Materials.Clear();
@@ -357,6 +391,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             UMaterialInstance result;
             if (Materials.TryGetValue(rn, out result))
                 return result;
+
+            var task = CreateMaterialInstance(rn);
             return null;
         }
         public async System.Threading.Tasks.Task<UMaterialInstance> CreateMaterialInstance(RName rn)

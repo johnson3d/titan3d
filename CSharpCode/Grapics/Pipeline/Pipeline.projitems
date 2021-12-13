@@ -10,16 +10,26 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CCamera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\UAvgBrightnessNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UBasePassNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\UHdrNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UHitproxyNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\UHzbNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickedProxiableManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickBlurNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickedNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickHollowNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\URenderGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\USceenSpaceNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\UScreenTilingNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Deferred\UDeferredBasePassNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Deferred\UDeferredDirLightingNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Deferred\UDeferredPolicy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Deferred\UForwordNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Mobile\UFinalCopyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\UCascadedShadowMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shadow\UShadowMapNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\UGpuSceneNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)URenderLayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mobile\UBasePassShading.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mobile\UMobileEditorFSPolicy.cs" />
@@ -40,5 +50,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)USlateApplication.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UStateManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UViewportSlate.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Pipeline.brick" />
   </ItemGroup>
 </Project>

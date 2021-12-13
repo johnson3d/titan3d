@@ -13,4 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AssetImport\PartialMeshPrimitives.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FBXImporter.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)FBX.brick" />
+  </ItemGroup>
 </Project>

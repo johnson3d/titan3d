@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace EngineNS.GamePlay.Scene
 {
-    public partial class UMeshNode : UNode
+    public partial class UMeshNode : USceneActorNode
     {
         public class UMeshNodeData : UNodeData
         {
@@ -46,18 +46,34 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public UMeshNode(UNodeData data, EBoundVolumeType bvType, Type placementType)
-            : base(data, bvType, placementType)
+        public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
-			
+            if (data as UMeshNodeData == null)
+            {
+                data = new UMeshNodeData();
+            }
+            if (await base.InitializeNode(world, data, bvType, placementType) == false)
+                return false;
+
+            var meshData = data as UMeshNodeData;
+            var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
+            if (materialMesh != null)
+            {
+                var mesh = new Graphics.Mesh.UMesh();
+                mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
+                this.Mesh = mesh;
+            }
+            return true;
         }
-        public override void GetDrawMesh(List<Graphics.Mesh.UMesh> meshes)
+        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
         {
+            if (mMesh == null)
+                return;
             meshes.Add(mMesh);
             foreach(var i in Children)
             {
                 if(i.HitproxyType == Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent)
-                    i.GetDrawMesh(meshes);
+                    i.GetHitProxyDrawMesh(meshes);
             }
         }
         public override void OnHitProxyChanged()
@@ -74,7 +90,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 mMesh.IsDrawHitproxy = true;
                 var value = HitProxy.ConvertHitProxyIdToVector4();
-                mMesh.SetHitproxy(ref value);
+                mMesh.SetHitproxy(in value);
             }
             else
             {
@@ -92,30 +108,42 @@ namespace EngineNS.GamePlay.Scene
                 base.IsAcceptShadow = value;
                 if (mMesh == null)
                     return;
-                var mdfQueueType = Graphics.Pipeline.Shader.UMdfQueueManager.GetMdfQueuePermutationType(mMesh.MdfQueue.GetBaseMdfQueue(), value);
+
+                List<string> features = new List<string>();
+                if (value == false)
+                {
+                    features.Add("NoShadow");
+                }
+
+                var saved = mMesh.MdfQueue.MdfDatas;
+                var mdfQueueType = mMesh.MdfQueue.GetPermutation(features);
                 mMesh.SetMdfQueueType(mdfQueueType);
+                mMesh.MdfQueue.MdfDatas = saved;
+
+                int ObjectFlags_2Bit = 0;
+                if (value)
+                    ObjectFlags_2Bit |= 1;
+                else
+                    ObjectFlags_2Bit &= (~1);
+                mMesh.PerMeshCBuffer.SetValue(RHI.CConstantBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
             }
         }
-        public static UMeshNode AddMeshNode(UNode parent, UNodeData data, Type placementType, Graphics.Mesh.UMesh mesh, Vector3 pos, Vector3 scale, Quaternion quat)
-        {
-            return AddMeshNode(parent, data, placementType, mesh, ref pos, ref scale, ref quat);
-        }
-        public static UMeshNode AddMeshNode(UNode parent, UNodeData data, Type placementType, Graphics.Mesh.UMesh mesh, ref Vector3 pos, ref Vector3 scale, ref Quaternion quat)
+        public static async System.Threading.Tasks.Task<UMeshNode> AddMeshNode(GamePlay.UWorld world, UNode parent, UNodeData data, Type placementType, Graphics.Mesh.UMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
-            var meshNode = scene.NewNode(typeof(UMeshNode), data, EBoundVolumeType.Box, placementType) as UMeshNode;
+            var meshNode = await scene.NewNode(world, typeof(UMeshNode), data, EBoundVolumeType.Box, placementType) as UMeshNode;
             if (mesh.MaterialMesh.Mesh.AssetName != null)
                 meshNode.NodeData.Name = mesh.MaterialMesh.Mesh.AssetName.Name;
             else
-                meshNode.NodeData.Name = meshNode.Id.ToString();
+                meshNode.NodeData.Name = meshNode.SceneId.ToString();
             meshNode.Mesh = mesh;
             meshNode.Parent = parent;
             
-            meshNode.Placement.SetTransform(ref pos, ref scale, ref quat);
+            meshNode.Placement.SetTransform(in pos, in scale, in quat);
 
             return meshNode;
         }
-        public static async System.Threading.Tasks.Task<UMeshNode> AddMeshNode(UNode parent, UNodeData data, Type placementType, Vector3 pos, Vector3 scale, Quaternion quat)
+        public static async System.Threading.Tasks.Task<UMeshNode> AddMeshNode(GamePlay.UWorld world, UNode parent, UNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var meshData = data as UMeshNodeData;
             var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
@@ -127,7 +155,7 @@ namespace EngineNS.GamePlay.Scene
             if (ok == false)
                 return null;
 
-            var meshNode = AddMeshNode(parent, data, placementType, mesh, ref pos, ref scale, ref quat);
+            var meshNode = await AddMeshNode(world, parent, data, placementType, mesh, pos, scale, quat);
             if (meshData.CollideName != null)
             {
                 var collideMesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(meshData.CollideName);
@@ -181,6 +209,45 @@ namespace EngineNS.GamePlay.Scene
                 Parent?.UpdateAABB();
             }
         }
+        [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
+        public RName MeshName 
+        {
+            get
+            {
+                var meshData = NodeData as UMeshNodeData;
+                if (meshData == null)
+                    return null;
+                return meshData.MeshName;
+            }
+            set
+            {
+                var meshData = NodeData as UMeshNodeData;
+                if (meshData == null)
+                    return;
+                meshData.MeshName = value;
+                System.Action action = async () =>
+                {
+                    var mesh = new Graphics.Mesh.UMesh();
+
+                    var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
+                    var ok = mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
+                    if (ok == false)
+                        return;
+                    Mesh = mesh;
+                    var world = this.GetWorld();
+                    if (world != null)
+                    {
+                        Mesh.SetWorldTransform(in Placement.AbsTransform, world, false);
+                    }
+                    else
+                    {
+                        Mesh.SetWorldTransform(in Placement.AbsTransform, null, false);
+                    }
+                    OnHitProxyChanged();
+                };
+                action();
+            }
+        }
         public override void OnNodeLoaded()
         {
             base.OnNodeLoaded();
@@ -200,10 +267,14 @@ namespace EngineNS.GamePlay.Scene
                         colorVar.Value = "1,0,1,1";
                     }
                     var mesh = new Graphics.Mesh.UMesh();
-                    if(this.IsAcceptShadow)
-                        mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                    if (this.IsAcceptShadow)
+                    {
+                        mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_Shadow>>.TypeDesc);
+                    }
                     else
-                        mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh_NoShadow>.TypeDesc);
+                    {
+                        mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
+                    }
                     Mesh = mesh;
                 };
                 action();
@@ -226,19 +297,35 @@ namespace EngineNS.GamePlay.Scene
                 action();
             }
         }
+        private uint CameralOffsetSerialId = 0;
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {
+            if (mMesh == null)
+                return;
+
+            if (rp.World.CameralOffsetSerialId != CameralOffsetSerialId)
+            {
+                CameralOffsetSerialId = rp.World.CameralOffsetSerialId;
+                mMesh.UpdateCameraOffset(rp.World);
+            }
+
             rp.VisibleMeshes.Add(mMesh);
+            if (rp.VisibleNodes != null)
+            {
+                rp.VisibleNodes.Add(this);
+            }
         }
         protected override void OnAbsTransformChanged()
         {
             if (mMesh == null)
                 return;
-            mMesh.SetWorldMatrix(ref Placement.AbsTransformWithScale);
+
+            var world = this.GetWorld();
+            mMesh.SetWorldTransform(in Placement.AbsTransform, world, false);
         }
         static Macross.UMacrossStackFrame mLogicTickFrame = new Macross.UMacrossStackFrame();
         static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
-        public override bool OnTickLogic()
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
         {
             using (var guard = new Macross.UMacrossStackGuard(mLogicTickFrame))
             {

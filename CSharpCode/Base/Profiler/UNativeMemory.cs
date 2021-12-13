@@ -39,7 +39,7 @@ namespace EngineNS.Profiler
                 CountOfAlloc++;
             }
         }
-        CoreSDK.FDelegate_FOnNativeMemFree OnNativeMemFree;
+        CoreSDK.FDelegate_FOnNativeMemAlloc OnNativeMemFree;
         private unsafe void OnNativeMemFreeImpl(IntPtr size, sbyte* file, IntPtr line, IntPtr id)
         {
             //var sourceFile = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)file);

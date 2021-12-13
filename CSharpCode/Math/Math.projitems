@@ -19,6 +19,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Color4.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Convex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DBoundingBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DBoundingSphere.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\BoundingBoxConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\BoundingSphereConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Color3Converter.cs" />
@@ -31,6 +33,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Design\Vector2Converter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Vector3Converter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Vector4Converter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DMatrix.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DPlane.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DVector3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DVector4.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Half.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HermiteSpline.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IDllImportApi.cs" />
@@ -55,5 +61,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Vector2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Vector3.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Vector4.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Math.brick" />
   </ItemGroup>
 </Project>

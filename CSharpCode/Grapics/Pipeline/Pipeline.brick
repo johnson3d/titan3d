@@ -1,0 +1,12 @@
+{
+  "Name": "Pipeline",
+  "Path": "CSharpCode/Graphics/Pipeline",
+  "FullName": "CSharpCode/Graphics/Pipeline/Pipeline.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/RHI/RHI.brick",
+    "CSharpCode/Rtti/Rtti.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

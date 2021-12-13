@@ -1,0 +1,10 @@
+{
+  "Name": "Editor",
+  "Path": "CSharpCode/Editor",
+  "FullName": "CSharpCode/Editor/Editor.brick",
+  "SharedProjects": [
+    "CSharpCode/ImGui/ImGui.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

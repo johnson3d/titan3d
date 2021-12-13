@@ -7,7 +7,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
     public class UShaderEditorStyles
     {
         public static UShaderEditorStyles Instance = new UShaderEditorStyles();
-        public EGui.UVAnim FunctionIcon = new EGui.UVAnim(0xFF00FF00, 25);
+        public EGui.UUvAnim FunctionIcon = new EGui.UUvAnim(0xFF00FF00, 25);
         public uint FunctionTitleColor = 0xFF204020;
         public uint FunctionBGColor = 0x80808080;
         public EGui.Controls.NodeGraph.NodePin.LinkDesc NewInOutPinDesc(string linkType = "Value")
@@ -81,9 +81,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             viewport.RenderPolicy = policy;
 
-            await viewport.RenderPolicy.Initialize(1, 1);
+            await viewport.RenderPolicy.Initialize(policy.Camera, 1, 1);
+            await viewport.World.InitWorld();
 
-            (viewport as Editor.UPreviewViewport).CameraController.Camera = viewport.RenderPolicy.GetBasePassNode().GBuffers.Camera;
+            (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.Camera);
 
             var materials = new Graphics.Pipeline.Shader.UMaterial[1];
             materials[0] = Material;
@@ -98,7 +99,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 //mesh.SetWorldMatrix(ref Matrix.mIdentity);
                 //viewport.RenderPolicy.VisibleMeshes.Add(mesh);
 
-                var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, Vector3.Zero, Vector3.One, Quaternion.Identity);
+                var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "PreviewObject";
                 meshNode.IsAcceptShadow = false;
@@ -117,7 +118,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
 
-            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World.Root);
+            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
         }
         public async System.Threading.Tasks.Task<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
@@ -129,6 +130,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             MaterialGraph.ResetGraph();
             IsStarting = true;
             Material = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(name);
+            Material.IsEditingMaterial = true;
             //Material = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(name);
             if (Material == null)
             {
@@ -160,7 +162,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             PreviewViewport.Title = $"MaterialPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy(), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
 
             await PreviewPropGrid.Initialize();
             PreviewPropGrid.PGName = $"PGMaterialPreview:{AssetName}";
@@ -375,59 +377,35 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     type == typeof(Var.VarColor3) ||
                     type == typeof(Var.VarColor4))
                 {
-                    var varNode = node as Var.VarNode;
-                    if(varNode.IsUniform)
-                    {
-                        var valueProp = type.GetProperty("Value");
-                        var value = valueProp.GetValue(node, null);
-                        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameValuePair();
-                        tmp.VarType = gen.GetTypeString(varNode.VarType.SystemType);
-                        tmp.Name = node.Name;
-                        tmp.Value = value.ToString();
-                        Material.UsedUniformVars.Add(tmp);
-                    }
+                    node.OnMaterialEditorGenCode(gen, Material);
+                    //var varNode = node as Var.VarNode;
+                    //if(varNode.IsUniform)
+                    //{
+                    //    var valueProp = type.GetProperty("Value");
+                    //    var value = valueProp.GetValue(node, null);
+                    //    var tmp = new Graphics.Pipeline.Shader.UMaterial.NameValuePair();
+                    //    tmp.VarType = gen.GetTypeString(varNode.VarType.SystemType);
+                    //    tmp.Name = node.Name;
+                    //    tmp.Value = value.ToString();
+                    //    Material.UsedUniformVars.Add(tmp);
+                    //}
                 }
                 else if (type == typeof(Var.Texture2D))
                 {
-                    var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
-                    tmp.Name = node.Name;
-                    var texNode = node as Var.Texture2D;
-                    tmp.Value = texNode.AssetName;
-                    Material.UsedRSView.Add(tmp);
+                    node.OnMaterialEditorGenCode(gen, Material);
                 }
                 else if (type == typeof(Var.SamplerState))
                 {
-                    var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
-                    tmp.Name = node.Name;
-                    var sampNode = node as Var.SamplerState;
-                    tmp.Value = sampNode.Desc;
-                    Material.UsedSamplerStates.Add(tmp);
+                    node.OnMaterialEditorGenCode(gen, Material);
                 }
-                else if (type == typeof(Control.SampleLevel2DNode))
+                else if (type == typeof(Control.SampleLevel2DNode) || type == typeof(Control.Sample2DNode) ||
+                    type == typeof(Control.SampleArrayLevel2DNode) || type == typeof(Control.SampleArray2DNode))
                 {
-                    var texNode = node as Control.SampleLevel2DNode;
-                    var texturePinIn = texNode.FindPinIn("texture");
-                    if (texturePinIn.HasLinker() == false)
-                    {
-                        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
-                        tmp.Name = texNode.TextureVarName;
-                        if (Material.FindSRV(tmp.Name) == null)
-                        {
-                            tmp.Value = texNode.AssetName;
-                            Material.UsedRSView.Add(tmp);
-                        }
-                    }
-                    var samplerPinIn = texNode.FindPinIn("sampler");
-                    if (samplerPinIn.HasLinker() == false)
-                    {
-                        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
-                        tmp.Name = "Samp_"+ texNode.TextureVarName;
-                        if (Material.FindSampler(tmp.Name) == null)
-                        {
-                            tmp.Value = texNode.Sampler;
-                            Material.UsedSamplerStates.Add(tmp);
-                        }
-                    }
+                    node.OnMaterialEditorGenCode(gen, Material);
+                }
+                else
+                {
+                    node.OnMaterialEditorGenCode(gen, Material);
                 }
             }
             

@@ -1,0 +1,10 @@
+{
+  "Name": "CodeBuilder",
+  "Path": "CSharpCode/Bricks/CodeBuilder",
+  "FullName": "CSharpCode/Bricks/CodeBuilder/CodeBuilder.brick",
+  "SharedProjects": [
+    "CSharpCode/Editor/Editor.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

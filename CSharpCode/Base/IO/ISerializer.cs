@@ -4,6 +4,21 @@ using System.Text;
 
 namespace EngineNS.IO
 {
+    public sealed class UCustomSerializerAttribute : Attribute
+    {
+        public System.Type CustomType;
+    }
+    public class UExampleCustom
+    {
+        public static void Save(IWriter ar, ISerializer host, string propName)
+        {
+
+        }
+        public static void Load(IReader ar, ISerializer host, string propName)
+        {
+
+        }
+    }
     //凡是派生了ISerizlizer接口的类，都会产生MetaClass信息
     public interface ISerializer
     {
@@ -147,6 +162,11 @@ namespace EngineNS.IO
             foreach (var i in metaVersion.Fields)
             {
                 var value = ReadObject(ar, i.FieldType.SystemType, obj);
+                if (i.CustomReader != null)
+                {
+                    i.CustomLoad(ar, obj, i.FieldName);
+                    continue;
+                }
                 if (value != null && i.PropInfo != null)
                 {
                     if (Rtti.UTypeDesc.CanCast(value.GetType(), i.PropInfo.PropertyType) == false)
@@ -237,6 +257,12 @@ namespace EngineNS.IO
             {
                 if (i.PropInfo != null && i.PropInfo.CanRead)
                 {
+                    if (i.CustomWriter != null)
+                    {
+                        i.CustomSave(ar, obj, i.FieldName);
+                        continue;
+                    }
+
                     var value = i.PropInfo.GetValue(obj, null);
                     if (value != null)
                         WriteObject(ar, value.GetType(), value);
@@ -411,6 +437,11 @@ namespace EngineNS.IO
                 unsafe
                 {
                     var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
+                    var attrs = t.GetCustomAttributes(typeof(Rtti.UStructAttrubte), false);
+                    if(attrs.Length>0)
+                    {
+                        size = (attrs[0] as Rtti.UStructAttrubte).ReadSize;
+                    }                    
                     var pBuffer = stackalloc byte[size];
                     ar.ReadPtr(pBuffer, size);
                     var v = System.Runtime.InteropServices.Marshal.PtrToStructure((IntPtr)pBuffer, t);
@@ -800,7 +831,14 @@ namespace EngineNS.IO
                 obj = Support.TConvert.ToObject(obj.GetType(), node.GetAttribute("Value"));
                 return;
             }
-            var thisType = Rtti.UTypeDesc.TypeOf(thisTypeStr).SystemType;
+            var typeDesc = Rtti.UTypeDesc.TypeOf(thisTypeStr);
+            if (typeDesc == null)
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "MetaData", $"{hostObject.GetType()}: MetaField({thisTypeStr}) Type Missing");
+                obj = Support.TConvert.ToObject(obj.GetType(), node.GetAttribute("Value"));
+                return;
+            }
+            var thisType = typeDesc.SystemType;
             if (obj == null && thisType == null)
                 return;
             if (obj == null)
@@ -1007,6 +1045,15 @@ namespace EngineNS.IO
                 (obj as ISerializer)?.OnPropertyRead(paramObject, prop, true);
             }
         }
+
+        public static string SaveAsJson(object obj)
+        {
+            return System.Text.Json.JsonSerializer.Serialize(obj);
+        }
+        public static T LoadFromJson<T>(string txt)
+        {
+            return System.Text.Json.JsonSerializer.Deserialize<T>(txt);
+        }
     }
 }
 
@@ -1042,7 +1089,7 @@ namespace EngineNS.UTest
             A = 10,
         };
         [Rtti.Meta]
-        public Transform F { get; set; } = new Transform();
+        public FTransform F { get; set; } = new FTransform();
         [Rtti.Meta]
         public List<int> G { get; set; } = new List<int>();
         [Rtti.Meta]
@@ -1137,9 +1184,9 @@ namespace EngineNS.UTest
                     tobj.I.Add(2, "b");
                     tobj.J.Add(1, new UTest_MetaObject.TestSubClass() { A = 5 });
                     tobj.J.Add(2, new UTest_MetaObject.TestSubClass() { A = 9 });
-                    var trans = new Transform();
+                    var trans = new FTransform();
                     trans.InitData();
-                    trans.Position = new Vector3(1, 1, 1);
+                    trans.Position = new DVector3(1, 1, 1);
                     tobj.F = trans;
                     ar.Write(tobj);
                     attr.EndWrite();

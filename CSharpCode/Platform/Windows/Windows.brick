@@ -1,0 +1,10 @@
+{
+  "Name": "Windows",
+  "Path": "CSharpCode/Platform/Windows",
+  "FullName": "CSharpCode/Platform/Windows/Windows.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick"
+  ],
+  "Nugets": [],
+  "DllModules": [ "3rd/csharp/System.Windows.Forms.dll" ]
+}

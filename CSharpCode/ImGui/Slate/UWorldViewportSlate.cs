@@ -15,7 +15,7 @@ namespace EngineNS.EGui.Slate
         public RHI.CScissorRect ScissorRect { get; } = new RHI.CScissorRect();
 
         public Graphics.Pipeline.UDrawBuffers Copy2SwapChainPass = new Graphics.Pipeline.UDrawBuffers();
-        public RenderPassDesc SwapChainPassDesc = new RenderPassDesc();
+        public RHI.CRenderPass SwapChainPassDesc;
 
         GamePlay.UAxis mAxis;
 
@@ -32,12 +32,6 @@ namespace EngineNS.EGui.Slate
         {
             World?.Cleanup();
             World = null;
-            if (SnapshotPtr != IntPtr.Zero)
-            {
-                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
-                handle.Free();
-                SnapshotPtr = IntPtr.Zero;
-            }
             RenderPolicy?.Cleanup();
             RenderPolicy = null;
         }
@@ -50,17 +44,24 @@ namespace EngineNS.EGui.Slate
         {
             RenderPolicy = policy;
 
-            await RenderPolicy.Initialize(1, 1);
+            await RenderPolicy.Initialize(policy.Camera, 1, 1);
 
-            CameraController.Camera = RenderPolicy.GetBasePassNode().GBuffers.Camera;
+            CameraController.ControlCamera(RenderPolicy.Camera);
         }
-        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Rtti.UTypeDesc policyType, float zMin, float zMax)
         {
+            await Initialize();
+
+            var policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.IRenderPolicy;
             if (OnInitialize == null)
             {
                 OnInitialize = this.Initialize_Default;
             }
             await OnInitialize(this, application, policy, zMin, zMax);
+
+            await this.World.InitWorld();
+            SetCameraOffset(in DVector3.Zero);
+            SetCameraOffset(new DVector3(-300, 0, 0));
 
             mAxis = new GamePlay.UAxis();
             await mAxis.Initialize(this.World, CameraController);
@@ -87,32 +88,29 @@ namespace EngineNS.EGui.Slate
             {
                 RenderPolicy?.OnResize(vpSize.X, vpSize.Y);
             }
-
-            if (SnapshotPtr != IntPtr.Zero)
-            {
-                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
-                handle.Free();
-            }
-            SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(RenderPolicy.GetFinalShowRSV()));
         }
-        IntPtr SnapshotPtr;
         protected override IntPtr GetShowTexture()
         {
-            return SnapshotPtr;
+            return RenderPolicy.GetFinalShowRSV().GetTextureHandle();
         }
         #region CameraControl
         Vector2 mPreMousePt;
+        Vector2 mStartMousePt;
         public float CameraMoveSpeed { get; set; } = 1.0f;
         public float CameraMouseWheelSpeed { get; set; } = 1.0f;
         public unsafe override bool OnEvent(ref SDL.SDL_Event e)
         {
             mAxis?.OnEvent(this, in e);
-            var keyboards = UEngine.Instance.EventProcessorManager.Keyboards;
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
+            var keyboards = UEngine.Instance.InputSystem;
+            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN)
+            {
+                mStartMousePt = new Vector2(e.motion.x, e.motion.y);
+            }
+            else if (e.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
             {
                 if (e.button.button == SDL.SDL_BUTTON_LEFT)
                 {
-                    if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_LALT])
+                    if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
                         CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.motion.x - mPreMousePt.X) * 0.01f);
                         CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.motion.y - mPreMousePt.Y) * 0.01f);
@@ -125,7 +123,7 @@ namespace EngineNS.EGui.Slate
                 }
                 else if (e.button.button == SDL.SDL_BUTTON_X1)
                 {
-                    if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_LALT])
+                    if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
                         CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, (e.motion.y - mPreMousePt.Y) * 0.03f, true);
                     }
@@ -141,7 +139,7 @@ namespace EngineNS.EGui.Slate
             }
             else if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL)
             {
-                if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_LALT])
+                if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                 {
                     CameraMoveSpeed += (float)(e.wheel.y * 0.01f);
                 }
@@ -150,40 +148,47 @@ namespace EngineNS.EGui.Slate
                     CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, e.wheel.y * CameraMouseWheelSpeed, true);
                 }
             }
-            else
+            else if(e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP)
             {
-                if(e.type != SDL.SDL_EventType.SDL_MOUSEBUTTONUP || mAxis.CurrentAxisType == GamePlay.UAxis.enAxisType.Null)
-                    return base.OnEvent(ref e);
+                if (e.button.button == SDL.SDL_BUTTON_LEFT && mAxis != null &&
+                    mAxis.CurrentAxisType == GamePlay.UAxis.enAxisType.Null &&
+                    (new Vector2(e.motion.x, e.motion.y) - mStartMousePt).Length() < 1.0f &&
+                    !mAxisOperated &&
+                    IsMouseIn)
+                {
+                    ProcessHitproxySelected(e.motion.x, e.motion.y);
+                }
             }
-            return true;
+
+            return base.OnEvent(ref e);
         }
         #endregion
         GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
         protected virtual void TickOnFocus()
         {
             float step = (UEngine.Instance.ElapseTickCount * 0.001f) * CameraMoveSpeed;
-            var keyboards = UEngine.Instance.EventProcessorManager.Keyboards;
-            if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_W])
+            var keyboards = UEngine.Instance.InputSystem;
+            if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_w))
             {
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, step, true);
             }
-            else if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_S])
+            else if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_s))
             {
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, -step, true);
             }
 
-            if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_A])
+            if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_a))
             {
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, step, true);
             }
-            else if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_D])
+            else if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_d))
             {
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, -step, true);
             }
         }
         public unsafe void TickLogic(int ellapse)
         {
-            World.TickLogic();
+            World.TickLogic(this.RenderPolicy, ellapse);
 
             if (IsDrawing == false)
                 return;
@@ -192,7 +197,9 @@ namespace EngineNS.EGui.Slate
                 TickOnFocus();
             }
 
+            mVisParameter.World = World;
             mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
+            mVisParameter.VisibleNodes = RenderPolicy.VisibleNodes;
             mVisParameter.CullCamera = RenderPolicy.GetBasePassNode().GBuffers.Camera;
             World.GatherVisibleMeshes(mVisParameter);
 
@@ -232,16 +239,18 @@ namespace EngineNS.EGui.Slate
         }
         #endregion
 
-        protected override void OnHitproxySelected(IProxiable proxy)
+        public override void OnHitproxySelected(IProxiable proxy)
         {
             base.OnHitproxySelected(proxy);
             var node = proxy as GamePlay.Scene.UNode;
             mAxis.SetSelectedNodes(node);
         }
 
+        bool mAxisOperated = false;
         public override void OnDrawViewportUI(in Vector2 startDrawPos)
         {
-            mAxis.OnDrawUI(startDrawPos);
+            if (mAxis != null)
+                mAxisOperated = mAxis.OnDrawUI(startDrawPos);
         }
     }
 }

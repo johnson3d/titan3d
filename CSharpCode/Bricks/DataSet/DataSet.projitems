@@ -13,4 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UDataSet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UTable.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)DataSet.brick" />
+  </ItemGroup>
 </Project>

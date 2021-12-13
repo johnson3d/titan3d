@@ -60,17 +60,23 @@ namespace EngineNS
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public unsafe extern static Matrix* v3dxMatrix4Inverse( Matrix *pOut, Matrix* pM, float *pDetSerminant);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
+        public unsafe extern static DMatrix* v3dxDMatrix4Inverse(DMatrix* pOut, DMatrix* pM, double* pDetSerminant); 
+        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public unsafe extern static Matrix* v3dxMatrix4Transpose_extern(Matrix* pOut, Matrix* pM);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public unsafe extern static void v3dxMatrix4NoRotation(Matrix* pOut, Matrix* pSrc);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public unsafe extern static int v3dxMatrixDecompose(Vector3 *pOutScale,Quaternion *pOutRotation,Vector3 *pOutTranslation,Matrix *pM);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
+        public unsafe extern static void v3dxDMatrixDecompose(Vector3* pOutScale, Quaternion* pOutRotation, DVector3* pOutTranslation, DMatrix* pM);
+        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public unsafe extern static Matrix* v3dxMatrixMultiply(Matrix *pOut,Matrix *pM1,Matrix *pM2);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public unsafe extern static Matrix* v3dxMatrixAffineTransformation(Matrix* pOut,float Scaling,Vector3 *pRotationCenter,Quaternion *pRotation,Vector3 *pTranslation);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public unsafe extern static Vector3 * v3dxPlaneIntersectLine(Vector3 *pOut,Plane *pP,Vector3 *pV1,Vector3 *pV2);
+        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
+        public unsafe extern static DVector3* v3dxDPlaneIntersectLine(DVector3* pOut, DPlane* pP, DVector3* pV1, DVector3* pV2);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public unsafe extern static Plane* v3dxPlaneScale(Plane* pOut, Plane* pP, float s);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
@@ -92,7 +98,11 @@ namespace EngineNS
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public unsafe extern static Matrix* v3dxMatrixTransformationOrigin(Matrix* pOut, Vector3* pScaling, Quaternion* pRotation, Vector3* pTranslation);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
+        public unsafe extern static DMatrix* v3dxDMatrixTransformationOrigin(DMatrix* pOut, Vector3* pScaling, Quaternion* pRotation, DVector3* pTranslation);
+        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         public unsafe extern static Matrix* v3dxMatrixTransformation(Matrix* pOut, Vector3* pScalingCenter, Quaternion* pScalingRotation, Vector3* pScaling, Vector3* pRotationCenter, Quaternion* pRotation, Vector3* pTranslation);
+        [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
+        public unsafe extern static DMatrix* v3dxDMatrixTransformation(DMatrix* pOut, DVector3* pScalingCenter, Quaternion* pScalingRotation, Vector3* pScaling, DVector3* pRotationCenter, Quaternion* pRotation, DVector3* pTranslation);
         //[System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]
         //public unsafe extern static Matrix* D3DXMatrixTransformation2D(Matrix* pOut, Vector2* pScalingCenter, float pScalingRotation, Vector2* pScaling, Vector2* pRotationCenter, float Rotation, Vector2* pTranslation);
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl)]

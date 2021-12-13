@@ -7,18 +7,22 @@ namespace EngineNS.Graphics.Mesh
     [Rtti.Meta]
     public class CMeshPrimitivesAMeta : IO.IAssetMeta
     {
+        public override string GetAssetExtType()
+        {
+            return CMeshPrimitives.AssetExt;
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
-            //必须是TextureAsset
-            return true;
+            return false;
         }
-        public override void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
-            base.OnDraw(ref cmdlist, ref sz, ContentBrowser);
+            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+            cmdlist.AddText(in start, 0xFFFFFFFF, "vms", null);
         }
     }
 
@@ -33,10 +37,10 @@ namespace EngineNS.Graphics.Mesh
         {
             ~ImportAttribute()
             {
-                mFileDialog.Dispose();
+                //mFileDialog.Dispose();
             }
             string mSourceFile;
-            ImGui.ImGuiFileDialog mFileDialog = ImGui.ImGuiFileDialog.CreateInstance();
+            ImGui.ImGuiFileDialog mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             //EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
             public override void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
             {
@@ -56,6 +60,10 @@ namespace EngineNS.Graphics.Mesh
         public CMeshPrimitives()
         {
             mCoreObject = IMeshPrimitives.CreateInstance();
+        }
+        public CMeshPrimitives(IMeshPrimitives iMeshPrimitives)
+        {
+            mCoreObject = iMeshPrimitives;
         }
         public IO.IAssetMeta CreateAMeta()
         {
@@ -79,7 +87,10 @@ namespace EngineNS.Graphics.Mesh
             {
                 mCoreObject.Save2Xnd(rc.mCoreObject, xnd.RootNode.mCoreObject);
             }
-
+            var attr = xnd.RootNode.mCoreObject.GetOrAddAttribute("PartialSkeleton",0,0);
+            var ar = attr.GetWriter(512);
+            ar.Write(PartialSkeleton);
+            attr.ReleaseWriter(ref ar);
             xnd.SaveXnd(name.Address);
         }
         [Rtti.Meta]
@@ -88,9 +99,11 @@ namespace EngineNS.Graphics.Mesh
             get;
             set;
         }
-        public Animation.Skeleton.CPartialSkeleton PartialSkeleton
+        [Rtti.Meta]
+        public Animation.SkeletonAnimation.Skeleton.USkinSkeleton PartialSkeleton
         {
-            get { return Animation.Skeleton.CPartialSkeleton.Create(mCoreObject.GetPartialSkeleton()); }
+            get;
+            set;
         }
         public static CMeshPrimitives LoadXnd(UMeshPrimitiveManager manager, IO.CXndHolder xnd)
         {
@@ -100,6 +113,18 @@ namespace EngineNS.Graphics.Mesh
                 var ret = result.mCoreObject.LoadXnd(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, "", xnd.mCoreObject, true);
                 if (ret == 0)
                     return null;
+                var attr = xnd.RootNode.mCoreObject.TryGetAttribute("PartialSkeleton");
+                if (attr.IsValidPointer)
+                {
+                    var ar = attr.GetReader(manager);
+                    IO.ISerializer partialSkeleton = null;
+                    ar.Read(out partialSkeleton, manager);
+                    attr.ReleaseReader(ref ar);
+                    if(partialSkeleton is Animation.SkeletonAnimation.Skeleton.USkinSkeleton)
+                    {
+                        result.PartialSkeleton = partialSkeleton as Animation.SkeletonAnimation.Skeleton.USkinSkeleton;
+                    }
+                }
                 return result;
             }
         }
@@ -145,6 +170,35 @@ namespace EngineNS.Graphics.Mesh
     }
     public class UMeshPrimitiveManager
     {
+        ~UMeshPrimitiveManager()
+        {
+            mUnitSphere?.Dispose();
+            mUnitSphere = null;
+        }
+        CMeshPrimitives mUnitSphere;
+        public CMeshPrimitives UnitSphere
+        {
+            get
+            {
+                if (mUnitSphere == null)
+                {
+                    mUnitSphere = Graphics.Mesh.CMeshDataProvider.MakeSphere(1.0f, 15, 15, 0xfffffff).ToMesh();
+                }
+                return mUnitSphere;
+            }
+        }
+        CMeshPrimitives mUnitBox;
+        public CMeshPrimitives UnitBox
+        {
+            get
+            {
+                if (mUnitBox == null)
+                {
+                    mUnitBox = Graphics.Mesh.CMeshDataProvider.MakeBox(0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0xfffffff).ToMesh();
+                }
+                return mUnitBox;
+            }
+        }
         public Dictionary<RName, CMeshPrimitives> Meshes { get; } = new Dictionary<RName, CMeshPrimitives>();
         public async System.Threading.Tasks.Task<CMeshPrimitives> GetMeshPrimitive(RName name)
         {

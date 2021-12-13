@@ -6,8 +6,7 @@ namespace EngineNS.GamePlay
 {
     public class UWorldRootNode : Scene.UScene
     {
-        public UWorldRootNode(Scene.UNodeData data)
-            : base(data)
+        public UWorldRootNode()
         {
             
         }
@@ -20,35 +19,76 @@ namespace EngineNS.GamePlay
         }        
         public override void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
         {
+            if (rp.VisibleNodes != null)
+            {
+                rp.VisibleNodes.Add(this);
+            }
             //base.OnGatherVisibleMeshes(rp);
         }
     }
 
-    public class UWorld
+    public partial class UWorld
     {
         public UWorld()
         {
+            mMemberTickables.CollectMembers(this);
+
             mOnVisitNode_GatherVisibleMeshesAll = this.OnVisitNode_GatherVisibleMeshesAll;
             mOnVisitNode_GatherBoundShapes = this.OnVisitNode_GatherBoundShapes;
+
+            mRoot = new UWorldRootNode();
+            mRoot.World = this;
+        }
+        UMemberTickables mMemberTickables = new UMemberTickables();
+        Graphics.Pipeline.Shader.UMaterialInstance mBoundingDebugMaterial;
+        public async System.Threading.Tasks.Task<bool> InitWorld()
+        {
+            Scene.UNodeData data = new Scene.UNodeData();
+            await mRoot.InitializeNode(this, data, Scene.EBoundVolumeType.Box, typeof(UPlacement));
+            mRoot.SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+
+            mBoundingDebugMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
+
+            await mMemberTickables.InitializeMembers(this);
+            return true;
         }
         public void Cleanup()
         {
             Root.ClearChildren();
+            mBoundingDebugMaterial = null;
+
+            mMemberTickables.CleanupMembers(this);
         }
+        internal DVector3 mCameraOffset = DVector3.Zero;
+        internal uint CameralOffsetSerialId = 1;
+        public DVector3 CameraOffset 
+        {
+            get => mCameraOffset;
+            set
+            {
+                mCameraOffset = value;
+                CameralOffsetSerialId++;
+            }
+        }
+        UWorldRootNode mRoot;
         public UWorldRootNode Root
         {
-            get;
-        } = new UWorldRootNode(new Scene.UNodeData());
+            get => mRoot;
+        }
         public UDirectionLight DirectionLight { get; } = new UDirectionLight();
         #region Culling
         public class UVisParameter
         {
+            public int CullType = 0;
+            public UWorld World;
             public Graphics.Pipeline.CCamera CullCamera;
-            public List<Graphics.Mesh.UMesh> VisibleMeshes = new List<Graphics.Mesh.UMesh>();
+            public List<Graphics.Mesh.UMesh> VisibleMeshes = null;// new List<Graphics.Mesh.UMesh>();
+            public List<GamePlay.Scene.UNode> VisibleNodes = null;
         }
         public virtual void GatherVisibleMeshes(UVisParameter rp)
         {
             rp.VisibleMeshes.Clear();
+            rp.VisibleNodes?.Clear();
 
             OnVisitNode_GatherVisibleMeshes(Root, rp);
         }
@@ -59,13 +99,13 @@ namespace EngineNS.GamePlay
             CONTAIN_TYPE type;
             if (node.HasStyle(Scene.UNode.ENodeStyles.VisibleFollowParent))
             {
-                type = CONTAIN_TYPE.CONTAIN_TEST_INNER;
+                type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
             }
             else
             {
-                var frustom = rp.CullCamera.mCoreObject.GetFrustum();
-                var absAABB = BoundingBox.Transform(in node.AABB, in node.Placement.mAbsTransform);
-                type = frustom->whichContainTypeFast(in absAABB, 1);
+                //var matrix = node.Placement.AbsTransform.ToMatrixNoScale();
+                var absAABB = DBoundingBox.TransformNoScale(in node.AABB, in node.Placement.AbsTransform);
+                type = rp.CullCamera.WhichContainTypeFast(this, in absAABB, true);
                 //这里还没想明白，把Frustum的6个平面变换到AABB所在坐标为啥不行
                 //type = frustom->whichContainTypeFast(ref node.AABB, ref node.Placement.AbsTransformInv, 1);
             }
@@ -120,19 +160,19 @@ namespace EngineNS.GamePlay
 
             ref var aabb = ref node.AABB;
             var size = aabb.GetSize();
-            var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeBoxWireframe(aabb.Minimum.X, aabb.Minimum.Y, aabb.Minimum.Z,
-                size.X, size.Y, size.Z).ToMesh();
+            var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeBoxWireframe((float)aabb.Minimum.X, (float)aabb.Minimum.Y, (float)aabb.Minimum.Z,
+                (float)size.X, (float)size.Y, (float)size.Z).ToMesh();
             var mesh2 = new Graphics.Mesh.UMesh();
 
             var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-            materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
+            materials1[0] = mBoundingDebugMaterial;// UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
             if (materials1[0] == null)
             {
-                System.Diagnostics.Debug.Assert(false);
+                //System.Diagnostics.Debug.Assert(false);
                 return false;
             }
             mesh2.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-            mesh2.SetWorldMatrix(ref node.Placement.mAbsTransform);
+            mesh2.SetWorldTransform(in node.Placement.AbsTransform, this, true);
 
             bvs.Add(mesh2);
 
@@ -141,9 +181,51 @@ namespace EngineNS.GamePlay
         #endregion
 
         #region GamePlay
-        public virtual void TickLogic()
+        private int mTimeMillisecond = 0;
+        public int TimeMillisecond { get=> mTimeMillisecond; } 
+        public float TimeSecond { get => ((float)mTimeMillisecond) * 0.001f; }
+
+        private int mDeltaTimeMillisecond = 0;
+        public int DeltaTimeMillisecond { get => mDeltaTimeMillisecond; }
+        public float DeltaTimeSecond { get => ((float)mDeltaTimeMillisecond) * 0.001f; }
+
+        private int mRealtimeMillisecondSinceStartup = 0;
+        public int RealtimeMillisecondSinceStartup { get=> mRealtimeMillisecondSinceStartup; }
+        public float RealtimeSecondSinceStartup { get => ((float)mRealtimeMillisecondSinceStartup) * 0.001f; }
+
+        public bool Pause { get; set; } = false;
+        public float TimeScale { get; set; } = 1.0f;
+
+        public void TickTime(int ellapseMillisecond)
         {
-            Root.TickLogic();
+            int scaledTime = (int)Math.Truncate((float)ellapseMillisecond * TimeScale);
+            mRealtimeMillisecondSinceStartup += scaledTime;
+            if (!Pause)
+            {
+                mTimeMillisecond += scaledTime;
+                mDeltaTimeMillisecond = scaledTime;
+            }
+            else
+            {
+                mDeltaTimeMillisecond = 0;
+            }
+        }
+        public void ResetTime()
+        {
+            mTimeMillisecond = 0;
+            mRealtimeMillisecondSinceStartup = 0;
+            mDeltaTimeMillisecond = 0;
+        }
+        public virtual void TickLogic(Graphics.Pipeline.IRenderPolicy policy, int ellapse)
+        {
+            TickTime(ellapse);
+
+            if (Pause)
+                return;
+
+            Root.TickLogic(this, policy);
+
+            mMemberTickables.TickLogic(this, UEngine.Instance.ElapseTickCount);
         }
         #endregion
     }

@@ -182,7 +182,7 @@ namespace EngineNS
         public static BoundingSphere FromBox(BoundingBox box)
 	    {
 		    BoundingSphere sphere;
-		    Vector3.Lerp( ref box.Minimum, ref box.Maximum, 0.5f, out sphere.Center );
+		    Vector3.Lerp(in box.Minimum, in box.Maximum, 0.5f, out sphere.Center );
 
 		    float x = box.Minimum.X - box.Maximum.X;
 		    float y = box.Minimum.Y - box.Maximum.Y;

@@ -15,11 +15,11 @@ namespace EngineNS.GamePlay
             HostNode = tagObject as Scene.UNode;
         }
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
-        public virtual Vector3 Position
+        public virtual DVector3 Position
         {
             get
             {
-                return Vector3.Zero;
+                return DVector3.Zero;
             }
             set
             {
@@ -46,14 +46,7 @@ namespace EngineNS.GamePlay
             {
 
             }
-        }
-        public virtual Matrix Transform
-        {
-            get
-            {
-                return Matrix.Identity;
-            }
-        }
+        }        
         public virtual bool IsIdentity
         {
             get { return true; }
@@ -62,100 +55,62 @@ namespace EngineNS.GamePlay
         {
             get { return false; }
         }
-        public virtual void SetTransform(ref Vector3 pos, ref Vector3 scale, ref Quaternion quat)
+        public bool InheritScale { get; set; } = false;
+        public virtual void SetTransform(in DVector3 pos, in Vector3 scale, in Quaternion quat)
         {
             
         }
-        public virtual void SetTransform(ref Transform data)
+        public virtual void SetTransform(in FTransform data)
         {
 
         }
-        
+        public virtual FTransform TransformData
+        {
+            get
+            {
+                return FTransform.Identity;
+            }
+            set
+            {
+
+            }
+        }
+        public virtual ref FTransform TransformRef
+        {
+            get
+            {
+                return ref FTransform.IdentityForRef;
+            }
+        }
+
         public Scene.UNode HostNode { get; private set; }
-        public Matrix mAbsTransform = Matrix.Identity;
-        public virtual Matrix AbsTransform
+        public virtual ref FTransform AbsTransform
         {
             get
             {
-                return mAbsTransform;
-            }
-            set
-            {
-                mAbsTransform = value;
-
-                AbsTransformWithScale = value;
+                return ref FTransform.IdentityForRef;
             }
         }
-        public Matrix AbsTransformInv = new Matrix();
-        public Matrix AbsTransformWithScale = new Matrix();
     }
 
-    public partial class UScalePlacement : UPlacementBase
+    public partial class UIdentityPlacement : UPlacementBase
     {
-        public UScalePlacement(Scene.UNode hostNode)
-            : base(hostNode)
-        {   
-        }
-        Vector3 mScale = Vector3.UnitXYZ;
-        public override Vector3 Scale
+        public UIdentityPlacement(Scene.UNode node)
+            : base(node)
         {
-            get => mScale;
-            set
-            {
-                mScale = value;
-                UpdateData();
-            }
+            
         }
-        public override bool HasScale
-        {
-            get { return true; }
-        }
-        public override bool IsIdentity
-        {
-            get { return false; }
-        }
-        void UpdateData()
-        {
-            mTransform = Matrix.Scaling(mScale);
-            HostNode.UpdateAbsTransform();
-            HostNode.UpdateAABB();
-            if (HostNode.Parent != null)
-                HostNode.Parent.UpdateAABB();
-        }
-        public Matrix mTransform = new Matrix();
-        public override Matrix Transform
+        public FTransform mAbsTransform = FTransform.Identity;
+        public override ref FTransform AbsTransform
         {
             get
             {
-                return mTransform;
-            }
-        }
-        public override Matrix AbsTransform
-        {
-            get
-            {
-                return mAbsTransform;
-            }
-            set
-            {
-                AbsTransformWithScale = value;
-                AbsTransformWithScale.M11 = value.M11 * Scale.X;
-                AbsTransformWithScale.M12 = value.M12 * Scale.X;
-                AbsTransformWithScale.M13 = value.M13 * Scale.X;
-
-                AbsTransformWithScale.M21 = value.M21 * Scale.Y;
-                AbsTransformWithScale.M22 = value.M22 * Scale.Y;
-                AbsTransformWithScale.M23 = value.M23 * Scale.Y;
-
-                AbsTransformWithScale.M31 = value.M31 * Scale.Z;
-                AbsTransformWithScale.M32 = value.M32 * Scale.Z;
-                AbsTransformWithScale.M33 = value.M33 * Scale.Z;
-                
-                mAbsTransform = AbsTransformWithScale;
+                return ref mAbsTransform;
             }
         }
     }
-    public partial class UPlacement : UPlacementBase
+
+    public partial class UPlacement : UIdentityPlacement
     {
         public UPlacement(Scene.UNode hostNode)
             : base(hostNode)
@@ -168,9 +123,9 @@ namespace EngineNS.GamePlay
         {
             get { return mIsIdentity; }
         }
-        Transform mTransformData;
+        public FTransform mTransformData;
         [Rtti.Meta(Order = 0)]
-        public Transform TransformData
+        public override FTransform TransformData
         {
             get => mTransformData;
             set
@@ -179,7 +134,14 @@ namespace EngineNS.GamePlay
                 UpdateData();
             }
         }
-        public override Vector3 Position
+        public override ref FTransform TransformRef
+        {
+            get
+            {
+                return ref mTransformData;
+            }
+        }
+        public override DVector3 Position
         {
             get => mTransformData.mPosition;
             set
@@ -210,44 +172,8 @@ namespace EngineNS.GamePlay
         {
             get { return mTransformData.HasScale; }
         }
-        public Matrix mTransform = new Matrix();
-        public override Matrix Transform
-        {
-            get
-            {
-                return mTransform;
-            }
-        }
-        public override Matrix AbsTransform
-        {
-            get
-            {
-                return mAbsTransform;
-            }
-            set
-            {
-                mAbsTransform = value;
-
-                AbsTransformWithScale = value;
-                AbsTransformWithScale.M11 = value.M11 * Scale.X;
-                AbsTransformWithScale.M12 = value.M12 * Scale.X;
-                AbsTransformWithScale.M13 = value.M13 * Scale.X;
-
-                AbsTransformWithScale.M21 = value.M21 * Scale.Y;
-                AbsTransformWithScale.M22 = value.M22 * Scale.Y;
-                AbsTransformWithScale.M23 = value.M23 * Scale.Y;
-
-                AbsTransformWithScale.M31 = value.M31 * Scale.Z;
-                AbsTransformWithScale.M32 = value.M32 * Scale.Z;
-                AbsTransformWithScale.M33 = value.M33 * Scale.Z;
-
-                mAbsTransform = InheritScale ? AbsTransformWithScale : value;
-            }
-        }
-        public bool InheritScale = false;
         private void UpdateData()
         {
-            mTransform = Matrix.Transformation(mTransformData.mQuat, mTransformData.mPosition);
             mIsIdentity = mTransformData.IsIdentity;
             HostNode.UpdateAbsTransform();
             HostNode.UpdateAABB();
@@ -255,7 +181,7 @@ namespace EngineNS.GamePlay
                 HostNode.Parent.UpdateAABB();
         }
 
-        public override void SetTransform(ref Vector3 pos, ref Vector3 scale, ref Quaternion quat)
+        public override void SetTransform(in DVector3 pos, in Vector3 scale, in Quaternion quat)
         {
             mTransformData.Position = pos;
             mTransformData.Scale = scale;
@@ -263,7 +189,7 @@ namespace EngineNS.GamePlay
 
             UpdateData();
         }
-        public override void SetTransform(ref Transform data)
+        public override void SetTransform(in FTransform data)
         {
             mTransformData = data;
             UpdateData();

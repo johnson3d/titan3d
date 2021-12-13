@@ -1,0 +1,10 @@
+{
+  "Name": "SourceControl",
+  "Path": "CSharpCode/Bricks/SourceControl",
+  "FullName": "CSharpCode/Bricks/SourceControl/SourceControl.brick",
+  "SharedProjects": [
+    "CSharpCode/Editor/Editor.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

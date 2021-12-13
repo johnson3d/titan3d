@@ -27,7 +27,7 @@ namespace EngineNS.IO
             if (source.Name == targetPath && source.RNameType == targetType)
                 return false;
 
-            var address = RName.GetAddress(targetType, targetPath) + ".ameta";
+            var address = RName.GetAddress(targetType, targetPath) + IAssetMeta.MetaExt;
             if (IO.FileManager.FileExists(address))
             {//不支持覆盖
                 return false;

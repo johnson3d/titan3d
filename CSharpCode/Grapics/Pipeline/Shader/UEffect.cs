@@ -208,7 +208,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.DescVS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material, mdf.GetType(), defines, true);
+                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", 
+                    shading, material, mdf.GetType(), defines, UEngine.Instance.Config.IsDebugShader, null);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (result.DescVS == null)
                 return null;
@@ -216,7 +217,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.DescPS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material, mdf.GetType(), defines, true);
+                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", 
+                    shading, material, mdf.GetType(), defines, UEngine.Instance.Config.IsDebugShader, null);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (result.DescPS == null)
                 return null;
@@ -291,7 +293,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var descVS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", material, mdfType.SystemType, defines, true);
+                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", EShaderType.EST_VertexShader, "5_0", 
+                    shading, material, mdfType.SystemType, defines, UEngine.Instance.Config.IsDebugShader, null);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (descVS == null)
                 return false;
@@ -299,7 +302,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var descPS = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", material, mdfType.SystemType, defines, true);
+                return compilier.CompileShader(shading.CodeName.Address, "PS_Main", EShaderType.EST_PixelShader, "5_0", 
+                    shading, material, mdfType.SystemType, defines, UEngine.Instance.Config.IsDebugShader, null);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (descPS == null)
                 return false;
@@ -361,22 +365,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 unsafe
                 {
                     var shaderProg = result.ShaderProgram.mCoreObject;
-                    result.CBPerViewportIndex = shaderProg.FindCBuffer("cbPerViewport");
+                    result.CBPerViewportIndex = shaderProg.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerViewport");
 
-                    result.CBPerFrameIndex = shaderProg.FindCBuffer("cbPerFrame");
-                    if (result.CBPerFrameIndex != 0xFFFFFFFF)
-                    {
-                        if (UEngine.Instance.GfxDevice.PerFrameCBuffer == null)
-                        {
-                            UEngine.Instance.GfxDevice.PerFrameCBuffer = rc.CreateConstantBuffer(result.ShaderProgram, result.CBPerFrameIndex);
-                        }
-                    }
+                    result.CBPerFrameIndex = shaderProg.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerFrame");
+                    
+                    result.CBPerCameraIndex = shaderProg.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerCamera");
 
-                    result.CBPerCameraIndex = shaderProg.FindCBuffer("cbPerCamera");
+                    result.CBPerMeshIndex = shaderProg.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerMesh");
 
-                    result.CBPerMeshIndex = shaderProg.FindCBuffer("cbPerMesh");
-
-                    result.CBPerMaterialIndex = shaderProg.FindCBuffer("cbPerMaterial");
+                    result.CBPerMaterialIndex = shaderProg.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerMaterial");
                 }
             }
             return isOK;
@@ -384,22 +381,36 @@ namespace EngineNS.Graphics.Pipeline.Shader
     }
     public class UEffectManager
     {
+        public UEffect DummyEffect;
+        public async System.Threading.Tasks.Task<bool> Initialize(UGfxDevice device)
+        {
+            DummyEffect = await UEffect.CreateEffect(UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(), 
+                0, device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
+            if (DummyEffect == null)
+                return false;
+            return true;
+        }
         public void Cleanup()
         {
+            System.Diagnostics.Debug.Assert(mCreatingSession.mSessions.Count == 0);
             Effects.Clear();
         }
+        private Thread.UAwaitSessionManager<Hash160, UEffect> mCreatingSession = new Thread.UAwaitSessionManager<Hash160, UEffect>();
         public Dictionary<Hash160, UEffect> Effects { get; } = new Dictionary<Hash160, UEffect>();
         public UEffect TryGetEffect(Hash160 hash)
         {
-            UEffect result;
-            if (Effects.TryGetValue(hash, out result))
-                return result;
+            lock (Effects)
+            {
+                UEffect result;
+                if (Effects.TryGetValue(hash, out result))
+                    return result;
 
-            return null;
+                return null;
+            }
         }
         public static Hash160 GetShaderHash(UShadingEnv shading, UMaterial material, UMdfQueue mdf)
         {
-            return Hash160.CreateHash160($"{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
+            return Hash160.CreateHash160($"{shading},{material.AssetName},{mdf}");
         }
         public async System.Threading.Tasks.Task<UEffect> GetEffect(UShadingEnv shading, UMaterial material, UMdfQueue mdf)
         {
@@ -421,44 +432,67 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return result;
             }
 
-            result = await UEffect.LoadEffect(hash, shading, material, mdf);
-            if (result != null)
+            bool isNewSession;
+            var session = mCreatingSession.GetOrNewSession(hash, out isNewSession);
+            if (isNewSession == false)
             {
-                if (Effects.ContainsKey(hash) == false)
+                return await session.Await();
+            }
+
+            try
+            {
+                result = await UEffect.LoadEffect(hash, shading, material, mdf);
+                if (result != null)
                 {
-                    Effects[hash] = result;
-                    return result;
+                    if (Effects.ContainsKey(hash) == false)
+                    {
+                        lock (Effects)
+                        {
+                            Effects[hash] = result;
+                        }
+                        return result;
+                    }
+                    else
+                    {
+                        result = Effects[hash];
+                        return result;
+                    }
+                }
+
+                result = await UEffect.CreateEffect(shading, shading.CurrentPermutationId, material, mdf);
+                result.Desc.EffectHash = hash;
+                if (result != null)
+                {
+                    result.Desc.PermutationId = shading.CurrentPermutationId;
+                    await UEngine.Instance.EventPoster.Post(() =>
+                    {
+                        result.SaveTo(hash);
+                        return true;
+                    }, Thread.Async.EAsyncTarget.AsyncIO);
+
+                    if (Effects.ContainsKey(hash) == false)
+                    {
+                        lock (Effects)
+                        {
+                            Effects[hash] = result;
+                        }
+                        return result;
+                    }
+                    else
+                    {
+                        result = Effects[hash];
+                        return result;
+                    }
                 }
                 else
                 {
-                    return Effects[hash];
-                }
-            }
-
-            result = await UEffect.CreateEffect(shading, shading.CurrentPermutationId, material, mdf);
-            result.Desc.EffectHash = hash;
-            if (result != null)
-            {
-                result.Desc.PermutationId = shading.CurrentPermutationId;
-                await UEngine.Instance.EventPoster.Post(() =>
-                {
-                    result.SaveTo(hash);
-                    return true;
-                }, Thread.Async.EAsyncTarget.AsyncIO);
-
-                if (Effects.ContainsKey(hash) == false)
-                {
-                    Effects[hash] = result;
+                    result = null;
                     return result;
                 }
-                else
-                {
-                    return Effects[hash];
-                }
             }
-            else
+            finally
             {
-                return null;
+                mCreatingSession.FinishSession(hash, session, result);
             }
         }
     }

@@ -268,7 +268,7 @@ namespace EngineNS
 		    float z = plane.Normal.Z;
 		    float d = plane.D;
 
-		    Matrix transformation = Matrix.Invert( ref temp );
+		    Matrix transformation = Matrix.Invert(in temp );
 
 		    Plane r;
 		    r.Normal.X = (((x * transformation.M11) + (y * transformation.M12)) + (z * transformation.M13)) + (d * transformation.M14);
@@ -291,7 +291,7 @@ namespace EngineNS
 
 		    int count = planes.Length;
 		    Plane[] results = new Plane[ count ];
-		    Matrix transformation = Matrix.Invert( ref temp );
+		    Matrix transformation = Matrix.Invert(in temp );
 
 		    for( int i = 0; i < count; i++ )
 		    {

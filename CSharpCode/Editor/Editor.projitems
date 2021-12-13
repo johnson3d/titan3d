@@ -10,7 +10,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Controller\EditorCameraController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\UAnimationClipEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UCpuProfiler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\UEditorSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UFileDialog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UInspector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UMaterialInstanceEditor.cs" />
@@ -23,7 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EditorAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIWindowsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UMainEditorApplication.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MetaViewEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UMetaViewEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayInEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderCompiler\UHLSLCompiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderCompiler\UShaderCode.cs" />
@@ -32,5 +34,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)UEditorWorldViewportSlate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UPreviewViewport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)USnapshot.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Editor.brick" />
   </ItemGroup>
 </Project>

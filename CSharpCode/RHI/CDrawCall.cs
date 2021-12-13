@@ -11,6 +11,11 @@ namespace EngineNS.RHI
         private uint PermutationId;
         //internal uint MaterialSerialId = 0;
         private bool IsUpdating = false;
+        public bool IsPermutationChanged()
+        {
+            var shading = Effect.ShadingEnv;
+            return PermutationId != shading.CurrentPermutationId;
+        }
         public void CheckPermutation(Graphics.Pipeline.Shader.UMaterial material, Graphics.Pipeline.Shader.UMdfQueue mdf)
         {
             var shading = Effect.ShadingEnv;
@@ -33,21 +38,7 @@ namespace EngineNS.RHI
             Effect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(shading, material, mdf);
             if (Effect != null)
             {
-                unsafe
-                {
-                    var pipeline = new IRenderPipeline(mCoreObject.GetPipeline());
-                    if (pipeline.NativePointer == IntPtr.Zero)
-                    {
-                        var desc = new IRenderPipelineDesc();
-                        desc.GpuProgram = Effect.ShaderProgram.mCoreObject;
-                        var pl = UEngine.Instance.GfxDevice.RenderContext.CreateRenderPipeline(ref desc);
-                        mCoreObject.BindPipeline(pl.mCoreObject);
-                    }
-                    else
-                    {
-                        pipeline.BindGpuProgram(Effect.ShaderProgram.mCoreObject);
-                    }
-                }
+                mCoreObject.GetPipeline().BindGpuProgram(Effect.ShaderProgram.mCoreObject);
             }
             IsUpdating = false;
         }
@@ -58,18 +49,8 @@ namespace EngineNS.RHI
             //MaterialSerialId = Material.SerialId;
             // 这里不应该被调用了，全部再UAtom上记录了材质版本变化
             //强制刷一下GpuProgram，避免出现Material刷新后，后续MaterialInstance的CheckPermutation不能正确绑定
-            var pipeline = new IRenderPipeline(mCoreObject.GetPipeline());
-            if (pipeline.NativePointer == IntPtr.Zero)
-            {
-                var desc = new IRenderPipelineDesc();
-                desc.GpuProgram = Effect.ShaderProgram.mCoreObject;
-                var pl = UEngine.Instance.GfxDevice.RenderContext.CreateRenderPipeline(ref desc);
-                mCoreObject.BindPipeline(pl.mCoreObject);
-            }
-            else
-            {
-                pipeline.BindGpuProgram(Effect.ShaderProgram.mCoreObject);
-            }
+            var pipeline = mCoreObject.GetPipeline();
+            pipeline.BindGpuProgram(Effect.ShaderProgram.mCoreObject);
 
             if (Material.BlendState != null)
                 pipeline.BindBlendState(Material.BlendState.mCoreObject);
@@ -78,23 +59,22 @@ namespace EngineNS.RHI
             if (Material.RasterizerState != null)
                 pipeline.BindRasterizerState(Material.RasterizerState.mCoreObject);
 
-            var textures = new IShaderResources(mCoreObject.GetShaderResources());
+            var textures = new IShaderRViewResources(mCoreObject.GetShaderRViewResources());
             for (int j = 0; j < Material.NumOfSRV; j++)
             {
                 var varName = Material.GetNameOfSRV(j);
-                var bindInfo = new TSBindInfo();
                 unsafe
                 {
-                    mCoreObject.GetSRVBindInfo(varName, ref bindInfo, sizeof(TSBindInfo));
-                }
-                var srv = Material.TryGetSRV(j);
-                if (bindInfo.PSBindPoint != 0xffffffff && srv != null)
-                {
-                    textures.PSBindTexture(bindInfo.PSBindPoint, srv.mCoreObject);
-                }
-                if (bindInfo.VSBindPoint != 0xffffffff && srv != null)
-                {
-                    textures.VSBindTexture(bindInfo.VSBindPoint, srv.mCoreObject);
+                    var bindInfo = mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, varName);
+                    var srv = Material.TryGetSRV(j);
+                    if (bindInfo->PSBindPoint != 0xffffffff && srv != null)
+                    {
+                        textures.BindPS(bindInfo->PSBindPoint, srv.mCoreObject);
+                    }
+                    if (bindInfo->VSBindPoint != 0xffffffff && srv != null)
+                    {
+                        textures.BindVS(bindInfo->VSBindPoint, srv.mCoreObject);
+                    }
                 }
             }
 
@@ -105,14 +85,118 @@ namespace EngineNS.RHI
                     var rc = UEngine.Instance.GfxDevice.RenderContext;
                     Material.PerMaterialCBuffer = rc.CreateConstantBuffer(Effect.ShaderProgram, Effect.CBPerMaterialIndex);
                     Material.UpdateUniformVars(Material.PerMaterialCBuffer);
-                    mCoreObject.BindCBufferAll(Effect.CBPerMaterialIndex, Material.PerMaterialCBuffer.mCoreObject);
+                    mCoreObject.BindShaderCBuffer(Effect.CBPerMaterialIndex, Material.PerMaterialCBuffer.mCoreObject);
                 }
             }
             if (Effect.CBPerFrameIndex != 0xFFFFFFFF)
             {
-                mCoreObject.BindCBufferAll(Effect.CBPerFrameIndex, UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject);
+                mCoreObject.BindShaderCBuffer(Effect.CBPerFrameIndex, UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject);
             }
             return true;
-        }        
+        }
+
+        public void SetInstanceNumber(int instNum)
+        {
+            mCoreObject.SetInstanceNumber(instNum);
+        }
+        public void BindCBuffer(string name, CConstantBuffer cbuffer)
+        {
+            unsafe
+            {
+                var binder = mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, name);
+                if (!CoreSDK.IsNullPointer(binder))
+                    BindCBuffer(binder, cbuffer);
+            }
+        }
+        public unsafe void BindCBuffer(IShaderBinder* binder, CConstantBuffer cbuffer)
+        {
+            mCoreObject.BindShaderCBuffer(binder, cbuffer.mCoreObject);
+        }
+        public void BindSrv(string name, CShaderResourceView srv)
+        {
+            unsafe
+            {
+                var binder = mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, name);
+                if (!CoreSDK.IsNullPointer(binder))
+                    BindSrv(binder, srv);
+            }
+        }
+        public unsafe void BindSrv(IShaderBinder* binder, CShaderResourceView srv)
+        {
+            mCoreObject.BindShaderSrv(binder, srv.mCoreObject);
+        }
+        public void SetIndirectDraw(RHI.CGpuBuffer pBuffer, uint offset)
+        {
+            mCoreObject.SetIndirectDraw(pBuffer.mCoreObject, offset);
+        }
+    }
+
+    public partial class CComputeDrawcall : AuxPtrType<IComputeDrawcall>
+    {
+        public void SetComputeShader(RHI.CComputeShader shader)
+        {
+            mCoreObject.SetComputeShader(shader.mCoreObject);
+        }
+        public void SetDispatchIndirectBuffer(RHI.CGpuBuffer buffer, uint offset)
+        {
+            mCoreObject.SetDispatchIndirectBuffer(buffer.mCoreObject, offset);
+        }
+        public void BindCBuffer(string name, CConstantBuffer cbuffer)
+        {
+            unsafe
+            {
+                var binder = mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, name);
+                if (!CoreSDK.IsNullPointer(binder))
+                {
+                    BindCBuffer(binder, cbuffer);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"BindCBuffer: {name} is not found");
+                }
+            }
+        }
+        public unsafe void BindCBuffer(IShaderBinder* binder, CConstantBuffer cbuffer)
+        {
+            mCoreObject.GetCBufferResources().BindCS(binder->m_CSBindPoint, cbuffer.mCoreObject);
+        }
+        public void BindUav(string name, CUnorderedAccessView uav)
+        {
+            unsafe
+            {
+                var binder = mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, name);
+                if (!CoreSDK.IsNullPointer(binder))
+                {
+                    BindUav(binder, uav);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"BindUav: {name} is not found");
+                }
+            }
+        }
+        public unsafe void BindUav(IShaderBinder* binder, CUnorderedAccessView uav)
+        {
+            mCoreObject.GetUavResources().BindCS(binder->m_CSBindPoint, uav.mCoreObject);
+        }
+        public void BindSrv(string name, CShaderResourceView srv)
+        {
+            unsafe
+            {
+                var binder = mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, name);
+                if (!CoreSDK.IsNullPointer(binder))
+                {
+                    BindSrv(binder, srv);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"BindSrv: {name} is not found");
+                }
+            }
+        }
+        public unsafe void BindSrv(IShaderBinder* binder, CShaderResourceView srv)
+        {
+            mCoreObject.GetShaderRViewResources().BindCS(binder->m_CSBindPoint, srv.mCoreObject);
+        }
     }
 }

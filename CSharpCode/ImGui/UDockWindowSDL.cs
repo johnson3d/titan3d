@@ -7,6 +7,7 @@ namespace EngineNS.EGui
 {
     public class UDockWindowSDL
     {
+        #region SDL
         public static unsafe void ImGui_ImplSDL2_UpdateMonitors()
         {
             var platform_io = ImGuiAPI.GetPlatformIO();
@@ -79,106 +80,204 @@ namespace EngineNS.EGui
             SDL.SDL_SetClipboardText(System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)text));
         }
         static bool[] g_MousePressed = new bool[]{ false, false, false };
-        public static unsafe bool ImGui_ImplSDL2_ProcessEvent(ref SDL.SDL_Event ev)
+        public static unsafe bool ImGui_ImplSDL2_ProcessEvent(in SDL.SDL_Event ev)
         {
             var io = ImGuiAPI.GetIO();
             switch (ev.type)
             {
                 case SDL.SDL_EventType.SDL_MOUSEWHEEL:
-                {
-                    if (ev.wheel.x > 0) io.MouseWheelH += 1;
-                    if (ev.wheel.x < 0) io.MouseWheelH -= 1;
-                    if (ev.wheel.y > 0) io.MouseWheel += 1;
-                    if (ev.wheel.y < 0) io.MouseWheel -= 1;
-                    return true;
-                }
-                case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
-                {
-                    if (ev.button.button == SDL.SDL_BUTTON_LEFT) g_MousePressed [0] = true;
-                    if (ev.button.button == SDL.SDL_BUTTON_RIGHT) g_MousePressed [1] = true;
-                    if (ev.button.button == SDL.SDL_BUTTON_MIDDLE) g_MousePressed [2] = true;
-                    return true;
-                }
-            case SDL.SDL_EventType.SDL_TEXTINPUT:
-                {
-                    var text = ev.text;
-                    var pText = (sbyte*)text.text;                        
-                    io.AddInputCharactersUTF8(pText);
-                    return true;
-                }
-            case SDL.SDL_EventType.SDL_KEYDOWN:
-            case SDL.SDL_EventType.SDL_KEYUP:
-                {
-                    var key = (int)ev.key.keysym.scancode;
-                    bool * keysDown = (bool*)&io.UnsafeAsLayout->KeysDown;
-                    //IM_ASSERT(key >= 0 && key<IM_ARRAYSIZE(io.KeysDown));
-                    keysDown[key] = (ev.type == SDL.SDL_EventType.SDL_KEYDOWN);
-                    io.KeyShift = ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_SHIFT) != 0);
-                    io.KeyCtrl = ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_CTRL) != 0);
-                    io.KeyAlt = ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_ALT) != 0);
-                    io.KeySuper = false;
-                    //io.KeySuper = ((SDL_GetModState() & KMOD_GUI) != 0);
-                    return true;
-                }
-            // Multi-viewport support
-            case SDL.SDL_EventType.SDL_WINDOWEVENT:
-                {
-                    var window_event = ev.window.windowEvent;
-                    if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE || window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_MOVED || window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED)
                     {
-                        ImGuiViewport* viewport = ImGuiAPI.FindViewportByPlatformHandle((void*)SDL.SDL_GetWindowFromID(ev.window.windowID));
-                        if (viewport != (ImGuiViewport*)0)
+                        if (ev.wheel.x > 0) io.MouseWheelH += 1;
+                        if (ev.wheel.x < 0) io.MouseWheelH -= 1;
+                        if (ev.wheel.y > 0) io.MouseWheel += 1;
+                        if (ev.wheel.y < 0) io.MouseWheel -= 1;
+                        return true;
+                    }
+                case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                    {
+                        if (ev.button.button == SDL.SDL_BUTTON_LEFT) g_MousePressed[0] = true;
+                        if (ev.button.button == SDL.SDL_BUTTON_RIGHT) g_MousePressed[1] = true;
+                        if (ev.button.button == SDL.SDL_BUTTON_MIDDLE) g_MousePressed[2] = true;
+                        return true;
+                    }
+                case SDL.SDL_EventType.SDL_TEXTINPUT:
+                    {
+                        var text = ev.text;
+                        var pText = (sbyte*)text.text;
+                        io.AddInputCharactersUTF8(pText);
+                        return true;
+                    }
+                case SDL.SDL_EventType.SDL_KEYDOWN:
+                case SDL.SDL_EventType.SDL_KEYUP:
+                    {
+                        var key = (int)ev.key.keysym.scancode;
+                        bool* keysDown = (bool*)&io.UnsafeAsLayout->KeysDown;
+                        //IM_ASSERT(key >= 0 && key<IM_ARRAYSIZE(io.KeysDown));
+                        keysDown[key] = (ev.type == SDL.SDL_EventType.SDL_KEYDOWN);
+                        io.KeyShift = ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_SHIFT) != 0);
+                        io.KeyCtrl = ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_CTRL) != 0);
+                        io.KeyAlt = ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_ALT) != 0);
+                        io.KeySuper = false;
+                        //io.KeySuper = ((SDL_GetModState() & KMOD_GUI) != 0);
+                        return true;
+                    }
+                // Multi-viewport support
+                case SDL.SDL_EventType.SDL_WINDOWEVENT:
+                    {
+                        var window_event = ev.window.windowEvent;
+                        if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE || window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_MOVED || window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED)
                         {
-                            if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE)
+                            ImGuiViewport* viewport = ImGuiAPI.FindViewportByPlatformHandle((void*)SDL.SDL_GetWindowFromID(ev.window.windowID));
+                            if (viewport != (ImGuiViewport*)0)
                             {
-                                viewport->PlatformRequestClose = true;
-                                var closeEvent = new SDL.SDL_Event();
-                                closeEvent.type = SDL.SDL_EventType.SDL_QUIT;
-                                SDL.SDL_PushEvent(ref closeEvent);
+                                if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE)
+                                {
+                                    viewport->PlatformRequestClose = true;
+                                    var closeEvent = new SDL.SDL_Event();
+                                    closeEvent.type = SDL.SDL_EventType.SDL_QUIT;
+                                    SDL.SDL_PushEvent(ref closeEvent);
+                                }
+                                if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_MOVED)
+                                    viewport->PlatformRequestMove = true;
+                                if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED)
+                                    viewport->PlatformRequestResize = true;
+                                return true;
                             }
-                            if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_MOVED)
-                                viewport->PlatformRequestMove = true;
-                            if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED)
-                                viewport->PlatformRequestResize = true;
-                            return true;
                         }
                     }
-                }
-                break;
+                    break;
             }
             return false;
         }
+        #endregion
 
         public class UImDrawDataRHI
         {
             public IScissorRect ScissorRect = IScissorRect.CreateInstance();
             public RHI.CCommandList CmdList;
-            public RenderPassDesc PassDesc = new RenderPassDesc();
+            public RHI.CRenderPass RenderPass;
+            public IShaderBinder FontTextureBindInfo;
+            public RHI.CConstantBuffer FontCBuffer;
+            public RHI.CDrawCall Drawcall;
+
             public RHI.CGeometryMesh GeomMesh;
+            public Graphics.Mesh.CMeshPrimitives PrimitiveMesh;
+            
+            #region TriangleData
             public RHI.CVertexBuffer VertexBuffer;
             public RHI.CIndexBuffer IndexBuffer;
             public Support.UNativeArray<ImDrawVert> DataVB = Support.UNativeArray<ImDrawVert>.CreateInstance();
             public Support.UNativeArray<ushort> DataIB = Support.UNativeArray<ushort>.CreateInstance();
-            public bool InitializeGraphics()
+            #endregion
+            public unsafe bool InitializeGraphics(EPixelFormat format, EPixelFormat dsFormat)
             {
+                var rc = UEngine.Instance.GfxDevice.RenderContext;
                 var clstDesc = new ICommandListDesc();
-                CmdList = UEngine.Instance.GfxDevice.RenderContext.CreateCommandList(ref clstDesc);
+                CmdList = rc.CreateCommandList(ref clstDesc);
 
-                PassDesc.mFBLoadAction_Color = FrameBufferLoadAction.LoadActionDontCare;
-                PassDesc.mFBStoreAction_Color = FrameBufferStoreAction.StoreActionStore;
-                PassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
-                PassDesc.mFBLoadAction_Depth = FrameBufferLoadAction.LoadActionDontCare;
-                PassDesc.mFBStoreAction_Depth = FrameBufferStoreAction.StoreActionStore;
-                PassDesc.mDepthClearValue = 1.0f;
-                PassDesc.mFBLoadAction_Stencil = FrameBufferLoadAction.LoadActionDontCare;
-                PassDesc.mFBStoreAction_Stencil = FrameBufferStoreAction.StoreActionStore;
-                PassDesc.mStencilClearValue = 0u;
+                var PassDesc = new IRenderPassDesc();
+                PassDesc.SetDefault();
+                unsafe
+                {
+                    PassDesc.NumOfMRT = 1;
+                    PassDesc.AttachmentMRTs[0].IsSwapChain = 1;
+                    PassDesc.AttachmentMRTs[0].Format = format;
+                    PassDesc.AttachmentMRTs[0].Samples = 1;
+                    PassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionClear;
+                    PassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
+                    PassDesc.m_AttachmentDepthStencil.Format = dsFormat;
+                    PassDesc.m_AttachmentDepthStencil.Samples = 1;
+                    PassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
+                    PassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
+                    PassDesc.m_AttachmentDepthStencil.StencilLoadAction = FrameBufferLoadAction.LoadActionClear;
+                    PassDesc.m_AttachmentDepthStencil.StencilStoreAction = FrameBufferStoreAction.StoreActionStore;
+                    //PassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
+                    //PassDesc.mDepthClearValue = 1.0f;
+                    //PassDesc.mStencilClearValue = 0u;
+                }
+                RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in PassDesc);
 
-                GeomMesh = UEngine.Instance.GfxDevice.RenderContext.CreateGeometryMesh();
+                GeomMesh = rc.CreateGeometryMesh();
+                PrimitiveMesh = new Graphics.Mesh.CMeshPrimitives();
+                PrimitiveMesh.mCoreObject.InitFromGeomtryMesh(rc.mCoreObject, GeomMesh.mCoreObject, 1, new BoundingBox());
+                var dpDesc = new DrawPrimitiveDesc();
+                dpDesc.SetDefault();
+                PrimitiveMesh.mCoreObject.PushAtomLOD(0, in dpDesc);
+
+                var renderer = UEngine.Instance.GfxDevice.SlateRenderer;
+                var shaderProg = renderer.SlateEffect.ShaderProgram;
+                Drawcall = rc.CreateDrawCall(renderer.SlateEffect);
+                Drawcall.mCoreObject.BindGeometry(PrimitiveMesh.mCoreObject, 0, 0);
+
+                var cbIndex = shaderProg.mCoreObject.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "ProjectionMatrixBuffer");
+                FontCBuffer = rc.CreateConstantBuffer(shaderProg, cbIndex);
+
+                var cb = shaderProg.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, cbIndex);
+                if (!CoreSDK.IsNullPointer(cb))
+                    Drawcall.mCoreObject.BindShaderCBuffer(cb, FontCBuffer.mCoreObject);
+                var smp = shaderProg.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_FontTexture");
+                if (!CoreSDK.IsNullPointer(smp))
+                    Drawcall.mCoreObject.BindShaderSampler(smp, renderer.SamplerState.mCoreObject);
+                var pDesc = shaderProg.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "FontTexture");
+                FontTextureBindInfo = *pDesc;
+
+                {
+                    var rstDesc = new IRasterizerStateDesc();
+                    rstDesc.SetDefault();
+                    rstDesc.ScissorEnable = 1;
+                    rstDesc.FillMode = EFillMode.FMD_SOLID;
+                    rstDesc.CullMode = ECullMode.CMD_NONE;
+                    var RasterizerState = UEngine.Instance.GfxDevice.RasterizerStateManager.GetPipelineState(rc, in rstDesc);
+
+                    var dssDesc = new IDepthStencilStateDesc();
+                    dssDesc.SetDefault();
+                    dssDesc.DepthEnable = 0;
+                    dssDesc.DepthWriteMask = EDepthWriteMask.DSWM_ZERO;
+                    dssDesc.DepthFunc = EComparisionMode.CMP_ALWAYS;
+                    var DepthStencilState = UEngine.Instance.GfxDevice.DepthStencilStateManager.GetPipelineState(rc, in dssDesc);
+
+                    var bldDesc = new IBlendStateDesc();
+                    bldDesc.SetDefault();
+                    unsafe
+                    {
+                        EngineNS.RenderTargetBlendDesc* pRenderTarget = bldDesc.RenderTarget;
+                        pRenderTarget[0].SetDefault();
+                        pRenderTarget[0].SrcBlendAlpha = EBlend.BLD_INV_SRC_ALPHA;
+                        pRenderTarget[0].DestBlendAlpha = EBlend.BLD_ONE;
+                        pRenderTarget[0].BlendEnable = 1;
+                    }
+                    var BlendState = UEngine.Instance.GfxDevice.BlendStateManager.GetPipelineState(rc, in bldDesc);
+
+                    //var Pipeline = Drawcall.mCoreObject.GetPipeline();
+                    //Pipeline.BindRenderPass(RenderPass.mCoreObject);
+                    //Pipeline.BindBlendState(BlendState.mCoreObject);
+                    
+                    //Pipeline.BindGpuProgram(shaderProg.mCoreObject);
+                    //Pipeline.BindRasterizerState(RasterizerState.mCoreObject);
+                    //Pipeline.BindDepthStencilState(DepthStencilState.mCoreObject);
+
+                    //Pipeline.GetGpuProgram().BindInputLayout(renderer.InputLayout.mCoreObject);
+
+                    var pipelineDesc = new IRenderPipelineDesc();
+                    pipelineDesc.SetDefault();
+
+                    pipelineDesc.RenderPass = RenderPass.mCoreObject;
+                    pipelineDesc.Blend = BlendState.mCoreObject;
+                    pipelineDesc.GpuProgram = shaderProg.mCoreObject;
+                    pipelineDesc.Rasterizer = RasterizerState.mCoreObject;
+                    pipelineDesc.DepthStencil = DepthStencilState.mCoreObject;
+                    var Pipeline = rc.CreateRenderPipeline(ref pipelineDesc);
+                    Pipeline.mCoreObject.GetGpuProgram().BindInputLayout(renderer.InputLayout.mCoreObject);
+
+                    Drawcall.mCoreObject.BindPipeline(Pipeline.mCoreObject);
+                }
                 return true;
             }
             public void Cleanup()
             {
+                FontCBuffer?.Dispose();
+                FontCBuffer = null;
+
                 CmdList?.Dispose();
                 CmdList = null;
                 DataVB.Dispose();
@@ -268,80 +367,75 @@ namespace EngineNS.EGui
                 -1.0f,
                 1.0f);
 
-            var renderer = UEngine.Instance.GfxDevice.SlateRenderer;
-            renderer.FontCBuffer.mCoreObject.SetVarValuePtr(0, &mvp, sizeof(Matrix), 0);            
+            rhiData.FontCBuffer.mCoreObject.SetVarValuePtr(0, &mvp, sizeof(Matrix), 0);            
 
             var fb_scale = io.DisplayFramebufferScale;
             draw_data.ScaleClipRects(in fb_scale);
 
             var drawCmd = rhiData.CmdList.mCoreObject;
-            drawCmd.BeginCommand();
-            unsafe
+            if(drawCmd.BeginCommand())
             {
-                renderer.FontCBuffer.mCoreObject.UpdateDrawPass(drawCmd, 1);
-                drawCmd.BeginRenderPass(ref rhiData.PassDesc, SwapChainBuffer.FrameBuffers.mCoreObject, "ImGui");
-
-                drawCmd.SetRenderPipeline(renderer.Pipeline.mCoreObject);
-
-                rhiData.GeomMesh.mCoreObject.ApplyGeometry(drawCmd, new IDrawCall(), 0);
-
-                //drawCmd.SetVertexBuffer(0, rhiData.VertexBuffer.mCoreObject, 0, (uint)sizeof(ImDrawVert));
-                //drawCmd.SetIndexBuffer(rhiData.IndexBuffer.mCoreObject);
-                drawCmd.SetViewport(SwapChainBuffer.ViewPort.mCoreObject);
-                drawCmd.PSSetSampler(0, renderer.SamplerState.mCoreObject);
-                drawCmd.VSSetConstantBuffer(0, renderer.FontCBuffer.mCoreObject);
-
-                // Render command lists
-                int vtx_offset = 0;
-                int idx_offset = 0;
-                Vector2 clip_off = draw_data.DisplayPos;
-                for (int n = 0; n < draw_data.CmdListsCount; n++)
+                var passClears = new IRenderPassClears();
+                passClears.SetDefault();
+                passClears.SetClearColor(0, new Color4(1, 0, 0, 0));
+                
+                if (drawCmd.BeginRenderPass(SwapChainBuffer.FrameBuffers.mCoreObject, in passClears, "ImGui"))
                 {
-                    var cmd_list = new ImDrawList(draw_data.CmdLists[n]);
-                    for (int cmd_i = 0; cmd_i < cmd_list.CmdBufferSize; cmd_i++)
+                    drawCmd.SetViewport(SwapChainBuffer.ViewPort.mCoreObject);
+                    
+                    // Render command lists
+                    int vtx_offset = 0;
+                    int idx_offset = 0;
+                    Vector2 clip_off = draw_data.DisplayPos;
+                    for (int n = 0; n < draw_data.CmdListsCount; n++)
                     {
-                        ImDrawCmd* pcmd = &cmd_list.CmdBufferData[cmd_i];
-                        if (pcmd->UserCallback != null)
+                        var cmd_list = new ImDrawList(draw_data.CmdLists[n]);
+                        for (int cmd_i = 0; cmd_i < cmd_list.CmdBufferSize; cmd_i++)
                         {
-                            throw new NotImplementedException();
-                        }
-                        else
-                        {
-                            //if (pcmd->TextureId == (void*)0)
-                            //{
-                            //    drawCmd.PSSetShaderResource(0, renderer.FontSRV.mCoreObject);
-                            //}
-                            //else
+                            ImDrawCmd* pcmd = &cmd_list.CmdBufferData[cmd_i];
+                            if (pcmd->UserCallback != null)
+                            {
+                                throw new NotImplementedException();
+                            }
+                            else
                             {
                                 var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)pcmd->TextureId);
                                 if (handle.IsAllocated)
                                 {
                                     var rsv = handle.Target as RHI.CShaderResourceView;
                                     if (rsv != null)
-                                        drawCmd.PSSetShaderResource(0, rsv.mCoreObject);
+                                    {
+                                        rhiData.Drawcall.mCoreObject.GetShaderRViewResources().BindPS(rhiData.FontTextureBindInfo.PSBindPoint, rsv.mCoreObject);
+                                    }
                                 }
                             }
+
+                            rhiData.ScissorRect.SetRectNumber(1);
+                            rhiData.ScissorRect.SetSCRect(0,
+                                (int)(pcmd->ClipRect.X - clip_off.X),
+                                (int)(pcmd->ClipRect.Y - clip_off.Y),
+                                (int)(pcmd->ClipRect.Z - clip_off.X),
+                                (int)(pcmd->ClipRect.W - clip_off.Y));
+                            drawCmd.SetScissorRect(rhiData.ScissorRect);
+
+                            var dpDesc = new DrawPrimitiveDesc();
+                            dpDesc.SetDefault();
+                            dpDesc.m_BaseVertexIndex = (uint)(vtx_offset + pcmd->VtxOffset);
+                            dpDesc.m_StartIndex = (uint)(idx_offset + pcmd->IdxOffset);
+                            dpDesc.m_NumPrimitives = pcmd->ElemCount / 3;
+                            rhiData.PrimitiveMesh.mCoreObject.SetAtom(0, 0, in dpDesc);
+                            rhiData.Drawcall.mCoreObject.BuildPass(drawCmd, 1);
                         }
-
-                        rhiData.ScissorRect.SetRectNumber(1);
-                        rhiData.ScissorRect.SetSCRect(0,
-                            (int)(pcmd->ClipRect.X - clip_off.X),
-                            (int)(pcmd->ClipRect.Y - clip_off.Y),
-                            (int)(pcmd->ClipRect.Z - clip_off.X),
-                            (int)(pcmd->ClipRect.W - clip_off.Y));
-                        drawCmd.SetScissorRect(rhiData.ScissorRect);
-
-                        drawCmd.DrawIndexedPrimitive(EPrimitiveType.EPT_TriangleList, (uint)(vtx_offset + pcmd->VtxOffset), (uint)(idx_offset + pcmd->IdxOffset), pcmd->ElemCount / 3, 1);
+                        idx_offset += (int)cmd_list.IdxBufferSize;
+                        vtx_offset += cmd_list.VtxBufferSize;
                     }
-                    idx_offset += (int)cmd_list.IdxBufferSize;
-                    vtx_offset += cmd_list.VtxBufferSize;
+
+                    drawCmd.EndRenderPass();
                 }
 
-                drawCmd.EndRenderPass();
+                drawCmd.SetScissorRect(new IScissorRect((void*)0));
+                drawCmd.EndCommand();
             }
-            drawCmd.EndCommand();
-
-            drawCmd.SetScissorRect(new IScissorRect((void*)0));
 
             drawCmd.Commit(rc.mCoreObject);
         }
@@ -544,8 +638,8 @@ namespace EngineNS.EGui
             viewport->RendererUserData = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(vpData)).ToPointer();
 
 
-            vpData.PresentWindow.InitSwapChain(UEngine.Instance.GfxDevice.RenderContext);
-            vpData.DrawData.InitializeGraphics();
+            vpData.PresentWindow.InitSwapChain(UEngine.Instance.GfxDevice.RenderContext);            
+            vpData.DrawData.InitializeGraphics(vpData.PresentWindow.GetSwapchainFormat(), vpData.PresentWindow.GetSwapchainDSFormat());
         }
         unsafe static ImGuiPlatformIO.FDelegate_Renderer_DestroyWindow ImGui_Renderer_DestroyWindow = ImGui_Renderer_DestroyWindow_Impl;
         unsafe static void ImGui_Renderer_DestroyWindow_Impl(ImGuiViewport* viewport)

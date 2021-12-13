@@ -97,8 +97,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Function.Name = "DO_PS_MATERIAL_IMPL";
             Function.ReturnType = typeof(void).FullName;
             Function.Arguments.Clear();
-            Function.Arguments.Add(new DefineVar() { DefType = "in PS_INPUT", VarName = "input" });
-            Function.Arguments.Add(new DefineVar() { DefType = "inout MTL_OUTPUT", VarName = "mtl" });
+            Function.Arguments.Add(new DefineFunctionParam() { DefType = "in PS_INPUT", VarName = "input" });
+            Function.Arguments.Add(new DefineFunctionParam() { DefType = "inout MTL_OUTPUT", VarName = "mtl" });
             Function.LocalVars.Clear();
             UniformVars.Clear();
             Function.Body.Lines.Clear();

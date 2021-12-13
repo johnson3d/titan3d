@@ -1,0 +1,10 @@
+{
+  "Name": "Terrain",
+  "Path": "CSharpCode/Bricks/Terrain",
+  "FullName": "CSharpCode/Bricks/Terrain/Terrain.brick",
+  "SharedProjects": [
+    "CSharpCode/GamePlay/GamePlay.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

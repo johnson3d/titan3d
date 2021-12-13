@@ -51,10 +51,10 @@ namespace EngineNS
             Maximum.Y = extentY * 0.5f;
             Maximum.Z = extentZ * 0.5f;
         }
-        public BoundingBox(Vector3 center, float extent = 0.5f)
+        public BoundingBox(Vector3 center, float extent = 1.0f)
         {
-            Minimum = -center * extent;
-            Maximum = center * extent;
+            Minimum = center - Vector3.UnitXYZ * extent * 0.5f;
+            Maximum = center + Vector3.UnitXYZ * extent * 0.5f;
         }
         /// <summary>
         /// 带参构造函数
@@ -129,6 +129,28 @@ namespace EngineNS
             SetVector3Value(ref results[7], Minimum.X, Minimum.Y, Minimum.Z);
 		    return results;
 	    }
+        public DVector3[] GetDCorners()
+        {
+            DVector3[] results = new DVector3[8];
+            Vector3 tmp = new Vector3();
+            SetVector3Value(ref tmp, Minimum.X, Maximum.Y, Maximum.Z);
+            results[0] = tmp.AsDVector();
+            SetVector3Value(ref tmp, Maximum.X, Maximum.Y, Maximum.Z);
+            results[1] = tmp.AsDVector();
+            SetVector3Value(ref tmp, Maximum.X, Minimum.Y, Maximum.Z);
+            results[2] = tmp.AsDVector();
+            SetVector3Value(ref tmp, Minimum.X, Minimum.Y, Maximum.Z);
+            results[3] = tmp.AsDVector();
+            SetVector3Value(ref tmp, Minimum.X, Maximum.Y, Minimum.Z);
+            results[4] = tmp.AsDVector();
+            SetVector3Value(ref tmp, Maximum.X, Maximum.Y, Minimum.Z);
+            results[5] = tmp.AsDVector();
+            SetVector3Value(ref tmp, Maximum.X, Minimum.Y, Minimum.Z);
+            results[6] = tmp.AsDVector();
+            SetVector3Value(ref tmp, Minimum.X, Minimum.Y, Minimum.Z);
+            results[7] = tmp.AsDVector();
+            return results;
+        }
         public unsafe void GetCornersUnsafe(Vector3* verts)
         {
             SetVector3Value(ref verts[0], Minimum.X, Maximum.Y, Maximum.Z);
@@ -183,22 +205,12 @@ namespace EngineNS
             }
         }
         [Rtti.Meta]
-        public ContainmentType Contains(BoundingBox box)
+        public ContainmentType Contains(in BoundingBox box)
         {
-            return Contains(ref this, ref box);
+            return Contains(in this, in box);
         }
         [Rtti.Meta]
-        public ContainmentType Contains(ref BoundingBox box)
-        {
-            return Contains(ref this, ref box);
-        }
-        [Rtti.Meta]
-        public static ContainmentType Contains(BoundingBox box1, BoundingBox box2)
-	    {
-            return Contains(ref box1, ref box2);
-	    }
-        [Rtti.Meta]
-        public static ContainmentType Contains(ref BoundingBox box1, ref BoundingBox box2)
+        public static ContainmentType Contains(in BoundingBox box1, in BoundingBox box2)
         {
             if (box1.Maximum.X < box2.Minimum.X || box1.Minimum.X > box2.Maximum.X)
                 return ContainmentType.Disjoint;
@@ -244,22 +256,12 @@ namespace EngineNS
         //}
 
         [Rtti.Meta]
-        public ContainmentType Contains(Vector3 vector)
+        public ContainmentType Contains(in Vector3 vector)
         {
-            return Contains(ref this, ref vector);
+            return Contains(in this, in vector);
         }
         [Rtti.Meta]
-        public ContainmentType Contains(ref Vector3 vector)
-        {
-            return Contains(ref this, ref vector);
-        }
-        [Rtti.Meta]
-        public static ContainmentType Contains(BoundingBox box, Vector3 vector)
-	    {
-            return Contains(ref box, ref vector);
-	    }
-        [Rtti.Meta]
-        public static ContainmentType Contains(ref BoundingBox box, ref Vector3 vector)
+        public static ContainmentType Contains(in BoundingBox box, in Vector3 vector)
         {
             if (box.Minimum.X <= vector.X && vector.X <= box.Maximum.X && box.Minimum.Y <= vector.Y &&
                 vector.Y <= box.Maximum.Y && box.Minimum.Z <= vector.Z && vector.Z <= box.Maximum.Z)
@@ -291,9 +293,9 @@ namespace EngineNS
             foreach ( var i in points )
 		    {
                 Vector3 vector = i;
-			    Vector3.Minimize( ref result.Minimum, ref vector, out min );
+			    Vector3.Minimize( in result.Minimum, in vector, out min );
                 result.Minimum = min;
-			    Vector3.Maximize( ref result.Maximum, ref vector, out max );
+			    Vector3.Maximize(in result.Maximum, in vector, out max );
                 result.Maximum = max;
 		    }
 
@@ -328,19 +330,13 @@ namespace EngineNS
         /// <returns>返回混合后的包围盒</returns>
 
         [Rtti.Meta]
-        public void Merge(ref Vector3 pos)
+        public void Merge(in Vector3 pos)
         {
-            Vector3.Minimize(ref Minimum, ref pos, out Minimum);
-            Vector3.Maximize(ref Maximum, ref pos, out Maximum);
+            Vector3.Minimize(in Minimum, in pos, out Minimum);
+            Vector3.Maximize(in Maximum, in pos, out Maximum);
         }
-
         [Rtti.Meta]
-        public static BoundingBox Merge(BoundingBox box1, BoundingBox box2)
-	    {
-            return Merge(ref box1, ref box2);
-	    }
-        [Rtti.Meta]
-        public static BoundingBox Merge(ref BoundingBox box1, ref BoundingBox box2)
+        public static BoundingBox Merge(in BoundingBox box1, in BoundingBox box2)
 	    {
             if (box1.IsEmpty())
                 return box2;
@@ -349,13 +345,13 @@ namespace EngineNS
             else
             {
                 BoundingBox box;
-                Vector3.Minimize(ref box1.Minimum, ref box2.Minimum, out box.Minimum);
-                Vector3.Maximize(ref box1.Maximum, ref box2.Maximum, out box.Maximum);
+                Vector3.Minimize(in box1.Minimum, in box2.Minimum, out box.Minimum);
+                Vector3.Maximize(in box1.Maximum, in box2.Maximum, out box.Maximum);
                 return box;
             }
 	    }
         [Rtti.Meta]
-        public static void Merge(ref BoundingBox box1, ref BoundingBox box2, out BoundingBox box)
+        public static void Merge(in BoundingBox box1, in BoundingBox box2, out BoundingBox box)
         {
             if (box1.IsEmpty())
             {
@@ -367,39 +363,33 @@ namespace EngineNS
             }
             else
             {
-                Vector3.Minimize(ref box1.Minimum, ref box2.Minimum, out box.Minimum);
-                Vector3.Maximize(ref box1.Maximum, ref box2.Maximum, out box.Maximum);
+                Vector3.Minimize(in box1.Minimum, in box2.Minimum, out box.Minimum);
+                Vector3.Maximize(in box1.Maximum, in box2.Maximum, out box.Maximum);
             }
         }
         [Rtti.Meta]
-        public void Merge2(ref BoundingBox box, ref BoundingBox outBox)
+        public void Merge2(in BoundingBox box, out BoundingBox outBox)
         {
             if (box.IsEmpty())
             {
                 outBox = this;
                 return;
             }
-            Vector3.Minimize(ref this.Minimum, ref box.Minimum, out outBox.Minimum);
-            Vector3.Maximize(ref this.Maximum, ref box.Maximum, out outBox.Maximum);
-        }
-        /// <summary>
-        /// 包围盒与点融合，新的包围盒取包围盒与点的最大值点和最小值点
-        /// </summary>
-        /// <param name="box"></param>
-        /// <param name="point"></param>
-        /// <returns></returns>
-        [Rtti.Meta]
-        public static BoundingBox Merge(BoundingBox box, Vector3 point)
-        {
-            return Merge(ref box, ref point);
+            Vector3.Minimize(in this.Minimum, in box.Minimum, out outBox.Minimum);
+            Vector3.Maximize(in this.Maximum, in box.Maximum, out outBox.Maximum);
         }
         [Rtti.Meta]
-        public static BoundingBox Merge(ref BoundingBox box, ref Vector3 point)
+        public static BoundingBox Merge(in BoundingBox box, in Vector3 point)
         {
             BoundingBox retBox;
-            Vector3.Minimize(ref box.Minimum, ref point, out retBox.Minimum);
-            Vector3.Maximize(ref box.Maximum, ref point, out retBox.Maximum);
+            Vector3.Minimize(in box.Minimum, in point, out retBox.Minimum);
+            Vector3.Maximize(in box.Maximum, in point, out retBox.Maximum);
             return retBox;
+        }
+        public static void And(in BoundingBox a, in BoundingBox b, out BoundingBox box)
+        {
+            Vector3.Maximize(in a.Minimum, in b.Minimum, out box.Minimum);
+            Vector3.Minimize(in a.Maximum, in b.Maximum, out box.Maximum);
         }
         /// <summary>
         /// 判断两个包围盒是否相交
@@ -410,9 +400,9 @@ namespace EngineNS
         [Rtti.Meta]
         public static bool Intersects(BoundingBox box1, BoundingBox box2)
 	    {
-            return Intersects(ref box1, ref box2);
+            return Intersects(in box1, in box2);
         }
-        public static bool Intersects(ref BoundingBox box1, ref BoundingBox box2)
+        public static bool Intersects(in BoundingBox box1, in BoundingBox box2)
         {
             if (box1.Maximum.X < box2.Minimum.X || box1.Minimum.X > box2.Maximum.X)
                 return false;
@@ -429,16 +419,25 @@ namespace EngineNS
         /// <param name="sphere">球体对象</param>
         /// <returns>如果相交返回true，否则返回false</returns>
         [Rtti.Meta]
-        public static bool Intersects(BoundingBox box, BoundingSphere sphere)
-        {
-            float dist;
-            return Intersects(ref box, ref sphere, out dist);
-        }
-        public static bool Intersects(ref BoundingBox box, ref BoundingSphere sphere, out float dist)
+        public static bool Intersects(in BoundingBox box, in BoundingSphere sphere)
         {
             Vector3 clamped;
 
-            Vector3.Clamp(ref sphere.Center, ref box.Minimum, ref box.Maximum, out clamped);
+            Vector3.Clamp(in sphere.Center, in box.Minimum, in box.Maximum, out clamped);
+
+            float x = sphere.Center.X - clamped.X;
+            float y = sphere.Center.Y - clamped.Y;
+            float z = sphere.Center.Z - clamped.Z;
+
+            float dist = (x * x) + (y * y) + (z * z);
+            var ret = (dist <= (sphere.Radius * sphere.Radius));            
+            return ret;
+        }
+        public static bool Intersects(in BoundingBox box, in BoundingSphere sphere, out float dist)
+        {
+            Vector3 clamped;
+
+            Vector3.Clamp(in sphere.Center, in box.Minimum, in box.Maximum, out clamped);
 
             float x = sphere.Center.X - clamped.X;
             float y = sphere.Center.Y - clamped.Y;
@@ -506,7 +505,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="value">对象实例</param>
         /// <returns>如果相等返回true，否则返回false</returns>
-        public override bool Equals(Object value)
+        public override bool Equals(object value)
 	    {
 		    if( value == null )
 			    return false;
@@ -541,25 +540,73 @@ namespace EngineNS
             Transform(in srcBox, in matrix, out result);
             return result;
         }
+        public static BoundingBox Transform(in BoundingBox srcBox, in FTransform matrix)
+        {
+            BoundingBox result;
+            Transform(in srcBox, in matrix, out result);
+            return result;
+        }
+        public static BoundingBox TransformNoScale(in BoundingBox srcBox, in FTransform matrix)
+        {
+            BoundingBox result;
+            TransformNoScale(in srcBox, in matrix, out result);
+            return result;
+        }
         //http://dev.theomader.com/transform-bounding-boxes/
         public static void Transform(in BoundingBox srcBox, in Matrix matrix, out BoundingBox result)
         {
-            var right = matrix.Right;
-            var up = matrix.Up;
-            var forward = matrix.Forward;
-            var trans = matrix.Translation;
+            //var right = matrix.Right;
+            //var up = matrix.Up;
+            //var forward = matrix.Forward;
+            //var trans = matrix.Translation;
 
-            var xa = right * srcBox.Minimum.X;
-            var xb = right * srcBox.Maximum.X;
+            //var xa = right * srcBox.Minimum.X;
+            //var xb = right * srcBox.Maximum.X;
 
-            var ya = up * srcBox.Minimum.Y;
-            var yb = up * srcBox.Maximum.Y;
+            //var ya = up * srcBox.Minimum.Y;
+            //var yb = up * srcBox.Maximum.Y;
 
-            var za = forward * srcBox.Minimum.Z;
-            var zb = forward * srcBox.Maximum.Z;
+            //var za = forward * srcBox.Minimum.Z;
+            //var zb = forward * srcBox.Maximum.Z;
 
-            result.Minimum = Vector3.Minimize(xa, xb) + Vector3.Minimize(ya, yb) + Vector3.Minimize(za, zb) + trans;
-            result.Maximum = Vector3.Maximize(xa, xb) + Vector3.Maximize(ya, yb) + Vector3.Maximize(za, zb) + trans;
+            //result.Minimum = Vector3.Minimize(xa, xb) + Vector3.Minimize(ya, yb) + Vector3.Minimize(za, zb) + trans;
+            //result.Maximum = Vector3.Maximize(xa, xb) + Vector3.Maximize(ya, yb) + Vector3.Maximize(za, zb) + trans;
+
+            result.Minimum = new Vector3(float.MaxValue);
+            result.Maximum = new Vector3(-float.MaxValue);
+            var corners = srcBox.GetCorners();
+            for(int i=1; i<corners.Length; i++)
+            {
+                Vector3.TransformCoordinate(in corners[i], in matrix, out corners[i]);
+                Vector3.Minimize(in result.Minimum, in corners[i], out result.Minimum);
+                Vector3.Maximize(in result.Maximum, in corners[i], out result.Maximum);
+            }
         }
+        public static void Transform(in BoundingBox srcBox, in FTransform transform, out BoundingBox result)
+        {
+            result.Minimum = new Vector3(float.MaxValue);
+            result.Maximum = new Vector3(-float.MaxValue);
+            var corners = srcBox.GetDCorners();
+            for (int i = 1; i < corners.Length; i++)
+            {
+                corners[i] = transform.TransformPosition(in corners[i]);
+                var v = corners[i].ToSingleVector3();
+                Vector3.Minimize(in result.Minimum, in v, out result.Minimum);
+                Vector3.Maximize(in result.Maximum, in v, out result.Maximum);
+            }
+        }
+        public static void TransformNoScale(in BoundingBox srcBox, in FTransform transform, out BoundingBox result)
+        {
+            result.Minimum = new Vector3(float.MaxValue);
+            result.Maximum = new Vector3(-float.MaxValue);
+            var corners = srcBox.GetDCorners();
+            for (int i = 1; i < corners.Length; i++)
+            {
+                corners[i] = transform.TransformPositionNoScale(in corners[i]);
+                var v = corners[i].ToSingleVector3();
+                Vector3.Minimize(in result.Minimum, in v, out result.Minimum);
+                Vector3.Maximize(in result.Maximum, in v, out result.Maximum);
+            }
+        }        
     }
 }

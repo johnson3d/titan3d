@@ -7,6 +7,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
     [Rtti.Meta]
     public partial class UMaterialAMeta : IO.IAssetMeta
     {
+        public override string GetAssetExtType()
+        {
+            return UMaterial.AssetExt;
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(GetAssetName());
@@ -15,16 +19,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             var address = RName.GetAddress(type, name);
             IO.FileManager.DeleteFile(address);
-            IO.FileManager.DeleteFile(address + ".ameta");
+            IO.FileManager.DeleteFile(address + IO.IAssetMeta.MetaExt);
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset
             return true;
         }
-        public override void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
-            base.OnDraw(ref cmdlist, ref sz, ContentBrowser);
+            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+            cmdlist.AddText(in start, 0xFFFFFFFF, "Mtl", null);
         }
     }
     [Rtti.Meta]
@@ -165,9 +170,23 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public virtual void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
             ameta.RefAssetRNames.Clear();
+            foreach (var i in UsedRSView)
+            {
+                if (i.Value == null)
+                    continue;
+                if (ameta.RefAssetRNames.Contains(i.Value) == false)
+                    ameta.RefAssetRNames.Add(i.Value);
+            }
         }
         public virtual void SaveAssetTo(RName name)
         {
+            var ameta = this.GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta();
+            }
+
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             var xnd = new IO.CXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("Material", 0, 0))
@@ -288,12 +307,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             foreach (var i in this.UsedRSView)
             {
-                codeBuilder.AddLine($"Texture2D {i.Name};");
+                codeBuilder.AddLine($"{i.ShaderType} {i.Name} DX_NOBIND;");
             }
 
             foreach (var i in this.UsedSamplerStates)
             {
-                codeBuilder.AddLine($"SamplerState {i.Name};");
+                codeBuilder.AddLine($"SamplerState {i.Name} DX_NOBIND;");
             }
 
             codeBuilder.AddLine("void DO_VS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)");
@@ -424,6 +443,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         HostMaterial.SerialId++;
                 }
             }
+            [Rtti.Meta]
+            public string ShaderType { get; set; } = "Texture2D";
             public NameRNamePair Clone(UMaterial mtl)
             {
                 var result = new NameRNamePair();
@@ -471,6 +492,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #region Sampler
         public class NameSamplerStateDescPair : IO.BaseSerializer
         {
+            public NameSamplerStateDescPair()
+            {
+                mValue.SetDefault();
+            }
             public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
             {
                 HostMaterial = hostObject as UMaterial;
@@ -518,7 +543,19 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public RHI.CSamplerState GetSampler(int index)
         {
-            return UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, ref mUsedSamplerStates[index].mValue);
+            if (mUsedSamplerStates[index].mValue.m_AddressU == 0)
+            {
+                mUsedSamplerStates[index].mValue.SetDefault();
+            }
+            //if (mUsedSamplerStates[index].mValue.m_AddressV == 0)
+            //{
+            //    mUsedSamplerStates[index].mValue.m_AddressV = EAddressMode.ADM_WRAP;
+            //}
+            //if (mUsedSamplerStates[index].mValue.m_AddressW == 0)
+            //{
+            //    mUsedSamplerStates[index].mValue.m_AddressW = EAddressMode.ADM_WRAP;
+            //}
+            return UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, in mUsedSamplerStates[index].mValue);
         }
         public NameSamplerStateDescPair FindSampler(string name)
         {
@@ -603,25 +640,25 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     case EShaderVarType.SVT_Float1:
                         {
                             float v = System.Convert.ToSingle(i.Value);
-                            cBuffer.SetValue(index, ref v);
+                            cBuffer.SetValue(index, in v);
                         }
                         break;
                     case EShaderVarType.SVT_Float2:
                         {
                             Vector2 v = Vector2.FromString(i.Value);
-                            cBuffer.SetValue(index, ref v);
+                            cBuffer.SetValue(index, in v);
                         }
                         break;
                     case EShaderVarType.SVT_Float3:
                         {
                             Vector3 v = Vector3.FromString(i.Value);
-                            cBuffer.SetValue(index, ref v);
+                            cBuffer.SetValue(index, in v);
                         }
                         break;
                     case EShaderVarType.SVT_Float4:
                         {
                             Vector4 v = Vector4.FromString(i.Value);
-                            cBuffer.SetValue(index, ref v);
+                            cBuffer.SetValue(index, in v);
                         }
                         break;
                 }
@@ -652,7 +689,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 GamePlay.Action.UAction.OnChanged(this, this, "Rasterizer", Rasterizer, value);
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
-                RasterizerState = UEngine.Instance.GfxDevice.RasterizerStateManager.GetPipelineState(rc, ref value);
+                RasterizerState = UEngine.Instance.GfxDevice.RasterizerStateManager.GetPipelineState(rc, in value);
                 SerialId++;
             }
         }
@@ -681,7 +718,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 GamePlay.Action.UAction.OnChanged(this, this, "DepthStencil", DepthStencil, value);
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
-                DepthStencilState = UEngine.Instance.GfxDevice.DepthStencilStateManager.GetPipelineState(rc, ref value);
+                DepthStencilState = UEngine.Instance.GfxDevice.DepthStencilStateManager.GetPipelineState(rc, in value);
                 SerialId++;
             }
         }
@@ -710,7 +747,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 GamePlay.Action.UAction.OnChanged(this, this, "Blend", Blend, value);
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
-                BlendState = UEngine.Instance.GfxDevice.BlendStateManager.GetPipelineState(rc, ref value);
+                BlendState = UEngine.Instance.GfxDevice.BlendStateManager.GetPipelineState(rc, in value);
                 SerialId++;
             }
         }
@@ -729,7 +766,21 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             Materials.Clear();
         }
-        public UMaterial NullMaterial = new UMaterial();
+        public async System.Threading.Tasks.Task Initialize(UGfxDevice device)
+        {
+            await Thread.AsyncDummyClass.DummyFunc();
+            ScreenMaterial = new UMaterial();
+
+            var dsDesc = new IDepthStencilStateDesc();
+            dsDesc.SetDefault();
+            dsDesc.m_DepthEnable = 0;
+            dsDesc.m_DepthWriteMask = 0;
+            ScreenMaterial.DepthStencil = dsDesc;
+
+            PxDebugMaterial = await this.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
+        }
+        public UMaterial ScreenMaterial;
+        public UMaterial PxDebugMaterial;
         public Dictionary<RName, UMaterial> Materials { get; } = new Dictionary<RName, UMaterial>();
         public async System.Threading.Tasks.Task<UMaterial> CreateMaterial(RName rn)
         {
@@ -754,7 +805,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
-            result.IsEditingMaterial = true;
             return result;
         }
         public async System.Threading.Tasks.Task<bool> ReloadMaterial(RName rn)

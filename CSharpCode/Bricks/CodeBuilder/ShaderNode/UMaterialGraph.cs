@@ -126,6 +126,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     node.Position = View2WorldSpace(ref posMenu);
                     this.AddNode(node);
                 }
+                if (ImGuiAPI.MenuItem($"texture2dArray", null, false, true))
+                {
+                    var node = new Var.Texture2DArray();
+                    node.Name = $"tex2dArray_{GenSerialId()}";
+                    node.Graph = this;
+                    node.Position = View2WorldSpace(ref posMenu);
+                    this.AddNode(node);
+                }
                 if (ImGuiAPI.MenuItem($"sampler", null, false, true))
                 {
                     var node = new Var.SamplerState();

@@ -1,0 +1,26 @@
+{
+  "Name": "ProjectGen",
+  "Path": "CSharpCode/Bricks/ProjectGen",
+  "FullName": "CSharpCode/Bricks/ProjectGen/ProjectGen.brick",
+  "Configs": [
+    {
+      "Name": null,
+      "Arch": 0,
+      "Defines": []
+    }
+  ],
+  "SharedProjects": [
+    "CSharpCode/Editor/Editor.brick"
+  ],
+  "Nugets": [
+    {
+      "Name": "Microsoft.CodeAnalysis.CSharp.Workspaces",
+      "Version": "15.1.1012"
+    },
+    {
+      "Name": "Microsoft.Build.Framework",
+      "Version": "16.5.0"
+    }
+  ],
+  "DllModules": []
+}

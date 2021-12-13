@@ -14,6 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)IO\IStreaming.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\UAssetOperator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\IAssemblyLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\UMacrossAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\UMacrossDebugger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\UMacrossModule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\UMacrossStackTracer.cs" />
@@ -43,7 +44,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Thread\ThreadRHI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Thread\UEngine.Thread.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UEngine.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Transform.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FTransform.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Hash160.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\FileManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\IAssetMeta.cs" />
@@ -65,5 +66,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)TName.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IModule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UTest\UnitTester.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Base.brick" />
   </ItemGroup>
 </Project>

@@ -9,6 +9,10 @@ namespace EngineNS.Graphics.Mesh
     [Rtti.Meta]
     public class UMaterialMeshAMeta : IO.IAssetMeta
     {
+        public override string GetAssetExtType()
+        {
+            return UMaterialMesh.AssetExt;
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(GetAssetName());
@@ -18,9 +22,10 @@ namespace EngineNS.Graphics.Mesh
             //必须是TextureAsset
             return true;
         }
-        public override void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
-            base.OnDraw(ref cmdlist, ref sz, ContentBrowser);
+            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+            cmdlist.AddText(in start, 0xFFFFFFFF, "ums", null);
         }
     }
     [Rtti.Meta]

@@ -13,4 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UTcpConnect.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UTcpServer.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)TcpServer.brick" />
+  </ItemGroup>
 </Project>

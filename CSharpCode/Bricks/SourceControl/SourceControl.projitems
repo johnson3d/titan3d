@@ -14,4 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)URepository.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)USource.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)SourceControl.brick" />
+  </ItemGroup>
 </Project>

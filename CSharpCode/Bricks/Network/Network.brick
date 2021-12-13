@@ -1,0 +1,11 @@
+{
+  "Name": "Network",
+  "Path": "CSharpCode/Bricks/Network",
+  "FullName": "CSharpCode/Bricks/Network/Network.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/Rtti/Rtti.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

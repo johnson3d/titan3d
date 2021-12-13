@@ -13,9 +13,21 @@
     <Compile Include="$(MSBuildThisFileDirectory)Action\UActionRecorder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Action\UPropertyUtility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Axis.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\ICameraControlNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\UCamera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\UCameraSpringArm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Character\UCharacter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controller\IController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controller\UNPCController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controller\UCharacterController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Movemnet\UMovement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\Actor\UActor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\UPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UGridNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UMeshNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UNode_Editor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\UPointLightNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\USkyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UDirectionLight.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UGameApplication.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UGameViewportSlate.cs" />
@@ -25,5 +37,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UScene.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UGameBase.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)GamePlay.brick" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Player\" />
   </ItemGroup>
 </Project>

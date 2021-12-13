@@ -1,0 +1,10 @@
+{
+  "Name": "Math",
+  "Path": "CSharpCode/Math",
+  "FullName": "CSharpCode/Math/Math.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

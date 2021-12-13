@@ -6,7 +6,7 @@ namespace EngineNS.GamePlay.Scene
 {
     public partial class UNode : Graphics.Pipeline.IProxiable
     {
-        public virtual void GetDrawMesh(List<Graphics.Mesh.UMesh> meshes)
+        public virtual void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
         {
             return;
         }
@@ -19,8 +19,8 @@ namespace EngineNS.GamePlay.Scene
             set
             {
                 var oldValue = HitproxyType;
-                uint flags = ((uint)value & ((uint)ENodeStyles.HitproxyMasks >> 2)) << 2;
-                SetStyle((ENodeStyles)flags);
+                uint flags = (((uint)value & ((uint)ENodeStyles.HitproxyMasks >> 2)) << 2);
+                NodeStyles = (NodeStyles & (~ENodeStyles.HitproxyMasks)) | (ENodeStyles)flags;
                 OnHipproxyTypeChanged(oldValue, HitproxyType);
                 OnHitProxyChanged();
             }

@@ -159,6 +159,7 @@ namespace EngineNS.UTest
         }
         public async System.Threading.Tasks.Task AsyncTest()
         {
+            await Thread.AsyncDummyClass.DummyFunc();
             var jobSystem = new Thread.Async.UJobSystem<UTestJob>();
             for (int i = 0; i < 1000; i++)
             {

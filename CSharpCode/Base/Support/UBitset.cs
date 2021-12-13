@@ -302,7 +302,7 @@ namespace EngineNS.Support
                 case EValueType.F64:
                     return mF64Value;
                 case EValueType.Name:
-                    return mNameString.GetString();
+                    return mNameString.c_str();
                 case EValueType.Struct:
                     return mStruct.ToObject();
                 case EValueType.Ptr:
@@ -326,7 +326,7 @@ namespace EngineNS.Support
             {
                 unsafe
                 {
-                    var type = Rtti.UTypeDesc.TypeOf(mTypeName.GetString());
+                    var type = Rtti.UTypeDesc.TypeOf(mTypeName.c_str());
                     var result = Rtti.UTypeDescManager.CreateInstance(type);
                     System.Runtime.InteropServices.Marshal.PtrToStructure(mStructPointer, result);
                     return result;

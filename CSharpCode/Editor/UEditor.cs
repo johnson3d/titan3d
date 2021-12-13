@@ -10,6 +10,9 @@ namespace EngineNS.Editor
     {
         [Rtti.Meta]
         public string GameProject { get; set; }
+        [Rtti.Meta]
+        public bool ShowLightDebugMesh { get; set; } = true;
+        public bool ShowPxDebugMesh { get; set; } = false;
     }
 
     public partial class UEditor : UModule<UEngine>
@@ -18,6 +21,8 @@ namespace EngineNS.Editor
 
         public override void Cleanup(UEngine host)
         {
+            RNamePopupContentBrowser?.Cleanup();
+            RNamePopupContentBrowser = null;
             base.Cleanup(host);
         }
 
@@ -32,6 +37,7 @@ namespace EngineNS.Editor
                 IO.FileManager.SaveObjectToXml(cfgFile, Config);
             }
 
+            await RNamePopupContentBrowser.Initialize();
             return await base.Initialize(host);
         }
     }

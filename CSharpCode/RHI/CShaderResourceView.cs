@@ -2,11 +2,55 @@
 using System.Collections.Generic;
 using System.Text;
 
+namespace EngineNS
+{
+    partial struct IShaderResourceViewDesc
+    {
+        [System.Runtime.InteropServices.FieldOffset(24)]
+        public BUFFER_SRV Buffer;
+        [System.Runtime.InteropServices.FieldOffset(24)]
+        public TEX1D_SRV Texture1D;
+        [System.Runtime.InteropServices.FieldOffset(24)]
+        public TEX1D_ARRAY_SRV Texture1DArray;
+        [System.Runtime.InteropServices.FieldOffset(24)]
+        public TEX2D_SRV Texture2D;
+        [System.Runtime.InteropServices.FieldOffset(24)]
+        public TEX2D_ARRAY_SRV Texture2DArray;
+        [System.Runtime.InteropServices.FieldOffset(24)]
+        public TEX2DMS_SRV Texture2DMS;
+        [System.Runtime.InteropServices.FieldOffset(24)]
+        public TEX2DMS_ARRAY_SRV Texture2DMSArray;
+        [System.Runtime.InteropServices.FieldOffset(24)]
+        public TEX3D_SRV Texture3D;
+        [System.Runtime.InteropServices.FieldOffset(24)]
+        public TEXCUBE_SRV TextureCube;
+        [System.Runtime.InteropServices.FieldOffset(24)]
+        public TEXCUBE_ARRAY_SRV TextureCubeArray;
+        [System.Runtime.InteropServices.FieldOffset(24)]
+        public BUFFEREX_SRV BufferEx;
+    }
+    public unsafe partial struct BUFFER_SRV
+    {
+        [System.Runtime.InteropServices.FieldOffset(0)]
+        public uint FirstElement;
+        [System.Runtime.InteropServices.FieldOffset(0)]
+        public uint ElementOffset;
+        [System.Runtime.InteropServices.FieldOffset(4)]
+        public uint NumElements;
+        [System.Runtime.InteropServices.FieldOffset(4)]
+        public uint ElementWidth;
+    }
+}
+
 namespace EngineNS.RHI
 {
     [Rtti.Meta]
     public class CShaderResourceViewAMeta : IO.IAssetMeta
     {
+        public override string GetAssetExtType()
+        {
+            return CShaderResourceView.AssetExt;
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
@@ -14,8 +58,8 @@ namespace EngineNS.RHI
         System.Threading.Tasks.Task<CShaderResourceView> SnapTask;
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
-            //必须是TextureAsset
-            return true;
+            //纹理不会引用别的资产
+            return false;
         }
         public unsafe override void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
         {
@@ -34,40 +78,35 @@ namespace EngineNS.RHI
 
             cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
             ImGuiAPI.PopClipRect();
-
         }
         public override void OnShowIconTimout(int time)
         {
-            if (SnapshotPtr != IntPtr.Zero)
+            if (SnapTask != null)
             {
-                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
-                handle.Free();
-                SnapshotPtr = IntPtr.Zero;
                 SnapTask = null;
             }
         }
-
         public unsafe override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
-            if (SnapshotPtr == IntPtr.Zero)
+            if (SnapTask == null)
             {
-                if (SnapTask == null)
-                {
-                    var rc = UEngine.Instance.GfxDevice.RenderContext;
-                    SnapTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
-                }
-                else if (SnapTask.IsCompleted)
-                {
-                    SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(SnapTask.Result));
-                    SnapTask = null;
-                }
+                var rc = UEngine.Instance.GfxDevice.RenderContext;
+                SnapTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
+                cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
+                return;
             }
-            if (SnapshotPtr != IntPtr.Zero)
+            else if (SnapTask.IsCompleted == false)
+            {
+                cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
+                return;
+            }
+            unsafe
             {
                 var uv0 = new Vector2(0, 0);
                 var uv1 = new Vector2(1, 1);
-                cmdlist.AddImage(SnapshotPtr.ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                cmdlist.AddImage(SnapTask.Result.GetTextureHandle().ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
             }
+            cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
         }
     }
     [Rtti.Meta]
@@ -85,8 +124,34 @@ namespace EngineNS.RHI
         }
         public object TagObject;
         public static int NumOfInstance = 0;
+        public static int NumOfGCHandle = 0;
         public const string AssetExt = ".srv";
 
+        IntPtr mTextureHandle = IntPtr.Zero;
+        public IntPtr GetTextureHandle()
+        {
+            if (mTextureHandle == IntPtr.Zero)
+            {
+                mTextureHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(this));
+                System.Threading.Interlocked.Increment(ref NumOfGCHandle);
+            }
+            return mTextureHandle;
+        }
+        public void FreeTextureHandle()
+        {
+            if (mTextureHandle != IntPtr.Zero)
+            {
+                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(mTextureHandle);
+                handle.Free();
+                mTextureHandle = IntPtr.Zero;
+                System.Threading.Interlocked.Decrement(ref NumOfGCHandle);
+            }
+        }
+        public override void Dispose()
+        {
+            FreeTextureHandle();
+            base.Dispose();
+        }
         public class UPicDesc
         {
             public ITxPicDesc Desc;
@@ -106,7 +171,7 @@ namespace EngineNS.RHI
             string mName;
             string mSourceFile;
             public UPicDesc mDesc = new UPicDesc();
-            ImGui.ImGuiFileDialog mFileDialog = ImGui.ImGuiFileDialog.CreateInstance();
+            ImGui.ImGuiFileDialog mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
             public override void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
             {
@@ -318,6 +383,10 @@ namespace EngineNS.RHI
         public System.Threading.Tasks.Task<bool> CurLoadTask { get; set; }
         public async System.Threading.Tasks.Task<bool> LoadLOD(int level)
         {
+            if (level == 0)
+            {
+                return false;
+            }
             if (level < 0 || level > MaxLOD)
                 return false;
             var tex2d = await UEngine.Instance.EventPoster.Post(() =>
@@ -338,15 +407,52 @@ namespace EngineNS.RHI
             {
                 if (tex2d == null)
                 {
-                    return this.mCoreObject.UpdateTexture2D(rc.mCoreObject, new ITexture2D((void*)0));
+                    return this.mCoreObject.UpdateBuffer(rc.mCoreObject, new IGpuBuffer((void*)0));
                 }
                 else
                 {
-                    return this.mCoreObject.UpdateTexture2D(rc.mCoreObject, tex2d.mCoreObject);
+                    return this.mCoreObject.UpdateBuffer(rc.mCoreObject, tex2d.mCoreObject.NativeSuper);
                 }
             }
         }
         #endregion
+
+        public static int CalcMipLevel(int width, int height, bool isAnyZero)
+        {
+            int mipLevel = 0;
+            do
+            {
+                height = height / 2;
+                width = width / 2;
+                mipLevel++;
+
+                if (isAnyZero)
+                {
+                    if ((height == 0 || width == 0))
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    if ((height == 0 && width == 0))
+                    {
+                        break;
+                    }
+                }
+                
+                if (height == 0)
+                {
+                    height = 1;
+                }
+                if (width == 0)
+                {
+                    width = 1;
+                }
+            }
+            while (true);
+            return mipLevel;
+        }
         public static unsafe void SaveTexture(XndNode node, StbImageSharp.ImageResult image, UPicDesc desc)
         {
             using (var memStream = new System.IO.MemoryStream(image.Data.Length))
@@ -354,7 +460,7 @@ namespace EngineNS.RHI
                 var writer = new StbImageWriteSharp.ImageWriter();
                 writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
                 var pngData = memStream.ToArray();
-                var attr = new XndAttribute(node.GetOrAddAttribute("Png", 0, 0));
+                var attr = node.GetOrAddAttribute("Png", 0, 0);
                 var ar = attr.GetWriter((ulong)memStream.Position);
                 ar.WriteNoSize(pngData, (int)memStream.Position);
                 attr.ReleaseWriter(ref ar);
@@ -365,7 +471,7 @@ namespace EngineNS.RHI
             int mipLevel = 0;
             var curImage = image;
             desc.MipSizes.Clear();
-            var pngMipsNode = new XndNode(node.GetOrAddNode("PngMips", 0, 0));
+            var pngMipsNode = node.GetOrAddNode("PngMips", 0, 0);
             do
             {
                 using (var memStream = new System.IO.MemoryStream(curImage.Data.Length))
@@ -374,7 +480,7 @@ namespace EngineNS.RHI
                     writer.WritePng(curImage.Data, curImage.Width, curImage.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
                     //writer.WriteJpg(curImage.Data, curImage.Width, curImage.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream, 100);
                     var pngData = memStream.ToArray();
-                    var attr = new XndAttribute(pngMipsNode.GetOrAddAttribute($"PngMip{mipLevel}", 0, 0));
+                    var attr = pngMipsNode.GetOrAddAttribute($"PngMip{mipLevel}", 0, 0);
                     var ar = attr.GetWriter((ulong)memStream.Position);
                     ar.WriteNoSize(pngData, (int)memStream.Position);
                     attr.ReleaseWriter(ref ar);
@@ -382,17 +488,22 @@ namespace EngineNS.RHI
                 desc.MipSizes.Add(new Int32_2() { x = width, y = height });
                 height = height / 2;
                 width = width / 2;
-                mipLevel++;
-                if ((height > 0 && width > 0))
+                if ((height == 0 && width == 0))
                 {
-                    curImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(curImage, width, height);
+                    break;
                 }
+                mipLevel++;
+                if (height == 0)
+                    height = 1;
+                if (width == 0)
+                    width = 1;
+                curImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(curImage, width, height);
             }
-            while (height > 0 && width > 0);
+            while (true);
 
             {
                 desc.Desc.MipLevel = mipLevel;
-                var attr = new XndAttribute(node.GetOrAddAttribute("Desc", 0, 0));
+                var attr = node.GetOrAddAttribute("Desc", 0, 0);
                 var ar = attr.GetWriter((ulong)sizeof(ITxPicDesc));
                 ar.Write(desc.Desc);
                 ar.Write(desc.MipSizes.Count);
@@ -403,13 +514,65 @@ namespace EngineNS.RHI
                 attr.ReleaseWriter(ref ar);
             }
         }
+        public static uint GetPixelByteWidth(EPixelFormat format)
+        {
+            switch (format)
+            {
+                case EPixelFormat.PXF_R8G8B8A8_UNORM:
+                case EPixelFormat.PXF_R8G8B8A8_TYPELESS:
+                case EPixelFormat.PXF_R8G8B8A8_SINT:
+                case EPixelFormat.PXF_R8G8B8A8_UINT:
+                case EPixelFormat.PXF_B8G8R8A8_UNORM:
+                case EPixelFormat.PXF_B8G8R8A8_TYPELESS:
+                case EPixelFormat.PXF_B8G8R8A8_UNORM_SRGB:
+                    return 4;
+                default:
+                    return 0;
+            }
+        }
+        public static unsafe StbImageSharp.ImageResult[] LoadPngImageLevels(RName name, uint mipLevel)
+        {
+            using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
+            {
+                UPicDesc desc = new UPicDesc();
+                {
+                    var attr = xnd.RootNode.TryGetAttribute("Desc");
+                    var ar = attr.GetReader(null);
+
+                    ar.Read(out desc.Desc);
+                    attr.ReleaseReader(ref ar);
+                }
+                var pngNode = xnd.RootNode.TryGetChildNode("PngMips");
+                if (pngNode.NativePointer == IntPtr.Zero)
+                    return null;
+
+                var result = new StbImageSharp.ImageResult[mipLevel];
+                for (uint i = 0; i < mipLevel; i++)
+                {
+                    var mipAttr = pngNode.TryGetAttribute($"PngMip{i}");
+                    if (mipAttr.NativePointer == IntPtr.Zero)
+                        return null;
+
+                    var ar = mipAttr.GetReader(null);
+                    byte[] data;
+                    ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
+                    mipAttr.ReleaseReader(ref ar);
+
+                    using (var memStream = new System.IO.MemoryStream(data, false))
+                    {
+                        result[i] = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                    }
+                }
+                return result;
+            }
+        }
         public static unsafe CTexture2D LoadPngTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            var pngNode = new XndNode(node.TryGetChildNode("PngMips"));
+            var pngNode = node.TryGetChildNode("PngMips");
             if (pngNode.NativePointer == IntPtr.Zero)
                 return null;
 
@@ -424,7 +587,7 @@ namespace EngineNS.RHI
                     var ptr = pngNode.TryGetAttribute($"PngMip{desc.MipLevel - mipLevel + i}");
                     if (ptr.NativePointer == IntPtr.Zero)
                         return null;
-                    var mipAttr = new XndAttribute(ptr);
+                    var mipAttr = ptr;
                     var ar = mipAttr.GetReader(null);
                     byte[] data;
                     ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
@@ -437,7 +600,7 @@ namespace EngineNS.RHI
                     }
                     handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(image.Data, System.Runtime.InteropServices.GCHandleType.Pinned);
                     pInitData[i].SetDefault();
-                    pInitData[i].pSysMem = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0).ToPointer();
+                    pInitData[i].pSysMem = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0).ToPointer();                    
                     pInitData[i].SysMemPitch = (uint)image.Width * 4;
 
                     colorComp = image.Comp;
@@ -456,7 +619,7 @@ namespace EngineNS.RHI
                         break;
                 }
 
-                return rc.CreateTexture2D(ref texDesc);
+                return rc.CreateTexture2D(in texDesc);
             }
             finally
             {
@@ -506,12 +669,15 @@ namespace EngineNS.RHI
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var srvDesc = new IShaderResourceViewDesc();
-            srvDesc.mFormat = tex2d.mCoreObject.mDesc.Format;
+            srvDesc.SetTexture2D();
+            srvDesc.Type = ESrvType.ST_Texture2D;
+            srvDesc.Format = tex2d.mCoreObject.mTextureDesc.Format;
+            srvDesc.Texture2D.MipLevels = (uint)mipLevel;
             unsafe
             {
-                srvDesc.m_pTexture2D = tex2d.mCoreObject;
+                srvDesc.mGpuBuffer = tex2d.mCoreObject.NativeSuper;
             }
-            var result = rc.CreateShaderResourceView(ref srvDesc);
+            var result = rc.CreateShaderResourceView(in srvDesc);
             result.PicDesc = desc;
             result.LevelOfDetail = mipLevel;
             result.TargetLOD = mipLevel;
@@ -519,18 +685,25 @@ namespace EngineNS.RHI
             return result;
         }
     }
-    public class CShaderResources : AuxPtrType<IShaderResources>
+    public class CCBufferResources : AuxPtrType<ICBufferResources>
+    {
+        public CCBufferResources()
+        {
+            mCoreObject = ICBufferResources.CreateInstance();
+        }
+    }
+    public class CShaderResources : AuxPtrType<IShaderRViewResources>
     {
         public CShaderResources()
         {
-            mCoreObject = IShaderResources.CreateInstance();
+            mCoreObject = IShaderRViewResources.CreateInstance();
         }
     }
-    public class CShaderSamplers : AuxPtrType<IShaderSamplers>
+    public class CShaderSamplers : AuxPtrType<ISamplerResources>
     {
         public CShaderSamplers()
         {
-            mCoreObject = IShaderSamplers.CreateInstance();
+            mCoreObject = ISamplerResources.CreateInstance();
         }
     }
 
@@ -547,11 +720,16 @@ namespace EngineNS.RHI
         }
         public void Cleanup()
         {
-            //foreach(var i in StreamingAssets)
-            //{                
-            //}
+            foreach (var i in StreamingAssets)
+            {
+                var srv = i.Value as CShaderResourceView;
+                if (srv == null)
+                    continue;
+                srv.Dispose();
+            }
             StreamingAssets.Clear();
         }
+        private Thread.UAwaitSessionManager<RName, CShaderResourceView> mCreatingSession = new Thread.UAwaitSessionManager<RName, CShaderResourceView>();
         List<RName> mWaitRemoves = new List<RName>();
         public async System.Threading.Tasks.Task<CShaderResourceView> CreateTexture(string file)
         {
@@ -592,15 +770,18 @@ namespace EngineNS.RHI
                     data.m_pSysMem = pData;
 
                     var rc = UEngine.Instance.GfxDevice.RenderContext;
-                    var texture2d = rc.CreateTexture2D(ref texDesc);
+                    var texture2d = rc.CreateTexture2D(in texDesc);
 
                     var srvDesc = new IShaderResourceViewDesc();
-                    srvDesc.mFormat = texture2d.mCoreObject.mDesc.Format;
+                    srvDesc.SetTexture2D();
+                    srvDesc.Type = ESrvType.ST_Texture2D;
+                    srvDesc.Format = texture2d.mCoreObject.mTextureDesc.Format;
+                    srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
                     unsafe
                     {
-                        srvDesc.m_pTexture2D = texture2d.mCoreObject;
+                        srvDesc.mGpuBuffer = texture2d.mCoreObject.NativeSuper;
                     }
-                    var result = rc.CreateShaderResourceView(ref srvDesc);
+                    var result = rc.CreateShaderResourceView(in srvDesc);
                     //result.PicDesc.Desc = texDesc;
                     //result.LevelOfDetail = mipLevel;
                     //result.TargetLOD = mipLevel;
@@ -614,29 +795,51 @@ namespace EngineNS.RHI
         {
             if (rn == null)
                 return null;
-            CShaderResourceView srv;
+            CShaderResourceView srv = null;
             IO.IStreaming result;
-            if (StreamingAssets.TryGetValue(rn, out result))
+            lock (StreamingAssets)
             {
-                srv = result as CShaderResourceView;
-                if (srv == null)
-                    return null;
-                srv.TargetLOD = mipLevel;
-                return srv;
+                if (StreamingAssets.TryGetValue(rn, out result))
+                {
+                    srv = result as CShaderResourceView;
+                    if (srv == null)
+                        return null;
+                    srv.TargetLOD = mipLevel;
+                    return srv;
+                }
             }
 
-            srv = await CShaderResourceView.LoadSrvMipmap(rn, mipLevel);
-            if (srv == null)
-                return null;
-            if (StreamingAssets.TryGetValue(rn, out result) == false)
+            bool isNewSession;
+            var session = mCreatingSession.GetOrNewSession(rn, out isNewSession);
+            if (isNewSession == false)
             {
-                StreamingAssets.Add(rn, srv);
+                return await session.Await();
             }
-            else
+
+            try
             {
-                srv = result as CShaderResourceView;
+                srv = await CShaderResourceView.LoadSrvMipmap(rn, mipLevel);
+                if (srv == null)
+                    return srv;
+                lock (StreamingAssets)
+                {
+                    if (StreamingAssets.TryGetValue(rn, out result) == false)
+                    {
+                        StreamingAssets.Add(rn, srv);
+                    }
+                    else
+                    {
+                        srv = result as CShaderResourceView;
+                    }
+                }
+                    
+                return srv;
             }
-            return srv;
+            finally
+            {
+                if (srv != null)
+                    mCreatingSession.FinishSession(rn, session, srv);
+            }            
         }
         public CShaderResourceView TryGetTexture(RName rn)
         {
@@ -653,21 +856,24 @@ namespace EngineNS.RHI
             }
             return null;
         }
-        public unsafe override void UpdateTargetLOD(IO.IStreaming asset)
+        public unsafe override bool UpdateTargetLOD(IO.IStreaming asset)
         {
             var srv = asset as CShaderResourceView;
             if (srv == null)
-                return;
+                return false;
 
             var now = UEngine.Instance.CurrentTickCount;
             var resState = new IResourceState(srv.mCoreObject.GetResourceState());
             if (now - resState.GetAccessTime() > 15 * 1000 * 1000)
             {
-                srv.TargetLOD = 0;
+                srv.TargetLOD = 1;
+                //mWaitRemoves.Add(asset.AssetName);
+                return true;
             }
             else
             {
                 srv.TargetLOD = srv.MaxLOD;
+                return true;
             }
         }
         int TickInterval = 150;

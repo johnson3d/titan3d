@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder
@@ -69,7 +70,9 @@ namespace EngineNS.Bricks.CodeBuilder
     {
         [Rtti.Meta]
         public string ClassName { get; set; } = "NewClass";
-        [DefineVar.PropDefTypeEditor(typeof(void), ExcludeValueType = true, ExcludeSealed = true, AssemblyFilter = "EngineCore")]
+        //[DefineVar.PropDefTypeEditor(typeof(void), ExcludeValueType = true, ExcludeSealed = true, AssemblyFilter = "EngineCore")]
+        //[EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true)]
+        [ReadOnly(true)]
         [Rtti.Meta]
         public string SuperClassName { get; set; } = null;
         [Rtti.Meta]
@@ -144,10 +147,6 @@ namespace EngineNS.Bricks.CodeBuilder
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
                 newValue = info.Value;
-                var sz = new Vector2(0, 0);
-                var bindType = EGui.UIEditor.EditableFormData.Instance.CurrentForm?.BindType;
-                if (bindType == null)
-                    return false;
 
                 ImGuiAPI.SetNextItemWidth(-1);
                 TypeSlt.AssemblyFilter = AssemblyFilter;
@@ -173,24 +172,45 @@ namespace EngineNS.Bricks.CodeBuilder
         public string InitValue { get; set; } = null;
     }
     [Rtti.Meta]
+    public class DefineFunctionParam : DefineVar
+    {
+        public enum enOpType
+        {
+            normal,
+            In,
+            Out,
+            Ref,
+        }
+        [Rtti.Meta]
+        public enOpType OpType { get; set; } = enOpType.normal;
+        [Rtti.Meta]
+        public bool IsParamArray { get; set; } = false;
+    }
+    [Rtti.Meta]
     public partial class DefineFunction : IExpression
     {
+        [Browsable(false)]
         public bool IsFunctionDefineChanged
         {
             get;
             set;
         } = false;
+        [Rtti.Meta]
         public EVisitMode VisitMode { get; set; } = EVisitMode.Public;
         [DefineVar.PropDefTypeEditor(typeof(void))]
         [Rtti.Meta]
         public string ReturnType { get; set; }
         [Rtti.Meta]
         public string Name { get; set; }
-        [Rtti.Meta]
-        public List<DefineVar> Arguments
+        [Rtti.Meta, ReadOnly(true)]
+        public List<DefineFunctionParam> Arguments
         {
             get;
-        } = new List<DefineVar>();
+            set;
+        } = new List<DefineFunctionParam>();
+
+        [Rtti.Meta, Browsable(false)]
+        public bool IsOverride { get; set; } = false;
 
         public ExecuteSequence Body = new ExecuteSequence();
         public List<DefineVar> LocalVars = new List<DefineVar>();
@@ -463,7 +483,7 @@ namespace EngineNS.UTest
             var mb_A = new Bricks.CodeBuilder.DefineVar() { IsLocalVar = false,  DefType = typeof(int).FullName, VarName = "A" };
 
             var fun_Func = new Bricks.CodeBuilder.DefineFunction() { ReturnType = typeof(int).FullName, Name = "Func" };
-            fun_Func.Arguments.Add(new Bricks.CodeBuilder.DefineVar() { DefType = typeof(int).FullName, VarName = "a" });
+            fun_Func.Arguments.Add(new Bricks.CodeBuilder.DefineFunctionParam() { DefType = typeof(int).FullName, VarName = "a" });
 
             var fun_Func2 = new Bricks.CodeBuilder.DefineFunction() { ReturnType = typeof(void).FullName, Name = "Func2" };
             

@@ -11,19 +11,24 @@ namespace EngineNS.Editor
         
         public UMainEditorApplication()
         {
-            mCpuProfiler = new Editor.Forms.UCpuProfiler();            
-            mMetaViewer = new Editor.MetaViewEditor();            
+            mCpuProfiler = new Editor.Forms.UCpuProfiler();
+            mMetaViewer = new Editor.UMetaViewEditor();            
             mMainInspector = new Forms.UInspector();
             WorldViewportSlate = new UEditorWorldViewportSlate(true);
             mWorldOutliner = new Editor.Forms.UWorldOutliner();
-            
+
+            mBrickManager = new Bricks.ProjectGen.UBrickManager();
+            mEditorSettings = new Forms.UEditorSettings();
+            mEditorSettings.ViewportSlate = this.WorldViewportSlate;
             //mWorldOutliner.TestUWorldOutliner(this);
         }
         private bool IsVisible = true;
         public Editor.Forms.UWorldOutliner mWorldOutliner;
         public Editor.Forms.UCpuProfiler mCpuProfiler;
         public Editor.Forms.UInspector mMainInspector;
-        public Editor.MetaViewEditor mMetaViewer = null;
+        public Editor.UMetaViewEditor mMetaViewer = null;
+        public Bricks.ProjectGen.UBrickManager mBrickManager = null;
+        public Editor.Forms.UEditorSettings mEditorSettings;
 
         public UEditorWorldViewportSlate WorldViewportSlate = null;
         public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
@@ -47,10 +52,12 @@ namespace EngineNS.Editor
 
             await mMetaViewer.Initialize();
 
-            var RenderPolicy = Rtti.UTypeDescManager.CreateInstance(rpType) as Graphics.Pipeline.IRenderPolicy;
-            await WorldViewportSlate.Initialize(this, RenderPolicy, 0, 1);
+            await WorldViewportSlate.Initialize(this, Rtti.UTypeDesc.TypeOf(rpType), 0, 1);
 
             await mMainInspector.Initialize();
+
+            await mEditorSettings.Initialize();
+
             mMainInspector.PropertyGrid.PGName = "MainInspector";
             mMainInspector.PropertyGrid.Target = EGui.UIProxy.StyleConfig.Instance;// WorldViewportSlate;
 
@@ -62,7 +69,272 @@ namespace EngineNS.Editor
             //Editor.UMainEditorApplication.RegRootForm(mWinTest);
             /////////////////////////////////
 
+            InitMainMenu();
+
             return true;
+        }
+        public void InitMainMenu()
+        {
+            mMenuItems = new List<EGui.UIProxy.MenuItemProxy>()
+            {
+                new EGui.UIProxy.MenuItemProxy()
+                {
+                    MenuName = "File",
+                    IsTopMenuItem = true,
+                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+                    {
+                        new EGui.UIProxy.NamedMenuSeparator()
+                        {
+                            Name = "OPEN",
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "Load...",
+                            Shortcut = "Ctrl+L",
+                            Icon = new EGui.UIProxy.ImageProxy()
+                            {
+                                ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                                ImageSize = new Vector2(16, 16),
+                                UVMin = new Vector2(140.0f/1024, 265.0f/1024),
+                                UVMax = new Vector2(156.0f/1024, 281.0f/1024),
+                            },
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                // Do sth
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "Save...",
+                            Shortcut = "Ctrl+S",
+                            Icon = new EGui.UIProxy.ImageProxy()
+                            {
+                                ImageFile = RName.GetRName("icons/icons.srv", RName.ERNameType.Engine),
+                                ImageSize = new Vector2(16, 16),
+                                UVMin = new Vector2(124.0f/1024, 305.0f/1024),
+                                UVMax = new Vector2(140.0f/1024, 321.0f/1024),
+                            },
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                // Do sth
+                            },
+                        },
+                    },
+                },
+                new EGui.UIProxy.MenuItemProxy()
+                {
+                    MenuName = "Windows",
+                    IsTopMenuItem = true,
+                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+                    {
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "WorldOutliner",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                mWorldOutliner.Visible = !mWorldOutliner.Visible;
+                                item.Selected = mWorldOutliner.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "CpuProfiler",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                mCpuProfiler.Visible = !mCpuProfiler.Visible;
+                                item.Selected = mCpuProfiler.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "MainInspector",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                mMainInspector.Visible = !mMainInspector.Visible;
+                                item.Selected = mMainInspector.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "MetaViewer",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                mMetaViewer.Visible = !mMetaViewer.Visible;
+                                item.Selected = mMetaViewer.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "BrickManager",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                mBrickManager.Visible = !mBrickManager.Visible;
+                                item.Selected = mBrickManager.Visible;
+                                if(mBrickManager.Visible)
+                                {
+                                    var task = mBrickManager.Initialize();
+                                }
+                            },
+                        },
+                    },
+                },
+                new EGui.UIProxy.MenuItemProxy()
+                {
+                    MenuName = "View",
+                    IsTopMenuItem = true,
+                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+                    {
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "DisableShadow",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                this.WorldViewportSlate.RenderPolicy.DisableShadow = !this.WorldViewportSlate.RenderPolicy.DisableShadow;
+                                item.Selected = this.WorldViewportSlate.RenderPolicy.DisableShadow;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "DisableAO",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                this.WorldViewportSlate.RenderPolicy.DisableAO = !this.WorldViewportSlate.RenderPolicy.DisableAO;
+                                item.Selected = this.WorldViewportSlate.RenderPolicy.DisableAO;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "DisableHDR",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                this.WorldViewportSlate.RenderPolicy.DisableHDR = !this.WorldViewportSlate.RenderPolicy.DisableHDR;
+                                item.Selected = this.WorldViewportSlate.RenderPolicy.DisableHDR;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "DisablePointLight",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                //var prop = this.WorldViewportSlate.RenderPolicy.GetType().GetProperty("DisablePointLight");
+                                //if(prop !=null && prop.PropertyType==typeof(bool))
+                                //{
+                                //    bool value = (bool)prop.GetValue(this.WorldViewportSlate.RenderPolicy);
+                                //    value = !value;
+                                //    prop.SetValue(this.WorldViewportSlate.RenderPolicy, value);
+                                //    item.CheckBox = value;
+                                //}
+                                this.WorldViewportSlate.RenderPolicy.DisablePointLight = !this.WorldViewportSlate.RenderPolicy.DisablePointLight;
+                                item.Selected = this.WorldViewportSlate.RenderPolicy.DisablePointLight;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "Forward",
+                            Selected = false,
+                            Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                var saved = this.WorldViewportSlate.RenderPolicy;
+                                var policy = new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy();                                
+                                await policy.Initialize(saved.Camera, this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
+                                policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
+                                this.WorldViewportSlate.RenderPolicy = policy;
+                                saved.Cleanup();
+
+                                policy.VoxelsNode.ResetDebugMeshNode(this.WorldViewportSlate.World);
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "Deferred",
+                            Selected = false,
+                            Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                var saved = this.WorldViewportSlate.RenderPolicy;
+                                var policy = new Graphics.Pipeline.Deferred.UDeferredPolicy();
+                                await policy.Initialize(saved.Camera, this.WorldViewportSlate.ClientSize.X,this.WorldViewportSlate.ClientSize.Y);
+                                policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
+                                this.WorldViewportSlate.RenderPolicy = policy;
+                                saved.Cleanup();
+
+                                policy.VoxelsNode.ResetDebugMeshNode(this.WorldViewportSlate.World);
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "ShowLightDebugger",
+                            Selected = true,
+                            Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                UEngine.Instance.EditorInstance.Config.ShowLightDebugMesh = !UEngine.Instance.EditorInstance.Config.ShowLightDebugMesh;
+                                item.Selected = UEngine.Instance.EditorInstance.Config.ShowLightDebugMesh;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "ShowPxDebugger",
+                            Selected = UEngine.Instance.EditorInstance.Config.ShowPxDebugMesh,
+                            Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                UEngine.Instance.EditorInstance.Config.ShowPxDebugMesh = !UEngine.Instance.EditorInstance.Config.ShowPxDebugMesh;
+                                item.Selected = UEngine.Instance.EditorInstance.Config.ShowPxDebugMesh;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "EditPolicy",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                this.mMainInspector.PropertyGrid.Target = WorldViewportSlate.RenderPolicy;
+                            },
+                        },
+                    },
+                },
+                new EGui.UIProxy.MenuItemProxy()
+                {
+                    MenuName = "Illumination",
+                    IsTopMenuItem = true,
+                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+                    {
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "VoxelDebugger",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                var vxNode = this.WorldViewportSlate.RenderPolicy.QueryNode("VoxelsNode") as Bricks.VXGI.UVoxelsNode;
+                                if(vxNode!=null)
+                                {
+                                    vxNode.DebugVoxels = !vxNode.DebugVoxels;
+                                    item.Selected = vxNode.DebugVoxels;
+                                }
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "ResetVoxels",
+
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                var vxNode = this.WorldViewportSlate.RenderPolicy.QueryNode("VoxelsNode") as Bricks.VXGI.UVoxelsNode;
+                                if(vxNode!=null)
+                                {
+                                    vxNode.SetEraseBox(in vxNode.VxSceneBox);
+                                }
+                            },
+                        },
+                    },
+                },
+            };
         }
 
         #region DrawGui
@@ -118,6 +390,8 @@ namespace EngineNS.Editor
                 mWorldOutliner.DockId = LeftDockId;
                 mMainInspector.DockId = RightDockId;
                 ContentBrowser.DockId = CenterDockId;
+                mBrickManager.DockId = CenterDockId;
+                mEditorSettings.DockId = LeftDockId;
             }
 
             var io = ImGuiAPI.GetIO();
@@ -205,83 +479,100 @@ namespace EngineNS.Editor
                 ImGuiAPI.ShowDemoWindow(ref _showDemoWindow);
             }
         }
+        List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
         private void DrawMainMenu()
         {
             if (ImGuiAPI.BeginMenuBar())
             {
-                if (ImGuiAPI.BeginMenu("File", true))
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                for (int i = 0; i < mMenuItems.Count; i++)
                 {
-                    if (ImGuiAPI.MenuItem("Load", null, false, true))
-                    {
-                        
-                    }
-                    if (ImGuiAPI.MenuItem("Save", null, false, true))
-                    {
-                        
-                    }
-                    ImGuiAPI.EndMenu();
-                }
-                if (ImGuiAPI.BeginMenu("Windows", true))
-                {
-                    var check = mWorldOutliner.Visible;
-                    ImGuiAPI.Checkbox("##mWorldOutliner", ref check);
-                    ImGuiAPI.SameLine(0, -1);
-                    if ( ImGuiAPI.MenuItem("WorldOutliner", null, false, true))
-                    {
-                        mWorldOutliner.Visible = !mWorldOutliner.Visible;
-                    }
-                    check = mCpuProfiler.Visible;
-                    ImGuiAPI.Checkbox("##mCpuProfiler", ref check);
-                    ImGuiAPI.SameLine(0, -1);
-                    if (ImGuiAPI.MenuItem("CpuProfiler", null, false, true))
-                    {
-                        mCpuProfiler.Visible = !mCpuProfiler.Visible;
-                    }
-                    check = mMainInspector.Visible;
-                    ImGuiAPI.Checkbox("##mMainInspector", ref check);
-                    ImGuiAPI.SameLine(0, -1);
-                    if (ImGuiAPI.MenuItem("MainInspector", null, false, true))
-                    {
-                        mMainInspector.Visible = !mMainInspector.Visible;
-                    }
-                    check = mMetaViewer.Visible;
-                    ImGuiAPI.Checkbox("##mMetaViewer", ref check);
-                    ImGuiAPI.SameLine(0, -1);
-                    if (ImGuiAPI.MenuItem("MetaViewer", null, false, true))
-                    {
-                        mMetaViewer.Visible = !mMetaViewer.Visible;
-                    }
-                    ImGuiAPI.EndMenu();
-                }
-                if (ImGuiAPI.BeginMenu("View", true))
-                {
-                    var check = this.WorldViewportSlate.RenderPolicy.DisableShadow;
-                    ImGuiAPI.Checkbox("##DisableShadow", ref check);
-                    ImGuiAPI.SameLine(0, -1);
-                    if (ImGuiAPI.MenuItem("DisableShadow", null, false, true))
-                    {
-                        this.WorldViewportSlate.RenderPolicy.DisableShadow = !check;
-                    }
-
-                    check = this.WorldViewportSlate.RenderPolicy.DisableAO;
-                    ImGuiAPI.Checkbox("##DisableAO", ref check);
-                    ImGuiAPI.SameLine(0, -1);
-                    if (ImGuiAPI.MenuItem("DisableAO", null, false, true))
-                    {
-                        this.WorldViewportSlate.RenderPolicy.DisableAO = !check;
-                    }
-
-                    ImGuiAPI.EndMenu();
+                    mMenuItems[i].OnDraw(ref drawList, ref Support.UAnyPointer.Default);
                 }
                 ImGuiAPI.EndMenuBar();
             }
+            //if (ImGuiAPI.BeginMenuBar())
+            //{
+            //    if (ImGuiAPI.BeginMenu("File", true))
+            //    {
+            //        if (ImGuiAPI.MenuItem("Load", null, false, true))
+            //        {
+                        
+            //        }
+            //        if (ImGuiAPI.MenuItem("Save", null, false, true))
+            //        {
+                        
+            //        }
+            //        ImGuiAPI.EndMenu();
+            //    }
+            //    if (ImGuiAPI.BeginMenu("Windows", true))
+            //    {
+            //        var check = mWorldOutliner.Visible;
+            //        ImGuiAPI.Checkbox("##mWorldOutliner", ref check);
+            //        ImGuiAPI.SameLine(0, -1);
+            //        if ( ImGuiAPI.MenuItem("WorldOutliner", null, false, true))
+            //        {
+            //            mWorldOutliner.Visible = !mWorldOutliner.Visible;
+            //        }
+            //        check = mCpuProfiler.Visible;
+            //        ImGuiAPI.Checkbox("##mCpuProfiler", ref check);
+            //        ImGuiAPI.SameLine(0, -1);
+            //        if (ImGuiAPI.MenuItem("CpuProfiler", null, false, true))
+            //        {
+            //            mCpuProfiler.Visible = !mCpuProfiler.Visible;
+            //        }
+            //        check = mMainInspector.Visible;
+            //        ImGuiAPI.Checkbox("##mMainInspector", ref check);
+            //        ImGuiAPI.SameLine(0, -1);
+            //        if (ImGuiAPI.MenuItem("MainInspector", null, false, true))
+            //        {
+            //            mMainInspector.Visible = !mMainInspector.Visible;
+            //        }
+            //        check = mMetaViewer.Visible;
+            //        ImGuiAPI.Checkbox("##mMetaViewer", ref check);
+            //        ImGuiAPI.SameLine(0, -1);
+            //        if (ImGuiAPI.MenuItem("MetaViewer", null, false, true))
+            //        {
+            //            mMetaViewer.Visible = !mMetaViewer.Visible;
+            //        }
+            //        ImGuiAPI.EndMenu();
+            //    }
+            //    if (ImGuiAPI.BeginMenu("View", true))
+            //    {
+            //        var check = this.WorldViewportSlate.RenderPolicy.DisableShadow;
+            //        ImGuiAPI.Checkbox("##DisableShadow", ref check);
+            //        ImGuiAPI.SameLine(0, -1);
+            //        if (ImGuiAPI.MenuItem("DisableShadow", null, false, true))
+            //        {
+            //            this.WorldViewportSlate.RenderPolicy.DisableShadow = !check;
+            //        }
+
+            //        check = this.WorldViewportSlate.RenderPolicy.DisableAO;
+            //        ImGuiAPI.Checkbox("##DisableAO", ref check);
+            //        ImGuiAPI.SameLine(0, -1);
+            //        if (ImGuiAPI.MenuItem("DisableAO", null, false, true))
+            //        {
+            //            this.WorldViewportSlate.RenderPolicy.DisableAO = !check;
+            //        }
+
+            //        ImGuiAPI.EndMenu();
+            //    }
+            //    ImGuiAPI.EndMenuBar();
+            //}
         }
-        private void DrawToolBar()
+        private unsafe void DrawToolBar()
         {
             var btSize = new Vector2(64, 64);
             ImGuiAPI.Button("New", in btSize);
             ImGuiAPI.SameLine(0, -1);
             ImGuiAPI.Button("Save", in btSize);
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Button("Cap", in btSize))
+            {
+                IRenderDocTool.GetInstance().InitTool(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
+                IRenderDocTool.GetInstance().SetActiveWindow(this.NativeWindow.HWindow.ToPointer());
+                IRenderDocTool.GetInstance().TriggerCapture();
+            }
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
         {

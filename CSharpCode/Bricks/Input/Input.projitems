@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>b6816a25-b92e-4e72-9b24-fd4acfb3aa93</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.Input</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Device\Mouse\MouseControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Device\Mouse\UMouse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InputMapping\Action\IAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Control\IControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Device\IInputDevice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Device\Keyboard\UKeyboard.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Device\Keyboard\UKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Events.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InputMapping\Action\UAxisAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InputMapping\Action\UTriggerAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InputMapping\Action\UValueAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InputMapping\Binding\IBinding.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InputMapping\Binding\UAxisBinding.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InputMapping\Binding\UTriggerBinding.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InputMapping\Binding\UValueBinding.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UInputSystem.cs" />
+  </ItemGroup>
+</Project>

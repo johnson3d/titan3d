@@ -34,6 +34,10 @@ namespace EngineNS.Rtti
     {//使用在Field上，系统自动产生Meta标志过的Property
         public MetaAttribute.EMetaFlags Flags = 0;
     }
+    public class UStructAttrubte : Attribute
+    {
+        public int ReadSize;
+    }
     public class MetaAttribute : Attribute
     {
         [Flags]
@@ -319,6 +323,7 @@ namespace EngineNS.Rtti
                 fd.FieldType = Rtti.UTypeDesc.TypeOf(i.PropertyType);
                 fd.FieldName = i.Name;
                 fd.FieldTypeStr = UTypeDescManager.Instance.GetTypeStringFromType(i.PropertyType);
+                fd.Build();
                 result.Fields.Add(fd);
             }
             result.Fields.Sort();
@@ -515,6 +520,48 @@ namespace EngineNS.Rtti
                 get;
                 set;
             }
+            public void Build()
+            {
+                if (PropInfo == null)
+                    return;
+                var attrs = PropInfo.GetCustomAttributes(typeof(IO.UCustomSerializerAttribute), false);
+                if (attrs.Length == 0)
+                    return;
+                var custom = attrs[0] as IO.UCustomSerializerAttribute;
+
+                if (custom.CustomType == null)
+                    return;
+
+                var types1 = new Type[] { typeof(IO.IWriter), typeof(IO.ISerializer), typeof(string) };
+                var methodSave = custom.CustomType.GetMethod("Save", types1);
+                if (methodSave.IsStatic == false)
+                    return;
+
+                var types2 = new Type[] { typeof(IO.IReader), typeof(IO.ISerializer), typeof(string) };
+                var methodLoad = custom.CustomType.GetMethod("Load", types2);
+                if (methodLoad.IsStatic == false)
+                    return;
+
+                CustomWriter = methodSave;
+                CustomReader = methodLoad;
+
+                //if JIT
+                CustomWriterAction = (Action<IO.IWriter, IO.ISerializer, string>)Delegate.CreateDelegate(typeof(Action<IO.IWriter, IO.ISerializer, string>), CustomWriter);
+                CustomReaderAction = (Action<IO.IReader, IO.ISerializer, string>)Delegate.CreateDelegate(typeof(Action<IO.IReader, IO.ISerializer, string>), CustomReader);
+            }
+            public void CustomSave(IO.IWriter ar, IO.ISerializer host, string propName)
+            {
+                CustomWriterAction(ar, host, propName);
+            }
+            public void CustomLoad(IO.IReader ar, IO.ISerializer host, string propName)
+            {
+                CustomReaderAction(ar, host, propName);
+            }
+            public System.Reflection.MethodInfo CustomWriter;
+            public System.Reflection.MethodInfo CustomReader;
+            //这个需要Jit CreateDelegate
+            private Action<IO.IWriter, IO.ISerializer, string> CustomWriterAction;
+            private Action<IO.IReader, IO.ISerializer, string> CustomReaderAction;
             public Rtti.UTypeDesc FieldType
             {
                 get;
@@ -599,6 +646,7 @@ namespace EngineNS.Rtti
                 }
                 fd.FieldType = Rtti.UTypeDesc.TypeOf(fd.FieldTypeStr);
                 fd.PropInfo = HostClass.ClassType.SystemType.GetProperty(fd.FieldName);
+                fd.Build();
                 if (fd.FieldType == null)
                 {
                     fd.FieldType = UMissingTypeManager.Instance.GetConvertType(fd.FieldTypeStr);

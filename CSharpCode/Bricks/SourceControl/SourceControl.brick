@@ -1,0 +1,11 @@
+{
+  "Name": "TcpServer",
+  "Path": "CSharpCode/Bricks/TcpServer",
+  "FullName": "CSharpCode/Bricks/TcpServer/TcpServer.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/Rtti/Rtti.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

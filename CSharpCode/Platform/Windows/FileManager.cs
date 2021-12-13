@@ -26,6 +26,8 @@ namespace EngineNS.IO
             SetRoot(ERootDir.Game, root + "content");
             SetRoot(ERootDir.Editor, root + "editorcontent");
             SetRoot(ERootDir.Cache, root + "cache");
+            SetRoot(ERootDir.EngineSource, root);
+            SetRoot(ERootDir.GameSource, root);
         }
     }
     public partial class UOpenFileDialog

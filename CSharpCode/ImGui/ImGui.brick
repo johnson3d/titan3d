@@ -1,0 +1,17 @@
+{
+  "Name": "ImGui",
+  "Path": "CSharpCode/ImGui",
+  "FullName": "CSharpCode/ImGui/ImGui.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/RHI/RHI.brick",
+    "CSharpCode/Rtti/Rtti.brick"    
+  ],
+  "Nugets": [
+    {
+      "Name": "ppy.SDL2-CS",
+      "Version": "1.0.82"
+    }
+  ],
+  "DllModules": []
+}

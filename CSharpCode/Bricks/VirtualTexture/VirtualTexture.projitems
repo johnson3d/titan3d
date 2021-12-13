@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>1ca2814e-c99c-419b-a83a-33bf1b1088c9</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.VirtualTexture</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)UVirtualTextureArray.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UVirtualTextureAtlas.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UVirtualTextureBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UVirtualTextureBindless.cs" />
+  </ItemGroup>
+</Project>

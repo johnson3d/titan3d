@@ -33,7 +33,10 @@ namespace EngineNS.IO
                             i.CurLoadTask = null;
                     }
 
-                    UpdateTargetLOD(i);
+                    if (false == UpdateTargetLOD(i))
+                    {
+                        continue;
+                    }
 
                     if (i.LevelOfDetail == i.TargetLOD)
                     {
@@ -52,9 +55,9 @@ namespace EngineNS.IO
                 }
             }
         }
-        public virtual void UpdateTargetLOD(IStreaming asset)
+        public virtual bool UpdateTargetLOD(IStreaming asset)
         {
-
+            return true;
         }
     }
 }

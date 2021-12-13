@@ -493,14 +493,19 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 {
                     CoreSDK.SDK_StrCpy(pBuffer, strPtr.ToPointer(), (uint)textBuffer.Length);
                     //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
-                    var changed = ImGuiAPI.InputText(name, pBuffer, (uint)textBuffer.Length, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
-                    //ImGuiAPI.PopStyleVar(1);
-                    //if (CoreSDK.SDK_StrCmp(pBuffer, strPtr.ToPointer()) != 0 && !info.Readonly)
-                    if(changed && !info.Readonly)
+                    if (info.Readonly)
+                        ImGuiAPI.Text(v);
+                    else
                     {
-                        newValue = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)pBuffer);
-                        valueChanged = true;
-                        //prop.SetValue(ref target, v);
+                        var changed = ImGuiAPI.InputText(name, pBuffer, (uint)textBuffer.Length, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+                        //ImGuiAPI.PopStyleVar(1);
+                        //if (CoreSDK.SDK_StrCmp(pBuffer, strPtr.ToPointer()) != 0 && !info.Readonly)
+                        if (changed && !info.Readonly)
+                        {
+                            newValue = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)pBuffer);
+                            valueChanged = true;
+                            //prop.SetValue(ref target, v);
+                        }
                     }
                     System.Runtime.InteropServices.Marshal.FreeHGlobal(strPtr);
                 }

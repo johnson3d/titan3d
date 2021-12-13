@@ -22,7 +22,7 @@ namespace EngineNS.Graphics.Pipeline
 
             if(engine.Config.SupportMultWindows)
             {
-                if (false == MainWindow.CreateNativeWindow(engine, "T3D", (int)winRect.X, (int)winRect.Y, (int)1, (int)1))
+                if (false == MainWindow.CreateNativeWindow(engine, "T3D", (int)winRect.X, (int)winRect.Y, (int)10, (int)10))
                 {
                     return false;
                 }
@@ -35,17 +35,18 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
             
-            if (InitGPU(engine.Config.AdaperId, engine.Config.RHIType, MainWindow.NativeWindow.HWindow, engine.Config.HasDebugLayer) == false)
+            if (await InitGPU(engine, engine.Config.AdaperId, engine.Config.RHIType, MainWindow.NativeWindow.HWindow, engine.Config.HasDebugLayer) == false)
             {
                 return false;
             }
 
             SlateRenderer = new EGui.Slate.UBaseRenderer();
-            SlateRenderer.Initialize(RName.GetRName("shaders/slate/imgui-vertex.hlsl", RName.ERNameType.Engine), RName.GetRName("shaders/slate/imgui-frag.hlsl", RName.ERNameType.Engine));
+            await SlateRenderer.Initialize();
 
             var rpType = Rtti.UTypeDesc.TypeOf(engine.Config.MainWindowRPolicy).SystemType;
             await MainWindow.InitializeApplication(RenderContext, rpType);
-            MainWindow.OnResize(winRect.Z, winRect.W);
+            var ws = MainWindow.NativeWindow.WindowSize;
+            MainWindow.OnResize(ws.X, ws.Y);
 
             engine.TickableManager.AddTickable(TextureManager);
             return true;
@@ -55,11 +56,14 @@ namespace EngineNS.Graphics.Pipeline
             if (PerFrameCBuffer != null)
             {
                 var timeOfSecend = (float)engine.CurrentTickCount * 0.001f;
-                PerFrameCBuffer.SetValue(PerFrameCBuffer.PerFrameIndexer.Time, ref timeOfSecend);
+                PerFrameCBuffer.SetValue(PerFrameCBuffer.PerFrameIndexer.Time, in timeOfSecend);
                 var timeSin = Math.Sin(timeOfSecend);
-                PerFrameCBuffer.SetValue(PerFrameCBuffer.PerFrameIndexer.TimeSin, ref timeSin);
+                PerFrameCBuffer.SetValue(PerFrameCBuffer.PerFrameIndexer.TimeSin, in timeSin);
                 var timeCos = Math.Cos(timeOfSecend);
-                PerFrameCBuffer.SetValue(PerFrameCBuffer.PerFrameIndexer.TimeSin, ref timeCos);
+                PerFrameCBuffer.SetValue(PerFrameCBuffer.PerFrameIndexer.TimeSin, in timeCos);
+
+                float elapsed = (float)engine.ElapseTickCount / 1000.0f;
+                PerFrameCBuffer.SetValue(PerFrameCBuffer.PerFrameIndexer.ElapsedTime, in elapsed);
             }
         }
         public delegate void Delegate_OnFenceCompetion(RHI.CFence fence);
@@ -103,6 +107,7 @@ namespace EngineNS.Graphics.Pipeline
             RasterizerStateManager.Cleanup();
             DepthStencilStateManager.Cleanup();
             SamplerStateManager.Cleanup();
+            RenderPassManager.Cleanup();
             InputLayoutManager.Cleanup();
             HitproxyManager.Cleanup();
 
@@ -123,36 +128,43 @@ namespace EngineNS.Graphics.Pipeline
         public USlateApplication MainWindow;
         public RHI.CRenderSystem RenderSystem { get; private set; }
         public RHI.CRenderContext RenderContext { get; private set; }
-        protected unsafe bool InitGPU(UInt32 Adapter, ERHIType rhi, IntPtr window, bool bDebugLayer)
+        protected async System.Threading.Tasks.Task<bool> InitGPU(UEngine engine, UInt32 Adapter, ERHIType rhi, IntPtr window, bool bDebugLayer)
         {
             if (UEngine.Instance.PlayMode != EPlayMode.Game)
             {
                 Editor.ShaderCompiler.UShaderCodeManager.Instance.Initialize(RName.GetRName("shaders/", RName.ERNameType.Engine));
             }
 
-            var sysDesc = new IRenderSystemDesc();
-            sysDesc.WindowHandle = window.ToPointer();
-            sysDesc.CreateDebugLayer = bDebugLayer?1:0;
-            RenderSystem = RHI.CRenderSystem.CreateRenderSystem(rhi, ref sysDesc);
-            if (RenderSystem == null)
-                return false;
+            unsafe
+            {
+                var sysDesc = new IRenderSystemDesc();
+                sysDesc.WindowHandle = window.ToPointer();
+                sysDesc.CreateDebugLayer = bDebugLayer ? 1 : 0;
+                RenderSystem = RHI.CRenderSystem.CreateRenderSystem(rhi, ref sysDesc);
+                if (RenderSystem == null)
+                    return false;
 
-            var deviceNum = RenderSystem.NumOfContext;
-            if (Adapter >= deviceNum)
-                return false;
-            var rcDesc = new IRenderContextDesc();
-            rcDesc.SetDefault();
-            RenderSystem.GetContextDesc(Adapter, ref rcDesc);
+                var deviceNum = RenderSystem.NumOfContext;
+                if (Adapter >= deviceNum)
+                    return false;
+                var rcDesc = new IRenderContextDesc();
+                rcDesc.SetDefault();
+                RenderSystem.GetContextDesc(Adapter, ref rcDesc);
 
-            rcDesc.CreateDebugLayer = bDebugLayer?1:0;
-            rcDesc.AppHandle = window.ToPointer();
-            RenderContext = RenderSystem.CreateContext(ref rcDesc);
-            if (RenderContext == null)
-                return false;
+                rcDesc.CreateDebugLayer = bDebugLayer ? 1 : 0;
+                rcDesc.AppHandle = window.ToPointer();
+                RenderContext = RenderSystem.CreateContext(ref rcDesc);
+                if (RenderContext == null)
+                    return false;
+            }
 
+            await MaterialManager.Initialize(this);
+            await MaterialInstanceManager.Initialize(engine);
+            await EffectManager.Initialize(this);
+            
             return true;
         }
-        
+
         #region Manager
         public RHI.UTextureManager TextureManager { get; } = new RHI.UTextureManager();
         public Shader.UMaterialManager MaterialManager { get; private set; } = new Shader.UMaterialManager();
@@ -178,6 +190,10 @@ namespace EngineNS.Graphics.Pipeline
         {
             get;
         } = new Graphics.Pipeline.USamplerStateManager();
+        public Graphics.Pipeline.URenderPassManager RenderPassManager
+        {
+            get;
+        } = new Graphics.Pipeline.URenderPassManager();
         public Graphics.Pipeline.UInputLayoutManager InputLayoutManager
         {
             get;
@@ -189,7 +205,20 @@ namespace EngineNS.Graphics.Pipeline
         #endregion
 
         #region GraphicsData
-        public RHI.CConstantBuffer PerFrameCBuffer { get; set; }
+        RHI.CConstantBuffer mPerFrameCBuffer;
+        public RHI.CConstantBuffer PerFrameCBuffer 
+        { 
+            get
+            {
+                if (mPerFrameCBuffer == null)
+                {
+                    var effect = UEngine.Instance.GfxDevice.EffectManager.DummyEffect;
+                    if (effect != null)
+                        mPerFrameCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(effect.ShaderProgram, effect.CBPerFrameIndex);
+                }
+                return mPerFrameCBuffer;
+            }
+        }
         #endregion
     }
 }

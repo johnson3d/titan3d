@@ -18,6 +18,7 @@ namespace EngineNS.IO
         void Write(string v);
         void Write(byte[] v);
         void Write(VNameString v);
+        void Write(RName v);
 
         void Write<T>(T v) where T : unmanaged;
     }
@@ -99,6 +100,11 @@ namespace EngineNS.IO
         public void Write(VNameString v)
         {
             Write(v.Text);
+        }
+        public void Write(RName v)
+        {
+            Write(v.RNameType);
+            Write(v.Name);
         }
         public void WriteIntSize(byte[] v)
         {

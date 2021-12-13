@@ -32,7 +32,7 @@ namespace EngineNS.Rtti
                     return null;
                 case Support.UAnyValue.EValueType.Struct:
                     {
-                        var type = Rtti.UTypeDesc.TypeOf(v.Struct.mTypeName.GetString());
+                        var type = Rtti.UTypeDesc.TypeOf(v.Struct.mTypeName.c_str());
                         if (type == null)
                             return null;
                         return System.Runtime.InteropServices.Marshal.PtrToStructure(v.Struct.mStructPointer, type.SystemType);

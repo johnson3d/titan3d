@@ -1,0 +1,13 @@
+{
+  "Name": "Base",
+  "Path": "CSharpCode/Base",
+  "FullName": "CSharpCode/Base/Base.brick",
+  "SharedProjects": [],
+  "Nugets": [
+    {
+      "Name": "RIPEMD160",
+      "Version": "1.0.1"
+    }
+  ],
+  "DllModules": []
+}

@@ -87,7 +87,7 @@ namespace EngineNS.Graphics.Pipeline
             NativeWindow.InitSwapChain(rc);
             unsafe
             {
-                mDrawData.InitializeGraphics();
+                mDrawData.InitializeGraphics(NativeWindow.GetSwapchainFormat(), NativeWindow.GetSwapchainDSFormat());
 
                 mImGuiContext = (IntPtr)ImGuiAPI.CreateContext(new ImFontAtlas((void*)0));
                 ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
@@ -387,5 +387,59 @@ namespace EngineNS.Graphics.Pipeline
             }
             ImGuiAPI.End();
         }
+    }
+
+    public class USlateAppBase : USlateApplication, ITickable
+    {
+        public override void Cleanup()
+        {
+            Graphics.Pipeline.USlateApplication.ClearRootForms();
+
+            UEngine.Instance.TickableManager.RemoveTickable(this);
+            base.Cleanup();
+        }
+        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, Type rpType)
+        {
+            await base.InitializeApplication(rc, rpType);
+            
+            UEngine.Instance.TickableManager.AddTickable(this);
+            return true;
+        }
+        protected bool Visible = true;
+        protected unsafe override void OnDrawUI()
+        {
+            if (Visible == false)
+            {
+                var num = ImGuiAPI.PlatformIO_Viewports_Size(ImGuiAPI.GetPlatformIO());
+                if (num == 1)
+                {//只剩下被特意隐藏的主Viewport了
+                    UEngine.Instance.PostQuitMessage();
+                }
+                return;
+            }
+            Vector2 sz = new Vector2(300, 600);
+            ImGuiAPI.SetNextWindowSize(in sz, ImGuiCond_.ImGuiCond_FirstUseEver);
+            if (ImGuiAPI.Begin("Slate", ref Visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+
+            }
+            ImGuiAPI.End();
+
+            DrawRootForms();
+        }
+        #region Tick
+        public virtual void TickLogic(int ellapse)
+        {
+
+        }
+        public virtual void TickRender(int ellapse)
+        {
+
+        }
+        public virtual void TickSync(int ellapse)
+        {
+            OnDrawSlate();
+        }
+        #endregion
     }
 }

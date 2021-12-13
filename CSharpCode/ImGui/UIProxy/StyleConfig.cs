@@ -164,6 +164,22 @@ namespace EngineNS.EGui.UIProxy
         [Controls.PropertyGrid.PGShowInPropertyGrid]
         public float ToolbarSeparatorThickness = 2;
 
+        // Button
+        [Rtti.Meta, Category("Button")]
+        [Controls.PropertyGrid.PGShowInPropertyGrid]
+        [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
+        public UInt32 ToolButtonTextColor = 0xFFBFBFBF;// new Vector4(0.75f, 0.75f, 0.75f, 1.00f);
+
+        [Rtti.Meta, Category("Button")]
+        [Controls.PropertyGrid.PGShowInPropertyGrid]
+        [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
+        public UInt32 ToolButtonTextColor_Hover = 0xFFFFFFFF;// new Vector4(1.00f, 1.00f, 1.00f, 1.00f);
+
+        [Rtti.Meta, Category("Button")]
+        [Controls.PropertyGrid.PGShowInPropertyGrid]
+        [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
+        public UInt32 ToolButtonTextColor_Press = 0xFFFFFFFF;// new Vector4(1.00f, 1.00f, 1.00f, 1.00f);
+
         // PropertyGrid
         [Rtti.Meta, Category("PropertyGrid")]
         [Controls.PropertyGrid.PGShowInPropertyGrid]

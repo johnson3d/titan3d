@@ -6,40 +6,44 @@
     <SharedGUID>fd56162e-fcd2-46a7-89fb-e4a0079dfe3e</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>Animation</Import_RootNamespace>
+    <Import_RootNamespace>EngineNS.Animation</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Base\AnimatableObjectHierarchy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\IAnimationAsset.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationClip.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Base\AnimationCurve.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Asset\AnimationChunk.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Base\AnimHierarchy.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Base\Curve.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\UAnimationClip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\UAnimationCurve.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\UAnimationChunk.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\UAnimHierarchy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\UCurve.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Animatable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pipeline\Command\IAnimationCommand.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Pipeline\AnimationPipeline.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Pipeline\Command\PropertiesSettingCommand.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Player\AnimationClipPlayer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Player\AnimationBlendSpacePlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pipeline\UAnimationPipeline.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pipeline\Command\UPropertiesSettingCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\IAnimationPlayer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Pose\CBonePose.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Pose\Control\IPoseControl.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Pose\CSkeletonPose.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Pose\ULimbPose.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Pose\USkeletonPose.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\CBone.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\CPartialSkeleton.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\Limb\ILimb.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\Limb\UBone.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\UFullSkeleton.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\USKeletonAsset.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Skeleton\Limb\USocket.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\USceneAnimationPlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\USkeletonAnimationPlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\RuntimePose\Control\IPoseControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\RuntimePose\RuntimePose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\AnimatablePose\UAnimatableLimbPose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\AnimatablePose\UAnimatableSkeletonPose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneNode\USkeletonAnimPlayNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\Skeleton\Limb\ILimb.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\Skeleton\Limb\UBone.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\Skeleton\USkinSkeleton.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\USKeletonAsset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\Skeleton\Limb\USocket.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UAnimationModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Asset\" />
     <Folder Include="$(MSBuildThisFileDirectory)Macross\" />
+    <Folder Include="$(MSBuildThisFileDirectory)MorphAnimation\" />
+    <Folder Include="$(MSBuildThisFileDirectory)SkeletonAnimation\" />
+    <Folder Include="$(MSBuildThisFileDirectory)SkeletonAnimation\" />
     <Folder Include="$(MSBuildThisFileDirectory)StateMachine\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Animation.brick" />
   </ItemGroup>
 </Project>

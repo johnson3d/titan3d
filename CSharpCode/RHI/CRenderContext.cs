@@ -57,6 +57,29 @@ namespace EngineNS.RHI
                 return result;
             }
         }
+        public CDrawCall CreateDrawCall(Graphics.Pipeline.Shader.UEffect effect)
+        {
+            var result = new CDrawCall();
+            unsafe
+            {
+                result.mCoreObject = mCoreObject.CreateDrawCall();
+                if (result.mCoreObject.NativePointer == IntPtr.Zero)
+                    return null;
+
+                var desc = new IRenderPipelineDesc();
+                desc.SetDefault();
+                //desc.Blend = UEngine.Instance.GfxDevice.BlendStateManager.DefaultState.mCoreObject;
+                //desc.DepthStencil = UEngine.Instance.GfxDevice.DepthStencilStateManager.DefaultState.mCoreObject;
+                //desc.Rasterizer = UEngine.Instance.GfxDevice.RasterizerStateManager.DefaultState.mCoreObject;
+                var pl = UEngine.Instance.GfxDevice.RenderContext.CreateRenderPipeline(ref desc);
+                pl.mCoreObject.BindGpuProgram(effect.ShaderProgram.mCoreObject);
+                pl.mCoreObject.BindBlendState(UEngine.Instance.GfxDevice.BlendStateManager.DefaultState.mCoreObject);
+                pl.mCoreObject.BindDepthStencilState(UEngine.Instance.GfxDevice.DepthStencilStateManager.DefaultState.mCoreObject);
+                pl.mCoreObject.BindRasterizerState(UEngine.Instance.GfxDevice.RasterizerStateManager.DefaultState.mCoreObject);
+                result.mCoreObject.BindPipeline(pl.mCoreObject);
+            }
+            return result;
+        }
         public async System.Threading.Tasks.Task<CDrawCall> CreateDrawCall(Graphics.Pipeline.Shader.UShadingEnv shading, Graphics.Pipeline.Shader.UMaterial material, Graphics.Pipeline.Shader.UMdfQueue mdf)
         {
             var result = new CDrawCall();
@@ -65,8 +88,30 @@ namespace EngineNS.RHI
                 result.mCoreObject = mCoreObject.CreateDrawCall();
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
+
+                var desc = new IRenderPipelineDesc();
+                desc.SetDefault();
+                //desc.Blend = UEngine.Instance.GfxDevice.BlendStateManager.DefaultState.mCoreObject;
+                //desc.DepthStencil = UEngine.Instance.GfxDevice.DepthStencilStateManager.DefaultState.mCoreObject;
+                //desc.Rasterizer = UEngine.Instance.GfxDevice.RasterizerStateManager.DefaultState.mCoreObject;
+                var pl = UEngine.Instance.GfxDevice.RenderContext.CreateRenderPipeline(ref desc);
+                pl.mCoreObject.BindBlendState(UEngine.Instance.GfxDevice.BlendStateManager.DefaultState.mCoreObject);
+                pl.mCoreObject.BindDepthStencilState(UEngine.Instance.GfxDevice.DepthStencilStateManager.DefaultState.mCoreObject);
+                pl.mCoreObject.BindRasterizerState(UEngine.Instance.GfxDevice.RasterizerStateManager.DefaultState.mCoreObject);
+                result.mCoreObject.BindPipeline(pl.mCoreObject);
             }
             await result.UpdateShaderProgram(shading, material, mdf);
+            return result;
+        }
+        public CComputeDrawcall CreateComputeDrawcall()
+        {
+            var result = new CComputeDrawcall();
+            unsafe
+            {
+                result.mCoreObject = mCoreObject.CreateComputeDrawcall();
+                if (result.mCoreObject.NativePointer == IntPtr.Zero)
+                    return null;
+            }
             return result;
         }
         public CRenderPipeline CreateRenderPipeline(ref IRenderPipelineDesc desc)
@@ -146,6 +191,17 @@ namespace EngineNS.RHI
                 return result;
             }
         }
+        public CRenderPass CreateRenderPass(in IRenderPassDesc desc)
+        {
+            unsafe
+            {
+                var result = new CRenderPass();
+                result.mCoreObject = mCoreObject.CreateRenderPass(in desc);
+                if (result.mCoreObject.NativePointer == IntPtr.Zero)
+                    return null;
+                return result;
+            }
+        }
         public CFrameBuffers CreateFrameBuffers(ref IFrameBuffersDesc desc)
         {
             unsafe
@@ -179,7 +235,7 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CTexture2D CreateTexture2D(ref ITexture2DDesc desc)
+        public CTexture2D CreateTexture2D(in ITexture2DDesc desc)
         {
             unsafe
             {
@@ -190,18 +246,26 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CShaderResourceView CreateShaderResourceView(ref EngineNS.IShaderResourceViewDesc desc)
+        public CShaderResourceView CreateShaderResourceView(in EngineNS.IShaderResourceViewDesc desc)
         {
             unsafe
             {
                 var result = new CShaderResourceView();
                 result.mCoreObject = mCoreObject.CreateShaderResourceView(in desc);
+                if (desc.ViewDimension == SRV_DIMENSION.SRV_DIMENSION_TEXTURE2D)
+                {
+                    var tex2d = new ITexture2D(desc.mGpuBuffer);
+                    result.PicDesc = new CShaderResourceView.UPicDesc();
+                    result.PicDesc.Desc.Width = (int)tex2d.mTextureDesc.Width;
+                    result.PicDesc.Desc.Height = (int)tex2d.mTextureDesc.Height;
+                    result.PicDesc.Desc.MipLevel = (int)tex2d.mTextureDesc.MipLevels;
+                }
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
             }
         }
-        public CGpuBuffer CreateGpuBuffer(ref IGpuBufferDesc desc, IntPtr pInitData)
+        public CGpuBuffer CreateGpuBuffer(in IGpuBufferDesc desc, IntPtr pInitData)
         {
             unsafe
             {
@@ -212,18 +276,18 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CShaderResourceView CreateShaderResourceViewFromBuffer(CGpuBuffer pBuffer, ref ISRVDesc desc)
+        public CUnorderedAccessView CreateUnorderedAccessView(IGpuBuffer pBuffer, in IUnorderedAccessViewDesc desc)
         {
             unsafe
             {
-                var result = new CShaderResourceView();
-                result.mCoreObject = mCoreObject.CreateShaderResourceViewFromBuffer(pBuffer.mCoreObject, in desc);
+                var result = new CUnorderedAccessView();
+                result.mCoreObject = mCoreObject.CreateUnorderedAccessView(pBuffer, in desc);
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;
             }
         }
-        public CUnorderedAccessView CreateUnorderedAccessView(CGpuBuffer pBuffer, ref IUnorderedAccessViewDesc desc)
+        public CUnorderedAccessView CreateUnorderedAccessView(CGpuBuffer pBuffer, in IUnorderedAccessViewDesc desc)
         {
             unsafe
             {
@@ -245,7 +309,7 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CSamplerState CreateSamplerState(ref ISamplerStateDesc desc)
+        public CSamplerState CreateSamplerState(in ISamplerStateDesc desc)
         {
             unsafe
             {
@@ -256,7 +320,7 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CRasterizerState CreateRasterizerState(ref IRasterizerStateDesc desc)
+        public CRasterizerState CreateRasterizerState(in IRasterizerStateDesc desc)
         {
             unsafe
             {
@@ -267,7 +331,7 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CDepthStencilState CreateDepthStencilState(ref IDepthStencilStateDesc desc)
+        public CDepthStencilState CreateDepthStencilState(in IDepthStencilStateDesc desc)
         {
             unsafe
             {
@@ -278,7 +342,7 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CBlendState CreateBlendState(ref IBlendStateDesc desc)
+        public CBlendState CreateBlendState(in IBlendStateDesc desc)
         {
             unsafe
             {
@@ -333,6 +397,17 @@ namespace EngineNS.RHI
                 return result;
             }
         }
+        public CConstantBuffer CreateConstantBuffer(CShaderProgram program, string name)
+        {
+            unsafe
+            {
+                var result = new CConstantBuffer();
+                result.mCoreObject = mCoreObject.CreateConstantBuffer(program.mCoreObject, name);
+                if (result.mCoreObject.NativePointer == IntPtr.Zero)
+                    return null;
+                return result;
+            }
+        }
         public CConstantBuffer CreateConstantBuffer(CShaderProgram program, UInt32 index)
         {
             unsafe
@@ -366,7 +441,18 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CShaderDesc CreateShaderDesc(RName shader, string entry, EShaderType type, CShaderDefinitions defines)
+        public CSemaphore CreateSemaphore()
+        {
+            unsafe
+            {
+                var result = new CSemaphore();
+                result.mCoreObject = mCoreObject.CreateGpuSemaphore();
+                if (result.mCoreObject.NativePointer == IntPtr.Zero)
+                    return null;
+                return result;
+            }
+        }
+        public CShaderDesc CreateShaderDesc(RName shader, string entry, EShaderType type, CShaderDefinitions defines, Editor.ShaderCompiler.UHLSLInclude incProvider)
         {
             string sm = "5_0";
             switch (type)
@@ -386,7 +472,7 @@ namespace EngineNS.RHI
                     break;
             }
             var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
-            return compilier.CompileShader(shader.Address, entry, type, sm, null, null, defines, true);
+            return compilier.CompileShader(shader.Address, entry, type, sm, null, null, null, defines, UEngine.Instance.Config.IsDebugShader, incProvider);
         }
     }
 }

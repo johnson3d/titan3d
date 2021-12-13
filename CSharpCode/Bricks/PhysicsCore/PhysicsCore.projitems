@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>f90694fa-d9fb-4be4-bfb0-d0973ec6741c</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.PhysicsCore</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Actor\UActor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Actor\UCharacter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPhyActor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPhyContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPhyController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPhyConvexMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPhyHeightfield.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPhyMaterial.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPhyMaterialEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPhyScene.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPhyShape.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPhyTriMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPhyTriMeshEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)URigidBodyNode.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)PhysicsCore.brick" />
+  </ItemGroup>
+</Project>

@@ -13,7 +13,7 @@ namespace EngineNS.Editor
             CameraController = new Controller.EditorCameraController();
             Title = "WorldEditor";
         }
-        protected override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
+        public override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
         {
             base.OnHitproxySelected(proxy);
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Graphics.Pipeline.Shader;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -23,6 +24,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             this.AddPinOut(OutSampler);
 
             mDesc.SetDefault();
+        }
+        public override void OnMaterialEditorGenCode(Bricks.CodeBuilder.HLSL.UHLSLGen gen, UMaterial Material)
+        {
+            var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+            tmp.Name = this.Name;
+            var sampNode = this;
+            tmp.Value = sampNode.Desc;
+            Material.UsedSamplerStates.Add(tmp);
         }
         public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
         {

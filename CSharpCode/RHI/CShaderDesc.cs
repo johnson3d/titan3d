@@ -25,5 +25,19 @@ namespace EngineNS.RHI
         {
             mCoreObject = IShaderDesc.CreateInstance(type);
         }
+        public string GLSL
+        {
+            get
+            {
+                return mCoreObject.GetGLCode();
+            }
+        }
+        public string MetalSL
+        {
+            get
+            {
+                return mCoreObject.GetMetalCode();
+            }
+        }
     }
 }

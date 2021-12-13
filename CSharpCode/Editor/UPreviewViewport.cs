@@ -19,22 +19,14 @@ namespace EngineNS.Editor
         {
             RenderPolicy?.Cleanup();
             RenderPolicy = null;
-            if (SnapshotPtr != IntPtr.Zero)
-            {
-                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
-                handle.Free();
-                SnapshotPtr = IntPtr.Zero;
-            }
         }
-        IntPtr SnapshotPtr;
-        
         protected async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
-            await RenderPolicy.Initialize(1, 1);
+            await RenderPolicy.Initialize(null, 1, 1);
 
-            CameraController.Camera = RenderPolicy.GetBasePassNode().GBuffers.Camera;
+            CameraController.ControlCamera(RenderPolicy.Camera);
 
             var materials = new Graphics.Pipeline.Shader.UMaterial[1];
             materials[0] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("utest/ttt.material"));
@@ -46,7 +38,7 @@ namespace EngineNS.Editor
             var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
-                var meshNode = GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, Vector3.Zero, Vector3.One, Quaternion.Identity);
+                var meshNode = await GamePlay .Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "PreviewObject";
                 meshNode.IsCastShadow = true;
@@ -58,31 +50,28 @@ namespace EngineNS.Editor
             //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
         }
-        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Rtti.UTypeDesc policyType, float zMin, float zMax)
         {
+            var policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.IRenderPolicy;
             if (OnInitialize == null)
             {
                 OnInitialize = this.Initialize_Default;
             }
             await OnInitialize(this, application, policy, zMin, zMax);
+
+            RenderPolicy.OnResize(ClientSize.X, ClientSize.Y);
         }
         protected override void OnClientChanged(bool bSizeChanged)
         {
             var vpSize = this.ClientSize;
             if (bSizeChanged)
             {
-                RenderPolicy?.OnResize(vpSize.X, vpSize.Y);
-                if (SnapshotPtr != IntPtr.Zero)
-                {
-                    var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
-                    handle.Free();
-                }
-                SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(RenderPolicy.GetFinalShowRSV()));
+                RenderPolicy?.OnResize(vpSize.X, vpSize.Y);                
             }
         }
         protected override IntPtr GetShowTexture()
         {
-            return SnapshotPtr;
+            return RenderPolicy.GetFinalShowRSV().GetTextureHandle();
         }
         #region CameraControl
         Vector2 mPreMousePt;
@@ -94,12 +83,13 @@ namespace EngineNS.Editor
             {
                 return true;
             }
-            var keyboards = UEngine.Instance.EventProcessorManager.Keyboards;
+
+            var keyboards = UEngine.Instance.InputSystem;
             if (e.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
             {
                 if (e.button.button == SDL.SDL_BUTTON_LEFT)
                 {
-                    if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_LALT])
+                    if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
                         CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.motion.x - mPreMousePt.X) * 0.01f);
                         CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.motion.y - mPreMousePt.Y) * 0.01f);
@@ -112,7 +102,7 @@ namespace EngineNS.Editor
                 }
                 else if (e.button.button == SDL.SDL_BUTTON_X1)
                 {
-                    if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_LALT])
+                    if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
                         CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, (e.motion.y - mPreMousePt.Y) * 0.03f);
                     }
@@ -128,7 +118,7 @@ namespace EngineNS.Editor
             }
             else if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL)
             {
-                if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_LALT])
+                if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                 {
                     CameraMoveSpeed += (float)(e.wheel.y * 0.01f);
                 }
@@ -143,29 +133,29 @@ namespace EngineNS.Editor
         protected virtual void TickOnFocus()
         {
             float step = (UEngine.Instance.ElapseTickCount * 0.001f) * CameraMoveSpeed;
-            var keyboards = UEngine.Instance.EventProcessorManager.Keyboards;
-            if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_W])
+            var keyboards = UEngine.Instance.InputSystem;
+            if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_w))
             {
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, step, true);
             }
-            else if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_S])
+            else if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_s))
             {
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, -step, true);
             }
 
-            if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_A])
+            if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_a))
             {
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, step, true);
             }
-            else if (keyboards[(int)SDL.SDL_Scancode.SDL_SCANCODE_D])
-            {
+            else if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_d))
+                {
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, -step, true);
             }
         }
         GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
         public void TickLogic(int ellapse)
         {
-            World.TickLogic();
+            World.TickLogic(this.RenderPolicy, ellapse);
 
             if (IsDrawing == false)
                 return;
@@ -175,7 +165,9 @@ namespace EngineNS.Editor
                 TickOnFocus();
             }
 
+            mVisParameter.World = World;
             mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
+            mVisParameter.VisibleNodes = RenderPolicy.VisibleNodes;
             mVisParameter.CullCamera = RenderPolicy.GetBasePassNode().GBuffers.Camera;
             World.GatherVisibleMeshes(mVisParameter);
 

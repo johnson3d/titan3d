@@ -18,6 +18,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 Graph = editor.MaterialGraph;
             }
         }
+        public virtual void OnMaterialEditorGenCode(Bricks.CodeBuilder.HLSL.UHLSLGen gen, Graphics.Pipeline.Shader.UMaterial material)
+        {
+
+        }
         public virtual string GetTitleName()
         {
             return Name;
@@ -36,12 +40,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var start = DrawPosition;
             var nodeMin = start;
             var nodeMax = nodeMin + new Vector2(ScaledNodeSize.X, nameSize.Y);
-            TitleImage.OnDraw(ref cmdlist, ref nodeMin, ref nodeMax);
+            TitleImage.OnDraw(ref cmdlist, in nodeMin, in nodeMax, 0);
             cmdlist.AddText(in nodeMin, Icon.Color, GetTitleName(), null);
 
             nodeMax = nodeMin + ScaledNodeSize;
             nodeMin.Y += nameSize.Y;
-            Background.OnDraw(ref cmdlist, ref nodeMin, ref nodeMax);
+            Background.OnDraw(ref cmdlist, in nodeMin, in nodeMax, 0);
 
             {
                 var prevStart = nodeMin;
@@ -67,7 +71,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     }
 
                     var rectMax = rectMin + inIcon.Size * fScale;
-                    inIcon.OnDraw(ref cmdlist, ref rectMin, ref rectMax);
+                    inIcon.OnDraw(ref cmdlist, in rectMin, in rectMax, 0);
                     Inputs[i].Offset = (rectMin - start) / ParentGraph.ScaleFactor;
 
                     nameSize = ImGuiAPI.CalcTextSize(Inputs[i].Name, false, -1.0f);
@@ -90,7 +94,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
                     rectMin.X = nodeMax.X - inIcon.Size.X * fScale;
                     var rectMax = rectMin + inIcon.Size * fScale;
-                    inIcon.OnDraw(ref cmdlist, ref rectMin, ref rectMax);
+                    inIcon.OnDraw(ref cmdlist, in rectMin, in rectMax, 0);
                     Outputs[i].Offset = (rectMin - start) / ParentGraph.ScaleFactor;
 
                     rectMin.X = rectMax.X;

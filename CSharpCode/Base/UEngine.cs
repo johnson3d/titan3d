@@ -52,6 +52,8 @@ namespace EngineNS
         [Rtti.Meta]
         public bool HasDebugLayer { get; set; } = false;
         [Rtti.Meta]
+        public bool IsDebugShader { get; set; } = false;
+        [Rtti.Meta]
         public string MainWindowType { get; set; }// = Rtti.TypeManager.Instance.GetTypeStringFromType(typeof(Editor.MainEditorWindow));
         [Rtti.Meta]
         public string MainWindowRPolicy { get; set; }// = Rtti.TypeManager.Instance.GetTypeStringFromType(typeof(Graphics.Pipeline.Mobile.UMobileFSPolicy));
@@ -70,6 +72,10 @@ namespace EngineNS
         [Rtti.Meta]
         public RName DefaultMaterialInstance { get; set; }// = RName.GetRName("UTest/box_wite.uminst");
     }
+    public partial class URuntimeConfig
+    {
+        public bool VS_StructureBuffer { get; set; } = false;
+    }
     public partial class UEngine : UModuleHost<UEngine>
     {
         private static UEngine mInstance;
@@ -77,6 +83,7 @@ namespace EngineNS
         public EPlayMode PlayMode { get; set; } = EPlayMode.Editor;
         [Rtti.Meta]
         public UEngineConfig Config { get; set; } = new UEngineConfig();
+        public URuntimeConfig RuntimeConfig { get; } = new URuntimeConfig();
         public IO.FileManager FileManager
         {
             get;
@@ -90,9 +97,12 @@ namespace EngineNS
         { 
             get;
         } = new UEventProcessorManager();
+
         public long CurrentTickCount { get; set; }
         public int ElapseTickCount { get; set; }
         public int FrameCount { get; set; }
+        public float TickCountSecond { get; set; }
+        public float ElapsedSecond { get; set; }
         protected override UEngine GetHost()
         {
             return this;
@@ -107,8 +117,14 @@ namespace EngineNS
             mInstance = engine;
             mInstance.PreInitEngine(cfgFile);
         }
+        static unsafe void NativeAssertEvent(void* arg0, void* arg1, int arg2)
+        {
+            System.Diagnostics.Debug.Assert(false);
+        }
+        static unsafe CoreSDK.FDelegate_FAssertEvent OnNativeAssertEvent = NativeAssertEvent;
         public bool PreInitEngine(string cfgFile=null)
         {
+            CoreSDK.SetAssertEvent(OnNativeAssertEvent);
             CoreSDK.InitF2MManager();
             NativeMemory.BeginProfiler();
 
@@ -150,6 +166,7 @@ namespace EngineNS
             System.Action action = async () =>
             {
                 await base.InitializeModules();
+                var rc = UEngine.Instance.GfxDevice.RenderContext;
                 if (Config.DoUnitTest)
                 {
                     t2 = Support.Time.HighPrecision_GetTickCount();
@@ -174,15 +191,19 @@ namespace EngineNS
                 ElapseTickCount = (int)((t1 - CurrentTickCount) / 1000);
                 CurrentTickCount = t1;
                 CoreSDK.UpdateEngineTick(CurrentTickCount);
-
-                if (-1 == EventProcessorManager.Tick(this))
+                InputSystem.BeforeTick();
+                if (-1 == InputSystem.Tick(this))
+                {
                     return false;
+                }
 
                 base.TickModules();
 
                 this.ThreadMain.Tick();
 
                 base.EndFrameModules();
+
+                InputSystem.AfterTick();
 
                 Profiler.TimeScopeManager.UpdateAllInstance();
 
@@ -193,6 +214,9 @@ namespace EngineNS
                 {
                     System.Threading.Thread.Sleep(idleTime);
                 }
+
+                TickCountSecond = ((float)CurrentTickCount) * 0.001f;
+                ElapsedSecond = ((float)ElapseTickCount) * 0.001f;
 
                 FrameCount++;
                 return true;

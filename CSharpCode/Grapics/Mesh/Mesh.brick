@@ -1,0 +1,12 @@
+{
+  "Name": "Mesh",
+  "Path": "CSharpCode/Graphics/Mesh",
+  "FullName": "CSharpCode/Graphics/Mesh/Mesh.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/RHI/RHI.brick",
+    "CSharpCode/Rtti/Rtti.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

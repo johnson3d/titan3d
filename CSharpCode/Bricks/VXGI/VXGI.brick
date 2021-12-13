@@ -1,0 +1,11 @@
+{
+  "Name": "VXGI",
+  "Path": "CSharpCode/Bricks/VXGI",
+  "FullName": "CSharpCode/Bricks/VXGI/VXGI.brick",
+  "SharedProjects": [
+    "CSharpCode/Graphics/Mesh/Mesh.brick",
+    "CSharpCode/Graphics/Pipeline/Pipeline.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

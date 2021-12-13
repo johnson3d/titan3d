@@ -35,6 +35,12 @@ namespace EngineNS.IO
         protected EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
         protected EGui.Controls.TypeSelector TypeSlt = new EGui.Controls.TypeSelector();
         protected System.Threading.Tasks.Task<bool> PGAssetInitTask;
+        public RName GetAssetRName()
+        {
+            if (mName == null)
+                return null;
+            return RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
+        }
         public override void DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
         {
             ExtName = ext;
@@ -72,7 +78,7 @@ namespace EngineNS.IO
                         break;
                 }
 
-            var saved = TypeSlt.SelectedType;
+                var saved = TypeSlt.SelectedType;
                 TypeSlt.OnDraw(-1, 6);
                 if (TypeSlt.SelectedType != saved)
                 {
@@ -81,79 +87,79 @@ namespace EngineNS.IO
                 }
 
                 var sz = new Vector2(0, 0);
-                if (mAsset != null)
+                var buffer = BigStackBuffer.CreateInstance(256);
+                buffer.SetText(mName);
+                ImGuiAPI.InputText("##in_rname", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+                var name = buffer.AsText();
+                eErrorType = enErrorType.None;
+                if (string.IsNullOrEmpty(name))
                 {
-                    var buffer = BigStackBuffer.CreateInstance(256);
-                    buffer.SetText(mName);
-                    ImGuiAPI.InputText("##in_rname", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
-                    var name = buffer.AsText();
-                    eErrorType = enErrorType.None;
-                    if(string.IsNullOrEmpty(name))
+                    eErrorType = enErrorType.EmptyName;
+                }
+                else if (mName != name)
+                {
+                    mName = name;
+                    var rn = RName.GetRName(mDir.Name + name + ExtName, mDir.RNameType);
+                    if (mAsset != null)
                     {
-                        eErrorType = enErrorType.EmptyName;
+                        mAsset.AssetName = rn;
                     }
-                    else if (mName != name)
-                    {
-                        mName = name;
-                        mAsset.AssetName = RName.GetRName(mDir.Name + name + ExtName, mDir.RNameType);
-                        if(IO.FileManager.FileExists(mAsset.AssetName.Address))
-                            eErrorType = enErrorType.IsExisting;
-                    }
-                    buffer.DestroyMe();
+                    if (IO.FileManager.FileExists(rn.Address))
+                        eErrorType = enErrorType.IsExisting;
+                }
+                buffer.DestroyMe();
 
-                    ImGuiAPI.Separator();
+                ImGuiAPI.Separator();
 
-                    if (PGAssetInitTask != null && !PGAssetInitTask.IsCompleted)
-                    {
-                    }
-                    else
-                    {
-                        PGAsset.OnDraw(false, false, false);
-                        PGAssetInitTask = null;
-                    }
+                if (PGAssetInitTask != null && !PGAssetInitTask.IsCompleted)
+                {
+                }
+                else
+                {
+                    PGAsset.OnDraw(false, false, false);
+                    PGAssetInitTask = null;
+                }
 
-                    if (CheckAsset())
+                if (CheckAsset())
+                {
+                    if (ImGuiAPI.Button("Create Asset", &sz))
                     {
-                        if (ImGuiAPI.Button("Create Asset", &sz))
+                        var rn = RName.GetRName(mDir.Name + name + ExtName, mDir.RNameType);
+                        if (IO.FileManager.FileExists(rn.Address) == false && string.IsNullOrWhiteSpace(mName) == false)
                         {
-                            if (IO.FileManager.FileExists(mAsset.AssetName.Address) == false && string.IsNullOrWhiteSpace(mName) == false)
+                            if (DoImportAsset())
                             {
-                                var ameta = mAsset.CreateAMeta();
-                                ameta.SetAssetName(mAsset.AssetName);
-                                ameta.AssetId = Guid.NewGuid();
-                                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mAsset.GetType());
-                                ameta.Description = $"This is a {mAsset.GetType().FullName}\nHahah";
-                                ameta.SaveAMeta();
-
-                                UEngine.Instance.AssetMetaManager.RegAsset(ameta);
-
-                                mAsset.SaveAssetTo(mAsset.AssetName);
-
                                 ImGuiAPI.CloseCurrentPopup();
                                 ContentBrowser.mAssetImporter = null;
                             }
                         }
-                        ImGuiAPI.SameLine(0, 20);
                     }
-                    if (ImGuiAPI.Button("Cancel", &sz))
-                    {
-                        ImGuiAPI.CloseCurrentPopup();
-                        ContentBrowser.mAssetImporter = null;
-                    }
+                    ImGuiAPI.SameLine(0, 20);
                 }
-                else
+                if (ImGuiAPI.Button("Cancel", &sz))
                 {
-                    if (ImGuiAPI.Button("Cancel", &sz))
-                    {
-                        ImGuiAPI.CloseCurrentPopup();
-                        ContentBrowser.mAssetImporter = null;
-                    }
+                    ImGuiAPI.CloseCurrentPopup();
+                    ContentBrowser.mAssetImporter = null;
                 }
                 ImGuiAPI.EndPopup();
             }
         }
         protected virtual bool CheckAsset()
         {
+            return true;
+        }
+        protected virtual bool DoImportAsset()
+        {
+            var ameta = mAsset.CreateAMeta();
+            ameta.SetAssetName(mAsset.AssetName);
+            ameta.AssetId = Guid.NewGuid();
+            ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mAsset.GetType());
+            ameta.Description = $"This is a {mAsset.GetType().FullName}\nHahah";
+            ameta.SaveAMeta();
+
+            UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
+            mAsset.SaveAssetTo(mAsset.AssetName);
             return true;
         }
     }
@@ -180,8 +186,27 @@ namespace EngineNS.IO
     [Rtti.Meta]
     public partial class IAssetMeta
     {
-        RName mAssetName;
+        public static readonly string MetaExt = ".ameta";
+        protected RName mAssetName;
         public bool HasSnapshot { get; set; } = true;
+        public IAssetMeta()
+        {
+            mDeleteMenuState.Reset();
+            mDeleteMenuState.HasIndent = false;
+        }
+        public virtual string GetAssetExtType()
+        {
+            System.Diagnostics.Debug.Assert(false);
+            return null;
+        }
+        public virtual void Cleanup()
+        {
+            if (Task != null)
+            {
+                Task.Result.mTextureRSV = null;
+                Task = null;
+            }
+        }
         public virtual async System.Threading.Tasks.Task<IAsset> LoadAsset()
         {
             System.Diagnostics.Debug.Assert(false);
@@ -192,7 +217,7 @@ namespace EngineNS.IO
         {
             var address = RName.GetAddress(type, name);
             IO.FileManager.DeleteFile(address);
-            IO.FileManager.DeleteFile(address + ".ameta");
+            IO.FileManager.DeleteFile(address + MetaExt);
             if (IO.FileManager.FileExists(address + ".snap"))
             {
                 IO.FileManager.DeleteFile(address + ".snap");
@@ -207,7 +232,7 @@ namespace EngineNS.IO
         public void SetAssetName(RName rn)
         {
             mAssetName = rn;
-            System.Diagnostics.Debug.Assert(rn.Name.EndsWith(".ameta") == false);
+            System.Diagnostics.Debug.Assert(rn.Name.EndsWith(MetaExt) == false);
         }
         public RName GetAssetName()
         {
@@ -216,7 +241,7 @@ namespace EngineNS.IO
         public void SaveAMeta()
         {
             if (mAssetName != null)
-                IO.FileManager.SaveObjectToXml(mAssetName.Address + ".ameta", this);
+                IO.FileManager.SaveObjectToXml(mAssetName.Address + MetaExt, this);
         }
         public virtual bool CanRefAssetType(IAssetMeta ameta)
         {
@@ -241,8 +266,8 @@ namespace EngineNS.IO
         //{
 
         //}
+        EGui.UIProxy.MenuItemProxy.MenuState mDeleteMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
-        internal IntPtr SnapshotPtr;
         public virtual unsafe void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
         {
             var start = ImGuiAPI.GetItemRectMin();
@@ -260,52 +285,76 @@ namespace EngineNS.IO
 
             cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
             ImGuiAPI.PopClipRect();
+
+            var createNewAssetValueStore = ContentBrowser.CreateNewAssets;
+            if (ImGuiAPI.BeginPopupContextItem(mAssetName.Address, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
+            {
+                ContentBrowser.CreateNewAssets = false;
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                Support.UAnyPointer menuData = new Support.UAnyPointer();
+
+                if (EGui.UIProxy.MenuItemProxy.MenuItem("Delete", null, false, null, ref drawList, ref menuData, ref mDeleteMenuState))
+                {
+                    try
+                    {
+                        DeleteAsset(mAssetName.Name, mAssetName.RNameType);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
+                OnDrawContextMenu(ref drawList);
+
+                ImGuiAPI.EndPopup();
+            }
+            else
+                ContentBrowser.CreateNewAssets = createNewAssetValueStore;
+        }
+        protected virtual void OnDrawContextMenu(ref ImDrawList cmdlist)
+        {
+
         }
         public virtual void OnShowIconTimout(int time)
         {
-            if (SnapshotPtr != IntPtr.Zero)
+            if (Task != null && Task.Result != null)
             {
-                var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(SnapshotPtr);
-                handle.Free();
-                SnapshotPtr = IntPtr.Zero;
+                Task.Result.mTextureRSV?.Dispose();
                 Task = null;
             }
         }
         public unsafe virtual void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
-            if (SnapshotPtr == IntPtr.Zero && HasSnapshot == true)
+            if (HasSnapshot == false)
+                return;
+            
+            if (Task == null)
             {
-                if (Task == null)
+                Task = Editor.USnapshot.Load(GetAssetName().Address + ".snap");
+                return;
+            }
+            else if (Task.IsCompleted == true)
+            {
+                if (Task.Result == null)
                 {
-                    Task = Editor.USnapshot.Load(GetAssetName().Address + ".snap");
-                }
-                else if (Task.IsCompleted)
-                {
-                    if (Task.Result == null)
-                    {
-                        HasSnapshot = false;
-                    }
-                    else
-                    {
-                        SnapshotPtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(Task.Result.mTextureRSV));
-                    }
+                    HasSnapshot = false;
                     Task = null;
                 }
-            }
-
-            if (SnapshotPtr != IntPtr.Zero)
-            {
-                var uv0 = new Vector2(0, 0);
-                var uv1 = new Vector2(1, 1);
-                cmdlist.AddImage(SnapshotPtr.ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                else
+                {
+                    var uv0 = new Vector2(0, 0);
+                    var uv1 = new Vector2(1, 1);
+                    cmdlist.AddImage(Task.Result.mTextureRSV.GetTextureHandle().ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                }
             }
         }
         [Rtti.Meta]
-        public EGui.UVAnim Icon
+        public EGui.UUvAnim Icon
         {
             get;
             set;
-        } = new EGui.UVAnim();
+        } = new EGui.UUvAnim();
         [Rtti.Meta]
         public string TypeStr { get; set; }
         [Rtti.Meta]
@@ -327,15 +376,10 @@ namespace EngineNS.IO
         {
             foreach (var i in Assets)
             {
-                if (i.Value.Task != null)
-                {
-                    var srv = i.Value.Task.Result.mTextureRSV;
-                    srv.Dispose();
-                    i.Value.Task.Result.mTextureRSV = null;
-                    i.Value.Task = null;
-                }
                 i.Value.OnShowIconTimout(-1);
                 i.Value.ShowIconTime = 0;
+
+                i.Value.Cleanup();
             }
             Assets.Clear();
 
@@ -367,7 +411,7 @@ namespace EngineNS.IO
         public void LoadMetas()
         {
             var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine);
-            var metas = IO.FileManager.GetFiles(RName.GetRName("", RName.ERNameType.Engine).Address, "*.ameta", true);
+            var metas = IO.FileManager.GetFiles(RName.GetRName("", RName.ERNameType.Engine).Address, "*" + IAssetMeta.MetaExt, true);
             foreach(var i in metas)
             {
                 var m = IO.FileManager.LoadXmlToObject(i) as IAssetMeta;
@@ -389,7 +433,7 @@ namespace EngineNS.IO
             }
 
             root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game);
-            metas = IO.FileManager.GetFiles(RName.GetRName("", RName.ERNameType.Game).Address, "*.ameta", true);
+            metas = IO.FileManager.GetFiles(RName.GetRName("", RName.ERNameType.Game).Address, "*" + IAssetMeta.MetaExt, true);
             foreach (var i in metas)
             {
                 var m = IO.FileManager.LoadXmlToObject<IAssetMeta>(i);
@@ -536,15 +580,15 @@ namespace EngineNS.UTest
     {
         public void UnitTestEntrance()
         {
-            IO.FileManager.SureDirectory(RName.GetRName("UTest").Address);
-            var rn = RName.GetRName("UTest/test_icon.uvanim");
-            var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
-            if (ameta == null)
-            {
-                var rnAsset = RName.GetRName("UTest/test_icon.uvanim");
-                var asset = UEngine.Instance.AssetMetaManager.NewAsset<EGui.UVAnim>(rnAsset);
-                asset.SaveAssetTo(rnAsset);
-            }
+            //IO.FileManager.SureDirectory(RName.GetRName("UTest").Address);
+            //var rn = RName.GetRName("UTest/test_icon.uvanim");
+            //var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
+            //if (ameta == null)
+            //{
+            //    var rnAsset = RName.GetRName("UTest/test_icon.uvanim");
+            //    var asset = UEngine.Instance.AssetMetaManager.NewAsset<EGui.UUvAnim>(rnAsset);
+            //    asset.SaveAssetTo(rnAsset);
+            //}
         }
     }
 }

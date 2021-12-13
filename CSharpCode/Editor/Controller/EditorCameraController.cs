@@ -6,10 +6,14 @@ namespace EngineNS.Editor.Controller
 {
     public class EditorCameraController : Graphics.Pipeline.ICameraController
     {
+        Graphics.Pipeline.CCamera mCamera;
         public Graphics.Pipeline.CCamera Camera
         {
-            get;
-            set;
+            get => mCamera;
+        }
+        public void ControlCamera(Graphics.Pipeline.CCamera camera)
+        {
+            mCamera = camera;
         }
         public void Rotate(Graphics.Pipeline.ECameraAxis axis, float angle, bool rotLookAt = false)
         {
@@ -39,7 +43,7 @@ namespace EngineNS.Editor.Controller
                         var up = EngineNS.Vector3.Dot(Camera.mCoreObject.GetUp(), Vector3.UnitY) * Vector3.UnitY;
                         up.Normalize();
                         var mat = EngineNS.Matrix.RotationAxis(up, angle);
-                        var dir = EngineNS.Vector3.TransformCoordinate((pos - lookAt), mat);
+                        var dir = EngineNS.DVector3.TransformCoordinate((pos - lookAt), mat.AsDMatrix());
                         if (rotLookAt)
                         {
                             var newLookAt = pos - dir;
@@ -62,7 +66,7 @@ namespace EngineNS.Editor.Controller
                     {
                         var right = Camera.mCoreObject.GetRight();
                         var mat = EngineNS.Matrix.RotationAxis(right, angle);
-                        var dir = EngineNS.Vector3.TransformCoordinate((pos - lookAt), mat);
+                        var dir = EngineNS.Vector3.TransformCoordinate((pos - lookAt).ToSingleVector3(), mat);
                         var up = EngineNS.Vector3.Cross(right, dir);
                         up.Normalize();
                         if (rotLookAt)

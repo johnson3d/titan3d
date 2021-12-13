@@ -1,0 +1,11 @@
+{
+  "Name": "Network",
+  "Path": "CSharpCode/Bricks/Particle",
+  "FullName": "CSharpCode/Bricks/Particle/Particle.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/Rtti/Rtti.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

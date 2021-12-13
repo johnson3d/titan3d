@@ -9,6 +9,10 @@
     <Import_RootNamespace>EngineNS.Bricks.VXGI</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)UVoxelDebugger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UVoxelsNode.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)VXGI.brick" />
   </ItemGroup>
 </Project>

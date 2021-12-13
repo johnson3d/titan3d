@@ -1,0 +1,10 @@
+{
+  "Name": "Rtti",
+  "Path": "CSharpCode/Rtti",
+  "FullName": "CSharpCode/Rtti/Rtti.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

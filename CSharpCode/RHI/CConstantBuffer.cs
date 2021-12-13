@@ -132,6 +132,8 @@ namespace EngineNS.RHI
             public int TimeSin;// = 1.0f;
             [UShaderType(ShaderType = typeof(float))]
             public int TimeCos;// = 1.0f;
+            [UShaderType(ShaderType = typeof(float))]
+            public int ElapsedTime;// = 1.0f;
         }
         public static PerFrame mPerFrameIndexer;
         public PerFrame PerFrameIndexer
@@ -171,6 +173,8 @@ namespace EngineNS.RHI
             public int PointLightNum;
             public int PointLightIndices;
 
+            public int ObjectFLags_2Bit;
+
             public int AbsBonePos;
             public int AbsBoneQuat;
         }
@@ -207,7 +211,12 @@ namespace EngineNS.RHI
         }
 
         #region SetVar
-        public void SetValue<T>(int index, ref T value, uint elem = 0) where T : unmanaged
+        public void SetValue<T>(string name, in T value, uint elem = 0) where T : unmanaged
+        {
+            var index = mCoreObject.FindVar(name);
+            SetValue(index, in value, elem);
+        }
+        public void SetValue<T>(int index, in T value, uint elem = 0) where T : unmanaged
         {
             unsafe
             {
@@ -217,12 +226,28 @@ namespace EngineNS.RHI
                 }
             }
         }
-        public void SetMatrix(int index, ref Matrix value, uint elem = 0)
+        public ref T GetValue<T>(int index, uint elem = 0) where T : unmanaged
         {
             unsafe
             {
-                var tm = Matrix.Transpose(ref value);
+                return ref *(T*)mCoreObject.GetVarValueAddress(index, elem);
+            }
+        }
+        public void SetMatrix(int index, in Matrix value, uint elem = 0)
+        {
+            unsafe
+            {
+                var tm = Matrix.Transpose(in value);
                 mCoreObject.SetVarValuePtr(index, &tm, sizeof(Matrix), elem);
+            }
+        }
+        public Matrix GetMatrix(int index, uint elem = 0)
+        {
+            unsafe
+            {
+                var tm = *(Matrix*)mCoreObject.GetVarValueAddress(index, elem);
+                tm.Transpose();
+                return tm;
             }
         }
         #endregion

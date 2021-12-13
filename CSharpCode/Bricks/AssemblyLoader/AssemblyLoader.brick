@@ -1,0 +1,16 @@
+{
+  "Name": "AssemblyLoader",
+  "Path": "CSharpCode/Bricks/AssemblyLoader",
+  "FullName": "CSharpCode/Bricks/AssemblyLoader/AssemblyLoader.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/Rtti/Rtti.brick"
+  ],
+  "Nugets": [
+    {
+      "Name": "System.Runtime.Loader",
+      "Version": "4.3.0"
+    }
+  ],
+  "DllModules": []
+}

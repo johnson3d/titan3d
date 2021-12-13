@@ -7,6 +7,11 @@ namespace EngineNS.Graphics.Pipeline
     public class UViewportSlate : IEventProcessor
     {
         public GamePlay.UWorld World { get; protected set; } = new GamePlay.UWorld();
+        public void SetCameraOffset(in DVector3 offset)
+        {
+            World.CameraOffset = offset;
+            this.RenderPolicy.Camera.mCoreObject.SetMatrixStartPosition(in offset);
+        }
         public virtual string Title { get; set; } = "Game";
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
@@ -39,6 +44,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public bool IsFocused { get; protected set; }
         public bool IsDrawing { get; protected set; }
+        public bool IsMouseIn = false;
 
         protected Graphics.Pipeline.UPresentWindow mPresentWindow;
         public enum EVieportType
@@ -129,9 +135,11 @@ namespace EngineNS.Graphics.Pipeline
                     {
                         min = min + pos;
                         max = max + pos;
-                        drawlist.AddImage(showTexture.ToPointer(), in min, in max, in uv1, in uv2, 0xFFFFFFFF);
+                        drawlist.AddImage(showTexture.ToPointer(), in min, in max, in uv1, in uv2, 0x01FFFFFF);// 0xFFFFFFFF);abgr
                     }
                 }
+
+                IsMouseIn = ImGuiAPI.IsMouseHoveringRect(in min, in max, true);
 
                 if(ImGuiAPI.BeginChild("ViewportClient", in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                 {
@@ -175,21 +183,21 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
+        public void ProcessHitproxySelected(float mouseX, float mouseY)
+        {
+            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.IRenderPolicy;
+            if (edtorPolicy != null)
+            {
+                var pos = Window2Viewport(new Vector2(mouseX, mouseY));
+                var hitObj = edtorPolicy.GetHitproxy((uint)pos.X, (uint)pos.Y);
+                OnHitproxySelected(hitObj);
+            }
+        }
         public unsafe virtual bool OnEvent(ref SDL.SDL_Event e)
         {
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP)
             {
                 OnMouseUp(ref e);
-                if(e.button.button == SDL.SDL_BUTTON_LEFT)
-                {
-                    var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.Mobile.UMobileEditorFSPolicy;
-                    if (edtorPolicy != null)
-                    {
-                        var pos = Window2Viewport(new Vector2((float)e.motion.x, (float)e.motion.y));
-                        var hitObj = edtorPolicy.GetHitproxy((uint)pos.X, (uint)pos.Y);
-                        OnHitproxySelected(hitObj);
-                    }
-                }
             }
             else if(e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN)
             {
@@ -209,9 +217,9 @@ namespace EngineNS.Graphics.Pipeline
         {
             return IntPtr.Zero;
         }
-        protected virtual void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
+        public virtual void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
         {
-            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.Mobile.UMobileEditorFSPolicy;
+            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.IRenderPolicy;
             if (edtorPolicy != null)
             {
                 if (proxy == null)
@@ -226,12 +234,15 @@ namespace EngineNS.Graphics.Pipeline
         }
         public delegate System.Threading.Tasks.Task FOnInitialize(UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax);
         public FOnInitialize OnInitialize = null;
-        public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Rtti.UTypeDesc policyType, float zMin, float zMax)
         {
+            var policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.IRenderPolicy;
             if (OnInitialize != null)
             {
                 await OnInitialize(this, application, policy, zMin, zMax);
             }
+            await this.World.InitWorld();
+            SetCameraOffset(in DVector3.Zero);
         }
     }
 }

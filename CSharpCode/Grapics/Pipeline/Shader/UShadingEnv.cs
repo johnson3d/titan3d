@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
-    public class UShadingEnv
+    public abstract class UShadingEnv
     {
         public UShadingEnv()
         {
@@ -37,7 +37,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //}
             return result;
         }
-        public virtual void OnBuildDrawCall(RHI.CDrawCall drawcall) { }
+        public abstract EVertexSteamType[] GetNeedStreams();
+        public virtual void OnBuildDrawCall(IRenderPolicy policy, RHI.CDrawCall drawcall) { }
         public uint CurrentPermutationId { get; set; } = 0;
         public RName CodeName { get; set; }
         public RHI.CConstantBuffer PerShadingCBuffer;
@@ -183,6 +184,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public virtual void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
         {
             
+        }
+    }
+    public class UDummyShading : Shader.UShadingEnv
+    {
+        public UDummyShading()
+        {
+            CodeName = RName.GetRName("shaders/ShadingEnv/DummyShading.cginc", RName.ERNameType.Engine);
+        }
+        public override EVertexSteamType[] GetNeedStreams()
+        {
+            return new EVertexSteamType[] { EVertexSteamType.VST_Position, };
         }
     }
     public class UShadingEnvManager : UModule<UEngine>

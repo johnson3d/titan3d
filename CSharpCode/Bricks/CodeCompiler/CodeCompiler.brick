@@ -1,0 +1,24 @@
+{
+  "Name": "CodeCompiler",
+  "Path": "CSharpCode/Bricks/CodeCompiler",
+  "FullName": "CSharpCode/Bricks/CodeCompiler/CodeCompiler.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/Rtti/Rtti.brick"
+  ],
+  "Nugets": [
+    {
+      "Name": "System.CodeDom",
+      "Version": "5.0.0"
+    },
+    {
+      "Name": "Microsoft.CodeAnalysis.CSharp.Workspaces",
+      "Version": "4.0.0-3.final"
+    },
+    {
+      "Name": "Microsoft.CodeAnalysis.Workspaces.MSBuild",
+      "Version": "4.0.0-3.final"
+    }
+  ],
+  "DllModules": []
+}

@@ -44,12 +44,29 @@ namespace EngineNS
 
         public float M44;
         #endregion
-        /// <summary>
-        /// 矩阵的元素
-        /// </summary>
-        /// <param name="row">行值</param>
-        /// <param name="column">列值</param>
-        /// <returns>矩阵的相应的行和列的值</returns>
+        
+        public DMatrix AsDMatrix()
+        {
+            DMatrix result;
+            result.M11 = M11;
+            result.M12 = M12;
+            result.M13 = M13;
+            result.M14 = M14;
+            result.M21 = M21;
+            result.M22 = M22;
+            result.M23 = M23;
+            result.M24 = M24;
+            result.M31 = M31;
+            result.M32 = M32;
+            result.M33 = M33;
+            result.M34 = M34;
+            result.M41 = M41;
+            result.M42 = M42;
+            result.M43 = M43;
+            result.M44 = M44;
+            return result;
+        }
+
         public float this[int row, int column]
         {
             get
@@ -112,6 +129,27 @@ namespace EngineNS
                     case 14: M43 = value; break;
                     case 15: M44 = value; break;
                 }
+            }
+        }
+        public enum EAxisType
+        {
+            None,
+            X,
+            Y,
+            Z,
+        };
+        public Vector3 GetScaledAxis(EAxisType InAxis )
+        {
+            switch (InAxis)
+            {
+                case EAxisType.X:
+                    return new Vector3(M11, M12, M13);
+                case EAxisType.Y:
+                    return new Vector3(M21, M22, M23);
+                case EAxisType.Z:
+                    return new Vector3(M31, M32, M33);
+                default:
+                    return Vector3.Zero;
             }
         }
         public Vector3 Left
@@ -202,7 +240,7 @@ namespace EngineNS
         /// <summary>
         /// 标准矩阵
         /// </summary>
-        public static Matrix mIdentity = InitStaticMatrix();
+        public readonly static Matrix Identity = InitStaticMatrix();
         /// <summary>
         /// 初始化矩阵为单位矩阵
         /// </summary>
@@ -224,13 +262,6 @@ namespace EngineNS
             matrix.M33 = 1.0f;
             matrix.M44 = 1.0f;
             return matrix;
-        }
-        public static Matrix Identity
-        {
-            get
-            {
-                return mIdentity;
-            }
         }
 
         #region Equal Overrride
@@ -301,13 +332,25 @@ namespace EngineNS
         /// </summary>
         /// <param name="value1">矩阵对象</param>
         /// <param name="value2">矩阵对象</param>
-        /// <returns>如果value1与value2相等返回true，否则返回false</returns>
-	    public static bool Equals(ref Matrix value1, ref Matrix value2)
+        /// <returns>如果value1与value2相等返回true，否则返回false</returns>	    
+        public static bool Equals(in Matrix value1, in Matrix value2, float epsilon = CoreDefine.Epsilon)
         {
-            return (value1.M11 == value2.M11 && value1.M12 == value2.M12 && value1.M13 == value2.M13 && value1.M14 == value2.M14 &&
-                     value1.M21 == value2.M21 && value1.M22 == value2.M22 && value1.M23 == value2.M23 && value1.M24 == value2.M24 &&
-                     value1.M31 == value2.M31 && value1.M32 == value2.M32 && value1.M33 == value2.M33 && value1.M34 == value2.M34 &&
-                     value1.M41 == value2.M41 && value1.M42 == value2.M42 && value1.M43 == value2.M43 && value1.M44 == value2.M44);
+            return CoreDefine.FloatEuqal(value1.M11, value2.M11, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M12, value2.M12, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M13, value2.M13, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M14, value2.M14, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M21, value2.M21, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M22, value2.M22, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M23, value2.M23, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M24, value2.M24, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M31, value2.M31, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M32, value2.M32, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M33, value2.M33, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M34, value2.M34, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M41, value2.M41, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M42, value2.M42, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M43, value2.M43, epsilon) &&
+                    CoreDefine.FloatEuqal(value1.M44, value2.M44, epsilon);
         }
         #endregion
         /// <summary>
@@ -336,12 +379,12 @@ namespace EngineNS
 
             return result;
         }
-        public static void CreateWorld(ref Vector3 position, ref Vector3 forward, ref Vector3 up, out Matrix result)
+        public static void CreateWorld(in Vector3 position, in Vector3 forward, in Vector3 up, out Matrix result)
         {
             Vector3 x, y, z;
-            Vector3.Normalize(ref forward, out z);
-            Vector3.Cross(ref forward, ref up, out x);
-            Vector3.Cross(ref x, ref forward, out y);
+            Vector3.Normalize(in forward, out z);
+            Vector3.Cross(in forward, in up, out x);
+            Vector3.Cross(in x, in forward, out y);
             x.Normalize();
             y.Normalize();
 
@@ -384,11 +427,11 @@ namespace EngineNS
             }
             else
             {
-                Vector3.Multiply(ref vector, (float)(1f / ((float)Math.Sqrt((double)num))), out vector);
+                Vector3.Multiply(in vector, (float)(1f / ((float)Math.Sqrt((double)num))), out vector);
             }
-            Vector3.Cross(ref cameraUpVector, ref vector, out vector3);
+            Vector3.Cross(in cameraUpVector, in vector, out vector3);
             vector3.Normalize();
-            Vector3.Cross(ref vector, ref vector3, out vector2);
+            Vector3.Cross(in vector, in vector3, out vector2);
             result.M11 = vector3.X;
             result.M12 = vector3.Y;
             result.M13 = vector3.Z;
@@ -425,16 +468,16 @@ namespace EngineNS
             }
             else
             {
-                Vector3.Multiply(ref vector2, (float)(1f / ((float)Math.Sqrt((double)num2))), out vector2);
+                Vector3.Multiply(in vector2, (float)(1f / ((float)Math.Sqrt((double)num2))), out vector2);
             }
             Vector3 vector4 = rotateAxis;
-            Vector3.Dot(ref rotateAxis, ref vector2, out num);
+            Vector3.Dot(in rotateAxis, in vector2, out num);
             if (Math.Abs(num) > 0.9982547f)
             {
                 if (objectForwardVector.HasValue)
                 {
                     vector = objectForwardVector.Value;
-                    Vector3.Dot(ref rotateAxis, ref vector, out num);
+                    Vector3.Dot(in rotateAxis, in vector, out num);
                     if (Math.Abs(num) > 0.9982547f)
                     {
                         num = ((rotateAxis.X * Vector3.Forward.X) + (rotateAxis.Y * Vector3.Forward.Y)) + (rotateAxis.Z * Vector3.Forward.Z);
@@ -446,16 +489,16 @@ namespace EngineNS
                     num = ((rotateAxis.X * Vector3.Forward.X) + (rotateAxis.Y * Vector3.Forward.Y)) + (rotateAxis.Z * Vector3.Forward.Z);
                     vector = (Math.Abs(num) > 0.9982547f) ? Vector3.Right : Vector3.Forward;
                 }
-                Vector3.Cross(ref rotateAxis, ref vector, out vector3);
+                Vector3.Cross(in rotateAxis, in vector, out vector3);
                 vector3.Normalize();
-                Vector3.Cross(ref vector3, ref rotateAxis, out vector);
+                Vector3.Cross(in vector3, in rotateAxis, out vector);
                 vector.Normalize();
             }
             else
             {
-                Vector3.Cross(ref rotateAxis, ref vector2, out vector3);
+                Vector3.Cross(in rotateAxis, in vector2, out vector3);
                 vector3.Normalize();
-                Vector3.Cross(ref vector3, ref vector4, out vector);
+                Vector3.Cross(in vector3, in vector4, out vector);
                 vector.Normalize();
             }
             matrix.M11 = vector3.X;
@@ -496,16 +539,16 @@ namespace EngineNS
             }
             else
             {
-                Vector3.Multiply(ref vector2, (float)(1f / ((float)Math.Sqrt((double)num2))), out vector2);
+                Vector3.Multiply(in vector2, (float)(1f / ((float)Math.Sqrt((double)num2))), out vector2);
             }
             Vector3 vector4 = rotateAxis;
-            Vector3.Dot(ref rotateAxis, ref vector2, out num);
+            Vector3.Dot(in rotateAxis, in vector2, out num);
             if (Math.Abs(num) > 0.9982547f)
             {
                 if (objectForwardVector.HasValue)
                 {
                     vector = objectForwardVector.Value;
-                    Vector3.Dot(ref rotateAxis, ref vector, out num);
+                    Vector3.Dot(in rotateAxis, in vector, out num);
                     if (Math.Abs(num) > 0.9982547f)
                     {
                         num = ((rotateAxis.X * Vector3.Forward.X) + (rotateAxis.Y * Vector3.Forward.Y)) + (rotateAxis.Z * Vector3.Forward.Z);
@@ -517,16 +560,16 @@ namespace EngineNS
                     num = ((rotateAxis.X * Vector3.Forward.X) + (rotateAxis.Y * Vector3.Forward.Y)) + (rotateAxis.Z * Vector3.Forward.Z);
                     vector = (Math.Abs(num) > 0.9982547f) ? Vector3.Right : Vector3.Forward;
                 }
-                Vector3.Cross(ref rotateAxis, ref vector, out vector3);
+                Vector3.Cross(in rotateAxis, in vector, out vector3);
                 vector3.Normalize();
-                Vector3.Cross(ref vector3, ref rotateAxis, out vector);
+                Vector3.Cross(in vector3, in rotateAxis, out vector);
                 vector.Normalize();
             }
             else
             {
-                Vector3.Cross(ref rotateAxis, ref vector2, out vector3);
+                Vector3.Cross(in rotateAxis, in vector2, out vector3);
                 vector3.Normalize();
-                Vector3.Cross(ref vector3, ref vector4, out vector);
+                Vector3.Cross(in vector3, in vector4, out vector);
                 vector.Normalize();
             }
             result.M11 = vector3.X;
@@ -574,7 +617,7 @@ namespace EngineNS
                 }
             }
         }
-        public static void Transpose(ref Matrix matrix, out Matrix result)
+        public static void Transpose(in Matrix matrix, out Matrix result)
         {
             result.M11 = matrix.M11;
             result.M12 = matrix.M21;
@@ -618,6 +661,25 @@ namespace EngineNS
                                 int hr = IDllImportApi.v3dxMatrixDecompose(plocalScale, plocalRot, plocalTrans, pinnedThis);
                                 return hr == 0;
                             }
+                        }
+                    }
+                }
+            }
+        }
+        public bool Decompose(out Vector3 scale, out Quaternion rotation, out DVector3 translation)
+        {
+            unsafe
+            {
+                fixed (Vector3* plocalScale = &scale)
+                {
+                    fixed (Quaternion* plocalRot = &rotation)
+                    {
+                        fixed (Matrix* pinnedThis = &this)
+                        {
+                            Vector3 pos = new Vector3();
+                            int hr = IDllImportApi.v3dxMatrixDecompose(plocalScale, plocalRot, &pos, pinnedThis);
+                            translation = pos.AsDVector();
+                            return hr == 0;
                         }
                     }
                 }
@@ -1255,9 +1317,9 @@ namespace EngineNS
             else
                 difference *= (float)(1.0f / Math.Sqrt(lengthSq));
 
-            Vector3.Cross(ref cameraUpVector, ref difference, out crossed);
+            Vector3.Cross(in cameraUpVector, in difference, out crossed);
             crossed.Normalize();
-            Vector3.Cross(ref difference, ref crossed, out final);
+            Vector3.Cross(in difference, in crossed, out final);
 
             result.M11 = crossed.X;
             result.M12 = crossed.Y;
@@ -1286,7 +1348,7 @@ namespace EngineNS
         /// <param name="cameraUpVector">摄像机的UP向量</param>
         /// <param name="cameraForwardVector">摄像机Forward向量</param>
         /// <param name="result">计算后的矩阵</param>
-	    public static void Billboard(ref Vector3 objectPosition, ref Vector3 cameraPosition, ref Vector3 cameraUpVector, ref Vector3 cameraForwardVector, out Matrix result)
+	    public static void Billboard(in Vector3 objectPosition, in Vector3 cameraPosition, in Vector3 cameraUpVector, in Vector3 cameraForwardVector, out Matrix result)
         {
             Vector3 difference = objectPosition - cameraPosition;
             Vector3 crossed;
@@ -1298,9 +1360,9 @@ namespace EngineNS
             else
                 difference *= (float)(1.0f / Math.Sqrt(lengthSq));
 
-            Vector3.Cross(ref cameraUpVector, ref difference, out crossed);
+            Vector3.Cross(in cameraUpVector, in difference, out crossed);
             crossed.Normalize();
-            Vector3.Cross(ref difference, ref crossed, out final);
+            Vector3.Cross(in difference, in crossed, out final);
 
             result.M11 = crossed.X;
             result.M12 = crossed.Y;
@@ -1569,7 +1631,7 @@ namespace EngineNS
         /// <param name="axis">旋转轴向量</param>
         /// <param name="angle">旋转角度</param>
         /// <returns>返回旋转后的矩阵</returns>
-        public static Matrix RotationAxis(Vector3 axis, float angle)
+        public static Matrix RotationAxis(in Vector3 axis, float angle)
         {
             if (axis.LengthSquared() != 1.0f)
                 axis.Normalize();
@@ -1612,7 +1674,7 @@ namespace EngineNS
         /// <param name="axis">旋转轴向量</param>
         /// <param name="angle">旋转角度</param>
         /// <param name="result">旋转后的矩阵</param>
-        public static void RotationAxis(ref Vector3 axis, float angle, out Matrix result)
+        public static void RotationAxis(in Vector3 axis, float angle, out Matrix result)
         {
             if (axis.LengthSquared() != 1.0f)
                 axis.Normalize();
@@ -1733,7 +1795,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="translation">移动的三维向量</param>
         /// <returns>返回平移后的矩阵</returns>
-        public static Matrix Translate(Vector3 translation)
+        public static Matrix Translate(in Vector3 translation)
         {
             Matrix result;
             result.M11 = 1.0f;
@@ -1759,7 +1821,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="translation">移动的三维向量</param>
         /// <param name="result">平移后的矩阵</param>
-        public static void Translate(ref Vector3 translation, out Matrix result)
+        public static void Translate(in Vector3 translation, out Matrix result)
         {
             result.M11 = 1.0f;
             result.M12 = 0.0f;
@@ -1973,6 +2035,16 @@ namespace EngineNS
             }
             return result;
         }
+        public static Matrix Transformation(Vector3 scaling, Quaternion rotation, DVector3 translation)
+        {
+            Matrix result;
+            unsafe
+            {
+                Vector3 tmp = translation.ToSingleVector3();
+                IDllImportApi.v3dxMatrixTransformationOrigin((Matrix*)&result, (Vector3*)&scaling, (Quaternion*)&rotation, (Vector3*)&tmp);
+            }
+            return result;
+        }
         public static Matrix Transformation(Quaternion rotation, Vector3 translation)
         {
             Matrix result;
@@ -1989,19 +2061,8 @@ namespace EngineNS
         /// <param name="rotation">旋转四元数</param>
         /// <param name="translation">平移向量</param>
         /// <param name="result">变换后的矩阵</param>
-        /// <returns>返回变换后的矩阵</returns>
-        public static Matrix Transformation(Vector3 scaling, Quaternion rotation, Vector3 translation, out Matrix result)
-        {
-            unsafe
-            {
-                fixed (Matrix* pinResult = &result)
-                {
-                    IDllImportApi.v3dxMatrixTransformationOrigin(pinResult, (Vector3*)&scaling, (Quaternion*)&rotation, (Vector3*)&translation);
-                }
-            }
-            return result;
-        }
-        public static Matrix Transformation(ref Vector3 scaling, ref Quaternion rotation, ref Vector3 translation, out Matrix result)
+        /// <returns>返回变换后的矩阵</returns>        
+        public static Matrix Transformation(in Vector3 scaling, in Quaternion rotation, in Vector3 translation, out Matrix result)
         {
             unsafe
             {
@@ -2011,6 +2072,20 @@ namespace EngineNS
                 fixed (Matrix* pinResult = &result)
                 {
                     IDllImportApi.v3dxMatrixTransformationOrigin(pinResult, pinScaling, pinRot, pinTrans);
+                }
+            }
+            return result;
+        }
+        public static Matrix Transformation(in Vector3 scaling, in Quaternion rotation, in DVector3 translation, out Matrix result)
+        {
+            unsafe
+            {
+                fixed (Vector3* pinScaling = &scaling)
+                fixed (Quaternion* pinRot = &rotation)                
+                fixed (Matrix* pinResult = &result)
+                {
+                    Vector3 tmp = translation.ToSingleVector3();
+                    IDllImportApi.v3dxMatrixTransformationOrigin(pinResult, pinScaling, pinRot, &tmp);
                 }
             }
             return result;
@@ -2071,8 +2146,6 @@ namespace EngineNS
                     }
                 }
             }
-
-
         }
 
         //public static Matrix Transformation2D(Vector2 scalingCenter, float scalingRotation, Vector2 scaling, Vector2 rotationCenter, float rotation, Vector2 translation)
@@ -2395,10 +2468,10 @@ namespace EngineNS
         /// </summary>
         /// <param name="mat">矩阵对象</param>
         /// <returns>返回逆矩阵</returns>
-        public static Matrix Invert(ref Matrix mat)
+        public static Matrix Invert(in Matrix mat)
         {
             Matrix result;
-            Invert(ref mat, out result);
+            Invert(in mat, out result);
 
             return result;
         }
@@ -2407,7 +2480,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="mat">矩阵对象</param>
         /// <param name="result">逆矩阵</param>
-        public static void Invert(ref Matrix mat, out Matrix result)
+        public static void Invert(in Matrix mat, out Matrix result)
         {
             unsafe
             {
@@ -2425,7 +2498,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="mat">矩阵对象</param>
         /// <returns>返回转置后的矩阵</returns>
-        public static Matrix Transpose(ref Matrix mat)
+        public static Matrix Transpose(in Matrix mat)
         {
             Matrix result;
             result.M11 = mat.M11;

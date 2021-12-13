@@ -15,5 +15,6 @@ namespace EngineNS.RHI
             desc.Height = (uint)height;
             mCoreObject.OnRestore(&desc);
         }
+        public CShaderResourceView[] BackBufferSRV;
     }
 }

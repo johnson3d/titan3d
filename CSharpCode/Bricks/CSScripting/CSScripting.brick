@@ -1,0 +1,16 @@
+{
+  "Name": "CSScripting",
+  "Path": "CSharpCode/Bricks/CSScripting",
+  "FullName": "CSharpCode/Bricks/CSScripting/CSScripting.brick",
+  "SharedProjects": [
+    "CSharpCode/Base/Base.brick",
+    "CSharpCode/Rtti/Rtti.brick"
+  ],
+  "Nugets": [
+    {
+      "Name": "Mono.Cecil",
+      "Version": "0.11.4"
+    }
+  ],
+  "DllModules": []
+}

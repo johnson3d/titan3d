@@ -81,4 +81,46 @@ namespace EngineNS.Support
             return weak;
         }
     }
+
+    public class ULogicTimer
+    {
+        public string Name { get; set; }
+        public float Interval { get; set; } = 1.0f;
+        float RemainTimer;
+        public delegate bool FOnTimer(ULogicTimer timer);
+        FOnTimer OnTimer;
+        public void SetOnTimer(FOnTimer cb)
+        {
+            OnTimer = cb;
+        }
+        public void UpdateTimer(float elapsed)
+        {
+            RemainTimer -= elapsed;
+            if (RemainTimer <= 0)
+            {
+                if(OnTimer!=null)
+                {
+                    if (OnTimer(this))
+                    {
+                        RemainTimer = Interval;
+                    }
+                }
+            }
+        }
+    }
+    public class ULogicTimerManager
+    {
+        public Dictionary<string, ULogicTimer> Timers { get; } = new Dictionary<string, ULogicTimer>();
+        public void SetTimer(ULogicTimer timer)
+        {
+            Timers[timer.Name] = timer;
+        }
+        public void UpdateTimer(float elapsed)
+        {
+            foreach (var i in Timers.Values)
+            {
+                i.UpdateTimer(elapsed);
+            }
+        }
+    }
 }

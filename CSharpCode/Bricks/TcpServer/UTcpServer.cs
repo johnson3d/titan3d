@@ -10,7 +10,7 @@ namespace EngineNS.Bricks.TcpServer
         static EngineNS.TcpServer.FDelegate_FOnTcpConnectAccept OnTcpConnectAccept = OnTcpConnectAcceptImpl;
         static EngineNS.TcpServer.FDelegate_FOnTcpConnectClosed OnTcpConnectClosed = OnTcpConnectClosedImpl;
         static EngineNS.TcpServer.FDelegate_FOnTcpServerListen OnTcpServerListen = OnTcpServerListenImpl;
-        static EngineNS.TcpServer.FDelegate_FOnTcpServerShutdown OnTcpServerShutdown = OnTcpServerShutdownImpl;
+        static EngineNS.TcpServer.FDelegate_FOnTcpServerListen OnTcpServerShutdown = OnTcpServerShutdownImpl;
 
         static unsafe void OnTcpConnectAcceptImpl(EngineNS.TcpServer arg0, EngineNS.TcpConnect arg1)
         {

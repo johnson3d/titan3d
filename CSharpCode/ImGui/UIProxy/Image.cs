@@ -24,24 +24,22 @@ namespace EngineNS.EGui.UIProxy
         public bool IntersectWithCurrentClipRect = true;
 
         System.Threading.Tasks.Task<RHI.CShaderResourceView> mTask;
-        IntPtr mImagePtr;
         public unsafe IntPtr GetImagePtrPointer()
         {
-            if (mImagePtr == IntPtr.Zero)
+            if (mTask == null)
             {
-                if (mTask == null)
-                {
-                    var rc = UEngine.Instance.GfxDevice.RenderContext;
-                    mTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(ImageFile);
-                }
-                else if (mTask.IsCompleted)
-                {
-                    mImagePtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(mTask.Result));
-                    mTask = null;
-                }
+                var rc = UEngine.Instance.GfxDevice.RenderContext;
+                mTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(ImageFile);
+                return IntPtr.Zero;
             }
-
-            return mImagePtr;
+            else if (mTask.IsCompleted == false)
+            {
+                return IntPtr.Zero;
+            }
+            else
+            {
+                return mTask.Result.GetTextureHandle();
+            }
         }
 
         public ImageProxy()
@@ -70,12 +68,8 @@ namespace EngineNS.EGui.UIProxy
         {
             if (mTask != null)
             {
+                mTask.Result?.FreeTextureHandle();
                 mTask = null;
-            }
-            if (mImagePtr != IntPtr.Zero)
-            {
-                System.Runtime.InteropServices.GCHandle.FromIntPtr(mImagePtr).Free();
-                mImagePtr = IntPtr.Zero;
             }
         }
         public unsafe bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
@@ -83,25 +77,11 @@ namespace EngineNS.EGui.UIProxy
             if (ImageFile == null)
                 return false;
 
-            if (mImagePtr == IntPtr.Zero)
-            {
-                if(mTask == null)
-                {
-                    var rc = UEngine.Instance.GfxDevice.RenderContext;
-                    mTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(ImageFile);
-                }
-                else if(mTask.IsCompleted)
-                {
-                    mImagePtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(mTask.Result));
-                    mTask = null;
-                }
-            }
-
             var startPos = ImGuiAPI.GetCursorScreenPos();
             var endPos = startPos + ImageSize;
             ImGuiAPI.PushClipRect(in startPos, in endPos, IntersectWithCurrentClipRect);
-            if(mImagePtr != IntPtr.Zero)
-                drawList.AddImage(mImagePtr.ToPointer(), in startPos, in endPos, in UVMin, in UVMax, Color);
+            if(GetImagePtrPointer() != IntPtr.Zero)
+                drawList.AddImage(GetImagePtrPointer().ToPointer(), in startPos, in endPos, in UVMin, in UVMax, Color);
             ImGuiAPI.PopClipRect();
             return true;
         }
@@ -110,24 +90,10 @@ namespace EngineNS.EGui.UIProxy
             if (ImageFile == null)
                 return;
 
-            if (mImagePtr == IntPtr.Zero)
-            {
-                if (mTask == null)
-                {
-                    var rc = UEngine.Instance.GfxDevice.RenderContext;
-                    mTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(ImageFile);
-                }
-                else if (mTask.IsCompleted)
-                {
-                    mImagePtr = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(mTask.Result));
-                    mTask = null;
-                }
-            }
-
             var endPos = pos + ImageSize;
             ImGuiAPI.PushClipRect(in pos, in endPos, IntersectWithCurrentClipRect);
-            if (mImagePtr != IntPtr.Zero)
-                drawList.AddImage(mImagePtr.ToPointer(), in pos, in endPos, in UVMin, in UVMax, Color);
+            if (GetImagePtrPointer() != IntPtr.Zero)
+                drawList.AddImage(GetImagePtrPointer().ToPointer(), in pos, in endPos, in UVMin, in UVMax, Color);
             ImGuiAPI.PopClipRect();
         }
     }

@@ -15,4 +15,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ClassMeta.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UNativeCoreProvider.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Rtti.brick" />
+  </ItemGroup>
 </Project>

@@ -215,7 +215,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
     {
         public class LinkDesc
         {
-            public UVAnim Icon { get; set; } = new UVAnim();
+            public UUvAnim Icon { get; set; } = new UUvAnim();
             public float ExtPadding { get; set; } = 10;
             public uint LineColor { get; set; } = 0xFFFF0000;//0xFF00FFFF
             public float LineThinkness { get; set; } = 3;
@@ -306,9 +306,9 @@ namespace EngineNS.EGui.Controls.NodeGraph
         {
             get { return Size * ParentGraph.ScaleFactor; }
         }
-        public UVAnim Icon { get; set; } = new UVAnim();
-        public UVAnim TitleImage { get; set; } = new UVAnim();
-        public UVAnim Background { get; set; } = new UVAnim();
+        public UUvAnim Icon { get; set; } = new UUvAnim();
+        public UUvAnim TitleImage { get; set; } = new UUvAnim();
+        public UUvAnim Background { get; set; } = new UUvAnim();
         public List<PinIn> Inputs
         {
             get;
@@ -484,16 +484,16 @@ namespace EngineNS.EGui.Controls.NodeGraph
                 {
                     var rectTitleMin = drawPosition;
                     var rectTitleMax = rectTitleMin + new Vector2(ScaledNodeSize.X, lineHeight);
-                    TitleImage.OnDraw(ref cmdlist, ref rectTitleMin, ref rectTitleMax);
+                    TitleImage.OnDraw(ref cmdlist, in rectTitleMin, in rectTitleMax, 0);
 
                     rectTitleMin.Y += lineHeight;
                     rectTitleMax = NodeMax;
-                    Background.OnDraw(ref cmdlist, ref rectTitleMin, ref rectTitleMax);
+                    Background.OnDraw(ref cmdlist, in rectTitleMin, in rectTitleMax, 0);
                 }
 
                 var rectMin = new Vector2(drawPosition.X + styles.IconOffset.X * fScale, lineY + styles.IconOffset.Y * fScale);
                 var rectMax = rectMin + Icon.Size * fScale;
-                Icon.OnDraw(ref cmdlist, ref rectMin, ref rectMax);
+                Icon.OnDraw(ref cmdlist, in rectMin, in rectMax, 0);
                 rectMin.X = rectMax.X;
                 rectMin.Y -= styles.IconOffset.Y * fScale;
                 nameSize = ImGuiAPI.CalcTextSize(Name, false, -1.0f);
@@ -521,7 +521,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                                     }
                                     rectMin.X = drawPosition.X + styles.PinInStyle.Offset * fScale;
                                     rectMax = rectMin + inIcon.Size * fScale;
-                                    inIcon.OnDraw(ref cmdlist, ref rectMin, ref rectMax);
+                                    inIcon.OnDraw(ref cmdlist, in rectMin, in rectMax, 0);
                                     Inputs[i].Offset = (rectMin - drawPosition) / ParentGraph.ScaleFactor;
                                     nameSize = ImGuiAPI.CalcTextSize(Inputs[i].Name, false, -1.0f);
                                     rectMin.X = rectMax.X;
@@ -552,7 +552,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                                     }
                                     rectMin.X = NodeMax.X - styles.PinOutStyle.Offset * fScale - inIcon.Size.X * fScale;
                                     rectMax = rectMin + inIcon.Size * fScale;
-                                    inIcon.OnDraw(ref cmdlist, ref rectMin, ref rectMax);
+                                    inIcon.OnDraw(ref cmdlist, in rectMin, in rectMax, 0);
                                     Outputs[i].Offset = (rectMin - drawPosition)/ParentGraph.ScaleFactor;
                                     nameSize = ImGuiAPI.CalcTextSize(Outputs[i].Name, false, -1.0f);
                                     rectMin.X -= nameSize.X;

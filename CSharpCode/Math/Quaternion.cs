@@ -89,12 +89,12 @@ namespace EngineNS
         /// <param name="value1">旋转四元数</param>
         /// <param name="value2">旋转四元数</param>
         /// <returns>如果两个对象相等返回true，否则返回false</returns>
-	    public static bool Equals(in Quaternion value1, in Quaternion value2)
+	    public static bool Equals(in Quaternion value1, in Quaternion value2, float epsilon = CoreDefine.Epsilon)
         {
-            bool reX = (Math.Abs(value1.X - value2.X) < CoreDefine.Epsilon);
-            bool reY = (Math.Abs(value1.Y - value2.Y) < CoreDefine.Epsilon);
-            bool reZ = (Math.Abs(value1.Z - value2.Z) < CoreDefine.Epsilon);
-            bool reW = (Math.Abs(value1.W - value2.W) < CoreDefine.Epsilon);
+            bool reX = (Math.Abs(value1.X - value2.X) < epsilon);
+            bool reY = (Math.Abs(value1.Y - value2.Y) < epsilon);
+            bool reZ = (Math.Abs(value1.Z - value2.Z) < epsilon);
+            bool reW = (Math.Abs(value1.W - value2.W) < epsilon);
             return (reX && reY && reZ && reW);
         }
         #endregion
@@ -127,24 +127,9 @@ namespace EngineNS
         /// <summary>
         /// 只读属性，标准四元数
         /// </summary>
-        public readonly static Quaternion mIdentity = new Quaternion(0, 0, 0, 1);
-        [Rtti.Meta]
-        public static Quaternion Identity
-        {
-            get
-            {
-                return mIdentity;
-            }
-        }
-        public readonly static Quaternion mZero = new Quaternion(0, 0, 0, 0);
-        [Rtti.Meta]
-        public static Quaternion Zero
-        {
-            get
-            {
-                return mZero;
-            }
-        }
+        public readonly static Quaternion Identity = new Quaternion(0, 0, 0, 1);
+        public readonly static Quaternion Zero = new Quaternion(0, 0, 0, 0);
+
         /// <summary>
         /// 只读属性，是否为标准四元数
         /// </summary>
@@ -309,6 +294,10 @@ namespace EngineNS
             Y *= length;
             Z *= length;
             W *= length;
+        }
+        public bool IsNormalized()
+        {
+            return (Math.Abs(1.0f - this.LengthSquared()) < 0.01f);
         }
         /// <summary>
         /// 共轭四元数
@@ -736,10 +725,31 @@ namespace EngineNS
         /// <param name="quaternion">四元数对象</param>
         /// <param name="scale">缩放大小</param>
         /// <returns>返回计算后的四元数</returns>
-        [Rtti.Meta]
         public static Vector3 RotateVector3(Quaternion quaternion, Vector3 vec)
         {
             return quaternion * vec;
+        }
+        public static DVector3 RotateVector3(Quaternion quaternion, DVector3 vec)
+        {
+            return quaternion * vec;
+        }
+        public static Vector3 UnrotateVector3(Quaternion quaternion, Vector3 vec)
+        {
+            Quaternion invQuat;
+            invQuat.X = -quaternion.X;
+            invQuat.Y = -quaternion.Y;
+            invQuat.Z = -quaternion.Z;
+            invQuat.W = quaternion.W;
+            return invQuat * vec;
+        }
+        public static DVector3 UnrotateVector3(Quaternion quaternion, DVector3 vec)
+        {
+            Quaternion invQuat;
+            invQuat.X = -quaternion.X;
+            invQuat.Y = -quaternion.Y;
+            invQuat.Z = -quaternion.Z;
+            invQuat.W = quaternion.W;
+            return invQuat * vec;
         }
         /// <summary>
         /// 四元数的乘法
@@ -835,7 +845,7 @@ namespace EngineNS
         {
             Quaternion result;
 
-            Vector3.Normalize(ref axis, out axis);
+            Vector3.Normalize(in axis, out axis);
 
             float half = angle * 0.5f;
             float sin = (float)(Math.Sin((double)(half)));
@@ -855,9 +865,9 @@ namespace EngineNS
         /// <param name="angle">旋转角度</param>
         /// <param name="result">计算后的四元数</param>
         [Rtti.Meta]
-        public static void RotationAxis(ref Vector3 axis, float angle, out Quaternion result)
+        public static void RotationAxis(Vector3 axis, float angle, out Quaternion result)
         {
-            Vector3.Normalize(ref axis, out axis);
+            Vector3.Normalize(in axis, out axis);
 
             float half = angle * 0.5f;
             float sin = (float)(Math.Sin((double)(half)));
@@ -1349,23 +1359,36 @@ namespace EngineNS
         /// <param name="left">旋转四元数</param>
         /// <param name="right">旋转四元数</param>
         /// <returns>返回计算后的旋转四元数</returns>
-	    public static Quaternion operator *(Quaternion left, Quaternion right)
+	    //public static Quaternion operator *(in Quaternion left, in Quaternion right)
+        //{
+            //Quaternion quaternion;
+            //float lx = left.X;
+            //float ly = left.Y;
+            //float lz = left.Z;
+            //float lw = left.W;
+            //float rx = right.X;
+            //float ry = right.Y;
+            //float rz = right.Z;
+            //float rw = right.W;
+
+            //quaternion.X = (rx * lw + lx * rw + ry * lz) - (rz * ly);
+            //quaternion.Y = (ry * lw + ly * rw + rz * lx) - (rx * lz);
+            //quaternion.Z = (rz * lw + lz * rw + rx * ly) - (ry * lx);
+            //quaternion.W = (rw * lw) - (rx * lx + ry * ly + rz * lz);
+
+            //return quaternion;
+        //}
+        public static Quaternion operator *(in Quaternion pq1, in Quaternion pq2)
+        {
+            return DXQuaternionMultiply(pq1, pq2);
+        }
+        public static Quaternion DXQuaternionMultiply(in Quaternion pq1, in Quaternion pq2)
         {
             Quaternion quaternion;
-            float lx = left.X;
-            float ly = left.Y;
-            float lz = left.Z;
-            float lw = left.W;
-            float rx = right.X;
-            float ry = right.Y;
-            float rz = right.Z;
-            float rw = right.W;
-
-            quaternion.X = (rx * lw + lx * rw + ry * lz) - (rz * ly);
-            quaternion.Y = (ry * lw + ly * rw + rz * lx) - (rx * lz);
-            quaternion.Z = (rz * lw + lz * rw + rx * ly) - (ry * lx);
-            quaternion.W = (rw * lw) - (rx * lx + ry * ly + rz * lz);
-
+            quaternion.X = pq2.W * pq1.X + pq2.X * pq1.W + pq2.Y * pq1.Z - pq2.Z * pq1.Y;
+            quaternion.Y = pq2.W * pq1.Y - pq2.X * pq1.Z + pq2.Y * pq1.W + pq2.Z * pq1.X;
+            quaternion.Z = pq2.W * pq1.Z + pq2.X * pq1.Y - pq2.Y * pq1.X + pq2.Z * pq1.W;
+            quaternion.W = pq2.W * pq1.W - pq2.X * pq1.X - pq2.Y * pq1.Y - pq2.Z * pq1.Z;
             return quaternion;
         }
         /// <summary>
@@ -1385,24 +1408,43 @@ namespace EngineNS
         }
         public static Vector3 operator *(Quaternion rotation, Vector3 point)
         {
-            float x = rotation.X * 2F;
-            float y = rotation.Y * 2F;
-            float z = rotation.Z * 2F;
-            float xx = rotation.X * x;
-            float yy = rotation.Y * y;
-            float zz = rotation.Z * z;
-            float xy = rotation.X * y;
-            float xz = rotation.X * z;
-            float yz = rotation.Y * z;
-            float wx = rotation.W * x;
-            float wy = rotation.W * y;
-            float wz = rotation.W * z;
+            // http://people.csail.mit.edu/bkph/articles/Quaternions.pdf
+            // V' = V + 2w(Q x V) + (2Q x (Q x V))
+            // refactor:
+            // V' = V + w(2(Q x V)) + (Q x (2(Q x V)))
+            // T = 2(Q x V);
+            // V' = V + w*(T) + (Q x T)
 
-            Vector3 res;
-            res.X = (1F - (yy + zz)) * point.X + (xy - wz) * point.Y + (xz + wy) * point.Z;
-            res.Y = (xy + wz) * point.X + (1F - (xx + zz)) * point.Y + (yz - wx) * point.Z;
-            res.Z = (xz - wy) * point.X + (yz + wx) * point.Y + (1F - (xx + yy)) * point.Z;
-            return res;
+            var Q = new Vector3(rotation.X, rotation.Y, rotation.Z);
+            var T = 2.0f * Vector3.Cross(Q, point);
+            var Result = point + (rotation.W * T) + Vector3.Cross(Q, T);
+            return Result;
+
+            //float x = rotation.X * 2F;
+            //float y = rotation.Y * 2F;
+            //float z = rotation.Z * 2F;
+            //float xx = rotation.X * x;
+            //float yy = rotation.Y * y;
+            //float zz = rotation.Z * z;
+            //float xy = rotation.X * y;
+            //float xz = rotation.X * z;
+            //float yz = rotation.Y * z;
+            //float wx = rotation.W * x;
+            //float wy = rotation.W * y;
+            //float wz = rotation.W * z;
+
+            //Vector3 res;
+            //res.X = (1F - (yy + zz)) * point.X + (xy - wz) * point.Y + (xz + wy) * point.Z;
+            //res.Y = (xy + wz) * point.X + (1F - (xx + zz)) * point.Y + (yz - wx) * point.Z;
+            //res.Z = (xz - wy) * point.X + (yz + wx) * point.Y + (1F - (xx + yy)) * point.Z;
+            //return res;
+        }
+        public static DVector3 operator *(in Quaternion rotation, in DVector3 point)
+        {
+            var Q = new DVector3(rotation.X, rotation.Y, rotation.Z);
+            var T = 2.0d * DVector3.Cross(in Q, in point);
+            var Result = point + (((double)rotation.W) * T) + DVector3.Cross(Q, T);
+            return Result;
         }
         /// <summary>
         /// 重载"*"号运算符

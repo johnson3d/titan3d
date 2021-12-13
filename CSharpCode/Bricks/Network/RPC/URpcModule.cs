@@ -201,7 +201,7 @@ namespace EngineNS.UTest
     using EngineNS.Rtti;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
-    using Microsoft.CodeAnalysis.CSharp.Syntax;
+    //using Microsoft.CodeAnalysis.CSharp.Syntax;
     using System.Reflection;
 
     [UTest.UTest]
