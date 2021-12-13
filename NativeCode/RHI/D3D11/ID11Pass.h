@@ -14,7 +14,7 @@ public:
 	virtual void SetViewport(ICommandList* cmd, IViewPort* vp) override;
 	virtual void SetScissorRect(ICommandList* cmd, IScissorRect* sr) override;
 
-	virtual void SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline) override;
+	virtual void SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline, EPrimitiveType dpType) override;
 
 	virtual void SetVertexBuffer(ICommandList* cmd, UINT32 StreamIndex, IVertexBuffer* VertexBuffer, UINT32 Offset, UINT Stride) override;
 	virtual void SetIndexBuffer(ICommandList* cmd, IIndexBuffer* IndexBuffer) override;
@@ -29,6 +29,12 @@ public:
 	virtual void DrawPrimitive(ICommandList* cmd, EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 NumPrimitives, UINT32 NumInstances) override;
 	virtual void DrawIndexedPrimitive(ICommandList* cmd, EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 StartIndex, UINT32 NumPrimitives, UINT32 NumInstances) override;
 	virtual void DrawIndexedInstancedIndirect(ICommandList* cmd, EPrimitiveType PrimitiveType, IGpuBuffer* pBufferForArgs, UINT32 AlignedByteOffsetForArgs) override;
+};
+
+class ID11ComputeDrawcall : public IComputeDrawcall
+{
+public:
+	virtual void BuildPass(ICommandList* cmd) override;
 };
 
 NS_END

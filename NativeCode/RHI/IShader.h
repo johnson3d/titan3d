@@ -11,15 +11,6 @@ class IConstantBuffer;
 struct TSBindInfo;
 class ShaderReflector;
 
-enum TR_ENUM()
-EShaderType
-{
-	EST_UnknownShader,
-	EST_VertexShader,
-	EST_PixelShader,
-	EST_ComputeShader,
-};
-
 inline EShaderType GetShaderTypeFrom(std::string sm)
 {
 	if (sm == "vs_4_0" || sm == "vs_5_0")
@@ -41,45 +32,41 @@ private:
 public:
 	std::string				Es300Code;
 	std::string				MetalCode;
+	std::vector<UINT>		SpirV;
 public:
 	EShaderType				ShaderType;
+private:
 	ShaderReflector*		Reflector;
 public:
 	RTTI_DEF(IShaderDesc, 0x965458df5b039800, true);
-	TR_CONSTRUCTOR()
-	IShaderDesc()
-	{
-		ShaderType = EST_UnknownShader;
-		Reflector = nullptr;
-	}
-	TR_CONSTRUCTOR()
-	IShaderDesc(EShaderType type)
-	{
-		ShaderType = type;
-		Reflector = nullptr;
-	}
+	
+	IShaderDesc();	
+	IShaderDesc(EShaderType type);
 	~IShaderDesc();
+	ShaderReflector* GetReflector() {
+		return Reflector;
+	}
 	void SetGLCode(const char* code){
 		Es300Code = code;
 	}
 	void SetMetalCode(const char* code) {
 		MetalCode = code;
 	}
-	TR_FUNCTION()
+	
 	const char* GetGLCode() const {
 		return Es300Code.c_str();
 	}
-	TR_FUNCTION()
+	
 	const char* GetMetalCode() const {
 		return MetalCode.c_str();
 	}
-	TR_FUNCTION()
+	
 	void SetShaderType(EShaderType type)
 	{
 		ShaderType = type;
 	}
-	TR_FUNCTION()
-	EShaderType GetShaderType()
+	
+	EShaderType GetShaderType() const
 	{
 		return ShaderType;
 	}
@@ -97,29 +84,9 @@ public:
 		return Codes;
 	}
 	
-	TR_FUNCTION()
 	void Save2Xnd(XndNode* node, DWORD platforms);
-	TR_FUNCTION()
-	vBOOL LoadXnd(XndNode* node);
-
-	TR_FUNCTION()
-	UINT GetCBufferNum();
-	TR_FUNCTION()
-	UINT GetSRVNum();
-	TR_FUNCTION()
-	UINT GetSamplerNum();
-	TR_FUNCTION()
-	vBOOL GetCBufferDesc(UINT index, IConstantBufferDesc* info);
-	TR_FUNCTION()
-	vBOOL GetSRVDesc(UINT index, TSBindInfo* info);
-	TR_FUNCTION()
-	vBOOL GetSamplerDesc(UINT index, TSBindInfo* info);
-	TR_FUNCTION()
-	UINT FindCBufferDesc(const char* name);
-	TR_FUNCTION()
-	UINT FindSRVDesc(const char* name);
-	TR_FUNCTION()
-	UINT FindSamplerDesc(const char* name);
+	
+	vBOOL LoadXnd(XndNode* node);	
 };
 
 class TR_CLASS()
@@ -131,31 +98,13 @@ public:
 	IShader();
 	~IShader();
 
-	TR_FUNCTION()
 	IShaderDesc* GetDesc() {
 		return mDesc;
 	}
-	
-	TR_FUNCTION()
-	UINT32 GetConstantBufferNumber() const;
-	TR_FUNCTION()
-	bool GetConstantBufferDesc(UINT32 Index, IConstantBufferDesc* desc);
-	TR_FUNCTION()
-	const IConstantBufferDesc* FindCBufferDesc(const char* name);
-	
-	TR_FUNCTION()
-	UINT GetShaderResourceNumber() const;
-	TR_FUNCTION()
-	bool GetShaderResourceBindInfo(UINT Index, TSBindInfo* info) const;
-	TR_FUNCTION()
-	const TSBindInfo* FindTextureBindInfo(const char* name);
 
-	TR_FUNCTION()
-	UINT GetSamplerNumber() const;
-	TR_FUNCTION()
-	bool GetSamplerBindInfo(UINT Index, TSBindInfo* info) const;
-	TR_FUNCTION()
-	const TSBindInfo* FindSamplerBindInfo(const char* name);
+	ShaderReflector* GetReflector() {
+		return mDesc->GetReflector();
+	}
 };
 
 class TR_CLASS(SV_Dispose=self->Release())

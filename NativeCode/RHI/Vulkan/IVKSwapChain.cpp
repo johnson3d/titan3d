@@ -6,6 +6,7 @@
 #include "IVKRenderSystem.h"
 #include "IVKRenderContext.h"
 #include "IVKShaderResourceView.h"
+#include "IVKTexture2D.h"
 
 #define new VNEW
 
@@ -15,14 +16,19 @@ IVKSwapChain::IVKSwapChain()
 {
 	mSwapChain = nullptr;
 	mSurface = nullptr;
+	mCurrentFrame = 0;
+	mCurrentImageIndex = 0;
 }
-
 
 IVKSwapChain::~IVKSwapChain()
 {
+	Cleanup();
+}
+
+void IVKSwapChain::Cleanup()
+{
 	for (size_t i = 0; i < mSwapChainTextures.size(); i++)
 	{
-		mSwapChainTextures[i]->mImage = nullptr;
 		mSwapChainTextures[i]->Release();
 	}
 	mSwapChainTextures.clear();
@@ -43,17 +49,29 @@ IVKSwapChain::~IVKSwapChain()
 		}
 		mSurface = nullptr;
 	}
+	for (size_t i = 0; i < mAvailableSemaphores.size(); i++)
+	{
+		vkDestroySemaphore(pRC->mLogicalDevice, mAvailableSemaphores[i], pRC->GetVkAllocCallBacks());
+	}
+	mAvailableSemaphores.clear();
 }
 
-ITexture2D* IVKSwapChain::GetTexture2D()
+UINT IVKSwapChain::GetBackBufferNum()
 {
-	return nullptr;
+	return (UINT)mSwapChainTextures.size();
+}
+
+ITexture2D* IVKSwapChain::GetBackBuffer(UINT index)
+{
+	return (ITexture2D*)mSwapChainTextures[index]->GetGpuBuffer();
 }
 
 bool IVKSwapChain::CheckSwapSurfaceFormat(const VkSurfaceFormatKHR& format,const std::vector<VkSurfaceFormatKHR>& availableFormats)
 {
-	for (const auto& availableFormat : availableFormats) {
-		if (availableFormat.format == format.format && availableFormat.colorSpace == format.colorSpace) {
+	for (const auto& availableFormat : availableFormats) 
+	{
+		if (availableFormat.format == format.format && availableFormat.colorSpace == format.colorSpace) 
+		{
 			return true;
 		}
 	}
@@ -129,27 +147,57 @@ bool IVKSwapChain::Init(IVKRenderContext* rc, const ISwapChainDesc* desc)
 
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-	if (vkCreateSwapchainKHR(rc->mLogicalDevice, &createInfo, nullptr, &mSwapChain) != VK_SUCCESS) 
+	if (vkCreateSwapchainKHR(rc->mLogicalDevice, &createInfo, rc->GetVkAllocCallBacks(), &mSwapChain) != VK_SUCCESS) 
 	{
 		return false;
 	}
 
-	vkGetSwapchainImagesKHR(rc->mLogicalDevice, mSwapChain, &imageCount, nullptr);
-
 	std::vector<VkImage> swapChainImages;
-	swapChainImages.resize(imageCount);
-	vkGetSwapchainImagesKHR(rc->mLogicalDevice, mSwapChain, &imageCount, swapChainImages.data());
+	{	
+		vkGetSwapchainImagesKHR(rc->mLogicalDevice, mSwapChain, &imageCount, nullptr);	
+		swapChainImages.resize(imageCount);
+		vkGetSwapchainImagesKHR(rc->mLogicalDevice, mSwapChain, &imageCount, swapChainImages.data());
+	}
 
 	for (size_t i = 0; i < swapChainImages.size(); i++)
 	{
-		auto pTexture = new IVKShaderResourceView();
-		ISRVDesc srvdesc;
+		auto pTex = new IVKTexture2D();
+		ITexture2DDesc rtDesc;
+		rtDesc.SetDefault();
+		rtDesc.Format = desc->Format;
+		rtDesc.Width = desc->Width;
+		rtDesc.Height = desc->Height;
+		rtDesc.MipLevels = 1;
+		rtDesc.ArraySize = 1;
+		pTex->InitVkImage(rc, swapChainImages[i], &rtDesc);
+		//pTex->TransitionImageLayout(rc, swapChainImages[i], surfaceFormat.format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);//VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		pTex->TransitionImageLayout(rc, swapChainImages[i], 0, 1, surfaceFormat.format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		auto pSrv = new IVKShaderResourceView();
+		IShaderResourceViewDesc srvdesc;
+		srvdesc.SetTexture2D();
+		srvdesc.mGpuBuffer = pTex;
 		srvdesc.Format = desc->Format;
 		srvdesc.Texture2D.MipLevels = 1;
-		srvdesc.ViewDimension = RESOURCE_DIMENSION_TEXTURE2D;
-		pTexture->Init(rc, swapChainImages[i], &srvdesc);
-		mSwapChainTextures.push_back(pTexture);
+		if (pSrv->Init(rc, &srvdesc) == false)
+		{
+			ASSERT(false);
+		}
+		pTex->Release();
+		mSwapChainTextures.push_back(pSrv);
 	}
+
+	mAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	VkSemaphoreCreateInfo semaphoreInfo{};
+	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) 
+	{
+		if (vkCreateSemaphore(rc->mLogicalDevice, &semaphoreInfo, rc->GetVkAllocCallBacks(), &mAvailableSemaphores[i]) != VK_SUCCESS ) 
+		{
+			return false;
+		}
+	}
+	mCurrentFrame = 0;
+	vkAcquireNextImageKHR(rc->mLogicalDevice, mSwapChain, UINT64_MAX, mAvailableSemaphores[mCurrentFrame], VK_NULL_HANDLE, &mCurrentImageIndex);
 	return true;
 }
 
@@ -160,7 +208,27 @@ void IVKSwapChain::BindCurrent()
 
 void IVKSwapChain::Present(UINT SyncInterval, UINT Flags)
 {
+	auto context = mRenderContext.GetPtr();
+	//vkAcquireNextImageKHR(context->mLogicalDevice, mSwapChain, UINT64_MAX, mAvailableSemaphores[mCurrentFrame], VK_NULL_HANDLE, &mCurrentImageIndex);
+	VkPresentInfoKHR presentInfo{};
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
+	VkSemaphore waitSemaphores[] = { mAvailableSemaphores[mCurrentFrame] };
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = waitSemaphores;
+
+	VkSwapchainKHR swapChains[] = { mSwapChain };
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = swapChains;
+
+	presentInfo.pImageIndices = &mCurrentImageIndex;
+	auto result = vkQueuePresentKHR(context->mPresentQueue, &presentInfo);
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+	{
+		
+	}
+	mCurrentFrame = (mCurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;	
+	result = vkAcquireNextImageKHR(context->mLogicalDevice, mSwapChain, UINT64_MAX, mAvailableSemaphores[mCurrentFrame], VK_NULL_HANDLE, &mCurrentImageIndex);
 }
 
 void IVKSwapChain::OnLost()
@@ -170,7 +238,12 @@ void IVKSwapChain::OnLost()
 
 vBOOL IVKSwapChain::OnRestore(const ISwapChainDesc* desc)
 {
-	return TRUE;
+	if (mRenderContext.GetPtr() == nullptr)
+		return FALSE;
+	mDesc = *desc;
+	
+	Cleanup();
+	return Init(mRenderContext.GetPtr(), desc) ? 1 : 0;
 }
 
 NS_END

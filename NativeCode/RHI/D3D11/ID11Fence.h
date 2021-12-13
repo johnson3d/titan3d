@@ -10,6 +10,7 @@ public:
 	ID11Fence();
 	~ID11Fence();
 	virtual void Wait();
+	virtual void Reset();
 	virtual bool IsCompletion();
 
 public:

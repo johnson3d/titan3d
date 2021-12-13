@@ -5,7 +5,6 @@
 #include "../../RHI/RHI.h"
 #include "FBXImporter.h"
 #include "../../Math/v3dxColor4.h"
-#include "../Animation/Skeleton/IPartialSkeleton.h"
 #include "../../Graphics/Mesh/Modifier/ISkinModifier.h"
 
 using namespace fbxsdk;
@@ -86,8 +85,9 @@ namespace AssetImportAndExport
 			std::vector<FBXAnimCurve> PropertyCurves;
 		public:
 			int GetCurveNum() const { return (int)PropertyCurves.size(); }
-			FBXAnimCurve* GetAnimCurve(int index) ;
-			FBXAnimCurve* GetAnimCurve(FBXCurvePropertyType propertyType);
+			FBXAnimCurve* GetPropertyCurve(VNameString propertyName);
+			FBXAnimCurve* GetPropertyCurve(int index) ;
+			FBXAnimCurve* GetPropertyCurve(FBXCurvePropertyType propertyType);
 		};
 
 		class TR_CLASS(SV_Dispose = delete self)
@@ -106,6 +106,7 @@ namespace AssetImportAndExport
 			void MakeTransformAnimElement(FbxNode* node,float scale, FBXAnimElement& outAnimElement);
 			void MakeAnimCurveKeyFrames(FbxAnimCurve* curve, float scale, FBXAnimCurve& outAnimCurve);
 			const FBXAnimImportDesc* GetAnimImportDesc() const;
+			bool CheckRootNode(FbxNode* node);
 		protected:
 			UINT mAnimIndex = -1;
 			FBXImporter* mHostFBXImporter;

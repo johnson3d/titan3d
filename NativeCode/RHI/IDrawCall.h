@@ -1,12 +1,15 @@
 #pragma once
 #include "IRenderResource.h"
 #include "IShader.h"
+#include "IComputeShader.h"
 #include "IVertexBuffer.h"
 #include "IIndexBuffer.h"
 #include "ITextureBase.h"
 #include "ICommandList.h"
 #include "ISamplerState.h"
+#include "IConstantBuffer.h"
 #include "IShaderResourceView.h"
+#include "IUnorderedAccessView.h"
 #include "Utility/IGeometryMesh.h"
 
 NS_BEGIN
@@ -16,7 +19,6 @@ class ICommandList;
 class IRenderPipeline;
 class IVertexShader;
 class IIndexShader;
-class IConstantBuffer;
 class IVertexBuffer;
 class IIndexBuffer;
 class ITextureBase;
@@ -27,56 +29,227 @@ class IMeshPrimitives;
 
 class IDrawCall;
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-IShaderResources : public VIUnknown
+template<typename ResType, typename SelfType>
+struct IResourcesBinder : public VIUnknownBase
 {
-	RTTI_DEF(IShaderResources, 0x25d4135e5b03e326, true);
-	typedef std::vector<std::pair<USHORT, AutoRef<IShaderResourceView>>> RSVVector;
-	RSVVector					VSResources;
-	RSVVector					PSResources;
+	typedef std::vector<std::pair<UINT, AutoRef<ResType>>> CResVector;
+	CResVector					VSResources;
+	CResVector					PSResources;
+	bool						IsDirty;
 
-	TR_CONSTRUCTOR()
-	IShaderResources() {}
-
-	~IShaderResources();
-	TR_FUNCTION()
-	void VSBindTexture(UINT slot, IShaderResourceView* tex);
-	TR_FUNCTION()
-	void PSBindTexture(UINT slot, IShaderResourceView* tex);
-	TR_FUNCTION()
-	IShaderResourceView* GetBindTextureVS(UINT slot);
-	TR_FUNCTION()
-	IShaderResourceView* GetBindTexturePS(UINT slot);
-	UINT PSResourceNum()
-	{	return (UINT)PSResources.size();
+	IResourcesBinder()
+	{
+		IsDirty = false;
 	}
-	UINT VSResourceNum()
+	virtual std::string GetShaderResourcesHash() const
+	{
+		std::stringstream ss;
+		for (auto& i : VSResources)
+		{
+			//ss << i.first;
+			ss << SelfType::GetResourceHash(i.second);
+		}
+		for (auto& i : PSResources)
+		{
+			//ss << i.first;
+			ss << SelfType::GetResourceHash(i.second);
+		}
+		return ss.str();
+	}
+	void BindVS(UINT slot, ResType* buffer)
+	{
+		if (slot == 0xFFFFFFFF)
+			return;
+		for (auto& i : VSResources)
+		{
+			if (i.first == (USHORT)slot)
+			{
+				if (i.second == buffer)
+					return;
+
+				i.second.StrongRef(buffer);
+				IsDirty = true;
+				return;
+			}
+		}
+		AutoRef<ResType> tmp;
+		tmp.StrongRef(buffer);
+		VSResources.push_back(std::make_pair(slot, tmp));
+		IsDirty = true;
+	}
+	void BindPS(UINT slot, ResType* buffer)
+	{
+		if (slot == 0xFFFFFFFF)
+			return;
+		for (auto& i : PSResources)
+		{
+			if (i.first == (USHORT)slot)
+			{
+				if (i.second == buffer)
+					return;
+
+				i.second.StrongRef(buffer);
+				IsDirty = true;
+				return;
+			}
+		}
+		AutoRef<ResType> tmp;
+		tmp.StrongRef(buffer);
+		PSResources.push_back(std::make_pair(slot, tmp));
+		IsDirty = true;
+	}
+
+	//shared with vs
+	void BindCS(UINT slot, ResType* buffer)
+	{
+		if (slot == 0xFFFFFFFF)
+			return;
+		for (auto& i : VSResources)
+		{
+			if (i.first == (USHORT)slot)
+			{
+				if (i.second == buffer)
+					return;
+
+				i.second.StrongRef(buffer);
+				IsDirty = true;
+				return;
+			}
+		}
+		AutoRef<ResType> tmp;
+		tmp.StrongRef(buffer);
+		VSResources.push_back(std::make_pair(slot, tmp));
+		IsDirty = true;
+	}
+	ResType* FindVS(const char* name)
+	{
+		for (auto& i : VSResources)
+		{
+			if (i.second == nullptr)
+				continue;
+
+			if (SelfType::IsEqualName(i.second, name))
+			{
+				return i.second;
+			}
+		}
+		return nullptr;
+	}
+	ResType* FindPS(const char* name)
+	{
+		for (auto& i : PSResources)
+		{
+			if (i.second == nullptr)
+				continue;
+
+			if (SelfType::IsEqualName(i.second, name))
+			{
+				return i.second;
+			}
+		}
+		return nullptr;
+	}
+	ResType* GetResourceVS(UINT slot)
+	{
+		for (auto& i : VSResources)
+		{
+			if (i.first == slot)
+			{
+				return i.second;
+			}
+		}
+		return nullptr;
+	}
+	ResType* GetResourcePS(UINT slot)
+	{
+		for (auto& i : VSResources)
+		{
+			if (i.first == slot)
+			{
+				return i.second;
+			}
+		}
+		return nullptr;
+	}
+	UINT NumOfVS()
 	{
 		return (UINT)VSResources.size();
 	}
+	UINT NumOfPS()
+	{
+		return (UINT)PSResources.size();
+	}
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-IShaderSamplers : public  VIUnknown
+struct TR_CLASS(SV_BaseFunction = true)
+	ICBufferResources : public IResourcesBinder<IConstantBuffer, ICBufferResources>
 {
-	RTTI_DEF(IShaderSamplers, 0x3192c6575b03e351, true);
-	typedef std::vector<std::pair<USHORT, AutoRef<ISamplerState>>> SamplerVector;
-	SamplerVector				VSSamplers;
-	SamplerVector				PSSamplers;
+	ICBufferResources()
+	{
 
-	TR_CONSTRUCTOR()
-	IShaderSamplers()
+	}
+	static bool IsEqualName(IConstantBuffer* obj, const char* name)
+	{
+		return obj->Desc.Name == name;
+	}
+	static void* GetResourceHash(IConstantBuffer* cb)
+	{
+		return cb;
+	}
+};
+
+struct TR_CLASS(SV_BaseFunction = true)
+IShaderRViewResources : public IResourcesBinder<IShaderResourceView, IShaderRViewResources>
+{
+	IShaderRViewResources() 
 	{
 		
 	}
-	~IShaderSamplers();
-	TR_FUNCTION()
-	void VSBindSampler(UINT slot, ISamplerState* sampler);
-	TR_FUNCTION()
-	void PSBindSampler(UINT slot, ISamplerState* sampler);
+	static bool IsEqualName(IShaderResourceView* obj, const char* name)
+	{
+		return false;
+	}
+	static void* GetResourceHash(IShaderResourceView* state)
+	{
+		return state->GetAPIObject();
+	}
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_BaseFunction = true)
+ISamplerResources : public  IResourcesBinder<ISamplerState, ISamplerResources>
+{	
+	ISamplerResources()
+	{
+		
+	}
+	static bool IsEqualName(ISamplerState* obj, const char* name)
+	{
+		return false;
+	}
+	static void* GetResourceHash(ISamplerState* state)
+	{
+		return state;
+	}
+};
+
+struct TR_CLASS(SV_BaseFunction = true)
+	IUavResources : public  IResourcesBinder<IUnorderedAccessView, IUavResources>
+{
+	IUavResources()
+	{
+
+	}
+	static bool IsEqualName(IUnorderedAccessView* obj, const char* name)
+	{
+		return false;
+	}
+	static void* GetResourceHash(IUnorderedAccessView* cb)
+	{
+		return cb;
+	}
+};
+
+struct TR_CLASS(SV_LayoutStruct = 8)
 DrawPrimitiveDesc
 {
 	DrawPrimitiveDesc()
@@ -102,10 +275,10 @@ DrawPrimitiveDesc
 	}
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IViewPort : public VIUnknown
 {
-	TR_CONSTRUCTOR()
+public:
 	IViewPort()
 	{
 		TopLeftX = 0;
@@ -117,21 +290,15 @@ IViewPort : public VIUnknown
 	}
 	RTTI_DEF(IViewPort, 0x1e91cb6f5b04f4ef, true);
 
-	TR_MEMBER()
 	float TopLeftX;
-	TR_MEMBER()
 	float TopLeftY;
-	TR_MEMBER()
 	float Width;
-	TR_MEMBER()
 	float Height;
-	TR_MEMBER()
 	float MinDepth;
-	TR_MEMBER()
 	float MaxDepth;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 SRRect
 {
 	int MinX;
@@ -140,30 +307,26 @@ SRRect
 	int MaxY;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IScissorRect : public VIUnknown
 {
+public:
 	RTTI_DEF(IScissorRect, 0x486b7d125d70a687, true);
-	TR_CONSTRUCTOR()
 	IScissorRect()
 	{
 
 	}
 	std::vector<SRRect> Rects;
 	
-	TR_FUNCTION()
 	void SetRectNumber(UINT num);
-	TR_FUNCTION()
 	UINT GetRectNumber() {
 		return (UINT)Rects.size();
 	}
-	TR_FUNCTION()
 	void SetSCRect(UINT idx, int left, int top, int right, int bottom);
-	TR_FUNCTION()
 	void GetSCRect(UINT idx, SRRect* pRect);
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 IDrawCallDesc
 {
 
@@ -172,18 +335,13 @@ IDrawCallDesc
 class GraphicsProfiler;
 class IGpuBuffer;
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-IDrawCall : public IRenderResource
+class TR_CLASS()
+	IDrawCall : public IRenderResource
 {
 	friend GraphicsProfiler;
 protected:
-	AutoRef<IRenderPipeline>				m_pPipelineState;
+	AutoRef<IRenderPipeline>				mPipelineState;
 	
-	typedef std::vector<std::pair<USHORT, AutoRef<IConstantBuffer>>> CBufferVector;
-
-	CBufferVector							CBuffersVS;
-	CBufferVector							CBuffersPS;
-
 	AutoRef<IMeshPrimitives>				MeshPrimitives;
 	AutoRef<IGpuBuffer>						IndirectDrawArgsBuffer;
 	UINT									IndirectDrawOffsetForArgs;
@@ -191,14 +349,31 @@ protected:
 	UINT									AtomIndex;
 	UINT									LodLevel;
 	UINT									NumInstances;
-	AutoRef<IShaderResources>				m_pShaderTexBinder;
-	AutoRef<IShaderSamplers>				m_pShaderSamplerBinder;
+
+	AutoRef<ICBufferResources>				mShaderCBufferBinder;
+	AutoRef<IShaderRViewResources>			mShaderSrvBinder;
+	AutoRef<ISamplerResources>				mShaderSamplerBinder;
 	
 	AutoRef<IVertexArray>					AttachVBs;
 	AutoRef<IIndexBuffer>					AttachIndexBuffer;
-	AutoRef<IShaderResources>				AttachSRVs;
+	AutoRef<IShaderRViewResources>			AttachSRVs;
 
 	IManagedObjectHolder					TagHandle;
+
+	void BuildPassDefault(ICommandList * cmd, vBOOL bImmCBuffer);
+	std::string GetShaderResourcesHash() const{
+		std::stringstream ss;
+		if (mShaderCBufferBinder != nullptr) {
+			ss << mShaderCBufferBinder->GetShaderResourcesHash();
+		}
+		if (mShaderSrvBinder != nullptr) {
+			ss << mShaderSrvBinder->GetShaderResourcesHash();
+		}
+		if (mShaderSamplerBinder != nullptr) {
+			ss << mShaderSamplerBinder->GetShaderResourcesHash();
+		}
+		return ss.str();
+	}
 public:
 	IDrawCall();
 	~IDrawCall();
@@ -206,123 +381,147 @@ public:
 	inline void operator=(const IDrawCall& rh) {
 		assert(false);
 	}
-	TR_FUNCTION()
 	IConstantBuffer* FindCBufferVS(const char* name);
-	TR_FUNCTION()
 	IConstantBuffer* FindCBufferPS(const char* name);
-	TR_FUNCTION()
 	virtual void BuildPass(ICommandList* cmd, vBOOL bImmCBuffer);
-	TR_FUNCTION()
 	virtual vBOOL ApplyGeomtry(ICommandList* cmd, vBOOL bImmCBuffer);
 
-	TR_FUNCTION()
 	IRenderPipeline* GetPipeline() {
-		return m_pPipelineState;
+		return mPipelineState;
 	}
-	TR_FUNCTION()
 	virtual void BindPipeline(IRenderPipeline* pipeline);
 	
-	TR_FUNCTION()
 	virtual void BindGeometry(IMeshPrimitives* mesh, UINT atom, float lod);
-	TR_FUNCTION()
 	void SetLod(float lod);
-	TR_FUNCTION()
 	float GetLod();
-	TR_FUNCTION()
 	void BindAttachVBs(IVertexArray* vbs) {
 		AttachVBs.StrongRef(vbs);
 	}
-	TR_FUNCTION()
 	void BindAttachIndexBuffer(IIndexBuffer* ib) {
 		AttachIndexBuffer.StrongRef(ib);
 	}
-	TR_FUNCTION()
-	void BindAttachSRVs(IShaderResources* srvs) {
+	
+	void BindAttachSRVs(IShaderRViewResources* srvs) {
 		AttachSRVs.StrongRef(srvs);
+	}	
+	ICBufferResources* GetCBufferResources() {
+		if (mShaderCBufferBinder == nullptr)
+		{
+			mShaderCBufferBinder.WeakRef(new ICBufferResources());
+		}
+		return mShaderCBufferBinder;
 	}
-	TR_FUNCTION()
-	IShaderResources* GetShaderResources() {
-		return m_pShaderTexBinder;
+	IShaderRViewResources* GetShaderRViewResources() {
+		if (mShaderSrvBinder == nullptr)
+		{
+			mShaderSrvBinder.WeakRef(new IShaderRViewResources());
+		}
+		return mShaderSrvBinder;
 	}
-	TR_FUNCTION()
-	virtual void BindShaderResources(IShaderResources* res)
+	ISamplerResources* GetShaderSamplers() {
+		if (mShaderSamplerBinder == nullptr)
+		{
+			mShaderSamplerBinder.WeakRef(new ISamplerResources());
+		}
+		return mShaderSamplerBinder;
+	}
+	virtual void BindShaderRViewResources(IShaderRViewResources* res)
 	{
-		m_pShaderTexBinder.StrongRef(res);
+		mShaderSrvBinder.StrongRef(res);
 	}
-	TR_FUNCTION()
-	virtual void BindShaderSamplers(IShaderSamplers* samps)
+	virtual void BindShaderSamplers(ISamplerResources* samps)
 	{
-		m_pShaderSamplerBinder.StrongRef(samps);
+		mShaderSamplerBinder.StrongRef(samps);
 	}
-	TR_FUNCTION()
 	void GetDrawPrimitive(DrawPrimitiveDesc* desc);
-	TR_FUNCTION()
 	void SetInstanceNumber(int instNum);
-	TR_FUNCTION()
 	void SetIndirectDraw(IGpuBuffer* pBuffer, UINT offset);
 	
-	TR_FUNCTION()
 	virtual void SetViewport(ICommandList* cmd, IViewPort* vp) = 0;
-	TR_FUNCTION()
 	virtual void SetScissorRect(ICommandList* cmd, IScissorRect* sr) = 0;
 
-	TR_FUNCTION()
-	virtual void SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline) = 0;
-	TR_FUNCTION()
+	virtual void SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline, EPrimitiveType dpType) = 0;
 	virtual void SetVertexBuffer(ICommandList* cmd, UINT32 StreamIndex, IVertexBuffer* VertexBuffer, UINT32 Offset, UINT Stride) = 0;
-	TR_FUNCTION()
 	virtual void SetIndexBuffer(ICommandList* cmd, IIndexBuffer* IndexBuffer) = 0;
 
-	TR_FUNCTION()
 	virtual void VSSetConstantBuffer(ICommandList* cmd, UINT32 Index, IConstantBuffer* CBuffer) = 0;
-	TR_FUNCTION()
 	virtual void PSSetConstantBuffer(ICommandList* cmd, UINT32 Index, IConstantBuffer* CBuffer) = 0;
-	TR_FUNCTION()
 	virtual void VSSetShaderResource(ICommandList* cmd, UINT32 Index, IShaderResourceView* Texture) = 0;
-	TR_FUNCTION()
 	virtual void PSSetShaderResource(ICommandList* cmd, UINT32 Index, IShaderResourceView* Texture) = 0;
-	TR_FUNCTION()
 	virtual void VSSetSampler(ICommandList* cmd, UINT32 Index, ISamplerState* Sampler) = 0;
-	TR_FUNCTION()
 	virtual void PSSetSampler(ICommandList* cmd, UINT32 Index, ISamplerState* Sampler) = 0;
 	
-	TR_FUNCTION()
 	virtual void DrawPrimitive(ICommandList* cmd, EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 NumPrimitives, UINT32 NumInstances) = 0;
-	TR_FUNCTION()
 	virtual void DrawIndexedPrimitive(ICommandList* cmd, EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 StartIndex, UINT32 NumPrimitives, UINT32 NumInstances) = 0;
-	TR_FUNCTION()
 	virtual void DrawIndexedInstancedIndirect(ICommandList* cmd, EPrimitiveType PrimitiveType, IGpuBuffer* pBufferForArgs, UINT32 AlignedByteOffsetForArgs) = 0;
 
-	//CBuffer
-	TR_FUNCTION()
-	virtual void BindCBufferVS(UINT32 Index, IConstantBuffer* CBuffer);
-	TR_FUNCTION()
-	virtual void BindCBufferPS(UINT32 Index, IConstantBuffer* CBuffer);
+	void BindShaderCBuffer(UINT index, IConstantBuffer* CBuffer);
+	void BindShaderCBuffer(IShaderBinder* binder, IConstantBuffer* CBuffer);
 
-	TR_FUNCTION()
-	UINT FindCBufferIndex(const char* name);
-	TR_FUNCTION()
-	void BindCBufferAll(UINT cbIndex, IConstantBuffer* CBuffer);
+	void BindShaderSrv(UINT index, IShaderResourceView* srv);
+	void BindShaderSrv(IShaderBinder* binder, IShaderResourceView* srv);
 
-	TR_FUNCTION()
-	UINT FindSRVIndex(const char* name);
-	TR_FUNCTION()
-	void BindSRVAll(UINT Index, IShaderResourceView* srv);
+	void BindShaderSampler(UINT index, ISamplerState* sampler);
+	void BindShaderSampler(IShaderBinder* binder, ISamplerState* sampler);
 
-	TR_FUNCTION()
-	bool GetSRVBindInfo(const char* name, TSBindInfo* info, int dataSize);
+	ShaderReflector* GetReflector();
 
-	TR_FUNCTION()
-	bool GetSamplerBindInfo(const char* name, TSBindInfo* info, int dataSize);
-
-	TR_FUNCTION()
 	void SetTagHandle(void* handle) {
 		TagHandle.SetHandle(handle);
 	}
-	TR_FUNCTION()
 	void* GetTagHandle() {
 		return TagHandle.mHandle;
 	}
+};
+
+class TR_CLASS()
+	IComputeDrawcall : public IRenderResource
+{
+protected:
+	AutoRef<IComputeShader>				mComputeShader;
+	AutoRef<ICBufferResources>			mShaderCBufferBinder;
+	AutoRef<IShaderRViewResources>		mShaderSrvBinder;
+	AutoRef<IUavResources>				mShaderUavBinder;
+
+	AutoRef<IGpuBuffer>					IndirectDrawArgsBuffer;
+	UINT								IndirectDrawArgsOffset;
+	UINT			mDispatchX;
+	UINT			mDispatchY;
+	UINT			mDispatchZ;
+public:
+	IComputeDrawcall()
+	{
+		IndirectDrawArgsOffset = 0;
+		mDispatchX = 0;
+		mDispatchY = 0;
+		mDispatchZ = 0;
+	}
+	void SetComputeShader(IComputeShader * shader);
+	ICBufferResources* GetCBufferResources() {
+		if (mShaderCBufferBinder == nullptr)
+		{
+			mShaderCBufferBinder.WeakRef(new ICBufferResources());
+		}
+		return mShaderCBufferBinder;
+	}
+	ShaderReflector* GetReflector();
+	IShaderRViewResources* GetShaderRViewResources() {
+		if (mShaderSrvBinder == nullptr)
+		{
+			mShaderSrvBinder.WeakRef(new IShaderRViewResources());
+		}
+		return mShaderSrvBinder;
+	}
+	IUavResources* GetUavResources() {
+		if (mShaderUavBinder == nullptr)
+		{
+			mShaderUavBinder.WeakRef(new IUavResources());
+		}
+		return mShaderUavBinder;
+	}
+	void SetDispatch(UINT x, UINT y, UINT z);	
+	void SetDispatchIndirectBuffer(IGpuBuffer* buffer, UINT offset);
+	virtual void BuildPass(ICommandList* cmd) = 0;
 };
 
 NS_END

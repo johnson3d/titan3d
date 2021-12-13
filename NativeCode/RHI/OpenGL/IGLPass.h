@@ -28,7 +28,7 @@ public:
 	virtual void SetViewport(ICommandList* cmd, IViewPort* vp) override;
 	virtual void SetScissorRect(ICommandList* cmd, IScissorRect* sr) override;
 
-	virtual void SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline) override;
+	virtual void SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline, EPrimitiveType dpType) override;
 
 	virtual void SetVertexBuffer(ICommandList* cmd, UINT32 StreamIndex, IVertexBuffer* VertexBuffer, UINT32 Offset, UINT Stride) override;
 	virtual void SetIndexBuffer(ICommandList* cmd, IIndexBuffer* IndexBuffer) override;
@@ -44,12 +44,16 @@ public:
 	virtual void DrawIndexedPrimitive(ICommandList* cmd, EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 StartIndex, UINT32 NumPrimitives, UINT32 NumInstances) override;
 	virtual void DrawIndexedInstancedIndirect(ICommandList* cmd, EPrimitiveType PrimitiveType, IGpuBuffer* pBufferForArgs, UINT32 AlignedByteOffsetForArgs) override;
 
-	virtual void BindCBufferVS(UINT32 Index, IConstantBuffer* CBuffer) override;
-	virtual void BindCBufferPS(UINT32 Index, IConstantBuffer* CBuffer) override;
-
 	virtual vBOOL ApplyGeomtry(ICommandList* cmd, vBOOL bImmCBuffer) override;
 public:
 	bool Init(IRenderContext* rc, const IDrawCallDesc* desc);
+};
+
+class IGLComputeDrawcall : public IComputeDrawcall
+{
+public:
+	virtual void BuildPass(ICommandList* cmd) override;
+	bool Init(IRenderContext* rc);
 };
 
 NS_END

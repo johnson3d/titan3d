@@ -4,8 +4,8 @@
 NS_BEGIN
 
 class ITexture2D;
-
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+class IRenderTargetView;
+struct TR_CLASS(SV_LayoutStruct = 8)
 ISwapChainDesc
 {
 	ISwapChainDesc()
@@ -17,7 +17,7 @@ ISwapChainDesc
 	{
 		Width = 0;
 		Height = 0;
-		Format = PXF_R8G8B8A8_UNORM;
+		Format = PXF_B8G8R8A8_UNORM;
 		ColorSpace = COLOR_SPACE_SRGB_NONLINEAR;
 		WindowHandle = nullptr;
 	}
@@ -28,25 +28,20 @@ ISwapChainDesc
 	void*	WindowHandle;
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 ISwapChain : public IRenderResource
 {
 public:
 	ISwapChain();
 	~ISwapChain();
 
-	TR_FUNCTION()
-	virtual ITexture2D* GetTexture2D() = 0;
-	TR_FUNCTION()
+	virtual UINT GetBackBufferNum() = 0;
+	virtual ITexture2D* GetBackBuffer(UINT index) = 0;
 	virtual void BindCurrent() = 0;
-	TR_FUNCTION()
 	virtual void Present(UINT SyncInterval, UINT Flags) = 0;
 
-	TR_FUNCTION()
 	virtual void OnLost() = 0;
-	TR_FUNCTION()
 	virtual vBOOL OnRestore(const ISwapChainDesc* desc) = 0;
-	TR_FUNCTION()
 	inline void GetDesc(ISwapChainDesc* desc)
 	{
 		*desc = mDesc;

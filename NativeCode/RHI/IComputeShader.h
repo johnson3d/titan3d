@@ -3,7 +3,7 @@
 
 NS_BEGIN
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IComputeShader : public IShader
 {
 public:

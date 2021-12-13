@@ -70,16 +70,16 @@ public:
 	~IInputLayout();
 
 	TR_MEMBER(SV_NoBind)
-	IInputLayoutDesc		mDesc;
+	AutoRef<IInputLayoutDesc>		mDesc;
 public:
 	inline UINT GetElemNumber() const {
-		return (UINT)mDesc.Layouts.size();
+		return (UINT)mDesc->Layouts.size();
 	}
 	inline const LayoutElement* GetElement(UINT StreamIndex) const {
-		for (size_t i = 0; i < mDesc.Layouts.size(); i++)
+		for (size_t i = 0; i < mDesc->Layouts.size(); i++)
 		{
-			if (mDesc.Layouts[i].InputSlot == StreamIndex)
-				return &mDesc.Layouts[i];
+			if (mDesc->Layouts[i].InputSlot == StreamIndex)
+				return &mDesc->Layouts[i];
 		}
 		return nullptr;
 	}

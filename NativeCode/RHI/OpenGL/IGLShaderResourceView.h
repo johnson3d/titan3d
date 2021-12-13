@@ -110,9 +110,8 @@ public:
 	virtual void Cleanup() override;
 
 public:
-	virtual bool UpdateTexture2D(IRenderContext* rc, const ITexture2D* pTexture2D) override;
+	virtual bool UpdateBuffer(IRenderContext* rc, const IGpuBuffer* buffer) override;
 	bool Init(IGLRenderContext* rc, const IShaderResourceViewDesc* desc);
-	bool Init(IGLRenderContext* rc, const IGLGpuBuffer* pBuffer, const ISRVDesc* desc);
 	
 	virtual void InvalidateResource() override;
 	virtual vBOOL RestoreResource() override;
@@ -123,6 +122,9 @@ public:
 
 	std::shared_ptr<GLSdk::GLBufferId> GetGLBufferId();
 
+	virtual void* GetAPIObject() override {
+		return this;
+	}
 public:
 	TObjectHandle<IGLRenderContext>	mRenderContext;
 	std::string			mResourceFile;

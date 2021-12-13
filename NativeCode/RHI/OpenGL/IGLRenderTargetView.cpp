@@ -2,6 +2,7 @@
 #include "IGLRenderContext.h"
 #include "IGLTexture2D.h"
 #include "IGLShaderResourceView.h"
+#include "IGLUnorderedAccessView.h"
 
 #define new VNEW
 
@@ -21,7 +22,14 @@ void IGLRenderTargetView::Cleanup()
 
 bool IGLRenderTargetView::Init(IGLRenderContext* rc, const IRenderTargetViewDesc* pDesc)
 {
-	m_refTexture2D.StrongRef(pDesc->m_pTexture2D);
+	RefGpuBuffer.StrongRef(pDesc->mGpuBuffer);
+
+	return true;
+}
+
+bool IGLRenderTargetView::Init(IGLRenderContext* rc, IGLGpuBuffer* pBuffer, const IRenderTargetViewDesc* desc)
+{
+	RefGpuBuffer.StrongRef(pBuffer);
 
 	return true;
 }

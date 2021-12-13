@@ -2,6 +2,7 @@
 #include "ITextureBase.h"
 #include "IRenderContext.h"
 #include "IShaderProgram.h"
+#include "ShaderReflector.h"
 #include "../Base/xnd/vfxxnd.h"
 
 #define new VNEW
@@ -82,7 +83,7 @@ IConstantBuffer::~IConstantBuffer()
 
 vBOOL IConstantBuffer::IsSameVars(IShaderProgram* program, UINT cbIndex)
 {
-	auto cbDesc = program->GetCBuffer(cbIndex);
+	auto cbDesc = program->GetReflector()->GetCBuffer(cbIndex);
 	if (cbDesc == nullptr)
 		return FALSE;
 	return Desc.IsSameVars(cbDesc);

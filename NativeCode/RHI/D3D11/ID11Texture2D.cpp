@@ -18,7 +18,7 @@ ID11Texture2D::~ID11Texture2D()
 
 bool ID11Texture2D::Init(ID11RenderContext* rc, const ITexture2DDesc* desc)
 {
-	mDesc = *desc;
+	mTextureDesc = *desc;
 	if (desc->MipLevels == 0)
 		return false;
 	D3D11_TEXTURE2D_DESC Tex2dDesc;
@@ -71,21 +71,21 @@ bool ID11Texture2D::InitD11Texture2D(ID3D11Texture2D* pTex2d)
 
 	D3D11_TEXTURE2D_DESC desc;
 	pTex2d->GetDesc(&desc);
-	mDesc.Width = desc.Width;
-	mDesc.Height = desc.Height;
-	mDesc.MipLevels = desc.MipLevels;
-	mDesc.ArraySize = desc.ArraySize;
-	mDesc.Format = DXFormatToFormat(desc.Format);
-	mDesc.BindFlags = desc.BindFlags;
-	mDesc.CPUAccess = desc.CPUAccessFlags;// CAS_WRITE | CAS_READ;
-	mDesc.InitData = nullptr;
-	ASSERT(mDesc.Format != PXF_UNKNOWN);
+	mTextureDesc.Width = desc.Width;
+	mTextureDesc.Height = desc.Height;
+	mTextureDesc.MipLevels = desc.MipLevels;
+	mTextureDesc.ArraySize = desc.ArraySize;
+	mTextureDesc.Format = DXFormatToFormat(desc.Format);
+	mTextureDesc.BindFlags = desc.BindFlags;
+	mTextureDesc.CPUAccess = desc.CPUAccessFlags;// CAS_WRITE | CAS_READ;
+	mTextureDesc.InitData = nullptr;
+	ASSERT(mTextureDesc.Format != PXF_UNKNOWN);
 	return true;
 }
 
-vBOOL ID11Texture2D::Map(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
+vBOOL ID11Texture2D::MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
 {
-	auto rc = cmd->GetContext().UnsafeConvertTo<ID11RenderContext>();
+	auto rc = (ID11RenderContext*)cmd->GetContext();
 	auto pContext = rc->mHardwareContext;
 
 	rc->mHWContextLocker.Lock();
@@ -102,9 +102,9 @@ vBOOL ID11Texture2D::Map(ICommandList* cmd, int MipLevel, void** ppData, UINT* p
 	return TRUE;
 }
 
-void ID11Texture2D::Unmap(ICommandList* cmd, int MipLevel)
+void ID11Texture2D::UnmapMipmap(ICommandList* cmd, int MipLevel)
 {
-	auto rc = cmd->GetContext().UnsafeConvertTo<ID11RenderContext>();
+	auto rc = (ID11RenderContext*)cmd->GetContext();
 	auto pContext = rc->mHardwareContext;
 	//auto pContext = ((ID11CommandList*)cmd)->mDeferredContext;
 	pContext->Unmap(m_pDX11Texture2D, 0);

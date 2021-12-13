@@ -1,7 +1,7 @@
 #include "ID11VertexBuffer.h"
 #include "ID11RenderContext.h"
 #include "ID11CommandList.h"
-#include "ID11UnorderedAccessView.h"
+#include "ID11GpuBuffer.h"
 
 #define new VNEW
 
@@ -185,7 +185,7 @@ void ID11VertexBuffer::SetDebugInfo(const char* info)
 		auto hr = mBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)debuginfo.length(), debuginfo.c_str());
 		if (hr != S_OK)
 		{
-			RHI_Trace("VB DebugName: %s\r\n", info);
+			_vfxTraceA("VB DebugName: %s\r\n", info);
 		}
 	}
 }

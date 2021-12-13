@@ -13,6 +13,7 @@ int IRenderContext::mChooseShaderModel = 5;
 IRenderContext::IRenderContext()
 {
 	m_pSwapChain = nullptr;
+	mCurrentFrame = 0;
 }
 
 
@@ -31,11 +32,21 @@ void IRenderContext::EndFrame()
 {
 	RResourceSwapChain::GetInstance()->TickSwap(this);
 	this->FlushImmContext();
+	mCurrentFrame++;
+}
+
+IConstantBuffer* IRenderContext::CreateConstantBuffer(IShaderProgram* program, const char* name)
+{
+	auto binder = program->GetReflector()->FindShaderBinder(SBT_CBuffer, name);
+	auto cb = program->GetReflector()->GetCBuffer(binder);
+	if (cb == nullptr)
+		return nullptr;
+	return this->CreateConstantBuffer(cb);
 }
 
 IConstantBuffer* IRenderContext::CreateConstantBuffer(IShaderProgram* program, UINT index)
 {
-	auto cb = program->GetCBuffer(index);
+	auto cb = program->GetReflector()->GetCBuffer(index);
 	if (cb == nullptr)
 		return nullptr;
 	return this->CreateConstantBuffer(cb);
@@ -43,11 +54,11 @@ IConstantBuffer* IRenderContext::CreateConstantBuffer(IShaderProgram* program, U
 
 IConstantBuffer* IRenderContext::CreateConstantBuffer2(IShaderDesc* desc, UINT index)
 {
-	if (index >= (UINT)desc->Reflector->mCBDescArray.size())
+	auto cb = desc->GetReflector()->GetCBuffer(index);
+	if (cb == nullptr)
 		return nullptr;
 	
-	const auto& cb = desc->Reflector->mCBDescArray[index];
-	return this->CreateConstantBuffer(&cb);
+	return this->CreateConstantBuffer(cb);
 }
 
 NS_END

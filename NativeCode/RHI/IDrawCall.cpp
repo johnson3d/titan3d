@@ -3,6 +3,7 @@
 #include "IRenderPipeline.h"
 #include "IVertexShader.h"
 #include "IPixelShader.h"
+#include "IComputeShader.h"
 #include "ICommandList.h"
 #include "IShaderResourceView.h"
 #include "ISamplerState.h"
@@ -20,9 +21,6 @@ NS_BEGIN
 
 RTTI_IMPL(EngineNS::IViewPort, EngineNS::VIUnknown);
 RTTI_IMPL(EngineNS::IScissorRect, EngineNS::VIUnknown);
-
-RTTI_IMPL(EngineNS::IShaderResources, EngineNS::VIUnknown);
-RTTI_IMPL(EngineNS::IShaderSamplers, EngineNS::VIUnknown);
 
 void IScissorRect::SetRectNumber(UINT num) 
 {
@@ -51,106 +49,6 @@ void IScissorRect::GetSCRect(UINT idx, SRRect* pRect)
 	pRect->MaxY = rc->MaxY;
 }
 
-IShaderResources::~IShaderResources()
-{
-}
-
-void IShaderResources::VSBindTexture(UINT slot, IShaderResourceView* tex)
-{
-	for (auto& i : VSResources)
-	{
-		if (i.first == (USHORT)slot)
-		{
-			if (i.second == tex)
-				return;
-			i.second.StrongRef(tex);
-			return;
-		}
-	}
-	AutoRef<IShaderResourceView> tmp;
-	tmp.StrongRef(tex);
-	VSResources.push_back(std::make_pair((USHORT)slot, tmp));
-}
-
-void IShaderResources::PSBindTexture(UINT slot, IShaderResourceView* tex)
-{
-	for (auto& i : PSResources)
-	{
-		if (i.first == (USHORT)slot)
-		{
-			if (i.second == tex)
-				return;
-			i.second.StrongRef(tex);
-			return;
-		}
-	}
-	AutoRef<IShaderResourceView> tmp;
-	tmp.StrongRef(tex);
-	PSResources.push_back(std::make_pair((USHORT)slot, tmp));
-}
-
-IShaderResourceView* IShaderResources::GetBindTextureVS(UINT slot)
-{
-	for (auto& i : VSResources)
-	{
-		if (i.first == (USHORT)slot)
-		{
-			return i.second;
-		}
-	}
-	return nullptr;
-}
-
-IShaderResourceView* IShaderResources::GetBindTexturePS(UINT slot)
-{
-	for (auto& i : PSResources)
-	{
-		if (i.first == (USHORT)slot)
-		{
-			return i.second;
-		}
-	}
-	return nullptr;
-}
-
-IShaderSamplers::~IShaderSamplers()
-{
-}
-
-void IShaderSamplers::VSBindSampler(UINT slot, ISamplerState* sampler)
-{
-	for (auto& i : VSSamplers)
-	{
-		if (i.first == (USHORT)slot)
-		{
-			if (i.second == sampler)
-				return;
-			i.second.StrongRef(sampler);
-			return;
-		}
-	}
-	AutoRef<ISamplerState> tmp;
-	tmp.StrongRef(sampler);
-	VSSamplers.push_back(std::make_pair((USHORT)slot, tmp));
-}
-
-void IShaderSamplers::PSBindSampler(UINT slot, ISamplerState* sampler)
-{
-	for (auto& i : PSSamplers)
-	{
-		if (i.first == (USHORT)slot)
-		{
-			if (i.second == sampler)
-				return;
-			i.second.StrongRef(sampler);
-			return;
-		}
-	}
-	AutoRef<ISamplerState> tmp;
-	tmp.StrongRef(sampler);
-	PSSamplers.push_back(std::make_pair((USHORT)slot, tmp));
-}
-
 IDrawCall::IDrawCall()
 {
 	AtomIndex = 0;
@@ -164,7 +62,6 @@ IDrawCall::~IDrawCall()
 {
 	
 }
-
 
 //#pragma optimize("atgwy", on)
 //#pragma auto_inline(on)
@@ -234,20 +131,44 @@ bool IsSameScissors(IScissorRect* lh, IScissorRect* rh)
 
 void IDrawCall::BuildPass(ICommandList* cmd, vBOOL bImmCBuffer)
 {
-	if (m_pPipelineState == nullptr)
+	BuildPassDefault(cmd, bImmCBuffer);
+
+	if (mShaderCBufferBinder != nullptr)
+	{
+		mShaderCBufferBinder->IsDirty = false;
+	}
+	if (mShaderSrvBinder != nullptr)
+	{
+		mShaderSrvBinder->IsDirty = false;
+	}
+	if (mShaderSamplerBinder != nullptr)
+	{
+		mShaderSamplerBinder->IsDirty = false;
+	}
+}
+
+void IDrawCall::BuildPassDefault(ICommandList* cmd, vBOOL bImmCBuffer)
+{
+	if (mPipelineState == nullptr)
 	{
 		return;
 	}
-	if (m_pPipelineState->GetGpuProgram()->GetVertexShader() == nullptr)
+	if (mPipelineState->GetGpuProgram()->GetVertexShader() == nullptr)
 	{
 		VFX_LTRACE(ELTT_Graphics, "VertexShader is null\r\n");
 		return;
 	}
-	//if (cmd->mCurrentState.ViewPort != m_pViewport)
-	//{
-		//SetViewport(cmd, m_pViewport);
-		//cmd->mCurrentState.ViewPort = m_pViewport;
-	//}
+
+	const DrawPrimitiveDesc* dpDesc = nullptr;
+	{
+		AUTO_SAMP("Native.IPass.BuildPass.Geometry");
+		vBOOL applyOK = ApplyGeomtry(cmd, bImmCBuffer);
+		if (applyOK == FALSE)
+			return;
+		dpDesc = MeshPrimitives->GetAtom(AtomIndex, LodLevel);
+		if (dpDesc == nullptr)
+			return;
+	}
 
 	{
 		AUTO_SAMP("Native.IPass.BuildPass.ShaderProgram");
@@ -269,15 +190,16 @@ void IDrawCall::BuildPass(ICommandList* cmd, vBOOL bImmCBuffer)
 				SetScissorRect(cmd, ScissorRect);
 			}
 		}*/
-		SetPipeline(cmd, m_pPipelineState);
+		SetPipeline(cmd, mPipelineState, dpDesc->PrimitiveType);
+		mPipelineState->mIsDirty = false;
 
-		auto gpuProgram = m_pPipelineState->GetGpuProgram();
+		auto gpuProgram = mPipelineState->GetGpuProgram();
 		gpuProgram->ApplyShaders(cmd);
 
 		auto vs = gpuProgram->GetVertexShader();
-		if (vs)
+		if (vs && mShaderCBufferBinder != nullptr)
 		{
-			for (const auto& i : CBuffersVS)
+			for (const auto& i : mShaderCBufferBinder->VSResources)
 			{
 				if (i.second == nullptr)
 					continue;
@@ -286,9 +208,9 @@ void IDrawCall::BuildPass(ICommandList* cmd, vBOOL bImmCBuffer)
 			}
 		}
 		auto ps = gpuProgram->GetPixelShader();
-		if (ps)
+		if (ps && mShaderCBufferBinder != nullptr)
 		{
-			for (const auto& i : CBuffersPS)
+			for (const auto& i : mShaderCBufferBinder->PSResources)
 			{
 				if (i.second == nullptr)
 					continue;
@@ -298,15 +220,15 @@ void IDrawCall::BuildPass(ICommandList* cmd, vBOOL bImmCBuffer)
 		}
 	}
 
-	if (m_pShaderTexBinder != nullptr)
+	if (mShaderSrvBinder != nullptr)
 	{
 		AUTO_SAMP("Native.IPass.BuildPass.Textures");
-		for (const auto& i : m_pShaderTexBinder->VSResources)
+		for (const auto& i : mShaderSrvBinder->VSResources)
 		{
 			if (i.second != nullptr)
 				VSSetShaderResource(cmd, i.first, i.second);
 		}
-		for (const auto& i : m_pShaderTexBinder->PSResources)
+		for (const auto& i : mShaderSrvBinder->PSResources)
 		{
 			if (i.second != nullptr)
 				PSSetShaderResource(cmd, i.first, i.second);
@@ -328,15 +250,15 @@ void IDrawCall::BuildPass(ICommandList* cmd, vBOOL bImmCBuffer)
 		}
 	}
 	
-	if (m_pShaderSamplerBinder != nullptr)
+	if (mShaderSamplerBinder != nullptr)
 	{
 		AUTO_SAMP("Native.IPass.BuildPass.Samplers");
-		for (const auto& i : m_pShaderSamplerBinder->VSSamplers)
+		for (const auto& i : mShaderSamplerBinder->VSResources)
 		{
 			if (i.second != nullptr)
 				VSSetSampler(cmd, i.first, i.second);
 		}
-		for (const auto& i : m_pShaderSamplerBinder->PSSamplers)
+		for (const auto& i : mShaderSamplerBinder->PSResources)
 		{
 			if (i.second != nullptr)
 				PSSetSampler(cmd, i.first, i.second);
@@ -344,25 +266,14 @@ void IDrawCall::BuildPass(ICommandList* cmd, vBOOL bImmCBuffer)
 	}
 
 	{
-		const DrawPrimitiveDesc* dpDesc = nullptr;
-		{
-			AUTO_SAMP("Native.IPass.BuildPass.Geometry");
-			vBOOL applyOK = ApplyGeomtry(cmd, bImmCBuffer);
-			if (applyOK == FALSE)
-				return;
-			dpDesc = MeshPrimitives->GetAtom(AtomIndex, LodLevel);
-			if (dpDesc == nullptr)
-				return;
-		}
-
 		if (AttachVBs != nullptr)
 		{
 			NumInstances = AttachVBs->mNumInstances;
 		}
-		else
+		/*else
 		{
 			NumInstances = 1;
-		}
+		}*/
 
 		if (cmd->OnPassBuilt != nullptr)
 		{
@@ -412,145 +323,206 @@ vBOOL IDrawCall::ApplyGeomtry(ICommandList* cmd, vBOOL bImmCBuffer)
 
 void IDrawCall::BindPipeline(IRenderPipeline* pipeline)
 {
-	m_pPipelineState.StrongRef(pipeline);
+	mPipelineState.StrongRef(pipeline);
 }
 
-void IDrawCall::BindCBufferVS(UINT32 Index, IConstantBuffer* CBuffer)
-{
-	if (Index == 0xFFFFFFFF)
-		return;
-	for (auto& i : CBuffersVS)
-	{
-		if (i.first == (USHORT)Index)
-		{
-			i.second.StrongRef(CBuffer);
-			return;
-		}
-	}
-
-	AutoRef<IConstantBuffer> tmp;
-	tmp.StrongRef(CBuffer);
-	CBuffersVS.push_back(std::make_pair((USHORT)Index, tmp));
-}
-
-void IDrawCall::BindCBufferPS(UINT32 Index, IConstantBuffer* CBuffer)
-{
-	if (Index == 0xFFFFFFFF)
-		return;
-	for (auto& i : CBuffersPS)
-	{
-		if (i.first == (USHORT)Index)
-		{
-			i.second.StrongRef(CBuffer);
-			return;
-		}
-	}
-
-	AutoRef<IConstantBuffer> tmp;
-	tmp.StrongRef(CBuffer);
-	CBuffersPS.push_back(std::make_pair((USHORT)Index, tmp));
-}
+//void IDrawCall::BindCBufferVS(UINT32 Index, IConstantBuffer* CBuffer)
+//{
+//	GetCBufferResources()->BindVS(Index, CBuffer);
+//}
+//
+//void IDrawCall::BindCBufferPS(UINT32 Index, IConstantBuffer* CBuffer)
+//{
+//	GetCBufferResources()->BindPS(Index, CBuffer);
+//}
 
 IConstantBuffer* IDrawCall::FindCBufferVS(const char* name) 
 {
-	for (auto& i : CBuffersVS)
-	{
-		if (i.second == nullptr)
-			continue;
-
-		if (i.second->Desc.Name == name)
-		{
-			return i.second;
-		}
-	}
-	return nullptr;
+	if (mShaderCBufferBinder == nullptr)
+		return nullptr;
+	return mShaderCBufferBinder->FindVS(name);
 }
 
 IConstantBuffer* IDrawCall::FindCBufferPS(const char* name) 
 {
-	for (auto& i : CBuffersPS)
-	{
-		if (i.second == nullptr)
-			continue;
+	if (mShaderCBufferBinder == nullptr)
+		return nullptr;
+	return mShaderCBufferBinder->FindPS(name);
+}
 
-		if (i.second->Desc.Name == name)
+//UINT IDrawCall::FindCBufferIndex(const char* name)
+//{
+//	if (this->mPipelineState == nullptr)
+//		return -1;
+//	IShaderProgram* program = this->mPipelineState->GetGpuProgram();
+//	if (program == nullptr)
+//		return -1;
+//	return program->GetReflector()->FindShaderBinder(SBT_CBuffer, name);
+//}
+//
+//void IDrawCall::BindCBufferAll(UINT cbIndex, IConstantBuffer* CBuffer)
+//{
+//	IShaderProgram* program = this->mPipelineState->GetGpuProgram();
+//	auto desc = program->GetReflector()->GetCBuffer(cbIndex);
+//	if (desc != nullptr)
+//	{
+//		if (desc->VSBindPoint != 0xFFFFFFFF)
+//			BindCBufferVS(desc->VSBindPoint, CBuffer);
+//		if (desc->PSBindPoint != 0xFFFFFFFF)
+//			BindCBufferPS(desc->PSBindPoint, CBuffer);
+//	}
+//}
+//
+//UINT IDrawCall::FindSRVIndex(const char* name)
+//{
+//	if (this->mPipelineState == nullptr)
+//		return -1;
+//	IShaderProgram* program = this->mPipelineState->GetGpuProgram();
+//	if (program == nullptr)
+//		return -1;
+//	return program->GetReflector()->FindShaderBinder(SBT_Srv, name);
+//}
+//
+//void IDrawCall::BindSRVAll(UINT Index, IShaderResourceView* srv)
+//{
+//	IShaderProgram* program = this->mPipelineState->GetGpuProgram();
+//	if (program == nullptr)
+//	{
+//		ASSERT(false);
+//		return;
+//	}
+//
+//	auto info = program->GetReflector()->GetShaderBinder(SBT_Srv, Index);
+//	if (info == nullptr)
+//		return;
+//
+//	if (info->VSBindPoint != 0xFFFFFFFF)
+//		mShaderSrvBinder->BindVS(info->VSBindPoint, srv);
+//	if (info->PSBindPoint != 0xFFFFFFFF)
+//		mShaderSrvBinder->BindPS(info->PSBindPoint, srv);
+//}
+
+void IDrawCall::BindShaderCBuffer(UINT index, IConstantBuffer* CBuffer)
+{
+	IShaderProgram* program = this->mPipelineState->GetGpuProgram();
+	auto desc = program->GetReflector()->GetCBuffer(index);
+	if (desc != nullptr)
+	{
+		if (desc->VSBindPoint != 0xFFFFFFFF)
+			GetCBufferResources()->BindVS(desc->VSBindPoint, CBuffer);
+		if (desc->PSBindPoint != 0xFFFFFFFF)
 		{
-			return i.second;
+			GetCBufferResources()->BindPS(desc->PSBindPoint, CBuffer);
 		}
 	}
-	return nullptr;
 }
 
-UINT IDrawCall::FindCBufferIndex(const char* name)
+void IDrawCall::BindShaderCBuffer(IShaderBinder* binder, IConstantBuffer* cbuffer)
 {
-	if (this->m_pPipelineState == nullptr)
-		return -1;
-	IShaderProgram* program = this->m_pPipelineState->GetGpuProgram();
-	if (program == nullptr)
-		return -1;
-	return program->FindCBuffer(name);
-}
-
-void IDrawCall::BindCBufferAll(UINT cbIndex, IConstantBuffer* CBuffer)
-{
-	IShaderProgram* program = this->m_pPipelineState->GetGpuProgram();
-	IConstantBufferDesc desc;
-	if (program->GetCBufferDesc(cbIndex, &desc) != FALSE)
-	{
-		if (desc.VSBindPoint != 0xFFFFFFFF)
-			BindCBufferVS(desc.VSBindPoint, CBuffer);
-		if (desc.PSBindPoint != 0xFFFFFFFF)
-			BindCBufferPS(desc.PSBindPoint, CBuffer);
-	}
-}
-
-UINT IDrawCall::FindSRVIndex(const char* name)
-{
-	if (this->m_pPipelineState == nullptr)
-		return -1;
-	IShaderProgram* program = this->m_pPipelineState->GetGpuProgram();
-	if (program == nullptr)
-		return -1;
-	return program->GetTextureBindSlotIndex(name);
-}
-
-void IDrawCall::BindSRVAll(UINT Index, IShaderResourceView* srv)
-{
-	IShaderProgram* program = this->m_pPipelineState->GetGpuProgram();
+	IShaderProgram* program = this->mPipelineState->GetGpuProgram();
 	if (program == nullptr)
 	{
 		ASSERT(false);
 		return;
 	}
 
-	TSBindInfo info;
-	if (program->GetShaderResourceBindInfo(Index, &info, sizeof(TSBindInfo)) == false)
+	if (binder->VSBindPoint != 0xFFFFFFFF)
+		GetCBufferResources()->BindVS(binder->VSBindPoint, cbuffer);
+	if (binder->PSBindPoint != 0xFFFFFFFF)
+	{
+		GetCBufferResources()->BindPS(binder->PSBindPoint, cbuffer);
+	}
+}
+
+void IDrawCall::BindShaderSrv(UINT index, IShaderResourceView* srv)
+{
+	IShaderProgram* program = this->mPipelineState->GetGpuProgram();
+	auto desc = program->GetReflector()->GetShaderBinder(SBT_Srv, index);
+	if (desc != nullptr)
+	{
+		if (desc->VSBindPoint != 0xFFFFFFFF)
+			GetShaderRViewResources()->BindVS(desc->VSBindPoint, srv);
+		if (desc->PSBindPoint != 0xFFFFFFFF)
+		{
+			//ASSERT(desc->PSBindPoint != 26);
+			GetShaderRViewResources()->BindPS(desc->PSBindPoint, srv);
+		}
+	}
+}
+
+void IDrawCall::BindShaderSrv(IShaderBinder* binder, IShaderResourceView* srv)
+{
+	IShaderProgram* program = this->mPipelineState->GetGpuProgram();
+	if (program == nullptr)
+	{
+		ASSERT(false);
 		return;
+	}
 
-	if (info.VSBindPoint != 0xFFFFFFFF)
-		m_pShaderTexBinder->VSBindTexture(info.VSBindPoint, srv);
-	if (info.PSBindPoint != 0xFFFFFFFF)
-		m_pShaderTexBinder->PSBindTexture(info.PSBindPoint, srv);
+	if (binder->VSBindPoint != 0xFFFFFFFF)
+		GetShaderRViewResources()->BindVS(binder->VSBindPoint, srv);
+	if (binder->PSBindPoint != 0xFFFFFFFF)
+	{
+		//ASSERT(binder->PSBindPoint != 26); 
+		GetShaderRViewResources()->BindPS(binder->PSBindPoint, srv);
+	}
 }
 
-bool IDrawCall::GetSRVBindInfo(const char* name, TSBindInfo* info, int dataSize)
+void IDrawCall::BindShaderSampler(UINT index, ISamplerState* sampler)
 {
-	IShaderProgram* program = this->m_pPipelineState->GetGpuProgram();
-	UINT slot = program->GetTextureBindSlotIndex(name);
-	if (slot == 0xFFFFFFFF)
-		return false;
-
-	return program->GetShaderResourceBindInfo(slot, info, dataSize);
+	IShaderProgram* program = this->mPipelineState->GetGpuProgram();
+	auto desc = program->GetReflector()->GetShaderBinder(SBT_Sampler, index);
+	if (desc != nullptr)
+	{
+		if (desc->VSBindPoint != 0xFFFFFFFF)
+			GetShaderSamplers()->BindVS(desc->VSBindPoint, sampler);
+		if (desc->PSBindPoint != 0xFFFFFFFF)
+			GetShaderSamplers()->BindPS(desc->PSBindPoint, sampler);
+	}
 }
 
-bool IDrawCall::GetSamplerBindInfo(const char* name, TSBindInfo* info, int dataSize)
+void IDrawCall::BindShaderSampler(IShaderBinder* binder, ISamplerState* sampler)
 {
-	IShaderProgram* program = this->m_pPipelineState->GetGpuProgram();
-	UINT slot = program->GetSamplerBindSlotIndex(name);
-	if (slot == 0xFFFFFFFF)
-		return false;
+	IShaderProgram* program = this->mPipelineState->GetGpuProgram();
+	if (program == nullptr)
+	{
+		ASSERT(false);
+		return;
+	}
 
-	return program->GetSamplerBindInfo(slot, info, dataSize);
+	if (binder->VSBindPoint != 0xFFFFFFFF)
+		GetShaderSamplers()->BindVS(binder->VSBindPoint, sampler);
+	if (binder->PSBindPoint != 0xFFFFFFFF)
+		GetShaderSamplers()->BindPS(binder->PSBindPoint, sampler);
+}
+
+ShaderReflector* IDrawCall::GetReflector() 
+{
+	return mPipelineState->GetGpuProgram()->GetReflector();
+}
+
+///===============================================
+void IComputeDrawcall::SetComputeShader(IComputeShader* shader)
+{
+	mComputeShader.StrongRef(shader);
+}
+
+void IComputeDrawcall::SetDispatch(UINT x, UINT y, UINT z)
+{
+	mDispatchX = x;
+	mDispatchY = y;
+	mDispatchZ = z;
+}
+
+void IComputeDrawcall::SetDispatchIndirectBuffer(IGpuBuffer* buffer, UINT offset) 
+{
+	IndirectDrawArgsBuffer.StrongRef(buffer);
+	IndirectDrawArgsOffset = offset;
+}
+
+ShaderReflector* IComputeDrawcall::GetReflector() 
+{
+	return mComputeShader->GetReflector();
 }
 
 NS_END

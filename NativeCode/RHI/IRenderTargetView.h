@@ -1,45 +1,132 @@
 #pragma once
-#include "IRenderResource.h"
+#include "ITextureBase.h"
 
 NS_BEGIN
 
+enum TR_ENUM()
+RTV_DIMENSION
+{
+	RTV_DIMENSION_UNKNOWN = 0,
+	RTV_DIMENSION_BUFFER = 1,
+	RTV_DIMENSION_TEXTURE1D = 2,
+	RTV_DIMENSION_TEXTURE1DARRAY = 3,
+	RTV_DIMENSION_TEXTURE2D = 4,
+	RTV_DIMENSION_TEXTURE2DARRAY = 5,
+	RTV_DIMENSION_TEXTURE2DMS = 6,
+	RTV_DIMENSION_TEXTURE2DMSARRAY = 7,
+	RTV_DIMENSION_TEXTURE3D = 8
+};
+
+struct TR_CLASS(SV_LayoutStruct = 8)
+	BUFFER_RTV
+{
+	union
+	{
+		UINT FirstElement;
+		UINT ElementOffset;
+	};
+	union
+	{
+		UINT NumElements;
+		UINT ElementWidth;
+	};
+};
+
+struct TR_CLASS(SV_LayoutStruct = 8)
+	TEX1D_RTV
+{
+	UINT MipSlice;
+};
+
+struct TR_CLASS(SV_LayoutStruct = 8)
+	TEX1D_ARRAY_RTV
+{
+	UINT MipSlice;
+	UINT FirstArraySlice;
+	UINT ArraySize;
+};
+
+struct TR_CLASS(SV_LayoutStruct = 8)
+	TEX2D_RTV
+{
+	UINT MipSlice;
+};
+
+struct TR_CLASS(SV_LayoutStruct = 8)
+	TEX2D_ARRAY_RTV
+{
+	UINT MipSlice;
+	UINT FirstArraySlice;
+	UINT ArraySize;
+};
+
+enum TR_ENUM()
+	ERtvType
+{
+	RTV_BufferSRV,
+	RTV_Texture1D,
+	RTV_Texture1DArray,
+	RTV_Texture2D,
+	RTV_Texture2DArray,
+	RTV_Texture2DMS,
+	RTV_Texture2DMSArray,
+	RTV_Texture3D,
+};
+
 class ITexture2D;
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 IRenderTargetViewDesc
 {
 	IRenderTargetViewDesc()
 	{
-		SetDefault();
+		SetTexture2D();
 	}
-	TR_FUNCTION()
-	void SetDefault()
+	void SetTexture2D()
 	{
-		m_pTexture2D = nullptr;
+		memset(this, 0, sizeof(IRenderTargetViewDesc));
+		Type = RTV_Texture2D;
+		mGpuBuffer = nullptr;
 		mCanBeSampled = TRUE;
 		Width = 0;
 		Height = 0;
 		Format = PXF_R8G8B8A8_UNORM;
+		ViewDimension = RTV_DIMENSION_TEXTURE2D;
 	}
-	ITexture2D*		m_pTexture2D;
+	ERtvType					Type;
+	IGpuBuffer*					mGpuBuffer;
 	vBOOL						mCanBeSampled;
 	UINT						Width;
 	UINT						Height;
+
 	EPixelFormat				Format;
+	RTV_DIMENSION				ViewDimension;
+
+	union
+	{
+		BUFFER_RTV Buffer;
+		TEX1D_RTV Texture1D;
+		TEX1D_ARRAY_RTV Texture1DArray;
+		TEX2D_RTV Texture2D;
+		TEX2D_ARRAY_RTV Texture2DArray;
+		//D3D11_TEX2DMS_RTV Texture2DMS;
+		//D3D11_TEX2DMS_ARRAY_RTV Texture2DMSArray;
+		//D3D11_TEX3D_RTV Texture3D;
+	};
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IRenderTargetView : public IRenderResource
 {
 public:
-	AutoRef<ITexture2D>		m_refTexture2D;
+	IRenderTargetViewDesc	Desc;
+	AutoRef<IGpuBuffer>		RefGpuBuffer;
 public:
 	IRenderTargetView();
 	~IRenderTargetView();
 
-	TR_FUNCTION()
-	ITexture2D* GetTexture2D() 
+	IGpuBuffer* GetGpuBuffer()
 	{
-		return m_refTexture2D;
+		return RefGpuBuffer;
 	}
 };
 

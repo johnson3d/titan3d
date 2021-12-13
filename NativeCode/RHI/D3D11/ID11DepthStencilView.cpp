@@ -68,7 +68,7 @@ bool ID11DepthStencilView::Init(ID11RenderContext* rc, const IDepthStencilViewDe
 		break;
 	}
 	DSVDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	DSVDesc.Texture2D.MipSlice = 0;
+	//DSVDesc.Texture2D.MipSlice = 0;
 	
 	auto hr = rc->mDevice->CreateDepthStencilView(((ID11Texture2D*)pDesc->m_pTexture2D)->m_pDX11Texture2D, &DSVDesc, &m_pDX11DSV);
 	if (FAILED(hr))

@@ -1,7 +1,7 @@
 #pragma once
 #include "../../RHI/RHI.h"
 #include "../../Math/v3dxFrustum.h"
-#include "../../Math/v3dxFrustum.h"
+#include "../../Math/v3dxDVector3.h"
 
 NS_BEGIN
 
@@ -11,8 +11,13 @@ ICamera : public VIUnknown
 public:
 	struct CameraData
 	{
-		v3dxVector3				mPosition;
-		v3dxVector3				mLookAt;
+		CameraData()
+		{
+			mMatrixStartPosition = v3dxDVector3(0, 0, 0);
+		}
+		v3dxDVector3			mMatrixStartPosition;
+		v3dxDVector3			mPosition;
+		v3dxDVector3			mLookAt;
 		v3dxVector3				mDirection;
 		v3dxVector3				mRight;
 		v3dxVector3				mUp;
@@ -24,6 +29,21 @@ public:
 		v3dxMatrix4				mViewProjectionInverse;
 		v3dxMatrix4				mViewPortOffsetMatrix;
 		v3dxMatrix4				mToViewPortMatrix;
+
+		v3dxVector3 GetLocalPosition() {
+			v3dxVector3 result;
+			result.x = (float)(mPosition.x - mMatrixStartPosition.x);
+			result.y = (float)(mPosition.y - mMatrixStartPosition.y);
+			result.z = (float)(mPosition.z - mMatrixStartPosition.z);
+			return result;
+		}
+		v3dxVector3 GetLocalLookAt() {
+			v3dxVector3 result;
+			result.x = (float)(mLookAt.x - mMatrixStartPosition.x);
+			result.y = (float)(mLookAt.y - mMatrixStartPosition.y);
+			result.z = (float)(mLookAt.z - mMatrixStartPosition.z);
+			return result;
+		}
 	};
 public:
 	RTTI_DEF(ICamera, 0x7ef43b215b18857a, true);
@@ -44,7 +64,7 @@ public:
 	TR_FUNCTION(SV_SupressGC)
 	void DoOrthoProjectionForShadow(float w, float h, float znear, float zfar, float TexelOffsetNdcX, float TexelOffsetNdcY);
 	TR_FUNCTION(SV_SupressGC)
-	void LookAtLH(const v3dxVector3* eye, const v3dxVector3* lookAt, const v3dxVector3* up);
+	void LookAtLH(const v3dxDVector3* eye, const v3dxDVector3* lookAt, const v3dxVector3* up);
 
 	TR_FUNCTION(SV_SupressGC)
 	vBOOL GetPickRay(v3dxVector3* pvPickRay, float x, float y, float sw, float sh);
@@ -55,12 +75,28 @@ public:
 	}
 
 	TR_FUNCTION(SV_SupressGC)
-	v3dxVector3 GetPosition() const{
+		v3dxDVector3 GetMatrixStartPosition() const {
+		return mLogicData->mMatrixStartPosition;
+	}
+	TR_FUNCTION(SV_SupressGC)
+		void SetMatrixStartPosition(const v3dxDVector3* pos){
+		mLogicData->mMatrixStartPosition = *pos;
+	}
+	TR_FUNCTION(SV_SupressGC)
+		v3dxDVector3 GetPosition() const{
 		return mLogicData->mPosition;
 	}
 	TR_FUNCTION(SV_SupressGC)
-	v3dxVector3 GetLookAt() const{
+		v3dxVector3 GetLocalPosition() const {
+		return mLogicData->GetLocalPosition();
+	}
+	TR_FUNCTION(SV_SupressGC)
+		v3dxDVector3 GetLookAt() const{
 		return mLogicData->mLookAt;
+	}
+	TR_FUNCTION(SV_SupressGC)
+		v3dxVector3 GetLocalLookAt() const {
+		return mLogicData->GetLocalLookAt();
 	}
 	TR_FUNCTION(SV_SupressGC)
 	v3dxVector3 GetDirection() const {
@@ -121,8 +157,10 @@ protected:
 	v3dxFrustum				mFrustum;
 	TR_MEMBER(SV_ReadOnly)
 	bool					mIsOrtho;
-	float					mOrthoWidth;
-	float					mOrthoHeight;
+	TR_MEMBER(SV_ReadOnly)
+	float					mWidth;
+	TR_MEMBER(SV_ReadOnly)
+	float					mHeight;
 
 public:
 	
@@ -137,7 +175,9 @@ public:
 	UINT					mProjectionInverseId;
 	UINT					mViewProjectionId;
 	UINT					mViewProjectionInverseId;
+	UINT					mID_ZNear;
 	UINT					mID_ZFar;
+	UINT					mCameraOffset;
 
 	CameraData*				mLogicData;
 	CameraData*				mRenderData;

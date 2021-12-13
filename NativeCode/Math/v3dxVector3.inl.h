@@ -4,7 +4,7 @@
 // class v3dxVector3 inline function
 //
 // Author : johnson
-// Modifier : lanzhengpeng(À¼Õ÷Åô)
+// Modifier : lanzhengpeng
 //			  flymemory
 // Create time :
 // Modify time : 2002-6-16 

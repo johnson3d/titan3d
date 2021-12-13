@@ -8,6 +8,11 @@
 
 NS_BEGIN
 
+void VIUnknownBase::DeleteThis()
+{
+	delete this;
+}
+
 CoreRtti VIUnknown::_RttiInfo("EngineNS::VIUnknown", "", VIUnknown::__UID__, sizeof(VIUnknown), nullptr, __FILE__, __LINE__);
 const vIID VIUnknown::__UID__;
 INT64 VIUnknown::EngineTime = 0;
@@ -20,7 +25,6 @@ vfxObjectLocker gDefaultObjectLocker;
 
 VIUnknown::VIUnknown()
 {
-	RefCount = 1;
 	//Handle = ObjectHandle::NewHandle(this);
 	Handle = nullptr;
 }
@@ -34,24 +38,9 @@ VIUnknown::~VIUnknown()
 	}
 }
 
-long VIUnknown::AddRef()
+void VIUnknown::Cleanup()
 {
-	return ++RefCount;
-}
 
-void VIUnknown::Release()
-{
-	RefCount--;
-	if (RefCount == 0)
-	{
-		DeleteThis();
-	}
-	return;
-}
-
-void VIUnknown::DeleteThis()
-{
-	delete this;
 }
 
 vfxObjectLocker* VIUnknown::GetLocker(int index) const

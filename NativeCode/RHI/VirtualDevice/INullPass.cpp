@@ -34,7 +34,7 @@ void INullDrawCall::SetScissorRect(ICommandList* cmd, IScissorRect* sr)
 
 }
 
-void INullDrawCall::SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline)
+void INullDrawCall::SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline, EPrimitiveType dpType)
 {
 	
 }

@@ -5,6 +5,21 @@
 
 NS_BEGIN
 
+struct TR_CLASS(SV_LayoutStruct = 8, SV_Manual)
+	BUFFER_SRV
+{
+	union
+	{
+		UINT FirstElement;
+		UINT ElementOffset;
+	};
+	union
+	{
+		UINT NumElements;
+		UINT ElementWidth;
+	};
+};
+
 class XndAttribute;
 class IRenderContext;
 

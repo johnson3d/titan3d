@@ -1,5 +1,5 @@
 #pragma once
-#include "IRenderResource.h"
+#include "IGpuBuffer.h"
 
 NS_BEGIN
 
@@ -12,7 +12,7 @@ public:
 	virtual void UnmapBuffer(ICommandList* cmdList) = 0;
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_EnumNoFlags)
+enum TR_ENUM(SV_EnumNoFlags)
 ETCFormat
 {
 	UNKNOWN,
@@ -36,7 +36,7 @@ ETCFormat
 	DEFAULT = SRGB8
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 ITextureBase : public IRenderResource
 {
 public:
@@ -44,7 +44,7 @@ public:
 	~ITextureBase();
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 ITexture2DDesc
 {
 	TR_FUNCTION()
@@ -113,20 +113,15 @@ PixelDesc
 	EPixelFormat Format;
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-ITexture2D : public ITextureBase
+class TR_CLASS()
+ITexture2D : public IGpuBuffer
 {
 public:
-	TR_MEMBER()
-	ITexture2DDesc		mDesc;
+	ITexture2DDesc		mTextureDesc;
 public:
-	TR_FUNCTION()
-	virtual vBOOL Map(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch) = 0;
-	TR_FUNCTION()
-	virtual void Unmap(ICommandList* cmd, int MipLevel) = 0;
-	TR_FUNCTION()
+	virtual vBOOL MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch) = 0;
+	virtual void UnmapMipmap(ICommandList* cmd, int MipLevel) = 0;
 	void BuildImageBlob(IBlobObject* blob, void* pData, UINT RowPitch);
-	TR_FUNCTION()
 	virtual void UpdateMipData(ICommandList* cmd, UINT level, void* pData, UINT width, UINT height, UINT Pitch) = 0;
 };
 

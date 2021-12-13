@@ -225,6 +225,7 @@ public:
 
 	static int MakesureDir(LPCSTR path);
 protected:
+	UINT_PTR mFileLength;
 	FILE* m_hFile;
 	vBOOL m_bCloseOnDelete;
 	VStringA m_strFileName;

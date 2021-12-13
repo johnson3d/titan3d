@@ -46,8 +46,10 @@ public:
 	VkPhysicalDevice GetPhysicalDevice(UINT index);
 public:
 	VkInstance					mVKInstance;
-	std::vector<const char*>	mDeviceExtensions;
+	UINT32						mDeviceNumber;
+	std::vector<VkPhysicalDevice>	mHwDevices;
 
+	std::vector<const char*>	mDeviceExtensions;
 	std::vector<const char*>	mValidationLayers;
 };
 

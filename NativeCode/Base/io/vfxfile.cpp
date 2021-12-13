@@ -83,17 +83,20 @@ int VFile::MakesureDir(LPCSTR path)
 {
 	m_hFile = NULL;
 	m_bCloseOnDelete = FALSE;
+	mFileLength = 0;
 }
 
  VFile::VFile(FILE* hFile)
 {
 	m_hFile = hFile;
 	m_bCloseOnDelete = FALSE;
+	mFileLength = 0;
 }
 
  VFile::VFile(LPCSTR lpszFileName, UINT nOpenFlags)
 {
 	ASSERT(lpszFileName);
+	mFileLength = 0;
 	Open(lpszFileName, nOpenFlags);
 //	if (!Open(lpszFileName, nOpenFlags))
 //		throw DWORD(::GetLastError());
@@ -190,6 +193,12 @@ vBOOL  VFile::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 		GVFLostAssets[lpszFileName] = lpszFileName;
 		return FALSE;
 	}
+
+	auto saved = fseek(m_hFile, 0, current);
+	fseek(m_hFile, 0, end);
+	mFileLength = ftell(m_hFile);
+	fseek(m_hFile, saved, begin);
+
 	GFileOpenNumber++;
 	if (GFileOpenNumber > 100)
 	{
@@ -298,15 +307,16 @@ vBOOL  VFile::SetLength(UINT_PTR dwNewLen)
 
 UINT_PTR  VFile::GetLength() const
 {
-	UINT_PTR dwLen, dwCur;
+	return mFileLength;
+	//UINT_PTR dwLen, dwCur;
 
-	// Seek is a non const operation
-	VFile* pFile = (VFile*)this;
-	dwCur = pFile->Seek(0L, current);
-	dwLen = pFile->SeekToEnd();
-	pFile->Seek(dwCur, begin);
+	//// Seek is a non const operation
+	//VFile* pFile = (VFile*)this;
+	//dwCur = pFile->Seek(0L, current);
+	//dwLen = pFile->SeekToEnd();
+	//pFile->Seek(dwCur, begin);
 
-	return dwLen;
+	//return dwLen;
 }
 
 // VFile does not support direct buffering (CMemFile does)

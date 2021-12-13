@@ -37,11 +37,17 @@ void ID11RenderPipeline::SetDepthStencilState(ICommandList* cmd, IDepthStencilSt
 void ID11RenderPipeline::SetBlendState(ICommandList* cmd, IBlendState* State)
 {
 	auto d11Cmd = (ID11CommandList*)cmd;
-	d11Cmd->mDeferredContext->OMSetBlendState(((ID11BlendState*)State)->mState, (const float*)&mBlendFactor, mSampleMask);
+	v3dxColor4 color(0,0,0,0);
+	d11Cmd->mDeferredContext->OMSetBlendState(((ID11BlendState*)State)->mState, (const float*)&color, mSampleMask);
 }
 
 bool ID11RenderPipeline::Init(ID11RenderContext* rc, const IRenderPipelineDesc* desc)
 {
+	BindRenderPass(desc->RenderPass);
+	BindBlendState(desc->Blend);
+	BindDepthStencilState(desc->DepthStencil);
+	BindGpuProgram(desc->GpuProgram);
+	BindRasterizerState(desc->Rasterizer);
 	return true;
 }
 

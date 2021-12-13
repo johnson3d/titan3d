@@ -3,85 +3,350 @@
 
 NS_BEGIN
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
-TSBindInfo
+struct TR_CLASS(SV_LayoutStruct = 8)
+	ShaderRViewBindInfo : public IShaderBinder
 {
-	TSBindInfo()
+	ShaderRViewBindInfo()
 	{
-		VSBindPoint = -1;
-		PSBindPoint = -1;
-		CSBindPoint = -1;
-		BindCount = 0;
+		SetDefault();
 	}
-	ECBufferRhiType		Type;
-	UINT				VSBindPoint;
-	UINT				PSBindPoint;
-	UINT				CSBindPoint;
-	UINT				BindCount;
-	VNameString			Name;
+	void SetDefault()
+	{
+		IShaderBinder::SetDefault();
+		BindType = EShaderBindType::SBT_Srv;
+		BufferType = EGpuBufferType::GBT_Unknown;
+	}
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+struct TR_CLASS(SV_LayoutStruct = 8)
+	SamplerBindInfo : public IShaderBinder
+{
+	SamplerBindInfo()
+	{
+		SetDefault();
+	}
+	void SetDefault()
+	{
+		IShaderBinder::SetDefault();
+		BindType = EShaderBindType::SBT_Sampler;
+		BufferType = EGpuBufferType::GBT_Unknown;
+	}
+};
+
+struct TR_CLASS(SV_LayoutStruct = 8)
+	UavBindInfo : public IShaderBinder
+{
+	UavBindInfo()
+	{
+		SetDefault();
+	}
+	void SetDefault()
+	{
+		IShaderBinder::SetDefault();
+		BindType = EShaderBindType::SBT_Uav;
+		BufferType = EGpuBufferType::GBT_UavBuffer;
+	}
+};
+
+class TR_CLASS()
 ShaderReflector : public VIUnknown
 {
 public:
 	std::vector<IConstantBufferDesc>	mCBDescArray;
-	std::vector<TSBindInfo>				mTexBindInfoArray;
-	std::vector<TSBindInfo>				mSamplerBindInfoArray;
+	std::vector<UavBindInfo>			mUavBindArray;
+	std::vector<ShaderRViewBindInfo>	mSrvBindArray;
+	std::vector<SamplerBindInfo>		mSamplerBindArray;
 
 	ShaderReflector();
 	~ShaderReflector();
 
-	TR_FUNCTION()
-	UINT FindCBuffer(const char* name)
+	void Reset()
 	{
-		for (size_t i = 0; i < mCBDescArray.size(); i++)
+		mCBDescArray.clear();
+		mUavBindArray.clear();
+		mSrvBindArray.clear();
+		mSamplerBindArray.clear();
+	}
+#if defined(USE_D11)
+	bool ReflectDXBC(const IShaderDesc* desc);
+#endif
+
+#if defined(USE_VK)
+	bool ReflectSpirV(const IShaderDesc * desc);
+#endif
+	void MergeShaderStage(EShaderType type, ShaderReflector* reflector);
+
+	UINT FindShaderBinder(EShaderBindType type, const char* name) const
+	{
+		switch (type)
 		{
-			if (mCBDescArray[i].Name == name)
-				return (int)i;
+		case EngineNS::SBT_CBuffer:
+			for (size_t i = 0; i < mCBDescArray.size(); i++)
+			{
+				if (mCBDescArray[i].Name == name)
+					return (int)i;
+			}
+			break;
+		case EngineNS::SBT_Uav:
+			for (size_t i = 0; i < mUavBindArray.size(); i++)
+			{
+				if (mUavBindArray[i].Name == name)
+					return (int)i;
+			}
+			break;
+		case EngineNS::SBT_Srv:
+			for (size_t i = 0; i < mSrvBindArray.size(); i++)
+			{
+				if (mSrvBindArray[i].Name == name)
+					return (int)i;
+			}
+			break;
+		case EngineNS::SBT_Sampler:
+			for (size_t i = 0; i < mSamplerBindArray.size(); i++)
+			{
+				if (mSamplerBindArray[i].Name == name)
+					return (int)i;
+			}
+			break;
+		default:
+			break;
 		}
+
 		return -1;
 	}
-	TR_FUNCTION()
-	IConstantBufferDesc* GetCBuffer(UINT index)
+	UINT FindShaderBinderBySlot(EShaderBindType type, EShaderType shaderType, UINT slot) const
+	{
+		switch (type)
+		{
+		case EngineNS::SBT_CBuffer:
+			for (size_t i = 0; i < mCBDescArray.size(); i++)
+			{
+				switch (shaderType)
+				{
+				case EngineNS::EST_UnknownShader:
+					break;
+				case EngineNS::EST_VertexShader:
+					{
+						if (mCBDescArray[i].VSBindPoint == slot)
+							return (int)i;
+					}
+					break;
+				case EngineNS::EST_PixelShader:
+					{
+						if (mCBDescArray[i].PSBindPoint == slot)
+							return (int)i;
+					}
+					break;
+				case EngineNS::EST_ComputeShader:
+					{
+						if (mCBDescArray[i].CSBindPoint == slot)
+							return (int)i;
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			break;
+		case EngineNS::SBT_Uav:
+			for (size_t i = 0; i < mUavBindArray.size(); i++)
+			{
+				switch (shaderType)
+				{
+					case EngineNS::EST_UnknownShader:
+						break;
+					case EngineNS::EST_VertexShader:
+					{
+						if (mUavBindArray[i].VSBindPoint == slot)
+							return (int)i;
+					}
+					break;
+					case EngineNS::EST_PixelShader:
+					{
+						if (mUavBindArray[i].PSBindPoint == slot)
+							return (int)i;
+					}
+					break;
+					case EngineNS::EST_ComputeShader:
+					{
+						if (mUavBindArray[i].CSBindPoint == slot)
+							return (int)i;
+					}
+					break;
+					default:
+						break;
+				}
+			}
+			break;
+		case EngineNS::SBT_Srv:
+			for (size_t i = 0; i < mSrvBindArray.size(); i++)
+			{
+				switch (shaderType)
+				{
+					case EngineNS::EST_UnknownShader:
+						break;
+					case EngineNS::EST_VertexShader:
+					{
+						if (mSrvBindArray[i].VSBindPoint == slot)
+							return (int)i;
+					}
+					break;
+					case EngineNS::EST_PixelShader:
+					{
+						if (mSrvBindArray[i].PSBindPoint == slot)
+							return (int)i;
+					}
+					break;
+					case EngineNS::EST_ComputeShader:
+					{
+						if (mSrvBindArray[i].CSBindPoint == slot)
+							return (int)i;
+					}
+					break;
+					default:
+						break;
+				}
+			}
+			break;
+		case EngineNS::SBT_Sampler:
+			for (size_t i = 0; i < mSamplerBindArray.size(); i++)
+			{
+				switch (shaderType)
+				{
+					case EngineNS::EST_UnknownShader:
+						break;
+					case EngineNS::EST_VertexShader:
+					{
+						if (mSamplerBindArray[i].VSBindPoint == slot)
+							return (int)i;
+					}
+					break;
+					case EngineNS::EST_PixelShader:
+					{
+						if (mSamplerBindArray[i].PSBindPoint == slot)
+							return (int)i;
+					}
+					break;
+					case EngineNS::EST_ComputeShader:
+					{
+						if (mSamplerBindArray[i].CSBindPoint == slot)
+							return (int)i;
+					}
+					break;
+					default:
+						break;
+				}
+			}
+			break;
+		default:
+			break;
+		}
+
+		return -1;
+	}
+	UINT FindOrNewShaderBinder(EShaderBindType type, const char* name, bool& isNew)
+	{
+		isNew = false;
+		switch (type)
+		{
+		case EngineNS::SBT_CBuffer:
+			{
+				for (size_t i = 0; i < mCBDescArray.size(); i++)
+				{
+					if (mCBDescArray[i].Name == name)
+						return (int)i;
+				}
+				isNew = true;
+				IConstantBufferDesc tmp;
+				tmp.Name = name;
+				mCBDescArray.push_back(tmp);
+				return (UINT)(mCBDescArray.size() - 1);
+			}
+		case EngineNS::SBT_Uav:
+			{
+				for (size_t i = 0; i < mUavBindArray.size(); i++)
+				{
+					if (mUavBindArray[i].Name == name)
+						return (int)i;
+				}
+				isNew = true;
+				UavBindInfo tmp;
+				tmp.Name = name;
+				mUavBindArray.push_back(tmp);
+				return (UINT)(mUavBindArray.size() - 1);
+			}
+		case EngineNS::SBT_Srv:
+			{
+				for (size_t i = 0; i < mSrvBindArray.size(); i++)
+				{
+					if (mSrvBindArray[i].Name == name)
+						return (int)i;
+				}
+				isNew = true;
+				ShaderRViewBindInfo tmp;
+				tmp.Name = name;
+				mSrvBindArray.push_back(tmp);
+				return (UINT)(mSrvBindArray.size() - 1);
+			}
+		case EngineNS::SBT_Sampler:
+			{
+				for (size_t i = 0; i < mSamplerBindArray.size(); i++)
+				{
+					if (mSamplerBindArray[i].Name == name)
+						return (int)i;
+				}
+				isNew = true;
+				SamplerBindInfo tmp;
+				tmp.Name = name;
+				mSamplerBindArray.push_back(tmp);
+				return (UINT)(mSamplerBindArray.size() - 1);
+			}
+		default:
+			return -1;
+		}
+	}
+	const IShaderBinder* GetShaderBinder(EShaderBindType type, UINT index) const
+	{
+		switch (type)
+		{
+		case EngineNS::SBT_CBuffer:
+			if (index >= (UINT)mCBDescArray.size())
+				return nullptr;
+			return &mCBDescArray[index];
+		case EngineNS::SBT_Uav:
+			if (index >= (UINT)mUavBindArray.size())
+				return nullptr;
+			return &mUavBindArray[index];
+		case EngineNS::SBT_Srv:
+			if (index >= (UINT)mSrvBindArray.size())
+				return nullptr;
+			return &mSrvBindArray[index];
+		case EngineNS::SBT_Sampler:
+			if (index >= (UINT)mSamplerBindArray.size())
+				return nullptr;
+			return &mSamplerBindArray[index];
+		default:
+			break;
+		}
+
+		return nullptr;
+	}
+	const IConstantBufferDesc* GetCBuffer(UINT index) const
 	{
 		if (index >= (UINT)mCBDescArray.size())
 			return nullptr;
 		return &mCBDescArray[index];
 	}
-	TR_FUNCTION()
-	UINT FindSRV(const char* name)
+	const IShaderBinder* GetShaderBinder(EShaderBindType type, const char* name) const
 	{
-		for (size_t i = 0; i < mTexBindInfoArray.size(); i++)
+		auto index = FindShaderBinder(type, name);
+		if (index == -1)
 		{
-			if (mTexBindInfoArray[i].Name == name)
-				return (int)i;
-		}
-		return -1;
-	}
-	TR_FUNCTION()
-	TSBindInfo* GetSRV(UINT index)
-	{
-		if (index >= (UINT)mTexBindInfoArray.size())
+			//ASSERT(false);
+			//VFX_LTRACE(ELTT_Graphics, "FindShaderBinder failed:(%s)\n", name);
 			return nullptr;
-		return &mTexBindInfoArray[index];
-	}
-	TR_FUNCTION()
-	UINT FindSampler(const char* name)
-	{
-		for (size_t i = 0; i < mSamplerBindInfoArray.size(); i++)
-		{
-			if (mSamplerBindInfoArray[i].Name == name)
-				return (int)i;
 		}
-		return -1;
-	}
-	TR_FUNCTION()
-	TSBindInfo* GetSampler(UINT index)
-	{
-		if (index >= (UINT)mSamplerBindInfoArray.size())
-			return nullptr;
-		return &mSamplerBindInfoArray[index];
+		return GetShaderBinder(type, index);
 	}
 };
 

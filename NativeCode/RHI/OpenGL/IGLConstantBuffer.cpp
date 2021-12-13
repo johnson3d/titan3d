@@ -45,7 +45,7 @@ bool IGLConstantBuffer::UpdateContent(ICommandList* cmd, void* pBuffer, UINT Siz
 	AUTO_SAMP("Native.IConstantBuffer.UpdateContent");
 	if (Size > Desc.Size)
 		return false;
-	RHI_ASSERT(Size == Desc.Size);
+	ASSERT(Size == Desc.Size);
 
 	GLSdk* sdk = ((IGLCommandList*)cmd)->mCmdList;
 

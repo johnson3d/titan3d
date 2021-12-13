@@ -1,6 +1,7 @@
 #pragma once
 #include "IRenderResource.h"
 #include "../Math/v3dxColor4.h"
+#include <unordered_map>
 
 NS_BEGIN
 
@@ -13,12 +14,13 @@ class IPixelShader;
 class IInputLayout;
 class IConstantBuffer;
 class ICommandList;
+class IRenderPass;
 class IRasterizerState;
 class IDepthStencilState;
 class IBlendState;
 class IShaderProgram;
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 IRenderPipelineDesc
 {
 	IRenderPipelineDesc()
@@ -27,26 +29,28 @@ IRenderPipelineDesc
 	}
 	void SetDefault()
 	{
+		RenderPass = nullptr;
 		GpuProgram = nullptr;
 		Rasterizer = nullptr;
 		DepthStencil = nullptr;
 		Blend = nullptr;
 		SampleMask = 0xFFFFFFFF;
-		BlendFactor.fromArgb(0, 0, 0, 0);
+		PrimitiveType = EPT_TriangleList;
 	}
+	IRenderPass*			RenderPass;
 	IShaderProgram*			GpuProgram;
 	IRasterizerState*		Rasterizer;
 	IDepthStencilState*		DepthStencil;
 	IBlendState*			Blend;
-	TR_MEMBER(SV_ReturnConverter = v3dVector4_t)
-	v3dxColor4				BlendFactor;
+	EPrimitiveType			PrimitiveType;
 	UINT					SampleMask;
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IRenderPipeline : public IRenderResource
 {
 protected:
+	AutoRef<IRenderPass>			mRenderPass;
 	AutoRef<IRasterizerState>		mRasterizerState;
 	AutoRef<IDepthStencilState>		mDepthStencilState;
 	AutoRef<IBlendState>			mBlendState;
@@ -55,29 +59,25 @@ public:
 	IRenderPipeline();
 	~IRenderPipeline();
 	
-	TR_FUNCTION()
+	void BindRenderPass(IRenderPass * State);
 	void BindRasterizerState(IRasterizerState* State);
-	TR_FUNCTION()
 	void BindDepthStencilState(IDepthStencilState* State);
-	TR_FUNCTION()
 	void BindBlendState(IBlendState* State);	
-	TR_FUNCTION()
 	void BindGpuProgram(IShaderProgram* pGpuPrgram);
 
-	TR_FUNCTION()
-	IRasterizerState* GetRasterizerState() {
+	inline IRenderPass* GetRenderPass() {
+		return mRenderPass;
+	}
+	inline IRasterizerState* GetRasterizerState() {
 		return mRasterizerState;
 	}
-	TR_FUNCTION()
-	IDepthStencilState* GetDepthStencilState() {
+	inline IDepthStencilState* GetDepthStencilState() {
 		return mDepthStencilState;
 	}
-	TR_FUNCTION()
-	IBlendState* GetBindBlendState() {
+	inline IBlendState* GetBindBlendState() {
 		return mBlendState;
 	}
-	TR_FUNCTION()
-	IShaderProgram* GetGpuProgram()
+	inline IShaderProgram* GetGpuProgram()
 	{
 		return mGpuProgram;
 	}
@@ -85,11 +85,10 @@ public:
 	virtual void SetRasterizerState(ICommandList* cmd, IRasterizerState* Layout) = 0;
 	virtual void SetDepthStencilState(ICommandList* cmd, IDepthStencilState* Layout) = 0;
 	virtual void SetBlendState(ICommandList* cmd, IBlendState* State) = 0;
-public:
-	TR_MEMBER(SV_ReturnConverter = v3dVector4_t)
-	v3dxColor4		mBlendFactor;
-	TR_MEMBER()
+public:	
 	UINT			mSampleMask;
+	
+	bool			mIsDirty;
 };
 
 NS_END

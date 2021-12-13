@@ -118,7 +118,15 @@ void VFile2Memory::TryReleaseHolder()
 
 UINT_PTR VFile2Memory::Length() const
 {
-	//mCachedSize;
+	if (mFile.IsFileOpened() == false)
+	{
+		if (false == ((ViseFile*)&mFile)->Open(mName.c_str(), VFile::modeRead))
+		{
+			VFX_LTRACE(ELTT_Error, "F2M Ptr [%s] open faile, someone deleted this file in runtime\r\n", mName.c_str());
+			return NULL;
+		}
+	}
+
 	return mFile.GetLength();
 }
 

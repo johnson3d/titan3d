@@ -21,8 +21,7 @@ void IGLInputLayout::Cleanup()
 
 bool IGLInputLayout::Init(IGLRenderContext* rc, const IInputLayoutDesc* desc)
 {
-	mDesc.Layouts = desc->Layouts;
-	mDesc.ShaderDesc = desc->ShaderDesc;
+	mDesc.StrongRef((IInputLayoutDesc*)desc);
 	return true;
 }
 

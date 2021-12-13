@@ -17,8 +17,7 @@ public:
 public:
 	TObjectHandle<IVKRenderContext>		mRenderContext;
 	VkBuffer							mBuffer;
-	VkDeviceMemory						mMemory;
-	VkDescriptorSetLayout				mLayout;
+	VKGpuMemory*						mMemory;
 
 	bool Init(IVKRenderContext* rc, const IConstantBufferDesc* desc);
 };

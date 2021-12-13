@@ -21,30 +21,30 @@ ITextureBase::~ITextureBase()
 
 void ITexture2D::BuildImageBlob(IBlobObject* blob, void* pData, UINT RowPitch)
 {
-	int nStride = (mDesc.Width * 32 + 7) / 8;
-	int nPixelBufferSize = nStride * mDesc.Height;
+	int nStride = (mTextureDesc.Width * 32 + 7) / 8;
+	int nPixelBufferSize = nStride * mTextureDesc.Height;
 	if (blob->GetSize() != sizeof(PixelDesc) + nPixelBufferSize)
 	{
 		blob->ReSize(sizeof(PixelDesc) + nPixelBufferSize);
 	}
 	PixelDesc* pOutDesc = (PixelDesc*)blob->GetData();
-	pOutDesc->Width = mDesc.Width;
-	pOutDesc->Height = mDesc.Height;
+	pOutDesc->Width = mTextureDesc.Width;
+	pOutDesc->Height = mTextureDesc.Height;
 	pOutDesc->Stride = nStride;
 	pOutDesc->Format = PXF_R8G8B8A8_UNORM;
 
 	XImageBuffer image;
 	image.m_pImage = (uint8_t*)(pOutDesc + 1);
-	image.m_nWidth = mDesc.Width;
-	image.m_nHeight = mDesc.Height;
+	image.m_nWidth = mTextureDesc.Width;
+	image.m_nHeight = mTextureDesc.Height;
 	image.m_nBitCount = 32;
 	image.m_nStride = nStride;
 	BYTE* row = (BYTE*)pData;
 	BYTE* dst = image.m_pImage;
-	UINT copySize = mDesc.Width * 4;
-	if (mDesc.Format == PXF_R8G8B8A8_UNORM)
+	UINT copySize = mTextureDesc.Width * 4;
+	if (mTextureDesc.Format == PXF_R8G8B8A8_UNORM)
 	{
-		for (UINT i = 0; i < mDesc.Height; i++)
+		for (UINT i = 0; i < mTextureDesc.Height; i++)
 		{
 			memcpy(dst, row, copySize);
 			/*for (UINT j = 0; j < mDesc.Width; j++)
@@ -70,12 +70,12 @@ void ITexture2D::BuildImageBlob(IBlobObject* blob, void* pData, UINT RowPitch)
 			dst += image.m_nStride;
 		}
 	}
-	else if (mDesc.Format == PXF_R16G16B16A16_FLOAT)
+	else if (mTextureDesc.Format == PXF_R16G16B16A16_FLOAT)
 	{
-		for (UINT i = 0; i < mDesc.Height; i++)
+		for (UINT i = 0; i < mTextureDesc.Height; i++)
 		{
 			auto color = (float16*)row;
-			for (UINT j = 0; j < mDesc.Width; j++)
+			for (UINT j = 0; j < mTextureDesc.Width; j++)
 			{
 				auto f1 = (float)color[j * 4];
 				auto f2 = (float)color[j * 4 + 1];

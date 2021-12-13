@@ -5,8 +5,8 @@
 #include "../../RHI/RHI.h"
 #include "FBXImporter.h"
 #include "../../Math/v3dxColor4.h"
-#include "../Animation/Skeleton/IPartialSkeleton.h"
 #include "../../Graphics/Mesh/Modifier/ISkinModifier.h"
+#include "FBXPartialSkeleton.h"
 
 namespace AssetImportAndExport
 {
@@ -112,7 +112,7 @@ namespace AssetImportAndExport
 		class BoneCluster
 		{
 			public:
-				IBone* Bone = nullptr;
+				FBXBoneDesc Bone;
 				FbxCluster* FBXCluster = nullptr;
 		};
 
@@ -133,20 +133,20 @@ namespace AssetImportAndExport
 					}
 					return nullptr;
 				};
-				EngineNS::IPartialSkeleton* GetPartialSkeleton()
+				FBXSkeletonDesc* GetSkeletonDesc()
 				{
 					if (HasProcessed)
 					{
-						return mPartialSkeleton;
+						return mSkeletonDesc;
 					}
 					return nullptr;
 				};
 				EFBXImportResult Process(EngineNS::IRenderContext* rc);
 				//v3dxMatrix4 ComputeTotalMatrix(FbxNode* Node, FbxScene* scene);
-				void RecursionCalculateBone(FbxNode* boneNode, const std::vector<BoneCluster>& boneClusters, EngineNS::IPartialSkeleton* skeleton);
+				void RecursionCalculateBone(FbxNode* boneNode, FBXSkeletonDesc* skeleton);
 			protected:
 				EngineNS::IMeshPrimitives* mMeshPrimitives = nullptr;
-				EngineNS::IPartialSkeleton* mPartialSkeleton = nullptr;
+				FBXSkeletonDesc* mSkeletonDesc = nullptr;
 				//EngineNS::ISkinModifier* mSkinModifier;
 			protected:
 				UINT mMeshIndex = -1;

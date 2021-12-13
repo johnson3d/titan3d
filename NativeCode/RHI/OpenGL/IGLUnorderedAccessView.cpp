@@ -24,7 +24,7 @@ void IGLGpuBuffer::Cleanup()
 
 bool IGLGpuBuffer::Init(IGLRenderContext* rc, const IGpuBufferDesc* desc, void* data)
 {
-	mDesc = *desc;
+	mBufferDesc = *desc;
 
 	GLenum stage = GL_DYNAMIC_DRAW;
 	switch (desc->Usage)
@@ -86,12 +86,12 @@ vBOOL IGLGpuBuffer::GetBufferData(IRenderContext* rc, IBlobObject* blob)
 	sdk->BindBuffer(mapTarget, mBufferId);
 	sdk->BindBufferBase(mapTarget, 0, mBufferId);
 
-	sdk->MapBufferRange(&target, mapTarget, 0, mDesc.ByteWidth, GL_MAP_READ_BIT);
+	sdk->MapBufferRange(&target, mapTarget, 0, mBufferDesc.ByteWidth, GL_MAP_READ_BIT);
 	if (target == nullptr)
 	{
 		return FALSE;
 	}
-	blob->PushData(target, mDesc.ByteWidth);
+	blob->PushData(target, mBufferDesc.ByteWidth);
 	GLboolean ret;
 	sdk->UnmapBuffer(&ret, mapTarget);
 	sdk->BindBuffer(mapTarget, 0);
@@ -113,13 +113,13 @@ void IGLGpuBuffer::Unmap(IRenderContext* rc, UINT Subresource)
 	
 }
 
-vBOOL IGLGpuBuffer::UpdateBufferData(ICommandList* cmd, void* data, UINT size)
+vBOOL IGLGpuBuffer::UpdateBufferData(ICommandList* cmd, UINT offset, void* data, UINT size)
 {
-	if (size > mDesc.ByteWidth)
+	if (size > mBufferDesc.ByteWidth)
 		return FALSE;
 
 	auto sdk = ((IGLCommandList*)cmd)->mCmdList;//((IGLCommandList*)rc->GetImmCommandList())->mCmdList;
-	if (size < mDesc.ByteWidth && mDesc.CPUAccessFlags & CAS_WRITE)
+	if (size < mBufferDesc.ByteWidth && mBufferDesc.CPUAccessFlags & CAS_WRITE)
 	{
 		std::shared_ptr<GLSdk::BufferHolder> pBufferHolder(new GLSdk::BufferHolder(data, (UINT)size, true));
 		GLSdk::ImmSDK->PushCommandDirect([=]()->void
@@ -128,12 +128,12 @@ vBOOL IGLGpuBuffer::UpdateBufferData(ICommandList* cmd, void* data, UINT size)
 				return;
 			GLvoid* target = nullptr;
 			GLSdk::ImmSDK->BindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mBufferId);
-			GLSdk::ImmSDK->MapBufferRange(&target, GL_SHADER_STORAGE_BUFFER, 0, mDesc.ByteWidth, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+			GLSdk::ImmSDK->MapBufferRange(&target, GL_SHADER_STORAGE_BUFFER, 0, mBufferDesc.ByteWidth, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 			if (target == nullptr)
 			{
 				return;
 			}
-			memcpy(target, pBufferHolder->mPointer, pBufferHolder->Length);
+			memcpy((BYTE*)target + offset, pBufferHolder->mPointer, pBufferHolder->Length);
 
 			GLboolean ret;
 			GLSdk::ImmSDK->UnmapBuffer(&ret, GL_SHADER_STORAGE_BUFFER);
@@ -166,6 +166,7 @@ IGLUnorderedAccessView::~IGLUnorderedAccessView()
 
 bool IGLUnorderedAccessView::Init(IGLRenderContext* rc, IGLGpuBuffer* pBuffer, const IUnorderedAccessViewDesc* desc)
 {
+	mDesc = *desc;
 	mBuffer.StrongRef(pBuffer);
 	
 	return true;

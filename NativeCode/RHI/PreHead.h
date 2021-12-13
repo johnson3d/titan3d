@@ -4,16 +4,18 @@
 #include "../Base/CoreRtti.h"
 #include "../Base/IUnknown.h"
 #include "../Base/debug/vfxdebug.h"
+#include "../Base/string/vfxstring.h"
 #include "../Base/TypeUtility.h"
 
-#define RHI_ASSERT assert
-
-#define RHI_Trace _vfxTraceA
-
-#if _DEBUG
-#define AssertRHI(bool_expr)                       assert(bool_expr)
-#else
-#define AssertRHI(bool_expr)                    do { if (false) (void)(bool_expr); } while(0)
+#if defined(PLATFORM_WIN)
+#define USE_VirtualDevice
+#define USE_D11
+#define USE_GL
+#define USE_VK
+#elif defined(PLATFORM_DROID)
+#define USE_GL
+#elif defined(PLATFORM_IOS)
+#define USE_METAL
 #endif
 
 NS_BEGIN
@@ -21,7 +23,7 @@ NS_BEGIN
 const int MaxCB = 16;
 const UINT32 MaxTexOrSamplerSlot = 16;
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_EnumNoFlags)
+enum TR_ENUM(SV_EnumNoFlags)
 ERHIType
 {
 	RHT_VirtualDevice,
@@ -31,13 +33,13 @@ ERHIType
 	RHIType_Metal,
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_EnumNoFlags)
+enum TR_ENUM(SV_EnumNoFlags = true)
 EColorSpace{
 	COLOR_SPACE_SRGB_NONLINEAR = 0,
 	COLOR_SPACE_EXTENDED_SRGB_LINEAR,
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_EnumNoFlags)
+enum TR_ENUM(SV_EnumNoFlags = true)
 EPixelFormat
 {
 	PXF_UNKNOWN = 0,
@@ -135,12 +137,15 @@ inline UINT GetPixelByteWidth(EPixelFormat fmt)
 	case PXF_R32_FLOAT:
 		return 4;
 	case PXF_R8G8B8A8_SINT:
-		return 4;
 	case PXF_R8G8B8A8_UINT:
-		return 4;
 	case PXF_R8G8B8A8_UNORM:
-		return 4;
 	case PXF_R8G8B8A8_SNORM:
+	case PXF_R8G8B8A8_TYPELESS:
+	case PXF_R8G8B8A8_UNORM_SRGB:
+		return 4;
+	case PXF_B8G8R8A8_UNORM:
+	case PXF_B8G8R8A8_TYPELESS:
+	case PXF_B8G8R8A8_UNORM_SRGB:
 		return 4;
 	case PXF_R16G16_UINT:
 		return 4;
@@ -189,11 +194,12 @@ inline UINT GetPixelByteWidth(EPixelFormat fmt)
 	case PXF_D16_UNORM:
 		return 2;
 	default:
+		ASSERT(false);
 		return 0;
 	}
 }
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+enum TR_ENUM()
 EBindFlags
 {
 	BF_VB = 0x1,
@@ -206,7 +212,7 @@ EBindFlags
 	BF_UNORDERED_ACCESS = 0x80
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+enum TR_ENUM()
 ECpuAccess
 {
 	CAS_WRITE = 0x10000,
@@ -214,7 +220,7 @@ ECpuAccess
 };
 
 struct IBlobObject;
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 ImageInitData
 {
 	ImageInitData()
@@ -233,7 +239,7 @@ ImageInitData
 	UINT SysMemSlicePitch;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+struct TR_CLASS()
 MacroDefine
 {
 	MacroDefine(const char* name, const char* definition)
@@ -253,7 +259,7 @@ MacroDefine
 	}
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_EnumNoFlags)
+enum TR_ENUM(SV_EnumNoFlags = true)
 EShaderVarType
 {
 	SVT_Float1,
@@ -312,7 +318,7 @@ inline void RgbaToColor4(UINT rgba, float color[4])
 	color[3] = (float)((rgba >> 24) & 0xFF) / 255.0f;
 }
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_EnumNoFlags)
+enum TR_ENUM(SV_EnumNoFlags = true)
 ESamplerFilter
 {
 	SPF_MIN_MAG_MIP_POINT = 0,
@@ -353,7 +359,7 @@ ESamplerFilter
 	SPF_MAXIMUM_ANISOTROPIC = 0x1d5
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_EnumNoFlags)
+enum TR_ENUM(SV_EnumNoFlags = true)
 EAddressMode
 {
 	ADM_WRAP = 1,
@@ -363,7 +369,7 @@ EAddressMode
 	ADM_MIRROR_ONCE,
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_EnumNoFlags)
+enum TR_ENUM(SV_EnumNoFlags = true)
 EComparisionMode
 {
 	CMP_NEVER = 1,
@@ -376,14 +382,14 @@ EComparisionMode
 	CMP_ALWAYS = 8
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_EnumNoFlags)
+enum TR_ENUM(SV_EnumNoFlags = true)
 EFillMode
 {
 	FMD_WIREFRAME = 2,
 	FMD_SOLID = 3
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_EnumNoFlags)
+enum TR_ENUM(SV_EnumNoFlags = true)
 ECullMode
 {
 	CMD_NONE = 1,
@@ -391,14 +397,14 @@ ECullMode
 	CMD_BACK = 3
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_EnumNoFlags)
+enum TR_ENUM(SV_EnumNoFlags = true)
 EDepthWriteMask
 {
 	DSWM_ZERO = 0,
 	DSWM_ALL = 1
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_EnumNoFlags)
+enum TR_ENUM(SV_EnumNoFlags = true)
 EStencilOp
 {
 	STOP_KEEP = 1,
@@ -409,6 +415,188 @@ EStencilOp
 	STOP_INVERT = 6,
 	STOP_INCR = 7,
 	STOP_DECR = 8
+};
+
+enum TR_ENUM(SV_EnumNoFlags = true)
+	EBlend
+{
+	BLD_ZERO = 1,
+	BLD_ONE = 2,
+	BLD_SRC_COLOR = 3,
+	BLD_INV_SRC_COLOR = 4,
+	BLD_SRC_ALPHA = 5,
+	BLD_INV_SRC_ALPHA = 6,
+	BLD_DEST_ALPHA = 7,
+	BLD_INV_DEST_ALPHA = 8,
+	BLD_DEST_COLOR = 9,
+	BLD_INV_DEST_COLOR = 10,
+	BLD_SRC_ALPHA_SAT = 11,
+	BLD_BLEND_FACTOR = 14,
+	BLD_INV_BLEND_FACTOR = 15,
+	BLD_SRC1_COLOR = 16,
+	BLD_INV_SRC1_COLOR = 17,
+	BLD_SRC1_ALPHA = 18,
+	BLD_INV_SRC1_ALPHA = 19
+};
+
+enum TR_ENUM(SV_EnumNoFlags = true)
+	EBlendOp
+{
+	BLDOP_ADD = 1,
+	BLDOP_SUBTRACT = 2,
+	BLDOP_REV_SUBTRACT = 3,
+	BLDOP_MIN = 4,
+	BLDOP_MAX = 5
+};
+
+enum TR_ENUM()
+	FrameBufferLoadAction
+{
+	LoadActionDontCare = 0,
+	LoadActionLoad = 1,
+	LoadActionClear = 2
+};
+
+enum TR_ENUM()
+	FrameBufferStoreAction
+{
+	StoreActionDontCare = 0,
+	StoreActionStore = 1,
+	StoreActionMultisampleResolve = 2,
+	StoreActionStoreAndMultisampleResolve = 3,
+	StoreActionUnknown = 4
+};
+
+enum TR_ENUM()
+	EPrimitiveType
+{
+	EPT_PointList = 1,
+		EPT_LineList = 2,
+		EPT_LineStrip = 3,
+		EPT_TriangleList = 4,
+		EPT_TriangleStrip = 5,
+		EPT_TriangleFan = 6,
+};
+
+inline UINT HLSLBinding2KhronosBindingLocation(const VNameString& sematic, UINT index)
+{
+	if (sematic == "POSITION")
+	{
+		if (index == 0)
+			return 0;
+	}
+	else if (sematic == "NORMAL")
+	{
+		if (index == 0)
+			return 1;
+	}
+	else if (sematic == "COLOR")
+	{
+		if (index == 0)
+			return 3;
+	}
+	else if (sematic == "TEXCOORD")
+	{
+		switch (index)
+		{
+			case 0:
+				return 2;
+			case 1:
+				return 4;
+			case 2:
+				return 5;
+			case 3:
+				return 6;
+			case 4:
+				return 7;
+			case 5:
+				return 8;
+			case 6:
+				return 9;
+			case 7:
+				return 10;
+			case 8:
+				return 11;
+			case 9:
+				return 12;
+			case 10:
+				return 13;
+			case 11:
+				return 14;
+			case 12:
+				return 15;
+		default:
+			break;
+		}
+	}
+	else if (sematic == "SV_VertexID")
+	{
+		if (index == 0)
+			return 16;
+	}
+	else if (sematic == "SV_InstanceID")
+	{
+		if (index == 0)
+			return 17;
+	}
+	return 0xFFFFFFFF;
+}
+
+enum TR_ENUM()
+	EShaderType
+{
+	EST_UnknownShader,
+	EST_VertexShader,
+	EST_PixelShader,
+	EST_ComputeShader,
+};
+
+enum TR_ENUM()
+	EGpuBufferType
+{
+	GBT_Unknown = 0,
+	GBT_VertexBuffer = 1,
+	GBT_IndexBuffer = (1 << 1),
+	GBT_UavBuffer = (1 << 2),
+	GBT_TBufferBuffer = (1 << 3),
+	GBT_IndirectBuffer = (1 << 4),
+	GBT_CBuffer = (1 << 5),	
+};
+
+enum TR_ENUM()
+	EShaderBindType
+{
+	SBT_CBuffer,
+	SBT_Uav,
+	SBT_Srv,
+	SBT_Sampler,
+};
+
+struct TR_CLASS(SV_LayoutStruct = 8)
+	IShaderBinder
+{
+	IShaderBinder()
+	{
+		SetDefault();
+	}
+	void SetDefault()
+	{
+		BindType = EShaderBindType::SBT_CBuffer;
+		VSBindPoint = -1;
+		PSBindPoint = -1;
+		CSBindPoint = -1;
+		BindCount = 0;
+		DescriptorSet = -1;
+		BufferType = EGpuBufferType::GBT_CBuffer;
+	}
+	EShaderBindType	BindType;
+	EGpuBufferType	BufferType;
+	UINT			VSBindPoint;
+	UINT			PSBindPoint;
+	UINT			CSBindPoint;
+	UINT			BindCount;
+	UINT			DescriptorSet;
+	VNameString		Name;
 };
 
 NS_END

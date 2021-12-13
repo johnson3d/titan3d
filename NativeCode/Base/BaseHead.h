@@ -2,6 +2,7 @@
 
 #if defined(PLATFORM_WIN)
 
+#define HasModule_Windows
 #define HasModule_ImGui
 #define HasModule_Base
 #define HasModule_Math
@@ -18,7 +19,11 @@
 #define HasModule_Animation
 #define HasModule_TcpClient
 #define HasModule_TcpServer
-#define HasModule_Windows
+#define HasModule_PhysicsCore
+#define HasModule_MeshSimplify
+#define HasModule_Terrain
+#define HasModule_RenderDoc
+#define HasModule_Particle
 
 #include <WinSock2.h>
 #include <mswsock.h>
@@ -48,6 +53,10 @@
 #define HasModule_TextConverter
 #define HasModule_Animation
 #define HasModule_TcpClient
+#define HasModule_PhysicsCore
+#define HasModule_MeshSimplify
+#define HasModule_Terrain
+#define HasModule_Particle
 
 #include <jni.h>
 #include <errno.h>
@@ -139,7 +148,7 @@ inline void _vfxTraceA(LPCSTR lpszFormat, ...)
 #endif
 
 //typedef char SByte;
-#define SByte char
+//#define SByte char
 #define Wchar16 unsigned short
 #define Wchar32 unsigned int
 

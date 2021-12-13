@@ -27,6 +27,7 @@ public:
 	virtual ICommandList* CreateCommandList(const ICommandListDesc* desc) override;
 	
 	virtual IDrawCall* CreateDrawCall() override;
+	virtual IComputeDrawcall* CreateComputeDrawcall() override;
 
 	virtual IRenderPipeline* CreateRenderPipeline(const IRenderPipelineDesc* desc) override;
 
@@ -38,12 +39,13 @@ public:
 	virtual IIndexBuffer* CreateIndexBufferFromBuffer(const IIndexBufferDesc* desc, const IGpuBuffer* pBuffer) override;
 	virtual IVertexBuffer* CreateVertexBufferFromBuffer(const IVertexBufferDesc* desc, const IGpuBuffer* pBuffer) override;
 	
+	virtual IRenderPass* CreateRenderPass(const IRenderPassDesc* desc) override;
 	virtual IFrameBuffers* CreateFrameBuffers(const IFrameBuffersDesc* desc) override;
 	virtual IRenderTargetView* CreateRenderTargetView(const IRenderTargetViewDesc* desc) override;
 	virtual IDepthStencilView* CreateDepthRenderTargetView(const IDepthStencilViewDesc* desc) override;
 	virtual ITexture2D* CreateTexture2D(const ITexture2DDesc* desc) override;
 	virtual IShaderResourceView* CreateShaderResourceView(const IShaderResourceViewDesc* desc) override;
-	virtual IShaderResourceView* CreateShaderResourceViewFromBuffer(IGpuBuffer* pBuffer, const ISRVDesc* desc) override;
+	//virtual IShaderResourceView* CreateShaderResourceViewFromBuffer(IGpuBuffer* pBuffer, const ISRVDesc* desc) override;
 	virtual IGpuBuffer* CreateGpuBuffer(const IGpuBufferDesc* desc, void* pInitData) override;
 	virtual IUnorderedAccessView* CreateUnorderedAccessView(IGpuBuffer* pBuffer, const IUnorderedAccessViewDesc* desc) override;
 	virtual IShaderResourceView* LoadShaderResourceView(const char* file) override;

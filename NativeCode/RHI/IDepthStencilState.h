@@ -3,7 +3,7 @@
 
 NS_BEGIN
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 StencilOpDesc
 {
 	EStencilOp StencilFailOp;
@@ -12,7 +12,7 @@ StencilOpDesc
 	EComparisionMode StencilFunc;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 IDepthStencilStateDesc
 {
 	IDepthStencilStateDesc()

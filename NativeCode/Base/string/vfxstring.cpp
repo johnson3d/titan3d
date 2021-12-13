@@ -10,9 +10,8 @@
 //-----------------------------------------------------------------------------
 #include "../BaseHead.h"
 #include "vfxstring.h"
-#include "../thread/vfxcritical.h"
 #include "../TextConverter/WordCodeHelper.h"
-
+#include "../thread/vfxcritical.h"
 
 #define new VNEW
 
@@ -223,11 +222,11 @@ VStringA VStringA_Utf82Gbk(LPCSTR utf8)
 }
 
 std::vector<std::string>		VNameString::mNameStrings;
-VCritical GNameStringLocker;
+VSLLock							GVNameLocker;
 
 int VNameString::GetIndexFromString(const char* str)
 {
-	VAutoVSLLock lk(GNameStringLocker);
+	VAutoVSLLock lk(GVNameLocker);
 	for (int i = 0; i < (int)mNameStrings.size(); i++)
 	{
 		if (mNameStrings[i] == str)
@@ -235,6 +234,17 @@ int VNameString::GetIndexFromString(const char* str)
 	}
 	mNameStrings.push_back(str);
 	return (int)(mNameStrings.size() - 1);
+}
+
+const std::string& VNameString::GetString() const
+{
+	VAutoVSLLock lk(GVNameLocker);
+	if (Index < 0 || Index >= mNameStrings.size())
+	{
+		static std::string tmp;
+		return tmp;
+	}
+	return mNameStrings[Index];
 }
 
 

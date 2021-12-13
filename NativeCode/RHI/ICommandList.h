@@ -21,11 +21,11 @@ class IDepthStencilView;
 class IShaderResourceView;
 class IUnorderedAccessView;
 class IDrawCall;
-struct RenderPassDesc;
+struct IRenderPassDesc;
 class IFrameBuffers;
 class ISwapChain;
-struct IViewPort;
-struct IScissorRect;
+class IViewPort;
+class IScissorRect;
 class IShaderProgram;
 class IRasterizerState;
 class IDepthStencilState;
@@ -41,9 +41,13 @@ class ITexture2D;
 class IGpuBuffer;
 class IRenderPipeline;
 class IFence;
+class ISemaphore;
+class IRenderPass;
 
 class GraphicsProfiler;
 class IClassInstance;
+
+struct IRenderPassClears;
 
 TR_CALLBACK(SV_NameSpace = EngineNS, SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void(*FOnPassBuilt)(ICommandList* cmd, const IDrawCall* pass);
@@ -53,19 +57,8 @@ VTypeHelperDefine(FOnPassBuilt, sizeof(void*));
 StructBegin(FOnPassBuilt, EngineNS)
 StructEnd(void)
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-EPrimitiveType
-{
-	EPT_PointList = 1,
-	EPT_LineList = 2,
-	EPT_LineStrip = 3,
-	EPT_TriangleList = 4,
-	EPT_TriangleStrip = 5,
-	EPT_TriangleFan = 6,
-};
-
 struct TR_CLASS()
-IPipelineStat : public VIUnknown
+	IPipelineStat : public VIUnknown
 {
 	IPipelineStat()
 	{
@@ -92,8 +85,8 @@ IPipelineStat : public VIUnknown
 	}
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-ICommandList : public VIUnknown
+class TR_CLASS()
+	ICommandList : public VIUnknown
 {
 protected:
 	TObjectHandle<IRenderContext>			mRHIContext;
@@ -105,12 +98,15 @@ public:
 	AutoRef<IPipelineStat>		mPipelineStat;
 	AutoRef<GraphicsProfiler>	mProfiler;
 	
-	FOnPassBuilt			OnPassBuilt;
+	FOnPassBuilt				OnPassBuilt;
+
+	std::vector<ISemaphore*>	mWaitSemaphores;
+	AutoRef<ISemaphore>			mSemaphore;
 public:
 	ICommandList();
 	~ICommandList();
 
-	AutoRef<IRenderContext> GetContext();
+	IRenderContext* GetContext();
 
 	void SetPipelineState(IPipelineStat* stat)
 	{
@@ -121,7 +117,7 @@ public:
 		return mPipelineStat;
 	}
 
-	virtual void BeginCommand() = 0;
+	virtual bool BeginCommand() = 0;
 	virtual void EndCommand() = 0;
 
 	void ClearMeshDrawPassArray();
@@ -135,13 +131,19 @@ public:
 	}
 
 	void SetDebugName(const char* name);
+
+	ISemaphore* GetSemaphore() {
+		return mSemaphore;
+	}
+	void AddWaitSemaphore(ISemaphore* semaphore);
+	void RemoveWaitSemaphore(ISemaphore* semaphore);
 	
 	/*virtual void SetRenderTargets(IFrameBuffers* FrameBuffers) = 0;
 
 	virtual void ClearMRT(const std::pair<BYTE,DWORD>* ClearColors, int ColorNum,
 		vBOOL bClearDepth, float Depth, vBOOL bClearStencil, UINT32 Stencil) = 0;*/
 	
-	virtual void BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer, const char* debugName = nullptr) = 0;
+	virtual bool BeginRenderPass(IFrameBuffers* pFrameBuffer, const IRenderPassClears* passClears, const char* debugName = nullptr) = 0;
 	virtual void BuildRenderPass(vBOOL bImmCBuffer);
 	virtual void EndRenderPass() = 0;
 
@@ -153,91 +155,34 @@ public:
 
 	void SetGraphicsProfiler(GraphicsProfiler* profiler);
 
-	virtual void SetRasterizerState(IRasterizerState* State){}
-	virtual void SetDepthStencilState(IDepthStencilState* State) {}
+	virtual void SetRasterizerState(IRasterizerState* State) = 0;
+	virtual void SetDepthStencilState(IDepthStencilState* State) = 0;
 	TR_FUNCTION(SV_NoStarToRef = blendFactor)
-	virtual void SetBlendState(IBlendState* State, float* blendFactor, UINT samplerMask) {}
+	virtual void SetBlendState(IBlendState* State, float* blendFactor, UINT samplerMask) = 0;
 
-	virtual void SetComputeShader(IComputeShader* ComputerShader)
-	{
-		ASSERT(false);
-	}
-	virtual void CSSetShaderResource(UINT32 Index, IShaderResourceView* Texture)
-	{
-		ASSERT(false);
-	}
-	virtual void CSSetUnorderedAccessView(UINT32 Index, IUnorderedAccessView* view, const UINT *pUAVInitialCounts)
-	{
-		ASSERT(false);
-	}
-	virtual void CSSetConstantBuffer(UINT32 Index, IConstantBuffer* cbuffer)
-	{
-		ASSERT(false);
-	}
-	virtual void CSDispatch(UINT x, UINT y, UINT z)
-	{
-		ASSERT(false);
-	}
-	virtual void PSSetShaderResource(UINT32 Index, IShaderResourceView* Texture)
-	{
-
-	}
-	virtual void PSSetSampler(UINT32 Index, ISamplerState* Sampler)
-	{
-
-	}
-	virtual void SetScissorRect(IScissorRect* sr)
-	{
-
-	}
-	virtual void SetVertexBuffer(UINT32 StreamIndex, IVertexBuffer* VertexBuffer, UINT32 Offset, UINT Stride)
-	{
-
-	}
-	virtual void SetIndexBuffer(IIndexBuffer* IndexBuffer)
-	{
-
-	}
-	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 NumPrimitives, UINT32 NumInstances)
-	{
-
-	}
-	virtual void DrawIndexedPrimitive(EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 StartIndex, UINT32 NumPrimitives, UINT32 NumInstances)
-	{
-
-	}
-	virtual void DrawIndexedInstancedIndirect(EPrimitiveType PrimitiveType, IGpuBuffer* pBufferForArgs, UINT32 AlignedByteOffsetForArgs)
-	{
-
-	}
-	virtual void IASetInputLayout(IInputLayout* pInputLayout)
-	{
-
-	}
-	virtual void VSSetShader(IVertexShader* pVertexShader, void** ppClassInstances, UINT NumClassInstances)
-	{
-
-	}
-	virtual void PSSetShader(IPixelShader* pPixelShader, void** ppClassInstances, UINT NumClassInstances)
-	{
-
-	}
-	virtual void SetViewport(IViewPort* vp)
-	{
-
-	}
-	virtual void VSSetConstantBuffer(UINT32 Index, IConstantBuffer* CBuffer)
-	{
-
-	}
-	virtual void PSSetConstantBuffer(UINT32 Index, IConstantBuffer* CBuffer)
-	{
-
-	}
-	virtual void SetRenderPipeline(IRenderPipeline* pipeline)
-	{
-
-	}
+	virtual void SetComputeShader(IComputeShader* ComputerShader) = 0;
+	virtual void CSSetShaderResource(UINT32 Index, IShaderResourceView* Texture) = 0;
+	virtual void CSSetUnorderedAccessView(UINT32 Index, IUnorderedAccessView* view, const UINT *pUAVInitialCounts) = 0;
+	virtual void CSSetConstantBuffer(UINT32 Index, IConstantBuffer* cbuffer) = 0;
+	virtual void CSDispatch(UINT x, UINT y, UINT z) = 0;
+	virtual void CSDispatchIndirect(IGpuBuffer* pBufferForArgs, UINT32 AlignedByteOffsetForArgs) = 0;
+	virtual void SetScissorRect(IScissorRect* sr) = 0;
+	virtual void SetVertexBuffer(UINT32 StreamIndex, IVertexBuffer* VertexBuffer, UINT32 Offset, UINT Stride) = 0;
+	virtual void SetIndexBuffer(IIndexBuffer* IndexBuffer) = 0;
+	virtual void DrawPrimitive(EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 NumPrimitives, UINT32 NumInstances) = 0;
+	virtual void DrawIndexedPrimitive(EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 StartIndex, UINT32 NumPrimitives, UINT32 NumInstances) = 0;
+	virtual void DrawIndexedInstancedIndirect(EPrimitiveType PrimitiveType, IGpuBuffer* pBufferForArgs, UINT32 AlignedByteOffsetForArgs) = 0;
+	virtual void IASetInputLayout(IInputLayout* pInputLayout) = 0;
+	virtual void VSSetShader(IVertexShader* pVertexShader, void** ppClassInstances, UINT NumClassInstances) = 0;
+	virtual void PSSetShader(IPixelShader* pPixelShader, void** ppClassInstances, UINT NumClassInstances) = 0;
+	virtual void SetViewport(IViewPort* vp) = 0;
+	virtual void VSSetConstantBuffer(UINT32 Index, IConstantBuffer* CBuffer) = 0;
+	virtual void PSSetConstantBuffer(UINT32 Index, IConstantBuffer* CBuffer) = 0;
+	virtual void VSSetShaderResource(UINT32 Index, IShaderResourceView* pSRV) = 0;
+	virtual void PSSetShaderResource(UINT32 Index, IShaderResourceView* pSRV) = 0;
+	virtual void VSSetSampler(UINT32 Index, ISamplerState* Sampler) = 0;
+	virtual void PSSetSampler(UINT32 Index, ISamplerState* Sampler) = 0;
+	virtual void SetRenderPipeline(IRenderPipeline* pipeline, EPrimitiveType dpType) = 0;
 	virtual vBOOL CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers) = 0;
 
 	virtual void Signal(IFence* fence, int value){}
@@ -282,6 +227,10 @@ public:
 		static bool IsCMPState;
 		bool IsSameScissors(IScissorRect* lh, IScissorRect* rh);
 	public:
+		inline IViewPort* GetViewport()
+		{
+			return ViewPort;
+		}
 		bool TrySet_ViewPort(IViewPort* v)
 		{
 			if (IsCMPState == false)

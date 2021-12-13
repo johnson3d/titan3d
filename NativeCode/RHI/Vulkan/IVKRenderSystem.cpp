@@ -1,7 +1,3 @@
-#ifdef PLATFORM_WIN
-#define VK_USE_PLATFORM_WIN32_KHR
-#endif
-
 #include "IVKRenderSystem.h"
 #include "IVKRenderContext.h"
 #include <set>
@@ -12,6 +8,7 @@ NS_BEGIN
 
 IVKRenderSystem::IVKRenderSystem()
 {
+	mDeviceNumber = 0;
 	mDeviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 	mValidationLayers.push_back("VK_LAYER_KHRONOS_validation");
 }
@@ -28,7 +25,7 @@ IVKRenderSystem::~IVKRenderSystem()
 
 vBOOL IVKRenderSystem::OnVKDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData)
 {
-	std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+	VFX_LTRACE(ELTT_Graphics, "Vulkan: %s\r\n", pCallbackData->pMessage);
 	return FALSE;
 }
 
@@ -40,7 +37,10 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityF
 void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
 	createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-	createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+				VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | 
+				VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT |
+				VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
 	createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 	createInfo.pfnUserCallback = debugCallback;
 }
@@ -53,7 +53,7 @@ bool IVKRenderSystem::Init(const IRenderSystemDesc* desc)
 	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 	appInfo.pEngineName = "Titan3D";
 	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.apiVersion = VK_API_VERSION_1_0;
+	appInfo.apiVersion = VK_API_VERSION_1_2;
 
 	VkInstanceCreateInfo createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -91,6 +91,10 @@ bool IVKRenderSystem::Init(const IRenderSystemDesc* desc)
 		return false;
 	}
 
+	vkEnumeratePhysicalDevices(mVKInstance, &mDeviceNumber, nullptr);
+
+	mHwDevices.resize(mDeviceNumber);
+	vkEnumeratePhysicalDevices(mVKInstance, &mDeviceNumber, mHwDevices.data());
 	/*VkSurfaceKHR surface = nullptr;
 #ifdef PLATFORM_WIN
 	{
@@ -222,9 +226,7 @@ IVKRenderSystem::SwapChainSupportDetails IVKRenderSystem::QuerySwapChainSupport(
 
 UINT32 IVKRenderSystem::GetContextNumber()
 {
-	uint32_t deviceCount = 0;
-	vkEnumeratePhysicalDevices(mVKInstance, &deviceCount, nullptr);
-	return deviceCount;
+	return mDeviceNumber;
 }
 
 VkPhysicalDevice IVKRenderSystem::GetPhysicalDevice(UINT index)
@@ -243,6 +245,9 @@ VkPhysicalDevice IVKRenderSystem::GetPhysicalDevice(UINT index)
 vBOOL IVKRenderSystem::GetContextDesc(UINT32 index, IRenderContextDesc* desc)
 {
 	VkPhysicalDevice phyDevice = GetPhysicalDevice(index);
+
+	VkPhysicalDeviceFeatures phyFeatures;
+	vkGetPhysicalDeviceFeatures(phyDevice, &phyFeatures);
 
 	VkPhysicalDeviceProperties phyDevProp;
 	vkGetPhysicalDeviceProperties(phyDevice, &phyDevProp);

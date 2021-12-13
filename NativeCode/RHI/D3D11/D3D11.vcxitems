@@ -23,6 +23,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)ID11DepthStencilView.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ID11Fence.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ID11FrameBuffers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11GpuBuffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ID11IndexBuffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ID11InputLayout.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ID11Pass.cpp" />
@@ -51,6 +52,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)ID11DepthStencilView.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ID11Fence.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ID11FrameBuffers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11GpuBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ID11IndexBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ID11InputLayout.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ID11Pass.h" />

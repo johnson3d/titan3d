@@ -15,7 +15,7 @@
 #define __v3dxFrustum__H__
 
 #include "v3dxMath.h"
-#include "v3dxVector3.h"
+#include "v3dxDVector3.h"
 #include "v3dxPlane3.h"
 #include "v3dxOBB.h"
 #include "v3dxSphere.h"
@@ -161,6 +161,7 @@ public:
 public:
 	TR_MEMBER(SV_ReturnConverter = v3dVector3_t)
 	v3dxVector3				m_vTipPt;
+	v3dxDVector3			mOffset;
 	
 	v3dxVector3				m_vecFrustum[8];
 	v3dxPlane3				m_aPlane[6];

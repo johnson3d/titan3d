@@ -10,16 +10,7 @@ namespace AssetImportAndExport
 	namespace FBX
 	{
 
-		bool CheckRootNode(FbxNode* node)
-		{
-			if (node == nullptr)
-				return false;
-			if (node == node->GetScene()->GetRootNode())
-			{
-				return true;
-			}
-			return false;
-		}
+
 
 		bool CheckBoneNode(FbxNode* node)
 		{
@@ -32,14 +23,14 @@ namespace AssetImportAndExport
 			return false;
 		}
 
-		FBXAnimCurve* FBXAnimElement::GetAnimCurve(int index)
+		FBXAnimCurve* FBXAnimElement::GetPropertyCurve(int index)
 		{
 			if (index > PropertyCurves.size())
 				return nullptr;
 			return &PropertyCurves[index];
 		}
 
-		FBXAnimCurve* FBXAnimElement::GetAnimCurve(FBXCurvePropertyType propertyType)
+		FBXAnimCurve* FBXAnimElement::GetPropertyCurve(FBXCurvePropertyType propertyType)
 		{
 			for (int i = 0; i < (int)PropertyCurves.size(); ++i)
 			{
@@ -49,6 +40,19 @@ namespace AssetImportAndExport
 				}
 			}
 			return nullptr;
+		}
+
+		AssetImportAndExport::FBX::FBXAnimCurve* FBXAnimElement::GetPropertyCurve(VNameString propertyName)
+		{
+			for (int i = 0; i < (int)PropertyCurves.size(); ++i)
+			{
+				if (PropertyCurves[i].Desc.Name == propertyName)
+				{
+					return &PropertyCurves[i];
+				}
+			}
+			return nullptr;
+
 		}
 
 		FBXKAnimKeyFrame* FBXAnimCurve::GetKeyFrame(int index)
@@ -124,7 +128,7 @@ namespace AssetImportAndExport
 				if (parentElement)
 				{
 					animElement.Desc.Parent = parentElement->Desc.Name;
-					animElement.Desc.ParentHash = parentElement->Desc.ParentHash;
+					animElement.Desc.ParentHash = parentElement->Desc.NameHash;
 				}
 				outAnimElements.push_back(animElement);
 				for (int i = 0; i < node->GetChildCount(); ++i)
@@ -154,7 +158,16 @@ namespace AssetImportAndExport
 				lLRM = lRotationM;
 			return lLRM;
 		}
-
+		bool FBXAnimImporter::CheckRootNode(FbxNode* node)
+		{
+			if (node == nullptr)
+				return false;
+			if (node == GetAnimImportDesc()->GetFBXNode())
+			{
+				return true;
+			}
+			return false;
+		}
 		void FBXAnimImporter::MakeTransformAnimElement(FbxNode* node, float scale, FBXAnimElement& outAnimElement)
 		{
 			auto layer = GetAnimImportDesc()->GetFBXAnimLayer();
@@ -162,7 +175,7 @@ namespace AssetImportAndExport
 			{
 				FBXAnimElementDesc& desc = outAnimElement.Desc;
 				desc.Name.SetString(FBXDataConverter::ConvertToStdString(node->GetName()).c_str());
-				desc.NameHash = HashHelper::APHash(desc.Name.GetString());
+				desc.NameHash = HashHelper::APHash(desc.Name.GetString().c_str());
 				//Pos
 				{
 					auto fbxXCurve = node->LclTranslation.GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_X);
@@ -258,7 +271,6 @@ namespace AssetImportAndExport
 						{
 							fbxsdk::FbxTime fbxTime;
 							fbxTime.SetSecondDouble(time);
-							auto r = CalculateLRM(node, fbxTime, !CheckRootNode(node)).GetR();
 							auto fbxQuat = CalculateLRM(node, fbxTime, !CheckRootNode(node)).GetQ();
 							auto quat = FBXDataConverter::ConvertQuat(fbxQuat);
 							v3dxVector3 lV;

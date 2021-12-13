@@ -17,6 +17,16 @@ VTypeHelperDefine(FGetShaderCodeStream, sizeof(void*));
 StructBegin(FGetShaderCodeStream, EngineNS)
 StructEnd(void)
 
+enum TR_ENUM()
+	EShaderLanguage
+{
+	SL_DXBC,
+	SL_DXIL,
+	SL_GLSL,
+	SL_SPIRV,
+	SL_METAL,
+};
+
 class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
 IShaderConductor : public VIUnknown
 {
@@ -24,22 +34,19 @@ public:
 	FGetShaderCodeStream			GetShaderCodeStream;
 public:
 	static IShaderConductor* GetInstance();	
-	TR_CONSTRUCTOR()
 	IShaderConductor()
 	{
 
 	}
-	TR_FUNCTION()
 	void SetCodeStreamGetter(FGetShaderCodeStream fn)
 	{
 		GetShaderCodeStream = fn;
-	}
-	TR_FUNCTION()
+	}	
 	bool CompileShader(IShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm,
-				const IShaderDefinitions* defines, bool bDebugShader, bool bDxbc, bool bGlsl, bool bMetal);
-
+				const IShaderDefinitions* defines, bool bDebugShader, EShaderLanguage sl);
+private:
 	bool CompileHLSL(IShaderDesc* desc, const char* hlsl, const char* entry, EShaderType type, std::string sm,
-				const IShaderDefinitions* defines, bool hasGLSL, bool hasMetal);
+				const IShaderDefinitions* defines, EShaderLanguage sl);
 };
 
 NS_END

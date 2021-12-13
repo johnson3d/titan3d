@@ -34,7 +34,7 @@ void IGLFrameBuffers::BindRenderTargetView(UINT index, IRenderTargetView* rt)
 
 void IGLFrameBuffers::BindDepthStencilView(IDepthStencilView* ds)
 {
-	if (mDesc.UseDSV == FALSE)
+	if (mDesc.HasSwapchain() == false)
 		return;
 	IFrameBuffers::BindDepthStencilView(ds);
 
@@ -43,7 +43,8 @@ void IGLFrameBuffers::BindDepthStencilView(IDepthStencilView* ds)
 
 void IGLFrameBuffers::ApplyBuffers(GLSdk* sdk)
 {
-	if (mDesc.IsSwapChainBuffer == FALSE)
+	bool hasSwapchain = mDesc.HasSwapchain();
+	if (hasSwapchain)
 	{
 		if (mNeedUpdate == false)
 		{
@@ -57,16 +58,16 @@ void IGLFrameBuffers::ApplyBuffers(GLSdk* sdk)
 			std::vector<GLenum> drawBuffers;
 			for (int i = 0; i < MAX_MRT_NUM; i++)
 			{
-				if (mRenderTargets[i] == nullptr || mRenderTargets[i]->GetTexture2D() == nullptr)
+				if (mRenderTargets[i] == nullptr || mRenderTargets[i]->GetGpuBuffer() == nullptr)
 					break;
-				auto refTex2d = (IGLTexture2D*)mRenderTargets[i]->GetTexture2D();
+				auto refTex2d = *(std::shared_ptr<GLSdk::GLBufferId>*)mRenderTargets[i]->GetGpuBuffer()->GetHWBuffer();
 				//GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level
 				//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, texture->mView, i);
-				sdk->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, refTex2d->mGlesTexture2D, 0);
+				sdk->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, refTex2d, 0);
 				drawBuffers.push_back(GL_COLOR_ATTACHMENT0 + i);
 			}
 
-			if (mDesc.UseDSV == TRUE)
+			if (hasSwapchain)
 			{
 				if (m_pDepthStencilView != NULL)
 				{
@@ -104,20 +105,20 @@ void IGLFrameBuffers::ApplyBuffers(GLSdk* sdk)
 					VFX_LTRACE(ELTT_Graphics, "DrawBuffers Error: Num=%d\r\n", (int)drawBuffers.size());
 					for (int i = 0; i < MAX_MRT_NUM; i++)
 					{
-						if (mRenderTargets[i] == nullptr || mRenderTargets[i]->GetTexture2D() == nullptr)
+						if (mRenderTargets[i] == nullptr || mRenderTargets[i]->GetGpuBuffer() == nullptr)
 							break;
-						auto refTex2d = (IGLTexture2D*)mRenderTargets[i]->GetTexture2D();
-						ITexture2DDesc& desc = refTex2d->mDesc;
+						auto refTex2d = *(std::shared_ptr<GLSdk::GLBufferId>*)mRenderTargets[i]->GetGpuBuffer()->GetHWBuffer();
+						//ITexture2DDesc& desc = refTex2d->mDesc;
 
-						VFX_LTRACE(ELTT_Graphics, "DrawBuffer(%d): %s\r\n", i, desc.ToString().c_str());
+						//VFX_LTRACE(ELTT_Graphics, "DrawBuffer(%d): %s\r\n", i, desc.ToString().c_str());
 					}
-					if (mDesc.UseDSV == TRUE)
+					if (hasSwapchain == TRUE)
 					{
 						if (m_pDepthStencilView != NULL)
 						{
 							auto rDSView = (IGLDepthStencilView*)m_pDepthStencilView;
 							auto GlesTex2d = ((IGLTexture2D*)(ITexture2D*)rDSView->m_refTexture2D);
-							VFX_LTRACE(ELTT_Graphics, "DrawBuffer(%d) DSV: Format = %d\r\n", GlesTex2d->mDesc.Format);
+							VFX_LTRACE(ELTT_Graphics, "DrawBuffer(%d) DSV: Format = %d\r\n", GlesTex2d->mTextureDesc.Format);
 						}
 					}
 				});
@@ -142,8 +143,9 @@ void IGLFrameBuffers::ApplyBuffers(GLSdk* sdk)
 bool IGLFrameBuffers::Init(IGLRenderContext* rc, const IFrameBuffersDesc* desc)
 {
 	mDesc = *desc;
+	mRenderPass.StrongRef(desc->RenderPass);
 	auto sdk = GLSdk::ImmSDK;
-	if (mDesc.IsSwapChainBuffer==FALSE)
+	if (desc->HasSwapchain())
 	{
 		mFrameBufferId = std::shared_ptr<GLSdk::GLBufferId>(sdk->GenFramebuffers());
 	}

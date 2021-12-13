@@ -75,6 +75,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxConvex.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IntegerType.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxTransform.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxDVector3.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="inl">

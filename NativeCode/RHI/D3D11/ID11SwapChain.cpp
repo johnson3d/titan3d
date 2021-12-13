@@ -2,6 +2,7 @@
 #include "ID11RenderContext.h"
 #include "ID11RenderSystem.h"
 #include "ID11Texture2D.h"
+#include "ID11RenderTargetView.h"
 #include "../../Base/vfxSampCounter.h"
 
 #define new VNEW
@@ -11,19 +12,23 @@ NS_BEGIN
 ID11SwapChain::ID11SwapChain()
 {
 	mSwapChain = nullptr;
+	mBufferCount = 0;
 	memset(&mSwapChainDesc, 0, sizeof(mSwapChainDesc));
-	m_pSwapChainBuffer = nullptr;
 }
 
 ID11SwapChain::~ID11SwapChain()
 {
-	Safe_Release(m_pSwapChainBuffer);
 	Safe_Release(mSwapChain);
 }
 
-ITexture2D* ID11SwapChain::GetTexture2D()
+UINT ID11SwapChain::GetBackBufferNum()
 {
-	return m_pSwapChainBuffer;
+	return 1;
+}
+
+ITexture2D* ID11SwapChain::GetBackBuffer(UINT index)
+{
+	return mBackBuffer;
 }
 
 void ID11SwapChain::BindCurrent()
@@ -51,7 +56,6 @@ vBOOL ID11SwapChain::OnRestore(const ISwapChainDesc* desc)
 		return FALSE;
 	mDesc = *desc;
 	
-	Safe_Release(m_pSwapChainBuffer);
 	Safe_Release(mSwapChain);
 
 	return Init(HostContext.GetPtr(), desc)?1:0;
@@ -97,12 +101,27 @@ bool ID11SwapChain::Init(ID11RenderContext* rc, const ISwapChainDesc* desc)
 
 	ID3D11Texture2D* pBackBuffer = NULL;
 	
+	DXGI_SWAP_CHAIN_DESC scDesc;
+	mSwapChain->GetDesc(&scDesc);
+	mBufferCount = scDesc.BufferCount;
 	hr = mSwapChain->GetBuffer(0, IID_ID3D11Texture2D, (void**)&pBackBuffer);
 	if (hr == S_OK)
 	{
-		m_pSwapChainBuffer = new ID11Texture2D();
-		m_pSwapChainBuffer->InitD11Texture2D(pBackBuffer);
+		AutoRef<ID11Texture2D> pTexture(new ID11Texture2D());
+		pTexture->InitD11Texture2D(pBackBuffer);
 		pBackBuffer->Release();
+		mBackBuffer = pTexture;
+
+		//auto pRTV = new ID11RenderTargetView();
+		//IRenderTargetViewDesc rtvDesc;
+		//rtvDesc.SetTexture2D();
+		//rtvDesc.mGpuBuffer = pTexture;
+		//rtvDesc.Format = pTexture->mTextureDesc.Format;
+		//rtvDesc.Width = pTexture->mTextureDesc.Width;
+		//rtvDesc.Height = pTexture->mTextureDesc.Height;
+		////rtvDesc.Texture2D.MipSlice = pTexture->mTextureDesc.MipLevels;
+		//pRTV->Init(rc, &rtvDesc);
+		//mSwapChainRTV.WeakRef(pRTV);
 	}
 
 #ifdef _DEBUG

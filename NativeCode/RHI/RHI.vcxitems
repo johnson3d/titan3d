@@ -22,6 +22,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)IDepthStencilView.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IFence.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IFrameBuffers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)IGpuBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IIndexBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IInputLayout.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IDrawCall.h" />

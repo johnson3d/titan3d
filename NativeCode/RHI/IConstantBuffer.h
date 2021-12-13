@@ -14,7 +14,7 @@ class IShaderProgram;
 
 #define MaxConstBufferNum 8
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 ConstantVarDesc
 {
 	ConstantVarDesc()
@@ -25,6 +25,9 @@ ConstantVarDesc
 	{
 
 	}
+	UINT GetArrayStride() const{
+		return Size / Elements;
+	}
 	EShaderVarType	Type;
 	UINT			Offset;
 	UINT			Size;
@@ -33,25 +36,8 @@ ConstantVarDesc
 	vBOOL			Dirty;
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-ECBufferRhiType
-{
-	SIT_CBUFFER = 0,
-	SIT_TBUFFER = (SIT_CBUFFER + 1),
-	SIT_TEXTURE = (SIT_TBUFFER + 1),
-	SIT_SAMPLER = (SIT_TEXTURE + 1),
-	SIT_UAV_RWTYPED = (SIT_SAMPLER + 1),
-	SIT_STRUCTURED = (SIT_UAV_RWTYPED + 1),
-	SIT_UAV_RWSTRUCTURED = (SIT_STRUCTURED + 1),
-	SIT_BYTEADDRESS = (SIT_UAV_RWSTRUCTURED + 1),
-	SIT_UAV_RWBYTEADDRESS = (SIT_BYTEADDRESS + 1),
-	SIT_UAV_APPEND_STRUCTURED = (SIT_UAV_RWBYTEADDRESS + 1),
-	SIT_UAV_CONSUME_STRUCTURED = (SIT_UAV_APPEND_STRUCTURED + 1),
-	SIT_UAV_RWSTRUCTURED_WITH_COUNTER = (SIT_UAV_CONSUME_STRUCTURED + 1),
-};
-
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
-IConstantBufferDesc
+struct TR_CLASS(SV_LayoutStruct = 8)
+IConstantBufferDesc : public IShaderBinder
 {
 	IConstantBufferDesc()
 	{
@@ -60,43 +46,39 @@ IConstantBufferDesc
 	TR_FUNCTION()
 	void SetDefault()
 	{
-		Size = 0;
-		VSBindPoint = -1;
-		PSBindPoint = -1;
-		CSBindPoint = -1;
-		BindCount = 0;
+		IShaderBinder::SetDefault();
+		BindType = EShaderBindType::SBT_CBuffer;
+		Size = 0;		
 		CPUAccess = 0;
-		Type = SIT_CBUFFER;
 	}
-	void CopyBaseData(IConstantBufferDesc* desc) const 
-	{
-		desc->Type = Type;
-		desc->Size = Size;
-		desc->VSBindPoint = VSBindPoint;
-		desc->PSBindPoint = PSBindPoint;
-		desc->CSBindPoint = CSBindPoint;
-		desc->BindCount = BindCount;
-		desc->CPUAccess = CPUAccess;
-		desc->BindCount = BindCount;
-	}
-	ECBufferRhiType	Type;
-	UINT			Size;
-	UINT			VSBindPoint;
-	UINT			PSBindPoint;
-	UINT			CSBindPoint;
-	UINT			BindCount;
+	UINT			Size;	
 	UINT			CPUAccess;
 	
-	VNameString		Name;
 	TR_DISCARD()
 	std::vector<ConstantVarDesc>	Vars;
+	
+	UINT FindVar(const char* name) const{
+		for (UINT i = 0; i < Vars.size(); i++)
+		{
+			if (Vars[i].Name == name)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+	const ConstantVarDesc* GetVar(UINT index) const {
+		if (index >= Vars.size())
+			return nullptr;
+		return &Vars[index];
+	}
 
 	void Save2Xnd(XndAttribute* attr);
 	void LoadXnd(XndAttribute* attr);
 	vBOOL IsSameVars(const IConstantBufferDesc* desc);
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IConstantBuffer : public IRenderResource
 {
 protected:
@@ -140,7 +122,7 @@ public:
 		desc->Dirty = TRUE;
 		if (sizeof(value) != desc->Size)
 			return false;
-		auto ptr = GetVarPtr(desc) + index * GetShaderVarTypeSize(desc->Type);
+		auto ptr = GetVarPtr(desc) + index * desc->GetArrayStride();//GetShaderVarTypeSize(desc->Type);
 		if (ptr == nullptr)
 			return false;
 		(*(KVarType*)ptr) = value;
@@ -155,7 +137,7 @@ public:
 			return false;
 		if (sizeof(value) != desc->Size)
 			return false;
-		auto ptr = GetVarPtr(desc) + index * GetShaderVarTypeSize(desc->Type);
+		auto ptr = GetVarPtr(desc) + index * desc->GetArrayStride();//GetShaderVarTypeSize(desc->Type);
 		value = (*(KVarType*)ptr);
 		return true;
 	}
@@ -218,7 +200,11 @@ public:
 			return FALSE;
 		auto var = &Desc.Vars[index];
 		var->Dirty = TRUE;
-		auto elementOffset = elementIndex * GetShaderVarTypeSize(var->Type);
+		auto elementOffset = elementIndex * var->GetArrayStride();//GetShaderVarTypeSize(var->Type);
+		/*if (var->Type == SVT_Struct)
+		{
+			elementOffset = elementIndex * (var->Size / var->Elements);
+		}*/
 		if (var->Offset + elementOffset + len > Desc.Size)
 			return FALSE;
 		BYTE* target = GetVarPtr(var) + elementOffset;
@@ -235,7 +221,11 @@ public:
 			return FALSE;
 		auto var = &Desc.Vars[index];
 		var->Dirty = TRUE;
-		auto elementOffset = elementIndex * GetShaderVarTypeSize(var->Type);
+		auto elementOffset = elementIndex * var->GetArrayStride();//GetShaderVarTypeSize(var->Type);
+		/*if (var->Type == SVT_Struct)
+		{
+			elementOffset = elementIndex * (var->Size / var->Elements);
+		}*/
 		BYTE* target = GetVarPtr(var) + elementOffset;
 		
 		return target;

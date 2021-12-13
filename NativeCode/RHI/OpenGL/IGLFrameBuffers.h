@@ -24,4 +24,22 @@ public:
 	void ApplyBuffers(GLSdk* sdk);
 };
 
+class IGLRenderPass : public IRenderPass
+{
+public:
+	IGLRenderPass()
+	{
+
+	}
+	~IGLRenderPass()
+	{
+
+	}
+	bool Init(IGLRenderContext* rc, const IRenderPassDesc* desc)
+	{
+		mDesc = *desc;
+		return true;
+	}
+};
+
 NS_END

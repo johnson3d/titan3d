@@ -2,7 +2,7 @@
 #include "ID11Texture2D.h"
 #include "ID11RenderContext.h"
 #include "ID11CommandList.h"
-#include "ID11UnorderedAccessView.h"
+#include "ID11GpuBuffer.h"
 #include "../../../3rd/native/Image.Shared/XImageDecoder.h"
 #include "../../../3rd/native/Image.Shared/XImageBuffer.h"
 //#include "../../Graphics/GfxEngine.h"
@@ -24,99 +24,149 @@ ID11ShaderResourceView::~ID11ShaderResourceView()
 {
 }
 
-bool ID11ShaderResourceView::UpdateTexture2D(IRenderContext* rc, const ITexture2D* pTexture2D)
+void SrvDesc2DX(D3D11_SHADER_RESOURCE_VIEW_DESC* tar, const IShaderResourceViewDesc* src)
 {
-	mTexture2D.StrongRef((ITexture2D*)pTexture2D);
+	memset(tar, 0, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+	tar->Format = FormatToDXFormat(src->Format);
+	tar->ViewDimension = *(D3D11_SRV_DIMENSION*)&src->ViewDimension;
+	switch (src->Type)
+	{
+		case ST_BufferSRV:
+		{
+			tar->Buffer = *(D3D11_BUFFER_SRV*)&src->Buffer;
+		}
+		break;
+		case ST_Texture1D:
+		{
+			tar->Texture1D.MipLevels = src->Texture1D.MipLevels;
+			tar->Texture1D.MostDetailedMip = src->Texture1D.MostDetailedMip;
+		}
+		break;
+		case ST_Texture1DArray:
+		{
+			tar->Texture1DArray.MipLevels = src->Texture1DArray.MipLevels;
+			tar->Texture1DArray.MostDetailedMip = src->Texture1DArray.MostDetailedMip;
+			tar->Texture1DArray.ArraySize = src->Texture1DArray.ArraySize;
+			tar->Texture1DArray.FirstArraySlice = src->Texture1DArray.FirstArraySlice;
+		}
+		break;
+		case ST_Texture2D:
+		{
+			tar->Texture2D.MipLevels = src->Texture2D.MipLevels;
+			tar->Texture2D.MostDetailedMip = src->Texture2D.MostDetailedMip;
+		}
+		break;
+		case ST_Texture2DArray:
+		{
+			tar->Texture2DArray.MipLevels = src->Texture2DArray.MipLevels;
+			tar->Texture2DArray.MostDetailedMip = src->Texture2DArray.MostDetailedMip;
+		}
+		break;
+		case ST_Texture2DMS:
+		{
 
-	if (pTexture2D == nullptr)
+		}
+		break;
+		case ST_Texture2DMSArray:
+		{
+
+		}
+		break;
+		case ST_Texture3D:
+		{
+
+		}
+		break;
+		case ST_Texture3DArray:
+		{
+
+		}
+		break;
+		case ST_TextureCube:
+		{
+
+		}
+		break;
+		case ST_TextureCubeArray:
+		{
+
+		}
+		break;
+		case ST_BufferEx:
+		{
+
+		}
+		break;
+		default:
+			break;
+	}
+
+	switch (tar->Format)
+	{
+		case DXGI_FORMAT_D24_UNORM_S8_UINT:
+		case DXGI_FORMAT_R24G8_TYPELESS:
+			tar->Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			break;
+		case DXGI_FORMAT_D32_FLOAT:
+		case DXGI_FORMAT_R32_TYPELESS:
+			tar->Format = DXGI_FORMAT_R32_FLOAT;
+			break;
+		case DXGI_FORMAT_D16_UNORM:
+		case DXGI_FORMAT_R16_TYPELESS:
+			tar->Format = DXGI_FORMAT_R16_UNORM;
+			break;
+	}
+}
+
+bool ID11ShaderResourceView::UpdateBuffer(IRenderContext* rc, const IGpuBuffer* buffer)
+{
+	mBuffer.StrongRef((IGpuBuffer*)buffer);
+
+	if (buffer == nullptr)
 	{
 		m_pDX11SRV = nullptr;
 		return true;
 	}
 
-	D3D11_TEXTURE2D_DESC Tex2dDesc;
-	auto pD11Texture2D = ((ID11Texture2D*)pTexture2D)->m_pDX11Texture2D;
-	pD11Texture2D->GetDesc(&Tex2dDesc);
-	D3D11_SHADER_RESOURCE_VIEW_DESC		mDX11SRVDesc;
-	memset(&mDX11SRVDesc, 0, sizeof(mDX11SRVDesc));
-	mDX11SRVDesc.Format = Tex2dDesc.Format;
-	mDX11SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	mDX11SRVDesc.Texture2D.MipLevels = Tex2dDesc.MipLevels;
-	mDX11SRVDesc.Texture2D.MostDetailedMip = 0;
-
-	switch (mDX11SRVDesc.Format)
+	if (mSrvDesc.Type == ST_Texture2D)
 	{
-	case DXGI_FORMAT_R24G8_TYPELESS:
-		mDX11SRVDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-		break;
-	case DXGI_FORMAT_R32_TYPELESS:
-		mDX11SRVDesc.Format = DXGI_FORMAT_R32_FLOAT;
-		break;
-	case DXGI_FORMAT_R16_TYPELESS:
-		mDX11SRVDesc.Format = DXGI_FORMAT_R16_UNORM;
-		break;
+		ID3D11ShaderResourceView* pSrv = nullptr;
+		auto hr = ((ID11RenderContext*)rc)->mDevice->CreateShaderResourceView((ID3D11Resource*)buffer->GetHWBuffer(), nullptr, &pSrv);
+		if (FAILED(hr))
+			return false;
+		m_pDX11SRV = pSrv;
 	}
+	else
+	{
+		D3D11_SHADER_RESOURCE_VIEW_DESC		mDX11SRVDesc;
+		SrvDesc2DX(&mDX11SRVDesc, &mSrvDesc);
 
-	ID3D11ShaderResourceView* pSrv = nullptr;
-	auto hr = ((ID11RenderContext*)rc)->mDevice->CreateShaderResourceView(pD11Texture2D, &mDX11SRVDesc, &pSrv);
-	if (FAILED(hr))
-		return false;
-
-	m_pDX11SRV = pSrv;
+		ID3D11ShaderResourceView* pSrv = nullptr;
+		auto hr = ((ID11RenderContext*)rc)->mDevice->CreateShaderResourceView((ID3D11Resource*)buffer->GetHWBuffer(), nullptr, &pSrv);
+		if (FAILED(hr))
+			return false;
+		m_pDX11SRV = pSrv;
+	}
 	//m_pDX11SRV->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen("ShaderResource"), "ShaderResource");
 	return true;
 }
 
 bool ID11ShaderResourceView::Init(ID11RenderContext* rc, const IShaderResourceViewDesc* pDesc)
 {
-	mTexture2D.StrongRef(pDesc->m_pTexture2D);
+	mSrvDesc = *pDesc;
+	mBuffer.StrongRef(pDesc->mGpuBuffer);
 
-	auto d11Texture = (ID11Texture2D*)pDesc->m_pTexture2D;
-	D3D11_TEXTURE2D_DESC Tex2dDesc;
-	d11Texture->m_pDX11Texture2D->GetDesc(&Tex2dDesc);
 	D3D11_SHADER_RESOURCE_VIEW_DESC		mDX11SRVDesc;
-	memset(&mDX11SRVDesc, 0, sizeof(mDX11SRVDesc));
-	mDX11SRVDesc.Format = Tex2dDesc.Format;
-	mDX11SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	mDX11SRVDesc.Texture2D.MipLevels = Tex2dDesc.MipLevels;
-	mDX11SRVDesc.Texture2D.MostDetailedMip = 0;
-	
-	switch (mDX11SRVDesc.Format)
-	{
-	case DXGI_FORMAT_R24G8_TYPELESS:
-		mDX11SRVDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-		break;
-	case DXGI_FORMAT_R32_TYPELESS:
-		mDX11SRVDesc.Format = DXGI_FORMAT_R32_FLOAT;
-		break;
-	case DXGI_FORMAT_R16_TYPELESS:
-		mDX11SRVDesc.Format = DXGI_FORMAT_R16_UNORM;
-		break;
-	}
+	SrvDesc2DX(&mDX11SRVDesc, &mSrvDesc);
 
 	ID3D11ShaderResourceView* pSrv = nullptr;
-	auto hr = rc->mDevice->CreateShaderResourceView(d11Texture->m_pDX11Texture2D, &mDX11SRVDesc, &pSrv);
+	auto hr = rc->mDevice->CreateShaderResourceView((ID3D11Resource*)pDesc->mGpuBuffer->GetHWBuffer(), &mDX11SRVDesc, &pSrv);
 	if (FAILED(hr))
 		return false;
 
-	m_pDX11SRV.StrongRef(pSrv);
-	//m_pDX11SRV->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen("ShaderResource"), "ShaderResource");
-	return true;
-}
-
-bool ID11ShaderResourceView::Init(ID11RenderContext* rc, ID11GpuBuffer* pBuffer, const ISRVDesc* desc)
-{
-	mSrvDesc = *desc;
-	D3D11_SHADER_RESOURCE_VIEW_DESC temp = *(D3D11_SHADER_RESOURCE_VIEW_DESC*)desc;
-	temp.Format = FormatToDXFormat(desc->Format);
-	/*D3D11_BUFFER_DESC descBuf;
-	ZeroMemory(&descBuf, sizeof(descBuf));
-	pBuffer->mBuffer->GetDesc(&descBuf);*/
-	ID3D11ShaderResourceView* pSrv = nullptr;
-	auto hr = rc->mDevice->CreateShaderResourceView(pBuffer->mBuffer, &temp, &pSrv);
-	if (FAILED(hr))
-		return false;
 	m_pDX11SRV = pSrv;
+	//m_pDX11SRV.StrongRef(pSrv);
+	//m_pDX11SRV->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)strlen("ShaderResource"), "ShaderResource");
 	return true;
 }
 
@@ -155,7 +205,10 @@ vBOOL ID11ShaderResourceView::RestoreResource()
 
 vBOOL ID11ShaderResourceView::Save2Memory(IRenderContext* rc, IBlobObject* data, int Type)
 {
-	ITexture2D* texture = mTexture2D;
+	if (mSrvDesc.Type != ST_Texture2D)
+	{
+		return FALSE;
+	}
 	ID3D11Texture2D* d11Texture = nullptr;
 	//auto d11Texture = ((ID11Texture2D*)texture)->mTexture2D;
 	m_pDX11SRV->GetResource((ID3D11Resource**)&d11Texture);

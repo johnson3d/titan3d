@@ -1,14 +1,13 @@
-/********************************************************************
-	V3D					A Powerful 3D Enjine
+/*******************************************************************
+	V3D					A Powerful 3D Engine
 	File:				v3dxmath.cpp
 	Created Time:		30:6:2002   16:35
 	Modify Time:
-	Original Author:	< johnson >
+	Original Author:	johnson
 	More Author:	
 	Abstract:			?
 	
 	Note:				
-
 *********************************************************************/
 #include "v3dxMath.h"
 
@@ -302,6 +301,10 @@ extern "C"
 		return v3dxMatrix4Inverse_CXX(out, mat, pDet);
 #endif
 	}
+	VFX_API v3dDMatrix4_t* v3dxDMatrix4Inverse(v3dDMatrix4_t* out, const v3dDMatrix4_t* mat, double* pDet)
+	{
+		return v3dxDMatrix4Inverse_CXX(out, mat, pDet);
+	}
 	VFX_API v3dMatrix4_t* v3dxMatrix4Transpose_extern(v3dMatrix4_t* pOut, const v3dMatrix4_t* pMat)
 	{
 		return v3dxMatrix4Transpose(pOut, pMat);
@@ -376,10 +379,10 @@ extern "C"
 	
 	VFX_API v3dMatrix4_t* v3dxMatrix4OrthoForDirLightShadow(v3dMatrix4_t* pOut, float w, float h, float zn, float zf, float TexelOffsetNdcX, float TexelOffsetNdcY)
 	{
-		pOut->m11 = 2.f / w;						pOut->m12 = 0.f;							pOut->m13 = 0.f;					 pOut->m14 = 0.f;
-		pOut->m21 = 0.f;							pOut->m22 = 2.f / h;						pOut->m23 = 0.f;					 pOut->m24 = 0.f;
-		pOut->m31 = 0.f;							pOut->m32 = 0.f;						     pOut->m33 = 1.f / (zf - zn);	 pOut->m34 = 0.f;
-		pOut->m41 = TexelOffsetNdcX;	pOut->m42 = TexelOffsetNdcY;   pOut->m43 = zn / (zn - zf);   pOut->m44 = 1.f;
+		pOut->m11 = 2.f / w;						pOut->m12 = 0.f;							pOut->m13 = 0.f;					pOut->m14 = 0.f;
+		pOut->m21 = 0.f;							pOut->m22 = 2.f / h;						pOut->m23 = 0.f;					pOut->m24 = 0.f;
+		pOut->m31 = 0.f;							pOut->m32 = 0.f;						    pOut->m33 = 1.f / (zf - zn);		pOut->m34 = 0.f;
+		pOut->m41 = TexelOffsetNdcX;				pOut->m42 = TexelOffsetNdcY;				pOut->m43 = zn / (zn - zf);			pOut->m44 = 1.f;
 		return pOut;
 	}
 
@@ -1834,6 +1837,41 @@ extern "C"
 		return pOut;
 	#endif
 	}
+	VFX_API v3dDMatrix4_t* v3dxDMatrixRotationQuaternion(v3dDMatrix4_t* pOut, CONST v3dxQuaternion* pQ)
+	{
+		double fTx = 2.0f * pQ->x;
+		double fTy = 2.0f * pQ->y;
+		double fTz = 2.0f * pQ->z;
+		double fTwx = fTx * pQ->w;
+		double fTwy = fTy * pQ->w;
+		double fTwz = fTz * pQ->w;
+		double fTxx = fTx * pQ->x;
+		double fTxy = fTy * pQ->x;
+		double fTxz = fTz * pQ->x;
+		double fTyy = fTy * pQ->y;
+		double fTyz = fTz * pQ->y;
+		double fTzz = fTz * pQ->z;
+
+		pOut->m[0][0] = 1.0 - (fTyy + fTzz);
+		pOut->m[0][1] = fTxy + fTwz;
+		pOut->m[0][2] = fTxz - fTwy;
+		pOut->m[1][0] = fTxy - fTwz;
+		pOut->m[1][1] = 1.0 - (fTxx + fTzz);
+		pOut->m[1][2] = fTyz + fTwx;
+		pOut->m[2][0] = fTxz + fTwy;
+		pOut->m[2][1] = fTyz - fTwx;
+		pOut->m[2][2] = 1.0 - (fTxx + fTyy);
+
+		pOut->m[0][3] = 0;
+		pOut->m[1][3] = 0;
+		pOut->m[2][3] = 0;
+		pOut->m[3][0] = 0;
+		pOut->m[3][1] = 0;
+		pOut->m[3][2] = 0;
+		pOut->m[3][3] = 1;
+
+		return pOut;
+	}
 
 	VFX_API void v3dxMatrix4NoRotation(OUT v3dxMatrix4 *pOut, const v3dxMatrix4 *pSrc)
 	{
@@ -1869,7 +1907,7 @@ extern "C"
 //		return E_FAIL;
 //#endif
 	//#if defined(USE_DXMATH) && defined(USE_DX)
-	#if defined WIN	// ������Windows��ʹ��DX�����㱣֤�༭������������������ƫ�ƽ�����ת�����ŵ�������Լ����㷨������
+	#if defined WIN
 		return D3DXMatrixDecompose((D3DXVECTOR3*)pOutScale, (D3DXQUATERNION*)pOutRotation, (D3DXVECTOR3*)pOutTranslation, (const D3DXMATRIX*)pM);
 	#else
 		auto saveMT = *pM;
@@ -1897,6 +1935,30 @@ extern "C"
 		return S_OK;
 	#endif
 	}
+	VFX_API void v3dxDMatrixDecompose(v3dxVector3* pOutScale, v3dxQuaternion* pOutRotation, v3dDVector3_t* pOutTranslation, const v3dDMatrix4_t* pM)
+	{
+		auto saveMT = *pM;
+		saveMT.ExtractionTrans(*pOutTranslation);
+		saveMT.m41 = 0;
+		saveMT.m42 = 0;
+		saveMT.m43 = 0;
+
+		saveMT.ExtractionScale(*pOutScale);
+
+		saveMT.m[0][0] /= pOutScale->x;
+		saveMT.m[0][1] /= pOutScale->x;
+		saveMT.m[0][2] /= pOutScale->x;
+
+		saveMT.m[1][0] /= pOutScale->y;
+		saveMT.m[1][1] /= pOutScale->y;
+		saveMT.m[1][2] /= pOutScale->y;
+
+		saveMT.m[2][0] /= pOutScale->z;
+		saveMT.m[2][1] /= pOutScale->z;
+		saveMT.m[2][2] /= pOutScale->z;
+
+		pOutRotation->fromRotationDMatrix(saveMT);
+	}
 
 	VFX_API v3dxMatrix4* v3dxMatrixTransformationOrigin(v3dxMatrix4 *pOut, CONST v3dxVector3 *pScaling,
 		CONST v3dxQuaternion *pRotation,
@@ -1907,6 +1969,40 @@ extern "C"
 		if (pRotation != nullptr)
 		{
 			pRotation->toRotationMatrix(*pOut);
+		}
+
+		if (pScaling != nullptr)
+		{
+			pOut->m[0][0] *= pScaling->x;
+			pOut->m[0][1] *= pScaling->x;
+			pOut->m[0][2] *= pScaling->x;
+
+			pOut->m[1][0] *= pScaling->y;
+			pOut->m[1][1] *= pScaling->y;
+			pOut->m[1][2] *= pScaling->y;
+
+			pOut->m[2][0] *= pScaling->z;
+			pOut->m[2][1] *= pScaling->z;
+			pOut->m[2][2] *= pScaling->z;
+		}
+		if (pTranslation != nullptr)
+		{
+			pOut->m[3][0] = pTranslation->x;
+			pOut->m[3][1] = pTranslation->y;
+			pOut->m[3][2] = pTranslation->z;
+		}
+		return pOut;
+	}
+
+	VFX_API v3dDMatrix4_t* v3dxDMatrixTransformationOrigin(v3dDMatrix4_t* pOut, CONST v3dxVector3* pScaling,
+		CONST v3dxQuaternion* pRotation,
+		CONST v3dDVector3_t* pTranslation)
+	{
+		pOut->identity();
+
+		if (pRotation != nullptr)
+		{
+			v3dxDMatrixRotationQuaternion(pOut, pRotation);
 		}
 
 		if (pScaling != nullptr)
@@ -1969,6 +2065,40 @@ extern "C"
 
 		return pOut;
 	#endif
+	}
+
+	VFX_API v3dDMatrix4_t* v3dxDMatrixTransformation(v3dDMatrix4_t* pOut, CONST v3dxVector3* pScalingCenter,
+		CONST v3dxQuaternion* pScalingRotation, CONST v3dxVector3* pScaling,
+		CONST v3dDVector3_t* pRotationCenter, CONST v3dxQuaternion* pRotation,
+		CONST v3dDVector3_t* pTranslation)
+	{
+		pOut->identity();
+		v3dDMatrix4_t matRC;
+		v3dDMatrix4_t matSC;
+		v3dDMatrix4_t matSR;
+		v3dDMatrix4_t matR;
+		v3dDMatrix4_t matS;
+		v3dDMatrix4_t matT;
+
+		v3dxDMatrix4Translation(&matRC, pRotationCenter->x, pRotationCenter->y, pRotationCenter->z);
+		v3dxDMatrix4Translation(&matSC, pScalingCenter->x, pScalingCenter->y, pScalingCenter->z);
+		v3dxDMatrix4Translation(&matT, pTranslation->x, pTranslation->y, pTranslation->z);
+
+		v3dxDMatrixRotationQuaternion(&matSR, pScalingRotation);
+		v3dxDMatrixRotationQuaternion(&matR, pRotation);
+
+		v3dxDMatrix4Scale(&matS, pScaling->x, pScaling->y, pScaling->z);
+
+		v3dDMatrix4_t matSCInv;
+		v3dDMatrix4_t matSRInv;
+		v3dDMatrix4_t matRCInv;
+		v3dxDMatrix4Inverse(&matSCInv, &matSC, NULL);
+		v3dxDMatrix4Inverse(&matSRInv, &matSR, NULL);
+		v3dxDMatrix4Inverse(&matRCInv, &matRC, NULL);
+
+		*pOut = matSCInv * matSRInv * matS * matSR * matSC * matRCInv * matR * matRC * matT;
+
+		return pOut;
 	}
 
 	VFX_API v3dxQuaternion* v3dxQuaternionMultiply(v3dxQuaternion *pOut, CONST v3dxQuaternion *pQ1, CONST v3dxQuaternion *pQ2)
@@ -2070,6 +2200,36 @@ extern "C"
 			return pOut;
 		return NULL;
 	#endif
+	}
+
+	VFX_API vBOOL v3dxLineIntersectDPlane(const v3dDVector3_t& u,
+		const v3dDVector3_t& v,
+		const v3dxDPlane3& p,
+		v3dDVector3_t& isect,
+		double& dist)
+	{
+		double x, y, z, denom;
+
+		x = v.x - u.x;  y = v.y - u.y;  z = v.z - u.z;
+		denom = p.m_vNormal.x * x + p.m_vNormal.y * y + p.m_vNormal.z * z;
+		if (std::abs(denom) < SMALL_EPSILON)
+			return FALSE; 
+
+		dist = -(v3dxDVec3Dot(&p.m_vNormal, &u) + p.m_fDD) / denom;
+		if (dist < -SMALL_EPSILON || dist > 1 + SMALL_EPSILON)
+			return FALSE;
+
+		isect.x = u.x + dist * x;  isect.y = u.y + dist * y;  isect.z = u.z + dist * z;
+		return TRUE;
+	}
+
+	VFX_API v3dDVector3_t* v3dxDPlaneIntersectLine(v3dDVector3_t* pOut, CONST v3dxDPlane3* pP, CONST v3dDVector3_t* pV1, CONST v3dDVector3_t* pV2)
+	{
+		double dist;
+		auto ret = v3dxLineIntersectDPlane(*(v3dDVector3_t*)pV1, *(v3dDVector3_t*)pV2, *pP, *(v3dDVector3_t*)pOut, dist);
+		if (ret == TRUE)
+			return pOut;
+		return NULL;
 	}
 
 	VFX_API v3dxPlane3* v3dxPlaneScale

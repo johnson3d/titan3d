@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)D11PreHead.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11BlendState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11CommandList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11ComputeShader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11ConstantBuffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11DepthStencilState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11Fence.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11FrameBuffers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11InputLayout.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11Pass.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11RasterizerState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11RenderContext.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11RenderPipeline.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11RenderSystem.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11SamplerState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11SwapChain.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11GpuBuffer.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11UnorderedAccessView.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11Texture2D.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11VertexBuffer.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11IndexBuffer.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11RenderTargetView.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11DepthStencilView.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11ShaderProgram.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11VertexShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11PixelShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)ID11ShaderResourceView.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)D11PreHead.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11BlendState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11CommandList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11ComputeShader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11ConstantBuffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11DepthStencilState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11Fence.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11FrameBuffers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11InputLayout.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11Pass.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11RasterizerState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11RenderContext.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11RenderPipeline.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11RenderSystem.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11SamplerState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11SwapChain.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11GpuBuffer.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11UnorderedAccessView.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11Texture2D.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11VertexBuffer.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11IndexBuffer.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11RenderTargetView.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11DepthStencilView.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11ShaderProgram.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11VertexShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11PixelShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ID11ShaderResourceView.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Buffer">
+      <UniqueIdentifier>{2473af21-4858-4351-a5a1-ffe38399ae09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{f7e5f949-ca00-42c1-81b5-a3aeab5dcbd8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

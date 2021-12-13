@@ -5,7 +5,6 @@
 #include "../../Math/v3dxBox3.h"
 #include "IGeometryMesh.h"
 #include "../IDrawCall.h"
-#include "../../Bricks/Animation/Skeleton/IPartialSkeleton.h"
 
 struct VHitResult;
 
@@ -52,14 +51,6 @@ public:
 	IGeometryMesh* GetGeomtryMesh() const {
 		return mGeometryMesh;
 	}
-	IPartialSkeleton* GetPartialSkeleton() const
-	{
-		return mPartialSkeleton;
-	}
-	void SetPartialSkeleton(IPartialSkeleton* value)
-	{
-		mPartialSkeleton = value;
-	}
 
 	TR_FUNCTION()
 	const char* GetName() const;
@@ -105,8 +96,6 @@ protected:
 	v3dxBox3				mAABB;
 	TR_MEMBER(SV_NoBind)
 	IResourceState			mResourceState;
-
-	AutoRef<IPartialSkeleton> mPartialSkeleton;
 };
 
 class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
@@ -117,6 +106,7 @@ public:
 	v3dxBox3				mAABB;
 	IBlobObject*			mVertexBuffers[VST_Number];
 	IBlobObject*			IndexBuffer;
+	IBlobObject*			FaceBuffer;
 	EIndexBufferType		IBType;
 	UINT					VertexNumber;
 	UINT					PrimitiveNumber;
@@ -189,8 +179,10 @@ public:
 
 	TR_FUNCTION()
 	UINT AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector2* uv, DWORD color);
-	TR_FUNCTION()
+	
+	//alternative interface for same mesh
 	vBOOL AddTriangle(UINT a, UINT b, UINT c);
+	vBOOL AddTriangle(UINT a, UINT b, UINT c, USHORT faceData);
 
 	vBOOL AddLine(UINT a, UINT b);
 

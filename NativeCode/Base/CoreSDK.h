@@ -60,22 +60,20 @@ class IShaderDesc;
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void (*FOnShaderTranslated)(IShaderDesc* shaderDesc);
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct=8)
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void (* FAssertEvent)(const void* str, const void* file, int line);
+
+class TR_CLASS(SV_LayoutStruct=8)
 CoreSDK
 {
 public:
 	static FWriteLogString mWriteLogString;
+	static FAssertEvent mAssertEvent;
 public:
-	static void Print2Console(TR_META(SV_NoStringConverter=true) char* txt, bool newLine) {
-		printf(txt);
-		if(newLine)
-			printf("\n");
-	}
-	static void Print2Console2(const char* txt, bool newLine) {
-		printf(txt);
-		if (newLine)
-			printf("\n");
-	}
+	static void Print2Console(TR_META(SV_NoStringConverter = true) char* txt, bool newLine);
+	static void Print2Console2(const char* txt, bool newLine);
+	static void SetAssertEvent(FAssertEvent fn);
+
 	static void InitF2MManager();
 	static void FinalF2MManager();
 	static void UpdateEngineTick(INT64 tick);
@@ -180,8 +178,12 @@ VTypeHelperDefine(FCreateManagedObject, sizeof(void*));
 VTypeHelperDefine(FFreeManagedObjectGCHandle, sizeof(void*));
 VTypeHelperDefine(FGetManagedObjectFromGCHandle, sizeof(void*));
 VTypeHelperDefine(FOnShaderTranslated, sizeof(void*));
+VTypeHelperDefine(FAssertEvent, sizeof(void*));
 
 StructBegin(FWriteLogString, EngineNS)
+StructEnd(void)
+
+StructBegin(FAssertEvent, EngineNS)
 StructEnd(void)
 
 StructBegin(FOnNativeMemAlloc, EngineNS)

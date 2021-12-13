@@ -16,6 +16,10 @@ public:
 
 	virtual void Cleanup() override;
 
+	virtual void* GetHWBuffer() const override {
+		return (void*)&mBufferId;
+	}
+
 	bool Init(IGLRenderContext* rc, const IGpuBufferDesc* desc, void* data);
 
 	bool Init(IGLRenderContext* rc, GLenum target, GLenum usage, void* data, UINT length);
@@ -29,7 +33,7 @@ public:
 		IMappedSubResource* mapRes) override;
 	virtual void Unmap(IRenderContext* rc, UINT Subresource) override;
 
-	virtual vBOOL UpdateBufferData(ICommandList* cmd, void* data, UINT size) override;
+	virtual vBOOL UpdateBufferData(ICommandList* cmd, UINT offset, void* data, UINT size) override;
 };
 
 class IGLUnorderedAccessView : public IUnorderedAccessView

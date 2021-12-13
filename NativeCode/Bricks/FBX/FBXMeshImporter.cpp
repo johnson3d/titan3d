@@ -2,9 +2,8 @@
 #include "FBXDataConverter.h"
 #include "../../NativeCode/RHI/IDrawCall.h"
 #include "../../Base/CoreSDK.h"
-#include "../Animation/Skeleton/IBone.h"
 #include "../../NativeCode/Graphics/Mesh/Modifier/ISkinModifier.h"
-#include "../Animation/Skeleton/IPartialSkeleton.h"
+#include "FBXPartialSkeleton.h"
 
 using namespace fbxsdk;
 using namespace EngineNS;
@@ -276,30 +275,18 @@ namespace AssetImportAndExport
 			return GetSkeletonRootNode(boneNode->GetParent());
 		}
 
-		void ReCalculateBoneBindMatrix(IBone* child, IBone* parent,IPartialSkeleton* skeleton)
-		{
-			if (parent != NULL)
-			{
-				//child->mSharedData->InitMatrix = child->mSharedData->InitMatrix * parent->mSharedData->InitMatrix;
-			}
-			for (int i = 0; i < child->GetChildNum(); ++i)
-			{
-				ReCalculateBoneBindMatrix(skeleton->GetBone(child->GetChild(i)), child, skeleton);
-			}
-		}
-
-		void IBoneDesc_SetName(IBoneDesc& desc, const VNameString& name)
+		void IBoneDesc_SetName(FBXBoneDesc& desc, const VNameString& name)
 		{
 			desc.Name = name;
 			desc.NameHash = HashHelper::APHash(name.c_str());
 		}
-		void IBoneDesc_SetParent(IBoneDesc& desc, const VNameString& name)
+		void IBoneDesc_SetParent(FBXBoneDesc& desc, const VNameString& name)
 		{
 			
 			desc.ParentName = name;
 			desc.ParentHash = HashHelper::APHash(name.c_str());
 		}
-		void IBoneDesc_SetBindMatrix(IBoneDesc& desc, const v3dxMatrix4& mat)
+		void IBoneDesc_SetBindMatrix(FBXBoneDesc& desc, const v3dxMatrix4& mat)
 		{
 			desc.InitMatrix = mat;
 			auto invMat = desc.InitMatrix.inverse();
@@ -594,13 +581,12 @@ namespace AssetImportAndExport
 			float* skinWeightsStream = new float[4 * renderVertexCount];
 
 			mMeshPrimitives = new IMeshPrimitives();
-			mMeshPrimitives->Init(rc, meshDesc->Name.GetString(), meshDesc->RenderAtom);
+			mMeshPrimitives->Init(rc, meshDesc->Name.GetString().c_str(), meshDesc->RenderAtom);
 
 			if (meshDesc->HaveSkin)
 			{
 				//build skeleton
-				std::vector < BoneCluster> BoneClusters;
-				mPartialSkeleton = new IPartialSkeleton();
+				mSkeletonDesc = new FBXSkeletonDesc();
 				{
 					auto skinDeformerCount = mesh->GetDeformerCount(FbxDeformer::EDeformerType::eSkin);
 					if (skinDeformerCount > 0)
@@ -645,7 +631,7 @@ namespace AssetImportAndExport
 								if (attType != FbxNodeAttribute::eSkeleton && attType != FbxNodeAttribute::eNull)
 									continue;
 								FbxSkeleton* fbxBone = (FbxSkeleton*)attr;
-								IBoneDesc boneDesc;;
+								FBXBoneDesc boneDesc;;
 								IBoneDesc_SetName(boneDesc, boneName.c_str());
 								auto mat = transformMatrix.Inverse() * linkTransformMatrix;
 								auto scaleT = mat.GetT() * meshDesc->Scale * mHostFBXImporter->GetFileImportDesc()->ScaleFactor;
@@ -669,38 +655,16 @@ namespace AssetImportAndExport
 										}
 									}
 								}
-								IBone* newBone = IBone::Create(boneDesc);
-								mPartialSkeleton->AddBone(newBone);
-								BoneCluster boneCluster;
-								boneCluster.Bone = newBone;
-								boneCluster.FBXCluster = cluster;
-								BoneClusters.push_back(boneCluster);
-								if (fbxBone->GetSkeletonType() == FbxSkeleton::eRoot)
-								{
-									mPartialSkeleton->SetRoot(boneName.c_str());
-								}
-								auto newMeshBone = IBone::Create(boneDesc);
-								mPartialSkeleton->AddBone(newMeshBone);
-								if (fbxBone->GetSkeletonType() == FbxSkeleton::eRoot)
-								{
-									mPartialSkeleton->SetRoot(boneName.c_str());
-								}
+								mSkeletonDesc->AddBoneDesc(boneDesc);
 							}
 							if (clusterCount > 0)
 							{
 								FbxCluster* cluster = skin->GetCluster(0);
 								FbxNode* link = cluster->GetLink();
 								auto root = GetSkeletonRootNode(link);
-								RecursionCalculateBone(root, BoneClusters, mPartialSkeleton);
-								auto rootName = FBXDataConverter::ConvertToStdString(root->GetName());
-								mPartialSkeleton->SetRoot(rootName.c_str());
+								RecursionCalculateBone(root, mSkeletonDesc);
 							}
-
 						}
-
-						mPartialSkeleton->RefreshHierarchy();
-						ReCalculateBoneBindMatrix(mPartialSkeleton->GetRoot(), NULL, mPartialSkeleton);
-						mMeshPrimitives->SetPartialSkeleton(mPartialSkeleton);
 					}
 				}
 
@@ -886,7 +850,7 @@ namespace AssetImportAndExport
 		}
 
 		
-		void FBXMeshImporter::RecursionCalculateBone(FbxNode* boneNode, const std::vector<BoneCluster>& boneClusters, IPartialSkeleton* skeleton)
+		void FBXMeshImporter::RecursionCalculateBone(FbxNode* boneNode, FBXSkeletonDesc* skeleton)
 		{
 			if (boneNode == NULL)
 				return;
@@ -896,12 +860,11 @@ namespace AssetImportAndExport
 			auto s = boneNode->LclScaling.Get();
 
 			//CalculateGlobalTransform(boneNode);
-			auto bone = skeleton->FindBone(boneName.c_str());
-			if (bone)
+			if (skeleton->IsExistBoneDesc(boneName.c_str()))
 			{
 				for (int i = 0; i < boneNode->GetChildCount(); ++i)
 				{
-					RecursionCalculateBone(boneNode->GetChild(i), boneClusters, skeleton);
+					RecursionCalculateBone(boneNode->GetChild(i), skeleton);
 				}
 			}
 			else
@@ -914,7 +877,7 @@ namespace AssetImportAndExport
 					return;
 				FbxSkeleton* fbxBone = (FbxSkeleton*)attr;
 
-				IBoneDesc boneDesc;
+				FBXBoneDesc boneDesc;
 				IBoneDesc_SetName(boneDesc ,boneName.c_str());
 				auto mat = boneNode->EvaluateGlobalTransform();
 				auto scaleT = mat.GetT() * mHostFBXImporter->GetFBXMeshDescs(mMeshIndex)->Scale;
@@ -938,11 +901,10 @@ namespace AssetImportAndExport
 						}
 					}
 				}
-				auto newBone = IBone::Create(boneDesc);
-				skeleton->AddBone(newBone);
+				skeleton->AddBoneDesc(boneDesc);
 				for (int i = 0; i < boneNode->GetChildCount(); ++i)
 				{
-					RecursionCalculateBone(boneNode->GetChild(i), boneClusters, skeleton);
+					RecursionCalculateBone(boneNode->GetChild(i), skeleton);
 				}
 			}
 
@@ -1832,7 +1794,6 @@ namespace AssetImportAndExport
 			{
 				//AssetCreater->OnImportMessageDumping(AMT_Import, 1, "build Skin");
 				//build vertexSkinIndex
-				std::vector < BoneCluster> BoneClusters;
 				int renderVertexCount = (int)Vertexs.size();
 				//std::vector<std::vector<UINT>> vertexSkinIndex;
 				//std::vector<std::vector<float>> vertexSkinWeight;

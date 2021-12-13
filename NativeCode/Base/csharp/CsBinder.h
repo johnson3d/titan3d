@@ -64,7 +64,6 @@ struct VTypeGetCSDesc
 #pragma pack(4)
 struct UAnyValue
 {
-	//和C#内要完全对应，不要乱改定义
 	enum EValueType : char
 	{
 		Unknown,

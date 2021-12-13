@@ -7,7 +7,7 @@
 
 NS_BEGIN
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+enum TR_ENUM()
 EVertexSteamType : UINT32
 {
 	VST_Position,
@@ -30,7 +30,7 @@ EVertexSteamType : UINT32
 	VST_FullMask = 0xffffffff,
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+enum TR_ENUM()
 EVertexShaderOutType
 {
 	VOT_Position,
@@ -57,7 +57,7 @@ EVertexShaderOutType
 class ICommandList;
 class IDrawCall;
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IVertexArray : public VIUnknown
 {
 public:
@@ -95,7 +95,7 @@ public:
 	}
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IGeometryMesh : public IRenderResource
 {
 protected:

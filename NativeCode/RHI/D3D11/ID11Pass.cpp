@@ -1,6 +1,7 @@
 #include "ID11Pass.h"
 #include "ID11CommandList.h"
 #include "ID11RenderPipeline.h"
+#include "ID11ComputeShader.h"
 #include "ID11CommandList.h"
 #include "ID11VertexBuffer.h"
 #include "ID11IndexBuffer.h"
@@ -11,6 +12,7 @@
 #include "ID11InputLayout.h"
 #include "ID11UnorderedAccessView.h"
 #include "ID11ShaderProgram.h"
+#include "ID11GpuBuffer.h"
 #include "../../Base/vfxSampCounter.h"
 
 #define new VNEW
@@ -58,7 +60,7 @@ void ID11DrawCall::SetScissorRect(ICommandList* cmd, IScissorRect* sr)
 	}
 }
 
-void ID11DrawCall::SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline)
+void ID11DrawCall::SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline, EPrimitiveType dpType)
 {
 	/*if (cmd->IsDoing() == false)
 		return;*/
@@ -117,18 +119,7 @@ void ID11DrawCall::VSSetShaderResource(ICommandList* cmd, UINT32 Index, IShaderR
 	/*if (cmd->IsDoing() == false)
 		return;*/
 
-	if (pSRV == nullptr)
-		return;
-
-	pSRV->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
-	if (pSRV->GetResourceState()->GetStreamState() != SS_Valid)
-		return;
-
-	pSRV->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
-
-	auto d11cmd = (ID11CommandList*)cmd;
-	ID3D11ShaderResourceView* pSrv = ((ID11ShaderResourceView*)pSRV)->m_pDX11SRV;
-	d11cmd->mDeferredContext->VSSetShaderResources(Index, 1, &pSrv);
+	cmd->VSSetShaderResource(Index, pSRV);
 }
 
 void ID11DrawCall::PSSetShaderResource(ICommandList* cmd, UINT32 Index, IShaderResourceView* pSRV)
@@ -136,39 +127,21 @@ void ID11DrawCall::PSSetShaderResource(ICommandList* cmd, UINT32 Index, IShaderR
 	/*if (cmd->IsDoing() == false)
 		return;*/
 	
-	if (pSRV == nullptr)
-		return;
-
-	pSRV->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
-	/*if (pSRV->GetResourceState()->GetStreamState() != SS_Valid)
-		return;*/
-
-	auto d11cmd = (ID11CommandList*)cmd;
-	ID3D11ShaderResourceView* pSrv = ((ID11ShaderResourceView*)pSRV)->m_pDX11SRV;
-	/*if(pSrv==nullptr)
-		d11cmd->mDeferredContext->PSSetShaderResources(Index, 1, &pSrv);
-	else
-		d11cmd->mDeferredContext->PSSetShaderResources(Index, 1, &pSrv);*/
-
-	if (pSrv != nullptr)
-		d11cmd->mDeferredContext->PSSetShaderResources(Index, 1, &pSrv);
+	cmd->PSSetShaderResource(Index, pSRV);
 }
 
 void ID11DrawCall::VSSetSampler(ICommandList* cmd, UINT32 Index, ISamplerState* Sampler)
 {
 	/*if (cmd->IsDoing() == false)
 		return;*/
-	auto d11cmd = (ID11CommandList*)cmd;
-	d11cmd->mDeferredContext->VSSetSamplers(Index, 1, &((ID11SamplerState*)Sampler)->mSampler);
+	cmd->VSSetSampler(Index, Sampler);
 }
 
 void ID11DrawCall::PSSetSampler(ICommandList* cmd, UINT32 Index, ISamplerState* Sampler)
 {
 	/*if (cmd->IsDoing() == false)
 		return;*/
-	auto d11cmd = (ID11CommandList*)cmd;
-	if(Sampler!=nullptr)
-		d11cmd->mDeferredContext->PSSetSamplers(Index, 1, &((ID11SamplerState*)Sampler)->mSampler);
+	cmd->PSSetSampler(Index, Sampler);
 }
 
 void ID11DrawCall::DrawPrimitive(ICommandList* cmd, EPrimitiveType PrimitiveType, UINT32 BaseVertexIndex, UINT32 NumPrimitives, UINT32 NumInstances)
@@ -223,6 +196,50 @@ void ID11DrawCall::DrawIndexedInstancedIndirect(ICommandList* cmd, EPrimitiveTyp
 	d11cmd->mDeferredContext->IASetPrimitiveTopology(PrimitiveTypeToDX(PrimitiveType, 0, &dpCount));
 
 	d11cmd->mDeferredContext->DrawIndexedInstancedIndirect(((ID11GpuBuffer*)pBufferForArgs)->mBuffer, AlignedByteOffsetForArgs);
+}
+
+void ID11ComputeDrawcall::BuildPass(ICommandList* cmd)
+{
+	auto d11cmd = (ID11CommandList*)cmd;
+
+	d11cmd->mDeferredContext->CSSetShader(mComputeShader.UnsafeConvertTo<ID11ComputeShader>()->mShader, nullptr, 0);
+
+	if (mShaderCBufferBinder != nullptr)
+	{
+		for (auto& i : mShaderCBufferBinder->VSResources)
+		{
+			auto d11buffer = i.second.UnsafeConvertTo<ID11ConstantBuffer>();			
+			d11buffer->UpdateDrawPass(cmd, 1);
+			d11cmd->mDeferredContext->CSSetConstantBuffers(i.first, 1, &d11buffer->mBuffer);
+		}
+	}
+	if (mShaderSrvBinder != nullptr)
+	{
+		for (auto& i : mShaderSrvBinder->VSResources)
+		{
+			auto d11buffer = i.second.UnsafeConvertTo<ID11ShaderResourceView>();
+			ID3D11ShaderResourceView* pSrv = d11buffer->m_pDX11SRV;
+			d11cmd->mDeferredContext->CSSetShaderResources(i.first, 1, &pSrv);
+		}
+	}
+	if (mShaderUavBinder != nullptr)
+	{
+		UInt32 nUavInitialCounts = 1;
+		for (auto& i : mShaderUavBinder->VSResources)
+		{
+			auto d11buffer = i.second.UnsafeConvertTo<ID11UnorderedAccessView>();
+			d11cmd->mDeferredContext->CSSetUnorderedAccessViews(i.first, 1, &d11buffer->mView, &nUavInitialCounts);
+		}
+	}
+	auto indirectBuffer = IndirectDrawArgsBuffer.UnsafeConvertTo<ID11GpuBuffer>();
+	if (indirectBuffer != nullptr)
+	{
+		d11cmd->mDeferredContext->DispatchIndirect(indirectBuffer->mBuffer, IndirectDrawArgsOffset);
+	}
+	else
+	{
+		d11cmd->mDeferredContext->Dispatch(mDispatchX, mDispatchY, mDispatchZ);
+	}
 }
 
 NS_END

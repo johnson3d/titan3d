@@ -89,9 +89,9 @@ void GLSdk::BindTexture2D(IGLShaderResourceView* srv)
 		return;
 	}
 	std::shared_ptr<GLSdk::GLBufferId> bufferId;
-	if (srv != nullptr && srv->mTexture2D != nullptr)
+	if (srv != nullptr && srv->mBuffer != nullptr)
 	{
-		bufferId = std::shared_ptr<GLSdk::GLBufferId>(srv->mTexture2D.UnsafeConvertTo<IGLTexture2D>()->mGlesTexture2D);
+		bufferId = *(std::shared_ptr<GLSdk::GLBufferId>*)srv->mBuffer->GetHWBuffer();
 	}
 	CMD_PUSH
 	{
@@ -112,10 +112,10 @@ void GLSdk::BindTexture2D(IGLShaderResourceView* srv)
 	this->PushCommand([=]()->void {
 		if (bufferId == nullptr)
 			return;
-		auto debugInfo = bufferId->DebugInfo.GetPtr();
+		auto debugInfo = (IGLShaderResourceView*)bufferId->DebugInfo.GetPtr();
 		if (debugInfo != nullptr)
 		{
-			auto pSRV = debugInfo.UnsafeConvertTo<IGLShaderResourceView>();
+			auto pSRV = debugInfo;
 			if (pSRV != nullptr)
 			{
 				/*if (pSRV->mResourceFile.find("b3") != std::string::npos)
@@ -156,12 +156,12 @@ void IGLDrawCall::SetScissorRect(ICommandList* cmd, IScissorRect* sr)
 	cmd->SetScissorRect(sr);
 }
 
-void IGLDrawCall::SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline)
+void IGLDrawCall::SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline, EPrimitiveType dpType)
 {
 	/*if (cmd->IsDoing() == false)
 		return;*/
 
-	cmd->SetRenderPipeline(pipeline);
+	cmd->SetRenderPipeline(pipeline, dpType);
 	//((IGLRenderPipeline*)pipeline)->ApplyState(cmd);
 }
 
@@ -201,7 +201,7 @@ void IGLDrawCall::VSSetShaderResource(ICommandList* cmd, UINT32 Index, IShaderRe
 	auto sdk = ((IGLCommandList*)cmd)->mCmdList;
 	auto rTexture = (IGLShaderResourceView*)Texture;
 
-	if (Texture->mSrvDesc.ViewDimension == RESOURCE_DIMENSION_BUFFER)
+	if (Texture->mSrvDesc.ViewDimension == SRV_DIMENSION_BUFFER)
 	{
 		GLenum target = GL_SHADER_STORAGE_BUFFER;// GL_UNIFORM_BUFFER;
 		auto pGpuBuffer = rTexture->mBuffer.UnsafeConvertTo<IGLGpuBuffer>();
@@ -260,16 +260,6 @@ void IGLDrawCall::DrawIndexedInstancedIndirect(ICommandList* cmd, EPrimitiveType
 	cmd->DrawIndexedInstancedIndirect(PrimitiveType, pBufferForArgs, AlignedByteOffsetForArgs);
 }
 
-void IGLDrawCall::BindCBufferVS(UINT32 Index, IConstantBuffer* CBuffer)
-{
-	IDrawCall::BindCBufferVS(Index, CBuffer);
-}
-
-void IGLDrawCall::BindCBufferPS(UINT32 Index, IConstantBuffer* CBuffer)
-{
-	IDrawCall::BindCBufferPS(Index, CBuffer);
-}
-
 bool IGLDrawCall::Init(IRenderContext* rc, const IDrawCallDesc* desc)
 {
 	return true;
@@ -314,6 +304,16 @@ vBOOL IGLDrawCall::ApplyGeomtry(ICommandList* cmd, vBOOL bImmCBuffer)
 	}
 
 	return TRUE;
+}
+
+void IGLComputeDrawcall::BuildPass(ICommandList* cmd)
+{
+
+}
+
+bool IGLComputeDrawcall::Init(IRenderContext* rc)
+{
+	return true;
 }
 
 NS_END

@@ -19,7 +19,14 @@ ID11BlendState::~ID11BlendState()
 bool ID11BlendState::Init(ID11RenderContext* rc, const IBlendStateDesc* desc)
 {
 	mDesc = *desc;
-	auto hr = rc->mDevice->CreateBlendState((D3D11_BLEND_DESC*)desc, &mState);
+	D3D11_BLEND_DESC dxDesc;
+	dxDesc.AlphaToCoverageEnable = desc->AlphaToCoverageEnable;
+	dxDesc.IndependentBlendEnable = desc->IndependentBlendEnable;
+	for (int i = 0; i < 8; i++)
+	{
+		memcpy(&dxDesc.RenderTarget[i], &desc->RenderTarget[i], sizeof(RenderTargetBlendDesc));
+	}
+	auto hr = rc->mDevice->CreateBlendState(&dxDesc, &mState);
 	if (hr != S_OK)
 		return false;
 	return true;

@@ -5,6 +5,7 @@
 NS_BEGIN
 
 class ID11RenderContext;
+class ID11GpuBuffer;
 
 class ID11RenderTargetView : public IRenderTargetView
 {

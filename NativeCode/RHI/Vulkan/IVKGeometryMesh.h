@@ -1,5 +1,5 @@
 #pragma once
-#include "../IGeometryMesh.h"
+#include "../Utility/IGeometryMesh.h"
 
 NS_BEGIN
 

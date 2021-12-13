@@ -19,6 +19,7 @@ ID11InputLayout::~ID11InputLayout()
 
 bool ID11InputLayout::Init(ID11RenderContext* rc, const IInputLayoutDesc* desc)
 {
+	mDesc.StrongRef((IInputLayoutDesc*)desc);
 	std::vector<D3D11_INPUT_ELEMENT_DESC>	elems;
 	for (size_t i=0; i<desc->Layouts.size();i++)
 	{
@@ -39,7 +40,7 @@ bool ID11InputLayout::Init(ID11RenderContext* rc, const IInputLayoutDesc* desc)
 		e.SemanticIndex = se.SemanticIndex;
 		e.SemanticName = se.SemanticName.c_str();
 		elems.push_back(e);
-		mDesc.AddElement(se.SemanticName.c_str(), se.SemanticIndex, se.Format, se.InputSlot, se.AlignedByteOffset, se.IsInstanceData, se.InstanceDataStepRate);
+		//mDesc->AddElement(se.SemanticName.c_str(), se.SemanticIndex, se.Format, se.InputSlot, se.AlignedByteOffset, se.IsInstanceData, se.InstanceDataStepRate);
 	}
 	if (desc->ShaderDesc != nullptr)
 	{

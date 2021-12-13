@@ -5,6 +5,7 @@
 NS_BEGIN
 
 class IVKRenderContext;
+class IVKGpuBuffer;
 class IVKIndexBuffer : public IIndexBuffer
 {
 public:
@@ -15,11 +16,10 @@ public:
 	virtual void UpdateGPUBuffData(ICommandList* cmd, void* ptr, UINT size) override;
 
 public:
-	TObjectHandle<IVKRenderContext>		mRenderContext;
-	VkBuffer							mBuffer;
-	VkDeviceMemory						mMemory;
+	AutoRef<IVKGpuBuffer>				mBuffer;
 
 	bool Init(IVKRenderContext* rc, const IIndexBufferDesc* desc);
+	bool Init(IVKRenderContext* rc, IVKGpuBuffer* pBuffer);
 };
 
 NS_END

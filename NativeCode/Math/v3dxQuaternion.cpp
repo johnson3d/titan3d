@@ -252,6 +252,60 @@ void v3dxQuaternion::fromRotationMatrix (const v3dxMatrix4& kRot)
 #endif
 }
 
+void v3dxQuaternion::fromRotationDMatrix(const v3dDMatrix4_t& kRot)
+{
+	v3dxQuaternion& result = *this;
+	auto scale = kRot.m11 + kRot.m22 + kRot.m33;
+
+	if (scale > 0.0)
+	{
+		auto sqrt = Math::D_Sqrt(scale + 1.0);
+
+		result.w = sqrt * 0.5;
+		sqrt = 0.5 / sqrt;
+
+		result.x = (kRot.m23 - kRot.m32) * sqrt;
+		result.y = (kRot.m31 - kRot.m13) * sqrt;
+		result.z = (kRot.m12 - kRot.m21) * sqrt;
+
+		return;
+	}
+
+	if ((kRot.m11 >= kRot.m22) && (kRot.m11 >= kRot.m33))
+	{
+		auto sqrt = Math::D_Sqrt(1.0 + kRot.m11 - kRot.m22 - kRot.m33);
+		auto half = 0.5 / sqrt;
+
+		result.x = 0.5 * sqrt;
+		result.y = (kRot.m12 + kRot.m21) * half;
+		result.z = (kRot.m13 + kRot.m31) * half;
+		result.w = (kRot.m23 - kRot.m32) * half;
+
+		return;
+	}
+
+	if (kRot.m22 > kRot.m33)
+	{
+		auto sqrt = Math::D_Sqrt(1.0 + kRot.m22 - kRot.m11 - kRot.m33);
+		auto half = 0.5 / sqrt;
+
+		result.x = (kRot.m21 + kRot.m12) * half;
+		result.y = 0.5f * sqrt;
+		result.z = (kRot.m32 + kRot.m23) * half;
+		result.w = (kRot.m31 - kRot.m13) * half;
+
+		return;
+	}
+
+	auto sqrt = Math::D_Sqrt(1.0 + kRot.m33 - kRot.m11 - kRot.m22);
+	auto half = 0.5 / sqrt;
+
+	result.x = (kRot.m31 + kRot.m13) * half;
+	result.y = (kRot.m32 + kRot.m23) * half;
+	result.z = 0.5f * sqrt;
+	result.w = (kRot.m12 - kRot.m21) * half;
+}
+
 void v3dxQuaternion::toRotationMatrix(v3dxMatrix3& Matrix3) const
 {
 	float fTx = 2.0f*x;
@@ -717,7 +771,6 @@ v3dxVector3 v3dxQuaternion::operator *(const v3dxVector3 &v3) const
 	static bool bDefault = true;
 	if(bDefault)
 	{
-		// �˴��õĹ�ʽ�� q^{-1}*u*q
 		v3dxVector3 uv, uuv; 
 		v3dxVector3 qvec(x, y, z);
 		v3dxVec3Cross( &uv, &qvec, &v3 );

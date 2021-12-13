@@ -133,7 +133,7 @@ vBOOL IMeshPrimitives::Init(IRenderContext* rc, const char* name, UINT atom)
 
 vBOOL IMeshPrimitives::InitFromGeomtryMesh(IRenderContext* rc, IGeometryMesh* mesh, UINT atom, const v3dxBox3* aabb)
 {
-	ASSERT(GLogicThreadId == vfxThread::GetCurrentThreadId());
+	//ASSERT(GLogicThreadId == vfxThread::GetCurrentThreadId());
 	mContext.FromObject(rc);
 	mAtoms.resize(atom);
 	mDesc.AtomNumber = atom;
@@ -282,24 +282,6 @@ void IMeshPrimitives::Save2Xnd(IRenderContext* rc, XndNode* pNode)
 		pAttr->Write(buffData.GetData(), desc.ByteWidth);
 		pAttr->EndWrite();
 	}
-
-	if (mPartialSkeleton)
-	{
-		XndNode* node = pNode->GetOrAddNode("PartialSkeleton", 0, 0);
-		{
-			XndAttribute* boneNumAttr = node->GetOrAddAttribute("BoneNum", 0, 0);
-			boneNumAttr->BeginWrite();
-			boneNumAttr->Write(mPartialSkeleton->GetBonesNum());
-			boneNumAttr->EndWrite();
-			XndAttribute* descAttr = node->GetOrAddAttribute("BoneDescs", 0, 0);
-			descAttr->BeginWrite();
-			for (int i = 0; i < mPartialSkeleton->GetBonesNum(); ++i)
-			{
-				descAttr->Write(mPartialSkeleton->GetBones()[i]->Desc);
-			}
-			descAttr->EndWrite();
-		}
-	}
 }
 
 vBOOL IMeshPrimitives::LoadXnd(IRenderContext* rc, const char* name, XndHolder* xnd, bool isLoad)
@@ -352,34 +334,6 @@ vBOOL IMeshPrimitives::LoadXnd(IRenderContext* rc, const char* name, XndHolder* 
 	{
 		return FALSE;
 	}
-
-	XndNode* node = pNode->TryGetChildNode("PartialSkeleton");
-	if(node)
-	{
-		XndAttribute* boneNumAttr = node->TryGetAttribute("BoneNum");
-		if (boneNumAttr)
-		{
-			boneNumAttr->BeginRead();
-			int boneNum = 0;
-			boneNumAttr->Read(boneNum);
-			boneNumAttr->EndRead();
-			XndAttribute* descAttr = node->TryGetAttribute("BoneDescs");
-			if (descAttr)
-			{
-				descAttr->BeginRead();
-				mPartialSkeleton = new IPartialSkeleton();
-				for (int i = 0; i < mPartialSkeleton->GetBonesNum(); ++i)
-				{
-					IBoneDesc boneDesc;
-					descAttr->Read(boneDesc);
-					mPartialSkeleton->AddBone(new IBone(boneDesc));
-				}
-				mPartialSkeleton->RefreshHierarchy();
-				descAttr->EndRead();
-			}
-		}
-	}
-
 
 	if (mAABB.IsEmpty())
 	{
@@ -761,6 +715,7 @@ IMeshDataProvider::IMeshDataProvider()
 {
 	memset(mVertexBuffers, 0, sizeof(mVertexBuffers));
 	IndexBuffer = nullptr;
+	FaceBuffer = nullptr;
 	IBType = IBT_Int16;
 }
 
@@ -776,6 +731,7 @@ void IMeshDataProvider::Cleanup()
 		Safe_Release(mVertexBuffers[i]);
 	}
 	Safe_Release(IndexBuffer);
+	Safe_Release(FaceBuffer);
 
 	mAtoms.clear();
 }
@@ -1385,12 +1341,12 @@ UINT IMeshDataProvider::GetStreamStride(EVertexSteamType stream)
 UINT IMeshDataProvider::AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector2* uv, DWORD color)
 {
 	auto cur = mVertexBuffers[VST_Position];
-	if (cur != nullptr)
+	if (cur != nullptr && pos != nullptr)
 	{
 		cur->PushData(pos, sizeof(v3dxVector3));
 	}
 	cur = mVertexBuffers[VST_Normal];
-	if (cur != nullptr)
+	if (cur != nullptr && nor != nullptr)
 	{
 		cur->PushData(nor, sizeof(v3dxVector3));
 	}
@@ -1405,7 +1361,7 @@ UINT IMeshDataProvider::AddVertex(const v3dxVector3* pos, const v3dxVector3* nor
 		cur->PushData(&color, sizeof(DWORD));
 	}
 	cur = mVertexBuffers[VST_UV];
-	if (cur != nullptr)
+	if (cur != nullptr && uv != nullptr)
 	{
 		cur->PushData(uv, sizeof(v3dxVector2));
 	}
@@ -1465,6 +1421,14 @@ vBOOL IMeshDataProvider::AddTriangle(UINT a, UINT b, UINT c)
 	}
 
 	PrimitiveNumber++;
+	return TRUE;
+}
+
+vBOOL IMeshDataProvider::AddTriangle(UINT a, UINT b, UINT c, USHORT faceData)
+{
+	FaceBuffer->PushData(&faceData, sizeof(USHORT));
+	if (FALSE == AddTriangle(a, b, c))
+		return FALSE;
 	return TRUE;
 }
 

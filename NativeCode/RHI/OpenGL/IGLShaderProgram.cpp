@@ -14,7 +14,6 @@ NS_BEGIN
 IGLShaderProgram::IGLShaderProgram()
 {
 	mNoPSProfilering = FALSE;
-	mProgramReflector = AutoRef<ShaderReflector>(new ShaderReflector());
 }
 
 IGLShaderProgram::~IGLShaderProgram()
@@ -33,7 +32,7 @@ vBOOL IGLShaderProgram::LinkShaders(IRenderContext* rc)
 	ASSERT(mProgram);
 	ASSERT(mProgram->IsValidBuffer());
 	ASSERT(sdk->IsGLThread());
-	RHI_ASSERT(mInputLayout != nullptr);
+	ASSERT(mInputLayout != nullptr);
 
 	auto glvs = mVertexShader.UnsafeConvertTo<IGLVertexShader>();
 	sdk->AttachShader(mProgram, glvs->mShader);
@@ -66,13 +65,13 @@ vBOOL IGLShaderProgram::LinkShaders(IRenderContext* rc)
 		return FALSE;
 	}
 
-	IGLShaderReflector::ReflectProgram((IGLRenderContext*)rc, mProgram, EST_UnknownShader, mProgramReflector);
+	IGLShaderReflector::ReflectProgram((IGLRenderContext*)rc, mProgram, EST_UnknownShader, mReflector);
 
-	for (size_t i = 0; i < mInputLayout->mDesc.Layouts.size(); i++)
+	for (size_t i = 0; i < mInputLayout->mDesc->Layouts.size(); i++)
 	{
 		GLint loc = -1;
 
-		auto& elem = mInputLayout->mDesc.Layouts[i];
+		auto& elem = mInputLayout->mDesc->Layouts[i];
 		std::string attribName = std::string("in_var_") + elem.SemanticName.c_str();
 		if (elem.SemanticIndex > 0)
 			attribName += std::to_string(elem.SemanticIndex);
@@ -127,78 +126,6 @@ void IGLShaderProgram::ApplyShaders(ICommandList* cmd)
 	if (cmd->mCurrentState.TrySet_ShaderProgram(this)==false)
 		return;
 	sdk->UseProgram(mProgram, this);
-}
-
-UINT IGLShaderProgram::FindCBuffer(const char* name)
-{
-	return mProgramReflector->FindCBuffer(name);
-}
-
-UINT IGLShaderProgram::GetCBufferNumber()
-{
-	return (UINT)mProgramReflector->mCBDescArray.size();
-}
-
-IConstantBufferDesc* IGLShaderProgram::GetCBuffer(UINT index)
-{
-	return mProgramReflector->GetCBuffer(index);
-}
-
-UINT IGLShaderProgram::GetShaderResourceNumber() const
-{
-	return (UINT)mProgramReflector->mTexBindInfoArray.size();
-}
-
-bool IGLShaderProgram::GetShaderResourceBindInfo(UINT Index, TSBindInfo* info, int dataSize) const
-{
-	auto pSrv = mProgramReflector->GetSRV(Index);
-	if (pSrv==nullptr)
-		return false;
-
-	if (dataSize >= sizeof(TSBindInfo))
-		*info = *pSrv;
-	else
-		memcpy(info, pSrv, dataSize);
-	return true;
-}
-
-UINT IGLShaderProgram::GetTextureBindSlotIndex(const char* name)
-{
-	return mProgramReflector->FindSRV(name);
-	/*for (size_t i = 0; i < mTextures.size(); i++)
-	{
-		if (mTextures[i].Name == name)
-			return (int)i;
-	}
-	return -1;*/
-}
-
-UINT IGLShaderProgram::GetSamplerNumber() const
-{
-	return (UINT)mProgramReflector->mSamplerBindInfoArray.size();
-}
-
-bool IGLShaderProgram::GetSamplerBindInfo(UINT Index, TSBindInfo* info, int dataSize) const
-{
-	auto pSampler = mProgramReflector->GetSampler(Index);
-	if (pSampler == nullptr)
-		return false;
-	if (dataSize >= sizeof(TSBindInfo))
-		*info = *pSampler;
-	else
-		memcpy(info, pSampler, dataSize);
-	return true;
-}
-
-UINT IGLShaderProgram::GetSamplerBindSlotIndex(const char* name)
-{
-	return mProgramReflector->FindSampler(name);
-	/*for (size_t i = 0; i < mSamplers.size(); i++)
-	{
-		if (mSamplers[i].Name == name)
-			return (int)i;
-	}
-	return -1;*/
 }
 
 bool IGLShaderProgram::Init(IGLRenderContext* rc, const IShaderProgramDesc* desc)

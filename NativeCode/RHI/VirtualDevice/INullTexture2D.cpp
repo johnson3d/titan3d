@@ -14,12 +14,12 @@ INullTexture2D::~INullTexture2D()
 {
 }
 
-vBOOL INullTexture2D::Map(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
+vBOOL INullTexture2D::MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
 {
 	return FALSE;
 }
 
-void INullTexture2D::Unmap(ICommandList* cmd, int MipLevel)
+void INullTexture2D::UnmapMipmap(ICommandList* cmd, int MipLevel)
 {
 	
 }

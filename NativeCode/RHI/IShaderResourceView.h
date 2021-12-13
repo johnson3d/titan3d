@@ -10,20 +10,7 @@ class ICommandList;
 class IRenderContext;
 class GfxTextureStreaming;
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
-IShaderResourceViewDesc
-{
-	IShaderResourceViewDesc()
-	{
-		mFormat = PXF_R8G8B8A8_UNORM;
-		m_pTexture2D = nullptr;
-	}
-
-	EPixelFormat		mFormat;
-	ITexture2D*			m_pTexture2D;
-};
-
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 ITxPicDesc
 {
 	/*ITxPicDesc()
@@ -46,47 +33,14 @@ ITxPicDesc
 	int				Height;
 };
 
-//struct ITex2DDesc
-//{
-//	UINT				mWidth;
-//	UINT				mHeight;
-//	UINT				mMipLevels;
-//	EPixelFormat	mFormat;
-//};
-
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-EResourceDimension
-{
-	RESOURCE_DIMENSION_UNKNOWN = 0,
-	RESOURCE_DIMENSION_BUFFER = 1,
-	RESOURCE_DIMENSION_TEXTURE1D = 2,
-	RESOURCE_DIMENSION_TEXTURE2D = 3,
-	RESOURCE_DIMENSION_TEXTURE3D = 4
-};
-
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8, SV_Manual)
-BUFFER_SRV
-{
-	union
-	{
-		UINT FirstElement;
-		UINT ElementOffset;
-	};
-	union
-	{
-		UINT NumElements;
-		UINT ElementWidth;
-	};
-};
-
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 TEX1D_SRV
 {
 	UINT MostDetailedMip;
 	UINT MipLevels;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 TEX1D_ARRAY_SRV
 {
 	UINT MostDetailedMip;
@@ -95,14 +49,14 @@ TEX1D_ARRAY_SRV
 	UINT ArraySize;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 TEX2D_SRV
 {
 	UINT MostDetailedMip;
 	UINT MipLevels;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 TEX2D_ARRAY_SRV
 {
 	UINT MostDetailedMip;
@@ -111,34 +65,34 @@ TEX2D_ARRAY_SRV
 	UINT ArraySize;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 TEX2DMS_SRV
 {
 	UINT UnusedField_NothingToDefine;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 TEX2DMS_ARRAY_SRV
 {
 	UINT FirstArraySlice;
 	UINT ArraySize;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 TEX3D_SRV
 {
 	UINT MostDetailedMip;
 	UINT MipLevels;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 TEXCUBE_SRV
 {
 	UINT MostDetailedMip;
 	UINT MipLevels;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 TEXCUBE_ARRAY_SRV
 {
 	UINT MostDetailedMip;
@@ -147,7 +101,7 @@ TEXCUBE_ARRAY_SRV
 	UINT NumCubes;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 BUFFEREX_SRV
 {
 	UINT FirstElement;
@@ -155,11 +109,67 @@ BUFFEREX_SRV
 	UINT Flags;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8, SV_Manual)
-ISRVDesc
+enum TR_ENUM()
+	ESrvType
 {
+	ST_BufferSRV,
+	ST_Texture1D,
+	ST_Texture1DArray,
+	ST_Texture2D,
+	ST_Texture2DArray,
+	ST_Texture2DMS,
+	ST_Texture2DMSArray,
+	ST_Texture3D,
+	ST_Texture3DArray,
+	ST_TextureCube,
+	ST_TextureCubeArray,
+	ST_BufferEx,
+};
+
+enum TR_ENUM()
+	SRV_DIMENSION
+{
+	SRV_DIMENSION_UNKNOWN = 0,
+	SRV_DIMENSION_BUFFER = 1,
+	SRV_DIMENSION_TEXTURE1D = 2,
+	SRV_DIMENSION_TEXTURE1DARRAY = 3,
+	SRV_DIMENSION_TEXTURE2D = 4,
+	SRV_DIMENSION_TEXTURE2DARRAY = 5,
+	SRV_DIMENSION_TEXTURE2DMS = 6,
+	SRV_DIMENSION_TEXTURE2DMSARRAY = 7,
+	SRV_DIMENSION_TEXTURE3D = 8,
+	SRV_DIMENSION_TEXTURECUBE = 9,
+	SRV_DIMENSION_TEXTURECUBEARRAY = 10,
+	SRV_DIMENSION_BUFFEREX = 11,
+};
+
+struct TR_CLASS(SV_LayoutStruct = 8, SV_Manual)
+	IShaderResourceViewDesc
+{
+	void SetTexture2D()
+	{
+		memset(this, 0, sizeof(IShaderResourceViewDesc));
+		Type = ST_Texture2D;
+		mGpuBuffer = nullptr;
+		Format = PXF_B8G8R8A8_UNORM;
+		ViewDimension = SRV_DIMENSION_TEXTURE2D;
+		Texture2D.MipLevels = 0;
+	}
+	void SetBuffer()
+	{
+		memset(this, 0, sizeof(IShaderResourceViewDesc));
+		Type = ST_BufferSRV;
+		mGpuBuffer = nullptr;
+		Format = PXF_UNKNOWN;
+		ViewDimension = SRV_DIMENSION_BUFFER;
+		Buffer.FirstElement = 0;
+		Buffer.NumElements = 0;
+	}
+	ESrvType Type;
+	IGpuBuffer* mGpuBuffer;
+	
 	EPixelFormat Format;
-	EResourceDimension ViewDimension;
+	SRV_DIMENSION ViewDimension;
 	union
 	{
 		BUFFER_SRV Buffer;
@@ -176,34 +186,24 @@ ISRVDesc
 	};
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IShaderResourceView : public IRenderResource
 {
 public:
 	IShaderResourceView();
 	~IShaderResourceView();
 
-	TR_FUNCTION()
-	inline ITexture2D* GetTexture2D() 
+	inline IGpuBuffer* GetGpuBuffer()
 	{
-		return mTexture2D;
+		return mBuffer;
 	}
-	TR_FUNCTION()
 	virtual IResourceState* GetResourceState() override{
 		return &mResourceState;
 	}
 
-	TR_FUNCTION()
-	virtual bool UpdateTexture2D(IRenderContext* rc, const ITexture2D* pTexture2D) = 0;
+	virtual bool UpdateBuffer(IRenderContext* rc, const IGpuBuffer* buffer) = 0;
 
-	TR_FUNCTION()
-	void GetTxDesc(ITxPicDesc* desc)
-	{
-		*desc = mTxDesc;
-	}
-
-	TR_FUNCTION()
-	virtual EPixelFormat GetTextureFormat();
+	virtual EPixelFormat GetFormat();
 	
 	virtual vBOOL Save2Memory(IRenderContext* rc, IBlobObject* data, int Type)
 	{
@@ -218,31 +218,15 @@ public:
 	{
 
 	}
+	virtual void* GetAPIObject() = 0;
 public:
-	ISRVDesc			mSrvDesc;
-	ITxPicDesc			mTxDesc;
-	AutoRef<ITexture2D>		mTexture2D;
+	IShaderResourceViewDesc	mSrvDesc;
+	ITxPicDesc				mTxDesc;
+
+	TR_MEMBER(SV_NoBind)
 	AutoRef<IGpuBuffer>		mBuffer;
 	TR_MEMBER(SV_NoBind)
-	IResourceState		mResourceState;
-public:
-	/*struct ETCDesc
-	{
-		EPixelFormat	Format;
-		vBOOL	sRGB;
-		int		Mipmap;
-	};
-	struct ETCLayer
-	{
-		int		Width;
-		int		Height;
-		UINT	Size;
-	};
-	struct ETCMipBuffers : public VIUnknown
-	{
-		std::vector<ETCLayer>			Layers;
-		std::vector<std::vector<BYTE>>	Pixels;
-	};*/
+	IResourceState			mResourceState;
 };
 
 NS_END

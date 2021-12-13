@@ -50,7 +50,7 @@ std::shared_ptr<GLSdk::GLBufferId> IGLShaderReflector::Reflect(IGLRenderContext*
 
 	sdk->DetachShader(mProgram, mShader);
 
-	ReflectProgram(rc, mProgram, pShaderDesc->ShaderType, pShaderDesc->Reflector);
+	ReflectProgram(rc, mProgram, pShaderDesc->ShaderType, pShaderDesc->GetReflector());
 
 	return mProgram;
 }
@@ -60,9 +60,7 @@ void IGLShaderReflector::ReflectProgram(IGLRenderContext* rc, const std::shared_
 	auto sdk = GLSdk::ImmSDK;
 
 	auto csReflector = pReflector;
-	csReflector->mCBDescArray.clear();
-	csReflector->mTexBindInfoArray.clear();
-	csReflector->mSamplerBindInfoArray.clear();
+	csReflector->Reset();
 
 	//reflection
 	GLchar szName[256];
@@ -104,7 +102,7 @@ void IGLShaderReflector::ReflectProgram(IGLRenderContext* rc, const std::shared_
 		GLint varCount;
 		sdk->GetActiveUniformBlockiv(mProgram, cbIndex, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &varCount);
 
-		RHI_ASSERT(varCount > 0);
+		ASSERT(varCount > 0);
 
 		std::vector<GLint> indices_block;
 		indices_block.resize(varCount);
@@ -236,18 +234,18 @@ void IGLShaderReflector::ReflectProgram(IGLRenderContext* rc, const std::shared_
 				}
 			}
 
-			TSBindInfo tDesc;
+			ShaderRViewBindInfo tDesc;
 			tDesc.Name = spirv_name;
 			GL_DescSetBindPoint(shaderType, tDesc, bindLoc);
 			tDesc.BindCount = 1;
 
-			TSBindInfo sDesc;
+			SamplerBindInfo sDesc;
 			sDesc.Name = spirv_name_samp;// "Samp_" + spirv_name;
 			GL_DescSetBindPoint(shaderType, sDesc, bindLoc);
 			sDesc.BindCount = 1;
 
-			csReflector->mTexBindInfoArray.push_back(tDesc);
-			csReflector->mSamplerBindInfoArray.push_back(sDesc);
+			csReflector->mSrvBindArray.push_back(tDesc);
+			csReflector->mSamplerBindArray.push_back(sDesc);
 		}
 		break;
 		case GL_UNSIGNED_INT_IMAGE_BUFFER:
@@ -256,32 +254,33 @@ void IGLShaderReflector::ReflectProgram(IGLRenderContext* rc, const std::shared_
 			GLint outSize;
 			sdk->GetProgramResourceiv(mProgram, GL_UNIFORM, uIdx, 1, &props_binding, 4, &outSize, &bindLoc);*/
 
-			IConstantBufferDesc desc;
-			desc.Type = SIT_UAV_RWTYPED;
+			UavBindInfo desc;
 			desc.Name = varNames;
 			GL_DescSetBindPoint(shaderType, desc, bindLoc);
 			desc.BindCount = 1;
 
 			if (shaderType == EST_ComputeShader)
 			{
-				csReflector->mCBDescArray.push_back(desc);
+				csReflector->mUavBindArray.push_back(desc);
 			}
 			else
 			{
-				TSBindInfo bindInfo;
+				ShaderRViewBindInfo bindInfo;
 				bindInfo.Name = desc.Name;
 				bindInfo.BindCount = desc.BindCount;
-				bindInfo.Type = desc.Type;
 				bindInfo.VSBindPoint = desc.VSBindPoint;
 				bindInfo.PSBindPoint = desc.PSBindPoint;
 				bindInfo.CSBindPoint = desc.CSBindPoint;
 
-				TSBindInfo sampBindInfo;
-				sampBindInfo = bindInfo;
+				SamplerBindInfo sampBindInfo;
+				sampBindInfo.BindCount = desc.BindCount;
+				sampBindInfo.VSBindPoint = desc.VSBindPoint;
+				sampBindInfo.PSBindPoint = desc.PSBindPoint;
+				sampBindInfo.CSBindPoint = desc.CSBindPoint;
 				sampBindInfo.Name = std::string("CS_") + sampBindInfo.Name.c_str();
 
-				csReflector->mTexBindInfoArray.push_back(bindInfo);
-				csReflector->mSamplerBindInfoArray.push_back(sampBindInfo);
+				csReflector->mSrvBindArray.push_back(bindInfo);
+				csReflector->mSamplerBindArray.push_back(sampBindInfo);
 			}
 		}
 		break;
@@ -310,19 +309,19 @@ void IGLShaderReflector::ReflectProgram(IGLRenderContext* rc, const std::shared_
 			auto segs = StringHelper::split(desc.Name, "_");
 			if (segs.size() <= 1)
 			{
-				desc.Type = SIT_UAV_RWSTRUCTURED;
+				desc.BindType = SBT_Uav;
 			}
 			else if (segs[1] == "RWStructuredBuffer")
 			{
-				desc.Type = SIT_UAV_RWSTRUCTURED;
+				desc.BindType = SBT_Uav;
 			}
 			else if (segs[1] == "StructuredBuffer")
 			{
-				desc.Type = SIT_STRUCTURED;
+				desc.BindType = SBT_Uav;
 			}
 			else
 			{
-				desc.Type = SIT_STRUCTURED;
+				desc.BindType = SBT_Uav;
 			}
 
 			GL_DescSetBindPoint(shaderType, desc, bindLoc);
@@ -334,20 +333,22 @@ void IGLShaderReflector::ReflectProgram(IGLRenderContext* rc, const std::shared_
 			}
 			else
 			{
-				TSBindInfo bindInfo;
+				ShaderRViewBindInfo bindInfo;
 				bindInfo.Name = desc.Name;
 				bindInfo.BindCount = desc.BindCount;
-				bindInfo.Type = desc.Type;
 				bindInfo.VSBindPoint = desc.VSBindPoint;
 				bindInfo.PSBindPoint = desc.PSBindPoint;
 				bindInfo.CSBindPoint = desc.CSBindPoint;
 
-				TSBindInfo sampBindInfo;
-				sampBindInfo = bindInfo;
+				SamplerBindInfo sampBindInfo;
+				sampBindInfo.BindCount = desc.BindCount;
+				sampBindInfo.VSBindPoint = desc.VSBindPoint;
+				sampBindInfo.PSBindPoint = desc.PSBindPoint;
+				sampBindInfo.CSBindPoint = desc.CSBindPoint;
 				sampBindInfo.Name = std::string("CS_") + sampBindInfo.Name.c_str();
 
-				csReflector->mTexBindInfoArray.push_back(bindInfo);
-				csReflector->mSamplerBindInfoArray.push_back(sampBindInfo);
+				csReflector->mSrvBindArray.push_back(bindInfo);
+				csReflector->mSamplerBindArray.push_back(sampBindInfo);
 			}
 		}
 	}

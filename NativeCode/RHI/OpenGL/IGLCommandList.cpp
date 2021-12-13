@@ -38,9 +38,10 @@ void IGLCommandList::Cleanup()
 {
 }
 
-void IGLCommandList::BeginCommand()
+bool IGLCommandList::BeginCommand()
 {
 	ICommandList::BeginCommand();
+	return true;
 }
 
 void IGLCommandList::EndCommand()
@@ -48,10 +49,14 @@ void IGLCommandList::EndCommand()
 	ICommandList::EndCommand();
 }
 
-void IGLCommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer, const char* debugName)
+bool IGLCommandList::BeginRenderPass(IFrameBuffers* pFrameBuffer, const IRenderPassClears* passClears, const char* debugName)
 {
-	if (pRenderPassDesc == nullptr)
-		return;
+	IRenderPass* pRenderPass = pFrameBuffer->mRenderPass;
+	if (passClears == nullptr)
+		return true;
+
+	auto pRenderPassDesc = &pRenderPass->mDesc;
+	
 	if (mProfiler != nullptr && mProfiler->mNoPixelWrite)
 	{
 		pFrameBuffer = mProfiler->mOnePixelFB;
@@ -61,29 +66,33 @@ void IGLCommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuff
 	((IGLFrameBuffers*)pFrameBuffer)->ApplyBuffers(mCmdList);
 	
 	GLbitfield flag = 0;
-	if (pRenderPassDesc->mFBLoadAction_Color == FrameBufferLoadAction::LoadActionClear)
+	if (pRenderPassDesc->AttachmentMRTs[0].LoadAction == FrameBufferLoadAction::LoadActionClear)
 	{
 		flag |= GL_COLOR_BUFFER_BIT;
-		mCmdList->ClearColor(pRenderPassDesc->mFBClearColorRT0.r, pRenderPassDesc->mFBClearColorRT0.g, pRenderPassDesc->mFBClearColorRT0.b, pRenderPassDesc->mFBClearColorRT0.a);
+		mCmdList->ClearColor(passClears->ClearColor[0].r,
+			passClears->ClearColor[0].g,
+			passClears->ClearColor[0].b,
+			passClears->ClearColor[0].a);
 
 	}
 
-	if (pRenderPassDesc->mFBLoadAction_Depth == FrameBufferLoadAction::LoadActionClear)
+	if (pRenderPassDesc->AttachmentMRTs[0].LoadAction == FrameBufferLoadAction::LoadActionClear)
 	{
 		flag |= GL_DEPTH_BUFFER_BIT;
-		mCmdList->ClearDepthf(pRenderPassDesc->mDepthClearValue);
+		mCmdList->ClearDepthf(passClears->DepthClearValue);
 	}
 
-	if (pRenderPassDesc->mFBLoadAction_Stencil == FrameBufferLoadAction::LoadActionClear)
+	if (pRenderPassDesc->AttachmentMRTs[0].StencilLoadAction == FrameBufferLoadAction::LoadActionClear)
 	{
 		flag |= GL_STENCIL_BUFFER_BIT;
-		mCmdList->ClearStencil(pRenderPassDesc->mStencilClearValue);
+		mCmdList->ClearStencil(passClears->StencilClearValue);
 	}
 
 	if (flag != 0)
 	{
 		mCmdList->Clear(flag);
 	}
+	return true;
 }
 //
 //void IGLCommandList::BuildRenderPass(vBOOL bImmCBuffer, IPass** ppPass)
@@ -255,56 +264,17 @@ void IGLCommandList::CSDispatch(UINT x, UINT y, UINT z)
 	mCmdList->ES31_DispatchCompute(x, y, z);
 }
 
-void IGLCommandList::PSSetShaderResource(UINT32 Index, IShaderResourceView* Texture)
+void IGLCommandList::CSDispatchIndirect(IGpuBuffer* pBufferForArgs, UINT32 AlignedByteOffsetForArgs)
 {
-	if (mCurrentState.TrySet_PSTextures(Index, Texture) == false)
+	if (IRenderContext::mChooseShaderModel < 4)
+	{
+		ASSERT(false);
 		return;
-
-	if (Texture == nullptr)
-		return;
-
-	Texture->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
-	if (Texture->GetResourceState()->GetStreamState() != SS_Valid)
-		return;
-
-	auto saved = GLSdk::CheckGLError;
-	GLSdk::CheckGLError = false;
-
+	}
 	auto sdk = mCmdList;
-	auto rTexture = (IGLShaderResourceView*)Texture;
-	if (Texture->mSrvDesc.ViewDimension == RESOURCE_DIMENSION_BUFFER)
-	{
-		GLenum target = GL_SHADER_STORAGE_BUFFER;// GL_UNIFORM_BUFFER;
-		auto pGpuBuffer = rTexture->mBuffer.UnsafeConvertTo<IGLGpuBuffer>();
-		sdk->BindBufferBase(target, Index, pGpuBuffer->mBufferId);
-	}
-	else
-	{
-		sdk->ActiveTexture(GL_TEXTURE0 + Index);
-
-		sdk->BindTexture2D(rTexture);
-		//sdk->BindTexture(GL_TEXTURE_2D, rTexture->mView);
-		sdk->Uniform1i(Index, Index);
-	}
-
-	GLSdk::CheckGLError = saved;
-}
-
-void IGLCommandList::PSSetSampler(UINT32 Index, ISamplerState* Sampler)
-{
-	auto sdk = mCmdList;
-
-	if (mCurrentState.TrySet_PSSampler(Index, Sampler) == false)
-	{
-		sdk->Uniform1i(Index, Index);
-		return;
-	}
-
-	auto glSamp = (IGLSamplerState*)Sampler;
-
-	sdk->BindSampler(Index, glSamp->mSampler);
-
-	sdk->Uniform1i(Index, Index);
+	auto buffer = (IGLGpuBuffer*)pBufferForArgs;
+	sdk->BindBuffer(GL_DISPATCH_INDIRECT_BUFFER, buffer->mBufferId);
+	mCmdList->ES31_DispatchComputeIndirect(AlignedByteOffsetForArgs);
 }
 
 void IGLCommandList::SetScissorRect(IScissorRect* sr)
@@ -343,7 +313,7 @@ void IGLCommandList::SetVertexBuffer(UINT32 StreamIndex, IVertexBuffer* VertexBu
 	sdk->BindVertexBuffer(glVB);
 	
 	auto layout = gpuProgram->GetInputLayout();
-	auto& vtxLayouts = layout->mDesc.Layouts;
+	auto& vtxLayouts = layout->mDesc->Layouts;
 	for (size_t i = 0; i < vtxLayouts.size(); i++)
 	{
 		const auto& elem = vtxLayouts[i];
@@ -540,6 +510,21 @@ void IGLCommandList::IASetInputLayout(IInputLayout* pInputLayout)
 
 }
 
+void IGLCommandList::SetRasterizerState(IRasterizerState* State)
+{
+
+}
+
+void IGLCommandList::SetDepthStencilState(IDepthStencilState* State)
+{
+
+}
+
+void IGLCommandList::SetBlendState(IBlendState* State, float* blendFactor, UINT samplerMask)
+{
+
+}
+
 void IGLCommandList::VSSetShader(IVertexShader* pVertexShader, void** ppClassInstances, UINT NumClassInstances)
 {
 	auto program = (IGLShaderProgram*)mPipelineState->GetGpuProgram();
@@ -597,7 +582,69 @@ void IGLCommandList::PSSetConstantBuffer(UINT32 Index, IConstantBuffer* CBuffer)
 	//OpenGL UniformBuffer set in Program,VS has set first.
 }
 
-void IGLCommandList::SetRenderPipeline(IRenderPipeline* pipeline)
+void IGLCommandList::VSSetShaderResource(UINT32 Index, IShaderResourceView* Texture)
+{
+
+}
+
+void IGLCommandList::PSSetShaderResource(UINT32 Index, IShaderResourceView* Texture)
+{
+	if (mCurrentState.TrySet_PSTextures(Index, Texture) == false)
+		return;
+
+	if (Texture == nullptr)
+		return;
+
+	Texture->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
+	if (Texture->GetResourceState()->GetStreamState() != SS_Valid)
+		return;
+
+	auto saved = GLSdk::CheckGLError;
+	GLSdk::CheckGLError = false;
+
+	auto sdk = mCmdList;
+	auto rTexture = (IGLShaderResourceView*)Texture;
+	if (Texture->mSrvDesc.ViewDimension == SRV_DIMENSION_BUFFER)
+	{
+		GLenum target = GL_SHADER_STORAGE_BUFFER;// GL_UNIFORM_BUFFER;
+		auto pGpuBuffer = rTexture->mBuffer.UnsafeConvertTo<IGLGpuBuffer>();
+		sdk->BindBufferBase(target, Index, pGpuBuffer->mBufferId);
+	}
+	else
+	{
+		sdk->ActiveTexture(GL_TEXTURE0 + Index);
+
+		sdk->BindTexture2D(rTexture);
+		//sdk->BindTexture(GL_TEXTURE_2D, rTexture->mView);
+		sdk->Uniform1i(Index, Index);
+	}
+
+	GLSdk::CheckGLError = saved;
+}
+
+void IGLCommandList::VSSetSampler(UINT32 Index, ISamplerState* Sampler)
+{
+
+}
+
+void IGLCommandList::PSSetSampler(UINT32 Index, ISamplerState* Sampler)
+{
+	auto sdk = mCmdList;
+
+	if (mCurrentState.TrySet_PSSampler(Index, Sampler) == false)
+	{
+		sdk->Uniform1i(Index, Index);
+		return;
+	}
+
+	auto glSamp = (IGLSamplerState*)Sampler;
+
+	sdk->BindSampler(Index, glSamp->mSampler);
+
+	sdk->Uniform1i(Index, Index);
+}
+
+void IGLCommandList::SetRenderPipeline(IRenderPipeline* pipeline, EPrimitiveType dpType)
 {
 	mPipelineState.StrongRef(pipeline);
 	((IGLRenderPipeline*)pipeline)->ApplyState(this);
@@ -606,8 +653,9 @@ void IGLCommandList::SetRenderPipeline(IRenderPipeline* pipeline)
 
 vBOOL IGLCommandList::CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers)
 {
-	AutoRef<ITexture2D> srcTex2D;
-	srcTex2D.StrongRef(src->GetTexture2D());
+	if (src->mSrvDesc.Type != ST_Texture2D)
+		return FALSE;
+	auto srcTex2D = src->mBuffer.UnsafeConvertTo<IGLTexture2D>();
 
 	IGLTexture2D* pGLTexture = (IGLTexture2D*)(*ppTexture);
 	bool needCreateTexture = false;
@@ -617,16 +665,16 @@ vBOOL IGLCommandList::CreateReadableTexture2D(ITexture2D** ppTexture, IShaderRes
 	}
 	else
 	{
-		if (pGLTexture->mDesc.Width != srcTex2D->mDesc.Width ||
-			pGLTexture->mDesc.Height != srcTex2D->mDesc.Height)
+		if (pGLTexture->mTextureDesc.Width != srcTex2D->mTextureDesc.Width ||
+			pGLTexture->mTextureDesc.Height != srcTex2D->mTextureDesc.Height)
 		{
 			needCreateTexture = true;
 		}
 	}
 
 	GLSdk* sdk = mCmdList;
-	UINT RowPitch = ((srcTex2D->mDesc.Width * GetPixelByteWidth(srcTex2D->mDesc.Format) + 3) / 4) * 4;
-	GLsizeiptr PboSize = RowPitch * srcTex2D->mDesc.Height;
+	UINT RowPitch = ((srcTex2D->mTextureDesc.Width * GetPixelByteWidth(srcTex2D->mTextureDesc.Format) + 3) / 4) * 4;
+	GLsizeiptr PboSize = RowPitch * srcTex2D->mTextureDesc.Height;
 
 	std::shared_ptr<GLSdk::GLBufferId> pBufferId;
 	if (needCreateTexture)
@@ -653,8 +701,8 @@ vBOOL IGLCommandList::CreateReadableTexture2D(ITexture2D** ppTexture, IShaderRes
 			GLint internalFormat;
 			GLint format;
 			GLenum type;
-			FormatToGL(srcTex2D->mDesc.Format, internalFormat, format, type);
-			sdk->ReadPixels(0, 0, srcTex2D->mDesc.Width, srcTex2D->mDesc.Height, format, GL_UNSIGNED_BYTE, 0);
+			FormatToGL(srcTex2D->mTextureDesc.Format, internalFormat, format, type);
+			sdk->ReadPixels(0, 0, srcTex2D->mTextureDesc.Width, srcTex2D->mTextureDesc.Height, format, GL_UNSIGNED_BYTE, 0);
 		}
 
 		sdk->BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
@@ -665,7 +713,7 @@ vBOOL IGLCommandList::CreateReadableTexture2D(ITexture2D** ppTexture, IShaderRes
 	{
 		Safe_Release(pGLTexture);
 		pGLTexture = new IGLTexture2D();
-		pGLTexture->mDesc = srcTex2D->mDesc;
+		pGLTexture->mTextureDesc = srcTex2D->mTextureDesc;
 		pGLTexture->mIsReadable = true;
 		pGLTexture->mGlesTexture2D = pBufferId;
 

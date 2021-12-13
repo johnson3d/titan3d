@@ -49,15 +49,10 @@ public:
 		v3dxQuaternionRotationYawPitchRoll(this, p_y, p_x, p_z);
 	}
 	void getAxisRadianAngle(v3dxVector3 &v3, float &fAngle) const;
-	//inline void getEulerRadianAngles(float &p_x, float &p_y, float &p_z) const
-	//{
-	//	v3dxVector3 vAxis;float fAngle;
-	//	getAxisRadianAngle( vAxis , fAngle );
-	//	//vAxis...��
-	//}
-	// void eularToMe(float fRadX, float fRadY, float fRadZ);
+	
 	void fromRotationMatrix(const v3dxMatrix3& kRot);
 	void fromRotationMatrix(const v3dxMatrix4& kRot);
+	void fromRotationDMatrix(const v3dDMatrix4_t& kRot);
 
 	void toRotationMatrix(v3dxMatrix3& Matrix3) const;
 	void toRotationMatrix(v3dxMatrix4& Matrix4) const;
@@ -66,12 +61,9 @@ public:
 	void ToAngleAxis(float &rfAngle, v3dxVector3& rkAxis) const;
 
 	// void fromAxes (const v3dxVector3* akAxis);
-	//ͨ��3���ᣬ������Ԫ��
 	void fromAxes(const v3dxVector3& xAxis, const v3dxVector3& yAxis, const v3dxVector3& zAxis);
 	// void toAxis(v3dxVector3 *pvAxis) const;
-	//��Ԫ���õ�����������
 	void toAxis(v3dxVector3 &vAxisX, v3dxVector3 &vAxisY, v3dxVector3 &vAxisZ) const;
-	//�ֱ�õ�3����
 	v3dxVector3 xAxis(void);
 	v3dxVector3 yAxis(void);
 	v3dxVector3 zAxis(void);

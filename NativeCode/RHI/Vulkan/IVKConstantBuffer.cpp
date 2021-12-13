@@ -9,29 +9,20 @@ IVKConstantBuffer::IVKConstantBuffer()
 {
 	mBuffer = nullptr;
 	mMemory = nullptr;
-	mLayout = nullptr;
 }
 
 IVKConstantBuffer::~IVKConstantBuffer()
 {
-	auto rc = mRenderContext.GetPtr();
-	if (rc == nullptr)
-		return;
-	if (mBuffer != nullptr)
+	PostVkExecute([Buffer = mBuffer, Memory = mMemory](IVKRenderContext* rc)
 	{
-		vkDestroyBuffer(rc->mLogicalDevice, mBuffer, nullptr);
-		mBuffer = nullptr;
-	}
-	if (mMemory != nullptr)
-	{
-		vkFreeMemory(rc->mLogicalDevice, mMemory, nullptr);
-		mMemory = nullptr;
-	}
-	if (mLayout != nullptr)
-	{
-		vkDestroyDescriptorSetLayout(rc->mLogicalDevice, mLayout, nullptr);
-		mLayout = nullptr;
-	}
+		if (Buffer != nullptr)
+		{
+			vkDestroyBuffer(rc->mLogicalDevice, Buffer, nullptr);
+		}
+		VK_FreeGpuMemory(rc, Memory);
+	});
+	mBuffer = nullptr;
+	mMemory = nullptr;
 }
 
 bool IVKConstantBuffer::UpdateContent(ICommandList* cmd, void* pBuffer, UINT Size)
@@ -41,20 +32,21 @@ bool IVKConstantBuffer::UpdateContent(ICommandList* cmd, void* pBuffer, UINT Siz
 		return false;
 	ASSERT(Size <= Desc.Size);
 	void* data;
-	if (vkMapMemory(rc->mLogicalDevice, mMemory, 0, Desc.Size, 0, &data)!= VK_SUCCESS)
+	if (vkMapMemory(rc->mLogicalDevice, mMemory->GetDeviceMemory(), mMemory->Offset, Desc.Size, 0, &data)!= VK_SUCCESS)
 	{
 		return false;
 	}
 	memcpy(data, pBuffer, Size);
-	vkUnmapMemory(rc->mLogicalDevice, mMemory);
+	vkUnmapMemory(rc->mLogicalDevice, mMemory->GetDeviceMemory());
 	return true;
 }
 
 bool IVKConstantBuffer::Init(IVKRenderContext* rc, const IConstantBufferDesc* desc)
 {
+	mRenderContext.FromObject(rc);
 	Desc = *desc;
 
-	VkDescriptorSetLayoutBinding uboLayoutBinding = {};
+	/*VkDescriptorSetLayoutBinding uboLayoutBinding = {};
 	uboLayoutBinding.binding = desc->VSBindPoint;
 	uboLayoutBinding.descriptorCount = 1;
 	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -66,11 +58,14 @@ bool IVKConstantBuffer::Init(IVKRenderContext* rc, const IConstantBufferDesc* de
 	layoutInfo.bindingCount = 1;
 	layoutInfo.pBindings = &uboLayoutBinding;
 
+	VkDescriptorSetLayout				mLayout;
 	if (vkCreateDescriptorSetLayout(rc->mLogicalDevice, &layoutInfo, nullptr, &mLayout) != VK_SUCCESS) {
 		return  false;
-	}
+	}*/
 
-	return VK_CreateBuffer(rc, desc->Size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, mBuffer, mMemory);
+	if (false == VK_CreateBuffer(rc, desc->Size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, mBuffer, mMemory))
+		return false;
+	return true;
 }
 
 NS_END

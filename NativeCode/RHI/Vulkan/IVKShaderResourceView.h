@@ -14,11 +14,15 @@ public:
 
 public:
 	TObjectHandle<IVKRenderContext>		mRenderContext;
-	VkImageView							mImageView;
-	VkImage								mImage;
-
+	union
+	{
+		VkImageView						mImageView;
+		VkBufferView					mBufferView;
+	};
 	bool Init(IVKRenderContext* rc, const IShaderResourceViewDesc* desc);
-	bool Init(IVKRenderContext* rc, VkImage pBuffer, const ISRVDesc* desc);
+
+	virtual bool UpdateBuffer(IRenderContext* rc, const IGpuBuffer* buffer) override;
+	virtual void* GetAPIObject() override;
 };
 
 NS_END

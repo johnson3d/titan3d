@@ -14,18 +14,13 @@ IShaderResourceView::IShaderResourceView()
 
 IShaderResourceView::~IShaderResourceView()
 {
-	mTexture2D.Clear();
+	mBuffer.Clear();
 }
 
 
-EPixelFormat IShaderResourceView::GetTextureFormat()
+EPixelFormat IShaderResourceView::GetFormat()
 {
-	if (mTexture2D == nullptr)
-	{
-		return PXF_UNKNOWN;
-	}
-
-	return mTexture2D->mDesc.Format;
+	return mSrvDesc.Format;
 }
 
 NS_END

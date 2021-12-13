@@ -18,17 +18,10 @@
 #include "VirtualDevice/INullRenderSystem.h"
 #include "D3D11/ID11RenderSystem.h"
 #include "OpenGL/IGLRenderSystem.h"
-//#include "Vulkan/IVKRenderSystem.h"
-#define USE_VirtualDevice
-#define USE_D11
-#define USE_GL
-//#define USE_VK
+#include "Vulkan/IVKRenderSystem.h"
 #elif defined(PLATFORM_DROID)
 #include "OpenGL/IGLRenderSystem.h"
 //#include "Vulkan/IVKRenderSystem.h"
-#define USE_GL
-//#define USE_VK
-
 #elif defined(PLATFORM_IOS)
 #include "MacMetal/MTLRenderSystem.h"
 #endif

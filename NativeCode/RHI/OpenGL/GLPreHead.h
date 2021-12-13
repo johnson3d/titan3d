@@ -587,6 +587,7 @@ inline GLenum PrimitiveTypeToGL(EPrimitiveType type, UINT NumPrimitives, UINT* p
 	switch (type)
 	{
 	case EPT_PointList:
+		*pCount = NumPrimitives;
 		break;
 	case EPT_LineList:
 		*pCount = NumPrimitives * 2;

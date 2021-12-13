@@ -40,7 +40,7 @@ GLint GetStride_Local(INT rowBytesSize)
 
 bool IGLTexture2D::Init(IGLRenderContext* pCtx, const ITexture2DDesc* pDesc)
 {
-	mDesc = *pDesc;
+	mTextureDesc = *pDesc;
 	
 	std::shared_ptr<GLSdk> sdk(new GLSdk(TRUE));
 	//auto sdk = GLSdk::ImmSDK;
@@ -78,7 +78,7 @@ bool IGLTexture2D::Init(IGLRenderContext* pCtx, const ITexture2DDesc* pDesc)
 		default:
 			break;
 		}
-		sdk->TexImage2D(GL_TEXTURE_2D, 0, internalFormat, mDesc.Width, mDesc.Height, 0, format, type, 0);
+		sdk->TexImage2D(GL_TEXTURE_2D, 0, internalFormat, mTextureDesc.Width, mTextureDesc.Height, 0, format, type, 0);
 		sdk->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		sdk->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		sdk->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -93,7 +93,7 @@ bool IGLTexture2D::Init(IGLRenderContext* pCtx, const ITexture2DDesc* pDesc)
 
 		sdk->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
 
-		sdk->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mDesc.MipLevels - 1);
+		sdk->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mTextureDesc.MipLevels - 1);
 
 		sdk->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -101,17 +101,17 @@ bool IGLTexture2D::Init(IGLRenderContext* pCtx, const ITexture2DDesc* pDesc)
 
 		sdk->TexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, 0.f);
 
-		UINT width = mDesc.Width;
-		UINT height = mDesc.Height;
+		UINT width = mTextureDesc.Width;
+		UINT height = mTextureDesc.Height;
 
-		for (UINT i = 0; i < mDesc.MipLevels; i++)
+		for (UINT i = 0; i < mTextureDesc.MipLevels; i++)
 		{
-			INT rowBytesSize = GetRowBytesFromWidthAndFormat_Local(width, mDesc.Format);
+			INT rowBytesSize = GetRowBytesFromWidthAndFormat_Local(width, mTextureDesc.Format);
 			GLint stride = GetStride_Local(rowBytesSize);
 			sdk->PixelStorei(GL_UNPACK_ALIGNMENT, stride);
 
 
-			FormatToGL(mDesc.Format, internalFormat, format, type);
+			FormatToGL(mTextureDesc.Format, internalFormat, format, type);
 			if (pDesc->InitData != nullptr)
 				sdk->TexImage2D(GL_TEXTURE_2D, (GLint)i, internalFormat, width, height, 0, format, type, pDesc->InitData[i].pSysMem);
 			else
@@ -132,7 +132,7 @@ bool IGLTexture2D::Init(IGLRenderContext* pCtx, const ITexture2DDesc* pDesc)
 	return true;
 }
 
-vBOOL IGLTexture2D::Map(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
+vBOOL IGLTexture2D::MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
 {
 	if (mIsReadable == false)
 		return FALSE;
@@ -141,13 +141,13 @@ vBOOL IGLTexture2D::Map(ICommandList* cmd, int MipLevel, void** ppData, UINT* pR
 	cmd = cmd->GetContext()->GetImmCommandList();
 	GLSdk* sdk = ((IGLCommandList*)cmd)->mCmdList;
 	sdk->BindBuffer(GL_PIXEL_PACK_BUFFER, mGlesTexture2D);
-	*pRowPitch = ((mDesc.Width * GetPixelByteWidth(mDesc.Format) + 3) / 4) * 4;
-	UINT dataSize = (*pRowPitch) * mDesc.Height;
+	*pRowPitch = ((mTextureDesc.Width * GetPixelByteWidth(mTextureDesc.Format) + 3) / 4) * 4;
+	UINT dataSize = (*pRowPitch) * mTextureDesc.Height;
 	sdk->MapBufferRange(ppData, GL_PIXEL_PACK_BUFFER, 0, dataSize, GL_MAP_READ_BIT);
 	return (*ppData)!=nullptr;
 }
 
-void IGLTexture2D::Unmap(ICommandList* cmd, int MipLevel)
+void IGLTexture2D::UnmapMipmap(ICommandList* cmd, int MipLevel)
 {
 	if (mIsReadable == false)
 		return;
@@ -171,14 +171,14 @@ void IGLTexture2D::UpdateMipData(ICommandList* cmd, UINT level, void* pData, UIN
 	sdk->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	sdk->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);*/
 
-	INT rowBytesSize = GetRowBytesFromWidthAndFormat_Local(width, mDesc.Format);
+	INT rowBytesSize = GetRowBytesFromWidthAndFormat_Local(width, mTextureDesc.Format);
 	GLint stride = GetStride_Local(rowBytesSize);
 	sdk->PixelStorei(GL_UNPACK_ALIGNMENT, stride);
 
 	GLint format = GL_DEPTH_STENCIL;
 	GLint internalFormat = GL_DEPTH24_STENCIL8;
 	GLenum type = GL_UNSIGNED_INT_24_8;
-	FormatToGL(mDesc.Format, internalFormat, format, type);
+	FormatToGL(mTextureDesc.Format, internalFormat, format, type);
 	sdk->TexImage2D(GL_TEXTURE_2D, (GLint)level, internalFormat, width, height, 0, format, type, pData);
 
 	sdk->BindTexture(GL_TEXTURE_2D, 0);

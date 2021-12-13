@@ -1,7 +1,7 @@
 #include "ID11IndexBuffer.h"
 #include "ID11RenderContext.h"
 #include "ID11CommandList.h"
-#include "ID11UnorderedAccessView.h"
+#include "ID11GpuBuffer.h"
 
 #define new VNEW
 

@@ -10,6 +10,7 @@ IFrameBuffers::IFrameBuffers()
 {
 	memset(mRenderTargets, 0, sizeof(mRenderTargets));
 	m_pDepthStencilView = nullptr;
+	mSwapChainIndex = -1;
 }
 
 IFrameBuffers::~IFrameBuffers()

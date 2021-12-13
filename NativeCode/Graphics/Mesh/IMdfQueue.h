@@ -32,6 +32,19 @@ public:
 		mMdfQueue.push_back(t);
 	}
 	IMdfQueue* CloneMdfQueue();
+	void RemoveModifier(IModifier* p) {
+		for (auto i = mMdfQueue.begin(); i != mMdfQueue.end(); i++)
+		{
+			if (*i == p)
+			{
+				mMdfQueue.erase(i);
+				return;
+			}
+		}
+	}
+	void ClearModifiers() {
+		mMdfQueue.clear();
+	}
 };
 
 NS_END

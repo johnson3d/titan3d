@@ -11,114 +11,21 @@ NS_BEGIN
 RTTI_IMPL(EngineNS::IShaderDefinitions, EngineNS::VIUnknown);
 RTTI_IMPL(EngineNS::IShaderDesc, EngineNS::VIUnknown);
 
+IShaderDesc::IShaderDesc()
+{
+	ShaderType = EST_UnknownShader;
+	Reflector = new ShaderReflector();
+}
+
+IShaderDesc::IShaderDesc(EShaderType type)
+{
+	ShaderType = type;
+	Reflector = new ShaderReflector();
+}
+
 IShaderDesc::~IShaderDesc()
 {
 	Safe_Release(Reflector);
-}
-
-UINT IShaderDesc::GetCBufferNum() 
-{
-	if (Reflector == nullptr)
-		return 0;
-	return (UINT)Reflector->mCBDescArray.size();
-}
-
-UINT IShaderDesc::GetSRVNum() 
-{
-	if (Reflector == nullptr)
-		return 0;
-	return (UINT)Reflector->mTexBindInfoArray.size();
-}
-
-UINT IShaderDesc::GetSamplerNum() 
-{
-	if (Reflector == nullptr)
-		return 0;
-	return (UINT)Reflector->mSamplerBindInfoArray.size();
-}
-
-vBOOL IShaderDesc::GetCBufferDesc(UINT index, IConstantBufferDesc* info)
-{
-	if (Reflector == nullptr)
-		return FALSE;
-	if (index >= Reflector->mCBDescArray.size())
-		return FALSE;
-	const auto& cb = Reflector->mCBDescArray[index];
-
-	cb.CopyBaseData(info);
-
-	return TRUE;
-}
-
-vBOOL IShaderDesc::GetSRVDesc(UINT index, TSBindInfo* info)
-{
-	if (Reflector == nullptr)
-		return FALSE;
-	if (index >= Reflector->mTexBindInfoArray.size())
-		return FALSE;
-	const auto& cb = Reflector->mTexBindInfoArray[index];
-	info->Type = cb.Type;
-	info->BindCount = cb.BindCount;
-	info->PSBindPoint = cb.PSBindPoint;
-	info->VSBindPoint = cb.VSBindPoint;
-	info->CSBindPoint = cb.CSBindPoint;
-
-	return TRUE;
-}
-
-vBOOL IShaderDesc::GetSamplerDesc(UINT index, TSBindInfo* info)
-{
-	if (Reflector == nullptr)
-		return FALSE;
-	if (index >= Reflector->mCBDescArray.size())
-		return FALSE;
-	const auto& cb = Reflector->mSamplerBindInfoArray[index];
-	info->Type = cb.Type;
-	info->BindCount = cb.BindCount;
-	info->PSBindPoint = cb.PSBindPoint;
-	info->VSBindPoint = cb.VSBindPoint;
-	info->CSBindPoint = cb.CSBindPoint;
-
-	return TRUE;
-}
-
-UINT IShaderDesc::FindCBufferDesc(const char* name) 
-{
-	if (Reflector == nullptr)
-		return 0;
-
-	for (UINT i = 0; i < (UINT)Reflector->mCBDescArray.size(); i++)
-	{
-		if (Reflector->mCBDescArray[i].Name == name)
-			return i;
-	}
-	return -1;
-}
-
-UINT IShaderDesc::FindSRVDesc(const char* name) 
-{
-	if (Reflector == nullptr)
-		return 0;
-
-	for (UINT i = 0; i < (UINT)Reflector->mTexBindInfoArray.size(); i++)
-	{
-		if (Reflector->mTexBindInfoArray[i].Name == name)
-			return i;
-	}
-	return -1;
-}
-
-UINT IShaderDesc::FindSamplerDesc(const char* name) 
-{
-	if (Reflector == nullptr)
-		return 0;
-
-	for (UINT i = 0; i < (UINT)Reflector->mSamplerBindInfoArray.size(); i++)
-	{
-		if (Reflector->mSamplerBindInfoArray[i].Name == name)
-			return i;
-	}
-	return -1;
 }
 
 void IShaderDesc::Save2Xnd(XndNode* node, DWORD platforms)
@@ -154,7 +61,17 @@ void IShaderDesc::Save2Xnd(XndNode* node, DWORD platforms)
 		metal->EndWrite();
 	}
 
-	if (Reflector != nullptr)
+	if (SpirV.size() > 0)
+	{
+		auto metal = node->GetOrAddAttribute("SPIRV", 0, 0);
+		metal->BeginWrite();
+		len = (UINT)SpirV.size();
+		metal->Write(&len, sizeof(UINT));
+		metal->Write(&SpirV[0], len * sizeof(UINT));
+		metal->EndWrite();
+	}
+
+	/*if (Reflector != nullptr)
 	{
 		auto rflct = node->GetOrAddAttribute("Reflector", 0, 0);
 		rflct->BeginWrite();
@@ -189,7 +106,7 @@ void IShaderDesc::Save2Xnd(XndNode* node, DWORD platforms)
 			rflct->Write(samp->Name);
 		}
 		rflct->EndWrite();
-	}
+	}*/
 }
 
 vBOOL IShaderDesc::LoadXnd(XndNode* node)
@@ -208,7 +125,7 @@ vBOOL IShaderDesc::LoadXnd(XndNode* node)
 		dxbc->EndRead();
 	}
 
-	if (IRenderSystem::Instance->mRHIType == RHT_OGL)
+	if (IRenderSystem::Instance->mRHIType == RHT_OGL || IRenderSystem::Instance->mRHIType == RHT_VULKAN)
 	{
 		auto gles = node->TryGetAttribute("ES300");
 		if (gles == nullptr)
@@ -220,6 +137,19 @@ vBOOL IShaderDesc::LoadXnd(XndNode* node)
 		gles->Read(&Es300Code[0], len);
 		//Es300Code[len] = '\'
 		gles->EndRead();
+	}
+
+	if (IRenderSystem::Instance->mRHIType == RHT_VULKAN)
+	{
+		auto spirvIR = node->TryGetAttribute("SPIRV");
+		if (spirvIR == nullptr)
+			return FALSE;
+
+		spirvIR->BeginRead();
+		spirvIR->Read(&len, sizeof(UINT));
+		SpirV.resize(len);
+		spirvIR->Read(&SpirV[0], len * sizeof(UINT));
+		spirvIR->EndRead();
 	}
 
 	if (IRenderSystem::Instance->mRHIType == RHIType_Metal)
@@ -235,7 +165,7 @@ vBOOL IShaderDesc::LoadXnd(XndNode* node)
 		metal->EndRead();
 	}
 
-	auto rflct = node->TryGetAttribute("Reflector");
+	/*auto rflct = node->TryGetAttribute("Reflector");
 	if (rflct != nullptr)
 	{
 		Reflector = new ShaderReflector();
@@ -276,7 +206,7 @@ vBOOL IShaderDesc::LoadXnd(XndNode* node)
 			rflct->Read(samp->Name);
 		}
 		rflct->EndRead();
-	}
+	}*/
 
 	return TRUE;
 }
@@ -288,93 +218,6 @@ IShader::IShader()
 
 IShader::~IShader()
 {
-}
-
-UINT32 IShader::GetConstantBufferNumber() const
-{
-	if (mDesc == nullptr || mDesc->Reflector == nullptr)
-		return 0;
-	return (UINT32)mDesc->Reflector->mCBDescArray.size();
-}
-
-bool IShader::GetConstantBufferDesc(UINT32 Index, IConstantBufferDesc* desc)
-{
-	if (mDesc == nullptr || mDesc->Reflector == nullptr)
-		return false;
-	if (Index >= mDesc->Reflector->mCBDescArray.size())
-		return false;
-	*desc = mDesc->Reflector->mCBDescArray[Index];
-	return true;
-}
-
-const IConstantBufferDesc* IShader::FindCBufferDesc(const char* name)
-{
-	if (mDesc == nullptr || mDesc->Reflector == nullptr)
-		return nullptr;
-	for (size_t i=0;i<mDesc->Reflector->mCBDescArray.size();i++)
-	{
-		if (mDesc->Reflector->mCBDescArray[i].Name == name)
-			return &mDesc->Reflector->mCBDescArray[i];
-	}
-	return nullptr;
-}
-
-UINT IShader::GetShaderResourceNumber() const
-{
-	if (mDesc == nullptr || mDesc->Reflector == nullptr)
-		return 0;
-	return (UINT)mDesc->Reflector->mTexBindInfoArray.size();
-}
-
-bool IShader::GetShaderResourceBindInfo(UINT Index, TSBindInfo* info) const
-{
-	if (mDesc == nullptr || mDesc->Reflector == nullptr)
-		return false;
-	if (Index >= mDesc->Reflector->mTexBindInfoArray.size())
-		return false;
-	*info = mDesc->Reflector->mTexBindInfoArray[Index];
-	return true;
-}
-
-const TSBindInfo* IShader::FindTextureBindInfo(const char* name)
-{
-	if (mDesc == nullptr || mDesc->Reflector == nullptr)
-		return nullptr;
-	for (size_t i = 0; i < mDesc->Reflector->mTexBindInfoArray.size(); i++)
-	{
-		if (mDesc->Reflector->mTexBindInfoArray[i].Name == name)
-			return &mDesc->Reflector->mTexBindInfoArray[i];
-	}
-	return nullptr;
-}
-
-UINT IShader::GetSamplerNumber() const
-{
-	if (mDesc == nullptr || mDesc->Reflector == nullptr)
-		return 0;
-	return (UINT)mDesc->Reflector->mSamplerBindInfoArray.size();
-}
-
-bool IShader::GetSamplerBindInfo(UINT Index, TSBindInfo* info) const
-{
-	if (mDesc == nullptr || mDesc->Reflector == nullptr)
-		return false;
-	if (Index >= mDesc->Reflector->mSamplerBindInfoArray.size())
-		return false;
-	*info = mDesc->Reflector->mSamplerBindInfoArray[Index];
-	return true;
-}
-
-const TSBindInfo* IShader::FindSamplerBindInfo(const char* name)
-{
-	if (mDesc == nullptr || mDesc->Reflector == nullptr)
-		return nullptr;
-	for (size_t i = 0; i < mDesc->Reflector->mSamplerBindInfoArray.size(); i++)
-	{
-		if (mDesc->Reflector->mSamplerBindInfoArray[i].Name == name)
-			return &mDesc->Reflector->mSamplerBindInfoArray[i];
-	}
-	return nullptr;
 }
 
 void IShaderDefinitions::ClearDefines()

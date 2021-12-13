@@ -9,8 +9,8 @@ RTTI_IMPL(EngineNS::ICamera, EngineNS::VIUnknown);
 ICamera::ICamera()
 {
 	mIsOrtho = false;
-	mOrthoWidth = 0;
-	mOrthoHeight = 0;
+	mWidth = 0;
+	mHeight = 0;
 	mPositionId = -1;
 	mLookAtId = -1;
 	mDirectionId = -1;
@@ -20,6 +20,7 @@ ICamera::ICamera()
 	mViewInverseId = -1;
 	mProjectionMatrixId = -1;
 	mID_ZFar = -1;
+	mCameraOffset = -1;
 	
 	mLogicData = new CameraData();
 	mRenderData = new CameraData();
@@ -28,8 +29,8 @@ ICamera::ICamera()
 	mZNear = 0.1f;
 	mZFar = 500.0f;
 	PerspectiveFovLH(mFov, 800.0f, 600.0f, mZNear, mZFar);
-	v3dxVector3 eye(0, 10, -10);
-	v3dxVector3 lookAt(0, 0, 0);
+	v3dxDVector3 eye(0, 10, -10);
+	v3dxDVector3 lookAt(0, 0, 0);
 	v3dxVector3 up(0, 11, 0);
 	LookAtLH(&eye, &lookAt, &up);
 }
@@ -65,7 +66,10 @@ void ICamera::BindConstBuffer(IRenderContext* rc, IConstantBuffer* cb)
 		mProjectionMatrixId = mCBuffer->FindVar("PrjMtx");
 		mProjectionInverseId = mCBuffer->FindVar("PrjInvMtx");
 
+		mID_ZNear = mCBuffer->FindVar("gZNear");
 		mID_ZFar = mCBuffer->FindVar("gZFar");
+
+		mCameraOffset = mCBuffer->FindVar("CameraOffset");
 
 		UpdateConstBufferData(rc, TRUE);
 	}
@@ -78,8 +82,10 @@ void ICamera::UpdateConstBufferData(IRenderContext* rc, vBOOL bImm)
 	memcpy(mRenderData, mLogicData, sizeof(CameraData));
 	if (mCBuffer != nullptr)
 	{
-		mCBuffer->SetVarValuePtr(mPositionId, &mLogicData->mPosition, sizeof(mLogicData->mPosition), 0);
-		mCBuffer->SetVarValuePtr(mLookAtId, &mLogicData->mLookAt, sizeof(mLogicData->mLookAt), 0);
+		auto pos = mLogicData->GetLocalPosition();
+		mCBuffer->SetVarValuePtr(mPositionId, &pos, sizeof(pos), 0);
+		auto lookat = mLogicData->GetLocalLookAt();
+		mCBuffer->SetVarValuePtr(mLookAtId, &lookat, sizeof(lookat), 0);
 		mCBuffer->SetVarValuePtr(mDirectionId, &mLogicData->mDirection, sizeof(mLogicData->mDirection), 0);
 		mCBuffer->SetVarValuePtr(mRightId, &mLogicData->mRight, sizeof(mLogicData->mRight), 0);
 		mCBuffer->SetVarValuePtr(mUpId, &mLogicData->mUp, sizeof(mLogicData->mUp), 0);
@@ -101,7 +107,11 @@ void ICamera::UpdateConstBufferData(IRenderContext* rc, vBOOL bImm)
 		{
 			mZFar = 500.0f;
 		}*/
+		mCBuffer->SetVarValuePtr(mID_ZNear, &mZNear, sizeof(mZNear), 0);
 		mCBuffer->SetVarValuePtr(mID_ZFar, &mZFar, sizeof(mZFar), 0);
+
+		auto cameraOffset = GetMatrixStartPosition().ToSingleVector();
+		mCBuffer->SetVarValuePtr(mCameraOffset, &cameraOffset, sizeof(cameraOffset), 0);
 
 		mCBuffer->UpdateDrawPass(rc->GetImmCommandList(), bImm);
 	}
@@ -172,7 +182,7 @@ void ICamera::UpdateFrustum()
 			v3dxVec3TransformCoord(&vec[i], &vecFrustum[i], &mLogicData->mViewInverse);
 	}
 
-	mFrustum.m_vTipPt = mLogicData->mPosition;
+	mFrustum.m_vTipPt = mLogicData->GetLocalPosition();
 	mFrustum.buildFrustum(vec);
 }
 
@@ -188,8 +198,8 @@ void ICamera::UpdateFrustumOrtho()
 	4-----5
 	*/
 	float fH, fW;
-	fH = mOrthoHeight /2;
-	fW = mOrthoWidth / 2;
+	fH = mHeight /2;
+	fW = mWidth / 2;
 	v3dxVector3 vecFrustum[8];
 	vecFrustum[2].setValue(-fW, fH, mZNear);
 	//	avStart[ENUM_FRUSTUMCN_LEFTTOP] += m_vCameraPt;
@@ -212,7 +222,8 @@ void ICamera::UpdateFrustumOrtho()
 	for (INT i = 0; i < 8; i++)
 		v3dxVec3TransformCoord(&vec[i], &vecFrustum[i], &mLogicData->mViewInverse);
 
-	mFrustum.m_vTipPt = mLogicData->mPosition;
+	mFrustum.mOffset = mLogicData->mMatrixStartPosition;
+	mFrustum.m_vTipPt = mLogicData->GetLocalPosition();
 	mFrustum.buildFrustum(vec);
 }
 
@@ -235,6 +246,9 @@ void ICamera::PerspectiveFovLH(float fov, float width, float height, float zMin,
 	mZFar = zMax;
 
 	//ClampZfar(mZNear, mZFar);
+
+	mWidth = width;
+	mHeight = height;
 
 	mFov = fov;
 	mAspect = width / height;
@@ -262,8 +276,8 @@ void ICamera::MakeOrtho(float w, float h, float zn, float zf)
 {
 	mIsOrtho = true;
 
-	mOrthoWidth = w;
-	mOrthoHeight = h;
+	mWidth = w;
+	mHeight = h;
 	mZNear = zn;
 	mZFar = zf;
 	
@@ -310,11 +324,13 @@ void ICamera::DoOrthoProjectionForShadow(float w, float h, float znear, float zf
 	mLogicData->mToViewPortMatrix = mLogicData->mToViewPortMatrix;
 }
 
-void ICamera::LookAtLH(const v3dxVector3* eye, const v3dxVector3* lookAt, const v3dxVector3* up)
+void ICamera::LookAtLH(const v3dxDVector3* eye, const v3dxDVector3* lookAt, const v3dxVector3* up)
 {
+	//mLogicData->mMatrixStartPosition = v3dxDVector3(0,0,0);
 	mLogicData->mPosition = *eye;
 	mLogicData->mLookAt = *lookAt;
-	mLogicData->mDirection = mLogicData->mLookAt - mLogicData->mPosition;
+	//mLogicData->mDirection = (mLogicData->mLookAt - mLogicData->mPosition);
+	mLogicData->mDirection = (mLogicData->mLookAt - mLogicData->mPosition).ToSingleVector();
 
 	v3dxVec3Cross(&mLogicData->mRight, up, &mLogicData->mDirection);
 	v3dxVec3Cross(&mLogicData->mUp, &mLogicData->mDirection, &mLogicData->mRight);
@@ -323,7 +339,13 @@ void ICamera::LookAtLH(const v3dxVector3* eye, const v3dxVector3* lookAt, const 
 	mLogicData->mRight.normalize();
 	mLogicData->mUp.normalize();
 
-	v3dxMatrixLookAtLH(&mLogicData->mViewMatrix, eye, lookAt, up);
+	v3dxVector3 localEye, localLookAt;
+	localEye = (mLogicData->mPosition - mLogicData->mMatrixStartPosition).ToSingleVector();
+	localLookAt = (mLogicData->mLookAt - mLogicData->mMatrixStartPosition).ToSingleVector();
+	//localEye = mLogicData->mPosition.ToSingleVector();
+	//localLookAt = mLogicData->mLookAt.ToSingleVector();
+
+	v3dxMatrixLookAtLH(&mLogicData->mViewMatrix, &localEye, &localLookAt, up);
 	v3dxMatrix4Inverse(&mLogicData->mViewInverse, &mLogicData->mViewMatrix, NULL);
 
 	mLogicData->mViewProjection = mLogicData->mViewMatrix * mLogicData->mProjectionMatrix;

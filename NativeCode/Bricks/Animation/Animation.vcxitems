@@ -13,16 +13,4 @@
   <ItemGroup>
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Pose\IBonePose.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Pose\ISkeletonPose.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Skeleton\IBone.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Skeleton\IPartialSkeleton.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Pose\IBonePose.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Pose\ISkeletonPose.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Skeleton\IBone.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Skeleton\IPartialSkeleton.h" />
-  </ItemGroup>
 </Project>

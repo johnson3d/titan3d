@@ -8,12 +8,13 @@ NS_BEGIN
 
 IRenderTargetView::IRenderTargetView()
 {
+	memset(&Desc, 0 , sizeof(Desc));
 }
 
 
 IRenderTargetView::~IRenderTargetView()
 {	
-	m_refTexture2D.Clear();
+	RefGpuBuffer.Clear();
 }
 
 NS_END

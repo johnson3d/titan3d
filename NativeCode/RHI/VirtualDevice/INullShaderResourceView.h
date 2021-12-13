@@ -15,7 +15,10 @@ public:
 public:
 	TObjectHandle<INullRenderContext>		mRenderContext;
 	
-	virtual bool UpdateTexture2D(IRenderContext* rc, const ITexture2D* pTexture2D) override;
+	virtual bool UpdateBuffer(IRenderContext* rc, const IGpuBuffer* buffer) override;
+	virtual void* GetAPIObject() override {
+		return this;
+	}
 	bool Init(INullRenderContext* rc, const IShaderResourceViewDesc* desc);
 };
 

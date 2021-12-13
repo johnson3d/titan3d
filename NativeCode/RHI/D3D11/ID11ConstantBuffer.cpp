@@ -50,7 +50,7 @@ bool ID11ConstantBuffer::UpdateContent(ICommandList* cmd, void* pBuffer, UINT Si
 
 	if (Size > Desc.Size || pBuffer == NULL)
 		return false;
-	RHI_ASSERT(Size == Desc.Size);
+	ASSERT(Size == Desc.Size);
 
 	auto refCmdList = (ID11CommandList*)cmd;
 	//refCmdList->mDeferredContext->UpdateSubresource(mBuffer, 0, NULL, pBuffer, 0, 0);

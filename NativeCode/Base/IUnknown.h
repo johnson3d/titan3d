@@ -20,35 +20,73 @@ NS_BEGIN
 struct ObjectHandle;
 struct IResourceState;
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-VIUnknown
+class TR_CLASS()
+	VIUnknownBase
+{
+protected:
+	std::atomic<int>	RefCount;
+public:
+	VIUnknownBase(const VIUnknownBase & rh)
+	{
+		assert(false);
+	}
+	inline VIUnknownBase& operator = (const VIUnknownBase& rh) {
+		assert(false);
+		return *this;
+	}
+	VIUnknownBase()
+	{
+		RefCount = 1;
+	}
+	virtual ~VIUnknownBase() {}
+
+	virtual long AddRef()
+	{
+		return ++RefCount;
+	}
+
+	virtual void Release()
+	{
+		RefCount--;
+		if (RefCount == 0)
+		{
+			DeleteThis();
+		}
+		return;
+	}
+	virtual void DeleteThis();
+};
+
+class TR_CLASS()
+	VIUnknown : public VIUnknownBase
 {
 private:
-	ObjectHandle * Handle;
-	std::atomic<int>	RefCount;
+	ObjectHandle* Handle;
 public:
 	static INT64	EngineTime;
 public:
 	static CoreRtti _RttiInfo;
 	static const vIID __UID__ = 0x0000000000000000;
 	virtual CoreRtti* GetRtti() { return &_RttiInfo; }
-	VIUnknown(const VIUnknown& rh)
+	
+	VIUnknown();
+	virtual ~VIUnknown();
+	virtual long AddRef() override
 	{
-		assert(false);
+		return ++RefCount;
 	}
-	inline VIUnknown& operator = (const VIUnknown& rh) {
-		assert(false);
-		return *this;
+	virtual void Release() override
+	{
+		RefCount--;
+		if (RefCount == 0)
+		{
+			DeleteThis();
+		}
 	}
-
-	virtual long AddRef();
-	virtual void Release();
-
-	virtual void DeleteThis();
-
-	virtual void Cleanup() {}
 
 	virtual Hash64 GetHash64();
+	virtual void Cleanup();
+	
 	virtual IResourceState* GetResourceState() {
 		return nullptr;
 	}
@@ -59,11 +97,8 @@ public:
 		return TRUE;
 	}
 	ObjectHandle* GetHandle();
-	
 
-	vfxObjectLocker* GetLocker(int index = 0) const;
-	VIUnknown();
-	virtual ~VIUnknown();
+	vfxObjectLocker* GetLocker(int index = 0) const;	
 };
 
 template<class T>
@@ -241,14 +276,11 @@ public:
 			return false;
 		return true;
 	}
-	AutoRef<T> GetPtr() const
+	T* GetPtr() const
 	{
 		if (Handle == nullptr)
 			return nullptr;
-		if (Handle->mPtrAddress == nullptr)
-			return nullptr;
-		Handle->mPtrAddress->AddRef();
-		return AutoRef<T>((T*)Handle->mPtrAddress);
+		return (T*)Handle->mPtrAddress;
 	}
 };
 

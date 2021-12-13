@@ -13,7 +13,7 @@ public:
 	ID11CommandList();
 	~ID11CommandList();
 
-	virtual void BeginCommand() override;
+	virtual bool BeginCommand() override;
 	
 	virtual void EndCommand() override;
 
@@ -22,7 +22,7 @@ public:
 	virtual void ClearMRT(const std::pair<BYTE, DWORD>* ClearColors, int ColorNum,
 		vBOOL bClearDepth, float Depth, vBOOL bClearStencil, UINT32 Stencil) override;*/
 	
-	virtual void BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer, const char* debugName) override;
+	virtual bool BeginRenderPass(IFrameBuffers* pFrameBuffer, const IRenderPassClears* passClears, const char* debugName) override;
 	//virtual void BuildRenderPass(vBOOL bImmCBuffer, UINT* limitter, IPass** ppPass) override;
 	virtual void EndRenderPass() override;
 	
@@ -37,8 +37,7 @@ public:
 	virtual void CSSetUnorderedAccessView(UINT32 Index, IUnorderedAccessView* view, const UINT *pUAVInitialCounts) override;
 	virtual void CSSetConstantBuffer(UINT32 Index, IConstantBuffer* cbuffer) override;
 	virtual void CSDispatch(UINT x, UINT y, UINT z) override;
-	virtual void PSSetShaderResource(UINT32 Index, IShaderResourceView* Texture) override;
-	virtual void PSSetSampler(UINT32 Index, ISamplerState* Sampler) override;
+	virtual void CSDispatchIndirect(IGpuBuffer* pBufferForArgs, UINT32 AlignedByteOffsetForArgs) override;
 	virtual void SetScissorRect(IScissorRect* sr) override;
 	virtual void SetVertexBuffer(UINT32 StreamIndex, IVertexBuffer* VertexBuffer, UINT32 Offset, UINT Stride) override;
 	virtual void SetIndexBuffer(IIndexBuffer* IndexBuffer) override;
@@ -51,7 +50,11 @@ public:
 	virtual void SetViewport(IViewPort* vp) override;
 	virtual void VSSetConstantBuffer(UINT32 Index, IConstantBuffer* CBuffer) override;
 	virtual void PSSetConstantBuffer(UINT32 Index, IConstantBuffer* CBuffer) override;
-	virtual void SetRenderPipeline(IRenderPipeline* pipeline) override;
+	virtual void VSSetShaderResource(UINT32 Index, IShaderResourceView* pSRV) override;
+	virtual void PSSetShaderResource(UINT32 Index, IShaderResourceView* pSRV) override;
+	virtual void VSSetSampler(UINT32 Index, ISamplerState* Sampler) override;
+	virtual void PSSetSampler(UINT32 Index, ISamplerState* Sampler) override;
+	virtual void SetRenderPipeline(IRenderPipeline* pipeline, EPrimitiveType dpType) override;
 	virtual vBOOL CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers) override;
 
 	virtual void Signal(IFence* fence, int value) override;

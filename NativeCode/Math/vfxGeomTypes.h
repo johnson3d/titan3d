@@ -37,6 +37,14 @@ struct v3dVector3_t
 	float				z;
 };
 
+class v3dDVector3_t
+{
+public:
+	double x;
+	double y;
+	double z;
+};
+
 struct v3dVector4_t
 {
 	union
@@ -71,6 +79,63 @@ struct v3dMatrix4_t
 		};
 		float m[4][4];
 	};
+};
+
+struct v3dDMatrix4_t
+{
+	union
+	{
+		struct
+		{
+			double				m11, m12, m13, m14;
+			double				m21, m22, m23, m24;
+			double				m31, m32, m33, m34;
+			double				m41, m42, m43, m44;
+		};
+		double m[4][4];
+	};
+	inline void identity()
+	{
+		m12 = m13 = m14 =
+			m21 = m23 = m24 =
+			m31 = m32 = m34 =
+			m41 = m42 = m43 = 0.0;
+		m11 = m22 = m33 = m44 = 1.0;
+	}
+	inline void ExtractionTrans(v3dDVector3_t& vTransPos) const
+	{
+		vTransPos.x = m41;
+		vTransPos.y = m42;
+		vTransPos.z = m43;
+	}
+	inline void ExtractionScale(v3dVector3_t& vScale) const
+	{
+		//vScale.x = sqrt(m11*m11 + m21*m21 + m31*m31); // getRow1().getLength();
+		//vScale.y = sqrt(m12*m12 + m22*m22 + m32*m32);
+		//vScale.z = sqrt(m13*m13 + m23*m23 + m33*m33);
+		vScale.x = (float)sqrt(m11 * m11 + m12 * m12 + m13 * m13); // getRow1().getLength();
+		vScale.y = (float)sqrt(m21 * m21 + m22 * m22 + m23 * m23);
+		vScale.z = (float)sqrt(m31 * m31 + m32 * m32 + m33 * m33);
+	}
+	inline v3dDMatrix4_t operator * (const v3dDMatrix4_t& Mat) const
+	{
+		v3dDMatrix4_t mat;
+		DMatrix4Mul(&mat, this, &Mat);
+		return mat;
+	}
+
+private:
+	static inline v3dDMatrix4_t* DMatrix4Mul(v3dDMatrix4_t* pOut, const v3dDMatrix4_t* mat1, const v3dDMatrix4_t* mat2) {
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				pOut->m[i][j] = mat1->m[i][0] * mat2->m[0][j] +
+					mat1->m[i][1] * mat2->m[1][j] +
+					mat1->m[i][2] * mat2->m[2][j] +
+					mat1->m[i][3] * mat2->m[3][j];
+			}
+		}
+		return pOut;
+	}
 };
 
 struct v3dMatrix3_t

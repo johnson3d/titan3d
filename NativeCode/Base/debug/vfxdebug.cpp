@@ -36,15 +36,13 @@ int MessageBoxA(
 }
 #endif
 
-typedef void (WINAPI *FAssertEvent)(const char* str, const char* file, int line);
 
-FAssertEvent GAssertEvent = nullptr;
 
 void NoWin_Assert(const char* str, const char* file, int line)
 {
-	if (GAssertEvent != nullptr)
+	if (EngineNS::CoreSDK::mAssertEvent != nullptr)
 	{
-		GAssertEvent(str, file, line);
+		EngineNS::CoreSDK::mAssertEvent(str, file, line);
 	}
 	else
 	{

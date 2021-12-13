@@ -8,6 +8,7 @@ NS_BEGIN
 
 struct IDrawCallDesc;
 class IDrawCall;
+class IComputeDrawcall;
 
 struct ISwapChainDesc;
 class ISwapChain;
@@ -52,6 +53,9 @@ class ITexture2D;
 struct IFrameBuffersDesc;
 class IFrameBuffers;
 
+struct IRenderPassDesc;
+class IRenderPass;
+
 struct IConstantBufferDesc;
 class IConstantBuffer;
 
@@ -74,14 +78,14 @@ struct IGpuBufferDesc;
 class IGpuBuffer;
 
 class IFence;
-struct ISRVDesc;
+class ISemaphore;
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 IRenderContextDesc
 {
 	IRenderContextDesc()
 	{
-
+		SetDefault();
 	}
 	TR_FUNCTION()
 	void SetDefault()
@@ -124,10 +128,14 @@ IRenderContextDesc
 	}
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 IRenderContextCaps
 {
 	IRenderContextCaps()
+	{
+		SetDefault();
+	}
+	void SetDefault()
 	{
 		ShaderModel = 5;
 		MaxShaderStorageBlockSize = 1024 * 1024 *4;
@@ -147,6 +155,10 @@ IRenderContextCaps
 		SupportHalfRT = 1;
 		SupportFloatTexture = 1;
 		SupportHalfTexture = 1;
+		SupportFloatTextureLinearFilter = 0;
+		SupportHalfTextureLinearFilter = 1;
+
+		MaxTexture2DArray = 1024;
 	}
 	int ShaderModel;
 	int MaxShaderStorageBlockSize;
@@ -174,18 +186,21 @@ IRenderContextCaps
 
 	int SupportFloatTexture;
 	int SupportHalfTexture;
+
+	int SupportFloatTextureLinearFilter;
+	int SupportHalfTextureLinearFilter;
+
+	int MaxTexture2DArray;
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IRenderContext : public VIUnknown
 {
 public:
 	IRenderContext();
 	~IRenderContext();
 
-	TR_FUNCTION()
 	virtual ERHIType GetRHIType() = 0;
-	TR_FUNCTION()
 	virtual int GetShaderModel() {
 		return 5;
 	}
@@ -194,81 +209,59 @@ public:
 		mChooseShaderModel = sm;
 	}
 
-	TR_FUNCTION()
 	void BeginFrame();
-	TR_FUNCTION()
 	void EndFrame();
 
-	TR_FUNCTION()
 	virtual ISwapChain* CreateSwapChain(const ISwapChainDesc* desc) = 0;
-	TR_FUNCTION()
 	virtual ICommandList* CreateCommandList(const ICommandListDesc* desc) = 0;
 	
-	TR_FUNCTION()
 	virtual IDrawCall* CreateDrawCall() = 0;
-	TR_FUNCTION()
+	virtual IComputeDrawcall* CreateComputeDrawcall() = 0;
 	virtual IRenderPipeline* CreateRenderPipeline(const IRenderPipelineDesc* desc) = 0;
 
-	TR_FUNCTION()
+	virtual IGpuBuffer* CreateGpuBuffer(const IGpuBufferDesc* desc, void* pInitData) = 0;
+
 	virtual IVertexBuffer* CreateVertexBuffer(const IVertexBufferDesc* desc) = 0;
-	TR_FUNCTION()
 	virtual IIndexBuffer* CreateIndexBuffer(const IIndexBufferDesc* desc) = 0;
-	TR_FUNCTION()
 	virtual IInputLayout* CreateInputLayout(const IInputLayoutDesc* desc) = 0;
-	TR_FUNCTION()
 	virtual IGeometryMesh* CreateGeometryMesh() = 0;
 
-	TR_FUNCTION()
 	virtual IIndexBuffer* CreateIndexBufferFromBuffer(const IIndexBufferDesc* desc, const IGpuBuffer* pBuffer) = 0;
-	TR_FUNCTION()
 	virtual IVertexBuffer* CreateVertexBufferFromBuffer(const IVertexBufferDesc* desc, const IGpuBuffer* pBuffer) = 0;
-	
-	TR_FUNCTION()
+
+	virtual IRenderPass* CreateRenderPass(const IRenderPassDesc* desc) = 0;
 	virtual IFrameBuffers* CreateFrameBuffers(const IFrameBuffersDesc* desc) = 0;
-	TR_FUNCTION()
+	
 	virtual IRenderTargetView* CreateRenderTargetView(const IRenderTargetViewDesc* desc) = 0;
-	TR_FUNCTION()
+	
 	virtual IDepthStencilView* CreateDepthRenderTargetView(const IDepthStencilViewDesc* desc) = 0;
-	TR_FUNCTION()
+
 	virtual ITexture2D* CreateTexture2D(const ITexture2DDesc* desc) = 0;
-	TR_FUNCTION()
-	virtual IShaderResourceView* CreateShaderResourceView(const IShaderResourceViewDesc* desc) = 0;
-	TR_FUNCTION()
-	virtual IGpuBuffer* CreateGpuBuffer(const IGpuBufferDesc* desc, void* pInitData) = 0;
-	TR_FUNCTION()
-	virtual IShaderResourceView* CreateShaderResourceViewFromBuffer(IGpuBuffer* pBuffer, const ISRVDesc* desc) = 0;
-	TR_FUNCTION()
+	
+	virtual IShaderResourceView* CreateShaderResourceView(const IShaderResourceViewDesc* desc) = 0;	
+	//virtual IShaderResourceView* CreateShaderResourceViewFromBuffer(IGpuBuffer* pBuffer, const ISRVDesc* desc) = 0;
+
 	virtual IUnorderedAccessView* CreateUnorderedAccessView(IGpuBuffer* pBuffer, const IUnorderedAccessViewDesc* desc) = 0;
 
-	TR_FUNCTION()
 	virtual IShaderResourceView* LoadShaderResourceView(const char* file) = 0;
-	TR_FUNCTION()
 	virtual ISamplerState* CreateSamplerState(const ISamplerStateDesc* desc) = 0;
-	TR_FUNCTION()
 	virtual IRasterizerState* CreateRasterizerState(const IRasterizerStateDesc* desc) = 0;
-	TR_FUNCTION()
 	virtual IDepthStencilState* CreateDepthStencilState(const IDepthStencilStateDesc* desc) = 0;
-	TR_FUNCTION()
 	virtual IBlendState* CreateBlendState(const IBlendStateDesc* desc) = 0;
 	//shader
-	TR_FUNCTION()
 	virtual IShaderProgram* CreateShaderProgram(const IShaderProgramDesc* desc) = 0;
-	TR_FUNCTION()
 	virtual IVertexShader* CreateVertexShader(const IShaderDesc* desc) = 0;
-	TR_FUNCTION()
 	virtual IPixelShader* CreatePixelShader(const IShaderDesc* desc) = 0;
-	TR_FUNCTION()
 	virtual IComputeShader* CreateComputeShader(const IShaderDesc* desc) = 0;
 	
-	TR_FUNCTION()
 	virtual IConstantBuffer* CreateConstantBuffer(const IConstantBufferDesc* desc) = 0;
 
-	TR_FUNCTION()
+	IConstantBuffer* CreateConstantBuffer(IShaderProgram* program, const char* name);
 	IConstantBuffer* CreateConstantBuffer(IShaderProgram* program, UINT index);
-	TR_FUNCTION()
 	IConstantBuffer* CreateConstantBuffer2(IShaderDesc* program, UINT index);
 
 	virtual IFence* CreateFence() { return nullptr; }
+	virtual ISemaphore* CreateGpuSemaphore() { return nullptr; }
 
 	virtual ICommandList* GetImmCommandList()
 	{
@@ -295,17 +288,19 @@ public:
 	{
 		return nullptr;
 	}
-	TR_FUNCTION()
 	void GetRenderContextCaps(IRenderContextCaps* pCaps)
 	{
 		*pCaps = mContextCaps;
 	}
-	TR_FUNCTION()
 	void UnsafeSetRenderContextCaps(IRenderContextCaps* pCaps)
 	{//用于在PC上模拟低配置mobile GPU
 		mContextCaps = *pCaps;
 	}
+	UINT GetCurrentFrame()const{
+		return mCurrentFrame;
+	}
 protected:
+	UINT											mCurrentFrame;
 	std::map<IRenderPipelineDesc, IRenderPipeline*>		Pipelines;
 	std::map<IShaderDesc, IVertexShader*>			VertexShaders;
 	std::map<IShaderDesc, IPixelShader*>			PixelShaders;

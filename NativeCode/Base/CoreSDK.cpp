@@ -75,12 +75,19 @@ StructImpl(FCreateManagedObject);
 StructImpl(FFreeManagedObjectGCHandle);
 StructImpl(FGetManagedObjectFromGCHandle);
 StructImpl(FOnShaderTranslated);
+StructImpl(FAssertEvent);
 
+FAssertEvent CoreSDK::mAssertEvent = nullptr;
 FWriteLogString CoreSDK::mWriteLogString = nullptr;
 FCreateManagedObject CoreSDK::CreateManagedObject = nullptr;
 FFreeManagedObjectGCHandle CoreSDK::FreeManagedObjectGCHandle = nullptr;
 FGetManagedObjectFromGCHandle CoreSDK::GetManagedObjectFromGCHandle = nullptr;
 FOnShaderTranslated CoreSDK::OnShaderTranslated = nullptr;
+
+void CoreSDK::SetAssertEvent(FAssertEvent fn)
+{
+	mAssertEvent = fn;
+}
 
 void CoreSDK::InitF2MManager()
 {
@@ -208,6 +215,17 @@ void* CoreSDK::Alloc(unsigned int size, const char* file, int line)
 void CoreSDK::Free(void* ptr)
 {
 	delete[] (unsigned char*)ptr;
+}
+
+void CoreSDK::Print2Console(TR_META(SV_NoStringConverter = true) char* txt, bool newLine) {
+	printf(txt);
+	if (newLine)
+		printf("\n");
+}
+void CoreSDK::Print2Console2(const char* txt, bool newLine) {
+	printf(txt);
+	if (newLine)
+		printf("\n");
 }
 
 NS_END

@@ -4,6 +4,7 @@
 #include "INullInputLayout.h"
 #include "INullRenderContext.h"
 #include "INullConstantBuffer.h"
+#include "../ShaderReflector.h"
 
 #define new VNEW
 
@@ -26,53 +27,6 @@ void INullShaderProgram::ApplyShaders(ICommandList* cmd)
 {
 
 }
-
-UINT INullShaderProgram::FindCBuffer(const char* name)
-{
-	return -1;
-}
-
-UINT INullShaderProgram::GetCBufferNumber()
-{
-	return 0;
-}
-
-IConstantBufferDesc* INullShaderProgram::GetCBuffer(UINT index)
-{
-	static IConstantBufferDesc CBufferDesc;
-	return &CBufferDesc;
-}
-
-UINT INullShaderProgram::GetShaderResourceNumber() const
-{
-	return 0;
-}
-
-bool INullShaderProgram::GetShaderResourceBindInfo(UINT Index, TSBindInfo* info, int dataSize) const
-{
-	return false;
-}
-
-UINT INullShaderProgram::GetTextureBindSlotIndex(const char* name)
-{
-	return -1;
-}
-
-UINT INullShaderProgram::GetSamplerNumber() const
-{
-	return 0;
-}
-
-bool INullShaderProgram::GetSamplerBindInfo(UINT Index, TSBindInfo* info, int dataSize) const
-{
-	return false;
-}
-
-UINT INullShaderProgram::GetSamplerBindSlotIndex(const char* name)
-{
-	return -1;
-}
-
 
 bool INullShaderProgram::Init(INullRenderContext* rc, const IShaderProgramDesc* desc)
 {

@@ -142,7 +142,13 @@ public:
 		 v3dxPlaneTransform(&result, &plane, &transformationInverse);
 	 }
 };
-
 #pragma pack(pop)
+
+class v3dxDPlane3
+{
+public:
+	v3dDVector3_t m_vNormal;
+	double m_fDD;
+};
 
 #endif

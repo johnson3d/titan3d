@@ -18,7 +18,7 @@ public:
 	virtual void SetViewport(ICommandList* cmd, IViewPort* vp) override;
 	virtual void SetScissorRect(ICommandList* cmd, IScissorRect* sr) override;
 
-	virtual void SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline) override;
+	virtual void SetPipeline(ICommandList* cmd, IRenderPipeline* pipeline, EPrimitiveType dpType) override;
 
 	virtual void SetVertexBuffer(ICommandList* cmd, UINT32 StreamIndex, IVertexBuffer* VertexBuffer, UINT32 Offset, UINT Stride) override;
 	virtual void SetIndexBuffer(ICommandList* cmd, IIndexBuffer* IndexBuffer) override;

@@ -13,11 +13,11 @@ struct ConstantVarDesc;
 struct IConstantBufferDesc;
 class IConstantBuffer;
 
-struct TSBindInfo;
+class ShaderReflector;
 
 class IRenderContext;
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 IShaderProgramDesc
 {
 	IInputLayout*	InputLayout;
@@ -25,13 +25,14 @@ IShaderProgramDesc
 	IPixelShader*	PixelShader;
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IShaderProgram : public IRenderResource
 {
 protected:
 	AutoRef<IInputLayout>		mInputLayout;
 	AutoRef<IVertexShader>		mVertexShader;
 	AutoRef<IPixelShader>		mPixelShader;
+	AutoRef<ShaderReflector>	mReflector;
 public:
 	IShaderProgram();
 	~IShaderProgram();
@@ -60,38 +61,9 @@ public:
 	TR_FUNCTION()
 	virtual void ApplyShaders(ICommandList* cmd) = 0;
 
-	TR_FUNCTION()
-	virtual UINT FindCBuffer(const char* name) = 0;
-	TR_FUNCTION()
-	virtual UINT GetCBufferNumber() = 0;
-	TR_FUNCTION()
-	virtual IConstantBufferDesc* GetCBuffer(UINT index) = 0;
-
-	TR_FUNCTION()
-	vBOOL GetCBufferDesc(UINT bufferIndex, IConstantBufferDesc* desc);
-
-	TR_FUNCTION()
-	int FindCBufferVar(const char* cbName, const char* name);
-
-	TR_FUNCTION()
-	virtual UINT GetShaderResourceNumber() const = 0;
-	TR_FUNCTION()
-	virtual bool GetShaderResourceBindInfo(UINT Index, TSBindInfo* info, int dataSize) const = 0;
-	TR_FUNCTION()
-	virtual UINT GetTextureBindSlotIndex(const char* name) = 0;
-
-	TR_FUNCTION()
-	vBOOL GetSRBindDesc(UINT Index, TSBindInfo* desc, int dataSize);
-
-	TR_FUNCTION()
-	virtual UINT GetSamplerNumber() const = 0;
-	TR_FUNCTION()
-	virtual bool GetSamplerBindInfo(UINT Index, TSBindInfo* info, int dataSize) const = 0;
-	TR_FUNCTION()
-	virtual UINT GetSamplerBindSlotIndex(const char* name) = 0;
-
-	TR_FUNCTION()
-	vBOOL GetSampBindDesc(UINT Index, TSBindInfo* desc, int dataSize);
+	ShaderReflector* GetReflector() {
+		return mReflector;
+	}
 };
 
 NS_END

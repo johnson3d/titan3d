@@ -16,7 +16,7 @@ INullShaderResourceView::~INullShaderResourceView()
 	
 }
 
-bool INullShaderResourceView::UpdateTexture2D(IRenderContext* rc, const ITexture2D* pTexture2D)
+bool INullShaderResourceView::UpdateBuffer(IRenderContext* rc, const IGpuBuffer* buffer)
 {
 	return true;
 }

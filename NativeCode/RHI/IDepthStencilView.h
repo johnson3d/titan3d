@@ -7,11 +7,10 @@ NS_BEGIN
 struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
 IDepthStencilViewDesc
 {
-	/*IDepthStencilViewDesc()
+	IDepthStencilViewDesc()
 	{
 		SetDefault();
-	}*/
-	TR_FUNCTION()
+	}
 	void SetDefault()
 	{
 		Width = 0;
@@ -21,6 +20,7 @@ IDepthStencilViewDesc
 		mCanBeSampled = TRUE;
 		mUseStencil = FALSE;
 		m_pTexture2D = nullptr;
+		MipLevel = 1;
 	}
 
 	UINT					Width;
@@ -29,6 +29,7 @@ IDepthStencilViewDesc
 	UINT					CPUAccess;
 	vBOOL					mCanBeSampled;
 	vBOOL					mUseStencil;
+	UINT					MipLevel;
 	ITexture2D*				m_pTexture2D;
 };
 

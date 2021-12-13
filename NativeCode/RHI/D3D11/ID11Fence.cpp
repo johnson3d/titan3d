@@ -31,6 +31,20 @@ void ID11Fence::Wait()
 
 }
 
+void ID11Fence::Reset()
+{
+	if (mContext == nullptr)
+	{
+		return;
+	}
+	BOOL ok = FALSE;
+	while (mContext->GetData(mQuery, &ok, sizeof(BOOL), 0) != S_OK)
+	{
+		
+	}
+	mContext = nullptr;
+}
+
 bool ID11Fence::IsCompletion()
 {
 	if (mContext == nullptr)

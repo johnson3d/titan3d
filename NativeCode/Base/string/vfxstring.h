@@ -119,10 +119,10 @@ struct VNameString_t
 
 #pragma pack(push)
 #pragma pack(4)
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 4)
+struct TR_CLASS(SV_LayoutStruct = 4)
 VNameString
 {
-	int Index;
+	int Index;	
 	static std::vector<std::string>		mNameStrings;
 	static int GetIndexFromString(const char* str);
 
@@ -141,21 +141,16 @@ VNameString
 	}
 	inline const char* c_str() const
 	{
-		return GetString();
+		return GetString().c_str();
 	}
-	inline const char* GetString() const
-	{
-		if (Index < 0 || Index >= mNameStrings.size())
-			return nullptr;
-		return mNameStrings[Index].c_str();
-	}
+	const std::string& GetString() const;
 	inline void SetString(const char* str)
 	{
 		Index = GetIndexFromString(str);
 	}
 	inline operator const char*()
 	{
-		return GetString();
+		return GetString().c_str();
 	}
 	inline operator std::string ()
 	{
@@ -188,21 +183,22 @@ inline bool operator==(const VNameString& lh, const char* rh)
 {
 	if (rh == nullptr)
 		return false;
-	return strcmp(lh.GetString(), rh) == 0;
+	return lh.GetString() == rh;
 }
 inline bool operator!=(const VNameString& lh, const char* rh)
 {
 	if (rh == nullptr)
 		return false;
-	return strcmp(lh.GetString(), rh) != 0;
+	return lh.GetString() != rh;
 }
 inline bool operator<=(const VNameString& lh, const char* rh)
 {
-	return strcmp(lh.GetString(), rh) <= 0;
+	return lh.GetString() <= rh;
 }
 inline bool operator>=(const VNameString& lh, const char* rh)
 {
-	return strcmp(lh.GetString(), rh) >= 0;
+	return lh.GetString() >= rh;
+	//return strcmp(lh.GetString(), rh) >= 0;
 }
 
 

@@ -22,7 +22,7 @@ public:
 	virtual IConstantBufferDesc* GetCBuffer(UINT index) override;
 
 	virtual UINT GetShaderResourceNumber() const override;
-	virtual bool GetShaderResourceBindInfo(UINT Index, TextureBindInfo* info) const override;
+	virtual bool GetShaderResourceBindInfo(UINT Index, ShaderRViewBindInfo* info) const override;
 	virtual UINT GetTextureBindSlotIndex(const char* name) override;
 
 	virtual UINT GetSamplerNumber() const override;
@@ -31,7 +31,7 @@ public:
 
 public:
 	std::vector<IConstantBufferDesc>	mConstBufferDescArray;
-	std::vector<TextureBindInfo>			mTexBindInfoArray;
+	std::vector<ShaderRViewBindInfo>			mTexBindInfoArray;
 	std::vector<SamplerBindInfo>			mSampBindInfoArray;
 
 public:

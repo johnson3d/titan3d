@@ -191,6 +191,16 @@ IDrawCall* IGLRenderContext::CreateDrawCall()
 	return pass;
 }
 
+IComputeDrawcall* IGLRenderContext::CreateComputeDrawcall()
+{
+	auto pass = new IGLComputeDrawcall();
+	if (pass->Init(this) == false)
+	{
+		pass->Release();
+		return nullptr;
+	}
+	return pass;
+}
 
 IRenderPipeline* IGLRenderContext::CreateRenderPipeline(const IRenderPipelineDesc* desc)
 {
@@ -200,6 +210,7 @@ IRenderPipeline* IGLRenderContext::CreateRenderPipeline(const IRenderPipelineDes
 		rpl->Release();
 		return nullptr;
 	}
+	rpl->BindRenderPass(desc->RenderPass);
 	rpl->BindBlendState(desc->Blend);
 	rpl->BindDepthStencilState(desc->DepthStencil);
 	rpl->BindRasterizerState(desc->Rasterizer);
@@ -254,6 +265,17 @@ IVertexBuffer* IGLRenderContext::CreateVertexBufferFromBuffer(const IVertexBuffe
 IGeometryMesh* IGLRenderContext::CreateGeometryMesh()
 {
 	return new IGLGeometryMesh();
+}
+
+IRenderPass* IGLRenderContext::CreateRenderPass(const IRenderPassDesc* desc)
+{
+	auto rt = new IGLRenderPass();
+	if (rt->Init(this, desc) == false)
+	{
+		rt->Release();
+		return nullptr;
+	}
+	return rt;
 }
 
 IFrameBuffers* IGLRenderContext::CreateFrameBuffers(const IFrameBuffersDesc* desc)
@@ -325,18 +347,18 @@ IGpuBuffer* IGLRenderContext::CreateGpuBuffer(const IGpuBufferDesc* desc, void* 
 	return result;
 }
 
-IShaderResourceView* IGLRenderContext::CreateShaderResourceViewFromBuffer(IGpuBuffer* pBuffer, const ISRVDesc* desc)
-{
-	auto view = new IGLShaderResourceView();
-	if (view->Init(this, (IGLGpuBuffer*)pBuffer, desc) == false)
-	{
-		view->Release();
-		return nullptr;
-	}
-	view->GetResourceState()->SetStreamState(SS_Valid);
-	view->GetResourceState()->SetResourceSize(pBuffer->GetResourceState()->GetResourceSize());
-	return view;
-}
+//IShaderResourceView* IGLRenderContext::CreateShaderResourceViewFromBuffer(IGpuBuffer* pBuffer, const ISRVDesc* desc)
+//{
+//	auto view = new IGLShaderResourceView();
+//	if (view->Init(this, (IGLGpuBuffer*)pBuffer, desc) == false)
+//	{
+//		view->Release();
+//		return nullptr;
+//	}
+//	view->GetResourceState()->SetStreamState(SS_Valid);
+//	view->GetResourceState()->SetResourceSize(pBuffer->GetResourceState()->GetResourceSize());
+//	return view;
+//}
 
 IUnorderedAccessView* IGLRenderContext::CreateUnorderedAccessView(IGpuBuffer* pBuffer, const IUnorderedAccessViewDesc* desc)
 {
@@ -893,16 +915,24 @@ bool IGLRenderContext::Init(IGLRenderSystem* sys, const IRenderContextDesc* desc
 		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &size);
 		VFX_LTRACE(ELTT_Graphics, "GL MaxCombinedTextureImageUnits= %d\r\n", size);
 
+		glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &size);
+		VFX_LTRACE(ELTT_Graphics, "GL MaxArrayTextureLayers= %d\r\n", size);
+
 		mContextCaps.SupportFloatRT = (HasExtension("GL_EXT_color_buffer_float")|| HasExtension("GL_ARB_color_buffer_float")) ? 1 : 0;
 		mContextCaps.SupportHalfRT = (HasExtension("GL_EXT_color_buffer_half_float") || HasExtension("GL_ARB_half_float_pixel")) ? 1:0;
 
 		mContextCaps.SupportFloatTexture = (HasExtension("GL_OES_texture_float") || HasExtension("GL_ARB_texture_float")) ? 1 : 0;
 		mContextCaps.SupportHalfTexture = (HasExtension("GL_OES_texture_half_float") || HasExtension("GL_ARB_half_float_pixel")) ? 1 : 0;
 
+		mContextCaps.SupportHalfTextureLinearFilter = HasExtension("GL_OES_texture_half_float_linear") ? 1 : 0;
+		mContextCaps.SupportFloatTextureLinearFilter = HasExtension("GL_OES_texture_float_linear") ? 1 : 0;
+	
 		VFX_LTRACE(ELTT_Graphics, "GL SupportFloatRT= %d\r\n", mContextCaps.SupportFloatRT);
 		VFX_LTRACE(ELTT_Graphics, "GL SupportHalfRT= %d\r\n", mContextCaps.SupportHalfRT);
 		VFX_LTRACE(ELTT_Graphics, "GL SupportFloatTexture= %d\r\n", mContextCaps.SupportFloatTexture);
 		VFX_LTRACE(ELTT_Graphics, "GL SupportHalfTexture= %d\r\n", mContextCaps.SupportHalfTexture);
+		VFX_LTRACE(ELTT_Graphics, "GL SupportFloatTextureLinearFilter= %d\r\n", mContextCaps.SupportFloatTextureLinearFilter);
+		VFX_LTRACE(ELTT_Graphics, "GL SupportHalfTextureLinearFilter= %d\r\n", mContextCaps.SupportHalfTextureLinearFilter);
 		
 		//glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING);
 		/*glGetIntegerv(GL_ARB_half_float_pixel, &size);

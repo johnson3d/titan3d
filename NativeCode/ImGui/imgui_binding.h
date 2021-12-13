@@ -1361,6 +1361,10 @@ public:
 	{
 		return ImGui::IsItemClicked(mouse_button);
 	}
+	static bool			 IsItemDoubleClicked(ImGuiMouseButton_ mouse_button = (ImGuiMouseButton_)0)
+	{
+		return ImGui::IsMouseDoubleClicked(mouse_button) && ImGui::IsItemHovered(ImGuiHoveredFlags_None);
+	}
 	static bool          IsItemVisible()
 	{
 		return ImGui::IsItemVisible();

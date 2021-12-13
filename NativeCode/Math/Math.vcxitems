@@ -49,6 +49,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxColor4.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxConvex.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxCylinder.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxDVector3.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxFrustum.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxIntersectFunction.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxLine.h" />

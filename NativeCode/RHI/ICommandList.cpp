@@ -3,6 +3,7 @@
 #include "IDrawCall.h"
 #include "ISamplerState.h"
 #include "IShaderResourceView.h"
+#include "IFence.h"
 
 #include "Utility/GraphicsProfiler.h"
 #include "../Base/vfxsampcounter.h"
@@ -44,6 +45,12 @@ ICommandList::ICommandList()
 
 ICommandList::~ICommandList()
 {
+	for (auto i : mWaitSemaphores)
+	{
+		i->Release();
+	}
+	mWaitSemaphores.clear();
+
 	for (auto i : mPassArray)
 	{
 		i->Release();
@@ -51,7 +58,7 @@ ICommandList::~ICommandList()
 	mPassArray.clear();
 }
 
-AutoRef<IRenderContext> ICommandList::GetContext() 
+IRenderContext* ICommandList::GetContext()
 {
 	return mRHIContext.GetPtr();
 }
@@ -61,13 +68,33 @@ void ICommandList::SetDebugName(const char* name)
 	mDebugName = StringHelper::strtowstr(name);
 }
 
-void ICommandList::BeginCommand()
+bool ICommandList::BeginCommand()
 {
 	this->mCurrentState.Reset();
+	return true;
 }
 
 void ICommandList::EndCommand()
 {
+}
+
+void ICommandList::RemoveWaitSemaphore(ISemaphore* semaphore)
+{
+	for (auto i = mWaitSemaphores.begin(); i != mWaitSemaphores.end(); i++)
+	{
+		if (*i == semaphore)
+		{
+			semaphore->Release();
+			mWaitSemaphores.erase(i);
+			return;
+		}
+	}
+}
+
+void ICommandList::AddWaitSemaphore(ISemaphore* semaphore)
+{
+	semaphore->AddRef();
+	mWaitSemaphores.push_back(semaphore);
 }
 
 void ICommandList::ClearMeshDrawPassArray()

@@ -62,6 +62,10 @@ IDrawCall* INullRenderContext::CreateDrawCall()
 	return pass;
 }
 
+IComputeDrawcall* INullRenderContext::CreateComputeDrawcall()
+{
+	return nullptr;
+}
 
 IRenderPipeline* INullRenderContext::CreateRenderPipeline(const IRenderPipelineDesc* desc)
 {
@@ -125,10 +129,10 @@ IShaderResourceView* INullRenderContext::CreateShaderResourceView(const IShaderR
 	auto drt = new INullShaderResourceView();
 	return drt;
 }
-IShaderResourceView* INullRenderContext::CreateShaderResourceViewFromBuffer(IGpuBuffer* pBuffer, const ISRVDesc* desc)
-{
-	return nullptr;
-}
+//IShaderResourceView* INullRenderContext::CreateShaderResourceViewFromBuffer(IGpuBuffer* pBuffer, const ISRVDesc* desc)
+//{
+//	return nullptr;
+//}
 IGpuBuffer* INullRenderContext::CreateGpuBuffer(const IGpuBufferDesc* desc, void* pInitData)
 {
 	return nullptr;

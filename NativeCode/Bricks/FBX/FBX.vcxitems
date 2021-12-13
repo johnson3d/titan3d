@@ -20,6 +20,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)FBXImporter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FBXMeshImporter.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)FBXUtils.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FBXPartialSkeleton.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)FBXAnimImporter.cpp" />
@@ -28,5 +29,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)FBXImporter.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FBXMeshImporter.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FBXUtils.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FBXPartialSkeleton.cpp" />
   </ItemGroup>
 </Project>

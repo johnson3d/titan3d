@@ -22,6 +22,7 @@
 #include "ID11PixelShader.h"
 #include "ID11RenderPipeline.h"
 #include "ID11Fence.h"
+#include "ID11GpuBuffer.h"
 #include "../Utility/GraphicsProfiler.h"
 #include "../../Base/vfxsampcounter.h"
 
@@ -53,10 +54,11 @@ ID11CommandList::~ID11CommandList()
 
 }
 
-void ID11CommandList::BeginCommand()
+bool ID11CommandList::BeginCommand()
 {
 	//this->mCurrentState.Reset();
 	ICommandList::BeginCommand();
+	return true;
 }
 
 void ID11CommandList::EndCommand()
@@ -75,7 +77,7 @@ void ID11CommandList::EndCommand()
 	ICommandList::EndCommand();
 }
 
-void ID11CommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer, const char* debugName)
+bool ID11CommandList::BeginRenderPass(IFrameBuffers* pFrameBuffer, const IRenderPassClears* passClears, const char* debugName)
 {
 	if (mProfiler != nullptr && mProfiler->mNoPixelWrite)
 	{
@@ -91,7 +93,11 @@ void ID11CommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuf
 	}
 	mDX11RTVArray.clear();
 
-	for (RTVIdx = 0; RTVIdx < MAX_MRT_NUM; RTVIdx++)
+	auto pRenderPass = pFrameBuffer->mRenderPass;
+	UINT NumRTV = 8;
+	if (pRenderPass != nullptr)
+		NumRTV = pRenderPass->mDesc.NumOfMRT;
+	for (RTVIdx = 0; RTVIdx < NumRTV; RTVIdx++)
 	{
 		auto refRTV = (ID11RenderTargetView*)pFrameBuffer->mRenderTargets[RTVIdx];
 		if (refRTV == nullptr || refRTV->m_pDX11RTV == nullptr)
@@ -138,50 +144,40 @@ void ID11CommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuf
 		}
 	}
 
-	if (pRenderPassDesc == nullptr)
+	if (passClears == nullptr)
 	{
-		return;
+		return true;
 	}
 
-	v3dxColor4 RTVClearColorArray[MAX_MRT_NUM] = {
-		pRenderPassDesc->mFBClearColorRT0,
-		pRenderPassDesc->mFBClearColorRT1,
-		pRenderPassDesc->mFBClearColorRT2,
-		pRenderPassDesc->mFBClearColorRT3,
-		pRenderPassDesc->mFBClearColorRT4,
-		pRenderPassDesc->mFBClearColorRT5,
-		pRenderPassDesc->mFBClearColorRT6,
-		pRenderPassDesc->mFBClearColorRT7
-	};
-	float ClearColor[4];
+	auto pRenderPassDesc = &pRenderPass->mDesc;
+	
 	for (RTVIdx = 0; RTVIdx < RTVArraySize; RTVIdx++)
 	{
-		if (pRenderPassDesc->mFBLoadAction_Color == FrameBufferLoadAction::LoadActionClear)
+		if (pRenderPassDesc->AttachmentMRTs[RTVIdx].LoadAction == FrameBufferLoadAction::LoadActionClear)
 		{
-			ClearColor[0] = RTVClearColorArray[RTVIdx].r;
-			ClearColor[1] = RTVClearColorArray[RTVIdx].g;
-			ClearColor[2] = RTVClearColorArray[RTVIdx].b;
-			ClearColor[3] = RTVClearColorArray[RTVIdx].a;
-
-			mDeferredContext->ClearRenderTargetView(mDX11RTVArray[RTVIdx], ClearColor);
+			mDeferredContext->ClearRenderTargetView(mDX11RTVArray[RTVIdx], (const float*)&passClears->ClearColor[RTVIdx]);
 		}
 	}
 
 	if (mDSView != nullptr)
 	{
 		DWORD flag = 0;
-		if (pRenderPassDesc->mFBLoadAction_Depth == FrameBufferLoadAction::LoadActionClear)
+		if (pRenderPassDesc->AttachmentDepthStencil.LoadAction == FrameBufferLoadAction::LoadActionClear)
 		{
 			flag |= D3D11_CLEAR_DEPTH;	
 		}
 
-		if (pRenderPassDesc->mFBLoadAction_Stencil == FrameBufferLoadAction::LoadActionClear)
+		if (pRenderPassDesc->AttachmentDepthStencil.StencilLoadAction == FrameBufferLoadAction::LoadActionClear)
 		{
 			flag |= D3D11_CLEAR_STENCIL;
 		}
 
-		mDeferredContext->ClearDepthStencilView(mDSView, flag, pRenderPassDesc->mDepthClearValue, pRenderPassDesc->mStencilClearValue);
+		if (flag != 0)
+		{
+			mDeferredContext->ClearDepthStencilView(mDSView, flag, passClears->DepthClearValue, passClears->StencilClearValue);
+		}
 	}
+	return true;
 }
 
 void ID11CommandList::EndRenderPass()
@@ -201,7 +197,7 @@ void ID11CommandList::Commit(IRenderContext* pRHICtx)
 		VAutoLock(((ID11RenderContext*)pRHICtx)->mHWContextLocker);
 		auto context = ((ID11RenderContext*)pRHICtx)->mHardwareContext;
 		
-		auto anno = GetContext().UnsafeConvertTo<ID11RenderContext>()->mDefinedAnnotation;
+		auto anno = ((ID11RenderContext*)GetContext())->mDefinedAnnotation;
 		if (anno != nullptr)
 		{
 			anno->BeginEvent(mDebugName.c_str());
@@ -302,23 +298,9 @@ void ID11CommandList::CSDispatch(UINT x, UINT y, UINT z)
 	mDeferredContext->Dispatch(x, y, z);
 }
 
-void ID11CommandList::PSSetShaderResource(UINT32 Index, IShaderResourceView* Texture)
+void ID11CommandList::CSDispatchIndirect(IGpuBuffer* pBufferForArgs, UINT32 AlignedByteOffsetForArgs)
 {
-	if (Texture == nullptr)
-		return;
-
-	Texture->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
-
-	ID3D11ShaderResourceView* pSrv = ((ID11ShaderResourceView*)Texture)->m_pDX11SRV;
-
-	if (pSrv != nullptr)
-		mDeferredContext->PSSetShaderResources(Index, 1, &pSrv);
-}
-
-void ID11CommandList::PSSetSampler(UINT32 Index, ISamplerState* Sampler)
-{
-	if (Sampler != nullptr)
-		mDeferredContext->PSSetSamplers(Index, 1, &((ID11SamplerState*)Sampler)->mSampler);
+	mDeferredContext->DispatchIndirect(((ID11GpuBuffer*)pBufferForArgs)->mBuffer, AlignedByteOffsetForArgs);
 }
 
 void ID11CommandList::SetScissorRect(IScissorRect* sr)
@@ -441,7 +423,52 @@ void ID11CommandList::PSSetConstantBuffer(UINT32 Index, IConstantBuffer* CBuffer
 	//CBuffer->UpdateDrawPass(this, TRUE);
 	mDeferredContext->PSSetConstantBuffers(Index, 1, &((ID11ConstantBuffer*)CBuffer)->mBuffer);
 }
-void ID11CommandList::SetRenderPipeline(IRenderPipeline* pipeline)
+void ID11CommandList::VSSetShaderResource(UINT32 Index, IShaderResourceView* pSRV)
+{
+	if (pSRV == nullptr)
+		return;
+
+	pSRV->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
+	if (pSRV->GetResourceState()->GetStreamState() != SS_Valid)
+		return;
+
+	pSRV->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
+
+	ID3D11ShaderResourceView* pSrv = ((ID11ShaderResourceView*)pSRV)->m_pDX11SRV;
+	mDeferredContext->VSSetShaderResources(Index, 1, &pSrv);
+}
+
+void ID11CommandList::PSSetShaderResource(UINT32 Index, IShaderResourceView* pSRV)
+{
+	if (pSRV == nullptr)
+		return;
+
+	pSRV->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
+	/*if (pSRV->GetResourceState()->GetStreamState() != SS_Valid)
+		return;*/
+
+	ID3D11ShaderResourceView* pSrv = ((ID11ShaderResourceView*)pSRV)->m_pDX11SRV;
+	/*if(pSrv==nullptr)
+		d11cmd->mDeferredContext->PSSetShaderResources(Index, 1, &pSrv);
+	else
+		d11cmd->mDeferredContext->PSSetShaderResources(Index, 1, &pSrv);*/
+
+	if (pSrv != nullptr)
+		mDeferredContext->PSSetShaderResources(Index, 1, &pSrv);
+}
+
+void ID11CommandList::VSSetSampler(UINT32 Index, ISamplerState* Sampler)
+{
+	if (Sampler != nullptr)
+		mDeferredContext->VSSetSamplers(Index, 1, &((ID11SamplerState*)Sampler)->mSampler);
+}
+
+void ID11CommandList::PSSetSampler(UINT32 Index, ISamplerState* Sampler)
+{
+	if (Sampler != nullptr)
+		mDeferredContext->PSSetSamplers(Index, 1, &((ID11SamplerState*)Sampler)->mSampler);
+}
+void ID11CommandList::SetRenderPipeline(IRenderPipeline* pipeline, EPrimitiveType dpType)
 {
 	((ID11RenderPipeline*)pipeline)->ApplyState(this);
 	pipeline->GetGpuProgram()->ApplyShaders(this);
@@ -465,8 +492,8 @@ vBOOL ID11CommandList::CreateReadableTexture2D(ITexture2D** ppTexture, IShaderRe
 	}
 	else
 	{
-		if (pD11Texture->mDesc.Width != desc.Width || 
-			pD11Texture->mDesc.Height != desc.Height)
+		if (pD11Texture->mTextureDesc.Width != desc.Width || 
+			pD11Texture->mTextureDesc.Height != desc.Height)
 		{
 			needCreateTexture = true;
 		}
@@ -479,7 +506,7 @@ vBOOL ID11CommandList::CreateReadableTexture2D(ITexture2D** ppTexture, IShaderRe
 		desc.Usage = D3D11_USAGE_STAGING;
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
 
-		auto rc = this->GetContext().UnsafeConvertTo<ID11RenderContext>();
+		auto rc = (ID11RenderContext*)this->GetContext();
 		auto pDevice = rc->mDevice;
 		auto hr = pDevice->CreateTexture2D(&desc, nullptr, &memTexture);
 		if (FAILED(hr))

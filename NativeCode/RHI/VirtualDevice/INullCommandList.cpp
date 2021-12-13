@@ -15,9 +15,10 @@ INullCommandList::~INullCommandList()
 	
 }
 
-void INullCommandList::BeginCommand()
+bool INullCommandList::BeginCommand()
 {
 	ICommandList::BeginCommand();
+	return true;
 }
 
 void INullCommandList::EndCommand()
@@ -25,9 +26,9 @@ void INullCommandList::EndCommand()
 	ICommandList::EndCommand();
 }
 
-void INullCommandList::BeginRenderPass(RenderPassDesc* pRenderPassDesc, IFrameBuffers* pFrameBuffer, const char* debugName)
+bool INullCommandList::BeginRenderPass(IFrameBuffers* pFrameBuffer, const IRenderPassClears* passClears, const char* debugName)
 {
-
+	return true;
 }
 
 void INullCommandList::EndRenderPass()
@@ -76,6 +77,11 @@ void INullCommandList::CSSetConstantBuffer(UINT32 Index, IConstantBuffer* cbuffe
 }
 
 void INullCommandList::CSDispatch(UINT x, UINT y, UINT z)
+{
+
+}
+
+void INullCommandList::CSDispatchIndirect(IGpuBuffer* pBufferForArgs, UINT32 AlignedByteOffsetForArgs)
 {
 
 }

@@ -18,11 +18,6 @@ INullSwapChain::~INullSwapChain()
 
 }
 
-ITexture2D* INullSwapChain::GetTexture2D()
-{
-	return nullptr;
-}
-
 bool INullSwapChain::Init(INullRenderContext* rc, const ISwapChainDesc* desc)
 {
 	mDesc = *desc;
