@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4153240744 Type="EngineNS.Graphics.Mesh.CMeshPrimitives@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <PartialSkeleton Type="EngineNS.Animation.Skeleton.USkinSkeleton@EngineCore" Order="0" />
+</Hash_4153240744>

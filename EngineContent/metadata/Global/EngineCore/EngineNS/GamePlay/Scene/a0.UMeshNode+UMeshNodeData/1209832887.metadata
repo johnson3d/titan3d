@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1209832887 Type="EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData@EngineCore">
+  <AtomType Type="System.String@Unknown" Order="0" />
+  <MdfQueueType Type="System.String@Unknown" Order="0" />
+  <MeshName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.UNode.ENodeStyles@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.UBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.UPlacementBase@EngineCore" Order="2" />
+</Hash_1209832887>

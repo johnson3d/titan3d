@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_3813830668 Type="EngineNS.Animation.Skeleton.USkinSkeletonDesc@EngineCore">
+  <InitMatrix Type="EngineNS.Matrix@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NameHash Type="System.UInt32@Unknown" Order="0" />
+  <ParentHash Type="System.UInt32@Unknown" Order="0" />
+  <ParentName Type="System.String@Unknown" Order="0" />
+</Hash_3813830668>

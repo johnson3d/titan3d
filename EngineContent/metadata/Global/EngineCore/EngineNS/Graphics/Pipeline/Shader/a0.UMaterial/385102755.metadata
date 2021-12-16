@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_385102755 Type="EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore">
+  <AlphaTest Type="System.Boolean@Unknown" Order="0" />
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Blend Type="EngineNS.IBlendStateDesc@EngineCore" Order="0" />
+  <DepthStencil Type="EngineNS.IDepthStencilStateDesc@EngineCore" Order="0" />
+  <GraphXMLString Type="System.String@Unknown" Order="0" />
+  <HLSLCode Type="System.String@Unknown" Order="0" />
+  <LightingMode Type="EngineNS.Graphics.Pipeline.Shader.UMaterial.ELightingMode@EngineCore" Order="0" />
+  <MaterialHash Type="EngineNS.Hash160@EngineCore" Order="0" />
+  <Rasterizer Type="EngineNS.IRasterizerStateDesc@EngineCore" Order="0" />
+  <RenderLayer Type="EngineNS.Graphics.Pipeline.ERenderLayer@EngineCore" Order="0" />
+  <UsedRSView Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.Shader.UMaterial.NameRNamePair@EngineCore,&gt;@Unknown" Order="0" />
+  <UsedUniformVars Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.Shader.UMaterial.NameValuePair@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_385102755>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1461935067 Type="EngineNS.Bricks.CodeBuilder.DefineFunction@EngineCore">
+  <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.DefineFunctionParam@EngineCore,&gt;@Unknown" Order="0" />
+  <IsOverride Type="System.Boolean@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <ReturnType Type="System.String@Unknown" Order="0" />
+  <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisitMode@EngineCore" Order="0" />
+</Hash_1461935067>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2963786321 Type="EngineNS.Bricks.Terrain.CDLOD.UTerrainNode.UTerrainData@EngineCore">
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.UNode.ENodeStyles@EngineCore" Order="0" />
+  <PatchSize Type="System.Single@Unknown" Order="0" />
+  <QTreeLevel Type="System.Int32@Unknown" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.UBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.UPlacementBase@EngineCore" Order="2" />
+</Hash_2963786321>

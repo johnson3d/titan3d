@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4258164878 Type="EngineNS.Bricks.CodeBuilder.ShaderNode.Control.SampleLevel2DNode@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <MethodDeclString Type="System.String@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <Position Type="EngineNS.Vector2@EngineCore" Order="0" />
+  <Sampler Type="EngineNS.ISamplerStateDesc@EngineCore" Order="0" />
+  <TextureVarName Type="System.String@Unknown" Order="0" />
+</Hash_4258164878>
