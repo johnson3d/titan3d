@@ -17,7 +17,7 @@ class TR_CLASS()
 	PhyContext : public PhyEntity
 {
 public:
-	RTTI_DEF(PhyContext, 0x0d6aae375befae7b, true);
+	ENGINE_RTTI(PhyContext);
 	physx::PxPhysics*		mContext;
 	physx::PxFoundation*	mFoundation;
 	physx::PxCooking*		mCooking;

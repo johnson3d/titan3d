@@ -70,6 +70,7 @@ void IGLShaderReflector::ReflectProgram(IGLRenderContext* rc, const std::shared_
 	for (GLuint cbIndex = 0; cbIndex < uboCount; cbIndex++)
 	{
 		IConstantBufferDesc desc;
+		desc.CBufferLayout = MakeWeakRef(new IConstantBufferLayout());
 		memset(szName, 0, sizeof(szName));
 		GLsizei len = 0;
 
@@ -143,11 +144,11 @@ void IGLShaderReflector::ReflectProgram(IGLRenderContext* rc, const std::shared_
 				varDesc.Name = segs[1];
 			}
 
-			desc.Vars.push_back(varDesc);
+			desc.CBufferLayout->Vars.push_back(varDesc);
 		}
 		//fuck opengl!
 		std::map<std::string, ConstantVarDesc*> structVars;
-		for (auto iter = desc.Vars.begin(); iter != desc.Vars.end(); )
+		for (auto iter = desc.CBufferLayout->Vars.begin(); iter != desc.CBufferLayout->Vars.end(); )
 		{
 			auto strPos = iter->Name.AsStdString().find_first_of(".");
 			if (strPos != std::string::npos)
@@ -170,7 +171,7 @@ void IGLShaderReflector::ReflectProgram(IGLRenderContext* rc, const std::shared_
 					stVar->Elements = 1;
 					structVars.insert(std::make_pair(iter->Name.AsStdString(), stVar));
 				}
-				iter = desc.Vars.erase(iter);
+				iter = desc.CBufferLayout->Vars.erase(iter);
 				continue;
 			}
 			strPos = iter->Name.AsStdString().find_first_of("[");
@@ -183,7 +184,7 @@ void IGLShaderReflector::ReflectProgram(IGLRenderContext* rc, const std::shared_
 
 		for (auto i : structVars)
 		{
-			desc.Vars.push_back(*i.second);
+			desc.CBufferLayout->Vars.push_back(*i.second);
 			delete i.second;
 		}
 		structVars.clear();
@@ -296,6 +297,7 @@ void IGLShaderReflector::ReflectProgram(IGLRenderContext* rc, const std::shared_
 		for (GLint uIdx = 0; uIdx < storageBlockCount; uIdx++)
 		{
 			IConstantBufferDesc desc;
+			desc.CBufferLayout = MakeWeakRef(new IConstantBufferLayout());
 			GLsizei length = 0;
 			sdk->ES31_GetProgramResourceName(mProgram, GL_SHADER_STORAGE_BLOCK, uIdx, 256, &length, szName);
 

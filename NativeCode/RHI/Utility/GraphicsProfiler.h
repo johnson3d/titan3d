@@ -17,7 +17,7 @@ public:
 	AutoRef<IPixelShader>	mPSEmpty;
 	AutoRef<IFrameBuffers>	mOnePixelFB;
 public:
-	RTTI_DEF(GraphicsProfiler, 0xf46200e35cbfc070, true);
+	ENGINE_RTTI(GraphicsProfiler);
 
 	GraphicsProfiler();
 	~GraphicsProfiler();

@@ -23,7 +23,7 @@ class VFile2Memory : public VRes2Memory
 {
 	VCritical					mLocker;
 public:
-	RTTI_DEF(VFile2Memory, vIID_VFile2Memory, true);
+	ENGINE_RTTI(VFile2Memory);
 	/*!	\copydoc VRes2Memory::Ptr */
 	virtual  VResPtr	Ptr(UINT_PTR offset , UINT_PTR size=-1) override;
 	/*!	\copydoc VRes2Memory::Free */

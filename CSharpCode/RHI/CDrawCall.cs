@@ -8,32 +8,32 @@ namespace EngineNS.RHI
     {
         public Graphics.Pipeline.Shader.UEffect Effect { get; private set; }
         public object TagObject { get; set; }
-        private uint PermutationId;
+        private Graphics.Pipeline.Shader.UShadingEnv.FPermutationId PermutationId;
         //internal uint MaterialSerialId = 0;
         private bool IsUpdating = false;
         public bool IsPermutationChanged()
         {
             var shading = Effect.ShadingEnv;
-            return PermutationId != shading.CurrentPermutationId;
+            return PermutationId != shading.mCurrentPermutationId;
         }
         public void CheckPermutation(Graphics.Pipeline.Shader.UMaterial material, Graphics.Pipeline.Shader.UMdfQueue mdf)
         {
             var shading = Effect.ShadingEnv;
             //if (shading == null)
             //    return;
-            if (PermutationId == shading.CurrentPermutationId && material.MaterialHash == Effect.Desc.MaterialHash)
+            if (PermutationId == shading.mCurrentPermutationId && material.MaterialHash == Effect.Desc.MaterialHash)
                 return;
 
             if (IsUpdating)
                 return;
 
-            PermutationId = shading.CurrentPermutationId;
+            PermutationId = shading.mCurrentPermutationId;
             var task = UpdateShaderProgram(shading, material, mdf);
         }
         public async System.Threading.Tasks.Task UpdateShaderProgram(Graphics.Pipeline.Shader.UShadingEnv shading, Graphics.Pipeline.Shader.UMaterial material, Graphics.Pipeline.Shader.UMdfQueue mdf)
         {
             IsUpdating = true;
-            PermutationId = shading.CurrentPermutationId;
+            PermutationId = shading.mCurrentPermutationId;
 
             Effect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(shading, material, mdf);
             if (Effect != null)
@@ -78,19 +78,19 @@ namespace EngineNS.RHI
                 }
             }
 
-            if (Effect.CBPerMaterialIndex != 0xFFFFFFFF)
+            if (Effect.ShaderIndexer.cbPerMaterial!= 0xFFFFFFFF)
             {
                 if (Material != null)
                 {
                     var rc = UEngine.Instance.GfxDevice.RenderContext;
-                    Material.PerMaterialCBuffer = rc.CreateConstantBuffer(Effect.ShaderProgram, Effect.CBPerMaterialIndex);
+                    Material.PerMaterialCBuffer = rc.CreateConstantBuffer(Effect.ShaderProgram, Effect.ShaderIndexer.cbPerMaterial);
                     Material.UpdateUniformVars(Material.PerMaterialCBuffer);
-                    mCoreObject.BindShaderCBuffer(Effect.CBPerMaterialIndex, Material.PerMaterialCBuffer.mCoreObject);
+                    mCoreObject.BindShaderCBuffer(Effect.ShaderIndexer.cbPerMaterial, Material.PerMaterialCBuffer.mCoreObject);
                 }
             }
-            if (Effect.CBPerFrameIndex != 0xFFFFFFFF)
+            if (Effect.ShaderIndexer.cbPerFrame != 0xFFFFFFFF)
             {
-                mCoreObject.BindShaderCBuffer(Effect.CBPerFrameIndex, UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject);
+                mCoreObject.BindShaderCBuffer(Effect.ShaderIndexer.cbPerFrame, UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject);
             }
             return true;
         }
@@ -197,6 +197,30 @@ namespace EngineNS.RHI
         public unsafe void BindSrv(IShaderBinder* binder, CShaderResourceView srv)
         {
             mCoreObject.GetShaderRViewResources().BindCS(binder->m_CSBindPoint, srv.mCoreObject);
+        }
+        public void BuildPass(ICommandList cmd)
+        {
+            mCoreObject.BuildPass(cmd);
+        }
+        public void BuildPass(RHI.CCommandList cmd)
+        {
+            mCoreObject.BuildPass(cmd.mCoreObject);
+        }
+    }
+
+    public partial class CCopyDrawcall : AuxPtrType<ICopyDrawcall>
+    {
+        public void SetCopyBuffer(EngineNS.IGpuBuffer src, uint srcOffset, EngineNS.IGpuBuffer tar, uint tarOffset, uint size)
+        {
+            mCoreObject.SetCopyBuffer(src, srcOffset, tar, tarOffset, size);
+        }
+        public void SetCopyTexture2D(EngineNS.IGpuBuffer src, uint srcMip, uint srcX, uint srcY, EngineNS.IGpuBuffer tar, uint tarMip, uint tarX, uint tarY, uint width, uint height)
+        {
+            mCoreObject.SetCopyTexture2D(src, srcMip, srcX, srcY, tar, tarMip, tarX, tarY, width, height);
+        }
+        public void BuildPass(RHI.CCommandList cmd)
+        {
+            mCoreObject.BuildPass(cmd.mCoreObject);
         }
     }
 }

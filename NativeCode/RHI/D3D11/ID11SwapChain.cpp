@@ -107,7 +107,7 @@ bool ID11SwapChain::Init(ID11RenderContext* rc, const ISwapChainDesc* desc)
 	hr = mSwapChain->GetBuffer(0, IID_ID3D11Texture2D, (void**)&pBackBuffer);
 	if (hr == S_OK)
 	{
-		AutoRef<ID11Texture2D> pTexture(new ID11Texture2D());
+		auto pTexture = MakeWeakRef(new ID11Texture2D());
 		pTexture->InitD11Texture2D(pBackBuffer);
 		pBackBuffer->Release();
 		mBackBuffer = pTexture;

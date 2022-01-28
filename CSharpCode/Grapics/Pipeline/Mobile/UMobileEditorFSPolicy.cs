@@ -6,44 +6,28 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 {
     public class UMobileEditorFSPolicy : UMobileFSPolicy
     {
+        public UMobileEditorFSPolicy()
+        {
+            RegRenderNode("BasePassNode", BasePassNode);
+            RegRenderNode("ShadowMapNode", mShadowMapNode);
+            RegRenderNode("HitproxyNode", HitproxyNode);
+            RegRenderNode("PickedNode", PickedNode);
+            RegRenderNode("PickBlurNode", PickBlurNode);
+            RegRenderNode("PickHollowNode", PickHollowNode);
+            RegRenderNode("GpuSceneNode", GpuSceneNode);
+            RegRenderNode("ScreenTilingNode", ScreenTilingNode);
+            RegRenderNode("VoxelsNode", VoxelsNode);
+            RegRenderNode("FinalCopyNode", FinalCopyNode);
+            RegRenderNode("HzbNode", HzbNode);
+            RegRenderNode("TranslucentNode", TranslucentNode);
+        }
         public override Common.UGpuSceneNode GetGpuSceneNode()
         {
             return GpuSceneNode;
         }
         public override RHI.CShaderResourceView GetFinalShowRSV()
         {
-            return FinalCopyNode.GBuffers.GetGBufferSRV(0);
-        }
-        public override Common.URenderGraphNode QueryNode(string name)
-        {
-            switch (name)
-            {
-                case "BasePassNode":
-                    return GetBasePassNode();
-                case "ShadowMapNode":
-                    return mShadowMapNode;
-                case "TranslucentNode":
-                    return TranslucentNode;
-                case "HitproxyNode":
-                    return HitproxyNode;
-                case "PickedNode":
-                    return PickedNode;
-                case "PickBlurNode":
-                    return PickBlurNode;
-                case "PickHollowNode":
-                    return PickHollowNode;
-                case "FinalCopyNode":
-                    return FinalCopyNode;
-                case "VoxelsNode":
-                    return VoxelsNode;
-                case "HzbNode":
-                    return HzbNode;
-                case "GpuSceneNode":
-                    return GpuSceneNode;
-                case "ScreenTilingNode":
-                    return ScreenTilingNode;
-            }
-            return null;
+            return this.AttachmentCache.FindAttachement(FinalCopyNode.GBuffers.RenderTargets[0].Attachement.AttachmentName).Srv;
         }
         public override bool DisableAO
         {
@@ -97,38 +81,38 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         //for test
         public Bricks.VXGI.UVoxelsNode VoxelsNode = new Bricks.VXGI.UVoxelsNode();
 
-        public override async System.Threading.Tasks.Task Initialize(CCamera camera, float x, float y)
+        public override async System.Threading.Tasks.Task Initialize(CCamera camera)
         {
-            await base.Initialize(camera, x, y);
+            await base.Initialize(camera);
 
             EnvMapSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine));
             VignetteSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("texture/default_vignette.srv", RName.ERNameType.Engine));
 
-            await BasePassNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>(),
-                EPixelFormat.PXF_R16G16B16A16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "BasePass");
+            //await BasePassNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>(),
+            //    EPixelFormat.PXF_R16G16B16A16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "BasePass");
 
-            await TranslucentNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>(),
-                EPixelFormat.PXF_R16G16B16A16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "BasePass");
+            //await TranslucentNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>(),
+            //    EPixelFormat.PXF_R16G16B16A16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "BasePass");
 
-            await HitproxyNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UHitproxyShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "Hitproxy");
+            //await HitproxyNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UHitproxyShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "Hitproxy");
 
-            await PickedNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickSetupShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "PickedNode");
+            //await PickedNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickSetupShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "PickedNode");
 
-            await PickBlurNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickBlurShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y, "PickBlur");
+            //await PickBlurNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickBlurShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y, "PickBlur");
             
-            await PickHollowNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickHollowShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y, "PickHollow");
+            //await PickHollowNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickHollowShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y, "PickHollow");
             
-            await FinalCopyNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UFinalCopyShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_UNKNOWN, x, y, "EditorFinal");
+            //await FinalCopyNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UFinalCopyShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_UNKNOWN, x, y, "EditorFinal");
             
-            await mShadowMapNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>(), EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_D16_UNORM, x, y, "ShadowDepth");
+            //await mShadowMapNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>(), EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_D16_UNORM, x, y, "ShadowDepth");
 
-            await VoxelsNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_D16_UNORM, x, y, "VoxelsNode");
+            //await VoxelsNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_D16_UNORM, x, y, "VoxelsNode");
 
-            await HzbNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_UNKNOWN, x, y, "HzbNode");
+            //await HzbNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_UNKNOWN, x, y, "HzbNode");
 
-            await ScreenTilingNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_UNKNOWN, x, y, "ScreenTilingNode");            
+            //await ScreenTilingNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_UNKNOWN, x, y, "ScreenTilingNode");            
 
-            await GpuSceneNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_UNKNOWN, x, y, "GpuScene");
+            //await GpuSceneNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_UNKNOWN, x, y, "GpuScene");
         }
         public override void OnResize(float x, float y)
         {
@@ -211,7 +195,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                                 case ERenderLayer.RL_Sky:
                                     return TranslucentNode.mTranslucentShading;
                                 default:
-                                    return TranslucentNode.mOpaqueShading;
+                                    return BasePassNode.mOpaqueShading;
                             }
                         }
                     }
@@ -228,7 +212,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             return null;
         }
         //渲染DrawCall的时候调用，如果产生了对应的ShadingType的Drawcall，则会callback到这里设置一些这个shading的特殊参数
-        public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom)
+        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom)
         {
             mesh.MdfQueue.OnDrawCall(shadingType, drawcall, this, mesh);
             //drawcall.Effect.ShadingEnv
@@ -247,6 +231,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickLogic(GamePlay.UWorld world)
         {
+            base.TickLogic(world);
+
             if (this.DisableShadow == false)
                 mShadowMapNode?.TickLogic(world, this, true);
 

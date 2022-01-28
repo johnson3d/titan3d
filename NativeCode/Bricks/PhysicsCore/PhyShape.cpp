@@ -13,7 +13,7 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::PhyShape, EngineNS::PhyEntity);
+ENGINE_RTTI_IMPL(EngineNS::PhyShape);
 
 PhyShape::PhyShape()
 {
@@ -361,7 +361,7 @@ IMeshPrimitives* PhyShape::IfGetTriMesh(IRenderContext* rc)
 		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
 		vbDesc.Stride = sizeof(v3dxVector3);
 		vbDesc.InitData = (void*)pVert;
-		AutoRef<IVertexBuffer> vbPos = rc->CreateVertexBuffer(&vbDesc);
+		auto vbPos = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
 		result->GetGeomtryMesh()->BindVertexBuffer(VST_Position, vbPos);
 
 		std::vector<v3dxVector3> normals;
@@ -372,7 +372,7 @@ IMeshPrimitives* PhyShape::IfGetTriMesh(IRenderContext* rc)
 			ibDesc.ByteWidth = sizeof(USHORT) * nTri * 3;
 			ibDesc.Type = IBT_Int16;
 			ibDesc.InitData = (void*)geom.triangleMesh->getTriangles();
-			AutoRef<IIndexBuffer> ib = rc->CreateIndexBuffer(&ibDesc);
+			auto ib = MakeWeakRef(rc->CreateIndexBuffer(&ibDesc));
 			result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
 			IMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
@@ -383,7 +383,7 @@ IMeshPrimitives* PhyShape::IfGetTriMesh(IRenderContext* rc)
 			ibDesc.ByteWidth = sizeof(UINT) * nTri * 3;
 			ibDesc.Type = IBT_Int32;
 			ibDesc.InitData = (void*)geom.triangleMesh->getTriangles();
-			AutoRef<IIndexBuffer> ib = rc->CreateIndexBuffer(&ibDesc);
+			auto ib = MakeWeakRef(rc->CreateIndexBuffer(&ibDesc));
 			result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
 			IMeshPrimitives::CalcNormals32(normals, (const v3dxVector3*)pVert, nVert, (UINT*)ibDesc.InitData, nTri);
@@ -392,7 +392,7 @@ IMeshPrimitives* PhyShape::IfGetTriMesh(IRenderContext* rc)
 		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
 		vbDesc.Stride = sizeof(v3dxVector3);
 		vbDesc.InitData = (void*)&normals[0];
-		AutoRef<IVertexBuffer> vbNor = rc->CreateVertexBuffer(&vbDesc);
+		auto vbNor = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
 		result->GetGeomtryMesh()->BindVertexBuffer(VST_Normal, vbNor);
 
 		DrawPrimitiveDesc desc;
@@ -422,7 +422,7 @@ IMeshPrimitives* PhyShape::IfGetTriMesh(IRenderContext* rc)
 		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
 		vbDesc.Stride = sizeof(v3dxVector3);
 		vbDesc.InitData = (void*)pVert;
-		AutoRef<IVertexBuffer> vbPos = rc->CreateVertexBuffer(&vbDesc);
+		auto vbPos = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
 		result->GetGeomtryMesh()->BindVertexBuffer(VST_Position, vbPos);
 
 		std::vector<v3dxVector3> normals;
@@ -433,7 +433,7 @@ IMeshPrimitives* PhyShape::IfGetTriMesh(IRenderContext* rc)
 			ibDesc.ByteWidth = sizeof(USHORT) * nTri * 3;
 			ibDesc.Type = IBT_Int16;
 			ibDesc.InitData = (void*)geom.triangleMesh->getTriangles();
-			AutoRef<IIndexBuffer> ib = rc->CreateIndexBuffer(&ibDesc);
+			auto ib = MakeWeakRef(rc->CreateIndexBuffer(&ibDesc));
 			result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
 			IMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
@@ -444,7 +444,7 @@ IMeshPrimitives* PhyShape::IfGetTriMesh(IRenderContext* rc)
 			ibDesc.ByteWidth = sizeof(UINT) * nTri * 3;
 			ibDesc.Type = IBT_Int32;
 			ibDesc.InitData = (void*)geom.triangleMesh->getTriangles();
-			AutoRef<IIndexBuffer> ib = rc->CreateIndexBuffer(&ibDesc);
+			auto ib = MakeWeakRef(rc->CreateIndexBuffer(&ibDesc));
 			result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
 			IMeshPrimitives::CalcNormals32(normals, (const v3dxVector3*)pVert, nVert, (UINT*)ibDesc.InitData, nTri);
@@ -453,7 +453,7 @@ IMeshPrimitives* PhyShape::IfGetTriMesh(IRenderContext* rc)
 		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
 		vbDesc.Stride = sizeof(v3dxVector3);
 		vbDesc.InitData = (void*)&normals[0];
-		AutoRef<IVertexBuffer> vbNor = rc->CreateVertexBuffer(&vbDesc);
+		auto vbNor = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
 		result->GetGeomtryMesh()->BindVertexBuffer(VST_Normal, vbNor);
 
 		DrawPrimitiveDesc desc;
@@ -489,7 +489,7 @@ IMeshPrimitives* PhyShape::IfGetConvexMesh(IRenderContext* rc)
 		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
 		vbDesc.Stride = sizeof(v3dxVector3);
 		vbDesc.InitData = (void*)pVert;
-		AutoRef<IVertexBuffer> vbPos = rc->CreateVertexBuffer(&vbDesc);
+		auto vbPos = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
 		result->GetGeomtryMesh()->BindVertexBuffer(VST_Position, vbPos);
 
 		std::vector<v3dxVector3> normals;
@@ -527,7 +527,7 @@ IMeshPrimitives* PhyShape::IfGetConvexMesh(IRenderContext* rc)
 		ibDesc.ByteWidth = sizeof(USHORT) * nTri * 3;
 		ibDesc.Type = IBT_Int16;
 		ibDesc.InitData = &indices[0];
-		AutoRef<IIndexBuffer> ib = rc->CreateIndexBuffer(&ibDesc);
+		auto ib = MakeWeakRef(rc->CreateIndexBuffer(&ibDesc));
 		result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
 		IMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
@@ -535,7 +535,7 @@ IMeshPrimitives* PhyShape::IfGetConvexMesh(IRenderContext* rc)
 		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
 		vbDesc.Stride = sizeof(v3dxVector3);
 		vbDesc.InitData = (void*)&normals[0];
-		AutoRef<IVertexBuffer> vbNor = rc->CreateVertexBuffer(&vbDesc);
+		auto vbNor = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
 		result->GetGeomtryMesh()->BindVertexBuffer(VST_Normal, vbNor);
 
 		DrawPrimitiveDesc desc;
@@ -562,7 +562,7 @@ IMeshPrimitives* PhyShape::IfGetConvexMesh(IRenderContext* rc)
 		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
 		vbDesc.Stride = sizeof(v3dxVector3);
 		vbDesc.InitData = (void*)pVert;
-		AutoRef<IVertexBuffer> vbPos = rc->CreateVertexBuffer(&vbDesc);
+		auto vbPos = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
 		result->GetGeomtryMesh()->BindVertexBuffer(VST_Position, vbPos);
 
 		std::vector<v3dxVector3> normals;
@@ -600,7 +600,7 @@ IMeshPrimitives* PhyShape::IfGetConvexMesh(IRenderContext* rc)
 		ibDesc.ByteWidth = sizeof(USHORT) * nTri * 3;
 		ibDesc.Type = IBT_Int16;
 		ibDesc.InitData = &indices[0];
-		AutoRef<IIndexBuffer> ib = rc->CreateIndexBuffer(&ibDesc);
+		auto ib = MakeWeakRef(rc->CreateIndexBuffer(&ibDesc));
 		result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
 		IMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
@@ -608,7 +608,7 @@ IMeshPrimitives* PhyShape::IfGetConvexMesh(IRenderContext* rc)
 		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
 		vbDesc.Stride = sizeof(v3dxVector3);
 		vbDesc.InitData = (void*)&normals[0];
-		AutoRef<IVertexBuffer> vbNor = rc->CreateVertexBuffer(&vbDesc);
+		auto vbNor = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
 		result->GetGeomtryMesh()->BindVertexBuffer(VST_Normal, vbNor);
 
 		DrawPrimitiveDesc desc;

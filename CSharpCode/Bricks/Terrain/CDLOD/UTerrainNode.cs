@@ -147,7 +147,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             IsAcceptShadow = true;
 
             RVTextureArray = new EngineNS.Bricks.VirtualTexture.UVirtualTextureArray();
-            RVTextureArray.CreateRVT(64, 64, 1, EPixelFormat.PXF_B8G8R8A8_UNORM, 256);
+            RVTextureArray.CreateRVT(64, 64, 1, EPixelFormat.PXF_R8G8B8A8_UNORM, 256);
             var cmd = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList();
             RVTextureArray.PushTexture2D(cmd, RName.GetRName("utest/texture/xsl.srv"));
             return true;
@@ -331,15 +331,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         //bool DebugPrintLOD = false;
         
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
-            EyeCenter = policy.Camera.mCoreObject.GetPosition();
-            EyeLocalCenter = policy.Camera.mCoreObject.GetLocalPosition();
+            EyeCenter = policy.DefaultCamera.mCoreObject.GetPosition();
+            EyeLocalCenter = policy.DefaultCamera.mCoreObject.GetLocalPosition();
             
             if (SetActiveCenter(in EyeCenter))
             {
                 world.CameraOffset = EyeCenter;
-                policy.Camera.mCoreObject.SetMatrixStartPosition(in EyeCenter);
+                policy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in EyeCenter);
             }
 
             //UpdateRangeLOD((NodeData as UTerrainData).LODRangeFloat, EyeCenter - this.Location);

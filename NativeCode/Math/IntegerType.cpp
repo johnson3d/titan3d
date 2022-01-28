@@ -9,14 +9,29 @@
 
 
 NS_BEGIN
-template<> AuxRttiStruct<v3dxMatrix4>		AuxRttiStruct<v3dxMatrix4>::Instance;
-template<> AuxRttiStruct<v3dxBox3>			AuxRttiStruct<v3dxBox3>::Instance;
-template<> AuxRttiStruct<v3dxVector2>		AuxRttiStruct<v3dxVector2>::Instance;
-template<> AuxRttiStruct<v3dxVector3>		AuxRttiStruct<v3dxVector3>::Instance;
-template<> AuxRttiStruct<v3dxColor4>		AuxRttiStruct<v3dxColor4>::Instance;
-template<> AuxRttiStruct<v3dxPlane3>		AuxRttiStruct<v3dxPlane3>::Instance;
-template<> AuxRttiStruct<v3dxQuaternion>	AuxRttiStruct<v3dxQuaternion>::Instance;
-template<> AuxRttiStruct<v3dxTransform>		AuxRttiStruct<v3dxTransform>::Instance;
+
+struct ThisRttiBuilder
+{
+	ThisRttiBuilder()
+	{
+		auto pRtti = GetClassObject<v3dxMatrix4>();
+		pRtti->BuildClassInfo<v3dxMatrix4>("v3dxMatrix4", nullptr);
+		pRtti = GetClassObject<v3dxBox3>();
+		pRtti->BuildClassInfo<v3dxBox3>("v3dxBox3", nullptr);
+		pRtti = GetClassObject<v3dxVector2>();
+		pRtti->BuildClassInfo<v3dxVector2>("v3dxVector2", nullptr);
+		pRtti = GetClassObject<v3dxVector3>();
+		pRtti->BuildClassInfo<v3dxVector3>("v3dxVector3", nullptr); 
+		pRtti = GetClassObject<v3dxColor4>();
+		pRtti->BuildClassInfo<v3dxColor4>("v3dxColor4", nullptr);
+		pRtti = GetClassObject<v3dxPlane3>();
+		pRtti->BuildClassInfo<v3dxPlane3>("v3dxPlane3", nullptr);
+		pRtti = GetClassObject<v3dxQuaternion>();
+		pRtti->BuildClassInfo<v3dxQuaternion>("v3dxQuaternion", nullptr);
+		pRtti = GetClassObject<v3dxTransform>();
+		pRtti->BuildClassInfo<v3dxTransform>("v3dxTransform", nullptr);
+	}
+} GThisRttiBuilder;
 NS_END
 
 v3dUInt32_4 v3dUInt32_4::GetVar(int x, int y, int z, int w)

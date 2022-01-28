@@ -25,13 +25,11 @@
 #include "ID11GpuBuffer.h"
 #include "../Utility/GraphicsProfiler.h"
 #include "../../Base/vfxsampcounter.h"
-
+#include <xlocbuf>
+#include <codecvt>
 #define new VNEW
 
 NS_BEGIN
-
-
-
 
 ID11CommandList::ID11CommandList()
 {
@@ -77,6 +75,38 @@ void ID11CommandList::EndCommand()
 	ICommandList::EndCommand();
 }
 
+void ID11CommandList::BeginEvent(const wchar_t* info)
+{
+	auto anno = ((ID11RenderContext*)GetContext())->mDefinedAnnotation;
+	if (anno != nullptr)
+	{
+		anno->BeginEvent(info);
+	}
+}
+
+void ID11CommandList::BeginEvent(const char* info)
+{
+	auto anno = ((ID11RenderContext*)GetContext())->mDefinedAnnotation;
+	if (anno != nullptr)
+	{
+		//std::wstring_convert<std:: codecvt_utf8_utf16<wchar_t>> converter;
+		////std::string str = converter.to_bytes(L"Hello world");
+		//std::wstring wstr = converter.from_bytes(info);
+		std::string str = info;
+		std::wstring wstr(str.begin(), str.end());
+		anno->BeginEvent(wstr.c_str());
+	}
+}
+
+void ID11CommandList::EndEvent()
+{
+	auto anno = ((ID11RenderContext*)GetContext())->mDefinedAnnotation;
+	if (anno != nullptr)
+	{
+		anno->EndEvent();
+	}
+}
+
 bool ID11CommandList::BeginRenderPass(IFrameBuffers* pFrameBuffer, const IRenderPassClears* passClears, const char* debugName)
 {
 	if (mProfiler != nullptr && mProfiler->mNoPixelWrite)
@@ -110,6 +140,7 @@ bool ID11CommandList::BeginRenderPass(IFrameBuffers* pFrameBuffer, const IRender
 	RTVArraySize = (UINT32)mDX11RTVArray.size();
 	Safe_Release(mDSView);
 
+	//BeginEvent(debugName);
 	if (RTVArraySize == 0)
 	{
 		ID3D11RenderTargetView* pNullRTV = NULL;
@@ -183,6 +214,7 @@ bool ID11CommandList::BeginRenderPass(IFrameBuffers* pFrameBuffer, const IRender
 void ID11CommandList::EndRenderPass()
 {
 	ICommandList::EndRenderPass();
+	//EndEvent();
 }
 
 
@@ -192,23 +224,14 @@ void ID11CommandList::Commit(IRenderContext* pRHICtx)
 	{
 		return;
 	}
-		
+	
 	{
 		VAutoLock(((ID11RenderContext*)pRHICtx)->mHWContextLocker);
 		auto context = ((ID11RenderContext*)pRHICtx)->mHardwareContext;
-		
-		auto anno = ((ID11RenderContext*)GetContext())->mDefinedAnnotation;
-		if (anno != nullptr)
-		{
-			anno->BeginEvent(mDebugName.c_str());
-		}
 
+		BeginEvent(mDebugName.c_str());
 		context->ExecuteCommandList(mCmdList, FALSE);
-
-		if (anno != nullptr)
-		{
-			anno->EndEvent();
-		}
+		EndEvent();
 
 		for (auto& i : mSignals)
 		{

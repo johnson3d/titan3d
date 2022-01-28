@@ -19,7 +19,7 @@ namespace EngineNS.Graphics.Mesh
                 if (mPerMeshCBuffer == null)
                 {
                     var effect = UEngine.Instance.GfxDevice.EffectManager.DummyEffect;
-                    mPerMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(effect.ShaderProgram, effect.CBPerMeshIndex);
+                    mPerMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(effect.ShaderProgram, effect.ShaderIndexer.cbPerMesh);
                     if (OnAfterCBufferCreated != null)
                     {
                         OnAfterCBufferCreated();
@@ -49,17 +49,18 @@ namespace EngineNS.Graphics.Mesh
                 public WeakReference<Pipeline.UGraphicsBuffers.UTargetViewIdentifier> TargetView;
                 public RHI.CDrawCall[] DrawCalls;
                 //不同的View上可以有不同的渲染策略，同一个模型，可以渲染在不同视口上，比如装备预览的策略可以和GameView不一样
-                public Pipeline.IRenderPolicy Policy;                
+                public Pipeline.URenderPolicy Policy;                
             }
             public List<ViewDrawCalls> TargetViews;
             
-            private async System.Threading.Tasks.Task BuildDrawCall(ViewDrawCalls vdc, UMesh mesh, int atom, Pipeline.IRenderPolicy policy, Pipeline.IRenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
+            private async System.Threading.Tasks.Task BuildDrawCall(ViewDrawCalls vdc, UMesh mesh, int atom, Pipeline.URenderPolicy policy,
+                Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
             {
                 if (atom >= mesh.MaterialMesh.Materials.Length)
                     return;
                 RHI.CDrawCall[] drawCalls = vdc.DrawCalls;
-                for (Pipeline.IRenderPolicy.EShadingType i = Pipeline.IRenderPolicy.EShadingType.BasePass;
-                    i < Pipeline.IRenderPolicy.EShadingType.Count; i++)
+                for (Pipeline.URenderPolicy.EShadingType i = Pipeline.URenderPolicy.EShadingType.BasePass;
+                    i < Pipeline.URenderPolicy.EShadingType.Count; i++)
                 {
                     var shading = policy.GetPassShading(i, mesh, atom, node);
                     if (shading != null)
@@ -146,25 +147,25 @@ namespace EngineNS.Graphics.Mesh
                         unsafe
                         {
                             var gpuProgram = drawcall.Effect.ShaderProgram;
-                            if (drawcall.Effect.CBPerFrameIndex != 0xFFFFFFFF && UEngine.Instance.GfxDevice.PerFrameCBuffer != null)
+                            if (drawcall.Effect.ShaderIndexer.cbPerFrame != 0xFFFFFFFF && UEngine.Instance.GfxDevice.PerFrameCBuffer != null)
                             {
-                                drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.CBPerFrameIndex, UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject);
+                                drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.ShaderIndexer.cbPerFrame, UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject);
                             }
-                            if (drawcall.Effect.CBPerMeshIndex != 0xFFFFFFFF)
+                            if (drawcall.Effect.ShaderIndexer.cbPerMesh!= 0xFFFFFFFF)
                             {
-                                drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.CBPerMeshIndex, mesh.PerMeshCBuffer.mCoreObject);
+                                drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.ShaderIndexer.cbPerMesh, mesh.PerMeshCBuffer.mCoreObject);
                             }
-                            if (drawcall.Effect.CBPerMaterialIndex != 0xFFFFFFFF)
+                            if (drawcall.Effect.ShaderIndexer.cbPerMaterial != 0xFFFFFFFF)
                             {
                                 if (Material != null)
                                 {
                                     if (Material.PerMaterialCBuffer == null)
                                     {
                                         var rc = UEngine.Instance.GfxDevice.RenderContext;
-                                        Material.PerMaterialCBuffer = rc.CreateConstantBuffer(gpuProgram, drawcall.Effect.CBPerMaterialIndex);
+                                        Material.PerMaterialCBuffer = rc.CreateConstantBuffer(gpuProgram, drawcall.Effect.ShaderIndexer.cbPerMaterial);
                                         Material.UpdateUniformVars(Material.PerMaterialCBuffer);
                                     }
-                                    drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.CBPerMaterialIndex, Material.PerMaterialCBuffer.mCoreObject);
+                                    drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.ShaderIndexer.cbPerMaterial, Material.PerMaterialCBuffer.mCoreObject);
                                 }
                             }
                         }
@@ -196,7 +197,7 @@ namespace EngineNS.Graphics.Mesh
                 TargetViews?.Clear();
                 TargetViews = null;
             }            
-            private ViewDrawCalls GetOrCreateDrawCalls(Pipeline.UGraphicsBuffers.UTargetViewIdentifier id, Pipeline.IRenderPolicy policy)
+            private ViewDrawCalls GetOrCreateDrawCalls(Pipeline.UGraphicsBuffers.UTargetViewIdentifier id, Pipeline.URenderPolicy policy)
             {
                 ViewDrawCalls drawCalls = null;
                 //查找或者缓存TargetView
@@ -219,13 +220,14 @@ namespace EngineNS.Graphics.Mesh
                 {
                     drawCalls = new ViewDrawCalls();
                     drawCalls.TargetView = new WeakReference<Pipeline.UGraphicsBuffers.UTargetViewIdentifier>(id);
-                    drawCalls.DrawCalls = new RHI.CDrawCall[(int)Pipeline.IRenderPolicy.EShadingType.Count];
+                    drawCalls.DrawCalls = new RHI.CDrawCall[(int)Pipeline.URenderPolicy.EShadingType.Count];
                     drawCalls.Policy = policy;
                     TargetViews.Add(drawCalls);
                 }
                 return drawCalls;
             }
-            public unsafe virtual RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, UMesh mesh, int atom, Pipeline.IRenderPolicy policy, Pipeline.IRenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
+            public unsafe virtual RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, UMesh mesh, int atom, Pipeline.URenderPolicy policy,
+                Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
             {
                 if (Material != mesh.MaterialMesh.Materials[atom] || 
                     Material.SerialId != MaterialSerialId)
@@ -445,7 +447,8 @@ namespace EngineNS.Graphics.Mesh
         //渲染原子Id
         //渲染策略policy
         //本次渲染的Shading模式
-        public RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, int atom, Pipeline.IRenderPolicy policy, Pipeline.IRenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
+        public RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, int atom, Pipeline.URenderPolicy policy, 
+            Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
         {
             if (atom >= Atoms.Length)
                 return null;

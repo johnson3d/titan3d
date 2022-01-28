@@ -101,6 +101,7 @@ namespace EngineNS.Bricks.Particle.Simple
     {
         public override async Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
+            var dd = CoreDefine.RoundUpPow2(512, 32);
             var nebulaData = data as UNebulaNodeData;
             nebulaData.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(USimpleMdfQueue));
 

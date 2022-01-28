@@ -36,7 +36,7 @@ enum v3dxBox3Coner
 
 enum v3dxBox3Side
 {
-	BOX3_SIDE_x = 0,				//����y,z�У�xΪСx
+	BOX3_SIDE_x = 0,				
 	BOX3_SIDE_X = 1,
 	BOX3_SIDE_y = 2,
 	BOX3_SIDE_Y = 3,

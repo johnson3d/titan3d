@@ -111,6 +111,9 @@
     <Import Project="..\NativeCode\Bricks\TcpClient\TcpClient.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\FreeType\FreeType.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\MeshOptimizer\MeshOptimizer.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\Particle\Particle.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\Terrain\Terrain.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
@@ -146,7 +149,8 @@
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -159,7 +163,8 @@
       <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -173,7 +178,8 @@
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -186,7 +192,8 @@
       <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -200,7 +207,8 @@
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -213,7 +221,8 @@
       <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -227,7 +236,8 @@
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
@@ -240,7 +250,8 @@
       <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>

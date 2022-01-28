@@ -11,8 +11,8 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::IGeometryMesh, EngineNS::VIUnknown);
-RTTI_IMPL(EngineNS::IVertexArray, EngineNS::VIUnknown);
+ENGINE_RTTI_IMPL(EngineNS::IGeometryMesh);
+ENGINE_RTTI_IMPL(EngineNS::IVertexArray);
 
 IVertexArray::~IVertexArray()
 {
@@ -203,7 +203,7 @@ IGeometryMesh* IGeometryMesh::MergeGeoms(IRenderContext* rc, IGeometryMesh** mes
 			auto pAddr = &vertPos[0];
 			vbDesc.InitData = pAddr;
 			vbDesc.Stride = sizeof(v3dxVector3);
-			AutoRef<IVertexBuffer> nvb = rc->CreateVertexBuffer(&vbDesc);
+			auto nvb = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
 			result->BindVertexBuffer((EVertexSteamType)i, nvb);
 		}
 		else
@@ -213,7 +213,7 @@ IGeometryMesh* IGeometryMesh::MergeGeoms(IRenderContext* rc, IGeometryMesh** mes
 				continue;
 
 			vbDesc.InitData = &verts[i][0];
-			AutoRef<IVertexBuffer> nvb = rc->CreateVertexBuffer(&vbDesc);
+			auto nvb = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
 			result->BindVertexBuffer((EVertexSteamType)i, nvb);
 		}
 	}

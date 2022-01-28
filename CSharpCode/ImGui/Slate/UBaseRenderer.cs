@@ -197,7 +197,7 @@ namespace EngineNS.EGui.Slate
             srvDesc.SetTexture2D();
             srvDesc.Type = ESrvType.ST_Texture2D;
             srvDesc.Format = txDesc.Format;
-            srvDesc.mGpuBuffer = fontData.FontTexture.mCoreObject.NativeSuper;
+            srvDesc.mGpuBuffer = fontData.FontTexture.mCoreObject;
             srvDesc.Texture2D.MipLevels = 1;
             fontData.FontSRV = rc.CreateShaderResourceView(in srvDesc);
 

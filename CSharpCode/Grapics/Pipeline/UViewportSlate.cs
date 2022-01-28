@@ -10,7 +10,7 @@ namespace EngineNS.Graphics.Pipeline
         public void SetCameraOffset(in DVector3 offset)
         {
             World.CameraOffset = offset;
-            this.RenderPolicy.Camera.mCoreObject.SetMatrixStartPosition(in offset);
+            this.RenderPolicy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in offset);
         }
         public virtual string Title { get; set; } = "Game";
         protected bool mVisible = true;
@@ -28,7 +28,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
-        public Graphics.Pipeline.IRenderPolicy RenderPolicy { get; set; }
+        public Graphics.Pipeline.URenderPolicy RenderPolicy { get; set; }
         public Vector2 Window2Viewport(Vector2 pos)
         {//pos为真实窗口的坐标，返回ViewportSlate坐标
             Vector2 tmp;
@@ -185,7 +185,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void ProcessHitproxySelected(float mouseX, float mouseY)
         {
-            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.IRenderPolicy;
+            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.URenderPolicy;
             if (edtorPolicy != null)
             {
                 var pos = Window2Viewport(new Vector2(mouseX, mouseY));
@@ -219,7 +219,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
         {
-            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.IRenderPolicy;
+            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.URenderPolicy;
             if (edtorPolicy != null)
             {
                 if (proxy == null)
@@ -232,11 +232,11 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
-        public delegate System.Threading.Tasks.Task FOnInitialize(UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax);
+        public delegate System.Threading.Tasks.Task FOnInitialize(UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax);
         public FOnInitialize OnInitialize = null;
         public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Rtti.UTypeDesc policyType, float zMin, float zMax)
         {
-            var policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.IRenderPolicy;
+            var policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.URenderPolicy;
             if (OnInitialize != null)
             {
                 await OnInitialize(this, application, policy, zMin, zMax);

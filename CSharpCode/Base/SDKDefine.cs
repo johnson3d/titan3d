@@ -39,6 +39,11 @@ namespace EngineNS
                 result += 1;
             return result;
         }
+        public static int RoundUpPow2(int numToRound, int multiple)
+        {
+            System.Diagnostics.Debug.Assert(multiple!=0 && ((multiple & (multiple - 1)) == 0));
+            return (numToRound + multiple - 1) & -multiple;
+        }
         public static void Swap<T>(ref T lh, ref T rh)
         {
             T tmp = lh;

@@ -67,16 +67,6 @@ extern "C" VFX_API void* SDK_Core_GetObjectFromPointer(void* ptr)
 
 NS_BEGIN
 
-StructImpl(FWriteLogString)
-StructImpl(FOnNativeMemAlloc)
-//StructImpl(FOnNativeMemFree)
-StructImpl(FOnNativeMemLeak)
-StructImpl(FCreateManagedObject);
-StructImpl(FFreeManagedObjectGCHandle);
-StructImpl(FGetManagedObjectFromGCHandle);
-StructImpl(FOnShaderTranslated);
-StructImpl(FAssertEvent);
-
 FAssertEvent CoreSDK::mAssertEvent = nullptr;
 FWriteLogString CoreSDK::mWriteLogString = nullptr;
 FCreateManagedObject CoreSDK::CreateManagedObject = nullptr;

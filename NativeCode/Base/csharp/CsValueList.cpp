@@ -4,8 +4,8 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::CsValueList, EngineNS::VIUnknown);
-RTTI_IMPL(EngineNS::CsQueue, EngineNS::VIUnknown);
+ENGINE_RTTI_IMPL(EngineNS::CsValueList);
+ENGINE_RTTI_IMPL(EngineNS::CsQueue);
 
 CsValueList::CsValueList(int stride)
 {

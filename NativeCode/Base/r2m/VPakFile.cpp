@@ -6,8 +6,8 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::VPakFile, EngineNS::VIUnknown);
-RTTI_IMPL(EngineNS::VPackFile2Memory, EngineNS::VIUnknown);
+ENGINE_RTTI_IMPL(EngineNS::VPakFile);
+ENGINE_RTTI_IMPL(EngineNS::VPackFile2Memory);
 
 VPakFile::VPakFile()
 {

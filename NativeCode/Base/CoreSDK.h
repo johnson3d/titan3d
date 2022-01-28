@@ -170,42 +170,5 @@ public:
 	}
 };
 
-VTypeHelperDefine(FWriteLogString, sizeof(void*));
-VTypeHelperDefine(FOnNativeMemAlloc, sizeof(void*));
-//VTypeHelperDefine(FOnNativeMemFree, sizeof(void*));
-VTypeHelperDefine(FOnNativeMemLeak, sizeof(void*));
-VTypeHelperDefine(FCreateManagedObject, sizeof(void*));
-VTypeHelperDefine(FFreeManagedObjectGCHandle, sizeof(void*));
-VTypeHelperDefine(FGetManagedObjectFromGCHandle, sizeof(void*));
-VTypeHelperDefine(FOnShaderTranslated, sizeof(void*));
-VTypeHelperDefine(FAssertEvent, sizeof(void*));
-
-StructBegin(FWriteLogString, EngineNS)
-StructEnd(void)
-
-StructBegin(FAssertEvent, EngineNS)
-StructEnd(void)
-
-StructBegin(FOnNativeMemAlloc, EngineNS)
-StructEnd(void)
-
-//StructBegin(FOnNativeMemFree, EngineNS)
-//StructEnd(void)
-
-StructBegin(FOnNativeMemLeak, EngineNS)
-StructEnd(void)
-
-StructBegin(FCreateManagedObject, EngineNS)
-StructEnd(void)
-
-StructBegin(FFreeManagedObjectGCHandle, EngineNS)
-StructEnd(void)
-
-StructBegin(FGetManagedObjectFromGCHandle, EngineNS)
-StructEnd(void)
-
-StructBegin(FOnShaderTranslated, EngineNS)
-StructEnd(void)
-
 NS_END
 

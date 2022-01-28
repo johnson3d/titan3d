@@ -23,6 +23,10 @@ struct TR_CLASS()
 		X = Z = -1;
 		Level = -1;
 	}
+	virtual ~QNodeBase()
+	{
+
+	}
 	virtual QNodeBase* GetChild(ENodeStyle style) {
 		return nullptr;
 	}
@@ -102,10 +106,10 @@ public:
 		else
 		{
 			func(this, false);
-			((QNode*)LBNode)->IterateNode();
-			((QNode*)LTNode)->IterateNode();
-			((QNode*)RBNode)->IterateNode();
-			((QNode*)RTNode)->IterateNode();
+			((QNode*)LBNode)->IterateNode(func);
+			((QNode*)LTNode)->IterateNode(func);
+			((QNode*)RBNode)->IterateNode(func);
+			((QNode*)RTNode)->IterateNode(func);
 		}
 	}
 };

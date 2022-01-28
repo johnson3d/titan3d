@@ -61,11 +61,10 @@ class TR_CLASS()
 IVertexArray : public VIUnknown
 {
 public:
-	RTTI_DEF(IVertexArray, 0x5d2268915cb1639f, true);
+	ENGINE_RTTI(IVertexArray);
 	IVertexBuffer*			VertexBuffers[VST_Number];
 	UINT					mNumInstances;
 
-	TR_CONSTRUCTOR()
 	IVertexArray()
 	{
 		memset(VertexBuffers, 0, sizeof(VertexBuffers));
@@ -73,17 +72,13 @@ public:
 	}
 	~IVertexArray();
 
-	TR_FUNCTION()
 	void Reset();
 
 	void ApplyVBs(ICommandList* cmd, IDrawCall* pass, vBOOL bImm);
 
-	TR_FUNCTION()
 	inline IVertexBuffer* GetVertexBuffer(EVertexSteamType index) {
 		return VertexBuffers[index];
 	}
-
-	TR_FUNCTION()
 	void BindVertexBuffer(EVertexSteamType index, IVertexBuffer* vb)
 	{
 		if (VertexBuffers[index] == vb)
@@ -105,7 +100,7 @@ public:
 	vBOOL					mIsDirty;
 	TimeKeys				MopherKeys[VST_Number];
 public:
-	RTTI_DEF(IGeometryMesh, 0x889c9cac5b2dd347, true);
+	ENGINE_RTTI(IGeometryMesh);
 	IGeometryMesh()
 	{
 		memset(VertexBuffers, 0, sizeof(VertexBuffers));
@@ -115,16 +110,13 @@ public:
 	~IGeometryMesh();
 	virtual void InvalidateResource() override;
 
-	TR_FUNCTION()
 	inline IVertexBuffer* GetVertexBuffer(EVertexSteamType index) {
 		return VertexBuffers[index];
 	}
-	TR_FUNCTION()
 	inline IIndexBuffer* GetIndexBuffer() {
 		return IndexBuffer;
 	}
 
-	TR_FUNCTION()
 	virtual void BindVertexBuffer(EVertexSteamType index, IVertexBuffer* vb)
 	{
 		if (VertexBuffers[index] == vb)
@@ -135,7 +127,6 @@ public:
 		VertexBuffers[index] = vb;
 		mIsDirty = TRUE;
 	}
-	TR_FUNCTION()
 	virtual void BindIndexBuffer(IIndexBuffer* ib)
 	{
 		if (IndexBuffer == ib)
@@ -149,7 +140,6 @@ public:
 
 	virtual vBOOL ApplyGeometry(ICommandList* cmd, IDrawCall* pass, vBOOL bImm);
 
-	TR_FUNCTION()
 	static IGeometryMesh* MergeGeoms(IRenderContext* rc, IGeometryMesh** meshArray, v3dxMatrix4* transform, int count, v3dxBox3* aabb);
 };
 

@@ -160,7 +160,7 @@ namespace EngineNS.Bricks.Procedure.Buffer2D
                 var rsvDesc = new IShaderResourceViewDesc();
                 rsvDesc.SetTexture2D();
                 rsvDesc.Type = ESrvType.ST_Texture2D;
-                rsvDesc.mGpuBuffer = texture.mCoreObject.NativeSuper;
+                rsvDesc.mGpuBuffer = texture.mCoreObject;
                 rsvDesc.Format = format;
                 rsvDesc.Texture2D.MipLevels = desc.MipLevels;
                 var result = UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(in rsvDesc);
@@ -324,7 +324,7 @@ namespace EngineNS.Bricks.Procedure.Buffer2D
                 var rsvDesc = new IShaderResourceViewDesc();
                 rsvDesc.SetTexture2D();
                 rsvDesc.Type = ESrvType.ST_Texture2D;
-                rsvDesc.mGpuBuffer = texture.mCoreObject.NativeSuper;
+                rsvDesc.mGpuBuffer = texture.mCoreObject;
                 rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
                 rsvDesc.Texture2D.MipLevels = desc.MipLevels;
                 var result = UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(in rsvDesc);
@@ -384,7 +384,7 @@ namespace EngineNS.Bricks.Procedure.Buffer2D
                 var rsvDesc = new IShaderResourceViewDesc();
                 rsvDesc.SetTexture2D();
                 rsvDesc.Type = ESrvType.ST_Texture2D;
-                rsvDesc.mGpuBuffer = texture.mCoreObject.NativeSuper;
+                rsvDesc.mGpuBuffer = texture.mCoreObject;
                 rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
                 rsvDesc.Texture2D.MipLevels = desc.MipLevels;
                 var result = UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(in rsvDesc);

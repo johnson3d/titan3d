@@ -6,7 +6,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
 {
     public class CSkinModifier : AuxPtrType<ISkinModifier>
     {
-        public Animation.SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose AnimatableSkeletonPose { get; set; }
+        public Animation.SkeletonAnimation.Runtime.Pose.UMeshSpaceRuntimePose RuntimeMeshSpacePose;
         public CSkinModifier()
         {
             mCoreObject = ISkinModifier.CreateInstance();

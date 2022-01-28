@@ -22,7 +22,7 @@ bool IVKDepthStencilView::Init(IVKRenderContext* rc, const IDepthStencilViewDesc
 
 	IShaderResourceViewDesc srvDesc;
 	srvDesc.SetTexture2D();
-	srvDesc.mGpuBuffer = desc->m_pTexture2D;
+	srvDesc.mGpuBuffer = desc->Texture2D;
 	srvDesc.Format = desc->Format;
 	srvDesc.ViewDimension = SRV_DIMENSION::SRV_DIMENSION_TEXTURE2D;
 
@@ -30,7 +30,7 @@ bool IVKDepthStencilView::Init(IVKRenderContext* rc, const IDepthStencilViewDesc
 	auto pSRV = new IVKShaderResourceView();
 	pSRV->Init(rc, &srvDesc);
 	mTextureSRV.WeakRef(pSRV);
-	m_refTexture2D.StrongRef(desc->m_pTexture2D);
+	m_refTexture2D.StrongRef((ITexture2D*)desc->Texture2D);
 	return true;
 }
 NS_END

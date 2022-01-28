@@ -282,7 +282,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
         } = Guid.NewGuid();
         public NodeGraph ParentGraph { get; set; }
         [Rtti.Meta]
-        public string Name
+        public virtual string Name
         {
             get;
             set;

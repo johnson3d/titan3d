@@ -47,7 +47,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             SourceCode = new IO.CMemStreamWriter();
             SourceCode.SetText(codeBuilder.ClassCode);
         }
-        public unsafe override void OnDrawCall(Graphics.Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Graphics.Pipeline.IRenderPolicy policy, Graphics.Mesh.UMesh mesh)
+        #region Index
+        private static RHI.FNameVarIndex StartPosition = new RHI.FNameVarIndex("StartPosition");
+        private static RHI.FNameVarIndex CurrentLOD = new RHI.FNameVarIndex("CurrentLOD");
+        private static RHI.FNameVarIndex EyeCenter = new RHI.FNameVarIndex("EyeCenter");
+        private static RHI.FNameVarIndex TexUVOffset = new RHI.FNameVarIndex("TexUVOffset"); 
+        #endregion
+        public unsafe override void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh)
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
             if (drawcall.TagObject == null)
@@ -85,20 +91,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var cbIndex = reflector.GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerPatch");
             if (!CoreSDK.IsNullPointer(index))
             {
-                var varIndex = pat.PatchCBuffer.mCoreObject.FindVar("StartPosition");
-                pat.PatchCBuffer.SetValue(varIndex, in pat.StartPosition);
+                pat.PatchCBuffer.SetValue(ref StartPosition, in pat.StartPosition);
 
-                varIndex = pat.PatchCBuffer.mCoreObject.FindVar("CurrentLOD");
-                pat.PatchCBuffer.SetValue(varIndex, pat.CurrentLOD);
+                pat.PatchCBuffer.SetValue(ref CurrentLOD, pat.CurrentLOD);
 
                 var terrain = pat.Level.GetTerrainNode();
-                varIndex = pat.PatchCBuffer.mCoreObject.FindVar("EyeCenter");
-                pat.PatchCBuffer.SetValue(varIndex, terrain.EyeLocalCenter - pat.StartPosition);
+                pat.PatchCBuffer.SetValue(ref EyeCenter, terrain.EyeLocalCenter - pat.StartPosition);
 
                 pat.TexUVOffset.X = (Patch.XInLevel * 64.0f) / 1024.0f;
                 pat.TexUVOffset.Y = (Patch.ZInLevel * 64.0f) / 1024.0f;
-                varIndex = pat.PatchCBuffer.mCoreObject.FindVar("TexUVOffset");
-                pat.PatchCBuffer.SetValue(varIndex, in pat.TexUVOffset);
+                pat.PatchCBuffer.SetValue(ref TexUVOffset, in pat.TexUVOffset);
 
                 drawcall.mCoreObject.BindShaderCBuffer(cbIndex, pat.PatchCBuffer.mCoreObject);
             }

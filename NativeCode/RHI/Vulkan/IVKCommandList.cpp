@@ -9,6 +9,7 @@
 #include "IVKGpuBuffer.h"
 #include "IVKShaderResourceView.h"
 #include "IVKFence.h"
+#include "IVKRenderSystem.h"
 
 #define new VNEW
 
@@ -79,6 +80,23 @@ void IVKCommandList::EndCommand()
 	ICommandList::EndCommand();
 }
 
+void IVKCommandList::BeginEvent(const char* info)
+{
+	if (IVKRenderSystem::fn_vkCmdBeginDebugUtilsLabelEXT == VK_NULL_HANDLE)
+		return;
+	VkDebugUtilsLabelEXT markerInfo = {};
+	markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+	markerInfo.pLabelName = info;
+	IVKRenderSystem::fn_vkCmdBeginDebugUtilsLabelEXT(mCommandBuffer, &markerInfo);
+}
+
+void IVKCommandList::EndEvent()
+{
+	if (IVKRenderSystem::fn_vkCmdEndDebugUtilsLabelEXT == VK_NULL_HANDLE)
+		return;
+	IVKRenderSystem::fn_vkCmdEndDebugUtilsLabelEXT(mCommandBuffer);
+}
+
 bool IVKCommandList::BeginRenderPass(IFrameBuffers* pFrameBuffer, const IRenderPassClears* passClears, const char* debugName)
 {
 	auto pVKFrameBuffers = ((IVKFrameBuffers*)pFrameBuffer);
@@ -119,6 +137,7 @@ bool IVKCommandList::BeginRenderPass(IFrameBuffers* pFrameBuffer, const IRenderP
 	renderPassInfo.clearValueCount = NumOfClear;// pRenderPass->mDesc.NumOfMRT;
 	renderPassInfo.pClearValues = clearValues;
 
+	BeginEvent(debugName);
 	mPassRendering = true;
 	vkCmdBeginRenderPass(mCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	return true;
@@ -129,6 +148,7 @@ void IVKCommandList::EndRenderPass()
 	if (mPassRendering)
 	{
 		vkCmdEndRenderPass(mCommandBuffer);
+		EndEvent();
 	}
 	mPassRendering = false;
 	auto pVKFrameBuffers = mFrameBuffer.UnsafeConvertTo<IVKFrameBuffers>();

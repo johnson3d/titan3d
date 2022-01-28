@@ -280,7 +280,7 @@ namespace EngineNS
         [Rtti.Meta]
         public byte w3;
     }
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct UInt8_2
     {
         public byte x;
@@ -293,7 +293,7 @@ namespace EngineNS
         public byte y;
         public byte z;
     }
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct UInt8_4
     {
         [Rtti.Meta]

@@ -122,7 +122,10 @@ public:
 	virtual vBOOL MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch) = 0;
 	virtual void UnmapMipmap(ICommandList* cmd, int MipLevel) = 0;
 	void BuildImageBlob(IBlobObject* blob, void* pData, UINT RowPitch);
-	virtual void UpdateMipData(ICommandList* cmd, UINT level, void* pData, UINT width, UINT height, UINT Pitch) = 0;
+	virtual void UpdateMipData(ICommandList * cmd, UINT level, void* pData, UINT width, UINT height, UINT Pitch) override
+	{
+
+	}
 };
 
 NS_END

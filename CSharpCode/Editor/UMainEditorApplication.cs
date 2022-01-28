@@ -245,7 +245,7 @@ namespace EngineNS.Editor
                             {
                                 var saved = this.WorldViewportSlate.RenderPolicy;
                                 var policy = new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy();                                
-                                await policy.Initialize(saved.Camera, this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
+                                await policy.Initialize(saved.DefaultCamera);
                                 policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
                                 this.WorldViewportSlate.RenderPolicy = policy;
                                 saved.Cleanup();
@@ -261,12 +261,12 @@ namespace EngineNS.Editor
                             {
                                 var saved = this.WorldViewportSlate.RenderPolicy;
                                 var policy = new Graphics.Pipeline.Deferred.UDeferredPolicy();
-                                await policy.Initialize(saved.Camera, this.WorldViewportSlate.ClientSize.X,this.WorldViewportSlate.ClientSize.Y);
+                                await policy.Initialize(saved.DefaultCamera);
                                 policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
                                 this.WorldViewportSlate.RenderPolicy = policy;
                                 saved.Cleanup();
 
-                                policy.VoxelsNode.ResetDebugMeshNode(this.WorldViewportSlate.World);
+                                //policy.VoxelsNode.ResetDebugMeshNode(this.WorldViewportSlate.World);
                             },
                         },
                         new EGui.UIProxy.MenuItemProxy()
@@ -311,7 +311,7 @@ namespace EngineNS.Editor
                             Selected = true,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
                             {
-                                var vxNode = this.WorldViewportSlate.RenderPolicy.QueryNode("VoxelsNode") as Bricks.VXGI.UVoxelsNode;
+                                var vxNode = this.WorldViewportSlate.RenderPolicy.FindFirstNode<Bricks.VXGI.UVoxelsNode>();
                                 if(vxNode!=null)
                                 {
                                     vxNode.DebugVoxels = !vxNode.DebugVoxels;
@@ -325,7 +325,7 @@ namespace EngineNS.Editor
 
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
                             {
-                                var vxNode = this.WorldViewportSlate.RenderPolicy.QueryNode("VoxelsNode") as Bricks.VXGI.UVoxelsNode;
+                                var vxNode = this.WorldViewportSlate.RenderPolicy.FindFirstNode<Bricks.VXGI.UVoxelsNode>();
                                 if(vxNode!=null)
                                 {
                                     vxNode.SetEraseBox(in vxNode.VxSceneBox);

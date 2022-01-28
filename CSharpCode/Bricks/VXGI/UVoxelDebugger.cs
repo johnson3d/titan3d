@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.VXGI
             SourceCode.SetText(codeBuilder.ClassCode);
         }
         RHI.CShaderResources mAttachSRVs = null;
-        public unsafe override void OnDrawCall(Graphics.Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Graphics.Pipeline.IRenderPolicy policy, Graphics.Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh)
         {
             var vxNode = this.MdfDatas as UVoxelsNode;
             if (vxNode == null)
@@ -273,9 +273,9 @@ namespace EngineNS.Bricks.VXGI
             }
 
             
-            var cmd = BasePass.DrawCmdList.mCoreObject;
-            SetupVxDebuggerDrawcall.mCoreObject.BuildPass(cmd);
-            CollectVxDebuggerDrawcall.mCoreObject.BuildPass(cmd);
+            var cmd = BasePass.DrawCmdList;
+            SetupVxDebuggerDrawcall.BuildPass(cmd);
+            CollectVxDebuggerDrawcall.BuildPass(cmd);
             //UInt32 nUavInitialCounts = 1;
             //cmd.SetComputeShader(CS_SetupVxDebugger.mCoreObject);
             //var srvIdx = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbGBufferDesc");

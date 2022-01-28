@@ -266,7 +266,7 @@ namespace EngineNS.EGui
                     pipelineDesc.GpuProgram = shaderProg.mCoreObject;
                     pipelineDesc.Rasterizer = RasterizerState.mCoreObject;
                     pipelineDesc.DepthStencil = DepthStencilState.mCoreObject;
-                    var Pipeline = rc.CreateRenderPipeline(ref pipelineDesc);
+                    var Pipeline = rc.CreateRenderPipeline(in pipelineDesc);
                     Pipeline.mCoreObject.GetGpuProgram().BindInputLayout(renderer.InputLayout.mCoreObject);
 
                     Drawcall.mCoreObject.BindPipeline(Pipeline.mCoreObject);
@@ -315,7 +315,7 @@ namespace EngineNS.EGui
                 vbDesc.Stride = (uint)sizeof(ImDrawVert);
                 vbDesc.CPUAccess = (UInt32)ECpuAccess.CAS_WRITE;
                 vbDesc.ByteWidth = (uint)(totalVBSize * 1.5f);
-                rhiData.VertexBuffer = rc.CreateVertexBuffer(ref vbDesc);
+                rhiData.VertexBuffer = rc.CreateVertexBuffer(in vbDesc);
                 rhiData.GeomMesh.mCoreObject.BindVertexBuffer(EVertexSteamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
             }
 
@@ -328,7 +328,7 @@ namespace EngineNS.EGui
                 ibDesc.CPUAccess = (UInt32)ECpuAccess.CAS_WRITE;
                 ibDesc.ByteWidth = (uint)(totalIBSize * 1.5f);
                 ibDesc.Type = EIndexBufferType.IBT_Int16;
-                rhiData.IndexBuffer = rc.CreateIndexBuffer(ref ibDesc);
+                rhiData.IndexBuffer = rc.CreateIndexBuffer(in ibDesc);
                 rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
             }
 

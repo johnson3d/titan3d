@@ -40,19 +40,19 @@ namespace EngineNS.EGui.Slate
             await EngineNS.Thread.AsyncDummyClass.DummyFunc();
             return true;
         }
-        public async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        public async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
-            await RenderPolicy.Initialize(policy.Camera, 1, 1);
-
-            CameraController.ControlCamera(RenderPolicy.Camera);
+            CameraController.ControlCamera(RenderPolicy.DefaultCamera);
         }
         public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Rtti.UTypeDesc policyType, float zMin, float zMax)
         {
             await Initialize();
 
-            var policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.IRenderPolicy;
+            var policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.URenderPolicy;
+            await policy.Initialize(null);
+
             if (OnInitialize == null)
             {
                 OnInitialize = this.Initialize_Default;
@@ -91,7 +91,10 @@ namespace EngineNS.EGui.Slate
         }
         protected override IntPtr GetShowTexture()
         {
-            return RenderPolicy.GetFinalShowRSV().GetTextureHandle();
+            var srv = RenderPolicy.GetFinalShowRSV();
+            if (srv == null)
+                return IntPtr.Zero;
+            return srv.GetTextureHandle();
         }
         #region CameraControl
         Vector2 mPreMousePt;
@@ -200,7 +203,7 @@ namespace EngineNS.EGui.Slate
             mVisParameter.World = World;
             mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
             mVisParameter.VisibleNodes = RenderPolicy.VisibleNodes;
-            mVisParameter.CullCamera = RenderPolicy.GetBasePassNode().GBuffers.Camera;
+            mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
             World.GatherVisibleMeshes(mVisParameter);
 
             if (mWorldBoundShapes != null)

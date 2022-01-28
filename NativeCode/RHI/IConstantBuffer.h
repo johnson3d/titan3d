@@ -15,7 +15,7 @@ class IShaderProgram;
 #define MaxConstBufferNum 8
 
 struct TR_CLASS(SV_LayoutStruct = 8)
-ConstantVarDesc
+	ConstantVarDesc
 {
 	ConstantVarDesc()
 	{
@@ -36,14 +36,66 @@ ConstantVarDesc
 	vBOOL			Dirty;
 };
 
+struct TR_CLASS()
+	IConstantBufferLayout : public VIUnknownBase
+{
+	TR_DISCARD()
+	std::vector<ConstantVarDesc>	Vars;
+
+	UINT FindVar(const char* name) const {
+		for (UINT i = 0; i < Vars.size(); i++)
+		{
+			if (Vars[i].Name == name)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+	const ConstantVarDesc* FindVarDesc(const char* name) const {
+		for (UINT i = 0; i < Vars.size(); i++)
+		{
+			if (Vars[i].Name == name)
+			{
+				return &Vars[i];
+			}
+		}
+		return nullptr;
+	}
+	const ConstantVarDesc* GetVar(UINT index) const {
+		if (index >= Vars.size())
+			return nullptr;
+		return &Vars[index];
+	}
+	vBOOL IsSameVars(const IConstantBufferLayout* desc)
+	{
+		if (Vars.size() != desc->Vars.size())
+			return FALSE;
+
+		for (size_t i = 0; i < Vars.size(); i++)
+		{
+			if (Vars[i].Type != desc->Vars[i].Type)
+				return FALSE;
+			if (Vars[i].Offset != desc->Vars[i].Offset)
+				return FALSE;
+			if (Vars[i].Elements != desc->Vars[i].Elements)
+				return FALSE;
+			if (Vars[i].Name != desc->Vars[i].Name)
+				return FALSE;
+		}
+
+		return TRUE;
+	}
+};
+
 struct TR_CLASS(SV_LayoutStruct = 8)
-IConstantBufferDesc : public IShaderBinder
+	IConstantBufferDesc : public IShaderBinder
 {
 	IConstantBufferDesc()
 	{
 		SetDefault();
 	}
-	TR_FUNCTION()
+	
 	void SetDefault()
 	{
 		IShaderBinder::SetDefault();
@@ -55,31 +107,30 @@ IConstantBufferDesc : public IShaderBinder
 	UINT			CPUAccess;
 	
 	TR_DISCARD()
-	std::vector<ConstantVarDesc>	Vars;
+	AutoRef<IConstantBufferLayout> CBufferLayout;
+	UINT FindVar(const char* name) const 
+	{
+		return CBufferLayout->FindVar(name);
+	}
+	const ConstantVarDesc* FindVarDesc(const char* name) const
+	{
+		return CBufferLayout->FindVarDesc(name);
+	}
+	const ConstantVarDesc* GetVar(UINT index) const 
+	{
+		return CBufferLayout->GetVar(index);
+	}
 	
-	UINT FindVar(const char* name) const{
-		for (UINT i = 0; i < Vars.size(); i++)
-		{
-			if (Vars[i].Name == name)
-			{
-				return i;
-			}
-		}
-		return -1;
-	}
-	const ConstantVarDesc* GetVar(UINT index) const {
-		if (index >= Vars.size())
-			return nullptr;
-		return &Vars[index];
-	}
-
 	void Save2Xnd(XndAttribute* attr);
 	void LoadXnd(XndAttribute* attr);
-	vBOOL IsSameVars(const IConstantBufferDesc* desc);
+	vBOOL IsSameVars(const IConstantBufferDesc* desc)
+	{
+		return CBufferLayout->IsSameVars(desc->CBufferLayout);
+	}
 };
 
 class TR_CLASS()
-IConstantBuffer : public IRenderResource
+	IConstantBuffer : public IRenderResource
 {
 protected:
 	bool							mDirty;
@@ -98,25 +149,21 @@ public:
 	IConstantBufferDesc				Desc;
 	std::vector<BYTE>				VarBuffer;
 	
-	TR_FUNCTION()
 	const char* GetName() const {
 		return Desc.Name.c_str();
 	}
-	TR_FUNCTION()
 	UINT GetSize() const {
 		return Desc.Size;
 	}
-	TR_FUNCTION()
 	vBOOL IsSameVars(IShaderProgram* program, UINT cbIndex);
 
-	virtual void DoSwap(IRenderContext* rc) override;
+	virtual void OnFrameEnd(IRenderContext* rc) override;
 	virtual bool UpdateContent(ICommandList* cmd, void* pBuffer, UINT Size) = 0;
-	TR_FUNCTION()
 	virtual void UpdateDrawPass(ICommandList* cmd, vBOOL bImm);
 
 	template<typename KVarType>
 	inline bool SetVarValue(const char* name, KVarType value, UINT index) {
-		auto desc = GetVarOffset(name);
+		auto desc = (ConstantVarDesc*)GetVarDesc(name);
 		if (desc == nullptr)
 			return false;
 		desc->Dirty = TRUE;
@@ -132,7 +179,7 @@ public:
 	}
 	template<typename KVarType>
 	inline bool GetVarValue(const char* name, KVarType& value, UINT index) {
-		auto desc = GetVarOffset(name);
+		auto desc = (ConstantVarDesc*)GetVarDesc(name);
 		if (desc == nullptr)
 			return false;
 		if (sizeof(value) != desc->Size)
@@ -144,7 +191,7 @@ public:
 
 	template<typename KVarType>
 	inline bool SetVarArrayValue(const char* name, KVarType* value, UINT count) {
-		auto desc = GetVarOffset(name);
+		auto desc = (ConstantVarDesc*)GetVarDesc(name);
 		if (desc == nullptr)
 			return false;
 		if (sizeof(KVarType)*count != desc->Size)
@@ -168,37 +215,26 @@ public:
 		UpdateContent(cmd, &VarBuffer[0], (UINT)VarBuffer.size());
 	}
 	vBOOL FlushContent2(IRenderContext* ctx);
-	TR_FUNCTION()
 	inline int FindVar(const char* name)
 	{
-		for (size_t i = 0; i < Desc.Vars.size(); i++)
-		{
-			auto& var = Desc.Vars[i];
-			if (var.Name == name)
-			{
-				return (int)i;
-			}
-		}
-		return -1;
+		return Desc.FindVar(name);
 	}
-	TR_FUNCTION()
 	inline vBOOL GetVarDesc(int index, ConstantVarDesc* desc)
 	{
-		if (index < 0 || index >= (int)Desc.Vars.size())
+		if (index < 0 || index >= (int)Desc.CBufferLayout->Vars.size())
 			return FALSE;
-		auto& var = Desc.Vars[index];
-		desc->Type = var.Type;
-		desc->Offset = var.Offset;
-		desc->Size = var.Size;
-		desc->Elements = var.Elements;
+		auto var = Desc.GetVar(index);		
+		desc->Type = var->Type;
+		desc->Offset = var->Offset;
+		desc->Size = var->Size;
+		desc->Elements = var->Elements;
 		return TRUE;
 	}
-	TR_FUNCTION()
 	inline vBOOL SetVarValuePtr(int index, void* data, int len, UINT elementIndex)
 	{
-		if (index < 0 || index >= (int)Desc.Vars.size())
+		if (index < 0 || index >= (int)Desc.CBufferLayout->Vars.size())
 			return FALSE;
-		auto var = &Desc.Vars[index];
+		auto var = (ConstantVarDesc*)Desc.GetVar(index);
 		var->Dirty = TRUE;
 		auto elementOffset = elementIndex * var->GetArrayStride();//GetShaderVarTypeSize(var->Type);
 		/*if (var->Type == SVT_Struct)
@@ -214,12 +250,11 @@ public:
 
 		return TRUE;
 	}
-	TR_FUNCTION()
 	inline void* GetVarValueAddress(int index, UINT elementIndex)
 	{
-		if (index < 0 || index >= (int)Desc.Vars.size())
+		if (index < 0 || index >= (int)Desc.CBufferLayout->Vars.size())
 			return FALSE;
-		auto var = &Desc.Vars[index];
+		auto var = (ConstantVarDesc*)Desc.GetVar(index);
 		var->Dirty = TRUE;
 		auto elementOffset = elementIndex * var->GetArrayStride();//GetShaderVarTypeSize(var->Type);
 		/*if (var->Type == SVT_Struct)
@@ -230,12 +265,11 @@ public:
 		
 		return target;
 	}
-	TR_FUNCTION()
 	inline BYTE* GetVarPtrToWrite(int index, int len)
 	{
-		if (index < 0 || index >= (int)Desc.Vars.size())
+		if (index < 0 || index >= (int)Desc.CBufferLayout->Vars.size())
 			return nullptr;
-		auto var = &Desc.Vars[index];
+		auto var = (ConstantVarDesc*)Desc.GetVar(index);
 		var->Dirty = TRUE;
 		if (var->Offset + len > Desc.Size)
 			return nullptr;
@@ -246,16 +280,8 @@ public:
 		return target;
 	}
 private:
-	inline ConstantVarDesc* GetVarOffset(const char* name) {
-		for (size_t i = 0; i < Desc.Vars.size(); i++)
-		{
-			auto& var = Desc.Vars[i];
-			if (var.Name == name)
-			{
-				return &Desc.Vars[i];
-			}
-		}
-		return nullptr;
+	inline const ConstantVarDesc* GetVarDesc(const char* name) {
+		return Desc.FindVarDesc(name);
 	}
 	inline BYTE* GetVarPtr(const ConstantVarDesc* varDesc) {
 		if (VarBuffer.size() == 0)

@@ -21,54 +21,13 @@ struct ObjectHandle;
 struct IResourceState;
 
 class TR_CLASS()
-	VIUnknownBase
-{
-protected:
-	std::atomic<int>	RefCount;
-public:
-	VIUnknownBase(const VIUnknownBase & rh)
-	{
-		assert(false);
-	}
-	inline VIUnknownBase& operator = (const VIUnknownBase& rh) {
-		assert(false);
-		return *this;
-	}
-	VIUnknownBase()
-	{
-		RefCount = 1;
-	}
-	virtual ~VIUnknownBase() {}
-
-	virtual long AddRef()
-	{
-		return ++RefCount;
-	}
-
-	virtual void Release()
-	{
-		RefCount--;
-		if (RefCount == 0)
-		{
-			DeleteThis();
-		}
-		return;
-	}
-	virtual void DeleteThis();
-};
-
-class TR_CLASS()
 	VIUnknown : public VIUnknownBase
 {
 private:
 	ObjectHandle* Handle;
 public:
 	static INT64	EngineTime;
-public:
-	static CoreRtti _RttiInfo;
-	static const vIID __UID__ = 0x0000000000000000;
-	virtual CoreRtti* GetRtti() { return &_RttiInfo; }
-	
+public:	
 	VIUnknown();
 	virtual ~VIUnknown();
 	virtual long AddRef() override
@@ -87,15 +46,6 @@ public:
 	virtual Hash64 GetHash64();
 	virtual void Cleanup();
 	
-	virtual IResourceState* GetResourceState() {
-		return nullptr;
-	}
-	virtual void InvalidateResource() {
-		return;
-	}
-	virtual vBOOL RestoreResource() {
-		return TRUE;
-	}
 	ObjectHandle* GetHandle();
 
 	vfxObjectLocker* GetLocker(int index = 0) const;	
@@ -110,9 +60,17 @@ public:
 	{
 		Ptr = nullptr;
 	}
+	static AutoRef<T> _MakeWeakRef(T* ptr)
+	{
+		AutoRef<T> result;
+		result.Ptr = ptr;
+		return result;
+	}
 	AutoRef(T* ptr)
 	{
 		Ptr = ptr;
+		if (Ptr != nullptr)
+			Ptr->AddRef();
 	}
 	AutoRef(const AutoRef<T>& rh)
 	{
@@ -148,6 +106,14 @@ public:
 			Ptr->AddRef();
 		return *this;
 	}
+	/*AutoRef<T>& operator = (T* rh)
+	{
+		if (rh != nullptr)
+			rh->AddRef();
+		Safe_Release(Ptr);
+		Ptr = rh;
+		return *this;
+	}*/
 	bool operator==(T* rh) const
 	{
 		return (Ptr == rh);
@@ -170,7 +136,7 @@ public:
 		return Ptr;
 	}*/
 	template<class ConverType>
-	ConverType* UnsafeConvertTo()
+	ConverType* UnsafeConvertTo() const
 	{
 #if PLATFORM_WIN
 		return dynamic_cast<ConverType*>(Ptr);
@@ -178,12 +144,36 @@ public:
 		return (ConverType*)(Ptr);
 #endif
 	}
-	
+	template<class ConverType>
+	inline AutoRef<ConverType> As()  const {
+		AutoRef<ConverType> result;
+		result.StrongRef(UnsafeConvertTo<ConverType>());
+		return result;
+	}
+	template<class ConverType>
+	operator AutoRef<ConverType>() const
+	{
+		AutoRef<ConverType> result;
+		result.StrongRef(Ptr);
+		return result;
+	}
 	operator T*() const
 	{
 		return Ptr;
 	}
+	T* GetPtr() {
+		return Ptr;
+	}
+	const T* GetPtr() const{
+		return Ptr;
+	}
 };
+
+template<class T>
+inline AutoRef<T> MakeWeakRef(T* ptr)
+{
+	return AutoRef<T>::_MakeWeakRef(ptr);
+}
 
 template<class T, bool isArray = false>
 class AutoPtr
@@ -362,11 +352,6 @@ EPlatformType
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef bool(*FOnManagedObjectHolderDestroy)(void* handle);
-
-VTypeHelperDefine(FOnManagedObjectHolderDestroy, sizeof(void*));
-
-StructBegin(FOnManagedObjectHolderDestroy, EngineNS)
-StructEnd(void)
 
 class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
 IManagedObjectHolder

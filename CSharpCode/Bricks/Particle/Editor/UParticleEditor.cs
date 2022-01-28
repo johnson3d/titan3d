@@ -182,15 +182,14 @@ namespace EngineNS.Bricks.Particle.Editor
 
         public UParticleGraph ParticleGraph { get; } = new UParticleGraph();
         bool IsStarting = false;
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             ParticleGraph.NebulaEditor = this;
             viewport.RenderPolicy = policy;
 
-            await viewport.RenderPolicy.Initialize(policy.Camera, 1, 1);
             await viewport.World.InitWorld();
 
-            (viewport as EngineNS.Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.Camera);
+            (viewport as EngineNS.Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             var materials = new Graphics.Pipeline.Shader.UMaterial[1];
             materials[0] = UEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
@@ -217,7 +216,7 @@ namespace EngineNS.Bricks.Particle.Editor
             BoundingSphere sphere;
             sphere.Center = aabb.GetCenter();
             sphere.Radius = radius;
-            policy.GetBasePassNode().GBuffers.Camera.AutoZoom(ref sphere);
+            policy.DefaultCamera.AutoZoom(ref sphere);
             //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SunLightDirection = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);

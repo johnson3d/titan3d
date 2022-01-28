@@ -143,7 +143,8 @@ bool ShaderReflector::ReflectDXBC(const IShaderDesc* desc)
 				D3D11_SHADER_BUFFER_DESC Desc;
 				auto hr = pCBuffer->GetDesc(&Desc);
 
-				IConstantBufferDesc tcbDesc;			
+				IConstantBufferDesc tcbDesc;
+				tcbDesc.CBufferLayout = MakeWeakRef(new IConstantBufferLayout());
 				tcbDesc.Name = csibDesc.Name;// Desc.Name;
 				DescSetBindPoint(desc->ShaderType, tcbDesc, csibDesc);
 				if (hr == S_OK)
@@ -168,7 +169,7 @@ bool ShaderReflector::ReflectDXBC(const IShaderDesc* desc)
 						else
 							tcvDesc.Elements = stDesc.Elements;
 
-						tcbDesc.Vars.push_back(tcvDesc);
+						tcbDesc.CBufferLayout->Vars.push_back(tcvDesc);
 					}
 				}
 				else
@@ -384,6 +385,12 @@ IDrawCall* ID11RenderContext::CreateDrawCall()
 IComputeDrawcall* ID11RenderContext::CreateComputeDrawcall()
 {
 	auto pass = new ID11ComputeDrawcall();
+	return pass;
+}
+
+ICopyDrawcall* ID11RenderContext::CreateCopyDrawcall()
+{
+	auto pass = new ID11CopyDrawcall();
 	return pass;
 }
 

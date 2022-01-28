@@ -356,7 +356,6 @@ extern "C"
 		return pOut;
 	}
 
-	//ƽ��ͶӰ
 	VFX_API v3dMatrix4_t* v3dxMatrix4Ortho( v3dMatrix4_t* pOut,
 								  float w,
 								  float h,
@@ -430,7 +429,6 @@ extern "C"
 			return 1;
 		else// if (s < 0) 
 			return -1;
-		//// V1 % V2 �õ� V1-V2-0 �淨����������p-0��������õ��н�����
 		//v3dVector3_t vPlaneNormal;
 		//v3dxVec3Cross( &vPlaneNormal , v1 , v2);
 		////float s = p->x*( v1->y*v2->z - v1->z*v2->y ) + p->y*( v1->z*v2->x - v1->x*v2->z ) + 
@@ -444,9 +442,6 @@ extern "C"
 		//	return 0;
 	}
 
-	/**
-	   ���߾���ƽ��
-	*/
 	VFX_API float v3dxPointLineDistance(const v3dVector3_t* p,
 							  const v3dVector3_t* l1, const v3dVector3_t* l2,v3dVector3_t* outClosePoint )
 	{
@@ -459,9 +454,7 @@ extern "C"
 		v3dxVec3Mul(&vtL,fRatio,&L);
 		v3dVector3_t p2l ;
 		v3dxVec3Sub( &p2l , &W , &vtL);
-		//v3dVector3_t p2l = W - L * (W*L)/(L*L);//(W*L)/(L*L)����ʸ��ͼ���Ҵ�������֪�������������Ǵ��㵽lp�ľ�����l2-l1����ı�
-					//L*������������������������������������Եõ����ߵ�����
-		return v3dxVec3Length( &p2l );//������������
+		return v3dxVec3Length( &p2l );
 	}
 
 	VFX_API float v3dxPointPlaneDistance(const v3dVector3_t* p, const v3dxPlane3* plane)
@@ -469,17 +462,9 @@ extern "C"
 		//plane.normalize();
 		return v3dxVec3Dot(p,&plane->m_vNormal)+plane->m_fDD;
 	}
-	/**
-	   ����3������ɵ����
-	   �������ص�����������������2����ƽ��
-	*/
 	VFX_API double Area3 (const v3dVector3_t* a, const v3dVector3_t* b,
 								 const v3dVector3_t* c)
 	{
-		//�˴�����������ļ��������Ӧ��
-		//û����2�����Գ�������ƽ���ı�������������������������⣬
-		//����˵���н��Ǹ��Ƕ�
-		//�������������Ҫ��abs * 0.5
 		v3dVector3_t v1;
 		v3dxVec3Sub( &v1 , b , a );
 		v3dVector3_t v2;
@@ -488,7 +473,7 @@ extern "C"
 				(v1.y * v2.x + v1.x * v2.z + v1.z * v2.y));
 	}
 
-	VFX_API float v3dxCalAngleXZ(const v3dVector3_t* vect)//��Y��
+	VFX_API float v3dxCalAngleXZ(const v3dVector3_t* vect)
 	{
 		v3dVector2_t vtProjection;
 		vtProjection.x=vect->x;
@@ -504,7 +489,7 @@ extern "C"
 		}
 	}
 
-	VFX_API float CalAngleYZ(const v3dVector3_t* vect)//��X��
+	VFX_API float CalAngleYZ(const v3dVector3_t* vect)
 	{
 		v3dVector2_t vtProjection;
 		vtProjection.x=vect->y;
@@ -520,7 +505,7 @@ extern "C"
 		}
 	}
 
-	VFX_API float CalAngleXY(const v3dVector3_t* vect)//��Z��
+	VFX_API float CalAngleXY(const v3dVector3_t* vect)
 	{
 		v3dVector2_t vtProjection;
 		vtProjection.x=vect->y;
@@ -648,7 +633,7 @@ extern "C"
 
 		fFromT = v3dxVec3Dot(pvLength, pvNormal);
 		if( fFromT > 0.f )
-			return FALSE;//����
+			return FALSE;
 
 		v3dVector3_t vFromA;
 		v3dxVec3Sub( &vFromA , pvA , pvFrom );
@@ -767,7 +752,7 @@ extern "C"
 
 		fFromT = v3dxVec3Dot(pvLength, pvNormal);
 		if( fFromT > 0.f )
-			return FALSE;//����
+			return FALSE;
 
 		v3dVector3_t vFromA;
 		v3dxVec3Sub( &vFromA , pvA , pvFrom );
@@ -1308,10 +1293,6 @@ extern "C"
 		return FALSE;
 	}
 
-
-	/**
-		�����߶κ������εĽ��㣬ʵ�õ�witchside����
-	*/
 	VFX_API vBOOL v3dxSegIntersectTriangleD( const v3dxVector3& tr1,
   							const v3dxVector3& tr2, 
 							const v3dxVector3& tr3,
@@ -1333,12 +1314,6 @@ extern "C"
 		return TRUE;
 	}
 
-	/**
-		���һ��3D�߶κ�һ��ƽ���ཻ�������һ�����㣬����true
-		���㷵�ص�isect��
-		��u������ľ��뷵�ص�dist��������뾭���˹�һ����
-		����0.5��ʾ��u��v���е�
-	*/
 	VFX_API vBOOL v3dxLineIntersectPlane_v1( const v3dxVector3& u,
 								 const v3dxVector3& v,
 								 float A, float B, float C, float D,
@@ -1346,20 +1321,16 @@ extern "C"
 	{
 		float x,y,z, denom;
 
-		x = v.x-u.x;  y = v.y-u.y;  z = v.z-u.z;//x,y,z������vu����
-		denom = A*x + B*y + C*z;//ֱ����ƽ�淨�������|UV|*|NORM|*cos(alpha)��
-								//��ΪA,B,C�����˵�λ������|NORM|=1��
-								//denom����|UV|*cos(alpha)�����˵����ֱ�����ƽ�����б�̶�
-								//denomҲ��ֱ����ƽ����ͶӰ���ȵ��Ǹ������εĶԱߣ��ٺ٣���ͼ�����ף�
-								//Ҳ���Ǵ��߷����ͶӰ����
+		x = v.x-u.x;  y = v.y-u.y;  z = v.z-u.z;
+		denom = A*x + B*y + C*z;
 		if (std::abs (denom) < SMALL_EPSILON) 
-			return FALSE; // sinֵ��С��˵��ֱ��ƽ����ƽ��
+			return FALSE; 
 
-		dist = -(A*u.x + B*u.y + C*u.z + D) / denom;//ǰ���������U��ƽ����룬�����������ֵ�ͳ�����
-		if (dist < -SMALL_EPSILON || dist > 1+SMALL_EPSILON) //��ֵ̫С��̫���ǿ������ཻ
+		dist = -(A*u.x + B*u.y + C*u.z + D) / denom;
+		if (dist < -SMALL_EPSILON || dist > 1+SMALL_EPSILON) 
 			return FALSE;
 
-		isect.x = u.x + dist*x;  isect.y = u.y + dist*y;  isect.z = u.z + dist*z;//����ֱ�߷��̼��㽻���
+		isect.x = u.x + dist*x;  isect.y = u.y + dist*y;  isect.z = u.z + dist*z;
 		return TRUE;
 	}
 
@@ -1374,9 +1345,9 @@ extern "C"
 		x = v.x-u.x;  y = v.y-u.y;  z = v.z-u.z;
 		denom = p.m_vNormal.x*x + p.m_vNormal.y*y + p.m_vNormal.z*z;
 		if (std::abs(denom) < SMALL_EPSILON)
-			return FALSE; // ƽ��
+			return FALSE; 
 
-		dist = -(p.m_vNormal.dotProduct(u) + p.m_fDD) / denom;//u�㵽ƽ��ľ��� ���� ����ƽ��н����� �õ� ֱ���Ͻ��㵹U��ľ���
+		dist = -(p.m_vNormal.dotProduct(u) + p.m_fDD) / denom;
 		if (dist < -SMALL_EPSILON || dist > 1+SMALL_EPSILON) 
 			return FALSE;
 
@@ -1384,10 +1355,6 @@ extern "C"
 		return TRUE;
 	}
 
-	/**
-		��������poly��ƽ��plane�Ľ��㣬���û�н��㣬����false���еĻ�segment
-		���ǽ��ߣ���segment��start��end��ͬ����ʾֻ��һ������
-	*/
 	VFX_API vBOOL v3dxPlaneIntersectPolygon( const v3dxPlane3& plane, v3dxPoly3* poly,
   							v3dxSegment3& seg)
 	{
@@ -1397,26 +1364,26 @@ extern "C"
 		float c, c1;
 		v3dxVector3 isect;
 		float dist;
-		i1 = poly->getNumVertices()-1;//�õ�����εı���
-		c1 = plane.classify ((*poly)[i1]);//�������㵽ƽ�����
+		i1 = poly->getNumVertices()-1;
+		c1 = plane.classify ((*poly)[i1]);
 		vBOOL found_v1 = FALSE;
 		vBOOL found_v2 = FALSE;
 		for (i = 0 ; i < poly->getNumVertices () ; i++)
 		{
 			c = plane.classify ((*poly)[i]);
-			if ((c < 0 && c1 > 0) || (c1 < 0 && c > 0))//�ֱ���ƽ�������
+			if ((c < 0 && c1 > 0) || (c1 < 0 && c > 0))
 			{
 				v3dxLineIntersectPlane_v2( (*poly)[i1], (*poly)[i],
-      					plane, isect, dist );//���������߶���ƽ��Ľ���
+      					plane, isect, dist );
 				if (!found_v1) 
 				{ 
 					v1 = isect; 
-					found_v1 = TRUE; //�ҵ���һ������
+					found_v1 = TRUE;
 				}
 				else 
 				{ 
 					v2 = isect; 
-					found_v2 = TRUE; //�ҵ��ڶ������㣬͹��������2������
+					found_v2 = TRUE;
 					break; 
 				}
 			}
@@ -1424,36 +1391,31 @@ extern "C"
 			c1 = c;
 		}
 		if (!found_v1) 
-			return FALSE;//û��һ������
+			return FALSE;
 		if (!found_v2) 
-			v2 = v1;//ֻ��һ������������������Ŷ����
+			v2 = v1;
 		return TRUE;
 	}
 
 	VFX_API void	v3dxAABBVertexEdges(const v3dxVector3& aabb_min, const v3dxVector3& aabb_max, v3dxVector3 v[8], int e[12][2])
 	{
-		// ��4
 		v[0] = v3dxVector3( aabb_min.x, aabb_max.y, aabb_min.z);
 		v[1] = v3dxVector3( aabb_max.x, aabb_max.y, aabb_min.z);
 		v[2] = v3dxVector3( aabb_max.x, aabb_max.y, aabb_max.z);
 		v[3] = v3dxVector3( aabb_min.x, aabb_max.y, aabb_max.z);
-		// ��4����Ӧ��
 		v[4] = v3dxVector3( aabb_min.x, aabb_min.y, aabb_min.z);
 		v[5] = v3dxVector3( aabb_max.x, aabb_min.y, aabb_min.z);
 		v[6] = v3dxVector3( aabb_max.x, aabb_min.y, aabb_max.z);
 		v[7] = v3dxVector3( aabb_min.x, aabb_min.y, aabb_max.z);
 
-		// ��4
 		e[0][0] = 0;	e[0][1] = 1;
 		e[1][0] = 1;	e[1][1] = 2;
 		e[2][0] = 2;	e[2][1] = 3;
 		e[3][0] = 3;	e[3][1] = 0;
-		// ��4
 		e[4][0] = 4;	e[4][1] = 5;
 		e[5][0] = 5;	e[5][1] = 6;
 		e[6][0] = 6;	e[6][1] = 7;
 		e[7][0] = 7;	e[7][1] = 4;
-		// ��4
 		e[8][0] = 0;	e[8][1] = 4;
 		e[9][0] = 1;	e[9][1] = 5;
 		e[10][0]= 2;	e[10][1]= 6;
@@ -1477,33 +1439,27 @@ extern "C"
 	{
 		if (Length < 3)
 		{
-			// С�������ܽ���Polygon
 			return;
 		}
-		// �Ϸ���
 		v3dxVector3* pVerticesUp = new v3dxVector3[Length];
 		for (int i = 0 ; i < Length ; ++i)
 		{
 			pVerticesUp[i] = pPoly[i];
 			pVerticesUp[i].y = MaxY;
 		}
-		// �·���
 		v3dxVector3* pVerticesDown = new v3dxVector3[Length];
 		for (int i = 0 ; i < Length ; ++i)
 		{
 			pVerticesDown[i] = pPoly[i];
 			pVerticesDown[i].y = MinY;
 		}
-		// ������Polygon������+2�������£�
 		OutResult.reserve(Length+2);
 		OutResult.resize(Length+2);
 		for (int i = 0 ; i < Length-1 ; ++i)
 		{
 			OutResult[i].set(pVerticesUp[i], pVerticesUp[i+1], pVerticesDown[i]);
 		}
-		// ���
 		OutResult[Length-1].set(pVerticesUp[Length-1], pVerticesUp[0], pVerticesDown[Length-1]);
-		// ����
 		OutResult[Length].set(pVerticesUp[0], pVerticesUp[1], pVerticesUp[2]);
 		OutResult[Length+1].set(pVerticesDown[0], pVerticesDown[1], pVerticesDown[2]);
 
@@ -1548,12 +1504,11 @@ extern "C"
 	#endif
 	}
 
-	//ƽ�� N * p + D = 0
-	//ֱ�� p(t) = Q + t * V
+	//N * p + D = 0
+	//ֱp(t) = Q + t * V
 	//=> N * p(t) + D = 0
 	//=> N * Q + t * N * V + D = 0
-	//=> t = -(N * Q + D) / (N * V)
-	//=> ����p(t) = Q + t * V�õ�����p(t)
+	//=> t = -(N * Q + D) / (N * V)	
 	VFX_API vBOOL IntersectPlaneLine(v3dVector3_t & o,const v3dxPlane3 & p,const v3dxLine3 & l)
 	{
 		float NV = v3dxVec3Dot(&p.m_vNormal,&l.m_direct);
@@ -1598,28 +1553,24 @@ extern "C"
 
 	VFX_API vBOOL VerticelLine(v3dxLine3 & l,const v3dxLine3 & l1,const v3dxLine3 & l2)
 	{
-		//���߷���
 		v3dxVec3Cross(&l.m_direct,&l1.m_direct,&l2.m_direct);
 		if(l.m_direct.x == 0 && l.m_direct.y == 0 && l.m_direct.z == 0)
 			return FALSE;
 
-		//���ߺ�l1���Թ���һ��ƽ��
 		v3dxVector3 n;
 		v3dxVec3Cross(&n,&l.m_direct,&l1.m_direct);
 		v3dxPlane3 p(n,l1.m_point);
 
-		//���l2�ʹ���Ľ�����Ϊ�ߵ����
 		return IntersectPlaneLine(l.m_point,p,l2);
 	}
 
 	VFX_API FLOAT DistanceLine2(const v3dxLine3* l1, const v3dxLine3* l2, v3dxVector3* outPointOnL1, v3dxVector3* outPointOnL2)
 	{
-		//���߷���
 		v3dxVector3 dir;
 		v3dxVec3Cross(&dir,&l1->m_direct,&l2->m_direct);
-		if( dir.getLengthSq()<EPSILON )  // Cheng �������ƺ���Ӧ���ж���ȣ�����޸�
+		if( dir.getLengthSq()<EPSILON )  
 			/*		if(dir.x == 0 && dir.y == 0 && dir.z == 0)*/
-		{//����ֱ��ƽ��
+		{
 			v3dxPlane3 p(l1->m_direct,l1->m_point);
 			v3dxVector3 v;
 			IntersectPlaneLine(v,p,*l2);
@@ -1627,15 +1578,13 @@ extern "C"
 		}
 		else
 		{
-			//���ߺ�l1���Թ���һ��ƽ��
 			v3dxVector3 v1;
 			v3dxVec3Cross(&v1,&dir,&l1->m_direct);
 			v3dxPlane3 p1(v1,l1->m_point);
-			IntersectPlaneLine(v1,p1,*l2); // Cheng Ӧ����l2������l1
-			if( outPointOnL2 )    // Cheng Ϊ��ӵĽӿ����ֵ
+			IntersectPlaneLine(v1,p1,*l2); 
+			if( outPointOnL2 )    
 				*outPointOnL2 = v1;
 
-			//���ߺ�l2���Թ���һ��ƽ��
 			v3dxVector3 v2;
 			v3dxVec3Cross(&v2,&dir,&l2->m_direct);
 			v3dxPlane3 p2(v2,l2->m_point);
@@ -2359,8 +2308,7 @@ extern "C"
 	}
 
 	inline float PerpDotProduct2D(const v3dxVector3* u, const v3dxVector3* v)
-	{//���� u ������ v �� PertDotProduct ���Ϊ��u �ķ�����������v �ĵ�˻������������������߶���ɵ�ƽ���ı��ε������||u||.||v||.sina��
-		//Hill (1994):��ֱu������Ϊ(u.z,-u.x)���������dot v��������Ĺ�ʽ
+	{
 		return u->z * v->x - u->x * v->z;
 	}
 
@@ -2372,13 +2320,12 @@ extern "C"
 		v3dxVec3Sub(&u, aq, ap);
 		v3dxVec3Sub(&v, bq, bp);
 		v3dxVec3Sub(&w, ap, bp);
-		float d = PerpDotProduct2D(&u, &v);//u,v����������ƽ���ı������d
-		if (fabsf(d) < 1e-6f) //������Ϊ0��˵���غ���
+		float d = PerpDotProduct2D(&u, &v);
+		if (fabsf(d) < 1e-6f) 
 			return FALSE;
 		d = 1.0f / d;
-		//����u,v,w���������ͷ��֣��ֱ�����,u,v���������鹲�׵�ƽ���ı���
-		*s = PerpDotProduct2D(&v, &w) * d;//v,w������ƽ���ı��κ�uv������ƽ���ı�������ȣ���Ϊ����v�����Ծ��Ǹ߱ȣ��߱ȸ�������������ɳ©ģ�ͣ���֪�������ǽ�����v�ϵı���s
-		*t = PerpDotProduct2D(&u, &w) * d;//ͬ�����ƣ��������������u�ϱ���t
+		*s = PerpDotProduct2D(&v, &w) * d;
+		*t = PerpDotProduct2D(&u, &w) * d;
 		if (*t < 0 || *t > 1)
 			return FALSE;
 		return TRUE;

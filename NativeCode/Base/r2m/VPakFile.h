@@ -59,7 +59,7 @@ private:
 public:
 	VPakFile();
 	~VPakFile();
-	RTTI_DEF(VPakFile, 0x7eba775b5e7597ca, true);
+	ENGINE_RTTI(VPakFile);
 
 	static vBOOL BuildPakFile(const VPakPair* const assets, UINT count, const char* pakFile);
 
@@ -98,7 +98,7 @@ protected:
 	std::vector<BYTE>				mCachedBuffer;
 	VFile* GetFile() const;
 public:
-	RTTI_DEF(VFile2Memory, 0x953fa2135e7597f0, true);
+	ENGINE_RTTI(VFile2Memory);
 	VPackFile2Memory();
 
 	virtual void Release() override;

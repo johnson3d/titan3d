@@ -9,6 +9,7 @@ NS_BEGIN
 struct IDrawCallDesc;
 class IDrawCall;
 class IComputeDrawcall;
+class ICopyDrawcall;
 
 struct ISwapChainDesc;
 class ISwapChain;
@@ -194,7 +195,7 @@ IRenderContextCaps
 };
 
 class TR_CLASS()
-IRenderContext : public VIUnknown
+	IRenderContext : public VIUnknown
 {
 public:
 	IRenderContext();
@@ -217,6 +218,7 @@ public:
 	
 	virtual IDrawCall* CreateDrawCall() = 0;
 	virtual IComputeDrawcall* CreateComputeDrawcall() = 0;
+	virtual ICopyDrawcall* CreateCopyDrawcall() = 0;
 	virtual IRenderPipeline* CreateRenderPipeline(const IRenderPipelineDesc* desc) = 0;
 
 	virtual IGpuBuffer* CreateGpuBuffer(const IGpuBufferDesc* desc, void* pInitData) = 0;
@@ -274,7 +276,9 @@ public:
 	}
 	//void BindCurrentSwapChain(ISwapChain* swapChain);
 	//virtual void Present(UINT SyncInterval, UINT Flags);
-
+	void PushFrameResource(IRenderResource* res);
+protected:
+	void ProcessFrameResources();
 public:
 	IRenderPipeline * GetPipeline(const IRenderPipelineDesc* desc)
 	{
@@ -308,6 +312,10 @@ protected:
 	ISwapChain*										m_pSwapChain;
 
 	IRenderContextCaps								mContextCaps;
+
+	VCritical						mFrameResLocker;
+	std::queue<IRenderResource*>	mFrameResources;
+	VCritical						mLocker;
 public:
 	static int				mChooseShaderModel;
 };

@@ -32,8 +32,8 @@
 	#define TR_DISCARD(...)
 #endif
 
-#define TR_DECL(type) friend struct AuxRttiStruct<type>;\
-						friend struct type##_Visitor;
+#define TR_DECL(type) friend struct type##_Visitor;\
+						friend struct AuxRttiBuilder<type>;
 
 NS_BEGIN
 
@@ -176,41 +176,56 @@ struct TObjectCreator<Type, false>
 	}
 };
 
+template<typename T>
+struct VIsReferType
+{
+	static const bool ResultValue = false;
+};
+template<typename T>
+struct VIsReferType<T&>
+{
+	static const bool ResultValue = true;
+};
+template<typename T>
+struct VIsReferType<const T&>
+{
+	static const bool ResultValue = true;
+};
 
 template<typename _type>
 struct VRefAsPtr
 {
-	typedef _type Result;
+	typedef _type ResultType;
 };
 
 template<typename _type>
 struct VRefAsPtr<_type&>
 {
-	typedef _type* Result;
+	typedef _type* ResultType;
 };
 
 template<typename _type>
 struct VRefAsPtr<const _type&>
 {
-	typedef _type* Result;
+	typedef _type* ResultType;
 };
 
 template<typename _type>
 struct VTypeAsRef
 {
-	typedef _type& Result;
+	typedef _type& ResultType;
 };
 
 template<typename _type>
 struct VTypeAsRef<_type&>
 {
-	typedef _type& Result;
+	typedef _type& ResultType;
 };
 
 template<typename _type>
 struct VTypeAsRef<const _type&>
 {
-	typedef _type& Result;
+	typedef _type& ResultType;
 };
 
 template<class _type>
@@ -267,6 +282,121 @@ struct VisitTupleElement
 	}
 };
 
+template <typename... T>
+struct VTypeList 
+{
+	static const int Size = sizeof...(T);
+	//typedef typename T... ArgTypes;
+};
+
+template<typename T>
+struct VTypeList_First{};
+template<typename first, typename... rest>
+struct VTypeList_First<VTypeList<first, rest...>>
+{
+	using ResultType = first;
+};
+
+template<typename T>
+struct VTypeList_PopFirst {};
+template<typename first, typename... rest>
+struct VTypeList_PopFirst<VTypeList<first, rest...>>
+{
+	using ResultType = VTypeList<rest...>;
+};
+
+template<typename TL, typename NewType>
+struct VTypeList_PushFront {};
+template<typename... TL, typename NewType>
+struct VTypeList_PushFront<VTypeList<TL...>, NewType>
+{
+	using ResultType = VTypeList<NewType, TL...>;
+};
+
+template<typename TL, typename NewType>
+struct VTypeList_PushBack {};
+template<typename... TL, typename NewType>
+struct VTypeList_PushBack<VTypeList<TL...>, NewType>
+{
+	using ResultType = VTypeList<TL..., NewType>;
+};
+
+template<typename TL, typename NewType>
+struct VTypeList_ReplaceFront {};
+template<typename First, typename... rest, typename NewType>
+struct VTypeList_ReplaceFront<VTypeList<First, rest...>, NewType>
+{
+	using ResultType = VTypeList<NewType, rest...>;
+};
+
+template<class TL>
+struct VTypeList_GetSize {};
+template<typename... ArgTypes>
+struct VTypeList_GetSize<VTypeList<ArgTypes...>>
+{
+	static const int ResultValue = sizeof...(ArgTypes);
+};
+
+template<int N, typename TL>
+struct VTypeList_GetAt {};
+template<int N, typename First, typename... rest>
+struct VTypeList_GetAt<N, VTypeList<First, rest...>>
+{
+	using ResultType = typename VTypeList_GetAt<N - 1, VTypeList<rest...>>::ResultType;
+};
+template<typename First, typename... rest>
+struct VTypeList_GetAt<0, VTypeList<First, rest...>>
+{
+	using ResultType = First;
+};
+
+template<int N, typename NewType, typename TL>
+struct VTypeList_SetAt {};
+template<int N, typename NewType, typename First, typename... rest>
+struct VTypeList_SetAt<N, NewType, VTypeList<First, rest...>>
+{
+	using StripType = typename VTypeList_SetAt<N - 1, NewType, VTypeList<rest...>>::ResultType;
+	using ResultType = typename VTypeList_PushFront<StripType, First>::ResultType ;
+};
+template<typename NewType, typename First, typename... rest>
+struct VTypeList_SetAt<0, NewType, VTypeList<First, rest...>>
+{
+	using ResultType = VTypeList<NewType, rest...>;
+};
+
+//template<size_t N, class first, class... rest>
+//struct TypeListGet
+//{
+//	typedef typename TypeListGet<N - 1, rest...>::ResultType ResultType;
+//};
+//
+//template<class first, class... rest>
+//struct TypeListGet<0, first, rest...>
+//{
+//	typedef first ResultType;
+//};
+
+template<typename ArgType, typename Visitor, size_t N, class... TupleType>
+struct ForeachTypeList
+{
+	static void Visit(void* arg, ArgType* arg2)
+	{
+		ForeachTypeList<ArgType, Visitor, N - 1, TupleType...>::Visit(arg, arg2);
+		using CurType = typename VTypeList_GetAt<N - 1, VTypeList<TupleType...>>::ResultType;
+		const auto& t = typename VRefAsPtr<CurType>::ResultType();
+		Visitor::VisitElement(arg, t, arg2);
+	}
+};
+
+template<typename ArgType, typename Visitor, class... TupleType>
+struct ForeachTypeList<ArgType, Visitor, 0, TupleType...>
+{
+	static void Visit(void*, ArgType* arg2)
+	{
+
+	}
+};
+
 //inline void TestForeachTuple()
 //{
 //	auto t = std::make_tuple(1, 1.2f);
@@ -277,10 +407,8 @@ struct VisitTupleElement
 template<class T1, class... Args>
 void MutiArg(const T1&t1, Args... args)
 {
-	//对第一个调用参数进行操作
 	//.....
 
-	//对参数包进行递归解析，这个函数会一直调用直到其参数个数为1时停止调用
 	MutiArg(args...);
 }
 

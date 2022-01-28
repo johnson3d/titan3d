@@ -34,12 +34,6 @@ inline v3dxMatrix3::~v3dxMatrix3()
 // data access -------------------------------------------------------
 
 
-/** get the private data buffer
-*��	@param strPara
-*		String of the paramater
-*	@return 
-*		The pointer of private data
-*/
 inline v3dxMatrix3::operator float*()
 {
 	return &m[0][0];

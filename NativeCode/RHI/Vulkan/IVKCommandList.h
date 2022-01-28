@@ -52,6 +52,8 @@ public:
 	virtual void SetRenderPipeline(IRenderPipeline* pipeline, EPrimitiveType dpType) override;
 	virtual vBOOL CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers) override;
 
+	virtual void BeginEvent(const char* info) override;
+	virtual void EndEvent() override;
 	bool Init(IVKRenderContext* rc, const ICommandListDesc* desc);
 public:
 	VkCommandBuffer							mCommandBuffer;

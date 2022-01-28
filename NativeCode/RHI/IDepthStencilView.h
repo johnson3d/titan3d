@@ -4,7 +4,7 @@
 
 NS_BEGIN
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 IDepthStencilViewDesc
 {
 	IDepthStencilViewDesc()
@@ -19,7 +19,7 @@ IDepthStencilViewDesc
 		CPUAccess = 0;
 		mCanBeSampled = TRUE;
 		mUseStencil = FALSE;
-		m_pTexture2D = nullptr;
+		Texture2D = nullptr;
 		MipLevel = 1;
 	}
 
@@ -30,18 +30,17 @@ IDepthStencilViewDesc
 	vBOOL					mCanBeSampled;
 	vBOOL					mUseStencil;
 	UINT					MipLevel;
-	ITexture2D*				m_pTexture2D;
+	IGpuBuffer*				Texture2D;
 };
 
 class IShaderResourceView;
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 IDepthStencilView : public IRenderResource
 {
 public:
 	IDepthStencilView();
 	~IDepthStencilView();
 
-	TR_FUNCTION()
 	ITexture2D* GetTexture2D()
 	{
 		return m_refTexture2D;

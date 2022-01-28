@@ -3,7 +3,7 @@
 // VictoryCore Code
 // class VSimpleMap
 //
-// Author : lanzhengpeng(������)
+// Author : lanzhengpeng
 // Modifer :	
 // Create Timer :	23:6:2002   14:34
 // Modify Timer :	

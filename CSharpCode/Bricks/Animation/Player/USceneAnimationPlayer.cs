@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EngineNS.Animation.Player
 {
@@ -22,11 +23,14 @@ namespace EngineNS.Animation.Player
         public void Evaluate()
         {
             //make command
-            Pipeline.UPropertiesSettingCommand command = new Pipeline.UPropertiesSettingCommand();
-            command.Context = new Pipeline.PropertiesSettingCommandContext(AnimationPropertiesSetter, Time);
+            Pipeline.UPropertiesSettingCommand command = new Pipeline.UPropertiesSettingCommand()
+            {
+                AnimationPropertiesSetter = AnimationPropertiesSetter,
+                Time = Time
+            };
 
             //if(IsImmediate)
-            command.Excute();
+            command.Execute();
             //else Insert to pipeline
             //AnimationPiple.CommandList.Add();
         }

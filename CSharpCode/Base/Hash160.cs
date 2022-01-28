@@ -389,4 +389,39 @@ namespace EngineNS
             return result;
         }
     }
+
+    public struct FHashText : IComparable<FHashText>
+    {
+        public static readonly FHashText Empty = new FHashText();
+        public Hash64 Hash;
+        public string Text;
+        public static FHashText Create(string text)
+        {
+            FHashText result;
+            result.Text = text;
+            result.Hash = Hash64.FromString(text);
+            return result;
+        }
+        public int CompareTo(FHashText other)
+        {
+            return Hash.CompareTo(other.Hash);
+        }
+        public override int GetHashCode()
+        {
+            return Hash.GetHashCode();
+        }
+        public static bool operator ==(in FHashText hash1, in FHashText hash2)
+        {
+            return hash1 == hash2;
+        }
+        public static bool operator !=(in FHashText hash1, in FHashText hash2)
+        {
+            return hash1 != hash2;
+        }
+        public override bool Equals(object obj)
+        {
+            var rh = (FHashText)obj;
+            return this.Hash == rh.Hash;
+        }
+    }
 }

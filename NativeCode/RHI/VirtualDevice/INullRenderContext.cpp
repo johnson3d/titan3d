@@ -67,6 +67,11 @@ IComputeDrawcall* INullRenderContext::CreateComputeDrawcall()
 	return nullptr;
 }
 
+ICopyDrawcall* INullRenderContext::CreateCopyDrawcall()
+{
+	return nullptr;
+}
+
 IRenderPipeline* INullRenderContext::CreateRenderPipeline(const IRenderPipelineDesc* desc)
 {
 	auto rpl = new INullRenderPipeline();

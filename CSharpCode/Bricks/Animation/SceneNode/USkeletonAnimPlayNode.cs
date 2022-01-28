@@ -15,35 +15,38 @@ namespace EngineNS.Animation.SceneNode
         }
         public Animation.Player.USkeletonAnimationPlayer Player { get; set; }
 
-        public override UNode Parent 
-        { 
+        public override UNode Parent
+        {
             get => base.Parent;
             set
             {
-                BindingToParent(value as UMeshNode);
                 base.Parent = value;
             }
         }
 
         public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
-            var animPlayNodeData = data as USkeletonAnimPlayNodeData;
-            Player = new Player.USkeletonAnimationPlayer();
-            Player.SkeletonAnimClip = await UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(animPlayNodeData.AnimatinName);
-
             SetStyle(ENodeStyles.Invisible);
-            return await base.InitializeNode(world, data, bvType, placementType);
+            if(!await base.InitializeNode(world, data, bvType, placementType))
+            {
+                return false;
+            }
+
+            var animPlayNodeData = NodeData as USkeletonAnimPlayNodeData;
+            var skeletonAnimClip = await UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(animPlayNodeData.AnimatinName);
+            Player = new Player.USkeletonAnimationPlayer(skeletonAnimClip);
+            return true;
         }
-        void BindingToParent(UMeshNode meshNode)
+        void BindingTo(UMeshNode meshNode)
         {
             System.Diagnostics.Debug.Assert(meshNode != null);
-            var pose = meshNode?.Mesh?.MaterialMesh?.Mesh?.PartialSkeleton?.CreatePose();
+            var pose = meshNode?.Mesh?.MaterialMesh?.Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
             var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;
-            skinMDfQueue.SkinModifier.AnimatableSkeletonPose = pose as SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
-
-            Player.Binding(pose);
+            skinMDfQueue.SkinModifier.RuntimeMeshSpacePose = SkeletonAnimation.Runtime.Pose.URuntimePoseUtility.CreateMeshSpaceRuntimePose(pose);
+            Player.BindingPose(pose);
+            Player.RuntimePose = skinMDfQueue.SkinModifier.RuntimeMeshSpacePose;
         }
-        public override void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
+        public override void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
             Player.Update(world.DeltaTimeSecond);
             Player.Evaluate();
@@ -52,11 +55,9 @@ namespace EngineNS.Animation.SceneNode
         public static async System.Threading.Tasks.Task<USkeletonAnimPlayNode> AddSkeletonAnimPlayNode(GamePlay.UWorld world, UNode parent, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             System.Diagnostics.Debug.Assert(parent is UMeshNode);
-            var scene = parent.GetNearestParentScene();
             var node = new Animation.SceneNode.USkeletonAnimPlayNode();
-            //var node = await scene.NewNode(world, typeof(Animation.SceneNode.USkeletonAnimPlayNode), data, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement)) as USkeletonAnimPlayNode;
-
             await node.InitializeNode(world, data, bvType, placementType);
+            node.BindingTo(parent as UMeshNode);
             node.Parent = parent;
 
             return node;

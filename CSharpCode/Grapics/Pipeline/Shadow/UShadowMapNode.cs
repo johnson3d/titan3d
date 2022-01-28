@@ -14,9 +14,9 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         {
             return new EVertexSteamType[] { EVertexSteamType.VST_Position};
         }
-        public override void OnBuildDrawCall(IRenderPolicy policy, RHI.CDrawCall drawcall)
+        public override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
         {
-            var shadowMapNode = policy.QueryNode("ShadowMapNode") as UShadowMapNode;
+            var shadowMapNode = policy.FindFirstNode<UShadowMapNode>();
             if (shadowMapNode == null)
                 return;
 
@@ -25,7 +25,17 @@ namespace EngineNS.Graphics.Pipeline.Shadow
     }
     public class UShadowMapNode : Common.URenderGraphNode
     {
+        public Common.URenderGraphPin DepthPinOut = Common.URenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+        public UShadowMapNode()
+        {
+            Name = "ShadowMap";
+        }
+        public override void InitNodePins()
+        {
+            AddOutput(DepthPinOut, EGpuBufferViewType.GBVT_Dsv | EGpuBufferViewType.GBVT_Srv);
+        }
         public GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
+        public CCamera ShadowCamera;
         public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
         public UDrawBuffers BasePass = new UDrawBuffers();
         public RHI.CRenderPass RenderPass;
@@ -55,22 +65,22 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         private Vector3[] mSSM_FrustumVtx = new Vector3[8];
         public UShadowShading mShadowShading;
 
-        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat fmt, EPixelFormat dsFmt, float x, float y, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.AsyncDummyClass.DummyFunc();
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-            mShadowShading = shading as UShadowShading;
+            mShadowShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>();
 
             var PassDesc = new IRenderPassDesc();
             unsafe
             {
                 PassDesc.NumOfMRT = 0;
-                PassDesc.AttachmentMRTs[0].Format = fmt;
+                PassDesc.AttachmentMRTs[0].Format = EPixelFormat.PXF_UNKNOWN;
                 PassDesc.AttachmentMRTs[0].Samples = 1;
-                PassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
-                PassDesc.m_AttachmentDepthStencil.Format = dsFmt;
+                PassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionDontCare;
+                PassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionDontCare;
+                PassDesc.m_AttachmentDepthStencil.Format = DepthPinOut.Attachement.Format;
                 PassDesc.m_AttachmentDepthStencil.Samples = 1;
                 PassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
                 PassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
@@ -82,14 +92,17 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             }
             RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in PassDesc);
 
-            var camera = new CCamera();
+            ShadowCamera = new CCamera();
             {
-                camera.mCoreObject.PerspectiveFovLH(3.14f / 4f, x, y, 0.3f, 1000.0f);
+                ShadowCamera.mCoreObject.PerspectiveFovLH(3.14f / 4f, 1, 1, 0.3f, 1000.0f);
                 var eyePos = new DVector3(0, 0, -10);
-                camera.mCoreObject.LookAtLH(in eyePos, in DVector3.Zero, in Vector3.Up);
+                ShadowCamera.mCoreObject.LookAtLH(in eyePos, in DVector3.Zero, in Vector3.Up);
             }
-            GBuffers.Initialize(RenderPass, camera, 0, dsFmt, (uint)x, (uint)y);
+            policy.AddCamera("DirLightShadow", ShadowCamera);
+            GBuffers.Initialize(policy, RenderPass);
             //GBuffers.CreateGBuffer(0, EPixelFormat.PXF_UNKNOWN, (uint)x, (uint)y);            
+            GBuffers.SetDepthStencil(policy, DepthPinOut);
+
             GBuffers.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
             GBuffers.OnResize(mInnerResolutionY, mInnerResolutionY);
 
@@ -100,6 +113,9 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             mShadowMapSizeAndRcp.Y = mResolutionY;
             mShadowMapSizeAndRcp.Z = 1.0f / mResolutionX;
             mShadowMapSizeAndRcp.W = 1.0f / mResolutionY;
+
+            DepthPinOut.Attachement.Width = mResolutionX;
+            DepthPinOut.Attachement.Height = mResolutionY;
 
             if (UEngine.Instance.GfxDevice.RenderContext.RHIType == ERHIType.RHT_OGL)
             {
@@ -143,20 +159,22 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             dpRastDesc.SlopeScaledDepthBias = 2;
             DepthRaster = UEngine.Instance.GfxDevice.RasterizerStateManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, in dpRastDesc);
         }
-        public void Cleanup()
+        public override void Cleanup()
         {
             GBuffers?.Cleanup();
             GBuffers = null;
+
+            base.Cleanup();
         }
         private static float Clamp(float X, float Min, float Max)
         {
             return X < Min ? Min : X < Max ? X : Max;
         }
-        public override unsafe void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
             mDirLightDirection = world.DirectionLight.mDirection;
 
-            var ViewerCamera = policy.GetBasePassNode().GBuffers.Camera;
+            var ViewerCamera = policy.DefaultCamera;
             //calculate viewer camera frustum bounding sphere and shadow camera data;
             float HalfFoV = ViewerCamera.mCoreObject.mFov * 0.5f;
             float zNear = ViewerCamera.mCoreObject.mZNear;
@@ -205,7 +223,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
             var ShadowCameraPos = FrustumSphereCenter - mDirLightDirection * ((float)FrustumSphereRadius + mShadowCameraOffset);
 
-            var shadowCamera = GBuffers.Camera.mCoreObject;
+            var shadowCamera = ShadowCamera.mCoreObject;
             shadowCamera.LookAtLH(ShadowCameraPos.AsDVector(), FrustumSphereCenter.AsDVector(), in Vector3.UnitY);
             float FrustumSphereDiameter = (float)FrustumSphereRadius * 2.0f;
             float ShadowCameraZFar = mShadowCameraOffset + FrustumSphereDiameter;
@@ -246,10 +264,10 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             //render Shadow Caster
             mVisParameter.CullType = -1;
             mVisParameter.World = world;
-            mVisParameter.CullCamera = GBuffers.Camera;
+            mVisParameter.CullCamera = ShadowCamera;
             world.GatherVisibleMeshes(mVisParameter);
 
-            var cmdlist = BasePass.DrawCmdList.mCoreObject;
+            var cmdlist = BasePass.DrawCmdList;
             cmdlist.ClearMeshDrawPassArray();            
             foreach (var i in mVisParameter.VisibleMeshes)
             {
@@ -260,10 +278,10 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                 for (int j = 0; j < i.Atoms.Length; j++)
                 {
-                    var drawcall = i.GetDrawCall(GBuffers, j, policy, IRenderPolicy.EShadingType.DepthPass, this);
+                    var drawcall = i.GetDrawCall(GBuffers, j, policy, URenderPolicy.EShadingType.DepthPass, this);
                     if (drawcall != null)
                     {
-                        drawcall.BindGBuffer(GBuffers);
+                        drawcall.BindGBuffer(ShadowCamera, GBuffers);
 
                         cmdlist.PushDrawCall(drawcall.mCoreObject);
                     }
@@ -278,26 +296,27 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 //passClear.SetDefault();
                 passClear.m_DepthClearValue = 1.0f;
                 passClear.m_StencilClearValue = 0;
-                if (bClear)
-                    cmdlist.BeginRenderPass(GBuffers.FrameBuffers.mCoreObject, in passClear, "ShadowDepth");
-                else
-                    cmdlist.BeginRenderPass(GBuffers.FrameBuffers.mCoreObject, (IRenderPassClears*)0, "ShadowDepth");
+                cmdlist.BeginRenderPass(policy, GBuffers, in passClear, "ShadowDepth");
+                //if (bClear)
+                //    cmdlist.BeginRenderPass(policy, GBuffers, in passClear, "ShadowDepth");
+                //else
+                //    cmdlist.BeginRenderPass(policy, GBuffers, "ShadowDepth");
                 cmdlist.BuildRenderPass(0);
                 cmdlist.EndRenderPass();
                 cmdlist.EndCommand();
             }
         }
 
-        public override unsafe void TickRender(IRenderPolicy policy)
+        public override unsafe void TickRender(URenderPolicy policy)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var cmdlist = BasePass.CommitCmdList.mCoreObject;
             cmdlist.Commit(rc.mCoreObject);
         }
-        public override void TickSync(IRenderPolicy policy)
+        public override void TickSync(URenderPolicy policy)
         {
             BasePass.SwapBuffer();
-            GBuffers?.Camera?.mCoreObject.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
+            ShadowCamera.mCoreObject.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
         }
     }
 }

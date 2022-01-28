@@ -6,7 +6,7 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::PhyActor, EngineNS::PhyEntity);
+ENGINE_RTTI_IMPL(EngineNS::PhyActor);
 
 PhyActor::PhyActor()
 {

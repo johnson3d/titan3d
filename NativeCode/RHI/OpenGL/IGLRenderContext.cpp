@@ -202,6 +202,13 @@ IComputeDrawcall* IGLRenderContext::CreateComputeDrawcall()
 	return pass;
 }
 
+ICopyDrawcall* IGLRenderContext::CreateCopyDrawcall()
+{
+	auto pass = new IGLCopyDrawcall();
+	
+	return pass;
+}
+
 IRenderPipeline* IGLRenderContext::CreateRenderPipeline(const IRenderPipelineDesc* desc)
 {
 	auto rpl = new IGLRenderPipeline();

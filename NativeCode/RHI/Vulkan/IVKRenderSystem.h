@@ -51,6 +51,9 @@ public:
 
 	std::vector<const char*>	mDeviceExtensions;
 	std::vector<const char*>	mValidationLayers;
+
+	static PFN_vkCmdBeginDebugUtilsLabelEXT fn_vkCmdBeginDebugUtilsLabelEXT;
+	static PFN_vkCmdEndDebugUtilsLabelEXT fn_vkCmdEndDebugUtilsLabelEXT;
 };
 
 NS_END

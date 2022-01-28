@@ -18,9 +18,10 @@ namespace EngineNS.Bricks.Particle
         }
         public UNebulaParticle NebulaParticle { get; } = new UNebulaParticle();
         
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
-            var particleNode = policy.QueryNode("ParticleNode") as UParticleGraphNode;
+            //var particleNode = policy.FindNode("ParticleNode") as UParticleGraphNode;
+            var particleNode = policy.FindFirstNode<UParticleGraphNode>();
             if (particleNode == null)
                 return true;
 

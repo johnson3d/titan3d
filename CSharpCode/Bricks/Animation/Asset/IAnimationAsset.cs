@@ -7,6 +7,10 @@ namespace EngineNS.Animation.Asset
 {
     public interface IAnimationAsset : IO.IAsset
     {
+        public float Duration { get; }
+    }
+    public interface IAnimationCompositeAsset : IO.IAsset
+    {
 
     }
     public class UAnimationTrack

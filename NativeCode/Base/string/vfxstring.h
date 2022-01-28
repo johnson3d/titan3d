@@ -117,15 +117,23 @@ struct VNameString_t
 	int Index;
 };
 
+struct VNameStringManager
+{
+private:	
+	std::vector<std::string>		mNameStrings;
+public:
+	static VNameStringManager* Get();
+	int GetIndexFromString(const char* str);
+	const std::string& GetString(int Index) const;
+};
+
 #pragma pack(push)
 #pragma pack(4)
 struct TR_CLASS(SV_LayoutStruct = 4)
 VNameString
 {
 	int Index;	
-	static std::vector<std::string>		mNameStrings;
-	static int GetIndexFromString(const char* str);
-
+	
 	VNameString() 
 		: Index(-1)
 	{
@@ -133,7 +141,11 @@ VNameString
 	}
 	VNameString(const char* str)
 	{
-		Index = GetIndexFromString(str);
+		Index = VNameStringManager::Get()->GetIndexFromString(str);
+	}
+	static int GetIndexFromString(const char* str)
+	{
+		return VNameStringManager::Get()->GetIndexFromString(str);
 	}
 	std::string AsStdString() const
 	{
@@ -143,10 +155,12 @@ VNameString
 	{
 		return GetString().c_str();
 	}
-	const std::string& GetString() const;
+	const std::string& GetString() const {
+		return VNameStringManager::Get()->GetString(Index);
+	}
 	inline void SetString(const char* str)
 	{
-		Index = GetIndexFromString(str);
+		Index = VNameStringManager::Get()->GetIndexFromString(str);
 	}
 	inline operator const char*()
 	{
@@ -162,11 +176,11 @@ VNameString
 	}
 	inline void operator=(const char* rh)
 	{
-		Index = GetIndexFromString(rh);
+		Index = VNameStringManager::Get()->GetIndexFromString(rh);
 	}
 	inline void operator=(const std::string rh)
 	{
-		Index = GetIndexFromString(rh.c_str());
+		Index = VNameStringManager::Get()->GetIndexFromString(rh.c_str());
 	}	
 };
 #pragma pack(pop)

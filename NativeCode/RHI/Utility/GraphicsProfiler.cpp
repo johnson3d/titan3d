@@ -10,7 +10,7 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::GraphicsProfiler, EngineNS::VIUnknown);
+ENGINE_RTTI_IMPL(EngineNS::GraphicsProfiler);
 
 GraphicsProfiler::GraphicsProfiler()
 {

@@ -8,8 +8,8 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::IShaderDefinitions, EngineNS::VIUnknown);
-RTTI_IMPL(EngineNS::IShaderDesc, EngineNS::VIUnknown);
+ENGINE_RTTI_IMPL(EngineNS::IShaderDefinitions);
+ENGINE_RTTI_IMPL(EngineNS::IShaderDesc);
 
 IShaderDesc::IShaderDesc()
 {

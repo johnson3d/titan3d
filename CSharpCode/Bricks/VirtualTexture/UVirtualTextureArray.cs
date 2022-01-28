@@ -43,7 +43,7 @@ namespace EngineNS.Bricks.VirtualTexture
             srvDesc.SetTexture2D();
             srvDesc.Type = ESrvType.ST_Texture2D;
             srvDesc.Format = format;
-            srvDesc.mGpuBuffer = Tex2DArray.mCoreObject.NativeSuper;
+            srvDesc.mGpuBuffer = Tex2DArray.mCoreObject;
             srvDesc.Texture2D.MipLevels = mipLevels;
 
             TexArraySRV = rc.CreateShaderResourceView(in srvDesc);

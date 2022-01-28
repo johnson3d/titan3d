@@ -49,7 +49,7 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 };
 
 class TR_CLASS()
-ShaderReflector : public VIUnknown
+	ShaderReflector : public VIUnknown
 {
 public:
 	std::vector<IConstantBufferDesc>	mCBDescArray;
@@ -68,10 +68,12 @@ public:
 		mSamplerBindArray.clear();
 	}
 #if defined(USE_D11)
+	TR_MEMBER(SV_NoBind=true)
 	bool ReflectDXBC(const IShaderDesc* desc);
 #endif
 
 #if defined(USE_VK)
+	TR_MEMBER(SV_NoBind = true)
 	bool ReflectSpirV(const IShaderDesc * desc);
 #endif
 	void MergeShaderStage(EShaderType type, ShaderReflector* reflector);
@@ -259,6 +261,7 @@ public:
 				isNew = true;
 				IConstantBufferDesc tmp;
 				tmp.Name = name;
+				tmp.CBufferLayout = MakeWeakRef(new IConstantBufferLayout());
 				mCBDescArray.push_back(tmp);
 				return (UINT)(mCBDescArray.size() - 1);
 			}

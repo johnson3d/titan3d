@@ -1148,7 +1148,7 @@ namespace EngineNS.GamePlay
                     {
                         if(!mIsTransAxisOperation)
                         {
-                            var edtorPolicy = viewport.RenderPolicy as Graphics.Pipeline.IRenderPolicy;
+                            var edtorPolicy = viewport.RenderPolicy as Graphics.Pipeline.URenderPolicy;
                             if (edtorPolicy != null)
                             {
                                 var pos = viewport.Window2Viewport(new Vector2((float)e.motion.x, (float)e.motion.y));

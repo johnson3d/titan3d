@@ -187,6 +187,10 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Particle", "CSharpCode\Bric
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Particle", "NativeCode\Bricks\Particle\Particle.vcxitems", "{74808257-00B1-488F-B8F4-80FA333FDBEF}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FarShadow", "CSharpCode\Bricks\FarShadow\FarShadow.shproj", "{F6ED5999-DC74-462B-8434-5BE3E976B236}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "RenderPolicyEditor", "CSharpCode\Bricks\RenderPolicyEditor\RenderPolicyEditor.shproj", "{B158AC21-F715-4BE5-8827-B147607F90DE}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		EngineConfig.vcxitems*{009d7483-131d-43de-bcbe-56f21fecadcf}*SharedItemsImports = 9
@@ -273,7 +277,10 @@ Global
 		NativeCode\Base\Base.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Animation\Animation.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		NativeCode\Bricks\Particle\Particle.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\TcpClient\TcpClient.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		NativeCode\Bricks\Terrain\Terrain.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\TextConverter\TextConverter.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Graphics\Mesh\Mesh.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Graphics\Pipeline\Pipeline.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
@@ -317,6 +324,7 @@ Global
 		NativeCode\RHI\VirtualDevice\VirtualDevice.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\RHI\Vulkan\Vulkan.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		CSharpCode\RHI\RHI.projitems*{adeb9174-81ed-41a3-b1ad-2e26b6a2ec4e}*SharedItemsImports = 13
+		CSharpCode\Bricks\RenderPolicyEditor\RenderPolicyEditor.projitems*{b158ac21-f715-4be5-8827-b147607f90de}*SharedItemsImports = 13
 		NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems*{b5361ff2-8412-484c-ba35-7a2c6099a964}*SharedItemsImports = 9
 		CSharpCode\Bricks\Input\Input.projitems*{b6816a25-b92e-4e72-9b24-fd4acfb3aa93}*SharedItemsImports = 13
 		3rd\native\FreeType\FreeType.vcxitems*{b6c92324-224e-420b-8d99-343a9cde08ae}*SharedItemsImports = 9
@@ -395,6 +403,7 @@ Global
 		3rd\csharp\StbImageSharp\StbImageSharp.projitems*{e0ad6c9d-2af8-43e8-bbb5-8bd96fe1dee2}*SharedItemsImports = 13
 		CSharpCode\Bricks\WorldSimulator\WorldSimulator.projitems*{ebb45312-f4af-4999-8c7f-b73b2a4b09bb}*SharedItemsImports = 13
 		3rd\native\Image.Shared\Image.Shared.vcxitems*{f5bfbfc3-132b-48f3-85e5-63a88a7fc5d0}*SharedItemsImports = 9
+		CSharpCode\Bricks\FarShadow\FarShadow.projitems*{f6ed5999-dc74-462b-8434-5be3e976b236}*SharedItemsImports = 13
 		CSharpCode\Bricks\PhysicsCore\PhysicsCore.projitems*{f90694fa-d9fb-4be4-bfb0-d0973ec6741c}*SharedItemsImports = 13
 		CSharpCode\Bricks\FBX\FBX.projitems*{fa20df81-66d6-4949-b053-7f33852aa1e1}*SharedItemsImports = 13
 		CSharpCode\Bricks\Animation\Animation.projitems*{fd56162e-fcd2-46a7-89fb-e4a0079dfe3e}*SharedItemsImports = 13
@@ -827,6 +836,8 @@ Global
 		{1CA2814E-C99C-419B-A83A-33BF1B1088C9} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{D15C508D-F0BB-4843-8B50-38728B79BBA9} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{74808257-00B1-488F-B8F4-80FA333FDBEF} = {041F2057-6090-446E-8CEF-D524C973477F}
+		{F6ED5999-DC74-462B-8434-5BE3E976B236} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
+		{B158AC21-F715-4BE5-8827-B147607F90DE} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}

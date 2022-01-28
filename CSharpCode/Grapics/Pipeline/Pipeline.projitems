@@ -12,9 +12,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)CCamera.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UAvgBrightnessNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UBasePassNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\UCopy2SwapChainNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\UCopyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UHdrNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UHitproxyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UHzbNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\UImageAssetNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickedProxiableManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickBlurNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\UPickedNode.cs" />
@@ -42,7 +45,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Shader\UMdfQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\UShadingEnv.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UGfxDevice.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IRenderPolicy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)URenderPolicy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mobile\UMobileFSPolicy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UGraphicsBuffers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UHitproxyManager.cs" />

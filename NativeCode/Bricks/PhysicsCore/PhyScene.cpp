@@ -11,11 +11,11 @@ using namespace physx;
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::PhyBoxControllerDesc, EngineNS::VIUnknown);
-RTTI_IMPL(EngineNS::PhyCapsuleControllerDesc, EngineNS::VIUnknown);
+ENGINE_RTTI_IMPL(EngineNS::PhyBoxControllerDesc);
+ENGINE_RTTI_IMPL(EngineNS::PhyCapsuleControllerDesc);
 
-RTTI_IMPL(EngineNS::PhySceneDesc, EngineNS::VIUnknown);
-RTTI_IMPL(EngineNS::PhyScene, EngineNS::PhyEntity);
+ENGINE_RTTI_IMPL(EngineNS::PhySceneDesc);
+ENGINE_RTTI_IMPL(EngineNS::PhyScene);
 
 PhySceneDesc::ContactReportCallback::FPxSimulationFilterShader PhySceneDesc::ContactReportCallback::_PxSimulationFilterShader = nullptr;
 

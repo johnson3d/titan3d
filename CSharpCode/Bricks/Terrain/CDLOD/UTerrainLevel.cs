@@ -234,7 +234,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.OnGatherVisibleMeshes(rp);
             }
         }
-        public void Tick(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
+        public void Tick(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
             foreach (var i in TiledPatch)
             {

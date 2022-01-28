@@ -13,10 +13,6 @@ class MemStreamWriter;
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, SV_NameSpace = EngineNS)
 typedef MemStreamWriter* (*FGetShaderCodeStream)(void* includeName);
 
-VTypeHelperDefine(FGetShaderCodeStream, sizeof(void*));
-StructBegin(FGetShaderCodeStream, EngineNS)
-StructEnd(void)
-
 enum TR_ENUM()
 	EShaderLanguage
 {

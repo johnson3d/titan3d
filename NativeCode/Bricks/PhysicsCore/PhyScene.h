@@ -113,7 +113,7 @@ public:
 
 		//typedef physx::PxSimulationFilterShader FPxSimulationFilterShader;
 		//typedef physx::PxFilterFlags(WINAPI*FPxSimulationFilterShader)(//void* self, 
-		typedef USHORT(*FPxSimulationFilterShader)(//void* self, ���ﲻ����physx::PxFilterFlags����Ϊc#callback����д�����ع��촦��
+		typedef USHORT(*FPxSimulationFilterShader)(//void* self, 
 			physx::PxFilterObjectAttributes attributes0, physx::PxFilterData* filterData0,
 			physx::PxFilterObjectAttributes attributes1, physx::PxFilterData* filterData1,
 			physx::PxPairFlags* pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize);
@@ -209,7 +209,7 @@ public:
 				_onAdvance(Handle, body, trans, count);
 		}
 	};
-	RTTI_DEF(PhySceneDesc, 0x821fb6ef5bf21426, false);
+	ENGINE_RTTI(PhySceneDesc);
 	PhySceneDesc();
 	~PhySceneDesc();
 	void Init();
@@ -279,7 +279,7 @@ class TR_CLASS()
 	PhyBoxControllerDesc : public PhyControllerDesc
 {
 public:
-	RTTI_DEF(PhyBoxControllerDesc, 0x990b86bc5c346130, true);
+	ENGINE_RTTI(PhyBoxControllerDesc);
 	PhyBoxControllerDesc()
 	{
 		mDesc = &mBoxDesc;
@@ -303,7 +303,7 @@ class TR_CLASS()
 	PhyCapsuleControllerDesc : public PhyControllerDesc
 {
 public:
-	RTTI_DEF(PhyCapsuleControllerDesc, 0xc907e31d5c346136, true);
+	ENGINE_RTTI(PhyCapsuleControllerDesc);
 	PhyCapsuleControllerDesc()
 	{
 		mDesc = &mCapsuleDesc;
@@ -334,7 +334,7 @@ class TR_CLASS()
 	PhyScene : public PhyEntity
 {
 public:
-	RTTI_DEF(PhyScene, 0x45c92b0b5befac5d, true);
+	ENGINE_RTTI(PhyScene);
 
 	PhyScene();
 	~PhyScene();

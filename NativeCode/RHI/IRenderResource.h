@@ -23,39 +23,33 @@ struct TR_CLASS(SV_LayoutStruct = 8, SV_Manual)
 class XndAttribute;
 class IRenderContext;
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-IBlobObject : public VIUnknown
+struct TR_CLASS()
+	IBlobObject : public VIUnknown
 {
-	RTTI_DEF(IBlobObject, 0x90eb57e75ba44773, true);
+	friend class TTASTSD;
+	ENGINE_RTTI(IBlobObject);
 	VArray<BYTE, BYTE>		mDatas;
-	
-	TR_CONSTRUCTOR()
+
 	IBlobObject()
 	{
 
 	}
 
-	TR_FUNCTION()
 	UINT GetSize() const {
 		return (UINT)mDatas.GetSize();
 	}
-	TR_FUNCTION()
 	void* GetData() {
 		if (mDatas.GetSize() == 0)
 			return nullptr;
 		return mDatas.GetData();
 	}
-	TR_FUNCTION()
-	void ReadFromXnd(XndAttribute* attr);
-	TR_FUNCTION()
-	void Write2Xnd(XndAttribute* attr);
+	void ReadFromXnd(XndAttribute * attr);
+	void Write2Xnd(XndAttribute * attr);
 
-	TR_FUNCTION()
 	void ReSize(UINT size)
 	{
 		mDatas.SetSize(size);
 	}
-	TR_FUNCTION()
 	void PushData(const void* data, UINT size)
 	{
 		int oldSize = mDatas.GetSize();
@@ -64,33 +58,27 @@ IBlobObject : public VIUnknown
 	}
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-IRenderResource : public VIUnknown
+class TR_CLASS()
+	IRenderResource : public VIUnknownBase
 {
 public:
 	IRenderResource();
 	~IRenderResource();
+	virtual void Cleanup();
 
-	virtual void DeleteThis() override;
-	virtual void DoSwap(IRenderContext* rc) {}
+	virtual void OnFrameEnd(IRenderContext * rc) {}
 
-	TR_FUNCTION()
 	virtual void SetDebugName(const char* name) {}
-};
 
-class RResourceSwapChain
-{
-protected:
-	std::queue<IRenderResource*>	mResources;
-	VCritical						mLocker;
-	static RResourceSwapChain		Instance;
-public:
-	static RResourceSwapChain* GetInstance() {
-		return &Instance;
+	virtual IResourceState* GetResourceState() {
+		return nullptr;
 	}
-	void Cleanup();
-	void PushResource(IRenderResource* res);
-	void TickSwap(IRenderContext* rc);
+	virtual void InvalidateResource() {
+		return;
+	}
+	virtual vBOOL RestoreResource() {
+		return TRUE;
+	}
 };
 
 NS_END

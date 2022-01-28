@@ -59,7 +59,11 @@ namespace EngineNS.GamePlay.Scene
         float SnapGridSize = 10.0f; //1,10,50... GEditor->GetGridSize();
         //float mEditor3DGridFade = 0.5f;
         //float mEditor2DGridFade = 0.5f;
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
+        private static RHI.FNameVarIndex ShaderIdx_SnapTile = new RHI.FNameVarIndex("SnapTile");
+        private static RHI.FNameVarIndex ShaderIdx_GridColor = new RHI.FNameVarIndex("GridColor");
+        private static RHI.FNameVarIndex ShaderIdx_UVMin = new RHI.FNameVarIndex("UVMin");
+        private static RHI.FNameVarIndex ShaderIdx_UVMax = new RHI.FNameVarIndex("UVMax");
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
             if (mGridlineMaterial == null || mGridlineMaterial.PerMaterialCBuffer == null)
                 return true;
@@ -70,11 +74,6 @@ namespace EngineNS.GamePlay.Scene
             {
                 WorldToUVScale *= 0.1f;
             }
-
-            var ShaderIdx_SnapTile = mGridlineMaterial.PerMaterialCBuffer.mCoreObject.FindVar("SnapTile");
-            var ShaderIdx_GridColor = mGridlineMaterial.PerMaterialCBuffer.mCoreObject.FindVar("GridColor");
-            var ShaderIdx_UVMin = mGridlineMaterial.PerMaterialCBuffer.mCoreObject.FindVar("UVMin");
-            var ShaderIdx_UVMax = mGridlineMaterial.PerMaterialCBuffer.mCoreObject.FindVar("UVMax");
 
             bool bIsPerspective = true;
             //float Darken = 0.11f;
@@ -90,9 +89,9 @@ namespace EngineNS.GamePlay.Scene
             //}
 
             double SnapTile = (1.0 / WorldToUVScale) / System.Math.Max(1.0, SnapGridSize);
-            mGridlineMaterial.PerMaterialCBuffer.SetValue(ShaderIdx_SnapTile, (float)SnapTile);
+            mGridlineMaterial.PerMaterialCBuffer.SetValue(ref ShaderIdx_SnapTile, (float)SnapTile);
 
-            var mPreCameraPos = ViewportSlate.RenderPolicy.GetBasePassNode().GBuffers.Camera.mCoreObject.GetPosition();
+            var mPreCameraPos = ViewportSlate.RenderPolicy.DefaultCamera.mCoreObject.GetPosition();
             var UVCameraPos = new DVector2(mPreCameraPos.X, mPreCameraPos.Z);
             var ObjectToWorld = EngineNS.DMatrix.Identity;
             ObjectToWorld.Translation = new DVector3(mPreCameraPos.X, 0, mPreCameraPos.Z);
@@ -113,8 +112,8 @@ namespace EngineNS.GamePlay.Scene
             var UVMin = UVMid + new DVector2(-UVRadi, -UVRadi);
             var UVMax = UVMid + new DVector2(UVRadi, UVRadi);
 
-            mGridlineMaterial.PerMaterialCBuffer.SetValue(ShaderIdx_UVMin, UVMin.AsSingleVector());
-            mGridlineMaterial.PerMaterialCBuffer.SetValue(ShaderIdx_UVMax, UVMax.AsSingleVector());
+            mGridlineMaterial.PerMaterialCBuffer.SetValue(ref ShaderIdx_UVMin, UVMin.AsSingleVector());
+            mGridlineMaterial.PerMaterialCBuffer.SetValue(ref ShaderIdx_UVMax, UVMax.AsSingleVector());
 
 
             var camPos = new DVector3(mPreCameraPos.X, 0, mPreCameraPos.Z);

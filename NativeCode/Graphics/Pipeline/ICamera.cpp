@@ -4,7 +4,7 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::ICamera, EngineNS::VIUnknown);
+ENGINE_RTTI_IMPL(EngineNS::ICamera);
 
 ICamera::ICamera()
 {

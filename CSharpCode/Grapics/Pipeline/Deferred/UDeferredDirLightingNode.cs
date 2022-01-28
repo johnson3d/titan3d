@@ -6,124 +6,151 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 {
     public class UDeferredDirLightingShading : Shader.UShadingEnv
     {
+        public UPermutationItem DisableAO
+        {
+            get;
+            set;
+        }
+        public UPermutationItem DisablePointLights
+        {
+            get;
+            set;
+        }
+        public UPermutationItem DisableShadow
+        {
+            get;
+            set;
+        }
+        public UPermutationItem DisableSunshaft
+        {
+            get;
+            set;
+        }
+        public UPermutationItem DisableBloom
+        {
+            get;
+            set;
+        }
+        public UPermutationItem DisableHdr
+        {
+            get;
+            set;
+        }
         public UDeferredDirLightingShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Deferred/DeferredDirLighting.cginc", RName.ERNameType.Engine);
 
-            var disable_Shadow = new MacroDefine();//0
-            disable_Shadow.Name = "DISABLE_SHADOW_ALL";
-            disable_Shadow.Values.Add("0");
-            disable_Shadow.Values.Add("1");
-            MacroDefines.Add(disable_Shadow);
+            this.BeginPermutaion();
 
-            var disable_AO = new MacroDefine();//1
-            disable_AO.Name = "ENV_DISABLE_AO";
-            disable_AO.Values.Add("0");
-            disable_AO.Values.Add("1");
-            MacroDefines.Add(disable_AO);
+            DisableAO = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_AO", (int)Shader.EPermutation_Bool.BitWidth);
+            DisablePointLights = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_POINTLIGHTS", (int)Shader.EPermutation_Bool.BitWidth);
+            DisableShadow = this.PushPermutation<Shader.EPermutation_Bool>("DISABLE_SHADOW_ALL", (int)Shader.EPermutation_Bool.BitWidth);
+            DisableSunshaft = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_SUNSHAFT", (int)Shader.EPermutation_Bool.BitWidth);
+            DisableBloom = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_BLOOM", (int)Shader.EPermutation_Bool.BitWidth);
+            DisableHdr = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_HDR", (int)Shader.EPermutation_Bool.BitWidth);
 
-            var disable_Sunshaft = new MacroDefine();//2
-            disable_Sunshaft.Name = "ENV_DISABLE_SUNSHAFT";
-            disable_Sunshaft.Values.Add("0");
-            disable_Sunshaft.Values.Add("1");
-            MacroDefines.Add(disable_Sunshaft);
+            DisableAO.SetValue((int)Shader.EPermutation_Bool.FalseValue);
+            DisableShadow.SetValue((int)Shader.EPermutation_Bool.FalseValue);
+            DisablePointLights.SetValue((int)Shader.EPermutation_Bool.FalseValue);
 
-            var disable_Bloom = new MacroDefine();//3
-            disable_Bloom.Name = "ENV_DISABLE_BLOOM";
-            disable_Bloom.Values.Add("0");
-            disable_Bloom.Values.Add("1");
-            MacroDefines.Add(disable_Bloom);
+            DisableSunshaft.SetValue((int)Shader.EPermutation_Bool.TrueValue);
+            DisableBloom.SetValue((int)Shader.EPermutation_Bool.TrueValue);
+            DisableHdr.SetValue((int)Shader.EPermutation_Bool.TrueValue);
 
-            var disable_Hdr = new MacroDefine();//4
-            disable_Hdr.Name = "ENV_DISABLE_HDR";
-            disable_Hdr.Values.Add("0");
-            disable_Hdr.Values.Add("1");
-            MacroDefines.Add(disable_Hdr);
-
-            var disable_PointLights = new MacroDefine();//5
-            disable_PointLights.Name = "ENV_DISABLE_POINTLIGHTS";
-            disable_PointLights.Values.Add("0");
-            disable_PointLights.Values.Add("1");
-            MacroDefines.Add(disable_PointLights);
-
-            UpdatePermutationBitMask();
-
-            mMacroValues.Add("0");//disable_Shadow_All = 0
-            mMacroValues.Add("0");//disable_AO = 0
-            mMacroValues.Add("1");//disable_Sunshaft = 1
-            mMacroValues.Add("1");//disable_Bloom = 1
-            mMacroValues.Add("0");//disable_Hdr = 1
-            mMacroValues.Add("0");//disable_PointLights = 0
-
-            UpdatePermutation(mMacroValues);
+            this.UpdatePermutation();
         }
         public override EVertexSteamType[] GetNeedStreams()
         {
             return new EVertexSteamType[] { EVertexSteamType.VST_Position,
                 EVertexSteamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(IRenderPolicy policy, RHI.CDrawCall drawcall)
+        public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
         {
         }
-        public unsafe override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
 
             var Manager = policy.TagObject as UDeferredPolicy;
+            var dirLightingNode = Manager.FindFirstNode<UDeferredDirLightingNode>();
 
             var gpuProgram = drawcall.Effect.ShaderProgram;
             var index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GBufferRT0");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, Manager.GetBasePassNode().GBuffers.GetGBufferSRV(0).mCoreObject);
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.Rt0PinIn);
+                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+            }
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GBufferRT0");
             if (!CoreSDK.IsNullPointer(index))
                 drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GBufferRT1");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, Manager.GetBasePassNode().GBuffers.GetGBufferSRV(1).mCoreObject);
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.Rt1PinIn);
+                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+            }
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GBufferRT1");
             if (!CoreSDK.IsNullPointer(index))
                 drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GBufferRT2");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, Manager.GetBasePassNode().GBuffers.GetGBufferSRV(2).mCoreObject);
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.Rt2PinIn);
+                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+            }
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GBufferRT2");
             if (!CoreSDK.IsNullPointer(index))
                 drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "DepthBuffer");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, Manager.GetBasePassNode().GBuffers.GetDepthStencilSRV().mCoreObject);
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.DepthStencilPinIn);
+                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+            }
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_DepthBuffer");
             if (!CoreSDK.IsNullPointer(index))
                 drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GShadowMap");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, Manager.mShadowMapNode.GBuffers.GetDepthStencilSRV().mCoreObject);
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.ShadowMapPinIn);
+                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+            }
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GShadowMap");
             if (!CoreSDK.IsNullPointer(index))
                 drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "gEnvMap");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, Manager.EnvMapSRV.mCoreObject);
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.EnvMapPinIn);
+                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+            }
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_gEnvMap");
             if (!CoreSDK.IsNullPointer(index))
                 drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GVignette");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, Manager.VignetteSRV.mCoreObject);
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.VignettePinIn);
+                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+            }
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GVignette");
             if (!CoreSDK.IsNullPointer(index))
                 drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GPickedTex");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, Manager.PickHollowNode.GBuffers.GetGBufferSRV(0).mCoreObject);
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.PickPinIn);
+                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+            }
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GPickedTex");
             if (!CoreSDK.IsNullPointer(index))
                 drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
@@ -134,52 +161,95 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "TilingBuffer");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, Manager.ScreenTilingNode.TileSRV.mCoreObject);
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.TileScreenPinIn);
+                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+            }
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GpuScene_PointLights");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, Manager.GpuSceneNode.PointLights.DataSRV.mCoreObject); 
+            {
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.PointLightsPinIn);
+                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+            }
         }
         public void SetDisableShadow(bool value)
         {
-            mMacroValues[0] = value ? "1" : "0";
-            UpdatePermutation(mMacroValues);
+            DisableShadow.SetValue(value);
+            UpdatePermutation();
         }
         public void SetDisableAO(bool value)
         {
-            mMacroValues[1] = value ? "1" : "0";
-            UpdatePermutation(mMacroValues);
+            DisableAO.SetValue(value);
+            UpdatePermutation();
         }
         public void SetDisableSunShaft(bool value)
         {
-            mMacroValues[2] = value ? "1" : "0";
-            UpdatePermutation(mMacroValues);
+            DisableSunshaft.SetValue(value);
+            UpdatePermutation();
         }
         public void SetDisableBloom(bool value)
         {
-            mMacroValues[3] = value ? "1" : "0";
-            UpdatePermutation(mMacroValues);
+            DisableBloom.SetValue(value);
+            UpdatePermutation();
         }
         public void SetDisableHDR(bool value)
         {
-            mMacroValues[4] = value ? "1" : "0";
-            UpdatePermutation(mMacroValues);
+            DisableHdr.SetValue(value);
+            UpdatePermutation();
         }
         public void SetDisablePointLights(bool value)
         {
-            mMacroValues[5] = value ? "1" : "0";
-            UpdatePermutation(mMacroValues);
+            DisablePointLights.SetValue(value);
+            UpdatePermutation();
         }
     }
     public class UDeferredDirLightingNode : Common.USceenSpaceNode
     {
+        public Common.URenderGraphPin Rt0PinIn = Common.URenderGraphPin.CreateInput("MRT0");
+        public Common.URenderGraphPin Rt1PinIn = Common.URenderGraphPin.CreateInput("MRT1");
+        public Common.URenderGraphPin Rt2PinIn = Common.URenderGraphPin.CreateInput("MRT2");
+        public Common.URenderGraphPin DepthStencilPinIn = Common.URenderGraphPin.CreateInput("DepthStencil");
+        public Common.URenderGraphPin ShadowMapPinIn = Common.URenderGraphPin.CreateInput("ShadowMap");
+        public Common.URenderGraphPin EnvMapPinIn = Common.URenderGraphPin.CreateInput("EnvMap");
+        public Common.URenderGraphPin VignettePinIn = Common.URenderGraphPin.CreateInput("Vignette");
+        public Common.URenderGraphPin PickPinIn = Common.URenderGraphPin.CreateInput("Pick");
+        public Common.URenderGraphPin TileScreenPinIn = Common.URenderGraphPin.CreateInput("TileScreen");
+        public Common.URenderGraphPin PointLightsPinIn = Common.URenderGraphPin.CreateInput("PointLights");
+
         public UDeferredDirLightingNode()
         {
+            Name = "UDeferredDirLightingNode";
         }
-        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y, string debugName)
+        public override void InitNodePins()
         {
-            await base.Initialize(policy, shading, rtFmt, dsFmt, x, y, debugName);
-            GBuffers.Camera = policy.GetBasePassNode().GBuffers.Camera;
+            AddInput(Rt0PinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(Rt1PinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(Rt2PinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(DepthStencilPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(ShadowMapPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(EnvMapPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(VignettePinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(PickPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(TileScreenPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(PointLightsPinIn, EGpuBufferViewType.GBVT_Srv);
+
+            ResultPinOut.Attachement.Format = EPixelFormat.PXF_R10G10B10A2_UNORM;
+            base.InitNodePins();
+            //Setup by base class
+            //pin = AddOutput("LightingResult");
+            //{
+            //    pin.Attachement.AttachmentName = FHashText.Create($"{Name}->LightingResult");
+            //}
+        }
+        public override void FrameBuild()
+        {
+            
+        }
+        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        {
+            await base.Initialize(policy, debugName);
+            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredDirLightingShading>();
         }
         private void SetCBuffer(GamePlay.UWorld world, RHI.CConstantBuffer cBuffer, UDeferredPolicy mobilePolicy)
         {
@@ -204,7 +274,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             cBuffer.SetValue(cBuffer.PerViewportIndexer.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
             cBuffer.SetValue(cBuffer.PerViewportIndexer.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
         }
-        public override void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
+        public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
             var mobilePolicy = policy as UDeferredPolicy;
             var cBuffer = GBuffers.PerViewportCBuffer;

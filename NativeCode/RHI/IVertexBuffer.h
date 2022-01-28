@@ -37,8 +37,6 @@ public:
 	TR_FUNCTION()
 	virtual void UpdateGPUBuffData(ICommandList* cmd, void* ptr, UINT size) = 0;
 
-	void UpdateDrawPass(ICommandList* cmd, vBOOL bImm);
-	virtual void DoSwap(IRenderContext* rc) override;
 	virtual void SetDebugInfo(const char* info)
 	{
 	}

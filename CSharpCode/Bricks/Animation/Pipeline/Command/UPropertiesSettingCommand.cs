@@ -5,28 +5,16 @@ using System.Text;
 
 namespace EngineNS.Animation.Pipeline
 {
-    public struct PropertiesSettingCommandContext
+    public class UPropertiesSettingCommand : IAnimationCommand
     {
         public UAnimationPropertiesSetter AnimationPropertiesSetter;
         public float Time;
-        //clamp pingpong repeat
 
-        public PropertiesSettingCommandContext(UAnimationPropertiesSetter animationPropertiesSetter, float time)
+        public void Execute()
         {
-            Time = time;
-            AnimationPropertiesSetter = animationPropertiesSetter;
-        }
-    }
-
-    public class UPropertiesSettingCommand : IAnimationCommand
-    {
-        public PropertiesSettingCommandContext Context { get; set; } = default;
-
-        public void Excute()
-        {
-            if (Context.AnimationPropertiesSetter == null)
+            if (AnimationPropertiesSetter == null)
                 return;
-            Context.AnimationPropertiesSetter.Evaluate(Context.Time);
+            AnimationPropertiesSetter.Evaluate(Time);
         }
     }
 }

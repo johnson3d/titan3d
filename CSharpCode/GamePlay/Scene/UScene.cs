@@ -232,7 +232,7 @@ namespace EngineNS.GamePlay.Scene
         #endregion
 
         UMemberTickables mMemberTickables = new UMemberTickables();
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
             mMemberTickables.TickLogic(this, UEngine.Instance.ElapseTickCount);
             return true;

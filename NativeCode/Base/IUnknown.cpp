@@ -13,13 +13,9 @@ void VIUnknownBase::DeleteThis()
 	delete this;
 }
 
-CoreRtti VIUnknown::_RttiInfo("EngineNS::VIUnknown", "", VIUnknown::__UID__, sizeof(VIUnknown), nullptr, __FILE__, __LINE__);
-const vIID VIUnknown::__UID__;
 INT64 VIUnknown::EngineTime = 0;
 
 FOnManagedObjectHolderDestroy IManagedObjectHolder::OnManagedObjectHolderDestroy = nullptr;
-
-StructImpl(FOnManagedObjectHolderDestroy)
 
 vfxObjectLocker gDefaultObjectLocker;
 
@@ -107,7 +103,11 @@ void VDefferedDeleteManager::PushObject(VIUnknown* obj)
 	if (refCount != 1)
 	{
 		ASSERT(false);
-		VFX_LTRACE(ELTT_Memory, "Object %s will be deleted, Its RefCount = %d\r\n", obj->GetRtti()->ClassName.c_str(), refCount);
+		auto pRtti = obj->GetRtti();
+		if (pRtti != nullptr)
+		{
+			VFX_LTRACE(ELTT_Memory, "Object %s will be deleted, Its RefCount = %d\r\n", obj->GetRtti()->Name.c_str(), refCount);
+		}
 		return;
 	}
 	

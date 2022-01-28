@@ -564,6 +564,19 @@ enum TR_ENUM()
 };
 
 enum TR_ENUM()
+	EGpuBufferViewType
+{
+	GBVT_Srv = 1,
+	GBVT_Rtv = (1 << 1),
+	GBVT_Dsv = (1 << 2),
+	GBVT_Uav = (1 << 3),
+	GBVT_CBuffer = (1 << 4),
+	GBVT_VertexBuffer = (1 << 5),
+	GBVT_IndexBuffer = (1 << 6),
+	GBVT_IndirectBuffer = (1 << 7),
+};
+
+enum TR_ENUM()
 	EShaderBindType
 {
 	SBT_CBuffer,

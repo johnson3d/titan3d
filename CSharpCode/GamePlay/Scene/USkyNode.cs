@@ -7,9 +7,9 @@ namespace EngineNS.GamePlay.Scene
 {
     public class USkyNode : UMeshNode
     {
-        public override bool OnTickLogic(UWorld world, IRenderPolicy policy)
+        public override bool OnTickLogic(UWorld world, URenderPolicy policy)
         {
-            var camPos = policy.Camera.mCoreObject.GetPosition();
+            var camPos = policy.DefaultCamera.mCoreObject.GetPosition();
             camPos = new DVector3(camPos.X, Placement.TransformRef.mPosition.Y, camPos.Z);
             if (Placement.Position != camPos)
             {

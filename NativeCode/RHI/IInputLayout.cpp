@@ -5,7 +5,7 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::IInputLayoutDesc, EngineNS::VIUnknown)
+ENGINE_RTTI_IMPL(EngineNS::IInputLayoutDesc)
 
 const LayoutElement* IInputLayoutDesc::FindElementBySemantic(const char* name, UINT index)
 {

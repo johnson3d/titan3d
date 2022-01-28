@@ -62,7 +62,7 @@ namespace EngineNS.GamePlay.Camera
             }
         }
 
-        public override bool OnTickLogic(UWorld world, IRenderPolicy policy)
+        public override bool OnTickLogic(UWorld world, URenderPolicy policy)
         {
             Placement.Position  = Placement.Quat * DVector3.Backward * ArmLength  + TargetOffset;
             return base.OnTickLogic(world, policy);

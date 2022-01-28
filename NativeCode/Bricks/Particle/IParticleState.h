@@ -19,6 +19,43 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 	}
 };
 
+struct TR_CLASS(SV_LayoutStruct = 8)
+	FVarAttribute
+{
+	VNameString		Name;
+	EShaderVarType	Type;
+	UINT			Offset;
+};
+
+class TR_CLASS()
+	IParticleSystemAttribute
+{
+	std::vector<FVarAttribute>		NamedAttributes;
+
+	void AddAttribute(const char* name, EShaderVarType type)
+	{
+		FVarAttribute tmp;
+		tmp.Name = name;
+		tmp.Type = type;
+		NamedAttributes.push_back(tmp);
+	}
+	void BuildAttributes(UINT AlignSize = 16);
+
+	int FindAttribute(const char* name) const
+	{
+		for (int i = 0; i < (int)NamedAttributes.size(); i++)
+		{
+			if (NamedAttributes[i].Name == name)
+				return i;
+		}
+		return -1;
+	}
+	FVarAttribute* GetAttributeAddress(int index)
+	{
+		return &NamedAttributes[index];
+	}
+};
+
 class IEmitter;
 class IParticlePool
 {

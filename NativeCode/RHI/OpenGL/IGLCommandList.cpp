@@ -49,6 +49,16 @@ void IGLCommandList::EndCommand()
 	ICommandList::EndCommand();
 }
 
+void IGLCommandList::BeginEvent(const char* info)
+{
+	mCmdList->ES32_PushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, info);
+}
+
+void IGLCommandList::EndEvent()
+{
+	mCmdList->ES32_PopDebugGroup();
+}
+
 bool IGLCommandList::BeginRenderPass(IFrameBuffers* pFrameBuffer, const IRenderPassClears* passClears, const char* debugName)
 {
 	IRenderPass* pRenderPass = pFrameBuffer->mRenderPass;
@@ -62,6 +72,7 @@ bool IGLCommandList::BeginRenderPass(IFrameBuffers* pFrameBuffer, const IRenderP
 		pFrameBuffer = mProfiler->mOnePixelFB;
 	}
 
+	BeginEvent(debugName);
 	//mSavedFrameBuffer = mCmdList->GetIntegerv(GL_FRAMEBUFFER_BINDING);
 	((IGLFrameBuffers*)pFrameBuffer)->ApplyBuffers(mCmdList);
 	
@@ -112,6 +123,7 @@ void IGLCommandList::EndRenderPass()
 {
 	ICommandList::EndRenderPass();
 	
+	EndEvent();
 	//mCmdList->BindFramebuffer(GL_FRAMEBUFFER, mSavedFrameBuffer);
 	//mSavedFrameBuffer.reset();
 }
@@ -191,7 +203,7 @@ bool IGLCommandList::Init(IGLRenderContext* rc, const ICommandListDesc* desc, GL
 {
 	if (sdk == nullptr)
 	{
-		mCmdList = new GLSdk();
+		mCmdList = MakeWeakRef(new GLSdk());
 	}
 	else
 	{

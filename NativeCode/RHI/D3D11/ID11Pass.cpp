@@ -13,6 +13,7 @@
 #include "ID11UnorderedAccessView.h"
 #include "ID11ShaderProgram.h"
 #include "ID11GpuBuffer.h"
+#include "ID11Texture2D.h"
 #include "../../Base/vfxSampCounter.h"
 
 #define new VNEW
@@ -239,6 +240,45 @@ void ID11ComputeDrawcall::BuildPass(ICommandList* cmd)
 	else
 	{
 		d11cmd->mDeferredContext->Dispatch(mDispatchX, mDispatchY, mDispatchZ);
+	}
+}
+
+void ID11CopyDrawcall::BuildPass(ICommandList* cmd)
+{
+	auto d11cmd = (ID11CommandList*)cmd;
+	D3D11_BOX box;
+	switch (Type)
+	{
+	case EngineNS::ICopyDrawcall::CPTP_Unkown:
+		break;
+	case EngineNS::ICopyDrawcall::CPTP_Buffer:
+		{
+			//d11cmd->mDeferredContext->CopyResource(((ID11GpuBuffer*)BufferDesc.Target.GetPtr())->mBuffer, ((ID11GpuBuffer*)BufferDesc.Source.GetPtr())->mBuffer);
+			box.left = BufferDesc.SrcOffset;
+			box.top = 0;
+			box.front = 0;
+			box.right = BufferDesc.SrcOffset + BufferDesc.Size;
+			box.bottom = 1;
+			box.back = 1; 
+			d11cmd->mDeferredContext->CopySubresourceRegion(((ID11GpuBuffer*)BufferDesc.Target.GetPtr())->mBuffer, 0, BufferDesc.TarOffset, 0, 0,
+				((ID11GpuBuffer*)BufferDesc.Source.GetPtr())->mBuffer, 0, &box);
+		}
+		break;
+	case EngineNS::ICopyDrawcall::CPTP_Texture2D:
+		{
+			//d11cmd->mDeferredContext->CopyResource(((ID11GpuBuffer*)BufferDesc.Target.GetPtr())->mBuffer, ((ID11GpuBuffer*)BufferDesc.Source.GetPtr())->mBuffer);
+			box.left = Texture2DDesc.SrcX;
+			box.top = Texture2DDesc.SrcY;
+			box.front = 0;
+			box.right = Texture2DDesc.SrcX + Texture2DDesc.Width;
+			box.bottom = Texture2DDesc.SrcY + Texture2DDesc.Height;
+			box.back = 1;
+			d11cmd->mDeferredContext->CopySubresourceRegion(((ID11Texture2D*)Texture2DDesc.Target.GetPtr())->m_pDX11Texture2D, 0, Texture2DDesc.TarX, Texture2DDesc.TarY, 0,
+				((ID11Texture2D*)Texture2DDesc.Source.GetPtr())->m_pDX11Texture2D, 0, &box);
+		}
+		break;
+	default:
+		break;
 	}
 }
 

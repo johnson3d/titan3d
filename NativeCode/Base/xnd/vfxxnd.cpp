@@ -9,7 +9,7 @@ bool XndAttribute::BeginRead()
 {
 	if (mMemReader == nullptr)
 	{
-		mMemReader = AutoRef<MemStreamReader>(new MemStreamReader());
+		mMemReader = MakeWeakRef(new MemStreamReader());
 	}
 	auto holder = mHolder.GetPtr();
 	if (holder == nullptr)
@@ -34,7 +34,7 @@ void XndAttribute::BeginWrite(UINT64 length)
 	if (mMemWriter == nullptr)
 	{
 		auto p = new MemStreamWriter();
-		mMemWriter = AutoRef<MemStreamWriter>(p);
+		mMemWriter = MakeWeakRef(p);
 	}
 	mMemWriter->ResetBufferSize(length);
 }
@@ -102,7 +102,7 @@ bool XndHolder::LoadXnd(const char* file)
 	mResource = nullptr;
 
 	{
-		mResource = AutoRef<VRes2Memory>(F2MManager::Instance->GetF2M(file)); 
+		mResource = MakeWeakRef(F2MManager::Instance->GetF2M(file));
 		if (mResource == nullptr)
 			return false;
 		UINT64 length = (UINT64)mResource->Length();
@@ -114,7 +114,7 @@ bool XndHolder::LoadXnd(const char* file)
 		ptr = mResource->Ptr(treeOffset, length - treeOffset);
 		MemStreamReader ar;
 		ar.ProxyPointer((BYTE*)ptr, length - treeOffset);
-		mRootNode = AutoRef<XndNode>(new XndNode());
+		mRootNode = MakeWeakRef(new XndNode());
 		ReadNodeTree(ar, mRootNode);
 		mResource->Free();
 
@@ -143,7 +143,7 @@ bool XndHolder::LoadXnd(const char* file)
 		io.Read(&offsetTrees, sizeof(offsetTrees));
 		io.Seek(offsetTrees, VFile_Base::begin);
 
-		mRootNode = AutoRef<XndNode>(new XndNode());
+		mRootNode = MakeWeakRef(new XndNode());
 
 		FileStreamReader ar(io);
 		ReadNodeTree(ar, mRootNode);
@@ -151,7 +151,7 @@ bool XndHolder::LoadXnd(const char* file)
 		io.Seek(0, VFile_Base::begin);
 		io.Close();
 
-		mResource = AutoRef<VRes2Memory>(F2MManager::Instance.GetF2M(file));
+		mResource = MakeWeakRef(F2MManager::Instance.GetF2M(file));
 		return true;
 	}
 	return false;*/
@@ -244,7 +244,7 @@ void XndHolder::ReadNodeTree(IStreamReader& ar, XndNode* node)
 		std::string name;
 		ar.Read(name);
 
-		AutoRef<XndAttribute> attr(this->NewAttribute(name.c_str(), version, flags));
+		auto attr = MakeWeakRef(this->NewAttribute(name.c_str(), version, flags));
 		node->AddAttribute(attr);
 
 		ar.Read(attr->mOffsetInResource);
@@ -254,7 +254,7 @@ void XndHolder::ReadNodeTree(IStreamReader& ar, XndNode* node)
 	ar.Read(num);
 	for (UINT i = 0; i < num; i++)
 	{
-		AutoRef<XndNode> cld(new XndNode());
+		auto cld = MakeWeakRef(new XndNode());
 		ReadNodeTree(ar, cld);
 		node->AddNode(cld);
 	}

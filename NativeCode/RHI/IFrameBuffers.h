@@ -14,9 +14,9 @@ class IRenderPass;
 
 
 struct TR_CLASS(SV_LayoutStruct = 8)
-	IIAttachmentDesc
+	IAttachmentDesc
 {
-	IIAttachmentDesc()
+	IAttachmentDesc()
 	{
 		SetDefault();
 	}
@@ -60,8 +60,8 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 		AttachmentDepthStencil.Format = EPixelFormat::PXF_UNKNOWN;
 	}
 	UINT NumOfMRT;
-	IIAttachmentDesc AttachmentMRTs[8];
-	IIAttachmentDesc AttachmentDepthStencil;
+	IAttachmentDesc AttachmentMRTs[8];
+	IAttachmentDesc AttachmentDepthStencil;
 };
 
 struct TR_CLASS(SV_LayoutStruct = 8)
@@ -97,7 +97,7 @@ public:
 
 
 struct TR_CLASS(SV_LayoutStruct = 8)
-IFrameBuffersDesc
+	IFrameBuffersDesc
 {
 	IFrameBuffersDesc()
 	{
@@ -116,7 +116,7 @@ IFrameBuffersDesc
 };
 
 class TR_CLASS()
-IFrameBuffers : public IRenderResource
+	IFrameBuffers : public IRenderResource
 {
 public:
 	IFrameBuffers();

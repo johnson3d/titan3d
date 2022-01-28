@@ -9,7 +9,7 @@ class TR_CLASS()
 	PhyMaterial : public PhyEntity
 {
 public:
-	RTTI_DEF(PhyMaterial, 0x9cfa450a5bf21655, true);
+	ENGINE_RTTI(PhyMaterial);
 
 	physx::PxMaterial* mMaterial;
 public:

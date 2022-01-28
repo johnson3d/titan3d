@@ -13,7 +13,7 @@ void IMesh::Initialize(IMeshPrimitives* mesh, IMdfQueue* mdf)
 {
 	mGeoms.StrongRef(mesh);
 	mMdfQueue.StrongRef(mdf);
-	mVertexArray = AutoRef<IVertexArray>(new IVertexArray());
+	mVertexArray = MakeWeakRef(new IVertexArray());
 }
 
 void IMesh::SetInputStreams(IVertexArray* draw)

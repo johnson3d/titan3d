@@ -9,17 +9,14 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
         public static IndexInSkeleton Invalid { get; } = new IndexInSkeleton(-1);
         public IndexInSkeleton(int index)
         {
-            Value = index;
+            mValue = index;
         }
-        public int ToInt()
-        {
-            return Value; 
-        }
+        public int Value { get => mValue; }
         public bool IsValid()
         {
-            return Value != -1 ? true : false;
+            return mValue != -1 ? true : false;
         }
-        private int Value;
+        private int mValue;
     }
 }
 

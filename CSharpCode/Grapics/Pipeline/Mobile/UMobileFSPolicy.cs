@@ -4,12 +4,8 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Mobile
 {
-    public class UMobileFSPolicy : IRenderPolicy
+    public class UMobileFSPolicy : URenderPolicy
     {
-        public override Common.UBasePassNode GetBasePassNode() 
-        { 
-            return BasePassNode; 
-        }
         #region Feature On/Off
         public override bool DisableShadow
         {
@@ -17,7 +13,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             set
             {
                 mDisableShadow = value;
-                BasePassNode.mOpaqueShading.SetDisableShadow(value);
+                BasePassNode.mOpaqueShading.DisableShadow.SetValue(value);
+                BasePassNode.mOpaqueShading.UpdatePermutation();
             }
         }
         public override bool DisableAO
@@ -26,7 +23,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             set
             {
                 mDisableAO = value;
-                BasePassNode.mOpaqueShading.SetDisableAO(value);
+                BasePassNode.mOpaqueShading.DisableAO.SetValue(value);
+                BasePassNode.mOpaqueShading.UpdatePermutation();
             }
         }
         public override bool DisablePointLight
@@ -39,7 +37,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             {
                 mDisablePointLight = value;
                 var shading = BasePassNode.mOpaqueShading;
-                shading?.SetDisablePointLights(value);
+                shading?.DisablePointLights.SetValue(value);
+                shading.UpdatePermutation();
             }
         }
         #endregion
@@ -67,15 +66,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public RHI.CShaderResourceView VignetteSRV;
         public override RHI.CShaderResourceView GetFinalShowRSV()
         {
-            return BasePassNode.GBuffers.GetGBufferSRV(0);
-        }
-
-        public override async System.Threading.Tasks.Task Initialize(CCamera camera, float x, float y)
-        {
-            await base.Initialize(camera, x, y);
-            await BasePassNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>(), EPixelFormat.PXF_R16G16B16A16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "BasePass");
-            
-            EnvMapSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine));
+            return this.AttachmentCache.FindAttachement(BasePassNode.GBuffers.RenderTargets[0].Attachement.AttachmentName).Srv;
         }
         public override void OnResize(float x, float y)
         {
@@ -97,7 +88,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             }
             return null;
         }
-        public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom)
+        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom)
         {
             base.OnDrawCall(shadingType, drawcall, mesh, atom);
             if (shadingType == EShadingType.BasePass)

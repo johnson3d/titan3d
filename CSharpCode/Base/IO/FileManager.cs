@@ -352,6 +352,15 @@ namespace EngineNS.IO
             IO.SerializerHelper.ReadObjectMetaFields(null, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
             return (T)pThis;
         }
+        public static bool LoadXmlToObject<T>(string file, T host) where T : class, new()
+        {
+            var xml = IO.FileManager.LoadXml(file);
+            if (xml == null)
+                return false;
+            object pThis = host;
+            IO.SerializerHelper.ReadObjectMetaFields(null, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+            return true;
+        }
     }
 
     public partial class UOpenFileDialog

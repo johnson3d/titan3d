@@ -1,9 +1,54 @@
 #include "IParticleState.h"
 #include "IEmitter.h"
+#include <tuple>
 
 #define new VNEW
 
 NS_BEGIN
+
+void IParticleSystemAttribute::BuildAttributes(UINT AlignSize)
+{	
+	UINT packOffset = 0;
+	UINT offsetTmp = 0;
+	for (size_t i = 0; i < NamedAttributes.size(); i++)
+	{
+		UINT size = 0;
+		size = GetShaderVarTypeSize(NamedAttributes[i].Type);
+
+		if (size >= 16)
+		{
+			NamedAttributes[i].Offset = packOffset;
+			if (size % AlignSize == 0)
+			{
+				packOffset += size;
+			}
+			else
+			{
+				packOffset += (size / AlignSize + 1) * AlignSize;
+			}
+			offsetTmp = 0;
+		}
+		else
+		{
+			NamedAttributes[i].Offset = packOffset + offsetTmp;
+			if (offsetTmp + size == AlignSize)
+			{
+				packOffset += AlignSize;
+				offsetTmp = 0;
+			}
+			else if (offsetTmp + size < AlignSize)
+			{
+				offsetTmp += size;
+			}
+			else
+			{
+				packOffset += AlignSize;
+				NamedAttributes[i].Offset = packOffset;
+				offsetTmp = 0;				
+			}
+		}
+	}
+}
 
 bool IParticlePool::InitPool(UINT dataStride, UINT maxNum)
 {

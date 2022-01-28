@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1084103970 Type="EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAsset@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <PolicyGraph Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph@EngineCore" Order="0" />
+</Hash_1084103970>

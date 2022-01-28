@@ -71,7 +71,7 @@ namespace EngineNS.RHI
                 //desc.Blend = UEngine.Instance.GfxDevice.BlendStateManager.DefaultState.mCoreObject;
                 //desc.DepthStencil = UEngine.Instance.GfxDevice.DepthStencilStateManager.DefaultState.mCoreObject;
                 //desc.Rasterizer = UEngine.Instance.GfxDevice.RasterizerStateManager.DefaultState.mCoreObject;
-                var pl = UEngine.Instance.GfxDevice.RenderContext.CreateRenderPipeline(ref desc);
+                var pl = UEngine.Instance.GfxDevice.RenderContext.CreateRenderPipeline(in desc);
                 pl.mCoreObject.BindGpuProgram(effect.ShaderProgram.mCoreObject);
                 pl.mCoreObject.BindBlendState(UEngine.Instance.GfxDevice.BlendStateManager.DefaultState.mCoreObject);
                 pl.mCoreObject.BindDepthStencilState(UEngine.Instance.GfxDevice.DepthStencilStateManager.DefaultState.mCoreObject);
@@ -94,7 +94,7 @@ namespace EngineNS.RHI
                 //desc.Blend = UEngine.Instance.GfxDevice.BlendStateManager.DefaultState.mCoreObject;
                 //desc.DepthStencil = UEngine.Instance.GfxDevice.DepthStencilStateManager.DefaultState.mCoreObject;
                 //desc.Rasterizer = UEngine.Instance.GfxDevice.RasterizerStateManager.DefaultState.mCoreObject;
-                var pl = UEngine.Instance.GfxDevice.RenderContext.CreateRenderPipeline(ref desc);
+                var pl = UEngine.Instance.GfxDevice.RenderContext.CreateRenderPipeline(in desc);
                 pl.mCoreObject.BindBlendState(UEngine.Instance.GfxDevice.BlendStateManager.DefaultState.mCoreObject);
                 pl.mCoreObject.BindDepthStencilState(UEngine.Instance.GfxDevice.DepthStencilStateManager.DefaultState.mCoreObject);
                 pl.mCoreObject.BindRasterizerState(UEngine.Instance.GfxDevice.RasterizerStateManager.DefaultState.mCoreObject);
@@ -114,7 +114,18 @@ namespace EngineNS.RHI
             }
             return result;
         }
-        public CRenderPipeline CreateRenderPipeline(ref IRenderPipelineDesc desc)
+        public CCopyDrawcall CreateCopyDrawcall()
+        {
+            var result = new CCopyDrawcall();
+            unsafe
+            {
+                result.mCoreObject = mCoreObject.CreateCopyDrawcall();
+                if (result.mCoreObject.NativePointer == IntPtr.Zero)
+                    return null;
+            }
+            return result;
+        }
+        public CRenderPipeline CreateRenderPipeline(in IRenderPipelineDesc desc)
         {
             unsafe
             {
@@ -125,7 +136,7 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CVertexBuffer CreateVertexBuffer(ref IVertexBufferDesc desc)
+        public CVertexBuffer CreateVertexBuffer(in IVertexBufferDesc desc)
         {
             unsafe
             {
@@ -136,7 +147,7 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CIndexBuffer CreateIndexBuffer(ref IIndexBufferDesc desc)
+        public CIndexBuffer CreateIndexBuffer(in IIndexBufferDesc desc)
         {
             unsafe
             {
@@ -169,7 +180,7 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CIndexBuffer CreateIndexBufferFromBuffer(ref IIndexBufferDesc desc, CGpuBuffer pBuffer)
+        public CIndexBuffer CreateIndexBufferFromBuffer(in IIndexBufferDesc desc, CGpuBuffer pBuffer)
         {
             unsafe
             {
@@ -180,7 +191,7 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CVertexBuffer CreateVertexBufferFromBuffer(ref IVertexBufferDesc desc, CGpuBuffer pBuffer)
+        public CVertexBuffer CreateVertexBufferFromBuffer(in IVertexBufferDesc desc, CGpuBuffer pBuffer)
         {
             unsafe
             {
@@ -202,7 +213,7 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CFrameBuffers CreateFrameBuffers(ref IFrameBuffersDesc desc)
+        public CFrameBuffers CreateFrameBuffers(in IFrameBuffersDesc desc)
         {
             unsafe
             {
@@ -213,7 +224,7 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CRenderTargetView CreateRenderTargetView(ref IRenderTargetViewDesc desc)
+        public CRenderTargetView CreateRenderTargetView(in IRenderTargetViewDesc desc)
         {
             unsafe
             {
@@ -224,7 +235,7 @@ namespace EngineNS.RHI
                 return result;
             }
         }
-        public CDepthStencilView CreateDepthRenderTargetView(ref IDepthStencilViewDesc desc)
+        public CDepthStencilView CreateDepthRenderTargetView(in IDepthStencilViewDesc desc)
         {
             unsafe
             {
@@ -240,7 +251,7 @@ namespace EngineNS.RHI
             unsafe
             {
                 var result = new CTexture2D();
-                result.mCoreObject = mCoreObject.CreateTexture2D(in desc);
+                result.mCoreObject = mCoreObject.CreateTexture2D(in desc).NativeSuper;
                 if (result.mCoreObject.NativePointer == IntPtr.Zero)
                     return null;
                 return result;

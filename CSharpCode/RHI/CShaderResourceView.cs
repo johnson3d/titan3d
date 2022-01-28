@@ -128,11 +128,16 @@ namespace EngineNS.RHI
         public const string AssetExt = ".srv";
 
         IntPtr mTextureHandle = IntPtr.Zero;
+        public bool IsHandle()
+        {
+            return mTextureHandle != IntPtr.Zero;
+        }
         public IntPtr GetTextureHandle()
         {
             if (mTextureHandle == IntPtr.Zero)
             {
-                mTextureHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(this));
+                mTextureHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(
+                    System.Runtime.InteropServices.GCHandle.Alloc(this, System.Runtime.InteropServices.GCHandleType.Weak));
                 System.Threading.Interlocked.Increment(ref NumOfGCHandle);
             }
             return mTextureHandle;
@@ -411,7 +416,7 @@ namespace EngineNS.RHI
                 }
                 else
                 {
-                    return this.mCoreObject.UpdateBuffer(rc.mCoreObject, tex2d.mCoreObject.NativeSuper);
+                    return this.mCoreObject.UpdateBuffer(rc.mCoreObject, tex2d.mCoreObject);
                 }
             }
         }
@@ -671,11 +676,11 @@ namespace EngineNS.RHI
             var srvDesc = new IShaderResourceViewDesc();
             srvDesc.SetTexture2D();
             srvDesc.Type = ESrvType.ST_Texture2D;
-            srvDesc.Format = tex2d.mCoreObject.mTextureDesc.Format;
+            srvDesc.Format = tex2d.GetTextureCore().mTextureDesc.Format;
             srvDesc.Texture2D.MipLevels = (uint)mipLevel;
             unsafe
             {
-                srvDesc.mGpuBuffer = tex2d.mCoreObject.NativeSuper;
+                srvDesc.mGpuBuffer = tex2d.mCoreObject;
             }
             var result = rc.CreateShaderResourceView(in srvDesc);
             result.PicDesc = desc;
@@ -775,11 +780,11 @@ namespace EngineNS.RHI
                     var srvDesc = new IShaderResourceViewDesc();
                     srvDesc.SetTexture2D();
                     srvDesc.Type = ESrvType.ST_Texture2D;
-                    srvDesc.Format = texture2d.mCoreObject.mTextureDesc.Format;
+                    srvDesc.Format = texDesc.Format;
                     srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
                     unsafe
                     {
-                        srvDesc.mGpuBuffer = texture2d.mCoreObject.NativeSuper;
+                        srvDesc.mGpuBuffer = texture2d.mCoreObject;
                     }
                     var result = rc.CreateShaderResourceView(in srvDesc);
                     //result.PicDesc.Desc = texDesc;

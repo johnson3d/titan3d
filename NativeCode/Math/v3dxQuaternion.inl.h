@@ -349,7 +349,6 @@ Q2=(w2, x2, y2, z2);
 A combined rotation of unit two v3dxQuaternions is achieved by
 
 Q1 * Q2 =( w1.w2 - v1.v2, w1.v2 + w2.v1 + v1*v2),
-�˹�ʽ��<<3D Math Primer for Graphics and Game Development>> 10.4.8 Equation10.13
 
 where
 

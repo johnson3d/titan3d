@@ -6,31 +6,6 @@
 
 NS_BEGIN
 
-StructImpl(ImVec2)
-StructImpl(ImVec4)
-
-StructImpl(items_getter)
-StructImpl(values_getter)
-StructImpl(alloc_func)
-StructImpl(free_func)
-StructImpl(ImGuiSizeCallback)
-StructImpl(ImGuiInputTextCallback)
-StructImpl(ImDrawCallback)
-
-StructImpl(Renderer_CreateWindow)
-StructImpl(Renderer_SetWindowSize)
-StructImpl(Renderer_RenderWindow)
-
-StructImpl(FGetClipboardTextFn)
-//StructImpl(FSetClipboardTextFn)
-
-//AuxRttiStruct<void __cdecl(struct ImGuiSizeCallbackData *)> AuxRttiStruct<void __cdecl(struct ImGuiSizeCallbackData *)>::Instance;
-//AuxRttiStruct<bool __cdecl(void *, int, char const * *)> AuxRttiStruct<bool __cdecl(void *, int, char const * *)>::Instance;
-//AuxRttiStruct<int __cdecl(struct ImGuiInputTextCallbackData *)> AuxRttiStruct<int __cdecl(struct ImGuiInputTextCallbackData *)>::Instance;
-//AuxRttiStruct<float __cdecl(void *, int)> AuxRttiStruct<float __cdecl(void *, int)>::Instance;
-//AuxRttiStruct<void * __cdecl(unsigned __int64, void *)> AuxRttiStruct<void * __cdecl(unsigned __int64, void *)>::Instance;
-//AuxRttiStruct<void __cdecl(void *, void *)> AuxRttiStruct<void __cdecl(void *, void *)>::Instance;
-
 static const float          DRAG_MOUSE_THRESHOLD_FACTOR = 0.50f;    // Multiplier for the default value of io.MouseDragThreshold to make DragFloat/DragInt react faster to mouse drags.
 
 void	ImGuiAPI::ImGui_NativeWindow_EnableDpiAwareness()
@@ -428,7 +403,7 @@ void ImGuiAPI::TableNextRow(const ImGuiTableRowData* rowData)
 void ImGuiAPI::TableNextRow_FirstColumn(const ImGuiTableRowData* rowData)
 {
 	ImGuiContext& g = *GImGui;
-	ImGuiWindow* window = g.CurrentWindow;
+	//ImGuiWindow* window = g.CurrentWindow;
 	ImGuiTable* table = g.CurrentTable;
 	if (table == nullptr)
 		return;

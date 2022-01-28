@@ -128,7 +128,7 @@ namespace EngineNS.GamePlay.Scene
                 mDebugMesh.IsDrawHitproxy = false;
             }
         }
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
             LightData.Intensity = 20 * (float)Math.Sin(UEngine.Instance.TickCountSecond * 0.005f);
 

@@ -10,6 +10,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             mCoreObject = ICamera.CreateInstance();
         }
+        public UGraphicsBuffers.UTargetViewIdentifier TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
         RHI.CConstantBuffer mPerCameraCBuffer;
         public RHI.CConstantBuffer PerCameraCBuffer
         {
@@ -18,7 +19,7 @@ namespace EngineNS.Graphics.Pipeline
                 if (mPerCameraCBuffer == null)
                 {
                     var effect = UEngine.Instance.GfxDevice.EffectManager.DummyEffect;
-                    mPerCameraCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(effect.ShaderProgram, effect.CBPerCameraIndex);
+                    mPerCameraCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(effect.ShaderProgram, effect.ShaderIndexer.cbPerCamera);
                     mPerCameraCBuffer.mCoreObject.NativeSuper.SetDebugName($"Camera");
                     mCoreObject.BindConstBuffer(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, mPerCameraCBuffer.mCoreObject);
                 }

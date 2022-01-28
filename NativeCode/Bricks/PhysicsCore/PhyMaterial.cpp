@@ -6,7 +6,7 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::PhyMaterial, EngineNS::PhyEntity);
+ENGINE_RTTI_IMPL(EngineNS::PhyMaterial);
 
 PhyMaterial::PhyMaterial()
 {

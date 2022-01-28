@@ -6,7 +6,7 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::PhyController, EngineNS::PhyEntity);
+ENGINE_RTTI_IMPL(EngineNS::PhyController);
 
 struct vPhysXCharacterControllerCallBack_ControllerFilter : public physx::PxControllerFilterCallback
 {

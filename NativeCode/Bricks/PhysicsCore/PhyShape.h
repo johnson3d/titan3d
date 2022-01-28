@@ -37,7 +37,7 @@ class TR_CLASS()
 	PhyShape : public PhyEntity
 {
 public:
-	RTTI_DEF(PhyShape, 0xb717a1145befb253, true)
+	ENGINE_RTTI(PhyShape)
 
 public:
 	TObjectHandle<PhyActor>			mActor;

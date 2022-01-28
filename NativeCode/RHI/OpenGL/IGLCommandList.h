@@ -58,6 +58,9 @@ public:
 	virtual void PSSetSampler(UINT32 Index, ISamplerState* Sampler) override;
 	virtual void SetRenderPipeline(IRenderPipeline* pipeline, EPrimitiveType dpType) override;
 	virtual vBOOL CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers) override;
+
+	virtual void BeginEvent(const char* info) override;
+	virtual void EndEvent() override;
 public:
 	bool Init(IGLRenderContext* rc, const ICommandListDesc* desc, GLSdk* sdk);
 	AutoRef<GLSdk>		mCmdList;

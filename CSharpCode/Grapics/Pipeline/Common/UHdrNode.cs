@@ -15,21 +15,18 @@ namespace EngineNS.Graphics.Pipeline.Common
             return new EVertexSteamType[] { EVertexSteamType.VST_Position,
                 EVertexSteamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(IRenderPolicy policy, RHI.CDrawCall drawcall)
+        public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
         {
         }
-        public unsafe override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
 
-            var Manager = policy.TagObject as IRenderPolicy;
-            var lightSRV = Manager.QuerySRV("LightRT");
-            if (lightSRV == null)
-                return;
-            var gpuSceneDescSRV = Manager.GetGpuSceneNode().GpuSceneDescSRV;
-            if (gpuSceneDescSRV == null)
-                return;
-            var gpuProgram = drawcall.Effect.ShaderProgram;
+            var Manager = policy.TagObject as URenderPolicy;
+            var node = Manager.FindFirstNode<UHdrNode>();
+            var lightSRV = node.GetAttachBuffer(node.ColorPinIn).Srv;
+            var gpuSceneDescSRV = node.GetAttachBuffer(node.GpuScenePinIn).Srv;
+            
             var index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GSourceTarget");
             if (!CoreSDK.IsNullPointer(index))
                 drawcall.mCoreObject.BindShaderSrv(index, lightSRV.mCoreObject);
@@ -48,5 +45,29 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
     public class UHdrNode : USceenSpaceNode
     {
+        public Common.URenderGraphPin ColorPinIn = Common.URenderGraphPin.CreateInput("Color");
+        public Common.URenderGraphPin GpuScenePinIn = Common.URenderGraphPin.CreateInput("GpuScene");
+        public UHdrNode()
+        {
+            Name = "HdrNode";            
+        }
+        public override void Cleanup()
+        {
+            base.Cleanup();
+        }
+        public override void InitNodePins()
+        {
+            AddInput(ColorPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(GpuScenePinIn, EGpuBufferViewType.GBVT_Srv);
+
+            ResultPinOut.Attachement.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+            base.InitNodePins();
+            //base Result
+        }
+        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        {
+            await base.Initialize(policy, debugName);
+            ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UHdrShading>();
+        }
     }
 }

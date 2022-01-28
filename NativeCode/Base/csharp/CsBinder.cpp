@@ -6,9 +6,6 @@
 
 NS_BEGIN
 
-template<>
-AuxRttiStruct<UAnyValue>		AuxRttiStruct<UAnyValue>::Instance;
-
 EngineNS::Rtti::UNativeCoreProvider GNativeCoreProvider;
 void UCs2CppBase::InitializeNativeCoreProvider()
 {
@@ -78,10 +75,10 @@ void UCs2CppBase::UnitTest()
 	mCs2CppBuilder.CreateManagedObject();
 	if (mCs2CppBuilder.mCSharpHandle != nullptr)
 	{
-		auto pObject = mCs2CppBuilder.GetManagedObject();
+		[[maybe_unused]] auto pObject = mCs2CppBuilder.GetManagedObject();
 		int b = 2;
-		auto r = mCs2CppBuilder.Func0(1.0, &b);
-		auto r2 = mCs2CppBuilder.Func1(5);
+		[[maybe_unused]] auto r = mCs2CppBuilder.Func0(1.0, &b);
+		[[maybe_unused]] auto r2 = mCs2CppBuilder.Func1(5);
 	}
 
 	/*mNativeCoreProvider.mCSFullName = "EngineNS.Rtti.UNativeCoreProvider@EngineCore";
@@ -99,7 +96,7 @@ void UCs2CppBase::UnitTest()
 
 			v.SetStruct(v3dxMatrix4::IDENTITY, "EngineNS.Matrix@EngineCore");
 			UCs2CppBase::GetNativeCoreProvider()->List_Add(list_int.GetHandle(), &v);
-			auto count = UCs2CppBase::GetNativeCoreProvider()->List_GetCount(list_int.GetHandle());
+			[[maybe_unused]] auto count = UCs2CppBase::GetNativeCoreProvider()->List_GetCount(list_int.GetHandle());
 
 			v.Dispose();
 		}

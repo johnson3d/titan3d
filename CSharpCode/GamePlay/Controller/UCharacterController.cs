@@ -62,7 +62,7 @@ namespace EngineNS.GamePlay.Controller
         float HInput = 0;
         float VInput = 0;
 
-        public override void TickLogic(UWorld world, IRenderPolicy policy)
+        public override void TickLogic(UWorld world, URenderPolicy policy)
         {
             base.TickLogic(world, policy);
 

@@ -9,6 +9,15 @@
     <Import_RootNamespace>EngineNS.Animation</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\BlendSpace\UBlendSpace.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pipeline\Command\UBlendSpaceEvaluateCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\UBlendSpace2DPlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneNode\UBlendSpaceAnimPlayNode.cs" />
+    <Compile Include="..\..\CSharpCode\Bricks\Animation\Asset\BlendSpace\UBlendSpace.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\BlendSpace\UBlendSpace1D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\BlendSpace\UBlendSpace2D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\BlendSpace\BlendSpaceGrid.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset\BlendSpace\DelaunayTriangleMaker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\AnimatableObjectHierarchy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\IAnimationAsset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\UAnimationClip.cs" />
@@ -36,7 +45,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)UAnimationModule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Asset\" />
     <Folder Include="$(MSBuildThisFileDirectory)Macross\" />
     <Folder Include="$(MSBuildThisFileDirectory)MorphAnimation\" />
     <Folder Include="$(MSBuildThisFileDirectory)SkeletonAnimation\" />

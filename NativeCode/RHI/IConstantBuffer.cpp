@@ -3,31 +3,12 @@
 #include "IRenderContext.h"
 #include "IShaderProgram.h"
 #include "ShaderReflector.h"
+#include "ICommandList.h"
 #include "../Base/xnd/vfxxnd.h"
 
 #define new VNEW
 
 NS_BEGIN
-
-vBOOL IConstantBufferDesc::IsSameVars(const IConstantBufferDesc* desc)
-{
-	if (Vars.size() != desc->Vars.size())
-		return FALSE;
-
-	for (size_t i = 0; i < Vars.size(); i++)
-	{
-		if (Vars[i].Type != desc->Vars[i].Type)
-			return FALSE;
-		if (Vars[i].Offset != desc->Vars[i].Offset)
-			return FALSE;
-		if (Vars[i].Elements != desc->Vars[i].Elements)
-			return FALSE;
-		if (Vars[i].Name != desc->Vars[i].Name)
-			return FALSE;
-	}
-
-	return TRUE;
-}
 
 void IConstantBufferDesc::Save2Xnd(XndAttribute* attr)
 {
@@ -37,10 +18,10 @@ void IConstantBufferDesc::Save2Xnd(XndAttribute* attr)
 	attr->Write(CSBindPoint);
 	attr->Write(BindCount);
 	attr->Write(Name);
-	attr->Write((UINT)Vars.size());
-	for (size_t i = 0; i < Vars.size(); i++)
+	attr->Write((UINT)CBufferLayout->Vars.size());
+	for (size_t i = 0; i < CBufferLayout->Vars.size(); i++)
 	{
-		ConstantVarDesc* var = &Vars[i];
+		ConstantVarDesc* var = &CBufferLayout->Vars[i];
 		attr->Write(var->Type);
 		attr->Write(var->Offset);
 		attr->Write(var->Size);
@@ -58,10 +39,10 @@ void IConstantBufferDesc::LoadXnd(XndAttribute* attr)
 	attr->Read(Name);
 	UINT count;
 	attr->Read(count);
-	Vars.resize(count);
-	for (size_t i = 0; i < Vars.size(); i++)
+	CBufferLayout->Vars.resize(count);
+	for (size_t i = 0; i < CBufferLayout->Vars.size(); i++)
 	{
-		ConstantVarDesc* var = &Vars[i];
+		ConstantVarDesc* var = &CBufferLayout->Vars[i];
 		attr->Read(var->Type);
 		attr->Read(var->Offset);
 		attr->Read(var->Size);
@@ -105,11 +86,11 @@ void IConstantBuffer::UpdateDrawPass(ICommandList* cmd, vBOOL bImm)
 		if (mHasPushed)
 			return;
 		mHasPushed = true;
-		RResourceSwapChain::GetInstance()->PushResource(this);
+		cmd->GetContext()->PushFrameResource(this);
 	}
 }
 
-void IConstantBuffer::DoSwap(IRenderContext* rc)
+void IConstantBuffer::OnFrameEnd(IRenderContext* rc)
 {
 	if (FlushContent2(rc)!=FALSE)
 	{

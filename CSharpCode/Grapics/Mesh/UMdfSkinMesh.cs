@@ -50,30 +50,30 @@ namespace EngineNS.Graphics.Mesh
             SourceCode = new IO.CMemStreamWriter();
             SourceCode.SetText(codeBuilder.ClassCode);
         }
-        public override void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Pipeline.IRenderPolicy policy, Mesh.UMesh mesh)
+        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Pipeline.URenderPolicy policy, Mesh.UMesh mesh)
         {
             unsafe
             {
                 var bones = mesh.MaterialMesh.Mesh.PartialSkeleton.GetLimb<Animation.SkeletonAnimation.Skeleton.Limb.UBone>();
                 int length = mesh.MaterialMesh.Mesh.PartialSkeleton.GetLimb<Animation.SkeletonAnimation.Skeleton.Limb.UBone>().Count;
-                var skeletonPose = SkinModifier.AnimatableSkeletonPose;
-                if(skeletonPose == null)
+                var runtimePose = SkinModifier.RuntimeMeshSpacePose;
+                if(runtimePose == null)
                 {
-                    skeletonPose = mesh.MaterialMesh.Mesh.PartialSkeleton.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
+                    var animPose = mesh.MaterialMesh.Mesh.PartialSkeleton.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
+                    runtimePose = Animation.SkeletonAnimation.Runtime.Pose.URuntimePoseUtility.CreateMeshSpaceRuntimePose(animPose);
                 }
                 List<Vector4> tempPos = new List<Vector4>();
                 Vector4* absPos = (Vector4*)mesh.PerMeshCBuffer.mCoreObject.GetVarPtrToWrite(mesh.PerMeshCBuffer.PerMeshIndexer.AbsBonePos, length);
                 Quaternion* absQuat = (Quaternion*)mesh.PerMeshCBuffer.mCoreObject.GetVarPtrToWrite(mesh.PerMeshCBuffer.PerMeshIndexer.AbsBoneQuat, length);
-                var meshSpaceSkeletonPose = Animation.SkeletonAnimation.RuntimePose.URuntimePoseUtility.ConvetToMeshSpacePose(skeletonPose);
+                
                 foreach (var bone in bones)
                 {
                     var boneDesc = bone.Desc as Animation.SkeletonAnimation.Skeleton.Limb.UBoneDesc;
-                    var limPose = skeletonPose.FindLimbPose(boneDesc.NameHash);
-                    if(limPose!= null)
+                    var index = Animation.SkeletonAnimation.Runtime.Pose.URuntimePoseUtility.GetIndex(boneDesc.NameHash, runtimePose);
+                    if(index.IsValid())
                     {
-                        var index =  Animation.SkeletonAnimation.RuntimePose.URuntimePoseUtility.GetIndexInSkeletonPose(limPose, skeletonPose);
                         //var trans = limPose.Transtorm;
-                        var trans = meshSpaceSkeletonPose.LimbPoses[index];
+                        var trans = runtimePose.Transforms[index.Value];
                         
                         * ((Vector3*)absPos) = trans.Position.ToSingleVector3() + trans.Quat * boneDesc.InvPos;
                         tempPos.Add(*absPos);

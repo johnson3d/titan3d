@@ -4,7 +4,7 @@
 
 NS_BEGIN
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
+struct TR_CLASS(SV_LayoutStruct = 8)
 LayoutElement
 {
 	UINT SemanticIndex;
@@ -17,10 +17,10 @@ LayoutElement
 	int GLAttribLocation;
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+struct TR_CLASS()
 IInputLayoutDesc : public VIUnknown
 {
-	RTTI_DEF(IInputLayoutDesc, 0x47e443e45b0395a3, true);
+	ENGINE_RTTI(IInputLayoutDesc);
 	IInputLayoutDesc()
 	{
 
@@ -29,7 +29,6 @@ IInputLayoutDesc : public VIUnknown
 	//only for d11,try to match input & vs layout.maybe It is not necessary
 	AutoRef<IShaderDesc>		ShaderDesc;
 
-	TR_FUNCTION()
 	void AddElement(const char* SemanticName,
 				UINT SemanticIndex,
 				EPixelFormat Format,

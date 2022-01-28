@@ -23,7 +23,6 @@ bool ID11ComputeShader::Init(ID11RenderContext* rc, const IShaderDesc* desc)
 		return false;
 
 	mDesc = (IShaderDesc*)desc;
-	mDesc->AddRef();
 #ifdef _DEBUG
 	mShader->SetPrivateData(WKPDID_D3DDebugObjectName, 0, NULL);
 	static UINT UniqueId = 0;

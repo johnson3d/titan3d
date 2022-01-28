@@ -19,7 +19,7 @@ using namespace physx;
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::PhyContext, EngineNS::PhyEntity);
+ENGINE_RTTI_IMPL(EngineNS::PhyContext);
 
 class PxVictoryAllocator : public physx::PxAllocatorCallback
 {

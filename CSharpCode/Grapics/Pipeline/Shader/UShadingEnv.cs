@@ -4,33 +4,189 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
+    public enum EPermutation_Bool : int
+    {
+        FalseValue = 0,
+        TrueValue = 1,
+        BitWidth = 1,
+    }
     public abstract class UShadingEnv
     {
         public UShadingEnv()
         {
-            var flds = this.GetType().GetFields();
-            foreach (var i in flds)
+            //var flds = this.GetType().GetFields();
+            //foreach (var i in flds)
+            //{
+            //    if (i.DeclaringType == typeof(UShadingEnv))
+            //        continue;
+            //    if (i.DeclaringType == typeof(object))
+            //        continue;
+            //    if (i.DeclaringType == typeof(UPermutationItem))
+            //        continue;
+            //    System.Diagnostics.Debug.Assert(false);
+            //}
+            //var props = this.GetType().GetProperties();
+            //foreach (var i in props)
+            //{
+            //    if (i.DeclaringType == typeof(UShadingEnv))
+            //        continue;
+            //    if (i.DeclaringType == typeof(object))
+            //        continue;
+            //    if (i.DeclaringType == typeof(UPermutationItem))
+            //        continue;
+            //    System.Diagnostics.Debug.Assert(false);
+            //}
+        }
+        #region PermutationID
+        public class UPermutationItem
+        {
+            public string Name;
+            public Rtti.UTypeDesc TypeDesc;
+            public int Start;
+            public int Width;
+            public FPermutationId Mask;
+            public FPermutationId Value;
+            public void SetValue(bool v)
             {
-                if (i.DeclaringType == typeof(UShadingEnv))
-                    continue;
-                if (i.DeclaringType == typeof(object))
-                    continue;
-                System.Diagnostics.Debug.Assert(false);
+                if (TypeDesc.SystemType != typeof(EPermutation_Bool))
+                {
+                    return;
+                }
+                if (v)
+                {
+                    SetValue((uint)EPermutation_Bool.TrueValue);
+                }
+                else
+                {
+                    SetValue((uint)EPermutation_Bool.FalseValue);
+                }
             }
-            var props = this.GetType().GetProperties();
-            foreach (var i in props)
+            public void SetValue(uint v)
             {
-                if (i.DeclaringType == typeof(UShadingEnv))
-                    continue;
-                if (i.DeclaringType == typeof(object))
-                    continue;
-                System.Diagnostics.Debug.Assert(false);
+                Value.SetValue(v, this);
+            }
+            public uint GetValue()
+            {
+                return Value.GetValue(this);
+            }
+            public string GetValueString(in FPermutationId id)
+            {
+                //if (!typeof(T).IsEnum)
+                //{
+                //    return null;
+                //}
+                //Enum.GetValues(typeof(T));
+                uint v = id.GetValue(this);
+                return Enum.GetName(TypeDesc.SystemType, v);
             }
         }
+        public struct FPermutationId : System.IEquatable<FPermutationId>
+        {
+            public override string ToString()
+            {
+                return Data.ToString();
+            }
+            public FPermutationId(uint v)
+            {
+                Data = v;
+            }
+            public uint Data;
+            
+            public static UPermutationItem GetMask(int start, int width)
+            {
+                UPermutationItem result = new UPermutationItem();
+                result.Start = start;
+                result.Width = width;
+                result.Mask.Data = 1;
+                for (int i = 1; i < width; i++)
+                {
+                    result.Mask.Data = (result.Mask.Data << 1);
+                    result.Mask.Data |= 1;
+                }
+                result.Mask.Data = (result.Mask.Data << start);
+                return result;
+            }
+            public void Reset()
+            {
+                Data = 0;
+            }
+            public static FPermutationId BitOrValue(in FPermutationId lh,  in FPermutationId rh)
+            {
+                return new FPermutationId(lh.Data | rh.Data);
+            }
+            public void SetValue(uint value, UPermutationItem mask)
+            {
+                Data = Data & (~mask.Mask.Data);
+                Data |= ((value << mask.Start) & mask.Mask.Data);
+            }
+            public uint GetValue(UPermutationItem mask)
+            {
+                return ((Data & mask.Mask.Data) >> mask.Start);
+            }
+            public override int GetHashCode()
+            {
+                return (int)Data;
+            }
+            public override bool Equals(object value)
+            {
+                if (value == null)
+                    return false;
+
+                if (value.GetType() != GetType())
+                    return false;
+
+                return Equals((FPermutationId)(value));
+            }
+            public bool Equals(FPermutationId other)
+            {
+                return this.Data == other.Data;
+            }
+            public static bool operator == (in FPermutationId left, in FPermutationId right)
+            {
+                return left.Equals(right);
+                //return Equals( left, right );
+            }
+            public static bool operator !=(in FPermutationId left, in FPermutationId right)
+            {
+                return !left.Equals(right);
+                //return Equals( left, right );
+            }
+        }
+        protected int PermutationBitWidth;
+        protected List<UPermutationItem> PermutationValues { get; } = new List<UPermutationItem>();
+        public void BeginPermutaion()
+        {
+            PermutationBitWidth = 0;
+            PermutationValues.Clear();
+        }
+        public UPermutationItem PushPermutation<T>(string name, int NumEnumMember, uint value = 0) where T : struct, IConvertible
+        {
+            var result = FPermutationId.GetMask(PermutationBitWidth, NumEnumMember);
+            result.Name = name;
+            result.TypeDesc = Rtti.UTypeDesc.TypeOf<T>();
+            result.Value.SetValue(value, result);
+
+            PermutationValues.Add(result);
+            PermutationBitWidth += NumEnumMember;
+            return result;
+        }
+        public void UpdatePermutation()
+        {
+            mCurrentPermutationId.Reset();
+            foreach (var i in PermutationValues)
+            {
+                mCurrentPermutationId = FPermutationId.BitOrValue(mCurrentPermutationId, in i.Value);
+            }
+        }
+        public virtual bool IsValidPermutation(UMdfQueue mdfQueue, UMaterial mtl)
+        {
+            return true;
+        }
+        #endregion
         public override string ToString()
         {
             string result = "";
-            result += $"{CodeName}:Permutation={CurrentPermutationId}\n";
+            result += $"{CodeName}:Permutation={mCurrentPermutationId}\n";
             //foreach (var i in MacroDefines)
             //{
             //    result += $"{i.Name} = {i.Values[i.CurValueIndex]}\n";
@@ -38,150 +194,25 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return result;
         }
         public abstract EVertexSteamType[] GetNeedStreams();
-        public virtual void OnBuildDrawCall(IRenderPolicy policy, RHI.CDrawCall drawcall) { }
-        public uint CurrentPermutationId { get; set; } = 0;
+        public virtual void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall) { }
+        public FPermutationId mCurrentPermutationId;
+        public FPermutationId CurrentPermutationId
+        {
+            get => mCurrentPermutationId;
+        }
         public RName CodeName { get; set; }
-        public RHI.CConstantBuffer PerShadingCBuffer;
-        public List<string> mMacroValues = new List<string>();
-        public class MacroDefine
+        public RHI.CConstantBuffer PerShadingCBuffer;                
+        public bool GetShaderDefines(in FPermutationId id, RHI.CShaderDefinitions defines)
         {
-            public int BitStart = 0;
-            public int BitCount = 0;
-            public uint BitMask = 1;
-            public string Name { get; set; }
-            public List<string> Values { get; } = new List<string>();
-            public int CurValueIndex = 0;
-            public void UpdateBitMask()
+            for (int i = 0; i < PermutationValues.Count; i++)
             {
-                BitMask = 1;
-                BitCount = 1;
-                while ((1 << BitCount) < Values.Count)
-                {
-                    BitMask |= (uint)(1 << BitCount);
-                    BitCount++;
-                }
-            }
-            public int GetValueIndex(string value)
-            {
-                for (int i = 0; i < Values.Count; i++)
-                {
-                    if (Values[i] == value)
-                        return i;
-                }
-                return -1;
-            }
-        }
-        public void UpdatePermutation(List<string> values)
-        {
-            uint permuationId;
-            this.GetPermutation(values, out permuationId);
-            this.CurrentPermutationId = permuationId;
-        }
-        public List<MacroDefine> MacroDefines = new List<MacroDefine>();
-        public uint NumOfBits;
-        protected void UpdatePermutationBitMask()
-        {
-            NumOfBits = 0;
-            int bitStart = 0;
-            for (int i = 0; i < MacroDefines.Count; i++)
-            {
-                MacroDefines[i].UpdateBitMask();
-                MacroDefines[i].BitStart = bitStart;
-                bitStart += MacroDefines[i].BitCount;
-                
-                NumOfBits += (uint)MacroDefines[i].Values.Count;
-                if (NumOfBits > 32)
-                    throw new IO.IOException("");
-            }
-        }
-        public int GetMacroIndex(string macroName)
-        {
-            for (int i = 0; i < MacroDefines.Count; i++)
-            {
-                if (MacroDefines[i].Name == macroName)
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-        public bool GetPermutation(List<string> values, out uint permutation)
-        {
-            permutation = 0;
-            if (values.Count != MacroDefines.Count)
-                return false;
-
-            for (int i = 0; i < values.Count; i++)
-            {
-                var index = MacroDefines[i].GetValueIndex(values[i]);
-                if (index < 0)
-                    return false;
-
-                permutation |= (uint)(index << MacroDefines[i].BitStart);
-            }
-
-            return true;
-        }
-        public bool GetMacroDefines(uint permutation, List<string> values)
-        {
-            values.Clear();
-            for (int i = 0; i < MacroDefines.Count; i++)
-            {
-                uint t = permutation >> MacroDefines[i].BitStart;
-                int index = (int)(t & MacroDefines[i].BitMask);
-
-                if (index >= MacroDefines[i].Values.Count)
-                    return false;
-                values.Add(MacroDefines[i].Values[index]);
+                uint v = id.GetValue(PermutationValues[i]);
+                //var valueStr = PermutationValues[i].GetValueString(in id);
+                defines.mCoreObject.AddDefine(PermutationValues[i].Name, $"{v}");
             }
             return true;
         }
-        public string GetDefineValue(uint permutation, string macroName)
-        {
-            foreach(var i in MacroDefines)
-            {
-                if(i.Name == macroName)
-                {
-                    uint t = permutation >> i.BitStart;
-                    int index = (int)(t & i.BitMask);
-
-                    if (index >= i.Values.Count)
-                        return null;
-                    return i.Values[index];
-                }
-            }
-            return null;
-        }
-        public string GetDefineValue(uint permutation, int macroIndex)
-        {
-            if (macroIndex >= MacroDefines.Count)
-                return null;
-            uint t = permutation >> MacroDefines[macroIndex].BitStart;
-            int index = (int)(t & MacroDefines[macroIndex].BitMask);
-
-            if (index >= MacroDefines[macroIndex].Values.Count)
-                return null;
-            return MacroDefines[macroIndex].Values[index];
-        }
-        public virtual bool IsValidPermutation(UMaterial mtl, uint permutation)
-        {
-            return true;
-        }
-        public bool GetShaderDefines(uint permutation, RHI.CShaderDefinitions defines)
-        {
-            for (int i = 0; i < MacroDefines.Count; i++)
-            {
-                uint t = permutation >> MacroDefines[i].BitStart;
-                int index = (int)(t & MacroDefines[i].BitMask);
-
-                if (index >= MacroDefines[i].Values.Count)
-                    return false;
-
-                defines.mCoreObject.AddDefine(MacroDefines[i].Name, MacroDefines[i].Values[index]);
-            }
-            return true;
-        }
-        public virtual void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, IRenderPolicy policy, Mesh.UMesh mesh)
+        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
             
         }

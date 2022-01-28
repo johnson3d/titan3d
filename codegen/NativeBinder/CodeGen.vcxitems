@@ -50,7 +50,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/CsValueList.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/DrawPrimitiveDesc.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FCsDictionaryIterator.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FVarAttribute.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/GraphicsProfiler.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IAttachmentDesc.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IBaseParticleState.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IBlendState.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IBlendStateDesc.cpp2cs.cpp" />
@@ -64,6 +66,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IComputeShader.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IConstantBuffer.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IConstantBufferDesc.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IConstantBufferLayout.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ICopyDrawcall.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IDepthStencilState.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IDepthStencilStateDesc.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IDepthStencilView.cpp2cs.cpp" />
@@ -78,7 +82,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IGeometryMesh.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IGpuBuffer.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IGpuBufferDesc.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IIAttachmentDesc.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IIndexBuffer.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IIndexBufferDesc.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IInputLayout.cpp2cs.cpp" />
@@ -96,6 +99,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiTableRowData.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiViewportDataSDL2.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IModifier.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IParticleSystemAttribute.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IPipelineStat.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IPixelShader.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IRasterizerState.cpp2cs.cpp" />
@@ -189,6 +193,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/QNodeBase.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/QTree.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RenderTargetBlendDesc.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiConstructor.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiEnum.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiEnumManager.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiMethodBase.cpp2cs.cpp" />
@@ -196,6 +201,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiStruct.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiStructManager.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiType.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiTypeConverter.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/SamplerBindInfo.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/SampResult.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ShaderReflector.cpp2cs.cpp" />

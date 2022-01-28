@@ -93,6 +93,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EDimensionUAV.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EFillMode.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EGpuBufferType.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EGpuBufferViewType.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EGpuMAP.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EGpuUsage.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EIndexBufferType.cpp2cs.cs" />
@@ -124,7 +125,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FCsDictionaryIterator.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FrameBufferLoadAction.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FrameBufferStoreAction.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FVarAttribute.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/GraphicsProfiler.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IAttachmentDesc.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IBaseParticleState.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IBlendState.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IBlendStateDesc.cpp2cs.cs" />
@@ -138,6 +141,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IComputeShader.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IConstantBuffer.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IConstantBufferDesc.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IConstantBufferLayout.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ICopyDrawcall.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IDepthStencilState.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IDepthStencilStateDesc.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IDepthStencilView.cpp2cs.cs" />
@@ -152,7 +157,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IGeometryMesh.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IGpuBuffer.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IGpuBufferDesc.cpp2cs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IIAttachmentDesc.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IIndexBuffer.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IIndexBufferDesc.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IInputLayout.cpp2cs.cs" />
@@ -170,6 +174,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiTableRowData.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiViewportDataSDL2.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IModifier.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IParticleSystemAttribute.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IPipelineStat.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IPixelShader.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IRasterizerState.cpp2cs.cs" />
@@ -267,6 +272,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/QNodeBase.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/QTree.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RenderTargetBlendDesc.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RttiConstructor.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RttiEnum.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RttiEnumManager.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RttiMethodBase.cpp2cs.cs" />
@@ -274,6 +280,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RttiStruct.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RttiStructManager.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RttiType.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RttiTypeConverter.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RTV_DIMENSION.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/SamplerBindInfo.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/SampResult.cpp2cs.cs" />

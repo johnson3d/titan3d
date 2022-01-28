@@ -6,6 +6,9 @@
 
 NS_BEGIN
 
+PFN_vkCmdBeginDebugUtilsLabelEXT IVKRenderSystem::fn_vkCmdBeginDebugUtilsLabelEXT = VK_NULL_HANDLE;
+PFN_vkCmdEndDebugUtilsLabelEXT IVKRenderSystem::fn_vkCmdEndDebugUtilsLabelEXT = VK_NULL_HANDLE;
+
 IVKRenderSystem::IVKRenderSystem()
 {
 	mDeviceNumber = 0;
@@ -130,6 +133,9 @@ bool IVKRenderSystem::Init(const IRenderSystemDesc* desc)
 	if (physicalDevice == VK_NULL_HANDLE) {
 		return false;
 	}*/
+
+	fn_vkCmdBeginDebugUtilsLabelEXT = (PFN_vkCmdBeginDebugUtilsLabelEXT)vkGetInstanceProcAddr(mVKInstance, "vkCmdBeginDebugUtilsLabelEXT");
+	fn_vkCmdEndDebugUtilsLabelEXT = (PFN_vkCmdEndDebugUtilsLabelEXT)vkGetInstanceProcAddr(mVKInstance, "vkCmdEndDebugUtilsLabelEXT");
 
 	return true;
 }

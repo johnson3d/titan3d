@@ -214,7 +214,7 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     var effect = UEngine.Instance.GfxDevice.EffectManager.DummyEffect;
                     if (effect != null)
-                        mPerFrameCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(effect.ShaderProgram, effect.CBPerFrameIndex);
+                        mPerFrameCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(effect.ShaderProgram, effect.ShaderIndexer.cbPerFrame);
                 }
                 return mPerFrameCBuffer;
             }

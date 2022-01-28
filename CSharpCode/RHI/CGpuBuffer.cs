@@ -33,6 +33,13 @@ namespace EngineNS
             MiscFlags = (UInt32)EResourceMiscFlag.BUFFER_STRUCTURED;
             Type = EGpuBufferType.GBT_UavBuffer;
         }
+        public void SetStaging()
+        {
+            Usage = EGpuUsage.USAGE_STAGING;
+            CPUAccessFlags = (UInt32)(ECpuAccess.CAS_WRITE | ECpuAccess.CAS_READ);
+            MiscFlags = (UInt32)EResourceMiscFlag.BUFFER_STRUCTURED;
+            Type = EGpuBufferType.GBT_UavBuffer;
+        }
     }
 }
 

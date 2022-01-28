@@ -278,6 +278,39 @@ namespace AssetImportAndExport.FBX
                 return mInner.AnimNum;
             }
         }
+
+        private bool mImportAnim = true;
+        public bool ImportAnim 
+        {
+            get => mImportAnim;
+            set
+            {
+                mImportAnim = value;
+                foreach(var objectDesc in ObjectList)
+                {
+                    if(objectDesc is FBXAnimDesc)
+                    {
+                        (objectDesc as FBXAnimDesc).Imported = value;
+                    }
+                }    
+            }
+        }
+        bool mImportMesh = true;
+        public bool ImportMesh
+        {
+            get => mImportMesh;
+            set
+            {
+                mImportMesh = value;
+                foreach (var objectDesc in ObjectList)
+                {
+                    if (objectDesc is FBXMeshDesc)
+                    {
+                        (objectDesc as FBXMeshDesc).Imported = value;
+                    }
+                }
+            }
+        }
         #endregion
 
         public List<FBXObjecctDecs> ObjectList { get; } = new List<FBXObjecctDecs>();

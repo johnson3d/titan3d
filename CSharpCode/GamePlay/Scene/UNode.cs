@@ -618,7 +618,7 @@ namespace EngineNS.GamePlay.Scene
         #endregion
 
         #region GamePlay
-        public virtual void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
+        public virtual void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
             if (OnTickLogic(world, policy) == false)
                 return;
@@ -629,7 +629,7 @@ namespace EngineNS.GamePlay.Scene
                 Children[i].TickLogic(world, policy);
             }
         }
-        public virtual bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
+        public virtual bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
             return true;
         }

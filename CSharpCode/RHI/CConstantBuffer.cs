@@ -4,6 +4,23 @@ using System.Text;
 
 namespace EngineNS.RHI
 {
+    public struct FNameVarIndex
+    {
+        public FNameVarIndex(string name)
+        {
+            Name = VNameString.FromString(name);
+            Index = -1;
+        }
+        public VNameString Name;
+        public int Index;
+        internal void CheckIndex(CConstantBuffer cbuffer)
+        {
+            if (Index < 0)
+            {
+                Index = cbuffer.mCoreObject.FindVar(Name.Text);
+            }
+        }
+    }
     public class CConstantBuffer : AuxPtrType<IConstantBuffer>
     {
         public class UShaderTypeAttribute : Attribute
@@ -210,7 +227,12 @@ namespace EngineNS.RHI
             }
         }
 
-        #region SetVar
+        #region SetVar        
+        public void SetValue<T>(ref FNameVarIndex index, in T value, uint elem = 0) where T : unmanaged
+        {
+            index.CheckIndex(this);
+            SetValue(index.Index, in value, elem);
+        }
         public void SetValue<T>(string name, in T value, uint elem = 0) where T : unmanaged
         {
             var index = mCoreObject.FindVar(name);
@@ -231,6 +253,15 @@ namespace EngineNS.RHI
             unsafe
             {
                 return ref *(T*)mCoreObject.GetVarValueAddress(index, elem);
+            }
+        }
+        public void SetMatrix(ref FNameVarIndex index, in Matrix value, uint elem = 0)
+        {
+            index.CheckIndex(this);
+            unsafe
+            {
+                var tm = Matrix.Transpose(in value);
+                mCoreObject.SetVarValuePtr(index.Index, &tm, sizeof(Matrix), elem);
             }
         }
         public void SetMatrix(int index, in Matrix value, uint elem = 0)

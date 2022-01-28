@@ -90,19 +90,19 @@ namespace EngineNS.Graphics.Mesh.Modifier
             desc.CPUAccess = (UInt32)ECpuAccess.CAS_WRITE;
             desc.ByteWidth = (UInt32)(sizeof(Vector3) * mMaxNumber);
             desc.Stride = (UInt32)sizeof(Vector3);
-            mPosVB = rc.CreateVertexBuffer(ref desc);
+            mPosVB = rc.CreateVertexBuffer(in desc);
 
             desc.ByteWidth = (UInt32)(sizeof(Vector4) * mMaxNumber);
             desc.Stride = (UInt32)sizeof(Vector4);
-            mScaleVB = rc.CreateVertexBuffer(ref desc);
+            mScaleVB = rc.CreateVertexBuffer(in desc);
 
             desc.ByteWidth = (UInt32)(sizeof(Quaternion) * mMaxNumber);
             desc.Stride = (UInt32)sizeof(Quaternion);
-            mRotateVB = rc.CreateVertexBuffer(ref desc);
+            mRotateVB = rc.CreateVertexBuffer(in desc);
 
             desc.ByteWidth = (UInt32)(sizeof(Vector4) * mMaxNumber);
             desc.Stride = (UInt32)sizeof(Vector4);
-            mF41VB = rc.CreateVertexBuffer(ref desc);
+            mF41VB = rc.CreateVertexBuffer(in desc);
         }
         public void PushInstance(ref Vector3 pos, ref Vector3 scale, ref Quaternion quat, ref UInt32_4 f41, int lightNum)
         {
@@ -165,7 +165,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 }
             }
         }
-        public void OnDrawCall(Pipeline.IRenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Pipeline.IRenderPolicy policy, UMesh mesh)
+        public void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Pipeline.URenderPolicy policy, UMesh mesh)
         {
             drawcall.mCoreObject.BindAttachVBs(mAttachVBs.mCoreObject);
         }

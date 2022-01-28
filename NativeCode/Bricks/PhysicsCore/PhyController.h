@@ -20,7 +20,7 @@ class TR_CLASS()
 	physx::PxController*		mController;
 	TObjectHandle<PhyScene>		mScene;
 public:
-	RTTI_DEF(PhyController, 0xf34234975c341640, false);
+	ENGINE_RTTI(PhyController);
 
 	PhyController(PhyScene* scene, physx::PxController* ctr);
 	~PhyController();

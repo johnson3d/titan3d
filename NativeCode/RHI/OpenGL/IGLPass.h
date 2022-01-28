@@ -56,4 +56,8 @@ public:
 	bool Init(IRenderContext* rc);
 };
 
+class IGLCopyDrawcall : public ICopyDrawcall
+{
+};
+
 NS_END

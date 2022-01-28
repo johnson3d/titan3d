@@ -19,8 +19,8 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::IViewPort, EngineNS::VIUnknown);
-RTTI_IMPL(EngineNS::IScissorRect, EngineNS::VIUnknown);
+ENGINE_RTTI_IMPL(EngineNS::IViewPort);
+ENGINE_RTTI_IMPL(EngineNS::IScissorRect);
 
 void IScissorRect::SetRectNumber(UINT num) 
 {
@@ -523,6 +523,42 @@ void IComputeDrawcall::SetDispatchIndirectBuffer(IGpuBuffer* buffer, UINT offset
 ShaderReflector* IComputeDrawcall::GetReflector() 
 {
 	return mComputeShader->GetReflector();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void ICopyDrawcall::SetCopyBuffer(IGpuBuffer* src, UINT srcOffset, IGpuBuffer* tar, UINT tarOffset, UINT size)
+{
+	if (src == nullptr || tar == nullptr)
+		return;
+
+	Type = CPTP_Buffer;
+	BufferDesc.Size = size;
+	BufferDesc.SrcOffset = srcOffset;
+	BufferDesc.TarOffset = tarOffset;
+	BufferDesc.Source = src;
+	BufferDesc.Target = tar;
+}
+
+void ICopyDrawcall::SetCopyTexture2D(IGpuBuffer* src, UINT srcMip, UINT srcX, UINT srcY,
+	IGpuBuffer* tar, UINT tarMip, UINT tarX, UINT tarY, UINT width, UINT height)
+{
+	Type = CPTP_Texture2D;
+	Texture2DDesc.Height = height;
+	Texture2DDesc.Width = width;
+	Texture2DDesc.SrcMipLevel = srcMip;
+	Texture2DDesc.TarMipLevel = tarMip;
+	Texture2DDesc.SrcX = srcX;
+	Texture2DDesc.SrcY = srcY;
+	Texture2DDesc.TarX = tarX;
+	Texture2DDesc.TarY = tarY;
+	Texture2DDesc.Source = src;
+	Texture2DDesc.Target = tar;
+}
+
+void ICopyDrawcall::BuildPass(ICommandList* cmd)
+{
+
 }
 
 NS_END

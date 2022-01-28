@@ -90,7 +90,7 @@ bool IGLIndexBuffer::Init(IGLRenderContext* rc, const IIndexBufferDesc* desc)
 	mDesc = *desc;
 	mDesc.InitData = nullptr;
 	
-	mGpuBuffer = new IGLGpuBuffer();
+	mGpuBuffer = MakeWeakRef(new IGLGpuBuffer());
 	
 	mGpuBuffer->Init(rc, GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, desc->InitData, desc->ByteWidth);
 

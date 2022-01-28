@@ -85,6 +85,8 @@
   <Import Project="..\..\CSharpCode\Bricks\Input\Input.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\VirtualTexture\VirtualTexture.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\Particle\Particle.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\FarShadow\FarShadow.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\RenderPolicyEditor\RenderPolicyEditor.projitems" Label="Shared" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.0.0-3.final" />

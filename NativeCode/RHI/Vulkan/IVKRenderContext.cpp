@@ -124,6 +124,7 @@ bool ShaderReflector::ReflectSpirV(const EngineNS::IShaderDesc* desc)
 		spvc_compiler_get_declared_struct_size(compiler_glsl, spv_type, &sz);
 
 		EngineNS::IConstantBufferDesc tmp;
+		tmp.CBufferLayout = MakeWeakRef(new IConstantBufferLayout());
 		tmp.Name = name;
 		tmp.BindCount = 1;
 		tmp.DescriptorSet = descriptorSet;
@@ -245,7 +246,7 @@ bool ShaderReflector::ReflectSpirV(const EngineNS::IShaderDesc* desc)
 			default:
 				break;
 			}
-			tmp.Vars.push_back(v);
+			tmp.CBufferLayout->Vars.push_back(v);
 		}
 		reflector->mCBDescArray.push_back(tmp);
 	}
@@ -817,6 +818,7 @@ bool IVKRenderContext::Init(const IRenderContextDesc* desc, IVKRenderSystem* pSy
 	pTexture->Release();
 
 	IConstantBufferDesc cbDesc;
+	cbDesc.CBufferLayout = MakeWeakRef(new IConstantBufferLayout());
 	cbDesc.SetDefault();
 	cbDesc.Size = 1;
 	mNullCBuffer.WeakRef((IVKConstantBuffer*)this->CreateConstantBuffer(&cbDesc));
@@ -824,6 +826,7 @@ bool IVKRenderContext::Init(const IRenderContextDesc* desc, IVKRenderSystem* pSy
 	ISamplerStateDesc smpDesc;
 	smpDesc.SetDefault();
 	mNullSampler.WeakRef((IVKSamplerState*)this->CreateSamplerState(&smpDesc));
+
 	return true;
 }
 
@@ -889,6 +892,17 @@ IComputeDrawcall* IVKRenderContext::CreateComputeDrawcall()
 		pass->Release();
 		return nullptr;
 	}
+	return pass;
+}
+
+ICopyDrawcall* IVKRenderContext::CreateCopyDrawcall()
+{
+	auto pass = new IVKCopyDrawcall();
+	/*if (pass->Init(this) == false)
+	{
+		pass->Release();
+		return nullptr;
+	}*/
 	return pass;
 }
 

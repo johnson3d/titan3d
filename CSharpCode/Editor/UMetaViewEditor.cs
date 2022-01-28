@@ -97,12 +97,12 @@ namespace EngineNS.Editor
 
             {
                 var meshData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
-                meshData.MeshName = RName.GetRName("utest/mesh/puppet.ums");
-                meshData.CollideName = RName.GetRName("utest/mesh/puppet.vms");
+                meshData.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
+                meshData.CollideName = RName.GetRName("utest/puppet/mesh/puppet.vms");
                 var meshNode = new GamePlay.Scene.UMeshNode();
                 await meshNode.InitializeNode(world, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
                 meshNode.Parent = root;
-                meshNode.Placement.SetTransform(new DVector3(5, 5, 5), new Vector3(0.01f), Quaternion.Identity);
+                meshNode.Placement.SetTransform(new DVector3(0, 0, 0), new Vector3(0.01f), Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "Robot0";
                 meshNode.IsAcceptShadow = false;
@@ -110,13 +110,13 @@ namespace EngineNS.Editor
 
                 {
                     var mesh1 = new Graphics.Mesh.UMesh();
-                    var puppetMesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(RName.GetRName("utest/mesh/puppet.vms"));
-                    var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("utest/mesh/puppet.ums"));
+                    var puppetMesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(RName.GetRName("utest/puppet/mesh/puppet.vms"));
+                    var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("utest/puppet/mesh/puppet.ums"));
                     if (materialMesh == null)
                     {
-                        materialMesh = UEngine.Instance.AssetMetaManager.NewAsset<Graphics.Mesh.UMaterialMesh>(RName.GetRName("utest/mesh/puppet.ums"));
+                        materialMesh = UEngine.Instance.AssetMetaManager.NewAsset<Graphics.Mesh.UMaterialMesh>(RName.GetRName("utest/puppet/mesh/puppet.ums"));
                         materialMesh.Initialize(puppetMesh, materials);
-                        materialMesh.SaveAssetTo(RName.GetRName("utest/mesh/puppet.ums"));
+                        materialMesh.SaveAssetTo(RName.GetRName("utest/puppet/mesh/puppet.ums"));
                     }
                     mesh1.Initialize(puppetMesh, materials, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfSkinMesh)));
                     var meshData1 = new GamePlay.Scene.UMeshNode.UMeshNodeData();                    
@@ -130,13 +130,13 @@ namespace EngineNS.Editor
                     meshNode1.IsAcceptShadow = false;
                     meshNode1.IsCastShadow = true;
 
-                    (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).MeshName = RName.GetRName("utest/mesh/puppet.ums");
+                    (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
                     (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfSkinMesh));
                     (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).AtomType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMesh.UAtom));
 
                     var sapnd = new Animation.SceneNode.USkeletonAnimPlayNode.USkeletonAnimPlayNodeData();
                     sapnd.Name = "PlayAnim";
-                    sapnd.AnimatinName = RName.GetRName("utest/mesh/w2_walk_aim_f_loop_ip.animclip");
+                    sapnd.AnimatinName = RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip");
                     await Animation.SceneNode.USkeletonAnimPlayNode.AddSkeletonAnimPlayNode(world, meshNode1, sapnd, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UIdentityPlacement));
                 }
             }

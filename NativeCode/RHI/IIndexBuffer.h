@@ -33,7 +33,6 @@ class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
 IIndexBuffer : public IRenderResource
 {
 public:
-	TR_MEMBER()
 	IIndexBufferDesc	mDesc;
 	//bool				mHasPushed;
 	//UINT				GpuBufferSize;
@@ -42,17 +41,13 @@ public:
 	IIndexBuffer();
 	~IIndexBuffer();
 
-	TR_FUNCTION()
 	virtual void GetBufferData(IRenderContext* rc, IBlobObject* data) = 0;
-	TR_FUNCTION()
 	virtual void SetDebugInfo(const char* info)
 	{
 
 	}
-	TR_FUNCTION()
 	virtual void UpdateGPUBuffData(ICommandList* cmd, void* ptr, UINT size) = 0;
 
-	virtual void DoSwap(IRenderContext* rc) override;
 };
 
 NS_END

@@ -19,7 +19,15 @@ IRenderContext::IRenderContext()
 
 IRenderContext::~IRenderContext()
 {
-	RResourceSwapChain::GetInstance()->Cleanup();
+	{
+		VAutoLock(mFrameResLocker);
+		while (mFrameResources.size() > 0)
+		{
+			auto r = mFrameResources.front();
+			mFrameResources.pop();
+			r->Release();
+		}
+	}
 	Safe_Release(m_pSwapChain);
 }
 
@@ -30,7 +38,7 @@ void IRenderContext::BeginFrame()
 
 void IRenderContext::EndFrame()
 {
-	RResourceSwapChain::GetInstance()->TickSwap(this);
+	ProcessFrameResources();
 	this->FlushImmContext();
 	mCurrentFrame++;
 }
@@ -59,6 +67,27 @@ IConstantBuffer* IRenderContext::CreateConstantBuffer2(IShaderDesc* desc, UINT i
 		return nullptr;
 	
 	return this->CreateConstantBuffer(cb);
+}
+
+void IRenderContext::PushFrameResource(IRenderResource* res)
+{
+	if (res == nullptr)
+		return;
+	res->AddRef();
+	VAutoLock(mFrameResLocker);
+	mFrameResources.push(res);
+}
+
+void IRenderContext::ProcessFrameResources()
+{
+	VAutoLock(mFrameResLocker);
+	while (mFrameResources.size() > 0)
+	{
+		auto r = mFrameResources.front();
+		mFrameResources.pop();
+		r->OnFrameEnd(this);
+		r->Release();
+	}
 }
 
 NS_END

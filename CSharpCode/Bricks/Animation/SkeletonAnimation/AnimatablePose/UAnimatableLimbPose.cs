@@ -11,6 +11,8 @@ namespace EngineNS.Animation.SkeletonAnimation.AnimatablePose
         [Animatable.AnimatableProperty]
         List<IAnimatableLimbPose> Children { get; }
         FTransform Transtorm { get;}
+
+        IAnimatableLimbPose Clone();
     }
 
     public partial class UAnimatableBonePose : IAnimatableLimbPose
@@ -40,6 +42,11 @@ namespace EngineNS.Animation.SkeletonAnimation.AnimatablePose
         public Vector3 Rotation { get; set; } = Vector3.Zero;
         [EngineNS.Animation.Animatable.AnimatableProperty]
         public Vector3 Scale { get; set; } = Vector3.One;
+
+        public IAnimatableLimbPose Clone()
+        {
+            return new UAnimatableBonePose(mDesc);
+        }
     }
 
     public partial class UAnimatableSocketPose : IAnimatableLimbPose
@@ -70,5 +77,10 @@ namespace EngineNS.Animation.SkeletonAnimation.AnimatablePose
         public Vector3 Rotation { get; set; } = Vector3.Zero;
         [EngineNS.Animation.Animatable.AnimatableProperty]
         public Vector3 Scale { get; set; } = Vector3.One;
+
+        public IAnimatableLimbPose Clone()
+        {
+            return new UAnimatableSocketPose(mDesc);
+        }
     }
 }

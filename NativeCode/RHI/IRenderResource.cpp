@@ -5,9 +5,7 @@
 
 NS_BEGIN
 
-RResourceSwapChain		RResourceSwapChain::Instance;
-
-RTTI_IMPL(EngineNS::IBlobObject, EngineNS::VIUnknown);
+ENGINE_RTTI_IMPL(EngineNS::IBlobObject);
 void IBlobObject::ReadFromXnd(XndAttribute* attr)
 {
 	UINT size;
@@ -35,42 +33,9 @@ IRenderResource::~IRenderResource()
 {
 }
 
-void IRenderResource::DeleteThis()
+void IRenderResource::Cleanup()
 {
-	VIUnknown::DeleteThis();
-	//VDefferedDeleteManager::GetInstance()->PushObject(this);
-}
 
-void RResourceSwapChain::Cleanup()
-{
-	VAutoLock(mLocker);
-	while (mResources.size() > 0)
-	{
-		auto r = mResources.front();
-		mResources.pop();
-		r->Release();
-	}
-}
-
-void RResourceSwapChain::PushResource(IRenderResource* res) 
-{
-	if (res == nullptr)
-		return;
-	res->AddRef();
-	VAutoLock(mLocker);
-	mResources.push(res);
-}
-
-void RResourceSwapChain::TickSwap(IRenderContext* rc)
-{
-	VAutoLock(mLocker);
-	while (mResources.size() > 0)
-	{
-		auto r = mResources.front();
-		mResources.pop();
-		r->DoSwap(rc);
-		r->Release();
-	}
 }
 
 NS_END

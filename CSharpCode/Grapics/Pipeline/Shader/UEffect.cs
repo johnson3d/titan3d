@@ -5,6 +5,27 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
+    public class UShaderIndexer : RHI.CShaderProgram.IShaderVarIndexer
+    {
+        [RHI.CShaderProgram.ShaderVar(VarType = "CBuffer")]
+        public uint cbPerViewport;
+        [RHI.CShaderProgram.ShaderVar(VarType = "CBuffer")]
+        public uint cbPerFrame;
+        [RHI.CShaderProgram.ShaderVar(VarType = "CBuffer")]
+        public uint cbPerCamera;
+        [RHI.CShaderProgram.ShaderVar(VarType = "CBuffer")]
+        public uint cbPerMesh;
+        [RHI.CShaderProgram.ShaderVar(VarType = "CBuffer")]
+        public uint cbPerMaterial;
+        [RHI.CShaderProgram.ShaderVar(VarType = "Texture")]
+        public uint gEnvMap;
+        [RHI.CShaderProgram.ShaderVar(VarType = "Texture")]
+        public uint gShadowMap;
+        [RHI.CShaderProgram.ShaderVar(VarType = "Sampler")]
+        public uint Samp_gEnvMap;
+        [RHI.CShaderProgram.ShaderVar(VarType = "Sampler")]
+        public uint Samp_gShadowMap;
+    }
     public class UEffect
     {
         public const string AssetExt = ".effect";
@@ -31,7 +52,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public string MdfQueueType { get; set; }
             [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
-            public uint PermutationId { get; set; }
+            public Shader.UShadingEnv.FPermutationId PermutationId { get; set; }
             [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
             public string ShadingType { get; set; }
             [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.DiscardWhenCooked)]
@@ -46,12 +67,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         public UShadingEnv ShadingEnv { get; internal set; }
 
-        public UInt32 CBPerViewportIndex { get; private set; }
-        public UInt32 CBPerFrameIndex { get; private set; }
-        public UInt32 CBPerCameraIndex { get; private set; }
-        public UInt32 CBPerMeshIndex { get; private set; }
-        public UInt32 CBPerMaterialIndex { get; private set; }
-        public object TagObject { get; set; }
+        public UShaderIndexer ShaderIndexer { get; } = new UShaderIndexer();
         public unsafe void SaveTo(Hash160 hash)
         {
             var path = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Cache, IO.FileManager.ESystemDir.Effect);
@@ -187,7 +203,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.ShadingEnv = shading;
             return result;
         }
-        public static async System.Threading.Tasks.Task<UEffect> CreateEffect(UShadingEnv shading, uint permutationId, UMaterial material, UMdfQueue mdf)
+        public static async System.Threading.Tasks.Task<UEffect> CreateEffect(UShadingEnv shading, UShadingEnv.FPermutationId permutationId, UMaterial material, UMdfQueue mdf)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
@@ -202,7 +218,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.ShadingEnv = shading;
 
             var defines = new RHI.CShaderDefinitions();
-            shading.GetShaderDefines(permutationId, defines);
+            shading.GetShaderDefines(in permutationId, defines);
 
             var cfg = UEngine.Instance.Config;
             result.DescVS = await UEngine.Instance.EventPoster.Post(() =>
@@ -362,19 +378,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             if (isOK)
             {
-                unsafe
-                {
-                    var shaderProg = result.ShaderProgram.mCoreObject;
-                    result.CBPerViewportIndex = shaderProg.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerViewport");
-
-                    result.CBPerFrameIndex = shaderProg.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerFrame");
-                    
-                    result.CBPerCameraIndex = shaderProg.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerCamera");
-
-                    result.CBPerMeshIndex = shaderProg.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerMesh");
-
-                    result.CBPerMaterialIndex = shaderProg.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerMaterial");
-                }
+                result.ShaderIndexer.UpdateIndex(result.ShaderProgram);                
             }
             return isOK;
         }
@@ -385,7 +389,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public async System.Threading.Tasks.Task<bool> Initialize(UGfxDevice device)
         {
             DummyEffect = await UEffect.CreateEffect(UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(), 
-                0, device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
+                new UShadingEnv.FPermutationId(0), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
             if (DummyEffect == null)
                 return false;
             return true;
@@ -417,7 +421,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             UEffect result = null;
             if (material.IsEditingMaterial)
             {
-                result = await UEffect.CreateEffect(shading, shading.CurrentPermutationId, material, mdf);
+                result = await UEffect.CreateEffect(shading, shading.mCurrentPermutationId, material, mdf);
                 return result;
             }
 
@@ -459,11 +463,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     }
                 }
 
-                result = await UEffect.CreateEffect(shading, shading.CurrentPermutationId, material, mdf);
+                result = await UEffect.CreateEffect(shading, shading.mCurrentPermutationId, material, mdf);
                 result.Desc.EffectHash = hash;
                 if (result != null)
                 {
-                    result.Desc.PermutationId = shading.CurrentPermutationId;
+                    result.Desc.PermutationId = shading.mCurrentPermutationId;
                     await UEngine.Instance.EventPoster.Post(() =>
                     {
                         result.SaveTo(hash);

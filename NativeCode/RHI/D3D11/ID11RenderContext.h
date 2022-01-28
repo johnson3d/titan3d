@@ -28,6 +28,7 @@ public:
 	
 	virtual IDrawCall* CreateDrawCall() override;
 	virtual IComputeDrawcall* CreateComputeDrawcall() override;
+	virtual ICopyDrawcall* CreateCopyDrawcall() override;
 
 	virtual IRenderPipeline* CreateRenderPipeline(const IRenderPipelineDesc* desc) override;
 

@@ -57,6 +57,9 @@ public:
 	virtual void SetRenderPipeline(IRenderPipeline* pipeline, EPrimitiveType dpType) override;
 	virtual vBOOL CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers) override;
 
+	void BeginEvent(const wchar_t* info);
+	virtual void BeginEvent(const char* info) override;	
+	virtual void EndEvent() override;
 	virtual void Signal(IFence* fence, int value) override;
 public:
 	ID3D11DeviceContext*		mDeferredContext;

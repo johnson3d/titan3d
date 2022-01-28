@@ -9,13 +9,9 @@ namespace AssetImportAndExport
 {
 	namespace FBX
 	{
-
-
-
 		bool CheckBoneNode(FbxNode* node)
 		{
 			auto att = node->GetNodeAttribute();
-			ASSERT(false);
 			if (att->GetAttributeType() == FbxNodeAttribute::EType::eSkeleton || att->GetAttributeType() == FbxNodeAttribute::EType::eNull)
 			{
 				return true;

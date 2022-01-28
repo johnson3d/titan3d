@@ -81,4 +81,9 @@ public:
 	bool Init(IVKRenderContext* rc);
 };
 
+class IVKCopyDrawcall : public ICopyDrawcall
+{
+
+};
+
 NS_END

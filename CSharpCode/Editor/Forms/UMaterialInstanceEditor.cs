@@ -41,15 +41,13 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
-            await viewport.RenderPolicy.Initialize(null, 1, 1);
-
             await viewport.World.InitWorld();
 
-            (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.Camera);
+            (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             var materials = new Graphics.Pipeline.Shader.UMaterial[1];
             materials[0] = Material;
@@ -74,7 +72,7 @@ namespace EngineNS.Editor.Forms
             BoundingSphere sphere;
             sphere.Center = aabb.GetCenter();
             sphere.Radius = radius;
-            policy.GetBasePassNode().GBuffers.Camera.AutoZoom(ref sphere);
+            policy.DefaultCamera.AutoZoom(ref sphere);
             //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SunLightDirection = new Vector3(1, 1, 1);
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);

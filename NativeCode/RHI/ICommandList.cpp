@@ -12,8 +12,6 @@
 
 NS_BEGIN
 
-StructImpl(FOnPassBuilt)
-
 bool ICommandList::ContextState::IsCMPState = false;
 
 bool ICommandList::ContextState::IsSameScissors(IScissorRect* lh, IScissorRect* rh)

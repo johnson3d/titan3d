@@ -38,7 +38,7 @@ public:
 private:
 	ShaderReflector*		Reflector;
 public:
-	RTTI_DEF(IShaderDesc, 0x965458df5b039800, true);
+	ENGINE_RTTI(IShaderDesc);
 	
 	IShaderDesc();	
 	IShaderDesc(EShaderType type);
@@ -111,7 +111,7 @@ class TR_CLASS(SV_Dispose=self->Release())
 IShaderDefinitions : public VIUnknown
 {
 public:
-	RTTI_DEF(IShaderDefinitions, 0x807c2f725b0bf4db, true);
+	ENGINE_RTTI(IShaderDefinitions);
 	std::vector<MacroDefine>	Definitions;
 	
 	TR_CONSTRUCTOR()

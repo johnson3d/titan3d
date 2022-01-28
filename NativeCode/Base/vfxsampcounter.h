@@ -173,7 +173,7 @@ public:
 	static v3dSampMgr* GetThreadInstance() {
 		if (ThreadInstance == nullptr)
 		{
-			ThreadInstance = AutoRef<v3dSampMgr>(new v3dSampMgr());
+			ThreadInstance = MakeWeakRef(new v3dSampMgr());
 		}
 		return ThreadInstance;
 	}

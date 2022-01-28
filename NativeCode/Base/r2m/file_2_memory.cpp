@@ -19,7 +19,7 @@
 
 NS_BEGIN
 
-RTTI_IMPL(VFile2Memory, EngineNS::VIUnknown);
+ENGINE_RTTI_IMPL(VFile2Memory);
 
 //------------------------------------------------------------------------
 VFile2Memory::VFile2Memory()
@@ -123,7 +123,7 @@ UINT_PTR VFile2Memory::Length() const
 		if (false == ((ViseFile*)&mFile)->Open(mName.c_str(), VFile::modeRead))
 		{
 			VFX_LTRACE(ELTT_Error, "F2M Ptr [%s] open faile, someone deleted this file in runtime\r\n", mName.c_str());
-			return NULL;
+			return 0;
 		}
 	}
 

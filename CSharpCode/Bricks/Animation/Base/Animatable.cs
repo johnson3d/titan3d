@@ -167,13 +167,34 @@ namespace EngineNS.Animation.Animatable
     public class UAnimationPropertiesSetter
     {
         public Dictionary<Animatable.IPropertySetter, Curve.ICurve> PropertySetFuncMapping { get; set; } = new Dictionary<Animatable.IPropertySetter, Curve.ICurve>();
-        public void Evaluate(float time)
+        public void Evaluate(float time) // async
         {
             var it = PropertySetFuncMapping.GetEnumerator();
             while (it.MoveNext())
             {
                 it.Current.Key.SetProperty(it.Current.Value, time);
             }
+        }
+
+        //DynamicInitialize will be refactoring in next version
+        public static UAnimationPropertiesSetter Binding(Asset.UAnimationClip animationClip, SkeletonAnimation.AnimatablePose.IAnimatableLimbPose bindedPose)
+        {
+            System.Diagnostics.Debug.Assert(bindedPose != null);
+            System.Diagnostics.Debug.Assert(animationClip != null);
+
+            var attrs = bindedPose.GetType().GetCustomAttributes(typeof(IAnimatableClassBindingAttribute), true);
+            UAnimationPropertiesSetter propertiesSetter = new UAnimationPropertiesSetter();
+            if (attrs.Length == 0)
+            {
+                var binder = new CommonAnimatableBingAttribute();
+                binder.Binding(bindedPose, animationClip.AnimatedHierarchy, animationClip, ref propertiesSetter);
+            }
+            else
+            {
+                var binder = attrs[0] as IAnimatableClassBindingAttribute;
+                binder.Binding(bindedPose, animationClip.AnimatedHierarchy, animationClip, ref propertiesSetter);
+            }
+            return propertiesSetter;
         }
     }
 

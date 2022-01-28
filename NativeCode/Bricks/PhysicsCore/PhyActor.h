@@ -34,7 +34,7 @@ class TR_CLASS()
 	PhyActor : public PhyEntity
 {
 public:
-	RTTI_DEF(PhyActor, 0x5860484d5befad18, true)
+	ENGINE_RTTI(PhyActor)
 public:
 	TObjectHandle<PhyScene>			mScene;
 	v3dxVector3						mPosition;

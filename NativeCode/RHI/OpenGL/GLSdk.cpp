@@ -10,7 +10,7 @@ NS_BEGIN
 
 bool GLSdk::IgnorGLCall = false;
 AutoRef<GLSdk> GLSdk::ImmSDK;
-AutoRef<GLSdk> GLSdk::DestroyCommands(new GLSdk());
+AutoRef<GLSdk> GLSdk::DestroyCommands = MakeWeakRef(new GLSdk());
 
 GLSdk::BufferHolder::BufferHolder(const void* p, UINT len, bool copy)
 {

@@ -37,4 +37,10 @@ public:
 	virtual void BuildPass(ICommandList* cmd) override;
 };
 
+class ID11CopyDrawcall : public ICopyDrawcall
+{
+public:
+	virtual void BuildPass(ICommandList* cmd) override;
+};
+
 NS_END

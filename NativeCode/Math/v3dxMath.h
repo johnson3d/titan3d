@@ -18,12 +18,12 @@
 #ifdef EPSILON
 #undef EPSILON
 #endif
-#define EPSILON 0.001f		/*�ǳ�С��ֵ*/
+#define EPSILON 0.001f		
 
 #ifdef SMALL_EPSILON
 #undef SMALL_EPSILON
 #endif
-#define SMALL_EPSILON 0.000001f		/*�ǳ�С��ֵ*/
+#define SMALL_EPSILON 0.000001f		
 
 #define V_PI  ((float)3.1415926535)
 #define V_TWOPI ((float)6.283185307)

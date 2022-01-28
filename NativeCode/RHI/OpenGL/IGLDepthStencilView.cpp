@@ -33,7 +33,7 @@ void IGLDepthStencilView::Cleanup()
 bool IGLDepthStencilView::Init(IGLRenderContext* rc, const IDepthStencilViewDesc* pDesc)
 {
 	mDesc = *pDesc;
-	m_refTexture2D.StrongRef(pDesc->m_pTexture2D);
+	m_refTexture2D.StrongRef((ITexture2D*)pDesc->Texture2D);
 	/*auto sdk = rc->mImmCmdList;
 	GLuint	Tex2d = 0;
 	if(0)
@@ -95,7 +95,7 @@ bool IGLDepthStencilView::Init(IGLRenderContext* rc, const IDepthStencilViewDesc
 		m_refSRV_DS.StrongRef(m_pSRV);
 		m_refSRV_DS->m_refTexture2D.StrongRef(m_pTex2d);
 		m_refSRV_DS->GetResourceState()->SetStreamState(SS_Valid);*/
-	m_refTexture2D.StrongRef(pDesc->m_pTexture2D);
+	m_refTexture2D.StrongRef((ITexture2D*)pDesc->Texture2D);
 	//}
 	
 	return true;

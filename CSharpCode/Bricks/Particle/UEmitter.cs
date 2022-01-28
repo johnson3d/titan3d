@@ -191,6 +191,16 @@ namespace EngineNS.Bricks.Particle
         public RHI.CConstantBuffer CBuffer;
         public RHI.CComputeDrawcall mParticleUpdateDrawcall;
         public RHI.CComputeDrawcall mParticleSetupDrawcall;
+        #region VarIndex
+        private static RHI.FNameVarIndex ParticleRandomPoolSize = new RHI.FNameVarIndex("ParticleRandomPoolSize");
+        private static RHI.FNameVarIndex Draw_IndexCountPerInstance = new RHI.FNameVarIndex("Draw_IndexCountPerInstance");
+        private static RHI.FNameVarIndex Draw_StartIndexLocation = new RHI.FNameVarIndex("Draw_StartIndexLocation");
+        private static RHI.FNameVarIndex Draw_BaseVertexLocation = new RHI.FNameVarIndex("Draw_BaseVertexLocation");
+        private static RHI.FNameVarIndex Draw_StartInstanceLocation = new RHI.FNameVarIndex("Draw_StartInstanceLocation");
+        private static RHI.FNameVarIndex ParticleMaxSize = new RHI.FNameVarIndex("ParticleMaxSize");
+        private static RHI.FNameVarIndex ParticleElapsedTime = new RHI.FNameVarIndex("ParticleElapsedTime");
+        private static RHI.FNameVarIndex ParticleRandomSeed = new RHI.FNameVarIndex("ParticleRandomSeed"); 
+        #endregion
         public unsafe void UpdateComputeDrawcall(RHI.CRenderContext rc, IParticleEmitter emitter)
         {
             UGpuParticleResources gpuResources = emitter.GpuResources;
@@ -201,13 +211,13 @@ namespace EngineNS.Bricks.Particle
 
                 var cbIndex = Shader.CSDesc_Particle_Update.mCoreObject.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbParticleDesc");
                 CBuffer = rc.CreateConstantBuffer2(Shader.CSDesc_Particle_Update, cbIndex);
-                CBuffer.SetValue("ParticleRandomPoolSize", UEngine.Instance.NebulaTemplateManager.ShaderRandomPoolSize);
+                CBuffer.SetValue(ref ParticleRandomPoolSize, UEngine.Instance.NebulaTemplateManager.ShaderRandomPoolSize);
                 var dpDesc = emitter.Mesh.MaterialMesh.Mesh.mCoreObject.GetAtom(0, 0);
-                CBuffer.SetValue("Draw_IndexCountPerInstance", dpDesc->m_NumPrimitives * 3);
-                CBuffer.SetValue("Draw_StartIndexLocation", dpDesc->m_StartIndex);
-                CBuffer.SetValue("Draw_BaseVertexLocation", dpDesc->m_BaseVertexIndex);
-                CBuffer.SetValue("Draw_StartInstanceLocation", 0);
-                CBuffer.SetValue("ParticleMaxSize", emitter.MaxParticle);
+                CBuffer.SetValue(ref Draw_IndexCountPerInstance, dpDesc->m_NumPrimitives * 3);
+                CBuffer.SetValue(ref Draw_StartIndexLocation, dpDesc->m_StartIndex);
+                CBuffer.SetValue(ref Draw_BaseVertexLocation, dpDesc->m_BaseVertexIndex);
+                CBuffer.SetValue(ref Draw_StartInstanceLocation, 0);
+                CBuffer.SetValue(ref ParticleMaxSize, emitter.MaxParticle);
 
                 mParticleUpdateDrawcall.SetComputeShader(Shader.CS_Particle_Update);
                 mParticleUpdateDrawcall.BindCBuffer("cbParticleDesc", CBuffer);
@@ -224,8 +234,8 @@ namespace EngineNS.Bricks.Particle
                 mParticleUpdateDrawcall.SetDispatchIndirectBuffer(gpuResources.DispatchArgBuffer, 0);
             }
 
-            CBuffer.SetValue("ParticleElapsedTime", UEngine.Instance.ElapsedSecond);
-            CBuffer.SetValue("ParticleRandomSeed", emitter.RandomNext());
+            CBuffer.SetValue(ref ParticleElapsedTime, UEngine.Instance.ElapsedSecond);
+            CBuffer.SetValue(ref ParticleRandomSeed, emitter.RandomNext());
 
             emitter.SetCBuffer(CBuffer);
 
@@ -538,8 +548,8 @@ namespace EngineNS.Bricks.Particle
         {
             CurrentQueue.UpdateComputeDrawcall(UEngine.Instance.GfxDevice.RenderContext, this);
 
-            var cmdlist = particleSystem.BasePass.DrawCmdList.mCoreObject;
-            CurrentQueue.mParticleUpdateDrawcall.mCoreObject.BuildPass(cmdlist);
+            var cmdlist = particleSystem.BasePass.DrawCmdList;
+            CurrentQueue.mParticleUpdateDrawcall.BuildPass(cmdlist);
             //CurrentQueue.mParticleSetupDrawcall.mCoreObject.BuildPass(cmdlist);
         }
         public unsafe void Flush2GPU(ICommandList cmd)
@@ -555,9 +565,10 @@ namespace EngineNS.Bricks.Particle
                 mGpuResources.CurAlivesBuffer.mCoreObject.UpdateBufferData(cmd, 16, mCoreObject.GetCurrentAliveAddress(), MaxParticle * (uint)sizeof(uint));//mCoreObject.GetLiveNumber()
             }
         }
+        private static RHI.FNameVarIndex SystemDataIndex = new RHI.FNameVarIndex("SystemData");
         public void SetCBuffer(RHI.CConstantBuffer CBuffer)
         {
-            CBuffer.SetValue("SystemData", in SystemData);
+            CBuffer.SetValue(ref SystemDataIndex, in SystemData);
         }
         #endregion
         public EParticleFlags HasFlags(in FParticleBase particle, EParticleFlags flags)

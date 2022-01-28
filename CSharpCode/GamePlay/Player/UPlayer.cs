@@ -42,7 +42,7 @@ namespace EngineNS.GamePlay.Player
 
         }
 
-        public override void TickLogic(UWorld world, IRenderPolicy policy)
+        public override void TickLogic(UWorld world, URenderPolicy policy)
         {
             base.TickLogic(world, policy);
             PlayerData.CharacterController?.TickLogic(world, policy);

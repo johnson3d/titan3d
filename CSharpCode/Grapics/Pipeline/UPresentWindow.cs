@@ -60,7 +60,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             SwapChainRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in SwapChainPassDesc);
 
-            SwapChainBuffer.Initialize(SwapChainRenderPass, null, 1, EPixelFormat.PXF_D24_UNORM_S8_UINT, (uint)w, (uint)h);
+            SwapChainBuffer.Initialize(null, SwapChainRenderPass);
             SwapChainBuffer.BindSwapChain(0, SwapChain);
             SwapChainBuffer.UpdateFrameBuffers(w, h);
         }
@@ -105,14 +105,14 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void TickLogic(int ellapse)
         {
-            var cmdlist = SwapChainPass.DrawCmdList.mCoreObject;
+            var cmdlist = SwapChainPass.DrawCmdList;
             if (cmdlist.BeginCommand())
             {
                 var passClears = new IRenderPassClears();
                 passClears.SetDefault();
                 passClears.SetClearColor(0, new Color4(1, 0, 0, 0));
 
-                if (cmdlist.BeginRenderPass(SwapChainBuffer.FrameBuffers.mCoreObject, in passClears, "PresentSwapChain"))
+                if (cmdlist.BeginRenderPass(null, SwapChainBuffer, in passClears, "PresentSwapChain"))
                 {
                     cmdlist.BuildRenderPass(0);
                     cmdlist.EndRenderPass();

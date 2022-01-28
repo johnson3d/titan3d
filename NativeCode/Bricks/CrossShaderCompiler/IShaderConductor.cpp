@@ -85,8 +85,6 @@ struct UEngineInclude : public ID3DInclude
 
 NS_BEGIN
 
-StructImpl(FGetShaderCodeStream)
-
 IShaderConductor* IShaderConductor::GetInstance()
 {
 	static IShaderConductor obj;

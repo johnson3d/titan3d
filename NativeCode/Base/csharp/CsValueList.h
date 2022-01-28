@@ -6,13 +6,12 @@
 
 NS_BEGIN
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 CsValueList : public VIUnknown
 {
 public:
-	RTTI_DEF(CsValueList, 0xcadd61c75cb69de9, true);
+	ENGINE_RTTI(CsValueList);
 	
-	TR_MEMBER()
 	UINT					mStride;
 	VArray<BYTE, BYTE>		mMemData;
 
@@ -89,7 +88,7 @@ public:
 	{
 		mStride = 0;
 	}
-	RTTI_DEF(CsQueue, 0xc7506ea55cddfde3, true);
+	ENGINE_RTTI(CsQueue);
 	TR_FUNCTION()
 	UINT GetCount() {
 		return (UINT)mDatas.size() / mStride;

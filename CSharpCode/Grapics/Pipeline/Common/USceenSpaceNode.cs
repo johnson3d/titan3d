@@ -6,40 +6,51 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     public class USceenSpaceNode : URenderGraphNode
     {
+        public Common.URenderGraphPin ResultPinOut = Common.URenderGraphPin.CreateOutput("Result", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public USceenSpaceNode()
+        {
+            Name = "USceenSpaceNode";
+        }
+        public override void InitNodePins()
+        {
+            AddOutput(ResultPinOut, EGpuBufferViewType.GBVT_Rtv | EGpuBufferViewType.GBVT_Srv);
+        }
         public Graphics.Mesh.UMesh ScreenMesh;
         public Shader.CommanShading.UBasePassPolicy ScreenDrawPolicy;
         public UGraphicsBuffers GBuffers { get; protected set; } = new UGraphicsBuffers();
         public UDrawBuffers BasePass = new UDrawBuffers();
         public RHI.CRenderPass RenderPass;
-        public unsafe void Cleanup()
+        public unsafe override void Cleanup()
         {
             GBuffers?.Cleanup();
             GBuffers = null;
+
+            base.Cleanup();
         }
         public string DebugName;
-        public override async System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat rtFmt, EPixelFormat dsFmt, float x, float y, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
             ScreenDrawPolicy = new Shader.CommanShading.UBasePassPolicy();
-            await ScreenDrawPolicy.Initialize(null, x, y);
-            ScreenDrawPolicy.mBasePassShading = shading;
+            await ScreenDrawPolicy.Initialize(null);
+            //ScreenDrawPolicy.mBasePassShading = shading;
             ScreenDrawPolicy.TagObject = policy;
 
             var PassDesc = new IRenderPassDesc();
             unsafe
             {
                 PassDesc.NumOfMRT = 1;
-                PassDesc.AttachmentMRTs[0].Format = rtFmt;
+                PassDesc.AttachmentMRTs[0].Format = ResultPinOut.Attachement.Format;
                 PassDesc.AttachmentMRTs[0].Samples = 1;
                 PassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionClear;
                 PassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
-                PassDesc.m_AttachmentDepthStencil.Format = dsFmt;
-                PassDesc.m_AttachmentDepthStencil.Samples = 1;
-                PassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
-                PassDesc.m_AttachmentDepthStencil.StencilLoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.m_AttachmentDepthStencil.StencilStoreAction = FrameBufferStoreAction.StoreActionStore;
+                //PassDesc.m_AttachmentDepthStencil.Format = dsFmt;
+                //PassDesc.m_AttachmentDepthStencil.Samples = 1;
+                //PassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
+                //PassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
+                //PassDesc.m_AttachmentDepthStencil.StencilLoadAction = FrameBufferLoadAction.LoadActionClear;
+                //PassDesc.m_AttachmentDepthStencil.StencilStoreAction = FrameBufferStoreAction.StoreActionStore;
                 //PassDesc.mFBClearColorRT0 = new Color4(0, 0, 0, 0);
                 //PassDesc.mDepthClearValue = 1.0f;
                 //PassDesc.mStencilClearValue = 0u;
@@ -47,9 +58,8 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in PassDesc); 
 
-            GBuffers.Initialize(RenderPass, null, 1, dsFmt, (uint)x, (uint)y);
-            GBuffers.CreateGBuffer(0, rtFmt, (uint)x, (uint)y);
-            GBuffers.UpdateFrameBuffers(x, y);
+            GBuffers.Initialize(policy, RenderPass);
+            GBuffers.SetRenderTarget(policy, 0, ResultPinOut);
             GBuffers.TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
 
             BasePass.Initialize(rc, debugName);
@@ -69,20 +79,20 @@ namespace EngineNS.Graphics.Pipeline.Common
                 ScreenMesh = mesh;
             }
         }
-        public override void OnResize(IRenderPolicy policy, float x, float y)
+        public override void OnResize(URenderPolicy policy, float x, float y)
         {
             if (GBuffers != null && RenderPass != null)
                 GBuffers.OnResize(x, y);
         }
-        public unsafe void ClearGBuffer()
+        public unsafe void ClearGBuffer(URenderPolicy policy)
         {
-            var cmdlist = BasePass.DrawCmdList.mCoreObject;
+            var cmdlist = BasePass.DrawCmdList;
             if(cmdlist.BeginCommand())
             {
                 var passClears = new IRenderPassClears();
                 passClears.SetDefault();
                 passClears.SetClearColor(0, new Color4(0, 0, 0, 0));
-                if (cmdlist.BeginRenderPass(GBuffers.FrameBuffers.mCoreObject, in passClears, "ClearScreen"))
+                if (cmdlist.BeginRenderPass(policy, GBuffers, in passClears, "ClearScreen"))
                 {
                     cmdlist.BuildRenderPass(0);
                     cmdlist.EndRenderPass();
@@ -90,25 +100,25 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.EndCommand();
             }
         }
-        public override unsafe void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            var cmdlist = BasePass.DrawCmdList.mCoreObject;
+            var cmdlist = BasePass.DrawCmdList;
             if (ScreenMesh != null)
             {
                 cmdlist.ClearMeshDrawPassArray();
                 cmdlist.SetViewport(GBuffers.ViewPort.mCoreObject);
                 for (int j = 0; j < ScreenMesh.Atoms.Length; j++)
                 {
-                    var drawcall = ScreenMesh.GetDrawCall(GBuffers, j, ScreenDrawPolicy, Graphics.Pipeline.IRenderPolicy.EShadingType.BasePass, this);
+                    var drawcall = ScreenMesh.GetDrawCall(GBuffers, j, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
                     if (drawcall == null)
                         continue;
-                    if (drawcall.Effect.CBPerViewportIndex != 0xFFFFFFFF)
+                    if (drawcall.Effect.ShaderIndexer.cbPerViewport != 0xFFFFFFFF)
                     {
-                        drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.CBPerViewportIndex, GBuffers.PerViewportCBuffer.mCoreObject);
+                        drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.ShaderIndexer.cbPerViewport, GBuffers.PerViewportCBuffer.mCoreObject);
                     }
-                    if (GBuffers.Camera != null && drawcall.Effect.CBPerCameraIndex != 0xFFFFFFFF)
+                    if (drawcall.Effect.ShaderIndexer.cbPerCamera != 0xFFFFFFFF)
                     {
-                        drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.CBPerCameraIndex, GBuffers.Camera.PerCameraCBuffer.mCoreObject);
+                        drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.ShaderIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer.mCoreObject);
                     }
                     cmdlist.PushDrawCall(drawcall.mCoreObject);
                 }
@@ -118,7 +128,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var passClears = new IRenderPassClears();
                 passClears.SetDefault();
                 passClears.SetClearColor(0, new Color4(0, 0, 0, 0));
-                if (cmdlist.BeginRenderPass(GBuffers.FrameBuffers.mCoreObject, in passClears, DebugName))
+                if (cmdlist.BeginRenderPass(policy, GBuffers, in passClears, DebugName))
                 {
                     cmdlist.BuildRenderPass(0);
                     cmdlist.EndRenderPass();
@@ -126,13 +136,13 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.EndCommand();
             }
         }
-        public override unsafe void TickRender(IRenderPolicy policy)
+        public override unsafe void TickRender(URenderPolicy policy)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var cmdlist = BasePass.CommitCmdList.mCoreObject;
             cmdlist.Commit(rc.mCoreObject);
         }
-        public override unsafe void TickSync(IRenderPolicy policy)
+        public override unsafe void TickSync(URenderPolicy policy)
         {
             BasePass.SwapBuffer();
         }

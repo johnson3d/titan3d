@@ -112,7 +112,7 @@ namespace EngineNS.Graphics.Mesh
             SourceCode = new IO.CMemStreamWriter();
             SourceCode.SetText(codeBuilder.ClassCode);
         }
-        public override void OnDrawCall(IRenderPolicy.EShadingType shadingType, CDrawCall drawcall, IRenderPolicy policy, UMesh mesh)
+        public override void OnDrawCall(URenderPolicy.EShadingType shadingType, CDrawCall drawcall, URenderPolicy policy, UMesh mesh)
         {
             mInstanceModifier?.OnDrawCall(shadingType, drawcall, policy, mesh);
         }

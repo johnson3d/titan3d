@@ -186,7 +186,7 @@ vBOOL  VFile::Open(LPCSTR lpszFileName, UINT nOpenFlags)
 		if(dwError != 2&& dwError != 3)
 		{
 			auto errorStr = ::GetErrorMessage(dwError);
-			VFX_LTRACE(ELTT_Resource, "VFile::Open file(%s)��(%s) open error = %d,%s\n", m_strFileName.c_str(), arg.c_str(), dwError, errorStr);
+			VFX_LTRACE(ELTT_Resource, "VFile::Open file(%s) (%s) open error = %d,%s\n", m_strFileName.c_str(), arg.c_str(), dwError, errorStr);
 			::LocalFree(errorStr);
 		}
 #endif

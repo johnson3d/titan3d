@@ -20,13 +20,13 @@ namespace EngineNS.Editor
             RenderPolicy?.Cleanup();
             RenderPolicy = null;
         }
-        protected async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
-            await RenderPolicy.Initialize(null, 1, 1);
+            await RenderPolicy.Initialize(null);
 
-            CameraController.ControlCamera(RenderPolicy.Camera);
+            CameraController.ControlCamera(RenderPolicy.DefaultCamera);
 
             var materials = new Graphics.Pipeline.Shader.UMaterial[1];
             materials[0] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("utest/ttt.material"));
@@ -52,7 +52,7 @@ namespace EngineNS.Editor
         }
         public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Rtti.UTypeDesc policyType, float zMin, float zMax)
         {
-            var policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.IRenderPolicy;
+            var policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.URenderPolicy;
             if (OnInitialize == null)
             {
                 OnInitialize = this.Initialize_Default;
@@ -168,7 +168,7 @@ namespace EngineNS.Editor
             mVisParameter.World = World;
             mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
             mVisParameter.VisibleNodes = RenderPolicy.VisibleNodes;
-            mVisParameter.CullCamera = RenderPolicy.GetBasePassNode().GBuffers.Camera;
+            mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
             World.GatherVisibleMeshes(mVisParameter);
 
             RenderPolicy?.TickLogic(World);

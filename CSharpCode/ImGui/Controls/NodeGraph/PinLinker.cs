@@ -149,7 +149,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
     {
         public NodePin StartPin { get; set; }
         public NodePin HoverPin { get; set; }
-        public bool IsBlocking = false;
+        public bool IsBlocking { get; set; } = false;
         private Vector2 BlockingEnd;
         public unsafe void OnDraw(NodeGraph graph, ref Vector2 endPoint, NodeGraphStyles styles = null)
         {

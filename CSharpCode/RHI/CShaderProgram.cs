@@ -49,6 +49,7 @@ namespace EngineNS.RHI
                     }
                 }
             }
+            public IShaderVarIndexer NextIndexer = null;
         }
 
         public ref IConstantBufferDesc GetCBuffer(string name)

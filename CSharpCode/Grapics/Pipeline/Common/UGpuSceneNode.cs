@@ -6,6 +6,49 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     public class UGpuSceneNode : Graphics.Pipeline.Common.URenderGraphNode
     {
+        public Common.URenderGraphPin GpuScenePinOut = Common.URenderGraphPin.CreateOutput("GpuScene", false, EPixelFormat.PXF_UNKNOWN);
+        public Common.URenderGraphPin PointLightsPinOut = Common.URenderGraphPin.CreateOutput("PointLights", false, EPixelFormat.PXF_UNKNOWN);
+        public UGpuSceneNode()
+        {
+            Name = "GpuSceneNode";
+        }
+        public override void Cleanup()
+        {
+            PointLights.Cleanup();
+
+            GpuSceneDescSRV?.Dispose();
+            GpuSceneDescSRV = null;
+            GpuSceneDescUAV?.Dispose();
+            GpuSceneDescUAV = null;
+            GpuSceneDescBuffer?.Dispose();
+            GpuSceneDescBuffer = null;
+
+            base.Cleanup();
+        }
+        public override void InitNodePins()
+        {
+            GpuScenePinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            AddOutput(GpuScenePinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Uav);
+            PointLightsPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            AddOutput(PointLightsPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Uav);
+        }
+        public unsafe override void FrameBuild()
+        {
+            GpuScenePinOut.Attachement.Height = 1;
+            GpuScenePinOut.Attachement.Width = (uint)sizeof(FGpuSceneDesc);
+
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(GpuScenePinOut);
+            attachement.Buffer = GpuSceneDescBuffer;
+            attachement.Srv = GpuSceneDescSRV;
+            attachement.Uav = GpuSceneDescUAV;
+
+            PointLightsPinOut.Attachement.Height = (uint)PointLights.DataArray.Count;
+            PointLightsPinOut.Attachement.Width = (uint)sizeof(FPointLight);
+            attachement = RenderGraph.AttachmentCache.ImportAttachment(PointLightsPinOut);
+            attachement.Buffer = PointLights.GpuBuffer;
+            attachement.Srv = PointLights.DataSRV;
+            attachement.Uav = PointLights.DataUAV;
+        }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         public struct FGpuSceneDesc
         {
@@ -201,7 +244,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             public Vector4 ColorAndIntensity;
         }
         public UGpuDataArray<FPointLight> PointLights = new UGpuDataArray<FPointLight>();
-        public async override System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat fmt, EPixelFormat dsFmt, float x, float y, string debugName)
+        public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.AsyncDummyClass.DummyFunc();
 
@@ -239,26 +282,15 @@ namespace EngineNS.Graphics.Pipeline.Common
             Exposure = 1.0f;
             EyeAdapterTimeRange = 5.0f;
         }
-        public void Cleanup()
-        {
-            PointLights.Cleanup();
-
-            GpuSceneDescSRV?.Dispose();
-            GpuSceneDescSRV = null;
-            GpuSceneDescUAV?.Dispose();
-            GpuSceneDescUAV = null;
-            GpuSceneDescBuffer?.Dispose();
-            GpuSceneDescBuffer = null;
-        }
-        public override unsafe void OnResize(IRenderPolicy policy, float x, float y)
+        public override unsafe void OnResize(URenderPolicy policy, float x, float y)
         {
 
         }
-        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
         {
             if (policy.VisibleNodes == null)
                 return;
-            var cmd = BasePass.DrawCmdList.mCoreObject;
+            var cmd = BasePass.DrawCmdList;
 
             PointLights.Clear();
             if (policy.DisablePointLight == false)
@@ -277,23 +309,23 @@ namespace EngineNS.Graphics.Pipeline.Common
                     light.ColorAndIntensity = new Vector4(lightData.Color.X, lightData.Color.Y, lightData.Color.Z, lightData.Intensity);
                     pointLight.IndexInGpuScene = PointLights.PushData(light);
                 }                
-                PointLights.Flush2GPU(cmd);
+                PointLights.Flush2GPU(cmd.mCoreObject);
             }
             //if PerFrameCBuffer dirty :flush
-            UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject.UpdateDrawPass(cmd, 1);
+            UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject.UpdateDrawPass(cmd.mCoreObject, 1);
             if (cmd.BeginCommand())
             {
                 cmd.EndCommand();
             }
         }
-        public unsafe override void TickRender(Graphics.Pipeline.IRenderPolicy policy)
+        public unsafe override void TickRender(Graphics.Pipeline.URenderPolicy policy)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
             var cmdlist_hp = BasePass.CommitCmdList.mCoreObject;
             cmdlist_hp.Commit(rc.mCoreObject);
         }
-        public unsafe override void TickSync(Graphics.Pipeline.IRenderPolicy policy)
+        public unsafe override void TickSync(Graphics.Pipeline.URenderPolicy policy)
         {
             BasePass.SwapBuffer();
         }

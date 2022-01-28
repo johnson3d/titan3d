@@ -1570,6 +1570,10 @@ void ImDrawList::AddText(const ImFont* font, float font_size, const ImVec2& pos,
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
+	if (text_begin == nullptr)
+	{
+        text_begin = "";
+	}
     if (text_end == NULL)
         text_end = text_begin + strlen(text_begin);
     if (text_begin == text_end)

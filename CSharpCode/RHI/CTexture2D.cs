@@ -4,7 +4,14 @@ using System.Text;
 
 namespace EngineNS.RHI
 {
-    public class CTexture2D : AuxPtrType<ITexture2D>
+    public class CTexture2D : CGpuBuffer //AuxPtrType<ITexture2D>
     {
+        public ITexture2D GetTextureCore()
+        {
+            unsafe
+            {
+                return new ITexture2D(mCoreObject.CppPointer);
+            }
+        }
     }
 }

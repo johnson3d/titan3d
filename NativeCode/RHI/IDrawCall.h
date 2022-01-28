@@ -199,34 +199,34 @@ struct TR_CLASS(SV_BaseFunction = true)
 };
 
 struct TR_CLASS(SV_BaseFunction = true)
-IShaderRViewResources : public IResourcesBinder<IShaderResourceView, IShaderRViewResources>
+	IShaderRViewResources : public IResourcesBinder<IShaderResourceView, IShaderRViewResources>
 {
-	IShaderRViewResources() 
+	IShaderRViewResources()
 	{
-		
+
 	}
-	static bool IsEqualName(IShaderResourceView* obj, const char* name)
+	static bool IsEqualName(IShaderResourceView * obj, const char* name)
 	{
 		return false;
 	}
-	static void* GetResourceHash(IShaderResourceView* state)
+	static void* GetResourceHash(IShaderResourceView * state)
 	{
 		return state->GetAPIObject();
 	}
 };
 
 struct TR_CLASS(SV_BaseFunction = true)
-ISamplerResources : public  IResourcesBinder<ISamplerState, ISamplerResources>
-{	
+	ISamplerResources : public  IResourcesBinder<ISamplerState, ISamplerResources>
+{
 	ISamplerResources()
 	{
-		
+
 	}
-	static bool IsEqualName(ISamplerState* obj, const char* name)
+	static bool IsEqualName(ISamplerState * obj, const char* name)
 	{
 		return false;
 	}
-	static void* GetResourceHash(ISamplerState* state)
+	static void* GetResourceHash(ISamplerState * state)
 	{
 		return state;
 	}
@@ -250,14 +250,14 @@ struct TR_CLASS(SV_BaseFunction = true)
 };
 
 struct TR_CLASS(SV_LayoutStruct = 8)
-DrawPrimitiveDesc
+	DrawPrimitiveDesc
 {
 	DrawPrimitiveDesc()
 	{
 		SetDefault();
 	}
 	TR_FUNCTION()
-	void SetDefault()
+		void SetDefault()
 	{
 		PrimitiveType = EPT_TriangleList;
 		BaseVertexIndex = 0;
@@ -270,13 +270,13 @@ DrawPrimitiveDesc
 	UINT StartIndex;
 	UINT NumPrimitives;
 	UINT NumInstances;
-	bool IsIndexDraw() const{
+	bool IsIndexDraw() const {
 		return StartIndex != 0xFFFFFFFF;
 	}
 };
 
 class TR_CLASS()
-IViewPort : public VIUnknown
+	IViewPort : public VIUnknown
 {
 public:
 	IViewPort()
@@ -288,7 +288,7 @@ public:
 		MinDepth = 0;
 		MaxDepth = 1.0F;
 	}
-	RTTI_DEF(IViewPort, 0x1e91cb6f5b04f4ef, true);
+	ENGINE_RTTI(IViewPort);
 
 	float TopLeftX;
 	float TopLeftY;
@@ -299,7 +299,7 @@ public:
 };
 
 struct TR_CLASS(SV_LayoutStruct = 8)
-SRRect
+	SRRect
 {
 	int MinX;
 	int MinY;
@@ -308,26 +308,26 @@ SRRect
 };
 
 class TR_CLASS()
-IScissorRect : public VIUnknown
+	IScissorRect : public VIUnknown
 {
 public:
-	RTTI_DEF(IScissorRect, 0x486b7d125d70a687, true);
+	ENGINE_RTTI(IScissorRect);
 	IScissorRect()
 	{
 
 	}
 	std::vector<SRRect> Rects;
-	
+
 	void SetRectNumber(UINT num);
 	UINT GetRectNumber() {
 		return (UINT)Rects.size();
 	}
 	void SetSCRect(UINT idx, int left, int top, int right, int bottom);
-	void GetSCRect(UINT idx, SRRect* pRect);
+	void GetSCRect(UINT idx, SRRect * pRect);
 };
 
 struct TR_CLASS(SV_LayoutStruct = 8)
-IDrawCallDesc
+	IDrawCallDesc
 {
 
 };
@@ -522,6 +522,62 @@ public:
 	void SetDispatch(UINT x, UINT y, UINT z);	
 	void SetDispatchIndirectBuffer(IGpuBuffer* buffer, UINT offset);
 	virtual void BuildPass(ICommandList* cmd) = 0;
+};
+
+struct FCopyBufferDesc
+{
+	FCopyBufferDesc()
+	{
+		
+	}
+	AutoRef<IGpuBuffer> Source;
+	AutoRef<IGpuBuffer> Target;
+	UINT SrcOffset;
+	UINT TarOffset;
+	UINT Size;
+};
+
+struct FCopyTexture2DDesc
+{
+	FCopyTexture2DDesc()
+	{
+		
+	}
+	AutoRef<IGpuBuffer> Source;
+	AutoRef<IGpuBuffer> Target;
+	UINT SrcMipLevel;
+	UINT TarMipLevel;
+	UINT SrcX;
+	UINT SrcY;
+	UINT TarX;
+	UINT TarY;
+	UINT Width;
+	UINT Height;
+};
+
+class TR_CLASS()
+	ICopyDrawcall : public IRenderResource
+{
+protected:
+	enum ECopyType
+	{
+		CPTP_Unkown,
+		CPTP_Buffer,
+		CPTP_Texture2D,
+	};
+	ECopyType Type;
+	FCopyBufferDesc BufferDesc;
+	FCopyTexture2DDesc Texture2DDesc;
+public:
+	ICopyDrawcall()
+	{
+		Type = CPTP_Unkown;
+	}
+	virtual void SetCopyBuffer(IGpuBuffer* src, UINT srcOffset, IGpuBuffer * tar, UINT tarOffset, UINT size);
+	virtual void SetCopyTexture2D(IGpuBuffer* src, UINT srcMip, UINT srcX, UINT srcY,
+		IGpuBuffer* tar, UINT tarMip, UINT tarX, UINT tarY, UINT width, UINT height);
+
+	virtual void BuildPass(ICommandList * cmd);
 };
 
 NS_END

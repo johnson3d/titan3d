@@ -35,7 +35,7 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::PhyEntity, EngineNS::VIUnknown);
+ENGINE_RTTI_IMPL(EngineNS::PhyEntity);
 
 PhyEntity::~PhyEntity()
 {

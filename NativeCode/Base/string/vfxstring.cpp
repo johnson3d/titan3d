@@ -15,11 +15,6 @@
 
 #define new VNEW
 
-#if !defined(PLATFORM_WIN)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wwritable-strings"
-#endif
-
 static char cbuf[BUFSIZ];
 static wchar_t wbuf[BUFSIZ];
 
@@ -221,12 +216,11 @@ VStringA VStringA_Utf82Gbk(LPCSTR utf8)
 	return result;
 }
 
-std::vector<std::string>		VNameString::mNameStrings;
-VSLLock							GVNameLocker;
+static VSLLock		gNameLocker;
 
-int VNameString::GetIndexFromString(const char* str)
+int VNameStringManager::GetIndexFromString(const char* str)
 {
-	VAutoVSLLock lk(GVNameLocker);
+	VAutoVSLLock lk(gNameLocker);
 	for (int i = 0; i < (int)mNameStrings.size(); i++)
 	{
 		if (mNameStrings[i] == str)
@@ -236,9 +230,9 @@ int VNameString::GetIndexFromString(const char* str)
 	return (int)(mNameStrings.size() - 1);
 }
 
-const std::string& VNameString::GetString() const
+const std::string& VNameStringManager::GetString(int Index) const
 {
-	VAutoVSLLock lk(GVNameLocker);
+	VAutoVSLLock lk(gNameLocker);
 	if (Index < 0 || Index >= mNameStrings.size())
 	{
 		static std::string tmp;
@@ -247,7 +241,9 @@ const std::string& VNameString::GetString() const
 	return mNameStrings[Index];
 }
 
+VNameStringManager* VNameStringManager::Get()
+{
+	static VNameStringManager Manager;
+	return &Manager;
+}
 
-#if !defined(PLATFORM_WIN)
-#pragma clang diagnostic pop
-#endif

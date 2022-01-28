@@ -149,7 +149,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 mMesh.PerMeshCBuffer.SetValue(RHI.CConstantBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
             }
         }
-        public void Tick(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy)
+        public void Tick(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
             if (TerrainMesh == null)
                 return;

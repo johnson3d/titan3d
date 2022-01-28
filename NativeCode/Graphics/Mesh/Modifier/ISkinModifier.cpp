@@ -46,7 +46,7 @@ void ISkinModifier::GetProvideStreams(UINT* pOutStreams)
 //		return FALSE;
 //	if (skeletonPose == nullptr)
 //		return FALSE;
-//	//shader buffer��С�ĳ��� 360������֧�֡�Shaders\CoreShader\Modifier\SkinModifier.var
+//	//shader buffer
 //	v3dxQuaternion* absPos = (v3dxQuaternion*)cb->GetVarPtrToWrite(AbsBonePos, (int)partialSkeleton->GetBonesNum() * sizeof(v3dxQuaternion));
 //	if (absPos == nullptr)
 //		return FALSE;
@@ -59,7 +59,6 @@ void ISkinModifier::GetProvideStreams(UINT* pOutStreams)
 //		IBone* bone = bones[i];
 //		if (bone != nullptr)
 //		{
-//			//�������translateRetarget,������������ѡ��ѡ�����Լ���shared���Լ���transform�ȵ�
 //			v3dxTransform trans;
 //			const IBoneDesc* shared = nullptr;
 //			EngineNS::IBonePose* outBone = skeletonPose->FindBonePose(bone->Desc.Name);

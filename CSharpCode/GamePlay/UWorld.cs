@@ -216,7 +216,7 @@ namespace EngineNS.GamePlay
             mRealtimeMillisecondSinceStartup = 0;
             mDeltaTimeMillisecond = 0;
         }
-        public virtual void TickLogic(Graphics.Pipeline.IRenderPolicy policy, int ellapse)
+        public virtual void TickLogic(Graphics.Pipeline.URenderPolicy policy, int ellapse)
         {
             TickTime(ellapse);
 

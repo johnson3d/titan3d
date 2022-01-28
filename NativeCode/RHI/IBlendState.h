@@ -5,13 +5,12 @@
 NS_BEGIN
 
 struct TR_CLASS(SV_LayoutStruct = 8)
-RenderTargetBlendDesc
+	RenderTargetBlendDesc
 {
 	RenderTargetBlendDesc()
 	{
 		SetDefault();
 	}
-	TR_FUNCTION()
 	void SetDefault()
 	{
 		BlendEnable = FALSE;
@@ -34,7 +33,7 @@ RenderTargetBlendDesc
 };
 
 struct TR_CLASS(SV_LayoutStruct = 8)
-IBlendStateDesc
+	IBlendStateDesc
 {
 	IBlendStateDesc()
 	{
@@ -57,8 +56,8 @@ IBlendStateDesc
 	//UINT NumOfRT;
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-IBlendState : public IRenderResource
+class TR_CLASS()
+	IBlendState : public IRenderResource
 {
 public:
 	IBlendState();

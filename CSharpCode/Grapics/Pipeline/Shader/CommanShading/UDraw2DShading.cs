@@ -15,7 +15,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
             return new EVertexSteamType[] { EVertexSteamType.VST_Position,
                 EVertexSteamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(IRenderPolicy policy, RHI.CDrawCall drawcall)
+        public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
         {
             //var gpuProgram = drawcall.Effect.ShaderProgram;
             //var cbIndex = drawcall.mCoreObject.FindCBufferIndex("cbPerShadingEnv");
@@ -43,7 +43,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
             return new EVertexSteamType[] { EVertexSteamType.VST_Position,
                 EVertexSteamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(IRenderPolicy policy, RHI.CDrawCall drawcall)
+        public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
         {
             var gpuProgram = drawcall.Effect.ShaderProgram;
             var cbIndex = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerShadingEnv");
@@ -90,7 +90,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
             return new EVertexSteamType[] { EVertexSteamType.VST_Position,
                 EVertexSteamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(IRenderPolicy policy, RHI.CDrawCall drawcall)
+        public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
         {
             var gpuProgram = drawcall.Effect.ShaderProgram;
             var cbIndex = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerShadingEnv");

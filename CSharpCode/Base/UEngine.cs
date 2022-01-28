@@ -124,6 +124,8 @@ namespace EngineNS
         static unsafe CoreSDK.FDelegate_FAssertEvent OnNativeAssertEvent = NativeAssertEvent;
         public bool PreInitEngine(string cfgFile=null)
         {
+            RttiStructManager.GetInstance().BuildRtti();
+
             CoreSDK.SetAssertEvent(OnNativeAssertEvent);
             CoreSDK.InitF2MManager();
             NativeMemory.BeginProfiler();

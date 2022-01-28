@@ -66,15 +66,15 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
-            await viewport.RenderPolicy.Initialize(null, 1, 1);
+            await viewport.RenderPolicy.Initialize(null);
 
             await viewport.World.InitWorld();
 
-            (viewport as EGui.Slate.UWorldViewportSlate).CameraController.ControlCamera(viewport.RenderPolicy.Camera);
+            (viewport as EGui.Slate.UWorldViewportSlate).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             Scene.Parent = PreviewViewport.World.Root;
 

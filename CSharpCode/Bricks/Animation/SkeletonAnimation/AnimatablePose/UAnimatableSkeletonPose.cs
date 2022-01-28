@@ -79,5 +79,16 @@ namespace EngineNS.Animation.SkeletonAnimation.AnimatablePose
             }
             return null;
         }
+
+        public IAnimatableLimbPose Clone()
+        {
+            var pose = new UAnimatableSkeletonPose(mDesc);
+            for (int i = 0; i < LimbPoses.Count; ++i)
+            {
+                pose.LimbPoses.Add(LimbPoses[i].Clone());
+            }
+            pose.ConstructHierarchy();
+            return pose;
+        }
     }
 }

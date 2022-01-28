@@ -10,8 +10,8 @@
 
 NS_BEGIN
 
-RTTI_IMPL(EngineNS::IMeshPrimitives, EngineNS::VIUnknown);
-RTTI_IMPL(EngineNS::IMeshDataProvider, EngineNS::VIUnknown);
+ENGINE_RTTI_IMPL(EngineNS::IMeshPrimitives);
+ENGINE_RTTI_IMPL(EngineNS::IMeshDataProvider);
 
 void IMeshPrimitives::CalcNormals32(OUT std::vector<v3dxVector3>& normals, const v3dxVector3* pos, UINT nVert, const UINT* triangles, UINT nTri)
 {
@@ -126,7 +126,7 @@ vBOOL IMeshPrimitives::Init(IRenderContext* rc, const char* name, UINT atom)
 	mAtoms.resize(atom);
 	mDesc.AtomNumber = atom;
 
-	mGeometryMesh = rc->CreateGeometryMesh();
+	mGeometryMesh = MakeWeakRef(rc->CreateGeometryMesh());
 
 	return TRUE;
 }
@@ -294,7 +294,7 @@ vBOOL IMeshPrimitives::LoadXnd(IRenderContext* rc, const char* name, XndHolder* 
 	auto pNode = xnd->GetRootNode();
 	if (mGeometryMesh == nullptr)
 	{
-		mGeometryMesh = rc->CreateGeometryMesh();
+		mGeometryMesh = MakeWeakRef(rc->CreateGeometryMesh());
 	}
 	else
 	{
@@ -427,7 +427,7 @@ AutoRef<IVertexBuffer> IMeshPrimitives::LoadVB(IRenderContext* rc, XndAttribute*
 		}
 	}
 
-	AutoRef<IVertexBuffer> vb = rc->CreateVertexBuffer(&desc);
+	auto vb = MakeWeakRef(rc->CreateVertexBuffer(&desc));
 	Safe_DeleteArray(data);
 
 	resSize += desc.ByteWidth;
@@ -613,7 +613,7 @@ vBOOL IMeshPrimitives::RestoreResource()
 		pAttr->EndRead();
 
 		desc.InitData = data;
-		AutoRef<IIndexBuffer> ib = rc->CreateIndexBuffer(&desc);
+		auto ib = MakeWeakRef(rc->CreateIndexBuffer(&desc));
 		mGeometryMesh->BindIndexBuffer(ib);
 		Safe_DeleteArray(data);
 
@@ -687,7 +687,7 @@ vBOOL IMeshPrimitives::SetGeomtryMeshStream(IRenderContext* rc, EVertexSteamType
 	desc.Stride = stride;
 	desc.CPUAccess = cpuAccess;
 	desc.InitData = data;
-	AutoRef<IVertexBuffer> vb = rc->CreateVertexBuffer(&desc);
+	auto vb = MakeWeakRef(rc->CreateVertexBuffer(&desc));
 	if (vb == nullptr)
 		return FALSE;
 	mGeometryMesh->BindVertexBuffer(stream, vb);
@@ -702,7 +702,7 @@ vBOOL IMeshPrimitives::SetGeomtryMeshIndex(IRenderContext* rc, void* data, UINT 
 	desc.Type = type;
 	desc.InitData = data;
 
-	AutoRef<IIndexBuffer> ib = rc->CreateIndexBuffer(&desc);
+	auto ib = MakeWeakRef(rc->CreateIndexBuffer(&desc));
 	if (ib == nullptr)
 		return FALSE;
 	mGeometryMesh->BindIndexBuffer(ib);

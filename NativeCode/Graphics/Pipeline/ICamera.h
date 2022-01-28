@@ -46,7 +46,7 @@ public:
 		}
 	};
 public:
-	RTTI_DEF(ICamera, 0x7ef43b215b18857a, true);
+	ENGINE_RTTI(ICamera);
 
 	TR_CONSTRUCTOR()
 	ICamera();

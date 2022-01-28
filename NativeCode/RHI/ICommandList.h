@@ -52,11 +52,6 @@ struct IRenderPassClears;
 TR_CALLBACK(SV_NameSpace = EngineNS, SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void(*FOnPassBuilt)(ICommandList* cmd, const IDrawCall* pass);
 
-VTypeHelperDefine(FOnPassBuilt, sizeof(void*));
-
-StructBegin(FOnPassBuilt, EngineNS)
-StructEnd(void)
-
 struct TR_CLASS()
 	IPipelineStat : public VIUnknown
 {
@@ -185,6 +180,8 @@ public:
 	virtual void SetRenderPipeline(IRenderPipeline* pipeline, EPrimitiveType dpType) = 0;
 	virtual vBOOL CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers) = 0;
 
+	virtual void BeginEvent(const char* info) = 0;
+	virtual void EndEvent() = 0;
 	virtual void Signal(IFence* fence, int value){}
 public:
 	struct ContextState

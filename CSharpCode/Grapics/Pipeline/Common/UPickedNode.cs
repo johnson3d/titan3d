@@ -19,16 +19,38 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
     public class UPickedNode : URenderGraphNode
     {
+        public Common.URenderGraphPin PickedPinOut = Common.URenderGraphPin.CreateOutput("Picked", false, EPixelFormat.PXF_R16G16_FLOAT);
+        public Common.URenderGraphPin DepthPinOut = Common.URenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);
+        public UPickedNode()
+        {
+            Name = "PickedNode";
+        }
+        public override void InitNodePins()
+        {
+            AddOutput(PickedPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Rtv);
+            AddOutput(DepthPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Dsv);
+        }
+        public override void OnResize(URenderPolicy policy, float x, float y)
+        {
+            PickedPinOut.Attachement.Width = (uint)(x * UHitproxyNode.ScaleFactor);
+            PickedPinOut.Attachement.Height = (uint)(y * UHitproxyNode.ScaleFactor);
+
+            DepthPinOut.Attachement.Width = (uint)(x * UHitproxyNode.ScaleFactor);
+            DepthPinOut.Attachement.Height = (uint)(y * UHitproxyNode.ScaleFactor);
+
+            if (PickedBuffer != null)
+                PickedBuffer.OnResize(x * UHitproxyNode.ScaleFactor, y * UHitproxyNode.ScaleFactor);
+        }
         public UPickedProxiableManager PickedManager;
         public UPickSetupShading PickedShading = null;
         public UGraphicsBuffers PickedBuffer { get; protected set; } = new UGraphicsBuffers();
         public UDrawBuffers BasePass = new UDrawBuffers();
         public RHI.CRenderPass RenderPass;
 
-        public async override System.Threading.Tasks.Task Initialize(IRenderPolicy policy, Shader.UShadingEnv shading, EPixelFormat fmt, EPixelFormat dsFmt, float x, float y, string debugName)
+        public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.AsyncDummyClass.DummyFunc();
-            PickedShading = shading as UPickSetupShading;
+            PickedShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickSetupShading>();
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName);
@@ -38,11 +60,11 @@ namespace EngineNS.Graphics.Pipeline.Common
             unsafe
             {
                 PassDesc.NumOfMRT = 1;
-                PassDesc.AttachmentMRTs[0].Format = fmt;
+                PassDesc.AttachmentMRTs[0].Format = PickedPinOut.Attachement.Format;
                 PassDesc.AttachmentMRTs[0].Samples = 1;
                 PassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionClear;
                 PassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
-                PassDesc.m_AttachmentDepthStencil.Format = dsFmt;
+                PassDesc.m_AttachmentDepthStencil.Format = DepthPinOut.Attachement.Format;
                 PassDesc.m_AttachmentDepthStencil.Samples = 1;
                 PassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
                 PassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
@@ -54,27 +76,25 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in PassDesc); 
 
-            PickedBuffer.Initialize(RenderPass, policy.Camera, 1, dsFmt, (uint)x, (uint)y);
-            PickedBuffer.CreateGBuffer(0, fmt, (uint)x, (uint)y);
-            PickedBuffer.UpdateFrameBuffers(x, y);
-            PickedBuffer.TargetViewIdentifier = policy.GetBasePassNode().GBuffers.TargetViewIdentifier;
+            PickedBuffer.Initialize(policy, RenderPass);
+            PickedBuffer.SetRenderTarget(policy, 0, PickedPinOut);
+            PickedBuffer.SetDepthStencil(policy, DepthPinOut);
+            
+            PickedBuffer.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
 
             PickedManager = policy.PickedProxiableManager;
         }
-        public unsafe void Cleanup()
+        public override void Cleanup()
         {
             PickedBuffer?.Cleanup();
             PickedBuffer = null;
-        }
-        public override void OnResize(IRenderPolicy policy, float x, float y)
-        {
-            if (PickedBuffer != null)
-                PickedBuffer.OnResize(x, y);
+
+            base.Cleanup();
         }
         List<Mesh.UMesh> mPickedMeshes = new List<Mesh.UMesh>();
-        public override unsafe void TickLogic(GamePlay.UWorld world, IRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            var cmdlist = BasePass.DrawCmdList.mCoreObject;
+            var cmdlist = BasePass.DrawCmdList;
             cmdlist.ClearMeshDrawPassArray();
             cmdlist.SetViewport(PickedBuffer.ViewPort.mCoreObject);
 
@@ -90,13 +110,13 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 for (int j = 0; j < mesh.Atoms.Length; j++)
                 {
-                    var drawcall = mesh.GetDrawCall(PickedBuffer, j, policy, Graphics.Pipeline.IRenderPolicy.EShadingType.Picked, this);
+                    var drawcall = mesh.GetDrawCall(PickedBuffer, j, policy, Graphics.Pipeline.URenderPolicy.EShadingType.Picked, this);
                     if (drawcall != null)
                     {
                         if (PickedBuffer.PerViewportCBuffer != null)
-                            drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.CBPerViewportIndex, PickedBuffer.PerViewportCBuffer.mCoreObject);
-                        if (PickedBuffer.Camera.PerCameraCBuffer != null)
-                            drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.CBPerCameraIndex, PickedBuffer.Camera.PerCameraCBuffer.mCoreObject);
+                            drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.ShaderIndexer.cbPerViewport, PickedBuffer.PerViewportCBuffer.mCoreObject);
+                        if (policy.DefaultCamera.PerCameraCBuffer != null)
+                            drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.ShaderIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer.mCoreObject);
 
                         cmdlist.PushDrawCall(drawcall.mCoreObject);
                     }
@@ -108,7 +128,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var passClears = new IRenderPassClears();
                 passClears.SetDefault();
                 passClears.SetClearColor(0, new Color4(1, 0, 1, 0));
-                if (cmdlist.BeginRenderPass(PickedBuffer.FrameBuffers.mCoreObject, in passClears, "Picked"))
+                if (cmdlist.BeginRenderPass(policy, PickedBuffer, in passClears, "Picked"))
                 {
                     cmdlist.BuildRenderPass(0);
                     cmdlist.EndRenderPass();
@@ -116,13 +136,13 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.EndCommand();
             }
         }
-        public unsafe override void TickRender(IRenderPolicy policy)
+        public unsafe override void TickRender(URenderPolicy policy)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var cmdlist = BasePass.CommitCmdList.mCoreObject;
             cmdlist.Commit(rc.mCoreObject);
         }
-        public unsafe override void TickSync(IRenderPolicy policy)
+        public unsafe override void TickSync(URenderPolicy policy)
         {
             BasePass.SwapBuffer();
         }

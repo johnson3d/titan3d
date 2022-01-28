@@ -100,6 +100,14 @@ public:
 	{
 
 	}
+	virtual void BeginEvent(const char* info) override
+	{
+
+	}
+	virtual void EndEvent() override
+	{
+
+	}
 };
 
 NS_END

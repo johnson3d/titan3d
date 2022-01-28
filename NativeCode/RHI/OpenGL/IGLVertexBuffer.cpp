@@ -94,7 +94,7 @@ bool IGLVertexBuffer::Init(IGLRenderContext* rc, const IVertexBufferDesc* desc)
 	mDesc = *desc;
 	mDesc.InitData = nullptr;
 
-	mGpuBuffer = new IGLGpuBuffer();
+	mGpuBuffer = MakeWeakRef(new IGLGpuBuffer());
 
 	mGpuBuffer->Init(rc, GL_ARRAY_BUFFER, GL_STATIC_DRAW, desc->InitData, desc->ByteWidth);
 

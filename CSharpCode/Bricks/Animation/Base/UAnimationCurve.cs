@@ -71,9 +71,12 @@ namespace EngineNS.Animation
             public CurveValue Evaluate(float time)
             {
                 Vector3 temp = Vector3.Zero;
-                temp.X = XCurve.Evaluate(time, ref mXCache);
-                temp.Y = YCurve.Evaluate(time, ref mYCache);
-                temp.Z = ZCurve.Evaluate(time, ref mZCache);
+                if (XCurve != null)
+                    temp.X = XCurve.Evaluate(time, ref mXCache);
+                if (YCurve != null)
+                    temp.Y = YCurve.Evaluate(time, ref mYCache);
+                if (ZCurve != null)
+                    temp.Z = ZCurve.Evaluate(time, ref mZCache);
                 CurveValue value = new CurveValue(temp);
                 return value;
             }
@@ -95,7 +98,8 @@ namespace EngineNS.Animation
             public CurveValue Evaluate(float time)
             {
                 float temp = 0;
-                temp = Curve.Evaluate(time, ref mCache);
+                if (Curve != null)
+                    temp = Curve.Evaluate(time, ref mCache);
                 CurveValue value = new CurveValue(temp);
                 return value;
             }

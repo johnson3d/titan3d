@@ -23,8 +23,7 @@ bool ID11PixelShader::Init(ID11RenderContext* rc, const IShaderDesc* desc)
 		return false;
 
 	mDesc = (IShaderDesc*)desc;
-	mDesc->AddRef();
-
+	
 	return true;
 }
 

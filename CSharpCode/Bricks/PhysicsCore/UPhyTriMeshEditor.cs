@@ -37,15 +37,15 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.IRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
-            await viewport.RenderPolicy.Initialize(null, 1, 1);
+            await viewport.RenderPolicy.Initialize(null);
 
             await viewport.World.InitWorld();
 
-            (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.Camera);
+            (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             ShowMesh = new Graphics.Mesh.UMaterialMesh();
             var meshPrimitve = TriMesh.ToMeshProvider().ToMesh();
@@ -73,7 +73,7 @@ namespace EngineNS.Bricks.PhysicsCore
             BoundingSphere sphere;
             sphere.Center = aabb.GetCenter();
             sphere.Radius = radius;
-            policy.GetBasePassNode().GBuffers.Camera.AutoZoom(ref sphere);
+            policy.DefaultCamera.AutoZoom(ref sphere);
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;

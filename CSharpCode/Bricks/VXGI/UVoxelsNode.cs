@@ -6,6 +6,42 @@ namespace EngineNS.Bricks.VXGI
 {
     public partial class UVoxelsNode : Graphics.Pipeline.Common.URenderGraphNode
     {
+        public Graphics.Pipeline.Common.URenderGraphPin GpuScenePinIn = Graphics.Pipeline.Common.URenderGraphPin.CreateInputOutput("GpuScene");
+        public Graphics.Pipeline.Common.URenderGraphPin AlbedoPinIn = Graphics.Pipeline.Common.URenderGraphPin.CreateInput("Albedo");
+        public Graphics.Pipeline.Common.URenderGraphPin DepthPinIn = Graphics.Pipeline.Common.URenderGraphPin.CreateInput("Depth");
+        public Graphics.Pipeline.Common.URenderGraphPin ShadowMaskPinIn = Graphics.Pipeline.Common.URenderGraphPin.CreateInput("ShadowMask");
+
+        public Graphics.Pipeline.Common.URenderGraphPin VxPoolPinOut = Graphics.Pipeline.Common.URenderGraphPin.CreateOutput("VxPool", false, EPixelFormat.PXF_UNKNOWN);
+        public Graphics.Pipeline.Common.URenderGraphPin VxScenePinOut = Graphics.Pipeline.Common.URenderGraphPin.CreateOutput("VxScene", false, EPixelFormat.PXF_UNKNOWN);
+
+        public UVoxelsNode()
+        {
+            Name = "UVoxelsNode";
+        }
+        public override void InitNodePins()
+        {
+            AddInputOutput(GpuScenePinIn, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Uav);
+
+            AddInput(AlbedoPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(DepthPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(ShadowMaskPinIn, EGpuBufferViewType.GBVT_Srv);
+
+            VxPoolPinOut.LifeMode = Graphics.Pipeline.UAttachBuffer.ELifeMode.Imported;
+            AddOutput(VxPoolPinOut, EGpuBufferViewType.GBVT_Uav);
+            VxScenePinOut.LifeMode = Graphics.Pipeline.UAttachBuffer.ELifeMode.Imported;
+            AddOutput(VxScenePinOut, EGpuBufferViewType.GBVT_Uav);
+        }
+
+        public override void FrameBuild()
+        {
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(VxPoolPinOut);
+            attachement.Buffer = VoxelPool;
+            attachement.Uav = UavVoxelPool;
+
+            attachement = RenderGraph.AttachmentCache.ImportAttachment(VxScenePinOut);
+            attachement.Buffer = VoxelScene;
+            attachement.Uav = UavVoxelScene;
+        }
         #region ConstantVar
         public const uint VxDescStructSize = 2;
         public const uint VxGroupCubeSide = 4;
@@ -20,7 +56,7 @@ namespace EngineNS.Bricks.VXGI
         public readonly UInt32_3 Dispatch_SetupDimArray3 = new UInt32_3(8, 8, 4);
         #endregion
 
-        public void Cleanup()
+        public override void Cleanup()
         {
             VoxelPool?.Dispose();
             VoxelPool = null;
@@ -35,9 +71,9 @@ namespace EngineNS.Bricks.VXGI
             UavVoxelAllocator = null;
             UavVoxelScene = null;
 
-            SrvAbedo = null;
             //UavAbedo?.Dispose();
             //UavAbedo = null;
+            base.Cleanup();
         }
         
         #region VoxelInject        
@@ -57,10 +93,7 @@ namespace EngineNS.Bricks.VXGI
         public RHI.CUnorderedAccessView UavVoxelScene;
         
         public uint DiffuseRTWidth;
-        public uint DiffuseRTHeight;        
-        RHI.CShaderResourceView SrvAbedo;
-        RHI.CShaderResourceView SrvShadowMask;
-        RHI.CShaderResourceView SrvDepth;
+        public uint DiffuseRTHeight;
         //public RHI.CUnorderedAccessView UavAbedo;
         //public RHI.CUnorderedAccessView UavNormal;
 
@@ -82,8 +115,7 @@ namespace EngineNS.Bricks.VXGI
         private RHI.CComputeDrawcall EraseVoxelGroupDrawcall;
         #endregion
 
-        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.IRenderPolicy policy, 
-            Graphics.Pipeline.Shader.UShadingEnv shading, EPixelFormat fmt, EPixelFormat dsFmt, float x, float y, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.URenderPolicy policy, string debugName)
         {
             await Thread.AsyncDummyClass.DummyFunc();
 
@@ -172,17 +204,11 @@ namespace EngineNS.Bricks.VXGI
 
             BasePass.Initialize(rc, debugName);
 
-            SrvAbedo = policy.GetBasePassNode().GBuffers.GetGBufferSRV(0);
-            SrvDepth = policy.GetBasePassNode().GBuffers.GetDepthStencilSRV();
-
-            DiffuseRTWidth = policy.GetBasePassNode().GBuffers.RTDesc[0].Width;
-            DiffuseRTHeight = policy.GetBasePassNode().GBuffers.RTDesc[0].Height;
-
             mCurStep = EStep.Setup;
 
             //ResetComputeDrawcall(policy);
         }
-        private unsafe void ResetComputeDrawcall(Graphics.Pipeline.IRenderPolicy policy)
+        private unsafe void ResetComputeDrawcall(Graphics.Pipeline.URenderPolicy policy)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             
@@ -199,12 +225,7 @@ namespace EngineNS.Bricks.VXGI
             {
                 SetupVxAllocatorDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, UavVoxelPool.mCoreObject);
             }
-            srvIdx = CSDesc_SetupVxAllocator.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "GpuSceneDesc");
-            if (srvIdx != (IShaderBinder*)0)
-            {
-                SetupVxAllocatorDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, policy.GetGpuSceneNode().GpuSceneDescUAV.mCoreObject);
-            }
-
+            
             SetupVxSceneDrawcall = rc.CreateComputeDrawcall();
             SetupVxSceneDrawcall.mCoreObject.SetComputeShader(CS_SetupVxScene.mCoreObject);
             SetupVxSceneDrawcall.mCoreObject.SetDispatch(
@@ -228,7 +249,7 @@ namespace EngineNS.Bricks.VXGI
             srvIdx = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerCamera");
             if (srvIdx != (IShaderBinder*)0)
             {
-                var camera = policy.GetBasePassNode().GBuffers.Camera;
+                var camera = policy.DefaultCamera;
                 EraseVoxelGroupDrawcall.mCoreObject.GetCBufferResources().BindCS(srvIdx->m_CSBindPoint, camera.PerCameraCBuffer.mCoreObject);
             }
             srvIdx = CSDesc_EraseVoxelGroup.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxAllocator");
@@ -240,11 +261,6 @@ namespace EngineNS.Bricks.VXGI
             if (srvIdx != (IShaderBinder*)0)
             {
                 EraseVoxelGroupDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, UavVoxelPool.mCoreObject);
-            }
-            srvIdx = CSDesc_EraseVoxelGroup.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "GpuSceneDesc");
-            if (srvIdx != (IShaderBinder*)0)
-            {
-                EraseVoxelGroupDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, policy.GetGpuSceneNode().GpuSceneDescUAV.mCoreObject);
             }
             srvIdx = CSDesc_EraseVoxelGroup.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxScene");
             if (srvIdx != (IShaderBinder*)0)
@@ -262,7 +278,7 @@ namespace EngineNS.Bricks.VXGI
             srvIdx = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerCamera");
             if (srvIdx != (IShaderBinder*)0)
             {
-                var camera = policy.GetBasePassNode().GBuffers.Camera;
+                var camera = policy.DefaultCamera;
                 InjectVoxelsDrawcall.mCoreObject.GetCBufferResources().BindCS(srvIdx->m_CSBindPoint, camera.PerCameraCBuffer.mCoreObject);
             }
             srvIdx = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxAllocator");
@@ -275,46 +291,19 @@ namespace EngineNS.Bricks.VXGI
             {
                 InjectVoxelsDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, UavVoxelPool.mCoreObject);
             }
-            srvIdx = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "GpuSceneDesc");
-            if (srvIdx != (IShaderBinder*)0)
-            {
-                InjectVoxelsDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, policy.GetGpuSceneNode().GpuSceneDescUAV.mCoreObject);
-            }
             srvIdx = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxScene");
             if (srvIdx != (IShaderBinder*)0)
             {
                 InjectVoxelsDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, UavVoxelScene.mCoreObject);
             }
-            srvIdx = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "GBufferAbedo");
-            if (srvIdx != (IShaderBinder*)0)
-            {
-                //CSDesc_InjectVoxels.mCoreObject.GetCBufferDesc(srvIdx, &desc);
-                //cmd.CSSetUnorderedAccessView(desc.m_CSBindPoint, UavDiffuseAndDepth.mCoreObject, &nUavInitialCounts);
-
-                InjectVoxelsDrawcall.mCoreObject.GetShaderRViewResources().BindCS(srvIdx->CSBindPoint, SrvAbedo.mCoreObject);
-            }
-            srvIdx = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GBufferShadowMask");
-            if (srvIdx != (IShaderBinder*)0)
-            {
-                InjectVoxelsDrawcall.mCoreObject.GetShaderRViewResources().BindCS(srvIdx->CSBindPoint, SrvShadowMask.mCoreObject);
-            }
-            srvIdx = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GBufferDepth");
-            if (srvIdx != (IShaderBinder*)0)
-            {
-                InjectVoxelsDrawcall.mCoreObject.GetShaderRViewResources().BindCS(srvIdx->CSBindPoint, SrvDepth.mCoreObject);
-            }
+            
         }
-        public override void OnResize(Graphics.Pipeline.IRenderPolicy policy, float x, float y)
+        public override void OnResize(Graphics.Pipeline.URenderPolicy policy, float x, float y)
         {
-            SrvShadowMask = policy.GetFinalShowRSV();
-
-            SrvAbedo = policy.GetBasePassNode().GBuffers.GetGBufferSRV(0);
-            SrvDepth = policy.GetBasePassNode().GBuffers.GetDepthStencilSRV();
-
             //UavAbedo?.Dispose();
             //UavAbedo = policy.GetBasePassNode().GBuffers.CreateUAV(0);
-            DiffuseRTWidth = policy.GetBasePassNode().GBuffers.RTDesc[0].Width;
-            DiffuseRTHeight = policy.GetBasePassNode().GBuffers.RTDesc[0].Height;
+            DiffuseRTWidth = (uint)x;// policy.GetBasePassNode().GBuffers.RTDesc[0].Width;
+            DiffuseRTHeight = (uint)y;// policy.GetBasePassNode().GBuffers.RTDesc[0].Height;
 
             ResetComputeDrawcall(policy);
         }
@@ -350,7 +339,7 @@ namespace EngineNS.Bricks.VXGI
             
         }
         bool bTestErase = false;
-        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.IRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
         {
             if (bTestErase)
             {
@@ -364,8 +353,8 @@ namespace EngineNS.Bricks.VXGI
                 GBufferSize.Y = DiffuseRTHeight;                
                 CBuffer.SetValue(idx, in GBufferSize);
 
-                var zNear = policy.GetBasePassNode().GBuffers.Camera.mCoreObject.mZNear;
-                var zfar = policy.GetBasePassNode().GBuffers.Camera.mCoreObject.mZFar;
+                var zNear = policy.DefaultCamera.mCoreObject.mZNear;
+                var zfar = policy.DefaultCamera.mCoreObject.mZFar;
 
                 var ReconstructPosArg = new Vector2(zfar / (zfar - zNear), zNear * zfar / (zNear - zfar));
                 idx = CBuffer.mCoreObject.FindVar("ReconstructPosArg");
@@ -395,10 +384,17 @@ namespace EngineNS.Bricks.VXGI
                     {
                         if (CS_SetupVxAllocator != null && CS_SetupVxScene != null)
                         {
-                            var cmd = BasePass.DrawCmdList.mCoreObject;
+                            var cmd = BasePass.DrawCmdList;
 
-                            SetupVxAllocatorDrawcall.mCoreObject.BuildPass(cmd);
-                            SetupVxSceneDrawcall.mCoreObject.BuildPass(cmd);
+                            var srvIdx = CSDesc_SetupVxAllocator.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "GpuSceneDesc");
+                            if (srvIdx != (IShaderBinder*)0)
+                            {
+                                var attachBuffer = GetAttachBuffer(GpuScenePinIn);
+                                SetupVxAllocatorDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, attachBuffer.Uav.mCoreObject);
+                            }
+
+                            SetupVxAllocatorDrawcall.BuildPass(cmd);
+                            SetupVxSceneDrawcall.BuildPass(cmd);
 
                             //cmd.SetComputeShader(CS_SetupVxAllocator.mCoreObject);
                             //var srvIdx = CSDesc_SetupVxAllocator.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxAllocator");
@@ -438,16 +434,23 @@ namespace EngineNS.Bricks.VXGI
                     {
                         if (CS_InjectVoxels != null)
                         {
-                            var cmd = BasePass.DrawCmdList.mCoreObject;
+                            var cmd = BasePass.DrawCmdList;
 
                             #region erase voxelgroups
                             if (VxEraseGroupSize.AnyNotZero())
                             {
+                                var srvIdx  = CSDesc_EraseVoxelGroup.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "GpuSceneDesc");
+                                if (srvIdx != (IShaderBinder*)0)
+                                {
+                                    var attachBuffer = GetAttachBuffer(GpuScenePinIn);
+                                    EraseVoxelGroupDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, attachBuffer.Uav.mCoreObject);
+                                }
+
                                 EraseVoxelGroupDrawcall.mCoreObject.SetDispatch(
                                     CoreDefine.Roundup(VxEraseGroupSize.x, Dispatch_SetupDimArray3.x),
                                     CoreDefine.Roundup(VxEraseGroupSize.y, Dispatch_SetupDimArray3.y),
                                     CoreDefine.Roundup(VxEraseGroupSize.z, Dispatch_SetupDimArray3.z));
-                                EraseVoxelGroupDrawcall.mCoreObject.BuildPass(cmd);
+                                EraseVoxelGroupDrawcall.BuildPass(cmd);
                                 //cmd.SetComputeShader(CS_EraseVoxelGroup.mCoreObject);
                                 //var srvIdx = CSDesc_EraseVoxelGroup.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
                                 //if (srvIdx != (IShaderBinder*)0)
@@ -490,11 +493,32 @@ namespace EngineNS.Bricks.VXGI
 
                             #region inject voxels
                             {
+                                var srvIdx  = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "GpuSceneDesc");
+                                if (srvIdx != (IShaderBinder*)0)
+                                {
+                                    InjectVoxelsDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, GetAttachBuffer(GpuScenePinIn).Uav.mCoreObject);
+                                }
+                                srvIdx = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GBufferAbedo");
+                                if (srvIdx != (IShaderBinder*)0)
+                                {
+                                    InjectVoxelsDrawcall.mCoreObject.GetShaderRViewResources().BindCS(srvIdx->CSBindPoint, GetAttachBuffer(AlbedoPinIn).Srv.mCoreObject);
+                                }
+                                srvIdx = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GBufferShadowMask");
+                                if (srvIdx != (IShaderBinder*)0)
+                                {
+                                    InjectVoxelsDrawcall.mCoreObject.GetShaderRViewResources().BindCS(srvIdx->CSBindPoint, GetAttachBuffer(ShadowMaskPinIn).Srv.mCoreObject);
+                                }
+                                srvIdx = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GBufferDepth");
+                                if (srvIdx != (IShaderBinder*)0)
+                                {
+                                    InjectVoxelsDrawcall.mCoreObject.GetShaderRViewResources().BindCS(srvIdx->CSBindPoint, GetAttachBuffer(DepthPinIn).Srv.mCoreObject);
+                                }
+
                                 InjectVoxelsDrawcall.mCoreObject.SetDispatch(
                                     CoreDefine.Roundup(DiffuseRTWidth, Dispatch_SetupDimArray2.x),
                                     CoreDefine.Roundup(DiffuseRTHeight, Dispatch_SetupDimArray2.y),
                                     1);
-                                InjectVoxelsDrawcall.mCoreObject.BuildPass(cmd);
+                                InjectVoxelsDrawcall.BuildPass(cmd);
                                 //cmd.SetComputeShader(CS_InjectVoxels.mCoreObject);
                                 //var srvIdx = CSDesc_InjectVoxels.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
                                 //if (srvIdx != (IShaderBinder*)0)
@@ -561,14 +585,14 @@ namespace EngineNS.Bricks.VXGI
             }            
         }
         
-        public unsafe override void TickRender(Graphics.Pipeline.IRenderPolicy policy)
+        public unsafe override void TickRender(Graphics.Pipeline.URenderPolicy policy)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
             var cmdlist_hp = BasePass.CommitCmdList.mCoreObject;
             cmdlist_hp.Commit(rc.mCoreObject);
         }
-        public unsafe override void TickSync(Graphics.Pipeline.IRenderPolicy policy)
+        public unsafe override void TickSync(Graphics.Pipeline.URenderPolicy policy)
         {
             BasePass.SwapBuffer();
         }
