@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>fca99047-6e09-44e6-b6d6-31bf2c3b2653</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.StateMachine</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)IState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StackBasedSM\UStackBasedStateMachine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StackBasedSM\UStackBasedState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StackBasedSM\UStackBasedStateTransition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedSM\UTimedStateMachine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedSM\UTimedState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedSM\UTimedTransition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UStateMachine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UTransition.cs" />
+  </ItemGroup>
+</Project>

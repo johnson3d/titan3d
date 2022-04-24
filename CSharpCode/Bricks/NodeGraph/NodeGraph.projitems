@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>406055cd-ecc3-4aef-a7f2-b2ff5f8ea54c</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Bricks.NodeGraph</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)UGraphRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ULinker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UMenuItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UNodeGraph.cs" />
+  </ItemGroup>
+</Project>
