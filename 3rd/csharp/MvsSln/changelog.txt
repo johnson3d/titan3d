@@ -1,0 +1,490 @@
+- - - - - - - - - - - - - - - - - - - 
+MvsSln - https://github.com/3F/MvsSln
+- - - - - - - - - - - - - - - - - - - 
+
+[v2.6] 2021.08.23
+
+    * FIXED: Fixed CalculateHashCode() Extension.
+             Internally affects many objects due to broken GetHashCode().
+             
+    * FIXED: Fixed SlnItems.ProjectDependenciesXml when empty input:
+             Report https://github.com/3F/MvsSln/issues/25#issuecomment-743840401
+
+    * NEW: packages.config support PR #30. Related issues #27, #28.
+           To activate it, use the following flags:
+            * PackagesConfig, PackagesConfigSolution, PackagesConfigLegacy.
+            
+            For example,
+            ```
+            using Sln l = new("Input.sln", SlnItems.AllNoLoad | SlnItems.PackagesConfig);
+
+            IPackageInfo found = l.Result.PackagesConfigs
+                                            .SelectMany(s => s.Packages)
+                                            .FirstOrDefault(p => p.Id.StartsWith("Microsoft."));
+            // found.MetaTFM ...
+
+            Version v = l.Result.PackagesConfigs.First().GetPackage("LX4Cnh")?.VersionParsed;
+            ```
+              Including GetNuTool compatible packages, format:
+              https://github.com/3F/GetNuTool#format-of-packages-list      
+      
+    * NEW: Added HasValue and HasNothing properties in PropertyItem.
+      
+    * NEW: Added SlnItems.AllMinimal and SlnItems.AllNoLoad in addition to SlnItems.All.
+    
+    * NEW: Added IXProject.GetPackageReferences().
+      
+    * CHANGED: ConfigItem.Format() marked as obsolete.
+               Use `ToString()` and `IConfPlatform.Formatted` instead.
+    
+
+[v2.5.3] 2020.07.23
+
+    * FIXED: Fixed XProjectEnv. Issue #29
+             XProjectByFile() can destroy original properties that was prepared for solution.
+             Related WARN:
+             `Project configuration is not found <- sln [Debug|Win32]`
+             
+    * CHANGED: Improved init of blank ProjectItem for GetOrLoadProject() in XProjectEnv.
+               Related issue #29.
+               
+    * NEW: Added the following extensions for ProjectItem:
+    
+        * IsCs() - Checking both legacy `ProjectType.Cs` and modern `ProjectType.CsSdk` types.
+        * IsFs() - Checking both legacy `ProjectType.Fs` and modern `ProjectType.FsSdk` types.
+        * IsVb() - Checking both legacy `ProjectType.Vb` and modern `ProjectType.VbSdk` types.
+        * IsSdk() - While ProjectType cannot inform the actual use of the modern Sdk style in projects,
+                    current method will try to detect this by using the extended logic:
+                    https://github.com/dotnet/project-system/blob/master/docs/opening-with-new-project-system.md
+
+
+[v2.5.2] 2020.05.05
+
+    * NEW: Activating ProjectReferences for existing ProjectDependencies (shallow copy) through new flag.
+           Issue #25.
+            ```
+            ProjectDependenciesXml = 0x0800 | ProjectDependencies | Env, 
+            ```
+                Covers ProjectDependencies (SLN) logic using data from project files (XML). 
+                Helps eliminate miscellaneous units between VS and msbuild world: 
+                https://github.com/3F/MvsSln/issues/25#issuecomment-617956253
+                Requires Env with loaded projects (LoadMinimalDefaultData or LoadDefaultData).
+                
+                A core feature in .NET DllExport Post-processing:
+                https://github.com/3F/DllExport/pull/148
+                
+    * NEW: `ProjectReference` support without obsolete projectguid. Issue #26.
+    
+    * NEW: IXProject methods:
+           ```
+           +IXProject.GetFullPath(string relative)
+           ```
+           
+    * FIXED: Fixed possible empty records in SlnParser.SetProjectItemsConfigs.
+    
+    * FIXED: Fixed `The given key was not present...` when different case for keys in Item.Metadata.
+    
+    * FIXED: Fixed protected XProject GetProjectGuid() + GetProjectName() when empty property.
+    
+    * CHANGED: Compatible signature update for `ForEach<T>` extension method:
+               ```
+               IEnumerable<T> ForEach<T>(this IEnumerable<T> items, Action<T> act)
+               ```
+    
+    * CHANGED: Updated Microsoft.CSharp 4.7.0 (Only for: netstandard2.0 + netcoreapp2.1)
+    
+    * CHANGED: Updated Microsoft.Build 16.5.0 (Only for: netcoreapp2.1)
+    
+
+[v2.5.1] 2020.01.30
+
+    * FIXED: Fixed NullReferenceException when empty xml nodes in PropertyItem through ProjectProperty.
+             This is possible for global or environment properties, for example:
+             ```
+             GetProperty("Platform")
+             GetProperty("Configuration")
+             ```
+             
+    * NEW: Added SDK based project types: .fsproj; .vbproj; .csproj
+           https://github.com/dotnet/project-system/blob/master/docs/opening-with-new-project-system.md
+           
+    * NEW: PropertyItem can now be safely compared between each other:
+           ```
+           new PropertyItem(...) == new PropertyItem(...)
+           ```
+           
+    * CHANGED: Updated package's tool hMSBuild 2.3
+
+               Release notes:
+               https://github.com/3F/hMSBuild/releases/tag/v2.3
+               
+    * CHANGED: Updated package's tool GetNuTool 1.8
+
+               Release notes:
+               https://github.com/3F/GetNuTool/releases/tag/1.8
+               
+    * NOTE: You can also use high quality Visual Studio Project Icons together with MvsSln:
+            https://twitter.com/GitHub3F/status/1219348325729816578
+
+
+[v2.5] 2019.10.17
+
+    * FIXED: Fixed parallelism problems when using Sln wrapper.
+    
+    * FIXED: Incorrect initialization for ProjectReferences class.
+    
+    * NEW: Added .net core based target platforms: netcoreapp2.1. + netstandard2.0. Issue #11.
+    
+    * NEW: Added netfx based target platforms: net472. PR #21.
+    
+    * NEW: IXProject methods:
+        ```
+        +bool AddPackageReference(string id, string version, IEnumerable<KeyValuePair<string, string>> meta = null);
+        +Item GetFirstPackageReference(string id);
+        +bool RemovePackageReference(string id);
+        ```
+    
+    * CHANGED: EnvDTE features are obsolete now. Scheduled for removal in future major releases. Issue #22.
+    
+    * CHANGED: MathExtension.CalculateHashCode now encapsulates GetHashCode() with null checking.
+    
+    * CHANGED: Compatible signature changes for the following extension method:
+        ```
+        AddOrUpdate(this IDictionary<string, string> source, IEnumerable<KeyValuePair<string, string>> items)
+        ```
+        
+    * KNOWN: Various [ possible ] problems when using modern MSBuild assemblies.
+    
+            ! Solution and details in our wiki: 
+            https://github.com/3F/MvsSln/wiki/Advanced-Features
+            
+            Do not hesitate to contact: https://github.com/3F/MvsSln/issues
+            
+    * NOTE: Discuss the planned v3.0 and its major changes: 
+            https://github.com/3F/MvsSln/milestone/4
+    
+    
+[v2.4] 2019.08.10
+
+    * FIXED: "The format ... of configuration is not supported". Issue #19.
+    
+    * FIXED: Fixed loading of projects via `IsolatedEnv.LoadProjects()`.
+    
+    * FIXED: Fixed possible NullReferenceException in `ProjectItem` constructors.
+    
+    * NEW: Introduces XProjectEnv. PR #17.
+           An splitted IsolatedEnv as the base but without IDisposable.
+        ```
+        IXProjectEnv slnEnv;
+        ...
+        slnEnv = new XProjectEnv(sln, properties);
+        ...
+        slnEnv = new IsolatedEnv(sln); // +IEnvironment, +IDisposable
+        slnEnv.Assign();
+        ...
+        ((IDisposable)slnEnv)?.Dispose();
+        ```
+        
+    * NEW: Added `PropertyNames` type. Regular MSBuild Properties and related.
+    
+    * NEW: Added `FileExt` type for work with `ProjectType` via its file only.
+    
+    * NEW: Added `Kinds` type: PRJ_UNLOADED; PRJ_SLN_DIR
+    
+    * NEW: New extension methods:
+        ```
+        +TVal GetOrDefault<TKey, TVal>(this IDictionary<TKey, TVal> data, TKey key, TVal def)
+        +bool IsEqual(this Project a, Project b)
+        +string GetSolutionDir(this Project eProject)
+        +string GetProjectRelativePath(this Project eProject)
+        +string GetConfig(this Project eProject)
+        +string GetPlatform(this Project eProject)
+        +string GetSolutionExt(this Project eProject)
+        string GetDirectoryFromFile(this string file)
+        Dictionary<string, string> GetFileProperties(this string file)
+        IDictionary<string, string> AddOrUpdate(this IDictionary<string, string> source, IDictionary<string, string> items)
+        bool Remove<T>(this IList<T> src, T elem, Func<T, T, bool> comparer)
+        bool IsLimEqual(this IXProject x, IXProject prj)
+        ```
+        
+    * CHANGED: Removed pGuid checking from `IXProjectEnv.GetOrLoadProject()`
+               Related to Issue #18.
+    
+    * CHANGED: ISlnResult changes: 
+        ```
+        +`string SolutionFile`
+            Full path to an solution file. 
+            Old versions still can address it through Properties.
+        ```
+    
+    * CHANGED: IConfPlatform changes:
+        ```
+        +`bool IsEqualByRule(string config, string platform, bool icase = false);`
+            Checking an config/platform by using {Rule} instance.
+        ```
+                    
+    * CHANGED: IXProjectEnv (IEnvironment) changes:
+        ```
+        +`IXProject XProjectByFile(...);`
+            Find project by full path to file.
+
+        +`IEnumerable<IXProject> Assign(IEnumerable<Project> projects = null);`
+            Assign an existing `Microsoft.Build.Evaluation.Project` instances for local collection.
+
+        +`IXProject AddOrGet(Project project);`
+            Adds `Microsoft.Build.Evaluation.Project` instance into IXProject collection if it does not exist.
+
+        +`ProjectItemCfg ExtractItemCfg(Project project);`
+            Prepares data from `Microsoft.Build.Evaluation.Project` instance.
+
+        +`void UnloadAll(bool throwIfErr = true);`
+            Unloads all evaluated projects at current time.
+
+        +`bool Unload(IXProject xp);`
+            Unloads specified project.
+
+        +`IEnumerable<Project> ValidProjects`
+            List of valid projects such as something except `.user`,`.metaproj` but contains FirstChild / LastChild XML node.
+        ```
+    
+    * CHANGED: Updated package's tool hMSBuild 2.2
+
+               Release notes:
+               https://github.com/3F/hMSBuild/releases/tag/v2.2
+               
+    * NOTE: The most 2.4 changes is relevant to integration with vsSolutionBuildEvent.
+    
+            https://twitter.com/GitHub3F/status/1158091930309398528    
+            https://github.com/3F/vsSolutionBuildEvent/pull/53
+            https://github.com/3F/MvsSln/pull/17
+            
+            Find any relevant use of the new features in that project.
+            
+
+[v2.3] 2019.06.17
+
+    * FIXED: Added support of `.` character in solution/project configuration name. 
+             Issue #13.
+             ~
+            ```
+             {Guid}.Debug.x64.x86|Any.CPU.etc.Build.0 = Debug.x64.x86|Any.CPU.etc
+                    \___________/ \_________/ \_____/ ^ \___________/ \_________/
+            ```
+    
+    * FIXED: [Broken in 2.2] Processing solution breaks when solution contains 
+             some unsupported/unknown project type. Issue #14. (Thanks @wouterroos).
+
+    * FIXED: Possible InvalidOperationException "Sequence contains no elements". 
+             Issue #20.
+    
+    * NEW: An `Deploy` flag support. PR #16 (Thanks @wouterroos).
+    
+           +IConfPlatformPrj.IncludeInDeploy
+
+    * NEW: Added new the following project types below. PR #15 (Thanks @wouterroos).
+    
+           +ProjectType.Deploy
+           +ProjectType.Sf
+
+    * CHANGED: Updated package's tool hMSBuild 2.1
+    
+               Release notes:
+               https://github.com/3F/hMSBuild/releases/tag/v2.1
+
+[v2.2] 2019.04.08
+
+    * FIXED: Fixed possible error when loading all found projects: 
+            'An equivalent project is already present in the project collection, ...'
+    
+    * NEW: Implemented R/W Handlers for `NestedProjects` section. Issue #7
+    
+    * NEW: Implemented new R/W handlers for `ExtensibilityGlobals` section.
+            Use `ExtItems = 0x0400` flag to activate it.
+
+    * NEW: Implemented native object comparison for ProjectItem, SolutionFolder, and RawText.
+            ```
+            ~
+            if(new ProjectItem(...) == new ProjectItem(...)) { ... }
+            if(new SolutionFolder(...) == new SolutionFolder(...)) { ... }
+            if(new RawText(...) == new RawText(...)) { ... }
+            if(new ConfigItem(...) == new ConfigItem(...)) { ... }
+            if((RawText)"data" == (RawText)"data") { ... }
+            ```
+
+    * NEW: New constructors for `SolutionFolder`. Issue #8:
+        ```
+        +SolutionFolder(string fGuid, string name, IEnumerable<RawText> items)
+        +SolutionFolder(Guid fGuid, string name)
+        +SolutionFolder(string fGuid, string name, SolutionFolder parent, params RawText[] items)
+        +SolutionFolder(string fGuid, string name, SolutionFolder? parent, IEnumerable<RawText> items)
+        +SolutionFolder(string name, params RawText[] items)
+        +SolutionFolder(string name, IEnumerable<RawText> items)
+        +SolutionFolder(string name, SolutionFolder parent, params RawText[] items)
+        +SolutionFolder(string name, SolutionFolder parent, IEnumerable<RawText> items)
+        +SolutionFolder(ProjectItem pItem, params RawText[] def)
+        +SolutionFolder(SolutionFolder folder)
+        ```
+        
+    * NEW: New constructors for `ProjectItem` (part of Issue #8):
+        ```
+        +ProjectItem(string name, ProjectType pType, SolutionFolder? parent = null)
+        +ProjectItem(string name, ProjectType pType, string path, SolutionFolder? parent = null, string slnDir = null)
+        +ProjectItem(string pGuid, string name, ProjectType pType, SolutionFolder? parent = null)
+        +ProjectItem(string pGuid, string name, ProjectType pType, string path, SolutionFolder? parent = null, string slnDir = null)
+        +ProjectItem(string pGuid, string name, string path, string pType, string slnDir = null)
+        +ProjectItem(ProjectItem prj)
+        ```
+        
+    * CHANGED: `ProjectItem.ProjectTypeBy(string guid)` marked as [Obsolete] and can be removed in new versions later.
+                You can use new methods when you need:
+                * `Guids.ProjectTypeBy(string guid)`
+                * `Guids.GuidBy(ProjectType type)`
+                
+    * CHANGED: Updated package tools hMSBuild 2.0 & GetNuTool 1.7.
+               Release notes:
+                * https://github.com/3F/GetNuTool/releases/tag/v1.7
+                * https://github.com/3F/hMSBuild/releases/tag/v2.0
+                
+
+[v2.1] 2018.08.05
+
+    * FIXED: Fixed bug 'The node is not parented by this object' 
+             When IXProject.RemoveImport is used for `Import` elements inside `ImportGroup`.
+             Related issue: https://github.com/3F/DllExport/issues/77
+
+    * NEW: Added `IXProject.AddImport(IEnumerable<ImportElement> elements, ...` 
+           To add 'import' elements inside ImportGroup.
+           
+    * CHANGED: IXProject changes:
+        * +`IXProject.PId` an unique identifier for project (not instance).
+        * +`IXProject.GetRelativePath(string path)` Makes relative path from used project.
+        * +`IXProject.AddImport(ImportElement element);`
+        * Compatible signature update: `bool RemoveImport(ImportElement element, bool holdEmptyGroup = false)`
+        
+    * CHANGED: Additional .ctors for XProject:
+        * +`XProject()`
+        * +`XProject(string file)`
+        * +`XProject(string file, IDictionary<string, string> properties)`
+        * +`XProject(Project prj)`
+
+[v2.0] 2017.10.05
+
+    * NEW: Updated architecture now provides 2 types of handlers - readers (ISlnHandler) and writers (IObjHandler).
+            You also can use your custom reader or writer, just implement an `ISlnHandler` or `IObjHandler`:
+            
+            ```
+              class MyReader: LAbstract, ISlnHandler { ... }
+              class MyWriter: WAbstract, IObjHandler { ... }
+            ```
+            
+            Read the documentation for details.
+            
+    * NEW: MvsSln now also may provide map of analyzed data. Parser will expose map through list of `ISection` for each line.
+           To enable this, define a bit 0x0080 for type of operations to parser.
+           This helps to get flexible control between readers and any writers.
+           
+           Example of using writer `WSolutionConfigurationPlatforms` together with calculated map:
+           
+            ```
+              var data = new List<IConfPlatform>() {
+                  new ConfigSln("Debug", "Any CPU"),
+                  new ConfigSln("Release_net45", "x64"),
+                  new ConfigSln("Release", "Any CPU"),
+              };
+              
+              var whandlers = new Dictionary<Type, HandlerValue>() {
+                  [typeof(LSolutionConfigurationPlatforms)] = new HandlerValue(new WSolutionConfigurationPlatforms(data)),
+              };
+              
+              using(var w = new SlnWriter("<path_to>.sln", whandlers)) {
+                  w.Write(map);
+              }
+            ```
+            
+            Read the documentation for details.
+            
+    * NEW: Implemented new writer `WProject`. 
+    * NEW: Implemented new writer `WProjectConfigurationPlatforms`.
+    * NEW: Implemented new writer `WSolutionConfigurationPlatforms`.
+    * NEW: Implemented new writer `WVisualStudioVersion`. 
+    * NEW: Implemented new writer `WProjectSolutionItems`.
+    * NEW: Implemented new reader `LVisualStudioVersion`.
+    * NEW: Implemented new reader `LProjectSolutionItems`.
+    * FIXED: Fixed possible bug when SlnItems.All &~ SlnItems.Projects.
+    * FIXED: Fixed possible null with PropertyItem.evaluatedValue:
+               MS describes this as 'the evaluated property value, which is never null'
+               But, this is not true: .NETFramework\v4.0\Microsoft.Build.dll - Version=4.0.0.0, PublicKeyToken=b03f5f7f11d50a3a
+               
+    * FIXED: Fixed possible null for `IXProject.ProjectName` when project does not contain this property.
+    * CHANGED: `IXProject.ProjectGuid` now will return value from ProjectItem.pGuid if project file does not contain an Guid at all. 
+                It's actual for SDK-based projects.
+               
+    * CHANGED: SlnParser now can be initialized without handlers at all.
+                ```
+                  ISlnContainer sln = new SlnParser(false);
+                  sln.SlnHandlers.Register(new LMySpec());
+                  ...
+
+                  // to reset and register all default:
+                  sln.SetDefaultHandlers();
+                ```
+               
+    * CHANGED: Updated SlnItems: added `Map` item to create map when processing sln data.
+    * CHANGED: `IsolatedEnv.Load(...)` splitted and marked as virtual to leave the final implementation for user, 
+                to avoid problems like in Issue #1 etc.
+                
+    * CHANGED: Updated abstract layer with some types from ISlnResult & ISlnResultSvc.
+    * CHANGED: Updated GetNuTool v1.6.1.10480_bde3e50 & hMSBuild v1.2.2.62992_3ee58c3.
+    * KNOWN_PROBLEM: C++ projects and their initialization for Visual Studio 2017. Issue #1.
+    
+    
+[v1.0.1] 2017.07.21
+
+    * FIXED: Fixed possible bug with already loaded project in collection when initializing new instance of Sln.
+    * FIXED: Fixed `IXProject.RemoveProperty(PropertyItem property)` & `IXProject.RemoveItem(Item item)` when selected items or properties does not exist.
+    * FIXED: Fixed possible exception when disposing object /IsolatedEnv.
+    * FIXED: Fixed possible NullReferenceException for IsolatedEnv + Improved layer of IXProject.
+    * NEW: Added `localScope` flag for `GetProperty(string name, bool localScope = true)`.
+           If true, will return default value for any special and imported properties type. It's important to use with `RemoveProperty(...)` etc.
+           
+    * NEW: Added `SlnItems.LoadMinimalDefaultData` flag to load only minimal default data. For example, the only one configuration for each project.
+           And its alias `EnvWithMinimalProjects` - To prepare environment with minimal loaded projects.
+           
+    * NEW: Added `IXProject.Reevaluate()` - To reevaluate data of project if necessary.
+           For example, if project contains 2 or more same properties by name: 
+           After `RemoveProperty(...)` the second property still will be unavailable for `GetProperty(...)`
+           because its node does not contain this at all. Use this to update nodes, or `revalue` flag with updated `RemoveProperty(...)`
+           
+    * NEW: Added `IXProject.RemoveImport(ImportElement element)` - For additional control of removing elements via IXProject.
+    * CHANGED: `IXProject.AddImport(...)` methods - now, does not have any restriction for adding new elements.
+    * CHANGED: `AssemblyName` from Projects.Item has been wrapped by `AsmData` for additional work with public key tokens etc.
+    * CHANGED: The result of `IXProject.GetImport(...)` has been wrapped by `ImportElement` to avoid using MBE for end user.
+    * CHANGED: Other list of changes:
+                * `+IXProject.ProjectPath`
+                * `+IXProject.ProjectFullPath`
+                * `+IXProject.GlobalProperties`
+                * `+IXProject.Save(string path, Encoding enc)`
+                * `+IXProject.GetImport(string project, string label, bool eq = false)`
+                * `+IXProject.GetImports(string project = null)`
+                * `+IXProject.GetImports(string project, string label, bool eq = false)`
+                * `+IXProject.AddReference(string fullpath, bool local, bool? embed = null, bool? spec = null)`
+                * `+IEnvironment.LoadMinimalProjects()`
+                
+    * CHANGED: Compatible update of signatures:
+                * `~IXProject.AddImport(string target, bool checking, string label = null)`
+                * `~IXProject.AddImport(string target, string condition, string label = null)`
+                * `~IXProject.GetProperty(string name, bool localScope = true)`
+                * `~IXProject.RemoveProperty(string name, bool revalue = false)`
+                * `~IXProject.RemoveProperty(PropertyItem property, bool revalue = false)`
+                * `~IEnvironment.LoadProjects(IEnumerable<ProjectItemCfg> pItems = null)`
+                
+    * CHANGED: Incompatible minor changes with result of `ProjectImportElement GetImport(string project = null)`. 
+               It has been wrapped by `ImportElement` to avoid using MBE.
+
+
+[v1.0] 2017.07.07
+
+    * Initial public release. Extracted from vsSolutionBuildEvent project: 
+      https://github.com/3F/vsSolutionBuildEvent
+
+      A new independent tool for complex support of the Visual Studio .sln files and its projects.
