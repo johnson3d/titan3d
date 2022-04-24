@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.Procedure.UPgcAssetAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="39025ad5-415f-4585-9357-fac812394c3f" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Procedure.UPgcAsset&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcAsset@EngineCore" />
+</Root>
