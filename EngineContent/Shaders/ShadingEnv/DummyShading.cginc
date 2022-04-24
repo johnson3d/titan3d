@@ -4,6 +4,8 @@
 #include "../Inc/VertexLayout.cginc"
 #include "../Inc/GpuSceneCommon.cginc"
 
+#include "../Inc/SysFunctionDefImpl.cginc"
+
 PS_INPUT VS_Main(VS_INPUT input)
 {
 	PS_INPUT output = (PS_INPUT)0;

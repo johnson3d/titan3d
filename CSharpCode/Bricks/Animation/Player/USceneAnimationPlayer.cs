@@ -1,4 +1,5 @@
 ﻿using EngineNS.Animation.Animatable;
+using EngineNS.Animation.Command;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -23,7 +24,7 @@ namespace EngineNS.Animation.Player
         public void Evaluate()
         {
             //make command
-            Pipeline.UPropertiesSettingCommand command = new Pipeline.UPropertiesSettingCommand()
+            UExtractPoseFromClipCommand command = new UExtractPoseFromClipCommand()
             {
                 AnimationPropertiesSetter = AnimationPropertiesSetter,
                 Time = Time

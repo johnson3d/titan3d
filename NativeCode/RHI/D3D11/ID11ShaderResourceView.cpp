@@ -58,43 +58,45 @@ void SrvDesc2DX(D3D11_SHADER_RESOURCE_VIEW_DESC* tar, const IShaderResourceViewD
 		break;
 		case ST_Texture2DArray:
 		{
+			tar->Texture2DArray.ArraySize = src->Texture2DArray.ArraySize;
+			tar->Texture2DArray.FirstArraySlice = src->Texture2DArray.FirstArraySlice;
 			tar->Texture2DArray.MipLevels = src->Texture2DArray.MipLevels;
 			tar->Texture2DArray.MostDetailedMip = src->Texture2DArray.MostDetailedMip;
 		}
 		break;
 		case ST_Texture2DMS:
 		{
-
+			ASSERT(false);
 		}
 		break;
 		case ST_Texture2DMSArray:
 		{
-
+			ASSERT(false);
 		}
 		break;
 		case ST_Texture3D:
 		{
-
+			ASSERT(false);
 		}
 		break;
 		case ST_Texture3DArray:
 		{
-
+			ASSERT(false);
 		}
 		break;
 		case ST_TextureCube:
 		{
-
+			ASSERT(false);
 		}
 		break;
 		case ST_TextureCubeArray:
 		{
-
+			ASSERT(false);
 		}
 		break;
 		case ST_BufferEx:
 		{
-
+			ASSERT(false);
 		}
 		break;
 		default:

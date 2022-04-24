@@ -81,7 +81,7 @@ namespace EngineNS.Editor.Forms
 
             PreviewViewport.Title = $"Mesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
 
             MeshPropGrid.Target = Mesh;
             UEngine.Instance.TickableManager.AddTickable(this);

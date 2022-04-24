@@ -43,6 +43,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiInputTextFlags_.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiIO.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiKey_.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImGuiModFlags_.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiMouseButton_.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiMouseCursor_.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiPayload.cpp2cs.cs" />
@@ -309,6 +310,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/UavBindInfo.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/UCs2CppBase.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/v3dSampMgr.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/vfxRandom.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/VIUnknown.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/VIUnknownBase.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/XndAttribute.cpp2cs.cs" />

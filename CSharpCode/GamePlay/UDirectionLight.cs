@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public class UDirectionLight
+    public class UDirectionLight : IO.BaseSerializer
     {
         public Vector3 mDirection;
         public float mSunLightLeak = 0.05f;
@@ -12,7 +12,15 @@ namespace EngineNS.GamePlay
         public float mSunLightIntensity = 2.5f;
         public Vector3 mSkyLightColor;
         public Vector3 mGroundLightColor;
+        [Rtti.Meta]
+        public Vector3 Direction
+        {
+            get => mDirection;
+            set => mDirection = value;
+        }
+
         [EGui.Controls.PropertyGrid.Color3PickerEditor]
+        [Rtti.Meta]
         public Vector3 SunLightColor
         {
             get => mSunLightColor;
@@ -22,6 +30,7 @@ namespace EngineNS.GamePlay
             }
         }
         [EGui.Controls.PropertyGrid.Color3PickerEditor]
+        [Rtti.Meta]
         public Vector3 SkyLightColor
         {
             get => mSkyLightColor;
@@ -31,6 +40,7 @@ namespace EngineNS.GamePlay
             }
         }
         [EGui.Controls.PropertyGrid.Color3PickerEditor]
+        [Rtti.Meta]
         public Vector3 GroundLightColor
         {
             get => mGroundLightColor;

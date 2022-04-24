@@ -178,8 +178,12 @@ void CS_Particle_Update(uint3 id : SV_DispatchThreadID,
 			bfDrawArg.Store(3 * 4, Draw_BaseVertexLocation);
 			bfDrawArg.Store(4 * 4, Draw_StartInstanceLocation);
 
-			//num = ROUNDUP(num, DispatchX);
-			num = NebulaRoundup(num + 1, DispatchX);
+			//num = RoundUpPow2(num + 1, DispatchX) / DispatchX;
+			if (num == 0)
+			{
+				num = 1;
+			}
+			num = NebulaRoundup(num, DispatchX);
 			bfDispatchArg.Store(0, num);//dispatchx
 			bfDispatchArg.Store(1 * 4, 1);//dispatchy
 			bfDispatchArg.Store(2 * 4, 1);//dispatchz

@@ -76,8 +76,6 @@ namespace EngineNS.Editor.Forms
 
             (viewport as EGui.Slate.UWorldViewportSlate).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            Scene.Parent = PreviewViewport.World.Root;
-
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
         }
@@ -85,12 +83,15 @@ namespace EngineNS.Editor.Forms
         {
             PreviewViewport.Title = $"Scene:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
 
             AssetName = name;
             Scene = await UEngine.Instance.SceneManager.GetScene(PreviewViewport.World, name);
             if (Scene == null)
                 return false;
+
+            await Scene.InitializeNode(PreviewViewport.World, Scene.NodeData, GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            Scene.Parent = PreviewViewport.World.Root;
 
             ScenePropGrid.Target = Scene;
 
@@ -229,6 +230,11 @@ namespace EngineNS.GamePlay.Scene
 {
     [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.USceneEditor))]
     public partial class UScene
+    {
+    }
+
+    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.USceneEditor))]
+    public partial class UPartitionScene
     {
     }
 }

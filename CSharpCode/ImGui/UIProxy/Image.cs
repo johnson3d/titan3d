@@ -72,7 +72,7 @@ namespace EngineNS.EGui.UIProxy
                 mTask = null;
             }
         }
-        public unsafe bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
+        public unsafe bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
         {
             if (ImageFile == null)
                 return false;
@@ -85,7 +85,7 @@ namespace EngineNS.EGui.UIProxy
             ImGuiAPI.PopClipRect();
             return true;
         }
-        public unsafe void OnDraw(ref ImDrawList drawList, ref Vector2 pos)
+        public unsafe void OnDraw(in ImDrawList drawList, in Vector2 pos)
         {
             if (ImageFile == null)
                 return;

@@ -10,9 +10,30 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Asset\BlendSpace\UBlendSpace.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Pipeline\Command\UBlendSpaceEvaluateCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\IBlendTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_AdditiveBlendSpace1D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_AdditiveBlendSpace2D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_AdditivePose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_AnimationClip.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_BindedPose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_BlendPose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_BlendSpace1D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_BlendSpace2D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_CCDIK.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_CopyPose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_CrossfadePose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_MakeAdditivePose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_SelectPoseByInt.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_ZeroPose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\UAnimationMacross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\UBlendSpace2DPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneNode\UBlendSpaceAnimPlayNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\RuntimePose\Control\Blend\UBlendPose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\RuntimePose\Control\Blend\UCrossfadePose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\RuntimePose\Control\IK\UCCDIK.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\RuntimePose\Control\IK\UFABRIK.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\RuntimePose\Control\IK\UTwoBoneIK.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\Skeleton\USceneSkeleton.cs" />
     <Compile Include="..\..\CSharpCode\Bricks\Animation\Asset\BlendSpace\UBlendSpace.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\BlendSpace\UBlendSpace1D.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset\BlendSpace\UBlendSpace2D.cs" />
@@ -26,9 +47,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Base\UAnimHierarchy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\UCurve.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Animatable.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Pipeline\Command\IAnimationCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Command\IAnimationCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Pipeline\UAnimationPipeline.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Pipeline\Command\UPropertiesSettingCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Command\UExtractPoseFromClipCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\IAnimationPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\USceneAnimationPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\USkeletonAnimationPlayer.cs" />
@@ -45,11 +66,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UAnimationModule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Macross\" />
     <Folder Include="$(MSBuildThisFileDirectory)MorphAnimation\" />
-    <Folder Include="$(MSBuildThisFileDirectory)SkeletonAnimation\" />
-    <Folder Include="$(MSBuildThisFileDirectory)SkeletonAnimation\" />
-    <Folder Include="$(MSBuildThisFileDirectory)StateMachine\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Animation.brick" />

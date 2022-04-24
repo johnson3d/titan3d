@@ -61,7 +61,7 @@ namespace EngineNS.RHI
             //纹理不会引用别的资产
             return false;
         }
-        public unsafe override void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
         {
             var start = ImGuiAPI.GetItemRectMin();
             var end = start + sz;
@@ -104,6 +104,7 @@ namespace EngineNS.RHI
             {
                 var uv0 = new Vector2(0, 0);
                 var uv1 = new Vector2(1, 1);
+                
                 cmdlist.AddImage(SnapTask.Result.GetTextureHandle().ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
             }
             cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
@@ -535,22 +536,41 @@ namespace EngineNS.RHI
                     return 0;
             }
         }
-        public static unsafe StbImageSharp.ImageResult[] LoadPngImageLevels(RName name, uint mipLevel)
+        public static unsafe UPicDesc LoadPicDesc(RName name)
         {
             using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
             {
-                UPicDesc desc = new UPicDesc();
-                {
-                    var attr = xnd.RootNode.TryGetAttribute("Desc");
-                    var ar = attr.GetReader(null);
+                var desc = new UPicDesc();
+                var attr = xnd.RootNode.TryGetAttribute("Desc");
+                var ar = attr.GetReader(null);
 
-                    ar.Read(out desc.Desc);
-                    attr.ReleaseReader(ref ar);
+                ar.Read(out desc.Desc);
+                attr.ReleaseReader(ref ar);
+                return desc;
+            }
+        }
+        public static unsafe StbImageSharp.ImageResult[] LoadPngImageLevels(RName name, uint mipLevel, ref UPicDesc desc)
+        {
+            using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
+            {
+                {
+                    if (desc != null)
+                    {
+                        var attr = xnd.RootNode.TryGetAttribute("Desc");
+                        var ar = attr.GetReader(null);
+
+                        ar.Read(out desc.Desc);
+                        attr.ReleaseReader(ref ar);
+                    }
                 }
                 var pngNode = xnd.RootNode.TryGetChildNode("PngMips");
                 if (pngNode.NativePointer == IntPtr.Zero)
                     return null;
 
+                if (mipLevel == 0)
+                {
+                    mipLevel = pngNode.GetNumOfAttribute();
+                }
                 var result = new StbImageSharp.ImageResult[mipLevel];
                 for (uint i = 0; i < mipLevel; i++)
                 {
@@ -733,6 +753,11 @@ namespace EngineNS.RHI
                 srv.Dispose();
             }
             StreamingAssets.Clear();
+        }
+        public CShaderResourceView DefaultTexture;
+        public async System.Threading.Tasks.Task Initialize(UEngine engine)
+        {
+            DefaultTexture = await GetTexture(engine.Config.DefaultTexture);
         }
         private Thread.UAwaitSessionManager<RName, CShaderResourceView> mCreatingSession = new Thread.UAwaitSessionManager<RName, CShaderResourceView>();
         List<RName> mWaitRemoves = new List<RName>();

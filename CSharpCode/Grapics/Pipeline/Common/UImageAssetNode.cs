@@ -27,13 +27,16 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             ImagePinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
             AddOutput(ImagePinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Uav);
+
+            ImageName = RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine);
         }
         public unsafe override void FrameBuild()
         {
-            var attachement = RenderGraph.AttachmentCache.ImportAttachment(ImagePinOut);
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(ImagePinOut);            
             attachement.Srv = ImageSrv;
         }
         public RHI.CShaderResourceView ImageSrv;
+        [Rtti.Meta]
         public RName ImageName
         {
             get

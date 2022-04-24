@@ -19,7 +19,7 @@ namespace EngineNS.Animation.Animatable
 
     public class IAnimatableClassBindingAttribute : Attribute
     {
-        public virtual void Binding(IAnimatable animatableObject, Base.UAnimHierarchy animHierarchy, Asset.UAnimationClip animationClip, ref UAnimationPropertiesSetter animationPropertiesSetter)
+        public virtual void Binding(in IAnimatable animatableObject, in Base.UAnimHierarchy animHierarchy, in Asset.UAnimationClip animationClip, ref UAnimationPropertiesSetter animationPropertiesSetter)
         {
 
         }
@@ -38,7 +38,7 @@ namespace EngineNS.Animation.Animatable
         //  |   |-AnimatableProperty
         //  |   |-List<AnimatableObject>
 
-        public override void Binding(IAnimatable animatableObject, Base.UAnimHierarchy animHierarchy, Asset.UAnimationClip animationClip, ref UAnimationPropertiesSetter animationPropertiesSetter)
+        public override void Binding(in IAnimatable animatableObject, in Base.UAnimHierarchy animHierarchy, in Asset.UAnimationClip animationClip, ref UAnimationPropertiesSetter animationPropertiesSetter)
         {
             System.Diagnostics.Debug.Assert(animHierarchy != null);
             var objType = Rtti.UTypeDesc.TypeOfFullName(animatableObject.GetType().FullName);
@@ -177,7 +177,7 @@ namespace EngineNS.Animation.Animatable
         }
 
         //DynamicInitialize will be refactoring in next version
-        public static UAnimationPropertiesSetter Binding(Asset.UAnimationClip animationClip, SkeletonAnimation.AnimatablePose.IAnimatableLimbPose bindedPose)
+        public static UAnimationPropertiesSetter Binding(in Asset.UAnimationClip animationClip, SkeletonAnimation.AnimatablePose.IAnimatableLimbPose bindedPose)
         {
             System.Diagnostics.Debug.Assert(bindedPose != null);
             System.Diagnostics.Debug.Assert(animationClip != null);

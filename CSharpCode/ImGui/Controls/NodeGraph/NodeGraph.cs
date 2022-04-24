@@ -23,6 +23,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
         {
             public UUvAnim Image { get; set; } = new UUvAnim();
             public float Offset { get; set; } = 3;
+            public float TextOffset { get; set; } = 3;
         }
         public PinStyle PinInStyle { get; set; } = new PinStyle();
         public PinStyle PinOutStyle { get; set; } = new PinStyle();
@@ -661,7 +662,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
                             UpdateSelectedDrageOffset(ref mousePos);
                             DraggingNodes = true;
                         }
-                        pressNode.OnLClicked(clickedPin);
+                        pressNode.OnLButtonClicked(clickedPin);
                     }
                     else
                     {

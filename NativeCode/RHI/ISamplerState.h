@@ -3,8 +3,8 @@
 
 NS_BEGIN
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_LayoutStruct = 8)
-ISamplerStateDesc
+struct TR_CLASS(SV_LayoutStruct = 8)
+	ISamplerStateDesc
 {
 	ISamplerStateDesc()
 	{
@@ -36,8 +36,8 @@ ISamplerStateDesc
 	float				MaxLOD;
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-ISamplerState : public IRenderResource
+class TR_CLASS()
+	ISamplerState : public IRenderResource
 {
 public:
 	ISamplerState();

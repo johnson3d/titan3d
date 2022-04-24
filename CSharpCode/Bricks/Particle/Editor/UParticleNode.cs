@@ -1,14 +1,13 @@
-﻿using EngineNS.EGui.Controls.NodeGraph;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
-    public partial class UParticleNode : EGui.Controls.NodeGraph.NodeBase
+    public partial class UParticleNode : NodeGraph.UNodeBase
     {
         internal UParticleEditor NebulaEditor;
-        public override void OnLinkedFrom(PinIn iPin, NodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             var funcGraph = ParentGraph as UParticleGraph;
             if (funcGraph == null || oPin.Link == null || iPin.Link == null)
@@ -23,8 +22,8 @@ namespace EngineNS.Bricks.Particle.Editor
     }
     public class UEmitterNode : UParticleNode
     {
-        public EGui.Controls.NodeGraph.PinOut Shapes { get; set; } = new EGui.Controls.NodeGraph.PinOut();
-        public EGui.Controls.NodeGraph.PinOut Effectors { get; set; } = new EGui.Controls.NodeGraph.PinOut();
+        public PinOut Shapes { get; set; } = new PinOut();
+        public PinOut Effectors { get; set; } = new PinOut();
         public UEmitterNode()
         {
             Shapes.Link = UParticleEditor.NewInOutPinDesc();
@@ -34,8 +33,8 @@ namespace EngineNS.Bricks.Particle.Editor
 
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
-            TitleImage.Color = 0xFF204020;
-            Background.Color = 0x80808080;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
             Name = "Emitter";
 
             AddPinOut(Shapes);
@@ -44,8 +43,8 @@ namespace EngineNS.Bricks.Particle.Editor
     }
     public class UEmitShapeNode : UParticleNode
     {
-        public EGui.Controls.NodeGraph.PinIn Left { get; set; } = new EGui.Controls.NodeGraph.PinIn();
-        public EGui.Controls.NodeGraph.PinOut Right { get; set; } = new EGui.Controls.NodeGraph.PinOut();
+        public PinIn Left { get; set; } = new PinIn();
+        public PinOut Right { get; set; } = new PinOut();
         public UEmitShapeNode()
         {
             Left.Link = UParticleEditor.NewInOutPinDesc();
@@ -55,14 +54,14 @@ namespace EngineNS.Bricks.Particle.Editor
 
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
-            TitleImage.Color = 0xFF204020;
-            Background.Color = 0x80808080;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
             Name = "EmitShape";
 
             AddPinIn(Left);
             AddPinOut(Right);
         }
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -78,8 +77,8 @@ namespace EngineNS.Bricks.Particle.Editor
     }
     public class UEffectorNode : UParticleNode
     {
-        public EGui.Controls.NodeGraph.PinIn Left { get; set; } = new EGui.Controls.NodeGraph.PinIn();
-        public EGui.Controls.NodeGraph.PinOut Right { get; set; } = new EGui.Controls.NodeGraph.PinOut();
+        public PinIn Left { get; set; } = new PinIn();
+        public PinOut Right { get; set; } = new PinOut();
         public UEffectorNode()
         {
             Left.Link = UParticleEditor.NewInOutPinDesc();
@@ -89,14 +88,14 @@ namespace EngineNS.Bricks.Particle.Editor
 
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
-            TitleImage.Color = 0xFF204020;
-            Background.Color = 0x80808080;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
             Name = "Effector";
 
             AddPinIn(Left);
             AddPinOut(Right);
         }
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;

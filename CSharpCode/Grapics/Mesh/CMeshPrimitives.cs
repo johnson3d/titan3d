@@ -200,6 +200,17 @@ namespace EngineNS.Graphics.Mesh
             }
         }
         public Dictionary<RName, CMeshPrimitives> Meshes { get; } = new Dictionary<RName, CMeshPrimitives>();
+        public async System.Threading.Tasks.Task Initialize()
+        {
+            await GetMeshPrimitive(RName.GetRName("axis/movex.vms", RName.ERNameType.Engine));
+        }
+        public CMeshPrimitives FindMeshPrimitive(RName name)
+        {
+            CMeshPrimitives result;
+            if (Meshes.TryGetValue(name, out result))
+                return result;
+            return null;
+        }
         public async System.Threading.Tasks.Task<CMeshPrimitives> GetMeshPrimitive(RName name)
         {
             CMeshPrimitives result;

@@ -38,7 +38,7 @@ namespace EngineNS.Bricks.CodeBuilder
     [Rtti.Meta]
     [UMacross.MacrossCreate]
     [IO.AssetCreateMenu(MenuName = "Macross")]
-    [Editor.UAssetEditor(EditorType = typeof(Bricks.CodeBuilder.MacrossNode.ClassGraph))]
+    [Editor.UAssetEditor(EditorType = typeof(Bricks.CodeBuilder.MacrossNode.UMacrossEditor))]
     public partial class UMacross : IO.IAsset
     {
         public const string AssetExt = ".macross";
@@ -97,7 +97,7 @@ namespace EngineNS.Bricks.CodeBuilder
                         }
                         if(!ImGuiAPI.IsAnyItemActive() && !ImGuiAPI.IsMouseClicked(0, false))
                             ImGuiAPI.SetKeyboardFocusHere(0);
-                        searchBar.OnDraw(ref comboDrawList, ref Support.UAnyPointer.Default);
+                        searchBar.OnDraw(in comboDrawList, in Support.UAnyPointer.Default);
                         bool bSelected = true;
                         foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
                         {
@@ -129,28 +129,23 @@ namespace EngineNS.Bricks.CodeBuilder
                         EGui.UIProxy.ComboBox.EndCombo();
                     }
 
-                    var buffer = BigStackBuffer.CreateInstance(256);
-                    buffer.SetText(mName);
                     ImGuiAPI.SetNextItemWidth(-1);
-                    ImGuiAPI.InputText("##in_rname", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
-                    var name = buffer.AsText();
+                    var nameChanged =ImGuiAPI.InputText("##in_rname", ref mName);
                     eErrorType = enErrorType.None;
-                    if (string.IsNullOrEmpty(name))
+                    if (string.IsNullOrEmpty(mName))
                         eErrorType = enErrorType.EmptyName;
-                    else if(mName != name)
+                    else if(nameChanged)
                     {
-                        mName = name;
-                        var rn = RName.GetRName(mDir.Name + name + ExtName, mDir.RNameType);
+                        var rn = RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
                         if (mAsset != null)
                             mAsset.AssetName = rn;
                         if (IO.FileManager.FileExists(rn.Address))
                             eErrorType = enErrorType.IsExisting;
                     }
-                    buffer.DestroyMe();
 
                     if(ImGuiAPI.Button("Create Asset", in Vector2.Zero))
                     {
-                        var rn = RName.GetRName(mDir.Name + name + ExtName, mDir.RNameType);
+                        var rn = RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
                         if(IO.FileManager.FileExists(rn.Address) == false && string.IsNullOrWhiteSpace(mName) == false)
                         {
                             ((UMacross)mAsset).mSelectedType = mSelectedType;
@@ -201,7 +196,7 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             IO.FileManager.CreateDirectory(name.Address);
 
-            var graph = new MacrossNode.ClassGraph();
+            var graph = new MacrossNode.UMacrossEditor();
             graph.AssetName = name;
             graph.DefClass.ClassName = name.PureName;
             graph.DefClass.NameSpace = IO.FileManager.GetParentPathName(name.Name).TrimEnd('/').Replace('/', '.');

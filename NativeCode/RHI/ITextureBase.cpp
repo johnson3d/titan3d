@@ -70,6 +70,29 @@ void ITexture2D::BuildImageBlob(IBlobObject* blob, void* pData, UINT RowPitch)
 			dst += image.m_nStride;
 		}
 	}
+	else if (mTextureDesc.Format == PXF_R10G10B10A2_UNORM)
+	{
+		for (UINT i = 0; i < mTextureDesc.Height; i++)
+		{
+			for (UINT j = 0; j < mTextureDesc.Width; j++)
+			{
+				auto color = *(DWORD*)(&row[j * 4]);
+				DWORD channel = (color & 0x3FF);
+				dst[j * 4] = (BYTE)(channel * 255 / 1024);
+
+				channel = ((color >> 10) & 0x3FF);
+				dst[j * 4 + 1] = (BYTE)(channel * 255 / 1024);
+				
+				channel = ((color >> 20) & 0x3FF);
+				dst[j * 4 + 2] = (BYTE)(channel * 255 / 1024);
+
+				channel = ((color >> 30) & 0x3);
+				dst[j * 4 + 3] = (BYTE)(channel * 255 / 4);
+			}
+			row += RowPitch;
+			dst += image.m_nStride;
+		}
+	}
 	else if (mTextureDesc.Format == PXF_R16G16B16A16_FLOAT)
 	{
 		for (UINT i = 0; i < mTextureDesc.Height; i++)

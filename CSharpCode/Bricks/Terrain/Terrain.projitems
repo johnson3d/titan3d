@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UPatch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainLevel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainMaterial.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainMdfQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UQTree.cs" />

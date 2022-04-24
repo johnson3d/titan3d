@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
     public partial class UParticleEditor : EngineNS.Editor.IAssetEditor, IO.ISerializer, ITickable, Graphics.Pipeline.IRootForm
     {
-        public static EGui.Controls.NodeGraph.NodePin.LinkDesc NewInOutPinDesc(string linkType = "Value")
+        public static LinkDesc NewInOutPinDesc(string linkType = "Value")
         {
-            var result = new EGui.Controls.NodeGraph.NodePin.LinkDesc();
+            var result = new LinkDesc();
             result.Icon.Size = new Vector2(20, 20);
             result.ExtPadding = 0;
             result.LineThinkness = 3;
@@ -125,6 +126,11 @@ namespace EngineNS.Bricks.Particle.Editor
             var size = new Vector2(-1, -1);
             if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
+                if (ImGuiAPI.CollapsingHeader("ParticleStruct", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                {
+                    ParticleStructBuilder.OnDraw();
+                }
+
                 ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
                 var winClass = new ImGuiWindowClass();
                 winClass.UnsafeCallConstructor();
@@ -141,10 +147,11 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
         {
+            
             var size = new Vector2(-1, -1);
             if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                ParticleGraph.OnDraw(null, false);
+                GraphRenderer.OnDraw();
             }
             ImGuiAPI.EndChild();
         }
@@ -181,6 +188,8 @@ namespace EngineNS.Bricks.Particle.Editor
         public Vector2 WindowSize = new Vector2(800, 600);
 
         public UParticleGraph ParticleGraph { get; } = new UParticleGraph();
+        public UGraphRenderer GraphRenderer { get; } = new UGraphRenderer();
+        public CodeBuilder.UClassLayoutBuilder ParticleStructBuilder { get; } = new CodeBuilder.UClassLayoutBuilder();
         bool IsStarting = false;
         protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
@@ -232,6 +241,10 @@ namespace EngineNS.Bricks.Particle.Editor
                 return false;
 
             ParticleGraph.ResetGraph();
+            ParticleGraph.OnChangeGraph = (UNodeGraph graph) =>
+            {
+                GraphRenderer.SetGraph(graph);
+            };
             IsStarting = true;
 
             AssetName = name;
@@ -244,9 +257,11 @@ namespace EngineNS.Bricks.Particle.Editor
 
             PreviewViewport.Title = $"NebulaPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
 
             UEngine.Instance.TickableManager.AddTickable(this);
+
+            GraphRenderer.SetGraph(this.ParticleGraph);
             return true;
         }
         public void OnCloseEditor()

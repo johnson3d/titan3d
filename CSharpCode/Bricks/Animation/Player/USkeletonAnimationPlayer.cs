@@ -1,5 +1,5 @@
 ﻿using EngineNS.Animation.Animatable;
-using EngineNS.Animation.Pipeline;
+using EngineNS.Animation.Command;
 using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using System;
@@ -15,10 +15,18 @@ namespace EngineNS.Animation.Player
         public float Duration { get => SkeletonAnimClip.Duration; }
 
         public Asset.UAnimationClip SkeletonAnimClip { get; protected set; } = null;
+
+        public ULocalSpaceRuntimePose OutPose
+        {
+            get 
+            {
+                if (mAnimEvaluateCommand == null)
+                    return null;
+
+                return mAnimEvaluateCommand.OutPose;
+            }
+        }
         protected UAnimationPropertiesSetter AnimationPropertiesSetter = null;
-        public UAnimatableSkeletonPose BindedPose { get; protected set; } = null;
-        public UMeshSpaceRuntimePose RuntimePose = null;
-        public ULocalSpaceRuntimePose LocalPose = null;
         public USkeletonAnimationPlayer(Asset.UAnimationClip skeletonAnimClip)
         {
             System.Diagnostics.Debug.Assert(skeletonAnimClip != null);
@@ -27,30 +35,27 @@ namespace EngineNS.Animation.Player
         public void BindingPose(UAnimatableSkeletonPose bindedPose)
         {
             System.Diagnostics.Debug.Assert(bindedPose != null);
-            AnimationPropertiesSetter = UAnimationPropertiesSetter.Binding(SkeletonAnimClip, bindedPose);
-            BindedPose = bindedPose;
-            LocalPose = URuntimePoseUtility.CreateLocalSpaceRuntimePose(BindedPose);
+            mAnimEvaluateCommand = new UExtractPoseFromClipCommand(ref bindedPose, SkeletonAnimClip);
         }
+
+        UExtractPoseFromClipCommand mAnimEvaluateCommand = null;
         public void Update(float elapse)
         {
             System.Diagnostics.Debug.Assert(SkeletonAnimClip.Duration != 0.0f);
 
             Time += elapse;
             Time %= SkeletonAnimClip.Duration;
+
+            //make command
+            mAnimEvaluateCommand.Time = Time;
         }
 
         public void Evaluate()
         {
             //make command
-            UPropertiesSettingCommand command = new UPropertiesSettingCommand()
-            { 
-                AnimationPropertiesSetter = AnimationPropertiesSetter,
-                Time = Time
-            };
             //if(IsImmediate)
-            command.Execute();
-            URuntimePoseUtility.CopyPose(ref LocalPose, BindedPose);
-            URuntimePoseUtility.ConvetToMeshSpaceRuntimePose(ref RuntimePose ,LocalPose);
+            mAnimEvaluateCommand.Execute();
+           
             //else Insert to pipeline
             //AnimationPiple.CommandList.Add();
         }

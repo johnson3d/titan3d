@@ -38,7 +38,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             PatchCBuffer?.Dispose();
             PatchCBuffer = null;
         }
-        public void Initialize(UTerrainLevelData level, int x, int z, Bricks.Procedure.Buffer2D.Image HeightMap)
+        public void Initialize(UTerrainLevelData level, int x, int z, Bricks.Procedure.UBufferConponent HeightMap)
         {
             Level = level;
 
@@ -98,7 +98,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             AABB.Maximum.Y = double.MinValue;
 
             int TexSizePerPatch  = level.GetTerrainNode().TexSizePerPatch;
-            var heightData = HeightMap.GetComponent(Procedure.Buffer2D.Image.EImageComponent.X);
+            var heightData = HeightMap;
             for (int i = 0; i < TexSizePerPatch; i++)
             {
                 for (int j = 0; j < TexSizePerPatch; j++)

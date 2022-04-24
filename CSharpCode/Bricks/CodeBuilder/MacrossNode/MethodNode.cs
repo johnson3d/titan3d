@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     public partial class MethodNode : INodeExpr, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
-        public EGui.Controls.NodeGraph.PinOut Result = null;
-        public EGui.Controls.NodeGraph.PinIn Self = null;
-        public List<EGui.Controls.NodeGraph.PinIn> Arguments = new List<EGui.Controls.NodeGraph.PinIn>();
-        public List<EGui.Controls.NodeGraph.PinOut> OutArguments = new List<EGui.Controls.NodeGraph.PinOut>();
+        public PinOut Result = null;
+        public PinIn Self = null;
+        public List<PinIn> Arguments = new List<PinIn>();
+        public List<PinOut> OutArguments = new List<PinOut>();
         public Rtti.UClassMeta.MethodMeta Method
         {
             get
@@ -99,14 +99,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             AddPinOut(AfterExec);
 
             Icon = MacrossStyles.Instance.FunctionIcon;
-            TitleImage.Color = MacrossStyles.Instance.FunctionTitleColor;
-            Background.Color = MacrossStyles.Instance.FunctionBGColor;
+            TitleColor = MacrossStyles.Instance.FunctionTitleColor;
+            BackColor = MacrossStyles.Instance.FunctionBGColor;
         }
         public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
         {
             if (ev.ValueType.FullName == "System.Type")
             {
-                var pin = ev.Tag as EGui.Controls.NodeGraph.PinIn;
+                var pin = ev.Tag as PinIn;
                 if (pin == null)
                     return;
                 var arg = Method.FindParameter(pin.Name);
@@ -122,11 +122,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         private void Initialize(Rtti.UClassMeta.MethodMeta m)
         {
             //Method = m;
+            if (mMethodMeta == null)
+            {
+                mMethodMeta = Rtti.UTypeDesc.TypeStr(m.Method.DeclaringType) + "#" + m.GetMethodDeclareString();
+            }
             Name = Method.Method.Name;
 
             if (Method.Method.IsStatic == false)
             {
-                Self = new EGui.Controls.NodeGraph.PinIn();
+                Self = new PinIn();
                 Self.Link = MacrossStyles.Instance.NewInOutPinDesc();
                 Self.Link.CanLinks.Add("Value");
                 Self.Name = "Self";
@@ -135,7 +139,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             if (Method.Method.ReturnType != typeof(void))
             {
-                Result = new EGui.Controls.NodeGraph.PinOut();
+                Result = new PinOut();
                 Result.Link = MacrossStyles.Instance.NewInOutPinDesc();
                 Result.Link.CanLinks.Add("Value");
                 Result.Name = "Result";
@@ -146,7 +150,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             OutArguments.Clear();
             foreach (var i in Method.Parameters)
             {
-                var pin = new EGui.Controls.NodeGraph.PinIn();
+                var pin = new PinIn();
                 pin.Link = MacrossStyles.Instance.NewInOutPinDesc();
                 pin.Link.CanLinks.Add("Value");
                 pin.Name = i.ParamInfo.Name;
@@ -177,7 +181,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 AddPinIn(pin);
                 if (i.ParamInfo.IsOut)
                 {
-                    var pinOut = new EGui.Controls.NodeGraph.PinOut();
+                    var pinOut = new PinOut();
                     pinOut.Link = MacrossStyles.Instance.NewInOutPinDesc();
                     pin.Link.CanLinks.Add("Value");
                     pinOut.Name = i.ParamInfo.Name;
@@ -205,7 +209,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        public override void OnMouseStayPin(EGui.Controls.NodeGraph.NodePin pin)
+        public override void OnMouseStayPin(NodePin pin)
         {
             if (pin == Self)
             {
@@ -230,7 +234,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if (pin == Arguments[i])
                 {
-                    var inPin = pin as EGui.Controls.NodeGraph.PinIn;
+                    var inPin = pin as PinIn;
                     var paramMeta = GetInPinParamMeta(inPin);
                     if (paramMeta != null)
                     {
@@ -252,7 +256,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        public override IExpression GetExpr(FunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        public override IExpression GetExpr(UMacrossFunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
         {
             ConvertTypeOp cvtExpr = null;
             DefineVar retVar = null;
@@ -298,10 +302,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             callExpr.NextExpr = this.GetNextExpr(funGraph, cGen);
             return callExpr;
         }
-        private IExpression GetExpr_Impl(FunctionGraph funGraph, ICodeGen cGen)
+        private IExpression GetExpr_Impl(UMacrossFunctionGraph funGraph, ICodeGen cGen)
         {
             CallOp CallExpr = new CallOp();
-            var links = new List<EGui.Controls.NodeGraph.PinLinker>();
+            var links = new List<UPinLinker>();
             if (Self != null)
             {
                 CallExpr.IsStatic = false;
@@ -335,7 +339,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             for (int i = 0; i < Arguments.Count; i++)
             {
                 links.Clear();
-                links = new List<EGui.Controls.NodeGraph.PinLinker>();
+                links = new List<UPinLinker>();
                 funGraph.FindInLinker(Arguments[i], links);
                 OpExpress argExpr = null;
                 if (links.Count == 1)
@@ -375,7 +379,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             
             return CallExpr;
         }
-        public Rtti.UClassMeta.MethodMeta.ParamMeta GetInPinParamMeta(EGui.Controls.NodeGraph.PinIn pin)
+        public Rtti.UClassMeta.MethodMeta.ParamMeta GetInPinParamMeta(PinIn pin)
         {
             for (int i = 0; i < Arguments.Count; i++)
             {
@@ -386,7 +390,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
+        public override System.Type GetOutPinType(PinOut pin)
         {
             if (pin == Result)
             {
@@ -412,7 +416,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return null;
         }
 
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -469,11 +473,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public unsafe void OnDrawTree()
         {
-            var buffer = BigStackBuffer.CreateInstance(256);
-            buffer.SetText(mFilterText);
-            ImGuiAPI.InputText("##in", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
-            mFilterText = buffer.AsText();
-            buffer.DestroyMe();
+            ImGuiAPI.InputText("##in", ref mFilterText);
             ImGuiAPI.Separator();
 
             DrawNSTree(Rtti.UClassMetaManager.Instance.TreeManager.RootNS);

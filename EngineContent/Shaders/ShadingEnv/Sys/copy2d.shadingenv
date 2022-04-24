@@ -3,6 +3,8 @@
 #include "Material"
 #include "MdfQueue"
 
+#include "../../Inc/SysFunctionDefImpl.cginc"
+
 cbuffer cbPerShadingEnv DX_NOBIND//: register(b4)
 {
 	matrix RenderMatrix;

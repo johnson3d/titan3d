@@ -9,6 +9,8 @@
 #include "Material"
 #include "MdfQueue"
 
+#include "../../../Inc/SysFunctionDefImpl.cginc"
+
 float3 ToneMap(float3 color)
 {
 	float LumHdr = CalcLuminanceYCbCr((half3)color);

@@ -21,11 +21,11 @@ namespace EngineNS.Editor
                 void* pData;
                 uint rowPitch;
                 uint depthPitch;                
-                if (texture.MapMipmap(cmdlist_hp, 0, &pData, &rowPitch, &depthPitch) != 0)
+                if (texture.MapMipmap(cmdlist_hp, 0, 0, &pData, &rowPitch, &depthPitch) != 0)
                 {
                     var bufferData = new Support.CBlobObject();
                     texture.BuildImageBlob(bufferData.mCoreObject, pData, rowPitch);
-                    texture.UnmapMipmap(cmdlist_hp, 0);
+                    texture.UnmapMipmap(cmdlist_hp, 0, 0);
 
                     SavePng(ameta, file, bufferData);
                 }

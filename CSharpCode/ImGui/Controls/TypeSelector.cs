@@ -9,6 +9,7 @@ namespace EngineNS.EGui.Controls
         public string AssemblyFilter = null;
         public bool ExcludeSealed = false;
         public bool ExcludeValueType = false;
+        public bool SearchFromMetas = false;
         Rtti.UTypeDesc mBaseType;
         public TypeSelector()
         {
@@ -19,33 +20,96 @@ namespace EngineNS.EGui.Controls
             get => mBaseType;
             set
             {
+                if (mBaseType == value)
+                    return;
                 mBaseType = value;
                 mShowTypes.Clear();
-                mShowTypes.Add(mBaseType);
-                foreach (var i in Rtti.UTypeDescManager.Instance.Services)
+                if (mBaseType != null)
+                    mShowTypes.Add(mBaseType);
+                if (SearchFromMetas)
                 {
-                    foreach (var j in i.Value.Types)
+                    foreach (var i in Rtti.UClassMetaManager.Instance.Metas.Values)
                     {
+                        if (i.MetaAttribute == null)
+                            continue;
                         if (!string.IsNullOrEmpty(AssemblyFilter))
                         {
-                            if (AssemblyFilter.Contains(j.Value.Assembly.Name) == false)
+                            if (AssemblyFilter.Contains(i.ClassType.Assembly.Name) == false)
                                 continue;
                         }
-                        if (ExcludeValueType && j.Value.SystemType.IsValueType)
+                        if (i.MetaAttribute.IsMacrossDeclareable == false)
                             continue;
-                        if (ExcludeSealed && j.Value.SystemType.IsSealed)
+                        if (ExcludeValueType && i.ClassType.SystemType.IsValueType)
+                            continue;
+                        if (ExcludeSealed && i.ClassType.SystemType.IsSealed)
                             continue;
 
                         if (mBaseType != null)
                         {
-                            if (j.Value.SystemType.IsSubclassOf(mBaseType.SystemType))
+                            if (i.ClassType.SystemType.IsSubclassOf(mBaseType.SystemType))
                             {
-                                mShowTypes.Add(j.Value);
+                                mShowTypes.Add(i.ClassType);
                             }
                         }
                         else
                         {
-                            mShowTypes.Add(j.Value);
+                            mShowTypes.Add(i.ClassType);
+                        }
+                    }
+                    foreach (var i in Rtti.UClassMetaManager.Instance.TypeMetas.Values)
+                    {
+                        if (!string.IsNullOrEmpty(AssemblyFilter))
+                        {
+                            if (AssemblyFilter.Contains(i.ClassType.Assembly.Name) == false)
+                                continue;
+                        }
+                        if (ExcludeValueType && i.ClassType.SystemType.IsValueType)
+                            continue;
+                        if (ExcludeSealed && i.ClassType.SystemType.IsSealed)
+                            continue;
+
+                        if (mBaseType != null)
+                        {
+                            if (i.ClassType.SystemType.IsSubclassOf(mBaseType.SystemType))
+                            {
+                                mShowTypes.Add(i.ClassType);
+                            }
+                        }
+                        else
+                        {
+                            mShowTypes.Add(i.ClassType);
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var i in Rtti.UTypeDescManager.Instance.Services)
+                    {
+                        foreach (var j in i.Value.Types)
+                        {
+                            if (!string.IsNullOrEmpty(AssemblyFilter))
+                            {
+                                if (AssemblyFilter.Contains(j.Value.Assembly.Name) == false)
+                                    continue;
+                            }
+                            if (ExcludeValueType && j.Value.SystemType.IsValueType)
+                                continue;
+                            if (ExcludeSealed && j.Value.SystemType.IsSealed)
+                                continue;
+
+                            //Rtti.UClassMetaManager.Instance.GetMeta(in hash);
+
+                            if (mBaseType != null)
+                            {
+                                if (j.Value.SystemType.IsSubclassOf(mBaseType.SystemType))
+                                {
+                                    mShowTypes.Add(j.Value);
+                                }
+                            }
+                            else
+                            {
+                                mShowTypes.Add(j.Value);
+                            }
                         }
                     }
                 }
@@ -58,6 +122,13 @@ namespace EngineNS.EGui.Controls
             set => mSelectedType = value;
         }
         private List<Rtti.UTypeDesc> mShowTypes = new List<Rtti.UTypeDesc>();
+        public List<Rtti.UTypeDesc> ShowTypes
+        {
+            get
+            {
+                return mShowTypes;
+            }
+        }
         string mFilterText = "";
         unsafe int ImGuiInputTextCallback(ImGuiInputTextCallbackData* data)
         {
@@ -77,16 +148,15 @@ namespace EngineNS.EGui.Controls
             return 0;
         }
         public string CtrlId = "##ComboTypeSelector";
-        public unsafe bool OnDraw(float itemWidth, int showMaxItems)
+        public delegate bool FOnTypeFilter(Rtti.UTypeDesc type);
+        public unsafe bool OnDraw(float itemWidth, int showMaxItems, FOnTypeFilter onTypeFilter = null)
         {
             ImGuiAPI.PushID(CtrlId);
             var textSize = ImGuiAPI.CalcTextSize(mSelectedType?.Name, false, -1);
-            var buffer = BigStackBuffer.CreateInstance(256);
-            buffer.SetText(mSelectedType?.Name);
+            var stName = mSelectedType?.Name;
             float arrowBtnWidth = 30 + UIProxy.StyleConfig.Instance.ItemSpacing.X;
             ImGuiAPI.SetNextItemWidth(itemWidth - arrowBtnWidth);
-            ImGuiAPI.InputText("##in", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_ReadOnly, null, (void*)0);
-            buffer.DestroyMe();
+            ImGuiAPI.InputText("##in", ref stName);
 
             ImGuiAPI.OpenPopupOnItemClick("combobox", ImGuiPopupFlags_.ImGuiPopupFlags_None);
             var pos = ImGuiAPI.GetItemRectMin();
@@ -104,15 +174,11 @@ namespace EngineNS.EGui.Controls
             size.Y += 5 + (size.Y * showMaxItems);
             var pivot = new Vector2(0, 0);
             ImGuiAPI.SetNextWindowPos(in pos, ImGuiCond_.ImGuiCond_None, in pivot);
-            ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_None);
+            //ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_None);
             if (ImGuiAPI.BeginPopup("combobox", ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
-                buffer = BigStackBuffer.CreateInstance(256);
-                buffer.SetText(mFilterText);
-                ImGuiAPI.InputText("##in", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
-                mFilterText = buffer.AsText();
-                buffer.DestroyMe();
-
+                ImGuiAPI.InputText("##in", ref mFilterText);
+             
                 ImGuiAPI.Separator();
                 var bSelected = true;
                 var sz = new Vector2(0, 0);
@@ -139,6 +205,16 @@ namespace EngineNS.EGui.Controls
                 {
                     for (int j = 0; j < mShowTypes.Count; j++)
                     {
+                        if (onTypeFilter != null)
+                        {
+                            if(onTypeFilter(mShowTypes[j]))
+                            {
+                                continue;
+                            }
+                        }
+
+                        //if (AllowVoidType == false && mShowTypes[j].SystemType == typeof(void))
+                        //    continue;
                         if (ImGuiAPI.Selectable(mShowTypes[j].Name, ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in sz))
                         {
                             bChanged = (mSelectedType != mShowTypes[j]);

@@ -9,6 +9,7 @@
     <Import_RootNamespace>EngineNS.EGui</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\BezierControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ContentBrowser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\CtrlUtility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\NodeBase.cs" />

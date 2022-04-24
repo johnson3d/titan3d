@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using EngineNS.EGui.Controls.NodeGraph;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
@@ -8,15 +8,15 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
     {
         public Rtti.UTypeDesc VarType;
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinOut Out { get; set; } = new EGui.Controls.NodeGraph.PinOut();
+        public PinOut Out { get; set; } = new PinOut();
         public UUniformVar()
         {
             VarType = Rtti.UTypeDescGetter<float>.TypeDesc;
 
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF80FF40;
-            TitleImage.Color = 0xFF804020;
-            Background.Color = 0x80808080;
+            TitleColor = 0xFF804020;
+            BackColor = 0x80808080;
 
             //Name = $"{Value}";
 
@@ -24,17 +24,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Out.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(Out);
         }
-        public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
+        public override System.Type GetOutPinType(PinOut pin)
         {
             return VarType.SystemType;
         }
-        public override void OnMouseStayPin(EGui.Controls.NodeGraph.NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin)
         {
             if (VarType == null)
                 return;
             EGui.Controls.CtrlUtility.DrawHelper($"VarType:{VarType.ToString()}");
         }
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -44,7 +44,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             return true;
         }
-        public override bool CanLinkTo(PinOut oPin, NodeBase InNode, PinIn iPin)
+        public override bool CanLinkTo(PinOut oPin, UNodeBase InNode, PinIn iPin)
         {
             if (base.CanLinkTo(oPin, InNode, iPin) == false)
                 return false;
@@ -63,7 +63,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 return IsHalfPrecision ? "half4" : "float4";
             return type.FullName;
         }
-        public virtual IExpression GetVarExpr(UMaterialGraph funGraph, ICodeGen cGen, EGui.Controls.NodeGraph.PinOut oPin, bool bTakeResult)
+        public virtual IExpression GetVarExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
         {
             DefineVar Var = new DefineVar();
             Var.IsLocalVar = false;
@@ -72,7 +72,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             return new OpUseDefinedVar(Var);
         }
-        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, EGui.Controls.NodeGraph.PinOut oPin, bool bTakeResult)
+        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
         {
             var expr = GetVarExpr(funGraph, cGen, oPin, bTakeResult);
             if (oPin == Out)

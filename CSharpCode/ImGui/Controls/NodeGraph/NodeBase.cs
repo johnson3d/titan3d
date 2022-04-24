@@ -84,17 +84,13 @@ namespace EngineNS.EGui.Controls.NodeGraph
                 unsafe
                 {
                     ImGuiAPI.PushItemWidth(ControlWidth * fScale);
-                    var buffer = BigStackBuffer.CreateInstance(128);
                     var oldStr = Value.ToString();
-                    buffer.SetText(oldStr);
-                    ImGuiAPI.InputText($"##{LabelName}", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal, null, (void*)0);
-                    var newStr = buffer.AsText();
-                    if (newStr != oldStr)
+                    bool nameChanged = ImGuiAPI.InputText($"##{LabelName}", ref oldStr);
+                    if (nameChanged)
                     {
-                        Value = EngineNS.Support.TConvert.ToObject(ValueType.SystemType, newStr);
+                        Value = EngineNS.Support.TConvert.ToObject(ValueType.SystemType, oldStr);
                         mNotify?.OnValueChanged(this);
                     }
-                    buffer.DestroyMe();
                     ImGuiAPI.PopItemWidth();
                 }
             }
@@ -168,17 +164,13 @@ namespace EngineNS.EGui.Controls.NodeGraph
                 unsafe
                 {
                     ImGuiAPI.PushItemWidth(ControlWidth * fScale);
-                    var buffer = BigStackBuffer.CreateInstance(256);
                     var oldStr = Value.ToString();
-                    buffer.SetText(oldStr);
-                    ImGuiAPI.InputText($"##{LabelName}", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
-                    var newStr = buffer.AsText();
-                    if (newStr != oldStr)
+                    bool nameChanged = ImGuiAPI.InputText($"##{LabelName}", ref oldStr);
+                    if (nameChanged)
                     {
-                        Value = EngineNS.Support.TConvert.ToObject(ValueType.SystemType, newStr);
+                        Value = EngineNS.Support.TConvert.ToObject(ValueType.SystemType, oldStr);
                         mNotify?.OnValueChanged(this);
                     }
-                    buffer.DestroyMe();
                     ImGuiAPI.PopItemWidth();
                 }
             }
@@ -651,7 +643,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
         {
 
         }
-        public virtual void OnLClicked(NodePin clickedPin)
+        public virtual void OnLButtonClicked(NodePin clickedPin)
         {
 
         }

@@ -75,11 +75,26 @@ namespace EngineNS.GamePlay
         {
             get => mRoot;
         }
-        public UDirectionLight DirectionLight { get; } = new UDirectionLight();
+        public UDirectionLight DirectionLight { get; set; } = new UDirectionLight();
         #region Culling
         public class UVisParameter
         {
-            public int CullType = 0;
+            public enum EVisCull
+            {
+                Normal,
+                Shadow,
+            }
+            [Flags]
+            public enum EVisCullFilter : uint
+            {
+                GameObject = 1,
+                LightDebug = (1 << 1),
+                PhyxDebug = (1 << 2),
+                EditorObject = LightDebug | PhyxDebug,
+                All = 0xFFFFFFFF,
+            }
+            public EVisCull CullType = EVisCull.Normal;
+            public EVisCullFilter CullFilters = EVisCullFilter.All;
             public UWorld World;
             public Graphics.Pipeline.CCamera CullCamera;
             public List<Graphics.Mesh.UMesh> VisibleMeshes = null;// new List<Graphics.Mesh.UMesh>();

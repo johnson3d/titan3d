@@ -231,4 +231,6 @@ void DoDefaultPSMaterial(in PS_INPUT pixel, inout MTL_OUTPUT mtl)
 Texture2D gDefaultTextue2D;
 SamplerState gDefaultSamplerState;
 
+float3 GetTerrainDiffuse(float2 uv, PS_INPUT input);
+
 #endif //_VertexLayout_cginc_

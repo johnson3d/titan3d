@@ -725,15 +725,15 @@ namespace EngineNS
         /// <param name="quaternion">四元数对象</param>
         /// <param name="scale">缩放大小</param>
         /// <returns>返回计算后的四元数</returns>
-        public static Vector3 RotateVector3(Quaternion quaternion, Vector3 vec)
+        public static Vector3 RotateVector3(in Quaternion quaternion, in Vector3 vec)
         {
             return quaternion * vec;
         }
-        public static DVector3 RotateVector3(Quaternion quaternion, DVector3 vec)
+        public static DVector3 RotateVector3(in Quaternion quaternion, in DVector3 vec)
         {
             return quaternion * vec;
         }
-        public static Vector3 UnrotateVector3(Quaternion quaternion, Vector3 vec)
+        public static Vector3 UnrotateVector3(in Quaternion quaternion, in Vector3 vec)
         {
             Quaternion invQuat;
             invQuat.X = -quaternion.X;
@@ -742,7 +742,7 @@ namespace EngineNS
             invQuat.W = quaternion.W;
             return invQuat * vec;
         }
-        public static DVector3 UnrotateVector3(Quaternion quaternion, DVector3 vec)
+        public static DVector3 UnrotateVector3(in Quaternion quaternion, in DVector3 vec)
         {
             Quaternion invQuat;
             invQuat.X = -quaternion.X;
@@ -758,7 +758,7 @@ namespace EngineNS
         /// <param name="scale">缩放大小</param>
         /// <returns>返回计算后的四元数</returns>
         [Rtti.Meta]
-        public static Quaternion MultiplyFloat(Quaternion quaternion, float scale)
+        public static Quaternion MultiplyFloat(in Quaternion quaternion, float scale)
         {
             Quaternion result;
             result.X = quaternion.X * scale;
@@ -774,7 +774,7 @@ namespace EngineNS
         /// <param name="scale">缩放大小</param>
         /// <param name="result">计算后的四元数</param>
         //[Rtti.Meta]
-        public static void Multiply(ref Quaternion quaternion, float scale, out Quaternion result)
+        public static void Multiply(in Quaternion quaternion, float scale, out Quaternion result)
         {
             result.X = quaternion.X * scale;
             result.Y = quaternion.Y * scale;
@@ -787,7 +787,7 @@ namespace EngineNS
         /// <param name="quat">四元数对象</param>
         /// <returns>返回计算后的四元数</returns>
         [Rtti.Meta]
-        public static Quaternion Negate(Quaternion quat)
+        public static Quaternion Negate(in Quaternion quat)
         {
             Quaternion result;
             result.X = -quat.X;
@@ -802,7 +802,7 @@ namespace EngineNS
         /// <param name="quat">四元数对象</param>
         /// <param name="result">计算后的四元数</param>
         [Rtti.Meta]
-        public static void Negate(ref Quaternion quat, out Quaternion result)
+        public static void Negate(in Quaternion quat, out Quaternion result)
         {
             result.X = -quat.X;
             result.Y = -quat.Y;
@@ -826,7 +826,7 @@ namespace EngineNS
         /// <param name="quat">四元数对象</param>
         /// <param name="result">计算后的四元数</param>
         [Rtti.Meta]
-        public static void Normalize(ref Quaternion quat, out Quaternion result)
+        public static void Normalize(in Quaternion quat, out Quaternion result)
         {
             float length = 1.0f / quat.Length();
             result.X = quat.X * length;
@@ -841,11 +841,12 @@ namespace EngineNS
         /// <param name="angle">旋转角度</param>
         /// <returns>返回计算后的四元数</returns>
         [Rtti.Meta]
-        public static Quaternion RotationAxis(Vector3 axis, float angle)
+        public static Quaternion RotationAxis(in Vector3 in_axis, float angle)
         {
             Quaternion result;
 
-            Vector3.Normalize(in axis, out axis);
+            Vector3 axis;
+            Vector3.Normalize(in in_axis, out axis);
 
             float half = angle * 0.5f;
             float sin = (float)(Math.Sin((double)(half)));
@@ -865,9 +866,10 @@ namespace EngineNS
         /// <param name="angle">旋转角度</param>
         /// <param name="result">计算后的四元数</param>
         [Rtti.Meta]
-        public static void RotationAxis(Vector3 axis, float angle, out Quaternion result)
+        public static void RotationAxis(in Vector3 in_axis, float angle, out Quaternion result)
         {
-            Vector3.Normalize(in axis, out axis);
+            Vector3 axis;
+            Vector3.Normalize(in in_axis, out axis);
 
             float half = angle * 0.5f;
             float sin = (float)(Math.Sin((double)(half)));
@@ -884,7 +886,7 @@ namespace EngineNS
         /// <param name="matrix">旋转矩阵</param>
         /// <returns>返回计算后的四元数</returns>
         [Rtti.Meta]
-        public static Quaternion RotationMatrix(Matrix matrix)
+        public static Quaternion RotationMatrix(in Matrix matrix)
         {
             Quaternion result;
             //float scale = matrix.M11 + matrix.M22 + matrix.M33;
@@ -953,7 +955,7 @@ namespace EngineNS
         /// <param name="matrix">旋转矩阵</param>
         /// <param name="result">计算后的四元数</param>
         [Rtti.Meta]
-        public static void RotationMatrix(ref Matrix matrix, out Quaternion result)
+        public static void RotationMatrix(in Matrix matrix, out Quaternion result)
         {
             //float scale = matrix.M11 + matrix.M22 + matrix.M33;
 
@@ -1041,7 +1043,7 @@ namespace EngineNS
             return result;
         }
         [Rtti.Meta]
-        public static Quaternion FromEuler(Vector3 euler)
+        public static Quaternion FromEuler(in Vector3 euler)
         {
             var yaw = euler.Y;
             var pitch = euler.X;
@@ -1098,7 +1100,7 @@ namespace EngineNS
         /// <param name="t">插值</param>
         /// <returns>返回计算后的旋转四元数</returns>
         [Rtti.Meta]
-        public static Quaternion Slerp(Quaternion q1, Quaternion q2, float t)
+        public static Quaternion Slerp(in Quaternion q1, in Quaternion q2, float t)
         {
             Quaternion result;
 
@@ -1142,7 +1144,7 @@ namespace EngineNS
         /// <param name="t">插值</param>
         /// <param name="result">计算后的旋转四元数</param>
         [Rtti.Meta]
-        public static void Slerp(ref Quaternion q1, ref Quaternion q2, float t, out Quaternion result)
+        public static void Slerp(in Quaternion q1, in Quaternion q2, float t, out Quaternion result)
         {
             float opposite;
             float inverse;
@@ -1173,29 +1175,7 @@ namespace EngineNS
             result.Y = (inverse * q1.Y) + (opposite * q2.Y);
             result.Z = (inverse * q1.Z) + (opposite * q2.Z);
             result.W = (inverse * q1.W) + (opposite * q2.W);
-        }
-        /// <summary>
-        /// 四元数编组
-        /// </summary>
-        /// <param name="q1">旋转四元数</param>
-        /// <param name="a">旋转四元数</param>
-        /// <param name="b">旋转四元数</param>
-        /// <param name="c">旋转四元数</param>
-        /// <param name="t">组名</param>
-        /// <returns>返回计算后的旋转四元数</returns>
-        [Rtti.Meta]
-        public static Quaternion Squad(Quaternion q1, Quaternion a, Quaternion b, Quaternion c, float t)
-        {
-            Quaternion result;
-
-            unsafe
-            {
-                IDllImportApi.v3dxQuaternionSquad((Quaternion*)&result, (Quaternion*)&q1, (Quaternion*)&a,
-                    (Quaternion*)&b, (Quaternion*)&c, t);
-            }
-
-            return result;
-        }
+        }        
         /// <summary>
         /// 四元数编组
         /// </summary>
@@ -1206,7 +1186,7 @@ namespace EngineNS
         /// <param name="t">组名</param>
         /// <param name="result">计算后的旋转四元数</param>
         [Rtti.Meta]
-        public static void Squad(ref Quaternion q1, ref Quaternion a, ref Quaternion b, ref Quaternion c, float t, out Quaternion result)
+        public static void Squad(in Quaternion q1, in Quaternion a, in Quaternion b, in Quaternion c, float t, out Quaternion result)
         {
             unsafe
             {

@@ -4,9 +4,13 @@ using System.Text;
 
 namespace EngineNS.Animation.Pipeline
 {
+    public struct FAnimationPose
+    {
+        public Guid ID;
+        public SkeletonAnimation.Runtime.Pose.IRuntimePose RuntimePose;
+    }
     public static class UAnimationPipeline
     {
-        public static List<IAnimationCommand> AnimCommandList = new List<IAnimationCommand>();
 
         public static void Evaluate()
         {

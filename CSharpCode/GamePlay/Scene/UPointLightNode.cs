@@ -4,6 +4,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
+    [UNode(NodeDataType = typeof(UPointLightNode.ULightNodeData), DefaultNamePrefix = "PointLight")]
     public partial class UPointLightNode : USceneActorNode
     {
         public class ULightNodeData : UNodeData
@@ -88,7 +89,7 @@ namespace EngineNS.GamePlay.Scene
                 rp.VisibleNodes.Add(this);
             }
 
-            if (UEngine.Instance.EditorInstance.Config.ShowLightDebugMesh == false)
+            if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == false)
                 return;
 
             if (DebugMesh != null)
@@ -151,6 +152,131 @@ namespace EngineNS.GamePlay.Scene
         {
             get { return false; }
             set { }
+        }
+    }
+    [UNode(NodeDataType = typeof(UDirLightNode.UDirLightNodeData), DefaultNamePrefix = "Sun")]
+    public partial class UDirLightNode : USceneActorNode
+    {
+        public class UDirLightNodeData : UNodeData
+        {
+            [Rtti.Meta]
+            public UDirectionLight LightData { get; set; } = new UDirectionLight();
+        }
+        public UDirLightNodeData LightData
+        {
+            get
+            {
+                return NodeData as UDirLightNodeData;
+            }
+        }
+        public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        {
+            if (data == null)
+            {
+                data = new UDirLightNodeData();
+            }
+            
+            var ret = await base.InitializeNode(world, data, bvType, placementType);
+            world.DirectionLight = LightData.LightData;
+            return ret;
+        }
+        Graphics.Mesh.UMesh mDebugMesh;
+        public Graphics.Mesh.UMesh DebugMesh
+        {
+            get
+            {
+                if (mDebugMesh == null)
+                {
+                    var cookedMesh = UEngine.Instance.GfxDevice.MeshPrimitiveManager.FindMeshPrimitive(RName.GetRName("axis/movex.vms", RName.ERNameType.Engine));
+                    if (cookedMesh == null)
+                        return null;
+                    var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
+                    materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("axis/axis_x_d.uminst", RName.ERNameType.Engine));
+                    var mesh2 = new Graphics.Mesh.UMesh();
+                    var ok1 = mesh2.Initialize(cookedMesh, materials1,
+                        Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
+                    if (ok1)
+                    {
+                        mDebugMesh = mesh2;
+
+                        mDebugMesh.HostNode = this;
+
+                        BoundVolume.LocalAABB = mDebugMesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+
+                        this.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+
+                        UpdateAbsTransform();
+                        UpdateAABB();
+                        Parent?.UpdateAABB();
+                    }
+                }
+                return mDebugMesh;
+            }
+        }
+        public override void OnNodeLoaded()
+        {
+            base.OnNodeLoaded();
+            UpdateAbsTransform();
+
+            var world = this.GetWorld();
+            if (world != null)
+            {
+                world.DirectionLight = LightData.LightData;
+            }
+        }
+        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
+        {
+            meshes.Add(mDebugMesh);
+            foreach (var i in Children)
+            {
+                if (i.HitproxyType == Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent)
+                    i.GetHitProxyDrawMesh(meshes);
+            }
+        }
+        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        {
+            if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == false)
+                return;
+
+            if (DebugMesh != null)
+                rp.VisibleMeshes.Add(mDebugMesh);
+        }
+        protected override void OnAbsTransformChanged()
+        {
+            var lightData = NodeData as UDirLightNodeData;
+            if (lightData == null)
+                return;
+
+            lightData.LightData.Direction = Quaternion.RotateVector3(in Placement.AbsTransform.mQuat, in Vector3.UnitZ);
+            if (mDebugMesh == null)
+                return;
+
+            var world = this.GetWorld();
+            var quat = Quaternion.Multiply(Quaternion.RotationAxis(in Vector3.Up, -(float)Math.PI * 0.5f), Placement.AbsTransform.mQuat);
+            var trans = FTransform.CreateTransform(in Placement.AbsTransform.mPosition, in Placement.AbsTransform.mScale, quat);
+            mDebugMesh.SetWorldTransform(in trans, world, false);
+            //mDebugMesh.SetWorldTransform(in Placement.AbsTransform, world, false);
+        }
+        public override void OnHitProxyChanged()
+        {
+            if (mDebugMesh == null)
+                return;
+            if (this.HitProxy == null)
+            {
+                mDebugMesh.IsDrawHitproxy = false;
+                return;
+            }
+
+            if (HitproxyType != Graphics.Pipeline.UHitProxy.EHitproxyType.None)
+            {
+                mDebugMesh.IsDrawHitproxy = true;
+                var value = HitProxy.ConvertHitProxyIdToVector4();
+                mDebugMesh.SetHitproxy(in value);
+            }
+            else
+            {
+                mDebugMesh.IsDrawHitproxy = false;
+            }
         }
     }
 }

@@ -75,6 +75,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)kmeans\kmeans.cpp">
       <Filter>kmeans</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)cityhash\city.cc">
+      <Filter>cityhash</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)BaseHead.h" />
@@ -188,6 +191,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)kmeans\kmeans.h">
       <Filter>kmeans</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)cityhash\city.h">
+      <Filter>cityhash</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)cityhash\citycrc.h">
+      <Filter>cityhash</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="io">
@@ -225,6 +234,9 @@
     </Filter>
     <Filter Include="kmeans">
       <UniqueIdentifier>{11e9b859-a849-4906-9e67-aaecf9a02d9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cityhash">
+      <UniqueIdentifier>{fc9bda83-fb26-4518-992d-9f8deb0422de}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -237,7 +237,7 @@ void ScreenPos( float4 projPos, out float2 screenPos )
   screenPos = (screenPos+1)*0.5;
 
 
-  screenPos.y = 1-screenPos.y;   // uv�����෴
+  screenPos.y = 1-screenPos.y;   
 
   screenPos.x += 1.0f* gViewportSizeAndRcp.z*0.5f;
   screenPos.y += 1.0f* gViewportSizeAndRcp.w*0.5f;
@@ -252,7 +252,6 @@ void Distortion( float4 localPos, float4 localNorm, float4 viewPos, float4 projP
 	float distortion = abs((NdotV / depth)*strength);
 	distortionAlpha = distortion / transparency;
 
-	// ���㵱ǰ��������ĻTexture�ϵ�uv����
 	float2 screenPos;
 	ScreenPos(projPos, screenPos);
 	distortionUV = screenPos + distortionOffset * distortion; 

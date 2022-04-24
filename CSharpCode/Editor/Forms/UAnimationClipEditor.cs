@@ -152,7 +152,7 @@ namespace EngineNS.Editor.Forms
 
             PreviewViewport.Title = $"MaterialMesh:{name}";
             //PreviewViewport.OnInitialize = Initialize_PreviewMesh;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
 
             AnimationClipPropGrid.Target = AnimationClip;
             UEngine.Instance.TickableManager.AddTickable(this);

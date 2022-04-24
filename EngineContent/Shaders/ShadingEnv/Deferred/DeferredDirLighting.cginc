@@ -20,6 +20,8 @@
 #include "DeferredCommon.cginc"
 #include "../../Inc/FXAAMobile.cginc"
 
+#include "../../Inc/SysFunctionDefImpl.cginc"
+
 Texture2D DepthBuffer DX_NOBIND;
 SamplerState Samp_DepthBuffer DX_NOBIND;
 

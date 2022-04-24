@@ -43,12 +43,15 @@ namespace EngineNS.Graphics.Pipeline
             SlateRenderer = new EGui.Slate.UBaseRenderer();
             await SlateRenderer.Initialize();
 
-            var rpType = Rtti.UTypeDesc.TypeOf(engine.Config.MainWindowRPolicy).SystemType;
-            await MainWindow.InitializeApplication(RenderContext, rpType);
+            System.Type rpType = Rtti.UTypeDesc.TypeOf(engine.Config.MainWindowRPolicy).SystemType;
+            //engine.Config.MainRPolicyName = RName.GetRName("UTest/testrendergraph.rpolicy");
+            await MainWindow.InitializeApplication(RenderContext, engine.Config.MainRPolicyName, rpType);
             var ws = MainWindow.NativeWindow.WindowSize;
             MainWindow.OnResize(ws.X, ws.Y);
 
             engine.TickableManager.AddTickable(TextureManager);
+
+            await this.MeshPrimitiveManager.Initialize();
             return true;
         }
         public override void Tick(UEngine engine)
@@ -158,6 +161,7 @@ namespace EngineNS.Graphics.Pipeline
                     return false;
             }
 
+            await TextureManager.Initialize(engine);
             await MaterialManager.Initialize(this);
             await MaterialInstanceManager.Initialize(engine);
             await EffectManager.Initialize(this);

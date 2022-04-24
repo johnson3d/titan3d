@@ -87,6 +87,9 @@
   <Import Project="..\..\CSharpCode\Bricks\Particle\Particle.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\FarShadow\FarShadow.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\RenderPolicyEditor\RenderPolicyEditor.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\NodeGraph\NodeGraph.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\StateMachine\StateMachine.projitems" Label="Shared" />
+  <Import Project="..\..\3rd\csharp\NvTriStrip\NvTriStrip.projitems" Label="Shared" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.0.0-3.final" />

@@ -46,12 +46,15 @@ namespace EngineNS.Graphics.Pipeline.Common
                 DestPinOut.Attachement.Format = SrcPinIn.Attachement.Format;
                 DestPinOut.Attachement.Width = SrcPinIn.Attachement.Width;
                 DestPinOut.Attachement.Height = SrcPinIn.Attachement.Height;
-            }            
-            attachement.Buffer = ResultBuffer.Buffer;
-            attachement.Srv = ResultBuffer.Srv;
-            attachement.Rtv = ResultBuffer.Rtv;
-            attachement.Dsv = ResultBuffer.Dsv;
-            attachement.Uav = ResultBuffer.Uav;
+            }
+            if (ResultBuffer != null)
+            {
+                attachement.Buffer = ResultBuffer.Buffer;
+                attachement.Srv = ResultBuffer.Srv;
+                attachement.Rtv = ResultBuffer.Rtv;
+                attachement.Dsv = ResultBuffer.Dsv;
+                attachement.Uav = ResultBuffer.Uav;
+            }
         }
         public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {

@@ -77,7 +77,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public Common.UGpuSceneNode GpuSceneNode = new Common.UGpuSceneNode();
         public Common.UScreenTilingNode ScreenTilingNode = new Common.UScreenTilingNode();
         public Common.UHzbNode HzbNode = new Common.UHzbNode();
-
+        public Common.UImageAssetNode EnvMapNode { get; set; } = new Common.UImageAssetNode();
+        public Common.UImageAssetNode VignetteNode { get; set; } = new Common.UImageAssetNode();
         //for test
         public Bricks.VXGI.UVoxelsNode VoxelsNode = new Bricks.VXGI.UVoxelsNode();
 
@@ -85,8 +86,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             await base.Initialize(camera);
 
-            EnvMapSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine));
-            VignetteSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("texture/default_vignette.srv", RName.ERNameType.Engine));
+            EnvMapNode.ImageName = RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine);
+            VignetteNode.ImageName = RName.GetRName("texture/default_vignette.srv", RName.ERNameType.Engine);
 
             //await BasePassNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>(),
             //    EPixelFormat.PXF_R16G16B16A16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "BasePass");
@@ -99,11 +100,11 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             //await PickedNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickSetupShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "PickedNode");
 
             //await PickBlurNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickBlurShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y, "PickBlur");
-            
+
             //await PickHollowNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickHollowShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y, "PickHollow");
-            
+
             //await FinalCopyNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UFinalCopyShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_UNKNOWN, x, y, "EditorFinal");
-            
+
             //await mShadowMapNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>(), EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_D16_UNORM, x, y, "ShadowDepth");
 
             //await VoxelsNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_D16_UNORM, x, y, "VoxelsNode");
@@ -113,6 +114,28 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             //await ScreenTilingNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_UNKNOWN, x, y, "ScreenTilingNode");            
 
             //await GpuSceneNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_UNKNOWN, x, y, "GpuScene");
+        }
+        protected override void OnBuildGraph()
+        {
+            //AddLinker(mShadowMapNode.DepthPinOut, FinalCopyNode.);
+            //AddLinker(BasePassNode.ColorPinOut, BasePassNode.);
+
+            {
+                AddLinker(PickedNode.PickedPinOut, PickBlurNode.PickedPinIn);
+            }
+            AddLinker(PickedNode.PickedPinOut, PickHollowNode.PickedPinIn);
+            AddLinker(PickBlurNode.ResultPinOut, PickHollowNode.BlurPinIn);
+
+            {
+                AddLinker(GpuSceneNode.PointLightsPinOut, ScreenTilingNode.PointLightsPinIn);
+                AddLinker(BasePassNode.DepthPinOut, ScreenTilingNode.DepthPinIn);
+            }
+
+            AddLinker(TranslucentNode.AlbedoPinInOut, FinalCopyNode.ColorPinIn);
+            AddLinker(PickHollowNode.ResultPinOut, FinalCopyNode.PickPinIn);
+            AddLinker(VignetteNode.ImagePinOut, FinalCopyNode.VignettePinIn);
+
+            RootNode = FinalCopyNode;
         }
         public override void OnResize(float x, float y)
         {

@@ -172,7 +172,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         }
         public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            mDirLightDirection = world.DirectionLight.mDirection;
+            mDirLightDirection = world.DirectionLight.Direction;
 
             var ViewerCamera = policy.DefaultCamera;
             //calculate viewer camera frustum bounding sphere and shadow camera data;
@@ -262,7 +262,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             mFadeParam.Y = -FadeStartDistance * mFadeParam.X;
 
             //render Shadow Caster
-            mVisParameter.CullType = -1;
+            mVisParameter.CullType = GamePlay.UWorld.UVisParameter.EVisCull.Shadow;
             mVisParameter.World = world;
             mVisParameter.CullCamera = ShadowCamera;
             world.GatherVisibleMeshes(mVisParameter);

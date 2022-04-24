@@ -14,17 +14,17 @@ INullTexture2D::~INullTexture2D()
 {
 }
 
-vBOOL INullTexture2D::MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
+vBOOL INullTexture2D::MapMipmap(ICommandList* cmd, UINT ArraySlice, UINT MipSlice, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
 {
 	return FALSE;
 }
 
-void INullTexture2D::UnmapMipmap(ICommandList* cmd, int MipLevel)
+void INullTexture2D::UnmapMipmap(ICommandList* cmd, UINT ArraySlice, UINT MipSlice)
 {
 	
 }
 
-void INullTexture2D::UpdateMipData(ICommandList* cmd, UINT level, void* pData, UINT width, UINT height, UINT Pitch)
+void INullTexture2D::UpdateMipData(ICommandList* cmd, UINT ArraySlice, UINT MipSlice, void* pData, UINT width, UINT height, UINT Pitch)
 {
 	
 }

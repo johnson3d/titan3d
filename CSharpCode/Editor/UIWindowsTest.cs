@@ -333,7 +333,7 @@ namespace EngineNS.Editor
                     var drawList = ImGuiAPI.GetWindowDrawList();
                     for (int i=0; i<mMenuItems.Count; i++)
                     {
-                        mMenuItems[i].OnDraw(ref drawList, ref Support.UAnyPointer.Default);
+                        mMenuItems[i].OnDraw(in drawList, in Support.UAnyPointer.Default);
                     }
                     ImGuiAPI.EndMenuBar();
                 }
@@ -528,7 +528,9 @@ namespace EngineNS.Editor
                 var contentBrowser = new ContentBrowser();
                 await contentBrowser.Initialize();
                 mPanels.Add(contentBrowser);
-                mPanels.Add(new ViewportPanel());
+            var viewPort = new ViewportPanel();
+            await viewPort.Initialize();
+            mPanels.Add(viewPort);
 
             return true;
         }
@@ -543,7 +545,7 @@ namespace EngineNS.Editor
             {
 
                 var drawList = ImGuiAPI.GetWindowDrawList();
-                mToolbar.OnDraw(ref drawList, ref Support.UAnyPointer.Default);
+                mToolbar.OnDraw(in drawList, in Support.UAnyPointer.Default);
 
                 var winPosMin = ImGuiAPI.GetWindowContentRegionMin() + new Vector2(0, mToolbar.ToolbarHeight);
                 var winPosMax = ImGuiAPI.GetWindowContentRegionMax();
@@ -596,15 +598,22 @@ namespace EngineNS.Editor
         public async Task<bool> Initialize() 
         {
             await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+
+            mBezierControl.Initialize(10.0f, 10.0f, 30.0f, 20.0f);
+
             return true; 
         }
 
         Vector2 uvMin = new Vector2(303.0f / 1024, 270.0f / 1024);
         Vector2 uvMax = new Vector2((303.0f + 32) / 1024, (270.0f + 32) / 1024);
+
+        EGui.Controls.BezierControl mBezierControl = new EGui.Controls.BezierControl();
+
         public void OnDraw()
         {
             if(ImGuiAPI.Begin("Viewport", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
+                mBezierControl.OnDraw();
             //    var drawList = ImGuiAPI.GetWindowDrawList();
             //    image.UVMin = uvMin;
             //    image.UVMax = uvMax;
@@ -689,7 +698,7 @@ namespace EngineNS.Editor
             if (ImGuiAPI.Begin("Content Browser", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
-                mToolbar.OnDraw(ref drawList, ref Support.UAnyPointer.Default);
+                mToolbar.OnDraw(in drawList, in Support.UAnyPointer.Default);
 
                 var winPosMin = ImGuiAPI.GetWindowContentRegionMin() + new Vector2(0, mToolbar.ToolbarHeight);
                 var winPosMax = ImGuiAPI.GetWindowContentRegionMax();

@@ -129,6 +129,10 @@ namespace EngineNS.RHI
         {
             mCoreObject.SetIndirectDraw(pBuffer.mCoreObject, offset);
         }
+        public ShaderReflector GetReflector()
+        {
+            return mCoreObject.GetReflector();
+        }
     }
 
     public partial class CComputeDrawcall : AuxPtrType<IComputeDrawcall>

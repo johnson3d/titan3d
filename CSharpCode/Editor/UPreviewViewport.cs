@@ -50,9 +50,21 @@ namespace EngineNS.Editor
             //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
         }
-        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Rtti.UTypeDesc policyType, float zMin, float zMax)
+        bool Initialized = false;
+        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, Rtti.UTypeDesc policyType, float zMin, float zMax)
         {
-            var policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.URenderPolicy;
+            Graphics.Pipeline.URenderPolicy policy = null;
+            var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName);
+            if (rpAsset != null)
+            {
+                policy = rpAsset.CreateRenderPolicy();
+            }
+            if (policy == null)
+            {
+                policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.URenderPolicy;
+            }            
+            await policy.Initialize(null);
+
             if (OnInitialize == null)
             {
                 OnInitialize = this.Initialize_Default;
@@ -60,6 +72,8 @@ namespace EngineNS.Editor
             await OnInitialize(this, application, policy, zMin, zMax);
 
             RenderPolicy.OnResize(ClientSize.X, ClientSize.Y);
+
+            Initialized = true;
         }
         protected override void OnClientChanged(bool bSizeChanged)
         {
@@ -71,7 +85,10 @@ namespace EngineNS.Editor
         }
         protected override IntPtr GetShowTexture()
         {
-            return RenderPolicy.GetFinalShowRSV().GetTextureHandle();
+            var srv = RenderPolicy?.GetFinalShowRSV();
+            if (srv == null)
+                return IntPtr.Zero;
+            return srv.GetTextureHandle();
         }
         #region CameraControl
         Vector2 mPreMousePt;
@@ -155,6 +172,8 @@ namespace EngineNS.Editor
         GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
         public void TickLogic(int ellapse)
         {
+            if (Initialized == false)
+                return;
             World.TickLogic(this.RenderPolicy, ellapse);
 
             if (IsDrawing == false)
@@ -175,6 +194,8 @@ namespace EngineNS.Editor
         }
         public void TickRender(int ellapse)
         {
+            if (Initialized == false)
+                return;
             if (IsDrawing == false)
                 return;
             RenderPolicy?.TickRender();
@@ -182,6 +203,8 @@ namespace EngineNS.Editor
         public Action AfterTickSync;
         public void TickSync(int ellapse)
         {
+            if (Initialized == false)
+                return;
             if (IsDrawing == false)
                 return;
             RenderPolicy?.TickSync();

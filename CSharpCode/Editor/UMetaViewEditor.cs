@@ -26,7 +26,8 @@ namespace EngineNS.Editor
         public EGui.Controls.PropertyGrid.PropertyGrid PGMember = new EGui.Controls.PropertyGrid.PropertyGrid() { IsReadOnly = true };
         public string mFilterText;
         async System.Threading.Tasks.Task DoTest()
-        {            
+        {
+#pragma warning disable CS0162
             if (false)
             {
                 //var shape = Graphics.Mesh.CMeshDataProvider.MakeRect2D(-1, -1, 2, 2, 0.0F, false);
@@ -71,6 +72,7 @@ namespace EngineNS.Editor
 
                 mainEditor.GetWorldViewportSlate().ShowBoundVolumes(true, null);
             }
+#pragma warning restore CS0162
         }
 
         public static async System.Threading.Tasks.Task TestCreateScene(GamePlay.UWorld world, GamePlay.Scene.UNode root, bool hideTerrain = false)
@@ -80,7 +82,6 @@ namespace EngineNS.Editor
             materials[1] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ground.uminst"));
             if (materials[0] == null)
                 return;
-
             {
                 var meshData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
                 meshData.MeshName = RName.GetRName("utest/mesh/skysphere001.ums");
@@ -94,7 +95,7 @@ namespace EngineNS.Editor
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = false;
             }
-
+    
             {
                 var meshData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
                 meshData.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
@@ -134,12 +135,34 @@ namespace EngineNS.Editor
                     (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfSkinMesh));
                     (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).AtomType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMesh.UAtom));
 
-                    var sapnd = new Animation.SceneNode.USkeletonAnimPlayNode.USkeletonAnimPlayNodeData();
-                    sapnd.Name = "PlayAnim";
-                    sapnd.AnimatinName = RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip");
-                    await Animation.SceneNode.USkeletonAnimPlayNode.AddSkeletonAnimPlayNode(world, meshNode1, sapnd, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UIdentityPlacement));
+                    //var sapnd = new Animation.SceneNode.USkeletonAnimPlayNode.USkeletonAnimPlayNodeData();
+                    //sapnd.Name = "PlayAnim";
+                    //sapnd.AnimatinName = RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip");
+                    //var animPlaynode = await Animation.SceneNode.USkeletonAnimPlayNode.AddSkeletonAnimPlayNode(world, meshNode, sapnd, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UIdentityPlacement));
+                    //animPlaynode.BindingTo(meshNode1);
+
+                    var gameplayMacross = new EngineNS.GamePlay.GamePlayMacross.UTestGameplayMacross();
+                    await gameplayMacross.ConstructAnimGraph(meshNode1);
+                    var gameplayMacrossNodeData = new EngineNS.GamePlay.GamePlayMacross.UGamePlayMacrossNode.UGamePlayMacrossNodeData();
+                    gameplayMacrossNodeData.GamePlayMacross = gameplayMacross;
+                    await EngineNS.GamePlay.GamePlayMacross.UGamePlayMacrossNode.AddGamePlayMacrossNodeNode(world, meshNode, gameplayMacrossNodeData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
                 }
             }
+
+            {
+                var meshData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
+                meshData.MeshName = RName.GetRName("utest/brdf_test/chair2.ums");
+                //meshData.CollideName = RName.GetRName("utest/puppet/mesh/puppet.vms");
+                var meshNode = new GamePlay.Scene.UMeshNode();
+                await meshNode.InitializeNode(world, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                meshNode.Parent = root;
+                meshNode.Placement.SetTransform(new DVector3(0, 10, 0), new Vector3(1.0f), Quaternion.Identity);
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.NodeData.Name = "Robot_Chair";
+                meshNode.IsAcceptShadow = false;
+                meshNode.IsCastShadow = true;
+            }
+
 
             var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
             materials1[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ddd.uminst"));
@@ -361,12 +384,8 @@ namespace EngineNS.Editor
                 if (ImGuiAPI.CollapsingHeader("ClassView", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     ImGuiAPI.PushItemWidth(-1);
-                    var buffer = BigStackBuffer.CreateInstance(256);
-                    buffer.SetText(mFilterText);
-                    ImGuiAPI.InputText("##in", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
-                    mFilterText = buffer.AsText();
-                    buffer.DestroyMe();
-
+                    ImGuiAPI.InputText("##in", ref mFilterText);
+                    
                     ImGuiAPI.Separator();
 
                     foreach (var i in Rtti.UClassMetaManager.Instance.Metas)

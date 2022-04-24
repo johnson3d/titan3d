@@ -10,6 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.CodeBuilder.ShaderNode.Control.HLSLMethod.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.Node.UOpNode.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UPgcNodeBase.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IAction.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IActor.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IInventory.macross.cs" />

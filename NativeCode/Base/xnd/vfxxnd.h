@@ -21,8 +21,8 @@ class XndAttribute;
 class XndNode;
 class XndHolder;
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-XndElement : public VIUnknown
+struct TR_CLASS()
+	XndElement : public VIUnknownBase
 {
 	std::string			mName;
 	UINT				mVersion;
@@ -33,11 +33,12 @@ XndElement : public VIUnknown
 	void SetName(const char* v) {
 		mName = v;
 	}
+	static UINT NameToHash(const std::string& name);
 	TObjectHandle<XndHolder>	mHolder;
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_Dispose = self->Release())
-XndAttribute : public XndElement
+class TR_CLASS(SV_Dispose = self->Release())
+	XndAttribute : public XndElement
 {
 	friend XndHolder;
 protected:
@@ -126,8 +127,8 @@ public:
 	}
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_Dispose = self->Release())
-XndNode : public XndElement
+class TR_CLASS(SV_Dispose = self->Release())
+	XndNode : public XndElement
 {
 protected:
 	std::vector<AutoRef<XndAttribute>>		mAttributes;
@@ -212,8 +213,8 @@ public:
 	}
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_Dispose = self->Release())
-XndHolder : public VIUnknown
+class TR_CLASS(SV_Dispose = self->Release())
+	XndHolder : public VIUnknown
 {
 	AutoRef<XndNode>			mRootNode;
 	AutoRef<VRes2Memory>		mResource;

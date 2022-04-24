@@ -409,7 +409,7 @@ void IVKTexture2D::TransitionImageLayout(IVKRenderContext* rc, VkImage image, UI
 		VK_EndSingleTimeCommands(rc, commandBuffer);
 }
 
-vBOOL IVKTexture2D::MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
+vBOOL IVKTexture2D::MapMipmap(ICommandList* cmd, UINT ArraySlice, UINT MipSlice, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
 {
 	//auto rc = cmd->GetContext().UnsafeConvertTo<ID11RenderContext>();
 	//auto pContext = rc->mHardwareContext;
@@ -428,7 +428,7 @@ vBOOL IVKTexture2D::MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, UI
 	return TRUE;
 }
 
-void IVKTexture2D::UnmapMipmap(ICommandList* cmd, int MipLevel)
+void IVKTexture2D::UnmapMipmap(ICommandList* cmd, UINT ArraySlice, UINT MipSlice)
 {
 	//auto rc = cmd->GetContext().UnsafeConvertTo<ID11RenderContext>();
 	//auto pContext = rc->mHardwareContext;
@@ -437,7 +437,7 @@ void IVKTexture2D::UnmapMipmap(ICommandList* cmd, int MipLevel)
 	//rc->mHWContextLocker.Unlock();
 }
 
-void IVKTexture2D::UpdateMipData(ICommandList* cmd, UINT level, void* pData, UINT width, UINT height, UINT Pitch)
+void IVKTexture2D::UpdateMipData(ICommandList* cmd, UINT ArraySlice, UINT MipSlice, void* pData, UINT width, UINT height, UINT Pitch)
 {
 	auto pContext = mContext.GetPtr();
 
@@ -457,9 +457,9 @@ void IVKTexture2D::UpdateMipData(ICommandList* cmd, UINT level, void* pData, UIN
 	region.bufferRowLength = 0;
 	region.bufferImageHeight = 0;
 	region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	region.imageSubresource.mipLevel = level;	
-	region.imageSubresource.baseArrayLayer = 0;
-	region.imageSubresource.layerCount = 1;
+	region.imageSubresource.mipLevel = MipSlice;
+	region.imageSubresource.baseArrayLayer = ArraySlice;
+	region.imageSubresource.layerCount = 1;//mTextureDesc.ArraySize;
 	region.imageOffset = { 0, 0, 0 };
 	region.imageExtent = 
 	{

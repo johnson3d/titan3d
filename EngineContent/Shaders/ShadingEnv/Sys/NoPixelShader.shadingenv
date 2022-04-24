@@ -1,5 +1,7 @@
 #include "../../Inc/VertexLayout.cginc"
 
+#include "../../Inc/SysFunctionDefImpl.cginc"
+
 struct PS_OUTPUT
 {
 	float4 RenderTarget0 : SV_Target0;

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassGraph@EngineCore">
+<Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor@EngineCore">
   <DefClass Type="EngineNS.Bricks.CodeBuilder.DefineClass@EngineCore">
-    <ClassName Type="System.String@Unknown" Value="NewClass" />
+    <ClassName Type="System.String@Unknown" Value="12121" />
     <Functions Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.DefineFunction@EngineCore,&gt;@Unknown" Count="0" />
     <Members Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.DefineVar@EngineCore,&gt;@Unknown" Count="0" />
+    <NameSpace Type="System.String@Unknown" Value="utest" />
   </DefClass>
 </Root>

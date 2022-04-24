@@ -58,6 +58,8 @@ namespace EngineNS
         [Rtti.Meta]
         public string MainWindowRPolicy { get; set; }// = Rtti.TypeManager.Instance.GetTypeStringFromType(typeof(Graphics.Pipeline.Mobile.UMobileFSPolicy));
         [Rtti.Meta]
+        public RName MainRPolicyName { get; set; }
+        [Rtti.Meta]
         public string RpcRootType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.UTest.UTest_Rpc));
         [Rtti.Meta]
         public bool CookDXBC { get; set; } = true;

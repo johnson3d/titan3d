@@ -132,7 +132,7 @@ bool IGLTexture2D::Init(IGLRenderContext* pCtx, const ITexture2DDesc* pDesc)
 	return true;
 }
 
-vBOOL IGLTexture2D::MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
+vBOOL IGLTexture2D::MapMipmap(ICommandList* cmd, UINT ArraySlice, UINT MipSlice, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
 {
 	if (mIsReadable == false)
 		return FALSE;
@@ -147,7 +147,7 @@ vBOOL IGLTexture2D::MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, UI
 	return (*ppData)!=nullptr;
 }
 
-void IGLTexture2D::UnmapMipmap(ICommandList* cmd, int MipLevel)
+void IGLTexture2D::UnmapMipmap(ICommandList* cmd, UINT ArraySlice, UINT MipSlice)
 {
 	if (mIsReadable == false)
 		return;
@@ -159,7 +159,7 @@ void IGLTexture2D::UnmapMipmap(ICommandList* cmd, int MipLevel)
 	sdk->BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }
 
-void IGLTexture2D::UpdateMipData(ICommandList* cmd, UINT level, void* pData, UINT width, UINT height, UINT Pitch)
+void IGLTexture2D::UpdateMipData(ICommandList* cmd, UINT ArraySlice, UINT MipSlice, void* pData, UINT width, UINT height, UINT Pitch)
 {
 	GLSdk* sdk = ((IGLCommandList*)cmd)->mCmdList;
 	
@@ -179,7 +179,7 @@ void IGLTexture2D::UpdateMipData(ICommandList* cmd, UINT level, void* pData, UIN
 	GLint internalFormat = GL_DEPTH24_STENCIL8;
 	GLenum type = GL_UNSIGNED_INT_24_8;
 	FormatToGL(mTextureDesc.Format, internalFormat, format, type);
-	sdk->TexImage2D(GL_TEXTURE_2D, (GLint)level, internalFormat, width, height, 0, format, type, pData);
+	sdk->TexImage2D(GL_TEXTURE_2D, (GLint)MipSlice + ArraySlice * mTextureDesc.MipLevels, internalFormat, width, height, 0, format, type, pData);
 
 	sdk->BindTexture(GL_TEXTURE_2D, 0);
 }

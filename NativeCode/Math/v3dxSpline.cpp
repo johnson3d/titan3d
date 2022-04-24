@@ -174,11 +174,9 @@ void v3dxSpline::buildVelocity(int idx)
 	sSubPoint& sNode = m_aNodeArray[idx];
 	if ( idx == 0 )
 	{
-		// 调整第一个节点
 		sNode.vVel1 = v3dxVector3::ZERO;
 		if ( nNodeCnt > 1 )
 			sNode.vVel2 = CalcVel(m_aNodeArray[1].vPos, sNode.vPos, sNode.fDist);
-		// 调整最后一个节点
 		if ( nNodeCnt == 2 )
 		{
 			m_aNodeArray[1].vVel1 = CalcVel(sNode.vPos, m_aNodeArray[1].vPos, sNode.fDist);
@@ -187,13 +185,11 @@ void v3dxSpline::buildVelocity(int idx)
 	}
 	else if ( idx == nNodeCnt - 1 )
 	{
-		// 调整第一个节点
 		if ( idx == 1 )
 		{
 			m_aNodeArray[0].vVel1 = v3dxVector3::ZERO;
 			m_aNodeArray[0].vVel2 = CalcVel(sNode.vPos, m_aNodeArray[0].vPos, m_aNodeArray[0].fDist);
 		}
-		// 调整最后一个节点
 		if ( idx > 0 )
 		{
 			sNode.vVel1 = CalcVel(m_aNodeArray[idx-1].vPos, sNode.vPos, m_aNodeArray[idx-1].fDist);
@@ -207,13 +203,11 @@ void v3dxSpline::buildVelocity(int idx)
 		v3dxVector3 vTg = (v2.getNormal() - v1.getNormal()).getNormal();
 		sNode.vVel2 = vTg * sNode.fDist;
 		sNode.vVel1 = -1 * vTg * sNode.fDist;
-		// 调整第一个节点
 		if ( idx == 1 )
 		{
 			m_aNodeArray[0].vVel1 = v3dxVector3::ZERO;
 			m_aNodeArray[0].vVel2 = CalcVel(sNode.vPos, m_aNodeArray[0].vPos, m_aNodeArray[0].fDist);
 		}
-		// 调整最后一个节点
 		if ( idx == nNodeCnt - 2 )
 		{
 			m_aNodeArray[nNodeCnt-1].vVel1 = CalcVel(sNode.vPos, m_aNodeArray[nNodeCnt-1].vPos, sNode.fDist);
@@ -255,7 +249,6 @@ v3dxVector3 v3dxSpline::getPosition(float fTime, int* pIndex/* = NULL*/, v3dxVec
 
 void v3dxSpline::genLineNodes(std::vector<v3dxVector3>* aArray, float fDistStep /*= 1.f*/, vBOOL bGetLessNode /*= TRUE*/)
 {
-	// 生成步幅为fDistStep的最少数量的直线段节点集合
 	aArray->clear();
 	if ( fDistStep <= 0 )
 		fDistStep = m_fMaxDistance / 100.f;

@@ -114,38 +114,34 @@ namespace EngineNS.EGui.Controls
                     var drawList = ImGuiAPI.GetWindowDrawList();
                     for (int i = 0; i < mDirContextMenu.Count; i++)
                     {
-                        mDirContextMenu[i].OnDraw(ref drawList, ref menuData);
+                        mDirContextMenu[i].OnDraw(in drawList, in menuData);
                     }
                 }
                 ImGuiAPI.EndPopup();
             }
         }
         public RName CurrentDir;
-        public void DrawDirectories(RName root, Vector2 size)
+        public void DrawDirectories(RName root)
         {
-            if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow;
+            if (root == CurrentDir)
+                flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Framed;
+            var treeNodeResult = ImGuiAPI.TreeNodeEx(root.RNameType.ToString(), flags);
+            DrawDirContextMenu(root.Address);
+            if (treeNodeResult)
             {
-                ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow;
-                if (root == CurrentDir)
-                    flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Framed;
-                var treeNodeResult = ImGuiAPI.TreeNodeEx(root.RNameType.ToString(), flags);
-                DrawDirContextMenu(root.Address);
-                if (treeNodeResult)
+                if (ImGuiAPI.IsItemActivated())
                 {
-                    if (ImGuiAPI.IsItemActivated())
-                    {
-                        CurrentDir = root;
-                    }
-                    var dirs = IO.FileManager.GetDirectories(root.Address, "*.*", false);
-                    foreach (var i in dirs)
-                    {
-                        var nextDirName = IO.FileManager.GetRelativePath(root.Address, i);
-                        DrawTree(root.RNameType, root.Name, nextDirName);
-                    }
-                    ImGuiAPI.TreePop();
+                    CurrentDir = root;
                 }
+                var dirs = IO.FileManager.GetDirectories(root.Address, "*.*", false);
+                foreach (var i in dirs)
+                {
+                    var nextDirName = IO.FileManager.GetRelativePath(root.Address, i);
+                    DrawTree(root.RNameType, root.Name, nextDirName);
+                }
+                ImGuiAPI.TreePop();
             }
-            ImGuiAPI.EndChild();
         }
         struct stDirMenuData
         {
@@ -248,93 +244,82 @@ namespace EngineNS.EGui.Controls
                 }
             }
         }
-        public unsafe void DrawFiles(RName dir, Vector2 size)
+        public unsafe void DrawFiles(RName dir, in Vector2 size)
         {
+            var cmdlist = ImGuiAPI.GetWindowDrawList();
             var itemSize = new Vector2(80, 100);
-            var cmdlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
-            if (mSearchBar != null)
-            {
-                mSearchBar.Width = size.X;
-                if (mSearchBar.OnDraw(ref cmdlist, ref Support.UAnyPointer.Default))
-                    FilterText = mSearchBar.SearchText;
-            }
-            else
-            {
-                SureSearchBar();
-            }
-            if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
-            {
-                ////////////////////////////////////////////////////////////
-                //var winPos = ImGuiAPI.GetWindowPos();
-                //var drawList = ImGuiAPI.GetForegroundDrawList();
-                //var viewPort = ImGuiAPI.GetWindowViewport();
-                //var min = ImGuiAPI.GetWindowContentRegionMin() + winPos;
-                //var max = ImGuiAPI.GetWindowContentRegionMax() + winPos;
-                ////////////////////////////////////////////////////////////
+            
+            //var cldPos = ImGuiAPI.GetWindowPos();
+            //var cldMin = ImGuiAPI.GetWindowContentRegionMin();
+            //var cldMax = ImGuiAPI.GetWindowContentRegionMax();
+            //cldMin += cldPos;
+            //cldMax += cldPos;
+            //////cldMin.Y += 30;
+            //cmdlist.PushClipRect(in cldMin, in cldMax, true);
 
-                var width = ImGuiAPI.GetWindowContentRegionWidth();
-                var files = IO.FileManager.GetFiles(dir.Address, "*" + IO.IAssetMeta.MetaExt, false);
-                float curPos = 0;
-                for(int i=0; i<files.Length; i++)
+            var width = ImGuiAPI.GetWindowContentRegionWidth();
+            var files = IO.FileManager.GetFiles(dir.Address, "*" + IO.IAssetMeta.MetaExt, false);
+            float curPos = 0;
+            for (int i = 0; i < files.Length; i++)
+            {
+                var file = files[i];
+                var name = IO.FileManager.GetPureName(file);
+                if (!string.IsNullOrEmpty(ExtNames))
                 {
-                    var file = files[i];
-                    var name = IO.FileManager.GetPureName(file);
-                    if (!string.IsNullOrEmpty(ExtNames))
+                    var splits = ExtNames.Split(',');
+                    var ext = IO.FileManager.GetExtName(name);
+                    bool find = false;
+                    for (int extIdx = 0; extIdx < splits.Length; extIdx++)
                     {
-                        var splits = ExtNames.Split(',');
-                        var ext = IO.FileManager.GetExtName(name);
-                        bool find = false;
-                        for(int extIdx = 0; extIdx < splits.Length; extIdx++)
+                        if (string.Equals(ext, splits[extIdx], StringComparison.OrdinalIgnoreCase))
                         {
-                            if (string.Equals(ext, splits[extIdx], StringComparison.OrdinalIgnoreCase))
-                            {
-                                find = true;
-                                break;
-                            }
+                            find = true;
+                            break;
                         }
-                        if (!find)
-                            continue;
                     }
-
-                    var filterName = IO.FileManager.GetPureName(name);
-                    if (!string.IsNullOrEmpty(FilterText))
-                    {
-                        if (filterName.Contains(FilterText, StringComparison.OrdinalIgnoreCase) == false)
-                            continue;
-                    }
-
-                    var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType));
-                    if (ameta == null)
+                    if (!find)
                         continue;
-
-                    DrawItem(ref cmdlist, ameta.Icon, ameta, ref itemSize);
-                    curPos += itemSize.X + 2;
-                    if (curPos + itemSize.X < width)
-                    {
-                        ImGuiAPI.SameLine(0, 2);
-                    }
-                    else
-                    {
-                        curPos = 0;
-                    }
                 }
 
-                ////////////////////////////////////////////////////////////
-                //drawList.AddRect(ref min, ref max, 0xFF0000FF, 0, ImDrawFlags_.ImDrawFlags_None, 1);
-                ////////////////////////////////////////////////////////////
-
-                if (CreateNewAssets && ImGuiAPI.BeginPopupContextWindow("##ContentFilesMenuWindow", ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
+                var filterName = IO.FileManager.GetPureName(name);
+                if (!string.IsNullOrEmpty(FilterText))
                 {
-                    var drawList = ImGuiAPI.GetWindowDrawList();
-                    var menuData = new Support.UAnyPointer();
+                    if (filterName.Contains(FilterText, StringComparison.OrdinalIgnoreCase) == false)
+                        continue;
+                }
 
-                    mNewAssetMenuItem.OnDraw(ref drawList, ref menuData);
-                    ImGuiAPI.EndPopup();
+                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType));
+                if (ameta == null)
+                    continue;
+
+                DrawItem(in cmdlist, ameta.Icon, ameta, in itemSize);
+                curPos += itemSize.X + 2;
+                if (curPos + itemSize.X < width)
+                {
+                    ImGuiAPI.SameLine(0, 2);
+                }
+                else
+                {
+                    curPos = 0;
                 }
             }
-            ImGuiAPI.EndChild();
+
+            //cmdlist.PopClipRect();
+
+            ////////////////////////////////////////////////////////////
+            //drawList.AddRect(ref min, ref max, 0xFF0000FF, 0, ImDrawFlags_.ImDrawFlags_None, 1);
+            ////////////////////////////////////////////////////////////
+
+            if (CreateNewAssets && ImGuiAPI.BeginPopupContextWindow("##ContentFilesMenuWindow", ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
+            {
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                var menuData = new Support.UAnyPointer();
+
+                mNewAssetMenuItem.OnDraw(in drawList, in menuData);
+                ImGuiAPI.EndPopup();
+            }
         }
-        private void DrawItem(ref ImDrawList cmdlist, UUvAnim icon, IO.IAssetMeta ameta, ref Vector2 sz)
+        private void DrawItem(in ImDrawList cmdlist, UUvAnim icon, IO.IAssetMeta ameta, in Vector2 sz)
         {
             ImGuiAPI.Selectable($"##{ameta.GetAssetName().Name}", false, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in sz);
             if (ImGuiAPI.IsItemVisible())
@@ -367,7 +352,7 @@ namespace EngineNS.EGui.Controls
                     ItemSelectedAction?.Invoke(ameta);
                 }
                 ameta.ShowIconTime = UEngine.Instance.CurrentTickCount;
-                ameta.OnDraw(ref cmdlist, ref sz, this);
+                ameta.OnDraw(in cmdlist, in sz, this);
             }
         }
         Vector2 LeftSize;
@@ -392,24 +377,51 @@ namespace EngineNS.EGui.Controls
 //                {
 //                    DockId = ImGuiAPI.GetWindowDockID();
 //                }
-                var cltMin = ImGuiAPI.GetWindowContentRegionMin();
-                var cltMax = ImGuiAPI.GetWindowContentRegionMax();
-
                 ImGuiAPI.Columns(2, null, true);
 
-                LeftSize.X = ImGuiAPI.GetColumnWidth(0);
-                LeftSize.Y = cltMax.Y - cltMin.Y;
+                if (LeftSize.X == 0)
+                {
+                    var cltSize = ImGuiAPI.GetWindowContentRegionWidth();
+                    ImGuiAPI.SetColumnWidth(0, ((float)cltSize) * 0.3f);
+                }
 
-                DrawDirectories(RName.GetRName("", RName.ERNameType.Game), LeftSize);
-
-                DrawDirectories(RName.GetRName("", RName.ERNameType.Engine), LeftSize);
-
+                if (ImGuiAPI.BeginChild("LeftWindow", in Vector2.InvmUnitXY, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                {
+                    var min = ImGuiAPI.GetWindowContentRegionMin();
+                    var max = ImGuiAPI.GetWindowContentRegionMax();
+                    LeftSize = max - min;
+                    
+                    DrawDirectories(RName.GetRName("", RName.ERNameType.Game));
+                    DrawDirectories(RName.GetRName("", RName.ERNameType.Engine));
+                }
+                ImGuiAPI.EndChild();
+                
                 ImGuiAPI.NextColumn();
 
-                RightSize.X = ImGuiAPI.GetColumnWidth(1);
-                RightSize.Y = cltMax.Y - cltMin.Y;
                 if (CurrentDir != null)
-                    DrawFiles(CurrentDir, RightSize);
+                {
+                    if (mSearchBar != null)
+                    {
+                        mSearchBar.Width = ImGuiAPI.GetColumnWidth(1);
+                        var cmdlist = ImGuiAPI.GetWindowDrawList();
+                        if (mSearchBar.OnDraw(in cmdlist, in Support.UAnyPointer.Default))
+                            FilterText = mSearchBar.SearchText;
+                    }
+                    else
+                    {
+                        SureSearchBar();
+                    }
+                    if (ImGuiAPI.BeginChild("RightWindow", in Vector2.InvmUnitXY, false, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysVerticalScrollbar))
+                    {
+                        var min = ImGuiAPI.GetWindowContentRegionMin();
+                        var max = ImGuiAPI.GetWindowContentRegionMax();
+                        RightSize = max - min;
+
+                        DrawFiles(CurrentDir, in RightSize);
+                    }
+                    ImGuiAPI.EndChild();
+                }
+                    
                 ImGuiAPI.NextColumn();
 
                 ImGuiAPI.Columns(1, null, true);

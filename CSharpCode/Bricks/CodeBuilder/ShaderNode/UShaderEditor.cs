@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
@@ -10,9 +10,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public EGui.UUvAnim FunctionIcon = new EGui.UUvAnim(0xFF00FF00, 25);
         public uint FunctionTitleColor = 0xFF204020;
         public uint FunctionBGColor = 0x80808080;
-        public EGui.Controls.NodeGraph.NodePin.LinkDesc NewInOutPinDesc(string linkType = "Value")
+        public LinkDesc NewInOutPinDesc(string linkType = "Value")
         {
-            var result = new EGui.Controls.NodeGraph.NodePin.LinkDesc();
+            var result = new LinkDesc();
             result.Icon.Size = new Vector2(20, 20);
             result.ExtPadding = 0;
             result.LineThinkness = 3;
@@ -137,7 +137,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 return false;
             }
 
-            var xml = IO.FileManager.LoadXmlFromString(Material.GraphXMLString);
+            //EngineNS.EGui.Controls.NodeGraph.PinLinker
+            var graphStr = Material.GraphXMLString.Replace("EngineNS.EGui.Controls.NodeGraph.PinLinker", "EngineNS.Bricks.NodeGraph.UPinLinker");
+            var xml = IO.FileManager.LoadXmlFromString(graphStr);            
+            
             if (xml != null)
             {
                 object pThis = this;
@@ -161,11 +164,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             PreviewViewport.Title = $"MaterialPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
 
             await PreviewPropGrid.Initialize();
             PreviewPropGrid.PGName = $"PGMaterialPreview:{AssetName}";
             PreviewPropGrid.Target = PreviewViewport;
+
+            GraphRenderer.SetGraph(MaterialGraph);
 
             UEngine.Instance.TickableManager.AddTickable(this);
             return true;
@@ -187,6 +192,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public Vector2 WindowSize = new Vector2(800, 600);
         [Rtti.Meta]
         public UMaterialGraph MaterialGraph { get; } = new UMaterialGraph();
+        public Bricks.NodeGraph.UGraphRenderer GraphRenderer = new NodeGraph.UGraphRenderer();
         [Rtti.Meta(Order = 1)]
         public Guid OutputNodeId
         {
@@ -352,7 +358,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var size = new Vector2(-1, -1);
             if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                MaterialGraph.OnDraw(null, false);
+                //MaterialGraph.OnDraw(null, false);
+                GraphRenderer.OnDraw();
             }
             ImGuiAPI.EndChild();
         }

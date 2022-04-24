@@ -62,7 +62,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             return true;
         }
     }
-    public class URenderGraphNode
+    public class URenderGraphNode : IO.BaseSerializer
     {
         public virtual void Cleanup()
         {
@@ -75,18 +75,18 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public int TempRootDistance = 0;
         public bool Enable { get; set; } = true;
-        public string Name { get; set; }
+        public virtual string Name { get; set; }
         public URenderGraph RenderGraph { get; internal set; }
         protected List<URenderGraphPin> InputGraphPins { get; } = new List<URenderGraphPin>();
         protected List<URenderGraphPin> OutputGraphPins { get; } = new List<URenderGraphPin>();
-        public int NumOfInput
+        public virtual int NumOfInput
         {
             get
             {
                 return InputGraphPins.Count;
             }
         }
-        public int NumOfOutput
+        public virtual int NumOfOutput
         {
             get
             {
@@ -142,11 +142,11 @@ namespace EngineNS.Graphics.Pipeline.Common
             OutputGraphPins.Add(pin);
             return true;
         }
-        public URenderGraphPin GetInput(int index)
+        public virtual URenderGraphPin GetInput(int index)
         {
             return InputGraphPins[index];
         }
-        public URenderGraphPin GetOutput(int index)
+        public virtual URenderGraphPin GetOutput(int index)
         {
             return OutputGraphPins[index];
         }

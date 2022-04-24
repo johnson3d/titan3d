@@ -9,8 +9,13 @@
     <Import_RootNamespace>EngineNS.Bricks.Procedure</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Buffer2D\Image.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Buffer2D\ImageOp.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Image2D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\UOpNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\UUserNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UBufferConponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPgcAsset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPgcEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPgcGraph.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Procedure.brick" />

@@ -8,7 +8,13 @@
 #define MAX_POINT_LIGHT_PER_OBJ 4
 #define BIG_FLOAT 1000000.0f
 
+//mem align pow n
 #define ROUNDUP(x,n) ((x+(n-1))&(~(n-1)))
+
+uint RoundUpPow2(uint numToRound, uint multiple)
+{
+	return (numToRound + multiple - 1) & -multiple;
+}
 
 half3 sRGB2Linear(half3 sRGBColor)
 {

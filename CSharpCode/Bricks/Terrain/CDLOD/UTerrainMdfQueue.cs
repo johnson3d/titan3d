@@ -71,7 +71,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 drawcall.mCoreObject.BindShaderSrv(index, pat.Level.HeightMapSRV.mCoreObject);
             index = reflector.GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_HeightMapTexture");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+                drawcall.mCoreObject.BindShaderSampler(index, policy.ClampState.mCoreObject);// UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
 
             index = reflector.GetShaderBinder(EShaderBindType.SBT_Srv, "HeightMapTextureArray");
             if (!CoreSDK.IsNullPointer(index))
@@ -86,6 +86,24 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 drawcall.mCoreObject.BindShaderSrv(index, pat.Level.NormalMapSRV.mCoreObject);
             index = reflector.GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_NormalMapTexture");
             if (!CoreSDK.IsNullPointer(index))
+                drawcall.mCoreObject.BindShaderSampler(index, policy.ClampState.mCoreObject);// UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+
+            index = reflector.GetShaderBinder(EShaderBindType.SBT_Srv, "MaterialIdTexture");
+            if (!CoreSDK.IsNullPointer(index))
+                drawcall.mCoreObject.BindShaderSrv(index, pat.Level.MaterialIdMapSRV.mCoreObject);
+            index = reflector.GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_MaterialIdTexture");
+            if (!CoreSDK.IsNullPointer(index))
+                drawcall.mCoreObject.BindShaderSampler(index, policy.ClampPointState.mCoreObject);
+
+            index = reflector.GetShaderBinder(EShaderBindType.SBT_Srv, "DiffuseTextureArray");
+            if (!CoreSDK.IsNullPointer(index))
+            {
+                var srv = pat.Level.GetTerrainNode().TerrainMaterialIdManager.DiffuseTextureArraySRV;
+                if (srv != null)
+                    drawcall.mCoreObject.BindShaderSrv(index, srv.mCoreObject);
+            }
+            index = reflector.GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_DiffuseTextureArray");
+            if (!CoreSDK.IsNullPointer(index))
                 drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
 
             var cbIndex = reflector.GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerPatch");
@@ -98,8 +116,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 var terrain = pat.Level.GetTerrainNode();
                 pat.PatchCBuffer.SetValue(ref EyeCenter, terrain.EyeLocalCenter - pat.StartPosition);
 
-                pat.TexUVOffset.X = (Patch.XInLevel * 64.0f) / 1024.0f;
-                pat.TexUVOffset.Y = (Patch.ZInLevel * 64.0f) / 1024.0f;
+                //pat.TexUVOffset.X = (Patch.XInLevel * 64.0f) / 1024.0f;
+                //pat.TexUVOffset.Y = (Patch.ZInLevel * 64.0f) / 1024.0f;
+                
+                //pat.TexUVOffset.X = (Patch.XInLevel * pat.Level.GetTerrainNode().PatchSize) / pat.Level.GetTerrainNode().LevelSize;
+                //pat.TexUVOffset.Y = (Patch.ZInLevel * pat.Level.GetTerrainNode().PatchSize) / pat.Level.GetTerrainNode().LevelSize;
+
+                pat.TexUVOffset.X = ((float)Patch.XInLevel / (float)pat.Level.GetTerrainNode().PatchSide);
+                pat.TexUVOffset.Y = ((float)Patch.ZInLevel / (float)pat.Level.GetTerrainNode().PatchSide);
+
                 pat.PatchCBuffer.SetValue(ref TexUVOffset, in pat.TexUVOffset);
 
                 drawcall.mCoreObject.BindShaderCBuffer(cbIndex, pat.PatchCBuffer.mCoreObject);

@@ -22,10 +22,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public async System.Threading.Tasks.Task<bool> Initialize(int mipLevel)
         {
             MipLevels = mipLevel;
-            Material = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine));
+            //Material = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine));
+            Material = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("utest/material/terrainidmap.material"));
             Material.IsEditingMaterial = false;
 
-            Material.UsedRSView[0].Value = RName.GetRName("UTest/texture/ground_01.srv");
+            //Material.UsedRSView[0].Value = RName.GetRName("UTest/texture/ground_01.srv");
 
             WireFrameMaterial = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
             WireFrameMaterial.IsEditingMaterial = false;

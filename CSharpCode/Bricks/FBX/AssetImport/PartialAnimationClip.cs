@@ -53,17 +53,12 @@ namespace EngineNS.Animation.Asset
                     }
                     ImGuiAPI.Separator();
 
-                    var buffer = BigStackBuffer.CreateInstance(256);
-                    buffer.SetText(mName);
-                    ImGuiAPI.InputText("##in_rname", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
-                    var name = buffer.AsText();
-                    if (mName != name)
+                    bool nameChanged = ImGuiAPI.InputText("##in_rname", ref mName);
+                    if (nameChanged)
                     {
-                        mName = name;
                         if (IO.FileManager.FileExists(mDir.Address + mName + RHI.CShaderResourceView.AssetExt))
                             eErrorType = enErrorType.IsExisting;
                     }
-                    buffer.DestroyMe();
 
                     ImGuiAPI.Separator();
                     if (PGAsset.Target != null)

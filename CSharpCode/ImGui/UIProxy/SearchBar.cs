@@ -39,7 +39,7 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public unsafe bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
+        public unsafe bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
         {
             bool retValue = false;
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in StyleConfig.Instance.PGSearchBoxFramePadding);
@@ -49,12 +49,8 @@ namespace EngineNS.EGui.UIProxy
             if(mFocused)
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, EGui.UIProxy.StyleConfig.Instance.PGSearchBoxFocusBorderColor);
 
-            var buffer = BigStackBuffer.CreateInstance(256);
-            var oldValue = SearchText;
-            buffer.SetText(oldValue);
             ImGuiAPI.SetNextItemWidth(Width);
-            retValue = ImGuiAPI.InputText(TName.FromString2("##", "PropertyGridFilterString").ToString(), buffer.GetBuffer(), (uint)buffer.GetSize(),
-                ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+            retValue = ImGuiAPI.InputText(TName.FromString2("##", "PropertyGridFilterString").ToString(), ref SearchText);
 
             var itemMin = ImGuiAPI.GetItemRectMin();
             var itemMax = ImGuiAPI.GetItemRectMax();
@@ -62,21 +58,19 @@ namespace EngineNS.EGui.UIProxy
             if (icon != null)
             {
                 var pos = new Vector2(itemMin.X + 6, itemMin.Y + (itemMax.Y - itemMin.Y - icon.ImageSize.Y) * 0.5f);
-                icon.OnDraw(ref drawList, ref pos);
+                icon.OnDraw(in drawList, in pos);
             }
 
             if (mFocused)
                 ImGuiAPI.PopStyleColor(1);
             mFocused = ImGuiAPI.IsItemFocused();
 
-            SearchText = buffer.AsText();            
             if (string.IsNullOrEmpty(SearchText))
             {
                 var textSize = ImGuiAPI.CalcTextSize(InfoText, false, 0);
                 var pos = new Vector2(itemMin.X + StyleConfig.Instance.PGSearchBoxFramePadding.X, itemMin.Y + (itemMax.Y - itemMin.Y - textSize.Y) * 0.5f);
                 drawList.AddText(in pos, StyleConfig.Instance.PGSearchBoxInfoTextColor, InfoText, null);
             }
-            buffer.DestroyMe();
 
             ImGuiAPI.PopStyleVar(3);
             return retValue;

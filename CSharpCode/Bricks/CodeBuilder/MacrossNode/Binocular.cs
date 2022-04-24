@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using EngineNS.EGui.Controls.NodeGraph;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
@@ -25,9 +25,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
         
-        public EGui.Controls.NodeGraph.PinIn Left { get; set; } = new EGui.Controls.NodeGraph.PinIn();
-        public EGui.Controls.NodeGraph.PinIn Right { get; set; } = new EGui.Controls.NodeGraph.PinIn();
-        public EGui.Controls.NodeGraph.PinOut Result { get; set; } = new EGui.Controls.NodeGraph.PinOut();
+        public PinIn Left { get; set; } = new PinIn();
+        public PinIn Right { get; set; } = new PinIn();
+        public PinOut Result { get; set; } = new PinOut();
         public Binocular(EBinocularOp InOp)
         {
             Op = InOp;
@@ -42,8 +42,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
-            TitleImage.Color = 0xFF204020;
-            Background.Color = 0x80808080;
+            
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
             Name = Bricks.CodeBuilder.CSharp.CSGen.GetOp(InOp);
 
             if (Op == EBinocularOp.Assign)
@@ -63,7 +64,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EditObject = new BinocularEditObject();
             EditObject.Host = this;
         }
-        public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
+        public override System.Type GetOutPinType(PinOut pin)
         {
             return LeftType.SystemType;
         }
@@ -80,11 +81,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             return EditObject;
         }
-        public override IExpression GetExpr(FunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        public override IExpression GetExpr(UMacrossFunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
         {
             var binOp = new BinocularOp();
             binOp.Op = this.Op;
-            var links = new List<EGui.Controls.NodeGraph.PinLinker>();
+            var links = new List<UPinLinker>();
             funGraph.FindInLinker(Left, links);
             if (links.Count != 1)
             {
@@ -92,7 +93,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             var leftNode = links[0].OutNode as INodeExpr;
             var leftExpr = leftNode.GetExpr(funGraph, cGen, true) as OpExpress;
-            var leftType = leftNode.GetOutPinType(links[0].Out);
+            var leftType = leftNode.GetOutPinType(links[0].OutPin);
             binOp.Left = leftExpr;
 
             links.Clear();
@@ -103,7 +104,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             var rightNode = links[0].OutNode as INodeExpr;
             var rightExpr = rightNode.GetExpr(funGraph, cGen, true) as OpExpress;
-            var rightType = rightNode.GetOutPinType(links[0].Out);
+            var rightType = rightNode.GetOutPinType(links[0].OutPin);
             if (rightType != leftType)
             {
                 var cvtExpr = new ConvertTypeOp();
@@ -132,14 +133,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (LeftType != null)
                 EGui.Controls.CtrlUtility.DrawHelper(LeftType.FullName);
         }
-        public override void OnRemoveLinker(EGui.Controls.NodeGraph.PinLinker linker)
+        public override void OnRemoveLinker(UPinLinker linker)
         {
-            if (linker.In == Left)
+            if (linker.InPin == Left)
             {
                 LeftType = null;
             }
         }
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -154,7 +155,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return true;
         }
-        public override void OnLinkedFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin);
 
@@ -165,7 +166,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     return;
 
                 var newType = nodeExpr.GetOutPinType(oPin);
-                if (LeftType.SystemType != newType)
+                if (LeftType != null && LeftType.SystemType != newType)
                 {//类型改变，所有输入输出都需要断开
                     this.ParentGraph.RemoveLinkedOut(this.Result);
                     this.ParentGraph.RemoveLinkedIn(this.Right);
@@ -235,7 +236,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EditObject = new CmpEditObject();
             EditObject.Host = this;
         }
-        public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
+        public override System.Type GetOutPinType(PinOut pin)
         {
             return typeof(bool);
         }
@@ -251,14 +252,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     EGui.Controls.CtrlUtility.DrawHelper(LeftType.FullName);
             }
         }
-        public override void OnRemoveLinker(EGui.Controls.NodeGraph.PinLinker linker)
+        public override void OnRemoveLinker(UPinLinker linker)
         {
-            if (linker.In == Left)
+            if (linker.InPin == Left)
             {
                 LeftType = null;
             }
         }
-        public override void OnLinkedFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin);
 
@@ -277,7 +278,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 LeftType = Rtti.UTypeDesc.TypeOf(newType);
             }
         }
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -373,11 +374,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             LeftType = Rtti.UTypeDescGetter<bool>.TypeDesc;
         }
-        public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
+        public override System.Type GetOutPinType(PinOut pin)
         {
             return typeof(bool);
         }
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;

@@ -142,7 +142,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         public RHI.CRenderPass GizmosRenderPass;
         private RHI.CFence mReadHitproxyFence;
         bool CanDrawHitproxy = true;
-        public static float ScaleFactor { get; set; } = 0.5f;
+        [Rtti.Meta]
+        public float ScaleFactor { get; set; } = 0.5f;
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.AsyncDummyClass.DummyFunc();
@@ -235,7 +236,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             if (GGizmosBuffers != null)
             {
-                GGizmosBuffers.OnResize(x * UHitproxyNode.ScaleFactor, y * UHitproxyNode.ScaleFactor);
+                //float scaleFactor = 1.0f;
+                //var hitProxyNode = policy.FindFirstNode<UHitproxyNode>();
+                //if (hitProxyNode != null)
+                //{
+                //    scaleFactor = policy.FindFirstNode<UHitproxyNode>().ScaleFactor;
+                //}
+                GGizmosBuffers.OnResize(x * ScaleFactor, y * ScaleFactor);
             }
         }
         public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
@@ -296,10 +303,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                     void* pData;
                     uint rowPitch;
                     uint depthPitch;
-                    if (ReadableHitproxyTexture.MapMipmap(cmdlist_hp, 0, &pData, &rowPitch, &depthPitch) != 0)
+                    if (ReadableHitproxyTexture.MapMipmap(cmdlist_hp, 0, 0, &pData, &rowPitch, &depthPitch) != 0)
                     {
                         ReadableHitproxyTexture.BuildImageBlob(mHitProxyData.mCoreObject, pData, rowPitch);
-                        ReadableHitproxyTexture.UnmapMipmap(cmdlist_hp, 0);
+                        ReadableHitproxyTexture.UnmapMipmap(cmdlist_hp, 0, 0);
                     }
                 }
                 CanDrawHitproxy = true;

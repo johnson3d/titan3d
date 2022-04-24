@@ -11,8 +11,11 @@ namespace EngineNS.Editor
         [Rtti.Meta]
         public string GameProject { get; set; }
         [Rtti.Meta]
-        public bool ShowLightDebugMesh { get; set; } = true;
-        public bool ShowPxDebugMesh { get; set; } = false;
+        public GamePlay.UWorld.UVisParameter.EVisCullFilter CullFilters { get; set; } = GamePlay.UWorld.UVisParameter.EVisCullFilter.All;
+        public bool IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter filters)
+        {
+            return (CullFilters & filters) == filters;
+        }
     }
 
     public partial class UEditor : UModule<UEngine>

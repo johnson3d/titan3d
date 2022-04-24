@@ -55,6 +55,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public EVieportType VieportType { get; set; } = EVieportType.Window;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
+        public bool IsViewportSlateFocused { get; private set; }
         public virtual void OnDrawViewportUI(in Vector2 startDrawPos) { }
         public virtual unsafe void OnDraw()
         {
@@ -143,6 +144,7 @@ namespace EngineNS.Graphics.Pipeline
 
                 if(ImGuiAPI.BeginChild("ViewportClient", in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                 {
+                    IsViewportSlateFocused = ImGuiAPI.IsHoverCurrentWindow() && ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows);
                     OnDrawViewportUI(in curPos);
                     ImGuiAPI.EndChild();
                 }
@@ -234,7 +236,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public delegate System.Threading.Tasks.Task FOnInitialize(UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax);
         public FOnInitialize OnInitialize = null;
-        public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Rtti.UTypeDesc policyType, float zMin, float zMax)
+        public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, Rtti.UTypeDesc policyType, float zMin, float zMax)
         {
             var policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.URenderPolicy;
             if (OnInitialize != null)

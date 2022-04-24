@@ -28,21 +28,17 @@ namespace EngineNS.EGui.UIProxy
             {
                 ImGuiAPI.Text(inputInfo);
                 ImGuiAPI.SameLine(0, -1);
-                var buffer = BigStackBuffer.CreateInstance(256);
-                buffer.SetText(inputValue);
                 if(string.IsNullOrEmpty(mErrorString))
                     ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Border, 0xFF0000FF);
-                ImGuiAPI.InputText("##in_inputValue", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+                ImGuiAPI.InputText("##in_inputValue", ref inputValue);
                 if(string.IsNullOrEmpty(mErrorString))
                     ImGuiAPI.PopStyleColor(1);
-                inputValue = buffer.AsText().ToLower();
                 mErrorString = inputValueMatch(inputValue);
                 if(!string.IsNullOrEmpty(mErrorString))
                 {
                     var clr = new Vector4(1, 0, 0, 1);
                     ImGuiAPI.TextColored(in clr, mErrorString);
                 }
-                buffer.DestroyMe();
 
                 if(ImGuiAPI.Button("OK", in Vector2.Zero) && string.IsNullOrEmpty(mErrorString))
                 {

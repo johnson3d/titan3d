@@ -36,6 +36,7 @@ namespace EngineNS.Graphics.Pipeline
         public RHI.CDepthStencilView Dsv;
         public RHI.CUnorderedAccessView Uav;
         public RHI.CShaderResourceView Srv;
+        public RHI.CConstantBuffer CBuffer;
         public void Cleanup()
         {
             if (LifeMode == ELifeMode.Imported)

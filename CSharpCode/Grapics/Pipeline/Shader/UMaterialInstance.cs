@@ -376,6 +376,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             rast.CullMode = ECullMode.CMD_NONE;
             mWireColorMateria.Rasterizer = rast;
             mWireColorMateria.RenderLayer = ERenderLayer.RL_Translucent;
+
+            await GetMaterialInstance(RName.GetRName("axis/axis_x_d.uminst", RName.ERNameType.Engine));
             return true;
         }
         public void Cleanup()

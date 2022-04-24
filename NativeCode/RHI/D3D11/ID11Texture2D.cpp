@@ -83,7 +83,7 @@ bool ID11Texture2D::InitD11Texture2D(ID3D11Texture2D* pTex2d)
 	return true;
 }
 
-vBOOL ID11Texture2D::MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
+vBOOL ID11Texture2D::MapMipmap(ICommandList* cmd, UINT ArraySlice, UINT MipSlice, void** ppData, UINT* pRowPitch, UINT* pDepthPitch)
 {
 	auto rc = (ID11RenderContext*)cmd->GetContext();
 	auto pContext = rc->mHardwareContext;
@@ -91,7 +91,7 @@ vBOOL ID11Texture2D::MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, U
 	rc->mHWContextLocker.Lock();
 	//auto pContext = ((ID11CommandList*)cmd)->mDeferredContext;
 	D3D11_MAPPED_SUBRESOURCE mapped;
-	if (pContext->Map(m_pDX11Texture2D, 0, D3D11_MAP_READ, 0, &mapped) != S_OK)
+	if (pContext->Map(m_pDX11Texture2D, D3D11CalcSubresource(MipSlice, ArraySlice, mTextureDesc.MipLevels), D3D11_MAP_READ, 0, &mapped) != S_OK)
 	{
 		rc->mHWContextLocker.Unlock();
 		return FALSE;
@@ -102,16 +102,16 @@ vBOOL ID11Texture2D::MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, U
 	return TRUE;
 }
 
-void ID11Texture2D::UnmapMipmap(ICommandList* cmd, int MipLevel)
+void ID11Texture2D::UnmapMipmap(ICommandList* cmd, UINT ArraySlice, UINT MipSlice)
 {
 	auto rc = (ID11RenderContext*)cmd->GetContext();
 	auto pContext = rc->mHardwareContext;
 	//auto pContext = ((ID11CommandList*)cmd)->mDeferredContext;
-	pContext->Unmap(m_pDX11Texture2D, 0);
+	pContext->Unmap(m_pDX11Texture2D, D3D11CalcSubresource(MipSlice, ArraySlice, mTextureDesc.MipLevels));
 	rc->mHWContextLocker.Unlock();
 }
 
-void ID11Texture2D::UpdateMipData(ICommandList* cmd, UINT level, void* pData, UINT width, UINT height, UINT Pitch)
+void ID11Texture2D::UpdateMipData(ICommandList* cmd, UINT ArraySlice, UINT MipSlice, void* pData, UINT width, UINT height, UINT Pitch)
 {
 	auto pContext = ((ID11CommandList*)cmd)->mDeferredContext;
 
@@ -122,7 +122,7 @@ void ID11Texture2D::UpdateMipData(ICommandList* cmd, UINT level, void* pData, UI
 	box.bottom = height;
 	box.front = 1;
 	box.back = 0;
-	pContext->UpdateSubresource(m_pDX11Texture2D, level, nullptr, pData, Pitch, Pitch*height);
+	pContext->UpdateSubresource(m_pDX11Texture2D, D3D11CalcSubresource(MipSlice, ArraySlice, mTextureDesc.MipLevels), nullptr, pData, Pitch, Pitch*height);
 }
 
 NS_END

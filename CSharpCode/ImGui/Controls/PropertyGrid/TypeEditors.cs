@@ -40,7 +40,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Button, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGColor);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonActive, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGActiveColor);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonHovered, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGHoverColor);
-                if (mImageButton.OnDraw(ref drawList, ref Support.UAnyPointer.Default))
+                if (mImageButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
                 {
                     newValue = Rtti.UTypeDescManager.CreateInstance(info.Type.SystemType);
                     valueChanged = true;
@@ -487,27 +487,23 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var v = info.Value as string;
-                var strPtr = System.Runtime.InteropServices.Marshal.StringToHGlobalAnsi(v);
-                Span<byte> textBuffer = stackalloc byte[1024 * 4];
-                fixed (byte* pBuffer = &textBuffer[0])
+                
                 {
-                    CoreSDK.SDK_StrCpy(pBuffer, strPtr.ToPointer(), (uint)textBuffer.Length);
                     //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
                     if (info.Readonly)
                         ImGuiAPI.Text(v);
                     else
                     {
-                        var changed = ImGuiAPI.InputText(name, pBuffer, (uint)textBuffer.Length, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+                        var changed = ImGuiAPI.InputText(name, ref v);
                         //ImGuiAPI.PopStyleVar(1);
                         //if (CoreSDK.SDK_StrCmp(pBuffer, strPtr.ToPointer()) != 0 && !info.Readonly)
                         if (changed && !info.Readonly)
                         {
-                            newValue = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)pBuffer);
+                            newValue = v;
                             valueChanged = true;
                             //prop.SetValue(ref target, v);
                         }
                     }
-                    System.Runtime.InteropServices.Marshal.FreeHGlobal(strPtr);
                 }
             }
             return valueChanged;
@@ -545,7 +541,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             base.Cleanup_Override();
         }
 
-        unsafe void ComboOpenAction(ref Support.UAnyPointer drawData)
+        unsafe void ComboOpenAction(in Support.UAnyPointer drawData)
         {
             var data = drawData.RefObject as DrawData;
             var propertyType = data.Type.SystemType;
@@ -649,7 +645,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             anyPointer.RefObject = mDrawData;
             var winSize = new Vector2(mComboBox.Width, -1);
             ImGuiAPI.SetNextWindowSize(in winSize, ImGuiCond_.ImGuiCond_Always);
-            mComboBox.OnDraw(ref drawList, ref anyPointer);
+            mComboBox.OnDraw(in drawList, in anyPointer);
             newValue = mDrawData.NewValue;
 
             return mDrawData.ValueChanged;

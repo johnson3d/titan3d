@@ -43,16 +43,16 @@ namespace EngineNS.Editor
             mWinTest.Cleanup();
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, Type rpType)
+        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName, Type rpType)
         {
-            await base.InitializeApplication(rc, rpType);
+            await base.InitializeApplication(rc, rpName, rpType);
 
             await ContentBrowser.Initialize();
             Editor.UMainEditorApplication.RegRootForm(ContentBrowser);
 
             await mMetaViewer.Initialize();
 
-            await WorldViewportSlate.Initialize(this, Rtti.UTypeDesc.TypeOf(rpType), 0, 1);
+            await WorldViewportSlate.Initialize(this, rpName, Rtti.UTypeDesc.TypeOf(rpType), 0, 1);
 
             await mMainInspector.Initialize();
 
@@ -237,56 +237,95 @@ namespace EngineNS.Editor
                                 item.Selected = this.WorldViewportSlate.RenderPolicy.DisablePointLight;
                             },
                         },
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "Forward",
-                            Selected = false,
-                            Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                            {
-                                var saved = this.WorldViewportSlate.RenderPolicy;
-                                var policy = new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy();                                
-                                await policy.Initialize(saved.DefaultCamera);
-                                policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
-                                this.WorldViewportSlate.RenderPolicy = policy;
-                                saved.Cleanup();
+                        #region del code
+                        //new EGui.UIProxy.MenuItemProxy()
+                        //{
+                        //    MenuName = "Forward",
+                        //    Selected = false,
+                        //    Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                        //    {
+                        //        var saved = this.WorldViewportSlate.RenderPolicy;
+                        //        //var policy = new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy();                                
+                        //        //await policy.Initialize(saved.DefaultCamera);
+                        //        //policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
+                        //        Graphics.Pipeline.URenderPolicy policy = null;
+                        //        var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(RName.GetRName("utest/forword.rpolicy"));
+                        //        if (rpAsset != null)
+                        //        {
+                        //            policy = rpAsset.CreateRenderPolicy();
+                        //        }
+                        //        await policy.Initialize(saved.DefaultCamera);
+                        //        policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
+                        //        policy.AddCamera("MainCamera", saved.DefaultCamera);
+                        //        policy.SetDefaultCamera("MainCamera");
 
-                                policy.VoxelsNode.ResetDebugMeshNode(this.WorldViewportSlate.World);
-                            },
-                        },
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "Deferred",
-                            Selected = false,
-                            Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                            {
-                                var saved = this.WorldViewportSlate.RenderPolicy;
-                                var policy = new Graphics.Pipeline.Deferred.UDeferredPolicy();
-                                await policy.Initialize(saved.DefaultCamera);
-                                policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
-                                this.WorldViewportSlate.RenderPolicy = policy;
-                                saved.Cleanup();
+                        //        this.WorldViewportSlate.RenderPolicy = policy;
+                        //        saved.Cleanup();
 
-                                //policy.VoxelsNode.ResetDebugMeshNode(this.WorldViewportSlate.World);
-                            },
-                        },
+                        //        //policy.VoxelsNode.ResetDebugMeshNode(this.WorldViewportSlate.World);
+                        //    },
+                        //},
+                        //new EGui.UIProxy.MenuItemProxy()
+                        //{
+                        //    MenuName = "Deferred",
+                        //    Selected = false,
+                        //    Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                        //    {
+                        //        var saved = this.WorldViewportSlate.RenderPolicy;
+                        //        //var policy = new Graphics.Pipeline.Deferred.UDeferredPolicy();
+                        //        //await policy.Initialize(saved.DefaultCamera);
+                        //        //policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
+                        //        Graphics.Pipeline.URenderPolicy policy = null;
+                        //        var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(RName.GetRName("utest/deferred.rpolicy"));
+                        //        if (rpAsset != null)
+                        //        {
+                        //            policy = rpAsset.CreateRenderPolicy();
+                        //        }
+                        //        await policy.Initialize(saved.DefaultCamera);
+                        //        policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
+                        //        policy.AddCamera("MainCamera", saved.DefaultCamera);
+                        //        policy.SetDefaultCamera("MainCamera");
+
+                        //        this.WorldViewportSlate.RenderPolicy = policy;
+                        //        saved.Cleanup();
+
+                        //        //policy.VoxelsNode.ResetDebugMeshNode(this.WorldViewportSlate.World);
+                        //    },
+                        //},
+                        #endregion
                         new EGui.UIProxy.MenuItemProxy()
                         {
                             MenuName = "ShowLightDebugger",
-                            Selected = true,
+                            Selected = UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug),
                             Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
                             {
-                                UEngine.Instance.EditorInstance.Config.ShowLightDebugMesh = !UEngine.Instance.EditorInstance.Config.ShowLightDebugMesh;
-                                item.Selected = UEngine.Instance.EditorInstance.Config.ShowLightDebugMesh;
+                                if(UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug))
+                                {
+                                    UEngine.Instance.EditorInstance.Config.CullFilters &= ~GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug;
+                                }
+                                else
+                                {
+                                    UEngine.Instance.EditorInstance.Config.CullFilters |= GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug;
+                                }
+
+                                item.Selected = UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug);
                             },
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
                             MenuName = "ShowPxDebugger",
-                            Selected = UEngine.Instance.EditorInstance.Config.ShowPxDebugMesh,
+                            Selected = UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug),
                             Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
                             {
-                                UEngine.Instance.EditorInstance.Config.ShowPxDebugMesh = !UEngine.Instance.EditorInstance.Config.ShowPxDebugMesh;
-                                item.Selected = UEngine.Instance.EditorInstance.Config.ShowPxDebugMesh;
+                                if(UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug))
+                                {
+                                    UEngine.Instance.EditorInstance.Config.CullFilters &= ~GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug;
+                                }
+                                else
+                                {
+                                    UEngine.Instance.EditorInstance.Config.CullFilters |= GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug;
+                                }
+                                item.Selected = UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug);
                             },
                         },
                         new EGui.UIProxy.MenuItemProxy()
@@ -338,7 +377,7 @@ namespace EngineNS.Editor
         }
 
         #region DrawGui
-        bool _showDemoWindow = true;
+        bool _showDemoWindow = false;
         public float LeftWidth = 0;
         public float CenterWidth = 0;
         public float RightWidth = 0;
@@ -487,7 +526,7 @@ namespace EngineNS.Editor
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 for (int i = 0; i < mMenuItems.Count; i++)
                 {
-                    mMenuItems[i].OnDraw(ref drawList, ref Support.UAnyPointer.Default);
+                    mMenuItems[i].OnDraw(in drawList, in Support.UAnyPointer.Default);
                 }
                 ImGuiAPI.EndMenuBar();
             }

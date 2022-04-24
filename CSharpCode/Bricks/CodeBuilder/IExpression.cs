@@ -139,11 +139,12 @@ namespace EngineNS.Bricks.CodeBuilder
         public bool IsLocalVar { get; set; } = true;
         public class PropDefTypeEditor : EGui.Controls.PropertyGrid.PGTypeEditorAttribute
         {
-            public PropDefTypeEditor(System.Type baseType)
+            public PropDefTypeEditor(System.Type baseType, bool allowVoid)
                 : base(baseType)
             {
-
+                AllowVoidType = allowVoid;
             }
+            public bool AllowVoidType = false;
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
                 newValue = info.Value;
@@ -151,10 +152,22 @@ namespace EngineNS.Bricks.CodeBuilder
                 ImGuiAPI.SetNextItemWidth(-1);
                 TypeSlt.AssemblyFilter = AssemblyFilter;
                 TypeSlt.ExcludeValueType = ExcludeValueType;
+                TypeSlt.SearchFromMetas = true;
                 TypeSlt.BaseType = BaseType;
                 var typeStr = info.Value as string;
                 TypeSlt.SelectedType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeStr);
-                if (TypeSlt.OnDraw(-1, 12))
+                int maxItem = TypeSlt.ShowTypes.Count;
+                if (maxItem > 12)
+                    maxItem = 12;
+                if (TypeSlt.OnDraw(-1, maxItem, (type)=>
+                    {
+                        if (!AllowVoidType)
+                        {
+                            if (type.SystemType == typeof(void))
+                                return true;
+                        }
+                        return false;
+                    }))
                 {
                     var v = TypeSlt.SelectedType;
                     newValue = v.FullName;
@@ -163,7 +176,8 @@ namespace EngineNS.Bricks.CodeBuilder
                 return false;
             }
         }
-        [PropDefTypeEditor(typeof(void))]
+        //[PropDefTypeEditor(typeof(void))]
+        [PropDefTypeEditor(null, false)]
         [Rtti.Meta]
         public string DefType { get; set; } = typeof(int).FullName;
         [Rtti.Meta]
@@ -197,7 +211,8 @@ namespace EngineNS.Bricks.CodeBuilder
         } = false;
         [Rtti.Meta]
         public EVisitMode VisitMode { get; set; } = EVisitMode.Public;
-        [DefineVar.PropDefTypeEditor(typeof(void))]
+        //[DefineVar.PropDefTypeEditor(typeof(void))]
+        [DefineVar.PropDefTypeEditor(null, true)]
         [Rtti.Meta]
         public string ReturnType { get; set; }
         [Rtti.Meta]

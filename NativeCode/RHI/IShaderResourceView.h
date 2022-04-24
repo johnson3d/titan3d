@@ -155,6 +155,15 @@ struct TR_CLASS(SV_LayoutStruct = 8, SV_Manual)
 		ViewDimension = SRV_DIMENSION_TEXTURE2D;
 		Texture2D.MipLevels = 0;
 	}
+	void SetTexture2DArray()
+	{
+		memset(this, 0, sizeof(IShaderResourceViewDesc));
+		Type = ST_Texture2DArray;
+		mGpuBuffer = nullptr;
+		Format = PXF_B8G8R8A8_UNORM;
+		ViewDimension = SRV_DIMENSION_TEXTURE2DARRAY;
+		Texture2DArray.MipLevels = 0;
+	}
 	void SetBuffer()
 	{
 		memset(this, 0, sizeof(IShaderResourceViewDesc));
@@ -196,6 +205,11 @@ public:
 	inline IGpuBuffer* GetGpuBuffer()
 	{
 		return mBuffer;
+	}
+	inline ITexture2D* TryGetTexture2D() {
+		if (mSrvDesc.Type != ST_Texture2D)
+			return nullptr;
+		return mBuffer.As<ITexture2D>();
 	}
 	virtual IResourceState* GetResourceState() override{
 		return &mResourceState;

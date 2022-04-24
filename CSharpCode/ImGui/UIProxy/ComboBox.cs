@@ -12,7 +12,7 @@ namespace EngineNS.EGui.UIProxy
         public ImGuiComboFlags_ Flags = ImGuiComboFlags_.ImGuiComboFlags_None;
         public float Width = -1;
 
-        public delegate void Delegate_ComboOpenAction(ref Support.UAnyPointer data);
+        public delegate void Delegate_ComboOpenAction(in Support.UAnyPointer data);
         public Delegate_ComboOpenAction ComboOpenAction;
 
         //ImageProxy mImage;
@@ -34,7 +34,7 @@ namespace EngineNS.EGui.UIProxy
             await Thread.AsyncDummyClass.DummyFunc();
             return true;
         }
-        public unsafe bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
+        public unsafe bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
         {
             //if (mImage == null)
             //    return false;
@@ -66,7 +66,7 @@ namespace EngineNS.EGui.UIProxy
 
             if(comboOpen)
             {
-                ComboOpenAction?.Invoke(ref drawData);
+                ComboOpenAction?.Invoke(in drawData);
                 ImGuiAPI.EndCombo();
             }
 

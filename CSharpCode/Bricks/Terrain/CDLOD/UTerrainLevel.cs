@@ -47,6 +47,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             streaming.PushStreamingLevel(this, bForce);
         }
+
+        public UTerrainMaterialIdManager GetMaterialIdManager()
+        {
+            return Node?.TerrainMaterialIdManager;
+        }
     }
     public class UTerrainLevelData
     {
@@ -54,6 +59,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public UPatch[,] TiledPatch;
         public RHI.CShaderResourceView HeightMapSRV;
         public RHI.CShaderResourceView NormalMapSRV;
+        public RHI.CShaderResourceView MaterialIdMapSRV;
         public float HeightMapMinHeight;
         public float HeightMapMaxHeight;
         
@@ -86,6 +92,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             HeightMapSRV = null;
             NormalMapSRV?.Dispose();
             NormalMapSRV = null;
+            MaterialIdMapSRV?.Dispose();
+            MaterialIdMapSRV = null;
         }
         public UTerrainNode GetTerrainNode()
         {
@@ -99,13 +107,25 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             Action action = () =>
             {
-                var oriImage = new Bricks.Procedure.Buffer2D.Image();
-                oriImage.Initialize(level.Node.TexSizePerPatch * patchSide, level.Node.TexSizePerPatch * patchSide, 0, Bricks.Procedure.Buffer2D.Image.EImageComponent.X);
-                terrainGen.SetStartPosition(in level.StartPosition);
-                terrainGen.Process(oriImage, Bricks.Procedure.Buffer2D.Image.EImageComponent.X);
+                var noise1 = terrainGen.AssetGraph.FindFirstNode("NoisePerlin1") as Procedure.Node.UNoisePerlin;
+                var noise2 = terrainGen.AssetGraph.FindFirstNode("NoisePerlin2") as Procedure.Node.UNoisePerlin;
+                noise1.StartPosition = level.StartPosition;
+                noise2.StartPosition = level.StartPosition;
 
-                var hMap = terrainGen.mResultImage;
+                //make border guard 2 + 1024 + 3
+                noise1.StartPosition.X -= 3.0f;
+                noise1.StartPosition.Z -= 3.0f;
 
+                noise2.StartPosition.X -= 3.0f;
+                noise2.StartPosition.Z -= 3.0f;
+
+                //noise1.DefaultWidth = level.Node.TexSizePerPatch * patchSide;
+                //noise1.DefaultHeight = level.Node.TexSizePerPatch * patchSide;
+                //noise2.DefaultWidth = level.Node.TexSizePerPatch * patchSide;
+                //noise2.DefaultHeight = level.Node.TexSizePerPatch * patchSide;
+
+                terrainGen.Compile();
+                var hMap = terrainGen.AssetGraph.Root.GetResultBuffer(0);
                 TiledPatch = new UPatch[patchSide, patchSide];
                 for (int i = 0; i < patchSide; i++)
                 {
@@ -116,17 +136,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     }
                 }
 
-                hMap.CompX.GetRange(out HeightMapMinHeight, out HeightMapMaxHeight);
+                hMap.GetRange(out HeightMapMinHeight, out HeightMapMaxHeight);
                 float HeightfieldMidHeight = (HeightMapMinHeight + HeightMapMaxHeight) * 0.5f;
                 PxHeightfieldScale = 0.1f;//0.1f精度为分米
-                HeightfieldWidth = hMap.CompX.Width;
-                HeightfieldHeight = hMap.CompX.Height;
-                PxHeightfieldSamples = new PhyHeightFieldSample[hMap.CompX.Width * hMap.CompX.Height];
+                HeightfieldWidth = hMap.Width;
+                HeightfieldHeight = hMap.Height;
+                PxHeightfieldSamples = new PhyHeightFieldSample[hMap.Width * hMap.Height];
                 for (int i = 0; i < HeightfieldHeight; i++)
                 {
                     for (int j = 0; j < HeightfieldWidth; j++)
                     {
-                        float height = hMap.CompX.GetPixel(i, j);
+                        float height = hMap.GetPixel(i, j);
                         float localHeight = height - HeightfieldMidHeight;
                         PxHeightfieldSamples[i * HeightfieldWidth + j].height = (short)(localHeight / PxHeightfieldScale);//(short)((height * (float)short.MaxValue) / maxHeight);
                         PxHeightfieldSamples[i * HeightfieldWidth + j].materialIndex0 = 0;
@@ -136,8 +156,31 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
                 InitPhysics(level);
 
-                HeightMapSRV = terrainGen.mResultImage.CompX.CreateAsTexture2D(HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
-                NormalMapSRV = terrainGen.mResultNormalImage.CreateRGBA8Texture2DAsNormal();
+                HeightMapSRV = hMap.CreateAsHeightMapTexture2D(HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
+                var norMap = new Bricks.Procedure.UImage2D();
+                norMap.Initialize(hMap.Width, hMap.Height,
+                    terrainGen.AssetGraph.Root.GetResultBuffer(1),
+                    terrainGen.AssetGraph.Root.GetResultBuffer(2),
+                    terrainGen.AssetGraph.Root.GetResultBuffer(3),
+                    null);
+
+                var idMap = new Bricks.Procedure.UImage2D();
+                idMap.Initialize(hMap.Width, hMap.Height,
+                    terrainGen.AssetGraph.Root.GetResultBuffer(4),
+                    null,
+                    null,
+                    null);
+
+                //var calcNorm = new Bricks.Procedure.Buffer2D.UCalcNormal();
+                ////calcNorm.HeightRange = (y1 + y2) * 2.0f;
+                //calcNorm.GridSize = 1.0f;
+                //calcNorm.Process(mResultImage, Bricks.Procedure.Buffer2D.UImage2D.EImageComponent.X);
+                //mResultNormalImage = calcNorm.mResultImage;
+
+                NormalMapSRV = norMap.CreateRGBA8Texture2DAsNormal(); //terrainGen.mResultNormalImage.CreateRGBA8Texture2DAsNormal();
+                MaterialIdMapSRV = idMap.CreateRGBA8Texture2D(false);
+
+                terrainGen.AssetGraph.BufferCache.ResetCache();
             };
             if (bForce)
             {

@@ -5,6 +5,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
+    [UNode(NodeDataType = typeof(UMeshNode.UMeshNodeData), DefaultNamePrefix = "Sky")]
     public class USkyNode : UMeshNode
     {
         public override bool OnTickLogic(UWorld world, URenderPolicy policy)

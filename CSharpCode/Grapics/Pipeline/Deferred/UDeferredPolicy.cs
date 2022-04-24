@@ -22,7 +22,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             RegRenderNode("GpuSceneNode", GpuSceneNode);
             RegRenderNode("ScreenTilingNode", ScreenTilingNode);
             RegRenderNode("HdrNode", HdrNode);
-            //RegRenderNode("VoxelsNode", VoxelsNode);
+            RegRenderNode("VoxelsNode", VoxelsNode);
             RegRenderNode("AvgBrightnessNode", AvgBrightnessNode);
             //RegRenderNode("HzbNode", HzbNode);
             RegRenderNode("Copy2SwapChainNode", Copy2SwapChainNode);
@@ -49,7 +49,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public Common.UAvgBrightnessNode AvgBrightnessNode { get; set; } = new Common.UAvgBrightnessNode();
         public Common.UHdrNode HdrNode { get; set; } = new Common.UHdrNode();
         //for test
-        //public Bricks.VXGI.UVoxelsNode VoxelsNode { get; set; } = new Bricks.VXGI.UVoxelsNode();
+        public Bricks.VXGI.UVoxelsNode VoxelsNode { get; set; } = new Bricks.VXGI.UVoxelsNode();
 
         public Common.UCopyNode TempCopyNode { get; set; } = new Common.UCopyNode();
 
@@ -216,10 +216,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     AddLinker(GpuSceneNode.PointLightsPinOut, ScreenTilingNode.PointLightsPinIn);
                     AddLinker(BasePassNode.DepthStencilPinOut, ScreenTilingNode.DepthPinIn);
                 }
-                AddLinker(ScreenTilingNode.TilingPinOut, DirLightingNode.TileScreenPinIn);                
+                AddLinker(ScreenTilingNode.TilingPinOut, DirLightingNode.TileScreenPinIn);
+                AddLinker(GpuSceneNode.GpuScenePinOut, DirLightingNode.GpuScenePinIn);
             }
             AddLinker(DirLightingNode.ResultPinOut, AvgBrightnessNode.ColorPinIn);
-            AddLinker(GpuSceneNode.GpuScenePinOut, AvgBrightnessNode.GpuScenePinInOut);
+            //AddLinker(GpuSceneNode.GpuScenePinOut, AvgBrightnessNode.GpuScenePinInOut);
 
             AddLinker(DirLightingNode.ResultPinOut, ForwordNode.ColorPinInOut);
             AddLinker(BasePassNode.DepthStencilPinOut, ForwordNode.DepthPinInOut);
@@ -232,6 +233,15 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             AddLinker(HdrNode.ResultPinOut, Copy2SwapChainNode.ColorPinInOut);
             AddLinker(HitproxyNode.HitIdPinOut, Copy2SwapChainNode.HitIdPinIn);
+
+            // vxgi
+            AddLinker(GpuSceneNode.GpuScenePinOut, VoxelsNode.GpuScenePinIn);
+            AddLinker(BasePassNode.Rt0PinOut, VoxelsNode.AlbedoPinIn);
+            AddLinker(BasePassNode.DepthStencilPinOut, VoxelsNode.DepthPinIn);
+            AddLinker(mShadowMapNode.DepthPinOut, VoxelsNode.ShadowMaskPinIn);
+            AddLinker(VoxelsNode.GpuScenePinIn, AvgBrightnessNode.GpuScenePinInOut);
+
+
             RootNode = Copy2SwapChainNode;
             DisableHDR = false;
         }

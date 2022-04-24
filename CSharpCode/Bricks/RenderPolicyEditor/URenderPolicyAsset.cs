@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             //纹理不会引用别的资产
             return false;
         }
-        public unsafe override void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
         {
             var start = ImGuiAPI.GetItemRectMin();
             var end = start + sz;
@@ -38,6 +38,11 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
             ImGuiAPI.PopClipRect();
         }
+        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        {
+            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+            cmdlist.AddText(in start, 0xFFFFFFFF, "RPolicy", null);
+        }
         public override void OnShowIconTimout(int time)
         {
             
@@ -52,6 +57,11 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public const string AssetExt = ".rpolicy";
 
         public class ImportAttribute : IO.CommonCreateAttribute
+        {
+            
+        }
+
+        public URenderPolicyAsset()
         {
             
         }
@@ -94,11 +104,50 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         {
             var result = new URenderPolicyAsset();
 
-            IO.FileManager.LoadXmlToObject(name.Address, result.PolicyGraph);            
+            if (IO.FileManager.LoadXmlToObject(name.Address, result.PolicyGraph) == false)
+                return null;
 
             return result;
         }
         [Rtti.Meta]
         public UPolicyGraph PolicyGraph { get; } = new UPolicyGraph();
+        public Graphics.Pipeline.URenderPolicy CreateRenderPolicy()
+        {
+            var policy = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(PolicyGraph.PolicyClassName)) as Graphics.Pipeline.URenderPolicy; // new Graphics.Pipeline.URenderPolicy();
+            foreach (UPolicyNode i in PolicyGraph.Nodes)
+            {
+                if (false == policy.RegRenderNode(i.Name, i.GraphNode))
+                {
+                    policy.Cleanup();
+                    return null;
+                }
+            }
+            foreach (var i in PolicyGraph.Linkers)
+            {
+                var inNode = policy.FindNode(i.InNode.Name);
+                if (inNode == null)
+                    continue;
+                var outNode = policy.FindNode(i.OutNode.Name);
+                if (outNode == null)
+                    continue;
+                var inPin = inNode.FindInput(i.InPin.Name);
+                if (inPin == null)
+                    continue;
+                var outPin = outNode.FindOutput(i.OutPin.Name);
+                if (outPin == null)
+                    continue;
+                policy.AddLinker(outPin, inPin);
+            }
+            var root = policy.FindFirstNode<Graphics.Pipeline.Common.UCopy2SwapChainNode>();
+            policy.RootNode = root;
+            bool hasInputError = false;
+            policy.BuildGraph(ref hasInputError);
+            if (hasInputError)
+            {
+                policy.Cleanup();
+                return null;
+            }
+            return policy;
+        }
     }
 }

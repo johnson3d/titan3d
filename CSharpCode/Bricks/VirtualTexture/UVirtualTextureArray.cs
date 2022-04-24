@@ -69,7 +69,8 @@ namespace EngineNS.Bricks.VirtualTexture
             }
             if (index == -1)
                 return null;
-            StbImageSharp.ImageResult[] mipDatas = RHI.CShaderResourceView.LoadPngImageLevels(name, ArrayDesc.MipLevels);
+            RHI.CShaderResourceView.UPicDesc txDesc = null;
+            StbImageSharp.ImageResult[] mipDatas = RHI.CShaderResourceView.LoadPngImageLevels(name, ArrayDesc.MipLevels, ref txDesc);
             if (mipDatas == null || mipDatas.Length == 0)
                 return null;
             if (mipDatas[0].Width != ArrayDesc.Width || mipDatas[0].Height != ArrayDesc.Height ||
@@ -85,7 +86,7 @@ namespace EngineNS.Bricks.VirtualTexture
             {
                 fixed (byte* pSrcData = &mipDatas[i].Data[0])
                 {
-                    Tex2DArray.mCoreObject.UpdateMipData(cmd, ArrayDesc.MipLevels * (uint)index + i, 
+                    Tex2DArray.GetTextureCore().UpdateMipData(cmd, (uint)index, i, 
                         pSrcData, (uint)mipDatas[i].Width, (uint)mipDatas[i].Height, (uint)mipDatas[i].Width * pixelByte);
                 }
             }

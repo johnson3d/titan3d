@@ -32,6 +32,14 @@ namespace EngineNS
                 return min;
             return a;
         }
+        public static float Clamp(float a, float min, float max)
+        {
+            if (a > max)
+                return max;
+            else if (a < min)
+                return min;
+            return a;
+        }
         public static uint Roundup(uint a, uint b)
         {
             uint result = a / b;

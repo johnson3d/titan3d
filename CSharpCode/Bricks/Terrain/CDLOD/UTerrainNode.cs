@@ -77,12 +77,86 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public DVector3 EyeCenter;
         public Vector3 EyeLocalCenter;
 
-        public Bricks.Procedure.Buffer2D.UTerrainGen TerrainGen = new Procedure.Buffer2D.UTerrainGen();
+        Bricks.Procedure.UPgcAsset mTerrainGen;
+        public Bricks.Procedure.UPgcAsset TerrainGen
+        {
+            get
+            {
+                if (mTerrainGen == null)
+                {
+#pragma warning disable CS0162
+                    if (true)
+                    {
+                        mTerrainGen = Procedure.UPgcAsset.LoadAsset(RName.GetRName("UTest/terraingen.pgc"));
+                        var hmNode = mTerrainGen.AssetGraph.FindFirstNode("HeightMappingNode") as Procedure.Node.UHeightMappingNode;
+                        if (hmNode != null)
+                        {
+                            TerrainMaterialIdManager = hmNode.MaterialIdManager;
+                            TerrainMaterialIdManager.BuildSRV(UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                        }
+                    }
+                    else
+                    {
+                        mTerrainGen = new Procedure.UPgcAsset();
+                        var root = new Bricks.Procedure.Node.UEndingNode();
+                        root.Name = "RootNode";
+                        root.PinNumber = 4;
+                        mTerrainGen.AssetGraph.AddNode(root);
+                        mTerrainGen.AssetGraph.Root = root;
+
+                        var perlinnode1 = new Procedure.Node.UNoisePerlin();
+                        perlinnode1.Name = "NoisePerlin1";
+                        mTerrainGen.AssetGraph.AddNode(perlinnode1);
+
+                        var perlinnode2 = new Procedure.Node.UNoisePerlin();
+                        perlinnode2.Name = "NoisePerlin2";
+                        mTerrainGen.AssetGraph.AddNode(perlinnode2);
+
+                        var addOp = new Bricks.Procedure.Node.UPixelAdd();
+                        addOp.Name = "Add";
+                        mTerrainGen.AssetGraph.AddNode(addOp);
+
+                        var smooth1 = new Bricks.Procedure.Node.USmoothGaussion();
+                        smooth1.Name = "Smooth1";
+                        mTerrainGen.AssetGraph.AddNode(smooth1);
+
+                        mTerrainGen.AssetGraph.AddLink(perlinnode1.ResultPin, addOp.LeftPin, true);
+                        mTerrainGen.AssetGraph.AddLink(perlinnode2.ResultPin, addOp.RightPin, true);
+
+                        mTerrainGen.AssetGraph.AddLink(addOp.ResultPin, smooth1.SrcPin, true);
+
+                        var calcNorm = new Bricks.Procedure.Node.UCalcNormal();
+                        calcNorm.Name = "CalcNorm";
+                        mTerrainGen.AssetGraph.AddNode(calcNorm);
+
+                        mTerrainGen.AssetGraph.AddLink(smooth1.ResultPin, calcNorm.HFieldPin, true);
+
+                        mTerrainGen.AssetGraph.AddLink(smooth1.ResultPin, root.Inputs[0], true);
+                        mTerrainGen.AssetGraph.AddLink(calcNorm.XPin, root.Inputs[1], true);
+                        mTerrainGen.AssetGraph.AddLink(calcNorm.YPin, root.Inputs[2], true);
+                        mTerrainGen.AssetGraph.AddLink(calcNorm.ZPin, root.Inputs[3], true);
+
+                        //TerrainGen.SmoothNum = 3;
+                        calcNorm.GridSize = 1.0f;
+                        perlinnode1.Amptitude = 130.0f;
+                        perlinnode1.Freq = 0.002f;
+                        perlinnode2.Amptitude = 1.5f;
+                        perlinnode2.Freq = 0.8f;
+                        //TerrainGen.GridStep = 1.0f;
+                        //TerrainGen.InitPerlin();
+                    }
+#pragma warning restore CS0162
+                }
+                return mTerrainGen;
+            }
+        }
+
         public ULevelStreaming LevelStreaming = new ULevelStreaming();
 
         public RHI.CConstantBuffer TerrainCBuffer;
 
         public VirtualTexture.UVirtualTextureArray RVTextureArray;
+        public UTerrainMaterialIdManager TerrainMaterialIdManager { get; set; }
         ~UTerrainNode()
         {
             Cleanup();
@@ -100,6 +174,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
                 Levels = null;
             }
+
+            TerrainMaterialIdManager?.Cleanup();
+            TerrainMaterialIdManager = null;
         }
         public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, GamePlay.Scene.UNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
         {
@@ -109,14 +186,6 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
                 return false;
-
-            TerrainGen.SmoothNum = 3;
-            TerrainGen.Amptitude1 = 130.0f;
-            TerrainGen.Freq1 = 0.002f;
-            TerrainGen.Amptitude2 = 1.5f;
-            TerrainGen.Freq2 = 0.8f;
-            TerrainGen.GridStep = 1.0f;
-            TerrainGen.InitPerlin();
 
             Terrain = world.TerrainMB.Terrain;
             var trData = data as UTerrainData;

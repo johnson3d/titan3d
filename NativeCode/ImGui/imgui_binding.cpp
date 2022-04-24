@@ -201,7 +201,8 @@ bool ImGuiAPI::DragScalar2(const char* label, ImGuiDataType data_type, void* p_d
 
 	const bool temp_input_allowed = (flags & ImGuiSliderFlags_NoInput) == 0;
 	ImGui::ItemSize(total_bb, style.FramePadding.y);
-	if (!ImGui::ItemAdd(total_bb, id, &frame_bb, temp_input_allowed ? ImGuiItemAddFlags_Focusable : 0))
+	//if (!ImGui::ItemAdd(total_bb, id, &frame_bb,temp_input_allowed ? ImGuiItemAddFlags_Focusable : 0))
+	if (!ImGui::ItemAdd(total_bb, id, &frame_bb, temp_input_allowed ? ImGuiItemFlags_Inputable : 0))
 		return false;
 
 	// Default format string when passing NULL
@@ -217,10 +218,12 @@ bool ImGuiAPI::DragScalar2(const char* label, ImGuiDataType data_type, void* p_d
 	bool temp_input_is_active = temp_input_allowed && ImGui::TempInputIsActive(id);
 	if (!temp_input_is_active)
 	{
-		const bool focus_requested = temp_input_allowed && (window->DC.LastItemStatusFlags & ImGuiItemStatusFlags_Focused) != 0;
+		bool lastFocused = ImGui::GetCurrentContext()->LastItemData.StatusFlags & ImGuiItemStatusFlags_Deactivated == 0;
+		//const bool focus_requested = temp_input_allowed && (window->DC.LastItemStatusFlags & ImGuiItemStatusFlags_Focused) != 0;
+		const bool focus_requested = temp_input_allowed && lastFocused;
 		const bool clicked = (hovered && g.IO.MouseClicked[0]);
 		const bool double_clicked = (hovered && g.IO.MouseDoubleClicked[0]);
-		if (focus_requested || clicked || double_clicked || g.NavActivateId == id || g.NavInputId == id)
+		if (focus_requested || clicked || double_clicked || g.NavActivateId == id || g.NavActivateInputId == id)
 		{
 			ImGui::SetActiveID(id, window);
 			ImGui::SetFocusID(id, window);
@@ -234,7 +237,7 @@ bool ImGuiAPI::DragScalar2(const char* label, ImGuiDataType data_type, void* p_d
 		if (temp_input_allowed && !temp_input_is_active)
 			if (g.ActiveId == id && hovered && g.IO.MouseReleased[0] && !ImGui::IsMouseDragPastThreshold(0, g.IO.MouseDragThreshold * DRAG_MOUSE_THRESHOLD_FACTOR))
 			{
-				g.NavInputId = id;
+				g.NavActivateInputId = id;
 				temp_input_is_active = true;
 			}
 	}
@@ -456,5 +459,22 @@ bool ImGuiAPI::ToggleButton(const char* label, bool* v, const ImVec2* size_arg, 
 	IMGUI_TEST_ENGINE_ITEM_INFO(id, label, window->DC.LastItemStatusFlags);
 	return pressed;
 }
+
+bool ImGuiAPI::IsIDNavInput(ImGuiID id)
+{
+	auto context = ImGui::GetCurrentContext();
+	if (context == nullptr)
+		return false;
+	return context->NavActivateId == id;
+}
+
+//bool ImGuiAPI::LastItemStatusFlagsHasFocused()
+//{
+//	ImGuiWindow* window = ImGui::GetCurrentWindow();
+//	if (window == nullptr)
+//		return false;
+//	return (window->DC.LastItemStatusFlags & ImGuiItemStatusFlags_Focused) != 0;
+//}
+
 NS_END
 

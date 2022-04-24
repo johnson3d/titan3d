@@ -25,6 +25,11 @@ namespace EngineNS.EGui.UIProxy
         [Rtti.Meta, Category("Common")]
         [Controls.PropertyGrid.PGShowInPropertyGrid]
         [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
+        public UInt32 GridColor = 0xff505050;// new Vector4(0.14f, 0.14f, 0.14f, 1.00f);
+
+        [Rtti.Meta, Category("Common")]
+        [Controls.PropertyGrid.PGShowInPropertyGrid]
+        [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 SeparatorColor = 0xFF151515;
 
         [Rtti.Meta, Category("Common")]

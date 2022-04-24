@@ -21,9 +21,9 @@ namespace EngineNS.Animation.Asset
         {
             return true;
         }
-        public override void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        public override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
         {
-            base.OnDraw(ref cmdlist, ref sz, ContentBrowser);
+            base.OnDraw(in cmdlist, in sz, ContentBrowser);
         }
     }
     [Rtti.Meta]

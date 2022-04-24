@@ -8,31 +8,31 @@ namespace EngineNS.GamePlay
 {
     public partial class UAxis : GamePlay.Action.IActionRecordable
     {
-        public readonly static RName mAxisMaterial_Focus = RName.GetRName(@"axis\axis_focus_matins.uminst", RName.ERNameType.Game);
-        public readonly static RName mAxisMaterial_Face_Focus = RName.GetRName(@"axis\axis_face_focus_matins.uminst", RName.ERNameType.Game);
-        public readonly static RName mAxisMaterial_Face = RName.GetRName(@"axis\axis_face.uminst", RName.ERNameType.Game);
-        public readonly static RName mAxisMaterial_Center = RName.GetRName(@"axis\axis_all.uminst", RName.ERNameType.Game);
-        public readonly static RName mAxisMaterial_X = RName.GetRName(@"axis\axis_x_matins.uminst", RName.ERNameType.Game);
-        public readonly static RName mAxisMaterial_Y = RName.GetRName(@"axis\axis_y_matins.uminst", RName.ERNameType.Game);
-        public readonly static RName mAxisMaterial_Z = RName.GetRName(@"axis\axis_z_matins.uminst", RName.ERNameType.Game);
-        public readonly static RName mAxisMaterial_X_d = RName.GetRName(@"axis\axis_x_d.uminst", RName.ERNameType.Game);
-        public readonly static RName mAxisMaterial_Y_d = RName.GetRName(@"axis\axis_y_d.uminst", RName.ERNameType.Game);
-        public readonly static RName mAxisMaterial_Z_d = RName.GetRName(@"axis\axis_z_d.uminst", RName.ERNameType.Game);
-        public readonly static RName mAxisMaterial_Focus_d = RName.GetRName(@"axis\axis_focus_d.uminst", RName.ERNameType.Game);
-        //public readonly RName mAxisMaterial_TX = RName.GetRName(@"editor\axis\axismaterial_tx.instmtl", RName.ERNameType.Game);
-        //public readonly RName mAxisMaterial_TY = RName.GetRName(@"editor\axis\axismaterial_ty.instmtl", RName.ERNameType.Game);
-        //public readonly RName mAxisMaterial_TZ = RName.GetRName(@"editor\axis\axismaterial_tz.instmtl", RName.ERNameType.Game);
+        public readonly static RName mAxisMaterial_Focus = RName.GetRName(@"axis\axis_focus_matins.uminst", RName.ERNameType.Engine);
+        public readonly static RName mAxisMaterial_Face_Focus = RName.GetRName(@"axis\axis_face_focus_matins.uminst", RName.ERNameType.Engine);
+        public readonly static RName mAxisMaterial_Face = RName.GetRName(@"axis\axis_face.uminst", RName.ERNameType.Engine);
+        public readonly static RName mAxisMaterial_Center = RName.GetRName(@"axis\axis_all.uminst", RName.ERNameType.Engine);
+        public readonly static RName mAxisMaterial_X = RName.GetRName(@"axis\axis_x_matins.uminst", RName.ERNameType.Engine);
+        public readonly static RName mAxisMaterial_Y = RName.GetRName(@"axis\axis_y_matins.uminst", RName.ERNameType.Engine);
+        public readonly static RName mAxisMaterial_Z = RName.GetRName(@"axis\axis_z_matins.uminst", RName.ERNameType.Engine);
+        public readonly static RName mAxisMaterial_X_d = RName.GetRName(@"axis\axis_x_d.uminst", RName.ERNameType.Engine);
+        public readonly static RName mAxisMaterial_Y_d = RName.GetRName(@"axis\axis_y_d.uminst", RName.ERNameType.Engine);
+        public readonly static RName mAxisMaterial_Z_d = RName.GetRName(@"axis\axis_z_d.uminst", RName.ERNameType.Engine);
+        public readonly static RName mAxisMaterial_Focus_d = RName.GetRName(@"axis\axis_focus_d.uminst", RName.ERNameType.Engine);
+        //public readonly RName mAxisMaterial_TX = RName.GetRName(@"editor\axis\axismaterial_tx.instmtl", RName.ERNameType.Engine);
+        //public readonly RName mAxisMaterial_TY = RName.GetRName(@"editor\axis\axismaterial_ty.instmtl", RName.ERNameType.Engine);
+        //public readonly RName mAxisMaterial_TZ = RName.GetRName(@"editor\axis\axismaterial_tz.instmtl", RName.ERNameType.Engine);
 
-        public readonly static RName mAxisMeshMoveAll = RName.GetRName(@"axis\moveall.vms", RName.ERNameType.Game);
-        public readonly static RName mAxisMeshMoveX = RName.GetRName(@"axis\movex.vms", RName.ERNameType.Game);
-        public readonly static RName mAxisMeshMoveXY = RName.GetRName(@"axis\movexy.vms", RName.ERNameType.Game);
-        public readonly static RName mAxisMeshMoveXY_Line = RName.GetRName(@"axis\movexy_line.vms", RName.ERNameType.Game);
-        public readonly static RName mAxisMeshRotX = RName.GetRName(@"axis\rotx.vms", RName.ERNameType.Game);
-        public readonly static RName mAxisMeshScaleAll = RName.GetRName(@"axis\scaleall.vms", RName.ERNameType.Game);
-        public readonly static RName mAxisMeshScaleX = RName.GetRName(@"axis\scalex.vms", RName.ERNameType.Game);
-        public readonly static RName mAxisMeshScaleXY = RName.GetRName(@"axis\scalexy.vms", RName.ERNameType.Game);
-        public readonly static RName mAxisMeshScaleXY_Line = RName.GetRName(@"axis\scalexy_line.vms", RName.ERNameType.Game);
-        public readonly static RName mAxisMeshEdgeX = RName.GetRName(@"axis\edgex.vms", RName.ERNameType.Game);
+        public readonly static RName mAxisMeshMoveAll = RName.GetRName(@"axis\moveall.vms", RName.ERNameType.Engine);
+        public readonly static RName mAxisMeshMoveX = RName.GetRName(@"axis\movex.vms", RName.ERNameType.Engine);
+        public readonly static RName mAxisMeshMoveXY = RName.GetRName(@"axis\movexy.vms", RName.ERNameType.Engine);
+        public readonly static RName mAxisMeshMoveXY_Line = RName.GetRName(@"axis\movexy_line.vms", RName.ERNameType.Engine);
+        public readonly static RName mAxisMeshRotX = RName.GetRName(@"axis\rotx.vms", RName.ERNameType.Engine);
+        public readonly static RName mAxisMeshScaleAll = RName.GetRName(@"axis\scaleall.vms", RName.ERNameType.Engine);
+        public readonly static RName mAxisMeshScaleX = RName.GetRName(@"axis\scalex.vms", RName.ERNameType.Engine);
+        public readonly static RName mAxisMeshScaleXY = RName.GetRName(@"axis\scalexy.vms", RName.ERNameType.Engine);
+        public readonly static RName mAxisMeshScaleXY_Line = RName.GetRName(@"axis\scalexy_line.vms", RName.ERNameType.Engine);
+        public readonly static RName mAxisMeshEdgeX = RName.GetRName(@"axis\edgex.vms", RName.ERNameType.Engine);
 
         public enum enAxisType
         {

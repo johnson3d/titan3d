@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
@@ -20,9 +20,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public uint FlowControlTitleColor = 0xFF299325;
 
-        public EGui.Controls.NodeGraph.NodePin.LinkDesc NewExecPinDesc()
+        public LinkDesc NewExecPinDesc()
         {
-            var result = new EGui.Controls.NodeGraph.NodePin.LinkDesc();
+            var result = new LinkDesc();
             result.Icon.Size = new Vector2(25, 25);
             result.ExtPadding = 10;
             result.LineColor = 0xFFFFFFFF;
@@ -30,9 +30,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             result.CanLinks.Add("Exec");
             return result;
         }
-        public EGui.Controls.NodeGraph.NodePin.LinkDesc NewInOutPinDesc()
+        public LinkDesc NewInOutPinDesc()
         {
-            var result = new EGui.Controls.NodeGraph.NodePin.LinkDesc();
+            var result = new LinkDesc();
             result.Icon.Size = new Vector2(20, 20);
             result.ExtPadding = 0;
             result.LineThinkness = 3;

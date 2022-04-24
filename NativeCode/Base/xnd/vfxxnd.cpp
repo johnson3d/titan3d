@@ -1,9 +1,15 @@
 #include "vfxxnd.h"
 #include "../r2m/F2MManager.h"
+#include "../cityhash/city.h"
 
 #define new VNEW
 
 NS_BEGIN
+
+UINT XndElement::NameToHash(const std::string& name)
+{
+	return CityHash32(name.c_str(), name.length());
+}
 
 bool XndAttribute::BeginRead()
 {

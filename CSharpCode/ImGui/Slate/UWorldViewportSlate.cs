@@ -46,11 +46,24 @@ namespace EngineNS.EGui.Slate
 
             CameraController.ControlCamera(RenderPolicy.DefaultCamera);
         }
-        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, Rtti.UTypeDesc policyType, float zMin, float zMax)
+        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, Rtti.UTypeDesc policyType, float zMin, float zMax)
+        {
+            URenderPolicy policy = null;
+            var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName);
+            if (rpAsset != null)
+            {
+                policy = rpAsset.CreateRenderPolicy();
+            }
+            if (policy == null)
+            {
+                policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.URenderPolicy;
+            }
+            await InitializeImpl(application, policy, zMin, zMax);
+        }
+        private async System.Threading.Tasks.Task InitializeImpl(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             await Initialize();
-
-            var policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.URenderPolicy;
+            
             await policy.Initialize(null);
 
             if (OnInitialize == null)
@@ -142,13 +155,16 @@ namespace EngineNS.EGui.Slate
             }
             else if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL)
             {
-                if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
+                if (IsViewportSlateFocused)
                 {
-                    CameraMoveSpeed += (float)(e.wheel.y * 0.01f);
-                }
-                else
-                {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, e.wheel.y * CameraMouseWheelSpeed, true);
+                    if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
+                    {
+                        CameraMoveSpeed += (float)(e.wheel.y * 0.01f);
+                    }
+                    else
+                    {
+                        CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, e.wheel.y * CameraMouseWheelSpeed, true);
+                    }
                 }
             }
             else if(e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP)

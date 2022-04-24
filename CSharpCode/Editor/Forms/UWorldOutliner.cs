@@ -167,9 +167,17 @@ namespace EngineNS.Editor.Forms
                             {
                                 var ntype = Rtti.UTypeDesc.TypeOf(i.ClassType.TypeString);
                                 var newNode = Rtti.UTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.USceneActorNode;
-                                await newNode.InitializeNode(mWorld, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                                var attrs = newNode.GetType().GetCustomAttributes(typeof(GamePlay.Scene.UNodeAttribute), false);
+                                GamePlay.Scene.UNodeData nodeData = null;
+                                string prefix = "Node";
+                                if (attrs.Length > 0)
+                                {
+                                    nodeData = Rtti.UTypeDescManager.CreateInstance((attrs[0] as GamePlay.Scene.UNodeAttribute).NodeDataType) as GamePlay.Scene.UNodeData;
+                                    prefix = (attrs[0] as GamePlay.Scene.UNodeAttribute).DefaultNamePrefix;
+                                }
+                                await newNode.InitializeNode(mWorld, nodeData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
                                 //var newNode = await node.ParentScene.NewNode(mWorld, i.ClassType.TypeString, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-                                newNode.NodeData.Name = $"Node_{newNode.SceneId}";
+                                newNode.NodeData.Name = $"{prefix}_{newNode.SceneId}";
                                 newNode.Parent = node;
                             }
                         }

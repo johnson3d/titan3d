@@ -81,10 +81,17 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void OnResize(URenderPolicy policy, float x, float y)
         {
-            ResultPinOut.Attachement.Width = (uint)(x * UHitproxyNode.ScaleFactor);
-            ResultPinOut.Attachement.Height = (uint)(y * UHitproxyNode.ScaleFactor);
+            float scaleFactor = 1.0f;
+            var hitProxyNode = policy.FindFirstNode<UHitproxyNode>();
+            if (hitProxyNode != null)
+            {
+                scaleFactor = hitProxyNode.ScaleFactor;
+            }
 
-            base.OnResize(policy, x * UHitproxyNode.ScaleFactor, y * UHitproxyNode.ScaleFactor);
+            ResultPinOut.Attachement.Width = (uint)(x * scaleFactor);
+            ResultPinOut.Attachement.Height = (uint)(y * scaleFactor);
+
+            base.OnResize(policy, x * scaleFactor, y * scaleFactor);
         }
     }
 }

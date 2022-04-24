@@ -1,8 +1,8 @@
 ﻿using EngineNS.Animation.Animatable;
 using EngineNS.Animation.Asset;
 using EngineNS.Animation.Asset.BlendSpace;
-using EngineNS.Animation.Pipeline;
-using EngineNS.Animation.Pipeline.Command;
+using EngineNS.Animation.BlendTree.Node;
+using EngineNS.Animation.Command;
 using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using System;
@@ -30,60 +30,20 @@ namespace EngineNS.Animation.Player
         public SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose BindedPose { get; set; } = null;
         public UMeshSpaceRuntimePose RuntimePose = null;
         public ULocalSpaceRuntimePose LocalPose = null;
-        public float Duration
-        {
-            get => DurationInMilliSecond * 0.001f;
-            set => DurationInMilliSecond = (long)(value * 1000);
-        }
-        public long DurationInMilliSecond
-        {
-            get;
-            protected set;
-        }
-        public uint KeyFrames
-        {
-            get;
-            protected set;
-        }
+        public float Duration { get; set; }
+
+        public uint KeyFrames { get; protected set; }
         public float PlayRate { get; set; } = 1.0f;
         public float Fps
         {
             get;
             protected set;
         }
-        public float CurrentTime
-        {
-            get => mCurrentTimeInMilliSecond * 0.001f;
-            set
-            {
-                mCurrentTimeInMilliSecond = (long)(value * 1000);
-            }
-        }
-        long mCurrentTimeInMilliSecond = 0;
-        public long CurrentTimeInMilliSecond
-        {
-            get => mCurrentTimeInMilliSecond;
-            set
-            {
-                mCurrentTimeInMilliSecond = value;
-            }
-        }
+        public float CurrentTime { get; set; }
         public float PlayPercent { get; set; } = 0.0f;
 
         //播放了多长时间，包括循环
-        protected long mLastTime = 0;
-        protected uint mCurrentLoopTimes = 0;
-        public uint CurrentLoopTimes
-        {
-            get => mCurrentLoopTimes;
-            set => mCurrentLoopTimes = value;
-        }
-        protected uint mLoopTimes = 0;
-        public uint LoopTimes
-        {
-            get => mLoopTimes;
-            set => mLoopTimes = value;
-        }
+        protected float mLastTime = 0;
         protected bool mIsLoop = true;
         public bool IsLoop
         {
@@ -102,16 +62,15 @@ namespace EngineNS.Animation.Player
             get => mFinish;
             set => mFinish = value;
         }
-        Int64 beforeTime = 0;
+        float beforeTime = 0;
         protected void TimeAdvance(float elapseTimeSecond)
         {
-            mLastTime += (long)((elapseTimeSecond * PlayRate) * 1000);
-            CurrentLoopTimes = (uint)(mLastTime / (DurationInMilliSecond + 1));
-            beforeTime = CurrentTimeInMilliSecond;
-            CurrentTimeInMilliSecond = mLastTime % (DurationInMilliSecond + 1);
-            if (IsLoop == false && beforeTime > CurrentTimeInMilliSecond)
+            mLastTime += elapseTimeSecond * PlayRate;
+            beforeTime = CurrentTime;
+            CurrentTime = mLastTime % Duration;
+            if (IsLoop == false && beforeTime > Duration)
             {
-                CurrentTimeInMilliSecond = DurationInMilliSecond;
+                CurrentTime = Duration;
                 Finish = true;
             }
             PlayPercent = CurrentTime / Duration;
@@ -121,6 +80,8 @@ namespace EngineNS.Animation.Player
         {
             System.Diagnostics.Debug.Assert(blendSpace2D != null);
             BlendSpace2D = blendSpace2D;
+            mEvaluateCmd = new UBlendSpaceEvaluateCommand();
+            mEvaluateCmd.Desc = new UBlendSpaceEvaluateCommandDesc();
         }
 
         public void BindingPose(UAnimatableSkeletonPose bindedPose)
@@ -131,37 +92,41 @@ namespace EngineNS.Animation.Player
 
 
         }
-
+        UBlendSpaceEvaluateCommand mEvaluateCmd = null;
         public void Update(float elapse)
         {
             UpdateRuntimeSamples();
             TimeAdvance(elapse);
-        }
 
-        public void Evaluate()
-        {
-            //make command  now is expensive of clonePose and BindingSetter need to optimize
-            UBlendSpaceEvaluateCommand bsEvaluateCmd = new UBlendSpaceEvaluateCommand();
+            mEvaluateCmd.Reset();
             for (int i = 0; i < mRuntimeBlendSamples.Count; ++i)
             {
                 UAnimatableSkeletonPose clipPose = BindedPose.Clone() as UAnimatableSkeletonPose;
                 var clip = mRuntimeBlendSamples[i].Animation as UAnimationClip;
                 System.Diagnostics.Debug.Assert(clip != null);
-                var setter = UAnimationPropertiesSetter.Binding(clip, clipPose);
-                UPropertiesSettingCommand animEvaluateCmd = new UPropertiesSettingCommand()
-                {
-                    AnimationPropertiesSetter = setter,
-                    Time = PlayPercent * clip.Duration
-                };
-                bsEvaluateCmd.AnimCmds.Add(animEvaluateCmd);
-                bsEvaluateCmd.AnimPoses.Add(clipPose);
-                bsEvaluateCmd.Weight.Add(mRuntimeBlendSamples[i].TotalWeight);
-                bsEvaluateCmd.LocalSpaceRuntimePoses.Add(SkeletonAnimation.Runtime.Pose.URuntimePoseUtility.CreateLocalSpaceRuntimePose(BindedPose));
+                UExtractPoseFromClipCommand animEvaluateCmd = new UExtractPoseFromClipCommand(ref clipPose,clip);
+                mEvaluateCmd.AnimCmds.Add(animEvaluateCmd);
+                mEvaluateCmd.AnimPoses.Add(clipPose);
+                animEvaluateCmd.Time = PlayPercent * clip.Duration;
+                mEvaluateCmd.Desc.Weights.Add(mRuntimeBlendSamples[i].TotalWeight);
+                mEvaluateCmd.Desc.Times.Add(PlayPercent * clip.Duration);
             }
-            bsEvaluateCmd.FinalPose = URuntimePoseUtility.CreateLocalSpaceRuntimePose(BindedPose);
+            mEvaluateCmd.OutPose = URuntimePoseUtility.CreateLocalSpaceRuntimePose(BindedPose);
+        }
+
+        public void Evaluate()
+        {
+            //make command  now is expensive of clonePose and BindingSetter need to optimize
+
+            
             //if(IsImmediate)
-            bsEvaluateCmd.Execute();
-            URuntimePoseUtility.ConvetToMeshSpaceRuntimePose(ref RuntimePose, bsEvaluateCmd.FinalPose);
+            for(int i = 0;i< mEvaluateCmd.AnimCmds.Count; ++i)
+            {
+                //TODO: 
+                mEvaluateCmd.AnimCmds[i].Execute();
+            }
+            mEvaluateCmd.Execute();
+            URuntimePoseUtility.ConvetToMeshSpaceRuntimePose(ref RuntimePose, mEvaluateCmd.OutPose);
             //else Insert to pipeline
             //AnimationPiple.CommandList.Add();
         }
@@ -184,8 +149,7 @@ namespace EngineNS.Animation.Player
                 scale = newDuration / Duration;
             Duration = newDuration;
             CurrentTime = CurrentTime * scale;
-            mLastTime = mCurrentTimeInMilliSecond;
-            LoopTimes = 0;
+            mLastTime = CurrentTime;
             KeyFrames = (uint)(Duration * 30);
 
         }

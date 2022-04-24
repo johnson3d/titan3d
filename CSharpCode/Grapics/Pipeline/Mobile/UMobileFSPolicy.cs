@@ -43,27 +43,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         #endregion
         public UMobileOpaqueNode BasePassNode = new UMobileOpaqueNode();
-        public Shadow.UShadowMapNode mShadowMapNode = new Shadow.UShadowMapNode();
-        [RName.PGRName(FilterExts = RHI.CShaderResourceView.AssetExt)]
-        public RName EnvMap
-        {
-            get
-            {
-                if (EnvMapSRV == null)
-                    return null;
-                return EnvMapSRV.AssetName;
-            }
-            set
-            {
-                Action action = async () =>
-                {
-                    EnvMapSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
-                };
-                action();
-            }
-        }
-        public RHI.CShaderResourceView EnvMapSRV;
-        public RHI.CShaderResourceView VignetteSRV;
+        public Shadow.UShadowMapNode mShadowMapNode = new Shadow.UShadowMapNode();        
         public override RHI.CShaderResourceView GetFinalShowRSV()
         {
             return this.AttachmentCache.FindAttachement(BasePassNode.GBuffers.RenderTargets[0].Attachement.AttachmentName).Srv;

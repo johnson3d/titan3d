@@ -1842,13 +1842,7 @@ public:
 	{
 		return ImGui::TempInputIsActive(id);
 	}
-	static bool LastItemStatusFlagsHasFocused()
-	{
-		ImGuiWindow* window = ImGui::GetCurrentWindow();
-		if (window == nullptr)
-			return false;
-		return (window->DC.LastItemStatusFlags & ImGuiItemStatusFlags_Focused) != 0;
-	}
+	//static bool LastItemStatusFlagsHasFocused();
 	static void SetActiveID(ImGuiID id)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -1870,7 +1864,8 @@ public:
 		auto context = ImGui::GetCurrentContext();
 		if (context == nullptr)
 			return;
-		context->NavInputId = id;
+		context->NavActivateInputId = id;
+		//context->NavInputId = id;
 	}
 	static void SetTempInputID(ImGuiID id)
 	{
@@ -1903,13 +1898,13 @@ public:
 			return false;
 		return context->NavActivateId == id;
 	}
-	static bool IsIDNavInput(ImGuiID id)
-	{
+	static bool IsIDNavInput(ImGuiID id);
+	/*{
 		auto context = ImGui::GetCurrentContext();
 		if (context == nullptr)
 			return false;
 		return context->NavInputId == id;
-	}
+	}*/
 	static bool DragBehavior(ImGuiID id, ImGuiDataType data_type, void* p_v, float v_speed, const void* p_min, const void* p_max, const char* format, ImGuiSliderFlags_ flags)
 	{
 		return ImGui::DragBehavior(id, data_type, p_v, v_speed, p_min, p_max, format, flags);

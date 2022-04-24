@@ -13,17 +13,42 @@ This source provides a C++ wrapper around Ken Perlin's noise function. I know th
 
 NS_BEGIN
 
-#define SAMPLE_SIZE 1024
+class TR_CLASS()
+	vfxRandom : public VIUnknownBase
+{
+	int rand_lcg(UINT& rng_state)
+	{
+		// LCG values from Numerical Recipes
+		rng_state = 1664525 * rng_state + 1013904223;
+		return (int)rng_state;
+	}
+	UINT mCurState;
+public:
+	vfxRandom()
+	{
+		mCurState = 0;
+	}
+	void SetSeed(int seed)
+	{
+		mCurState = (UINT)seed;
+	}
+	int NextValue() {
+		return rand_lcg(mCurState);
+	}
+	int NextValue16Bit() {
+		return (((UINT)rand_lcg(mCurState))>>16) & 0x7fff;
+	}
+};
+//#define SAMPLE_SIZE 1024
 
 class TR_CLASS()
-	Perlin : public VIUnknown
+	Perlin : public VIUnknownBase
 {
 public:
-	TR_CONSTRUCTOR()
-		Perlin(int octaves, double freq, double amp, int seed);
+	Perlin(int octaves, double freq, double amp, int seed, int samplerSize = 1024);
+	~Perlin();
 
-	TR_FUNCTION()
-		double Get(double x, double y)
+	double Get(double x, double y)
 	{
 		double vec[2];
 		vec[0] = x;
@@ -31,8 +56,7 @@ public:
 		return perlin_noise_2D(vec);
 	};
 
-	TR_FUNCTION()
-		double GetAmplitude()
+	double GetAmplitude()
 	{
 		return mAmplitude;
 	}
@@ -45,18 +69,52 @@ private:
 	double noise3(double vec[3]);
 	void normalize2(double v[2]);
 	void normalize3(double v[3]);
-	void init(void);
+	void init(vfxRandom* random);
 
-	int   mOctaves;
+	int mSamplerSize;
+	int mOctaves;
 	double mFrequency;
 	double mAmplitude;
-	int   mSeed;
+	int mSeed;
 
-	int p[SAMPLE_SIZE + SAMPLE_SIZE + 2];
+	/*int p[SAMPLE_SIZE + SAMPLE_SIZE + 2];
 	double g3[SAMPLE_SIZE + SAMPLE_SIZE + 2][3];
 	double g2[SAMPLE_SIZE + SAMPLE_SIZE + 2][2];
-	double g1[SAMPLE_SIZE + SAMPLE_SIZE + 2];
-	bool  mStart;
+	double g1[SAMPLE_SIZE + SAMPLE_SIZE + 2];*/
+
+	int* p;
+	struct DPoint3
+	{
+		double X;
+		double Y;
+		double Z;
+		inline double& operator[](int index)
+		{
+			return ((&X)[index]);
+		}
+		inline operator double* ()
+		{
+			return &X;
+		}
+	};
+	DPoint3* g3;
+	struct DPoint2
+	{
+		double X;
+		double Y;
+		inline double& operator[](int index)
+		{
+			return ((&X)[index]);
+		}
+		inline operator double* ()
+		{
+			return &X;
+		}
+	};
+	DPoint2* g2;
+	double* g1;
+
+	//bool  mStart;
 
 };
 

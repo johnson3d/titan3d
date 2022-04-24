@@ -88,7 +88,7 @@ namespace EngineNS.GamePlay.Scene
                 flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
             var ret = ImGuiAPI.TreeNodeEx(index.ToString(), flags, "");
             ImGuiAPI.SameLine(0, -3);
-            ImGuiAPI.Text(NodeName);
+            ImGuiAPI.Text(string.IsNullOrEmpty(NodeName) ? "EmptyName" : NodeName);
             return ret;
         }
     }

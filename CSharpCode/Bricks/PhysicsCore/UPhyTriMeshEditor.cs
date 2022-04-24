@@ -87,7 +87,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
             PreviewViewport.Title = $"PxTriMesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMesh;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
             UEngine.Instance.TickableManager.AddTickable(this);
 
             TriMeshPropGrid.Target = TriMesh;

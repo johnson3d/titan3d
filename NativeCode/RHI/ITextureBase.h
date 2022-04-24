@@ -45,10 +45,10 @@ public:
 };
 
 struct TR_CLASS(SV_LayoutStruct = 8)
-ITexture2DDesc
+	ITexture2DDesc
 {
 	TR_FUNCTION()
-	void SetDefault()
+		void SetDefault()
 	{
 		Width = 0;
 		Height = 0;
@@ -66,11 +66,11 @@ ITexture2DDesc
 	EPixelFormat	Format;
 	UINT			BindFlags;
 	UINT			CPUAccess;
-	
-	ImageInitData*	InitData;
+
+	ImageInitData* InitData;
 
 	TR_DISCARD()
-	std::string ToString()
+		std::string ToString()
 	{
 		return VStringA_FormatV("Format = %d; Width = %d; Height = %d; MipLevels = %d; BindFlags = %d; CPUAccess = %d;",
 			Format, Width, Height, MipLevels, BindFlags, CPUAccess);
@@ -119,10 +119,13 @@ ITexture2D : public IGpuBuffer
 public:
 	ITexture2DDesc		mTextureDesc;
 public:
-	virtual vBOOL MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch) = 0;
-	virtual void UnmapMipmap(ICommandList* cmd, int MipLevel) = 0;
+	ITexture2DDesc GetTextureDesc() const{
+		return mTextureDesc;
+	}
+	virtual vBOOL MapMipmap(ICommandList* cmd, UINT ArraySlice, UINT MipSlice, void** ppData, UINT* pRowPitch, UINT* pDepthPitch) = 0;
+	virtual void UnmapMipmap(ICommandList* cmd, UINT ArraySlice, UINT MipSlice) = 0;
 	void BuildImageBlob(IBlobObject* blob, void* pData, UINT RowPitch);
-	virtual void UpdateMipData(ICommandList * cmd, UINT level, void* pData, UINT width, UINT height, UINT Pitch) override
+	virtual void UpdateMipData(ICommandList * cmd, UINT ArraySlice, UINT MipSlice, void* pData, UINT width, UINT height, UINT Pitch)
 	{
 
 	}

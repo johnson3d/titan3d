@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 {
@@ -10,9 +10,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
     }
     public class CallNode : IBaseNode
     {
-        public EGui.Controls.NodeGraph.PinOut Result = null;
-        public List<EGui.Controls.NodeGraph.PinIn> Arguments = new List<EGui.Controls.NodeGraph.PinIn>();
-        public List<EGui.Controls.NodeGraph.PinOut> OutArguments = new List<EGui.Controls.NodeGraph.PinOut>();
+        public PinOut Result = null;
+        public List<PinIn> Arguments = new List<PinIn>();
+        public List<PinOut> OutArguments = new List<PinOut>();
         public Rtti.UClassMeta.MethodMeta Method;
         [Rtti.Meta]
         public string MethodDeclString
@@ -39,8 +39,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         public CallNode()
         {
             Icon = UShaderEditorStyles.Instance.FunctionIcon;
-            TitleImage.Color = UShaderEditorStyles.Instance.FunctionTitleColor;
-            Background.Color = UShaderEditorStyles.Instance.FunctionBGColor;
+            TitleColor = UShaderEditorStyles.Instance.FunctionTitleColor;
+            BackColor = UShaderEditorStyles.Instance.FunctionBGColor;
         }
         internal void Initialize(Rtti.UClassMeta.MethodMeta m)
         {
@@ -49,7 +49,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
             if (Method.Method.ReturnType != typeof(void))
             {
-                Result = new EGui.Controls.NodeGraph.PinOut();
+                Result = new PinOut();
                 Result.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
                 Result.Name = "Result";
                 AddPinOut(Result);
@@ -59,7 +59,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             OutArguments.Clear();
             foreach (var i in Method.Parameters)
             {
-                var pin = new EGui.Controls.NodeGraph.PinIn();
+                var pin = new PinIn();
                 pin.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
                 pin.Link.CanLinks.Add("Value");
                 pin.Name = i.ParamInfo.Name;
@@ -68,7 +68,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 AddPinIn(pin);
                 if (i.ParamInfo.IsOut)
                 {
-                    var pinOut = new EGui.Controls.NodeGraph.PinOut();
+                    var pinOut = new PinOut();
                     pinOut.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
                     pin.Link.CanLinks.Add("Value");
                     pinOut.Name = i.ParamInfo.Name;
@@ -94,7 +94,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 //}
             }
         }
-        public override void OnMouseStayPin(EGui.Controls.NodeGraph.NodePin pin)
+        public override void OnMouseStayPin(NodePin pin)
         {
             if (pin == Result)
             {
@@ -114,7 +114,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             {
                 if (pin == Arguments[i])
                 {
-                    var inPin = pin as EGui.Controls.NodeGraph.PinIn;
+                    var inPin = pin as PinIn;
                     var paramMeta = GetInPinParamMeta(inPin);
                     if (paramMeta != null)
                     {
@@ -136,7 +136,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 }
             }
         }
-        public Rtti.UClassMeta.MethodMeta.ParamMeta GetInPinParamMeta(EGui.Controls.NodeGraph.PinIn pin)
+        public Rtti.UClassMeta.MethodMeta.ParamMeta GetInPinParamMeta(PinIn pin)
         {
             for (int i = 0; i < Arguments.Count; i++)
             {
@@ -147,7 +147,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             return null;
         }
-        public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
+        public override System.Type GetOutPinType(PinOut pin)
         {
             if (pin == Result)
             {
@@ -174,7 +174,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             return null;
         }
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -198,7 +198,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             Executed = false;
         }
         bool Executed = false;
-        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, EGui.Controls.NodeGraph.PinOut oPin, bool bTakeResult)
+        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
         {
             if (Executed)
             {
@@ -281,7 +281,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         private IExpression GetExpr_Impl(UMaterialGraph funGraph, ICodeGen cGen)
         {
             CallOp CallExpr = new CallOp();
-            var links = new List<EGui.Controls.NodeGraph.PinLinker>();
+            var links = new List<UPinLinker>();
             
             {
                 //这里要处理Static名字获取
@@ -308,13 +308,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 }
 
                 links.Clear();
-                links = new List<EGui.Controls.NodeGraph.PinLinker>();
+                links = new List<UPinLinker>();
                 funGraph.FindInLinker(Arguments[i], links);
                 OpExpress argExpr = null;
                 if (links.Count == 1)
                 {
                     var argNode = links[0].OutNode as IBaseNode;
-                    argExpr = argNode.GetExpr(funGraph, cGen, links[0].Out, true) as OpExpress;
+                    argExpr = argNode.GetExpr(funGraph, cGen, links[0].OutPin, true) as OpExpress;
                     if (argExpr == null)
                         throw new GraphException(this, Arguments[i], $"argExpr = null:{Arguments[i].Name}");
                 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
@@ -11,8 +11,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Name = "Sequence";
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF0fEF30;
-            TitleImage.Color = MacrossStyles.Instance.FlowControlTitleColor;
-            Background.Color = MacrossStyles.Instance.BGColor;
+            TitleColor = MacrossStyles.Instance.FlowControlTitleColor;
+            BackColor = MacrossStyles.Instance.BGColor;
 
             AddPin.Name = "AddPin";
             AddPin.Link = MacrossStyles.Instance.NewExecPinDesc();
@@ -21,32 +21,32 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             AddPinIn(BeforeExec);
             AddPinOut(AddPin);
         }
-        public EGui.Controls.NodeGraph.PinOut AddPin { get; set; } = new EGui.Controls.NodeGraph.PinOut();
-        public List<EGui.Controls.NodeGraph.PinOut> Sequences = new List<EGui.Controls.NodeGraph.PinOut>();
-        public override void OnLClicked(EGui.Controls.NodeGraph.NodePin clickedPin)
+        public PinOut AddPin { get; set; } = new PinOut();
+        public List<PinOut> Sequences = new List<PinOut>();
+        public override void OnLButtonClicked(NodePin clickedPin)
         {
             if (clickedPin == AddPin)
             {
-                var aPin = new EGui.Controls.NodeGraph.PinOut();
+                var aPin = new PinOut();
                 aPin.Name = $"Pin{Sequences.Count}";
                 aPin.Link = MacrossStyles.Instance.NewExecPinDesc();
                 Sequences.Add(aPin);
                 AddPinOut(aPin);
             }
         }
-        public override void OnShowPinMenu(EGui.Controls.NodeGraph.NodePin pin)
+        public override void OnShowPinMenu(NodePin pin)
         {
             if (ImGuiAPI.MenuItem($"DeletePin", null, false, true))
             {
-                var addedPin = pin as EGui.Controls.NodeGraph.PinOut;
+                var addedPin = pin as PinOut;
                 if (Sequences.Contains(addedPin))
                 {
                     ParentGraph.RemoveLinkedOut(addedPin);
                     RemovePinOut(addedPin);
                     Sequences.Remove(addedPin);
 
-                    ParentGraph.mMenuShowPin = null;
-                    ParentGraph.mMenuType = EGui.Controls.NodeGraph.NodeGraph.EMenuType.None;
+                    //ParentGraph.mMenuShowPin = null;
+                    //ParentGraph.mMenuType = EGui.Controls.NodeGraph.NodeGraph.EMenuType.None;
 
                     for (int i = 0; i < Sequences.Count; i++)
                     {
@@ -63,8 +63,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Name = "If";
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF0fEF30;
-            TitleImage.Color = MacrossStyles.Instance.FlowControlTitleColor;
-            Background.Color = MacrossStyles.Instance.BGColor;
+            TitleColor = MacrossStyles.Instance.FlowControlTitleColor;
+            BackColor = MacrossStyles.Instance.BGColor;
 
             ConditionPin.Name = "bool";
             ConditionPin.Link = MacrossStyles.Instance.NewInOutPinDesc();
@@ -84,10 +84,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             AddPinOut(TruePin);
             AddPinOut(FalsePin);
         }
-        public EGui.Controls.NodeGraph.PinIn ConditionPin { get; set; } = new EGui.Controls.NodeGraph.PinIn();
-        public EGui.Controls.NodeGraph.PinOut TruePin { get; set; } = new EGui.Controls.NodeGraph.PinOut();
-        public EGui.Controls.NodeGraph.PinOut FalsePin { get; set; } = new EGui.Controls.NodeGraph.PinOut();
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public PinIn ConditionPin { get; set; } = new PinIn();
+        public PinOut TruePin { get; set; } = new PinOut();
+        public PinOut FalsePin { get; set; } = new PinOut();
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -102,10 +102,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return true;
         }
-        public override IExpression GetExpr(FunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        public override IExpression GetExpr(UMacrossFunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
         {
             var ifOp = new IfOp();
-            var links = new List<EGui.Controls.NodeGraph.PinLinker>();
+            var links = new List<UPinLinker>();
             funGraph.FindInLinker(ConditionPin, links);
             if (links.Count != 1)
             {
@@ -174,7 +174,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
     public partial class ReturnNode : INodeExpr
     {
-        public static ReturnNode NewReturnNode(FunctionGraph funGraph)
+        public static ReturnNode NewReturnNode(UMacrossFunctionGraph funGraph)
         {
             var result = new ReturnNode();
             result.Initialize(funGraph);
@@ -185,12 +185,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Name = "Return";
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF0fEF30;
-            TitleImage.Color = MacrossStyles.Instance.FlowControlTitleColor;
-            Background.Color = MacrossStyles.Instance.BGColor;
+            TitleColor = MacrossStyles.Instance.FlowControlTitleColor;
+            BackColor = MacrossStyles.Instance.BGColor;
 
             AddPinIn(BeforeExec);
         }
-        public void Initialize(FunctionGraph funGraph)
+        public void Initialize(UMacrossFunctionGraph funGraph)
         {
             ReturnType = funGraph.Function.ReturnType;
             var retType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(funGraph.Function.ReturnType);
@@ -204,7 +204,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 RemovePinIn(ReturnValuePin);
             }
 
-            ReturnValuePin = new EGui.Controls.NodeGraph.PinIn();
+            ReturnValuePin = new PinIn();
 
             ReturnValuePin.Name = "Result";
             ReturnValuePin.Link = MacrossStyles.Instance.NewInOutPinDesc();
@@ -216,7 +216,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             base.OnPreRead(tagObject, hostObject, fromXml);
 
-            var funGraph = this.ParentGraph as FunctionGraph;
+            var funGraph = this.ParentGraph as UMacrossFunctionGraph;
             if (funGraph == null)
                 return;
             Initialize(funGraph);
@@ -227,15 +227,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             get;
             set;
         }
-        public EGui.Controls.NodeGraph.PinIn ReturnValuePin { get; set; } = null;
-        public override void OnMouseStayPin(EGui.Controls.NodeGraph.NodePin stayPin)
+        public PinIn ReturnValuePin { get; set; } = null;
+        public override void OnMouseStayPin(NodePin stayPin)
         {
             if (ReturnValuePin != stayPin)
                 return;
 
             EGui.Controls.CtrlUtility.DrawHelper(ReturnType);
         }
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -243,7 +243,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (iPin == BeforeExec)
                 return true;
 
-            var funGraph = this.ParentGraph as FunctionGraph;
+            var funGraph = this.ParentGraph as UMacrossFunctionGraph;
             if (funGraph == null)
                 return false;
 
@@ -266,7 +266,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return false;
         }
 
-        public override IExpression GetExpr(FunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        public override IExpression GetExpr(UMacrossFunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
         {
             var retType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(funGraph.Function.ReturnType);
             if (retType == null)
@@ -275,13 +275,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var expr = new ReturnOp();
             if (retType.SystemType != typeof(void))
             {
-                var links = new List<EGui.Controls.NodeGraph.PinLinker>();
+                var links = new List<UPinLinker>();
                 funGraph.FindInLinker(ReturnValuePin, links);
                 if (links.Count != 1)
                     throw new GraphException(this, ReturnValuePin, "Please link Result pin");
                 var returnValueNode = links[0].OutNode as INodeExpr;
                 var resultExpr = returnValueNode.GetExpr(funGraph, cGen, true) as OpExpress;
-                var resultType = returnValueNode.GetOutPinType(links[0].Out);
+                var resultType = returnValueNode.GetOutPinType(links[0].OutPin);
                 if (resultType == retType.SystemType)
                 {
                     expr.ReturnExpr = resultExpr;

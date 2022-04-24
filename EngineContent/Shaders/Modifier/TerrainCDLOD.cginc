@@ -41,6 +41,20 @@ Texture2D		ArrayTextures[3];
 Texture2D		NormalMapTexture DX_NOBIND;
 SamplerState	Samp_NormalMapTexture DX_NOBIND;
 
+Texture2D		MaterialIdTexture DX_NOBIND;
+SamplerState	Samp_MaterialIdTexture DX_NOBIND;
+
+Texture2DArray	DiffuseTextureArray DX_NOBIND;
+SamplerState	Samp_DiffuseTextureArray DX_NOBIND;
+
+float3 GetTerrainDiffuse(float2 uv, PS_INPUT input)
+{
+	return DiffuseTextureArray.Sample(Samp_DiffuseTextureArray, float3(uv.xy, input.SpecialData.x)).rgb;
+	//return DiffuseTextureArray.Sample(Samp_DiffuseTextureArray, float3(uv.xy, 2)).rgb;
+	//return float3(1,1,1);
+}
+#define Def_GetTerrainDiffuse
+
 float3 GetPosition(float2 uv)
 {
 	float3 result = float3(0,0,0);
@@ -58,6 +72,11 @@ float3 GetPosition(float2 uv)
 
 	//result += StartPosition;
 	return result;
+}
+
+float4 GetMaterialId(float2 uv)
+{
+	return MaterialIdTexture.SampleLevel(Samp_MaterialIdTexture, uv.xy, 0);
 }
 
 float2 GetGlobalUV(float2 vPosInWorld)
@@ -112,6 +131,9 @@ void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
 	vert.vPosition = vsOut.vPosition.xyz;
 	vert.vNormal = vsOut.vNormal;
 	vert.vUV = vsOut.vUV;
+	vsOut.SpecialData.x = (uint)(GetMaterialId(heightUV.xy).r * 255.0f + 0.1f);
+	if (vsOut.SpecialData.x >= 2)
+		vsOut.SpecialData.x = 1;
 }
 
 void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)

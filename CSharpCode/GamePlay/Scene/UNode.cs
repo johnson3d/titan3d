@@ -4,6 +4,11 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
+    public class UNodeAttribute : Attribute
+    {
+        public System.Type NodeDataType = typeof(UNodeData);
+        public string DefaultNamePrefix = "Node";
+    }
     public class UNodeData : IO.BaseSerializer
     {
         public int GetStructSize()
@@ -298,6 +303,8 @@ namespace EngineNS.GamePlay.Scene
         {
             get
             {
+                if (Placement == null)
+                    return DVector3.Zero;
                 return Placement.AbsTransform.Position;
             }
         }

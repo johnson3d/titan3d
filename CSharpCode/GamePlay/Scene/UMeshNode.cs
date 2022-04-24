@@ -4,6 +4,7 @@ using System.ComponentModel;
 
 namespace EngineNS.GamePlay.Scene
 {
+    [UNode(NodeDataType = typeof(UMeshNode.UMeshNodeData), DefaultNamePrefix = "Mesh")]
     public partial class UMeshNode : USceneActorNode
     {
         public class UMeshNodeData : UNodeData

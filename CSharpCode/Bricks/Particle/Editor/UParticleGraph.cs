@@ -1,49 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
-    public class UParticleGraph : EGui.Controls.NodeGraph.NodeGraph
+    public class UParticleGraph : NodeGraph.UNodeGraph
     {
-        public UParticleEditor NebulaEditor;
-        protected override void ShowAddNode(Vector2 posMenu)
+        public UParticleGraph()
         {
-            if (ImGuiAPI.MenuItem($"AddEmitter", null, false, true))
+            UpdateCanvasMenus();
+            UpdateNodeMenus();
+            UpdatePinMenus();
+        }
+        public UParticleEditor NebulaEditor;
+        public override void UpdateCanvasMenus()
+        {
+            CanvasMenus.SubMenuItems.Clear();
+            CanvasMenus.Text = "Canvas";
+
+            CanvasMenus.AddMenuItem(
+                "AddEmitter", null,
+                (UMenuItem item, object sender) =>
+                {
+                    var node = new UEmitterNode();
+                    node.NebulaEditor = NebulaEditor;
+                    node.Position = PopMenuPosition;
+                    this.AddNode(node);
+                });
+            var shapes = CanvasMenus.AddMenuItem("Shape", null, null);
             {
-                var node = new UEmitterNode();
-                node.NebulaEditor = NebulaEditor;
-                node.Position = View2WorldSpace(ref posMenu);
-                this.AddNode(node);
-            }
-            if (ImGuiAPI.BeginMenu("Shapes", true))
-            {
-                if (ImGuiAPI.MenuItem($"Box", null, false, true))
+                shapes.AddMenuItem("Box", null, (UMenuItem item, object sender) =>
                 {
                     var node = new UBoxEmitShapeNode();
                     node.NebulaEditor = NebulaEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
+                    node.Position = PopMenuPosition;
                     this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"Sphere", null, false, true))
+                });
+                shapes.AddMenuItem("Sphere", null, (UMenuItem item, object sender) =>
                 {
                     var node = new USphereEmitShapeNode();
                     node.NebulaEditor = NebulaEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
+                    node.Position = PopMenuPosition;
                     this.AddNode(node);
-                }
-                ImGuiAPI.EndMenu();
+                });
             }
-            if (ImGuiAPI.BeginMenu("Effector", true))
+            var effectors = CanvasMenus.AddMenuItem("Effector", null, null);
             {
-                if (ImGuiAPI.MenuItem($"Accelerated", null, false, true))
+                effectors.AddMenuItem("Accelerated", null, (UMenuItem item, object sender) =>
                 {
                     var node = new UAcceleratedEffectorNode();
                     node.NebulaEditor = NebulaEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node); 
-                }
-                ImGuiAPI.EndMenu();
+                    node.Position = PopMenuPosition;
+                    this.AddNode(node);
+                });
             }
         }
     }

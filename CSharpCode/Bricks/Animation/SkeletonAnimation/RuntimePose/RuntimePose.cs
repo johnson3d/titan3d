@@ -1,4 +1,5 @@
-﻿using EngineNS.Animation.SkeletonAnimation.Skeleton;
+﻿using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
+using EngineNS.Animation.SkeletonAnimation.Skeleton;
 using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
 using System;
 using System.Collections.Generic;
@@ -9,41 +10,101 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
 {
     public interface IRuntimePose
     {
+        public int HashCode { get; }
         public List<ILimbDesc> Descs { get; set; }
         public List<FTransform> Transforms { get; set; }
     }
     public class ULocalSpaceRuntimePose : IRuntimePose  //or struct
     {
+        public int HashCode => 0;
         public List<ILimbDesc> Descs { get; set; } = new List<ILimbDesc>();    //or array
         public List<FTransform> Transforms { get; set; } = new List<FTransform>();//or array
-
     }
     public class UMeshSpaceRuntimePose : IRuntimePose
     {
+        public int HashCode => 0;
         public List<ILimbDesc> Descs { get; set; } = new List<ILimbDesc>();//or array
         public List<FTransform> Transforms { get; set; } = new List<FTransform>();//or array
-
     }
+
+    /// <summary>
+    /// LocalSpace Position MeshSpace Rotation
+    /// </summary>
+    public class ULPosMRotRuntimePose : IRuntimePose  //or struct
+    {
+        public int HashCode => 0;
+        public List<ILimbDesc> Descs { get; set; } = new List<ILimbDesc>();    //or array
+        public List<FTransform> Transforms { get; set; } = new List<FTransform>();//or array
+    }
+
 
     public class URuntimePoseUtility
     {
-        public static IndexInSkeleton GetIndex(uint NameHash, IRuntimePose pose)
+        #region Get
+        public static FTransform GetTransform(string limbName, IRuntimePose pose)
+        {
+            var index = GetIndex(limbName, pose);
+            if (index.Value < 0)
+            {
+                return FTransform.Identity;
+            }
+            return pose.Transforms[index.Value];
+        }
+        public static FTransform GetTransform(uint limbNameHash, IRuntimePose pose)
+        {
+            var index = GetIndex(limbNameHash, pose);
+            if (index.Value < 0)
+            {
+                return FTransform.Identity;
+            }
+            return pose.Transforms[index.Value];
+        }
+        public static ILimbDesc GetDesc(string limbName, IRuntimePose pose)
+        {
+            var index = GetIndex(limbName, pose);
+            if (index.Value < 0)
+            {
+                return null;
+            }
+            return pose.Descs[index.Value];
+        }
+        public static ILimbDesc GetDesc(uint limbNameHash, IRuntimePose pose)
+        {
+            var index = GetIndex(limbNameHash, pose);
+            if (index.Value < 0)
+            {
+                return null;
+            }
+            return pose.Descs[index.Value];
+        }
+        public static IndexInSkeleton GetIndex(string limbName, IRuntimePose pose)
         {
             for (int i = 0; i < pose.Descs.Count; ++i)
             {
-                if (NameHash == pose.Descs[i].NameHash)
+                if (limbName == pose.Descs[i].Name)
                 {
                     return new IndexInSkeleton(i);
                 }
             }
-            return new IndexInSkeleton(- 1);
+            return new IndexInSkeleton(-1);
         }
-        public static List<IndexInSkeleton> GetChildren(uint NameHash, IRuntimePose pose)
+        public static IndexInSkeleton GetIndex(uint limbNameHash, IRuntimePose pose)
+        {
+            for (int i = 0; i < pose.Descs.Count; ++i)
+            {
+                if (limbNameHash == pose.Descs[i].NameHash)
+                {
+                    return new IndexInSkeleton(i);
+                }
+            }
+            return new IndexInSkeleton(-1);
+        }
+        public static List<IndexInSkeleton> GetChildren(uint limbNameHash, IRuntimePose pose)
         {
             List<IndexInSkeleton> childs = new List<IndexInSkeleton>();
             for (int i = 0; i < pose.Descs.Count; ++i)
             {
-                if (NameHash == pose.Descs[i].ParentHash)
+                if (limbNameHash == pose.Descs[i].ParentHash)
                 {
                     childs.Add(new IndexInSkeleton(i));
                 }
@@ -72,6 +133,9 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
             }
             return null;
         }
+        #endregion get
+
+        #region Create RuntimePose
         public static ULocalSpaceRuntimePose CreateLocalSpaceRuntimePose(AnimatablePose.UAnimatableSkeletonPose skeletonPose)
         {
             ULocalSpaceRuntimePose pose = new ULocalSpaceRuntimePose();
@@ -84,49 +148,144 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
         }
         public static UMeshSpaceRuntimePose CreateMeshSpaceRuntimePose(AnimatablePose.UAnimatableSkeletonPose skeletonPose)
         {
-            UMeshSpaceRuntimePose pose = new UMeshSpaceRuntimePose();
-            for (int i = 0; i < skeletonPose.LimbPoses.Count; ++i)
-            {
-                pose.Transforms.Add(skeletonPose.LimbPoses[i].Transtorm);
-                pose.Descs.Add(skeletonPose.LimbPoses[i].Desc);
-            }
-            var rootHash = GetRootDesc(pose).NameHash;
-            ConvertToMeshSpaceTransformRecursively(rootHash, ref pose);
-            return pose;
+            ULocalSpaceRuntimePose localSpacePose = CreateLocalSpaceRuntimePose(skeletonPose);
+            return ConvetToMeshSpaceRuntimePose(localSpacePose);
         }
+        #endregion Create RuntimePose
+
+        #region ConvertRuntimePose
         public static UMeshSpaceRuntimePose ConvetToMeshSpaceRuntimePose(ULocalSpaceRuntimePose localSpacePose)
         {
             UMeshSpaceRuntimePose temp = new UMeshSpaceRuntimePose();
-            temp.Transforms.AddRange(localSpacePose.Transforms);
-            temp.Descs.AddRange(localSpacePose.Descs);
-
-            var rootHash = GetRootDesc(temp).NameHash;
-            ConvertToMeshSpaceTransformRecursively(rootHash, ref temp);
+            ConvetToMeshSpaceRuntimePose(ref temp, localSpacePose);
             return temp;
         }
-        public static void ConvetToMeshSpaceRuntimePose(ref UMeshSpaceRuntimePose meshSpacePose, ULocalSpaceRuntimePose localSpacePose)
+        public static void ConvetToMeshSpaceRuntimePose(ref UMeshSpaceRuntimePose desMeshSpacePose, ULocalSpaceRuntimePose srcLocalSpacePose)
         {
-            meshSpacePose.Transforms.Clear();
-            meshSpacePose.Descs.Clear();
-            meshSpacePose.Transforms.AddRange(localSpacePose.Transforms);
-            meshSpacePose.Descs.AddRange(localSpacePose.Descs);
+            desMeshSpacePose.Transforms.Clear();
+            desMeshSpacePose.Descs.Clear();
+            desMeshSpacePose.Transforms.AddRange(srcLocalSpacePose.Transforms);
+            desMeshSpacePose.Descs.AddRange(srcLocalSpacePose.Descs);
 
-            var rootHash = GetRootDesc(meshSpacePose).NameHash;
-            ConvertToMeshSpaceTransformRecursively(rootHash, ref meshSpacePose);
+            var rootHash = GetRootDesc(desMeshSpacePose).NameHash;
+            ConvertToMeshSpaceTransformRecursively(ref desMeshSpacePose, rootHash, srcLocalSpacePose);
         }
-        static void ConvertToMeshSpaceTransformRecursively(uint parentHash, ref UMeshSpaceRuntimePose InOutPose)
+        static void ConvertToMeshSpaceTransformRecursively(ref UMeshSpaceRuntimePose outPose, uint parentHash, ULocalSpaceRuntimePose srcPose)
         {
-            var parentIndex = GetIndex(parentHash, InOutPose);
-            var childrenIndexs = GetChildren(parentHash, InOutPose);
+            var parentIndex = GetIndex(parentHash, srcPose);
+            var childrenIndexs = GetChildren(parentHash, srcPose);
             for (int i = 0; i < childrenIndexs.Count; ++i)
             {
                 var childIndex = childrenIndexs[i].Value;
                 FTransform temp;
-                FTransform.Multiply(out temp, InOutPose.Transforms[childIndex], InOutPose.Transforms[parentIndex.Value]);
-                InOutPose.Transforms[childIndex] = temp;
-                ConvertToMeshSpaceTransformRecursively(InOutPose.Descs[childIndex].NameHash, ref InOutPose);
+                FTransform.Multiply(out temp, srcPose.Transforms[childIndex], outPose.Transforms[parentIndex.Value]);
+                outPose.Transforms[childIndex] = temp;
+                ConvertToMeshSpaceTransformRecursively(ref outPose, srcPose.Descs[childIndex].NameHash, srcPose);
             }
         }
+        public static ULocalSpaceRuntimePose ConvetToLocalSpaceRuntimePose(UMeshSpaceRuntimePose meshSpacePose)
+        {
+            ULocalSpaceRuntimePose temp = new ULocalSpaceRuntimePose();
+            ConvetToLocalSpaceRuntimePose(ref temp, meshSpacePose);
+            return temp;
+        }
+        public static void ConvetToLocalSpaceRuntimePose(ref ULocalSpaceRuntimePose desLocalSpacePose, UMeshSpaceRuntimePose srcMeshSpacePose)
+        {
+            desLocalSpacePose.Transforms.Clear();
+            desLocalSpacePose.Descs.Clear();
+            desLocalSpacePose.Transforms.AddRange(srcMeshSpacePose.Transforms);
+            desLocalSpacePose.Descs.AddRange(srcMeshSpacePose.Descs);
+
+            var rootHash = GetRootDesc(desLocalSpacePose).NameHash;
+            ConvertToLocalSpaceTransformRecursively(ref desLocalSpacePose, rootHash, srcMeshSpacePose);
+        }
+        static void ConvertToLocalSpaceTransformRecursively(ref ULocalSpaceRuntimePose outPose, uint parentHash, UMeshSpaceRuntimePose srcPose)
+        {
+            var parentIndex = GetIndex(parentHash, srcPose);
+            var childrenIndexs = GetChildren(parentHash, srcPose);
+            for (int i = 0; i < childrenIndexs.Count; ++i)
+            {
+                var childIndex = childrenIndexs[i].Value;
+                ConvertToLocalSpaceTransformRecursively(ref outPose, srcPose.Descs[childIndex].NameHash, srcPose);
+                FTransform temp;
+                FTransform.Multiply(out temp, srcPose.Transforms[childIndex], srcPose.Transforms[parentIndex.Value].Inverse());
+                outPose.Transforms[childIndex] = temp;
+            }
+        }
+
+        public static void ConvetToLocalSpaceRuntimePose(ref ULocalSpaceRuntimePose desLocalSpacePose, UAnimatableSkeletonPose skeletonPose)
+        {
+            desLocalSpacePose.Transforms.Clear();
+            desLocalSpacePose.Descs.Clear();
+            for (int i = 0; i < skeletonPose.LimbPoses.Count; ++i)
+            {
+                desLocalSpacePose.Transforms.Add(skeletonPose.LimbPoses[i].Transtorm);
+                desLocalSpacePose.Descs.Add(skeletonPose.LimbPoses[i].Desc);
+            }
+        }
+
+        public static ULPosMRotRuntimePose ConvetToLPosMRotRuntimePose(ULocalSpaceRuntimePose localSpacePose)
+        {
+            ULPosMRotRuntimePose temp = new ULPosMRotRuntimePose();
+            ConvetToLPosMRotRuntimePose(ref temp, localSpacePose);
+            return temp;
+        }
+        public static void ConvetToLPosMRotRuntimePose(ref ULPosMRotRuntimePose desLPosMRotSpacePose, ULocalSpaceRuntimePose srcLocalSpacePose)
+        {
+            desLPosMRotSpacePose.Transforms.Clear();
+            desLPosMRotSpacePose.Descs.Clear();
+            desLPosMRotSpacePose.Transforms.AddRange(srcLocalSpacePose.Transforms);
+            desLPosMRotSpacePose.Descs.AddRange(srcLocalSpacePose.Descs);
+
+            var rootHash = GetRootDesc(desLPosMRotSpacePose).NameHash;
+            ConvetToLPosMRotTransformRecursively(ref desLPosMRotSpacePose, rootHash, srcLocalSpacePose);
+        }
+        static void ConvetToLPosMRotTransformRecursively(ref ULPosMRotRuntimePose outPose, uint parentHash, ULocalSpaceRuntimePose srcPose)
+        {
+            var parentIndex = GetIndex(parentHash, srcPose);
+            var childrenIndexs = GetChildren(parentHash, srcPose);
+            for (int i = 0; i < childrenIndexs.Count; ++i)
+            {
+                var childIndex = childrenIndexs[i].Value;
+                FTransform temp;
+                temp = srcPose.Transforms[childIndex];
+                temp.Quat = temp.Quat * srcPose.Transforms[parentIndex.Value].Quat;
+                outPose.Transforms[childIndex] = temp;
+                ConvetToLPosMRotTransformRecursively(ref outPose, srcPose.Descs[childIndex].NameHash, srcPose);
+            }
+        }
+
+        public static ULocalSpaceRuntimePose ConvetToLocalSpaceRuntimePose(ULPosMRotRuntimePose lPosMRotRuntimePose)
+        {
+            ULocalSpaceRuntimePose temp = new ULocalSpaceRuntimePose();
+            ConvetToLocalSpaceRuntimePose(ref temp, lPosMRotRuntimePose);
+            return temp;
+        }
+        public static void ConvetToLocalSpaceRuntimePose(ref ULocalSpaceRuntimePose desLocalSpacePose, ULPosMRotRuntimePose srcLPosMRotRuntimePose)
+        {
+            desLocalSpacePose.Transforms.Clear();
+            desLocalSpacePose.Descs.Clear();
+            desLocalSpacePose.Transforms.AddRange(srcLPosMRotRuntimePose.Transforms);
+            desLocalSpacePose.Descs.AddRange(srcLPosMRotRuntimePose.Descs);
+
+            var rootHash = GetRootDesc(desLocalSpacePose).NameHash;
+            ConvertToLocalSpaceTransformRecursively(ref desLocalSpacePose, rootHash, srcLPosMRotRuntimePose);
+        }
+        static void ConvertToLocalSpaceTransformRecursively(ref ULocalSpaceRuntimePose outPose, uint parentHash, ULPosMRotRuntimePose srcPose)
+        {
+            var parentIndex = GetIndex(parentHash, srcPose);
+            var childrenIndexs = GetChildren(parentHash, srcPose);
+            for (int i = 0; i < childrenIndexs.Count; ++i)
+            {
+                var childIndex = childrenIndexs[i].Value;
+                ConvertToLocalSpaceTransformRecursively(ref outPose, srcPose.Descs[childIndex].NameHash, srcPose);
+                FTransform temp;
+                temp = srcPose.Transforms[childIndex];
+                temp.Quat = temp.Quat * srcPose.Transforms[parentIndex.Value].Quat.Inverse();
+                outPose.Transforms[childIndex] = temp;
+            }
+        }
+        #endregion ConvertRuntimePose
 
         public static T CopyPose<T>(T pose) where T : IRuntimePose
         {
@@ -142,7 +301,12 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
             descPose.Transforms.AddRange(srcPose.Transforms);
             descPose.Descs.AddRange(srcPose.Descs);
         }
-        public static void CopyPose(ref ULocalSpaceRuntimePose descPose, AnimatablePose.UAnimatableSkeletonPose srcPose) 
+        public static void CopyTransforms<T>(ref T descPose, T srcPose) where T : IRuntimePose
+        {
+            descPose.Transforms.Clear();
+            descPose.Transforms.AddRange(srcPose.Transforms);
+        }
+        public static void CopyTransforms(ref ULocalSpaceRuntimePose descPose, AnimatablePose.UAnimatableSkeletonPose srcPose)
         {
             for (int i = 0; i < srcPose.LimbPoses.Count; ++i)
             {
@@ -153,14 +317,77 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
         public static void BlendPoses<T>(ref T outPose, T aPose, T bPose, float alpha) where T : IRuntimePose
         {
             System.Diagnostics.Debug.Assert(aPose.Transforms.Count == bPose.Transforms.Count);
-            for(int i = 0; i< aPose.Transforms.Count; ++i)
+            for (int i = 0; i < aPose.Transforms.Count; ++i)
             {
                 var lerpedPos = DVector3.Lerp(aPose.Transforms[i].Position, bPose.Transforms[i].Position, alpha);
                 var lerpedRot = Quaternion.Slerp(aPose.Transforms[i].Quat, bPose.Transforms[i].Quat, alpha);
                 outPose.Transforms[i] = FTransform.CreateTransform(lerpedPos, Vector3.One, lerpedRot);
             }
         }
+        public static void BlendPoses<T>(ref T outPose, List<T> poses, List<float> weights) where T : IRuntimePose
+        {
+            System.Diagnostics.Debug.Assert(poses.Count > 0);
+            int boneCount = poses[0].Transforms.Count;
+            DVector3 pos = DVector3.Zero;
+            Quaternion rot = Quaternion.Identity;
+            for (int boneIndex = 0; boneIndex < boneCount; ++boneIndex)
+            {
+                for (int poseIndex = 0; poseIndex < poses.Count; ++poseIndex)
+                {
+                    pos += poses[poseIndex].Transforms[boneIndex].Position * weights[poseIndex];
+                    rot *= poses[poseIndex].Transforms[boneIndex].Quat * weights[poseIndex];
+                }
+                outPose.Transforms[boneIndex] = FTransform.CreateTransform(pos, Vector3.One, rot);
+            }
+        }
+        public static void ZeroPose<T>(ref T descPose) where T : IRuntimePose
+        {
+            for (int i = 0; i < descPose.Transforms.Count; ++i)
+            {
+                descPose.Transforms[i] = FTransform.Identity;
+            }
+        }
+        public static void ZeroPosePosition<T>(ref T descPose) where T : IRuntimePose
+        {
+            for (int i = 0; i < descPose.Transforms.Count; ++i)
+            {
+                var transform = descPose.Transforms[i];
+                transform.Position = DVector3.Zero;
+                descPose.Transforms[i] = transform;
+            }
+        }
+        public static void AddPoses(ref ULPosMRotRuntimePose outPose, ULPosMRotRuntimePose basePose, ULPosMRotRuntimePose additivePose, float alpha)
+        {
+            System.Diagnostics.Debug.Assert(basePose.Transforms.Count == additivePose.Transforms.Count);
+            System.Diagnostics.Debug.Assert(basePose.Transforms.Count == outPose.Transforms.Count);
+            for (int i = 0; i < outPose.Transforms.Count; ++i)
+            {
+                FTransform baseBone = basePose.Transforms[i];
+                FTransform additiveBone = additivePose.Transforms[i];
+                var quat = additiveBone.Quat * baseBone.Quat;
+                var pos = baseBone.Position + additiveBone.Position;
+                var lerpedPos = DVector3.Lerp(baseBone.Position, pos, alpha);
+                var lerpedRot = Quaternion.Slerp(baseBone.Quat, quat, alpha);
+                lerpedRot.Normalize();
+                outPose.Transforms[i] = FTransform.CreateTransform(lerpedPos, Vector3.One, lerpedRot);
+            }
+        }
+        public static void MinusPoses(ref ULPosMRotRuntimePose outPose, ULPosMRotRuntimePose minusPose, ULPosMRotRuntimePose minuendPose)
+        {
+            System.Diagnostics.Debug.Assert(minusPose.Transforms.Count == minuendPose.Transforms.Count);
+            System.Diagnostics.Debug.Assert(minuendPose.Transforms.Count == outPose.Transforms.Count);
+            for (int i = 0; i < outPose.Transforms.Count; ++i)
+            {
+                FTransform minusBone = minusPose.Transforms[i];
+                FTransform minuendBone = minuendPose.Transforms[i];
+                var position = minuendBone.Position - minusBone.Position;
+                var rotation = minuendBone.Quat * minusBone.Quat.Inverse();
+                rotation.Normalize();
+
+                outPose.Transforms[i] = FTransform.CreateTransform(position, Vector3.One, rotation);
+            }
+        }
     }
 
-   
+
 }

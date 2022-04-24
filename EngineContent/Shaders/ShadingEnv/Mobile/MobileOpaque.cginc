@@ -13,6 +13,8 @@
 #include "Material"
 #include "MdfQueue"
 
+#include "../../Inc/SysFunctionDefImpl.cginc"
+
 //WARNING:don't change vs_main or ps_main's parameters name cause we also use it in c++;It's an appointment;
 PS_INPUT VS_Main(VS_INPUT input)
 {

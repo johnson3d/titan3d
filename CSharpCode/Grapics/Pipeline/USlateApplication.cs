@@ -5,10 +5,13 @@ using SDL2;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public interface IRootForm
+    public interface IGuiModule
+    {
+        void OnDraw();
+    }
+    public interface IRootForm : IGuiModule
     {
         bool Visible { get; set; }
-        void OnDraw();
         uint DockId { get; set; }
         ImGuiCond_ DockCond { get; set; }
         Task<bool> Initialize();
@@ -80,7 +83,7 @@ namespace EngineNS.Graphics.Pipeline
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
             return NativeWindow.CreateNativeWindow(title, x, y, w, h, sdl_flags) != IntPtr.Zero;
         }
-        public virtual async Task<bool> InitializeApplication(RHI.CRenderContext rc, Type rpType)
+        public virtual async Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName, Type rpType = null)
         {
             await Thread.AsyncDummyClass.DummyFunc();
 
@@ -88,7 +91,7 @@ namespace EngineNS.Graphics.Pipeline
             unsafe
             {
                 mDrawData.InitializeGraphics(NativeWindow.GetSwapchainFormat(), NativeWindow.GetSwapchainDSFormat());
-
+                
                 mImGuiContext = (IntPtr)ImGuiAPI.CreateContext(new ImFontAtlas((void*)0));
                 ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
                 UEngine.Instance.GfxDevice.SlateRenderer.RecreateFontDeviceTexture();
@@ -398,9 +401,9 @@ namespace EngineNS.Graphics.Pipeline
             UEngine.Instance.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, Type rpType)
+        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName, Type rpType)
         {
-            await base.InitializeApplication(rc, rpType);
+            await base.InitializeApplication(rc, rpName, rpType);
             
             UEngine.Instance.TickableManager.AddTickable(this);
             return true;

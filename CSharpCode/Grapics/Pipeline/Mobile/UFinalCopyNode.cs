@@ -91,7 +91,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
 
-            var Manager = policy.TagObject as UMobileEditorFSPolicy;
+            var Manager = policy.TagObject as URenderPolicy;
 
             var node = Manager.FindFirstNode<UFinalCopyNode>();
             var gpuProgram = drawcall.Effect.ShaderProgram;

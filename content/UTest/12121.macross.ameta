@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="ddbe296d-b5b8-4db0-bd03-e87e3fd11e9d" />
+  <AssetId Type="System.Guid@Unknown" Value="0735b39c-fffd-4f84-99f2-a00ba2be4925" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.CodeBuilder.UMacross&#xA;Hahah" />
-  <Icon Type="EngineNS.EGui.UVAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
     <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
     <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.RenderPolicyEditor
 {
@@ -12,6 +12,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public URenderPolicyAsset PolicyGraph { get; private set; }
+        public UGraphRenderer GraphRenderer { get; } = new UGraphRenderer();
         public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public float LeftWidth = 0;
         public Vector2 WindowPos;
@@ -64,6 +65,8 @@ namespace EngineNS.Bricks.RenderPolicyEditor
 
             await NodePropGrid.Initialize();
             NodePropGrid.Target = PolicyGraph;
+
+            GraphRenderer.SetGraph(this.PolicyGraph.PolicyGraph);
 
             return true;
         }
@@ -146,11 +149,41 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             {
                 var noused = Compile();
             }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Button("Set", in btSize))
+            {
+                var noused = SetCurrentPolicy();
+            }
         }
         uint PreviewDockId = 0;
         private async System.Threading.Tasks.Task Save()
         {
             PolicyGraph.SaveAssetTo(AssetName);
+
+            //Editor.USnapshot.Save(AssetName, PolicyGraph.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+        }
+        private async System.Threading.Tasks.Task SetCurrentPolicy()
+        {
+            var mainWindow = UEngine.Instance.GfxDevice.MainWindow as EngineNS.Editor.UMainEditorApplication;
+            var saved = mainWindow.WorldViewportSlate.RenderPolicy;
+            //var policy = new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy();                                
+            //await policy.Initialize(saved.DefaultCamera);
+            //policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
+            Graphics.Pipeline.URenderPolicy policy = null;
+            var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(AssetName);
+            if (rpAsset != null)
+            {
+                policy = rpAsset.CreateRenderPolicy();
+            }
+            await policy.Initialize(saved.DefaultCamera);
+            policy.OnResize(mainWindow.WorldViewportSlate.ClientSize.X, mainWindow.WorldViewportSlate.ClientSize.Y);
+            policy.AddCamera("MainCamera", saved.DefaultCamera);
+            policy.SetDefaultCamera("MainCamera");
+
+            mainWindow.WorldViewportSlate.RenderPolicy = policy;
+            saved.Cleanup();
+
+            UEngine.Instance.Config.MainRPolicyName = AssetName;
         }
         private async System.Threading.Tasks.Task Compile()
         {
@@ -202,7 +235,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                 var sz = ImGuiAPI.GetWindowSize();
                 sz.Y = sz.X;
                 ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
-                if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     NodePropGrid.OnDraw(true, false, false);
                 }
@@ -215,7 +248,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             var size = new Vector2(-1, -1);
             if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                PolicyGraph.PolicyGraph.OnDraw(null, false);
+                GraphRenderer.OnDraw();
             }
             ImGuiAPI.EndChild();
         }

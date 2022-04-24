@@ -10,8 +10,8 @@
 
 NS_BEGIN
 
-#define B SAMPLE_SIZE
-#define BM (SAMPLE_SIZE-1)
+#define B mSamplerSize
+#define BM (mSamplerSize-1)
 
 #define N 0x1000
 #define NP 12   /* 2^N */
@@ -34,12 +34,12 @@ double Perlin::noise1(double arg)
 
 	vec[0] = arg;
 
-	if (mStart)
+	/*if (mStart)
 	{
 		srand(mSeed);
 		mStart = false;
 		init();
-	}
+	}*/
 
 	setup(0, bx0,bx1, rx0,rx1);
 
@@ -57,12 +57,10 @@ double Perlin::noise2(double vec[2])
 	double rx0, rx1, ry0, ry1, *q, sx, sy, a, b, t, u, v;
 	int i, j;
 
-	if (mStart)
+	/*if (mStart)
 	{
-		srand(mSeed);
-		mStart = false;
-		init();
-	}
+		
+	}*/
 
 	setup(0,bx0,bx1,rx0,rx1);
 	setup(1,by0,by1,ry0,ry1);
@@ -101,12 +99,12 @@ double Perlin::noise3(double vec[3])
 	double rx0, rx1, ry0, ry1, rz0, rz1, *q, sy, sz, a, b, c, d, t, u, v;
 	int i, j;
 
-	if (mStart)
+	/*if (mStart)
 	{
 		srand(mSeed);
 		mStart = false;
 		init();
-	}
+	}*/
 
 	setup(0, bx0,bx1, rx0,rx1);
 	setup(1, by0,by1, ry0,ry1);
@@ -171,26 +169,26 @@ void Perlin::normalize3(double v[3])
 	v[2] = v[2] * s;
 }
 
-void Perlin::init(void)
+void Perlin::init(vfxRandom* random)
 {
 	int i, j, k;
 
 	for (i = 0 ; i < B ; i++)
 	{
 		p[i] = i;
-		g1[i] = (double)((rand() % (B + B)) - B) / B;
+		g1[i] = (double)((random->NextValue16Bit() % (B + B)) - B) / B;
 		for (j = 0 ; j < 2 ; j++)
-			g2[i][j] = (double)((rand() % (B + B)) - B) / B;
+			g2[i][j] = (double)((random->NextValue16Bit() % (B + B)) - B) / B;
 		normalize2(g2[i]);
 		for (j = 0 ; j < 3 ; j++)
-			g3[i][j] = (double)((rand() % (B + B)) - B) / B;
+			g3[i][j] = (double)((random->NextValue16Bit() % (B + B)) - B) / B;
 		normalize3(g3[i]);
 	}
 
 	while (--i)
 	{
 		k = p[i];
-		p[i] = p[j = rand() % B];
+		p[i] = p[j = random->NextValue16Bit() % B];
 		p[j] = k;
 	}
 
@@ -230,13 +228,33 @@ double Perlin::perlin_noise_2D(double vec[2])
 
 
 
-Perlin::Perlin(int octaves, double freq, double amp,int seed)
+Perlin::Perlin(int octaves, double freq, double amp,int seed, int samplerSize)
 {
+	mSamplerSize = samplerSize;
 	mOctaves = octaves;
 	mFrequency = freq;
 	mAmplitude = amp;
 	mSeed = seed;
-	mStart = true;
+	//mStart = true;
+
+	p = new int[mSamplerSize + mSamplerSize + 2];
+	g3 = new DPoint3[mSamplerSize + mSamplerSize + 2];
+	g2 = new DPoint2[mSamplerSize + mSamplerSize + 2];
+	g1 = new double[mSamplerSize + mSamplerSize + 2];
+
+	//srand(mSeed);
+	vfxRandom random;
+	random.SetSeed(mSeed);
+	//mStart = false;
+	init(&random);
+}
+
+Perlin::~Perlin()
+{
+	delete[] p;
+	delete[] g3;
+	delete[] g2;
+	delete[] g1;
 }
 
 NS_END

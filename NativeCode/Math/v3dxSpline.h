@@ -7,8 +7,8 @@
 	file ext:	h
 	author:		Jones
 	
-	purpose:	v3dxSpline:样条曲线类
-				v3dxCurve2:用于调整z=0平面[0～x]区间内y数值的2d曲线
+	purpose:	v3dxSpline:
+				v3dxCurve2:
 *********************************************************************/
 #ifndef __V3DSPLINE__
 #define __V3DSPLINE__
@@ -65,9 +65,9 @@ public:
 	}
 
 protected:
-	std::vector<sSubPoint> m_aNodeArray;// 顶点
-	float	m_fMaxDistance;		// 线段集合总长度
-	vBOOL	m_bTangentOnTail;	// 在首尾处设定切线
+	std::vector<sSubPoint> m_aNodeArray;
+	float	m_fMaxDistance;		
+	vBOOL	m_bTangentOnTail;	
 };
 
 class v3dxCurve2 : public v3dxSpline
@@ -132,14 +132,14 @@ public:
 	}
 
 protected:
-	float	m_fValBgn;	// 数值初值
-	float	m_fValEnd;	// 数值末值
-	float	m_fValMin;	// 数值最大值
-	float	m_fValMax;	// 数值最小值
-	float	m_fHoriLength;// 水平线长度
-	float	m_fValRand;	// 数值随机幅度
-	vBOOL	m_bRandomOnHead;// 随机幅度只作用于第一个顶点
-	vBOOL	m_bStraightMode;// 平直模式
+	float	m_fValBgn;
+	float	m_fValEnd;
+	float	m_fValMin;
+	float	m_fValMax;
+	float	m_fHoriLength;
+	float	m_fValRand;
+	vBOOL	m_bRandomOnHead;
+	vBOOL	m_bStraightMode;
 };
 //V3D_END
 

@@ -41,7 +41,7 @@ namespace EngineNS
                 mComboBox?.Cleanup();
                 base.Cleanup_Override();
             }
-            void ComboOpenAction(ref Support.UAnyPointer data)
+            void ComboOpenAction(in Support.UAnyPointer data)
             {
                 UEngine.Instance.EditorInstance.RNamePopupContentBrowser.OnDraw();
             }
@@ -81,7 +81,7 @@ namespace EngineNS
                 ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Always);
                 UEngine.Instance.EditorInstance.RNamePopupContentBrowser.ExtNames = FilterExts;
                 UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset = null;
-                mComboBox.OnDraw(ref drawList, ref anyPt);
+                mComboBox.OnDraw(in drawList, in anyPt);
                 if(UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset != null &&
                     UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset.GetAssetName() != name)
                 {

@@ -1,149 +1,174 @@
 ﻿using EngineNS.Bricks.CodeBuilder.ShaderNode.Operator;
 using System;
 using System.Collections.Generic;
-using EngineNS;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
-    public partial class UMaterialGraph : EGui.Controls.NodeGraph.NodeGraph
+    public partial class UMaterialGraph : UNodeGraph
     {
+        public UMaterialGraph()
+        {
+            UpdateCanvasMenus();
+            UpdateNodeMenus();
+            UpdatePinMenus();
+        }
         public UShaderEditor ShaderEditor;
         uint CurSerialId = 0;
         public uint GenSerialId()
         {
             return CurSerialId++;
         }
-        protected override void ShowAddNode(Vector2 posMenu)
+        public override void UpdateCanvasMenus()
         {
-            if (ImGuiAPI.BeginMenu("Operation", true))
+            CanvasMenus.SubMenuItems.Clear();
+            CanvasMenus.Text = "Canvas";
+            var oprations = CanvasMenus.AddMenuItem("Operation", null, null);
             {
-                if (ImGuiAPI.MenuItem($"+", null, false, true))
-                {
-                    var node = new AddNode();
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"-", null, false, true))
-                {
-                    var node = new SubNode();
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"*", null, false, true))
-                {
-                    var node = new MulNode();
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"/", null, false, true))
-                {
-                    var node = new DivNode();
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"%", null, false, true))
-                {
-                    var node = new ModNode();
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"&", null, false, true))
-                {
-                    var node = new BitAndNode();
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"|", null, false, true))
-                {
-                    var node = new BitOrNode();
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                ImGuiAPI.EndMenu();
+                oprations.AddMenuItem("+", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new AddNode();
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                oprations.AddMenuItem("-", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new SubNode();
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                oprations.AddMenuItem("*", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new MulNode();
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                oprations.AddMenuItem("/", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new DivNode();
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                oprations.AddMenuItem("%", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new ModNode();
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                oprations.AddMenuItem("&", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new BitAndNode();
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                oprations.AddMenuItem("|", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new BitOrNode();
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
             }
-            if (ImGuiAPI.BeginMenu("Data", true))
+            var Datas = CanvasMenus.AddMenuItem("Data", null, null);
             {
-                if (ImGuiAPI.MenuItem($"float", null, false, true))
-                {
-                    var node = new Var.VarDimF1();
-                    node.Name = $"f1_{GenSerialId()}";
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"float2", null, false, true))
-                {
-                    var node = new Var.VarDimF2();
-                    node.Name = $"f2_{GenSerialId()}";
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"float3", null, false, true))
-                {
-                    var node = new Var.VarDimF3();
-                    node.Name = $"f3_{GenSerialId()}";
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"float4", null, false, true))
-                {
-                    var node = new Var.VarDimF4();
-                    node.Name = $"f4_{GenSerialId()}";
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"Color3", null, false, true))
-                {
-                    var node = new Var.VarColor3();
-                    node.Name = $"clr3_{GenSerialId()}";
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"Color4", null, false, true))
-                {
-                    var node = new Var.VarColor4();
-                    node.Name = $"clr4_{GenSerialId()}";
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"texture2d", null, false, true))
-                {
-                    var node = new Var.Texture2D();
-                    node.Name = $"tex2d_{GenSerialId()}";
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"texture2dArray", null, false, true))
-                {
-                    var node = new Var.Texture2DArray();
-                    node.Name = $"tex2dArray_{GenSerialId()}";
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"sampler", null, false, true))
-                {
-                    var node = new Var.SamplerState();
-                    node.Name = $"sampler_{GenSerialId()}";
-                    node.Graph = this;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                ImGuiAPI.EndMenu();
+                Datas.AddMenuItem("float", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new Var.VarDimF1();
+                        node.Name = $"f1_{GenSerialId()}";
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                Datas.AddMenuItem("float2", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new Var.VarDimF2();
+                        node.Name = $"f2_{GenSerialId()}";
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                Datas.AddMenuItem("float3", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new Var.VarDimF3();
+                        node.Name = $"f3_{GenSerialId()}";
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                Datas.AddMenuItem("float4", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new Var.VarDimF4();
+                        node.Name = $"f3_{GenSerialId()}";
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                Datas.AddMenuItem("Color3", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new Var.VarColor3();
+                        node.Name = $"clr3_{GenSerialId()}";
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                Datas.AddMenuItem("Color4", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new Var.VarColor4();
+                        node.Name = $"clr4_{GenSerialId()}";
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                Datas.AddMenuItem("texture2d", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new Var.Texture2D();
+                        node.Name = $"tex2d_{GenSerialId()}";
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                Datas.AddMenuItem("texture2dArray", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new Var.Texture2DArray();
+                        node.Name = $"tex2dArray_{GenSerialId()}";
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                Datas.AddMenuItem("sampler", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new Var.SamplerState();
+                        node.Name = $"sampler_{GenSerialId()}";
+                        node.Graph = this;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
             }
+        }
+        public override void OnAfterDrawMenu(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles)
+        {
             if (ImGuiAPI.BeginMenu("Function", true))
             {
                 var kls = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(Control.HLSLMethod).FullName);
@@ -163,7 +188,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                                     node.Initialize(i);
                                     node.Name = i.Method.Name;
                                     node.Graph = this;
-                                    node.Position = View2WorldSpace(ref posMenu);
+                                    node.Position = PopMenuPosition;
                                     this.AddNode(node);
                                 }
                             }
@@ -172,7 +197,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                                 var node = Control.CallNode.NewMethodNode(i);
                                 node.Name = i.Method.Name;
                                 node.Graph = this;
-                                node.Position = View2WorldSpace(ref posMenu);
+                                node.Position = PopMenuPosition;
                                 this.AddNode(node);
                             }
                         }
@@ -181,7 +206,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                             var node = Control.CallNode.NewMethodNode(i);
                             node.Name = i.Method.Name;
                             node.Graph = this;
-                            node.Position = View2WorldSpace(ref posMenu);
+                            node.Position = PopMenuPosition;
                             this.AddNode(node);
                         }
                     }
@@ -204,7 +229,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                             node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as RHI.CConstantBuffer.UShaderTypeAttribute).ShaderType);
                             node.Name = i.Name;
                             node.Graph = this;
-                            node.Position = View2WorldSpace(ref posMenu);
+                            node.Position = PopMenuPosition;
                             this.AddNode(node);
                         }
                     }
@@ -216,6 +241,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 if (ImGuiAPI.BeginMenu("PSInput", true))
                 {
+                    {
+                        if (ImGuiAPI.MenuItem("Input", null, false, true))
+                        {
+                            var node = new UUniformVar();
+                            node.VarType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.UMaterial.PSInput));
+                            node.Name = "input";
+                            node.Graph = this;
+                            node.Position = PopMenuPosition;
+                            this.AddNode(node);
+                        }   
+                    }
                     System.Reflection.FieldInfo[] members = typeof(Graphics.Pipeline.Shader.UMaterial.PSInput).GetFields();
                     foreach (var i in members)
                     {
@@ -225,7 +261,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                             node.VarType = Rtti.UTypeDesc.TypeOf(i.FieldType);
                             node.Name = "input." + i.Name;
                             node.Graph = this;
-                            node.Position = View2WorldSpace(ref posMenu);
+                            node.Position = PopMenuPosition;
                             this.AddNode(node);
                         }
                     }
@@ -236,11 +272,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
 
         //int Seed = 5;
-        public unsafe override void OnDrawAfter(EGui.Controls.NodeGraph.NodeGraphStyles styles = null)
+        public override void OnDrawAfter(Bricks.NodeGraph.UGraphRenderer renderer, EGui.Controls.NodeGraph.NodeGraphStyles styles, ImDrawList cmdlist)
         {
-            var cmdlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
-
-            var O = WindowPos + new Vector2(GraphViewSize.X / 2, GraphViewSize.Y);
+            //var O = WindowPos + new Vector2(GraphViewSize.X / 2, GraphViewSize.Y);
 
             //mRand = new System.Random(Seed);
             //Tree(ref O, Math.PI / 2, 100, 10, ref cmdlist);
@@ -260,11 +294,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             Tree(ref p, angle + Math.PI / 18 * (0.9f + mRand.NextDouble() * 0.2), length * 0.8 * (0.9f + mRand.NextDouble() * 0.2), width * 0.8f, ref cmdlist);
             Tree(ref p, angle - Math.PI / 18 * (0.9f + mRand.NextDouble() * 0.2), length * 0.8 * (0.9f + mRand.NextDouble() * 0.2), width * 0.8f, ref cmdlist);
-        }
-
-        protected override void OnLClicked()
-        {
-            base.OnLClicked();
         }
     }
 }

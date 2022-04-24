@@ -212,7 +212,16 @@ namespace EngineNS.IO
             var pos = str.LastIndexOf('/');
             return str.Substring(0, pos);
         }
-        public static string GetPureName(string str)
+        public static string GetPureName(string str, int maxWorld = int.MaxValue)
+        {
+            var result = GetPureNameImpl(str);
+            if (result.Length > maxWorld)
+            {
+                result = result.Substring(0, maxWorld) + "..";
+            }
+            return result;
+        }
+        public static string GetPureNameImpl(string str)
         {
             var filename = EngineNS.IO.FileManager.GetLastestPathName(str);
             var pos = filename.LastIndexOf('.');

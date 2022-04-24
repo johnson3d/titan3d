@@ -2,6 +2,8 @@
 
 #include "dummy.gen"
 
+#include "Inc/SysFunctionDefImpl.cginc"
+
 #ifdef MDFQUEUE_FUNCTION
 	MDFQUEUE_FUNCTION
 #endif

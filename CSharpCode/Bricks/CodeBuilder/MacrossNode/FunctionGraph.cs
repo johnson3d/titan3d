@@ -1,46 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using EngineNS.EGui.Controls.NodeGraph;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class FunctionStartNode : INodeExpr
+    public partial class UFunctionStartNode : INodeExpr
     {
-        public static FunctionStartNode NewStartNode(FunctionGraph graph)
+        public static UFunctionStartNode NewStartNode(UMacrossFunctionGraph graph)
         {
-            var result = new FunctionStartNode();
+            var result = new UFunctionStartNode();
             result.FuncGraph = graph;
             result.Initialize(graph);
             return result;
         }
-        public FunctionStartNode()
+        public UFunctionStartNode()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF40FF40;
-            TitleImage.Color = 0xFF804020;
-            Background.Color = 0x80808080;
+            TitleColor = 0xFF804020;
+            BackColor = 0x80808080;
 
             Position = new Vector2(100, 100);
         }
-        private void Initialize(FunctionGraph graph)
+        private void Initialize(UMacrossFunctionGraph graph)
         {
             FuncGraph = graph;
 
             AddPinOut(AfterExec);
             UpdateFunctionDefine();
+            OnPositionChanged();
         }
         public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             base.OnPreRead(tagObject, hostObject, fromXml);
-            var graph = hostObject as FunctionGraph;
+            var graph = hostObject as UMacrossFunctionGraph;
             if (graph == null)
                 return;
             
             Initialize(graph);
         }
-        public FunctionGraph FuncGraph;
-        public List<EGui.Controls.NodeGraph.PinOut> Arguments = new List<EGui.Controls.NodeGraph.PinOut>();
+        public UMacrossFunctionGraph FuncGraph;
+        public List<PinOut> Arguments = new List<PinOut>();
         public void UpdateFunctionDefine()
         {
             for (int i = 0; i < FuncGraph.Function.Arguments.Count; i++)
@@ -52,10 +52,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             Name = FuncGraph.Function.Name;
 
-            var newArgs = new List<EGui.Controls.NodeGraph.PinOut>();
+            var newArgs = new List<PinOut>();
             foreach (var i in FuncGraph.Function.Arguments)
             {
-                EGui.Controls.NodeGraph.PinOut argPin = null;
+                PinOut argPin = null;
                 foreach (var j in Arguments)
                 {
                     var defType = j.Tag as string;
@@ -69,7 +69,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
                 if (argPin == null)
                 {
-                    argPin = new EGui.Controls.NodeGraph.PinOut();
+                    argPin = new PinOut();
                     argPin.Tag = i.DefType;
                     argPin.Name = i.VarName;
                 }
@@ -107,15 +107,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         else
                         {
                             retNode.ReturnType = FuncGraph.Function.ReturnType;
-                            retNode.Initialize(this.ParentGraph as FunctionGraph);
+                            retNode.Initialize(this.ParentGraph as UMacrossFunctionGraph);
                         }
                     }
                 }
             }
         }
-        public void BuildExpr(FunctionGraph funGraph, ICodeGen cGen)
+        public void BuildExpr(UMacrossFunctionGraph funGraph, ICodeGen cGen)
         {
-            var links = new List<PinLinker>();
+            var links = new List<UPinLinker>();
             funGraph.FindOutLinker(AfterExec, links);
             foreach (var i in links)
             {
@@ -133,7 +133,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
+        public override System.Type GetOutPinType(PinOut pin)
         {
             for (int i = 0; i < Arguments.Count; i++)
             {
@@ -147,11 +147,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return null;
         }
     }
-    public partial class FunctionGraph : EGui.Controls.NodeGraph.NodeGraph
+    public partial class UMacrossFunctionGraph : UNodeGraph
     {
-        public static FunctionGraph NewGraph(ClassGraph kls, DefineFunction func = null)
+        public static UMacrossFunctionGraph NewGraph(UMacrossEditor kls, DefineFunction func = null)
         {
-            var result = new FunctionGraph();
+            var result = new UMacrossFunctionGraph();
             result.MacrossEditor = kls;
             result.Initialize();
             //result.FunctionName = funName;
@@ -163,19 +163,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 result.Function = func;
 
-                result.StartNode = FunctionStartNode.NewStartNode(result);
+                result.StartNode = UFunctionStartNode.NewStartNode(result);
                 result.StartNode.Graph = kls;
                 result.AddNode(result.StartNode);
             }
             return result;
         }
-        protected override void Initialize()
-        {
-            base.Initialize();
-        }
         public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
-            var klsGraph = tagObject as ClassGraph;
+            var klsGraph = tagObject as UMacrossEditor;
             if (klsGraph == null)
                 return;
 
@@ -183,10 +179,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml)
         {
-            var klsGraph = tagObject as ClassGraph;
+            var klsGraph = tagObject as UMacrossEditor;
             if (klsGraph == null)
                 return;
         }
+        public Bricks.NodeGraph.UGraphRenderer GraphRenderer = new NodeGraph.UGraphRenderer();
         public void BuildCodeExpr(ICodeGen cGen)
         {
             Function.LocalVars.Clear();
@@ -209,16 +206,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             get { return StartNode.NodeId; }
             set
             {
-                StartNode = this.FindNode(value) as FunctionStartNode;
+                StartNode = this.FindNode(value) as UFunctionStartNode;
                 if (StartNode == null)
                 {
-                    StartNode = FunctionStartNode.NewStartNode(this);
+                    StartNode = UFunctionStartNode.NewStartNode(this);
                     AddNode(StartNode);
                 }
             }
         }
-        private FunctionStartNode StartNode;
-        public ClassGraph MacrossEditor
+        private UFunctionStartNode StartNode;
+        public UMacrossEditor MacrossEditor
         {
             get;
             private set;
@@ -236,298 +233,329 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             return _mCurSerialId++;
         }
-        protected override void ShowAddNode(Vector2 posMenu)
+        public override void UpdateCanvasMenus()
         {
-            if (ImGuiAPI.BeginMenu("Operation", true))
+            CanvasMenus.SubMenuItems.Clear();
+            CanvasMenus.Text = "Canvas";
+            var oprations = CanvasMenus.AddMenuItem("Operation", null, null);
             {
-                if (ImGuiAPI.MenuItem($"+", null, false, true))
-                {
-                    var node = new AddNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"-", null, false, true))
-                {
-                    var node = new SubNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"*", null, false, true))
-                {
-                    var node = new MulNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"/", null, false, true))
-                {
-                    var node = new DivNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"%", null, false, true))
-                {
-                    var node = new ModNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"&", null, false, true))
-                {
-                    var node = new BitAndNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"|", null, false, true))
-                {
-                    var node = new BitOrNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                ImGuiAPI.EndMenu();
+                oprations.AddMenuItem("+", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new AddNode();
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                oprations.AddMenuItem("-", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new SubNode();
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                oprations.AddMenuItem("*", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new MulNode();
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                oprations.AddMenuItem("/", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new DivNode();
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                oprations.AddMenuItem("%", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new ModNode();
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                oprations.AddMenuItem("&", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new BitAndNode();
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                oprations.AddMenuItem("|", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new BitOrNode();
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
             }
-            if (ImGuiAPI.BeginMenu("Bool Operation", true))
+            var boolOp = CanvasMenus.AddMenuItem("Operation", null, null);
             {
-                if (ImGuiAPI.MenuItem($"==", null, false, true))
-                {
-                    var node = new EqualNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"!=", null, false, true))
-                {
-                    var node = new NotEqualNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($">", null, false, true))
-                {
-                    var node = new GreateNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($">=", null, false, true))
-                {
-                    var node = new GreateEqualNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"<", null, false, true))
-                {
-                    var node = new LessNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"<=", null, false, true))
-                {
-                    var node = new LessEqualNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"&&", null, false, true))
-                {
-                    var node = new AndNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"||", null, false, true))
-                {
-                    var node = new OrNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                ImGuiAPI.EndMenu();
+                boolOp.AddMenuItem("==", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new EqualNode();
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                boolOp.AddMenuItem("!=", null,
+                   (UMenuItem item, object sender) =>
+                   {
+                       var node = new NotEqualNode();
+                       node.Graph = MacrossEditor;
+                       node.Position = PopMenuPosition;
+                       this.AddNode(node);
+                   });
+                boolOp.AddMenuItem(">", null,
+                   (UMenuItem item, object sender) =>
+                   {
+                       var node = new GreateNode();
+                       node.Graph = MacrossEditor;
+                       node.Position = PopMenuPosition;
+                       this.AddNode(node);
+                   });
+                boolOp.AddMenuItem(">=", null,
+                   (UMenuItem item, object sender) =>
+                   {
+                       var node = new GreateEqualNode();
+                       node.Graph = MacrossEditor;
+                       node.Position = PopMenuPosition;
+                       this.AddNode(node);
+                   });
+                boolOp.AddMenuItem("<", null,
+                   (UMenuItem item, object sender) =>
+                   {
+                       var node = new LessNode();
+                       node.Graph = MacrossEditor;
+                       node.Position = PopMenuPosition;
+                       this.AddNode(node);
+                   });
+                boolOp.AddMenuItem("<=", null,
+                   (UMenuItem item, object sender) =>
+                   {
+                       var node = new LessEqualNode();
+                       node.Graph = MacrossEditor;
+                       node.Position = PopMenuPosition;
+                       this.AddNode(node);
+                   });
+                boolOp.AddMenuItem("&&", null,
+                   (UMenuItem item, object sender) =>
+                   {
+                       var node = new AndNode();
+                       node.Graph = MacrossEditor;
+                       node.Position = PopMenuPosition;
+                       this.AddNode(node);
+                   });
+                boolOp.AddMenuItem("||", null,
+                   (UMenuItem item, object sender) =>
+                   {
+                       var node = new OrNode();
+                       node.Graph = MacrossEditor;
+                       node.Position = PopMenuPosition;
+                       this.AddNode(node);
+                   });
             }
-            if (ImGuiAPI.BeginMenu("Data", true))
+            var Datas = CanvasMenus.AddMenuItem("Data", null, null);
             {
-                if (ImGuiAPI.BeginMenu("POD", true))
+                var POD = Datas.AddMenuItem("POD", null, null);
                 {
-                    if (ImGuiAPI.MenuItem($"SByte", null, false, true))
+                    POD.AddMenuItem("Int8", null,
+                    (UMenuItem item, object sender) =>
                     {
                         var node = new SByteLVar();
                         node.Name = $"lVar_{GenSerialId()}";
                         node.Graph = MacrossEditor;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
-                    }
-                    if (ImGuiAPI.MenuItem($"Int16", null, false, true))
+                    });
+                    POD.AddMenuItem("Int16", null,
+                    (UMenuItem item, object sender) =>
                     {
                         var node = new Int16LVar();
                         node.Name = $"lVar_{GenSerialId()}";
                         node.Graph = MacrossEditor;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
-                    }
-                    if (ImGuiAPI.MenuItem($"Int32", null, false, true))
+                    });
+                    POD.AddMenuItem("Int32", null,
+                    (UMenuItem item, object sender) =>
                     {
                         var node = new Int32LVar();
                         node.Name = $"lVar_{GenSerialId()}";
                         node.Graph = MacrossEditor;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
-                    }
-                    if (ImGuiAPI.MenuItem($"Int64", null, false, true))
+                    });
+                    POD.AddMenuItem("Int64", null,
+                    (UMenuItem item, object sender) =>
                     {
                         var node = new Int64LVar();
                         node.Name = $"lVar_{GenSerialId()}";
                         node.Graph = MacrossEditor;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
-                    }
-                    if (ImGuiAPI.MenuItem($"Byte", null, false, true))
+                    });
+                    POD.AddMenuItem("UInt8", null,
+                    (UMenuItem item, object sender) =>
                     {
                         var node = new ByteLVar();
                         node.Name = $"lVar_{GenSerialId()}";
                         node.Graph = MacrossEditor;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
-                    }
-                    if (ImGuiAPI.MenuItem($"UInt16", null, false, true))
+                    });
+                    POD.AddMenuItem("UInt16", null,
+                    (UMenuItem item, object sender) =>
                     {
                         var node = new UInt16LVar();
                         node.Name = $"lVar_{GenSerialId()}";
                         node.Graph = MacrossEditor;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
-                    }
-                    if (ImGuiAPI.MenuItem($"UInt32", null, false, true))
+                    });
+                    POD.AddMenuItem("UInt32", null,
+                    (UMenuItem item, object sender) =>
                     {
                         var node = new UInt32LVar();
                         node.Name = $"lVar_{GenSerialId()}";
                         node.Graph = MacrossEditor;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
-                    }
-                    if (ImGuiAPI.MenuItem($"UInt64", null, false, true))
+                    });
+                    POD.AddMenuItem("UInt64", null,
+                    (UMenuItem item, object sender) =>
                     {
                         var node = new UInt64LVar();
                         node.Name = $"lVar_{GenSerialId()}";
                         node.Graph = MacrossEditor;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
-                    }
-                    if (ImGuiAPI.MenuItem($"Float", null, false, true))
+                    });
+                    POD.AddMenuItem("Single", null,
+                    (UMenuItem item, object sender) =>
                     {
                         var node = new FloatLVar();
                         node.Name = $"lVar_{GenSerialId()}";
                         node.Graph = MacrossEditor;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
-                    }
-                    if (ImGuiAPI.MenuItem($"Double", null, false, true))
+                    });
+                    POD.AddMenuItem("Double", null,
+                    (UMenuItem item, object sender) =>
                     {
                         var node = new DoubleLVar();
                         node.Name = $"lVar_{GenSerialId()}";
                         node.Graph = MacrossEditor;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
-                    }
-                    if (ImGuiAPI.MenuItem($"String", null, false, true))
+                    });
+                    POD.AddMenuItem("String", null,
+                    (UMenuItem item, object sender) =>
                     {
                         var node = new StringLVar();
                         node.Name = $"lVar_{GenSerialId()}";
                         node.Graph = MacrossEditor;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
-                    }
-                    if (ImGuiAPI.BeginMenu("BaseData", true))
+                    });
+                    POD.AddMenuItem("Vector2", null,
+                    (UMenuItem item, object sender) =>
                     {
-                        if (ImGuiAPI.MenuItem($"Vector2", null, false, true))
+                        var node = new Vector2LVar();
+                        node.Name = $"lVar_{GenSerialId()}";
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                    POD.AddMenuItem("Vector3", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new Vector3LVar();
+                        node.Name = $"lVar_{GenSerialId()}";
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                    POD.AddMenuItem("Vector4", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new Vector4LVar();
+                        node.Name = $"lVar_{GenSerialId()}";
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                }
+                {
+                    Datas.AddMenuItem("AnyVar", null,
+                        (UMenuItem item, object sender) =>
                         {
-                            var node = new Vector2LVar();
+                            var node = new AnyVar();
                             node.Name = $"lVar_{GenSerialId()}";
                             node.Graph = MacrossEditor;
-                            node.Position = View2WorldSpace(ref posMenu);
+                            node.Position = PopMenuPosition;
                             this.AddNode(node);
-                        }
-                        if (ImGuiAPI.MenuItem($"Vector3", null, false, true))
+                        });
+                    Datas.AddMenuItem("TypeConverter", null,
+                        (UMenuItem item, object sender) =>
                         {
-                            var node = new Vector3LVar();
-                            node.Name = $"lVar_{GenSerialId()}";
+                            var type = Rtti.UClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeStr(typeof(object)));
+                            var node = TypeConverterVar.NewTypeConverterVar(type, type);
+                            node.Name = $"lAnyVar_{GenSerialId()}";
                             node.Graph = MacrossEditor;
-                            node.Position = View2WorldSpace(ref posMenu);
+                            node.Position = PopMenuPosition;
                             this.AddNode(node);
-                        }
-                        if (ImGuiAPI.MenuItem($"Vector4", null, false, true))
+                        });
+                    Datas.AddMenuItem("VarSetter", null,
+                        (UMenuItem item, object sender) =>
                         {
-                            var node = new Vector4LVar();
-                            node.Name = $"lVar_{GenSerialId()}";
+                            var node = new VarSetNode();
+                            node.Name = $"VarSet_{GenSerialId()}";
                             node.Graph = MacrossEditor;
-                            node.Position = View2WorldSpace(ref posMenu);
+                            node.Position = PopMenuPosition;
                             this.AddNode(node);
-                        }
-                        ImGuiAPI.EndMenu();
-                    }
-                    ImGuiAPI.EndMenu();
-                }   
-                if (ImGuiAPI.MenuItem($"AnyVar", null, false, true))
-                {
-                    var node = new AnyVar();
-                    node.Name = $"lAnyVar_{GenSerialId()}";
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
+                        });
                 }
-                if (ImGuiAPI.MenuItem($"TypeConverter", null, false, true))
-                {
-                    var type = Rtti.UClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeStr(typeof(object)));
-                    var node = TypeConverterVar.NewTypeConverterVar(type, type);
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"VarSetter", null, false, true))
-                {
-                    var node = new VarSetNode();
-                    node.Name = $"VarSet_{GenSerialId()}";
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                ImGuiAPI.EndMenu();
             }
-            if (ImGuiAPI.BeginMenu("FlowControl", true))
+            var flowControls = CanvasMenus.AddMenuItem("FlowControl", null, null);
             {
-                if (ImGuiAPI.MenuItem($"Sequence", null, false, true))
-                {
-                    var node = new SequenceNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"If", null, false, true))
-                {
-                    var node = new IfNode();
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }
-                if (ImGuiAPI.MenuItem($"Return", null, false, true))
-                {
-                    var node = ReturnNode.NewReturnNode(this);
-                    node.Graph = MacrossEditor;
-                    node.Position = View2WorldSpace(ref posMenu);
-                    this.AddNode(node);
-                }                
-                ImGuiAPI.EndMenu();
+                flowControls.AddMenuItem("Sequence", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new SequenceNode();
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                flowControls.AddMenuItem("If", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new IfNode();
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
+                flowControls.AddMenuItem("Return", null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new ReturnNode();
+                        node.Graph = MacrossEditor;
+                        node.Position = PopMenuPosition;
+                        this.AddNode(node);
+                    });
             }
         }
         Bricks.CodeBuilder.MacrossNode.MethodSelector mMethodSelector = new Bricks.CodeBuilder.MacrossNode.MethodSelector();
         MacrossSelector KlassSelector = new MacrossSelector();
-        protected override void OnAppendGraphMenuContent(Vector2 posMenu)
+        public override void OnAfterDrawMenu(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles)
         {
             mMethodSelector.mSltMember = null;
             mMethodSelector.mSltField = null;
@@ -535,22 +563,22 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mMethodSelector.OnDrawTree();
             if (mMethodSelector.mSltMember != null)
             {
-                mMenuType = EMenuType.None;
+                CurMenuType = EGraphMenu.None;
             }
             else if (mMethodSelector.mSltField != null)
             {
-                mMenuType = EMenuType.None;
+                CurMenuType = EGraphMenu.None;
             }
             else if (mMethodSelector.mSltMethod != null)
             {
-                mMenuType = EMenuType.None;
+                CurMenuType = EGraphMenu.None;
                 var node = MethodNode.NewMethodNode(mMethodSelector.mSltMethod);
                 node.Graph = MacrossEditor;
-                node.Position = View2WorldSpace(ref posMenu);
+                node.Position = PopMenuPosition;
                 this.AddNode(node);
             }
         }
-        public override void OnDrawAfter(NodeGraphStyles styles = null)
+        public override void OnDrawAfter(Bricks.NodeGraph.UGraphRenderer renderer, EGui.Controls.NodeGraph.NodeGraphStyles styles, ImDrawList cmdlist)
         {
             var mousePt = ImGuiAPI.GetMousePos() - ImGuiAPI.GetWindowPos();
             if (mousePt.X < 0 || mousePt.Y < 0)
@@ -562,8 +590,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (MacrossEditor.IsDraggingMember && MacrossEditor.DraggingMember != null)
             {
                 MacrossEditor.DraggingMember.ParentGraph = this;
-                MacrossEditor.DraggingMember.Position = this.View2WorldSpace(ref mousePt);
-                MacrossEditor.DraggingMember.OnDraw(styles);
+                var screenPt = this.ToScreenPos(mousePt.X, mousePt.Y);
+                MacrossEditor.DraggingMember.Position = this.ViewportRateToCanvas(in screenPt);
+                //MacrossEditor.DraggingMember.Position = this.View2WorldSpace(ref mousePt);
+                //MacrossEditor.DraggingMember.OnDraw(styles);
+                renderer.DrawNode(cmdlist, MacrossEditor.DraggingMember);
 
                 if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) == false)
                 {
@@ -579,12 +610,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 Function.IsFunctionDefineChanged = false;
             }
         }
-        protected override void OnLClicked()
+        public override void OnLButtonClicked()
         {
             //MacrossEditor.NodePropGrid.SingleTarget = null;
         }
         bool PopKlassSelector = false;
-        protected override bool OnLinkingUp(LinkingLine linking, NodeBase pressNode)
+        public override bool OnLinkingUp(ULinkingLine linking, UNodeBase pressNode)
         {
             if (linking.StartPin == null)
             {
@@ -596,7 +627,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             if (linking.StartPin != null && pressNode == null)
             {
-                var oPin = linking.StartPin as EGui.Controls.NodeGraph.PinOut;
+                var oPin = linking.StartPin as PinOut;
                 if (oPin != null)
                 {
                     var type = nodeExpr.GetOutPinType(oPin);
@@ -613,7 +644,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return true;
         }
-        protected override unsafe void OnDrawMenu(NodeGraphStyles styles)
+        public override unsafe void OnBeforeDrawMenu(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles)
         {
             if (PopKlassSelector)
             {
@@ -641,8 +672,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     if (node != null)
                                     {
                                         node.Graph = MacrossEditor;
-                                        var posMenu = vPos - WindowPos;
-                                        node.Position = View2WorldSpace(ref posMenu);
+                                        node.Position = this.PopMenuPosition;
                                         this.AddNode(node);
 
                                         this.AddLink(oPin.HostNode, oPin.Name, node, node.Left.Name);
@@ -663,8 +693,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         defKls.NameSpace = KlassSelector.KlsMeta.ClassType.Namespace;
                         var node = ClassMemberVar.NewClassMemberVar(defKls, KlassSelector.mSltMember.FieldName);
                         node.Graph = MacrossEditor;
-                        var posMenu = vPos - WindowPos;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
 
                         var oPin = LinkingOp.StartPin as PinOut;
@@ -685,8 +714,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         defKls.NameSpace = KlassSelector.KlsMeta.ClassType.Namespace;
                         var node = ClassMemberVar.NewClassMemberVar(defKls, KlassSelector.mSltField.Field.Name);
                         node.Graph = MacrossEditor;
-                        var posMenu = vPos - WindowPos;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
 
                         var oPin = LinkingOp.StartPin as PinOut;
@@ -704,8 +732,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     {
                         var node = MethodNode.NewMethodNode(KlassSelector.mSltMethod);
                         node.Graph = MacrossEditor;
-                        var posMenu = vPos - WindowPos;
-                        node.Position = View2WorldSpace(ref posMenu);
+                        node.Position = PopMenuPosition;
                         this.AddNode(node);
 
                         var oPin = LinkingOp.StartPin as PinOut;
@@ -732,10 +759,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     PopKlassSelector = false;
                 }
             }
-            else
-            {
-                base.OnDrawMenu(styles);
-            }
+            //else
+            //{
+            //    base.OnBeforeDrawMenu(styles);
+            //}
         }
     }
 }

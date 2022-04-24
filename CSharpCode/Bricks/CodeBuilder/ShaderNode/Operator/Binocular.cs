@@ -1,7 +1,6 @@
-﻿using EngineNS.EGui.Controls.NodeGraph;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 {
@@ -26,11 +25,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             }
         }
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinIn Left { get; set; } = new EGui.Controls.NodeGraph.PinIn();
+        public PinIn Left { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinIn Right { get; set; } = new EGui.Controls.NodeGraph.PinIn();
+        public PinIn Right { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinOut Result { get; set; } = new EGui.Controls.NodeGraph.PinOut();
+        public PinOut Result { get; set; } = new PinOut();
         public Binocular(EBinocularOp InOp)
         {
             Op = InOp;
@@ -45,15 +44,15 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
-            TitleImage.Color = 0xFF204020;
-            Background.Color = 0x80808080;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
             Name = Bricks.CodeBuilder.CSharp.CSGen.GetOp(InOp);
 
             AddPinIn(Left);
             AddPinIn(Right);
             AddPinOut(Result);
         }
-        public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
+        public override System.Type GetOutPinType(PinOut pin)
         {
             return LeftType.SystemType;
         }
@@ -61,15 +60,15 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         {
             var binOp = new BinocularOp();
             binOp.Op = this.Op;
-            var links = new List<EGui.Controls.NodeGraph.PinLinker>();
+            var links = new List<UPinLinker>();
             funGraph.FindInLinker(Left, links);
             if (links.Count != 1)
             {
                 throw new GraphException(this, Left, $"Left link error : {links.Count}");
             }
             var leftNode = links[0].OutNode as IBaseNode;
-            var leftExpr = leftNode.GetExpr(funGraph, cGen, links[0].Out, true) as OpExpress;
-            var leftType = leftNode.GetOutPinType(links[0].Out);
+            var leftExpr = leftNode.GetExpr(funGraph, cGen, links[0].OutPin, true) as OpExpress;
+            var leftType = leftNode.GetOutPinType(links[0].OutPin);
             binOp.Left = leftExpr;
 
             links.Clear();
@@ -79,8 +78,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
                 throw new GraphException(this, Left, $"Right link error : {links.Count}");
             }
             var rightNode = links[0].OutNode as IBaseNode;
-            var rightExpr = rightNode.GetExpr(funGraph, cGen, links[0].Out, true) as OpExpress;
-            var rightType = rightNode.GetOutPinType(links[0].Out);
+            var rightExpr = rightNode.GetExpr(funGraph, cGen, links[0].OutPin, true) as OpExpress;
+            var rightType = rightNode.GetOutPinType(links[0].OutPin);
             if (rightType != leftType)
             {
                 var cvtExpr = new ConvertTypeOp();
@@ -109,14 +108,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             if (LeftType != null)
                 EGui.Controls.CtrlUtility.DrawHelper(LeftType.FullName);
         }
-        public override void OnRemoveLinker(EGui.Controls.NodeGraph.PinLinker linker)
+        public override void OnRemoveLinker(UPinLinker linker)
         {
-            if (linker.In == Left)
+            if (linker.InPin == Left)
             {
                 LeftType = null;
             }
         }
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -134,7 +133,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             }
             return true;
         }
-        public override void OnLinkedFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin);
 

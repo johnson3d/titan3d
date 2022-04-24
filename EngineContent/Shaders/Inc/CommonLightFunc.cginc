@@ -25,7 +25,7 @@ half3 EnvBRDFMobile(half3 LightColorSpec, half3 OptSpecShading, half Roughness, 
 */
 void	SimpleLight_Diffuse( out half3 LightShadingDiffuse, half3 N, half3 L, half3 LightColorDiffuse, half SSS)
 {
-	//// N��L
+	//// 
 	//float	fNdotL		= max( 0.0f, dot( N, L) );
 	//if(fNdotL==0)
 	//{

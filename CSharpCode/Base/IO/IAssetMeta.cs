@@ -87,19 +87,16 @@ namespace EngineNS.IO
                 }
 
                 var sz = new Vector2(0, 0);
-                var buffer = BigStackBuffer.CreateInstance(256);
-                buffer.SetText(mName);
-                ImGuiAPI.InputText("##in_rname", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
-                var name = buffer.AsText();
+
+                bool nameChanged = ImGuiAPI.InputText("##in_rname", ref mName);
                 eErrorType = enErrorType.None;
-                if (string.IsNullOrEmpty(name))
+                if (string.IsNullOrEmpty(mName))
                 {
                     eErrorType = enErrorType.EmptyName;
                 }
-                else if (mName != name)
+                else if (nameChanged)
                 {
-                    mName = name;
-                    var rn = RName.GetRName(mDir.Name + name + ExtName, mDir.RNameType);
+                    var rn = RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
                     if (mAsset != null)
                     {
                         mAsset.AssetName = rn;
@@ -107,7 +104,6 @@ namespace EngineNS.IO
                     if (IO.FileManager.FileExists(rn.Address))
                         eErrorType = enErrorType.IsExisting;
                 }
-                buffer.DestroyMe();
 
                 ImGuiAPI.Separator();
 
@@ -124,7 +120,7 @@ namespace EngineNS.IO
                 {
                     if (ImGuiAPI.Button("Create Asset", &sz))
                     {
-                        var rn = RName.GetRName(mDir.Name + name + ExtName, mDir.RNameType);
+                        var rn = RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
                         if (IO.FileManager.FileExists(rn.Address) == false && string.IsNullOrWhiteSpace(mName) == false)
                         {
                             if (DoImportAsset())
@@ -268,23 +264,23 @@ namespace EngineNS.IO
         //}
         EGui.UIProxy.MenuItemProxy.MenuState mDeleteMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
-        public virtual unsafe void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
         {
             var start = ImGuiAPI.GetItemRectMin();
             var end = start + sz;
 
-            var name = IO.FileManager.GetPureName(GetAssetName().Name);
+            var name = IO.FileManager.GetPureName(GetAssetName().Name, 9);
             var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
             Vector2 tpos;
             tpos.Y = start.Y + sz.Y - tsz.Y;
             tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
-            ImGuiAPI.PushClipRect(in start, in end, true);
+            //ImGuiAPI.PushClipRect(in start, in end, true);
 
             end.Y -= tsz.Y;
             OnDrawSnapshot(in cmdlist, ref start, ref end);
 
             cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
-            ImGuiAPI.PopClipRect();
+            //ImGuiAPI.PopClipRect();
 
             var createNewAssetValueStore = ContentBrowser.CreateNewAssets;
             if (ImGuiAPI.BeginPopupContextItem(mAssetName.Address, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))

@@ -21,9 +21,9 @@ public:
 	bool Init(IGLRenderContext* rc, const ITexture2DDesc* desc);
 	static GLuint LoadDDS(IGLRenderContext* rc, const char * imagepath);
 
-	virtual vBOOL MapMipmap(ICommandList* cmd, int MipLevel, void** ppData, UINT* pRowPitch, UINT* pDepthPitch) override;
-	virtual void UnmapMipmap(ICommandList* cmd, int MipLevel) override;
-	virtual void UpdateMipData(ICommandList* cmd, UINT level, void* pData, UINT width, UINT height, UINT Pitch) override;
+	virtual vBOOL MapMipmap(ICommandList* cmd, UINT ArraySlice, UINT MipSlice, void** ppData, UINT* pRowPitch, UINT* pDepthPitch) override;
+	virtual void UnmapMipmap(ICommandList* cmd, UINT ArraySlice, UINT MipSlice) override;
+	virtual void UpdateMipData(ICommandList* cmd, UINT ArraySlice, UINT MipSlice, void* pData, UINT width, UINT height, UINT Pitch) override;
 };
 
 NS_END

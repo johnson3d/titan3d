@@ -330,6 +330,9 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\ParticleCommon.cginc">
       <Filter>Bricks\Particle</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\SysFunctionDefImpl.cginc">
+      <Filter>Inc</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

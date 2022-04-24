@@ -32,14 +32,21 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void OnResize(URenderPolicy policy, float x, float y)
         {
-            PickedPinOut.Attachement.Width = (uint)(x * UHitproxyNode.ScaleFactor);
-            PickedPinOut.Attachement.Height = (uint)(y * UHitproxyNode.ScaleFactor);
+            float scaleFactor = 1.0f;
+            var hitProxyNode = policy.FindFirstNode<UHitproxyNode>();
+            if (hitProxyNode != null)
+            {
+                scaleFactor = hitProxyNode.ScaleFactor;
+            }
 
-            DepthPinOut.Attachement.Width = (uint)(x * UHitproxyNode.ScaleFactor);
-            DepthPinOut.Attachement.Height = (uint)(y * UHitproxyNode.ScaleFactor);
+            PickedPinOut.Attachement.Width = (uint)(x * scaleFactor);
+            PickedPinOut.Attachement.Height = (uint)(y * scaleFactor);
+
+            DepthPinOut.Attachement.Width = (uint)(x * scaleFactor);
+            DepthPinOut.Attachement.Height = (uint)(y * scaleFactor);
 
             if (PickedBuffer != null)
-                PickedBuffer.OnResize(x * UHitproxyNode.ScaleFactor, y * UHitproxyNode.ScaleFactor);
+                PickedBuffer.OnResize(x * scaleFactor, y * scaleFactor);
         }
         public UPickedProxiableManager PickedManager;
         public UPickSetupShading PickedShading = null;
@@ -105,7 +112,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             foreach (var mesh in mPickedMeshes)
             {
-                if (mesh.Atoms == null)
+                if (mesh == null || mesh.Atoms == null)
                     continue;
 
                 for (int j = 0; j < mesh.Atoms.Length; j++)

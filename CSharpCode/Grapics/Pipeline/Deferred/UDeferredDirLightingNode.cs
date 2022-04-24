@@ -71,7 +71,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
 
-            var Manager = policy.TagObject as UDeferredPolicy;
+            var Manager = policy.TagObject as URenderPolicy;
             var dirLightingNode = Manager.FindFirstNode<UDeferredDirLightingNode>();
 
             var gpuProgram = drawcall.Effect.ShaderProgram;
@@ -157,7 +157,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer.mCoreObject);
+            {
+                //drawcall.mCoreObject.BindShaderCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer.mCoreObject);
+                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.GpuScenePinIn);
+                drawcall.mCoreObject.BindShaderCBuffer(index, attachBuffer.CBuffer.mCoreObject);
+            }
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "TilingBuffer");
             if (!CoreSDK.IsNullPointer(index))
@@ -170,7 +174,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             if (!CoreSDK.IsNullPointer(index))
             {
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.PointLightsPinIn);
-                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                if (attachBuffer.Srv != null)
+                    drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
             }
         }
         public void SetDisableShadow(bool value)
@@ -215,6 +220,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public Common.URenderGraphPin VignettePinIn = Common.URenderGraphPin.CreateInput("Vignette");
         public Common.URenderGraphPin PickPinIn = Common.URenderGraphPin.CreateInput("Pick");
         public Common.URenderGraphPin TileScreenPinIn = Common.URenderGraphPin.CreateInput("TileScreen");
+        public Common.URenderGraphPin GpuScenePinIn = Common.URenderGraphPin.CreateInput("GpuScene");
         public Common.URenderGraphPin PointLightsPinIn = Common.URenderGraphPin.CreateInput("PointLights");
 
         public UDeferredDirLightingNode()
@@ -233,6 +239,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInput(PickPinIn, EGpuBufferViewType.GBVT_Srv);
             AddInput(TileScreenPinIn, EGpuBufferViewType.GBVT_Srv);
             AddInput(PointLightsPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(GpuScenePinIn, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Uav);
 
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R10G10B10A2_UNORM;
             base.InitNodePins();
@@ -251,20 +258,24 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             await base.Initialize(policy, debugName);
             ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredDirLightingShading>();
         }
-        private void SetCBuffer(GamePlay.UWorld world, RHI.CConstantBuffer cBuffer, UDeferredPolicy mobilePolicy)
+        private void SetCBuffer(GamePlay.UWorld world, RHI.CConstantBuffer cBuffer, URenderPolicy mobilePolicy)
         {
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gFadeParam, in mobilePolicy.mShadowMapNode.mFadeParam);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowTransitionScale, in mobilePolicy.mShadowMapNode.mShadowTransitionScale);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowMapSizeAndRcp, in mobilePolicy.mShadowMapNode.mShadowMapSizeAndRcp);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gViewer2ShadowMtx, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtx);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowDistance, in mobilePolicy.mShadowMapNode.mShadowDistance);
+            var shadowNode = mobilePolicy.FindFirstNode<Shadow.UShadowMapNode>();
+            if (shadowNode != null)
+            {
+                cBuffer.SetValue(cBuffer.PerViewportIndexer.gFadeParam, in shadowNode.mFadeParam);
+                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowTransitionScale, in shadowNode.mShadowTransitionScale);
+                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowMapSizeAndRcp, in shadowNode.mShadowMapSizeAndRcp);
+                cBuffer.SetValue(cBuffer.PerViewportIndexer.gViewer2ShadowMtx, in shadowNode.mViewer2ShadowMtx);
+                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowDistance, in shadowNode.mShadowDistance);
+            }
 
             var dirLight = world.DirectionLight;
             //dirLight.mDirection = MathHelper.RandomDirection();
-            var dir = dirLight.mDirection;
+            var dir = dirLight.Direction;
             var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
             cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightDirection_Leak, in gDirLightDirection_Leak);
-            var gDirLightColor_Intensity = new Vector4(dirLight.mSunLightColor.X, dirLight.mSunLightColor.Y, dirLight.mSunLightColor.Z, dirLight.mSunLightIntensity);
+            var gDirLightColor_Intensity = new Vector4(dirLight.SunLightColor.X, dirLight.SunLightColor.Y, dirLight.SunLightColor.Z, dirLight.mSunLightIntensity);
             cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightColor_Intensity, in gDirLightColor_Intensity);
 
             cBuffer.SetValue(cBuffer.PerViewportIndexer.mSkyLightColor, in dirLight.mSkyLightColor);
@@ -276,13 +287,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            var mobilePolicy = policy as UDeferredPolicy;
             var cBuffer = GBuffers.PerViewportCBuffer;
-            if (mobilePolicy != null)
-            {
-                if (cBuffer != null)
-                    SetCBuffer(world, cBuffer, mobilePolicy);
-            }
+            if (cBuffer != null)
+                SetCBuffer(world, cBuffer, policy);
             base.TickLogic(world, policy, bClear);
         }
     }

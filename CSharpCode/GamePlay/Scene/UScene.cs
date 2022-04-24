@@ -46,7 +46,8 @@ namespace EngineNS.GamePlay.Scene
                 TypeSlt.SelectedType = type;
 
                 PGAssetInitTask = PGAsset.Initialize();
-                mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType, new USceneData()) as IO.IAsset;
+                //mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType, new USceneData()) as IO.IAsset;
+                mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
                 PGAsset.Target = mAsset;
             }
         }
@@ -182,7 +183,10 @@ namespace EngineNS.GamePlay.Scene
                 }
 
                 USceneData nodeData = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(descAttr.Name)) as USceneData;
-                UScene scene = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(xnd.RootNode.Name), nodeData) as UScene;
+
+                //UScene don't have construct with params
+                //UScene scene = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(xnd.RootNode.Name), nodeData) as UScene;
+                UScene scene = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(xnd.RootNode.Name)) as UScene;
                 if (scene == null)
                     return null;
                 scene.World = world;

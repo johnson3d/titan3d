@@ -59,8 +59,8 @@ public:
 	}
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_Dispose=self->Release())
-MemStreamWriter : public IStreamWriter
+class TR_CLASS(SV_Dispose = self->Release())
+	MemStreamWriter : public IStreamWriter
 {
 	BYTE*					mDataStream;
 	UINT64					mBufferSize;
@@ -94,8 +94,8 @@ public:
 	}
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS, SV_Dispose = self->Release())
-MemStreamReader : public IStreamReader
+class TR_CLASS(SV_Dispose = self->Release())
+	MemStreamReader : public IStreamReader
 {
 	BYTE*					mProxyPointer;
 	UINT64					mLength;

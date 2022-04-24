@@ -17,9 +17,9 @@ namespace EngineNS.GamePlay
             UEngine.Instance.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, Type rpType)
+        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName, Type rpType)
         {
-            await base.InitializeApplication(rc, rpType);
+            await base.InitializeApplication(rc, rpName, rpType);
             await UEngine.Instance.StartPlayInEditor(this, typeof(EngineNS.Graphics.Pipeline.Mobile.UMobileEditorFSPolicy), EngineNS.RName.GetRName("Demo0.mcrs"));
 
             UEngine.Instance.TickableManager.AddTickable(this);

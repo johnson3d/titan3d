@@ -38,6 +38,39 @@ namespace EngineNS
                 return false;
             return true;
         }
+        public static bool InputText(string label, ref string text, 
+            ImGuiInputTextFlags_ flags = ImGuiInputTextFlags_.ImGuiInputTextFlags_None, 
+            FDelegate_ImGuiInputTextCallback callback = null, object user_data = null)
+        {
+            if (text == null)
+                text = "";
+            using (var buffer = BigStackBuffer.CreateInstance((text.Length + 1) * 2))
+            {
+                buffer.SetText(text);
+                bool changed = false;
+                if (user_data == null)
+                {
+                    changed = InputText(label, buffer.GetBuffer(), (uint)buffer.GetSize(), flags, callback, (void*)0);
+                }
+                else
+                {
+                    // user_data to gchandle
+                    System.Runtime.InteropServices.GCHandle handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(IntPtr.Zero);
+                    changed = InputText(label, buffer.GetBuffer(), (uint)buffer.GetSize(), flags, callback, IntPtr.Zero.ToPointer());
+                }
+                if (changed)
+                {
+                    text = buffer.AsText();
+                    return true;
+                }
+                return false;
+            }   
+        }
+        public static bool Button(string label)
+        {
+            var sz = new Vector2();
+            return Button(label, in sz);
+        }
     }
 }
 

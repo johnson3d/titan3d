@@ -4,6 +4,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
+    [UNode(NodeDataType = typeof(UGridNode.UGridNodeData), DefaultNamePrefix = "Grid")]
     public partial class UGridNode : UMeshNode
     {
         public class UGridNodeData : UNodeData

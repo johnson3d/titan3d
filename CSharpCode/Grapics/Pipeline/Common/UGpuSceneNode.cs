@@ -41,10 +41,15 @@ namespace EngineNS.Graphics.Pipeline.Common
             attachement.Buffer = GpuSceneDescBuffer;
             attachement.Srv = GpuSceneDescSRV;
             attachement.Uav = GpuSceneDescUAV;
+            attachement.CBuffer = PerGpuSceneCBuffer;
 
             PointLightsPinOut.Attachement.Height = (uint)PointLights.DataArray.Count;
             PointLightsPinOut.Attachement.Width = (uint)sizeof(FPointLight);
             attachement = RenderGraph.AttachmentCache.ImportAttachment(PointLightsPinOut);
+            //if (attachement.Buffer == null)
+            //{
+            //    PointLights.Flush2GPU(this.BasePass.DrawCmdList.mCoreObject);
+            //}
             attachement.Buffer = PointLights.GpuBuffer;
             attachement.Srv = PointLights.DataSRV;
             attachement.Uav = PointLights.DataUAV;

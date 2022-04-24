@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using EngineNS.EGui.Controls.NodeGraph;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class INodeExpr : EGui.Controls.NodeGraph.NodeBase
+    public partial class INodeExpr : UNodeBase
     {
         public bool HasError = false;
         public GraphException CodeExcept;
-        public ClassGraph Graph;
-        public EGui.Controls.NodeGraph.PinIn BeforeExec { get; set; } = new EGui.Controls.NodeGraph.PinIn();
-        public EGui.Controls.NodeGraph.PinOut AfterExec { get; set; } = new EGui.Controls.NodeGraph.PinOut();
+        public UMacrossEditor Graph;
+        public PinIn BeforeExec { get; set; } = new PinIn();
+        public PinOut AfterExec { get; set; } = new PinOut();
         public INodeExpr()
         {
             BeforeExec.Name = " >>";
@@ -20,24 +19,24 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
             AfterExec.Link = MacrossStyles.Instance.NewExecPinDesc();
         }
-        public virtual IExpression GetExpr(FunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        public virtual IExpression GetExpr(UMacrossFunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
         {
             return null;
         }
-        public IExpression GetNextExpr(FunctionGraph funGraph, ICodeGen cGen)
+        public IExpression GetNextExpr(UMacrossFunctionGraph funGraph, ICodeGen cGen)
         {
             if (AfterExec.HasLinker())
             {
-                var links = new List<EGui.Controls.NodeGraph.PinLinker>();
+                var links = new List<UPinLinker>();
                 funGraph.FindOutLinker(AfterExec, links);
                 var nextNode = links[0].InNode as INodeExpr;
                 return nextNode.GetExpr(funGraph, cGen, false);
             }
             return null;
         }
-        public override void OnLinkedTo(PinOut oPin, NodeBase InNode, PinIn iPin)
+        public override void OnLinkedTo(PinOut oPin, UNodeBase InNode, PinIn iPin)
         {
-            var funcGraph = ParentGraph as FunctionGraph;
+            var funcGraph = ParentGraph as UMacrossFunctionGraph;
             if (funcGraph == null || oPin.Link == null || iPin.Link == null)
             {
                 return;
@@ -49,9 +48,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 //funcGraph.AddLink(this, oPin.Name, InNode, iPin.Name, false);
             }
         }
-        public override void OnLinkedFrom(PinIn iPin, NodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
-            var funcGraph = ParentGraph as FunctionGraph;
+            var funcGraph = ParentGraph as UMacrossFunctionGraph;
             if (funcGraph == null || oPin.Link == null || iPin.Link == null)
             {
                 return;
@@ -66,7 +65,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             return null;
         }
-        public override void OnLClicked(NodePin clickedPin)
+        public override void OnLButtonClicked(NodePin clickedPin)
         {
             if (HasError)
             {
@@ -89,30 +88,30 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             //EGui.Controls.CtrlUtility.DrawHelper($"Stay:{stayPin.Name}");
         }
-        public virtual System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
+        public virtual System.Type GetOutPinType(PinOut pin)
         {
             return null;
         }
         public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             base.OnPreRead(tagObject, hostObject, fromXml);
-            var klsGraph = tagObject as ClassGraph;
+            var klsGraph = tagObject as UMacrossEditor;
             if (klsGraph == null)
                 return;
 
             Graph = klsGraph;
         }
-        protected override void OnAfterDraw(NodeGraphStyles styles, ref ImDrawList cmdlist)
+        public override void OnAfterDraw(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles, ImDrawList cmdlist)
         {
-            float fScale = ParentGraph.ScaleFactor;
-            var ScaledNodeSize = this.Size * fScale;
+            //float fScale = ParentGraph.ScaleFactor;
+            //var ScaledNodeSize = this.Size * fScale;
 
-            if (HasError)
-            {
-                var nameSize = ImGuiAPI.CalcTextSize("Error", false, -1.0f);
-                var drawPos = this.DrawPosition + ScaledNodeSize * 0.5f - nameSize * 0.5f;
-                cmdlist.AddText(in drawPos, 0xFF0000FF, "Error", null);
-            }
+            //if (HasError)
+            //{
+            //    var nameSize = ImGuiAPI.CalcTextSize("Error", false, -1.0f);
+            //    var drawPos = this.DrawPosition + ScaledNodeSize * 0.5f - nameSize * 0.5f;
+            //    cmdlist.AddText(in drawPos, 0xFF0000FF, "Error", null);
+            //}
         }
     }
 }

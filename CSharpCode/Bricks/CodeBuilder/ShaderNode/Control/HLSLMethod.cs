@@ -37,6 +37,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             return new Vector4();
         }
         [Rtti.Meta]
+        public static Vector3 GetTerrainDiffuse(Vector2 uv, Graphics.Pipeline.Shader.UMaterial.PSInput input)
+        {
+            return Vector3.Zero;
+        }
+        [Rtti.Meta]
         public static void Clamp(float x, float min, float max, out float ret)
         {
             ret = 0;
@@ -81,7 +86,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
     {
         public SampleLevel2DNode()
         {
-            PreviewWidth = 100;
+            PrevSize = new Vector2(100, 100);
             TextureVarName = $"Texture_{(uint)NodeId.GetHashCode()}";
             
             mSampler.SetDefault();
@@ -146,12 +151,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         public ISamplerStateDesc Sampler { get => mSampler; set => mSampler = value; }
         private RHI.CShaderResourceView TextureSRV;
-        public unsafe override void OnPreviewDraw(ref Vector2 prevStart, ref Vector2 prevEnd)
+        public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null)
                 return;
-
-            var cmdlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
 
             var uv0 = new Vector2(0, 0);
             var uv1 = new Vector2(1, 1);
@@ -195,7 +198,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
     {
         public Sample2DNode()
         {
-            PreviewWidth = 100;
+            PrevSize = new Vector2(100, 100);
             TextureVarName = $"Texture_{(uint)NodeId.GetHashCode()}";
 
             mSampler.SetDefault();
@@ -260,12 +263,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         public ISamplerStateDesc Sampler { get => mSampler; set => mSampler = value; }
         private RHI.CShaderResourceView TextureSRV;
-        public unsafe override void OnPreviewDraw(ref Vector2 prevStart, ref Vector2 prevEnd)
+        public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null)
                 return;
-
-            var cmdlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
 
             var uv0 = new Vector2(0, 0);
             var uv1 = new Vector2(1, 1);
@@ -309,7 +310,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
     {
         public SampleArrayLevel2DNode()
         {
-            PreviewWidth = 100;
+            PrevSize = new Vector2(100, 100);
             TextureVarName = $"TextureArray_{(uint)NodeId.GetHashCode()}";
 
             mSampler.SetDefault();
@@ -374,12 +375,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         public ISamplerStateDesc Sampler { get => mSampler; set => mSampler = value; }
         private RHI.CShaderResourceView TextureSRV;
-        public unsafe override void OnPreviewDraw(ref Vector2 prevStart, ref Vector2 prevEnd)
+        public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null)
                 return;
-
-            var cmdlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
 
             var uv0 = new Vector2(0, 0);
             var uv1 = new Vector2(1, 1);
@@ -423,7 +422,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
     {
         public SampleArray2DNode()
         {
-            PreviewWidth = 100;
+            PrevSize = new Vector2(100, 100);
             TextureVarName = $"TextureArray_{(uint)NodeId.GetHashCode()}";
 
             mSampler.SetDefault();
@@ -488,12 +487,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         public ISamplerStateDesc Sampler { get => mSampler; set => mSampler = value; }
         private RHI.CShaderResourceView TextureSRV;
-        public unsafe override void OnPreviewDraw(ref Vector2 prevStart, ref Vector2 prevEnd)
+        public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null)
                 return;
-
-            var cmdlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
 
             var uv0 = new Vector2(0, 0);
             var uv1 = new Vector2(1, 1);

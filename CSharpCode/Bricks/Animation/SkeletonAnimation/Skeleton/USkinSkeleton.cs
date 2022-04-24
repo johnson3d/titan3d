@@ -7,6 +7,10 @@ using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
 
 namespace EngineNS.Animation.SkeletonAnimation.Skeleton
 {
+    public interface ISkeleton
+    {
+
+    }
     [Rtti.Meta]
     public class USkinSkeletonDesc : IO.BaseSerializer, ILimbDesc
     {
@@ -23,7 +27,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
     }
 
     [Rtti.Meta]
-    public class USkinSkeleton : IO.BaseSerializer, ILimb
+    public class USkinSkeleton : IO.BaseSerializer, ILimb, ISkeleton
     {
         public AnimatablePose.IAnimatableLimbPose CreatePose()
         {

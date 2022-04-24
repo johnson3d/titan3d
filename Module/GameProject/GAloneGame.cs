@@ -16,7 +16,7 @@ namespace GameProject
         {
             WorldViewportSlate = new EngineNS.GamePlay.UGameViewportSlate(true);
 
-            await WorldViewportSlate.Initialize(null, EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Graphics.Pipeline.Deferred.UDeferredPolicy)), 0, 1);
+            await WorldViewportSlate.Initialize(null, UEngine.Instance.Config.MainRPolicyName, EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Graphics.Pipeline.Deferred.UDeferredPolicy)), 0, 1);
 
             WorldViewportSlate.RenderPolicy.DisableShadow = false;
             UEngine.Instance.GfxDevice.MainWindow.NativeWindow.RegEventProcessor(WorldViewportSlate);
@@ -38,11 +38,11 @@ namespace GameProject
                 newNode.Parent = root;
                 newNode.IsAcceptShadow = true;
 
-                await CreateCharacter(world, root);
 
                 newNode.SetActiveCenter(new DVector3(30, 0, 30));
                 var alt = newNode.GetAltitude(30, 30);
                 alt += 10.0f;
+                await CreateCharacter(world, root);
                 ChiefPlayer.Placement.Position = new DVector3(30, alt, 30);
 
                 
@@ -88,7 +88,7 @@ namespace GameProject
             sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"), Vector3.Zero));
             sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_walk_aim_f_loop_ip.animclip"), new Vector3(3, 0, 0)));
             await EngineNS.Animation.SceneNode.UBlendSpaceAnimPlayNode.AddBlendSpace2DAnimPlayNode(world, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
-
+            
             var characterController = new EngineNS.GamePlay.Controller.UCharacterController();
             await characterController.InitializeNode(WorldViewportSlate.World, new EngineNS.GamePlay.Scene.UNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             characterController.Parent = world.Root;

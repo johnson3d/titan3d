@@ -40,7 +40,7 @@ namespace EngineNS.EGui.UIProxy
             ToolbarItems.Remove(item);
         }
 
-        public bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
+        public bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
         {
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
             var windowWidth = ImGuiAPI.GetWindowWidth();
@@ -53,7 +53,7 @@ namespace EngineNS.EGui.UIProxy
             {
                 ImGuiAPI.SameLine(itemOffset, itemSpacing);
                 //ImGuiAPI.SameLine(0, -1);
-                ToolbarItems[i].OnDraw(ref drawList, ref drawData);
+                ToolbarItems[i].OnDraw(in drawList, in drawData);
                 itemOffset = ToolbarItems[i].NextItemOffset;
                 itemSpacing = ToolbarItems[i].NextItemSpacing;
             }
@@ -86,7 +86,7 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
+        public bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
         {
             bool retValue = false;
             var cursorScrPos = ImGuiAPI.GetCursorScreenPos();
@@ -105,7 +105,7 @@ namespace EngineNS.EGui.UIProxy
                 tempScrPos.Y = cursorScrPos.Y + (StyleConfig.Instance.ToolbarHeight - Icon.ImageSize.Y) * 0.5f + clickDelta;
                 hitRectMin.X = cursorScrPos.X;
                 hitRectMin.Y = tempScrPos.Y;
-                Icon.OnDraw(ref drawList, ref tempScrPos);
+                Icon.OnDraw(in drawList, in tempScrPos);
 
                 tempScrPos.X = cursorScrPos.X + Icon.ImageSize.X + StyleConfig.Instance.ToolbarButtonIconTextSpacing;
                 hitRectMax.X = tempScrPos.X;
@@ -171,7 +171,7 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public bool OnDraw(ref ImDrawList drawList, ref Support.UAnyPointer drawData)
+        public bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
         {
             var cursorScrPos = ImGuiAPI.GetCursorScreenPos();
             cursorScrPos.X += StyleConfig.Instance.ToolbarSeparatorThickness * 0.5f;

@@ -49,9 +49,10 @@ namespace EngineNS.Rtti
             NoMacrossOverride = (1 << 3),//只可使用在虚函数上，不允许Macross重载
 
             MacrossReadOnly = (1 << 4),//只可使用在成员变量，成员属性上，该属性对Macross只读
+            MacrossDeclareable = (1<<5),//可在Macross中申明实例
 
-            DiscardWhenCooked = (1 << 5),//在cook资源中不序列化
-            DiscardWhenRPC = (1 << 6),//在做RPC的时候不序列化
+            DiscardWhenCooked = (1 << 6),//在cook资源中不序列化
+            DiscardWhenRPC = (1 << 7),//在做RPC的时候不序列化
         }
         public int Order = 0;
         public EMetaFlags Flags = 0;
@@ -60,6 +61,13 @@ namespace EngineNS.Rtti
             get
             {
                 return (Flags & EMetaFlags.MacrossReadOnly) != 0;
+            }
+        }
+        public bool IsMacrossDeclareable
+        {
+            get
+            {
+                return (Flags & EMetaFlags.MacrossDeclareable) != 0;
             }
         }
     }
@@ -829,6 +837,23 @@ namespace EngineNS.Rtti
             }
 
             ForceSaveAll();
+
+            GetMeta(UTypeDesc.TypeOf(typeof(void)));
+            GetMeta(UTypeDesc.TypeOf(typeof(char)));
+            GetMeta(UTypeDesc.TypeOf(typeof(byte)));
+            GetMeta(UTypeDesc.TypeOf(typeof(Int16)));
+            GetMeta(UTypeDesc.TypeOf(typeof(UInt16)));
+            GetMeta(UTypeDesc.TypeOf(typeof(Int32)));
+            GetMeta(UTypeDesc.TypeOf(typeof(UInt32)));
+            GetMeta(UTypeDesc.TypeOf(typeof(Int64)));
+            GetMeta(UTypeDesc.TypeOf(typeof(UInt64)));
+            GetMeta(UTypeDesc.TypeOf(typeof(float)));
+            GetMeta(UTypeDesc.TypeOf(typeof(double)));
+            GetMeta(UTypeDesc.TypeOf(typeof(string)));
+            GetMeta(UTypeDesc.TypeOf(typeof(Vector2)));
+            GetMeta(UTypeDesc.TypeOf(typeof(Vector3)));
+            GetMeta(UTypeDesc.TypeOf(typeof(Vector4)));
+            GetMeta(UTypeDesc.TypeOf(typeof(Quaternion)));
         }
         public void BuildMeta()
         {
@@ -972,7 +997,7 @@ namespace EngineNS.Rtti
                 return GetMeta(typeStr);
             }
         }
-        public UClassMeta GetMeta(Hash64 hash)
+        public UClassMeta GetMeta(in Hash64 hash)
         {
             UClassMeta meta;
             if (mHashMetas.TryGetValue(hash, out meta))

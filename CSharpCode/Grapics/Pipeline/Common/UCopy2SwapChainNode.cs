@@ -10,6 +10,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public Common.URenderGraphPin ColorPinInOut = Common.URenderGraphPin.CreateInputOutput("Color");
         public Common.URenderGraphPin HitIdPinIn = Common.URenderGraphPin.CreateInput("HitId");
         public Common.URenderGraphPin HzbPinIn = Common.URenderGraphPin.CreateInput("Hzb");
+        public Common.URenderGraphPin SavedPinIn0 = Common.URenderGraphPin.CreateInput("Save0");
         public UCopy2SwapChainNode()
         {
             Name = "Copy2SwapChainNode";
@@ -25,6 +26,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddInput(HitIdPinIn, EGpuBufferViewType.GBVT_Srv);
             HzbPinIn.IsAllowInputNull = true;
             AddInput(HzbPinIn, EGpuBufferViewType.GBVT_Srv);
+            SavedPinIn0.IsAllowInputNull = true;
+            AddInput(SavedPinIn0, EGpuBufferViewType.GBVT_Srv);
         }
         public override async Task Initialize(URenderPolicy policy, string debugName)
         {

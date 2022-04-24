@@ -6,6 +6,8 @@
 #include "Material"
 #include "MdfQueue"
 
+#include "../../../Inc/SysFunctionDefImpl.cginc"
+
 Texture2D gPickedSetUpTex DX_NOBIND;
 SamplerState Samp_gPickedSetUpTex DX_NOBIND;
 

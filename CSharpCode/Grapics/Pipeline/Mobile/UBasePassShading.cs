@@ -71,31 +71,58 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             var Manager = policy as Mobile.UMobileEditorFSPolicy;
             if (Manager != null)
             {
-                var indexer = drawcall.Effect.ShaderIndexer;
-                if (Manager.EnvMapSRV != null)
+                var node = Manager.FindFirstNode<UMobileForwordNodeBase>();
+                if (node != null)
                 {
-                    drawcall.mCoreObject.BindShaderSrv(indexer.gEnvMap, Manager.EnvMapSRV.mCoreObject);
-                    drawcall.mCoreObject.BindShaderSampler(indexer.Samp_gEnvMap, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+                    var index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "gEnvMap");
+                    if (!CoreSDK.IsNullPointer(index))
+                    {
+                        var attachBuffer = node.GetAttachBuffer(node.EnvMapPinIn);
+                        drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                    }
+                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_gEnvMap");
+                    if (!CoreSDK.IsNullPointer(index))
+                        drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+
+                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GVignette");
+                    if (!CoreSDK.IsNullPointer(index))
+                    {
+                        var attachBuffer = node.GetAttachBuffer(node.VignettePinIn);
+                        drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                    }
+                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GVignette");
+                    if (!CoreSDK.IsNullPointer(index))
+                        drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+
+                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GShadowMap");
+                    if (!CoreSDK.IsNullPointer(index))
+                    {
+                        var attachBuffer = node.GetAttachBuffer(node.ShadowMapPinIn);
+                        drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                    }
+                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GShadowMap");
+                    if (!CoreSDK.IsNullPointer(index))
+                        drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+
+                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
+                    if (!CoreSDK.IsNullPointer(index))
+                        drawcall.mCoreObject.BindShaderCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer.mCoreObject);
+
+                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "TilingBuffer");
+                    if (!CoreSDK.IsNullPointer(index))
+                    {
+                        var attachBuffer = node.GetAttachBuffer(node.TileScreenPinIn);
+                        drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                    }
+
+                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GpuScene_PointLights");
+                    if (!CoreSDK.IsNullPointer(index))
+                    {
+                        var attachBuffer = node.GetAttachBuffer(node.PointLightsPinIn);
+                        if (attachBuffer.Srv != null)
+                            drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                    }
                 }
-
-                if (Manager.mShadowMapNode != null)
-                {
-                    var depth = Manager.mShadowMapNode.GetAttachBuffer(Manager.mShadowMapNode.DepthPinOut);
-                    drawcall.mCoreObject.BindShaderSrv(indexer.gShadowMap, depth.Srv.mCoreObject);
-                    drawcall.mCoreObject.BindShaderSampler(indexer.Samp_gShadowMap, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
-                }
-
-                var index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
-                if (!CoreSDK.IsNullPointer(index))
-                    drawcall.mCoreObject.BindShaderCBuffer(index, Manager.GpuSceneNode.PerGpuSceneCBuffer.mCoreObject);
-
-                index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "TilingBuffer");
-                if (!CoreSDK.IsNullPointer(index))
-                    drawcall.mCoreObject.BindShaderSrv(index, Manager.ScreenTilingNode.TileSRV.mCoreObject);
-
-                index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GpuScene_PointLights");
-                if (!CoreSDK.IsNullPointer(index))
-                    drawcall.mCoreObject.BindShaderSrv(index, Manager.GpuSceneNode.PointLights.DataSRV.mCoreObject);
             }
         }
     }
@@ -113,7 +140,25 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             CodeName = RName.GetRName("shaders/ShadingEnv/Mobile/MobileTranslucent.cginc", RName.ERNameType.Engine);
         }
     }
-    public class UMobileOpaqueNode : Common.UBasePassNode
+    public class UMobileForwordNodeBase : Common.UBasePassNode
+    {
+        public Common.URenderGraphPin ShadowMapPinIn = Common.URenderGraphPin.CreateInput("ShadowMap");
+        public Common.URenderGraphPin EnvMapPinIn = Common.URenderGraphPin.CreateInput("EnvMap");
+        public Common.URenderGraphPin VignettePinIn = Common.URenderGraphPin.CreateInput("Vignette");        
+        public Common.URenderGraphPin TileScreenPinIn = Common.URenderGraphPin.CreateInput("TileScreen");
+        public Common.URenderGraphPin PointLightsPinIn = Common.URenderGraphPin.CreateInput("PointLights");
+
+        public override void InitNodePins()
+        {
+            AddInput(ShadowMapPinIn, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Dsv);
+            AddInput(EnvMapPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(VignettePinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(TileScreenPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(PointLightsPinIn, EGpuBufferViewType.GBVT_Srv);
+        }
+    }
+
+    public class UMobileOpaqueNode : UMobileForwordNodeBase
     {
         public Common.URenderGraphPin ColorPinOut = Common.URenderGraphPin.CreateOutput("Color", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);
         public Common.URenderGraphPin DepthPinOut = Common.URenderGraphPin.CreateOutput("Depth", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
@@ -124,6 +169,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public override void InitNodePins()
         {
+            base.InitNodePins();
+
             AddOutput(ColorPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Rtv);
             AddOutput(DepthPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Dsv);
             AddOutput(GizmosDepthPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Dsv);
@@ -215,17 +262,21 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 GGizmosBuffers.OnResize(x, y);
             }
         }
-        protected void SetCBuffer(GamePlay.UWorld world, RHI.CConstantBuffer cBuffer, UMobileFSPolicy mobilePolicy)
+        protected void SetCBuffer(GamePlay.UWorld world, RHI.CConstantBuffer cBuffer, URenderPolicy mobilePolicy)
         {
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gFadeParam, in mobilePolicy.mShadowMapNode.mFadeParam);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowTransitionScale, in mobilePolicy.mShadowMapNode.mShadowTransitionScale);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowMapSizeAndRcp, in mobilePolicy.mShadowMapNode.mShadowMapSizeAndRcp);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gViewer2ShadowMtx, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtx);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowDistance, in mobilePolicy.mShadowMapNode.mShadowDistance);
+            var shadowNode = mobilePolicy.FindFirstNode<Shadow.UShadowMapNode>();
+            if (shadowNode != null)
+            {
+                cBuffer.SetValue(cBuffer.PerViewportIndexer.gFadeParam, in shadowNode.mFadeParam);
+                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowTransitionScale, in shadowNode.mShadowTransitionScale);
+                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowMapSizeAndRcp, in shadowNode.mShadowMapSizeAndRcp);
+                cBuffer.SetValue(cBuffer.PerViewportIndexer.gViewer2ShadowMtx, in shadowNode.mViewer2ShadowMtx);
+                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowDistance, in shadowNode.mShadowDistance);
+            }
 
             var dirLight = world.DirectionLight;
             //dirLight.mDirection = MathHelper.RandomDirection();
-            var dir = dirLight.mDirection;
+            var dir = dirLight.Direction;
             var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
             cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightDirection_Leak, in gDirLightDirection_Leak);
             var gDirLightColor_Intensity = new Vector4(dirLight.mSunLightColor.X, dirLight.mSunLightColor.Y, dirLight.mSunLightColor.Z, dirLight.mSunLightIntensity);
@@ -240,13 +291,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            var mobilePolicy = policy as UMobileFSPolicy;
+            var mobilePolicy = policy;
             var cBuffer = GBuffers.PerViewportCBuffer;
-            if (mobilePolicy != null)
-            {
-                if (cBuffer != null)
-                    SetCBuffer(world, cBuffer, mobilePolicy);
-            }
+            if (cBuffer != null)
+                SetCBuffer(world, cBuffer, mobilePolicy);
 
             BasePass.ClearMeshDrawPassArray();
             BasePass.SetViewport(GBuffers.ViewPort);
@@ -306,6 +354,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public override void InitNodePins()
         {
+            base.InitNodePins();
+
             AddInputOutput(AlbedoPinInOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Rtv);
             AddInputOutput(DepthPinInOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Dsv);
             
@@ -400,7 +450,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             var dirLight = world.DirectionLight;
             //dirLight.mDirection = MathHelper.RandomDirection();
-            var dir = dirLight.mDirection;
+            var dir = dirLight.Direction;
             var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
             cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightDirection_Leak, in gDirLightDirection_Leak);
             var gDirLightColor_Intensity = new Vector4(dirLight.mSunLightColor.X, dirLight.mSunLightColor.Y, dirLight.mSunLightColor.Z, dirLight.mSunLightIntensity);

@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using EngineNS.EGui.Controls.NodeGraph;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     public partial class Monocular : INodeExpr
     {
-        public EGui.Controls.NodeGraph.PinIn Left { get; set; } = new EGui.Controls.NodeGraph.PinIn();
-        public EGui.Controls.NodeGraph.PinOut Result { get; set; } = new EGui.Controls.NodeGraph.PinOut();
+        public PinIn Left { get; set; } = new PinIn();
+        public PinOut Result { get; set; } = new PinOut();
     }
     public partial class TypeConverterVar : Monocular, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
@@ -30,7 +30,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public Rtti.UClassMeta SrcType;
         public Rtti.UClassMeta TarType;
-        public EGui.Controls.NodeGraph.PinIn ToType { get; set; } = new EGui.Controls.NodeGraph.PinIn();
+        public PinIn ToType { get; set; } = new PinIn();
         public TypeConverterVar()
         {
             Left.Name = " Src";
@@ -48,8 +48,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
-            TitleImage.Color = 0xFF204020;
-            Background.Color = 0x80808080;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
             Name = "As";
 
             AddPinIn(Left);
@@ -90,9 +90,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 OnValueChanged(typeSlt);
             }
         }
-        public override IExpression GetExpr(FunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        public override IExpression GetExpr(UMacrossFunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
         {
-            var links = new List<EGui.Controls.NodeGraph.PinLinker>();
+            var links = new List<UPinLinker>();
             funGraph.FindInLinker(Left, links);
             if (links.Count != 1)
             {
@@ -112,11 +112,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             TarType = Rtti.UClassMetaManager.Instance.GetMeta(ev.Value as Rtti.UTypeDesc);
         }
-        public override void OnLoadLinker(PinLinker linker)
+        public override void OnLoadLinker(UPinLinker linker)
         {
             base.OnLoadLinker(linker);
         }
-        public override void OnMouseStayPin(EGui.Controls.NodeGraph.NodePin stayPin)
+        public override void OnMouseStayPin(NodePin stayPin)
         {
             if (stayPin == Left)
             {
@@ -129,20 +129,20 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     EGui.Controls.CtrlUtility.DrawHelper($"VarType:{TarType.ClassType.FullName}");
             }
         }
-        public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
+        public override System.Type GetOutPinType(PinOut pin)
         {
             if (TarType == null)
                 return null;
             return TarType.ClassType.SystemType;
         }
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
 
             return true;
         }
-        public override void OnLinkedFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin);
 

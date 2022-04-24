@@ -37,6 +37,7 @@ namespace EngineNS.Bricks.ProjectGen
                 return x.FullName.CompareTo(y.FullName);
             });
 
+#pragma warning disable CS0162
             if (false)
             {
                 var testObj = new UBrickDesc();
@@ -55,6 +56,7 @@ namespace EngineNS.Bricks.ProjectGen
                 //string jsonString = IO.FileManager.ReadAllText(@"F:\titan2.0\CSharpCode\Base\Base.brick");
                 //var testObj2 = IO.SerializerHelper.LoadFromJson<UBrickDesc>(jsonString);
             }
+#pragma warning restore CS0162
             return true;
         }
         public void SaveProject(string projName)

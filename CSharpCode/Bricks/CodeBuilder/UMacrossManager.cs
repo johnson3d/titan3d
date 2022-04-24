@@ -46,9 +46,10 @@ namespace EngineNS.Bricks.CodeBuilder
                     new CodeCompiler.ProjectConfig()
                     {
                         ProjectType = CodeCompiler.ProjectConfig.enProjectType.DefaultGame,
-                        ProjectFile = IO.FileManager.GetRelativePath(
-                            UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject,
-                            UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game) + "MacrossGenCSharp.shproj"),
+                        //ProjectFile = IO.FileManager.GetRelativePath(
+                        //    UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject,
+                        //    UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game) + "MacrossGenCSharp.shproj"),
+                        ProjectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game) + "MacrossGenCSharp.shproj",
                         ProjectGuid = Guid.NewGuid(),
                         MinVSVersion = new Version(14, 0),
                     }

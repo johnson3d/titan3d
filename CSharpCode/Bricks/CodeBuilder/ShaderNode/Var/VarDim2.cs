@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
@@ -10,7 +10,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         {
             return $"{Name}=({Value})";
         }
-        public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
+        public override System.Type GetOutPinType(PinOut pin)
         {
             if (pin == OutXY)
                 return typeof(Vector2);
@@ -19,7 +19,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 return typeof(float);
             return null;
         }
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -52,7 +52,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             Executed = false;
         }
         bool Executed = false;
-        public override IExpression GetVarExpr(UMaterialGraph funGraph, ICodeGen cGen, EGui.Controls.NodeGraph.PinOut oPin, bool bTakeResult)
+        public override IExpression GetVarExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
         {
             DefineVar Var = new DefineVar();
             Var.IsLocalVar = !IsUniform;
@@ -78,7 +78,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             if (linkXY != null)
             {
                 var exprNode = linkXY.OutNode as IBaseNode;
-                var xyExpr = exprNode.GetExpr(funGraph, cGen, linkXY.Out, true) as OpExpress;
+                var xyExpr = exprNode.GetExpr(funGraph, cGen, linkXY.OutPin, true) as OpExpress;
                 var setExpr = new AssignOp();
                 setExpr.Left = new OpUseDefinedVar(Var);
                 setExpr.Right = xyExpr;
@@ -89,7 +89,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             if (linkX != null)
             {
                 var exprNode = linkX.OutNode as IBaseNode;
-                var xExpr = exprNode.GetExpr(funGraph, cGen, linkX.Out, true) as OpExpress;
+                var xExpr = exprNode.GetExpr(funGraph, cGen, linkX.OutPin, true) as OpExpress;
                 var setExpr = new AssignOp();
                 var member = new BinocularOp(EBinocularOp.GetMember);
                 member.Left = new OpUseDefinedVar(Var);
@@ -103,7 +103,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             if (linkY != null)
             {
                 var exprNode = linkY.OutNode as IBaseNode;
-                var yExpr = exprNode.GetExpr(funGraph, cGen, linkY.Out, true) as OpExpress;
+                var yExpr = exprNode.GetExpr(funGraph, cGen, linkY.OutPin, true) as OpExpress;
                 var setExpr = new AssignOp();
                 var member = new BinocularOp(EBinocularOp.GetMember);
                 member.Left = new OpUseDefinedVar(Var);
@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             }
             return new OpExecuteAndUseDefinedVar(seq, Var);
         }
-        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, EGui.Controls.NodeGraph.PinOut oPin, bool bTakeResult)
+        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
         {
             var expr = GetVarExpr(funGraph, cGen, oPin, bTakeResult);
             if (oPin == OutXY)
@@ -150,17 +150,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         [Rtti.Meta]
         public Vector2 Value { get; set; } = Vector2.Zero;
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinIn InXY { get; set; } = new EGui.Controls.NodeGraph.PinIn();
+        public PinIn InXY { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinIn InX { get; set; } = new EGui.Controls.NodeGraph.PinIn();
+        public PinIn InX { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinIn InY { get; set; } = new EGui.Controls.NodeGraph.PinIn();
+        public PinIn InY { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinOut OutXY { get; set; } = new EGui.Controls.NodeGraph.PinOut();
+        public PinOut OutXY { get; set; } = new PinOut();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinOut OutX { get; set; } = new EGui.Controls.NodeGraph.PinOut();
+        public PinOut OutX { get; set; } = new PinOut();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinOut OutY { get; set; } = new EGui.Controls.NodeGraph.PinOut();
+        public PinOut OutY { get; set; } = new PinOut();
         public VarDimF2()
         {
             VarType = Rtti.UTypeDescGetter<Vector2>.TypeDesc;

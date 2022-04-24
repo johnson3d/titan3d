@@ -90,7 +90,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             await Thread.AsyncDummyClass.DummyFunc();
 
-            var dfPolicy = policy as UDeferredPolicy;
+            var dfPolicy = policy;// as UDeferredPolicy;
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, "ForwordPass");
 
@@ -134,7 +134,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             GizmosRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in GizmosPassDesc);
 
-            var realGBuffer = dfPolicy.DirLightingNode.GBuffers;
             GBuffers.Initialize(dfPolicy, RenderPass);
             GBuffers.SetRenderTarget(dfPolicy, 0, ColorPinInOut);
             GBuffers.SetDepthStencil(dfPolicy, DepthPinInOut);
@@ -164,8 +163,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             if (mOpaqueShading == null)
                 return;
-            var dfPolicy = policy as UDeferredPolicy;
-            var realGBuffer = dfPolicy.DirLightingNode.GBuffers;
             if (GBuffers != null)
             {
                 GBuffers.OnResize(x, y);

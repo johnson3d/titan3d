@@ -1,23 +1,22 @@
 ﻿using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
     public class SamplerState : VarNode
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinOut OutSampler { get; set; } = new EGui.Controls.NodeGraph.PinOut();
+        public PinOut OutSampler { get; set; } = new PinOut();
         public SamplerState()
         {
             VarType = Rtti.UTypeDescGetter<SamplerState>.TypeDesc;
-            PreviewWidth = 0;
-
+            
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF40FF40;
-            TitleImage.Color = 0xFF804020;
-            Background.Color = 0x80808080;
+            TitleColor = 0xFF804020;
+            BackColor = 0x80808080;
 
             OutSampler.Name = "sampler";
             OutSampler.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
@@ -33,13 +32,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             tmp.Value = sampNode.Desc;
             Material.UsedSamplerStates.Add(tmp);
         }
-        public override System.Type GetOutPinType(EGui.Controls.NodeGraph.PinOut pin)
+        public override System.Type GetOutPinType(PinOut pin)
         {
             return VarType.SystemType;
         }
         ISamplerStateDesc mDesc;
         public ISamplerStateDesc Desc { get => mDesc; set => mDesc = value; }
-        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, EGui.Controls.NodeGraph.PinOut oPin, bool bTakeResult)
+        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
         {
             var Var = new OpUseVar(this.Name, false);
             return Var;

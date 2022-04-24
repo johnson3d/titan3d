@@ -12,6 +12,8 @@
 #include "Material"
 #include "MdfQueue"
 
+#include "../../Inc/SysFunctionDefImpl.cginc"
+
 #ifdef MDFQUEUE_FUNCTION
 MDFQUEUE_FUNCTION
 #endif

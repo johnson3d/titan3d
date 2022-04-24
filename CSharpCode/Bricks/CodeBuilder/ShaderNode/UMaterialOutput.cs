@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
@@ -16,8 +16,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF40FF40;
-            TitleImage.Color = 0xFF804020;
-            Background.Color = 0x80808080;
+            TitleColor = 0xFF804020;
+            BackColor = 0x80808080;
 
             Name = "Output";
 
@@ -52,20 +52,21 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             this.AddPinIn(AlphaTest);
         }
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinIn Albedo { get; set; } = new EGui.Controls.NodeGraph.PinIn();
+        public PinIn Albedo { get; set; } = new PinIn();
 
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinIn Emissive { get; set; } = new EGui.Controls.NodeGraph.PinIn();[EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinIn Normal { get; set; } = new EGui.Controls.NodeGraph.PinIn();
+        public PinIn Emissive { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinIn Metallic { get; set; } = new EGui.Controls.NodeGraph.PinIn();
+        public PinIn Normal { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinIn Rough { get; set; } = new EGui.Controls.NodeGraph.PinIn();
+        public PinIn Metallic { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinIn Alpha { get; set; } = new EGui.Controls.NodeGraph.PinIn();
+        public PinIn Rough { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EGui.Controls.NodeGraph.PinIn AlphaTest { get; set; } = new EGui.Controls.NodeGraph.PinIn();
-        public override bool CanLinkFrom(EGui.Controls.NodeGraph.PinIn iPin, EGui.Controls.NodeGraph.NodeBase OutNode, EGui.Controls.NodeGraph.PinOut oPin)
+        public PinIn Alpha { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn AlphaTest { get; set; } = new PinIn();
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -92,7 +93,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             return true;
         }
 
-        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, EGui.Controls.NodeGraph.PinOut oPin, bool bTakeResult)
+        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
         {
             Function.Name = "DO_PS_MATERIAL_IMPL";
             Function.ReturnType = typeof(void).FullName;
@@ -106,7 +107,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var linker = funGraph.FindInLinkerSingle(Albedo);
                 var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.Out, false) as OpExpress;
+                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
                 var assignOp = new AssignOp();
                 var setExpr = new HardCodeOp();
                 setExpr.Code = "mtl.mAlbedo";
@@ -118,7 +119,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var linker = funGraph.FindInLinkerSingle(Emissive);
                 var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.Out, false) as OpExpress;
+                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
                 var assignOp = new AssignOp();
                 var setExpr = new HardCodeOp();
                 setExpr.Code = "mtl.mEmissive";
@@ -130,7 +131,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var linker = funGraph.FindInLinkerSingle(Normal);
                 var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.Out, false) as OpExpress;
+                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
                 var assignOp = new AssignOp();
                 var setExpr = new HardCodeOp();
                 setExpr.Code = "mtl.mNormal";
@@ -142,7 +143,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var linker = funGraph.FindInLinkerSingle(Metallic);
                 var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.Out, false) as OpExpress;
+                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
                 var assignOp = new AssignOp();
                 var setExpr = new HardCodeOp();
                 setExpr.Code = "mtl.mMetallic";
@@ -154,7 +155,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var linker = funGraph.FindInLinkerSingle(Rough);
                 var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.Out, false) as OpExpress;
+                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
                 var assignOp = new AssignOp();
                 var setExpr = new HardCodeOp();
                 setExpr.Code = "mtl.mRough";
@@ -166,7 +167,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var linker = funGraph.FindInLinkerSingle(Alpha);
                 var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.Out, false) as OpExpress;
+                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
                 var assignOp = new AssignOp();
                 var setExpr = new HardCodeOp();
                 setExpr.Code = "mtl.mAlpha";
@@ -178,7 +179,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var linker = funGraph.FindInLinkerSingle(AlphaTest);
                 var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.Out, false) as OpExpress;
+                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
                 var assignOp = new AssignOp();
                 var setExpr = new HardCodeOp();
                 setExpr.Code = "mtl.mAlphaTest";

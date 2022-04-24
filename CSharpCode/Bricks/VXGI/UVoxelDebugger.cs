@@ -124,6 +124,23 @@ namespace EngineNS.Bricks.VXGI
                 CoreDefine.Roundup(VxSceneY, Dispatch_SetupDimArray3.y), 
                 CoreDefine.Roundup(VxSceneZ, Dispatch_SetupDimArray3.z));
 
+            // renwind test
+            srvIdx = CSDesc_CollectVxDebugger.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxPool");
+            if (srvIdx != (IShaderBinder*)0)
+            {
+                CollectVxDebuggerDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, UavVoxelPool.mCoreObject);
+            }
+            srvIdx = CSDesc_CollectVxDebugger.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxScene");
+            if (srvIdx != (IShaderBinder*)0)
+            {
+                CollectVxDebuggerDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, UavVoxelScene.mCoreObject);
+            }
+            srvIdx = CSDesc_CollectVxDebugger.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxIndirectDebugDraws");
+            if (srvIdx != (IShaderBinder*)0)
+            {
+                CollectVxDebuggerDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, UavVxIndirectDebugDraws.mCoreObject);
+            }
+
             srvIdx = CSDesc_CollectVxDebugger.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
             if (srvIdx != (IShaderBinder*)0)
             {

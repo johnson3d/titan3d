@@ -190,5 +190,278 @@ namespace EngineNS.Graphics.Pipeline
 
             base.OnResize(x, y);
         }
+
+        #region CommonState
+        RHI.CSamplerState mClampState;
+        public RHI.CSamplerState ClampState
+        {
+            get
+            {
+                if (mClampState == null)
+                {
+                    var desc = new ISamplerStateDesc();
+                    desc.SetDefault();
+                    desc.Filter = ESamplerFilter.SPF_MIN_MAG_MIP_LINEAR;
+                    desc.CmpMode = EComparisionMode.CMP_NEVER;
+                    desc.AddressU = EAddressMode.ADM_CLAMP;
+                    desc.AddressV = EAddressMode.ADM_CLAMP;
+                    desc.AddressW = EAddressMode.ADM_CLAMP;
+                    desc.MaxAnisotropy = 0;
+                    desc.MipLODBias = 0;
+                    desc.MinLOD = 0;
+                    desc.MaxLOD = 3.402823466e+38f;
+                    mClampState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
+                        UEngine.Instance.GfxDevice.RenderContext, in desc);
+                }
+                return mClampState;
+            }
+        }
+        RHI.CSamplerState mClampPointState;
+        public RHI.CSamplerState ClampPointState
+        {
+            get
+            {
+                if (mClampPointState == null)
+                {
+                    var desc = new ISamplerStateDesc();
+                    desc.SetDefault();
+                    desc.Filter = ESamplerFilter.SPF_MIN_MAG_MIP_POINT;
+                    desc.CmpMode = EComparisionMode.CMP_NEVER;
+                    desc.AddressU = EAddressMode.ADM_CLAMP;
+                    desc.AddressV = EAddressMode.ADM_CLAMP;
+                    desc.AddressW = EAddressMode.ADM_CLAMP;
+                    desc.MaxAnisotropy = 0;
+                    desc.MipLODBias = 0;
+                    desc.MinLOD = 0;
+                    desc.MaxLOD = 3.402823466e+38f;
+                    mClampPointState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
+                        UEngine.Instance.GfxDevice.RenderContext, in desc);
+                }
+                return mClampPointState;
+            }
+        }
+        #endregion
+    }
+
+    public class UDeferredPolicyBase : URenderPolicy
+    {
+        Deferred.UDeferredBasePassNode mBasePassNode;
+        Deferred.UDeferredBasePassNode BasePassNode
+        {
+            get
+            {
+                if (mBasePassNode == null)
+                {
+                    mBasePassNode = FindFirstNode<Deferred.UDeferredBasePassNode>();
+                }
+                return mBasePassNode;
+            }
+        }
+        Deferred.UForwordNode mForwordNode;
+        Deferred.UForwordNode ForwordNode
+        {
+            get
+            {
+                if (mForwordNode == null)
+                {
+                    mForwordNode = FindFirstNode<Deferred.UForwordNode>();
+                }
+                return mForwordNode;
+            }
+        }
+        Shadow.UShadowMapNode mShadowMapNode;
+        Shadow.UShadowMapNode ShadowMapNode
+        {
+            get
+            {
+                if (mShadowMapNode == null)
+                {
+                    mShadowMapNode = FindFirstNode<Shadow.UShadowMapNode>();
+                }
+                return mShadowMapNode;
+            }
+        }
+        Common.UHitproxyNode mHitproxyNode;
+        Common.UHitproxyNode HitproxyNode
+        {
+            get
+            {
+                if (mHitproxyNode == null)
+                {
+                    mHitproxyNode = FindFirstNode<Common.UHitproxyNode>();
+                }
+                return mHitproxyNode;
+            }
+        }
+        Common.UPickedNode mPickedNode;
+        Common.UPickedNode PickedNode
+        {
+            get
+            {
+                if (mPickedNode == null)
+                {
+                    mPickedNode = FindFirstNode<Common.UPickedNode>();
+                }
+                return mPickedNode;
+            }
+        }
+        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        {
+            switch (type)
+            {
+                case EShadingType.BasePass:
+                    {
+                        //var BasePassNode = FindFirstNode<Deferred.UDeferredBasePassNode>();
+                        if (node == BasePassNode)
+                        {
+                            return BasePassNode.mOpaqueShading;
+                        }
+                        else
+                        {
+                            //var ForwordNode = FindFirstNode<Deferred.UForwordNode>();
+                            if (node == ForwordNode)
+                            {
+                                switch (mesh.Atoms[atom].Material.RenderLayer)
+                                {
+                                    case ERenderLayer.RL_Translucent:
+                                        return ForwordNode.mTranslucentShading;
+                                    case ERenderLayer.RL_Sky:
+                                        return ForwordNode.mTranslucentShading;
+                                    default:
+                                        return ForwordNode.mOpaqueShading;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case EShadingType.DepthPass:
+                    {
+                        //var ShadowMapNode = FindFirstNode<Shadow.UShadowMapNode>();
+                        return ShadowMapNode.mShadowShading;
+                    }
+                case EShadingType.HitproxyPass:
+                    {
+                        //var HitproxyNode = FindFirstNode<Common.UHitproxyNode>();
+                        return HitproxyNode.mHitproxyShading;
+                    }
+                case EShadingType.Picked:
+                    {
+                        //var PickedNode = FindFirstNode<Common.UPickedNode>();
+                        return PickedNode.PickedShading;
+                    }
+                default:
+                    break;
+            }
+            return null;
+        }
+    }
+    public class UForwordPolicyBase : URenderPolicy
+    {
+        Mobile.UMobileOpaqueNode mBasePassNode;
+        Mobile.UMobileOpaqueNode BasePassNode
+        {
+            get
+            {
+                if (mBasePassNode == null)
+                {
+                    mBasePassNode = FindFirstNode<Mobile.UMobileOpaqueNode>();
+                }
+                return mBasePassNode;
+            }
+        }
+        Mobile.UMobileTranslucentNode mTranslucentNode;
+        Mobile.UMobileTranslucentNode TranslucentNode
+        {
+            get
+            {
+                if (mTranslucentNode == null)
+                {
+                    mTranslucentNode = FindFirstNode<Mobile.UMobileTranslucentNode>();
+                }
+                return mTranslucentNode;
+            }
+        }
+        Shadow.UShadowMapNode mShadowMapNode;
+        Shadow.UShadowMapNode ShadowMapNode
+        {
+            get
+            {
+                if (mShadowMapNode == null)
+                {
+                    mShadowMapNode = FindFirstNode<Shadow.UShadowMapNode>();
+                }
+                return mShadowMapNode;
+            }
+        }
+        Common.UHitproxyNode mHitproxyNode;
+        Common.UHitproxyNode HitproxyNode
+        {
+            get
+            {
+                if (mHitproxyNode == null)
+                {
+                    mHitproxyNode = FindFirstNode<Common.UHitproxyNode>();
+                }
+                return mHitproxyNode;
+            }
+        }
+        Common.UPickedNode mPickedNode;
+        Common.UPickedNode PickedNode
+        {
+            get
+            {
+                if (mPickedNode == null)
+                {
+                    mPickedNode = FindFirstNode<Common.UPickedNode>();
+                }
+                return mPickedNode;
+            }
+        }
+        public override Shader.UShadingEnv GetPassShading(EShadingType type, Mesh.UMesh mesh, int atom, Pipeline.Common.URenderGraphNode node)
+        {
+            switch (type)
+            {
+                case EShadingType.BasePass:
+                    {
+                        //var BasePassNode = FindFirstNode<Mobile.UMobileOpaqueNode>();
+                        //var TranslucentNode = FindFirstNode<Mobile.UMobileTranslucentNode>();
+                        if (node == BasePassNode)
+                        {
+                            return BasePassNode.mOpaqueShading;
+                        }
+                        else if (node == TranslucentNode)
+                        {
+                            switch (mesh.Atoms[atom].Material.RenderLayer)
+                            {
+                                case ERenderLayer.RL_Translucent:
+                                    return TranslucentNode.mTranslucentShading;
+                                case ERenderLayer.RL_Sky:
+                                    return TranslucentNode.mTranslucentShading;
+                                default:
+                                    return BasePassNode.mOpaqueShading;
+                            }
+                        }
+                    }
+                    break;
+                case EShadingType.DepthPass:
+                    {
+                        //var ShadowMapNode = FindFirstNode<Shadow.UShadowMapNode>();
+                        return ShadowMapNode.mShadowShading;
+                    }
+                case EShadingType.HitproxyPass:
+                    {
+                        //var HitproxyNode = FindFirstNode<Common.UHitproxyNode>();
+                        return HitproxyNode.mHitproxyShading;
+                    }
+                case EShadingType.Picked:
+                    {
+                        //var PickedNode = FindFirstNode<Common.UPickedNode>();
+                        return PickedNode.PickedShading;
+                    }
+                default:
+                    break;
+            }
+            return null;
+        }
     }
 }
