@@ -218,7 +218,7 @@ bool ImGuiAPI::DragScalar2(const char* label, ImGuiDataType data_type, void* p_d
 	bool temp_input_is_active = temp_input_allowed && ImGui::TempInputIsActive(id);
 	if (!temp_input_is_active)
 	{
-		bool lastFocused = (ImGui::GetCurrentContext()->LastItemData.StatusFlags & ImGuiItemStatusFlags_Deactivated) == 0;
+		bool lastFocused = ImGui::GetCurrentContext()->LastItemData.StatusFlags & ImGuiItemStatusFlags_Deactivated == 0;
 		//const bool focus_requested = temp_input_allowed && (window->DC.LastItemStatusFlags & ImGuiItemStatusFlags_Focused) != 0;
 		const bool focus_requested = temp_input_allowed && lastFocused;
 		const bool clicked = (hovered && g.IO.MouseClicked[0]);
