@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>a2ec9f38-402e-4af3-b718-dbbbbae41e33</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>NvTriStrip</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)EdgeInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FaceInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NvStripifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PrimitiveGroup.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PrimitiveType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Stripifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StripInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StripStartInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VertexCache.cs" />
+  </ItemGroup>
+</Project>
