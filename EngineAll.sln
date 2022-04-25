@@ -289,7 +289,10 @@ Global
 		NativeCode\Base\Base.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\Animation\Animation.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		NativeCode\Bricks\Particle\Particle.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\TcpClient\TcpClient.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
+		NativeCode\Bricks\Terrain\Terrain.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Bricks\TextConverter\TextConverter.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Graphics\Mesh\Mesh.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
 		NativeCode\Graphics\Pipeline\Pipeline.vcxitems*{8de1fcd5-27c3-4af6-8fc3-3590240a7a5f}*SharedItemsImports = 4
