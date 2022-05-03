@@ -95,7 +95,7 @@ vBOOL ID11GpuBuffer::UpdateBufferData(ICommandList* cmd, UINT offset, void* data
 		return FALSE;
 
 	auto pContext = ((ID11CommandList*)cmd)->mDeferredContext;
-	if (size < mDesc.ByteWidth && mDesc.CPUAccessFlags & CAS_WRITE)
+	if (size <= mDesc.ByteWidth && mDesc.CPUAccessFlags & CAS_WRITE)
 	{
 		D3D11_MAPPED_SUBRESOURCE mapRes;
 		auto hr = pContext->Map(mBuffer, 0, (D3D11_MAP)D3D11_MAP_WRITE_DISCARD, 0, &mapRes);

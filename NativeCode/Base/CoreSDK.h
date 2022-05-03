@@ -63,8 +63,8 @@ typedef void (*FOnShaderTranslated)(IShaderDesc* shaderDesc);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void (* FAssertEvent)(const void* str, const void* file, int line);
 
-class TR_CLASS(SV_LayoutStruct=8)
-CoreSDK
+class TR_CLASS(SV_LayoutStruct = 8)
+	CoreSDK
 {
 public:
 	static FWriteLogString mWriteLogString;
@@ -126,20 +126,18 @@ public:
 	}
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-BigStackBuffer
+class TR_CLASS(SV_Dispose = delete self)
+	BigStackBuffer
 {
 	BYTE*		mBuffer;
 	int			mSize;
 public:
-	TR_CONSTRUCTOR()
 	BigStackBuffer(int size)
 	{
 		mBuffer = new BYTE[size];
 		memset(mBuffer, 0, size);
 		mSize = size;
 	}
-	TR_CONSTRUCTOR()
 	BigStackBuffer(int size, const char* text)
 	{
 		if ((int)strlen(text) > size)
@@ -155,18 +153,11 @@ public:
 		delete[] mBuffer;
 		mBuffer = nullptr;
 	}
-	TR_FUNCTION()
 	void* GetBuffer() {
 		return mBuffer;
 	}
-	TR_FUNCTION()
 	int GetSize() const{
 		return mSize;
-	}
-	TR_FUNCTION()
-	void DestroyMe()
-	{
-		delete this;
 	}
 };
 

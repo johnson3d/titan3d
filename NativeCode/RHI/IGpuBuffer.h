@@ -119,11 +119,6 @@ public:
 		return TRUE;
 	}
 
-	virtual void UpdateMipData(ICommandList* cmd, UINT level, void* pData, UINT width, UINT height, UINT Pitch)
-	{
-
-	}
-
 	virtual IResourceState* GetResourceState() override {
 		return &mResourceState;
 	}

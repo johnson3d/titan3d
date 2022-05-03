@@ -397,6 +397,9 @@ inline D3D_PRIMITIVE_TOPOLOGY PrimitiveTypeToDX(EPrimitiveType type, UINT NumPri
 {
 	switch (type)
 	{
+	case EPT_LineStrip:
+		*pCount = NumPrimitives;
+		return D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP;
 	case EPT_LineList:
 		*pCount = NumPrimitives * 2;
 		return D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
