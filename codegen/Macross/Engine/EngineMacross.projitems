@@ -20,9 +20,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Converter.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.CustomConvert.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.IGameBase.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Macross.UMacrossTestClass.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.MathHelper.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Profiler.Log.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UTest.UTest_MetaObject.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UTickableManager.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MacrossContextMenu.macross.cs" />
   </ItemGroup>
 </Project>
