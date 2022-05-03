@@ -111,9 +111,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameProject", "Module\GameProject\GameProject.csproj", "{52C1E4B9-D416-471C-8B95-F8A149067D8E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MainEditor", "Module\MainEditor\MainEditor.csproj", "{921E9FEA-31DA-4BA4-BD83-19C0C0EBFBD2}"
-	ProjectSection(ProjectDependencies) = postProject
-		{52C1E4B9-D416-471C-8B95-F8A149067D8E} = {52C1E4B9-D416-471C-8B95-F8A149067D8E}
-	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CSScripting", "CSharpCode\Bricks\CSScripting\CSScripting.shproj", "{575605B6-98E4-4C83-A845-88061A67AD6B}"
 EndProject

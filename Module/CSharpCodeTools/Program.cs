@@ -164,6 +164,13 @@ namespace CSharpCodeTools
                 Macross.UMacrossClassManager.Instance.GatherClass();
                 Console.WriteLine("Macross:WriteCode");
                 Macross.UMacrossClassManager.Instance.WriteCode(macross_target);
+
+                Macross.UMacrossContextMenuManager.Instance.GatherCodeFiles(includes, excludes);
+                Console.WriteLine("MacrossContextMenu:GatherClass");
+                Macross.UMacrossContextMenuManager.Instance.GatherClass();
+                Console.WriteLine("MacrossContextMenu:WriteCode");
+                Macross.UMacrossContextMenuManager.Instance.WriteCode(macross_target);
+                Macross.UMacrossClassManager.Instance.WritedFiles.Add($"{macross_target}/MacrossContextMenu.macross.cs".ToLower());
                 Macross.UMacrossClassManager.Instance.MakeSharedProjectCSharp(macross_target + "/", "EngineMacross.projitems");
                 Console.WriteLine("Macross:Finished");
             }

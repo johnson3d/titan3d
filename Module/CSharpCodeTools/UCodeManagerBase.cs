@@ -322,7 +322,7 @@ namespace CSharpCodeTools
             return false;
         }
 
-        public void WriteCode(string dir)
+        public virtual void WriteCode(string dir)
         {
             foreach (var i in ClassDefines)
             {

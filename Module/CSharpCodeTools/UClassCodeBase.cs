@@ -42,31 +42,47 @@ namespace CSharpCodeTools
         }
 
         #region code writer
-        private int NumOfTab = 0;
+        protected int NumOfTab = 0;
         public int GetTabNum()
         {
             return NumOfTab;
         }
         public void PushTab()
         {
-            NumOfTab++;
+            PushTab(ref NumOfTab);
+        }
+        public static void PushTab(ref int numOfTab)
+        {
+            numOfTab++;
         }
         public void PopTab()
         {
-            NumOfTab--;
+            PopTab(ref NumOfTab);
+        }
+        public static void PopTab(ref int numOfTab)
+        {
+            numOfTab--;
         }
         public void PushBrackets()
         {
-            AddLine("{");
-            NumOfTab++;
+            PushBrackets(ref ClassCode, ref NumOfTab);
+        }
+        public static void PushBrackets(ref string classCode, ref int numOfTab)
+        {
+            AddLine("{", ref classCode, in numOfTab);
+            numOfTab++;
         }
         public void PopBrackets(bool semicolon = false)
         {
-            NumOfTab--;
+            PopBrackets(ref ClassCode, ref NumOfTab, semicolon);
+        }
+        public static void PopBrackets(ref string classCode, ref int numOfTab, bool semicolon = false)
+        {
+            numOfTab--;
             if (semicolon)
-                AddLine("};");
+                AddLine("};", ref classCode, in numOfTab);
             else
-                AddLine("}");
+                AddLine("}", ref classCode, in numOfTab);
         }
         public string ClassCode = "";
         public enum ELineMode
@@ -77,19 +93,27 @@ namespace CSharpCodeTools
         }
         public string AddLine(string code, ELineMode mode = ELineMode.TabKeep)
         {
+            return AddLine(code, ref ClassCode, in NumOfTab, mode);
+        }
+        public static string AddLine(string code, ref string classCode, in int numOfTab, ELineMode mode = ELineMode.TabKeep)
+        {
             string result = "";
-            for (int i = 0; i < NumOfTab; i++)
+            for (int i = 0; i < numOfTab; i++)
             {
                 result += '\t';
             }
             result += code + '\n';
 
-            ClassCode += result;
+            classCode += result;
             return result;
         }
         public void NewLine()
         {
-            AddLine("\n");
+            NewLine(ref ClassCode, in NumOfTab);
+        }
+        public static void NewLine(ref string classCode, in int numOfTab)
+        {
+            AddLine("\n", ref classCode, in numOfTab);
         }
         public string AppendCode(string code, bool bTab, bool bNewLine)
         {
