@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Movemnet\UMovement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\Actor\UActor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\UPlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\UBezierSplineNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UGridNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UMeshNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UNode_Editor.cs" />

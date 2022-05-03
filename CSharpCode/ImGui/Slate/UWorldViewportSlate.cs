@@ -269,7 +269,7 @@ namespace EngineNS.EGui.Slate
         public override void OnDrawViewportUI(in Vector2 startDrawPos)
         {
             if (mAxis != null)
-                mAxisOperated = mAxis.OnDrawUI(startDrawPos);
+                mAxisOperated = mAxis.OnDrawUI(this, startDrawPos);
         }
     }
 }

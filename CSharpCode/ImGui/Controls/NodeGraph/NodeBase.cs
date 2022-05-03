@@ -18,33 +18,107 @@ namespace EngineNS.EGui.Controls.NodeGraph
             mNotify = notify;
             LabelName = "EVL_" + System.Threading.Interlocked.Add(ref GID_EditableValue, 1).ToString();
         }
-        public static EditableValue CreateEditableValue(IValueEditNotify notify, System.Type type, object tag)
+        static EditableValue CreateEditableValue_Internal(IValueEditNotify notify, Rtti.UTypeDesc type, object tag)
         {
-            if (type == typeof(SByte) ||
-                type == typeof(Int16) ||
-                type == typeof(Int32) ||
-                type == typeof(byte) ||
-                type == typeof(UInt16) ||
-                type == typeof(UInt32) ||
-                type == typeof(UInt64) ||
-                type == typeof(Int64) ||
-                type == typeof(Int64) ||
-                type == typeof(float) ||
-                type == typeof(double) ||
-                type == typeof(string) ||
-                type == typeof(Vector2) ||
-                type == typeof(Vector3) ||
-                type == typeof(Vector4))
+            var result = new EditableValue(notify);
+            result.ValueType = type;
+            result.Tag = tag;
+            return result;
+        }
+        public static EditableValue CreateEditableValue(IValueEditNotify notify, Type type, object tag)
+        {
+            return CreateEditableValue(notify, Rtti.UTypeDesc.TypeOf(type), tag);
+        }
+        public static EditableValue CreateEditableValue(IValueEditNotify notify, Rtti.UTypeDesc type, object tag)
+        {
+            if (type.IsEqual(typeof(SByte)))
             {
-                var result = new EditableValue(notify);
-                result.ValueType = Rtti.UTypeDesc.TypeOf(type);
-                result.Tag = tag;
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = (SByte)0;
                 return result;
             }
-            else if(type == typeof(System.Type))
+            if (type.IsEqual(typeof(Int16)))
+            { 
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = (Int16)0;
+                return result;
+            }
+            if (type.IsEqual(typeof(Int32)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = (Int32)0;
+                return result;
+            }
+            if (type.IsEqual(typeof(Int64)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = (Int64)0;
+                return result;
+            }
+            if (type.IsEqual(typeof(byte)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = (byte)0;
+                return result;
+            }
+            if (type.IsEqual(typeof(UInt16)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = (UInt16)0;
+                return result;
+            }
+            if (type.IsEqual(typeof(UInt32)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = (UInt32)0;
+                return result;
+            }
+            if (type.IsEqual(typeof(UInt64)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = (UInt64)0;
+                return result;
+            }
+            if (type.IsEqual(typeof(float)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = (float)0;
+                return result;
+            }
+            if (type.IsEqual(typeof(double)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = (double)0;
+                return result;
+            }
+            if (type.IsEqual(typeof(string)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = "";
+                return result;
+            }
+            if (type.IsEqual(typeof(Vector2)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = Vector2.Zero;
+                return result;
+            }
+            if (type.IsEqual(typeof(Vector3)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = Vector3.Zero;
+                return result;
+            }
+            if (type.IsEqual(typeof(Vector4)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                result.Value = Vector4.Zero;
+                return result;
+            }
+            else if(type.IsEqual(typeof(System.Type)))
             {
                 var result = new TypeSelectorEValue(notify);
-                result.ValueType = Rtti.UTypeDesc.TypeOf(type);
+                result.ValueType = type;
                 result.Selector.CtrlId = result.LabelName;
                 result.Tag = tag;
                 return result;
@@ -53,7 +127,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
         }
         private string LabelName;
         public Rtti.UTypeDesc ValueType { get; set; }
-        public object Value { get; set; }
+        public object Value { get; set; }   // todo: change value to UAnyValue
         public float ControlWidth { get; set; } = 80;
         private static int GID_EditableValue = 0;
         public virtual unsafe void OnDraw(NodeBase node, int index, NodeGraphStyles styles, float fScale)
@@ -136,7 +210,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
             else if (ValueType.SystemType == typeof(Vector3))
             {
                 ImGuiAPI.PushItemWidth(ControlWidth * fScale);
-                var v = (Vector2)(Value);
+                var v = (Vector3)(Value);
                 var saved = v;
                 ImGuiAPI.InputFloat3($"##{LabelName}", (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
                 if (saved != v)
@@ -149,7 +223,7 @@ namespace EngineNS.EGui.Controls.NodeGraph
             else if (ValueType.SystemType == typeof(Vector4))
             {
                 ImGuiAPI.PushItemWidth(ControlWidth * fScale);
-                var v = (Vector2)(Value);
+                var v = (Vector4)(Value);
                 var saved = v;
                 ImGuiAPI.InputFloat4($"##{LabelName}", (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
                 if (saved != v)

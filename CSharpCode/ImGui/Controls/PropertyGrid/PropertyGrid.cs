@@ -90,9 +90,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     }
     public class PGTypeEditorAttribute : PGCustomValueEditorAttribute
     {
+        
         public string AssemblyFilter = null;
-        public bool ExcludeSealed = false;
-        public bool ExcludeValueType = false;
+        public TypeSelector.EFilterMode FilterMode = TypeSelector.EFilterMode.IncludeObjectType | TypeSelector.EFilterMode.IncludeValueType;
+
         public Rtti.UTypeDesc BaseType;
         public PGTypeEditorAttribute(System.Type baseType)
         {
@@ -108,9 +109,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             //    return false;
             //var props = bindType.SystemType.GetProperties();
             ImGuiAPI.SetNextItemWidth(-1);
-            TypeSlt.AssemblyFilter = AssemblyFilter;
-            TypeSlt.ExcludeSealed = ExcludeSealed;
-            TypeSlt.ExcludeValueType = ExcludeValueType;
+            TypeSlt.FilterMode = FilterMode;
+            TypeSlt.AssemblyFilter = AssemblyFilter;            
             TypeSlt.BaseType = BaseType;
             var multiValue = info.Value as PropertyMultiValue;
             if(multiValue != null && multiValue.HasDifferentValue())
@@ -119,8 +119,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             else
             {
-                var typeStr = info.Value.ToString();// as string;
-                TypeSlt.SelectedType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeStr);
+                //var typeStr = info.Value.ToString();// as string;
+                //TypeSlt.SelectedType = Rtti.UTypeDesc.TypeOf(typeStr); //Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeStr);
+                TypeSlt.SelectedType = info.Value as Rtti.UTypeDesc;
                 if (TypeSlt.OnDraw(-1, 12))
                 {
                     newValue = TypeSlt.SelectedType;

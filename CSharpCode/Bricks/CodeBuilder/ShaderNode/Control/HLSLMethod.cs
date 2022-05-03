@@ -9,28 +9,28 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
     public partial class HLSLMethod
     {
         [Rtti.Meta]
-        [UserCallNode(CallNodeType = typeof(SampleLevel2DNode))]
+        //[UserCallNode(CallNodeType = typeof(SampleLevel2DNode))]
         public static Vector4 SampleLevel2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float level, out Vector3 rgb)
         {
             rgb = new Vector3();
             return new Vector4();
         }
         [Rtti.Meta]
-        [UserCallNode(CallNodeType = typeof(Sample2DNode))]
+        //[UserCallNode(CallNodeType = typeof(Sample2DNode))]
         public static Vector4 Sample2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, out Vector3 rgb)
         {
             rgb = new Vector3();
             return new Vector4();
         }
         [Rtti.Meta]
-        [UserCallNode(CallNodeType = typeof(SampleArrayLevel2DNode))]
+        //[UserCallNode(CallNodeType = typeof(SampleArrayLevel2DNode))]
         public static Vector4 SampleArrayLevel2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, float level, out Vector3 rgb)
         {
             rgb = new Vector3();
             return new Vector4();
         }
         [Rtti.Meta]
-        [UserCallNode(CallNodeType = typeof(SampleArray2DNode))]
+        //[UserCallNode(CallNodeType = typeof(SampleArray2DNode))]
         public static Vector4 SampleArray2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, out Vector3 rgb)
         {
             rgb = new Vector3();
@@ -81,7 +81,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             ret.Z = v1.Z + s.Z * (v2.Z - v1.Z);
         }
     }
-
+    [ContextMenu("SampleLevel2D", "Function\\SampleLevel2D", UMaterialGraph.MaterialEditorKeyword)]
     public class SampleLevel2DNode : CallNode
     {
         public SampleLevel2DNode()
@@ -94,33 +94,33 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         ~SampleLevel2DNode()
         {
         }
-        public override void OnMaterialEditorGenCode(Bricks.CodeBuilder.HLSL.UHLSLGen gen, UMaterial Material)
-        {
-            var texNode = this;
-            var texturePinIn = texNode.FindPinIn("texture");
-            if (texturePinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
-                tmp.Name = texNode.TextureVarName;
-                tmp.ShaderType = "Texture2D";
-                if (Material.FindSRV(tmp.Name) == null)
-                {
-                    tmp.Value = texNode.AssetName;
-                    Material.UsedRSView.Add(tmp);
-                }
-            }
-            var samplerPinIn = texNode.FindPinIn("sampler");
-            if (samplerPinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
-                tmp.Name = "Samp_" + texNode.TextureVarName;
-                if (Material.FindSampler(tmp.Name) == null)
-                {
-                    tmp.Value = texNode.Sampler;
-                    Material.UsedSamplerStates.Add(tmp);
-                }
-            }
-        }
+        //public override void OnMaterialEditorGenCode(UMaterial Material)
+        //{
+        //    var texNode = this;
+        //    var texturePinIn = texNode.FindPinIn("texture");
+        //    if (texturePinIn.HasLinker() == false)
+        //    {
+        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+        //        tmp.Name = texNode.TextureVarName;
+        //        tmp.ShaderType = "Texture2D";
+        //        if (Material.FindSRV(tmp.Name) == null)
+        //        {
+        //            tmp.Value = texNode.AssetName;
+        //            Material.UsedRSView.Add(tmp);
+        //        }
+        //    }
+        //    var samplerPinIn = texNode.FindPinIn("sampler");
+        //    if (samplerPinIn.HasLinker() == false)
+        //    {
+        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+        //        tmp.Name = "Samp_" + texNode.TextureVarName;
+        //        if (Material.FindSampler(tmp.Name) == null)
+        //        {
+        //            tmp.Value = texNode.Sampler;
+        //            Material.UsedSamplerStates.Add(tmp);
+        //        }
+        //    }
+        //}
         [Rtti.Meta]
         public string TextureVarName { get; set; }
         [Rtti.Meta]
@@ -163,37 +163,96 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 cmdlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             }
         }
-        protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
-        {
-            if (Method.Parameters[i].ParamInfo.Name == "texture")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = TextureVarName;
-                return new OpUseDefinedVar(retVar);
-            }
-            else if (Method.Parameters[i].ParamInfo.Name == "sampler")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = "Samp_" + TextureVarName;
-                return new OpUseDefinedVar(retVar);
-            }
-            else if (Method.Parameters[i].ParamInfo.Name == "uv")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = "input.vUV";
-                return new OpUseDefinedVar(retVar);
-            }
+        //protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
+        //{
+        //    if (Method.Parameters[i].Name == "texture")
+        //    {
+        //        var retVar = new DefineVar();
+        //        retVar.IsLocalVar = false;
+        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
+        //        retVar.VarName = TextureVarName;
+        //        return new OpUseDefinedVar(retVar);
+        //    }
+        //    else if (Method.Parameters[i].Name == "sampler")
+        //    {
+        //        var retVar = new DefineVar();
+        //        retVar.IsLocalVar = false;
+        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
+        //        retVar.VarName = "Samp_" + TextureVarName;
+        //        return new OpUseDefinedVar(retVar);
+        //    }
+        //    else if (Method.Parameters[i].Name == "uv")
+        //    {
+        //        var retVar = new DefineVar();
+        //        retVar.IsLocalVar = false;
+        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
+        //        retVar.VarName = "input.vUV";
+        //        return new OpUseDefinedVar(retVar);
+        //    }
 
-            return base.OnNoneLinkedParameter(funGraph, cGen, i);
+        //    return base.OnNoneLinkedParameter(funGraph, cGen, i);
+        //}
+
+        protected override UExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
+        {
+            var method = Method;
+            if (method.Parameters[argIdx].Name == "texture")
+            {
+                var retVal = new UVariableReferenceExpression()
+                {
+                    VariableName = TextureVarName
+                };
+                return retVal;
+            }
+            else if (method.Parameters[argIdx].Name == "sampler")
+            {
+                var retVal = new UVariableReferenceExpression()
+                {
+                    VariableName = "Samp_" + TextureVarName
+                };
+                return retVal;
+            }
+            else if (method.Parameters[argIdx].Name == "uv")
+            {
+                var retVal = new UVariableReferenceExpression()
+                {
+                    VariableName = "input.vUV"
+                };
+                return retVal;
+            }
+            return base.GetNoneLinkedParameterExp(pin, argIdx, ref data);
+        }
+        public override void BuildStatements(ref NodeGraph.BuildCodeStatementsData data)
+        {
+            var material = data.UserData as UMaterial;
+            var texturePinIn = FindPinIn("texture");
+            if (texturePinIn.HasLinker() == false)
+            {
+                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+                tmp.Name = TextureVarName;
+                tmp.ShaderType = "Texture2D";
+                if (material.FindSRV(tmp.Name) == null)
+                {
+                    tmp.Value = AssetName;
+                    material.UsedRSView.Add(tmp);
+                }
+            }
+            var samplerPinIn = FindPinIn("sampler");
+            if (samplerPinIn.HasLinker() == false)
+            {
+                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+                tmp.Name = "Samp_" + TextureVarName;
+                if (material.FindSampler(tmp.Name) == null)
+                {
+                    tmp.Value = Sampler;
+                    material.UsedSamplerStates.Add(tmp);
+                }
+            }
+            base.BuildStatements(ref data);
         }
     }
 
+    [ContextMenu("Sample2D", "Function\\Sample2D", UMaterialGraph.MaterialEditorKeyword)]
     public class Sample2DNode : CallNode
     {
         public Sample2DNode()
@@ -206,33 +265,33 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         ~Sample2DNode()
         {
         }
-        public override void OnMaterialEditorGenCode(Bricks.CodeBuilder.HLSL.UHLSLGen gen, UMaterial Material)
-        {
-            var texNode = this;
-            var texturePinIn = texNode.FindPinIn("texture");
-            if (texturePinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
-                tmp.Name = texNode.TextureVarName;
-                tmp.ShaderType = "Texture2D";
-                if (Material.FindSRV(tmp.Name) == null)
-                {
-                    tmp.Value = texNode.AssetName;
-                    Material.UsedRSView.Add(tmp);
-                }
-            }
-            var samplerPinIn = texNode.FindPinIn("sampler");
-            if (samplerPinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
-                tmp.Name = "Samp_" + texNode.TextureVarName;
-                if (Material.FindSampler(tmp.Name) == null)
-                {
-                    tmp.Value = texNode.Sampler;
-                    Material.UsedSamplerStates.Add(tmp);
-                }
-            }
-        }
+        //public override void OnMaterialEditorGenCode(UMaterial Material)
+        //{
+        //    var texNode = this;
+        //    var texturePinIn = texNode.FindPinIn("texture");
+        //    if (texturePinIn.HasLinker() == false)
+        //    {
+        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+        //        tmp.Name = texNode.TextureVarName;
+        //        tmp.ShaderType = "Texture2D";
+        //        if (Material.FindSRV(tmp.Name) == null)
+        //        {
+        //            tmp.Value = texNode.AssetName;
+        //            Material.UsedRSView.Add(tmp);
+        //        }
+        //    }
+        //    var samplerPinIn = texNode.FindPinIn("sampler");
+        //    if (samplerPinIn.HasLinker() == false)
+        //    {
+        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+        //        tmp.Name = "Samp_" + texNode.TextureVarName;
+        //        if (Material.FindSampler(tmp.Name) == null)
+        //        {
+        //            tmp.Value = texNode.Sampler;
+        //            Material.UsedSamplerStates.Add(tmp);
+        //        }
+        //    }
+        //}
         [Rtti.Meta]
         public string TextureVarName { get; set; }
         [Rtti.Meta]
@@ -275,37 +334,95 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 cmdlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             }
         }
-        protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
-        {
-            if (Method.Parameters[i].ParamInfo.Name == "texture")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = TextureVarName;
-                return new OpUseDefinedVar(retVar);
-            }
-            else if (Method.Parameters[i].ParamInfo.Name == "sampler")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = "Samp_" + TextureVarName;
-                return new OpUseDefinedVar(retVar);
-            }
-            else if (Method.Parameters[i].ParamInfo.Name == "uv")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = "input.vUV";
-                return new OpUseDefinedVar(retVar);
-            }
+        //protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
+        //{
+        //    if (Method.Parameters[i].Name == "texture")
+        //    {
+        //        var retVar = new DefineVar();
+        //        retVar.IsLocalVar = false;
+        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
+        //        retVar.VarName = TextureVarName;
+        //        return new OpUseDefinedVar(retVar);
+        //    }
+        //    else if (Method.Parameters[i].Name == "sampler")
+        //    {
+        //        var retVar = new DefineVar();
+        //        retVar.IsLocalVar = false;
+        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
+        //        retVar.VarName = "Samp_" + TextureVarName;
+        //        return new OpUseDefinedVar(retVar);
+        //    }
+        //    else if (Method.Parameters[i].Name == "uv")
+        //    {
+        //        var retVar = new DefineVar();
+        //        retVar.IsLocalVar = false;
+        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
+        //        retVar.VarName = "input.vUV";
+        //        return new OpUseDefinedVar(retVar);
+        //    }
 
-            return base.OnNoneLinkedParameter(funGraph, cGen, i);
+        //    return base.OnNoneLinkedParameter(funGraph, cGen, i);
+        //}
+        protected override UExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
+        {
+            var method = Method;
+            if(method.Parameters[argIdx].Name == "texture")
+            {
+                var retVal = new UVariableReferenceExpression()
+                {
+                    VariableName = TextureVarName
+                };
+                return retVal;
+            }
+            else if(method.Parameters[argIdx].Name == "sampler")
+            {
+                var retVal = new UVariableReferenceExpression()
+                {
+                    VariableName = "Samp_" + TextureVarName
+                };
+                return retVal;
+            }
+            else if(method.Parameters[argIdx].Name == "uv")
+            {
+                var retVal = new UVariableReferenceExpression()
+                {
+                    VariableName = "input.vUV"
+                };
+                return retVal;
+            }
+            return base.GetNoneLinkedParameterExp(pin, argIdx, ref data);
+        }
+        public override void BuildStatements(ref NodeGraph.BuildCodeStatementsData data)
+        {
+            var material = data.UserData as UMaterial;
+            var texturePinIn = FindPinIn("texture");
+            if(texturePinIn.HasLinker() == false)
+            {
+                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+                tmp.Name = TextureVarName;
+                tmp.ShaderType = "Texture2D";
+                if (material.FindSRV(tmp.Name) == null)
+                {
+                    tmp.Value = AssetName;
+                    material.UsedRSView.Add(tmp);
+                }
+            }
+            var samplerPinIn = FindPinIn("sampler");
+            if (samplerPinIn.HasLinker() == false)
+            {
+                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+                tmp.Name = "Samp_" + TextureVarName;
+                if (material.FindSampler(tmp.Name) == null)
+                {
+                    tmp.Value = Sampler;
+                    material.UsedSamplerStates.Add(tmp);
+                }
+            }
+            base.BuildStatements(ref data);
         }
     }
 
+    [ContextMenu("SampleArrayLevel2D", "Function\\SampleArrayLevel2D", UMaterialGraph.MaterialEditorKeyword)]
     public class SampleArrayLevel2DNode : CallNode
     {
         public SampleArrayLevel2DNode()
@@ -318,33 +435,33 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         ~SampleArrayLevel2DNode()
         {
         }
-        public override void OnMaterialEditorGenCode(Bricks.CodeBuilder.HLSL.UHLSLGen gen, UMaterial Material)
-        {
-            var texNode = this;
-            var texturePinIn = texNode.FindPinIn("texture");
-            if (texturePinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
-                tmp.Name = texNode.TextureVarName;
-                tmp.ShaderType = "Texture2DArray";
-                if (Material.FindSRV(tmp.Name) == null)
-                {
-                    tmp.Value = texNode.AssetName;
-                    Material.UsedRSView.Add(tmp);
-                }
-            }
-            var samplerPinIn = texNode.FindPinIn("sampler");
-            if (samplerPinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
-                tmp.Name = "Samp_" + texNode.TextureVarName;
-                if (Material.FindSampler(tmp.Name) == null)
-                {
-                    tmp.Value = texNode.Sampler;
-                    Material.UsedSamplerStates.Add(tmp);
-                }
-            }
-        }
+        //public override void OnMaterialEditorGenCode(UMaterial Material)
+        //{
+        //    var texNode = this;
+        //    var texturePinIn = texNode.FindPinIn("texture");
+        //    if (texturePinIn.HasLinker() == false)
+        //    {
+        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+        //        tmp.Name = texNode.TextureVarName;
+        //        tmp.ShaderType = "Texture2DArray";
+        //        if (Material.FindSRV(tmp.Name) == null)
+        //        {
+        //            tmp.Value = texNode.AssetName;
+        //            Material.UsedRSView.Add(tmp);
+        //        }
+        //    }
+        //    var samplerPinIn = texNode.FindPinIn("sampler");
+        //    if (samplerPinIn.HasLinker() == false)
+        //    {
+        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+        //        tmp.Name = "Samp_" + texNode.TextureVarName;
+        //        if (Material.FindSampler(tmp.Name) == null)
+        //        {
+        //            tmp.Value = texNode.Sampler;
+        //            Material.UsedSamplerStates.Add(tmp);
+        //        }
+        //    }
+        //}
         [Rtti.Meta]
         public string TextureVarName { get; set; }
         [Rtti.Meta]
@@ -387,37 +504,95 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 cmdlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             }
         }
-        protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
-        {
-            if (Method.Parameters[i].ParamInfo.Name == "texture")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = TextureVarName;
-                return new OpUseDefinedVar(retVar);
-            }
-            else if (Method.Parameters[i].ParamInfo.Name == "sampler")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = "Samp_" + TextureVarName;
-                return new OpUseDefinedVar(retVar);
-            }
-            else if (Method.Parameters[i].ParamInfo.Name == "uv")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = "input.vUV";
-                return new OpUseDefinedVar(retVar);
-            }
+        //protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
+        //{
+        //    if (Method.Parameters[i].Name == "texture")
+        //    {
+        //        var retVar = new DefineVar();
+        //        retVar.IsLocalVar = false;
+        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
+        //        retVar.VarName = TextureVarName;
+        //        return new OpUseDefinedVar(retVar);
+        //    }
+        //    else if (Method.Parameters[i].Name == "sampler")
+        //    {
+        //        var retVar = new DefineVar();
+        //        retVar.IsLocalVar = false;
+        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
+        //        retVar.VarName = "Samp_" + TextureVarName;
+        //        return new OpUseDefinedVar(retVar);
+        //    }
+        //    else if (Method.Parameters[i].Name == "uv")
+        //    {
+        //        var retVar = new DefineVar();
+        //        retVar.IsLocalVar = false;
+        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
+        //        retVar.VarName = "input.vUV";
+        //        return new OpUseDefinedVar(retVar);
+        //    }
 
-            return base.OnNoneLinkedParameter(funGraph, cGen, i);
+        //    return base.OnNoneLinkedParameter(funGraph, cGen, i);
+        //}
+        protected override UExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
+        {
+            var method = Method;
+            if (method.Parameters[argIdx].Name == "texture")
+            {
+                var retVal = new UVariableReferenceExpression()
+                {
+                    VariableName = TextureVarName
+                };
+                return retVal;
+            }
+            else if (method.Parameters[argIdx].Name == "sampler")
+            {
+                var retVal = new UVariableReferenceExpression()
+                {
+                    VariableName = "Samp_" + TextureVarName
+                };
+                return retVal;
+            }
+            else if (method.Parameters[argIdx].Name == "uv")
+            {
+                var retVal = new UVariableReferenceExpression()
+                {
+                    VariableName = "input.vUV"
+                };
+                return retVal;
+            }
+            return base.GetNoneLinkedParameterExp(pin, argIdx, ref data);
+        }
+        public override void BuildStatements(ref NodeGraph.BuildCodeStatementsData data)
+        {
+            var material = data.UserData as UMaterial;
+            var texturePinIn = FindPinIn("texture");
+            if (texturePinIn.HasLinker() == false)
+            {
+                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+                tmp.Name = TextureVarName;
+                tmp.ShaderType = "Texture2D";
+                if (material.FindSRV(tmp.Name) == null)
+                {
+                    tmp.Value = AssetName;
+                    material.UsedRSView.Add(tmp);
+                }
+            }
+            var samplerPinIn = FindPinIn("sampler");
+            if (samplerPinIn.HasLinker() == false)
+            {
+                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+                tmp.Name = "Samp_" + TextureVarName;
+                if (material.FindSampler(tmp.Name) == null)
+                {
+                    tmp.Value = Sampler;
+                    material.UsedSamplerStates.Add(tmp);
+                }
+            }
+            base.BuildStatements(ref data);
         }
     }
 
+    [ContextMenu("SampleArray2D", "Function\\SampleArray2D", UMaterialGraph.MaterialEditorKeyword)]
     public class SampleArray2DNode : CallNode
     {
         public SampleArray2DNode()
@@ -430,33 +605,33 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         ~SampleArray2DNode()
         {
         }
-        public override void OnMaterialEditorGenCode(Bricks.CodeBuilder.HLSL.UHLSLGen gen, UMaterial Material)
-        {
-            var texNode = this;
-            var texturePinIn = texNode.FindPinIn("texture");
-            if (texturePinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
-                tmp.Name = texNode.TextureVarName;
-                tmp.ShaderType = "Texture2DArray";
-                if (Material.FindSRV(tmp.Name) == null)
-                {
-                    tmp.Value = texNode.AssetName;
-                    Material.UsedRSView.Add(tmp);
-                }
-            }
-            var samplerPinIn = texNode.FindPinIn("sampler");
-            if (samplerPinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
-                tmp.Name = "Samp_" + texNode.TextureVarName;
-                if (Material.FindSampler(tmp.Name) == null)
-                {
-                    tmp.Value = texNode.Sampler;
-                    Material.UsedSamplerStates.Add(tmp);
-                }
-            }
-        }
+        //public override void OnMaterialEditorGenCode(UMaterial Material)
+        //{
+        //    var texNode = this;
+        //    var texturePinIn = texNode.FindPinIn("texture");
+        //    if (texturePinIn.HasLinker() == false)
+        //    {
+        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+        //        tmp.Name = texNode.TextureVarName;
+        //        tmp.ShaderType = "Texture2DArray";
+        //        if (Material.FindSRV(tmp.Name) == null)
+        //        {
+        //            tmp.Value = texNode.AssetName;
+        //            Material.UsedRSView.Add(tmp);
+        //        }
+        //    }
+        //    var samplerPinIn = texNode.FindPinIn("sampler");
+        //    if (samplerPinIn.HasLinker() == false)
+        //    {
+        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+        //        tmp.Name = "Samp_" + texNode.TextureVarName;
+        //        if (Material.FindSampler(tmp.Name) == null)
+        //        {
+        //            tmp.Value = texNode.Sampler;
+        //            Material.UsedSamplerStates.Add(tmp);
+        //        }
+        //    }
+        //}
         [Rtti.Meta]
         public string TextureVarName { get; set; }
         [Rtti.Meta]
@@ -499,34 +674,91 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 cmdlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             }
         }
-        protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
-        {
-            if (Method.Parameters[i].ParamInfo.Name == "texture")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = TextureVarName;
-                return new OpUseDefinedVar(retVar);
-            }
-            else if (Method.Parameters[i].ParamInfo.Name == "sampler")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = "Samp_" + TextureVarName;
-                return new OpUseDefinedVar(retVar);
-            }
-            else if (Method.Parameters[i].ParamInfo.Name == "uv")
-            {
-                var retVar = new DefineVar();
-                retVar.IsLocalVar = false;
-                retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParamInfo.ParameterType);
-                retVar.VarName = "input.vUV";
-                return new OpUseDefinedVar(retVar);
-            }
+        //protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
+        //{
+        //    if (Method.Parameters[i].Name == "texture")
+        //    {
+        //        var retVar = new DefineVar();
+        //        retVar.IsLocalVar = false;
+        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
+        //        retVar.VarName = TextureVarName;
+        //        return new OpUseDefinedVar(retVar);
+        //    }
+        //    else if (Method.Parameters[i].Name == "sampler")
+        //    {
+        //        var retVar = new DefineVar();
+        //        retVar.IsLocalVar = false;
+        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
+        //        retVar.VarName = "Samp_" + TextureVarName;
+        //        return new OpUseDefinedVar(retVar);
+        //    }
+        //    else if (Method.Parameters[i].Name == "uv")
+        //    {
+        //        var retVar = new DefineVar();
+        //        retVar.IsLocalVar = false;
+        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
+        //        retVar.VarName = "input.vUV";
+        //        return new OpUseDefinedVar(retVar);
+        //    }
 
-            return base.OnNoneLinkedParameter(funGraph, cGen, i);
+        //    return base.OnNoneLinkedParameter(funGraph, cGen, i);
+        //}
+        protected override UExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
+        {
+            var method = Method;
+            if (method.Parameters[argIdx].Name == "texture")
+            {
+                var retVal = new UVariableReferenceExpression()
+                {
+                    VariableName = TextureVarName
+                };
+                return retVal;
+            }
+            else if (method.Parameters[argIdx].Name == "sampler")
+            {
+                var retVal = new UVariableReferenceExpression()
+                {
+                    VariableName = "Samp_" + TextureVarName
+                };
+                return retVal;
+            }
+            else if (method.Parameters[argIdx].Name == "uv")
+            {
+                var retVal = new UVariableReferenceExpression()
+                {
+                    VariableName = "input.vUV"
+                };
+                return retVal;
+            }
+            return base.GetNoneLinkedParameterExp(pin, argIdx, ref data);
+        }
+        public override void BuildStatements(ref NodeGraph.BuildCodeStatementsData data)
+        {
+            var material = data.UserData as UMaterial;
+            var texturePinIn = FindPinIn("texture");
+            if (texturePinIn.HasLinker() == false)
+            {
+                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+                tmp.Name = TextureVarName;
+                tmp.ShaderType = "Texture2D";
+                if (material.FindSRV(tmp.Name) == null)
+                {
+                    tmp.Value = AssetName;
+                    material.UsedRSView.Add(tmp);
+                }
+            }
+            var samplerPinIn = FindPinIn("sampler");
+            if (samplerPinIn.HasLinker() == false)
+            {
+                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+                tmp.Name = "Samp_" + TextureVarName;
+                if (material.FindSampler(tmp.Name) == null)
+                {
+                    tmp.Value = Sampler;
+                    material.UsedSamplerStates.Add(tmp);
+                }
+            }
+            base.BuildStatements(ref data);
         }
     }
 }

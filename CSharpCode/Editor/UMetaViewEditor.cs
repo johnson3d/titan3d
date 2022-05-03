@@ -178,7 +178,7 @@ namespace EngineNS.Editor
                 var colorVar = materials1[0].FindVar("clr4_0");
                 if (colorVar != null)
                 {
-                    colorVar.Value = "1,0,1,1";
+                    colorVar.SetValue(new Vector4(1,0,1,1));
                 }
                 var ok1 = mesh2.Initialize(cookedMesh, materials1, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
                 if (ok1)
@@ -264,6 +264,18 @@ namespace EngineNS.Editor
 
             var app = UEngine.Instance.GfxDevice.MainWindow as Graphics.Pipeline.USlateApplication;
             gridNode.ViewportSlate = app.GetWorldViewportSlate();
+
+            var dirLightNode = new GamePlay.Scene.UDirLightNode();            
+            await dirLightNode.InitializeNode(world, new GamePlay.Scene.UDirLightNode.UDirLightNodeData(), GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+            dirLightNode.NodeData.Name = $"DirLight";
+            dirLightNode.Parent = root;
+
+            dirLightNode.Placement.Scale = new Vector3(10, 10, 10);
+
+            //dirLightNode.Placement.Quat = Quaternion.RotationYawPitchRoll((float)Math.PI * 0.25f, (float)Math.PI * 0.25f, 0);
+            var toVec = new Vector3(-1, -1, -1);
+            toVec.Normalize();
+            dirLightNode.Placement.Quat = Quaternion.RotationFrowTwoVector(in Vector3.UnitZ, in toVec);
         }
 
         public static async System.Threading.Tasks.Task TestCreateCharacter(GamePlay.UWorld world, GamePlay.Scene.UNode root, bool hideTerrain = false)

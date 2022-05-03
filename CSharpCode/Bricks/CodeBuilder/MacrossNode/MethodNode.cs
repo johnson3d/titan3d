@@ -4,13 +4,18 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class MethodNode : INodeExpr, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class MethodNode : UNodeBase, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
     {
         public PinOut Result = null;
         public PinIn Self = null;
-        public List<PinIn> Arguments = new List<PinIn>();
-        public List<PinOut> OutArguments = new List<PinOut>();
-        public Rtti.UClassMeta.MethodMeta Method
+        public struct PinData
+        {
+            public PinIn PinIn;
+            public PinOut PinOut;
+            public EMethodArgumentAttribute OpType;
+        }
+        public List<PinData> Arguments = new List<PinData>();
+        private Rtti.UClassMeta.MethodMeta Method
         {
             get
             {
@@ -25,6 +30,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return null;
             }
         }
+        private Rtti.UClassMeta HostClass
+        {
+            get
+            {
+                var segs = mMethodMeta.Split('#');
+                if (segs.Length != 2)
+                    return null;
+                return Rtti.UClassMetaManager.Instance.GetMeta(segs[0]);
+            }
+        }
+        public UMethodDeclaration MethodDesc;
         public string mMethodMeta;
         [Rtti.Meta(Order = 0)]
         public string MethodMeta
@@ -38,18 +54,37 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set
             {
                 mMethodMeta = value;
-                var segs = value.Split('#');
-                if (segs.Length != 2)
+                if (string.IsNullOrEmpty(value))
                     return;
-                var kls = Rtti.UClassMetaManager.Instance.GetMeta(segs[0]);
-                if (kls != null)
+                if(value[0] == '@')
                 {
-                    var mtd = kls.GetMethod(segs[1]);
+                    var mtd = GetMethodMeta(value.TrimStart('@'));
+                    if (mtd != null)
+                        Initialize(mtd);
+                }
+                else
+                {
+                    var mtd = GetMethodMeta(value);
                     if (mtd != null)
                         Initialize(mtd);
                 }
             }
         }
+        Rtti.UClassMeta.MethodMeta GetMethodMeta(string metaStr)
+        {
+            var segs = metaStr.Split('#');
+            if (segs.Length != 2)
+                return null;
+            var kls = Rtti.UClassMetaManager.Instance.GetMeta(segs[0]);
+            if (kls != null)
+            {
+                var mtd = kls.GetMethod(segs[1]);
+                return mtd;
+            }
+            return null;
+        }
+        [Rtti.Meta]
+        public bool SelfMethod { get; set; } = false;
         public class TSaveData : IO.BaseSerializer
         {
             [Rtti.Meta]
@@ -63,10 +98,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var tmp = new TSaveData();
                 foreach(var i in Arguments)
                 {
-                    if (i.EditValue == null)
+                    if (i.PinIn == null)
+                        continue;
+                    var pin = i.PinIn;
+                    if (pin.EditValue == null)
                         continue;
 
-                    tmp.DefaultArguments[i.Name] = i.EditValue.Value.ToString();
+                    tmp.DefaultArguments[pin.Name] = pin.EditValue.Value.ToString();
                 }
                 return tmp;
             }
@@ -76,12 +114,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     for (int j = 0; j < Arguments.Count; j++)
                     {
-                        if (Arguments[j].EditValue == null)
-                            continue;
-                        if(Arguments[j].Name == i.Key)
+                        if(Arguments[j].PinIn != null)
                         {
-                            Arguments[j].EditValue.Value = Support.TConvert.ToObject(Method.GetParameter(j).ParamInfo.ParameterType, i.Value);
-                            OnValueChanged(Arguments[j].EditValue);
+                            var pin = Arguments[j].PinIn;
+                            if (pin.EditValue == null)
+                                continue;
+                            if (pin.Name == i.Key)
+                            {
+                                pin.EditValue.Value = Support.TConvert.ToObject(Method.GetParameter(j).ParameterType, i.Value);
+                                OnValueChanged(pin.EditValue);
+                            }
                         }
                     }
                 }
@@ -93,8 +135,20 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             result.Initialize(m);
             return result;
         }
+        public static MethodNode NewMethodNode(UMethodDeclaration methodDef)
+        {
+            var result = new MethodNode();
+            result.Initialize(methodDef);
+            return result;
+        }
+        public PinIn BeforeExec { get; set; } = new PinIn();
+        public PinOut AfterExec { get; set; } = new PinOut();
         public MethodNode()
         {
+            BeforeExec.Name = " >>";
+            AfterExec.Name = ">> ";
+            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            AfterExec.Link = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
             AddPinOut(AfterExec);
 
@@ -114,7 +168,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     if ((arg.Meta.ConvertOutArguments & Rtti.MetaParameterAttribute.EArgumentFilter.R) != 0)
                     {
-                        Result.Tag = ev.Value;
+                        Result.Tag = Rtti.UTypeDesc.TypeOf((Type)ev.Value);
                     }
                 }
             }
@@ -122,13 +176,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         private void Initialize(Rtti.UClassMeta.MethodMeta m)
         {
             //Method = m;
-            if (mMethodMeta == null)
+            if (string.IsNullOrEmpty(mMethodMeta))
             {
-                mMethodMeta = Rtti.UTypeDesc.TypeStr(m.Method.DeclaringType) + "#" + m.GetMethodDeclareString();
+                mMethodMeta = Rtti.UTypeDesc.TypeStr(m.DeclaringType) + "#" + m.GetMethodDeclareString();
             }
-            Name = Method.Method.Name;
+            var method = Method;
+            Name = method.MethodName;
 
-            if (Method.Method.IsStatic == false)
+            if (method.IsStatic == false)
             {
                 Self = new PinIn();
                 Self.Link = MacrossStyles.Instance.NewInOutPinDesc();
@@ -137,7 +192,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 AddPinIn(Self);
             }
 
-            if (Method.Method.ReturnType != typeof(void))
+            if (!method.ReturnType.IsEqual(typeof(void)))
             {
                 Result = new PinOut();
                 Result.Link = MacrossStyles.Instance.NewInOutPinDesc();
@@ -147,64 +202,160 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
 
             Arguments.Clear();
-            OutArguments.Clear();
-            foreach (var i in Method.Parameters)
+            foreach (var i in method.Parameters)
             {
-                var pin = new PinIn();
-                pin.Link = MacrossStyles.Instance.NewInOutPinDesc();
-                pin.Link.CanLinks.Add("Value");
-                pin.Name = i.ParamInfo.Name;
-
-                var ev = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, i.ParamInfo.ParameterType, pin);
-                if (ev != null)
+                var pinData = new PinData();
+                pinData.OpType = EMethodArgumentAttribute.Default;
+                if (i.IsOut)
+                    pinData.OpType = EMethodArgumentAttribute.Out;
+                else if (i.IsIn)
+                    pinData.OpType = EMethodArgumentAttribute.In;
+                else if (i.IsRef)
+                    pinData.OpType = EMethodArgumentAttribute.Ref;
+                
+                if (!i.IsOut)
                 {
-                    ev.ControlWidth = 80;
-                    pin.EditValue = ev;
-                    if (i.Meta != null && i.ParamInfo.ParameterType == typeof(System.Type))
+                    var pin = new PinIn();
+                    pin.Link = MacrossStyles.Instance.NewInOutPinDesc();
+                    pin.Link.CanLinks.Add("Value");
+                    pin.Name = i.Name;
+                    pin.Tag = i.ParameterType;
+                    var ev = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, i.ParameterType, pin);
+                    if (ev != null)
                     {
-                        var typeEV = ev as EGui.Controls.NodeGraph.TypeSelectorEValue;
-                        if (typeEV != null)
+                        ev.ControlWidth = 80;
+                        pin.EditValue = ev;
+                        if (i.Meta != null && i.ParameterType.IsEqual(typeof(System.Type)))
                         {
-                            typeEV.Selector.BaseType = Rtti.UTypeDesc.TypeOf(i.Meta.FilterType);
-                            if (typeEV.Selector.SelectedType == null)
-                                typeEV.Selector.SelectedType = Rtti.UTypeDesc.TypeOf(i.Meta.FilterType);
-                            if (ev.Value == null)
+                            var typeEV = ev as EGui.Controls.NodeGraph.TypeSelectorEValue;
+                            if (typeEV != null)
                             {
-                                ev.Value = i.Meta.FilterType;
-                                OnValueChanged(typeEV);
+                                typeEV.Selector.BaseType = Rtti.UTypeDesc.TypeOf(i.Meta.FilterType);
+                                if (typeEV.Selector.SelectedType == null)
+                                    typeEV.Selector.SelectedType = Rtti.UTypeDesc.TypeOf(i.Meta.FilterType);
+                                if (ev.Value == null)
+                                {
+                                    ev.Value = i.Meta.FilterType;
+                                    OnValueChanged(typeEV);
+                                }
                             }
                         }
                     }
+                    AddPinIn(pin);
+                    pinData.PinIn = pin;
                 }
-
-                Arguments.Add(pin);
-                AddPinIn(pin);
-                if (i.ParamInfo.IsOut)
+                if (i.IsOut || i.IsRef)
                 {
                     var pinOut = new PinOut();
                     pinOut.Link = MacrossStyles.Instance.NewInOutPinDesc();
-                    pin.Link.CanLinks.Add("Value");
-                    pinOut.Name = i.ParamInfo.Name;
-                    OutArguments.Add(pinOut);
+                    pinOut.Link.CanLinks.Add("Value");
+                    pinOut.Name = i.Name;
+                    pinOut.Tag = i.ParameterType;
                     AddPinOut(pinOut);
+                    pinData.PinOut = pinOut;
                 }
-            }
-            for (int i = 0; i < Method.Parameters.Length; i++)
-            {
-                var param = Method.Parameters[i];
-                if (param.Meta != null && param.Meta.FilterType != null && param.Meta.ConvertOutArguments != 0)
+                Arguments.Add(pinData);
+
+                if (i.Meta != null && i.Meta.FilterType != null && i.Meta.ConvertOutArguments != 0)
                 {
-                    if (Result != null && (param.Meta.ConvertOutArguments & Rtti.MetaParameterAttribute.EArgumentFilter.R) != 0)
+                    if (Result != null && (i.Meta.ConvertOutArguments & Rtti.MetaParameterAttribute.EArgumentFilter.R) != 0)
                     {
                         if (Result.Tag != null)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Meta", $"{Method.Method.Name} ParamMeta Error");
+                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Meta", $"{method.MethodName} ParamMeta Error");
                         }
-                        Result.Tag = param.Meta.FilterType;
+                        Result.Tag = i.Meta.FilterType;
                     }
-                    for (int j = 0; j < 30; j++)
-                    {
+                }
+            }
+        }
+        public static string GetMethodMeta(UMethodDeclaration m)
+        {
+            var methodMeta = "@";
+            if(m.HostClass != null)
+            {
+                methodMeta += (m.HostClass.Namespace != null) ? (m.HostClass.Namespace.Namespace + ".") : "" +
+                               m.HostClass.ClassName;
+            }
+            methodMeta += "#" + m.GetKeyword();
+            return methodMeta;
+        }
+        private void Initialize(UMethodDeclaration m)
+        {
+            if (string.IsNullOrEmpty(mMethodMeta))
+            {
+                mMethodMeta = GetMethodMeta(m);
+            }
+            Name = m.MethodName;
+            MethodDesc = m;
 
+            if(m.ReturnValue != null)
+            {
+                Result = new PinOut();
+                Result.Link = MacrossStyles.Instance.NewInOutPinDesc();
+                Result.Link.CanLinks.Add("Value");
+                Result.Name = "Result";
+                AddPinOut(Result);
+            }
+
+            Arguments.Clear();
+            foreach(var i in m.Arguments)
+            {
+                var pinData = new PinData();
+                pinData.OpType = i.OperationType;
+
+                if(i.OperationType != EMethodArgumentAttribute.Out)
+                {
+                    var pin = new PinIn();
+                    pin.Link = MacrossStyles.Instance.NewInOutPinDesc();
+                    pin.Link.CanLinks.Add("Value");
+                    pin.Name = i.VariableName;
+                    pin.Tag = i.VariableType.TypeDesc;
+                    var ev = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, i.VariableType.TypeDesc, pin);
+                    if (ev != null)
+                    {
+                        ev.ControlWidth = 80;
+                        pin.EditValue = ev;
+                        if (i.Meta != null && i.VariableType.IsEqual(typeof(System.Type)))
+                        {
+                            var typeEV = ev as EGui.Controls.NodeGraph.TypeSelectorEValue;
+                            if (typeEV != null)
+                            {
+                                typeEV.Selector.BaseType = Rtti.UTypeDesc.TypeOf(i.Meta.FilterType);
+                                if (typeEV.Selector.SelectedType == null)
+                                    typeEV.Selector.SelectedType = Rtti.UTypeDesc.TypeOf(i.Meta.FilterType);
+                                if (ev.Value == null)
+                                {
+                                    ev.Value = i.Meta.FilterType;
+                                    OnValueChanged(typeEV);
+                                }
+                            }
+                        }
+                    }
+                    AddPinIn(pin);
+                    pinData.PinIn = pin;
+                }
+                if(i.OperationType == EMethodArgumentAttribute.Out || i.OperationType == EMethodArgumentAttribute.Ref)
+                {
+                    var pinOut = new PinOut();
+                    pinOut.Link = MacrossStyles.Instance.NewInOutPinDesc();
+                    pinOut.Link.CanLinks.Add("Value");
+                    pinOut.Name = i.VariableName;
+                    pinOut.Tag = i.VariableType.TypeDesc;
+                    AddPinOut(pinOut);
+                    pinData.PinOut = pinOut;
+                }
+                Arguments.Add(pinData);
+
+                if (i.Meta != null && i.Meta.FilterType != null && i.Meta.ConvertOutArguments != 0)
+                {
+                    if (Result != null && (i.Meta.ConvertOutArguments & Rtti.MetaParameterAttribute.EArgumentFilter.R) != 0)
+                    {
+                        if (Result.Tag != null)
+                        {
+                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Meta", $"{m.MethodName} ParamMeta Error");
+                        }
+                        Result.Tag = i.Meta.FilterType;
                     }
                 }
             }
@@ -213,203 +364,483 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             if (pin == Self)
             {
-                EGui.Controls.CtrlUtility.DrawHelper($"{Method.Method.DeclaringType.FullName}"); 
+                EGui.Controls.CtrlUtility.DrawHelper($"{Method.DeclaringType.FullName}"); 
                 return;
             }
             if (pin == Result)
             {
                 if (Result.Tag != null)
                 {
-                    var cvtType = Result.Tag as System.Type;
+                    var cvtType = Result.Tag as Rtti.UTypeDesc;
                     if (cvtType != null)
                     {
                         EGui.Controls.CtrlUtility.DrawHelper($"{cvtType.FullName}");
                         return;
                     }
                 }
-                EGui.Controls.CtrlUtility.DrawHelper($"{Method.Method.ReturnType.FullName}");
+                EGui.Controls.CtrlUtility.DrawHelper($"{Method.ReturnType.FullName}");
                 return;
             }
             for (int i = 0; i < Arguments.Count; i++)
             {
-                if (pin == Arguments[i])
+                if (pin == Arguments[i].PinIn)
                 {
                     var inPin = pin as PinIn;
                     var paramMeta = GetInPinParamMeta(inPin);
                     if (paramMeta != null)
                     {
-                        EGui.Controls.CtrlUtility.DrawHelper($"{paramMeta.ParamInfo.ParameterType.FullName}");
+                        EGui.Controls.CtrlUtility.DrawHelper($"{paramMeta.ParameterType.FullName}");
                     }
                     return;
                 }
-            }
-            for (int i = 0; i < OutArguments.Count; i++)
-            {
-                if (pin == OutArguments[i])
+                else if(pin == Arguments[i].PinOut)
                 {
                     var paramMeta = Method.FindParameter(pin.Name);
                     if (paramMeta != null)
                     {
-                        EGui.Controls.CtrlUtility.DrawHelper($"{paramMeta.ParamInfo.ParameterType.FullName}");
+                        EGui.Controls.CtrlUtility.DrawHelper($"{paramMeta.ParameterType.FullName}");
                     }
                     return;
                 }
             }
         }
-        public override IExpression GetExpr(UMacrossFunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        //public override IExpression GetExpr(UMacrossMethodGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        //{
+        //    ConvertTypeOp cvtExpr = null;
+        //    DefineVar retVar = null;
+
+        //    var mth_ret_temp_name = $"tmp_r_{Method.Method.Name}_{this.NodeId.GetHashCode().ToString().Replace("-", "_")}";
+        //    if (Method.Method.ReturnType != typeof(void))
+        //    {
+        //        if (bTakeResult)
+        //        {
+        //            return new OpUseVar(mth_ret_temp_name, false);
+        //        }
+        //        retVar = new DefineVar();
+        //        retVar.IsLocalVar = true;
+        //        retVar.DefType = Method.Method.ReturnType.FullName;
+        //        retVar.VarName = mth_ret_temp_name;
+        //        retVar.InitValue = cGen.GetDefaultValue(Method.Method.ReturnType);
+
+        //        if (Result != null && Result.Tag != null && ((Result.Tag as System.Type) != Method.Method.ReturnType))
+        //        {
+        //            var cvtTargetType = (Result.Tag as System.Type);
+        //            retVar.DefType = cvtTargetType.FullName;
+        //            cvtExpr = new ConvertTypeOp();
+        //            cvtExpr.TargetType = retVar.DefType;
+        //        }
+        //    }
+        //    if (bTakeResult)
+        //    {
+        //        throw new GraphException(this, Self, "Use return value with void function");
+        //    }
+
+        //    var callExpr = GetExpr_Impl(funGraph, cGen) as CallOp;
+
+        //    if (retVar != null)
+        //    {
+        //        funGraph.Function.AddLocalVar(retVar);
+        //        callExpr.FunReturnLocalVar = retVar.VarName;
+        //    }
+        //    if (cvtExpr != null)
+        //    {
+        //        callExpr.ConvertType = cvtExpr;
+        //    }
+
+        //    callExpr.NextExpr = this.GetNextExpr(funGraph, cGen);
+        //    return callExpr;
+        //}
+        //private IExpression GetExpr_Impl(UMacrossMethodGraph funGraph, ICodeGen cGen)
+        //{
+        //    CallOp CallExpr = new CallOp();
+        //    var links = new List<UPinLinker>();
+        //    if (Self != null)
+        //    {
+        //        CallExpr.IsStatic = false;
+        //        funGraph.FindInLinker(Self, links);
+        //        if (links.Count == 0)
+        //        {
+        //            if(SelfMethod)
+        //            {
+        //                CallExpr.Host = new ThisVar();
+        //                CallExpr.Name = Method.Method.Name;
+        //            }
+        //            else
+        //            {
+        //                CallExpr.Host = new NewObjectOp() { Type = Method.Method.DeclaringType.FullName };
+        //                CallExpr.Name = Method.Method.Name;
+        //            }
+        //        }
+        //        else if (links.Count == 1)
+        //        {
+        //            var selfNode = links[0].OutNode as UNodeExpr;
+        //            var selfExpr = selfNode.GetExpr(funGraph, cGen, true) as OpExpress;
+        //            CallExpr.Host = selfExpr;
+        //            CallExpr.Name = Method.Method.Name;
+        //        }
+        //        else
+        //        {
+        //            throw new GraphException(this, Self, "Please Self pin");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        //这里要处理Static名字获取
+        //        //CallExpr.Host = selfExpr;
+        //        CallExpr.IsStatic = true;
+        //        CallExpr.Host = new HardCodeOp() { Code = Method.Method.DeclaringType.FullName };
+        //        CallExpr.Name = Method.Method.Name;
+        //    }
+
+        //    for (int i = 0; i < Arguments.Count; i++)
+        //    {
+        //        links.Clear();
+        //        links = new List<UPinLinker>();
+        //        funGraph.FindInLinker(Arguments[i], links);
+        //        OpExpress argExpr = null;
+        //        if (links.Count == 1)
+        //        {
+        //            var argNode = links[0].OutNode as UNodeExpr;
+        //            argExpr = argNode.GetExpr(funGraph, cGen, true) as OpExpress;
+        //        }
+        //        else if (links.Count == 0)
+        //        {
+        //            var paramInfo = Method.GetParameter(i).ParamInfo;
+
+        //            var refType = VariableReferenceOp.eReferenceType.None;
+        //            if (paramInfo.IsIn)
+        //            {
+        //                refType = VariableReferenceOp.eReferenceType.In;
+        //            }
+        //            else if(paramInfo.IsOut)
+        //            {
+        //                refType = VariableReferenceOp.eReferenceType.Out;
+        //            }
+        //            else if(paramInfo.ParameterType.IsByRef)
+        //            {
+        //                refType = VariableReferenceOp.eReferenceType.Ref;
+        //            }
+
+        //            if(refType == VariableReferenceOp.eReferenceType.None)
+        //            {
+        //                var newOp = new NewObjectOp();
+        //                argExpr = newOp;
+        //                newOp.Type = cGen.GetTypeString(paramInfo.ParameterType.GetElementType());
+        //                if (Arguments[i].EditValue != null)
+        //                {
+        //                    if (Arguments[i].EditValue.Value is System.Type)
+        //                        newOp.InitValue = ((System.Type)Arguments[i].EditValue.Value).FullName;
+        //                    else
+        //                        newOp.InitValue = Arguments[i].EditValue.Value?.ToString();
+        //                }
+        //                else if (paramInfo.ParameterType.IsValueType == false)
+        //                {
+        //                    newOp.InitValue = "null";
+        //                }
+        //                else
+        //                {
+
+        //                }
+        //            }
+        //            else
+        //            {
+        //                var refOp = new VariableReferenceOp();
+        //                var paramTempName = $"tmp_v_{paramInfo.Name}_{Method.Method.Name}_{(uint)this.NodeId.GetHashCode()}";
+        //                refOp.VariableName = paramTempName;
+        //                refOp.ReferenceType = refType;
+        //                var defineVar = new DefineVar()
+        //                {
+        //                    IsLocalVar = true,
+        //                    DefType = cGen.GetTypeString(paramInfo.ParameterType.GetElementType()),
+        //                    VarName = paramTempName
+        //                };
+        //                funGraph.Function.LocalVars.Add(defineVar);
+        //                argExpr = refOp;
+        //                if (Arguments[i].EditValue != null)
+        //                {
+        //                    if (Arguments[i].EditValue.Value is System.Type)
+        //                        defineVar.InitValue = ((System.Type)Arguments[i].EditValue.Value).FullName;
+        //                    else
+        //                        defineVar.InitValue = Arguments[i].EditValue.Value?.ToString();
+        //                }
+        //                else
+        //                {
+        //                    defineVar.InitValue = cGen.GetDefaultValue(Method.Parameters[i].ParamInfo.ParameterType.GetElementType());
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            throw new GraphException(this, Self, $"Arg error:{Arguments[i].Name}");
+        //        }
+        //        CallExpr.Arguments.Add(argExpr);
+        //    }
+
+        //    return CallExpr;
+        //}
+        string GetReturnValueName()
         {
-            ConvertTypeOp cvtExpr = null;
-            DefineVar retVar = null;
-
-            var mth_ret_temp_name = $"tmp_r_{Method.Method.Name}_{this.NodeId.GetHashCode().ToString().Replace("-", "_")}";
-            if (Method.Method.ReturnType != typeof(void))
-            {
-                if (bTakeResult)
-                {
-                    return new OpUseVar(mth_ret_temp_name, false);
-                }
-                retVar = new DefineVar();
-                retVar.IsLocalVar = true;
-                retVar.DefType = Method.Method.ReturnType.FullName;
-                retVar.VarName = mth_ret_temp_name;
-                retVar.InitValue = cGen.GetDefaultValue(Method.Method.ReturnType);
-
-                if (Result != null && Result.Tag != null && ((Result.Tag as System.Type) != Method.Method.ReturnType))
-                {
-                    var cvtTargetType = (Result.Tag as System.Type);
-                    retVar.DefType = cvtTargetType.FullName;
-                    cvtExpr = new ConvertTypeOp();
-                    cvtExpr.TargetType = retVar.DefType;
-                }
-            }
-            if (bTakeResult)
-            {
-                throw new GraphException(this, Self, "Use return value with void function");
-            }
-
-            var callExpr = GetExpr_Impl(funGraph, cGen) as CallOp;
-            
-            if (retVar != null)
-            {
-                funGraph.Function.AddLocalVar(retVar);
-                callExpr.FunReturnLocalVar = retVar.VarName;
-            }
-            if (cvtExpr != null)
-            {
-                callExpr.ConvertType = cvtExpr;
-            }
-
-            callExpr.NextExpr = this.GetNextExpr(funGraph, cGen);
-            return callExpr;
+            return $"tmp_r_{Method.MethodName}_{(uint)NodeId.GetHashCode()}";
         }
-        private IExpression GetExpr_Impl(UMacrossFunctionGraph funGraph, ICodeGen cGen)
+        string GetParamValueName(string paramName)
         {
-            CallOp CallExpr = new CallOp();
-            var links = new List<UPinLinker>();
+            return $"v_{paramName}_{Method.MethodName}_{(uint)NodeId.GetHashCode()}";
+        }
+
+        void GenArgumentCodes(int argIdx, ref BuildCodeStatementsData data, out UExpressionBase exp, 
+            List<UStatementBase> beforeStatements = null, 
+            List<UStatementBase> afterStatements = null)
+        {
+            var pinData = Arguments[argIdx];
+            switch (pinData.OpType)
+            {
+                case EMethodArgumentAttribute.Out:
+                    {
+                        var outPin = pinData.PinOut;
+                        var paramName = GetParamValueName(outPin.Name);
+                        exp = new UVariableReferenceExpression(paramName);
+                        if(beforeStatements != null)
+                        {
+                            var varDec = new UVariableDeclaration()
+                            {
+                                VariableType = new UTypeReference(outPin.Tag as Rtti.UTypeDesc),
+                                VariableName = paramName,
+                            };
+                            beforeStatements.Add(varDec);
+                        }
+                    }
+                    break;
+                case EMethodArgumentAttribute.Ref:
+                case EMethodArgumentAttribute.In:
+                    {
+                        var inPin = pinData.PinIn;
+                        if(data.NodeGraph.PinHasLinker(inPin))
+                        {
+                            var paramName = GetParamValueName(inPin.Name);
+                            var texp = data.NodeGraph.GetOppositePinExpression(inPin, ref data);
+                            if(texp is UVariableReferenceExpression)
+                            { 
+                                if(((UVariableReferenceExpression)texp).IsProperty)
+                                {
+                                    exp = new UVariableReferenceExpression(paramName);
+                                    if(beforeStatements != null)
+                                    {
+                                        var varDec = new UVariableDeclaration()
+                                        {
+                                            VariableType = new UTypeReference(inPin.Tag as Rtti.UTypeDesc),
+                                            VariableName = paramName,
+                                            InitValue = texp,
+                                        };
+                                        beforeStatements.Add(varDec);
+                                    }
+                                    if(afterStatements != null && pinData.OpType == EMethodArgumentAttribute.Ref)
+                                    {
+                                        var assign = new UAssignOperatorStatement()
+                                        {
+                                            From = new UVariableReferenceExpression(paramName),
+                                            To = texp,
+                                        };
+                                        afterStatements.Add(assign);
+                                    }
+                                }
+                                else
+                                    exp = texp;
+                            }
+                            else
+                            {
+                                exp = new UVariableReferenceExpression(paramName);
+                                if(beforeStatements != null)
+                                {
+                                    var varDec = new UVariableDeclaration()
+                                    {
+                                        VariableType = new UTypeReference(inPin.Tag as Rtti.UTypeDesc),
+                                        VariableName = paramName,
+                                        InitValue = texp,
+                                    };
+                                    beforeStatements.Add(varDec);
+                                }
+                            }
+                        }
+                        else
+                            exp = GetNoneLinkedParameterExp(inPin, argIdx, ref data);
+                    }
+                    break;
+                default:
+                    {
+                        var inPin = pinData.PinIn;
+                        if (data.NodeGraph.PinHasLinker(inPin))
+                            exp = data.NodeGraph.GetOppositePinExpression(inPin, ref data);
+                        else
+                            exp = GetNoneLinkedParameterExp(inPin, argIdx, ref data);
+                    }
+                    break;
+            }
+        }
+        protected virtual UExpressionBase GetNoneLinkedParameterExp(PinIn pin, int argIdx, ref BuildCodeStatementsData data)
+        {
+            return new UPrimitiveExpression(pin.EditValue.ValueType, pin.EditValue.Value);
+        }
+        public override void BuildStatements(ref BuildCodeStatementsData data)
+        {
+            if (MethodDesc != null)
+                BuildStatementsWithMethodDec(ref data);
+            else
+                BuildStatementsWithMethodMeta(ref data);
+        }
+        private void BuildStatementsWithMethodDec(ref BuildCodeStatementsData data)
+        {
+            var methodInvokeExp = new UMethodInvokeStatement()
+            {
+                MethodName = MethodDesc.MethodName,
+            };
             if (Self != null)
             {
-                CallExpr.IsStatic = false;
-                funGraph.FindInLinker(Self, links);
-                if (links.Count == 0)
-                {
-                    CallExpr.Host = new NewObjectOp(){ Type = Method.Method.DeclaringType.FullName };
-                    CallExpr.Name = Method.Method.Name;
-                }
-                else if (links.Count == 1)
-                {
-                    var selfNode = links[0].OutNode as INodeExpr;
-                    var selfExpr = selfNode.GetExpr(funGraph, cGen, true) as OpExpress;
-                    CallExpr.Host = selfExpr;
-                    CallExpr.Name = Method.Method.Name;
-                }
-                else
-                {
-                    throw new GraphException(this, Self, "Please Self pin");
-                }
+                if (data.NodeGraph.PinHasLinker(Self))
+                    methodInvokeExp.Host = data.NodeGraph.GetOppositePinExpression(Self, ref data);
             }
             else
             {
-                //这里要处理Static名字获取
-                //CallExpr.Host = selfExpr;
-                CallExpr.IsStatic = true;
-                CallExpr.Host = new HardCodeOp() { Code = Method.Method.DeclaringType.FullName };
-                CallExpr.Name = Method.Method.Name;
+                // method is static
+                if (HostClass != null)
+                    methodInvokeExp.Host = new UClassReferenceExpression() { Class = HostClass.ClassType };
             }
 
+            if (MethodDesc.ReturnValue != null)
+            {
+                var retValName = GetReturnValueName();
+                methodInvokeExp.ReturnValue = new UVariableDeclaration()
+                {
+                    VariableType = MethodDesc.ReturnValue.VariableType,
+                    VariableName = retValName,
+                    InitValue = new UDefaultValueExpression(MethodDesc.ReturnValue.VariableType),
+                };
+                if (!data.MethodDec.HasLocalVariable(retValName))
+                    data.MethodDec.AddLocalVar(methodInvokeExp.ReturnValue);
+            }
+
+            List<UStatementBase> beforeSt = new List<UStatementBase>();
+            List<UStatementBase> afterSt = new List<UStatementBase>();
             for (int i = 0; i < Arguments.Count; i++)
             {
-                links.Clear();
-                links = new List<UPinLinker>();
-                funGraph.FindInLinker(Arguments[i], links);
-                OpExpress argExpr = null;
-                if (links.Count == 1)
+                var arg = new UMethodInvokeArgumentExpression()
                 {
-                    var argNode = links[0].OutNode as INodeExpr;
-                    argExpr = argNode.GetExpr(funGraph, cGen, true) as OpExpress;
-                }
-                else if (links.Count == 0)
-                {
-                    var newOp = new NewObjectOp();
-                    argExpr = newOp;
-                    var paramType = Method.GetParameter(i).ParamInfo.ParameterType;
-                    newOp.Type = paramType.FullName;
-
-                    if (Arguments[i].EditValue != null)
-                    {
-                        if (Arguments[i].EditValue.Value is System.Type)
-                            newOp.InitValue = ((System.Type)Arguments[i].EditValue.Value).FullName;
-                        else
-                            newOp.InitValue = Arguments[i].EditValue.Value?.ToString();
-                    }
-                    else if (paramType.IsValueType == false)
-                    {
-                        newOp.InitValue = "null";
-                    }
-                    else
-                    {
-                        
-                    }
-                }
-                else
-                {
-                    throw new GraphException(this, Self, $"Arg error:{Arguments[i].Name}");
-                }
-                CallExpr.Arguments.Add(argExpr);
+                    OperationType = Arguments[i].OpType,
+                };
+                GenArgumentCodes(i, ref data, out arg.Expression, beforeSt, afterSt);
+                methodInvokeExp.Arguments.Add(arg);
             }
-            
-            return CallExpr;
+            data.CurrentStatements.AddRange(beforeSt);
+            data.CurrentStatements.Add(methodInvokeExp);
+            data.CurrentStatements.AddRange(afterSt);
+
+            var nextNode = data.NodeGraph.GetOppositePinNode(AfterExec);
+            if (nextNode != null)
+                nextNode.BuildStatements(ref data);
+        }
+        private void BuildStatementsWithMethodMeta(ref BuildCodeStatementsData data)
+        {
+            var method = Method;
+            var methodInvokeExp = new UMethodInvokeStatement()
+            {
+                MethodName = method.MethodName,
+            };
+            if(Self != null)
+            {
+                if(data.NodeGraph.PinHasLinker(Self))
+                    methodInvokeExp.Host = data.NodeGraph.GetOppositePinExpression(Self, ref data);
+            }
+            else
+            {
+                // method is static
+                if(HostClass != null)
+                    methodInvokeExp.Host = new UClassReferenceExpression() { Class = HostClass.ClassType };
+            }
+
+            if(method.HasReturnValue())
+            {
+                var retValName = GetReturnValueName();
+                methodInvokeExp.ReturnValue = new UVariableDeclaration()
+                {
+                    VariableType = new UTypeReference(method.ReturnType),
+                    VariableName = retValName,
+                    InitValue = new UDefaultValueExpression(method.ReturnType),
+                };
+                if(!data.MethodDec.HasLocalVariable(retValName))
+                    data.MethodDec.AddLocalVar(methodInvokeExp.ReturnValue);
+            }
+
+            List<UStatementBase> beforeSt = new List<UStatementBase>();
+            List<UStatementBase> afterSt = new List<UStatementBase>();
+            for (int i=0; i<Arguments.Count; i++)
+            {
+                var arg = new UMethodInvokeArgumentExpression()
+                {
+                    OperationType = Arguments[i].OpType,
+                };
+                GenArgumentCodes(i, ref data, out arg.Expression, beforeSt, afterSt);
+                methodInvokeExp.Arguments.Add(arg);
+            }
+            data.CurrentStatements.AddRange(beforeSt);
+            data.CurrentStatements.Add(methodInvokeExp);
+            data.CurrentStatements.AddRange(afterSt);
+
+            var nextNode = data.NodeGraph.GetOppositePinNode(AfterExec);
+            if (nextNode != null)
+                nextNode.BuildStatements(ref data);
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            if(pin == Result)
+            {
+                return new UVariableReferenceExpression(GetReturnValueName());
+            }
+            else
+            {
+                for (int i = 0; i < Arguments.Count; i++)
+                {
+                    if (pin == Arguments[i].PinIn || 
+                        pin == Arguments[i].PinOut)
+                    {
+                        UExpressionBase retVal;
+                        GenArgumentCodes(i, ref data, out retVal);
+                        return retVal;
+                    }
+                }
+            }
+            return null;
         }
         public Rtti.UClassMeta.MethodMeta.ParamMeta GetInPinParamMeta(PinIn pin)
         {
             for (int i = 0; i < Arguments.Count; i++)
             {
-                if (pin == Arguments[i])
+                if (pin == Arguments[i].PinIn)
                 {
                     return Method.GetParameter(i);
                 }
             }
             return null;
         }
-        public override System.Type GetOutPinType(PinOut pin)
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
+            var method = Method;
             if (pin == Result)
             {
                 if (Result.Tag != null)
                 {
-                    var cvtType = Result.Tag as System.Type;
+                    var cvtType = Result.Tag as Rtti.UTypeDesc;
                     if (cvtType != null)
                         return cvtType;
                 }
-                return Method.Method.ReturnType;
+                return method.ReturnType;
             }
-            foreach(var i in OutArguments)
+            foreach(var i in Arguments)
             {
-                if (pin == i)
+                if (pin == i.PinOut)
                 {
-                    foreach(var j in Method.Parameters)
+                    foreach(var j in method.Parameters)
                     {
-                        if (j.ParamInfo.Name == i.Name && j.ParamInfo.IsOut)
-                            return j.ParamInfo.ParameterType.GetElementType();
+                        if (j.Name == i.PinOut.Name && j.IsOut)
+                            return j.ParameterType;
                     }
                 }
             }
@@ -421,21 +852,21 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
 
-            var nodeExpr = OutNode as INodeExpr;
+            var nodeExpr = OutNode as UNodeBase;
             if (nodeExpr == null)
                 return true;
 
             if (iPin == Self)
             {
                 var testType = nodeExpr.GetOutPinType(oPin);
-                return ICodeGen.CanConvert(testType, Method.Method.DeclaringType);
+                return UCodeGeneratorBase.CanConvert(testType, Method.DeclaringType);
             }
             for (int i = 0; i < Arguments.Count; i++)
             {
-                if (iPin == Arguments[i])
+                if (iPin == Arguments[i].PinIn)
                 {
                     var testType = nodeExpr.GetOutPinType(oPin);
-                    return ICodeGen.CanConvert(testType, Method.GetParameter(i).ParamInfo.ParameterType);
+                    return UCodeGeneratorBase.CanConvert(testType, Method.GetParameter(i).ParameterType);
                 }
             }
             return true;
@@ -454,10 +885,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             public uint SubClassColor = 0xFF5340FF;
         }
         public MethodSelectorStyle Styles = MethodSelectorStyle.Instance;
-        private string mFilterText;
         public Rtti.UClassMeta.MethodMeta mSltMethod;
         public Rtti.UClassMeta.FieldMeta mSltField;
-        public Rtti.UMetaVersion.MetaField mSltMember;
+        public Rtti.UClassMeta.PropertyMeta mSltMember;
         public unsafe void OnDraw(Vector2 pos)
         {
             var pivot = new Vector2(0, 0);
@@ -471,17 +901,21 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 ImGuiAPI.EndPopup();
             }
         }
-        public unsafe void OnDrawTree()
+        public unsafe void OnDrawTree(string filterText = null)
         {
-            ImGuiAPI.InputText("##in", ref mFilterText);
+            //var buffer = BigStackBuffer.CreateInstance(256);
+            //buffer.SetText(mFilterText);
+            //ImGuiAPI.InputText("##in", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+            //mFilterText = buffer.AsText();
+            //buffer.DestroyMe();
             ImGuiAPI.Separator();
 
-            DrawNSTree(Rtti.UClassMetaManager.Instance.TreeManager.RootNS);
+            DrawNSTree(filterText, Rtti.UClassMetaManager.Instance.TreeManager.RootNS);
         }
-        public unsafe void DrawNSTree(Rtti.NameSpace ns)
+        public unsafe void DrawNSTree(string filterText, Rtti.NameSpace ns)
         {
-            bool bTestFilter = string.IsNullOrEmpty(mFilterText) == false;
-            if (bTestFilter && ns.IsContain(mFilterText) == false)
+            bool bTestFilter = string.IsNullOrEmpty(filterText) == false;
+            if (bTestFilter && ns.IsContain(filterText) == false)
             {
                 return;
             }
@@ -492,7 +926,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 foreach(var i in ns.ChildrenNS)
                 {
-                    DrawNSTree(i);
+                    DrawNSTree(filterText, i);
                 }
                 ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;
                 foreach (var i in ns.Types)
@@ -502,12 +936,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     ImGuiAPI.PopStyleColor(1);
                     if (bShow)
                     {
-                        foreach(var j in i.CurrentVersion.Fields)
+                        foreach(var j in i.CurrentVersion.Propertys)
                         {
-                            if (bTestFilter && j.FieldName.Contains(mFilterText) == false)
+                            if (bTestFilter && j.PropertyName.Contains(filterText) == false)
                                 continue;
                             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, Styles.MemberColor);
-                            ImGuiAPI.TreeNodeEx(j.FieldName, flags);
+                            ImGuiAPI.TreeNodeEx(j.PropertyName, flags);
                             if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                             {
                                 mSltMember = j;
@@ -518,7 +952,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         }                        
                         foreach (var j in i.Fields)
                         {
-                            if (bTestFilter && j.Field.Name.Contains(mFilterText) == false)
+                            if (bTestFilter && j.Field.Name.Contains(filterText) == false)
                                 continue;
                             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, Styles.FieldColor);
                             ImGuiAPI.TreeNodeEx(j.Field.Name, flags);
@@ -532,10 +966,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         }
                         foreach (var j in i.Methods)
                         {
-                            if (bTestFilter && j.Method.Name.Contains(mFilterText) == false)
+                            if (bTestFilter && j.MethodName.Contains(filterText) == false)
                                 continue;
                             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, Styles.MethodColor);
-                            ImGuiAPI.TreeNodeEx(j.Method.Name, flags);
+                            ImGuiAPI.TreeNodeEx(j.MethodName, flags);
                             if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                             {
                                 mSltMethod = j;
@@ -557,7 +991,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public Rtti.UClassMeta KlsMeta;
         public Rtti.UClassMeta.MethodMeta mSltMethod;
         public Rtti.UClassMeta.FieldMeta mSltField;
-        public Rtti.UMetaVersion.MetaField mSltMember;
+        public Rtti.UClassMeta.PropertyMeta mSltMember;
         public Rtti.UClassMeta mSltSubClass;
         public unsafe void OnDraw(Vector2 pos)
         {
@@ -590,10 +1024,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if (KlsMeta != null)
                 {
-                    foreach (var j in KlsMeta.CurrentVersion.Fields)
+                    foreach (var j in KlsMeta.CurrentVersion.Propertys)
                     {
                         ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, Styles.MemberColor);
-                        ImGuiAPI.TreeNodeEx(j.FieldName, flags);
+                        ImGuiAPI.TreeNodeEx(j.PropertyName, flags);
                         if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                         {
                             mSltMember = j;
@@ -635,7 +1069,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     foreach (var j in KlsMeta.Methods)
                     {
                         ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, Styles.MethodColor);
-                        ImGuiAPI.TreeNodeEx(j.Method.Name, flags);
+                        ImGuiAPI.TreeNodeEx(j.MethodName, flags);
                         if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                         {
                             mSltMethod = j;

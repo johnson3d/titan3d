@@ -6,21 +6,25 @@ namespace EngineNS.Bricks.Procedure.Node
 {
     public partial class UOpNode : UPgcNodeBase
     {
-        [Rtti.Meta]
-        public int DefaultWidth { get; set; } = -1;
-        [Rtti.Meta]
-        public int DefaultHeight { get; set; } = -1;
-        public override Int32_2 GetOutPinSize(PinOut pin)
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             var graph = this.ParentGraph as UPgcGraph;
-            Int32_2 result = new Int32_2(DefaultWidth, DefaultHeight);
-            if (result.x == -1)
+            var result = UBufferCreator.CreateInstance(
+                DefaultBufferCreator.BufferType, 
+                DefaultBufferCreator.XSize,
+                DefaultBufferCreator.YSize,
+                DefaultBufferCreator.ZSize);
+            if (result.XSize == -1)
             {
-                result.x = graph.DefaultWidth;
+                result.XSize = graph.DefaultCreator.XSize;
             }
-            if (result.y == -1)
+            if (result.YSize == -1)
             {
-                result.y = graph.DefaultHeight;
+                result.YSize = graph.DefaultCreator.YSize;
+            }
+            if (result.ZSize == -1)
+            {
+                result.ZSize = graph.DefaultCreator.ZSize;
             }
             return result;
         }
@@ -55,25 +59,15 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             PrevSize = new Vector2(100, 100);
 
-            RedPin.Name = " R";
-            GreenPin.Name = " G";
-            BluePin.Name = " B";
-            AlphaPin.Name = " A";
-
-            RedPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            GreenPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            BluePin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            AlphaPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddPinOut(RedPin);
-            AddPinOut(GreenPin);
-            AddPinOut(BluePin);
-            AddPinOut(AlphaPin);
+            AddOutput(RedPin, " R", DefaultBufferCreator);
+            AddOutput(GreenPin, " G", DefaultBufferCreator);
+            AddOutput(BluePin, " B", DefaultBufferCreator);
+            AddOutput(AlphaPin, " A", DefaultBufferCreator);
         }
         ~UImageLoader()
         {
@@ -137,6 +131,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 }
             }
 
+            DefaultBufferCreator.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
             if (image != null)
             {
                 UBufferConponent red = null;
@@ -152,17 +147,17 @@ namespace EngineNS.Bricks.Procedure.Node
                             PixelSize = 3;
                             LineSize = 3 * image.Width;
                             LineSize = (int)CoreDefine.Roundup((uint)LineSize, 4);
-                            red = new UBufferConponent();
-                            green = new UBufferConponent();
-                            blue = new UBufferConponent();
 
-                            red.SetSize(image.Width, image.Height, 0);
+                            DefaultBufferCreator.XSize = image.Width;
+                            DefaultBufferCreator.YSize = image.Height;
+                            DefaultBufferCreator.ZSize = 1;
+                            
+                            red = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
+                            green = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
+                            blue = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
+
                             graph.BufferCache.RegBuffer(RedPin, red);
-
-                            green.SetSize(image.Width, image.Height, 0);
                             graph.BufferCache.RegBuffer(GreenPin, green);
-
-                            blue.SetSize(image.Width, image.Height, 0);
                             graph.BufferCache.RegBuffer(BluePin, blue);
 
                             fixed (byte* p = &image.Data[0])
@@ -188,21 +183,19 @@ namespace EngineNS.Bricks.Procedure.Node
                         {
                             PixelSize = 4;
                             LineSize = 4 * image.Width;
-                            red = new UBufferConponent();
-                            green = new UBufferConponent();
-                            blue = new UBufferConponent();
-                            alpha = new UBufferConponent();
 
-                            red.SetSize(image.Width, image.Height, 0);
+                            DefaultBufferCreator.XSize = image.Width;
+                            DefaultBufferCreator.YSize = image.Height;
+                            DefaultBufferCreator.ZSize = 1;
+
+                            red = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
+                            green = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
+                            blue = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
+                            alpha = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
+
                             graph.BufferCache.RegBuffer(RedPin, red);
-
-                            green.SetSize(image.Width, image.Height, 0);
                             graph.BufferCache.RegBuffer(GreenPin, green);
-
-                            blue.SetSize(image.Width, image.Height, 0);
-                            graph.BufferCache.RegBuffer(BluePin, blue);
-
-                            alpha.SetSize(image.Width, image.Height, 0);
+                            graph.BufferCache.RegBuffer(BluePin, blue);                            
                             graph.BufferCache.RegBuffer(AlphaPin, alpha);
 
                             fixed (byte* p = &image.Data[0])
@@ -246,44 +239,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
     }
-    public class UMonocular : UOpNode
-    {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinIn SrcPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinOut ResultPin { get; set; } = new PinOut();
-        
-        public UMonocular()
-        {
-            SrcPin.Name = " Src";
-            ResultPin.Name = " Result";
-
-            SrcPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            ResultPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-
-            Icon.Size = new Vector2(25, 25);
-            Icon.Color = 0xFF00FF00;
-            TitleColor = 0xFF204020;
-            BackColor = 0x80808080;
-
-            AddPinIn(SrcPin);
-            AddPinOut(ResultPin);
-        }
-
-        public override Int32_2 GetOutPinSize(PinOut pin)
-        {
-            if(ResultPin == pin)
-            {
-                var graph = ParentGraph as UPgcGraph;
-                var buffer = graph.BufferCache.FindBuffer(SrcPin);
-                if (buffer != null)
-                {
-                    return new Int32_2(buffer.Width, buffer.Height); 
-                }
-            }
-            return base.GetOutPinSize(pin);
-        }
-    }
+    
     public class UBinocular : UOpNode
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
@@ -294,24 +250,16 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut ResultPin { get; set; } = new PinOut();
         public UBinocular()
         {
-            LeftPin.Name = " Left";
-            RightPin.Name = " Right";
-            ResultPin.Name = " Result";
-
-            LeftPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            RightPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            ResultPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddPinIn(LeftPin);
-            AddPinIn(RightPin);
-            AddPinOut(ResultPin);
+            AddInput(LeftPin, " Left", DefaultInputDesc);
+            AddInput(RightPin, " Right", DefaultInputDesc);
+            AddOutput(ResultPin, " Result", DefaultBufferCreator);
         }
-        public override Int32_2 GetOutPinSize(PinOut pin)
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
             {
@@ -319,10 +267,10 @@ namespace EngineNS.Bricks.Procedure.Node
                 var buffer = graph.BufferCache.FindBuffer(LeftPin);
                 if (buffer != null)
                 {
-                    return new Int32_2(buffer.Width, buffer.Height);
+                    return buffer.BufferCreator;
                 }
             }
-            return base.GetOutPinSize(pin);
+            return base.GetOutBufferCreator(pin);
         }
     }
 
@@ -332,31 +280,63 @@ namespace EngineNS.Bricks.Procedure.Node
         public int X { get; set; } = 0;
         [Rtti.Meta]
         public int Y { get; set; } = 0;
-        public override Int32_2 GetOutPinSize(PinOut pin)
+        [Rtti.Meta]
+        public int Z { get; set; } = 0;
+        public override bool IsMatchLinkedPin(UBufferCreator input, UBufferCreator output)
+        {
+            //base.IsMatchLinkedPin(input, output);
+            return true;
+        }
+        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        {
+            base.OnLinkedFrom(iPin, OutNode, oPin);
+
+            var input = oPin.Tag as UBufferCreator;
+            var output = ResultPin.Tag as UBufferCreator;
+
+            if (output.BufferType != input.BufferType)
+            {
+                (SrcPin.Tag as UBufferCreator).BufferType = input.BufferType;
+                output.BufferType = input.BufferType;
+                //DefaultBufferCreator.BufferType = input.BufferType;
+                this.ParentGraph.RemoveLinkedOut(ResultPin);
+            }
+        }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             var graph = this.ParentGraph as UPgcGraph;
-            Int32_2 result = new Int32_2(DefaultWidth, DefaultHeight);
-            if (result.x == -1)
+            var result = UBufferCreator.CreateInstance(DefaultBufferCreator.BufferType,
+                DefaultBufferCreator.XSize,
+                DefaultBufferCreator.YSize,
+                DefaultBufferCreator.ZSize);
+            if (result.XSize == -1)
             {
-                result.x = graph.DefaultWidth;
+                result.XSize = graph.DefaultCreator.XSize;
             }
-            if (result.y == -1)
+            if (result.YSize == -1)
             {
-                result.y = graph.DefaultHeight;
+                result.YSize = graph.DefaultCreator.YSize;
+            }
+            if (result.ZSize == -1)
+            {
+                result.ZSize = graph.DefaultCreator.ZSize;
             }
             return result;
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             var curComp = graph.BufferCache.FindBuffer(SrcPin);
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
-            for (int i = 0; i < resultComp.Height; i++)
+            for (int i = 0; i < resultComp.Depth; i++)
             {
-                for (int j = 0; j < resultComp.Width; j++)
+                for (int j = 0; j < resultComp.Height; j++)
                 {
-                    var pxl = curComp.GetPixel(X + j, Y + i);
+                    for (int k = 0; k < resultComp.Width; k++)
+                    {
+                        var srcAddress = curComp.GetSuperPixelAddress(X + k, Y + j, Z + i);
 
-                    resultComp.SetPixel(j, i, pxl);
+                        resultComp.SetSuperPixelAddress(k, j, i, srcAddress);
+                    }
                 }
             }
             curComp.LifeCount--;
@@ -366,35 +346,47 @@ namespace EngineNS.Bricks.Procedure.Node
 
     public class UStretch : UMonocular
     {
-        public override Int32_2 GetOutPinSize(PinOut pin)
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             var graph = this.ParentGraph as UPgcGraph;
-            Int32_2 result = new Int32_2(DefaultWidth, DefaultHeight);
-            if (result.x == -1)
+            var result = UBufferCreator.CreateInstance(DefaultBufferCreator.BufferType,
+                DefaultBufferCreator.XSize,
+                DefaultBufferCreator.YSize,
+                DefaultBufferCreator.ZSize);
+            if (result.XSize == -1)
             {
-                result.x = graph.DefaultWidth;
+                result.XSize = graph.DefaultCreator.XSize;
             }
-            if (result.y == -1)
+            if (result.YSize == -1)
             {
-                result.y = graph.DefaultHeight;
+                result.YSize = graph.DefaultCreator.YSize;
+            }
+            if (result.ZSize == -1)
+            {
+                result.ZSize = graph.DefaultCreator.ZSize;
             }
             return result;
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             var curComp = graph.BufferCache.FindBuffer(SrcPin);
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
-            for (int i = 0; i < resultComp.Height; i++)
+            for (int i = 0; i < resultComp.Depth; i++)
             {
-                for (int j = 0; j < resultComp.Width; j++)
+                for (int j = 0; j < resultComp.Height; j++)
                 {
-                    float x = (float)(j * curComp.Width) / (float)resultComp.Width;
-                    float y = (float)(i * curComp.Height) / (float)resultComp.Height;
-                    var pxl = curComp.GetPixel((int)x, (int)y);
+                    for (int k = 0; k < resultComp.Width; k++)
+                    {
+                        float x = (float)(k * curComp.Width) / (float)resultComp.Width;
+                        float y = (float)(j * curComp.Height) / (float)resultComp.Height;
+                        float z = (float)(i * curComp.Depth) / (float)resultComp.Depth;
+                        var pxl = curComp.GetSuperPixelAddress((int)x, (int)y, (int)z);
 
-                    resultComp.SetPixel(j, i, pxl);
+                        resultComp.SetSuperPixelAddress(k, j, i, pxl);
+                    }
                 }
             }
+                
             curComp.LifeCount--;
             return true;
         }
@@ -408,19 +400,24 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         [Rtti.Meta]
         public float Value { get; set; } = 1.0f;
-        public override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             var curComp = graph.BufferCache.FindBuffer(SrcPin);
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
-            for (int i = 0; i < curComp.Height; i++)
-            {
-                for (int j = 0; j < curComp.Width; j++)
-                {
-                    var pxl = curComp.GetPixel(j, i);
+            var op = resultComp.PixelOperator;
 
-                    resultComp.SetPixel(j, i, pxl * Value);
+            var MulValue = Value;
+            for (int i = 0; i < resultComp.Depth; i++)
+            {
+                for (int j = 0; j < resultComp.Height; j++)
+                {
+                    for (int k = 0; k < resultComp.Width; k++)
+                    {
+                        resultComp.PixelOperator.Mul(curComp.GetSuperPixelAddress(k, j, i), curComp.GetSuperPixelAddress(k, j, i), &MulValue);
+                    }
                 }
             }
+                
             curComp.LifeCount--;
             return true;
         }
@@ -455,59 +452,51 @@ namespace EngineNS.Bricks.Procedure.Node
                 {
                     for (int j = 0; j < curComp.Width; j++)
                     {
-                        var center = curComp.GetPixel(j, i);
+                        var center = curComp.GetPixel<float>(j, i);
                         pixels[1, 1] = center;
 
-                        var v = curComp.GetPixel(j - 1, i - 1);
                         {//line1
-                            if (v != float.MaxValue)
-                                pixels[0, 0] = v;
+                            if (curComp.IsValidPixel(j - 1, i - 1))
+                                pixels[0, 0] = curComp.GetPixel<float>(j - 1, i - 1);
                             else
                                 pixels[0, 0] = center;
 
-                            v = curComp.GetPixel(j, i - 1);
-                            if (v != float.MaxValue)
-                                pixels[0, 1] = v;
+                            if (curComp.IsValidPixel(j, i - 1))
+                                pixels[0, 1] = curComp.GetPixel<float>(j, i - 1);
                             else
                                 pixels[0, 1] = center;
 
-                            v = curComp.GetPixel(j + 1, i - 1);
-                            if (v != float.MaxValue)
-                                pixels[0, 2] = v;
+                            if (curComp.IsValidPixel(j + 1, i - 1))
+                                pixels[0, 2] = curComp.GetPixel<float>(j + 1, i - 1);
                             else
                                 pixels[0, 2] = center;
                         }
 
                         {//line2
-                            v = curComp.GetPixel(j - 1, i);
-                            if (v != float.MaxValue)
-                                pixels[1, 0] = v;
+                            if (curComp.IsValidPixel(j - 1, i))
+                                pixels[1, 0] = curComp.GetPixel<float>(j - 1, i);
                             else
                                 pixels[1, 0] = center;
 
-                            v = curComp.GetPixel(j + 1, i);
-                            if (v != float.MaxValue)
-                                pixels[1, 2] = v;
+                            if (curComp.IsValidPixel(j + 1, i))
+                                pixels[1, 2] = curComp.GetPixel<float>(j + 1, i);
                             else
                                 pixels[1, 2] = center;
                         }
 
                         {//line3
-                            v = curComp.GetPixel(j - 1, i + 1);
-                            if (v != float.MaxValue)
-                                pixels[2, 0] = v;
+                            if (curComp.IsValidPixel(j - 1, i + 1))
+                                pixels[2, 0] = curComp.GetPixel<float>(j - 1, i + 1);
                             else
                                 pixels[2, 0] = center;
 
-                            v = curComp.GetPixel(j, i + 1);
-                            if (v != float.MaxValue)
-                                pixels[2, 1] = v;
+                            if (curComp.IsValidPixel(j, i + 1))
+                                pixels[2, 1] = curComp.GetPixel<float>(j, i + 1);
                             else
                                 pixels[2, 1] = center;
 
-                            v = curComp.GetPixel(j + 1, i + 1);
-                            if (v != float.MaxValue)
-                                pixels[2, 2] = v;
+                            if (curComp.IsValidPixel(j + 1, i + 1))
+                                pixels[2, 2] = curComp.GetPixel<float>(j + 1, i + 1);
                             else
                                 pixels[2, 2] = center;
                         }
@@ -545,16 +534,12 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut ResultPin { get; set; } = new PinOut();
         public UNoisePerlin()
         {
-            ResultPin.Name = " Result";
-
-            ResultPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddPinOut(ResultPin);
+            AddOutput(ResultPin, " Result", DefaultBufferCreator);
         }
         int mOctaves = 3;
         [Rtti.Meta]
@@ -628,7 +613,7 @@ namespace EngineNS.Bricks.Procedure.Node
             UpdatePerlin();
             return true;
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
 
@@ -639,7 +624,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 for (int j = 0; j < resultComp.Width; j++)
                 {
                     var value = (float)mPerlin.mCoreObject.Get(StartPosition.X + GridSize * j + XScale * j, StartPosition.Z + GridSize * i + YScale * i);
-                    resultComp.SetPixel(j, i, value);
+                    resultComp.SetSuperPixelAddress(j, i, 0, &value);
                 }
             }
             return true;
@@ -725,16 +710,13 @@ namespace EngineNS.Bricks.Procedure.Node
         public UBezier()
         {
             PrevSize = new Vector2(200, 60);
-            ResultPin.Name = " Result";
-
-            ResultPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc("Bezier");
-
+            
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddPinOut(ResultPin);
+            AddOutput(ResultPin, " Result", DefaultBufferCreator, "Bezier");
 
             mBezierCtrl.Initialize(MinX, MinY, MaxX, MaxY);
         }
@@ -763,7 +745,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public int DstW { get; set; } = -1;
         [Rtti.Meta]
         public int DstH { get; set; } = -1;
-        public override Int32_2 GetOutPinSize(PinOut pin)
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
             {
@@ -771,24 +753,23 @@ namespace EngineNS.Bricks.Procedure.Node
                 var buffer = graph.BufferCache.FindBuffer(LeftPin);
                 if (buffer != null)
                 {
-                    return new Int32_2(buffer.Width, buffer.Height);
+                    return buffer.BufferCreator;
                 }
             }
-            return base.GetOutPinSize(pin);
+            return base.GetOutBufferCreator(pin);
         }
-        public override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             var left = graph.BufferCache.FindBuffer(LeftPin);
             var right = graph.BufferCache.FindBuffer(RightPin);
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
             //Copy Left to Result
+            var op = resultComp.PixelOperator;
             for (int i = 0; i < resultComp.Height; i++)
             {
                 for (int j = 0; j < resultComp.Width; j++)
                 {
-                    var pxl = left.GetPixel(j, i);
-
-                    resultComp.SetPixel(j, i, pxl);
+                    op.Copy(resultComp.GetSuperPixelAddress(j, i, 0), left.GetSuperPixelAddress(j, i, 0));
                 }
             }
             int width = DstW;
@@ -817,9 +798,9 @@ namespace EngineNS.Bricks.Procedure.Node
                 {
                     float x = (float)(j * srcwidth) / (float)width;
                     float y = (float)(i * srcheight) / (float)height;
-                    
-                    var pxl = right.GetPixel((int)SrcX + (int)x, (int)SrcY + (int)y);
-                    resultComp.SetPixel((int)DstX + j, (int)DstY + i, pxl);
+
+                    op.Copy(resultComp.GetSuperPixelAddress((int)DstX + j, (int)DstY + i, 0),
+                        right.GetSuperPixelAddress((int)SrcX + (int)x, (int)SrcY + (int)y, 0));
                 }
             }
 
@@ -830,7 +811,7 @@ namespace EngineNS.Bricks.Procedure.Node
     }
     public class UPixelAdd : UBinocular
     {
-        public override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             var left = graph.BufferCache.FindBuffer(LeftPin);
             var right = graph.BufferCache.FindBuffer(RightPin);
@@ -845,16 +826,14 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             
             var result = graph.BufferCache.FindBuffer(ResultPin);
-            for (int i = 0; i < result.Height; i++)
+            for (int i = 0; i < result.Depth; i++)
             {
-                for (int j = 0; j < result.Width; j++)
+                for (int j = 0; j < result.Height; j++)
                 {
-                    float rValue = 0;
-                    if (right != null)
+                    for (int k = 0; k < result.Width; k++)
                     {
-                        rValue = right.GetPixel(j, i);
+                        result.PixelOperator.Add(result.GetSuperPixelAddress(k, j, i), left.GetSuperPixelAddress(k, j, i), right.GetSuperPixelAddress(k, j, i));
                     }
-                    result.SetPixel(j, i, left.GetPixel(j, i) + rValue);
                 }
             }
             left.LifeCount--;
@@ -865,7 +844,7 @@ namespace EngineNS.Bricks.Procedure.Node
     }
     public class UPixelSub : UBinocular
     {
-        public override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             var left = graph.BufferCache.FindBuffer(LeftPin);
             var right = graph.BufferCache.FindBuffer(RightPin);
@@ -880,16 +859,14 @@ namespace EngineNS.Bricks.Procedure.Node
             }
 
             var result = graph.BufferCache.FindBuffer(ResultPin);
-            for (int i = 0; i < result.Height; i++)
+            for (int i = 0; i < result.Depth; i++)
             {
-                for (int j = 0; j < result.Width; j++)
+                for (int j = 0; j < result.Height; j++)
                 {
-                    float rValue = 0;
-                    if (right != null)
+                    for (int k = 0; k < result.Width; k++)
                     {
-                        rValue = right.GetPixel(j, i);
+                        result.PixelOperator.Sub(result.GetSuperPixelAddress(k, j, i), left.GetSuperPixelAddress(k, j, i), right.GetSuperPixelAddress(k, j, i));
                     }
-                    result.SetPixel(j, i, left.GetPixel(j, i) - rValue);
                 }
             }
             left.LifeCount--;
@@ -900,7 +877,7 @@ namespace EngineNS.Bricks.Procedure.Node
     }
     public class UPixelMul : UBinocular
     {
-        public override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             var left = graph.BufferCache.FindBuffer(LeftPin);
             var right = graph.BufferCache.FindBuffer(RightPin);
@@ -915,16 +892,14 @@ namespace EngineNS.Bricks.Procedure.Node
             }
 
             var result = graph.BufferCache.FindBuffer(ResultPin);
-            for (int i = 0; i < result.Height; i++)
+            for (int i = 0; i < result.Depth; i++)
             {
-                for (int j = 0; j < result.Width; j++)
+                for (int j = 0; j < result.Height; j++)
                 {
-                    float rValue = 0;
-                    if (right != null)
+                    for (int k = 0; k < result.Width; k++)
                     {
-                        rValue = right.GetPixel(j, i);
+                        result.PixelOperator.Mul(result.GetSuperPixelAddress(k, j, i), left.GetSuperPixelAddress(k, j, i), right.GetSuperPixelAddress(k, j, i));
                     }
-                    result.SetPixel(j, i, left.GetPixel(j, i) * rValue);
                 }
             }
             left.LifeCount--;
@@ -935,7 +910,7 @@ namespace EngineNS.Bricks.Procedure.Node
     }
     public class UPixelDiv : UBinocular
     {
-        public override bool OnProcedure(UPgcGraph graph)
+        public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             var left = graph.BufferCache.FindBuffer(LeftPin);
             var right = graph.BufferCache.FindBuffer(RightPin);
@@ -950,18 +925,17 @@ namespace EngineNS.Bricks.Procedure.Node
             }
 
             var result = graph.BufferCache.FindBuffer(ResultPin);
-            for (int i = 0; i < result.Height; i++)
+            for (int i = 0; i < result.Depth; i++)
             {
-                for (int j = 0; j < result.Width; j++)
+                for (int j = 0; j < result.Height; j++)
                 {
-                    float rValue = 0;
-                    if (right != null)
+                    for (int k = 0; k < result.Width; k++)
                     {
-                        rValue = right.GetPixel(j, i);
+                        result.PixelOperator.Div(result.GetSuperPixelAddress(k, j, i), left.GetSuperPixelAddress(k, j, i), right.GetSuperPixelAddress(k, j, i));
                     }
-                    result.SetPixel(j, i, left.GetPixel(j, i) / rValue);
                 }
             }
+                
             left.LifeCount--;
             if (right != null)
                 right.LifeCount--;
@@ -985,27 +959,17 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut ZPin { get; set; } = new PinOut();
         public UCalcNormal()
         {
-            HFieldPin.Name = " Height";
-            XPin.Name = "X";
-            YPin.Name = "Y";
-            ZPin.Name = "Z";
-
-            HFieldPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            XPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            YPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            ZPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddPinIn(HFieldPin);
-            AddPinOut(XPin);
-            AddPinOut(YPin);
-            AddPinOut(ZPin);
+            AddInput(HFieldPin, " Height", DefaultInputDesc);
+            AddOutput(XPin, "X", DefaultBufferCreator);
+            AddOutput(YPin, "Y", DefaultBufferCreator);
+            AddOutput(ZPin, "Z", DefaultBufferCreator);
         }
-        public override Int32_2 GetOutPinSize(PinOut pin)
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (XPin == pin || YPin == pin || ZPin == pin)
             {
@@ -1013,10 +977,10 @@ namespace EngineNS.Bricks.Procedure.Node
                 var buffer = graph.BufferCache.FindBuffer(HFieldPin);
                 if (buffer != null)
                 {
-                    return new Int32_2(buffer.Width, buffer.Height);
+                    return buffer.BufferCreator;
                 }
             }
-            return base.GetOutPinSize(pin);
+            return base.GetOutBufferCreator(pin);
         }
         [Rtti.Meta]
         public float GridSize { get; set; } = 1.0f;
@@ -1028,7 +992,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var yResult = graph.BufferCache.FindBuffer(YPin);
             var zResult = graph.BufferCache.FindBuffer(ZPin);
             float minHeight, maxHeight;
-            heightFiels.GetRange(out minHeight, out maxHeight);
+            heightFiels.GetRangeUnsafe<float, FFloatOperator>(out minHeight, out maxHeight);
             //float range = HeightRange;// maxHeight - minHeight;
             for (int i = 1; i < heightFiels.Height - 1; i++)
             {
@@ -1107,9 +1071,9 @@ namespace EngineNS.Bricks.Procedure.Node
                     //}
                     #endregion
 
-                    float altInfo = heightFiels.GetPixel(j, i);
-                    float v_du = heightFiels.GetPixel(j + 1, i);
-                    float v_dv = heightFiels.GetPixel(j, i + 1);
+                    float altInfo = heightFiels.GetPixel<float>(j, i);
+                    float v_du = heightFiels.GetPixel<float>(j + 1, i);
+                    float v_dv = heightFiels.GetPixel<float>(j, i + 1);
 
                     var A = new Vector3(GridSize, (v_du - altInfo), 0);
                     var B = new Vector3(0, (v_dv - altInfo), -GridSize);
@@ -1151,33 +1115,19 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut ZPin { get; set; } = new PinOut();
         public UNormalize3D()
         {
-            InXPin.Name = " InX";
-            InYPin.Name = " InY";
-            InZPin.Name = " InZ";
-            XPin.Name = "X";
-            YPin.Name = "Y";
-            ZPin.Name = "Z";
-
-            InXPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            InYPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            InZPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            XPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            YPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            ZPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddPinIn(InXPin);
-            AddPinIn(InYPin);
-            AddPinIn(InZPin);
-            AddPinOut(XPin);
-            AddPinOut(YPin);
-            AddPinOut(ZPin);
+            AddInput(InXPin, " InX", DefaultInputDesc);
+            AddInput(InYPin, " InY", DefaultInputDesc);
+            AddInput(InZPin, " InZ", DefaultInputDesc);
+            AddOutput(XPin, "X", DefaultBufferCreator);
+            AddOutput(YPin, "Y", DefaultBufferCreator);
+            AddOutput(ZPin, "Z", DefaultBufferCreator);
         }
-        public override Int32_2 GetOutPinSize(PinOut pin)
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (XPin == pin || YPin == pin || ZPin == pin)
             {
@@ -1185,10 +1135,10 @@ namespace EngineNS.Bricks.Procedure.Node
                 var buffer = graph.BufferCache.FindBuffer(InXPin);
                 if (buffer != null)
                 {
-                    return new Int32_2(buffer.Width, buffer.Height);
+                    return buffer.BufferCreator;
                 }
             }
-            return base.GetOutPinSize(pin);
+            return base.GetOutBufferCreator(pin);
         }
         public override bool OnProcedure(UPgcGraph graph)
         {
@@ -1210,9 +1160,9 @@ namespace EngineNS.Bricks.Procedure.Node
                 for (int j = 1; j < xSrc.Width - 1; j++)
                 {
                     Vector3 nor;
-                    nor.X = xSrc.GetPixel(j, i);
-                    nor.Y = ySrc.GetPixel(j, i);
-                    nor.Z = zSrc.GetPixel(j, i);
+                    nor.X = xSrc.GetPixel<float>(j, i);
+                    nor.Y = ySrc.GetPixel<float>(j, i);
+                    nor.Z = zSrc.GetPixel<float>(j, i);
                     nor.Normalize();
 
                     xResult.SetPixel(j, i, nor.X);
@@ -1230,46 +1180,41 @@ namespace EngineNS.Bricks.Procedure.Node
     public class UPreviewImage : UPgcNodeBase
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn InXYZPin { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinIn InXPin { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinIn InYPin { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinIn InZPin { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut XYZPin { get; set; } = new PinOut();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut XPin { get; set; } = new PinOut();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut YPin { get; set; } = new PinOut();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut ZPin { get; set; } = new PinOut();
+
+        public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
         public UPreviewImage()
         {
             PrevSize = new Vector2(100, 100);
-
-            InXPin.Name = " InX";
-            InYPin.Name = " InY";
-            InZPin.Name = " InZ";
-            XPin.Name = "X";
-            YPin.Name = "Y";
-            ZPin.Name = "Z";
-
-            InXPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            InYPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            InZPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            XPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            YPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            ZPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
 
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddPinIn(InXPin);
-            AddPinIn(InYPin);
-            AddPinIn(InZPin);
-            AddPinOut(XPin);
-            AddPinOut(YPin);
-            AddPinOut(ZPin);
+            AddInput(InXYZPin, " InXYZ", XYZBufferCreator);
+            AddInput(InXPin, " InX", DefaultInputDesc);
+            AddInput(InYPin, " InY", DefaultInputDesc);
+            AddInput(InZPin, " InZ", DefaultInputDesc);
+
+            AddOutput(XYZPin, " XYZ", XYZBufferCreator);
+            AddOutput(XPin, "X", DefaultBufferCreator);
+            AddOutput(YPin, "Y", DefaultBufferCreator);
+            AddOutput(ZPin, "Z", DefaultBufferCreator);
         }
         public override int PreviewResultIndex
         {
@@ -1291,28 +1236,53 @@ namespace EngineNS.Bricks.Procedure.Node
                 cmdlist.AddImage(PreviewSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             }
         }
-        public override Int32_2 GetOutPinSize(PinOut pin)
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
-            return base.GetOutPinSize(pin);
+            return base.GetOutBufferCreator(pin);
         }
         public override bool OnProcedure(UPgcGraph graph)
         {
-            var xSrc = graph.BufferCache.FindBuffer(InXPin);
-            var ySrc = graph.BufferCache.FindBuffer(InYPin);
-            var zSrc = graph.BufferCache.FindBuffer(InZPin);
-            
-            graph.BufferCache.RegBuffer(XPin, xSrc);
-            graph.BufferCache.RegBuffer(YPin, ySrc);
-            graph.BufferCache.RegBuffer(ZPin, zSrc);
+            var xyzSrc = graph.BufferCache.FindBuffer(InXYZPin) as USuperBuffer<Vector3, FFloat3Operator>;
+            var xSrc = graph.BufferCache.FindBuffer(InXPin) as USuperBuffer<float, FFloatOperator>;
+            var ySrc = graph.BufferCache.FindBuffer(InYPin) as USuperBuffer<float, FFloatOperator>;
+            var zSrc = graph.BufferCache.FindBuffer(InZPin) as USuperBuffer<float, FFloatOperator>;
+
+            if (xyzSrc != null)
+            {
+                graph.BufferCache.RegBuffer(XYZPin, xyzSrc);
+            }
+            if (xSrc != null)
+            {
+                graph.BufferCache.RegBuffer(XPin, xSrc);
+            }
+            if (ySrc != null)
+            {
+                graph.BufferCache.RegBuffer(YPin, ySrc);
+            }
+            if (zSrc != null)
+            {
+                graph.BufferCache.RegBuffer(ZPin, zSrc);
+            }
 
             if (graph.GraphEditor != null)
             {
                 var norMap = new Bricks.Procedure.UImage2D();
-                norMap.Initialize(xSrc.Width, xSrc.Height,
-                    xSrc,
-                    ySrc,
-                    zSrc,
-                    null);
+
+                if (xyzSrc != null)
+                {
+                    norMap.Initialize(xyzSrc.Width, xyzSrc.Height,
+                        xyzSrc,
+                        null,
+                        0);
+                }
+                else
+                {
+                    norMap.Initialize(xSrc.Width, xSrc.Height,
+                        xSrc,
+                        ySrc,
+                        zSrc,
+                        null);
+                }
 
                 if (PreviewSRV != null)
                 {
@@ -1359,19 +1329,34 @@ namespace EngineNS.Bricks.Procedure.Node
                 this.Outputs.Clear();
                 for (int i = 0; i < value; i++)
                 {
-                    var inPin = new PinIn();
-                    inPin.Name = $"in{i}";
-                    inPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-                    AddPinIn(inPin);
+                    var inPin = new PinIn();            
+                    var inputDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+                    AddInput(inPin, $"in{i}", inputDesc);
 
                     var outPin = new PinOut();
-                    outPin.Name = $"out{i}";
-                    outPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-                    AddPinOut(outPin);
+                    AddOutput(outPin, $"out{i}", inputDesc);
                 }
 
                 OnPositionChanged();
             }
+        }
+        public override bool IsMatchLinkedPin(UBufferCreator input, UBufferCreator output)
+        {
+            return true;
+        }
+        public override void OnLoadLinker(UPinLinker linker)
+        {
+            base.OnLoadLinker(linker);
+
+            var input = linker.OutPin.Tag as UBufferCreator;
+            (linker.InPin.Tag as UBufferCreator).BufferType = input.BufferType;
+        }
+        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        {
+            base.OnLinkedFrom(iPin, OutNode, oPin);
+
+            var input = oPin.Tag as UBufferCreator;
+            (iPin.Tag as UBufferCreator).BufferType = input.BufferType;
         }
         public override UBufferConponent GetResultBuffer(int index)
         {

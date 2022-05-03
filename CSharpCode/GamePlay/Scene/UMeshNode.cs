@@ -121,12 +121,13 @@ namespace EngineNS.GamePlay.Scene
                 mMesh.SetMdfQueueType(mdfQueueType);
                 mMesh.MdfQueue.MdfDatas = saved;
 
-                int ObjectFlags_2Bit = 0;
-                if (value)
-                    ObjectFlags_2Bit |= 1;
-                else
-                    ObjectFlags_2Bit &= (~1);
-                mMesh.PerMeshCBuffer.SetValue(RHI.CConstantBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                //int ObjectFlags_2Bit = 0;
+                //if (value)
+                //    ObjectFlags_2Bit |= 1;
+                //else
+                //    ObjectFlags_2Bit &= (~1);
+                //mMesh.PerMeshCBuffer.SetValue(RHI.CConstantBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                mMesh.IsAcceptShadow = value;
             }
         }
         public static async System.Threading.Tasks.Task<UMeshNode> AddMeshNode(GamePlay.UWorld world, UNode parent, UNodeData data, Type placementType, Graphics.Mesh.UMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
@@ -257,28 +258,24 @@ namespace EngineNS.GamePlay.Scene
             var meshData = NodeData as UMeshNodeData;
             if (meshData == null || meshData.MeshName == null)
             {
-                System.Action action = async () =>
+                var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
+                var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
+                materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria;// UEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
+                //var colorVar = materials1[0].FindVar("clr4_0");
+                //if (colorVar != null)
+                //{
+                //    colorVar.SetValue(new Vector4(1, 0, 1, 1));
+                //}
+                var mesh = new Graphics.Mesh.UMesh();
+                if (this.IsAcceptShadow)
                 {
-                    var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
-                    var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-                    materials1[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(UEngine.Instance.Config.DefaultMaterialInstance);
-                    var colorVar = materials1[0].FindVar("clr4_0");
-                    if (colorVar != null)
-                    {
-                        colorVar.Value = "1,0,1,1";
-                    }
-                    var mesh = new Graphics.Mesh.UMesh();
-                    if (this.IsAcceptShadow)
-                    {
-                        mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_Shadow>>.TypeDesc);
-                    }
-                    else
-                    {
-                        mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
-                    }
-                    Mesh = mesh;
-                };
-                action();
+                    mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_Shadow>>.TypeDesc);
+                }
+                else
+                {
+                    mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
+                }
+                Mesh = mesh;
                 return;
             }
             else

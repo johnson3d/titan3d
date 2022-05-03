@@ -414,7 +414,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public static Hash160 GetShaderHash(UShadingEnv shading, UMaterial material, UMdfQueue mdf)
         {
-            return Hash160.CreateHash160($"{shading},{material.AssetName},{mdf}");
+            var caps = new IRenderContextCaps();
+            UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetRenderContextCaps(ref caps);
+            return Hash160.CreateHash160($"{shading},{material.AssetName},{mdf},{caps}");
         }
         public async System.Threading.Tasks.Task<UEffect> GetEffect(UShadingEnv shading, UMaterial material, UMdfQueue mdf)
         {

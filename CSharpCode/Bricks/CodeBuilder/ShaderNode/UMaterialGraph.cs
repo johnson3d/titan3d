@@ -7,6 +7,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
     public partial class UMaterialGraph : UNodeGraph
     {
+        public const string MaterialEditorKeyword = "Material";
+
         public UMaterialGraph()
         {
             UpdateCanvasMenus();
@@ -19,258 +21,239 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             return CurSerialId++;
         }
+        static void GetNodeNameAndMenuStr(in string menuString, UMaterialGraph graph, ref string nodeName, ref string menuName)
+        {
+            menuName = menuString;
+            nodeName = menuName;
+            var idx = menuString.IndexOf('@');
+            if (idx >= 0)
+            {
+                var idxEnd = menuString.IndexOf('@', idx + 1);
+                var subStr = menuString.Substring(idx + 1, idxEnd - idx - 1);
+                subStr = subStr.Replace("serial", graph.GenSerialId().ToString());
+                menuName = menuString.Remove(idx, idxEnd - idx + 1);
+                nodeName = menuName.Insert(idx, subStr);
+            }
+        }
         public override void UpdateCanvasMenus()
         {
             CanvasMenus.SubMenuItems.Clear();
             CanvasMenus.Text = "Canvas";
-            var oprations = CanvasMenus.AddMenuItem("Operation", null, null);
+            foreach(var service in Rtti.UTypeDescManager.Instance.Services.Values)
             {
-                oprations.AddMenuItem("+", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new AddNode();
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                oprations.AddMenuItem("-", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new SubNode();
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                oprations.AddMenuItem("*", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new MulNode();
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                oprations.AddMenuItem("/", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new DivNode();
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                oprations.AddMenuItem("%", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new ModNode();
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                oprations.AddMenuItem("&", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new BitAndNode();
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                oprations.AddMenuItem("|", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new BitOrNode();
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-            }
-            var Datas = CanvasMenus.AddMenuItem("Data", null, null);
-            {
-                Datas.AddMenuItem("float", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new Var.VarDimF1();
-                        node.Name = $"f1_{GenSerialId()}";
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                Datas.AddMenuItem("float2", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new Var.VarDimF2();
-                        node.Name = $"f2_{GenSerialId()}";
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                Datas.AddMenuItem("float3", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new Var.VarDimF3();
-                        node.Name = $"f3_{GenSerialId()}";
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                Datas.AddMenuItem("float4", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new Var.VarDimF4();
-                        node.Name = $"f3_{GenSerialId()}";
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                Datas.AddMenuItem("Color3", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new Var.VarColor3();
-                        node.Name = $"clr3_{GenSerialId()}";
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                Datas.AddMenuItem("Color4", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new Var.VarColor4();
-                        node.Name = $"clr4_{GenSerialId()}";
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                Datas.AddMenuItem("texture2d", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new Var.Texture2D();
-                        node.Name = $"tex2d_{GenSerialId()}";
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                Datas.AddMenuItem("texture2dArray", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new Var.Texture2DArray();
-                        node.Name = $"tex2dArray_{GenSerialId()}";
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-                Datas.AddMenuItem("sampler", null,
-                    (UMenuItem item, object sender) =>
-                    {
-                        var node = new Var.SamplerState();
-                        node.Name = $"sampler_{GenSerialId()}";
-                        node.Graph = this;
-                        node.Position = PopMenuPosition;
-                        this.AddNode(node);
-                    });
-            }
-        }
-        public override void OnAfterDrawMenu(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles)
-        {
-            if (ImGuiAPI.BeginMenu("Function", true))
-            {
-                var kls = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(Control.HLSLMethod).FullName);
-                foreach(var i in kls.Methods)
+                foreach(var typeDesc in service.Types.Values)
                 {
-                    if (ImGuiAPI.MenuItem(i.Method.Name, null, false, true))
+                    var atts = typeDesc.SystemType.GetCustomAttributes(typeof(ContextMenuAttribute), true);
+                    if(atts.Length > 0)
                     {
-                        var attrs = i.Method.GetCustomAttributes(typeof(Control.UserCallNodeAttribute), false);
-                        if (attrs.Length > 0)
+                        var parentMenu = CanvasMenus;
+                        var att = atts[0] as ContextMenuAttribute;
+                        if (!att.HasKeyString(MaterialEditorKeyword))
+                            continue;
+                        for(var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
                         {
-                            var usr = attrs[0] as Control.UserCallNodeAttribute;
-                            if (usr.CallNodeType != null)
-                            {
-                                var node = Rtti.UTypeDescManager.CreateInstance(usr.CallNodeType) as Control.CallNode;
-                                if (node != null)
-                                {
-                                    node.Initialize(i);
-                                    node.Name = i.Method.Name;
-                                    node.Graph = this;
-                                    node.Position = PopMenuPosition;
-                                    this.AddNode(node);
-                                }
-                            }
+                            var menuStr = att.MenuPaths[menuIdx];
+                            string nodeName = null;
+                            GetNodeNameAndMenuStr(menuStr, this, ref nodeName, ref menuStr);
+                            if (menuIdx < att.MenuPaths.Length - 1)
+                                parentMenu = parentMenu.AddMenuItem(menuStr, null, null);
                             else
                             {
-                                var node = Control.CallNode.NewMethodNode(i);
-                                node.Name = i.Method.Name;
-                                node.Graph = this;
-                                node.Position = PopMenuPosition;
-                                this.AddNode(node);
+                                parentMenu.AddMenuItem(menuStr, att.FilterStrings, null,
+                                    (UMenuItem item, object sender) =>
+                                    {
+                                        var node = Rtti.UTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
+                                        if (nodeName != null)
+                                            node.Name = nodeName;
+                                        node.UserData = this;
+                                        node.Position = PopMenuPosition;
+                                        SetDefaultActionForNode(node);
+                                        this.AddNode(node);
+                                    });
                             }
                         }
-                        else
-                        {
-                            var node = Control.CallNode.NewMethodNode(i);
-                            node.Name = i.Method.Name;
-                            node.Graph = this;
-                            node.Position = PopMenuPosition;
-                            this.AddNode(node);
-                        }
                     }
                 }
-                ImGuiAPI.EndMenu();
             }
-            if (ImGuiAPI.BeginMenu("UniformVars", true))
+            var kls = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(Control.HLSLMethod).FullName);
+            var funcMenu = CanvasMenus.AddMenuItem("Function", null, null);
+            foreach(var i in kls.Methods)
             {
-                if (ImGuiAPI.BeginMenu("PerFrame", true))
-                {
-                    System.Reflection.FieldInfo[] members = RHI.CConstantBuffer.PerFrameType.GetFields();
-                    foreach (var i in members)
+                funcMenu.AddMenuItem(i.MethodName, null,
+                    (UMenuItem item, object sender) =>
                     {
-                        var attrs = i.GetCustomAttributes(typeof(RHI.CConstantBuffer.UShaderTypeAttribute), false);
-                        if (attrs.Length == 0)
-                            continue;
-                        if (ImGuiAPI.MenuItem(i.Name, null, false, true))
-                        {
-                            var node = new UUniformVar();
-                            node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as RHI.CConstantBuffer.UShaderTypeAttribute).ShaderType);
-                            node.Name = i.Name;
-                            node.Graph = this;
-                            node.Position = PopMenuPosition;
-                            this.AddNode(node);
-                        }
-                    }
-                    ImGuiAPI.EndMenu();
-                }
-                ImGuiAPI.EndMenu();
+                        var node = Control.CallNode.NewMethodNode(i);
+                        node.Name = i.MethodName;
+                        node.UserData = this;
+                        node.Position = PopMenuPosition;
+                        SetDefaultActionForNode(node);
+                        this.AddNode(node);
+                    });
             }
-            if (ImGuiAPI.BeginMenu("InputVars", true))
+            var uniformVarMenus = CanvasMenus.AddMenuItem("UniformVars", null, null);
+            var perFrameMenus = uniformVarMenus.AddMenuItem("PerFrame", null, null);
+            var members = RHI.CConstantBuffer.PerFrameType.GetFields();
+            foreach(var i in members)
             {
-                if (ImGuiAPI.BeginMenu("PSInput", true))
+                var attrs = i.GetCustomAttributes(typeof(RHI.CConstantBuffer.UShaderTypeAttribute), false);
+                if (attrs.Length == 0)
+                    continue;
+                perFrameMenus.AddMenuItem(i.Name, null,
+                    (UMenuItem item, object sender) =>
+                    {
+                        var node = new UUniformVar();
+                        node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as RHI.CConstantBuffer.UShaderTypeAttribute).ShaderType);
+                        node.Name = i.Name;
+                        node.UserData = this;
+                        node.Position = PopMenuPosition;
+                        SetDefaultActionForNode(node);
+                        this.AddNode(node);
+                    });
+            }
+            var inputVarMenus = CanvasMenus.AddMenuItem("InputVars", null, null);
+            var psInputMenus = inputVarMenus.AddMenuItem("PSInput", null, null);
+            psInputMenus.AddMenuItem("Input", null,
+                (UMenuItem item, object sender) =>
                 {
+                    var node = new UUniformVar();
+                    node.VarType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.UMaterial.PSInput));
+                    node.Name = "input";
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                });
+            System.Reflection.FieldInfo[] psInputmembers = typeof(Graphics.Pipeline.Shader.UMaterial.PSInput).GetFields();
+            foreach (var i in psInputmembers)
+            {
+                psInputMenus.AddMenuItem(i.Name, null,
+                    (UMenuItem item, object sender) =>
                     {
-                        if (ImGuiAPI.MenuItem("Input", null, false, true))
-                        {
-                            var node = new UUniformVar();
-                            node.VarType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.UMaterial.PSInput));
-                            node.Name = "input";
-                            node.Graph = this;
-                            node.Position = PopMenuPosition;
-                            this.AddNode(node);
-                        }   
-                    }
-                    System.Reflection.FieldInfo[] members = typeof(Graphics.Pipeline.Shader.UMaterial.PSInput).GetFields();
-                    foreach (var i in members)
-                    {
-                        if (ImGuiAPI.MenuItem(i.Name, null, false, true))
-                        {
-                            var node = new UUniformVar();
-                            node.VarType = Rtti.UTypeDesc.TypeOf(i.FieldType);
-                            node.Name = "input." + i.Name;
-                            node.Graph = this;
-                            node.Position = PopMenuPosition;
-                            this.AddNode(node);
-                        }
-                    }
-                    ImGuiAPI.EndMenu();
-                }
-                ImGuiAPI.EndMenu();
+                        var node = new UUniformVar();
+                        node.VarType = Rtti.UTypeDesc.TypeOf(i.FieldType);
+                        node.Name = "input." + i.Name;
+                        node.UserData = this;
+                        node.Position = PopMenuPosition;
+                        SetDefaultActionForNode(node);
+                        this.AddNode(node);
+                    });
             }
         }
-
+        //public override void OnAfterDrawMenu(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles)
+        //{
+        //    //if (ImGuiAPI.BeginMenu("Function", true))
+        //    //{
+        //    //    var kls = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(Control.HLSLMethod).FullName);
+        //    //    foreach(var i in kls.Methods)
+        //    //    {
+        //    //        if (ImGuiAPI.MenuItem(i.MethodName, null, false, true))
+        //    //        {
+        //    //            var attrs = i.GetCustomAttributes(typeof(Control.UserCallNodeAttribute), false);
+        //    //            if (attrs.Length > 0)
+        //    //            {
+        //    //                var usr = attrs[0] as Control.UserCallNodeAttribute;
+        //    //                if (usr.CallNodeType != null)
+        //    //                {
+        //    //                    var node = Rtti.UTypeDescManager.CreateInstance(usr.CallNodeType) as Control.CallNode;
+        //    //                    if (node != null)
+        //    //                    {
+        //    //                        node.Initialize(i);
+        //    //                        node.Name = i.MethodName;
+        //    //                        node.UserData = this;
+        //    //                        node.Position = PopMenuPosition;
+        //    //                        this.AddNode(node);
+        //    //                    }
+        //    //                }
+        //    //                else
+        //    //                {
+        //    //                    var node = Control.CallNode.NewMethodNode(i);
+        //    //                    node.Name = i.MethodName;
+        //    //                    node.UserData = this;
+        //    //                    node.Position = PopMenuPosition;
+        //    //                    this.AddNode(node);
+        //    //                }
+        //    //            }
+        //    //            else
+        //    //            {
+        //    //                var node = Control.CallNode.NewMethodNode(i);
+        //    //                node.Name = i.MethodName;
+        //    //                node.UserData = this;
+        //    //                node.Position = PopMenuPosition;
+        //    //                this.AddNode(node);
+        //    //            }
+        //    //        }
+        //    //    }
+        //    //    ImGuiAPI.EndMenu();
+        //    //}
+        //    if (ImGuiAPI.BeginMenu("UniformVars", true))
+        //    {
+        //        if (ImGuiAPI.BeginMenu("PerFrame", true))
+        //        {
+        //            System.Reflection.FieldInfo[] members = RHI.CConstantBuffer.PerFrameType.GetFields();
+        //            foreach (var i in members)
+        //            {
+        //                var attrs = i.GetCustomAttributes(typeof(RHI.CConstantBuffer.UShaderTypeAttribute), false);
+        //                if (attrs.Length == 0)
+        //                    continue;
+        //                if (ImGuiAPI.MenuItem(i.Name, null, false, true))
+        //                {
+        //                    var node = new UUniformVar();
+        //                    node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as RHI.CConstantBuffer.UShaderTypeAttribute).ShaderType);
+        //                    node.Name = i.Name;
+        //                    node.UserData = this;
+        //                    node.Position = PopMenuPosition;
+        //                    SetDefaultActionForNode(node);
+        //                    //node.OnPreReadAction = NodeOnPreRead;
+        //                    this.AddNode(node);
+        //                }
+        //            }
+        //            ImGuiAPI.EndMenu();
+        //        }
+        //        ImGuiAPI.EndMenu();
+        //    }
+        //    if (ImGuiAPI.BeginMenu("InputVars", true))
+        //    {
+        //        if (ImGuiAPI.BeginMenu("PSInput", true))
+        //        {
+        //            {
+        //                if (ImGuiAPI.MenuItem("Input", null, false, true))
+        //                {
+        //                    var node = new UUniformVar();
+        //                    node.VarType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.UMaterial.PSInput));
+        //                    node.Name = "input";
+        //                    node.UserData = this;
+        //                    node.Position = PopMenuPosition;
+        //                    SetDefaultActionForNode(node);
+        //                    //node.OnPreReadAction = NodeOnPreRead;
+        //                    this.AddNode(node);
+        //                }   
+        //            }
+        //            System.Reflection.FieldInfo[] members = typeof(Graphics.Pipeline.Shader.UMaterial.PSInput).GetFields();
+        //            foreach (var i in members)
+        //            {
+        //                if (ImGuiAPI.MenuItem(i.Name, null, false, true))
+        //                {
+        //                    var node = new UUniformVar();
+        //                    node.VarType = Rtti.UTypeDesc.TypeOf(i.FieldType);
+        //                    node.Name = "input." + i.Name;
+        //                    node.UserData = this;
+        //                    node.Position = PopMenuPosition;
+        //                    SetDefaultActionForNode(node);
+        //                    //node.OnPreReadAction = NodeOnPreRead;
+        //                    this.AddNode(node);
+        //                }
+        //            }
+        //            ImGuiAPI.EndMenu();
+        //        }
+        //        ImGuiAPI.EndMenu();
+        //    }
+        //}
+        public override void SetDefaultActionForNode(UNodeBase node)
+        {
+            node.OnLButtonClickedAction = NodeLButtonClickedAction;
+            node.OnLinkedFromAction = NodeOnLinkedFrom;
+            //node.OnPreReadAction = NodeOnPreRead;
+        }
         //int Seed = 5;
         public override void OnDrawAfter(Bricks.NodeGraph.UGraphRenderer renderer, EGui.Controls.NodeGraph.NodeGraphStyles styles, ImDrawList cmdlist)
         {
@@ -295,5 +278,51 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Tree(ref p, angle + Math.PI / 18 * (0.9f + mRand.NextDouble() * 0.2), length * 0.8 * (0.9f + mRand.NextDouble() * 0.2), width * 0.8f, ref cmdlist);
             Tree(ref p, angle - Math.PI / 18 * (0.9f + mRand.NextDouble() * 0.2), length * 0.8 * (0.9f + mRand.NextDouble() * 0.2), width * 0.8f, ref cmdlist);
         }
+
+        private void NodeLButtonClickedAction(UNodeBase node, NodePin clickedPin)
+        {
+            //if (HasError)
+            //{
+            //    if (Graph != null)
+            //    {
+            //        Graph.ShaderEditor.NodePropGrid.SingleTarget = CodeExcept;
+            //    }
+            //    return;
+            //}
+            var graph = node.UserData as UMaterialGraph;
+            graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = null;
+
+            if (node.GetPropertyEditObject() == null)
+            {
+                if (graph != null)
+                {
+                    graph.ShaderEditor.NodePropGrid.Target = null;
+                }
+                return;
+            }
+
+            graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<UNodeBase>.TypeDesc;
+            graph.ShaderEditor.NodePropGrid.Target = node.GetPropertyEditObject();
+        }
+        private void NodeOnLinkedFrom(UNodeBase node, PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        {
+            var funcGraph = ParentGraph as UMaterialGraph;
+            if (funcGraph == null || oPin.Link == null || iPin.Link == null)
+            {
+                return;
+            }
+            if (iPin.Link.CanLinks.Contains("Value"))
+            {
+                funcGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
+            }
+        }
+        //private void NodeOnPreRead(UNodeBase node, object tagObject, object hostObject, bool fromXml)
+        //{
+        //    var editor = tagObject as UShaderEditor;
+        //    if (editor != null)
+        //    {
+        //        node.UserData = editor.MaterialGraph;
+        //    }
+        //}
     }
 }

@@ -9,8 +9,19 @@ namespace EngineNS.GamePlay.Scene
     {
         public class ULightNodeData : UNodeData
         {
+            internal UPointLightNode HostNode;
+            Vector3 mColor;
             [Rtti.Meta]
-            public Vector3 Color { get; set; }
+            [EGui.Controls.PropertyGrid.Color3PickerEditor()]
+            public Vector3 Color 
+            { 
+                get=> mColor;
+                set
+                {
+                    mColor = value;
+                    HostNode?.OnLightColorChanged();
+                }
+            }
             [Rtti.Meta]
             public float Intensity { get; set; }
             [Rtti.Meta]
@@ -22,7 +33,10 @@ namespace EngineNS.GamePlay.Scene
             {
                 data = new ULightNodeData();
             }
-            return await base.InitializeNode(world, data, bvType, placementType);
+            
+            var ret = await base.InitializeNode(world, data, bvType, placementType);
+            GetNodeData<ULightNodeData>().HostNode = this;
+            return ret;
         }
         public static async System.Threading.Tasks.Task<UPointLightNode> AddPointLightNode(UWorld world, UNode parent, ULightNodeData data, DVector3 pos)
         {
@@ -37,6 +51,18 @@ namespace EngineNS.GamePlay.Scene
             return meshNode;
         }
         public UInt16 IndexInGpuScene = UInt16.MaxValue;
+        internal void OnLightColorChanged()
+        {
+            if (mDebugMesh != null)
+            {
+                var colorVar = mDebugMesh.MaterialMesh.Materials[0].FindVar("clr4_0");
+                if (colorVar != null)
+                {
+                    Vector4 clr4 = new Vector4(GetNodeData<ULightNodeData>().Color, 1);
+                    colorVar.SetValue(in clr4);
+                }
+            }
+        }
         Graphics.Mesh.UMesh mDebugMesh;
         public Graphics.Mesh.UMesh DebugMesh
         {
@@ -46,7 +72,7 @@ namespace EngineNS.GamePlay.Scene
                 {
                     var cookedMesh = UEngine.Instance.GfxDevice.MeshPrimitiveManager.UnitSphere;
                     var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-                    materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria;
+                    materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
                     var mesh2 = new Graphics.Mesh.UMesh();
                     var ok1 = mesh2.Initialize(cookedMesh, materials1,
                         Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMeshPermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>>.TypeDesc);
@@ -63,6 +89,8 @@ namespace EngineNS.GamePlay.Scene
                         UpdateAbsTransform();
                         UpdateAABB();
                         Parent?.UpdateAABB();
+
+                        OnLightColorChanged();
                     }
                 }
                 return mDebugMesh;
@@ -131,7 +159,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
-            LightData.Intensity = 20 * (float)Math.Sin(UEngine.Instance.TickCountSecond * 0.005f);
+            //test temp code 
+            LightData.Intensity = 120 * (float)Math.Sin(UEngine.Instance.TickCountSecond * 0.005f);
 
             return true;
         }
@@ -247,7 +276,7 @@ namespace EngineNS.GamePlay.Scene
             if (lightData == null)
                 return;
 
-            lightData.LightData.Direction = Quaternion.RotateVector3(in Placement.AbsTransform.mQuat, in Vector3.UnitZ);
+            lightData.LightData.Direction = Quaternion.RotateVector3(in Placement.AbsTransform.mQuat, in Vector3.UnitX);
             if (mDebugMesh == null)
                 return;
 

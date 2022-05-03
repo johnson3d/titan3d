@@ -337,12 +337,12 @@ namespace EngineNS.IO
             var xml = IO.FileManager.LoadXml(file);
             if (xml == null)
                 return null;
-            System.Type type = null;
+            Rtti.UTypeDesc type = null;
             foreach(System.Xml.XmlAttribute i in xml.LastChild.Attributes)
             {
                 if (i.Name == "Type")
                 {
-                    type = Rtti.UTypeDesc.TypeOf(i.Value).SystemType;
+                    type = Rtti.UTypeDesc.TypeOf(i.Value);
                     break;
                 }
             }

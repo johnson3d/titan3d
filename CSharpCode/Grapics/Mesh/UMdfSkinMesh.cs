@@ -8,6 +8,7 @@ namespace EngineNS.Graphics.Mesh
     public class UMdfSkinMesh : Graphics.Pipeline.Shader.UMdfQueue
     {
         public Mesh.Modifier.CSkinModifier SkinModifier { get; set; }
+        public RHI.CConstantBuffer PerSkinMeshCBuffer { get; set; }
         public UMdfSkinMesh()
         {
             SkinModifier = new Mesh.Modifier.CSkinModifier();
@@ -29,26 +30,32 @@ namespace EngineNS.Graphics.Mesh
         {
             mCoreObject.ClearModifiers();
             SkinModifier = (mdf as UMdfSkinMesh).SkinModifier;
+            PerSkinMeshCBuffer = (mdf as UMdfSkinMesh).PerSkinMeshCBuffer;
             unsafe
             {
                 mCoreObject.PushModifier(SkinModifier.mCoreObject.NativeSuper);
             }
         }
-        protected override void UpdateShaderCode()
+        protected override string GetBaseBuilder(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
         {
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/modifier/SkinModifier.cginc", RName.ERNameType.Engine).Address}\"");
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)");
-            codeBuilder.PushBrackets();
+            var codeString = "";
+            var mdfSourceName = RName.GetRName("shaders/modifier/SkinModifier.cginc", RName.ERNameType.Engine);
+            codeBuilder.AddLine($"#include \"{mdfSourceName.Address}\"", ref codeString);
+            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)", ref codeString);
+            codeBuilder.PushSegment(ref codeString);
             {
-                codeBuilder.AddLine("DoSkinModifierVS(output, input);");
+                codeBuilder.AddLine("DoSkinModifierVS(output, input);", ref codeString);
             }
-            codeBuilder.PopBrackets();
+            codeBuilder.PopSegment(ref codeString);
 
-            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION");
+            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref codeString);
+
+            var code = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCodeProvider(mdfSourceName);
+            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{code.SourceCode.AsText.GetHashCode()}", ref codeString);
 
             SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(codeBuilder.ClassCode);
+            SourceCode.SetText(codeString);
+            return codeString;
         }
         public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Pipeline.URenderPolicy policy, Mesh.UMesh mesh)
         {
@@ -62,9 +69,22 @@ namespace EngineNS.Graphics.Mesh
                     var animPose = mesh.MaterialMesh.Mesh.PartialSkeleton.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
                     runtimePose = Animation.SkeletonAnimation.Runtime.Pose.URuntimePoseUtility.CreateMeshSpaceRuntimePose(animPose);
                 }
+                
+                if (PerSkinMeshCBuffer == null)
+                {
+                    PerSkinMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(drawcall.Effect.ShaderProgram, "cbSkinMesh");
+                }
+
+                var binder = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbSkinMesh");
+                if (CoreSDK.IsNullPointer(binder))
+                {
+                    return;
+                }
+                drawcall.mCoreObject.BindShaderCBuffer(binder, PerSkinMeshCBuffer.mCoreObject);
+
                 List<Vector4> tempPos = new List<Vector4>();
-                Vector4* absPos = (Vector4*)mesh.PerMeshCBuffer.mCoreObject.GetVarPtrToWrite(mesh.PerMeshCBuffer.PerMeshIndexer.AbsBonePos, length);
-                Quaternion* absQuat = (Quaternion*)mesh.PerMeshCBuffer.mCoreObject.GetVarPtrToWrite(mesh.PerMeshCBuffer.PerMeshIndexer.AbsBoneQuat, length);
+                Vector4* absPos = (Vector4*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(0, length);
+                Quaternion* absQuat = (Quaternion*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(1, length);
                 
                 foreach (var bone in bones)
                 {
@@ -104,28 +124,19 @@ namespace EngineNS.Graphics.Mesh
     {
         protected override void UpdateShaderCode()
         {
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/modifier/SkinModifier.code", RName.ERNameType.Engine).Address}\"");
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)");
-            codeBuilder.PushBrackets();
-            {
-                codeBuilder.AddLine("DoSkinModifierVS(output, input);");
-            }
-            codeBuilder.PopBrackets();
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            var codeString = GetBaseBuilder(codeBuilder);
 
-            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION");
-            
             if (typeof(PermutationType).Name == "UMdf_NoShadow")
             {
-                codeBuilder.AddLine("#define DISABLE_SHADOW_MDFQUEUE 1");
+                codeBuilder.AddLine("#define DISABLE_SHADOW_MDFQUEUE 1", ref codeString);
             }
             else if (typeof(PermutationType).Name == "UMdf_Shadow")
             {
 
             }
 
-            SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(codeBuilder.ClassCode);
+            SourceCode.SetText(codeString);
         }
     }
 }

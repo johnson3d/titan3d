@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 {
-    public class Binocular : IBaseNode
+    [Obsolete]
+    public class Binocular : UNodeBase
     {
         public Rtti.UTypeDesc LeftType;
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
@@ -46,57 +48,66 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             Icon.Color = 0xFF00FF00;
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
-            Name = Bricks.CodeBuilder.CSharp.CSGen.GetOp(InOp);
+            Name = "[Obsolete]" + Bricks.CodeBuilder.CSharp.CSGen.GetOp(InOp);
 
             AddPinIn(Left);
             AddPinIn(Right);
             AddPinOut(Result);
         }
-        public override System.Type GetOutPinType(PinOut pin)
+        public override void OnPropertyRead(object root, PropertyInfo prop, bool fromXml)
         {
-            return LeftType.SystemType;
+            base.OnPropertyRead(root, prop, fromXml);
+            if(prop.Name == "Name")
+            {
+                Name = "[Obsolete]" + Name;
+            }
         }
-        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
-            var binOp = new BinocularOp();
-            binOp.Op = this.Op;
-            var links = new List<UPinLinker>();
-            funGraph.FindInLinker(Left, links);
-            if (links.Count != 1)
-            {
-                throw new GraphException(this, Left, $"Left link error : {links.Count}");
-            }
-            var leftNode = links[0].OutNode as IBaseNode;
-            var leftExpr = leftNode.GetExpr(funGraph, cGen, links[0].OutPin, true) as OpExpress;
-            var leftType = leftNode.GetOutPinType(links[0].OutPin);
-            binOp.Left = leftExpr;
-
-            links.Clear();
-            funGraph.FindInLinker(Right, links);
-            if (links.Count != 1)
-            {
-                throw new GraphException(this, Left, $"Right link error : {links.Count}");
-            }
-            var rightNode = links[0].OutNode as IBaseNode;
-            var rightExpr = rightNode.GetExpr(funGraph, cGen, links[0].OutPin, true) as OpExpress;
-            var rightType = rightNode.GetOutPinType(links[0].OutPin);
-            if (rightType != leftType)
-            {
-                var cvtExpr = new ConvertTypeOp();
-                cvtExpr.TargetType = cGen.GetTypeString(leftType);
-                cvtExpr.ObjExpr = rightExpr;
-                binOp.Right = cvtExpr;
-            }
-            else
-            {
-                binOp.Right = rightExpr;
-            }
-
-            return binOp;
+            return LeftType;
         }
+        //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        //{
+        //    var binOp = new BinocularOp();
+        //    binOp.Op = this.Op;
+        //    var links = new List<UPinLinker>();
+        //    funGraph.FindInLinker(Left, links);
+        //    if (links.Count != 1)
+        //    {
+        //        throw new GraphException(this, Left, $"Left link error : {links.Count}");
+        //    }
+        //    var leftNode = links[0].OutNode;
+        //    var leftExpr = leftNode.GetExpr(funGraph, cGen, links[0].OutPin, true) as OpExpress;
+        //    var leftType = leftNode.GetOutPinType(links[0].OutPin);
+        //    binOp.Left = leftExpr;
+
+        //    links.Clear();
+        //    funGraph.FindInLinker(Right, links);
+        //    if (links.Count != 1)
+        //    {
+        //        throw new GraphException(this, Left, $"Right link error : {links.Count}");
+        //    }
+        //    var rightNode = links[0].OutNode;
+        //    var rightExpr = rightNode.GetExpr(funGraph, cGen, links[0].OutPin, true) as OpExpress;
+        //    var rightType = rightNode.GetOutPinType(links[0].OutPin);
+        //    if (rightType != leftType)
+        //    {
+        //        var cvtExpr = new ConvertTypeOp();
+        //        cvtExpr.TargetType = cGen.GetTypeString(leftType);
+        //        cvtExpr.ObjExpr = rightExpr;
+        //        binOp.Right = cvtExpr;
+        //    }
+        //    else
+        //    {
+        //        binOp.Right = rightExpr;
+        //    }
+
+        //    return binOp;
+        //}
     }
 
     #region ValueOp
+    [Obsolete]
     public class ValueOpNode : Binocular
     {
         public ValueOpNode(EBinocularOp op)
@@ -122,14 +133,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 
             if (iPin == Right)
             {
-                var nodeExpr = OutNode as IBaseNode;
+                var nodeExpr = OutNode;
                 if (nodeExpr == null)
                     return true;
                 var testType = nodeExpr.GetOutPinType(oPin);
 
-                if (testType == typeof(float))
+                if (testType.IsEqual(typeof(float)))
                     return true;
-                return ICodeGen.CanConvert(testType, LeftType.SystemType);
+                return ICodeGen.CanConvert(testType, LeftType);
             }
             return true;
         }
@@ -139,20 +150,21 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 
             if (iPin == Left)
             {//二元运算，左值决定输出类型
-                var nodeExpr = OutNode as IBaseNode;
+                var nodeExpr = OutNode;
                 if (nodeExpr == null)
                     return;
 
                 var newType = nodeExpr.GetOutPinType(oPin);
-                if (LeftType != null && LeftType.SystemType != newType)
+                if (LeftType != null && LeftType != newType)
                 {//类型改变，所有输入输出都需要断开
                     this.ParentGraph.RemoveLinkedOut(this.Result);
                     this.ParentGraph.RemoveLinkedIn(this.Right);
                 }
-                LeftType = Rtti.UTypeDesc.TypeOf(newType);
+                LeftType = newType;
             }
         }
     }
+    [Obsolete]
     public class AddNode : ValueOpNode
     {
         public AddNode()
@@ -160,6 +172,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         {
         }
     }
+    [Obsolete]
     public class SubNode : ValueOpNode
     {
         public SubNode()
@@ -167,6 +180,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         {
         }
     }
+    [Obsolete]
     public class MulNode : ValueOpNode
     {
         public MulNode()
@@ -174,6 +188,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         {
         }
     }
+    [Obsolete]
     public class DivNode : ValueOpNode
     {
         public DivNode()
@@ -181,6 +196,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         {
         }
     }
+    [Obsolete]
     public class ModNode : ValueOpNode
     {
         public ModNode()
@@ -188,6 +204,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         {
         }
     }
+    [Obsolete]
     public class BitAndNode : ValueOpNode
     {
         public BitAndNode()
@@ -196,6 +213,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 
         }
     }
+    [Obsolete]
     public class BitOrNode : ValueOpNode
     {
         public BitOrNode()

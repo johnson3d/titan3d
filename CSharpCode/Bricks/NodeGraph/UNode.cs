@@ -4,6 +4,31 @@ using System.Text;
 
 namespace EngineNS.Bricks.NodeGraph
 {
+    public class GraphException : Exception
+    {
+        public UNodeBase ErrorNode;
+        public NodePin ErrorPin;
+        public string ErrorPinName
+        {
+            get
+            {
+                if (ErrorPin != null)
+                    return ErrorPin.Name;
+                return "";
+            }
+        }
+        public string ErrorInfo { get; set; }
+        public GraphException(UNodeBase node, NodePin pin, string info,
+            [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
+            [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+            [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
+        {
+            ErrorNode = node;
+            ErrorPin = pin;
+            ErrorInfo = $"{sourceFilePath}:{sourceLineNumber}->{memberName}->{info}";
+        }
+    }
+
     public class LinkDesc
     {
         public EGui.UUvAnim Icon { get; set; } = new EGui.UUvAnim();
@@ -57,11 +82,21 @@ namespace EngineNS.Bricks.NodeGraph
 
     public class UNodeBase : IO.ISerializer
     {
+        public bool HasError = false;
+        public GraphException CodeExcept;
+        public void ResetErrors()
+        {
+            HasError = false;
+            CodeExcept = null;
+        }
+
+        public Action<UNodeBase, object, object, bool> OnPreReadAction;
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             var graph = hostObject as UNodeGraph;
             if (graph != null)
                 ParentGraph = graph;
+            OnPreReadAction?.Invoke(this, tagObject, hostObject, fromXml);
         }
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
         [Rtti.Meta]
@@ -89,6 +124,8 @@ namespace EngineNS.Bricks.NodeGraph
         public uint TitleColor { get; set; }
         public List<PinIn> Inputs { get; } = new List<PinIn>();
         public List<PinOut> Outputs { get; } = new List<PinOut>();
+
+        public object UserData;
 
         public UNodeBase()
         {
@@ -368,42 +405,80 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
         #region override
+        public delegate void Deleage_OnPreviewDraw(UNodeBase node, in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist);
+        public Deleage_OnPreviewDraw OnPreviewDrawAction;
         public virtual void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
-
+            OnPreviewDrawAction?.Invoke(this, in prevStart, in prevEnd, cmdlist);
         }
+        public Action<UNodeBase, EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles, ImDrawList> OnAfterDrawAction;
         public virtual void OnAfterDraw(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles, ImDrawList cmdlist)
         {
-
+            OnAfterDrawAction?.Invoke(this, styles, cmdlist);
         }
+        public Action<UNodeBase, NodePin> OnShowPinMenuAction;
         public virtual void OnShowPinMenu(NodePin pin)
         {
-
+            OnShowPinMenuAction?.Invoke(this, pin);
         }
+        public Action<UNodeBase, UPinLinker> OnRemoveLinkerAction;
         public virtual void OnRemoveLinker(UPinLinker linker)
         {
-
+            OnRemoveLinkerAction?.Invoke(this, linker);
         }
+        public Action<UNodeBase, UPinLinker> OnLoadLinkerAction;
         public virtual void OnLoadLinker(UPinLinker linker)
         {
-
+            OnLoadLinkerAction?.Invoke(this, linker);
         }
+        public Action<UNodeBase, PinOut, UNodeBase, PinIn> OnLinkedToAction;
         public virtual void OnLinkedTo(PinOut oPin, UNodeBase InNode, PinIn iPin)
         {
+            OnLinkedToAction?.Invoke(this, oPin, InNode, iPin);
         }
+        public Action<UNodeBase, PinIn, UNodeBase, PinOut> OnLinkedFromAction;
         public virtual void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
+            OnLinkedFromAction?.Invoke(this, iPin, OutNode, oPin);
         }
+        public Action<UNodeBase> OnDoubleClickAction;
         public virtual void OnDoubleClick() 
         {
+            OnDoubleClickAction?.Invoke(this);
         }
+        public Action<UNodeBase, NodePin> OnLButtonClickedAction;
         public virtual void OnLButtonClicked(NodePin hitPin)
         {
+            OnLButtonClickedAction?.Invoke(this, hitPin);
         }
+        public Func<UNodeBase, object> GetPropertyEditObjectAction;
+        public virtual object GetPropertyEditObject()
+        {
+            if (GetPropertyEditObjectAction != null)
+                return GetPropertyEditObjectAction(this);
+            return this;
+        }
+        public Action<UNodeBase, NodePin> OnMouseStayPinAction;
         public virtual void OnMouseStayPin(NodePin stayPin)
         {
-
+            OnMouseStayPinAction?.Invoke(this, stayPin);
         }
+        public Func<PinOut, Rtti.UTypeDesc> GetOutPinTypeAction;
+        public virtual Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        {
+            if (GetOutPinTypeAction != null)
+                return GetOutPinTypeAction(pin);
+            return null;
+        }
+        public virtual void BuildStatements(ref BuildCodeStatementsData data) 
+        {
+            throw new InvalidOperationException("Invalid build statements");
+        }
+        public virtual CodeBuilder.UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data) 
+        {
+            throw new NotImplementedException("Invalid get expression");
+        }
+
         #endregion
         public delegate bool FOnNodeVisit(NodePin iPin, UPinLinker linker);
         public bool TourNodeTree(FOnNodeVisit visit)

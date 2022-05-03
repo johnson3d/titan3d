@@ -103,7 +103,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 for (int j = 0; j < TexSizePerPatch; j++)
                 {
-                    float alt = heightData.GetPixel(x * TexSizePerPatch + j, z * TexSizePerPatch + i);
+                    float alt = heightData.GetPixel<float>(x * TexSizePerPatch + j, z * TexSizePerPatch + i);
                     if (alt > AABB.Maximum.Y)
                     {
                         AABB.Maximum.Y = alt;
@@ -141,12 +141,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 mMesh.SetMdfQueueType(mdfQueueType);
                 mMesh.MdfQueue.MdfDatas = saved;
 
-                int ObjectFlags_2Bit = 0;
-                if (value)
-                    ObjectFlags_2Bit |= 1;
-                else
-                    ObjectFlags_2Bit &= (~1);
-                mMesh.PerMeshCBuffer.SetValue(RHI.CConstantBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                //int ObjectFlags_2Bit = 0;
+                //if (value)
+                //    ObjectFlags_2Bit |= 1;
+                //else
+                //    ObjectFlags_2Bit &= (~1);
+                //mMesh.PerMeshCBuffer.SetValue(RHI.CConstantBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                mMesh.IsAcceptShadow = value;
             }
         }
         public void Tick(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)

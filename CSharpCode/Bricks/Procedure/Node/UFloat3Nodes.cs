@@ -1,0 +1,387 @@
+﻿using System;
+using System.Collections.Generic;
+using EngineNS.Bricks.NodeGraph;
+
+
+namespace EngineNS.Bricks.Procedure.Node
+{
+    [Bricks.CodeBuilder.ContextMenu("Float3Unpack", "Float3\\Unpack", UPgcGraph.PgcEditorKeyword)]
+    public class UFloat3UnpackNodes : UPgcNodeBase
+    {
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn InXYZ { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut XPin { get; set; } = new PinOut();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut YPin { get; set; } = new PinOut();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut ZPin { get; set; } = new PinOut();
+
+        public UBufferCreator InputFloat3Desc = UBufferCreator.CreateInstance< USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator OutputFloatDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UFloat3UnpackNodes()
+        {
+            Icon.Size = new Vector2(25, 25);
+            Icon.Color = 0xFF00FF00;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
+
+            AddInput(InXYZ, "InXYZ", InputFloat3Desc);
+            AddOutput(XPin, "X", OutputFloatDesc);
+            AddOutput(YPin, "Y", OutputFloatDesc);
+            AddOutput(ZPin, "Z", OutputFloatDesc);
+        }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            var graph = ParentGraph as UPgcGraph;
+            if (XPin == pin || YPin == pin || ZPin == pin)
+            {   
+                var buffer = graph.BufferCache.FindBuffer(InXYZ);
+                if (buffer != null)
+                {
+                    var result = buffer.BufferCreator.Clone();
+                    result.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
+                    return result;
+                }
+            }
+            return base.GetOutBufferCreator(pin);
+        }
+        public override unsafe bool InitProcedure(UPgcGraph graph)
+        {
+            return true;
+        }
+        public override bool OnProcedure(UPgcGraph graph)
+        {
+            var inXYZ = graph.BufferCache.FindBuffer(InXYZ);
+            var xResult = graph.BufferCache.FindBuffer(XPin);
+            var yResult = graph.BufferCache.FindBuffer(YPin);
+            var zResult = graph.BufferCache.FindBuffer(ZPin);
+
+            for (int i = 0; i < inXYZ.Depth; i++)
+            {
+                for (int j = 0; j < inXYZ.Height; j++)
+                {
+                    for (int k = 0; k < inXYZ.Width; k++)
+                    {
+                        var xyz = inXYZ.GetPixel<Vector3>(k, j, i);
+                        xResult.SetPixel<float>(k, j, i, xyz.X);
+                        yResult.SetPixel<float>(k, j, i, xyz.Y);
+                        zResult.SetPixel<float>(k, j, i, xyz.Z);
+                    }
+                }
+            }
+
+            return true;
+        }
+    }
+
+    [Bricks.CodeBuilder.ContextMenu("Float3Pack", "Float3\\Pack", UPgcGraph.PgcEditorKeyword)]
+    public class UFloat3PackNodes : UPgcNodeBase
+    {
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn XPin { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn YPin { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn ZPin { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutXYZ { get; set; } = new PinOut();
+
+        public UBufferCreator InputFloatDesc = UBufferCreator.CreateInstance< USuperBuffer <float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat3Desc = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+
+        public UFloat3PackNodes()
+        {
+            Icon.Size = new Vector2(25, 25);
+            Icon.Color = 0xFF00FF00;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
+
+            AddInput(XPin, "X", InputFloatDesc);
+            AddInput(YPin, "Y", InputFloatDesc);
+            AddInput(ZPin, "Z", InputFloatDesc);
+            AddOutput(OutXYZ, "OutXYZ", OutputFloat3Desc);
+        }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            var graph = ParentGraph as UPgcGraph;
+            if (OutXYZ == pin )
+            {
+                var buffer = graph.BufferCache.FindBuffer(XPin);
+                if (buffer != null)
+                {
+                    var result = buffer.BufferCreator.Clone();
+                    result.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
+                    return result;
+                }
+            }
+            return base.GetOutBufferCreator(pin);
+        }
+        public override bool OnProcedure(UPgcGraph graph)
+        {
+            var ResultXYZ = graph.BufferCache.FindBuffer(OutXYZ);
+            var xComp = graph.BufferCache.FindBuffer(XPin);
+            var yComp = graph.BufferCache.FindBuffer(YPin);
+            var zComp = graph.BufferCache.FindBuffer(ZPin);
+
+            for (int i = 0; i < ResultXYZ.Depth; i++)
+            {
+                for (int j = 0; j < ResultXYZ.Height; j++)
+                {
+                    for (int k = 0; k < ResultXYZ.Width; k++)
+                    {
+                        float x = 0;
+                        if (xComp.IsValidPixel(k, j, i))
+                            x = xComp.GetPixel<float>(k, j, i);
+                        float y = 0;
+                        if (xComp.IsValidPixel(k, j, i))
+                            y = yComp.GetPixel<float>(k, j, i);
+                        float z = 0;
+                        if (zComp.IsValidPixel(k, j, i))
+                            z = zComp.GetPixel<float>(k, j, i);
+
+                        ResultXYZ.SetPixel<Vector3>(k, j, i, new Vector3(x, y, z));
+                    }
+                }
+            }
+
+            return true;
+        }
+    }
+
+    /*
+     0 1 2
+     3 c 4
+     5 6 7
+     */
+    [Bricks.CodeBuilder.ContextMenu("Float3HeightToNormal", "Float3\\Height2Normal", UPgcGraph.PgcEditorKeyword)]
+    public class UFloat3HeightToNormal : UPgcNodeBase
+    {
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn HFieldPin { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut Normal { get; set; } = new PinOut();
+
+        public UBufferCreator InputFloatDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat3Desc = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+
+        public UFloat3HeightToNormal()
+        {
+            Icon.Size = new Vector2(25, 25);
+            Icon.Color = 0xFF00FF00;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
+
+            AddInput(HFieldPin, "Height", InputFloatDesc);
+            AddOutput(Normal, "Normal", OutputFloat3Desc);
+        }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            if (Normal == pin)
+            {
+                var graph = ParentGraph as UPgcGraph;
+                var buffer = graph.BufferCache.FindBuffer(HFieldPin);
+                if (buffer != null)
+                {
+                    var result = buffer.BufferCreator.Clone();
+                    result.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
+                    return result;
+                }
+            }
+            return base.GetOutBufferCreator(pin);
+        }
+        [Rtti.Meta]
+        public float GridSize { get; set; } = 1.0f;
+        //public float HeightRange;
+        public override bool OnProcedure(UPgcGraph graph)
+        {
+            var heightFiels = graph.BufferCache.FindBuffer(HFieldPin);
+            var xyzResult = graph.BufferCache.FindBuffer(Normal);
+            float minHeight, maxHeight;
+            heightFiels.GetRangeUnsafe<float, FFloatOperator>(out minHeight, out maxHeight);
+            //float range = HeightRange;// maxHeight - minHeight;
+            for (int i = 1; i < heightFiels.Height - 1; i++)
+            {
+                for (int j = 1; j < heightFiels.Width - 1; j++)
+                {
+                    float altInfo = heightFiels.GetPixel<float>(j, i);
+                    float v_du = heightFiels.GetPixel<float>(j + 1, i);
+                    float v_dv = heightFiels.GetPixel<float>(j, i + 1);
+
+                    var A = new Vector3(GridSize, (v_du - altInfo), 0);
+                    var B = new Vector3(0, (v_dv - altInfo), -GridSize);
+
+                    var n = Vector3.Cross(A, B);
+                    n = Vector3.Normalize(n);
+
+                    xyzResult.SetPixel(j, i, n);
+                }
+            }
+            heightFiels.LifeCount--;
+            return true;
+        }
+    }
+
+    [Bricks.CodeBuilder.ContextMenu("Float3Normalize", "Float3\\Normalize", UPgcGraph.PgcEditorKeyword)]
+    public class UFloat3Normalize : UPgcNodeBase
+    {
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn InXYZ { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutXYZ { get; set; } = new PinOut();
+        public UBufferCreator InputFloat3Desc = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat3Desc = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UFloat3Normalize()
+        {
+            Icon.Size = new Vector2(25, 25);
+            Icon.Color = 0xFF00FF00;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
+
+            AddInput(InXYZ, "InXYZ", InputFloat3Desc);
+            AddOutput(OutXYZ, "XYZ", OutputFloat3Desc);
+        }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            if (OutXYZ == pin )
+            {
+                var graph = ParentGraph as UPgcGraph;
+                var buffer = graph.BufferCache.FindBuffer(InXYZ);
+                if (buffer != null)
+                {
+                    return buffer.BufferCreator;
+                }
+            }
+            return base.GetOutBufferCreator(pin);
+        }
+        public override bool OnProcedure(UPgcGraph graph)
+        {
+            var xyzSrc = graph.BufferCache.FindBuffer(InXYZ);
+            var xyzResult = graph.BufferCache.FindBuffer(OutXYZ);
+            for (int i = 0; i < xyzResult.Depth; i++)
+            {
+                for (int j = 0; j < xyzResult.Height; j++)
+                {
+                    for (int k = 0; k < xyzResult.Width; k++)
+                    {
+                        Vector3 nor = xyzSrc.GetPixel<Vector3>(k, j, i);
+                        nor.Normalize();
+
+                        xyzResult.SetPixel(k, j, i, nor);
+                    }
+                }
+            }
+
+            xyzSrc.LifeCount--;
+            return true;
+        }
+    }
+
+    [Bricks.CodeBuilder.ContextMenu("Float3Gaussion", "Float3\\Gaussion", UPgcGraph.PgcEditorKeyword)]
+    public class UFloat3Gaussion : UMonocular
+    {
+        static float[,] BlurMatrix =
+        {
+            { 0.0947416f, 0.118318f, 0.0947416f },
+            { 0.118318f, 0.147761f, 0.118318f },
+            { 0.0947416f, 0.118318f, 0.0947416f }
+        };
+        public UFloat3Gaussion()
+        {
+            DefaultInputDesc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
+            DefaultBufferCreator.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
+        }
+        [Rtti.Meta]
+        public bool ClampBorder { get; set; } = true;
+        public override bool OnProcedure(UPgcGraph graph)
+        {
+            var curComp = graph.BufferCache.FindBuffer(SrcPin);
+            var resultComp = graph.BufferCache.FindBuffer(ResultPin);
+            Vector3[,] pixels = new Vector3[3, 3];
+            for (int i = 0; i < curComp.Height; i++)
+            {
+                for (int j = 0; j < curComp.Width; j++)
+                {
+                    var center = curComp.GetPixel<Vector3>(j, i);
+                    pixels[1, 1] = center;
+
+                    {//line1
+                        if (curComp.IsValidPixel(j - 1, i - 1))
+                            pixels[0, 0] = curComp.GetPixel<Vector3>(j - 1, i - 1);
+                        else
+                            pixels[0, 0] = center;
+
+                        if (curComp.IsValidPixel(j, i - 1))
+                            pixels[0, 1] = curComp.GetPixel<Vector3>(j, i - 1);
+                        else
+                            pixels[0, 1] = center;
+
+                        if (curComp.IsValidPixel(j + 1, i - 1))
+                            pixels[0, 2] = curComp.GetPixel<Vector3>(j + 1, i - 1);
+                        else
+                            pixels[0, 2] = center;
+                    }
+
+                    {//line2
+                        if (curComp.IsValidPixel(j - 1, i))
+                            pixels[1, 0] = curComp.GetPixel<Vector3>(j - 1, i);
+                        else
+                            pixels[1, 0] = center;
+
+                        if (curComp.IsValidPixel(j + 1, i))
+                            pixels[1, 2] = curComp.GetPixel<Vector3>(j + 1, i);
+                        else
+                            pixels[1, 2] = center;
+                    }
+
+                    {//line3
+                        if (curComp.IsValidPixel(j - 1, i + 1))
+                            pixels[2, 0] = curComp.GetPixel<Vector3>(j - 1, i + 1);
+                        else
+                            pixels[2, 0] = center;
+
+                        if (curComp.IsValidPixel(j, i + 1))
+                            pixels[2, 1] = curComp.GetPixel<Vector3>(j, i + 1);
+                        else
+                            pixels[2, 1] = center;
+
+                        if (curComp.IsValidPixel(j + 1, i + 1))
+                            pixels[2, 2] = curComp.GetPixel<Vector3>(j + 1, i + 1);
+                        else
+                            pixels[2, 2] = center;
+                    }
+
+                    Vector3 value;
+                    value.X = pixels[0, 0].X * BlurMatrix[0, 0] + pixels[0, 1].X * BlurMatrix[0, 1] + pixels[0, 2].X * BlurMatrix[0, 2]
+                        + pixels[1, 0].X * BlurMatrix[1, 0] + pixels[1, 1].X * BlurMatrix[1, 1] + pixels[1, 2].X * BlurMatrix[1, 2]
+                        + pixels[2, 0].X * BlurMatrix[2, 0] + pixels[2, 1].X * BlurMatrix[2, 1] + pixels[2, 2].X * BlurMatrix[2, 2];
+                    value.Y = pixels[0, 0].Y * BlurMatrix[0, 0] + pixels[0, 1].Y * BlurMatrix[0, 1] + pixels[0, 2].Y * BlurMatrix[0, 2]
+                        + pixels[1, 0].Y * BlurMatrix[1, 0] + pixels[1, 1].Y * BlurMatrix[1, 1] + pixels[1, 2].Y * BlurMatrix[1, 2]
+                        + pixels[2, 0].Y * BlurMatrix[2, 0] + pixels[2, 1].Y * BlurMatrix[2, 1] + pixels[2, 2].Y * BlurMatrix[2, 2];
+                    value.Z = pixels[0, 0].Z * BlurMatrix[0, 0] + pixels[0, 1].Z * BlurMatrix[0, 1] + pixels[0, 2].Z * BlurMatrix[0, 2]
+                        + pixels[1, 0].Z * BlurMatrix[1, 0] + pixels[1, 1].Z * BlurMatrix[1, 1] + pixels[1, 2].Z * BlurMatrix[1, 2]
+                        + pixels[2, 0].Z * BlurMatrix[2, 0] + pixels[2, 1].Z * BlurMatrix[2, 1] + pixels[2, 2].Z * BlurMatrix[2, 2];
+                    if (ClampBorder)
+                    {
+                        if (i == 0 || j == 0 || i == curComp.Height - 1 || j == curComp.Width - 1)
+                        {
+                            resultComp.SetPixel(j, i, center);
+                        }
+                        else
+                        {
+                            resultComp.SetPixel(j, i, value);
+                        }
+                    }
+                    else
+                    {
+                        resultComp.SetPixel(j, i, value);
+                    }
+                }
+            }
+
+            curComp.LifeCount--;
+
+            return true;
+        }
+    }
+}

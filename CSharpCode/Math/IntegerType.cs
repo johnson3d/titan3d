@@ -129,6 +129,17 @@ namespace EngineNS
     [StructLayout(LayoutKind.Explicit, Pack = 4)]
     public struct UInt32_4
     {
+        public readonly static UInt32_4 Zero = new UInt32_4();
+        public readonly static UInt32_4 One = CreateInstance(1,1,1,1);
+        static UInt32_4 CreateInstance(uint _x, uint _y, uint _z, uint _w)
+        {
+            UInt32_4 result = new UInt32_4();
+            result.x = _x;
+            result.y = _y;
+            result.z = _z;
+            result.w = _w;
+            return result;
+        }
         public void SetValue(uint _x, uint _y, uint _z, uint _w)
         {
             x = _x;

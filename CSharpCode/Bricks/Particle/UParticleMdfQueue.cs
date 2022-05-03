@@ -55,15 +55,17 @@ namespace EngineNS.Bricks.Particle
         }
         protected override void UpdateShaderCode()
         {
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
 
-            codeBuilder.AddLine("#ifndef _UParticlMdfQueue_Nebula_INC_");
-            codeBuilder.AddLine("#define _UParticlMdfQueue_Nebula_INC_");
-            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Bricks/Particle/NebulaParticle.cginc", RName.ERNameType.Engine).Address}\"");
+            codeBuilder.AddLine("#ifndef _UParticlMdfQueue_Nebula_INC_", ref sourceCode);
+            codeBuilder.AddLine("#define _UParticlMdfQueue_Nebula_INC_", ref sourceCode);
+            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Bricks/Particle/NebulaParticle.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
 
-            codeBuilder.AddLine("#endif");
+            codeBuilder.AddLine("#endif", ref sourceCode);
             SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(codeBuilder.ClassCode);
+            SourceCode.SetText(sourceCode);
         }
     }
 }

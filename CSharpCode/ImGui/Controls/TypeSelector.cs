@@ -6,10 +6,17 @@ namespace EngineNS.EGui.Controls
 {
     public class TypeSelector
     {
+        [Flags]
+        public enum EFilterMode
+        {
+            IncludeSealed = 1,
+            IncludeObjectType = (1 << 1),
+            IncludeValueType = (1 << 2),
+            ExcludeNoMeta = (1 << 3),
+            ExcludeNoMacrossDecl = (1 << 4),
+        }
         public string AssemblyFilter = null;
-        public bool ExcludeSealed = false;
-        public bool ExcludeValueType = false;
-        public bool SearchFromMetas = false;
+        public EFilterMode FilterMode = EFilterMode.IncludeObjectType | EFilterMode.IncludeValueType;
         Rtti.UTypeDesc mBaseType;
         public TypeSelector()
         {
@@ -26,82 +33,38 @@ namespace EngineNS.EGui.Controls
                 mShowTypes.Clear();
                 if (mBaseType != null)
                     mShowTypes.Add(mBaseType);
-                if (SearchFromMetas)
+                foreach (var i in Rtti.UTypeDescManager.Instance.Services)
                 {
-                    foreach (var i in Rtti.UClassMetaManager.Instance.Metas.Values)
-                    {
-                        if (i.MetaAttribute == null)
-                            continue;
-                        if (!string.IsNullOrEmpty(AssemblyFilter))
-                        {
-                            if (AssemblyFilter.Contains(i.ClassType.Assembly.Name) == false)
-                                continue;
-                        }
-                        if (i.MetaAttribute.IsMacrossDeclareable == false)
-                            continue;
-                        if (ExcludeValueType && i.ClassType.SystemType.IsValueType)
-                            continue;
-                        if (ExcludeSealed && i.ClassType.SystemType.IsSealed)
-                            continue;
-
-                        if (mBaseType != null)
-                        {
-                            if (i.ClassType.SystemType.IsSubclassOf(mBaseType.SystemType))
-                            {
-                                mShowTypes.Add(i.ClassType);
-                            }
-                        }
-                        else
-                        {
-                            mShowTypes.Add(i.ClassType);
-                        }
-                    }
-                    foreach (var i in Rtti.UClassMetaManager.Instance.TypeMetas.Values)
+                    foreach (var j in i.Value.Types)
                     {
                         if (!string.IsNullOrEmpty(AssemblyFilter))
                         {
-                            if (AssemblyFilter.Contains(i.ClassType.Assembly.Name) == false)
+                            if (AssemblyFilter.Contains(j.Value.Assembly.Name) == false)
                                 continue;
                         }
-                        if (ExcludeValueType && i.ClassType.SystemType.IsValueType)
-                            continue;
-                        if (ExcludeSealed && i.ClassType.SystemType.IsSealed)
+                        if (j.Value.SystemType.IsTypeDefinition)
                             continue;
 
-                        if (mBaseType != null)
+                        if ((j.Value.SystemType.IsValueType &&
+                            ((FilterMode & EFilterMode.IncludeValueType) == EFilterMode.IncludeValueType)) ||
+                            (!j.Value.SystemType.IsValueType &&
+                            ((FilterMode & EFilterMode.IncludeObjectType) == EFilterMode.IncludeObjectType)))
                         {
-                            if (i.ClassType.SystemType.IsSubclassOf(mBaseType.SystemType))
+                            bool incSealed = (FilterMode & EFilterMode.IncludeValueType) == EFilterMode.IncludeValueType;
+                            if (incSealed == false && j.Value.SystemType.IsSealed)
+                                continue;
+
+                            bool excNoMeta = (FilterMode & EFilterMode.ExcludeNoMeta) == EFilterMode.ExcludeNoMeta;
+                            if (excNoMeta)
                             {
-                                mShowTypes.Add(i.ClassType);
-                            }
-                        }
-                        else
-                        {
-                            mShowTypes.Add(i.ClassType);
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var i in Rtti.UTypeDescManager.Instance.Services)
-                    {
-                        foreach (var j in i.Value.Types)
-                        {
-                            if (!string.IsNullOrEmpty(AssemblyFilter))
-                            {
-                                if (AssemblyFilter.Contains(j.Value.Assembly.Name) == false)
+                                if (Rtti.UClassMetaManager.Instance.Metas.ContainsKey(j.Key) == false)
                                     continue;
                             }
-                            if (ExcludeValueType && j.Value.SystemType.IsValueType)
-                                continue;
-                            if (ExcludeSealed && j.Value.SystemType.IsSealed)
-                                continue;
-
-                            //Rtti.UClassMetaManager.Instance.GetMeta(in hash);
 
                             if (mBaseType != null)
                             {
-                                if (j.Value.SystemType.IsSubclassOf(mBaseType.SystemType))
+                                if (j.Value.SystemType.IsSubclassOf(mBaseType.SystemType) ||
+                                    j.Value.SystemType.GetInterface(mBaseType.SystemType.Name) != null)
                                 {
                                     mShowTypes.Add(j.Value);
                                 }

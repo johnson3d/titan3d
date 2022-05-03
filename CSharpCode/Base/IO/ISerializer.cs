@@ -4,19 +4,15 @@ using System.Text;
 
 namespace EngineNS.IO
 {
-    public sealed class UCustomSerializerAttribute : Attribute
+    public class UCustomSerializerAttribute : Attribute
     {
-        public System.Type CustomType;
-    }
-    public class UExampleCustom
-    {
-        public static void Save(IWriter ar, ISerializer host, string propName)
+        public virtual void Save(IWriter ar, object host, string propName)
         {
 
         }
-        public static void Load(IReader ar, ISerializer host, string propName)
+        public virtual object Load(IReader ar, object host, string propName)
         {
-
+            return null;
         }
     }
     //凡是派生了ISerizlizer接口的类，都会产生MetaClass信息
@@ -112,7 +108,7 @@ namespace EngineNS.IO
             {
                 throw new Exception($"MetaVersion lost:{versionHash}");
             }
-            obj = Rtti.UTypeDescManager.CreateInstance(meta.ClassType.SystemType) as ISerializer;
+            obj = Rtti.UTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
             obj.OnPreRead(ar.Tag, hostObject, false);
             return Read(ar, obj, metaVersion);
         }
@@ -159,19 +155,25 @@ namespace EngineNS.IO
                 }
             }
 #endif
-            foreach (var i in metaVersion.Fields)
+            foreach (var i in metaVersion.Propertys)
             {
-                var value = ReadObject(ar, i.FieldType.SystemType, obj);
-                if (i.CustomReader != null)
+                if (i.CustumSerializer != null)
                 {
-                    i.CustomLoad(ar, obj, i.FieldName);
+                    var t = i.CustumSerializer.Load(ar, obj, i.PropertyName);
+                    if (i.PropInfo.CanWrite)
+                    {
+                        i.PropInfo.SetValue(obj, t);
+                        obj.OnPropertyRead(ar.Tag, i.PropInfo, false);
+                    }
                     continue;
                 }
+                var value = ReadObject(ar, i.FieldType.SystemType, obj);
+                
                 if (value != null && i.PropInfo != null)
                 {
                     if (Rtti.UTypeDesc.CanCast(value.GetType(), i.PropInfo.PropertyType) == false)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Serializer", $"ProperySet {i.FieldName}: {value.GetType().FullName}!={i.PropInfo.PropertyType.FullName}");
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Serializer", $"ProperySet {i.PropertyName}: {value.GetType().FullName}!={i.PropInfo.PropertyType.FullName}");
                         continue;
                     }
                     try
@@ -253,13 +255,13 @@ namespace EngineNS.IO
         }
         public static void WriteMember(IWriter ar, ISerializer obj, Rtti.UMetaVersion metaVersion)
         {
-            foreach (var i in metaVersion.Fields)
+            foreach (var i in metaVersion.Propertys)
             {
                 if (i.PropInfo != null && i.PropInfo.CanRead)
                 {
-                    if (i.CustomWriter != null)
+                    if (i.CustumSerializer != null)
                     {
-                        i.CustomSave(ar, obj, i.FieldName);
+                        i.CustumSerializer.Save(ar, obj, i.PropertyName);
                         continue;
                     }
 
@@ -498,7 +500,7 @@ namespace EngineNS.IO
                 Rtti.UMetaVersion metaVersion;
                 if (meta != null && (metaVersion = meta.GetMetaVersion(versionHash)) != null)
                 {
-                    var obj = Rtti.UTypeDescManager.CreateInstance(meta.ClassType.SystemType) as ISerializer;
+                    var obj = Rtti.UTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
                     obj.OnPreRead(ar.Tag, hostObject, false);
                     Read(ar, obj, metaVersion);
                     return obj;
@@ -731,6 +733,13 @@ namespace EngineNS.IO
                     attr.Value = $"{rn.RNameType},{rn.Name},{rn.AssetId}";
                     node.Attributes.Append(attr);
                 }
+                else if (obj.GetType() == typeof(Rtti.UTypeDesc))
+                {
+                    var rn = obj as Rtti.UTypeDesc;
+                    var attr = xml.CreateAttribute($"Value");
+                    attr.Value = rn.TypeString;
+                    node.Attributes.Append(attr);
+                }
                 else if (obj.GetType().IsValueType || obj.GetType() == typeof(string))
                 {
                     var attr = xml.CreateAttribute($"Value");
@@ -747,13 +756,13 @@ namespace EngineNS.IO
             }
 
             var metaVer = meta.CurrentVersion;
-            foreach (var i in metaVer.Fields)
+            foreach (var i in metaVer.Propertys)
             {
                 var fv = i.PropInfo.GetValue(obj, null);
                 if (fv == null)
                     continue;
 
-                var prop = xml.CreateElement($"{i.FieldName}", xml.NamespaceURI);
+                var prop = xml.CreateElement($"{i.PropertyName}", xml.NamespaceURI);
                 var attr = xml.CreateAttribute($"Type");
                 attr.Value = i.FieldTypeStr;
                 prop.Attributes.Append(attr);
@@ -862,13 +871,24 @@ namespace EngineNS.IO
                     {
                         continue;
                     }
-                    var rn = obj as RName;
                     var segs = valueAttr.Split(',');
                     Guid assetId;
                     Guid.TryParse(segs[2], out assetId);
                     var rnType = (RName.ERNameType)Support.TConvert.ToEnumValue(typeof(RName.ERNameType), segs[0]);
                     var v = RName.GetRName(segs[1], rnType);                    
                     v.AssetId = assetId;
+                    if (prop.CanWrite)
+                        prop.SetValue(obj, v);
+                    continue;
+                }
+                else if (prop.PropertyType == typeof(Rtti.UTypeDesc))
+                {
+                    var valueAttr = i.GetAttribute("Value");
+                    if (string.IsNullOrEmpty(valueAttr))
+                    {
+                        continue;
+                    }
+                    var v = Rtti.UTypeDesc.TypeOf(valueAttr);
                     if (prop.CanWrite)
                         prop.SetValue(obj, v);
                     continue;

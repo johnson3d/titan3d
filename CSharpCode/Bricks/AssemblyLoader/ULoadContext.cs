@@ -103,7 +103,7 @@ namespace EngineNS.Macross
     {
         Bricks.AssemblyLoader.ULoadContext Loader = null;
         public List<string> IncludeAssemblies { get; } = new List<string>();
-        public System.Reflection.Assembly LoadAssembly(string assemblyPath)
+        public System.Reflection.Assembly LoadAssembly(string assemblyPath, string pdbPath = null)
         {
             TryUnload();
 
@@ -115,7 +115,20 @@ namespace EngineNS.Macross
                 byte[] buffer = new byte[sr.Length];
                 sr.Read(buffer, 0, buffer.Length);
                 var mrs = new System.IO.MemoryStream(buffer);
-                return Loader.LoadFromStream(mrs);
+                if (pdbPath != null && IO.FileManager.FileExists(pdbPath))
+                {
+                    using (FileStream pdbStream = new FileStream(pdbPath, FileMode.Open, FileAccess.Read))
+                    {
+                        var pdbBuffer = new byte[pdbStream.Length];
+                        pdbStream.Read(pdbBuffer, 0, pdbBuffer.Length);
+                        var pdbmrs = new System.IO.MemoryStream(pdbBuffer);
+                        return Loader.LoadFromStream(mrs, pdbmrs);
+                    }
+                }
+                else
+                {
+                    return Loader.LoadFromStream(mrs);
+                }
             }
             //return Loader.LoadFromAssemblyPath(assemblyPath);
         }

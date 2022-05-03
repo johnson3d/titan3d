@@ -111,12 +111,19 @@ namespace EngineNS.EGui.Controls
             get => mShowGrid;
             set => mShowGrid = value;
         }
-        float mGridStep = 64.0f;
+        float mGridRowCount = 10;
         [Rtti.Meta]
-        public float GridStep
+        public float GridRowCount
         {
-            get => mGridStep;
-            set => mGridStep = value;
+            get => mGridRowCount;
+            set => mGridRowCount = value;
+        }
+        float mGridColumnCount = 15;
+        [Rtti.Meta]
+        public float GridColumnCount
+        {
+            get => mGridColumnCount;
+            set => mGridColumnCount = value;
         }
         bool mLockLinkedControlPoint = true;
         [Rtti.Meta]
@@ -228,13 +235,16 @@ namespace EngineNS.EGui.Controls
             drawList.AddRectFilled(in canvasP0, in canvasP1, UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
             if(mShowGrid)
             {
-                for(var x = canvasP0.X; x < canvasP1.X; x += mGridStep)
+                var gridDelta = canvasP1 - canvasP0;
+                var columnDelta = gridDelta.X / mGridColumnCount;
+                for(var x = canvasP0.X; x < canvasP1.X; x += columnDelta)
                 {
                     var p1 = new Vector2(x, canvasP0.Y);
                     var p2 = new Vector2(x, canvasP1.Y);
                     drawList.AddLine(in p1, in p2, UIProxy.StyleConfig.Instance.GridColor, 1.0f);
                 }
-                for(var y = canvasP0.Y; y < canvasP1.Y; y += mGridStep)
+                var rowDelta = gridDelta.Y / mGridRowCount;
+                for(var y = canvasP0.Y; y < canvasP1.Y; y += rowDelta)
                 {
                     var p1 = new Vector2(canvasP0.X, y);
                     var p2 = new Vector2(canvasP1.X, y);

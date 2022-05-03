@@ -226,7 +226,8 @@ namespace EngineNS.Bricks.NodeGraph
 
                 var nameSize = UNodeBase.CalcTextSize(i.Name);
                 var textPos = new Vector2(nodeStart.X - nameSize.X - styles.PinPadding - styles.PinInStyle.TextOffset, start.Y);
-                cmdlist.AddText(textPos, 0xFFFFFFFF, i.Name, null);
+                if(!string.IsNullOrEmpty(i.Name))
+                    cmdlist.AddText(textPos, 0xFFFFFFFF, i.Name, null);
                 if (i.Link != null && i.Link.Icon != null)
                 {
                     DrawImage(cmdlist, i.Link.Icon, start, end);
@@ -243,7 +244,8 @@ namespace EngineNS.Bricks.NodeGraph
                 end = CanvasToDraw(i.Position + i.Size);
 
                 var textPos = new Vector2(nodeEnd.X + styles.PinPadding + styles.PinInStyle.TextOffset, start.Y);
-                cmdlist.AddText(textPos, 0xFFFFFFFF, i.Name, null);
+                if (!string.IsNullOrEmpty(i.Name))
+                    cmdlist.AddText(textPos, 0xFFFFFFFF, i.Name, null);
                 if (i.Link != null && i.Link.Icon != null)
                 {
                     DrawImage(cmdlist, i.Link.Icon, start, end);
@@ -344,6 +346,8 @@ namespace EngineNS.Bricks.NodeGraph
             p4 += DrawOffset;
             cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, styles.LinkerColor, 3, 30);
         }
+        bool mCanvasMenuFilterFocused = false;
+        string mCanvasMenuFilterStr = "";
         public void DrawPopMenu()
         {
             if (mGraph.CurMenuType == UNodeGraph.EGraphMenu.None)
@@ -355,16 +359,26 @@ namespace EngineNS.Bricks.NodeGraph
                 switch (mGraph.CurMenuType)
                 {
                     case UNodeGraph.EGraphMenu.Canvas:
-                        mGraph.OnBeforeDrawMenu(styles);
-                        DrawMenu(mGraph.CanvasMenus);
-                        mGraph.OnAfterDrawMenu(styles);
+                        {
+                            mGraph.OnBeforeDrawMenu(styles);
+                            var width = ImGuiAPI.GetColumnWidth(0);
+                            var drawList = ImGuiAPI.GetWindowDrawList();
+                            EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref mCanvasMenuFilterStr, width);
+                            if(mGraph.CanvasMenuDirty)
+                                mGraph.UpdateCanvasMenus();
+                            for(var childIdx = 0; childIdx < mGraph.CanvasMenus.SubMenuItems.Count; childIdx++)
+                                DrawMenu(mGraph.CanvasMenus.SubMenuItems[childIdx], mCanvasMenuFilterStr.ToLower());
+                            mGraph.OnAfterDrawMenu(styles);
+                        }
                         break;
                     case UNodeGraph.EGraphMenu.Node:
-                        DrawMenu(mGraph.NodeMenus);
+                        for(var childIdx = 0; childIdx < mGraph.NodeMenus.SubMenuItems.Count; childIdx++)
+                            DrawMenu(mGraph.NodeMenus.SubMenuItems[childIdx], mCanvasMenuFilterStr.ToLower());
                         break;
                     case UNodeGraph.EGraphMenu.Pin:
                         {
-                            DrawMenu(mGraph.PinMenus);
+                            for(var childIdx = 0; childIdx < mGraph.PinMenus.SubMenuItems.Count; childIdx++)
+                                DrawMenu(mGraph.PinMenus.SubMenuItems[childIdx], mCanvasMenuFilterStr.ToLower());
                             var pressPin = mGraph.PopMenuPressObject as NodePin;
                             if (pressPin != null)
                             {
@@ -382,8 +396,11 @@ namespace EngineNS.Bricks.NodeGraph
                 mGraph.CurMenuType = UNodeGraph.EGraphMenu.None;
             }
         }
-        public void DrawMenu(UMenuItem item)
+        public void DrawMenu(UMenuItem item, string filter = "")
         {
+            if (!item.FilterCheck(filter))
+                return;
+
             if (item.OnMenuDraw != null)
             {
                 item.OnMenuDraw(item, this);
@@ -392,24 +409,28 @@ namespace EngineNS.Bricks.NodeGraph
             
             if (item.SubMenuItems.Count == 0)
             {
-                
-                if (ImGuiAPI.MenuItem(item.Text, null, false, true))
+                if(!string.IsNullOrEmpty(item.Text))
                 {
-                    if (item.Action != null)
+                    ImGuiAPI.TreeNodeEx(item.Text, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen);
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
-                        item.Action(item, mGraph.PopMenuPressObject);
+                        if (item.Action != null)
+                        {
+                            item.Action(item, mGraph.PopMenuPressObject);
+                            ImGuiAPI.CloseCurrentPopup();
+                        }
                     }
                 }
             }
             else
             {
-                if (ImGuiAPI.BeginMenu(item.Text, true))
+                if(ImGuiAPI.TreeNode(item.Text))
                 {
-                    foreach (var i in item.SubMenuItems)
+                    for(int menuIdx = 0; menuIdx < item.SubMenuItems.Count; menuIdx++)
                     {
-                        DrawMenu(i);
+                        DrawMenu(item.SubMenuItems[menuIdx], filter);
                     }
-                    ImGuiAPI.EndMenu();
+                    ImGuiAPI.TreePop();
                 }
             }
         }

@@ -84,6 +84,12 @@ namespace EngineNS.EGui.Controls.NodeGraph
             get => true;
         }
 
+        private uint _mCurSerialId = 0;
+        public uint GenSerialId()
+        {
+            return _mCurSerialId++;
+        }
+
         protected virtual void Initialize()
         {
             InitializeCommonMenu();
@@ -921,22 +927,27 @@ namespace EngineNS.EGui.Controls.NodeGraph
                 return false;
             }
         }
-        protected virtual bool ShowGraphMenu(NodeGraphStyles styles)
+        private string mFilterText;
+        protected unsafe virtual bool ShowGraphMenu(NodeGraphStyles styles)
         {
             Vector2 GraphMenuSize = new Vector2(-1, -1);
             ImGuiAPI.SetNextWindowSize(in GraphMenuSize, ImGuiCond_.ImGuiCond_None);
             if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
             {
-                var posMenu = ImGuiAPI.GetWindowPos();
-                posMenu -= GraphViewPosition;
-                var btSize = new Vector2(-1, 0);
-                if (ImGuiAPI.BeginMenu("Add Node", true))
-                {
-                    ShowAddNode(posMenu);
-                    ImGuiAPI.EndMenu();
-                }
+                EGui.UIProxy.InputText.OnDraw("##in", ref mFilterText, ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
 
-                OnAppendGraphMenuContent(posMenu);
+                var posMenu = ImGuiAPI.GetMousePosOnOpeningCurrentPopup();
+                posMenu -= GraphViewPosition;
+                if (ShowAddNode(posMenu, mFilterText))
+                    ImGuiAPI.CloseCurrentPopup();
+                //var btSize = new Vector2(-1, 0);
+                //if (ImGuiAPI.BeginMenu("Add Node", true))
+                //{
+                //    ShowAddNode(posMenu);
+                //    ImGuiAPI.EndMenu();
+                //}
+
+                OnAppendGraphMenuContent(mFilterText, posMenu);
                 
                 ImGuiAPI.EndPopup();
                 return true;
@@ -946,65 +957,66 @@ namespace EngineNS.EGui.Controls.NodeGraph
                 return false;
             }
         }
-        protected virtual void ShowAddNode(Vector2 posMenu)
+        protected virtual bool ShowAddNode(Vector2 posMenu, string filterText)
         {
-            if (ImGuiAPI.MenuItem($"Node1", null, false, true))
-            {
-                var TestNode1 = new EngineNS.EGui.Controls.NodeGraph.NodeBase();
-                TestNode1.Icon.Size = new Vector2(25, 25);
-                TestNode1.Icon.Color = 0xFF00FF00;
-                TestNode1.TitleImage.Color = 0xFF204020;
-                TestNode1.Background.Color = 0x80808080;
-                TestNode1.Position = View2WorldSpace(ref posMenu);
-                TestNode1.Name = "TestGraphNode";
-                var pin_in = new EngineNS.EGui.Controls.NodeGraph.PinIn();
-                pin_in.Name = "Pin0";
-                pin_in.EditValue = new EngineNS.EGui.Controls.NodeGraph.EditableValue(null);
-                pin_in.EditValue.ValueType = Rtti.UTypeDescGetter<int>.TypeDesc;
-                pin_in.EditValue.Value = (int)3;
-                pin_in.EditValue.ControlWidth = 100;
-                TestNode1.AddPinIn(pin_in);
-                pin_in = new EngineNS.EGui.Controls.NodeGraph.PinIn();
-                pin_in.Name = "Pin1";
-                TestNode1.AddPinIn(pin_in);
-                pin_in = new EngineNS.EGui.Controls.NodeGraph.PinIn();
-                pin_in.Name = "Pin2";
-                TestNode1.AddPinIn(pin_in);
+            return true;
+            //if (ImGuiAPI.MenuItem($"Node1", null, false, true))
+            //{
+            //    var TestNode1 = new EngineNS.EGui.Controls.NodeGraph.NodeBase();
+            //    TestNode1.Icon.Size = new Vector2(25, 25);
+            //    TestNode1.Icon.Color = 0xFF00FF00;
+            //    TestNode1.TitleImage.Color = 0xFF204020;
+            //    TestNode1.Background.Color = 0x80808080;
+            //    TestNode1.Position = View2WorldSpace(ref posMenu);
+            //    TestNode1.Name = "TestGraphNode";
+            //    var pin_in = new EngineNS.EGui.Controls.NodeGraph.PinIn();
+            //    pin_in.Name = "Pin0";
+            //    pin_in.EditValue = new EngineNS.EGui.Controls.NodeGraph.EditableValue(null);
+            //    pin_in.EditValue.ValueType = Rtti.UTypeDescGetter<int>.TypeDesc;
+            //    pin_in.EditValue.Value = (int)3;
+            //    pin_in.EditValue.ControlWidth = 100;
+            //    TestNode1.AddPinIn(pin_in);
+            //    pin_in = new EngineNS.EGui.Controls.NodeGraph.PinIn();
+            //    pin_in.Name = "Pin1";
+            //    TestNode1.AddPinIn(pin_in);
+            //    pin_in = new EngineNS.EGui.Controls.NodeGraph.PinIn();
+            //    pin_in.Name = "Pin2";
+            //    TestNode1.AddPinIn(pin_in);
 
-                var pin_out = new EngineNS.EGui.Controls.NodeGraph.PinOut();
-                pin_out.Name = "Out0";
-                TestNode1.AddPinOut(pin_out);
-                pin_out = new EngineNS.EGui.Controls.NodeGraph.PinOut();
-                pin_out.Name = "Out1";
-                TestNode1.AddPinOut(pin_out);
+            //    var pin_out = new EngineNS.EGui.Controls.NodeGraph.PinOut();
+            //    pin_out.Name = "Out0";
+            //    TestNode1.AddPinOut(pin_out);
+            //    pin_out = new EngineNS.EGui.Controls.NodeGraph.PinOut();
+            //    pin_out.Name = "Out1";
+            //    TestNode1.AddPinOut(pin_out);
 
-                this.AddNode(TestNode1);
-            }
-            if (ImGuiAPI.MenuItem($"Node2", null, false, true))
-            {
-                var TestNode2 = new EngineNS.EGui.Controls.NodeGraph.NodeBase();
-                TestNode2.Icon.Size = new Vector2(25, 25);
-                TestNode2.Icon.Color = 0xFFFFFF00;
-                TestNode2.TitleImage.Color = 0xFF402020;
-                TestNode2.Background.Color = 0x80808080;
+            //    this.AddNode(TestNode1);
+            //}
+            //if (ImGuiAPI.MenuItem($"Node2", null, false, true))
+            //{
+            //    var TestNode2 = new EngineNS.EGui.Controls.NodeGraph.NodeBase();
+            //    TestNode2.Icon.Size = new Vector2(25, 25);
+            //    TestNode2.Icon.Color = 0xFFFFFF00;
+            //    TestNode2.TitleImage.Color = 0xFF402020;
+            //    TestNode2.Background.Color = 0x80808080;
 
-                TestNode2.Position = View2WorldSpace(ref posMenu);
-                TestNode2.Name = "TestGraphNode2";
-                var pin_in = new EngineNS.EGui.Controls.NodeGraph.PinIn();
-                pin_in.Name = "Pin0";
-                TestNode2.AddPinIn(pin_in);
-                pin_in = new EngineNS.EGui.Controls.NodeGraph.PinIn();
-                pin_in.Name = "Pin1";
-                TestNode2.AddPinIn(pin_in);
+            //    TestNode2.Position = View2WorldSpace(ref posMenu);
+            //    TestNode2.Name = "TestGraphNode2";
+            //    var pin_in = new EngineNS.EGui.Controls.NodeGraph.PinIn();
+            //    pin_in.Name = "Pin0";
+            //    TestNode2.AddPinIn(pin_in);
+            //    pin_in = new EngineNS.EGui.Controls.NodeGraph.PinIn();
+            //    pin_in.Name = "Pin1";
+            //    TestNode2.AddPinIn(pin_in);
 
-                var pin_out = new EngineNS.EGui.Controls.NodeGraph.PinOut();
-                pin_out.Name = "Out0";
-                TestNode2.AddPinOut(pin_out);
+            //    var pin_out = new EngineNS.EGui.Controls.NodeGraph.PinOut();
+            //    pin_out.Name = "Out0";
+            //    TestNode2.AddPinOut(pin_out);
 
-                this.AddNode(TestNode2);
-            }
+            //    this.AddNode(TestNode2);
+            //}
         }
-        protected virtual void OnAppendGraphMenuContent(Vector2 posMenu)
+        protected virtual void OnAppendGraphMenuContent(string filterText, Vector2 posMenu)
         {
 
         }

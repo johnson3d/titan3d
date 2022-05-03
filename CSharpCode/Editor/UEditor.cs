@@ -10,6 +10,17 @@ namespace EngineNS.Editor
     {
         [Rtti.Meta]
         public string GameProject { get; set; }
+        public string GameProjectPath 
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(GameProject))
+                    return "";
+                return IO.FileManager.GetBaseDirectory(GameProject);
+            }
+        }
+        [Rtti.Meta]
+        public string GameAssembly { get; set; }
         [Rtti.Meta]
         public GamePlay.UWorld.UVisParameter.EVisCullFilter CullFilters { get; set; } = GamePlay.UWorld.UVisParameter.EVisCullFilter.All;
         public bool IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter filters)
@@ -37,8 +48,12 @@ namespace EngineNS.Editor
             {
                 Config = new UEditorConfig();
                 Config.GameProject = "Module/GameProject/GameProject.csproj";
+                Config.GameAssembly = "binaries/net5.0/GameProject.dll";
                 IO.FileManager.SaveObjectToXml(cfgFile, Config);
             }
+
+            var gameAssembly = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + Config.GameAssembly;
+            UEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
 
             await RNamePopupContentBrowser.Initialize();
             return await base.Initialize(host);

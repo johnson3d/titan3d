@@ -12,6 +12,46 @@ namespace EngineNS.Graphics.Mesh
         public Pipeline.Shader.UMdfQueue MdfQueue { get; private set; }
         RHI.CConstantBuffer mPerMeshCBuffer;
         protected System.Action OnAfterCBufferCreated;
+
+        int ObjectFlags_2Bit = 0;
+        public bool IsAcceptShadow
+        {
+            get
+            {
+                return (ObjectFlags_2Bit & 1) != 0;
+            }
+            set
+            {
+                if (value)
+                {
+                    ObjectFlags_2Bit |= 1;
+                }
+                else
+                {
+                    ObjectFlags_2Bit &= (~1);
+                }
+                PerMeshCBuffer.SetValue(RHI.CConstantBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+            }
+        }
+        public bool IsUnlit
+        {
+            get
+            {
+                return (ObjectFlags_2Bit & (2)) != 0;
+            }
+            set
+            {
+                if (value)
+                {
+                    ObjectFlags_2Bit |= (2);
+                }
+                else
+                {
+                    ObjectFlags_2Bit &= (~(2));
+                }
+                PerMeshCBuffer.SetValue(RHI.CConstantBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+            }
+        }
         public RHI.CConstantBuffer PerMeshCBuffer 
         {
             get
@@ -163,8 +203,8 @@ namespace EngineNS.Graphics.Mesh
                                     {
                                         var rc = UEngine.Instance.GfxDevice.RenderContext;
                                         Material.PerMaterialCBuffer = rc.CreateConstantBuffer(gpuProgram, drawcall.Effect.ShaderIndexer.cbPerMaterial);
-                                        Material.UpdateUniformVars(Material.PerMaterialCBuffer);
                                     }
+                                    Material.UpdateUniformVars(Material.PerMaterialCBuffer);
                                     drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.ShaderIndexer.cbPerMaterial, Material.PerMaterialCBuffer.mCoreObject);
                                 }
                             }
@@ -339,7 +379,7 @@ namespace EngineNS.Graphics.Mesh
         {
             if (atomType == null)
                 atomType = Rtti.UTypeDesc.TypeOf(typeof(UAtom));
-            if (atomType != Rtti.UTypeDesc.TypeOf(typeof(UAtom)) && atomType.SystemType.IsSubclassOf(typeof(UAtom)) == false)
+            if (atomType != Rtti.UTypeDesc.TypeOf(typeof(UAtom)) && atomType.IsSubclassOf(typeof(UAtom)) == false)
                 return false;
             MaterialMesh = materialMesh;
 
@@ -360,7 +400,7 @@ namespace EngineNS.Graphics.Mesh
         {
             if (atomType == null)
                 atomType = Rtti.UTypeDesc.TypeOf(typeof(UAtom));
-            if (atomType != Rtti.UTypeDesc.TypeOf(typeof(UAtom)) && atomType.SystemType.IsSubclassOf(typeof(UAtom)) == false)
+            if (atomType != Rtti.UTypeDesc.TypeOf(typeof(UAtom)) && atomType.IsSubclassOf(typeof(UAtom)) == false)
                 return false;
             MaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(materialMesh);
             if (MaterialMesh == null)
@@ -384,7 +424,7 @@ namespace EngineNS.Graphics.Mesh
         {
             if (atomType == null)
                 atomType = Rtti.UTypeDesc.TypeOf(typeof(UAtom));
-            if (atomType != Rtti.UTypeDesc.TypeOf(typeof(UAtom)) && atomType.SystemType.IsSubclassOf(typeof(UAtom)) == false)
+            if (atomType != Rtti.UTypeDesc.TypeOf(typeof(UAtom)) && atomType.IsSubclassOf(typeof(UAtom)) == false)
                 return false;
 
             MaterialMesh = new UMaterialMesh();
@@ -416,7 +456,7 @@ namespace EngineNS.Graphics.Mesh
         {
             if (atomType == null)
                 atomType = Rtti.UTypeDescGetter<UAtom>.TypeDesc;
-            if (atomType != Rtti.UTypeDescGetter<UAtom>.TypeDesc && atomType.SystemType.IsSubclassOf(typeof(UAtom)) == false)
+            if (atomType != Rtti.UTypeDescGetter<UAtom>.TypeDesc && atomType.IsSubclassOf(typeof(UAtom)) == false)
                 return false;
 
             MaterialMesh = new UMaterialMesh();

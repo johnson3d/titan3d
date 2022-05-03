@@ -138,7 +138,27 @@ namespace EngineNS.Rtti
 
         public override string ToString()
         {
-            return SystemType.ToString();
+            return TypeStr(SystemType);//SystemType.ToString();
+        }
+        public bool IsEqual(Type type)
+        {
+            return SystemType == type;
+        }
+        public bool IsSubclassOf(UTypeDesc type)
+        {
+            return SystemType.IsSubclassOf(type.SystemType);
+        }
+        public bool IsSubclassOf(Type type)
+        {
+            return SystemType.IsSubclassOf(type);
+        }
+        public object[] GetCustomAttributes(Type type, bool inherit)
+        {
+            return SystemType.GetCustomAttributes(type, inherit);
+        }
+        public Type GetInterface(string name)
+        {
+            return SystemType.GetInterface(name);
         }
     }
     public struct UTypeDescGetter<T>
@@ -368,9 +388,10 @@ namespace EngineNS.Rtti
                 {
                     tdesc = new UTypeDesc()
                     {
-                        SystemType = t,
+                        //SystemType = t,
                         Assembly = desc
                     };
+                    tdesc.SystemType = t;
                     Types.Add(str, tdesc);
                 }
             }
@@ -459,7 +480,7 @@ namespace EngineNS.Rtti
             {
                 foreach(var j in i.Value.Types)
                 {
-                    if(j.Value.SystemType.FullName == fullName)
+                    if(j.Value.FullName == fullName)
                     {
                         return j.Value;
                     }

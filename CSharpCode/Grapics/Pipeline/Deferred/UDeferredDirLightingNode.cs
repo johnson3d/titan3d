@@ -83,7 +83,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GBufferRT0");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState.mCoreObject);
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GBufferRT1");
             if (!CoreSDK.IsNullPointer(index))
@@ -93,7 +93,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GBufferRT1");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState.mCoreObject);
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GBufferRT2");
             if (!CoreSDK.IsNullPointer(index))
@@ -103,7 +103,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GBufferRT2");
             if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState.mCoreObject);
 
             index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "DepthBuffer");
             if (!CoreSDK.IsNullPointer(index))

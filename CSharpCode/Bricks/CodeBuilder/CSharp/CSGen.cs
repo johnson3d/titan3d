@@ -4,8 +4,10 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder.CSharp
 {
+    [Obsolete]
     public class CSGen : ICodeGen
     {
+        public DefineAttributeGen mDefineAttributeGen = new DefineAttributeGen();
         public DefineClassGen mDefineClassGen = new DefineClassGen();
         public DefineVarGen mDefineVarGen = new DefineVarGen();
         public DefineFunctionGen mDefineFunctionGen = new DefineFunctionGen();
@@ -37,8 +39,14 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
         public AssignOpGen mAssignOpGen = new AssignOpGen();
         public NewObjectOpGen mNewObjectOpGen = new NewObjectOpGen();
         public HardCodeOpGen mHardCodeOpGen = new HardCodeOpGen();
+        public DefaultValueOpGen mDefaultValueOpGen = new DefaultValueOpGen();
+        public VariableReferenceOpGen mArgumentReferenceOpGen = new VariableReferenceOpGen();
         public override IGen GetGen(Type exprType)
         {
+            if (exprType == typeof(DefineAttribute))
+            {
+                return mDefineAttributeGen;
+            }
             if (exprType == typeof(DefineClass))
             {
                 return mDefineClassGen;
@@ -163,6 +171,14 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             {
                 return mHardCodeOpGen;
             }
+            else if (exprType == typeof(DefaultValueOp))
+            {
+                return mDefaultValueOpGen;
+            }
+            else if (exprType == typeof(VariableReferenceOp))
+            {
+                return mArgumentReferenceOpGen;
+            }
             return null;
         }
 
@@ -242,6 +258,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
         }
     }
 
+    [Obsolete]
     public class ExprGen : IGen
     {
         public virtual void GenLines(IExpression src, ICodeGen cgen)
@@ -251,6 +268,22 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
         public virtual bool IsFlowControl { get => false; }
     }
 
+    [Obsolete]
+    public class DefineAttributeGen : ExprGen
+    {
+        public override void GenLines(IExpression src, ICodeGen cgen)
+        {
+            var expr = (DefineAttribute)src;
+            var code = $"[{expr.GetFullName()}(";
+            for(int i=0; i<expr.Members.Count; i++)
+            {
+                code += expr.Members[i].InitValue + ",";
+            }
+            code = code.TrimEnd(',') + ")]";
+            cgen.AddLine(code);
+        }
+    }
+    [Obsolete]
     public class DefineClassGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -284,6 +317,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             }
         }
     }
+    [Obsolete]
     public class DefineVarGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -316,12 +350,17 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return $"{opStr}{paramsStr}{expr.DefType} {expr.VarName}";
         }
     }
+    [Obsolete]
     public class DefineFunctionGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
         {
             var csGen = (CSGen)cgen;
             var expr = (DefineFunction)src;
+            for(int i=0; i<expr.Attributes.Count; i++)
+            {
+                csGen.mDefineAttributeGen.GenLines(expr.Attributes[i], cgen);
+            }
             var overrideStr = expr.IsOverride ? " override" : "";
             if (expr.ReturnType == "System.Void")
             {
@@ -355,6 +394,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             cgen.PopBrackets();
         }
     }
+    [Obsolete]
     public class ExecuteSequenceGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -375,6 +415,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             }
         }
     }
+    [Obsolete]
     public class OpUseVarGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -387,6 +428,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
                 return $"{expr.Name}";
         }
     }
+    [Obsolete]
     public class OpUseDefinedVarGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -407,6 +449,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
                 return expr.DefVar.VarName;
         }
     }
+    [Obsolete]
     public class BinocularOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -425,6 +468,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return $"({strLeft}) {strOp} ({strRight})";
         }
     }
+    [Obsolete]
     public class MonocularOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -448,6 +492,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             }
         }
     }
+    [Obsolete]
     public class CallOpGen : ExprGen, IOpGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -500,6 +545,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return expr.FunReturnLocalVar;
         }
     }
+    [Obsolete]
     public class CallDefFunOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -527,6 +573,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
                 return $"{strHost}.{strName}({callArgs})";
         }
     }
+    [Obsolete]
     public class ReturnOpGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -545,6 +592,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
         }
         public override bool IsFlowControl { get => true; }
     }
+    [Obsolete]
     public class IfOpGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -595,6 +643,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
         }
         public override bool IsFlowControl { get => true; }
     }
+    [Obsolete]
     public class ForOpGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -619,6 +668,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             csGen.PopBrackets();
         }
     }
+    [Obsolete]
     public class ContinueOpGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -629,6 +679,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             csGen.AddLine($"continue");
         }
     }
+    [Obsolete]
     public class BreakOpGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -639,6 +690,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             csGen.AddLine($"break");
         }
     }
+    [Obsolete]
     public class IndexerOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -660,6 +712,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return $"({tarGen})[{args}]";
         }
     }
+    [Obsolete]
     public class ThisVarGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -669,6 +722,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return "this";
         }
     }
+    [Obsolete]
     public class ConstVarGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -678,6 +732,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return expr.Num;
         }
     }
+    [Obsolete]
     public class BoolEqualOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -694,6 +749,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return $"{strLeft} == {strRight}";
         }
     }
+    [Obsolete]
     public class BoolGreateOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -710,6 +766,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return $"{strLeft} > {strRight}";
         }
     }
+    [Obsolete]
     public class BoolGreateEqualOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -726,6 +783,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return $"{strLeft} >= {strRight}";
         }
     }
+    [Obsolete]
     public class BoolLessOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -742,6 +800,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return $"{strLeft} < {strRight}";
         }
     }
+    [Obsolete]
     public class BoolLessEqualOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -758,6 +817,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return $"{strLeft} <= {strRight}";
         }
     }
+    [Obsolete]
     public class BoolAndOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -774,6 +834,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return $"{strLeft} && {strRight}";
         }
     }
+    [Obsolete]
     public class BoolOrOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -790,6 +851,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return $"{strLeft} || {strRight}";
         }
     }
+    [Obsolete]
     public class BoolNotOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -804,6 +866,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return $"!({strTar})";
         }
     }
+    [Obsolete]
     public class DefineAndInitVarOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -813,6 +876,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             return $"{expr.DefType} {expr.VarName} = {expr.VarValue}";
         }
     }
+    [Obsolete]
     public class ConvertTypeOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -833,6 +897,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             }
         }
     }
+    [Obsolete]
     public class NewObjectOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -878,6 +943,35 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
             }
         }
     }
+    [Obsolete]
+    public class DefaultValueOpGen : ExprGen, IOpGen
+    {
+        public string Gen(OpExpress src, ICodeGen cgen)
+        {
+            var expr = (DefaultValueOp)src;
+
+            return $"default({expr.Type})";
+        }
+    }
+    [Obsolete]
+    public class VariableReferenceOpGen : ExprGen, IOpGen
+    {
+        public string Gen(OpExpress src, ICodeGen cgen)
+        {
+            var varRefOp = (VariableReferenceOp)src;
+            switch (varRefOp.ReferenceType)
+            {
+                case VariableReferenceOp.eReferenceType.In:
+                    return "in " + varRefOp.VariableName;
+                case VariableReferenceOp.eReferenceType.Out:
+                    return "out " + varRefOp.VariableName;
+                case VariableReferenceOp.eReferenceType.Ref:
+                    return "ref " + varRefOp.VariableName;
+            }
+            return varRefOp.VariableName;
+        }
+    }
+    [Obsolete]
     public class AssignOpGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -902,6 +996,7 @@ namespace EngineNS.Bricks.CodeBuilder.CSharp
         }
     }
 
+    [Obsolete]
     public class HardCodeOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)

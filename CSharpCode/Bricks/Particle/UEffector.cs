@@ -60,25 +60,30 @@ namespace EngineNS.Bricks.Particle
         }        
         public virtual string GetParametersDefine()
         {
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
 
-            codeBuilder.AddLine($"struct {Name}_EffectorParameters");
-            codeBuilder.PushBrackets();
+            codeBuilder.AddLine($"struct {Name}_EffectorParameters", ref sourceCode);
+            codeBuilder.PushSegment(ref sourceCode);
             {
-                codeBuilder.AddLine("float3 Acceleration;");
+                codeBuilder.AddLine("float3 Acceleration;", ref sourceCode);
             }
-            codeBuilder.PopBrackets(true);
+            codeBuilder.PopSegment(ref sourceCode);
+            sourceCode += ";";
 
-            return codeBuilder.ClassCode;
+            return sourceCode;
         }
         public string GetHLSL()
         {
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
 
             var code = IO.FileManager.ReadAllText($"{RName.GetRName("Shaders\\Bricks\\Particle\\Effectors.compute", RName.ERNameType.Engine).Address}");
-            codeBuilder.AddLine(code);
+            codeBuilder.AddLine(code, ref sourceCode);
 
-            return codeBuilder.ClassCode;
+            return sourceCode;
         }
         public unsafe void DoEffect(IParticleEmitter emitter, float elapsed, void* particle)
         {

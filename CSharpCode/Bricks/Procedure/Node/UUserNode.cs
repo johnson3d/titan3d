@@ -21,9 +21,7 @@ namespace EngineNS.Bricks.Procedure.Node
                     if (pin == null)
                     {
                         pin = new PinIn();
-                        pin.Name = mPinName;
-                        pin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-                        nodeDef.HostNode.AddPinIn(pin);
+                        nodeDef.HostNode.AddInput(pin, mPinName, nodeDef.HostNode.DefaultInputDesc);
                     }
                     else
                     {
@@ -40,7 +38,7 @@ namespace EngineNS.Bricks.Procedure.Node
                         pin = new PinOut();
                         pin.Name = mPinName;
                         pin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-                        nodeDef.HostNode.AddPinOut(pin);
+                        nodeDef.HostNode.AddOutput(pin, mPinName, nodeDef.HostNode.DefaultBufferCreator);
                     }
                     else
                     {
@@ -91,9 +89,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 foreach(var i in value)
                 {
                     var pin = new PinIn();
-                    pin.Name = i;
-                    pin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-                    AddPinIn(pin);
+                    AddInput(pin, i, DefaultInputDesc);
                 }
                 this.OnPositionChanged();
             }
@@ -120,9 +116,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 foreach (var i in value)
                 {
                     var pin = new PinOut();
-                    pin.Name = i;
-                    pin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-                    AddPinOut(pin);
+                    AddOutput(pin, i, DefaultBufferCreator);
                 }
                 this.OnPositionChanged();
             }
@@ -157,27 +151,19 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut ResultPin { get; set; } = new PinOut();
         public UHeightMappingNode()
         {
-            HeightPin.Name = " Height";
-            BezierPin.Name = " Bezier";
-            ResultPin.Name = " Result";
-
-            HeightPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-            BezierPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc("Bezier");
-            ResultPin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc();
-
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddPinIn(HeightPin);
-            AddPinIn(BezierPin);
-            AddPinOut(ResultPin);
+            AddInput(HeightPin, " Height", DefaultInputDesc);
+            AddInput(BezierPin, " Bezier", DefaultInputDesc, "Bezier");
+            AddOutput(ResultPin, " Result", DefaultBufferCreator);
         }
 
         [Rtti.Meta]
         public Terrain.CDLOD.UTerrainMaterialIdManager MaterialIdManager { get; } = new Terrain.CDLOD.UTerrainMaterialIdManager();
-        public override Int32_2 GetOutPinSize(PinOut pin)
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             if (ResultPin == pin)
             {
@@ -185,10 +171,10 @@ namespace EngineNS.Bricks.Procedure.Node
                 var buffer = graph.BufferCache.FindBuffer(HeightPin);
                 if (buffer != null)
                 {
-                    return new Int32_2(buffer.Width, buffer.Height);
+                    return buffer.BufferCreator;
                 }
             }
-            return base.GetOutPinSize(pin);
+            return base.GetOutBufferCreator(pin);
         }
         public override bool OnProcedure(UPgcGraph graph)
         {
@@ -211,7 +197,7 @@ namespace EngineNS.Bricks.Procedure.Node
             {
                 for (int j = 0; j < resultComp.Width; j++)
                 {
-                    var height = heightComp.GetPixel(j, i);
+                    var height = heightComp.GetPixel<float>(j, i);
                     var vzValue = BezierCalculate.ValueOnBezier(bzNode.BzPoints, height);// - bzNode.MinX);// ((double)j) * rangeX / (double)resultComp.Width);
 
                     var norValue = (vzValue.Y - bzNode.MinY) / rangeY;

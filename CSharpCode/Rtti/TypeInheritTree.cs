@@ -29,7 +29,7 @@ namespace EngineNS.Rtti
                     return true;
                 foreach(var j in i.Methods)
                 {
-                    if (j.Method.Name.Contains(filter))
+                    if (j.MethodName.Contains(filter))
                         return true;
                 }
                 foreach (var j in i.Fields)
@@ -37,9 +37,9 @@ namespace EngineNS.Rtti
                     if (j.Field.Name.Contains(filter))
                         return true;
                 }
-                foreach (var j in i.CurrentVersion.Fields)
+                foreach (var j in i.CurrentVersion.Propertys)
                 {
-                    if (j.FieldName.Contains(filter))
+                    if (j.PropertyName.Contains(filter))
                         return true;
                 }
             }

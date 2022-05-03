@@ -6,7 +6,7 @@ using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
-    public class VarNode : IBaseNode
+    public class VarNode : UNodeBase
     {
         public VarNode()
         {
@@ -37,8 +37,24 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 this.Name = value;
             }
         }
-        public override void OnMaterialEditorGenCode(Bricks.CodeBuilder.HLSL.UHLSLGen gen, UMaterial Material)
+        //public override void OnMaterialEditorGenCode(UMaterial Material)
+        //{
+        //    var varNode = this;
+        //    if (varNode.IsUniform)
+        //    {
+        //        var type = this.GetType();
+        //        var valueProp = type.GetProperty("Value");
+        //        var value = valueProp.GetValue(this, null);
+        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameValuePair();
+        //        tmp.VarType = gen.GetTypeString(varNode.VarType);
+        //        tmp.Name = this.Name;
+        //        tmp.Value = value.ToString();
+        //        Material.UsedUniformVars.Add(tmp);
+        //    }
+        //}
+        public override void BuildStatements(ref BuildCodeStatementsData data)
         {
+            var material = data.UserData as UMaterial;
             var varNode = this;
             if (varNode.IsUniform)
             {
@@ -46,10 +62,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var valueProp = type.GetProperty("Value");
                 var value = valueProp.GetValue(this, null);
                 var tmp = new Graphics.Pipeline.Shader.UMaterial.NameValuePair();
-                tmp.VarType = gen.GetTypeString(varNode.VarType.SystemType);
+                tmp.VarType = data.CodeGen.GetTypeString(varNode.VarType);
                 tmp.Name = this.Name;
                 tmp.Value = value.ToString();
-                Material.UsedUniformVars.Add(tmp);
+                material.UsedUniformVars.Add(tmp);
             }
         }
         protected virtual void OnAsUniform(bool isUniform)
@@ -96,64 +112,60 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             return true;
         }
-        public static string Type2HLSLType(Type type, bool IsHalfPrecision)
+        public static string Type2HLSLType(Rtti.UTypeDesc type, bool IsHalfPrecision)
         {
-            if (type == typeof(float))
+            if (type.IsEqual(typeof(float)))
                 return IsHalfPrecision ? "half" : "float";
-            else if (type == typeof(Vector2))
+            else if (type.IsEqual(typeof(Vector2)))
                 return IsHalfPrecision ? "half2" : "float2";
-            else if (type == typeof(Vector3))
+            else if (type.IsEqual(typeof(Vector3)))
                 return IsHalfPrecision ? "half3" : "float3";
-            else if (type == typeof(Vector4))
+            else if (type.IsEqual(typeof(Vector4)))
                 return IsHalfPrecision ? "half4" : "float4";
             return type.FullName;
         }
-        public virtual IExpression GetVarExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
-        {
-            DefineVar Var = new DefineVar();
-            Var.IsLocalVar = !IsUniform;
-            Var.VarName = this.Name;
-            Var.DefType = Type2HLSLType(VarType.SystemType, IsHalfPrecision);
+        //public virtual IExpression GetVarExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        //{
+        //    DefineVar Var = new DefineVar();
+        //    Var.IsLocalVar = !IsUniform;
+        //    Var.VarName = this.Name;
+        //    Var.DefType = Type2HLSLType(VarType.SystemType, IsHalfPrecision);
 
-            Var.InitValue = GetDefaultValue();
+        //    Var.InitValue = GetDefaultValue();
 
-            if (Var.IsLocalVar)
-            {
-                funGraph.ShaderEditor.MaterialOutput.Function.AddLocalVar(Var);
-            }
-            else
-            {
-                funGraph.ShaderEditor.MaterialOutput.UniformVars.Add(Var);
-            }
-            return new OpUseDefinedVar(Var);
-        }
+        //    if (Var.IsLocalVar)
+        //    {
+        //        funGraph.ShaderEditor.MaterialOutput.Function.AddLocalVar(Var);
+        //    }
+        //    else
+        //    {
+        //        funGraph.ShaderEditor.MaterialOutput.UniformVars.Add(Var);
+        //    }
+        //    return new OpUseDefinedVar(Var);
+        //}
         protected virtual string GetDefaultValue()
         {
             return "0";
         }
     }
-    
+    [ContextMenu("f1,float1", "Data\\float@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class VarDimF1 : VarNode
     {
-        public override string GetTitleName()
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
-            return $"{Name}={Value}";
-        }
-        public override System.Type GetOutPinType(PinOut pin)
-        {
-            return VarType.SystemType;
+            return VarType;
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
 
-            var nodeExpr = OutNode as IBaseNode;
+            var nodeExpr = OutNode as UNodeBase;
             var type = nodeExpr.GetOutPinType(oPin);
 
             if (iPin == InX)
             {
-                if (type != typeof(float))
+                if (!type.IsEqual(typeof(float)))
                     return false;
             }
             return true;
@@ -182,54 +194,93 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             OutX.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutX);
         }
-        public override void PreGenExpr()
+        //public override void PreGenExpr()
+        //{
+        //    Executed = false;
+        //}
+        //bool Executed = false;
+        //public override IExpression GetVarExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        //{
+        //    DefineVar Var = new DefineVar();
+        //    Var.IsLocalVar = !IsUniform;
+        //    Var.VarName = this.Name;
+        //    Var.DefType = Type2HLSLType(VarType, IsHalfPrecision);
+
+        //    Var.InitValue = GetDefaultValue();
+
+        //    if (Var.IsLocalVar)
+        //    {
+        //        funGraph.ShaderEditor.MaterialOutput.Function.AddLocalVar(Var);
+        //    }
+        //    else
+        //    {
+        //        funGraph.ShaderEditor.MaterialOutput.UniformVars.Add(Var);
+        //    }
+        //    if (Executed)
+        //    {
+        //        return new OpUseDefinedVar(Var);
+        //    }
+        //    Executed = true;
+        //    var seq = new ExecuteSequence();
+        //    var linkX = funGraph.FindInLinkerSingle(InX);
+        //    if (linkX != null)
+        //    {
+        //        var exprNode = linkX.OutNode as IBaseNode;
+        //        var xyExpr = exprNode.GetExpr(funGraph, cGen, linkX.OutPin, true) as OpExpress;
+        //        var setExpr = new AssignOp();
+        //        setExpr.Left = new OpUseDefinedVar(Var);
+        //        setExpr.Right = xyExpr;
+
+        //        seq.Lines.Add(setExpr);
+        //    }
+        //    return new OpExecuteAndUseDefinedVar(seq, Var);
+        //}        
+        //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        //{
+        //    var expr = GetVarExpr(funGraph, cGen, oPin, bTakeResult);
+        //    if (oPin == OutX)
+        //    {
+        //        return expr;
+        //    }
+        //    return null;
+        //}
+        public override void BuildStatements(ref BuildCodeStatementsData data)
         {
-            Executed = false;
+            base.BuildStatements(ref data);
+            if(data.NodeGraph.PinHasLinker(InX))
+            {
+                var pinNode = data.NodeGraph.GetOppositePinNode(InX);
+                var opPin = data.NodeGraph.GetOppositePin(InX);
+                pinNode.BuildStatements(ref data);
+
+                data.CurrentStatements.Add(new UAssignOperatorStatement()
+                {
+                    From = pinNode.GetExpression(opPin, ref data),
+                    To = new UVariableReferenceExpression(Name),
+                });
+            }
+
+            if(!data.MethodDec.HasLocalVariable(Name))
+            {
+                var val = new UVariableDeclaration()
+                {
+                    VariableType = new UTypeReference(Type2HLSLType(VarType, IsHalfPrecision)),
+                    VariableName = Name,
+                    InitValue = new UPrimitiveExpression(Value),
+                };
+                if (IsUniform)
+                {
+                    var graph = data.NodeGraph as UMaterialGraph;
+                    graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
+                }
+                else
+                    data.MethodDec.AddLocalVar(val);
+            }
         }
-        bool Executed = false;
-        public override IExpression GetVarExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
-            DefineVar Var = new DefineVar();
-            Var.IsLocalVar = !IsUniform;
-            Var.VarName = this.Name;
-            Var.DefType = Type2HLSLType(VarType.SystemType, IsHalfPrecision);
-
-            Var.InitValue = GetDefaultValue();
-
-            if (Var.IsLocalVar)
-            {
-                funGraph.ShaderEditor.MaterialOutput.Function.AddLocalVar(Var);
-            }
-            else
-            {
-                funGraph.ShaderEditor.MaterialOutput.UniformVars.Add(Var);
-            }
-            if (Executed)
-            {
-                return new OpUseDefinedVar(Var);
-            }
-            Executed = true;
-            var seq = new ExecuteSequence();
-            var linkX = funGraph.FindInLinkerSingle(InX);
-            if (linkX != null)
-            {
-                var exprNode = linkX.OutNode as IBaseNode;
-                var xyExpr = exprNode.GetExpr(funGraph, cGen, linkX.OutPin, true) as OpExpress;
-                var setExpr = new AssignOp();
-                setExpr.Left = new OpUseDefinedVar(Var);
-                setExpr.Right = xyExpr;
-
-                seq.Lines.Add(setExpr);
-            }
-            return new OpExecuteAndUseDefinedVar(seq, Var);
-        }        
-        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
-        {
-            var expr = GetVarExpr(funGraph, cGen, oPin, bTakeResult);
-            if (oPin == OutX)
-            {
-                return expr;
-            }
+            if(pin == OutX)
+                return new UVariableReferenceExpression(Name);
             return null;
         }
     }

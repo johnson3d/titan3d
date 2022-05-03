@@ -50,7 +50,7 @@ namespace EngineNS.IO
             TypeSlt.SelectedType = type;
 
             PGAssetInitTask = PGAsset.Initialize();
-            mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType.SystemType) as IAsset;
+            mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IAsset;
             PGAsset.Target = mAsset;
         }
         public override unsafe void OnDraw(EGui.Controls.ContentBrowser ContentBrowser)
@@ -82,7 +82,7 @@ namespace EngineNS.IO
                 TypeSlt.OnDraw(-1, 6);
                 if (TypeSlt.SelectedType != saved)
                 {
-                    mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType.SystemType) as IAsset;
+                    mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IAsset;
                     PGAsset.Target = mAsset;
                 }
 
@@ -299,18 +299,19 @@ namespace EngineNS.IO
                     {
 
                     }
+                    ContentBrowser.CreateNewAssets = createNewAssetValueStore;
                 }
 
-                OnDrawContextMenu(ref drawList);
-
+                if(OnDrawContextMenu(ref drawList))
+                    ContentBrowser.CreateNewAssets = createNewAssetValueStore;
                 ImGuiAPI.EndPopup();
             }
             else
                 ContentBrowser.CreateNewAssets = createNewAssetValueStore;
         }
-        protected virtual void OnDrawContextMenu(ref ImDrawList cmdlist)
+        protected virtual bool OnDrawContextMenu(ref ImDrawList cmdlist)
         {
-
+            return false;
         }
         public virtual void OnShowIconTimout(int time)
         {
@@ -487,7 +488,7 @@ namespace EngineNS.IO
         }
         public IAssetCreateAttribute ImportAsset(RName dir, Rtti.UTypeDesc type, string ext)
         {
-            var attrs = type.SystemType.GetCustomAttributes(typeof(IAssetCreateAttribute), true);
+            var attrs = type.GetCustomAttributes(typeof(IAssetCreateAttribute), true);
             if (attrs.Length > 0)
             {
                 var importer = attrs[0] as IAssetCreateAttribute;

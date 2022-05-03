@@ -300,24 +300,24 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public List<string> UserDefines { get; set; } = new List<string>();
         internal virtual void UpdateShaderCode(bool EmptyMaterial)
         {
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-
-            codeBuilder.AddLine($"#ifndef _Material_H_");
-            codeBuilder.AddLine($"#define _Material_H_");
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            codeBuilder.AddLine($"#ifndef _Material_H_", ref sourceCode);
+            codeBuilder.AddLine($"#define _Material_H_", ref sourceCode);
 
             foreach (var i in this.UsedRSView)
             {
-                codeBuilder.AddLine($"{i.ShaderType} {i.Name} DX_NOBIND;");
+                codeBuilder.AddLine($"{i.ShaderType} {i.Name} DX_NOBIND;", ref sourceCode);
             }
 
             foreach (var i in this.UsedSamplerStates)
             {
-                codeBuilder.AddLine($"SamplerState {i.Name} DX_NOBIND;");
+                codeBuilder.AddLine($"SamplerState {i.Name} DX_NOBIND;", ref sourceCode);
             }
 
-            codeBuilder.AddLine("void DO_VS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)");
-            codeBuilder.PushBrackets();
-            codeBuilder.PopBrackets();
+            codeBuilder.AddLine("void DO_VS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)", ref sourceCode);
+            codeBuilder.PushSegment(ref sourceCode);
+            codeBuilder.PopSegment(ref sourceCode);
 
             if (EmptyMaterial)
             {
@@ -335,60 +335,70 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 //codeBuilder.AddLine("mtl.mRough = 0.5f;");
                 //codeBuilder.AddLine("mtl.mEmissive = float3(0.1,0.1,0.1);");
                 //codeBuilder.PopBrackets();
-
-                codeBuilder.AppendCode(this.HLSLCode, false, true);
+                sourceCode += this.HLSLCode;
+                //codeBuilder.AppendCode(this.HLSLCode, false, true);
             }
             else
             {
-                codeBuilder.AppendCode(this.HLSLCode, false, true);
+                sourceCode += this.HLSLCode;
+                //codeBuilder.AppendCode(this.HLSLCode, false, true);
             }
 
-            codeBuilder.AddLine("#undef DO_VS_MATERIAL");
-            codeBuilder.AddLine("#define DO_VS_MATERIAL DO_VS_MATERIAL_IMPL");
-            codeBuilder.AddLine("#undef DO_PS_MATERIAL");
-            codeBuilder.AddLine("#define DO_PS_MATERIAL DO_PS_MATERIAL_IMPL");
+            codeBuilder.AddLine("#undef DO_VS_MATERIAL", ref sourceCode);
+            codeBuilder.AddLine("#define DO_VS_MATERIAL DO_VS_MATERIAL_IMPL", ref sourceCode);
+            codeBuilder.AddLine("#undef DO_PS_MATERIAL", ref sourceCode);
+            codeBuilder.AddLine("#define DO_PS_MATERIAL DO_PS_MATERIAL_IMPL", ref sourceCode);
 
             switch (LightingMode)
             {
                 case ELightingMode.Unlight:
-                    codeBuilder.AddLine("#define MTL_ID_UNLIT");
+                    codeBuilder.AddLine("#define MTL_ID_UNLIT", ref sourceCode);
                     break;
                 case ELightingMode.Skin:
-                    codeBuilder.AddLine("#define MTL_ID_SKIN");
+                    codeBuilder.AddLine("#define MTL_ID_SKIN", ref sourceCode);
                     break;
                 case ELightingMode.Transmit:
-                    codeBuilder.AddLine("#define MTL_ID_TRANSMIT");
+                    codeBuilder.AddLine("#define MTL_ID_TRANSMIT", ref sourceCode);
                     break;
                 case ELightingMode.Hair:
-                    codeBuilder.AddLine("#define MTL_ID_HAIR");
+                    codeBuilder.AddLine("#define MTL_ID_HAIR", ref sourceCode);
                     break;
                 case ELightingMode.Eye:
-                    codeBuilder.AddLine("#define MTL_ID_EYE");
+                    codeBuilder.AddLine("#define MTL_ID_EYE", ref sourceCode);
                     break;
             }
 
             if (AlphaTest)
             {
-                codeBuilder.AddLine("#define ALPHA_TEST");
+                codeBuilder.AddLine("#define ALPHA_TEST", ref sourceCode);
             }
 
             if (UserDefines != null)
             {
                 foreach (var i in UserDefines)
                 {
-                    codeBuilder.AddLine($"#define {i}");
+                    codeBuilder.AddLine($"#define {i}", ref sourceCode);
                 }
             }
 
-            codeBuilder.AddLine("#endif//_Material_H_");
-            SourceCode.SetText(codeBuilder.ClassCode);
+            codeBuilder.AddLine("#endif//_Material_H_", ref sourceCode);
+            SourceCode.SetText(sourceCode);
 
             string uniformVarsCode = "";
             foreach (var i in this.UsedUniformVars)
             {
-                uniformVarsCode += $"{i.VarType} {i.Name};";
+                if (i.VarType == "float4")
+                {
+                    uniformVarsCode += $"{i.VarType} {i.Name} = float4({i.Value});";
+                }
+                else
+                {
+                    uniformVarsCode += $"{i.VarType} {i.Name};";
+                }
             }
             DefineCode.SetText(uniformVarsCode);
+
+            PerMaterialCBuffer = null;
 
             mMaterialHash = GetHash();
         }
@@ -591,6 +601,34 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     if (HostMaterial != null)
                         HostMaterial.SerialId++;
                 }
+            }
+            public bool SetValue(in Vector4 v)
+            {
+                if (VarType != "float4")
+                    return false;
+                Value = v.ToString();
+                return true;
+            }
+            public bool SetValue(in Vector3 v)
+            {
+                if (VarType != "float3")
+                    return false;
+                Value = v.ToString();
+                return true;
+            }
+            public bool SetValue(in Vector2 v)
+            {
+                if (VarType != "float2")
+                    return false;
+                Value = v.ToString();
+                return true;
+            }
+            public bool SetValue(float v)
+            {
+                if (VarType != "float")
+                    return false;
+                Value = v.ToString();
+                return true;
             }
             public NameValuePair Clone(UMaterial mtl)
             {

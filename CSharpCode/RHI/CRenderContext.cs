@@ -14,6 +14,23 @@ namespace EngineNS
             }
         }
     }
+    public unsafe partial struct IRenderContextCaps
+    {
+        public void SetShaderGlobalEnv(IShaderDefinitions defPtr)
+        {
+            if (MaxVertexShaderStorageBlocks > 0)
+            {
+                defPtr.AddDefine("HW_VS_STRUCTUREBUFFER", "1");
+            }
+        }
+        public override string ToString()
+        {
+            string result = "";
+            if(MaxVertexShaderStorageBlocks > 0)
+                result += "HW_VS_STRUCTUREBUFFER=1\n";
+            return result;
+        }
+    }
 }
 
 

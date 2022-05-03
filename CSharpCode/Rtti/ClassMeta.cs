@@ -103,12 +103,12 @@ namespace EngineNS.Rtti
 
             var tarType = tar.GetType();
             var srcType = src.GetType();
-            foreach (var i in CurrentVersion.Fields)
+            foreach (var i in CurrentVersion.Propertys)
             {
-                var tarProp = tarType.GetProperty(i.FieldName);
+                var tarProp = tarType.GetProperty(i.PropertyName);
                 if (tarProp == null)
                     continue;
-                var srcProp = srcType.GetProperty(i.FieldName);
+                var srcProp = srcType.GetProperty(i.PropertyName);
                 if (srcProp == null)
                     continue;
                 if (tarProp.PropertyType == srcProp.PropertyType)
@@ -127,21 +127,21 @@ namespace EngineNS.Rtti
         public void CopyObjectMetaField(List<UMetaFieldValue> tar, object src)
         {
             var srcType = src.GetType();
-            foreach (var i in CurrentVersion.Fields)
+            foreach (var i in CurrentVersion.Propertys)
             {
-                var srcProp = srcType.GetProperty(i.FieldName);
+                var srcProp = srcType.GetProperty(i.PropertyName);
                 if (srcProp == null)
                     continue;
 
                 var fld = new UMetaFieldValue();
-                fld.Name = i.FieldName;
+                fld.Name = i.PropertyName;
                 fld.FieldType = Rtti.UTypeDesc.TypeOf(srcProp.PropertyType);
                 fld.Value = srcProp.GetValue(src);
                 var lst = fld.Value as System.Collections.IList;
                 var dict = fld.Value as System.Collections.IDictionary;
                 if (lst != null)
                 {
-                    var tarlst = Rtti.UTypeDescManager.CreateInstance(fld.FieldType.SystemType) as System.Collections.IList;
+                    var tarlst = Rtti.UTypeDescManager.CreateInstance(fld.FieldType) as System.Collections.IList;
                     for (int j = 0; j < lst.Count; j++)
                     {
                         tarlst.Add(lst[j]);
@@ -150,7 +150,7 @@ namespace EngineNS.Rtti
                 }
                 if (dict != null)
                 {
-                    var tardict = Rtti.UTypeDescManager.CreateInstance(fld.FieldType.SystemType) as System.Collections.IDictionary;
+                    var tardict = Rtti.UTypeDescManager.CreateInstance(fld.FieldType) as System.Collections.IDictionary;
                     var j = dict.GetEnumerator();
                     while (j.MoveNext())
                     {
@@ -191,7 +191,7 @@ namespace EngineNS.Rtti
                 {
                     foreach (var j in i.Value.Types)
                     {
-                        if(j.Value.SystemType.IsSubclassOf(this.ClassType.SystemType))
+                        if(j.Value.IsSubclassOf(this.ClassType))
                         {
                             var klsMeta = Rtti.UClassMetaManager.Instance.GetMeta(j.Value);
                             if (klsMeta == null)
@@ -210,7 +210,7 @@ namespace EngineNS.Rtti
                 return false;
             if (ClassType == tarKls.ClassType)
                 return true;
-            return ClassType.SystemType.IsSubclassOf(tarKls.ClassType.SystemType);
+            return ClassType.IsSubclassOf(tarKls.ClassType);
         }
         public bool CanConvertFrom(UClassMeta srcKls)
         {
@@ -218,7 +218,7 @@ namespace EngineNS.Rtti
                 return false;
             if (ClassType == srcKls.ClassType)
                 return true;
-            return srcKls.ClassType.SystemType.IsSubclassOf(ClassType.SystemType);
+            return srcKls.ClassType.IsSubclassOf(ClassType);
         }
         public UClassMeta(UTypeDesc t)
         {
@@ -233,7 +233,7 @@ namespace EngineNS.Rtti
         {
             get
             {
-                return UTypeDesc.TypeStr(ClassType.SystemType);
+                return UTypeDesc.TypeStr(ClassType);
             }
         }
         public string MetaDirectoryName
@@ -298,7 +298,7 @@ namespace EngineNS.Rtti
             //var metaRoot = UEngine.Instance.FileManager.GetPath(rootDir, IO.FileManager.ESystemDir.MetaData);
             //var path = EngineNS.IO.FileManager.CombinePath(metaRoot, typeDesc.Assembly.Service);
             //path = EngineNS.IO.FileManager.CombinePath(path, typeDesc.Assembly.Name);
-            var tmpPath = EngineNS.IO.FileManager.CombinePath(Path, $"{MetaDirectoryName}");
+            var tmpPath = Path;// EngineNS.IO.FileManager.CombinePath(Path, $"{MetaDirectoryName}");
             if (!EngineNS.IO.FileManager.DirectoryExists(tmpPath))
             {
                 EngineNS.IO.FileManager.CreateDirectory(tmpPath);
@@ -310,7 +310,7 @@ namespace EngineNS.Rtti
         {
             var type = ClassType;
             {
-                var attrs = type.SystemType.GetCustomAttributes(typeof(MetaAttribute), true);
+                var attrs = type.GetCustomAttributes(typeof(MetaAttribute), true);
                 if (attrs.Length == 1)
                 {
                     MetaAttribute = attrs[0] as MetaAttribute;
@@ -324,24 +324,24 @@ namespace EngineNS.Rtti
                 if (attrs.Length == 0)
                     continue;
                 var meta = attrs[0] as MetaAttribute;
-                var fd = new UMetaVersion.MetaField();
+                var fd = new PropertyMeta();
                 fd.Meta = meta;
                 fd.PropInfo = i;
                 fd.Order = meta.Order;
                 fd.FieldType = Rtti.UTypeDesc.TypeOf(i.PropertyType);
-                fd.FieldName = i.Name;
+                fd.PropertyName = i.Name;
                 fd.FieldTypeStr = UTypeDescManager.Instance.GetTypeStringFromType(i.PropertyType);
                 fd.Build();
-                result.Fields.Add(fd);
+                result.Propertys.Add(fd);
             }
-            result.Fields.Sort();
+            result.Propertys.Sort();
             string hashString = "";
-            foreach(var i in result.Fields)
+            foreach(var i in result.Propertys)
             {
                 hashString += i.ToString();
             }
             result.MetaHash = EngineNS.UniHash.APHash(hashString);
-            if (MetaAttribute != null || type.SystemType.GetInterface(nameof(IO.ISerializer)) != null)
+            if (MetaAttribute != null || type.GetInterface(nameof(IO.ISerializer)) != null)
             {
                 if (MetaVersions.TryGetValue(result.MetaHash, out mCurrentVersion) == false)
                 {
@@ -359,28 +359,107 @@ namespace EngineNS.Rtti
             public class ParamMeta
             {
                 public MetaParameterAttribute Meta;
-                public System.Reflection.ParameterInfo ParamInfo;
+                private System.Reflection.ParameterInfo ParamInfo;
+                public Rtti.UTypeDesc ParameterType;
+                public bool IsParamArray = false;
+                public string Name;
+                public Bricks.CodeBuilder.EMethodArgumentAttribute ArgumentAttribute = Bricks.CodeBuilder.EMethodArgumentAttribute.Default;
+                public object DefaultValue = null;
+
+                public bool HasDefaultValue
+                {
+                    get => DefaultValue != null;
+                }
+
+                public void Init(System.Reflection.ParameterInfo info)
+                {
+                    ParamInfo = info;
+                    Name = info.Name;
+                    var att = info.GetCustomAttributes(typeof(System.ParamArrayAttribute), true);
+                    IsParamArray = (att.Length > 0);
+                    if (info.IsOut)
+                    {
+                        ArgumentAttribute = Bricks.CodeBuilder.EMethodArgumentAttribute.Out;
+                        ParameterType = Rtti.UTypeDesc.TypeOf(info.ParameterType.GetElementType());
+                    }
+                    else if (info.IsIn)
+                    {
+                        ArgumentAttribute = Bricks.CodeBuilder.EMethodArgumentAttribute.In;
+                        ParameterType = Rtti.UTypeDesc.TypeOf(info.ParameterType.GetElementType());
+                    }
+                    else if (info.ParameterType.IsByRef)
+                    {
+                        ArgumentAttribute = Bricks.CodeBuilder.EMethodArgumentAttribute.Ref;
+                        ParameterType = Rtti.UTypeDesc.TypeOf(info.ParameterType.GetElementType());
+                    }
+                    else
+                        ParameterType = Rtti.UTypeDesc.TypeOf(info.ParameterType);
+                    DefaultValue = info.DefaultValue;
+                }
+                public bool IsOut
+                {
+                    get => (ArgumentAttribute == Bricks.CodeBuilder.EMethodArgumentAttribute.Out);
+                }
+                public bool IsIn
+                {
+                    get => (ArgumentAttribute == Bricks.CodeBuilder.EMethodArgumentAttribute.In);
+                }
+                public bool IsRef
+                {
+                    get => (ArgumentAttribute == Bricks.CodeBuilder.EMethodArgumentAttribute.Ref);
+                }
             }
             public MetaAttribute Meta;
-            public System.Reflection.MethodInfo Method;
+            private System.Reflection.MethodInfo Method;
             public ParamMeta[] Parameters;
-            private string Name;
-            public void Init()
-            {
-                var parameters = Method.GetParameters();
+            public string MethodName;
+            public Rtti.UTypeDesc ReturnType;
+            public Rtti.UTypeDesc DeclaringType;
+            public bool IsStatic = false;
+            public bool IsVirtual = false;
+            public List<object> CustomAttributes;
+            public List<object> InheritCustomAttributes;
 
+            private string DeclarName;
+            public void Init(System.Reflection.MethodInfo method)
+            {
+                Method = method;
+                MethodName = Method.Name;
+                IsStatic = Method.IsStatic;
+                IsVirtual = Method.IsVirtual;
+                ReturnType = Rtti.UTypeDesc.TypeOf(Method.ReturnType);
+                DeclaringType = Rtti.UTypeDesc.TypeOf(Method.DeclaringType);
+
+                CustomAttributes = new List<object>(method.CustomAttributes);
+                var atts = method.GetCustomAttributes(true);
+                if(atts.Length > 0)
+                {
+                    InheritCustomAttributes = new List<object>(atts.Length - CustomAttributes.Count);
+                    for(int i=0; i<atts.Length; i++)
+                    {
+                        if (CustomAttributes.Contains(atts[i]))
+                            continue;
+                        InheritCustomAttributes.Add(atts[i]);
+                    }
+                }
+
+                var parameters = Method.GetParameters();
                 Parameters = new ParamMeta[parameters.Length];
-                Name = $"{Method.ReturnType.FullName} {Method.DeclaringType.FullName}.{Method.Name}(";                
+                DeclarName = $"{Method.ReturnType.FullName} {Method.DeclaringType.FullName}.{Method.Name}(";                
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     Parameters[i] = new ParamMeta();
-                    Parameters[i].ParamInfo = parameters[i];
+                    Parameters[i].Init(parameters[i]);
                     Parameters[i].Meta = GetParameterMeta(i);
-                    Name += $"{parameters[i].ParameterType.FullName} {parameters[i].Name}";
+                    DeclarName += $"{parameters[i].ParameterType.FullName} {parameters[i].Name}";
                     if (i < parameters.Length - 1)
-                        Name += ",";
+                        DeclarName += ",";
                 }
-                Name += ')';
+                DeclarName += ')';
+            }
+            public ParamMeta[] GetParameters()
+            {
+                return Parameters;
             }
             public ParamMeta GetParameter(int index)
             {
@@ -390,7 +469,7 @@ namespace EngineNS.Rtti
             {
                 foreach(var i in Parameters)
                 {
-                    if (i.ParamInfo.Name == name)
+                    if (i.Name == name)
                         return i;
                 }
                 return null;
@@ -405,7 +484,7 @@ namespace EngineNS.Rtti
             }
             public override string ToString()
             {
-                return Name;
+                return DeclarName;
             }
             public string GetMethodDeclareString()
             {
@@ -420,9 +499,42 @@ namespace EngineNS.Rtti
                 result += ')';
                 return result;
             }
-            public void CheckMetaField()
+            public object[] GetCustomAttributes(Type type, bool inherit)
             {
+                List<object> retVal;
+                if (inherit)
+                {
+                    retVal = new List<object>(CustomAttributes.Count + InheritCustomAttributes.Count);
+                    for(int i=0; i<CustomAttributes.Count; i++)
+                    {
+                        if(CustomAttributes[i].GetType() == type)
+                            retVal.Add(CustomAttributes[i]);
+                    }
+                    for(int i=0; i<InheritCustomAttributes.Count; i++)
+                    {
+                        if (InheritCustomAttributes[i].GetType() == type)
+                            retVal.Add(InheritCustomAttributes[i]);
+                    }
+                }
+                else
+                {
+                    retVal = new List<object>(CustomAttributes.Count);
+                    for(int i=0; i<CustomAttributes.Count; i++)
+                    {
+                        if (CustomAttributes[i].GetType() == type)
+                            retVal.Add(CustomAttributes[i]);
+                    }
+                }
+                return retVal.ToArray();
+            }
 
+            public bool HasReturnValue()
+            {
+                if (ReturnType == null)
+                    return false;
+                if (ReturnType.IsEqual(typeof(void)))
+                    return false;
+                return true;
             }
         }
         public List<MethodMeta> Methods { get; } = new List<MethodMeta>();
@@ -449,8 +561,8 @@ namespace EngineNS.Rtti
 
                 var mth = new MethodMeta();
                 mth.Meta = attrs[0] as MetaAttribute;
-                mth.Method = i;
-                mth.Init();
+                //mth.Method = i;
+                mth.Init(i);
                 Methods.Add(mth);
             }
         }
@@ -489,13 +601,92 @@ namespace EngineNS.Rtti
                 Fields.Add(mth);
             }
         }
+        public FieldMeta GetField(string declString)
+        {
+            for (int i = 0; i < Fields.Count; i++)
+            {
+                if (Fields[i].Field.Name == declString)
+                    return Fields[i];
+            }
+            return null;
+        }
+        #endregion
+
+        #region MacrossProperty
+        public class PropertyMeta : IComparable<PropertyMeta>
+        {
+            public MetaAttribute Meta
+            {
+                get;
+                set;
+            }
+            public System.Reflection.PropertyInfo PropInfo
+            {
+                get;
+                set;
+            }
+            public void Build()
+            {
+                if (PropInfo == null)
+                    return;
+                var attrs = PropInfo.GetCustomAttributes(typeof(IO.UCustomSerializerAttribute), true);
+                if (attrs.Length == 0)
+                    return;
+                CustumSerializer = attrs[0] as IO.UCustomSerializerAttribute;
+            }
+            public IO.UCustomSerializerAttribute CustumSerializer;
+            public Rtti.UTypeDesc FieldType
+            {
+                get;
+                set;
+            }
+            public int Order { get; set; } = 0;
+            private string mFieldTypeStr;
+            public string FieldTypeStr
+            {
+                get => mFieldTypeStr;
+                set
+                {
+                    mFieldTypeStr = value;
+                }
+            }
+            public string PropertyName
+            {
+                get;
+                set;
+            }
+            public int CompareTo(PropertyMeta other)
+            {
+                var cmp = Order.CompareTo(other.Order);
+                if (cmp > 0)
+                    return 1;
+                else if (cmp < 0)
+                    return -1;
+                else
+                {
+                    cmp = PropertyName.CompareTo(other.PropertyName);
+                    if (cmp > 0)
+                        return 1;
+                    else if (cmp < 0)
+                        return -1;
+                    else
+                    {
+                        return FieldTypeStr.CompareTo(other.FieldTypeStr);
+                    }
+                }
+            }
+            public override string ToString()
+            {
+                return FieldTypeStr + PropertyName;
+            }
+        }
         #endregion
 
         public void CheckMetaField()
         {
-            foreach(var i in MetaVersions)
+            foreach (var i in MetaVersions)
             {
-                i.Value.CheckMetaField();
+                i.Value.CheckMetaProperty();
             }
             BuildMethods();
         }
@@ -516,122 +707,32 @@ namespace EngineNS.Rtti
             get;
             internal set;
         } = 0;
-        public class MetaField : IComparable<MetaField>
-        {
-            public MetaAttribute Meta
-            {
-                get;
-                set;
-            }
-            public System.Reflection.PropertyInfo PropInfo
-            {
-                get;
-                set;
-            }
-            public void Build()
-            {
-                if (PropInfo == null)
-                    return;
-                var attrs = PropInfo.GetCustomAttributes(typeof(IO.UCustomSerializerAttribute), false);
-                if (attrs.Length == 0)
-                    return;
-                var custom = attrs[0] as IO.UCustomSerializerAttribute;
-
-                if (custom.CustomType == null)
-                    return;
-
-                var types1 = new Type[] { typeof(IO.IWriter), typeof(IO.ISerializer), typeof(string) };
-                var methodSave = custom.CustomType.GetMethod("Save", types1);
-                if (methodSave.IsStatic == false)
-                    return;
-
-                var types2 = new Type[] { typeof(IO.IReader), typeof(IO.ISerializer), typeof(string) };
-                var methodLoad = custom.CustomType.GetMethod("Load", types2);
-                if (methodLoad.IsStatic == false)
-                    return;
-
-                CustomWriter = methodSave;
-                CustomReader = methodLoad;
-
-                //if JIT
-                CustomWriterAction = (Action<IO.IWriter, IO.ISerializer, string>)Delegate.CreateDelegate(typeof(Action<IO.IWriter, IO.ISerializer, string>), CustomWriter);
-                CustomReaderAction = (Action<IO.IReader, IO.ISerializer, string>)Delegate.CreateDelegate(typeof(Action<IO.IReader, IO.ISerializer, string>), CustomReader);
-            }
-            public void CustomSave(IO.IWriter ar, IO.ISerializer host, string propName)
-            {
-                CustomWriterAction(ar, host, propName);
-            }
-            public void CustomLoad(IO.IReader ar, IO.ISerializer host, string propName)
-            {
-                CustomReaderAction(ar, host, propName);
-            }
-            public System.Reflection.MethodInfo CustomWriter;
-            public System.Reflection.MethodInfo CustomReader;
-            //这个需要Jit CreateDelegate
-            private Action<IO.IWriter, IO.ISerializer, string> CustomWriterAction;
-            private Action<IO.IReader, IO.ISerializer, string> CustomReaderAction;
-            public Rtti.UTypeDesc FieldType
-            {
-                get;
-                set;
-            }
-            public int Order { get; set; } = 0;
-            private string mFieldTypeStr;
-            public string FieldTypeStr
-            {
-                get => mFieldTypeStr;
-                set
-                {
-                    mFieldTypeStr = value;
-                }
-            }
-            public string FieldName
-            {
-                get;
-                set;
-            }
-            public int CompareTo(MetaField other)
-            {
-                var cmp = Order.CompareTo(other.Order);
-                if (cmp > 0)
-                    return 1;
-                else if (cmp < 0)
-                    return -1;
-                else
-                {
-                    cmp = FieldName.CompareTo(other.FieldName);
-                    if (cmp > 0)
-                        return 1;
-                    else if (cmp < 0)
-                        return -1;
-                    else
-                    {
-                        return FieldTypeStr.CompareTo(other.FieldTypeStr);
-                    }
-                }
-            }
-            public override string ToString()
-            {
-                return FieldTypeStr + FieldName;
-            }
-        }
-        public List<MetaField> Fields
+        public List<UClassMeta.PropertyMeta> Propertys
         {
             get;
-        } = new List<MetaField>();
-        public void CheckMetaField()
+        } = new List<UClassMeta.PropertyMeta>();
+        public UClassMeta.PropertyMeta GetProperty(string declString)
+        {
+            for (int i = 0; i < Propertys.Count; i++)
+            {
+                if (Propertys[i].PropertyName == declString)
+                    return Propertys[i];
+            }
+            return null;
+        }
+        public void CheckMetaProperty()
         {
             if (HostClass.ClassType.IsRemoved)
             {
-                foreach (var i in Fields)
+                foreach (var i in Propertys)
                 {
                     i.PropInfo = null;
                 }
                 return;
             }
-            foreach(var i in Fields)
+            foreach (var i in Propertys)
             {
-                i.PropInfo = HostClass.ClassType.SystemType.GetProperty(i.FieldName);
+                i.PropInfo = HostClass.ClassType.SystemType.GetProperty(i.PropertyName);
             }
         }
         public bool LoadVersion(uint hash, System.Xml.XmlNode node)
@@ -639,8 +740,8 @@ namespace EngineNS.Rtti
             MetaHash = hash;
             foreach (System.Xml.XmlNode i in node.ChildNodes)
             {
-                var fd = new MetaField();
-                fd.FieldName = i.Name;
+                var fd = new UClassMeta.PropertyMeta();
+                fd.PropertyName = i.Name;
                 foreach (System.Xml.XmlAttribute j in i.Attributes)
                 {
                     if (j.Name == "Type")
@@ -653,17 +754,17 @@ namespace EngineNS.Rtti
                     }
                 }
                 fd.FieldType = Rtti.UTypeDesc.TypeOf(fd.FieldTypeStr);
-                fd.PropInfo = HostClass.ClassType.SystemType.GetProperty(fd.FieldName);
+                fd.PropInfo = HostClass.ClassType.SystemType.GetProperty(fd.PropertyName);
                 fd.Build();
                 if (fd.FieldType == null)
                 {
                     fd.FieldType = UMissingTypeManager.Instance.GetConvertType(fd.FieldTypeStr);
                     if (fd.PropInfo != null && fd.FieldType == null)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Meta", $"Property lost: Name = {fd.FieldName}; Type = {fd.FieldTypeStr}");
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Meta", $"Property lost: Name = {fd.PropertyName}; Type = {fd.FieldTypeStr}");
                     }
                 }
-                Fields.Add(fd);
+                Propertys.Add(fd);
             }
             return true;
         }
@@ -675,9 +776,9 @@ namespace EngineNS.Rtti
             fdType.Value = HostClass.ClassMetaName;
             root.Attributes.Append(fdType);
             xml.AppendChild(root);
-            foreach (var i in Fields)
+            foreach (var i in Propertys)
             {
-                var fd = xml.CreateElement($"{i.FieldName}", root.NamespaceURI);
+                var fd = xml.CreateElement($"{i.PropertyName}", root.NamespaceURI);
                 fdType = xml.CreateAttribute("Type");
                 fdType.Value = i.FieldTypeStr;
                 fd.Attributes.Append(fdType);
@@ -862,9 +963,9 @@ namespace EngineNS.Rtti
                 foreach(var j in i.Value.Types)
                 {
                     MetaAttribute meta;
-                    if (j.Value.SystemType.GetInterface(nameof(EngineNS.IO.ISerializer)) == null)
+                    if (j.Value.GetInterface(nameof(EngineNS.IO.ISerializer)) == null)
                     {
-                        var attrs = j.Value.SystemType.GetCustomAttributes(typeof(MetaAttribute), true);
+                        var attrs = j.Value.GetCustomAttributes(typeof(MetaAttribute), true);
                         if (attrs.Length == 0)
                             continue;
                         meta = attrs[0] as MetaAttribute;
@@ -874,33 +975,8 @@ namespace EngineNS.Rtti
                     var metaName = j.Value.TypeString;// Rtti.UTypeDescManager.Instance.GetTypeStringFromType(j.Value.SystemType);
                     if (mMetas.TryGetValue(metaName, out kls) == false)
                     {
-                        var root = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Engine, IO.FileManager.ESystemDir.MetaData);
-                        if (j.Value.Assembly.IsGameModule)
-                            root = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Game, IO.FileManager.ESystemDir.MetaData);
-
                         kls = new UClassMeta(j.Value);
-
-                        var dir = kls.ClassType.Assembly.Service;
-                        dir += "." + kls.ClassType.Assembly.Name;
-                        dir += "." + kls.ClassType.Namespace;
-
-                        dir = dir.Replace('.', '/');
-                        dir = root + dir;
-
-                        var name = kls.ClassType.FullName.Substring(kls.ClassType.Namespace.Length);
-                        if (name.StartsWith('.'))
-                        {
-                            name = name.Substring(1);
-                        }
-                        if (name.Length < 250)
-                        {   
-                            kls.Path = dir + "/a0." + name;
-                        }
-                        else
-                        {
-                            kls.Path = dir + "/a0." + kls.MetaDirectoryName;
-                        }
-                        
+                        kls.Path = GetPath(kls);                        
                         var ver = kls.BuildCurrentVersion();
                         mMetas.Add(metaName, kls);
                         kls.SaveClass();
@@ -915,29 +991,9 @@ namespace EngineNS.Rtti
 
         public void ForceSaveAll()
         {
-            var root = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Engine, IO.FileManager.ESystemDir.MetaData);
             foreach (var i in mMetas)
             {
-                var dir = i.Value.ClassType.Assembly.Service;
-                dir += "." + i.Value.ClassType.Assembly.Name;
-                dir += "." + i.Value.ClassType.Namespace;
-
-                dir = dir.Replace('.', '/');
-                dir = root + dir;
-
-                var name = i.Value.ClassType.FullName.Substring(i.Value.ClassType.Namespace.Length);
-                if (name.StartsWith('.'))
-                {
-                    name = name.Substring(1);
-                }
-                if (name.Length <250)
-                {
-                    i.Value.Path = dir + "/a0." + name;
-                }
-                else
-                {
-                    i.Value.Path = dir + "/a0." + i.Value.MetaDirectoryName;
-                }
+                i.Value.Path = GetPath(i.Value);
                 IO.FileManager.SureDirectory(i.Value.Path);
                 foreach (var j in i.Value.MetaVersions)
                 {
@@ -946,6 +1002,40 @@ namespace EngineNS.Rtti
 
                 var txtFilepath = EngineNS.IO.FileManager.CombinePath(i.Value.Path, $"typedesc.txt");
                 EngineNS.IO.FileManager.WriteAllText(txtFilepath, i.Value.ClassType.TypeString);
+            }
+        }
+        string GetPath(UClassMeta classMeta)
+        {
+            string root = "";
+            if (classMeta.ClassType.Assembly.IsGameModule)
+                root = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Game, IO.FileManager.ESystemDir.MetaData);
+            else
+                root = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Engine, IO.FileManager.ESystemDir.MetaData);
+
+            var dir = classMeta.ClassType.Assembly.Service;
+            dir += "." + classMeta.ClassType.Assembly.Name;
+            if(!string.IsNullOrEmpty(classMeta.ClassType.Namespace))
+                dir += "." + classMeta.ClassType.Namespace;
+
+            dir = dir.Replace('.', '/');
+            dir = root + dir;
+
+            string name;
+            if (string.IsNullOrEmpty(classMeta.ClassType.Namespace))
+                name = classMeta.ClassType.FullName;
+            else
+                name = classMeta.ClassType.FullName.Substring(classMeta.ClassType.Namespace.Length);
+            if (name.StartsWith('.'))
+            {
+                name = name.Substring(1);
+            }
+            if (name.Length <250)
+            {
+                return dir + "/a0." + name;
+            }
+            else
+            {
+                return dir + "/a0." + classMeta.MetaDirectoryName;
             }
         }
         public UClassMeta GetMeta(string name, bool bTryBuild = true)
@@ -968,6 +1058,9 @@ namespace EngineNS.Rtti
                 else
                 {
                     result = new UClassMeta(type);
+                    result.Path = GetPath(result);
+                    result.BuildMethods();
+                    result.BuildFields();
                     result.BuildCurrentVersion();
                     TypeMetas.Add(type, result);
                     return result;

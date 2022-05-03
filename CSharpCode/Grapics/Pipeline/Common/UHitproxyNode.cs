@@ -177,7 +177,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 GizmosPassDesc.NumOfMRT = 1;
                 GizmosPassDesc.AttachmentMRTs[0].Format = HitIdPinOut.Attachement.Format;
                 GizmosPassDesc.AttachmentMRTs[0].Samples = 1;
-                GizmosPassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionClear;
+                GizmosPassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionDontCare;
                 GizmosPassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
                 GizmosPassDesc.m_AttachmentDepthStencil.Format = DepthPinOut.Attachement.Format;
                 GizmosPassDesc.m_AttachmentDepthStencil.Samples = 1;

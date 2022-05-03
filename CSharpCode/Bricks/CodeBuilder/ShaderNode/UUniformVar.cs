@@ -4,7 +4,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
-    public partial class UUniformVar : IBaseNode
+    public partial class UUniformVar : UNodeBase
     {
         public Rtti.UTypeDesc VarType;
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
@@ -24,9 +24,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Out.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(Out);
         }
-        public override System.Type GetOutPinType(PinOut pin)
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
-            return VarType.SystemType;
+            return VarType;
         }
         public override void OnMouseStayPin(NodePin stayPin)
         {
@@ -63,23 +63,28 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 return IsHalfPrecision ? "half4" : "float4";
             return type.FullName;
         }
-        public virtual IExpression GetVarExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
-        {
-            DefineVar Var = new DefineVar();
-            Var.IsLocalVar = false;
-            Var.VarName = this.Name;
-            Var.DefType = Type2HLSLType(VarType.SystemType, false);
+        //public virtual IExpression GetVarExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        //{
+        //    DefineVar Var = new DefineVar();
+        //    Var.IsLocalVar = false;
+        //    Var.VarName = this.Name;
+        //    Var.DefType = Type2HLSLType(VarType.SystemType, false);
 
-            return new OpUseDefinedVar(Var);
-        }
-        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        //    return new OpUseDefinedVar(Var);
+        //}
+        //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        //{
+        //    var expr = GetVarExpr(funGraph, cGen, oPin, bTakeResult);
+        //    if (oPin == Out)
+        //    {
+        //        return expr;
+        //    }
+        //    return null;
+        //}
+
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
-            var expr = GetVarExpr(funGraph, cGen, oPin, bTakeResult);
-            if (oPin == Out)
-            {
-                return expr;
-            }
-            return null;
+            return new UVariableReferenceExpression(Name);
         }
     }
 }

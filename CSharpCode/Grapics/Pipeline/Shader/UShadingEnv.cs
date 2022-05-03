@@ -48,7 +48,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             public FPermutationId Value;
             public void SetValue(bool v)
             {
-                if (TypeDesc.SystemType != typeof(EPermutation_Bool))
+                if (!TypeDesc.IsEqual(typeof(EPermutation_Bool)))
                 {
                     return;
                 }

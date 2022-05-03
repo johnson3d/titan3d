@@ -153,6 +153,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 MaterialGraph.AddNode(MaterialOutput);
             }
 
+            for(int i=0; i<MaterialGraph.Nodes.Count; i++)
+            {
+                MaterialGraph.SetDefaultActionForNode(MaterialGraph.Nodes[i]);
+            }
+
             AssetName = name;
             IsStarting = false;
 
@@ -289,7 +294,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Compile", in btSize))
             {
-                System.Diagnostics.Trace.Write(GenHLSLCode());
+                var code = GenHLSLCode();
+                System.Diagnostics.Trace.WriteLine(Material.DefineCode.AsText);
+                System.Diagnostics.Trace.WriteLine(code);
 
                 var xml = new System.Xml.XmlDocument();
                 var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
@@ -298,7 +305,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 var xmlText = IO.FileManager.GetXmlText(xml);
                 Material.GraphXMLString = xmlText;
                 Material.UpdateShaderCode(false);
-                Material.HLSLCode = GenHLSLCode();
+                Material.HLSLCode = code;// GenHLSLCode();
                 Material.SerialId++;
             }
         }
@@ -365,68 +372,101 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
         #endregion
 
+        Backends.UHLSLCodeGenerator mHLSLCodeGen = new Backends.UHLSLCodeGenerator();
         private string GenHLSLCode()
         {
-            var gen = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-
             Material.UsedRSView.Clear();
             Material.UsedUniformVars.Clear();
             Material.UsedSamplerStates.Clear();
-            foreach (IBaseNode node in MaterialGraph.Nodes)
+
+            var gen = mHLSLCodeGen.GetCodeObjectGen(Rtti.UTypeDescGetter<UMethodDeclaration>.TypeDesc);
+            BuildCodeStatementsData data = new BuildCodeStatementsData()
             {
-                node.PreGenExpr();
-                var type = node.GetType();
-                if (type == typeof(Var.VarDimF1) ||
-                    type == typeof(Var.VarDimF2) ||
-                    type == typeof(Var.VarDimF3) ||
-                    type == typeof(Var.VarDimF4) ||
-                    type == typeof(Var.VarColor3) ||
-                    type == typeof(Var.VarColor4))
-                {
-                    node.OnMaterialEditorGenCode(gen, Material);
-                    //var varNode = node as Var.VarNode;
-                    //if(varNode.IsUniform)
-                    //{
-                    //    var valueProp = type.GetProperty("Value");
-                    //    var value = valueProp.GetValue(node, null);
-                    //    var tmp = new Graphics.Pipeline.Shader.UMaterial.NameValuePair();
-                    //    tmp.VarType = gen.GetTypeString(varNode.VarType.SystemType);
-                    //    tmp.Name = node.Name;
-                    //    tmp.Value = value.ToString();
-                    //    Material.UsedUniformVars.Add(tmp);
-                    //}
-                }
-                else if (type == typeof(Var.Texture2D))
-                {
-                    node.OnMaterialEditorGenCode(gen, Material);
-                }
-                else if (type == typeof(Var.SamplerState))
-                {
-                    node.OnMaterialEditorGenCode(gen, Material);
-                }
-                else if (type == typeof(Control.SampleLevel2DNode) || type == typeof(Control.Sample2DNode) ||
-                    type == typeof(Control.SampleArrayLevel2DNode) || type == typeof(Control.SampleArray2DNode))
-                {
-                    node.OnMaterialEditorGenCode(gen, Material);
-                }
-                else
-                {
-                    node.OnMaterialEditorGenCode(gen, Material);
-                }
-            }
-            
-            var expr = this.MaterialOutput.GetExpr(MaterialGraph, gen, null, false);
+                NodeGraph = MaterialGraph,
+                UserData = Material,
+                CodeGen = mHLSLCodeGen,
+            };
+            MaterialOutput.BuildStatements(ref data);
 
-            var funGen = gen.GetGen(typeof(DefineFunction));
-            funGen.GenLines(expr, gen);
+            string code = "";
+            UCodeGeneratorData genData = new UCodeGeneratorData()
+            {
+                Method = MaterialOutput.Function,
+                CodeGen = mHLSLCodeGen,
+                UserData = Material,
+            };
+            gen.GenCodes(MaterialOutput.Function, ref code, ref genData);
 
-            Material.HLSLCode = gen.ClassCode;
+            Material.HLSLCode = code;
 
             Material.UpdateShaderCode(false);
             Material.SerialId++;
 
-            return gen.ClassCode;
+            return code;
         }
+        //[Obsolete]
+        //private string GenHLSLCode_Old()
+        //{
+        //    var gen = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+
+        //    Material.UsedRSView.Clear();
+        //    Material.UsedUniformVars.Clear();
+        //    Material.UsedSamplerStates.Clear();
+        //    foreach (IBaseNode node in MaterialGraph.Nodes)
+        //    {
+        //        node.PreGenExpr();
+        //        var type = node.GetType();
+        //        if (type == typeof(Var.VarDimF1) ||
+        //            type == typeof(Var.VarDimF2) ||
+        //            type == typeof(Var.VarDimF3) ||
+        //            type == typeof(Var.VarDimF4) ||
+        //            type == typeof(Var.VarColor3) ||
+        //            type == typeof(Var.VarColor4))
+        //        {
+        //            node.OnMaterialEditorGenCode(Material);
+        //            //var varNode = node as Var.VarNode;
+        //            //if(varNode.IsUniform)
+        //            //{
+        //            //    var valueProp = type.GetProperty("Value");
+        //            //    var value = valueProp.GetValue(node, null);
+        //            //    var tmp = new Graphics.Pipeline.Shader.UMaterial.NameValuePair();
+        //            //    tmp.VarType = gen.GetTypeString(varNode.VarType.SystemType);
+        //            //    tmp.Name = node.Name;
+        //            //    tmp.Value = value.ToString();
+        //            //    Material.UsedUniformVars.Add(tmp);
+        //            //}
+        //        }
+        //        else if (type == typeof(Var.Texture2D))
+        //        {
+        //            node.OnMaterialEditorGenCode(Material);
+        //        }
+        //        else if (type == typeof(Var.SamplerState))
+        //        {
+        //            node.OnMaterialEditorGenCode(Material);
+        //        }
+        //        else if (type == typeof(Control.SampleLevel2DNode) || type == typeof(Control.Sample2DNode) ||
+        //            type == typeof(Control.SampleArrayLevel2DNode) || type == typeof(Control.SampleArray2DNode))
+        //        {
+        //            node.OnMaterialEditorGenCode(Material);
+        //        }
+        //        else
+        //        {
+        //            node.OnMaterialEditorGenCode(Material);
+        //        }
+        //    }
+            
+        //    var expr = this.MaterialOutput.GetExpr(MaterialGraph, gen, null, false);
+
+        //    var funGen = gen.GetGen(typeof(DefineFunction));
+        //    funGen.GenLines(expr, gen);
+
+        //    Material.HLSLCode = gen.ClassCode;
+
+        //    Material.UpdateShaderCode(false);
+        //    Material.SerialId++;
+
+        //    return gen.ClassCode;
+        //}
     }
 }
 

@@ -40,7 +40,7 @@ namespace EngineNS.UTest
             str = Rtti.UTypeDesc.TypeStr(typeof(Matrix[]));
             type = Rtti.UTypeDesc.TypeOf(str);
             var args = new object[] { 8, };
-            var obj = Rtti.UTypeDescManager.CreateInstance(type.SystemType, args) as Array;
+            var obj = Rtti.UTypeDescManager.CreateInstance(type, args) as Array;
             unsafe
             {
                 var pMatrix = (Matrix*)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(obj, 0).ToPointer();

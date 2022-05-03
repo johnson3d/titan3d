@@ -43,6 +43,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\ComboBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Dialog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Image.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Input.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Menu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\MessageBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\SearchBar.cs" />

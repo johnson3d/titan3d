@@ -42,33 +42,70 @@ namespace EngineNS.Bricks.Procedure
         public EImageComponent Components { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
-        public void Initialize(int w, int h, float defaultValue, EImageComponent comps = EImageComponent.All)
+        public unsafe void Initialize(int w, int h, float defaultValue, EImageComponent comps = EImageComponent.All)
         {
             Width = w;
             Height = h;
             Components = comps;
             if ((comps & EImageComponent.X) != 0)
             {
-                CompX = new UBufferConponent();
-                CompX.SetSize(w, h, defaultValue);
+                var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
+                CompX = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
             }
             if ((comps & EImageComponent.Y) != 0)
             {
-                CompY = new UBufferConponent();
-                CompY.SetSize(w, h, defaultValue);
+                var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
+                CompY = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
             }
             if ((comps & EImageComponent.Z) != 0)
             {
-                CompZ = new UBufferConponent();
-                CompZ.SetSize(w, h, defaultValue);
+                var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
+                CompZ = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
             }
             if ((comps & EImageComponent.W) != 0)
             {
-                CompW = new UBufferConponent();
-                CompW.SetSize(w, h, defaultValue);
+                var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
+                CompW = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
             }
         }
-        public void Initialize(int w, int h, UBufferConponent xComp, UBufferConponent yComp, UBufferConponent zComp, UBufferConponent wComp)
+        public void Initialize(int w, int h,
+            USuperBuffer<Vector3, FFloat3Operator> xyzComp,
+            USuperBuffer<float, FFloatOperator> wComp, int slice = 0)
+        {
+            Width = w;
+            Height = h;
+
+            Components = EImageComponent.X | EImageComponent.Y | EImageComponent.Z;
+            if (wComp != null)
+            {
+                CompW = wComp;
+                Components |= EImageComponent.W;
+            }
+
+            var creator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(w, h, 1);
+            CompX = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+            CompY = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+            CompZ = UBufferConponent.CreateInstance(in creator) as USuperBuffer<float, FFloatOperator>;
+
+            slice = slice % xyzComp.Slice;
+
+            for (int i = 0; i < h; i++)
+            {
+                for (int j = 0; j < w; j++)
+                {
+                    
+                    var src = xyzComp.GetPixel<Vector3>(j, i, slice);
+                    CompX.SetPixel<float>(j, i, src.X);
+                    CompY.SetPixel<float>(j, i, src.Y);
+                    CompZ.SetPixel<float>(j, i, src.Z);
+                }
+            }
+        }
+        public void Initialize(int w, int h, 
+            USuperBuffer<float, FFloatOperator> xComp, 
+            USuperBuffer<float, FFloatOperator> yComp, 
+            USuperBuffer<float, FFloatOperator> zComp, 
+            USuperBuffer<float, FFloatOperator> wComp)
         {
             Width = w;
             Height = h;
@@ -116,11 +153,11 @@ namespace EngineNS.Bricks.Procedure
             }
             return result;
         }
-        public UBufferConponent CompX;
-        public UBufferConponent CompY;
-        public UBufferConponent CompZ;
-        public UBufferConponent CompW;
-        public UBufferConponent GetComponent(EImageComponent comp)
+        public USuperBuffer<float, FFloatOperator> CompX;
+        public USuperBuffer<float, FFloatOperator> CompY;
+        public USuperBuffer<float, FFloatOperator> CompZ;
+        public USuperBuffer<float, FFloatOperator> CompW;
+        public USuperBuffer<float, FFloatOperator> GetComponent(EImageComponent comp)
         {
             switch (comp)
             {
@@ -207,19 +244,19 @@ namespace EngineNS.Bricks.Procedure
                         {
                             if (CompX != null)
                             {
-                                px.X = (byte)((CompX.GetPixel(j, i) - minX) / rangeX * 255.0f);
+                                px.X = (byte)((CompX.GetPixel<float>(j, i) - minX) / rangeX * 255.0f);
                             }
                             if (CompY != null)
                             {
-                                px.Y = (byte)((CompY.GetPixel(j, i) - minY) / rangeY * 255.0f);
+                                px.Y = (byte)((CompY.GetPixel<float>(j, i) - minY) / rangeY * 255.0f);
                             }
                             if (CompZ != null)
                             {
-                                px.Z = (byte)((CompZ.GetPixel(j, i) - minZ) / rangeZ * 255.0f);
+                                px.Z = (byte)((CompZ.GetPixel<float>(j, i) - minZ) / rangeZ * 255.0f);
                             }
                             if (CompW != null)
                             {
-                                px.W = (byte)((CompW.GetPixel(j, i) - minW) / rangeW * 255.0f);
+                                px.W = (byte)((CompW.GetPixel<float>(j, i) - minW) / rangeW * 255.0f);
                             }
                             else
                             {
@@ -230,19 +267,19 @@ namespace EngineNS.Bricks.Procedure
                         {
                             if (CompX != null)
                             {
-                                px.X = (byte)CompX.GetPixel(j, i);
+                                px.X = (byte)CompX.GetPixel<float>(j, i);
                             }
                             if (CompY != null)
                             {
-                                px.Y = (byte)CompY.GetPixel(j, i);
+                                px.Y = (byte)CompY.GetPixel<float>(j, i);
                             }
                             if (CompZ != null)
                             {
-                                px.Z = (byte)CompZ.GetPixel(j, i);
+                                px.Z = (byte)CompZ.GetPixel<float>(j, i);
                             }
                             if (CompW != null)
                             {
-                                px.W = (byte)CompW.GetPixel(j, i);
+                                px.W = (byte)CompW.GetPixel<float>(j, i);
                             }
                             else
                             {
@@ -291,22 +328,22 @@ namespace EngineNS.Bricks.Procedure
                         Byte4 px = new Byte4();
                         if (CompX != null)
                         {
-                            var v = (CompX.GetPixel(j, i) + 1.0f) / 2.0f;
+                            var v = (CompX.GetPixel<float>(j, i) + 1.0f) / 2.0f;
                             px.X = (byte)(v * 255.0f);
                         }
                         if (CompY != null)
                         {
-                            var v = (CompY.GetPixel(j, i) + 1.0f) / 2.0f;
+                            var v = (CompY.GetPixel<float>(j, i) + 1.0f) / 2.0f;
                             px.Y = (byte)(v * 255.0f);
                         }
                         if (CompZ != null)
                         {
-                            var v = (CompZ.GetPixel(j, i) + 1.0f) / 2.0f;
+                            var v = (CompZ.GetPixel<float>(j, i) + 1.0f) / 2.0f;
                             px.Z = (byte)(v * 255.0f);
                         }
                         if (CompW != null)
                         {
-                            var v = (CompW.GetPixel(j, i) + 1.0f) / 2.0f;
+                            var v = (CompW.GetPixel<float>(j, i) + 1.0f) / 2.0f;
                             px.W = (byte)(v * 255.0f);
                         }
                         pixels[i, j] = px;

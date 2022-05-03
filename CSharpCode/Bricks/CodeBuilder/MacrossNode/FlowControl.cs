@@ -4,8 +4,11 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class SequenceNode : INodeExpr
+    [ContextMenu("Sequence", "FlowControl\\Sequence", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    public partial class SequenceNode : UNodeBase
     {
+        public PinIn BeforeExec { get; set; } = new PinIn();
+
         public SequenceNode()
         {
             Name = "Sequence";
@@ -18,6 +21,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             AddPin.Link = MacrossStyles.Instance.NewExecPinDesc();
             AddPin.Link.CanLinks.Clear();
 
+            BeforeExec.Name = " >>";
+            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
             AddPinOut(AddPin);
         }
@@ -55,9 +60,22 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
+        public override void BuildStatements(ref BuildCodeStatementsData data)
+        {
+            for(int i=0; i<Sequences.Count; i++)
+            {
+                var linker = data.NodeGraph.GetFirstLinker(Sequences[i]);
+                if (linker != null)
+                    linker.InPin.HostNode.BuildStatements(ref data);
+            }
+        }
     }
-    public partial class IfNode : INodeExpr
+    [ContextMenu("if", "FlowControl\\If", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    public partial class IfNode : UNodeBase
     {
+        public PinIn BeforeExec { get; set; } = new PinIn();
+        public PinOut AfterExec { get; set; } = new PinOut();
+
         public IfNode()
         {
             Name = "If";
@@ -66,115 +84,186 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             TitleColor = MacrossStyles.Instance.FlowControlTitleColor;
             BackColor = MacrossStyles.Instance.BGColor;
 
-            ConditionPin.Name = "bool";
-            ConditionPin.Link = MacrossStyles.Instance.NewInOutPinDesc();
-            ConditionPin.Link.CanLinks.Clear();
-            ConditionPin.Link.CanLinks.Add("Value");
+            //ConditionPin.Name = "bool";
+            //ConditionPin.Link = MacrossStyles.Instance.NewInOutPinDesc();
+            //ConditionPin.Link.CanLinks.Clear();
+            //ConditionPin.Link.CanLinks.Add("Value");
 
-            TruePin.Name = "True";
-            TruePin.Link = MacrossStyles.Instance.NewExecPinDesc();
+            //TruePin.Name = "True";
+            //TruePin.Link = MacrossStyles.Instance.NewExecPinDesc();
+            AddConditionResultPair();
 
             FalsePin.Name = "False";
             FalsePin.Link = MacrossStyles.Instance.NewExecPinDesc();
 
+            BeforeExec.Name = " >>";
+            AfterExec.Name = ">> ";
+            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            AfterExec.Link = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
             AddPinOut(AfterExec);
 
-            AddPinIn(ConditionPin);
-            AddPinOut(TruePin);
+            //AddPinIn(ConditionPin);
+            //AddPinOut(TruePin);
             AddPinOut(FalsePin);
         }
-        public PinIn ConditionPin { get; set; } = new PinIn();
-        public PinOut TruePin { get; set; } = new PinOut();
+        void AddConditionResultPair()
+        {
+            var pinIn = AddPinIn(new PinIn()
+            {
+                Name = "Condition",
+            });
+            var pinOut = AddPinOut(new PinOut()
+            {
+                Name = "True",
+            });
+            ConditionResultPairs.Add(new KeyValuePair<PinIn, PinOut>(pinIn, pinOut));
+        }
+        //public PinIn ConditionPin { get; set; } = new PinIn();
+        //public PinOut TruePin { get; set; } = new PinOut();
+        public List<KeyValuePair<PinIn, PinOut>> ConditionResultPairs = new List<KeyValuePair<PinIn, PinOut>>();
         public PinOut FalsePin { get; set; } = new PinOut();
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
 
-            if (iPin == ConditionPin)
+            for(int i=0; i<ConditionResultPairs.Count; i++)
             {
-                var nodeExpr = OutNode as INodeExpr;
-                var type = nodeExpr.GetOutPinType(oPin);
-                if (type == null)
-                    return false;
-                return type == typeof(bool);
+                if (iPin == ConditionResultPairs[i].Key)
+                {
+                    var nodeExpr = OutNode as UNodeBase;
+                    var type = nodeExpr.GetOutPinType(oPin);
+                    if (type == null)
+                        return false;
+                    return type.IsEqual(typeof(bool));
+                }
             }
             return true;
         }
-        public override IExpression GetExpr(UMacrossFunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
+
+        //public override IExpression GetExpr(UMacrossMethodGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        //{
+        //    var ifOp = new IfOp();
+        //    var links = new List<UPinLinker>();
+        //    funGraph.FindInLinker(ConditionPin, links);
+        //    if (links.Count != 1)
+        //    {
+        //        throw new GraphException(this, ConditionPin, $"Condition link error : {links.Count}");
+        //    }
+        //    var condiNode = links[0].OutNode as UNodeExpr;
+        //    var condiExpr = condiNode.GetExpr(funGraph, cGen, true) as OpExpress;
+        //    {
+        //        var condiType = condiExpr.GetType();
+        //        bool checkOk = false;
+        //        var cmpOp = condiExpr as BinocularOp;
+        //        if (cmpOp != null && cmpOp.IsCmpOp())
+        //        {
+        //            checkOk = true;
+        //        }
+        //        if (condiType.IsSubclassOf(typeof(BoolOp)))
+        //        {
+        //            checkOk = true;
+        //        }
+        //        if(checkOk == false)
+        //        {
+        //            throw new GraphException(this, ConditionPin, $"Condition must be bool expression");
+        //        }
+        //    }
+        //    ifOp.Condition = condiExpr;
+
+        //    links.Clear();
+        //    funGraph.FindOutLinker(TruePin, links);
+        //    if (links.Count == 1)
+        //    {
+        //        var trueNode = links[0].InNode as UNodeExpr;
+        //        var sequence = new ExecuteSequence();
+        //        var trueExpr = trueNode.GetExpr(funGraph, cGen, false);
+        //        if (trueExpr == null)
+        //        {
+        //            throw new GraphException(this, TruePin, $"True expression must be ExecuteSequence");
+        //        }
+        //        else
+        //        {
+        //            sequence.PushExpr(trueExpr);
+        //        }
+        //        ifOp.TrueExpr = sequence;
+        //    }
+
+        //    links.Clear();
+        //    funGraph.FindOutLinker(FalsePin, links);
+        //    if (links.Count == 1)
+        //    {
+        //        var falseNode = links[0].InNode as UNodeExpr;
+        //        var sequence = new ExecuteSequence();                
+        //        var falseExpr = falseNode.GetExpr(funGraph, cGen, false);
+        //        if (falseExpr == null)
+        //        {
+        //            throw new GraphException(this, FalsePin, $"False expression must be ExecuteSequence");
+        //        }
+        //        else
+        //        {
+        //            sequence.PushExpr(falseExpr);
+        //        }
+        //        ifOp.ElseExpr = sequence;
+        //    }
+
+        //    ifOp.NextExpr = this.GetNextExpr(funGraph, cGen);
+        //    return ifOp;
+        //}
+        public override void BuildStatements(ref BuildCodeStatementsData data)
         {
-            var ifOp = new IfOp();
-            var links = new List<UPinLinker>();
-            funGraph.FindInLinker(ConditionPin, links);
-            if (links.Count != 1)
+            var ifStatement = new UIfStatement();
+            data.CurrentStatements.Add(ifStatement);
+            for(int i=0; i<ConditionResultPairs.Count; i++)
             {
-                throw new GraphException(this, ConditionPin, $"Condition link error : {links.Count}");
-            }
-            var condiNode = links[0].OutNode as INodeExpr;
-            var condiExpr = condiNode.GetExpr(funGraph, cGen, true) as OpExpress;
-            {
-                var condiType = condiExpr.GetType();
-                bool checkOk = false;
-                var cmpOp = condiExpr as BinocularOp;
-                if (cmpOp != null && cmpOp.IsCmpOp())
+                var condition = data.NodeGraph.GetOppositePinExpression(ConditionResultPairs[i].Key, ref data);
+                var node = data.NodeGraph.GetOppositePinNode(ConditionResultPairs[i].Value);
+                var trueStatement = new UExecuteSequenceStatement();
+                if(node != null)
                 {
-                    checkOk = true;
+                    var trueData = new BuildCodeStatementsData();
+                    data.CopyTo(ref trueData);
+                    trueData.CurrentStatements = trueStatement.Sequence;
+                    node.BuildStatements(ref trueData);
                 }
-                if (condiType.IsSubclassOf(typeof(BoolOp)))
+                if(i == 0)
                 {
-                    checkOk = true;
-                }
-                if(checkOk == false)
-                {
-                    throw new GraphException(this, ConditionPin, $"Condition must be bool expression");
-                }
-            }
-            ifOp.Condition = condiExpr;
-
-            links.Clear();
-            funGraph.FindOutLinker(TruePin, links);
-            if (links.Count == 1)
-            {
-                var trueNode = links[0].InNode as INodeExpr;
-                var sequence = new ExecuteSequence();
-                var trueExpr = trueNode.GetExpr(funGraph, cGen, false);
-                if (trueExpr == null)
-                {
-                    throw new GraphException(this, TruePin, $"True expression must be ExecuteSequence");
+                    ifStatement.Condition = condition;
+                    ifStatement.TrueStatement = trueStatement;
                 }
                 else
                 {
-                    sequence.PushExpr(trueExpr);
+                    var elseIfStatement = new UIfStatement()
+                    {
+                        Condition = condition,
+                        TrueStatement = trueStatement,
+                    };
+                    ifStatement.ElseIfs.Add(elseIfStatement);
                 }
-                ifOp.TrueExpr = sequence;
             }
-
-            links.Clear();
-            funGraph.FindOutLinker(FalsePin, links);
-            if (links.Count == 1)
+            var falseStatement = new UExecuteSequenceStatement();
+            ifStatement.FalseStatement = falseStatement;
+            var falseNode = data.NodeGraph.GetOppositePinNode(FalsePin);
+            if(falseNode != null)
             {
-                var falseNode = links[0].InNode as INodeExpr;
-                var sequence = new ExecuteSequence();                
-                var falseExpr = falseNode.GetExpr(funGraph, cGen, false);
-                if (falseExpr == null)
-                {
-                    throw new GraphException(this, FalsePin, $"False expression must be ExecuteSequence");
-                }
-                else
-                {
-                    sequence.PushExpr(falseExpr);
-                }
-                ifOp.ElseExpr = sequence;
+                var falseData = new BuildCodeStatementsData();
+                data.CopyTo(ref falseData);
+                falseData.CurrentStatements = falseStatement.Sequence;
+                falseNode.BuildStatements(ref falseData);
             }
 
-            ifOp.NextExpr = this.GetNextExpr(funGraph, cGen);
-            return ifOp;
+            var nextNode = data.NodeGraph.GetOppositePinNode(AfterExec);
+            if (nextNode != null)
+                nextNode.BuildStatements(ref data);
         }
     }
-    public partial class ReturnNode : INodeExpr
+    [ContextMenu("return", "FlowControl\\Return", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    public partial class ReturnNode : UNodeBase
     {
-        public static ReturnNode NewReturnNode(UMacrossFunctionGraph funGraph)
+        public PinIn BeforeExec { get; set; } = new PinIn();
+
+        public static ReturnNode NewReturnNode(UMacrossMethodGraph funGraph)
         {
             var result = new ReturnNode();
             result.Initialize(funGraph);
@@ -188,52 +277,78 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             TitleColor = MacrossStyles.Instance.FlowControlTitleColor;
             BackColor = MacrossStyles.Instance.BGColor;
 
+            BeforeExec.Name = " >>";
+            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
         }
-        public void Initialize(UMacrossFunctionGraph funGraph)
+        public void Initialize(UMacrossMethodGraph methodGraph)
         {
-            ReturnType = funGraph.Function.ReturnType;
-            var retType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(funGraph.Function.ReturnType);
-            if (retType != null)
+            if (methodGraph.MethodDatas.Count != 1)
+                return;
+
+            // 图中只有一个函数时才能有返回值
+            var data = methodGraph.MethodDatas[0];
+            if(data.MethodDec.ReturnValue != null)
             {
-                if (retType.SystemType == typeof(void))
-                    return;
+                var retPin = AddPinIn(new PinIn()
+                {
+                    Name = data.MethodDec.ReturnValue.VariableName
+                });
             }
-            if (ReturnValuePin != null)
+            for(int i=0; i<data.MethodDec.Arguments.Count; i++)
             {
-                RemovePinIn(ReturnValuePin);
+                var argDec = data.MethodDec.Arguments[i];
+                if(argDec.OperationType == EMethodArgumentAttribute.Ref ||
+                   argDec.OperationType == EMethodArgumentAttribute.Out)
+                {
+                    var pin = AddPinIn(new PinIn()
+                    {
+                        Name = argDec.VariableName
+                    });
+                }
             }
+            //ReturnType = methodGraph.Function.ReturnType;
+            //var retType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(methodGraph.Function.ReturnType);
+            //if (retType != null)
+            //{
+            //    if (retType.SystemType == typeof(void))
+            //        return;
+            //}
+            //if (ReturnValuePin != null)
+            //{
+            //    RemovePinIn(ReturnValuePin);
+            //}
 
-            ReturnValuePin = new PinIn();
+            //ReturnValuePin = new PinIn();
 
-            ReturnValuePin.Name = "Result";
-            ReturnValuePin.Link = MacrossStyles.Instance.NewInOutPinDesc();
-            ReturnValuePin.Link.CanLinks.Add("Value");
+            //ReturnValuePin.Name = "Result";
+            //ReturnValuePin.Link = MacrossStyles.Instance.NewInOutPinDesc();
+            //ReturnValuePin.Link.CanLinks.Add("Value");
 
-            AddPinIn(ReturnValuePin);
+            //AddPinIn(ReturnValuePin);
         }
         public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             base.OnPreRead(tagObject, hostObject, fromXml);
 
-            var funGraph = this.ParentGraph as UMacrossFunctionGraph;
+            var funGraph = this.ParentGraph as UMacrossMethodGraph;
             if (funGraph == null)
                 return;
             Initialize(funGraph);
         }
-        [Rtti.Meta]
-        public string ReturnType
-        {
-            get;
-            set;
-        }
-        public PinIn ReturnValuePin { get; set; } = null;
+        //[Rtti.Meta]
+        //public string ReturnType
+        //{
+        //    get;
+        //    set;
+        //}
+        //public PinIn ReturnValuePin { get; set; } = null;
         public override void OnMouseStayPin(NodePin stayPin)
         {
-            if (ReturnValuePin != stayPin)
-                return;
+            //if (ReturnValuePin != stayPin)
+            //    return;
 
-            EGui.Controls.CtrlUtility.DrawHelper(ReturnType);
+            //EGui.Controls.CtrlUtility.DrawHelper(ReturnType);
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
@@ -243,65 +358,241 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (iPin == BeforeExec)
                 return true;
 
-            var funGraph = this.ParentGraph as UMacrossFunctionGraph;
+            var funGraph = this.ParentGraph as UMacrossMethodGraph;
             if (funGraph == null)
                 return false;
 
-            var nodeExpr = OutNode as INodeExpr;
+            var nodeExpr = OutNode as UNodeBase;
             if (nodeExpr == null)
                 return false;
 
-            var retType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(funGraph.Function.ReturnType);
-            if (retType != null)
-            {
-                if (retType.SystemType == typeof(void))
-                    return false;
+            //var retType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(funGraph.Function.ReturnType);
+            //if (retType != null)
+            //{
+            //    if (retType.SystemType == typeof(void))
+            //        return false;
 
-                var type = nodeExpr.GetOutPinType(oPin);
-                if (ICodeGen.CanConvert(type, retType.SystemType))
+            //    var type = nodeExpr.GetOutPinType(oPin);
+            //    if (ICodeGen.CanConvert(type, retType.SystemType))
+            //    {
+            //        return true;
+            //    }
+            //}
+            //return false;
+            return true;
+        }
+        public override void BuildStatements(ref BuildCodeStatementsData data)
+        {
+            for(int i=0; i<Inputs.Count; i++)
+            {
+                var exp = data.NodeGraph.GetOppositePinExpression(Inputs[i], ref data);
+                var st = new UAssignOperatorStatement()
                 {
-                    return true;
-                }
+                    From = exp,
+                    To = new UVariableReferenceExpression(Inputs[i].Name)
+                };
+                data.CurrentStatements.Add(st);
             }
-            return false;
+            data.CurrentStatements.Add(new UReturnStatement());
+        }
+        //public override IExpression GetExpr(UMacrossMethodGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        //{
+        //    var retType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(funGraph.Function.ReturnType);
+        //    if (retType == null)
+        //        throw new GraphException(this, ReturnValuePin, "ReturnType is null");
+
+        //    var expr = new ReturnOp();
+        //    if (retType.SystemType != typeof(void))
+        //    {
+        //        var links = new List<UPinLinker>();
+        //        funGraph.FindInLinker(ReturnValuePin, links);
+        //        if (links.Count != 1)
+        //            throw new GraphException(this, ReturnValuePin, "Please link Result pin");
+        //        var returnValueNode = links[0].OutNode as UNodeExpr;
+        //        var resultExpr = returnValueNode.GetExpr(funGraph, cGen, true) as OpExpress;
+        //        var resultType = returnValueNode.GetOutPinType(links[0].OutPin);
+        //        if (resultType == retType.SystemType)
+        //        {
+        //            expr.ReturnExpr = resultExpr;
+        //        }
+        //        else
+        //        {
+        //            var cvtExpr = new ConvertTypeOp();
+        //            cvtExpr.TargetType = cGen.GetTypeString(retType.SystemType);
+        //            cvtExpr.ObjExpr = resultExpr;
+        //            if (retType.SystemType.IsValueType == false && retType.SystemType.IsEnum == false)
+        //                cvtExpr.UseAs = true;
+        //            else
+        //                cvtExpr.UseAs = false;
+        //            expr.ReturnExpr = cvtExpr;
+        //        }
+        //        if (expr.ReturnExpr == null)
+        //            throw new GraphException(this, ReturnValuePin, "Result must link a OpExpression");
+        //    }
+
+        //    return expr;
+        //}
+    }
+    [ContextMenu("forloop", "FlowControl\\For", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    public partial class ForLoopNode : UNodeBase
+    {
+        public PinIn BeginIdxPin;
+        public PinIn EndIdxPin;
+        public PinIn StepPin;
+        public PinOut IndexPin;
+        public PinOut LoopBodyPin;
+        public Int64 BeginIdx;
+        public Int64 EndIdx;
+        public Int64 StepIdx;
+        static string mLoopIdxName = "loopIndex";
+        public PinIn BeforeExec { get; set; } = new PinIn();
+        public PinOut AfterExec { get; set; } = new PinOut();
+
+        public ForLoopNode()
+        {
+            BeginIdx = 0;
+            EndIdx = 100;
+            StepIdx = 1;
+
+            Name = "For";
+            TitleColor = MacrossStyles.Instance.FlowControlTitleColor;
+            BackColor = MacrossStyles.Instance.BGColor;
+
+            BeforeExec.Name = " >>";
+            AfterExec.Name = ">> ";
+            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            AfterExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            AddPinIn(BeforeExec);
+            AddPinOut(AfterExec);
+            BeginIdxPin = AddPinIn(new PinIn() { Name = "BeginIdx" });
+            EndIdxPin = AddPinIn(new PinIn() { Name = "EndIdx" });
+            StepPin = AddPinIn(new PinIn() { Name = "Step" });
+
+            IndexPin = AddPinOut(new PinOut() { Name = "Index" });
+            LoopBodyPin = AddPinOut(new PinOut() { Name = "LoopBody" });
         }
 
-        public override IExpression GetExpr(UMacrossFunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        public override void BuildStatements(ref BuildCodeStatementsData data)
         {
-            var retType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(funGraph.Function.ReturnType);
-            if (retType == null)
-                throw new GraphException(this, ReturnValuePin, "ReturnType is null");
-
-            var expr = new ReturnOp();
-            if (retType.SystemType != typeof(void))
+            var forStatement = new UForLoopStatement()
             {
-                var links = new List<UPinLinker>();
-                funGraph.FindInLinker(ReturnValuePin, links);
-                if (links.Count != 1)
-                    throw new GraphException(this, ReturnValuePin, "Please link Result pin");
-                var returnValueNode = links[0].OutNode as INodeExpr;
-                var resultExpr = returnValueNode.GetExpr(funGraph, cGen, true) as OpExpress;
-                var resultType = returnValueNode.GetOutPinType(links[0].OutPin);
-                if (resultType == retType.SystemType)
-                {
-                    expr.ReturnExpr = resultExpr;
-                }
-                else
-                {
-                    var cvtExpr = new ConvertTypeOp();
-                    cvtExpr.TargetType = cGen.GetTypeString(retType.SystemType);
-                    cvtExpr.ObjExpr = resultExpr;
-                    if (retType.SystemType.IsValueType == false && retType.SystemType.IsEnum == false)
-                        cvtExpr.UseAs = true;
-                    else
-                        cvtExpr.UseAs = false;
-                    expr.ReturnExpr = cvtExpr;
-                }
-                if (expr.ReturnExpr == null)
-                    throw new GraphException(this, ReturnValuePin, "Result must link a OpExpression");
+                LoopIndexName = mLoopIdxName,
+            };
+            data.CurrentStatements.Add(forStatement);
+            var beginIdxExp = data.NodeGraph.GetOppositePinExpression(BeginIdxPin, ref data);
+            if (beginIdxExp != null)
+                forStatement.BeginExpression = beginIdxExp;
+            else
+                forStatement.BeginExpression = new UPrimitiveExpression(BeginIdx);
+            var endIdxExp = data.NodeGraph.GetOppositePinExpression(EndIdxPin, ref data);
+            if (endIdxExp != null)
+                forStatement.EndExpression = endIdxExp;
+            else
+                forStatement.EndExpression = new UPrimitiveExpression(EndIdx);
+            var stepExp = data.NodeGraph.GetOppositePinExpression(StepPin, ref data);
+            if (stepExp != null)
+                forStatement.StepExpression = stepExp;
+            else
+                forStatement.StepExpression = new UPrimitiveExpression(StepIdx);
+
+            var bodyNode = data.NodeGraph.GetOppositePinNode(LoopBodyPin);
+            if(bodyNode != null)
+            {
+                var bodyStatements = new UExecuteSequenceStatement();
+                forStatement.LoopBody = bodyStatements;
+                var loopData = new BuildCodeStatementsData();
+                data.CopyTo(ref loopData);
+                loopData.CurrentStatements = bodyStatements.Sequence;
+                bodyNode.BuildStatements(ref loopData);
             }
-            
-            return expr;
+
+            var nextNode = data.NodeGraph.GetOppositePinNode(AfterExec);
+            if (nextNode != null)
+                nextNode.BuildStatements(ref data);
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            if (pin == null || pin == IndexPin)
+                return new UVariableReferenceExpression(mLoopIdxName);
+            return null;
+        }
+    }
+    [ContextMenu("whileloop", "FlowControl\\While", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    public partial class WhileNode : UNodeBase
+    {
+        public PinIn ConditionPin;
+        public PinOut LoopBodyPin;
+        public PinIn BeforeExec { get; set; } = new PinIn();
+        public PinOut AfterExec { get; set; } = new PinOut();
+
+        public WhileNode()
+        {
+            Name = "While";
+            TitleColor = MacrossStyles.Instance.FlowControlTitleColor;
+            BackColor = MacrossStyles.Instance.BGColor;
+
+            BeforeExec.Name = " >>";
+            AfterExec.Name = ">> ";
+            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            AfterExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            AddPinIn(BeforeExec);
+            AddPinOut(AfterExec);
+            ConditionPin = AddPinIn(new PinIn() { Name = "Condition" });
+            LoopBodyPin = AddPinOut(new PinOut() { Name = "LoopBody" });
+        }
+
+        public override void BuildStatements(ref BuildCodeStatementsData data)
+        {
+            var whileStatement = new UWhileLoopStatement();
+            data.CurrentStatements.Add(whileStatement);
+            var conditionExp = data.NodeGraph.GetOppositePinExpression(ConditionPin, ref data);
+            whileStatement.Condition = conditionExp;
+            var bodyNode = data.NodeGraph.GetOppositePinNode(LoopBodyPin);
+            if(bodyNode != null)
+            {
+                var bodyStatement = new UExecuteSequenceStatement();
+                whileStatement.LoopBody = bodyStatement;
+                var loopData = new BuildCodeStatementsData();
+                data.CopyTo(ref loopData);
+                loopData.CurrentStatements = bodyStatement.Sequence;
+                bodyNode.BuildStatements(ref loopData);
+            }
+
+            var nextNode = data.NodeGraph.GetOppositePinNode(AfterExec);
+            if (nextNode != null)
+                nextNode.BuildStatements(ref data);
+        }
+    }
+    [ContextMenu("continue", "FlowControl\\Continue", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    public partial class ContinueNode : UNodeBase
+    {
+        public PinIn BeforeExec { get; set; } = new PinIn();
+        public ContinueNode()
+        {
+            Name = "Continue";
+            BeforeExec.Name = " >>";
+            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            AddPinIn(BeforeExec);
+        }
+        public override void BuildStatements(ref BuildCodeStatementsData data)
+        {
+            data.CurrentStatements.Add(new UContinueStatement());
+        }
+    }
+    [ContextMenu("break", "FlowControl\\Break", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    public partial class BreakNode : UNodeBase
+    {
+        public PinIn BeforeExec { get; set; } = new PinIn();
+        public BreakNode()
+        {
+            Name = "Break";
+            BeforeExec.Name = " >>";
+            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            AddPinIn(BeforeExec);
+        }
+        public override void BuildStatements(ref BuildCodeStatementsData data)
+        {
+            data.CurrentStatements.Add(new UBreakStatement());
         }
     }
 }

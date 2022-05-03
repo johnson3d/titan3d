@@ -5,10 +5,10 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class Binocular : INodeExpr
+    public partial class Binocular : UNodeBase
     {
         public Rtti.UTypeDesc LeftType;
-        public EBinocularOp Op { get; set; }
+        public UBinaryOperatorExpression.EBinaryOperation Op { get; set; }
 
         [Rtti.Meta]
         public string LeftTypeString
@@ -28,9 +28,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public PinIn Left { get; set; } = new PinIn();
         public PinIn Right { get; set; } = new PinIn();
         public PinOut Result { get; set; } = new PinOut();
-        public Binocular(EBinocularOp InOp)
+        public Binocular(UBinaryOperatorExpression.EBinaryOperation InOp, string name)
         {
             Op = InOp;
+            Name = name;
 
             Left.Name = " L";
             Right.Name = " R";
@@ -45,13 +46,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
-            Name = Bricks.CodeBuilder.CSharp.CSGen.GetOp(InOp);
-
-            if (Op == EBinocularOp.Assign)
-            {
-                AddPinIn(BeforeExec);
-                AddPinOut(AfterExec);
-            }
 
             AddPinIn(Left);
             AddPinIn(Right);
@@ -64,9 +58,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EditObject = new BinocularEditObject();
             EditObject.Host = this;
         }
-        public override System.Type GetOutPinType(PinOut pin)
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
-            return LeftType.SystemType;
+            return LeftType;
         }
         BinocularEditObject EditObject;
         private class BinocularEditObject
@@ -77,55 +71,70 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 get { return Host.Name; }
             }
         }
-        protected override object GetPropertyEditObject()
+        public override object GetPropertyEditObject()
         {
             return EditObject;
         }
-        public override IExpression GetExpr(UMacrossFunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
-            var binOp = new BinocularOp();
-            binOp.Op = this.Op;
-            var links = new List<UPinLinker>();
-            funGraph.FindInLinker(Left, links);
-            if (links.Count != 1)
+            if (pin != null && pin != Result)
+                return null;
+            var binOp = new UBinaryOperatorExpression()
             {
-                throw new GraphException(this, Left, $"Left link error : {links.Count}");
-            }
-            var leftNode = links[0].OutNode as INodeExpr;
-            var leftExpr = leftNode.GetExpr(funGraph, cGen, true) as OpExpress;
-            var leftType = leftNode.GetOutPinType(links[0].OutPin);
-            binOp.Left = leftExpr;
-
-            links.Clear();
-            funGraph.FindInLinker(Right, links);
-            if (links.Count != 1)
-            {
-                throw new GraphException(this, Left, $"Right link error : {links.Count}");
-            }
-            var rightNode = links[0].OutNode as INodeExpr;
-            var rightExpr = rightNode.GetExpr(funGraph, cGen, true) as OpExpress;
-            var rightType = rightNode.GetOutPinType(links[0].OutPin);
-            if (rightType != leftType)
-            {
-                var cvtExpr = new ConvertTypeOp();
-                cvtExpr.TargetType = cGen.GetTypeString(leftType);
-                cvtExpr.ObjExpr = rightExpr;
-                binOp.Right = cvtExpr;
-            }
-            else
-            {
-                binOp.Right = rightExpr;
-            }
-
+                Operation = this.Op,
+                Left = data.NodeGraph.GetOppositePinExpression(Left, ref data),
+                Right = data.NodeGraph.GetOppositePinExpression(Right, ref data)
+            };
             return binOp;
         }
+        public override void BuildStatements(ref BuildCodeStatementsData data)
+        {
+        }
+        //public override IExpression GetExpr(UMacrossMethodGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        //{
+        //    var binOp = new BinocularOp();
+        //    binOp.Op = this.Op;
+        //    var links = new List<UPinLinker>();
+        //    funGraph.FindInLinker(Left, links);
+        //    if (links.Count != 1)
+        //    {
+        //        throw new GraphException(this, Left, $"Left link error : {links.Count}");
+        //    }
+        //    var leftNode = links[0].OutNode as UNodeExpr;
+        //    var leftExpr = leftNode.GetExpr(funGraph, cGen, true) as OpExpress;
+        //    var leftType = leftNode.GetOutPinType(links[0].OutPin);
+        //    binOp.Left = leftExpr;
+
+        //    links.Clear();
+        //    funGraph.FindInLinker(Right, links);
+        //    if (links.Count != 1)
+        //    {
+        //        throw new GraphException(this, Left, $"Right link error : {links.Count}");
+        //    }
+        //    var rightNode = links[0].OutNode as UNodeExpr;
+        //    var rightExpr = rightNode.GetExpr(funGraph, cGen, true) as OpExpress;
+        //    var rightType = rightNode.GetOutPinType(links[0].OutPin);
+        //    if (rightType != leftType)
+        //    {
+        //        var cvtExpr = new ConvertTypeOp();
+        //        cvtExpr.TargetType = cGen.GetTypeString(leftType);
+        //        cvtExpr.ObjExpr = rightExpr;
+        //        binOp.Right = cvtExpr;
+        //    }
+        //    else
+        //    {
+        //        binOp.Right = rightExpr;
+        //    }
+
+        //    return binOp;
+        //}
     }
 
     #region ValueOp
     public partial class ValueOpNode : Binocular
     {
-        public ValueOpNode(EBinocularOp op)
-            : base(op)
+        public ValueOpNode(UBinaryOperatorExpression.EBinaryOperation op, string name)
+            : base(op, name)
         {
         }
         public override void OnMouseStayPin(NodePin stayPin)
@@ -147,11 +156,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             if (iPin == Right)
             {
-                var nodeExpr = OutNode as INodeExpr;
+                var nodeExpr = OutNode;
                 if (nodeExpr == null)
                     return true;
                 var testType = nodeExpr.GetOutPinType(oPin);
-                return ICodeGen.CanConvert(testType, LeftType.SystemType);
+                return UCodeGeneratorBase.CanConvert(testType, LeftType);
             }
             return true;
         }
@@ -161,84 +170,116 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             if (iPin == Left)
             {//二元运算，左值决定输出类型
-                var nodeExpr = OutNode as INodeExpr;
+                var nodeExpr = OutNode;
                 if (nodeExpr == null)
                     return;
 
                 var newType = nodeExpr.GetOutPinType(oPin);
-                if (LeftType != null && LeftType.SystemType != newType)
+                if (LeftType != null && LeftType != newType)
                 {//类型改变，所有输入输出都需要断开
                     this.ParentGraph.RemoveLinkedOut(this.Result);
                     this.ParentGraph.RemoveLinkedIn(this.Right);
                 }
-                LeftType = Rtti.UTypeDesc.TypeOf(newType);
+                LeftType = newType;
             }
         }
     }
+    [ContextMenu("add,+", "Operation\\+", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class AddNode : ValueOpNode
     {
         public AddNode()
-            : base(EBinocularOp.Add)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Add, "+")
         {
         }
     }
+    [ContextMenu("subtraction,-", "Operation\\-", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class SubNode : ValueOpNode
     {
         public SubNode()
-            : base(EBinocularOp.Sub)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Subtract, "-")
         {
         }
     }
+    [ContextMenu("multiplication,*", "Operation\\*", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class MulNode : ValueOpNode
     {
         public MulNode()
-            : base(EBinocularOp.Mul)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Multiply, "*")
         {
         }
     }
+    [ContextMenu("division,/", "Operation\\/", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class DivNode : ValueOpNode
     {
         public DivNode()
-            : base(EBinocularOp.Div)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Divide, "/")
         {
         }
     }
+    [ContextMenu("mod,%", "Operation\\%", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class ModNode : ValueOpNode
     {
         public ModNode()
-            : base(EBinocularOp.Mod)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Modulus, "%")
         {
         }
     }
+    [ContextMenu("bitand,&", "Operation\\&", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class BitAndNode : ValueOpNode
     {
         public BitAndNode()
-            : base(EBinocularOp.BitAnd)
+            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseAnd, "&")
         {
          
         }
     }
+    [ContextMenu("bitor,|", "Operation\\|", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class BitOrNode : ValueOpNode
     {
         public BitOrNode()
-            : base(EBinocularOp.BitOr)
+            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseOr, "|")
         {
         }
     }
+    [ContextMenu("bitxor,^", "Operation\\^", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    public partial class BitXorNode : ValueOpNode
+    {
+        public BitXorNode()
+            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseXOR, "^")
+        {
+        }
+    }
+    [ContextMenu("bitleftshift,|", "Operation\\<<", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    public partial class BitLeftshiftNode : ValueOpNode
+    {
+        public BitLeftshiftNode()
+            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseLeftShift, "<<")
+        {
+        }
+    }
+    [ContextMenu("bitrightshift,|", "Operation\\>>", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    public partial class BitRightshiftNode : ValueOpNode
+    {
+        public BitRightshiftNode()
+            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseRightShift, ">>")
+        {
+        }
+    }
+
     #endregion
 
     #region Cmp
     public partial class CmpNode : Binocular
     {
-        public CmpNode(EBinocularOp op)
-            : base(op)
+        public CmpNode(UBinaryOperatorExpression.EBinaryOperation op, string name)
+            : base(op, name)
         {
             EditObject = new CmpEditObject();
             EditObject.Host = this;
         }
-        public override System.Type GetOutPinType(PinOut pin)
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
-            return typeof(bool);
+            return Rtti.UTypeDesc.TypeOf(typeof(bool));
         }
         public override void OnMouseStayPin(NodePin stayPin)
         {
@@ -265,17 +306,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             if (iPin == Left)
             {//比较运算，左值决定比较类型
-                var nodeExpr = OutNode as INodeExpr;
+                var nodeExpr = OutNode;
                 if (nodeExpr == null)
                     return;
 
                 var newType = nodeExpr.GetOutPinType(oPin);
-                if (LeftType.SystemType != newType)
+                if (LeftType != newType)
                 {//类型改变，所有输入输出都需要断开
                     this.ParentGraph.RemoveLinkedOut(this.Result);
                     this.ParentGraph.RemoveLinkedIn(this.Right);
                 }
-                LeftType = Rtti.UTypeDesc.TypeOf(newType);
+                LeftType = newType;
             }
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
@@ -285,11 +326,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             if (iPin == Right)
             {
-                var nodeExpr = OutNode as INodeExpr;
+                var nodeExpr = OutNode;
                 if (nodeExpr == null)
                     return true;
                 var testType = nodeExpr.GetOutPinType(oPin);
-                return ICodeGen.CanConvert(testType, LeftType.SystemType);
+                return UCodeGeneratorBase.CanConvert(testType, LeftType);
             }
             return true;
         }
@@ -311,55 +352,61 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        protected override object GetPropertyEditObject()
+        public override object GetPropertyEditObject()
         {
             return EditObject;
         }
     }
+    [ContextMenu("equal,==", "Bool Operation\\==", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class EqualNode : CmpNode
     {
         public EqualNode()
-            : base(EBinocularOp.CmpEqual)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Equality, "==")
         {
             
         }
     }
+    [ContextMenu("notequal,!=", "Bool Operation\\!=", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class NotEqualNode : CmpNode
     {
         public NotEqualNode()
-            : base(EBinocularOp.CmpNotEqual)
+            : base(UBinaryOperatorExpression.EBinaryOperation.NotEquality, "!=")
         {
             
         }
     }
+    [ContextMenu("greate,>", "Bool Operation\\>", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class GreateNode : CmpNode
     {
         public GreateNode()
-            : base(EBinocularOp.CmpGreate)
+            : base(UBinaryOperatorExpression.EBinaryOperation.GreaterThan, ">")
         {
             
         }
     }
+    [ContextMenu("greateequal,>=", "Bool Operation\\>=", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class GreateEqualNode : CmpNode
     {
         public GreateEqualNode()
-            : base(EBinocularOp.CmpGreateEqual)
+            : base(UBinaryOperatorExpression.EBinaryOperation.GreaterThanOrEqual, ">=")
         {
             
         }
     }
+    [ContextMenu("less,<", "Bool Operation\\<", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class LessNode : CmpNode
     {
         public LessNode()
-            : base(EBinocularOp.CmpLess)
+            : base(UBinaryOperatorExpression.EBinaryOperation.LessThan, "<")
         {
             
         }
     }
+    [ContextMenu("lessequal,<=", "Bool Operation\\<=", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class LessEqualNode : CmpNode
     {
         public LessEqualNode()
-            : base(EBinocularOp.CmpLessEqual)
+            : base(UBinaryOperatorExpression.EBinaryOperation.LessThanOrEqual, "<=")
         {
             
         }
@@ -369,41 +416,43 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     #region Bool
     public partial class BoolNode : Binocular
     {
-        public BoolNode(EBinocularOp op)
-            : base(op)
+        public BoolNode(UBinaryOperatorExpression.EBinaryOperation op, string name)
+            : base(op, name)
         {
             LeftType = Rtti.UTypeDescGetter<bool>.TypeDesc;
         }
-        public override System.Type GetOutPinType(PinOut pin)
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
-            return typeof(bool);
+            return Rtti.UTypeDesc.TypeOf(typeof(bool));
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
 
-            var nodeExpr = OutNode as INodeExpr;
+            var nodeExpr = OutNode;
             if (nodeExpr == null)
                 return true;
-            if (nodeExpr.GetOutPinType(oPin) != typeof(bool))
+            if (!nodeExpr.GetOutPinType(oPin).IsEqual(typeof(bool)))
             {
                 return false;
             }
             return true;
         }
     }
+    [ContextMenu("and,&&", "Bool Operation\\&&", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class AndNode : BoolNode
     {
         public AndNode()
-            : base(EBinocularOp.And)
+            : base(UBinaryOperatorExpression.EBinaryOperation.BooleanAnd, "&&")
         {
         }
     }
+    [ContextMenu("or,||", "Bool Operation\\||", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class OrNode : BoolNode
     {
         public OrNode()
-            : base(EBinocularOp.Or)
+            : base(UBinaryOperatorExpression.EBinaryOperation.BooleanOr, "||")
         {
         }
     }

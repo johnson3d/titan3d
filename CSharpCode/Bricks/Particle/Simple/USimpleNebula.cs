@@ -61,35 +61,37 @@ namespace EngineNS.Bricks.Particle.Simple
         }
         public override string GetHLSL()
         {
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
 
             var code = IO.FileManager.ReadAllText($"{RName.GetRName("UTest\\Particles\\USimpleEmitter\\Emitter.compute").Address}");
-            codeBuilder.AddLine(code);
+            codeBuilder.AddLine(code, ref sourceCode);
 
-            codeBuilder.AddLine("\nvoid DoParticleEmitShape(uint3 id, inout FParticle cur, uint shapeIndex)");
-            codeBuilder.PushBrackets();
+            codeBuilder.AddLine("\nvoid DoParticleEmitShape(uint3 id, inout FParticle cur, uint shapeIndex)", ref sourceCode);
+            codeBuilder.PushSegment(ref sourceCode);
             {
                 int index = 0;
-                codeBuilder.AddLine("switch(shapeIndex)");
-                codeBuilder.PushBrackets();
+                codeBuilder.AddLine("switch(shapeIndex)", ref sourceCode);
+                codeBuilder.PushSegment(ref sourceCode);
                 {
                     foreach (var i in EmitterShapes)
                     {
-                        codeBuilder.AddLine($"case {index}:");
-                        codeBuilder.PushBrackets();
+                        codeBuilder.AddLine($"case {index}:", ref sourceCode);
+                        codeBuilder.PushSegment(ref sourceCode);
                         {
-                            codeBuilder.AddLine($"{i.Name}_UpdateLocation(id, EmitShape{index}, cur);");
+                            codeBuilder.AddLine($"{i.Name}_UpdateLocation(id, EmitShape{index}, cur);", ref sourceCode);
                         }
-                        codeBuilder.PopBrackets();
-                        codeBuilder.AddLine($"break;");
+                        codeBuilder.PopSegment(ref sourceCode);
+                        codeBuilder.AddLine($"break;", ref sourceCode);
                         index++;
                     }
                 }
-                codeBuilder.PopBrackets();
+                codeBuilder.PopSegment(ref sourceCode);
             }
-            codeBuilder.PopBrackets();
+            codeBuilder.PopSegment(ref sourceCode);
 
-            return codeBuilder.ClassCode;
+            return sourceCode;
         }
     }
 

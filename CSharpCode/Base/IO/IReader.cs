@@ -201,7 +201,7 @@ namespace EngineNS.IO
                 Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"MetaVersion lost:{versionHash}");
                 throw new Exception($"MetaVersion lost:{versionHash}");
             }
-            v = Rtti.UTypeDescManager.CreateInstance(meta.ClassType.SystemType) as ISerializer;
+            v = Rtti.UTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
             v.OnPreRead(this.Tag, hostObject, false);
             
             SerializerHelper.Read(this, v, metaVersion);
@@ -240,7 +240,7 @@ namespace EngineNS.IO
                 Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"MetaVersion lost:{versionHash}");
                 throw new Exception($"MetaVersion lost:{versionHash}");
             }
-            if (meta.ClassType.SystemType != v.GetType())
+            if (!meta.ClassType.IsEqual(v.GetType()))
                 return false;
             //v = Rtti.UTypeDescManager.CreateInstance(meta.ClassType.SystemType) as ISerializer;
             v.OnPreRead(this.Tag, hostObject, false);

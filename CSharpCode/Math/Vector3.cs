@@ -210,6 +210,9 @@ namespace EngineNS
         public readonly static Vector3 Left = new Vector3(-1f, 0f, 0f);
         public readonly static Vector3 Forward = new Vector3(0f, 0f, -1f);
         public readonly static Vector3 Backward = new Vector3(0f, 0f, 1f);
+
+        public readonly static Vector3 MaxValue = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        public readonly static Vector3 MinValue = new Vector3(float.MinValue, float.MinValue, float.MinValue);
         #endregion
 
         #region Constructure
@@ -286,16 +289,17 @@ namespace EngineNS
         /// 向量的单位化
         /// </summary>
         [Rtti.Meta]
-        public void Normalize()
+        public float Normalize()
 	    {
 		    float length = Length();
 		    if( length == 0 )
-			    return;
+			    return length;
 		    float num = 1 / length;
 		    X *= num;
 		    Y *= num;
 		    Z *= num;
-	    }
+            return length;
+        }
         /// <summary>
         /// 向量的单位向量，不改变原向量
         /// </summary>
@@ -824,6 +828,13 @@ namespace EngineNS
 
 		    return (float)( Math.Sqrt( (x * x) + (y * y) + (z * z) ) );
 	    }
+        [Rtti.Meta]
+        public static float RayDistanceSquared(in Vector3 point, in Vector3 start, in Vector3 dirNormalized, out float len)
+        {
+            var v = point - start;
+            len = Vector3.Dot(in v, in dirNormalized);
+            return v.LengthSquared() - (len * len);
+        }
         /// <summary>
         /// 计算两点间的距离的平方
         /// </summary>

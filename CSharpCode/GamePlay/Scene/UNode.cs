@@ -107,17 +107,17 @@ namespace EngineNS.GamePlay.Scene
             VisibleMeshProvider = (1 << 0),//deprecated
             VisibleFollowParent = (1 << 1),
             HitproxyMasks = (1 << 2) | (1 << 3),//value: 0,1,2 NoProxy,RootProxy,FollowProxy
-            DiscardAABB = (1<<4),
+            DiscardAABB = (1 << 4),
             CastShadow = (1 << 5),
             AcceptShadow = (1 << 6),
             HideBoundShape = (1 << 7),
             NoPickedDraw = (1 << 8),
             SelfInvisible = (1 << 9),
             ChildrenInvisible = (1 << 10),
-            SceneManaged = (1<<11),
+            SceneManaged = (1 << 11),
             Invisible = SelfInvisible | ChildrenInvisible,
         }
-        public ENodeStyles NodeStyles 
+        public ENodeStyles NodeStyles
         {
             get
             {
@@ -193,7 +193,7 @@ namespace EngineNS.GamePlay.Scene
                 if (value)
                 {
                     SetStyle(ENodeStyles.SceneManaged);
-                    if(this.SceneId == UInt32.MaxValue)
+                    if (this.SceneId == UInt32.MaxValue)
                     {
                         ParentScene?.AllocId(this);
                     }
@@ -209,13 +209,13 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         #endregion
-        
+
         #region BaseFields
         public virtual bool IsSceneManagedType()
         {
             return false;
         }
-        
+
         public virtual UInt32 SceneId
         {
             get => UInt32.MaxValue;
@@ -245,7 +245,7 @@ namespace EngineNS.GamePlay.Scene
                 if (mParent != null)
                 {
                     mParent.Children.Remove(this);
-                }                
+                }
                 mParent = value;
                 if (mParent != null)
                 {
@@ -298,6 +298,10 @@ namespace EngineNS.GamePlay.Scene
                     UpdateAbsTransform();
                 }
             }
+        }
+        public T GetNodeData<T>() where T : UNodeData
+        {
+            return NodeData as T;
         }
         public DVector3 Location
         {

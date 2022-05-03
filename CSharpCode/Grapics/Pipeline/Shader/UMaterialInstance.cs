@@ -154,6 +154,35 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.SerialId++;
             return result;
         }
+        public UMaterialInstance CloneMaterialInstance()
+        {
+            var result = new UMaterialInstance();
+            result.ParentMaterial = ParentMaterial;
+            result.AssetState = IO.EAssetState.LoadFinished;
+            result.RenderLayer = RenderLayer;
+
+            foreach (var i in this.UsedRSView)
+            {
+                result.UsedRSView.Add(i.Clone(result));
+            }
+
+            foreach (var i in this.UsedSamplerStates)
+            {
+                result.UsedSamplerStates.Add(i.Clone(result));
+            }
+
+            foreach (var i in this.UsedUniformVars)
+            {
+                result.UsedUniformVars.Add(i.Clone(result));
+            }
+
+            result.mRasterizerState = mRasterizerState;
+            result.mDepthStencilState = mDepthStencilState;
+            result.mBlendState = mBlendState;
+
+            result.SerialId++;
+            return result;
+        }
         [Browsable(false)]
         public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
         public class TSaveData : IO.BaseSerializer
@@ -370,14 +399,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             await Thread.AsyncDummyClass.DummyFunc();
 
-            mWireColorMateria = await CreateMaterialInstance(engine.Config.DefaultMaterialInstance);
+            await GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
+            await GetMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+            await GetMaterialInstance(RName.GetRName("axis/axis_x_d.uminst", RName.ERNameType.Engine));
+            await GetMaterialInstance(RName.GetRName("axis/axis_face.uminst", RName.ERNameType.Engine));
+
+            mWireColorMateria = await CreateMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));// engine.Config.DefaultMaterialInstance);
             var rast = mWireColorMateria.Rasterizer;
             rast.FillMode = EFillMode.FMD_WIREFRAME;
             rast.CullMode = ECullMode.CMD_NONE;
             mWireColorMateria.Rasterizer = rast;
             mWireColorMateria.RenderLayer = ERenderLayer.RL_Translucent;
 
-            await GetMaterialInstance(RName.GetRName("axis/axis_x_d.uminst", RName.ERNameType.Engine));
             return true;
         }
         public void Cleanup()

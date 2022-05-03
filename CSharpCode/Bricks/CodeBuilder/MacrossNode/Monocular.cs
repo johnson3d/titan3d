@@ -5,7 +5,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class Monocular : INodeExpr
+    public partial class Monocular : UNodeBase
     {
         public PinIn Left { get; set; } = new PinIn();
         public PinOut Result { get; set; } = new PinOut();
@@ -90,23 +90,34 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 OnValueChanged(typeSlt);
             }
         }
-        public override IExpression GetExpr(UMacrossFunctionGraph funGraph, ICodeGen cGen, bool bTakeResult)
-        {
-            var links = new List<UPinLinker>();
-            funGraph.FindInLinker(Left, links);
-            if (links.Count != 1)
-            {
-                throw new GraphException(this, Left, "Please link SourceObject pin");
-            }
-            var srcNode = links[0].OutNode as INodeExpr;
-            var srcExpr = srcNode.GetExpr(funGraph, cGen, true) as OpExpress;
+        //public override IExpression GetExpr(UMacrossMethodGraph funGraph, ICodeGen cGen, bool bTakeResult)
+        //{
+        //    var links = new List<UPinLinker>();
+        //    funGraph.FindInLinker(Left, links);
+        //    if (links.Count != 1)
+        //    {
+        //        throw new GraphException(this, Left, "Please link SourceObject pin");
+        //    }
+        //    var srcNode = links[0].OutNode as UNodeExpr;
+        //    var srcExpr = srcNode.GetExpr(funGraph, cGen, true) as OpExpress;
 
-            var cvtExpr = new ConvertTypeOp();
-            cvtExpr.ObjExpr = srcExpr;
-            cvtExpr.TargetType = TarType.ClassType.FullName;
-            if (TarType.ClassType.SystemType.IsValueType == false)
-                cvtExpr.UseAs = true;
-            return cvtExpr;
+        //    var cvtExpr = new ConvertTypeOp();
+        //    cvtExpr.ObjExpr = srcExpr;
+        //    cvtExpr.TargetType = TarType.ClassType.FullName;
+        //    if (TarType.ClassType.SystemType.IsValueType == false)
+        //        cvtExpr.UseAs = true;
+        //    return cvtExpr;
+        //}
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            if (pin != Result)
+                return null;
+            var exp = new UCastExpression()
+            {
+                TargetType = new UTypeReference(TarType.ClassType),
+                Expression = data.NodeGraph.GetOppositePinExpression(Left, ref data),
+            };
+            return exp;
         }
         public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
         {
@@ -129,11 +140,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     EGui.Controls.CtrlUtility.DrawHelper($"VarType:{TarType.ClassType.FullName}");
             }
         }
-        public override System.Type GetOutPinType(PinOut pin)
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
             if (TarType == null)
                 return null;
-            return TarType.ClassType.SystemType;
+            return TarType.ClassType;
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
@@ -148,7 +159,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             if (iPin == Left)
             {
-                var nodeExpr = OutNode as INodeExpr;
+                var nodeExpr = OutNode as UNodeBase;
                 if (nodeExpr == null)
                     return;
 

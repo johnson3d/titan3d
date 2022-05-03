@@ -20,6 +20,13 @@ namespace EngineNS.CodeCompiler
         public Guid ProjectGuid;
         [Rtti.Meta]
         public string ProjectFile;
+        public string AbsProjectFile
+        {
+            get
+            {
+                return IO.FileManager.GetBaseDirectory(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject) + ProjectFile;
+            }
+        }
         [Rtti.Meta]
         public System.Version MinVSVersion;
         [Rtti.Meta]
@@ -32,8 +39,9 @@ namespace EngineNS.CodeCompiler
     {
         public static bool GenerateSharedProject(ProjectConfig config)
         {
-            var projFolder = IO.FileManager.GetParentPathName(config.ProjectFile);
-            var projName = IO.FileManager.GetPureName(config.ProjectFile);
+            var absProjFile = config.AbsProjectFile;
+            var projFolder = IO.FileManager.GetParentPathName(absProjFile);
+            var projName = IO.FileManager.GetPureName(absProjFile);
             var version = "1.0";
             var encode = "utf-8";
             var nsUrl = "http://schemas.microsoft.com/developer/msbuild/2003";
@@ -77,7 +85,7 @@ namespace EngineNS.CodeCompiler
                 import.SetAttribute("Project", @"$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\CodeSharing\Microsoft.CodeSharing.CSharp.targets");
                 root.AppendChild(import);
 
-                xml.Save(config.ProjectFile);
+                xml.Save(absProjFile);
             }
 
             // projitems
@@ -118,7 +126,7 @@ namespace EngineNS.CodeCompiler
                 }
                 root.AppendChild(itemGroup);
 
-                var projItemFileName = IO.FileManager.RemoveExtName(config.ProjectFile) + ".projitems";
+                var projItemFileName = IO.FileManager.RemoveExtName(absProjFile) + ".projitems";
                 xml.Save(projItemFileName);
             }
 

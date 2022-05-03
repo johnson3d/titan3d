@@ -13,7 +13,15 @@ namespace EngineNS.CodeCompiler
 {
     public class CSharpCompiler
     {
-        public static void CompilerCSharpCodes(string[] cshaprFiles, string[] refAssemblyFiles, string[] preprocessorSymbols, string outputFile, string pdbFile, CSharpCompilationOptions option)
+        static string[] mBaseAssemblys =
+        {
+            "System.Core.dll",
+            "System.Runtime.dll",
+            "System.Private.CoreLib.dll",
+            "System.Collections.dll",
+        };
+
+        public static bool CompilerCSharpCodes(string[] cshaprFiles, string[] refAssemblyFiles, string[] preprocessorSymbols, string outputFile, string pdbFile, CSharpCompilationOptions option)
         {
             var syntaxTrees = new SyntaxTree[cshaprFiles.Length];
             for (int i = 0; i < cshaprFiles.Length; i++)
@@ -25,14 +33,22 @@ namespace EngineNS.CodeCompiler
                     encoding: Encoding.UTF8);
             }
 
-            var metaRefs = new PortableExecutableReference[refAssemblyFiles.Length];
+            // base reference
+            var metaRefs = new PortableExecutableReference[refAssemblyFiles.Length + mBaseAssemblys.Length];
+            var baseAssembDir = IO.FileManager.GetBaseDirectory(typeof(object).Assembly.Location);
+            for(int i=0; i<mBaseAssemblys.Length; i++)
+            {
+                metaRefs[i] = MetadataReference.CreateFromFile(baseAssembDir + mBaseAssemblys[i]);
+            }
+            // reference assemblies
             for (int i = 0; i < refAssemblyFiles.Length; i++)
             {
-                metaRefs[i] = MetadataReference.CreateFromFile(refAssemblyFiles[i]);
+                metaRefs[i + mBaseAssemblys.Length] = MetadataReference.CreateFromFile(refAssemblyFiles[i]);
             }
 
             var name = IO.FileManager.GetPureName(outputFile);
             var compilation = CSharpCompilation.Create(name, syntaxTrees, metaRefs, option);
+            bool retValue = true;
             using (var outStream = new MemoryStream())
             using (var pdbStream = new MemoryStream())
             {
@@ -40,30 +56,40 @@ namespace EngineNS.CodeCompiler
                 if (option.OptimizationLevel == OptimizationLevel.Debug)
                 {
                     if (string.IsNullOrEmpty(pdbFile))
-                        pdbFile = System.IO.Path.ChangeExtension(outputFile, "pdb");
+                        pdbFile = System.IO.Path.ChangeExtension(outputFile, "tpdb");
                     emitOptions = emitOptions.WithDebugInformationFormat(DebugInformationFormat.PortablePdb).WithPdbFilePath(pdbFile);
                 }
 
                 var emitResult = compilation.Emit(outStream, pdbStream, null, null, null, emitOptions);
                 if (emitResult.Success)
                 {
+                    retValue = true;
                     using (var fs = new FileStream(outputFile, FileMode.Create))
                     {
                         fs.Write(outStream.ToArray());
                     }
                     if(option.OptimizationLevel == OptimizationLevel.Debug)
                     {
-                        using (var fs = new FileStream(pdbFile, FileMode.Create))
+                        try
                         {
-                            fs.Write(pdbStream.ToArray());
+                            using (var fs = new FileStream(pdbFile, FileMode.Create))
+                            {
+                                fs.Write(pdbStream.ToArray());
+                            }
+                        }
+                        catch(System.Exception)
+                        {
+
                         }
                     }
                 }
                 else
                 {
-
+                    retValue = false;
                 }
             }
+
+            return retValue;
         }
 
         public enum enCommandType
@@ -136,7 +162,7 @@ namespace EngineNS.CodeCompiler
             return enCommandType.Unknow;
         }
 
-        public static void CompilerCSharpWithArguments(string[] args)
+        public static bool CompilerCSharpWithArguments(string[] args)
         {
             List<string> csFiles = new List<string>();
             List<string> refAssemblyFiles = new List<string>();
@@ -293,7 +319,7 @@ namespace EngineNS.CodeCompiler
                 assemblyIdentityComparer, strongNameProvider, publicSign,
                 metadataImportOptions, nullableContextOptions);
 
-            CompilerCSharpCodes(csFiles.ToArray(), refAssemblyFiles.ToArray(), preprocessorSymbols.ToArray(), outputFile, pdbFile, option);
+            return CompilerCSharpCodes(csFiles.ToArray(), refAssemblyFiles.ToArray(), preprocessorSymbols.ToArray(), outputFile, pdbFile, option);
         }
     }
 }

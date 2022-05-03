@@ -60,8 +60,18 @@ namespace EngineNS.Graphics.Pipeline
 
                 if (HitProxyAllocatorId == uint.MaxValue)
                 {
-                    //reset all
-                    
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "UHitproxy", "HitProxyAllocatorId == uint.MaxValue");
+                    System.Diagnostics.Debug.Assert(false);
+                    HitProxyAllocatorId = 0;
+                    foreach (var i in Proxies)
+                    {
+                        IProxiable obj;                        
+                        if(i.Value.ProxyObject.TryGetTarget(out obj))
+                        {
+                            obj.HitProxy.ProxyId = ++HitProxyAllocatorId;
+                            obj.OnHitProxyChanged();
+                        }
+                    }
                 }
 
                 var result = new UHitProxy();
@@ -117,10 +127,9 @@ namespace EngineNS.Graphics.Pipeline
         {
             if (proxy.HitProxy == null)
                 return;
-            if (proxy.HitProxy.IsPoxyObject(proxy))
-            {
-                UnmapProxy(proxy.HitProxy.ProxyId);
-            }
+
+            UnmapProxy(proxy.HitProxy.ProxyId);
+
             proxy.HitProxy = null;
         }
     }

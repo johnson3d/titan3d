@@ -27,6 +27,12 @@ namespace EngineNS.Editor
             {
                 this.ShowBoundVolumes(true, node);
             }
+
+            var app = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+            if (app != null)
+            {
+                app.mMainInspector.PropertyGrid.Target = proxy;
+            }
         }
         protected override void OnMouseUp(ref SDL.SDL_Event e)
         {

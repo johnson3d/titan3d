@@ -32,7 +32,7 @@ namespace EngineNS.GamePlay.Scene
             var gridColor = materialInstance.FindVar("GridColor");
             if (gridColor != null)
             {
-                gridColor.Value = new Vector4(0.6f, 0.6f, 0.6f, 1).ToString();
+                gridColor.SetValue(new Vector4(0.6f, 0.6f, 0.6f, 1));
             }
             var mesh = Graphics.Mesh.CMeshDataProvider.MakeGridPlane(rc, Vector2.Zero, Vector2.One, 10).ToMesh();
 

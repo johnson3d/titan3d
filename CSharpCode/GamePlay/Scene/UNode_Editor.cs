@@ -6,6 +6,10 @@ namespace EngineNS.GamePlay.Scene
 {
     public partial class UNode : Graphics.Pipeline.IProxiable
     {
+        ~UNode()
+        {
+            UEngine.Instance?.GfxDevice.HitproxyManager.UnmapProxy(this);
+        }
         public virtual void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
         {
             return;

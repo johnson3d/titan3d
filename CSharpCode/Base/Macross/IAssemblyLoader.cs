@@ -7,7 +7,7 @@ namespace EngineNS.Macross
     public interface IAssemblyLoader
     {
         List<string> IncludeAssemblies { get; }
-        System.Reflection.Assembly LoadAssembly(string assemblyPath);
+        System.Reflection.Assembly LoadAssembly(string assemblyPath, string pdbPath = null);
         void TryUnload();
         object GetInnerObject();
     }

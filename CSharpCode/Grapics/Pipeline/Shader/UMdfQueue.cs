@@ -48,9 +48,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public RName CodeName { get; set; }
         public IO.CMemStreamWriter DefineCode { get; protected set; }
         public IO.CMemStreamWriter SourceCode { get; protected set; }
+        protected virtual string GetBaseBuilder(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
+        {
+            return "";
+        }
         protected virtual void UpdateShaderCode()
         {
-
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            GetBaseBuilder(codeBuilder);
         }
         
         public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, URenderPolicy policy, Mesh.UMesh mesh)

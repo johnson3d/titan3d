@@ -56,10 +56,6 @@ namespace EngineNS
     }
     public unsafe partial struct BigStackBuffer : IDisposable
     {
-        public void Dispose()
-        {
-            DestroyMe();
-        }
         public string AsText()
         {
             return System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)GetBuffer());

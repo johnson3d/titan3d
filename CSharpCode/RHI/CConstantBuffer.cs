@@ -191,9 +191,6 @@ namespace EngineNS.RHI
             public int PointLightIndices;
 
             public int ObjectFLags_2Bit;
-
-            public int AbsBonePos;
-            public int AbsBoneQuat;
         }
         public static PerMesh mPerMeshIndexer;
         public PerMesh PerMeshIndexer

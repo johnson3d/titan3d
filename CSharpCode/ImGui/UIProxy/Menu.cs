@@ -14,6 +14,7 @@ namespace EngineNS.EGui.UIProxy
         public bool IsTopMenuItem = false;
         public bool Selected = false;
         public ImageProxy Icon = null;
+        public bool Visible = true;
 
         public struct MenuState
         {
@@ -62,6 +63,9 @@ namespace EngineNS.EGui.UIProxy
 
         public bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
         {
+            if (!Visible)
+                return false;
+
             bool retValue = false;
             //ImGuiAPI.BeginGroup();
             bool colorPushed = false;

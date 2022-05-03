@@ -37,15 +37,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         protected override void UpdateShaderCode()
         {
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
 
-            codeBuilder.AddLine("#ifndef _UTerrainMdfQueue_CDLOD_INC_");
-            codeBuilder.AddLine("#define _UTerrainMdfQueue_CDLOD_INC_");
-            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Modifier/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address}\"");
+            codeBuilder.AddLine("#ifndef _UTerrainMdfQueue_CDLOD_INC_", ref sourceCode);
+            codeBuilder.AddLine("#define _UTerrainMdfQueue_CDLOD_INC_", ref sourceCode);
+            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Modifier/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
 
-            codeBuilder.AddLine("#endif");
+            codeBuilder.AddLine("#endif", ref sourceCode);
             SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(codeBuilder.ClassCode);
+            SourceCode.SetText(sourceCode);
         }
         #region Index
         private static RHI.FNameVarIndex StartPosition = new RHI.FNameVarIndex("StartPosition");
@@ -167,17 +169,19 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     {
         protected override void UpdateShaderCode()
         {
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
 
-            codeBuilder.AddLine("#ifndef _UTerrainMdfQueue_CDLOD_INC_");
-            codeBuilder.AddLine("#define _UTerrainMdfQueue_CDLOD_INC_");
-            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Modifier/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address}\"");
+            codeBuilder.AddLine("#ifndef _UTerrainMdfQueue_CDLOD_INC_", ref sourceCode);
+            codeBuilder.AddLine("#define _UTerrainMdfQueue_CDLOD_INC_", ref sourceCode);
+            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Modifier/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
 
-            codeBuilder.AddLine("#endif");
+            codeBuilder.AddLine("#endif", ref sourceCode);
 
             if (typeof(PermutationType).Name == "UMdf_NoShadow")
             {
-                codeBuilder.AddLine("#define DISABLE_SHADOW_MDFQUEUE 1");
+                codeBuilder.AddLine("#define DISABLE_SHADOW_MDFQUEUE 1", ref sourceCode);
             }
             else if (typeof(PermutationType).Name == "UMdf_Shadow")
             {
@@ -185,7 +189,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
 
             SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(codeBuilder.ClassCode);
+            SourceCode.SetText(sourceCode);
         }
     }
 }

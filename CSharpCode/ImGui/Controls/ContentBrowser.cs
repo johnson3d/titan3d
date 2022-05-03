@@ -248,6 +248,7 @@ namespace EngineNS.EGui.Controls
         {
             var cmdlist = ImGuiAPI.GetWindowDrawList();
             var itemSize = new Vector2(80, 100);
+                CreateNewAssets = true;
             
             //var cldPos = ImGuiAPI.GetWindowPos();
             //var cldMin = ImGuiAPI.GetWindowContentRegionMin();
@@ -369,8 +370,11 @@ namespace EngineNS.EGui.Controls
             if (string.IsNullOrEmpty(name))
                 name = "ContentBrowser";
             bool draw = true;
-            if(DrawInWindow)
+            if (DrawInWindow)
+            {
+                ImGuiAPI.SetNextWindowSize(new Vector2(800, 300), ImGuiCond_.ImGuiCond_FirstUseEver);
                 draw = ImGuiAPI.Begin(name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar);
+            }
             if(draw)
             {
 //                if (ImGuiAPI.IsWindowDocked())

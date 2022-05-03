@@ -4,6 +4,25 @@ using System.Text;
 
 namespace EngineNS.Bricks.NodeGraph
 {
+    public struct BuildCodeStatementsData
+    {
+        public CodeBuilder.UNamespaceDeclaration NsDec;
+        public CodeBuilder.UClassDeclaration ClassDec;
+        public CodeBuilder.UMethodDeclaration MethodDec;
+        public CodeBuilder.UCodeGeneratorBase CodeGen;
+        public UNodeGraph NodeGraph;
+        public List<CodeBuilder.UStatementBase> CurrentStatements;
+        public object UserData;
+        
+        public void CopyTo(ref BuildCodeStatementsData data)
+        {
+            data.NsDec = NsDec;
+            data.ClassDec = ClassDec;
+            data.MethodDec = MethodDec;
+            data.NodeGraph = NodeGraph;
+        }
+    }
+
     public class UNodeGraph : IO.ISerializer
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
@@ -14,6 +33,7 @@ namespace EngineNS.Bricks.NodeGraph
             UpdateNodeMenus();
             UpdatePinMenus();
         }
+        public virtual void SetDefaultActionForNode(UNodeBase node) { }
         [Rtti.Meta]
         public string GraphName { get; set; } = "NodeGraph";
         [Rtti.Meta]
@@ -313,6 +333,34 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return linker.InPin.HostNode;
         }
+        public CodeBuilder.UExpressionBase GetOppositePinExpression(PinIn pin, ref BuildCodeStatementsData data)
+        {
+            var linker = GetFirstLinker(pin);
+            if (linker == null)
+                return null;
+            return linker.OutPin.HostNode.GetExpression(linker.OutPin, ref data);
+        }
+        public CodeBuilder.UExpressionBase GetOppositePinExpression(PinOut pin, ref BuildCodeStatementsData data)
+        {
+            var linker = GetFirstLinker(pin);
+            if (linker == null)
+                return null;
+            return linker.InPin.HostNode.GetExpression(linker.InPin, ref data);
+        }
+        public PinOut GetOppositePin(PinIn pin)
+        {
+            var linker = GetFirstLinker(pin);
+            if (linker == null)
+                return null;
+            return linker.OutPin;
+        }
+        public PinIn GetOppositePin(PinOut pin)
+        {
+            var linker = GetFirstLinker(pin);
+            if (linker == null)
+                return null;
+            return linker.InPin;
+        }
 
         public UNodeBase AddNode(UNodeBase node)
         {
@@ -432,11 +480,13 @@ namespace EngineNS.Bricks.NodeGraph
         public UMenuItem NodeMenus = new UMenuItem();
         public UMenuItem PinMenus = new UMenuItem();
 
+        public bool CanvasMenuDirty = false;
         public virtual void UpdateCanvasMenus()
         {
             CanvasMenus.SubMenuItems.Clear();
             CanvasMenus.Text = "Canvas";
         }
+        public bool NodeMenuDirty = false;
         public virtual void UpdateNodeMenus()
         {
             NodeMenus.SubMenuItems.Clear();
@@ -462,6 +512,7 @@ namespace EngineNS.Bricks.NodeGraph
                     this.ClearSelected();
                 });
         }
+        public bool PinMenuDirty = false;
         public virtual void UpdatePinMenus()
         {
             PinMenus.SubMenuItems.Clear();
@@ -900,7 +951,21 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public virtual unsafe void OnBeforeDrawMenu(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles)
         {
-
+            if(CanvasMenuDirty)
+            {
+                UpdateCanvasMenus();
+                CanvasMenuDirty = false;
+            }
+            if(NodeMenuDirty)
+            {
+                UpdateNodeMenus();
+                NodeMenuDirty = false;
+            }
+            if(PinMenuDirty)
+            {
+                UpdatePinMenus();
+                PinMenuDirty = false;
+            }
         }
         public virtual unsafe void OnAfterDrawMenu(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles)
         {

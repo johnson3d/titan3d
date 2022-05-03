@@ -150,6 +150,30 @@ namespace EngineNS.Graphics.Pipeline
                 return mDefaultState;
             }
         }
+        RHI.CSamplerState mPointState;
+        public RHI.CSamplerState PointState
+        {
+            get
+            {
+                if (mPointState == null)
+                {
+                    var desc = new ISamplerStateDesc();
+                    desc.SetDefault();
+                    desc.Filter = ESamplerFilter.SPF_MIN_MAG_MIP_POINT;
+                    desc.CmpMode = EComparisionMode.CMP_NEVER;
+                    desc.AddressU = EAddressMode.ADM_CLAMP;
+                    desc.AddressV = EAddressMode.ADM_CLAMP;
+                    desc.AddressW = EAddressMode.ADM_CLAMP;
+                    desc.MaxAnisotropy = 0;
+                    desc.MipLODBias = 0;
+                    desc.MinLOD = 0;
+                    desc.MaxLOD = 3.402823466e+38f;
+                    mPointState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
+                        UEngine.Instance.GfxDevice.RenderContext, in desc);
+                }
+                return mPointState;
+            }
+        }
         protected unsafe override RHI.CSamplerState CreateState(RHI.CRenderContext rc, void* desc)
         {
             return rc.CreateSamplerState(in *(ISamplerStateDesc*)desc);

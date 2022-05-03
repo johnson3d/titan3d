@@ -208,6 +208,11 @@ namespace EngineNS.Editor.ShaderCompiler
                             System.Diagnostics.Debugger.Break();
                             break;
                     }
+                    
+                    var caps = new IRenderContextCaps();
+                    UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetRenderContextCaps(ref caps);
+                    caps.SetShaderGlobalEnv(defPtr);
+
                     var cfg = UEngine.Instance.Config;
                     if (cfg.CookDXBC)
                     {
@@ -241,7 +246,7 @@ namespace EngineNS.Editor.ShaderCompiler
                         if (ok == false)
                             return null;
                     }
-                    
+
                     return desc;
                 }
             }   

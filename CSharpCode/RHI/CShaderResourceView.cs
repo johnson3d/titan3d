@@ -245,16 +245,17 @@ namespace EngineNS.RHI
                     }
                     ImGuiAPI.Separator();
 
-                    var buffer = BigStackBuffer.CreateInstance(256);
-                    buffer.SetText(mName);
-                    ImGuiAPI.InputText("##in_rname", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
-                    var name = buffer.AsText();
-                    if (mName != name)
+                    using (var buffer = BigStackBuffer.CreateInstance(256))
                     {
-                        mName = name;
-                        bFileExisting = IO.FileManager.FileExists(mDir.Address + mName + RHI.CShaderResourceView.AssetExt);
+                        buffer.SetText(mName);
+                        ImGuiAPI.InputText("##in_rname", buffer.GetBuffer(), (uint)buffer.GetSize(), ImGuiInputTextFlags_.ImGuiInputTextFlags_None, null, (void*)0);
+                        var name = buffer.AsText();
+                        if (mName != name)
+                        {
+                            mName = name;
+                            bFileExisting = IO.FileManager.FileExists(mDir.Address + mName + RHI.CShaderResourceView.AssetExt);
+                        }
                     }
-                    buffer.DestroyMe();
 
                     ImGuiAPI.Separator();
 

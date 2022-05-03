@@ -834,12 +834,16 @@ namespace EngineNS
             result.Z = quat.Z * length;
             result.W = quat.W * length;
         }
-        /// <summary>
-        /// 计算按轴旋转后的四元数
-        /// </summary>
-        /// <param name="axis">旋转轴</param>
-        /// <param name="angle">旋转角度</param>
-        /// <returns>返回计算后的四元数</returns>
+        //from to : normalized
+        [Rtti.Meta]
+        public static Quaternion RotationFrowTwoVector(in Vector3 from, in Vector3 to)
+        {
+            var axis = Vector3.Cross(in from, in to);
+            float dv = Vector3.Dot(in from, in to);
+            var angle = (float)Math.Acos(dv);
+            return RotationAxis(in axis, angle);
+        }
+
         [Rtti.Meta]
         public static Quaternion RotationAxis(in Vector3 in_axis, float angle)
         {

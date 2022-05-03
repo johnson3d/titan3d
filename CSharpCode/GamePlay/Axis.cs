@@ -2645,7 +2645,7 @@ namespace EngineNS.GamePlay
         }
 
         #region UI
-        public unsafe bool OnDrawUI(in Vector2 startDrawPos)
+        public unsafe bool OnDrawUI(Graphics.Pipeline.UViewportSlate slate, in Vector2 startDrawPos)
         {
             var io = ImGuiAPI.GetIO();
             var oldCaptureValue = io.WantCaptureMouse;
@@ -2654,6 +2654,8 @@ namespace EngineNS.GamePlay
             bool retValue = false;
             ImGuiAPI.SetCursorScreenPos(startDrawPos);
 
+            slate.IsHoverGuiItem = false;
+
             Vector2 btnSize = new Vector2(24, 24);
             var n = mAxisOperationType == enAxisOperationType.Select;
             if(ImGuiAPI.ToggleButton("N", ref n, in btnSize, 0))
@@ -2661,6 +2663,7 @@ namespace EngineNS.GamePlay
                 SetAxisOperationType(enAxisOperationType.Select);
                 retValue = true;
             }
+            slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             ImGuiAPI.SameLine(0, 4);
             var m = mAxisOperationType == enAxisOperationType.Move;
             if(ImGuiAPI.ToggleButton("M", ref m, in btnSize, 0))
@@ -2668,6 +2671,7 @@ namespace EngineNS.GamePlay
                 SetAxisOperationType(enAxisOperationType.Move);
                 retValue = true;
             }
+            slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             ImGuiAPI.SameLine(0, 4);
             var r = mAxisOperationType == enAxisOperationType.Rot;
             if (ImGuiAPI.ToggleButton("R", ref r, in btnSize, 0))
@@ -2675,6 +2679,7 @@ namespace EngineNS.GamePlay
                 SetAxisOperationType(enAxisOperationType.Rot);
                 retValue = true;
             }
+            slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             ImGuiAPI.SameLine(0, 4);
             var s = mAxisOperationType == enAxisOperationType.Scale;
             if (ImGuiAPI.ToggleButton("S", ref s, in btnSize, 0))
@@ -2682,6 +2687,7 @@ namespace EngineNS.GamePlay
                 SetAxisOperationType(enAxisOperationType.Scale);
                 retValue = true;
             }
+            slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             ImGuiAPI.SameLine(0, 4);
             var e = mAxisOperationType == enAxisOperationType.Edge;
             if (ImGuiAPI.ToggleButton("E", ref e, in btnSize, 0))
@@ -2689,6 +2695,7 @@ namespace EngineNS.GamePlay
                 SetAxisOperationType(enAxisOperationType.Edge);
                 retValue = true;
             }
+            slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             ImGuiAPI.SameLine(0, 10);
             var ls = mAxisSpace == enAxisSpace.Local;
             if(ImGuiAPI.ToggleButton("L", ref ls, in btnSize, 0))
@@ -2696,7 +2703,8 @@ namespace EngineNS.GamePlay
                 SetAxisSpace(enAxisSpace.Local);
                 retValue = true;
             }
-            switch(mAxisOperationType)
+            slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+            switch (mAxisOperationType)
             {
                 case enAxisOperationType.Scale:
                 case enAxisOperationType.Edge:
@@ -2710,6 +2718,7 @@ namespace EngineNS.GamePlay
                             SetAxisSpace(enAxisSpace.World);
                             retValue = true;
                         }
+                        slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
                     }
                     break;
             }
@@ -2719,6 +2728,7 @@ namespace EngineNS.GamePlay
                 CenterAxisMode = mCenterAxisMode;
                 retValue = true;
             }
+            slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
 
             ImGuiAPI.SameLine(0, 10);
             var snapGrid = HasSnapType(enSnapType.MoveGrid);
@@ -2727,6 +2737,7 @@ namespace EngineNS.GamePlay
                 SetSnapType(enSnapType.MoveGrid);
                 retValue = true;
             }
+            slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
 
             var minValue = float.MinValue;
             var maxValue = float.MaxValue;

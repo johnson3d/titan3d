@@ -144,6 +144,8 @@ namespace EngineNS.Editor
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
                             {
                                 mCpuProfiler.Visible = !mCpuProfiler.Visible;
+                                var application = UEngine.Instance.GfxDevice.MainWindow as EngineNS.Editor.UMainEditorApplication;
+                                mCpuProfiler.DockId = application.CenterDockId;
                                 item.Selected = mCpuProfiler.Visible;
                             },
                         },
@@ -424,6 +426,7 @@ namespace EngineNS.Editor
                 RightDockId = ImGuiAPI.GetID("RightDocker");
 
                 mCpuProfiler.DockId = CenterDockId;
+                mClrProfiler.DockId = CenterDockId;
                 mMetaViewer.DockId = RightDockId;
                 WorldViewportSlate.DockId = CenterDockId;
                 mWorldOutliner.DockId = LeftDockId;

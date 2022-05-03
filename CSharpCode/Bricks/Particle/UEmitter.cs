@@ -282,18 +282,20 @@ namespace EngineNS.Bricks.Particle
             {
                 result += i.GetHLSL();
             }
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-            codeBuilder.AddLine("\nvoid DoParticleEffectors(uint3 id, inout FParticle particle)");
-            codeBuilder.PushBrackets();
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+            codeBuilder.AddLine("\nvoid DoParticleEffectors(uint3 id, inout FParticle particle)", ref sourceCode);
+            codeBuilder.PushSegment(ref sourceCode);
             int index = 0;
             foreach (var i in Effectors)
             {
-                codeBuilder.AddLine($"{i.Name}_EffectorExecute(id, particle, EffectorParameters{index});");
+                codeBuilder.AddLine($"{i.Name}_EffectorExecute(id, particle, EffectorParameters{index});", ref sourceCode);
                 index++;
             }
-            codeBuilder.PopBrackets();
+            codeBuilder.PopSegment(ref sourceCode);
 
-            result += codeBuilder.ClassCode;
+            result += sourceCode;
             return result;
         }
         public string GetCBufferDefines()

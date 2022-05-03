@@ -191,7 +191,7 @@ namespace EngineNS.Macross
                 }
                 foreach (var k in changed)
                 {
-                    if (k.FullName == j.Value.SystemType.FullName)
+                    if (k.FullName == j.Value.FullName)
                     {
                         j.Value.SystemType = k;
                         j.Value.Assembly = desc;

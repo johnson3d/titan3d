@@ -4,6 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder
 {
+    [Obsolete]
     public class UCodeWriter
     {
         private int NumOfTab = 0;
@@ -71,6 +72,7 @@ namespace EngineNS.Bricks.CodeBuilder
             return result;
         }
     }
+    [Obsolete]
     public abstract class ICodeGen : UCodeWriter
     {
         public abstract IGen GetGen(Type exprType);
@@ -80,6 +82,10 @@ namespace EngineNS.Bricks.CodeBuilder
             var klsGen = GetGen(typeof(DefineClass));
 
             klsGen.GenLines(kls, this);
+        }
+        public virtual string GetDefaultValue(Rtti.UTypeDesc t)
+        {
+            return GetDefaultValue(t.SystemType);
         }
         public virtual string GetDefaultValue(System.Type t)
         {
@@ -109,12 +115,12 @@ namespace EngineNS.Bricks.CodeBuilder
                 return $"null";
             }
         }
-        public virtual string GetTypeString(System.Type t)
+        public virtual string GetTypeString(Rtti.UTypeDesc t)
         {
             return t.FullName;
         }
 
-        public static bool CanConvert(Type left, Type right)
+        public static bool CanConvert(Rtti.UTypeDesc left, Rtti.UTypeDesc right)
         {
             if (left == null || right == null)
                 return false;
@@ -132,18 +138,18 @@ namespace EngineNS.Bricks.CodeBuilder
             }
             return false;
         }
-        public static bool IsNumeric(Type t)
+        public static bool IsNumeric(Rtti.UTypeDesc t)
         {
-            if (t == typeof(sbyte) ||
-                t == typeof(Int16) ||
-                t == typeof(Int32) ||
-                t == typeof(Int64) ||
-                t == typeof(byte) ||
-                t == typeof(UInt16) ||
-                t == typeof(UInt32) ||
-                t == typeof(UInt64) ||
-                t == typeof(float) ||
-                t == typeof(double))
+            if (t.IsEqual(typeof(sbyte)) ||
+                t.IsEqual(typeof(Int16)) ||
+                t.IsEqual(typeof(Int32)) ||
+                t.IsEqual(typeof(Int64)) ||
+                t.IsEqual(typeof(byte)) ||
+                t.IsEqual(typeof(UInt16)) ||
+                t.IsEqual(typeof(UInt32)) ||
+                t.IsEqual(typeof(UInt64)) ||
+                t.IsEqual(typeof(float)) ||
+                t.IsEqual(typeof(double)))
             {
                 return true;
             }

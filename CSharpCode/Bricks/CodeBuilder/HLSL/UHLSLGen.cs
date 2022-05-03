@@ -4,6 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder.HLSL
 {
+    [Obsolete]
     public class UHLSLGen : ICodeGen
     {
         public DefineClassGen mDefineClassGen = new DefineClassGen();
@@ -38,6 +39,8 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
         public AssignOpGen mAssignOpGen = new AssignOpGen();
         public NewObjectOpGen mNewObjectOpGen = new NewObjectOpGen();
         public HardCodeOpGen mHardCodeOpGen = new HardCodeOpGen();
+        public DefaultValueOpGen mDefaultValueOpGen = new DefaultValueOpGen();
+        public VariableReferenceOpGen mArgumentReferenceOpGen = new VariableReferenceOpGen();
         public override IGen GetGen(Type exprType)
         {
             if (exprType == typeof(DefineClass))
@@ -170,39 +173,39 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             }
             return null;
         }
-        public override string GetTypeString(System.Type t)
+        public override string GetTypeString(Rtti.UTypeDesc t)
         {
-            if (t == typeof(float))
+            if (t.IsEqual(typeof(float)))
                 return "float";
-            else if (t == typeof(Vector2))
+            else if (t.IsEqual(typeof(Vector2)))
                 return "float2";
-            else if (t == typeof(Vector3))
+            else if (t.IsEqual(typeof(Vector3)))
                 return "float3";
-            else if (t == typeof(Vector4))
+            else if (t.IsEqual(typeof(Vector4)))
                 return "float4";
-            else if (t == typeof(Matrix))
+            else if (t.IsEqual(typeof(Matrix)))
                 return "matrix";
-            else if (t == typeof(int))
+            else if (t.IsEqual(typeof(int)))
                 return "int";
-            else if (t == typeof(Int32_2))
+            else if (t.IsEqual(typeof(Int32_2)))
                 return "int2";
-            else if (t == typeof(Int32_3))
+            else if (t.IsEqual(typeof(Int32_3)))
                 return "int3";
-            else if (t == typeof(Int32_4))
+            else if (t.IsEqual(typeof(Int32_4)))
                 return "int4";
-            else if (t == typeof(uint))
+            else if (t.IsEqual(typeof(uint)))
                 return "uint";
-            else if (t == typeof(UInt32_2))
+            else if (t.IsEqual(typeof(UInt32_2)))
                 return "uint2";
-            else if (t == typeof(UInt32_3))
+            else if (t.IsEqual(typeof(UInt32_3)))
                 return "uint3";
-            else if (t == typeof(UInt32_4))
+            else if (t.IsEqual(typeof(UInt32_4)))
                 return "uint4";
-            else if (t == typeof(EngineNS.Bricks.CodeBuilder.ShaderNode.Var.Texture2D))
+            else if (t.IsEqual(typeof(EngineNS.Bricks.CodeBuilder.ShaderNode.Var.Texture2D)))
                 return "Texture2D";
-            else if (t == typeof(EngineNS.Bricks.CodeBuilder.ShaderNode.Var.Texture2DArray))
+            else if (t.IsEqual(typeof(EngineNS.Bricks.CodeBuilder.ShaderNode.Var.Texture2DArray)))
                 return "Texture2DArray";
-            else if (t == typeof(EngineNS.Bricks.CodeBuilder.ShaderNode.Var.SamplerState))
+            else if (t.IsEqual(typeof(EngineNS.Bricks.CodeBuilder.ShaderNode.Var.SamplerState)))
                 return "SamplerState";
             return t.FullName;
         }
@@ -311,6 +314,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             }
         }
     }
+    [Obsolete]
     public class ExprGen : IGen
     {
         public virtual void GenLines(IExpression src, ICodeGen cgen)
@@ -319,7 +323,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
         }
         public virtual bool IsFlowControl { get => false; }
     }
-
+    [Obsolete]
     public class DefineClassGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -353,6 +357,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             }
         }
     }
+    [Obsolete]
     public class DefineVarGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -365,6 +370,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return $"{expr.DefType} {expr.VarName}";
         }
     }
+    [Obsolete]
     public class DefineFunctionGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -403,6 +409,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             cgen.PopBrackets();
         }
     }
+    [Obsolete]
     public class ExecuteSequenceGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -423,6 +430,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             }
         }
     }
+    [Obsolete]
     public class OpUseVarGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -435,6 +443,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
                 return $"{expr.Name}";
         }
     }
+    [Obsolete]
     public class OpUseDefinedVarGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -455,6 +464,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
                 return expr.DefVar.VarName;
         }
     }
+    [Obsolete]
     public class OpExecuteAndUseDefinedVarGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -477,6 +487,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
                 return expr.DefVar.VarName;
         }
     }
+    [Obsolete]
     public class BinocularOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -498,6 +509,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
                 return $"({strLeft}) {strOp} ({strRight})";
         }
     }
+    [Obsolete]
     public class MonocularOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -521,6 +533,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             }
         }
     }
+    [Obsolete]
     public class CallOpGen : ExprGen, IOpGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -574,6 +587,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return expr.FunOutLocalVar;
         }
     }
+    [Obsolete]
     public class CallDefFunOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -601,6 +615,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
                 return $"{strHost}.{strName}({callArgs})";
         }
     }
+    [Obsolete]
     public class ReturnOpGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -619,6 +634,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
         }
         public override bool IsFlowControl { get => true; }
     }
+    [Obsolete]
     public class IfOpGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -669,6 +685,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
         }
         public override bool IsFlowControl { get => true; }
     }
+    [Obsolete]
     public class ForOpGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -693,6 +710,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             csGen.PopBrackets();
         }
     }
+    [Obsolete]
     public class ContinueOpGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -703,6 +721,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             csGen.AddLine($"continue");
         }
     }
+    [Obsolete]
     public class BreakOpGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -713,6 +732,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             csGen.AddLine($"break");
         }
     }
+    [Obsolete]
     public class IndexerOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -734,6 +754,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return $"({tarGen})[{args}]";
         }
     }
+    [Obsolete]
     public class ThisVarGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -743,6 +764,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return "this";
         }
     }
+    [Obsolete]
     public class ConstVarGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -752,6 +774,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return expr.Num;
         }
     }
+    [Obsolete]
     public class BoolEqualOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -768,6 +791,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return $"{strLeft} == {strRight}";
         }
     }
+    [Obsolete]
     public class BoolGreateOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -784,6 +808,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return $"{strLeft} > {strRight}";
         }
     }
+    [Obsolete]
     public class BoolGreateEqualOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -800,6 +825,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return $"{strLeft} >= {strRight}";
         }
     }
+    [Obsolete]
     public class BoolLessOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -816,6 +842,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return $"{strLeft} < {strRight}";
         }
     }
+    [Obsolete]
     public class BoolLessEqualOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -832,6 +859,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return $"{strLeft} <= {strRight}";
         }
     }
+    [Obsolete]
     public class BoolAndOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -848,6 +876,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return $"{strLeft} && {strRight}";
         }
     }
+    [Obsolete]
     public class BoolOrOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -864,6 +893,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return $"{strLeft} || {strRight}";
         }
     }
+    [Obsolete]
     public class BoolNotOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -878,6 +908,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return $"!({strTar})";
         }
     }
+    [Obsolete]
     public class DefineAndInitVarOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -887,6 +918,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             return $"{expr.DefType} {expr.VarName} = {expr.VarValue}";
         }
     }
+    [Obsolete]
     public class ConvertTypeOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -907,6 +939,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             }
         }
     }
+    [Obsolete]
     public class NewObjectOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)
@@ -952,6 +985,41 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
             }
         }
     }
+    [Obsolete]
+    public class DefaultValueOpGen : ExprGen, IOpGen
+    {
+        public string Gen(OpExpress src, ICodeGen cgen)
+        {
+            var expr = (DefaultValueOp)src;
+            switch(expr.Type)
+            {
+                case "float":
+                case "System.Single":
+                    return "0";
+                case "flost2":
+                case "EngineNS.Vector2":
+                    return "float2(0,0)";
+                case "float3":
+                case "EngineNS.Vector3":
+                    return "float3(0,0,0)";
+                case "float4":
+                case "EngineNS.Vector4":
+                    return "float4(0,0,0,0)";
+                default:
+                    throw new InvalidOperationException($"{expr.Type} is invalid type in default value");
+            }
+        }
+    }
+    [Obsolete]
+    public class VariableReferenceOpGen : ExprGen, IOpGen
+    {
+        public string Gen(OpExpress src, ICodeGen cgen)
+        {
+            var varRefOp = (VariableReferenceOp)src;
+            return varRefOp.VariableName;
+        }
+    }
+    [Obsolete]
     public class AssignOpGen : ExprGen
     {
         public override void GenLines(IExpression src, ICodeGen cgen)
@@ -976,6 +1044,7 @@ namespace EngineNS.Bricks.CodeBuilder.HLSL
         }
     }
 
+    [Obsolete]
     public class HardCodeOpGen : ExprGen, IOpGen
     {
         public string Gen(OpExpress src, ICodeGen cgen)

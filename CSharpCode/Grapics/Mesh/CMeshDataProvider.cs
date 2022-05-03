@@ -1363,6 +1363,46 @@ namespace EngineNS.Graphics.Mesh
             builder.PushAtomLOD(0, &dpDesc);
             return meshBuilder;
         }
+        public static unsafe CMeshDataProvider MakeBezier3DSpline(UBezier3DSpline spline, uint color)
+        {
+            var meshBuilder = new Graphics.Mesh.CMeshDataProvider();
+            var builder = meshBuilder.mCoreObject;
+            uint streams = (uint)((1 << (int)EVertexSteamType.VST_Position) |
+                (1 << (int)EVertexSteamType.VST_Normal) |
+                (1 << (int)EVertexSteamType.VST_Color) |
+                (1 << (int)EVertexSteamType.VST_UV));
+            builder.Init(streams, EIndexBufferType.IBT_Int16, 1);
+
+            var dpDesc = new DrawPrimitiveDesc();
+            dpDesc.SetDefault();
+            dpDesc.PrimitiveType = EPrimitiveType.EPT_LineStrip;
+            dpDesc.NumPrimitives = 0;
+            dpDesc.StartIndex = 0xffffffff;
+
+            var aabb = new BoundingBox();
+            aabb.InitEmptyBox();
+            foreach (var i in spline.Curves)
+            {
+                if (i.Start == i.End)
+                    continue;
+
+                var cache = i.GetPointCache(spline.Segments);
+                aabb = BoundingBox.Merge(in aabb, in cache.AABB);
+
+                for (int j = 0; j < cache.CachedPoints.Length; j++)
+                {
+                    ref var start = ref cache.CachedPoints[j].Position;
+                    //ref var end = ref cache.CachedPoints[j + 1].Position;
+
+                    builder.AddVertex(in start, in Vector3.UnitX, in Vector2.Zero, color);
+                    dpDesc.NumPrimitives++;
+                }
+            }
+            dpDesc.NumPrimitives--;
+            builder.PushAtomLOD(0, &dpDesc);
+            builder.SetAABB(ref aabb);
+            return meshBuilder;
+        }
     }
 }
 

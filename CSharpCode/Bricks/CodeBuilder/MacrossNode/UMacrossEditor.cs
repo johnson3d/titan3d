@@ -1,9 +1,11 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
@@ -29,64 +31,62 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         List<EGui.UIProxy.MenuItemProxy> mOverrideMethodMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
         void InitializeOverrideMethodList()
         {
-            if (string.IsNullOrEmpty(DefClass.SuperClassName))
-                return;
-            var superClass = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(DefClass.SuperClassName);
-            if (superClass == null)
-                return;
-
-            mOverrideMethodMenuItems.Clear();
-            var methods = superClass.SystemType.GetMethods();
-            for(int i=0; i<methods.Length; i++)
+            for(int i=0; i<DefClass.SupperClassNames.Count; i++)
             {
-                if (!methods[i].IsVirtual)
+                var superClass = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(DefClass.SupperClassNames[i]);
+                //var superClass = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(DefClass.SupperClassNames[i]);
+                if (superClass == null)
                     continue;
 
-                var method = methods[i];
-                var menuItem = new EGui.UIProxy.MenuItemProxy();
-                menuItem.MenuName = method.Name + "(";
-                var parameters = method.GetParameters();
-                for(int paramIdx = 0; paramIdx < parameters.Length; paramIdx++)
+                mOverrideMethodMenuItems.Clear();
+                var methods = superClass.Methods; //.SystemType.GetMethods();
+                for(int methodIdx=0; methodIdx < methods.Count; methodIdx++)
                 {
-                    menuItem.MenuName += parameters[paramIdx].ParameterType.Name + ",";
-                }
-                menuItem.MenuName = menuItem.MenuName.TrimEnd(',');
-                menuItem.MenuName += ")";
+                    if (!methods[methodIdx].IsVirtual)
+                        continue;
+                    var method = methods[methodIdx];
 
-                menuItem.Action = (proxy, data) =>
-                {
-                    var f = new DefineFunction();
-                    f.IsOverride = true;
-                    f.ReturnType = method.ReturnType.FullName;
-                    f.Name = method.Name;
-                    f.Arguments = new List<DefineFunctionParam>(parameters.Length);
-                    for(int paramIdx = 0; paramIdx < parameters.Length; paramIdx++)
+                    bool hasMethod = false;
+                    var keyWord = UMethodDeclaration.GetKeyword(method);
+                    for(int mI = 0; mI < Methods.Count; mI++)
                     {
-                        var parameter = parameters[paramIdx];
-                        var argument = new DefineFunctionParam()
+                        for(int dataIdx =0; dataIdx < Methods[mI].MethodDatas.Count; dataIdx++)
                         {
-                            VarName = parameter.Name,
-                        };
-                        argument.DefType = parameter.ParameterType.FullName.TrimEnd('&');
-                        if (parameter.IsIn)
-                            argument.OpType = DefineFunctionParam.enOpType.In;
-                        else if (parameter.IsOut)
-                            argument.OpType = DefineFunctionParam.enOpType.Out;
-                        else if (parameter.ParameterType.IsByRef)
-                            argument.OpType = DefineFunctionParam.enOpType.Ref;
-                        if (parameter.HasDefaultValue && parameter.DefaultValue != null)
-                            argument.InitValue = parameter.DefaultValue.ToString();
-                        if (parameter.GetCustomAttributes(typeof(ParamArrayAttribute), false).Length > 0)
-                            argument.IsParamArray = true;
-                        f.Arguments.Add(argument);
+                            if(keyWord == Methods[mI].MethodDatas[dataIdx].MethodDec.GetKeyword())
+                            {
+                                hasMethod = true;
+                                break;
+                            }
+                        }
+                        if (hasMethod)
+                            break;
                     }
-                    DefClass.Functions.Add(f);
+                    if (hasMethod)
+                        continue;
 
-                    var func = UMacrossFunctionGraph.NewGraph(this, f);
-                    Functions.Add(func);
-                };
+                    var menuItem = new EGui.UIProxy.MenuItemProxy();
+                    //menuItem.MenuName = method.Name + "(";
+                    //var parameters = method.GetParameters();
+                    //for(int paramIdx = 0; paramIdx < parameters.Length; paramIdx++)
+                    //{
+                    //    menuItem.MenuName += parameters[paramIdx].ParameterType.Name + ",";
+                    //}
+                    //menuItem.MenuName = menuItem.MenuName.TrimEnd(',');
+                    //menuItem.MenuName += ")";
+                    menuItem.MenuName = keyWord;
 
-                mOverrideMethodMenuItems.Add(menuItem);
+                    menuItem.Action = (proxy, data) =>
+                    {
+                        var f = UMethodDeclaration.GetMethodDeclaration(method);
+                        DefClass.AddMethod(f);
+
+                        var func = UMacrossMethodGraph.NewGraph(this, f);
+                        Methods.Add(func);
+                        menuItem.Visible = false;
+                    };
+
+                    mOverrideMethodMenuItems.Add(menuItem);
+                }
             }
         }
 
@@ -132,11 +132,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
         public void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
-        public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid { get; } = new EGui.Controls.PropertyGrid.PropertyGrid();
         [Rtti.Meta(Order = 0)]
-        public DefineClass DefClass { get; } = new DefineClass();
+        public UClassDeclaration DefClass { get; } = new UClassDeclaration();
+        //public DefineClass DefClass { get; } = new DefineClass();
         //[Rtti.Meta(Order = 1)]
-        public List<UMacrossFunctionGraph> Functions { get; } = new List<UMacrossFunctionGraph>();
+        public List<UMacrossMethodGraph> Methods { get; } = new List<UMacrossMethodGraph>();
         public RName AssetName { get; set; }
         bool mVisible = true;
         public bool Visible 
@@ -148,12 +148,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public EGui.Controls.PropertyGrid.PropertyGrid PGMember = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public List<UMacrossFunctionGraph> OpenFunctions = new List<UMacrossFunctionGraph>();
+        public List<UMacrossMethodGraph> OpenFunctions = new List<UMacrossMethodGraph>();
         public MemberVar DraggingMember;
         public bool IsDraggingMember = false;
         public float LeftWidth = 300;
         bool bFirstDraw = true;
-        
+        UCSharpCodeGenerator mCSCodeGen = new UCSharpCodeGenerator();
+        public UCSharpCodeGenerator CSCodeGen => mCSCodeGen;
+
+
         public void SaveClassGraph(RName rn)
         {
             var xml = new System.Xml.XmlDocument();
@@ -163,14 +166,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var xmlText = IO.FileManager.GetXmlText(xml);
             IO.FileManager.WriteAllText($"{rn.Address}/class_graph.dat", xmlText);
 
-            for(int i=0; i<Functions.Count; i++)
+            for(int i=0; i<Methods.Count; i++)
             {
                 var funcXml = new System.Xml.XmlDocument();
                 var funcXmlRoot = funcXml.CreateElement($"Root", funcXml.NamespaceURI);
                 funcXml.AppendChild(funcXmlRoot);
-                IO.SerializerHelper.WriteObjectMetaFields(funcXml, funcXmlRoot, Functions[i]);
+                IO.SerializerHelper.WriteObjectMetaFields(funcXml, funcXmlRoot, Methods[i]);
                 var funcXmlText = IO.FileManager.GetXmlText(funcXml);
-                IO.FileManager.WriteAllText($"{rn.Address}/{Functions[i].Function.Name}.func", funcXmlText);
+                IO.FileManager.WriteAllText($"{rn.Address}/{Methods[i].Name}.func", funcXmlText);
             }
 
             //LoadClassGraph(rn);
@@ -178,9 +181,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public void LoadClassGraph(RName rn)
         {
             DefClass.Reset();
-            Functions.Clear();
+            Methods.Clear();
             OpenFunctions.Clear();
-            NodePropGrid.Target = null;
             PGMember.Target = null;
 
             {
@@ -194,23 +196,47 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 object pThis = this;
                 IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
 
-                DefClass.Functions.Clear();
+                DefClass.ClearMethods();
                 var funcFiles = IO.FileManager.GetFiles(rn.Address, "*.func", false);
                 for (int i = 0; i < funcFiles.Length; i++)
                 {
                     try
                     {
                         var funcXml = IO.FileManager.LoadXml(funcFiles[i]);
-                        var funcGraph = UMacrossFunctionGraph.NewGraph(this);
+                        var funcGraph = UMacrossMethodGraph.NewGraph(this);
                         object pFuncGraph = funcGraph;
                         IO.SerializerHelper.ReadObjectMetaFields(null, funcXml.LastChild as System.Xml.XmlElement, ref pFuncGraph, null);
-                        DefClass.Functions.Add(funcGraph.Function);
-                        Functions.Add(funcGraph);
+                        for(int methodIdx = 0; methodIdx < funcGraph.MethodDatas.Count; methodIdx++)
+                        {
+                            DefClass.AddMethod(funcGraph.MethodDatas[methodIdx].MethodDec);
+                        }
+                        for (var nodeIdx = 0; nodeIdx < funcGraph.Nodes.Count; nodeIdx++)
+                        {
+                            var node = funcGraph.Nodes[nodeIdx];
+                            node.UserData = this;
+                            funcGraph.SetDefaultActionForNode(node);
+                            var methodNode = node as MethodNode;
+                            if (methodNode == null)
+                                continue;
+
+                            for (int methodIdx = 0; methodIdx < DefClass.Methods.Count; methodIdx++)
+                            {
+                                if (methodNode.MethodMeta == MethodNode.GetMethodMeta(DefClass.Methods[methodIdx]))
+                                {
+                                    methodNode.MethodDesc = DefClass.Methods[methodIdx];
+                                }
+                            }
+                        }
+                        Methods.Add(funcGraph);
                     }
                     catch (System.Exception e)
                     {
                         Profiler.Log.WriteException(e);
                     }
+                }
+                for(int i=0; i<Methods.Count; i++)
+                {
+                    Methods[i].CanvasMenuDirty = true;
                 }
             }
 
@@ -220,20 +246,20 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             try
             {
-                var gen = new Bricks.CodeBuilder.CSharp.CSGen();
-                foreach (var i in Functions)
+                foreach (var i in Methods)
                 {
-                    i.BuildCodeExpr(gen);
+                    i.BuildExpression(DefClass);
                 }
 
-                gen.BuildClassCode(DefClass);
+                string code = "";
+                mCSCodeGen.GenerateClassCode(DefClass, ref code);
 
-                SaveCSFile(gen);
+                SaveCSFile(code);
 
                 EngineNS.UEngine.Instance.MacrossManager.GenerateProjects();
-                return gen.ClassCode;
+                return code;
             }
-            catch (GraphException ex)
+            catch (NodeGraph.GraphException ex)
             {
                 if (ex.ErrorNode != null)
                 {
@@ -252,26 +278,52 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public void CompileCode()
         {
-            var csFiles = IO.FileManager.GetFiles(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game), "*.cs");
+            var csFiles = new List<string>(IO.FileManager.GetFiles(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game), "*.cs"));
+            var projectPath = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProjectPath;
+            csFiles.AddRange(IO.FileManager.GetFiles(projectPath, "*.cs"));
             List<string> arguments = new List<string>();
-            for (int i=0; i<csFiles.Length; ++i)
+            for (int i=0; i<csFiles.Count; ++i)
                 arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFiles[i]));
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OutputFile, UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current) + "net5.0/GameProject.dll"));
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.PdbFile, UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current) + "net5.0/GameProject.pdb"));
+
+            var projectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject;
+            var projDef = XDocument.Load(projectFile);
+            var references = projDef.Element("Project").Elements("ItemGroup").Elements("Reference").Select(refElem => refElem.Value);
+            foreach(var reference in references)
+            {
+                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile, projectPath + reference));
+            }
+            //var references = projDef.Element(projDef.n) 
+
+            var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameAssembly;
+            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OutputFile, assemblyFile));
+            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.PdbFile, assemblyFile.Replace(".dll", ".pdb")));
             arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.Outputkind, OutputKind.DynamicallyLinkedLibrary.ToString()));
             arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OptimizationLevel, OptimizationLevel.Debug.ToString()));
-            
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile, typeof(object).Assembly.Location));
 
-            CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray());
+            if(CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray()))
+            {
+                UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
+                var typeDesc = DefClass.TryGetTypeDesc();
+                var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeDesc);
+                meta.BuildMethods();
+                meta.BuildFields();
+                var version = meta.BuildCurrentVersion();
+                version.SaveVersion();
+                meta.SaveClass();
+
+                for (int i = 0; i < Methods.Count; i++)
+                {
+                    Methods[i].CanvasMenuDirty = true;
+                }
+            }
         }
 
-        void SaveCSFile(CSharp.CSGen gen)
+        void SaveCSFile(string code)
         {
             var fileName = AssetName.Address + "/" + DefClass.ClassName + ".cs";
             using(var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
             {
-                sr.Write(gen.ClassCode);
+                sr.Write(code);
             }
         }
 
@@ -399,9 +451,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     while (true)
                     {
                         bool bFind = false;
-                        for (int i = 0; i < DefClass.Members.Count; i++)
+                        for (int i = 0; i < DefClass.Properties.Count; i++)
                         {
-                            if (DefClass.Members[i].VarName == $"Member_{num}")
+                            if (DefClass.Properties[i].VariableName == $"Member_{num}")
                             {
                                 num++;
                                 bFind = true;
@@ -412,11 +464,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             break;
                     }
 
-                    var mb = new DefineVar();
-                    mb.DefType = typeof(int).FullName;
-                    mb.VarName = $"Member_{num}";
-                    mb.IsLocalVar = false;
-                    DefClass.Members.Add(mb);
+                    var mb = new UVariableDeclaration();
+                    mb.VariableType = new UTypeReference(typeof(int));
+                    mb.VariableName = $"Member_{num}";
+                    mb.VisitMode = EVisisMode.Local;
+                    DefClass.Properties.Add(mb);
                 }
                 if (membersTreeNodeResult)
                 {
@@ -425,16 +477,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         IsDraggingMember = true;
                     }
                     var memRegionSize = ImGuiAPI.GetContentRegionAvail();
-                    for(int i=0; i<DefClass.Members.Count; i++)
+                    for(int i=0; i<DefClass.Properties.Count; i++)
                     {
-                        var mem = DefClass.Members[i];
-                        var memberTreeNodeResult = ImGuiAPI.TreeNodeEx(mem.VarName, flags);
+                        var mem = DefClass.Properties[i];
+                        var memberTreeNodeResult = ImGuiAPI.TreeNodeEx(mem.VariableName, flags);
                         var memberTreeNodeClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
                         ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
                         if(EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "mem_X_" + i))
                         {
                             // todo: 引用删除警告
-                            DefClass.Members.Remove(mem);
+                            DefClass.Properties.Remove(mem);
                             break;
                         }
                         if (memberTreeNodeResult)
@@ -442,8 +494,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             if (memberTreeNodeClicked)
                             {
                                 PGMember.Target = mem;
-                                DraggingMember = MemberVar.NewMemberVar(DefClass, mem.VarName);
-                                DraggingMember.Graph = this;
+                                DraggingMember = MemberVar.NewMemberVar(DefClass, mem.VariableName);
+                                DraggingMember.UserData = this;
                                 IsDraggingMember = false;
                             }
                         }
@@ -466,9 +518,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         while(true)
                         {
                             bool bFind = false;
-                            for (int i = 0; i < DefClass.Functions.Count; i++)
+                            for (int i = 0; i < DefClass.Methods.Count; i++)
                             {
-                                if (DefClass.Functions[i].Name == $"Method_{num}")
+                                if (DefClass.Methods[i].MethodName == $"Method_{num}")
                                 {
                                     num++;
                                     bFind = true;
@@ -479,13 +531,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 break;
                         }
 
-                        var f = new DefineFunction();
-                        f.ReturnType = typeof(void).FullName;
-                        f.Name = $"Method_{num}";
-                        DefClass.Functions.Add(f);
+                        var f = new UMethodDeclaration()
+                        {
+                            MethodName = $"Method_{num}",
+                        };
+                        DefClass.AddMethod(f);
 
-                        var func = UMacrossFunctionGraph.NewGraph(this, f);
-                        Functions.Add(func);
+                        var func = UMacrossMethodGraph.NewGraph(this, f);
+                        Methods.Add(func);
+                        for(int i=0; i<OpenFunctions.Count; i++)
+                        {
+                            OpenFunctions[i].CanvasMenuDirty = true;
+                        }
                     }
                     if (EGui.UIProxy.MenuItemProxy.BeginMenuItem("Override Method", null, null, ref drawList, ref menuData, ref mOverrideMenuState))
                     {
@@ -501,43 +558,56 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 if (methodsTreeNodeResult)
                 {
                     var funcRegionSize = ImGuiAPI.GetContentRegionAvail();
-                    for(int i=Functions.Count - 1; i>=0; i--)
+                    for(int i=Methods.Count - 1; i>=0; i--)
                     {
-                        var func = Functions[i];
-                        var funcTreeNodeResult = ImGuiAPI.TreeNodeEx(func.ToString(), flags);
+                        var method = Methods[i];
+                        var methodTreeNodeResult = ImGuiAPI.TreeNodeEx(method.Name, flags);
                         ImGuiAPI.SameLine(0, EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X);
-                        var funcTreeNodeDoubleClicked = ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
-                        var funcTreeNodeIsItemClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+                        var methodTreeNodeDoubleClicked = ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+                        var methodTreeNodeIsItemClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
                         ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
-                        var keyName = $"Delete func {func.Function.Name}?";
+                        var keyName = $"Delete func {method.Name}?";
                         if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "func_X_" + i))
                         {
                             EGui.UIProxy.MessageBox.Open(keyName);
                             break;
                         }
-                        EGui.UIProxy.MessageBox.Draw(keyName, $"Are you sure to delete {func.Function.Name}?", EGui.UIProxy.MessageBox.EButtonType.YesNo,
+                        EGui.UIProxy.MessageBox.Draw(keyName, $"Are you sure to delete {method.Name}?", EGui.UIProxy.MessageBox.EButtonType.YesNo,
                         () =>
                         {
                             if (AssetName != null)
-                                IO.FileManager.DeleteFile($"{AssetName.Address}/{func.Function.Name}.func");
-                            Functions.Remove(func);
-                            DefClass.Functions.Remove(func.Function);
-                        }, null);
-
-                        if (funcTreeNodeResult)
-                        {
-                            if (funcTreeNodeDoubleClicked)
+                                IO.FileManager.DeleteFile($"{AssetName.Address}/{method.Name}.func");
+                            Methods.Remove(method);
+                            for(int methodIdx = 0; methodIdx < method.MethodDatas.Count; methodIdx++)
+                                DefClass.RemoveMethod(method.MethodDatas[methodIdx].MethodDec);
+                            for(int itemIdx = 0; itemIdx < mOverrideMethodMenuItems.Count; itemIdx++)
                             {
-                                if (OpenFunctions.Contains(func) == false)
+                                for(int dataIdx = 0; dataIdx < method.MethodDatas.Count; dataIdx++)
                                 {
-                                    func.VisibleInClassGraphTables = true;
-                                    func.GraphRenderer.SetGraph(func);
-                                    OpenFunctions.Add(func);
+                                    if(mOverrideMethodMenuItems[itemIdx].MenuName == method.MethodDatas[dataIdx].MethodDec.GetKeyword())
+                                    {
+                                        mOverrideMethodMenuItems[itemIdx].Visible = true;
+                                    }
                                 }
                             }
-                            else if (funcTreeNodeIsItemClicked)
+
+                            OpenFunctions.Remove(method);
+                        }, null);
+
+                        if (methodTreeNodeResult)
+                        {
+                            if (methodTreeNodeDoubleClicked)
                             {
-                                PGMember.Target = func.Function;
+                                if (OpenFunctions.Contains(method) == false)
+                                {
+                                    method.VisibleInClassGraphTables = true;
+                                    method.GraphRenderer.SetGraph(method);
+                                    OpenFunctions.Add(method);
+                                }
+                            }
+                            else if (methodTreeNodeIsItemClicked)
+                            {
+                                PGMember.Target = method;
                             }
                         }
                     }
@@ -549,10 +619,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (ImGuiAPI.CollapsingHeader("Property", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
             {
                 PGMember.OnDraw(true, false, false);
-            }
-            if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
-            {
-                NodePropGrid.OnDraw(true, false, false);
             }
         }
         protected unsafe void OnRightWindow()
@@ -566,7 +632,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var sz = vMax - vMin;
                 foreach (var i in OpenFunctions)
                 {
-                    if (ImGuiAPI.BeginTabItem(i.Function.Name, ref i.VisibleInClassGraphTables, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
+                    if (ImGuiAPI.BeginTabItem(i.Name, ref i.VisibleInClassGraphTables, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
                     {
                         DrawFunctionGraph(i, sz);
 
@@ -585,7 +651,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public void DrawFunctionGraph(UMacrossFunctionGraph func, Vector2 size)
+        public void DrawFunctionGraph(UMacrossMethodGraph func, Vector2 size)
         {
             if (ImGuiAPI.BeginChild("Function", in size, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
             {

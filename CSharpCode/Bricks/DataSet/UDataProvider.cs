@@ -58,7 +58,7 @@ namespace EngineNS.Bricks.DataSet
                 tmp.ColumnIndex = columns.ColumeIndex;
                 if (columns.DataConverter != null)
                 {
-                    tmp.Conveter = Rtti.UTypeDescManager.CreateInstance(columns.DataConverter.SystemType) as UDataConverter;
+                    tmp.Conveter = Rtti.UTypeDescManager.CreateInstance(columns.DataConverter) as UDataConverter;
                 }
                 if (i.PropertyType.GetInterface("IDataProvider") != null)
                 {

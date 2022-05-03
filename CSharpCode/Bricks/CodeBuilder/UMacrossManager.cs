@@ -38,18 +38,17 @@ namespace EngineNS.Bricks.CodeBuilder
                 Config.GameReferenceAssemblies = new List<string>()
                 {
                     IO.FileManager.GetRelativePath(
-                        UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject,
-                        UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current) + "Engine.Window.dll"),
+                        IO.FileManager.GetBaseDirectory(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject),
+                        UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current)) + "Engine.Window.dll",
                 };
                 Config.GenProjects = new List<CodeCompiler.ProjectConfig>()
                 {
                     new CodeCompiler.ProjectConfig()
                     {
                         ProjectType = CodeCompiler.ProjectConfig.enProjectType.DefaultGame,
-                        //ProjectFile = IO.FileManager.GetRelativePath(
-                        //    UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject,
-                        //    UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game) + "MacrossGenCSharp.shproj"),
-                        ProjectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game) + "MacrossGenCSharp.shproj",
+                        ProjectFile = IO.FileManager.GetRelativePath(
+                            IO.FileManager.GetBaseDirectory(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject),
+                            UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game)) + "MacrossGenCSharp.shproj",
                         ProjectGuid = Guid.NewGuid(),
                         MinVSVersion = new Version(14, 0),
                     }

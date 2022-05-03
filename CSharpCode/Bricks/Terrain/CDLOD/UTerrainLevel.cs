@@ -136,7 +136,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     }
                 }
 
-                hMap.GetRange(out HeightMapMinHeight, out HeightMapMaxHeight);
+                hMap.GetRangeUnsafe<float, Procedure.FFloatOperator>(out HeightMapMinHeight, out HeightMapMaxHeight);
                 float HeightfieldMidHeight = (HeightMapMinHeight + HeightMapMaxHeight) * 0.5f;
                 PxHeightfieldScale = 0.1f;//0.1f精度为分米
                 HeightfieldWidth = hMap.Width;
@@ -146,7 +146,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 {
                     for (int j = 0; j < HeightfieldWidth; j++)
                     {
-                        float height = hMap.GetPixel(i, j);
+                        float height = hMap.GetPixel<float>(i, j);
                         float localHeight = height - HeightfieldMidHeight;
                         PxHeightfieldSamples[i * HeightfieldWidth + j].height = (short)(localHeight / PxHeightfieldScale);//(short)((height * (float)short.MaxValue) / maxHeight);
                         PxHeightfieldSamples[i * HeightfieldWidth + j].materialIndex0 = 0;
@@ -159,14 +159,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 HeightMapSRV = hMap.CreateAsHeightMapTexture2D(HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
                 var norMap = new Bricks.Procedure.UImage2D();
                 norMap.Initialize(hMap.Width, hMap.Height,
-                    terrainGen.AssetGraph.Root.GetResultBuffer(1),
-                    terrainGen.AssetGraph.Root.GetResultBuffer(2),
-                    terrainGen.AssetGraph.Root.GetResultBuffer(3),
+                    terrainGen.AssetGraph.Root.GetResultBuffer(1) as Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>,
                     null);
 
                 var idMap = new Bricks.Procedure.UImage2D();
                 idMap.Initialize(hMap.Width, hMap.Height,
-                    terrainGen.AssetGraph.Root.GetResultBuffer(4),
+                    terrainGen.AssetGraph.Root.GetResultBuffer(2) as Procedure.USuperBuffer<float, Procedure.FFloatOperator>,
                     null,
                     null,
                     null);

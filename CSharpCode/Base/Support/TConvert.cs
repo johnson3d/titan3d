@@ -254,6 +254,10 @@ namespace EngineNS.Support
                 return 0;
             }
         }
+        public static object ToObject(Rtti.UTypeDesc type, string text)
+        {
+            return ToObject(type.SystemType, text);
+        }
         public static object ToObject(System.Type type, string text)
         {
             try

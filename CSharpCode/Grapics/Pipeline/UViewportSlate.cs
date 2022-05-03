@@ -57,6 +57,7 @@ namespace EngineNS.Graphics.Pipeline
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public bool IsViewportSlateFocused { get; private set; }
         public virtual void OnDrawViewportUI(in Vector2 startDrawPos) { }
+        public bool IsHoverGuiItem { get; set; }
         public virtual unsafe void OnDraw()
         {
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
@@ -145,7 +146,7 @@ namespace EngineNS.Graphics.Pipeline
                 if(ImGuiAPI.BeginChild("ViewportClient", in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                 {
                     IsViewportSlateFocused = ImGuiAPI.IsHoverCurrentWindow() && ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows);
-                    OnDrawViewportUI(in curPos);
+                    OnDrawViewportUI(in curPos);                    
                     ImGuiAPI.EndChild();
                 }
             }
@@ -226,6 +227,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (proxy == null)
                 {
+                    //if (this.IsHoverGuiItem == false)
                     edtorPolicy.PickedProxiableManager.ClearSelected();
                 }
                 else

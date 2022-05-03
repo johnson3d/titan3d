@@ -7,6 +7,43 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder
 {
+    public class ContextMenuAttribute : Attribute
+    {
+        // --------------------------------------
+        public string[] MenuPaths;  // \分隔
+        // 可使用符号
+        // @serial@ 序列号,serial和@之前可以任意加字符，serial会替换为序列号
+        // --------------------------------------
+        public string FilterStrings; // ,分隔
+        public string[] KeyStrings;
+
+        public ContextMenuAttribute(string filterStrings, string menuPaths, params string[] keyStrings)
+        {
+            MenuPaths = menuPaths.Split('\\');
+            FilterStrings = filterStrings;
+            KeyStrings = keyStrings;
+        }
+        public bool HasKeyString(string keyString)
+        {
+            for(int i=0; i<KeyStrings.Length; i++)
+            {
+                if (KeyStrings[i] == keyString)
+                    return true;
+            }
+            return false;
+        }
+    }
+
+    public class MacrossContextMenuData
+    {
+        public delegate bool Delegate_MenuIsVisible(MacrossContextMenuData data);
+        public delegate bool Delegate_MenuNodeShow(MacrossContextMenuData data);
+
+        public string ParentMenuName;
+        public string FilterText;
+        public Vector2 PosMenu;
+    }
+
     public partial class UMacrossAMeta : IO.IAssetMeta
     {
         public override string GetAssetExtType()
@@ -42,6 +79,7 @@ namespace EngineNS.Bricks.CodeBuilder
     public partial class UMacross : IO.IAsset
     {
         public const string AssetExt = ".macross";
+        public const string MacrossEditorKeyword = "Macross";
 
         public class MacrossCreateAttribute : IO.CommonCreateAttribute
         {
@@ -108,7 +146,7 @@ namespace EngineNS.Bricks.CodeBuilder
                                 if (type.IsSealed)
                                     continue;
 
-                                var atts = type.SystemType.GetCustomAttributes(typeof(Macross.UMacrossAttribute), false);
+                                var atts = type.GetCustomAttributes(typeof(Macross.UMacrossAttribute), false);
                                 if (atts == null || atts.Length == 0)
                                     continue;
 
@@ -199,9 +237,9 @@ namespace EngineNS.Bricks.CodeBuilder
             var graph = new MacrossNode.UMacrossEditor();
             graph.AssetName = name;
             graph.DefClass.ClassName = name.PureName;
-            graph.DefClass.NameSpace = IO.FileManager.GetParentPathName(name.Name).TrimEnd('/').Replace('/', '.');
+            graph.DefClass.Namespace = new UNamespaceDeclaration(IO.FileManager.GetParentPathName(name.Name).TrimEnd('/').Replace('/', '.'));
             if (mSelectedType != null)
-                graph.DefClass.SuperClassName = mSelectedType.FullName;
+                graph.DefClass.SupperClassNames.Add(mSelectedType.FullName);
             graph.SaveClassGraph(name);
         }
     }

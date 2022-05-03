@@ -16,27 +16,29 @@ namespace EngineNS.Bricks.VXGI
         }
         protected override void UpdateShaderCode()
         {
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-            codeBuilder.AddLine($"#include \"{RName.GetRName("Shaders/Compute/VXGI/VxDebugModifier.cginc", RName.ERNameType.Engine).Address}\"");
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)");
-            codeBuilder.PushBrackets();
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            string sourceCode = "";
+            //var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
+            codeBuilder.AddLine($"#include \"{RName.GetRName("Shaders/Compute/VXGI/VxDebugModifier.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
+            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)", ref sourceCode);
+            codeBuilder.PushSegment(ref sourceCode);
             {
-                codeBuilder.AddLine($"DoVoxelDebugMeshVS(output, input);");
+                codeBuilder.AddLine($"DoVoxelDebugMeshVS(output, input);", ref sourceCode);
             }
-            codeBuilder.PopBrackets();
+            codeBuilder.PopSegment(ref sourceCode);
 
-            codeBuilder.AddLine("void MdfQueueDoModifiersPS(inout PS_INPUT input, inout MTL_OUTPUT mtl)");
-            codeBuilder.PushBrackets();
+            codeBuilder.AddLine("void MdfQueueDoModifiersPS(inout PS_INPUT input, inout MTL_OUTPUT mtl)", ref sourceCode);
+            codeBuilder.PushSegment(ref sourceCode);
             {
-                codeBuilder.AddLine($"DoVoxelDebugMeshPS(input, mtl);");
+                codeBuilder.AddLine($"DoVoxelDebugMeshPS(input, mtl);", ref sourceCode);
             }
-            codeBuilder.PopBrackets();
+            codeBuilder.PopSegment(ref sourceCode);
 
-            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION");
-            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION_PS");
+            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref sourceCode);
+            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION_PS", ref sourceCode);
 
             SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(codeBuilder.ClassCode);
+            SourceCode.SetText(sourceCode);
         }
         RHI.CShaderResources mAttachSRVs = null;
         public unsafe override void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh)

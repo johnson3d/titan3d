@@ -47,7 +47,7 @@ namespace EngineNS.GamePlay
             await mRoot.InitializeNode(this, data, Scene.EBoundVolumeType.Box, typeof(UPlacement));
             mRoot.SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
 
-            mBoundingDebugMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
+            mBoundingDebugMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
 
             await mMemberTickables.InitializeMembers(this);
             return true;
@@ -90,7 +90,8 @@ namespace EngineNS.GamePlay
                 GameObject = 1,
                 LightDebug = (1 << 1),
                 PhyxDebug = (1 << 2),
-                EditorObject = LightDebug | PhyxDebug,
+                UtilityDebug = (1 << 3),
+                EditorObject = LightDebug | PhyxDebug | UtilityDebug,
                 All = 0xFFFFFFFF,
             }
             public EVisCull CullType = EVisCull.Normal;
@@ -188,6 +189,8 @@ namespace EngineNS.GamePlay
             }
             mesh2.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             mesh2.SetWorldTransform(in node.Placement.AbsTransform, this, true);
+            mesh2.IsAcceptShadow = false;
+            mesh2.IsUnlit = true;
 
             bvs.Add(mesh2);
 

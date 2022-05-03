@@ -4,12 +4,12 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
-    public partial class UMaterialOutput : IBaseNode
+    public partial class UMaterialOutput : UNodeBase
     {
         public static UMaterialOutput NewNode(UMaterialGraph graph)
         {
             var result = new UMaterialOutput();
-            result.Graph = graph;
+            result.UserData = graph;
             return result;
         }
         public UMaterialOutput()
@@ -71,14 +71,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
 
-            var nodeExpr = OutNode as IBaseNode;
+            var nodeExpr = OutNode as UNodeBase;
             var type = nodeExpr.GetOutPinType(oPin);
 
             if (iPin == Albedo ||
                 iPin == Emissive ||
                 iPin == Normal )
             {
-                if (type != typeof(Vector3))
+                if (!type.IsEqual(typeof(Vector3)))
                     return false;
             }
             else if (iPin == Metallic ||
@@ -86,112 +86,234 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 iPin == Alpha ||
                 iPin == AlphaTest)
             {
-                if (type != typeof(float))
+                if (!type.IsEqual(typeof(float)))
                     return false;
             }
 
             return true;
         }
 
-        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        //[Obsolete]
+        //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        //{
+        //    Function.Name = "DO_PS_MATERIAL_IMPL";
+        //    Function.ReturnType = typeof(void).FullName;
+        //    Function.Arguments.Clear();
+        //    Function.Arguments.Add(new DefineFunctionParam() { DefType = "in PS_INPUT", VarName = "input" });
+        //    Function.Arguments.Add(new DefineFunctionParam() { DefType = "inout MTL_OUTPUT", VarName = "mtl" });
+        //    Function.LocalVars.Clear();
+        //    UniformVars.Clear();
+        //    Function.Body.Lines.Clear();
+        //    if (Albedo.HasLinker())
+        //    {
+        //        var linker = funGraph.FindInLinkerSingle(Albedo);
+        //        var exprNode = linker.OutNode as IBaseNode;
+        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
+        //        var assignOp = new AssignOp();
+        //        var setExpr = new HardCodeOp();
+        //        setExpr.Code = "mtl.mAlbedo";
+        //        assignOp.Left = setExpr;
+        //        assignOp.Right = expr;
+        //        Function.Body.PushExpr(assignOp);
+        //    }
+        //    if (Emissive.HasLinker())
+        //    {
+        //        var linker = funGraph.FindInLinkerSingle(Emissive);
+        //        var exprNode = linker.OutNode as IBaseNode;
+        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
+        //        var assignOp = new AssignOp();
+        //        var setExpr = new HardCodeOp();
+        //        setExpr.Code = "mtl.mEmissive";
+        //        assignOp.Left = setExpr;
+        //        assignOp.Right = expr;
+        //        Function.Body.PushExpr(assignOp);
+        //    }
+        //    if (Normal.HasLinker())
+        //    {
+        //        var linker = funGraph.FindInLinkerSingle(Normal);
+        //        var exprNode = linker.OutNode as IBaseNode;
+        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
+        //        var assignOp = new AssignOp();
+        //        var setExpr = new HardCodeOp();
+        //        setExpr.Code = "mtl.mNormal";
+        //        assignOp.Left = setExpr;
+        //        assignOp.Right = expr;
+        //        Function.Body.PushExpr(assignOp);
+        //    }
+        //    if (Metallic.HasLinker())
+        //    {
+        //        var linker = funGraph.FindInLinkerSingle(Metallic);
+        //        var exprNode = linker.OutNode as IBaseNode;
+        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
+        //        var assignOp = new AssignOp();
+        //        var setExpr = new HardCodeOp();
+        //        setExpr.Code = "mtl.mMetallic";
+        //        assignOp.Left = setExpr;
+        //        assignOp.Right = expr;
+        //        Function.Body.PushExpr(assignOp);
+        //    }
+        //    if (Rough.HasLinker())
+        //    {
+        //        var linker = funGraph.FindInLinkerSingle(Rough);
+        //        var exprNode = linker.OutNode as IBaseNode;
+        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
+        //        var assignOp = new AssignOp();
+        //        var setExpr = new HardCodeOp();
+        //        setExpr.Code = "mtl.mRough";
+        //        assignOp.Left = setExpr;
+        //        assignOp.Right = expr;
+        //        Function.Body.PushExpr(assignOp);
+        //    }
+        //    if (Alpha.HasLinker())
+        //    {
+        //        var linker = funGraph.FindInLinkerSingle(Alpha);
+        //        var exprNode = linker.OutNode as IBaseNode;
+        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
+        //        var assignOp = new AssignOp();
+        //        var setExpr = new HardCodeOp();
+        //        setExpr.Code = "mtl.mAlpha";
+        //        assignOp.Left = setExpr;
+        //        assignOp.Right = expr;
+        //        Function.Body.PushExpr(assignOp);
+        //    }
+        //    if (AlphaTest.HasLinker())
+        //    {
+        //        var linker = funGraph.FindInLinkerSingle(AlphaTest);
+        //        var exprNode = linker.OutNode as IBaseNode;
+        //        var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
+        //        var assignOp = new AssignOp();
+        //        var setExpr = new HardCodeOp();
+        //        setExpr.Code = "mtl.mAlphaTest";
+        //        assignOp.Left = setExpr;
+        //        assignOp.Right = expr;
+        //        Function.Body.PushExpr(assignOp);
+        //    }
+
+        //    return Function;
+        //}
+
+        //[Obsolete]
+        //public DefineFunction Function { get; } = new DefineFunction();
+        //[Obsolete]
+        //public List<DefineVar> UniformVars { get; } = new List<DefineVar>();
+
+        public UMethodDeclaration Function { get; } = new UMethodDeclaration();
+        public List<UVariableDeclaration> UniformVars { get; } = new List<UVariableDeclaration>();
+        public override void BuildStatements(ref BuildCodeStatementsData data)
         {
-            Function.Name = "DO_PS_MATERIAL_IMPL";
-            Function.ReturnType = typeof(void).FullName;
+            var graph = data.NodeGraph as UMaterialGraph;
+            Function.MethodName = "DO_PS_MATERIAL_IMPL";
             Function.Arguments.Clear();
-            Function.Arguments.Add(new DefineFunctionParam() { DefType = "in PS_INPUT", VarName = "input" });
-            Function.Arguments.Add(new DefineFunctionParam() { DefType = "inout MTL_OUTPUT", VarName = "mtl" });
-            Function.LocalVars.Clear();
+            Function.Arguments.Add(
+                new UMethodArgumentDeclaration()
+                {
+                    OperationType = EMethodArgumentAttribute.In,
+                    VariableType = new UTypeReference("PS_INPUT"),
+                    VariableName = "input",
+                });
+            Function.Arguments.Add(
+                new UMethodArgumentDeclaration()
+                {
+                    OperationType = EMethodArgumentAttribute.Ref,
+                    VariableType = new UTypeReference("MTL_OUTPUT"),
+                    VariableName = "mtl",
+                });
+            Function.LocalVariables.Clear();
             UniformVars.Clear();
-            Function.Body.Lines.Clear();
+            Function.MethodBody.Sequence.Clear();
+            data.CurrentStatements = Function.MethodBody.Sequence;
+            data.MethodDec = Function;
             if (Albedo.HasLinker())
             {
-                var linker = funGraph.FindInLinkerSingle(Albedo);
-                var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-                var assignOp = new AssignOp();
-                var setExpr = new HardCodeOp();
-                setExpr.Code = "mtl.mAlbedo";
-                assignOp.Left = setExpr;
-                assignOp.Right = expr;
-                Function.Body.PushExpr(assignOp);
+                var linker = graph.FindInLinkerSingle(Albedo);
+                var pinNode = graph.GetOppositePinNode(Albedo);
+                pinNode.BuildStatements(ref data);
+                var exp = graph.GetOppositePinExpression(Albedo, ref data);
+                var assign = new UAssignOperatorStatement()
+                {
+                    From = exp,
+                    To = new UVariableReferenceExpression("mAlbedo", new UVariableReferenceExpression("mtl")),
+                };
+                Function.MethodBody.Sequence.Add(assign);
             }
-            if (Emissive.HasLinker())
+            if(Emissive.HasLinker())
             {
-                var linker = funGraph.FindInLinkerSingle(Emissive);
-                var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-                var assignOp = new AssignOp();
-                var setExpr = new HardCodeOp();
-                setExpr.Code = "mtl.mEmissive";
-                assignOp.Left = setExpr;
-                assignOp.Right = expr;
-                Function.Body.PushExpr(assignOp);
+                var linker = graph.FindInLinkerSingle(Emissive);
+                var pinNode = graph.GetOppositePinNode(Emissive);
+                pinNode.BuildStatements(ref data);
+                var exp = graph.GetOppositePinExpression(Emissive, ref data);
+                var assign = new UAssignOperatorStatement()
+                {
+                    From = exp,
+                    To = new UVariableReferenceExpression("mEmissive", new UVariableReferenceExpression("mtl")),
+                };
+                Function.MethodBody.Sequence.Add(assign);
             }
             if (Normal.HasLinker())
             {
-                var linker = funGraph.FindInLinkerSingle(Normal);
-                var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-                var assignOp = new AssignOp();
-                var setExpr = new HardCodeOp();
-                setExpr.Code = "mtl.mNormal";
-                assignOp.Left = setExpr;
-                assignOp.Right = expr;
-                Function.Body.PushExpr(assignOp);
+                var linker = graph.FindInLinkerSingle(Normal);
+                var pinNode = graph.GetOppositePinNode(Normal);
+                pinNode.BuildStatements(ref data);
+                var exp = graph.GetOppositePinExpression(Normal, ref data);
+                var assign = new UAssignOperatorStatement()
+                {
+                    From = exp,
+                    To = new UVariableReferenceExpression("mNormal", new UVariableReferenceExpression("mtl")),
+                };
+                Function.MethodBody.Sequence.Add(assign);
             }
             if (Metallic.HasLinker())
             {
-                var linker = funGraph.FindInLinkerSingle(Metallic);
-                var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-                var assignOp = new AssignOp();
-                var setExpr = new HardCodeOp();
-                setExpr.Code = "mtl.mMetallic";
-                assignOp.Left = setExpr;
-                assignOp.Right = expr;
-                Function.Body.PushExpr(assignOp);
+                var linker = graph.FindInLinkerSingle(Metallic);
+                var pinNode = graph.GetOppositePinNode(Metallic);
+                pinNode.BuildStatements(ref data);
+                var exp = graph.GetOppositePinExpression(Metallic, ref data);
+                var assign = new UAssignOperatorStatement()
+                {
+                    From = exp,
+                    To = new UVariableReferenceExpression("mMetallic", new UVariableReferenceExpression("mtl")),
+                };
+                Function.MethodBody.Sequence.Add(assign);
             }
             if (Rough.HasLinker())
             {
-                var linker = funGraph.FindInLinkerSingle(Rough);
-                var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-                var assignOp = new AssignOp();
-                var setExpr = new HardCodeOp();
-                setExpr.Code = "mtl.mRough";
-                assignOp.Left = setExpr;
-                assignOp.Right = expr;
-                Function.Body.PushExpr(assignOp);
+                var linker = graph.FindInLinkerSingle(Rough);
+                var pinNode = graph.GetOppositePinNode(Rough);
+                pinNode.BuildStatements(ref data);
+                var exp = graph.GetOppositePinExpression(Rough, ref data);
+                var assign = new UAssignOperatorStatement()
+                {
+                    From = exp,
+                    To = new UVariableReferenceExpression("mRough", new UVariableReferenceExpression("mtl")),
+                };
+                Function.MethodBody.Sequence.Add(assign);
             }
             if (Alpha.HasLinker())
             {
-                var linker = funGraph.FindInLinkerSingle(Alpha);
-                var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-                var assignOp = new AssignOp();
-                var setExpr = new HardCodeOp();
-                setExpr.Code = "mtl.mAlpha";
-                assignOp.Left = setExpr;
-                assignOp.Right = expr;
-                Function.Body.PushExpr(assignOp);
+                var linker = graph.FindInLinkerSingle(Alpha);
+                var pinNode = graph.GetOppositePinNode(Alpha);
+                pinNode.BuildStatements(ref data);
+                var exp = graph.GetOppositePinExpression(Alpha, ref data);
+                var assign = new UAssignOperatorStatement()
+                {
+                    From = exp,
+                    To = new UVariableReferenceExpression("mAlpha", new UVariableReferenceExpression("mtl")),
+                };
+                Function.MethodBody.Sequence.Add(assign);
             }
             if (AlphaTest.HasLinker())
             {
-                var linker = funGraph.FindInLinkerSingle(AlphaTest);
-                var exprNode = linker.OutNode as IBaseNode;
-                var expr = exprNode.GetExpr(funGraph, cGen, linker.OutPin, false) as OpExpress;
-                var assignOp = new AssignOp();
-                var setExpr = new HardCodeOp();
-                setExpr.Code = "mtl.mAlphaTest";
-                assignOp.Left = setExpr;
-                assignOp.Right = expr;
-                Function.Body.PushExpr(assignOp);
+                var linker = graph.FindInLinkerSingle(AlphaTest);
+                var pinNode = graph.GetOppositePinNode(AlphaTest);
+                pinNode.BuildStatements(ref data);
+                var exp = graph.GetOppositePinExpression(AlphaTest, ref data);
+                var assign = new UAssignOperatorStatement()
+                {
+                    From = exp,
+                    To = new UVariableReferenceExpression("mAlphaTest", new UVariableReferenceExpression("mtl")),
+                };
+                Function.MethodBody.Sequence.Add(assign);
             }
-
-            return Function;
         }
-
-        public DefineFunction Function { get; } = new DefineFunction();
-        public List<DefineVar> UniformVars { get; } = new List<DefineVar>();
     }
 }

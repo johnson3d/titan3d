@@ -132,6 +132,10 @@ namespace EngineNS.Support
             {
                 SetVector3(*(Vector3*)&v);
             }
+            else if(typeof(T) == typeof(Vector4))
+            {
+                SetVector4(*(Vector4*)&v);
+            }
             else if (typeof(T) == typeof(Quaternion))
             {
                 SetQuaternion(*(Quaternion*)&v);
@@ -151,6 +155,51 @@ namespace EngineNS.Support
             {
                 CoreSDK.MemoryCopy(tar, (void*)p, (uint)size);
             }
+        }
+        public unsafe bool IsEqual(in UAnyValue val)
+        {
+            if (ValueType != val.ValueType)
+                return false;
+            switch(ValueType)
+            {
+                case EValueType.ManagedHandle:
+                    return GCHandle.Target == val.GCHandle.Target;
+                case EValueType.I8:
+                    return mI8Value == val.mI8Value;
+                case EValueType.I16:
+                    return mI16Value == val.mI16Value;
+                case EValueType.I32:
+                    return mI32Value == val.mI32Value;
+                case EValueType.I64:
+                    return mI64Value == val.mI64Value;
+                case EValueType.UI8:
+                    return mUI8Value == val.mUI8Value;
+                case EValueType.UI16:
+                    return mUI16Value == val.mUI16Value;
+                case EValueType.UI32:
+                    return mUI32Value == val.mUI32Value;
+                case EValueType.UI64:
+                    return mUI64Value == val.mUI64Value;
+                case EValueType.F32:
+                    return mF32Value == val.mF32Value;
+                case EValueType.F64:
+                    return mF64Value == val.mF64Value;
+                case EValueType.Name:
+                    return mNameString.Text == val.mNameString.Text;
+                case EValueType.Struct:
+                    return (mStruct.mStructPointer == val.mStruct.mStructPointer) &&
+                           (mStruct.mStructSize == val.mStruct.mStructSize) &&
+                           (mStruct.mTypeName.Text == val.mStruct.mTypeName.Text);
+                case EValueType.Ptr:
+                    return mPointer == val.mPointer;
+                case EValueType.V2:
+                    return mV2 == val.mV2;
+                case EValueType.V3:
+                    return mV3 == val.mV3;
+                case EValueType.V4:
+                    return mV4 == val.mV4;
+            }
+            return false;
         }
         public unsafe IntPtr GetStructPointer()
         {
@@ -313,6 +362,50 @@ namespace EngineNS.Support
                     return mV3;
                 case EValueType.V4:
                     return mV4;
+                default:
+                    return null;
+            }
+        }
+        public override string ToString()
+        {
+            switch(mValueType)
+            {
+                case EValueType.Unknown:
+                    return "null";
+                case EValueType.ManagedHandle:
+                    return "null";
+                case EValueType.I8:
+                    return mI8Value.ToString();
+                case EValueType.I16:
+                    return mI16Value.ToString();
+                case EValueType.I32:
+                    return mI32Value.ToString();
+                case EValueType.I64:
+                    return mI64Value.ToString();
+                case EValueType.UI8:
+                    return mUI8Value.ToString();
+                case EValueType.UI16:
+                    return mUI16Value.ToString();
+                case EValueType.UI32:
+                    return mUI32Value.ToString();
+                case EValueType.UI64:
+                    return mUI64Value.ToString();
+                case EValueType.F32:
+                    return mF32Value.ToString();
+                case EValueType.F64:
+                    return mF64Value.ToString();
+                case EValueType.Name:
+                    return mNameString.c_str();
+                case EValueType.Struct:
+                    return mStruct.ToString();
+                case EValueType.Ptr:
+                    return "null";
+                case EValueType.V2:
+                    return mV2.ToString();
+                case EValueType.V3:
+                    return mV3.ToString();
+                case EValueType.V4:
+                    return mV4.ToString();
                 default:
                     return null;
             }
@@ -590,6 +683,15 @@ namespace EngineNS.Support
             Dispose();
             mValueType = EValueType.V3;
             mV3 = v;
+        }
+        public void SetVector4(Vector4 v)
+        {
+            Dispose();
+            mValueType = EValueType.V4;
+            mV4.X = v.X;
+            mV4.Y = v.Y;
+            mV4.Z = v.Z;
+            mV4.W = v.W;
         }
         public void SetQuaternion(Quaternion v)
         {

@@ -5,6 +5,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
+    [ContextMenu("sampler", "Data\\Sampler@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class SamplerState : VarNode
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
@@ -24,24 +25,38 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             mDesc.SetDefault();
         }
-        public override void OnMaterialEditorGenCode(Bricks.CodeBuilder.HLSL.UHLSLGen gen, UMaterial Material)
+        //public override void OnMaterialEditorGenCode(UMaterial Material)
+        //{
+        //    var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+        //    tmp.Name = this.Name;
+        //    var sampNode = this;
+        //    tmp.Value = sampNode.Desc;
+        //    Material.UsedSamplerStates.Add(tmp);
+        //}
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
+            return VarType;
+        }
+        ISamplerStateDesc mDesc;
+        public ISamplerStateDesc Desc { get => mDesc; set => mDesc = value; }
+        //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        //{
+        //    var Var = new OpUseVar(this.Name, false);
+        //    return Var;
+        //}
+
+        public override void BuildStatements(ref BuildCodeStatementsData data)
+        {
+            var material = data.UserData as UMaterial;
             var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
             tmp.Name = this.Name;
             var sampNode = this;
             tmp.Value = sampNode.Desc;
-            Material.UsedSamplerStates.Add(tmp);
+            material.UsedSamplerStates.Add(tmp);
         }
-        public override System.Type GetOutPinType(PinOut pin)
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
-            return VarType.SystemType;
-        }
-        ISamplerStateDesc mDesc;
-        public ISamplerStateDesc Desc { get => mDesc; set => mDesc = value; }
-        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
-        {
-            var Var = new OpUseVar(this.Name, false);
-            return Var;
+            return new UVariableReferenceExpression(Name);
         }
     }
 }

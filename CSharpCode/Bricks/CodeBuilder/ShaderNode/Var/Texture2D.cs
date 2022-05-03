@@ -5,6 +5,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
+    [ContextMenu("texture2d", "Data\\Texture2D@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class Texture2D : VarNode
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
@@ -48,17 +49,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         {
             
         }
-        public override void OnMaterialEditorGenCode(Bricks.CodeBuilder.HLSL.UHLSLGen gen, UMaterial Material)
+        //public override void OnMaterialEditorGenCode(UMaterial Material)
+        //{
+        //    var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+        //    tmp.Name = this.Name;
+        //    var texNode = this;
+        //    tmp.Value = texNode.AssetName;
+        //    Material.UsedRSView.Add(tmp);
+        //}
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
-            var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
-            tmp.Name = this.Name;
-            var texNode = this;
-            tmp.Value = texNode.AssetName;
-            Material.UsedRSView.Add(tmp);
-        }
-        public override System.Type GetOutPinType(PinOut pin)
-        {
-            return VarType.SystemType;
+            return VarType;
         }
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
@@ -75,15 +76,30 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public override void OnLButtonClicked(NodePin clickedPin)
         {
             base.OnLButtonClicked(clickedPin);
-
-            Graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<VarNode>.TypeDesc;
+            var graph = UserData as UMaterialGraph;
+            graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<VarNode>.TypeDesc;
         }
-        public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
+        //{
+        //    var Var = new OpUseVar(this.Name, false);
+        //    return Var;
+        //}
+
+        public override void BuildStatements(ref BuildCodeStatementsData data)
         {
-            var Var = new OpUseVar(this.Name, false);
-            return Var;
+            var material = data.UserData as UMaterial;
+            var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+            tmp.Name = this.Name;
+            var texNode = this;
+            tmp.Value = texNode.AssetName;
+            material.UsedRSView.Add(tmp);
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            return new UVariableReferenceExpression(Name);
         }
     }
+    [ContextMenu("texture2darray", "Data\\Texture2DArray@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class Texture2DArray : VarNode
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
@@ -102,9 +118,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             OutTex.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutTex);
         }
-        public override System.Type GetOutPinType(PinOut pin)
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
-            return VarType.SystemType;
+            return VarType;
         }
     }
 }

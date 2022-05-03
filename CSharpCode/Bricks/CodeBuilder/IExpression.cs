@@ -5,10 +5,12 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder
 {
+    [Obsolete]
     public class IExpression
     {
         public IExpression NextExpr;
     }
+    [Obsolete]
     public enum EBinocularOp
     {
         Assign,// =
@@ -29,6 +31,7 @@ namespace EngineNS.Bricks.CodeBuilder
         BitOr,// |   
         GetMember,//. ----> a.b
     }
+    [Obsolete]
     public enum EMonocularOp
     {
         Not,// !
@@ -38,6 +41,7 @@ namespace EngineNS.Bricks.CodeBuilder
         RDecrease,//i--
         LDecrease,//--i
     }
+    [Obsolete]
     public enum EFlowOp
     {
         If,// if
@@ -48,6 +52,7 @@ namespace EngineNS.Bricks.CodeBuilder
         Break,// break
         Return,// return
     }
+    [Obsolete]
     public enum EVisitMode
     {
         Public,
@@ -55,17 +60,41 @@ namespace EngineNS.Bricks.CodeBuilder
         Private,
         Local,
     }
+    [Obsolete]
     public interface IGen
     {
         void GenLines(IExpression src, ICodeGen cgen);
         bool IsFlowControl { get; }
     }
+    [Obsolete]
     public interface IOpGen : IGen
     {
         string Gen(OpExpress src, ICodeGen cgen);
     }
     //定义表达式
     [Rtti.Meta]
+    [Obsolete]
+    public partial class DefineAttribute : IExpression
+    {
+        [Rtti.Meta]
+        public string AttributeName { get; set; }
+        [Rtti.Meta]
+        public string NameSpace { get; set; }
+        [Rtti.Meta]
+        public List<DefineVar> Members
+        {
+            get;
+            set;
+        } = new List<DefineVar>();
+
+        public string GetFullName()
+        {
+            return NameSpace + '.' + AttributeName;
+        }
+
+    }
+    [Rtti.Meta]
+    [Obsolete]
     public partial class DefineClass : IExpression
     {
         [Rtti.Meta]
@@ -87,6 +116,18 @@ namespace EngineNS.Bricks.CodeBuilder
             if (desc == null)
                 return null;
             return desc.SystemType;
+        }
+        public Rtti.UTypeDesc TryGetTypeDesc()
+        {
+            return Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(GetFullName());
+        }
+        public Rtti.UClassMeta TryGetTypeMeta()
+        {
+            var desc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(GetFullName());
+            if (desc == null)
+                return null;
+
+            return Rtti.UClassMetaManager.Instance.GetMeta(desc);
         }
         public string GetFullName()
         {
@@ -131,6 +172,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
     [Rtti.Meta]
+    [Obsolete]
     public partial class DefineVar : IExpression
     {
         [Rtti.Meta]
@@ -151,8 +193,8 @@ namespace EngineNS.Bricks.CodeBuilder
 
                 ImGuiAPI.SetNextItemWidth(-1);
                 TypeSlt.AssemblyFilter = AssemblyFilter;
-                TypeSlt.ExcludeValueType = ExcludeValueType;
-                TypeSlt.SearchFromMetas = true;
+                TypeSlt.FilterMode = FilterMode;
+                TypeSlt.FilterMode |= EGui.Controls.TypeSelector.EFilterMode.ExcludeNoMeta;// .SearchFromMetas = true;
                 TypeSlt.BaseType = BaseType;
                 var typeStr = info.Value as string;
                 TypeSlt.SelectedType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeStr);
@@ -186,6 +228,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public string InitValue { get; set; } = null;
     }
     [Rtti.Meta]
+    [Obsolete]
     public class DefineFunctionParam : DefineVar
     {
         public enum enOpType
@@ -201,6 +244,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public bool IsParamArray { get; set; } = false;
     }
     [Rtti.Meta]
+    [Obsolete]
     public partial class DefineFunction : IExpression
     {
         [Browsable(false)]
@@ -209,6 +253,20 @@ namespace EngineNS.Bricks.CodeBuilder
             get;
             set;
         } = false;
+
+        [Rtti.Meta, Browsable(false)]
+        public List<DefineAttribute> Attributes
+        {
+            get;
+            set;
+        } = new List<DefineAttribute>()
+        {
+            new DefineAttribute()
+            {
+                AttributeName = "MetaAttribute",
+                NameSpace = "EngineNS.Rtti",
+            }
+        };
         [Rtti.Meta]
         public EVisitMode VisitMode { get; set; } = EVisitMode.Public;
         //[DefineVar.PropDefTypeEditor(typeof(void))]
@@ -254,9 +312,11 @@ namespace EngineNS.Bricks.CodeBuilder
     }
     //运算表达式
     #region OpExpression
+    [Obsolete]
     public class OpExpress : IExpression
     {
     }
+    [Obsolete]
     public class OpUseVar : OpExpress
     {
         public bool IsMember;
@@ -267,6 +327,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         public string Name;
     }
+    [Obsolete]
     public class OpUseDefinedVar : OpExpress
     {
         public OpUseDefinedVar(DefineVar v)
@@ -276,6 +337,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public OpExpress Self;
         public DefineVar DefVar;
     }
+    [Obsolete]
     public class OpExecuteAndUseDefinedVar : OpExpress
     {
         public OpExecuteAndUseDefinedVar(IExpression exec, DefineVar v)
@@ -287,6 +349,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public OpExpress Self;
         public DefineVar DefVar;
     }
+    [Obsolete]
     public class BinocularOp : OpExpress
     {
         public BinocularOp()
@@ -316,6 +379,7 @@ namespace EngineNS.Bricks.CodeBuilder
             }
         }
     }
+    [Obsolete]
     public class MonocularOp : OpExpress
     {
         public MonocularOp(EMonocularOp o)
@@ -325,15 +389,18 @@ namespace EngineNS.Bricks.CodeBuilder
         public EMonocularOp Op;
         public OpExpress Target;
     }
+    [Obsolete]
     public class IndexerOp : OpExpress
     {
         public OpExpress Target;
         public List<OpExpress> Arguments = new List<OpExpress>();
     }
+    [Obsolete]
     public class ThisVar : OpExpress
     {
 
     }
+    [Obsolete]
     public class ConstVar : OpExpress
     {
         public ConstVar(string n)
@@ -343,6 +410,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public Rtti.UTypeDesc VarType;
         public string Num;
     }
+    [Obsolete]
     public class CallOp : OpExpress
     {
         public bool IsStatic = false;
@@ -354,6 +422,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public string FunOutLocalVar;
         public ConvertTypeOp ConvertType;
     }
+    [Obsolete]
     public class CallDefFunOp : OpExpress
     {
         public OpExpress Host;
@@ -361,74 +430,108 @@ namespace EngineNS.Bricks.CodeBuilder
         public List<OpExpress> Arguments = new List<OpExpress>();
     }
     #region BoolOp
+    [Obsolete]
     public class BoolOp : OpExpress
     {
     }
+    [Obsolete]
     public class BoolEqualOp : BoolOp
     {
         public OpExpress Left;
         public OpExpress Right;
     }
+    [Obsolete]
     public class BoolGreateOp : BoolOp
     {
         public OpExpress Left;
         public OpExpress Right;
     }
+    [Obsolete]
     public class BoolGreateEqualOp : BoolOp
     {
         public OpExpress Left;
         public OpExpress Right;
     }
+    [Obsolete]
     public class BoolLessOp : BoolOp
     {
         public OpExpress Left;
         public OpExpress Right;
     }
+    [Obsolete]
     public class BoolLessEqualOp : BoolOp
     {
         public OpExpress Left;
         public OpExpress Right;
     }
+    [Obsolete]
     public class BoolAndOp : BoolOp
     {
         public BoolOp Left;
         public BoolOp Right;
     }
+    [Obsolete]
     public class BoolOrOp : BoolOp
     {
         public BoolOp Left;
         public BoolOp Right;
     }
+    [Obsolete]
     public class BoolNotOp : BoolOp
     {
         public BoolOp Target;
     }
     #endregion
+    [Obsolete]
     public class DefineAndInitVarOp : OpExpress
     {
         public string DefType;
         public string VarName;
         public string VarValue;
     }
+    [Obsolete]
     public class ConvertTypeOp : OpExpress
     {
         public string TargetType;
         public OpExpress ObjExpr;
         public bool UseAs;
     }
+    [Obsolete]
     public class NewObjectOp : OpExpress
     {
         public string Type;
         public string InitValue;
     }
+    [Obsolete]
     public class HardCodeOp : OpExpress
     {
         public string Code;
+    }
+    // 获取默认值
+    [Obsolete]
+    public class DefaultValueOp : OpExpress
+    {
+        public string Type;
+        public string ValueName;
+    }
+    [Obsolete]
+    public class VariableReferenceOp : OpExpress
+    {
+        public enum eReferenceType
+        {
+            None,
+            In,
+            Out,
+            Ref,
+        }
+        public eReferenceType ReferenceType = eReferenceType.None;
+        public string VariableName;
     }
     #endregion
 
     #region FlowExpression
     //流程控制表达式
+    [Obsolete]
     public class ExecuteSequence : IExpression
     {
         public List<IExpression> Lines = new List<IExpression>();
@@ -437,10 +540,12 @@ namespace EngineNS.Bricks.CodeBuilder
             Lines.Add(expr);
         }
     }
+    [Obsolete]
     public class ReturnOp : IExpression
     {
         public OpExpress ReturnExpr;
     }
+    [Obsolete]
     public class IfOp : IExpression
     {
         public OpExpress Condition;//Must be BoolOp or Cmp
@@ -448,6 +553,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public List<IfOp> ElseIfs = new List<IfOp>();//这里塞入的IfOp的ElseExpr将忽略
         public ExecuteSequence ElseExpr;
     }
+    [Obsolete]
     public class ForOp : IExpression
     {
         public OpExpress BeginExpr;
@@ -455,14 +561,17 @@ namespace EngineNS.Bricks.CodeBuilder
         public OpExpress LoopExpr;
         public ExecuteSequence LoopBody = new ExecuteSequence();
     }
+    [Obsolete]
     public class ContinueOp : IExpression
     {
 
     }
+    [Obsolete]
     public class BreakOp : IExpression
     {
 
     }
+    [Obsolete]
     public class AssignOp : BinocularOp
     {
         public AssignOp()
@@ -477,6 +586,7 @@ namespace EngineNS.Bricks.CodeBuilder
 namespace EngineNS.UTest
 {
     [UTest]
+    [Obsolete]
     public class UTest_Codom
     {
         public int A;

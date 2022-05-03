@@ -165,9 +165,9 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         #endregion
 
-        public class UMeshDataSave
+        public class UMeshDataSave : IO.UCustomSerializerAttribute
         {
-            public unsafe static void Save(IO.IWriter ar, object host, string propName)
+            public override unsafe void Save(IO.IWriter ar, object host, string propName)
             {
                 System.Diagnostics.Debug.Assert(propName == "MeshDataSave");
                 var mesh = host as UPhyTriMesh;
@@ -175,7 +175,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 ar.Write(blob.GetSize());
                 ar.WritePtr(blob.GetData(), (int)blob.GetSize());
             }
-            public unsafe static void Load(IO.IReader ar, object host, string propName)
+            public override unsafe object Load(IO.IReader ar, object host, string propName)
             {
                 System.Diagnostics.Debug.Assert(propName == "MeshDataSave");
                 var mesh = host as UPhyTriMesh;
@@ -185,9 +185,10 @@ namespace EngineNS.Bricks.PhysicsCore
                 blob.mCoreObject.ReSize(size);
                 ar.ReadPtr(blob.mCoreObject.GetData(), (int)size);
                 mesh.mCoreObject.CreateFromCookedData(UEngine.Instance.PhyModue.PhyContext.mCoreObject, blob.mCoreObject.GetData(), size);
+                return null;
             }
         }
-        [IO.UCustomSerializer(CustomType = typeof(UMeshDataSave))]
+        [UMeshDataSave()]
         [Rtti.Meta]
         public object MeshDataSave
         {

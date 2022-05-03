@@ -23,21 +23,21 @@ namespace EngineNS.Graphics.Mesh
         {
             return null;
         }
-        protected override void UpdateShaderCode()
+        protected override string GetBaseBuilder(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
         {
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)");
-            codeBuilder.PushBrackets();
+            string codeString = "";
+            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)", ref codeString);
+            codeBuilder.PushSegment(ref codeString);
             {
 
             }
-            codeBuilder.PopBrackets();
+            codeBuilder.PopSegment(ref codeString);
 
-            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION");
+            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref codeString);
 
             SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(codeBuilder.ClassCode);
+            SourceCode.SetText(codeString);
+            return codeString;
         }
         public override Rtti.UTypeDesc GetPermutation(List<string> features)
         {
@@ -56,27 +56,19 @@ namespace EngineNS.Graphics.Mesh
     {
         protected override void UpdateShaderCode()
         {
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)");
-            codeBuilder.PushBrackets();
-            {
-
-            }
-            codeBuilder.PopBrackets();
-
-            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION");
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            var codeString = GetBaseBuilder(codeBuilder);
             
             if (typeof(PermutationType).Name == "UMdf_NoShadow")
             {
-                codeBuilder.AddLine("#define DISABLE_SHADOW_MDFQUEUE 1");
+                codeBuilder.AddLine("#define DISABLE_SHADOW_MDFQUEUE 1", ref codeString);
             }
             else if (typeof(PermutationType).Name == "UMdf_Shadow")
             {
 
             }
 
-            SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(codeBuilder.ClassCode);
+            SourceCode.SetText(codeString);
         }
     }
 
@@ -85,36 +77,73 @@ namespace EngineNS.Graphics.Mesh
         public UMdfInstanceStaticMesh()
         {
             mInstanceModifier = new Modifier.UInstanceModifier();
+            mInstanceModifier.SetMode(true);
             UpdateShaderCode();
         }
-        public Modifier.UInstanceModifier mInstanceModifier;
+        Modifier.UInstanceModifier mInstanceModifier;
+        public Modifier.UInstanceModifier InstanceModifier
+        {
+            get => mInstanceModifier;
+        }
+        public void SetInstantMode(bool bSSBO = true)
+        {
+            mInstanceModifier.SetMode(bSSBO);
+        }
         public override EVertexSteamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position, 
+            return new EVertexSteamType[] { 
+                EVertexSteamType.VST_Position,
+                EVertexSteamType.VST_Normal,
                 EVertexSteamType.VST_InstPos, 
                 EVertexSteamType.VST_InstQuat,
                 EVertexSteamType.VST_InstScale,
                 EVertexSteamType.VST_F4_1};
         }
-        protected override void UpdateShaderCode()
+        protected override string GetBaseBuilder(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
         {
-            var codeBuilder = new Bricks.CodeBuilder.HLSL.UHLSLGen();
-            codeBuilder.AddLine($"#include \"{RName.GetRName("Shaders/Modifier/InstancingModifier.cginc", RName.ERNameType.Engine).Address}\"");
-            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)");
-            codeBuilder.PushBrackets();
+            string codeString = "";
+            var mdfSourceName = RName.GetRName("shaders/modifier/InstancingModifier.cginc", RName.ERNameType.Engine);
+            codeBuilder.AddLine($"#include \"{mdfSourceName.Address}\"", ref codeString);
+            codeBuilder.AddLine("void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)", ref codeString);
+            codeBuilder.PushSegment(ref codeString);
             {
-                codeBuilder.AddLine($"DoInstancingModifierVS(output, input);"); 
+                codeBuilder.AddLine($"DoInstancingModifierVS(output, input);", ref codeString);
             }
-            codeBuilder.PopBrackets();
+            codeBuilder.PopSegment(ref codeString);
 
-            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION");
+            codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref codeString);
+
+            var code = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCodeProvider(mdfSourceName);
+            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{code.SourceCode.AsText.GetHashCode()}", ref codeString);
 
             SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(codeBuilder.ClassCode);
+            SourceCode.SetText(codeString);
+
+            return codeString;
         }
         public override void OnDrawCall(URenderPolicy.EShadingType shadingType, CDrawCall drawcall, URenderPolicy policy, UMesh mesh)
         {
             mInstanceModifier?.OnDrawCall(shadingType, drawcall, policy, mesh);
+        }
+    }
+
+    public class UMdfInstanceStaticMeshPermutation<PermutationType> : UMdfInstanceStaticMesh
+    {
+        protected override void UpdateShaderCode()
+        {
+            var codeBuilder = new Bricks.CodeBuilder.Backends.UHLSLCodeGenerator();
+            var codeString = GetBaseBuilder(codeBuilder);
+
+            if (typeof(PermutationType).Name == "UMdf_NoShadow")
+            {
+                codeBuilder.AddLine("#define DISABLE_SHADOW_MDFQUEUE 1", ref codeString);
+            }
+            else if (typeof(PermutationType).Name == "UMdf_Shadow")
+            {
+
+            }
+
+            SourceCode.SetText(codeString);
         }
     }
 }
