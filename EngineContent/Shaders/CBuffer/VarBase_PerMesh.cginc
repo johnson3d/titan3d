@@ -18,9 +18,6 @@ VK_BIND(5) cbuffer cbPerMesh DX_BIND_B(5)
 
 	int ObjectFLags_2Bit;
 
-	float4 AbsBonePos[360];
-	float4 AbsBoneQuat[360];
-
 	//float4 PointLightPos_RadiusInv[4];
 	//float4 PointLightColor_Intensity[4];
 };

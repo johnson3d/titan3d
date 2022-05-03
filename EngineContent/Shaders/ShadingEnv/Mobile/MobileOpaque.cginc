@@ -21,7 +21,7 @@ PS_INPUT VS_Main(VS_INPUT input)
 	PS_INPUT output = (PS_INPUT)0;
 	Default_VSInput2PSInput(output, input);
 
-#if defined(MDF_INSTANCING)
+#if defined(VS_NO_WorldTransform)
 	output.PointLightIndices = PointLightIndices;
 	output.SpecialData.x = PointLightNum;
 #endif
@@ -37,7 +37,7 @@ PS_INPUT VS_Main(VS_INPUT input)
 #endif
 	}
 
-#if !defined(MDF_INSTANCING)
+#if !defined(VS_NO_WorldTransform)
 	output.vPosition.xyz += mtl.mVertexOffset;
 
 	output.vWorldPos = mul(float4(output.vPosition.xyz, 1), WorldMatrix).xyz;

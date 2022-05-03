@@ -115,16 +115,22 @@ struct PS_INPUT
 	VK_LOCATION(16) nointerpolation uint4 SpecialData : TEXCOORD13;
 };
 
-#if HW_VS_STRUCTUREBUFFER
 struct VSInstantData
 {
-	matrix WorldMatrix;
-	uint4 CustomData;
+	float3 Position;
+	uint HitProxyId;
+	
+	float3 Scale;
+	uint CustomData2;
+
+	float4 Quat;
+
+	uint4 UserData;
+
 	uint4 PointLightIndices;
 };
 
-StructuredBuffer<VSInstantData> VSInstantDataArray DX_NOBIND;//: register(t13);
-#endif
+VSInstantData GetInstanceData(VS_INPUT input);
 
 void Default_VSInput2PSInput(inout PS_INPUT output, VS_INPUT input)
 {

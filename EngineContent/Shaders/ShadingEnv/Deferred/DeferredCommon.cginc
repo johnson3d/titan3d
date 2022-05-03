@@ -12,6 +12,17 @@ struct GBufferData
 	int		ObjectFlags_2Bit;
 };
 
+bool IsAcceptShadow(GBufferData GBuffer)
+{
+	return (GBuffer.ObjectFlags_2Bit & 1) != 0;
+}
+
+bool IsUnlit(GBufferData GBuffer)
+{
+	//return GBuffer.ObjectFlags_2Bit == 1;
+	return (GBuffer.ObjectFlags_2Bit & (2)) != 0;
+}
+
 half3 EncodeNormalXYZ(half3 n)
 {
 	return half3(n.xyz * 0.5f + 0.5f);
@@ -28,7 +39,7 @@ void EncodeGBuffer(GBufferData GBuffer, out float4 rt0, out float4 rt1, out floa
 	rt0.w = GBuffer.Metallicity;
 
 	rt1.xyz = EncodeNormalXYZ(GBuffer.WorldNormal.xyz);	
-	rt1.w = ((half)GBuffer.ObjectFlags_2Bit) / 4.0h;
+	rt1.w = ((half)GBuffer.ObjectFlags_2Bit) / 3.0h;
 
 	rt2.w = GBuffer.Roughness;
 	rt2.r = GBuffer.Emissive;

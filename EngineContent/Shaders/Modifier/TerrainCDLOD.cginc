@@ -149,7 +149,7 @@ void MdfQueueDoModifiersPS(inout MTL_OUTPUT output, PS_INPUT input)
 }
 
 #define MDFQUEUE_FUNCTION
-#define MDF_INSTANCING
+#define VS_NO_WorldTransform
 
 //#define MDFQUEUE_FUNCTION_PS
 

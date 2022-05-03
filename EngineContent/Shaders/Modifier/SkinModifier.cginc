@@ -1,4 +1,10 @@
 
+cbuffer cbSkinMesh DX_NOBIND//
+{
+	float4 AbsBonePos[360];
+	float4 AbsBoneQuat[360];
+};
+
 half3 RotateVec(in half3 inPos, in half4 inQuat)
 {
 	half3 uv = (half3)cross(inQuat.xyz, inPos);

@@ -99,6 +99,12 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 	GBufferData GBuffer = DecodeGBuffer(rt0, rt1, rt2);
 
+	if (IsUnlit(GBuffer))
+	{
+		output.RT0.rgb = GBuffer.MtlColorRaw;
+		return output;
+	}
+
 	bool NoPixel = (all(GBuffer.WorldNormal) == 0);
 	
 	half3 Albedo = sRGB2Linear((half3)GBuffer.MtlColorRaw);
@@ -141,7 +147,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #if DISABLE_SHADOW_ALL == 1
 	ShadowValue = 1.0h;
 #else
-	if (PerPixelViewerDistance > gShadowDistance || (GBuffer.ObjectFlags_2Bit & 1) == 0)
+	if (PerPixelViewerDistance > gShadowDistance || IsAcceptShadow(GBuffer) == false)
 	{
 		ShadowValue = 1.0h;
 	}
@@ -246,7 +252,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 	output.RT0.rgb = Linear2sRGB(Color);
 	//output.RT0.rgb = Linear2sRGB(GBuffer.MtlColorRaw);
-	
+
 	return output;
 }
 

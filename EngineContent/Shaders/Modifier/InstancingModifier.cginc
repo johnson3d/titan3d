@@ -1,4 +1,17 @@
-#define MDF_INSTANCING 
+
+#if HW_VS_STRUCTUREBUFFER == 1
+StructuredBuffer<VSInstantData> VSInstantDataArray DX_NOBIND;//: register(t13);
+VSInstantData GetInstanceData(VS_INPUT input)
+{
+	VSInstantData result = VSInstantDataArray[input.vInstanceId];
+	//result.InstanceId = input.vInstanceId;
+	return result;
+}
+#define Def_GetInstanceData
+#endif
+
+//#define VS_NO_WorldTransform
+#define VPS_SpecialData_X_HitProxy
 
 float3 InstancingRotateVec(in float3 inPos, in float4 inQuat)
 {
@@ -12,26 +25,46 @@ float3 InstancingRotateVec(in float3 inPos, in float4 inQuat)
 
 void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
 {
-#if HW_VS_STRUCTUREBUFFER
-	VSInstantData InstData = VSInstantDataArray[vert.vInstanceId];
-	vert.vPosition = mul(float4(vert.vPosition.xyz, 1), InstData.WorldMatrix).xyz;
-	vert.vNormal = normalize(mul(float4(vert.vNormal.xyz, 0), InstData.WorldMatrix).xyz);
-	vert.vTangent.xyz = normalize(mul(float4(vert.vTangent.xyz, 0), InstData.WorldMatrix).xyz);
-	vsOut.vWorldPos = vert.vPosition;
+	VSInstantData instData = GetInstanceData(vert);
 
-	vsOut.SpecialData.x = vert.vInstanceId;
-#else
-	float3 Pos = vert.vInstPos.xyz + InstancingRotateVec(vert.vPosition * vert.vInstScale.xyz, vert.vInstQuat);
-	
+	float3 Pos = instData.Position.xyz + InstancingRotateVec(vert.vPosition * instData.Scale.xyz, instData.Quat);
+
 	vert.vPosition.xyz = Pos;
-	vert.vNormal.xyz = InstancingRotateVec(vert.vNormal.xyz, vert.vInstQuat);
-	
-	vsOut.SpecialData.x = vert.vInstScale.w;
+	vert.vNormal.xyz = InstancingRotateVec(vert.vNormal.xyz, instData.Quat);
 
-	for(int i=0;i<vert.vInstScale.w;i++)
+	vsOut.vPosition.xyz = Pos;
+	vsOut.vNormal = vert.vNormal;
+	vsOut.SpecialData.x = instData.HitProxyId;
+
+	//vsOut.vWorldPos = Pos;
+	
+	/*vsOut.SpecialData.x = vert.vInstScale.w;
+
+	for (int i = 0; i < vert.vInstScale.w; i++)
 	{
 		uint lightIndex = vert.vF4_1[i];
 		vsOut.PointLightIndices[i] = (uint)lightIndex;
-	}
-#endif
+	}*/
+//#if HW_VS_STRUCTUREBUFFER
+//	VSInstantData InstData = VSInstantDataArray[vert.vInstanceId];
+//	vert.vPosition = mul(float4(vert.vPosition.xyz, 1), InstData.WorldMatrix).xyz;
+//	vert.vNormal = normalize(mul(float4(vert.vNormal.xyz, 0), InstData.WorldMatrix).xyz);
+//	vert.vTangent.xyz = normalize(mul(float4(vert.vTangent.xyz, 0), InstData.WorldMatrix).xyz);
+//	vsOut.vWorldPos = vert.vPosition;
+//
+//	vsOut.SpecialData.x = vert.vInstanceId;
+//#else
+//	float3 Pos = vert.vInstPos.xyz + InstancingRotateVec(vert.vPosition * vert.vInstScale.xyz, vert.vInstQuat);
+//	
+//	vert.vPosition.xyz = Pos;
+//	vert.vNormal.xyz = InstancingRotateVec(vert.vNormal.xyz, vert.vInstQuat);
+//	
+//	vsOut.SpecialData.x = vert.vInstScale.w;
+//
+//	for(int i=0;i<vert.vInstScale.w;i++)
+//	{
+//		uint lightIndex = vert.vF4_1[i];
+//		vsOut.PointLightIndices[i] = (uint)lightIndex;
+//	}
+//#endif
 }

@@ -6,7 +6,7 @@
 half3 MultiPbrPointLightMobile(PS_INPUT input, float3 WorldPos, half3 V, half3 N, half3 OptDiffShading, half3 OptSpecShading, half Roughness)
 {
 	half3 BaseShading = (half3)0;
-#if defined(MDF_INSTANCING)
+#if defined(VS_NO_WorldTransform)
 #if ShaderModel >= 4
 	uint instanceId = input.SpecialData.x;
 	VSInstantData InstData = VSInstantDataArray[instanceId];

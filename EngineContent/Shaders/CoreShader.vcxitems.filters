@@ -63,13 +63,7 @@
     <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.cginc">
       <Filter>Modifier</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.var">
-      <Filter>Modifier</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.cginc">
-      <Filter>Modifier</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.var">
       <Filter>Modifier</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Font.shadingenv">
@@ -79,9 +73,6 @@
       <Filter>ShadingEnv\Sys</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.cginc">
-      <Filter>Modifier</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.var">
       <Filter>Modifier</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\NoPixelShader.shadingenv">

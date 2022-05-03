@@ -11,7 +11,7 @@
 PS_INPUT VS_Main( VS_INPUT input )
 {
 	PS_INPUT output = (PS_INPUT)0;
-#if defined(MDF_INSTANCING)
+#if defined(VS_NO_WorldTransform)
 	output.PointLightIndices = PointLightIndices;
 	output.SpecialData.x = PointLightNum;
 #endif

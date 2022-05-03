@@ -64,7 +64,6 @@
     <None Include="$(MSBuildThisFileDirectory)MobileSky.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileTranslucent.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.var" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\TerrainCDLOD.cginc" />
     <None Include="$(MSBuildThisFileDirectory)PickedBlurH.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)PickedBlurV.shadingenv" />
@@ -99,9 +98,7 @@
     <None Include="$(MSBuildThisFileDirectory)UFOMobileCopy.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaque.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.var" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.var" />
     <None Include="$(MSBuildThisFileDirectory)UFOMobileOpaqueNPR.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)UFOMobileOutlineNPR.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)UFOMobileTranslucent.shadingenv" />
