@@ -4,214 +4,6 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure
 {
-    public interface ISuperPixelOperatorBase
-    {
-        Rtti.UTypeDesc ElementType { get; }
-        Rtti.UTypeDesc BufferType { get; }
-        unsafe void SetAsMaxValue(void* tar);
-        unsafe void SetAsMinValue(void* tar);
-        unsafe void Copy(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src);
-        unsafe void Add(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right);
-        unsafe void Sub(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right);
-        unsafe void Mul(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right);
-        unsafe void Div(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right);
-    }
-
-    public interface ISuperPixelOperator<T> : ISuperPixelOperatorBase where T : unmanaged
-    {
-        T MaxValue { get; }
-        T MinValue { get; }
-        int Compare(in T left, in T right);
-        T Add(in T left, in T right);
-    }
-    public struct FFloatOperator : ISuperPixelOperator<float>
-    {
-        public Rtti.UTypeDesc ElementType
-        {
-            get
-            {
-                return Rtti.UTypeDescGetter<float>.TypeDesc;
-            }
-        }
-        public Rtti.UTypeDesc BufferType
-        {
-            get
-            {
-                return Rtti.UTypeDescGetter<USuperBuffer<float,FFloatOperator>>.TypeDesc;
-            }
-        }
-        public float MaxValue { get => float.MaxValue; }
-        public float MinValue { get => float.MinValue; }
-        public int Compare(in float left, in float right)
-        {
-            return left.CompareTo(right);
-        }
-        public float Add(in float left, in float right)
-        {
-            return left + right;
-        }
-        public unsafe void SetAsMaxValue(void* tar)
-        {
-            (*(float*)tar) = float.MaxValue;
-        }
-        public unsafe void SetAsMinValue(void* tar)
-        {
-            (*(float*)tar) = float.MinValue;
-        }
-        public unsafe void Copy(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
-        {
-            (*(float*)tar) = (*(float*)src);
-        }
-        public unsafe void Add(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
-        {
-            if (resultType != Rtti.UTypeDescGetter<float>.TypeDesc && resultType != leftType && resultType != rightType)
-            {
-                return;
-            }
-            float rValue = 0;
-            if (right != (void*)0)
-            {
-                rValue = *(float*)right;
-            }
-            (*(float*)result) = (*(float*)left) + rValue;
-        }
-        public unsafe void Sub(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
-        {
-            if (resultType != Rtti.UTypeDescGetter<float>.TypeDesc && resultType != leftType && resultType != rightType)
-            {
-                return;
-            }
-            float rValue = 0;
-            if (right != (void*)0)
-            {
-                rValue = *(float*)right;
-            }
-            (*(float*)result) = (*(float*)left) - rValue;
-        }
-        public unsafe void Mul(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
-        {
-            if (resultType != Rtti.UTypeDescGetter<float>.TypeDesc && resultType != leftType && resultType != rightType)
-            {
-                return;
-            }
-            float rValue = 1;
-            if (right != (void*)0)
-            {
-                rValue = *(float*)right;
-            }
-            (*(float*)result) = (*(float*)left) * rValue;
-        }
-        public unsafe void Div(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
-        {
-            if (resultType != Rtti.UTypeDescGetter<float>.TypeDesc && resultType != leftType && resultType != rightType)
-            {
-                return;
-            }
-            float rValue = 1;
-            if (right != (void*)0)
-            {
-                rValue = *(float*)right;
-            }
-            (*(float*)result) = (*(float*)left) / rValue;
-        }
-    }
-    public struct FFloat3Operator : ISuperPixelOperator<Vector3>
-    {
-        public Rtti.UTypeDesc ElementType
-        {
-            get
-            {
-                return Rtti.UTypeDescGetter<Vector3>.TypeDesc;
-            }
-        }
-        public Rtti.UTypeDesc BufferType
-        {
-            get
-            {
-                return Rtti.UTypeDescGetter<USuperBuffer<Vector3, FFloat3Operator>>.TypeDesc;
-            }
-        }
-        public Vector3 MaxValue { get => Vector3.MaxValue; }
-        public Vector3 MinValue { get => Vector3.MinValue; }
-        public int Compare(in Vector3 left, in Vector3 right)
-        {
-            //if (left.X < right.X ||
-            //    left.Y < right.Y ||
-            //    left.Z < right.Z)
-            //    return -1;
-            //else 
-            //return left.CompareTo(right);
-            return 0;
-        }
-        public Vector3 Add(in Vector3 left, in Vector3 right)
-        {
-            return left + right;
-        }
-        public unsafe void SetAsMaxValue(void* tar)
-        {
-            (*(Vector3*)tar) = Vector3.MaxValue;
-        }
-        public unsafe void SetAsMinValue(void* tar)
-        {
-            (*(Vector3*)tar) = Vector3.MinValue;
-        }
-        public unsafe void Copy(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
-        {
-            (*(Vector3*)tar) = (*(Vector3*)src);
-        }
-        public unsafe void Add(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
-        {
-            if (resultType != Rtti.UTypeDescGetter<Vector3>.TypeDesc && resultType != leftType && resultType != rightType)
-            {
-                return;
-            }
-            Vector3 rValue = Vector3.Zero;
-            if (right != (void*)0)
-            {
-                rValue = *(Vector3*)right;
-            }
-            (*(Vector3*)result) = (*(Vector3*)left) + rValue;
-        }
-        public unsafe void Sub(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
-        {
-            if (resultType != Rtti.UTypeDescGetter<Vector3>.TypeDesc && resultType != leftType && resultType != rightType)
-            {
-                return;
-            }
-            Vector3 rValue = Vector3.Zero;
-            if (right != (void*)0)
-            {
-                rValue = *(Vector3*)right;
-            }
-            (*(Vector3*)result) = (*(Vector3*)left) - rValue;
-        }
-        public unsafe void Mul(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
-        {
-            if (resultType != Rtti.UTypeDescGetter<Vector3>.TypeDesc && resultType != leftType && resultType != rightType)
-            {
-                return;
-            }
-            Vector3 rValue = Vector3.One;
-            if (right != (void*)0)
-            {
-                rValue = *(Vector3*)right;
-            }
-            (*(Vector3*)result) = (*(Vector3*)left) * rValue;
-        }
-        public unsafe void Div(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
-        {
-            if (resultType != Rtti.UTypeDescGetter<Vector3>.TypeDesc && resultType != leftType && resultType != rightType)
-            {
-                return;
-            }
-            Vector3 rValue = Vector3.One;
-            if (right != (void*)0)
-            {
-                rValue = *(Vector3*)right;
-            }
-            (*(Vector3*)result) = (*(Vector3*)left) / rValue;
-        }
-    }
     public class UBufferConponent
     {
         public UBufferCreator BufferCreator { get; private set; }
@@ -366,106 +158,33 @@ namespace EngineNS.Bricks.Procedure
             }
         }
 
-        public void GetRangeUnsafe<T, TOperator>(out T minValue, out T maxValue) 
+        public unsafe void GetRangeUnsafe<T, TOperator>(out T minValue, out T maxValue) 
             where T : unmanaged
             where TOperator : ISuperPixelOperator<T>, new()
         {
             var tOp = new TOperator();
             minValue = tOp.MaxValue;
             maxValue = tOp.MinValue;
-            for (int i = 0; i < Depth; i++)
+            var srcType = Rtti.UTypeDescGetter<T>.TypeDesc;
+            fixed(T* pMaxValue = &maxValue)
+            fixed (T* pMinValue = &minValue)
             {
-                for (int j = 0; j < Height; j++)
-                {
-                    for (int k = 0; k < Width; k++)
-                    {
-                        ref T pixl = ref GetPixel<T>(k, j, i);
-                        if (tOp.Compare(pixl, maxValue) > 0)
-                            maxValue = pixl;
-                        if (tOp.Compare(pixl, minValue) < 0)
-                            minValue = pixl;
-                    }
-                }
-            }
-        }
-
-        public virtual RHI.CShaderResourceView CreateAsHeightMapTexture2D(float minHeight, float maxHeight, EPixelFormat format = EPixelFormat.PXF_R32_FLOAT, bool bNomalized = false)
-        {
-            return null;
-        }
-        //public void GetMaxAbs(out float maxValue)
-        //{
-        //    maxValue = float.MinValue;
-        //    for (int i = 0; i < Pixels.Length; i++)
-        //    {
-        //        var f = Pixels[i];
-        //        if (Math.Abs(f) > maxValue)
-        //            maxValue = f;
-        //    }
-        //}
-    }
-    public class USuperBuffer<T, TOperator> : UBufferConponent where T : unmanaged 
-        where TOperator : ISuperPixelOperator<T>, new()
-    {
-        public readonly static TOperator mOperator = new TOperator();
-        public override ISuperPixelOperatorBase PixelOperator { get => mOperator; }
-        public unsafe void CreateBuffer(int xSize, int ySize, int zSize, in T initValue = default(T))
-        {
-            fixed (T* pAddr = &initValue)
-            {
-                CreateBuffer(sizeof(T), xSize, ySize, zSize, pAddr);
-            }
-        }
-        public unsafe ref T GetSuperPixel(int x, int y, int z)
-        {
-            return ref *(T*)GetSuperPixelAddress(x, y, z);
-        }
-        public unsafe void SetSuperPixel(int x, int y, int z, in T value)
-        {
-            fixed (T* pAddr = &value)
-            {
-                SetSuperPixelAddress(x, y, z, (byte*)pAddr);
-            }
-        }
-        public void GetRange(out T minValue, out T maxValue)
-        {
-            minValue = mOperator.MaxValue;
-            maxValue = mOperator.MinValue;
-            for (int i = 0; i < Depth; i++)
-            {
-                for (int j = 0; j < Height; j++)
-                {
-                    for (int k = 0; k < Width; k++)
-                    {
-                        ref T pixl = ref GetSuperPixel(k, j, i);
-                        if (mOperator.Compare(pixl, maxValue) > 0)
-                            maxValue = pixl;
-                        if (mOperator.Compare(pixl, minValue) < 0)
-                            minValue = pixl;
-                    }
-                }
-            }
-        }
-        public unsafe void LoadTexture(RName name, int xyz)
-        {
-            using (var stream = System.IO.File.OpenRead(name.Address))
-            {
-                var image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                CreateBuffer(image.Height, image.Width, 1);
                 for (int i = 0; i < Depth; i++)
                 {
                     for (int j = 0; j < Height; j++)
                     {
                         for (int k = 0; k < Width; k++)
                         {
-                            var t = ((float)image.Data[Width * i * 4 + j * 4 + 1]) / 256.0f;
-                            SetSuperPixel(k, j, i, (*(T*)&t));
+                            var curPixelAddr = GetSuperPixelAddress(k, j, i);
+                            tOp.SetIfGreateThan(srcType, pMaxValue, srcType, curPixelAddr);
+                            tOp.SetIfLessThan(srcType, pMinValue, srcType, curPixelAddr);
                         }
                     }
-                }   
-            }
+                }
+            }   
         }
-        public override unsafe RHI.CShaderResourceView CreateAsHeightMapTexture2D(float minHeight, float maxHeight, EPixelFormat format = EPixelFormat.PXF_R32_FLOAT, bool bNomalized = false)
+
+        public virtual unsafe RHI.CShaderResourceView CreateAsHeightMapTexture2D(float minHeight, float maxHeight, EPixelFormat format = EPixelFormat.PXF_R32_FLOAT, bool bNomalized = false)
         {
             RHI.CTexture2D texture;
             if (minHeight >= 0 && minHeight <= 1 && maxHeight >= 0 && maxHeight <= 1)
@@ -510,7 +229,6 @@ namespace EngineNS.Bricks.Procedure
                         break;
                     case EPixelFormat.PXF_R16_FLOAT:
                         {//高度信息有2的11次方级别精度高度
-
                             var Count = Width * Height;
                             var tarPixels = new Half[Count];
                             var pSlice = (float*)this.GetSliceAddress(0);
@@ -587,6 +305,137 @@ namespace EngineNS.Bricks.Procedure
                 rsvDesc.Texture2D.MipLevels = desc.MipLevels;
                 var result = UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(in rsvDesc);
                 return result;
+            }
+        }
+
+        public virtual unsafe RHI.CShaderResourceView CreateVector3Texture2D(Vector3 minHeight, Vector3 maxHeight)
+        {
+            RHI.CTexture2D texture;
+            if (minHeight.X >= 0 && minHeight.X <= 1 && maxHeight.X >= 0 && maxHeight.X <= 1)
+            {
+                minHeight.X = 0;
+                maxHeight.X = 1;
+            }
+            if (minHeight.Y >= 0 && minHeight.Y <= 1 && maxHeight.Y >= 0 && maxHeight.Y <= 1)
+            {
+                minHeight.Y = 0;
+                maxHeight.Y = 1;
+            }
+            if (minHeight.Z >= 0 && minHeight.Z <= 1 && maxHeight.Z >= 0 && maxHeight.Z <= 1)
+            {
+                minHeight.Z = 0;
+                maxHeight.Z = 1;
+            }
+            var hRange = maxHeight - minHeight;
+            unsafe
+            {
+                var desc = new ITexture2DDesc();
+                desc.SetDefault();
+                desc.Width = (uint)Width;
+                desc.Height = (uint)Height;
+                desc.MipLevels = 1;
+                desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                ImageInitData initData = new ImageInitData();
+                initData.SetDefault();
+                desc.InitData = &initData;
+                {
+                    var Count = Width * Height;
+                    var tarPixels = new Byte4[Count];
+                    var pSlice = (Vector3*)this.GetSliceAddress(0);
+                    for (int i = 0; i < Count; i++)
+                    {
+                        var tmp = pSlice[i] - minHeight;
+                        if (tmp.X > 0)
+                        {
+                            int xx = 0;
+                        }
+                        tmp = tmp * 255.0f;
+                        tmp = tmp / hRange;
+                        if (tmp.X > 0)
+                        {
+                            int xx = 0;
+                        }
+                        //tarPixels[i].X = (byte)(((pSlice[i].X - minHeight.X) / hRange.) * 255.0f);
+                        //tarPixels[i].Y = (byte)(((pSlice[i].Y - minHeight) / hRange) * 255.0f);
+                        //tarPixels[i].Z = (byte)(((pSlice[i].Z - minHeight) / hRange) * 255.0f);
+                        tarPixels[i].X = (byte)tmp.X;
+                        tarPixels[i].Y = (byte)tmp.Y;
+                        tarPixels[i].Z = (byte)tmp.Z;
+                        tarPixels[i].W = 255;
+                    }
+                    fixed (Byte4* p = &tarPixels[0])
+                    {
+                        initData.SysMemPitch = desc.Width * (uint)sizeof(Byte4);
+                        initData.pSysMem = p;
+                        texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture2D(in desc);
+                    }
+                }
+
+                var rsvDesc = new IShaderResourceViewDesc();
+                rsvDesc.SetTexture2D();
+                rsvDesc.Type = ESrvType.ST_Texture2D;
+                rsvDesc.mGpuBuffer = texture.mCoreObject;
+                rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                rsvDesc.Texture2D.MipLevels = desc.MipLevels;
+                var result = UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(in rsvDesc);
+                return result;
+            }
+        }
+        //public void GetMaxAbs(out float maxValue)
+        //{
+        //    maxValue = float.MinValue;
+        //    for (int i = 0; i < Pixels.Length; i++)
+        //    {
+        //        var f = Pixels[i];
+        //        if (Math.Abs(f) > maxValue)
+        //            maxValue = f;
+        //    }
+        //}
+    }
+    public class USuperBuffer<T, TOperator> : UBufferConponent where T : unmanaged 
+        where TOperator : ISuperPixelOperator<T>, new()
+    {
+        public readonly static TOperator mOperator = new TOperator();
+        public override ISuperPixelOperatorBase PixelOperator { get => mOperator; }
+        public unsafe void CreateBuffer(int xSize, int ySize, int zSize, in T initValue = default(T))
+        {
+            fixed (T* pAddr = &initValue)
+            {
+                CreateBuffer(sizeof(T), xSize, ySize, zSize, pAddr);
+            }
+        }
+        public unsafe ref T GetSuperPixel(int x, int y, int z)
+        {
+            return ref *(T*)GetSuperPixelAddress(x, y, z);
+        }
+        public unsafe void SetSuperPixel(int x, int y, int z, in T value)
+        {
+            fixed (T* pAddr = &value)
+            {
+                SetSuperPixelAddress(x, y, z, (byte*)pAddr);
+            }
+        }
+        public unsafe void GetRange(out T minValue, out T maxValue)
+        {
+            GetRangeUnsafe<T, TOperator>(out minValue, out maxValue);
+        }
+        public unsafe void LoadTexture(RName name, int xyz)
+        {
+            using (var stream = System.IO.File.OpenRead(name.Address))
+            {
+                var image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                CreateBuffer(image.Height, image.Width, 1);
+                for (int i = 0; i < Depth; i++)
+                {
+                    for (int j = 0; j < Height; j++)
+                    {
+                        for (int k = 0; k < Width; k++)
+                        {
+                            var t = ((float)image.Data[Width * i * 4 + j * 4 + 1]) / 256.0f;
+                            SetSuperPixel(k, j, i, (*(T*)&t));
+                        }
+                    }
+                }   
             }
         }
     }

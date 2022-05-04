@@ -41,4 +41,28 @@ namespace EngineNS.Bricks.Procedure.Node
             return base.GetOutBufferCreator(pin);
         }
     }
+
+    public class UAnyTypeMonocular : UMonocular
+    {
+        public override bool IsMatchLinkedPin(UBufferCreator input, UBufferCreator output)
+        {
+            //base.IsMatchLinkedPin(input, output);
+            return true;
+        }
+        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        {
+            base.OnLinkedFrom(iPin, OutNode, oPin);
+
+            var input = oPin.Tag as UBufferCreator;
+            var output = ResultPin.Tag as UBufferCreator;
+
+            if (output.BufferType != input.BufferType)
+            {
+                (SrcPin.Tag as UBufferCreator).BufferType = input.BufferType;
+                output.BufferType = input.BufferType;
+                //DefaultBufferCreator.BufferType = input.BufferType;
+                this.ParentGraph.RemoveLinkedOut(ResultPin);
+            }
+        }
+    }
 }

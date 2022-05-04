@@ -48,6 +48,8 @@ namespace EngineNS.Bricks.Procedure.Node
     public class UImageLoader : UPgcNodeBase
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut RgbPin { get; set; } = new PinOut();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut RedPin { get; set; } = new PinOut();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut GreenPin { get; set; } = new PinOut();
@@ -55,6 +57,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut BluePin { get; set; } = new PinOut();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut AlphaPin { get; set; } = new PinOut();
+
+        public UBufferCreator RgbBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
         public UImageLoader()
         {
             PrevSize = new Vector2(100, 100);
@@ -64,10 +68,11 @@ namespace EngineNS.Bricks.Procedure.Node
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddOutput(RedPin, " R", DefaultBufferCreator);
-            AddOutput(GreenPin, " G", DefaultBufferCreator);
-            AddOutput(BluePin, " B", DefaultBufferCreator);
-            AddOutput(AlphaPin, " A", DefaultBufferCreator);
+            AddOutput(RgbPin, "RGB", RgbBufferCreator);
+            AddOutput(RedPin, "R", DefaultBufferCreator);
+            AddOutput(GreenPin, "G", DefaultBufferCreator);
+            AddOutput(BluePin, "B", DefaultBufferCreator);
+            AddOutput(AlphaPin, "A", DefaultBufferCreator);
         }
         ~UImageLoader()
         {
@@ -156,9 +161,13 @@ namespace EngineNS.Bricks.Procedure.Node
                             green = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
                             blue = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
 
+                            var rgb = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(image.Width, image.Height, 1));
+
                             graph.BufferCache.RegBuffer(RedPin, red);
                             graph.BufferCache.RegBuffer(GreenPin, green);
                             graph.BufferCache.RegBuffer(BluePin, blue);
+
+                            graph.BufferCache.RegBuffer(RgbPin, rgb);
 
                             fixed (byte* p = &image.Data[0])
                             {
@@ -166,14 +175,20 @@ namespace EngineNS.Bricks.Procedure.Node
                                 {
                                     for (int j = 0; j < image.Width; j++)
                                     {
+                                        var rgbValue = new Vector3();
                                         float v = (float)p[LineSize * i + j * PixelSize] / 256.0f;
+                                        rgbValue.X = v;
                                         red.SetPixel(j, i, v);
 
                                         v = (float)p[LineSize * i + j * PixelSize + 1] / 256.0f;
+                                        rgbValue.Y = v;
                                         green.SetPixel(j, i, v);
 
                                         v = (float)p[LineSize * i + j * PixelSize + 2] / 256.0f;
+                                        rgbValue.Y = v;
                                         blue.SetPixel(j, i, v);
+
+                                        rgb.SetPixel<Vector3>(j, i, in rgbValue);
                                     }
                                 }
                             }
@@ -193,10 +208,14 @@ namespace EngineNS.Bricks.Procedure.Node
                             blue = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
                             alpha = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
 
+                            var rgb = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(image.Width, image.Height, 1));
+
                             graph.BufferCache.RegBuffer(RedPin, red);
                             graph.BufferCache.RegBuffer(GreenPin, green);
                             graph.BufferCache.RegBuffer(BluePin, blue);                            
                             graph.BufferCache.RegBuffer(AlphaPin, alpha);
+
+                            graph.BufferCache.RegBuffer(RgbPin, rgb);
 
                             fixed (byte* p = &image.Data[0])
                             {
@@ -204,17 +223,23 @@ namespace EngineNS.Bricks.Procedure.Node
                                 {
                                     for (int j = 0; j < image.Width; j++)
                                     {
+                                        var rgbValue = new Vector3();
                                         float v = (float)p[LineSize * i + j * PixelSize] / 255.0f;
+                                        rgbValue.X = v;
                                         blue.SetPixel(j, i, v);
 
                                         v = (float)p[LineSize * i + j * PixelSize + 1] / 255.0f;
+                                        rgbValue.Y = v;
                                         green.SetPixel(j, i, v);
 
                                         v = (float)p[LineSize * i + j * PixelSize + 2] / 255.0f;
+                                        rgbValue.Z = v;
                                         red.SetPixel(j, i, v);
 
                                         v = (float)p[LineSize * i + j * PixelSize + 3] / 255.0f;
                                         alpha.SetPixel(j, i, v);
+
+                                        rgb.SetPixel<Vector3>(j, i, in rgbValue);
                                     }
                                 }
                             }
@@ -274,7 +299,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 
-    public class UCopyRect : UMonocular
+    public class UCopyRect : UAnyTypeMonocular
     {
         [Rtti.Meta]
         public int X { get; set; } = 0;
@@ -282,26 +307,6 @@ namespace EngineNS.Bricks.Procedure.Node
         public int Y { get; set; } = 0;
         [Rtti.Meta]
         public int Z { get; set; } = 0;
-        public override bool IsMatchLinkedPin(UBufferCreator input, UBufferCreator output)
-        {
-            //base.IsMatchLinkedPin(input, output);
-            return true;
-        }
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
-        {
-            base.OnLinkedFrom(iPin, OutNode, oPin);
-
-            var input = oPin.Tag as UBufferCreator;
-            var output = ResultPin.Tag as UBufferCreator;
-
-            if (output.BufferType != input.BufferType)
-            {
-                (SrcPin.Tag as UBufferCreator).BufferType = input.BufferType;
-                output.BufferType = input.BufferType;
-                //DefaultBufferCreator.BufferType = input.BufferType;
-                this.ParentGraph.RemoveLinkedOut(ResultPin);
-            }
-        }
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             var graph = this.ParentGraph as UPgcGraph;
@@ -344,8 +349,9 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 
-    public class UStretch : UMonocular
+    public class UStretch : UAnyTypeMonocular
     {
+        
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             var graph = this.ParentGraph as UPgcGraph;
@@ -369,30 +375,32 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
-            var curComp = graph.BufferCache.FindBuffer(SrcPin);
+            var left = graph.BufferCache.FindBuffer(SrcPin);
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
+            var Op = resultComp.PixelOperator;
+            var tarType = resultComp.BufferCreator.ElementType;
+            var srcType = left.BufferCreator.ElementType;
             for (int i = 0; i < resultComp.Depth; i++)
             {
                 for (int j = 0; j < resultComp.Height; j++)
                 {
                     for (int k = 0; k < resultComp.Width; k++)
                     {
-                        float x = (float)(k * curComp.Width) / (float)resultComp.Width;
-                        float y = (float)(j * curComp.Height) / (float)resultComp.Height;
-                        float z = (float)(i * curComp.Depth) / (float)resultComp.Depth;
-                        var pxl = curComp.GetSuperPixelAddress((int)x, (int)y, (int)z);
-
-                        resultComp.SetSuperPixelAddress(k, j, i, pxl);
+                        float x = (float)(k * left.Width) / (float)resultComp.Width;
+                        float y = (float)(j * left.Height) / (float)resultComp.Height;
+                        float z = (float)(i * left.Depth) / (float)resultComp.Depth;
+                        
+                        Op.Copy(tarType, resultComp.GetSuperPixelAddress(k, j, i), srcType, left.GetSuperPixelAddress((int)x, (int)y, (int)z));
                     }
                 }
             }
-                
-            curComp.LifeCount--;
+
+            left.LifeCount--;
             return true;
         }
     }
 
-    public class UMulValue : UMonocular
+    public class UMulValue : UAnyTypeMonocular
     {
         public UMulValue()
         {
@@ -427,6 +435,8 @@ namespace EngineNS.Bricks.Procedure.Node
 
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
+            base.OnPreviewDraw(in prevStart, in prevEnd, cmdlist);
+
             unsafe
             {
                 cmdlist.AddText(in prevStart, 0xFFFFFFFF, $"{Value}", null);

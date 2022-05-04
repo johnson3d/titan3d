@@ -186,18 +186,31 @@ namespace EngineNS.Bricks.Procedure
             {
                 if (mPreviewResultIndex >= 0)
                 {
+                    if (PreviewSRV != null)
+                    {
+                        PreviewSRV?.FreeTextureHandle();
+                        PreviewSRV = null;
+                    }
+
                     var previewBuffer = GetResultBuffer(mPreviewResultIndex);
                     if (previewBuffer != null)
                     {
-                        if (PreviewSRV != null)
+                        if (previewBuffer.BufferCreator.ElementType == Rtti.UTypeDescGetter<float>.TypeDesc)
                         {
-                            PreviewSRV?.FreeTextureHandle();
-                            PreviewSRV = null;
+                            float minV = float.MaxValue;
+                            float maxV = float.MinValue;
+                            previewBuffer.GetRangeUnsafe<float, FFloatOperator>(out minV, out maxV);
+                            PreviewSRV = previewBuffer.CreateAsHeightMapTexture2D(minV, maxV, EPixelFormat.PXF_R16_FLOAT, true);
                         }
-                        float minV = float.MaxValue;
-                        float maxV = float.MinValue;
-                        previewBuffer.GetRangeUnsafe<float, FFloatOperator>(out minV, out maxV);
-                        PreviewSRV = previewBuffer.CreateAsHeightMapTexture2D(minV, maxV, EPixelFormat.PXF_R16_FLOAT, true);
+                        else if (previewBuffer.BufferCreator.ElementType == Rtti.UTypeDescGetter<Vector3>.TypeDesc)
+                        {
+                            Vector3 minV = Vector3.MaxValue;
+                            Vector3 maxV = Vector3.MinValue;
+                            previewBuffer.GetRangeUnsafe<Vector3, FFloat3Operator>(out minV, out maxV);
+                            //float fMax = maxV.GetMaxValue();
+                            //float fMin = minV.GetMinValue();
+                            PreviewSRV = previewBuffer.CreateVector3Texture2D(minV, maxV);
+                        }
                     }
                 }
             }

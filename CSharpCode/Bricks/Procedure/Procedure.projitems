@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Image2D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ISuperPixelOperator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\UFloat3Nodes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\UMonocular.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\UOpNode.cs" />

@@ -116,12 +116,20 @@ namespace EngineNS
 		        FloatSelect(Z, 1.0f, -1.0f)
 		        );
         }
-    #region Def Struct
-    /// <summary>
-    /// Gets or sets the X component of the vector.
-    /// </summary>
-    /// <value>The X component of the vector.</value>
-    [Rtti.Meta]
+        public float GetMaxValue()
+        {
+            return Math.Max(X, Math.Max(Y, Z));
+        }
+        public float GetMinValue()
+        {
+            return Math.Min(X, Math.Min(Y, Z));
+        }
+        #region Def Struct
+        /// <summary>
+        /// Gets or sets the X component of the vector.
+        /// </summary>
+        /// <value>The X component of the vector.</value>
+        [Rtti.Meta]
         public float X;
 
         /// <summary>
