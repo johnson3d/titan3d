@@ -10,11 +10,11 @@ namespace EngineNS.Bricks.Procedure
         Rtti.UTypeDesc BufferType { get; }
         unsafe void SetAsMaxValue(void* tar);
         unsafe void SetAsMinValue(void* tar);
-        unsafe void Copy(void* tar, void* src);
-        unsafe void Add(void* result, void* left, void* right);
-        unsafe void Sub(void* result, void* left, void* right);
-        unsafe void Mul(void* result, void* left, void* right);
-        unsafe void Div(void* result, void* left, void* right);
+        unsafe void Copy(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src);
+        unsafe void Add(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right);
+        unsafe void Sub(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right);
+        unsafe void Mul(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right);
+        unsafe void Div(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right);
     }
 
     public interface ISuperPixelOperator<T> : ISuperPixelOperatorBase where T : unmanaged
@@ -58,12 +58,16 @@ namespace EngineNS.Bricks.Procedure
         {
             (*(float*)tar) = float.MinValue;
         }
-        public unsafe void Copy(void* tar, void* src)
+        public unsafe void Copy(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
         {
             (*(float*)tar) = (*(float*)src);
         }
-        public unsafe void Add(void* result, void* left, void* right)
+        public unsafe void Add(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
+            if (resultType != Rtti.UTypeDescGetter<float>.TypeDesc && resultType != leftType && resultType != rightType)
+            {
+                return;
+            }
             float rValue = 0;
             if (right != (void*)0)
             {
@@ -71,8 +75,12 @@ namespace EngineNS.Bricks.Procedure
             }
             (*(float*)result) = (*(float*)left) + rValue;
         }
-        public unsafe void Sub(void* result, void* left, void* right)
+        public unsafe void Sub(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
+            if (resultType != Rtti.UTypeDescGetter<float>.TypeDesc && resultType != leftType && resultType != rightType)
+            {
+                return;
+            }
             float rValue = 0;
             if (right != (void*)0)
             {
@@ -80,8 +88,12 @@ namespace EngineNS.Bricks.Procedure
             }
             (*(float*)result) = (*(float*)left) - rValue;
         }
-        public unsafe void Mul(void* result, void* left, void* right)
+        public unsafe void Mul(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
+            if (resultType != Rtti.UTypeDescGetter<float>.TypeDesc && resultType != leftType && resultType != rightType)
+            {
+                return;
+            }
             float rValue = 1;
             if (right != (void*)0)
             {
@@ -89,8 +101,12 @@ namespace EngineNS.Bricks.Procedure
             }
             (*(float*)result) = (*(float*)left) * rValue;
         }
-        public unsafe void Div(void* result, void* left, void* right)
+        public unsafe void Div(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
+            if (resultType != Rtti.UTypeDescGetter<float>.TypeDesc && resultType != leftType && resultType != rightType)
+            {
+                return;
+            }
             float rValue = 1;
             if (right != (void*)0)
             {
@@ -139,12 +155,16 @@ namespace EngineNS.Bricks.Procedure
         {
             (*(Vector3*)tar) = Vector3.MinValue;
         }
-        public unsafe void Copy(void* tar, void* src)
+        public unsafe void Copy(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
         {
             (*(Vector3*)tar) = (*(Vector3*)src);
         }
-        public unsafe void Add(void* result, void* left, void* right)
+        public unsafe void Add(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
+            if (resultType != Rtti.UTypeDescGetter<Vector3>.TypeDesc && resultType != leftType && resultType != rightType)
+            {
+                return;
+            }
             Vector3 rValue = Vector3.Zero;
             if (right != (void*)0)
             {
@@ -152,8 +172,12 @@ namespace EngineNS.Bricks.Procedure
             }
             (*(Vector3*)result) = (*(Vector3*)left) + rValue;
         }
-        public unsafe void Sub(void* result, void* left, void* right)
+        public unsafe void Sub(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
+            if (resultType != Rtti.UTypeDescGetter<Vector3>.TypeDesc && resultType != leftType && resultType != rightType)
+            {
+                return;
+            }
             Vector3 rValue = Vector3.Zero;
             if (right != (void*)0)
             {
@@ -161,8 +185,12 @@ namespace EngineNS.Bricks.Procedure
             }
             (*(Vector3*)result) = (*(Vector3*)left) - rValue;
         }
-        public unsafe void Mul(void* result, void* left, void* right)
+        public unsafe void Mul(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
+            if (resultType != Rtti.UTypeDescGetter<Vector3>.TypeDesc && resultType != leftType && resultType != rightType)
+            {
+                return;
+            }
             Vector3 rValue = Vector3.One;
             if (right != (void*)0)
             {
@@ -170,8 +198,12 @@ namespace EngineNS.Bricks.Procedure
             }
             (*(Vector3*)result) = (*(Vector3*)left) * rValue;
         }
-        public unsafe void Div(void* result, void* left, void* right)
+        public unsafe void Div(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
         {
+            if (resultType != Rtti.UTypeDescGetter<Vector3>.TypeDesc && resultType != leftType && resultType != rightType)
+            {
+                return;
+            }
             Vector3 rValue = Vector3.One;
             if (right != (void*)0)
             {
@@ -266,6 +298,7 @@ namespace EngineNS.Bricks.Procedure
             return true;
         }
         #endregion
+
         public bool IsValidPixel(int x, int y = 0, int z = 0)
         {
             if (x < 0 || x >= Width ||

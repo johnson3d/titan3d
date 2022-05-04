@@ -152,9 +152,9 @@ namespace EngineNS.Bricks.Procedure.Node
                             DefaultBufferCreator.YSize = image.Height;
                             DefaultBufferCreator.ZSize = 1;
                             
-                            red = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
-                            green = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
-                            blue = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
+                            red = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
+                            green = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
+                            blue = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
 
                             graph.BufferCache.RegBuffer(RedPin, red);
                             graph.BufferCache.RegBuffer(GreenPin, green);
@@ -188,10 +188,10 @@ namespace EngineNS.Bricks.Procedure.Node
                             DefaultBufferCreator.YSize = image.Height;
                             DefaultBufferCreator.ZSize = 1;
 
-                            red = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
-                            green = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
-                            blue = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
-                            alpha = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 0));
+                            red = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
+                            green = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
+                            blue = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
+                            alpha = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
 
                             graph.BufferCache.RegBuffer(RedPin, red);
                             graph.BufferCache.RegBuffer(GreenPin, green);
@@ -402,23 +402,26 @@ namespace EngineNS.Bricks.Procedure.Node
         public float Value { get; set; } = 1.0f;
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
-            var curComp = graph.BufferCache.FindBuffer(SrcPin);
-            var resultComp = graph.BufferCache.FindBuffer(ResultPin);
-            var op = resultComp.PixelOperator;
+            var left = graph.BufferCache.FindBuffer(SrcPin);
+            var result = graph.BufferCache.FindBuffer(ResultPin);
+            var op = result.PixelOperator;
 
             var MulValue = Value;
-            for (int i = 0; i < resultComp.Depth; i++)
+            var resultType = result.BufferCreator.ElementType;
+            var leftType = left.BufferCreator.ElementType;
+            var rightType = Rtti.UTypeDescGetter<float>.TypeDesc;
+            for (int i = 0; i < result.Depth; i++)
             {
-                for (int j = 0; j < resultComp.Height; j++)
+                for (int j = 0; j < result.Height; j++)
                 {
-                    for (int k = 0; k < resultComp.Width; k++)
+                    for (int k = 0; k < result.Width; k++)
                     {
-                        resultComp.PixelOperator.Mul(curComp.GetSuperPixelAddress(k, j, i), curComp.GetSuperPixelAddress(k, j, i), &MulValue);
+                        op.Mul(resultType, result.GetSuperPixelAddress(k, j, i), leftType, left.GetSuperPixelAddress(k, j, i), rightType, & MulValue);
                     }
                 }
             }
-                
-            curComp.LifeCount--;
+
+            left.LifeCount--;
             return true;
         }
 
@@ -765,11 +768,13 @@ namespace EngineNS.Bricks.Procedure.Node
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
             //Copy Left to Result
             var op = resultComp.PixelOperator;
+            var tarType = resultComp.BufferCreator.ElementType;
+            var srcType = left.BufferCreator.ElementType;
             for (int i = 0; i < resultComp.Height; i++)
             {
                 for (int j = 0; j < resultComp.Width; j++)
                 {
-                    op.Copy(resultComp.GetSuperPixelAddress(j, i, 0), left.GetSuperPixelAddress(j, i, 0));
+                    op.Copy(tarType, resultComp.GetSuperPixelAddress(j, i, 0), srcType, left.GetSuperPixelAddress(j, i, 0));
                 }
             }
             int width = DstW;
@@ -799,8 +804,8 @@ namespace EngineNS.Bricks.Procedure.Node
                     float x = (float)(j * srcwidth) / (float)width;
                     float y = (float)(i * srcheight) / (float)height;
 
-                    op.Copy(resultComp.GetSuperPixelAddress((int)DstX + j, (int)DstY + i, 0),
-                        right.GetSuperPixelAddress((int)SrcX + (int)x, (int)SrcY + (int)y, 0));
+                    op.Copy(tarType, resultComp.GetSuperPixelAddress((int)DstX + j, (int)DstY + i, 0),
+                        srcType, right.GetSuperPixelAddress((int)SrcX + (int)x, (int)SrcY + (int)y, 0));
                 }
             }
 
@@ -817,22 +822,31 @@ namespace EngineNS.Bricks.Procedure.Node
             var right = graph.BufferCache.FindBuffer(RightPin);
             if (right != null)
             {
-                if (left.Width != right.Width || left.Height != right.Height)
+                if (GetInputBufferCreator(LeftPin).ElementType != GetInputBufferCreator(RightPin).ElementType 
+                    && left.Depth != right.Depth)
                 {
                     left.LifeCount--;
                     right.LifeCount--;
                     return false;
                 }
             }
-            
+
             var result = graph.BufferCache.FindBuffer(ResultPin);
+            var resultType = result.BufferCreator.ElementType;
+            var leftType = left.BufferCreator.ElementType;
+            var rightType = right.BufferCreator.ElementType;
             for (int i = 0; i < result.Depth; i++)
             {
                 for (int j = 0; j < result.Height; j++)
                 {
                     for (int k = 0; k < result.Width; k++)
                     {
-                        result.PixelOperator.Add(result.GetSuperPixelAddress(k, j, i), left.GetSuperPixelAddress(k, j, i), right.GetSuperPixelAddress(k, j, i));
+                        float l_x = (float)(k * left.Width) / (float)result.Width;
+                        float l_y = (float)(j * left.Height) / (float)result.Height;
+
+                        float r_x = (float)(k * right.Width) / (float)result.Width;
+                        float r_y = (float)(j * right.Height) / (float)result.Height;
+                        result.PixelOperator.Add(resultType, result.GetSuperPixelAddress(k, j, i), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, i), rightType, right.GetSuperPixelAddress((int)r_x, (int)r_y, i));
                     }
                 }
             }
@@ -850,7 +864,8 @@ namespace EngineNS.Bricks.Procedure.Node
             var right = graph.BufferCache.FindBuffer(RightPin);
             if (right != null)
             {
-                if (left.Width != right.Width || left.Height != right.Height)
+                if (GetInputBufferCreator(LeftPin).ElementType != GetInputBufferCreator(RightPin).ElementType
+                    && left.Depth != right.Depth)
                 {
                     left.LifeCount--;
                     right.LifeCount--;
@@ -859,13 +874,21 @@ namespace EngineNS.Bricks.Procedure.Node
             }
 
             var result = graph.BufferCache.FindBuffer(ResultPin);
+            var resultType = result.BufferCreator.ElementType;
+            var leftType = left.BufferCreator.ElementType;
+            var rightType = right.BufferCreator.ElementType;
             for (int i = 0; i < result.Depth; i++)
             {
                 for (int j = 0; j < result.Height; j++)
                 {
                     for (int k = 0; k < result.Width; k++)
                     {
-                        result.PixelOperator.Sub(result.GetSuperPixelAddress(k, j, i), left.GetSuperPixelAddress(k, j, i), right.GetSuperPixelAddress(k, j, i));
+                        float l_x = (float)(k * left.Width) / (float)result.Width;
+                        float l_y = (float)(j * left.Height) / (float)result.Height;
+
+                        float r_x = (float)(k * right.Width) / (float)result.Width;
+                        float r_y = (float)(j * right.Height) / (float)result.Height;
+                        result.PixelOperator.Sub(resultType, result.GetSuperPixelAddress(k, j, i), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, i), rightType, right.GetSuperPixelAddress((int)r_x, (int)r_y, i));
                     }
                 }
             }
@@ -883,7 +906,8 @@ namespace EngineNS.Bricks.Procedure.Node
             var right = graph.BufferCache.FindBuffer(RightPin);
             if (right != null)
             {
-                if (left.Width != right.Width || left.Height != right.Height)
+                if (GetInputBufferCreator(LeftPin).ElementType != GetInputBufferCreator(RightPin).ElementType
+                    && left.Depth != right.Depth)
                 {
                     left.LifeCount--;
                     right.LifeCount--;
@@ -892,13 +916,21 @@ namespace EngineNS.Bricks.Procedure.Node
             }
 
             var result = graph.BufferCache.FindBuffer(ResultPin);
+            var resultType = result.BufferCreator.ElementType;
+            var leftType = left.BufferCreator.ElementType;
+            var rightType = right.BufferCreator.ElementType;
             for (int i = 0; i < result.Depth; i++)
             {
                 for (int j = 0; j < result.Height; j++)
                 {
                     for (int k = 0; k < result.Width; k++)
                     {
-                        result.PixelOperator.Mul(result.GetSuperPixelAddress(k, j, i), left.GetSuperPixelAddress(k, j, i), right.GetSuperPixelAddress(k, j, i));
+                        float l_x = (float)(k * left.Width) / (float)result.Width;
+                        float l_y = (float)(j * left.Height) / (float)result.Height;
+
+                        float r_x = (float)(k * right.Width) / (float)result.Width;
+                        float r_y = (float)(j * right.Height) / (float)result.Height;
+                        result.PixelOperator.Mul(resultType, result.GetSuperPixelAddress(k, j, i), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, i), rightType, right.GetSuperPixelAddress((int)r_x, (int)r_y, i));
                     }
                 }
             }
@@ -916,7 +948,8 @@ namespace EngineNS.Bricks.Procedure.Node
             var right = graph.BufferCache.FindBuffer(RightPin);
             if (right != null)
             {
-                if (left.Width != right.Width || left.Height != right.Height)
+                if (GetInputBufferCreator(LeftPin).ElementType != GetInputBufferCreator(RightPin).ElementType
+                    && left.Depth != right.Depth)
                 {
                     left.LifeCount--;
                     right.LifeCount--;
@@ -925,17 +958,24 @@ namespace EngineNS.Bricks.Procedure.Node
             }
 
             var result = graph.BufferCache.FindBuffer(ResultPin);
+            var resultType = result.BufferCreator.ElementType;
+            var leftType = left.BufferCreator.ElementType;
+            var rightType = right.BufferCreator.ElementType;
             for (int i = 0; i < result.Depth; i++)
             {
                 for (int j = 0; j < result.Height; j++)
                 {
                     for (int k = 0; k < result.Width; k++)
                     {
-                        result.PixelOperator.Div(result.GetSuperPixelAddress(k, j, i), left.GetSuperPixelAddress(k, j, i), right.GetSuperPixelAddress(k, j, i));
+                        float l_x = (float)(k * left.Width) / (float)result.Width;
+                        float l_y = (float)(j * left.Height) / (float)result.Height;
+
+                        float r_x = (float)(k * right.Width) / (float)result.Width;
+                        float r_y = (float)(j * right.Height) / (float)result.Height;
+                        result.PixelOperator.Div(resultType, result.GetSuperPixelAddress(k, j, i), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, i), rightType, right.GetSuperPixelAddress((int)r_x, (int)r_y, i));
                     }
                 }
             }
-                
             left.LifeCount--;
             if (right != null)
                 right.LifeCount--;

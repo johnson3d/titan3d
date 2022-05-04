@@ -159,6 +159,10 @@ namespace EngineNS.Bricks.Procedure
                 cmdlist.AddImage(PreviewSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             }
         }
+        public UBufferCreator GetInputBufferCreator(PinIn pin)
+        {
+            return pin.Tag as UBufferCreator;
+        }
         public virtual UBufferCreator GetOutBufferCreator(PinOut pin)
         {
             //return pin.Tag as UBufferCreator;
