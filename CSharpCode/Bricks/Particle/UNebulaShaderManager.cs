@@ -61,9 +61,9 @@ namespace EngineNS.Bricks.Particle
         public void Init(RName nebula, IParticleEmitter emitter, string particleVar, string sysData, string cbVar, string define, string code)
         {
             var defines = new RHI.CShaderDefinitions();
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.x}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray1.y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray1.z}");
+            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.X}");
+            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray1.Y}");
+            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray1.Z}");
             defines.mCoreObject.AddDefine("BufferHeadSize", $"{UGpuParticleResources.BufferHeadSize*4}");
 
             ParticleVar = new IO.CMemStreamWriter();

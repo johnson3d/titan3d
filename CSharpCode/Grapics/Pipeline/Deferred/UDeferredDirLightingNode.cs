@@ -59,10 +59,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             this.UpdatePermutation();
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position,
-                EVertexSteamType.VST_UV,};
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
+                EVertexStreamType.VST_UV,};
         }
         public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
         {

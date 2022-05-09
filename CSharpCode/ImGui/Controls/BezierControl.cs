@@ -227,8 +227,16 @@ namespace EngineNS.EGui.Controls
                 tempCtPointRadius = System.Math.Min(tempCtPointRadius * delta, MaxControlPointRadius);
             }
 
-            bool isHovered = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
-            bool isActive = ImGuiAPI.IsItemActive();
+            //bool isHovered = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
+            bool isHovered = false;
+            var msPt = ImGuiAPI.GetMousePos();
+            int Border = 2;
+            if (msPt.X > (canvasP0.X - Border) && msPt.X < canvasP0.X + canvasSize.X + Border &&
+                msPt.Y > (canvasP0.Y - Border) && msPt.Y < canvasP0.Y + canvasSize.Y + Border)
+            {
+                isHovered = true;
+            }
+            bool isActive = true;// ImGuiAPI.IsItemActive();
 
             var io = ImGuiAPI.GetIO();
             var drawList = ImGuiAPI.GetWindowDrawList();
@@ -260,15 +268,19 @@ namespace EngineNS.EGui.Controls
             bool hoverInPoint = false;
 
             var isdragging = isActive && ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Left, 3.0f);
-            if(!isdragging)
+            if (!isdragging)
             {
-                if(mRemovingPoint)
+                if (mRemovingPoint)
                 {
                     BezierPoints.RemoveAt(mHoverPointIdx);
                     BezierPoints.RemoveAt(mHoverPointIdx + (mHoverPointIdx % 2) - 1);
                     mRemovingPoint = false;
                 }
                 mHoverPointIdx = -1;
+            }
+            else
+            {
+                int xxx = 0;
             }
 
             for (int i=0; i<BezierPoints.Count; i+=2)

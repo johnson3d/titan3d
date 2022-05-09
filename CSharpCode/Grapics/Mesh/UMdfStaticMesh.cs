@@ -19,7 +19,7 @@ namespace EngineNS.Graphics.Mesh
 
             UpdateShaderCode();
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
             return null;
         }
@@ -89,15 +89,15 @@ namespace EngineNS.Graphics.Mesh
         {
             mInstanceModifier.SetMode(bSSBO);
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { 
-                EVertexSteamType.VST_Position,
-                EVertexSteamType.VST_Normal,
-                EVertexSteamType.VST_InstPos, 
-                EVertexSteamType.VST_InstQuat,
-                EVertexSteamType.VST_InstScale,
-                EVertexSteamType.VST_F4_1};
+            return new EVertexStreamType[] { 
+                EVertexStreamType.VST_Position,
+                EVertexStreamType.VST_Normal,
+                EVertexStreamType.VST_InstPos, 
+                EVertexStreamType.VST_InstQuat,
+                EVertexStreamType.VST_InstScale,
+                EVertexStreamType.VST_F4_1};
         }
         protected override string GetBaseBuilder(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
         {

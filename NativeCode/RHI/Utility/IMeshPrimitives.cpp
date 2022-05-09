@@ -357,7 +357,7 @@ void IMeshPrimitives::InvalidateResource()
 	mGeometryMesh->InvalidateResource(); 
 }
 
-const char* VBType2String(EVertexSteamType type)
+const char* VBType2String(EVertexStreamType type)
 {
 	switch (type)
 	{
@@ -398,7 +398,7 @@ const char* VBType2String(EVertexSteamType type)
 	}
 }
 
-AutoRef<IVertexBuffer> IMeshPrimitives::LoadVB(IRenderContext* rc, XndAttribute* pAttr, UINT stride, TimeKeys& tkeys, UINT& resSize, EVertexSteamType stream)
+AutoRef<IVertexBuffer> IMeshPrimitives::LoadVB(IRenderContext* rc, XndAttribute* pAttr, UINT stride, TimeKeys& tkeys, UINT& resSize, EVertexStreamType stream)
 {
 	pAttr->BeginRead();
 	UINT uVert, uKey, uStride;
@@ -680,7 +680,7 @@ UINT IMeshPrimitives::GetLodLevel(UINT index, float lod)
 	return (UINT)(num * lod);
 }
 
-vBOOL IMeshPrimitives::SetGeomtryMeshStream(IRenderContext* rc, EVertexSteamType stream, void* data, UINT size, UINT stride, UINT cpuAccess)
+vBOOL IMeshPrimitives::SetGeomtryMeshStream(IRenderContext* rc, EVertexStreamType stream, void* data, UINT size, UINT stride, UINT cpuAccess)
 {
 	IVertexBufferDesc desc;
 	desc.ByteWidth = size;
@@ -747,10 +747,10 @@ vBOOL IMeshDataProvider::ToMesh(IRenderContext* rc, IMeshPrimitives* mesh)
 			continue;
 
 		resSize += mVertexBuffers[i]->GetSize();
-		mesh->SetGeomtryMeshStream(rc, (EVertexSteamType)i,
+		mesh->SetGeomtryMeshStream(rc, (EVertexStreamType)i,
 			mVertexBuffers[i]->GetData(),
 			mVertexBuffers[i]->GetSize(),
-			GetStreamStride((EVertexSteamType)i), 0);
+			GetStreamStride((EVertexStreamType)i), 0);
 	}
 	mesh->SetGeomtryMeshIndex(rc, IndexBuffer->GetData(), IndexBuffer->GetSize(), IBType, 0);
 	mesh->mAtoms = mAtoms;
@@ -789,7 +789,7 @@ vBOOL IMeshDataProvider::InitFromMesh(IRenderContext* rc, IMeshPrimitives* mesh)
 
 	for (int i = 0; i < VST_Number; i++)
 	{
-		auto vb = geom->GetVertexBuffer((EVertexSteamType)i);
+		auto vb = geom->GetVertexBuffer((EVertexStreamType)i);
 		if(vb==nullptr)
 			continue;
 
@@ -854,7 +854,7 @@ vBOOL IMeshDataProvider::Init(DWORD streams, EIndexBufferType ibType, int atom)
 	return TRUE;
 }
 
-void IMeshDataProvider::LoadVB(XndAttribute* pAttr, UINT stride, EVertexSteamType stream)
+void IMeshDataProvider::LoadVB(XndAttribute* pAttr, UINT stride, EVertexStreamType stream)
 {
 	pAttr->BeginRead();
 	UINT uVert, uKey, uStride;
@@ -879,7 +879,7 @@ void IMeshDataProvider::LoadVB(XndAttribute* pAttr, UINT stride, EVertexSteamTyp
 	delete[] data;
 }
 
-vBOOL IMeshDataProvider::LoadFromMeshPrimitive(XndNode* pNode, EVertexSteamType streams)
+vBOOL IMeshDataProvider::LoadFromMeshPrimitive(XndNode* pNode, EVertexStreamType streams)
 {
 	IMeshPrimitives::VModelDesc mDesc;
 	XndAttribute* pAttr = pNode->TryGetAttribute("HeadAttrib");
@@ -1056,7 +1056,7 @@ UINT IMeshDataProvider::GetAtomNumber() const
 	return (UINT)mAtoms.size();
 }
 
-IBlobObject* IMeshDataProvider::GetStream(EVertexSteamType index)
+IBlobObject* IMeshDataProvider::GetStream(EVertexStreamType index)
 {
 	return mVertexBuffers[index];
 }
@@ -1283,7 +1283,7 @@ int IMeshDataProvider::IntersectTriangle(const v3dxVector3* scale, const v3dxVec
 	return -1;
 }
 
-void* IMeshDataProvider::GetVertexPtr(EVertexSteamType stream, UINT index)
+void* IMeshDataProvider::GetVertexPtr(EVertexStreamType stream, UINT index)
 {
 	auto vb = mVertexBuffers[stream];
 	if (vb == nullptr)
@@ -1296,7 +1296,7 @@ void* IMeshDataProvider::GetVertexPtr(EVertexSteamType stream, UINT index)
 	return pData + index * stride;
 }
 
-UINT IMeshDataProvider::GetStreamStride(EVertexSteamType stream)
+UINT IMeshDataProvider::GetStreamStride(EVertexStreamType stream)
 {
 	switch (stream)
 	{

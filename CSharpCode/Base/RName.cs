@@ -129,6 +129,7 @@ namespace EngineNS
         {
             Game = 0,
             Engine,
+            Transient,
             Count,
         }
         ERNameType mRNameType = ERNameType.Game;

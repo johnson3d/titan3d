@@ -16,12 +16,12 @@ namespace EngineNS
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct Int32_2 : IEquatable<Int32_2>
     {
-        public int x;
-        public int y;
+        public int X;
+        public int Y;
         public Int32_2(int InX, int InY)
         {
-            x = InX;
-            y = InY;
+            X = InX;
+            Y = InY;
         }
         public override bool Equals(object value)
         {
@@ -35,11 +35,11 @@ namespace EngineNS
         }
         public override int GetHashCode()
         {
-            return x + y;
+            return X + Y;
         }
         public bool Equals(Int32_2 other)
         {
-            if (x == other.x && y == other.y)
+            if (X == other.X && Y == other.Y)
                 return true;
             return false;
         }
@@ -53,76 +53,256 @@ namespace EngineNS
         }
     }
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct Int32_3
+    public struct Int32_3 : System.IEquatable<Int32_3>
     {
-        public int x;
-        public int y;
-        public int z;
+        public Int32_3(int _x, int _y, int _z)
+        {
+            X = _x;
+            Y = _y;
+            Z = _z;
+        }
+        public override bool Equals(object value)
+        {
+            if (value == null)
+                return false;
+
+            if (value.GetType() != GetType())
+                return false;
+
+            return Equals((UInt32_3)value);
+        }
+        public bool Equals(Int32_3 value)
+        {
+            return (X == value.X && Y == value.Y && Z == value.Z);
+        }
+        public override int GetHashCode()
+        {
+            return X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode();
+        }
+        public int X;
+        public int Y;
+        public int Z;
+        public readonly static Int32_3 Zero = new Int32_3(0, 0, 0);
+        public readonly static Int32_3 One = new Int32_3(1, 1, 1);
+        public readonly static Int32_3 MaxValue = new Int32_3(int.MaxValue, int.MaxValue, int.MaxValue);
+        public readonly static Int32_3 MinValue = new Int32_3(int.MinValue, int.MinValue, int.MinValue);
+
+        public static Int32_3 Maximize(in Int32_3 left, in Int32_3 right)
+        {
+            Int32_3 vector;
+            vector.X = (left.X > right.X) ? left.X : right.X;
+            vector.Y = (left.Y > right.Y) ? left.Y : right.Y;
+            vector.Z = (left.Z > right.Z) ? left.Z : right.Z;
+            return vector;
+        }
+        public static Int32_3 Minimize(in Int32_3 left, in Int32_3 right)
+        {
+            Int32_3 vector;
+            vector.X = (left.X < right.X) ? left.X : right.X;
+            vector.Y = (left.Y < right.Y) ? left.Y : right.Y;
+            vector.Z = (left.Z < right.Z) ? left.Z : right.Z;
+            return vector;
+        }
+
+        public static Int32_3 operator +(in Int32_3 left, in Int32_3 right)
+        {
+            Int32_3 result;
+            result.X = left.X + right.X;
+            result.Y = left.Y + right.Y;
+            result.Z = left.Z + right.Z;
+            return result;
+        }
+        public static Int32_3 operator -(in Int32_3 left, in Int32_3 right)
+        {
+            Int32_3 result;
+            result.X = left.X - right.X;
+            result.Y = left.Y - right.Y;
+            result.Z = left.Z - right.Z;
+            return result;
+        }
+        public static Int32_3 operator +(in Int32_3 value)
+        {
+            Int32_3 result;
+            result.X = +value.X;
+            result.Y = +value.Y;
+            result.Z = +value.Z;
+            return result;
+        }
+        public static Int32_3 operator *(in Int32_3 value, int scale)
+        {
+            Int32_3 result;
+            result.X = value.X * scale;
+            result.Y = value.Y * scale;
+            result.Z = value.Z * scale;
+            return result;
+        }
+        public static Int32_3 operator *(in Int32_3 left, in Int32_3 right)
+        {
+            Int32_3 result;
+            result.X = left.X * right.X;
+            result.Y = left.Y * right.Y;
+            result.Z = left.Z * right.Z;
+            return result;
+        }
+        public static Int32_3 operator /(in Int32_3 left, in Int32_3 right)
+        {
+            Int32_3 result;
+            result.X = left.X / right.X;
+            result.Y = left.Y / right.Y;
+            result.Z = left.Z / right.Z;
+            return result;
+        }
+        public static Int32_3 operator /(in Int32_3 value, int scale)
+        {
+            Int32_3 result;
+            result.X = value.X / scale;
+            result.Y = value.Y / scale;
+            result.Z = value.Z / scale;
+            return result;
+        }
+        public static bool operator ==(in Int32_3 left, in Int32_3 right)
+        {
+            return left.Equals(right);
+        }
+        public static bool operator !=(in Int32_3 left, in Int32_3 right)
+        {
+            return !left.Equals(right);
+        }
     }
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct Int32_4
     {
-        public int x;
-        public int y;
-        public int z;
-        public int w;
+        public int X;
+        public int Y;
+        public int Z;
+        public int W;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct UInt32_2
     {
-        public UInt32 x;
-        public UInt32 y;
+        public UInt32 X;
+        public UInt32 Y;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct UInt32_3
+    public struct UInt32_3 : System.IEquatable<UInt32_3>
     {
         public UInt32_3(uint InX, uint InY, uint InZ)
         {
-            x = InX;
-            y = InY;
-            z = InZ;
+            X = InX;
+            Y = InY;
+            Z = InZ;
         }
-        public UInt32 x;
-        public UInt32 y;
-        public UInt32 z;
+        public static UInt32_3 Zero = new UInt32_3(0, 0, 0);
+        public static UInt32_3 One = new UInt32_3(1, 1, 1);
+        public UInt32 X;
+        public UInt32 Y;
+        public UInt32 Z;
+        public override bool Equals(object value)
+        {
+            if (value == null)
+                return false;
+
+            if (value.GetType() != GetType())
+                return false;
+
+            return Equals((UInt32_3)value);
+        }
+        public bool Equals(UInt32_3 value)
+        {
+            return (X == value.X && Y == value.Y && Z == value.Z);
+        }
+        public override int GetHashCode()
+        {
+            return X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode();
+        }
+        public static UInt32_3 Maximize(in UInt32_3 left, in UInt32_3 right)
+        {
+            UInt32_3 vector;
+            vector.X = (left.X > right.X) ? left.X : right.X;
+            vector.Y = (left.Y > right.Y) ? left.Y : right.Y;
+            vector.Z = (left.Z > right.Z) ? left.Z : right.Z;
+            return vector;
+        }
+        public static UInt32_3 Minimize(in UInt32_3 left, in UInt32_3 right)
+        {
+            UInt32_3 vector;
+            vector.X = (left.X < right.X) ? left.X : right.X;
+            vector.Y = (left.Y < right.Y) ? left.Y : right.Y;
+            vector.Z = (left.Z < right.Z) ? left.Z : right.Z;
+            return vector;
+        }
+
+        public static UInt32_3 operator +(in UInt32_3 left, in UInt32_3 right)
+        {
+            UInt32_3 result;
+            result.X = left.X + right.X;
+            result.Y = left.Y + right.Y;
+            result.Z = left.Z + right.Z;
+            return result;
+        }
+        public static UInt32_3 operator -(in UInt32_3 left, in UInt32_3 right)
+        {
+            UInt32_3 result;
+            result.X = left.X - right.X;
+            result.Y = left.Y - right.Y;
+            result.Z = left.Z - right.Z;
+            return result;
+        }
+        public static UInt32_3 operator +(in UInt32_3 value)
+        {
+            UInt32_3 result;
+            result.X = +value.X;
+            result.Y = +value.Y;
+            result.Z = +value.Z;
+            return result;
+        }
+        public static UInt32_3 operator *(in UInt32_3 value, uint scale)
+        {
+            UInt32_3 result;
+            result.X = value.X * scale;
+            result.Y = value.Y * scale;
+            result.Z = value.Z * scale;
+            return result;
+        }
+        public static UInt32_3 operator *(in UInt32_3 left, in UInt32_3 right)
+        {
+            UInt32_3 result;
+            result.X = left.X * right.X;
+            result.Y = left.Y * right.Y;
+            result.Z = left.Z * right.Z;
+            return result;
+        }
+        public static UInt32_3 operator /(in UInt32_3 left, in UInt32_3 right)
+        {
+            UInt32_3 result;
+            result.X = left.X / right.X;
+            result.Y = left.Y / right.Y;
+            result.Z = left.Z / right.Z;
+            return result;
+        }
+        public static UInt32_3 operator /(in UInt32_3 value, uint scale)
+        {
+            UInt32_3 result;
+            result.X = value.X / scale;
+            result.Y = value.Y / scale;
+            result.Z = value.Z / scale;
+            return result;
+        }
+        public static bool operator ==(in UInt32_3 left, in UInt32_3 right)
+        {
+            return left.Equals(right);
+        }
+        public static bool operator !=(in UInt32_3 left, in UInt32_3 right)
+        {
+            return !left.Equals(right);
+        }
         public UInt32 MaxSide()
         {
-            if (x >= y)
-            {
-                if (y >= z)
-                {
-                    return x;
-                }
-                else
-                {
-                    if (x >= z)
-                        return x;
-                    else
-                        return z;
-                }
-            }
-            else
-            {
-                if (y >= z)
-                {
-                    return y;
-                }
-                else
-                {
-                    if (x >= z)
-                        return y;
-                    else
-                        return z;
-                }
-            }
+            return CoreDefine.Max(X, CoreDefine.Max(Y, Z));
         }
         public bool AnyNotZero()
         {
-            return (x > 0) || (y > 0) || (z > 0);
-        }
-        public void SetZero()
-        {
-            x = y = z = 0;
+            return (X > 0) || (Y > 0) || (Z > 0);
         }
     }
 
@@ -134,18 +314,18 @@ namespace EngineNS
         static UInt32_4 CreateInstance(uint _x, uint _y, uint _z, uint _w)
         {
             UInt32_4 result = new UInt32_4();
-            result.x = _x;
-            result.y = _y;
-            result.z = _z;
-            result.w = _w;
+            result.X = _x;
+            result.Y = _y;
+            result.Z = _z;
+            result.W = _w;
             return result;
         }
         public void SetValue(uint _x, uint _y, uint _z, uint _w)
         {
-            x = _x;
-            y = _y;
-            z = _z;
-            w = _w;
+            X = _x;
+            Y = _y;
+            Z = _z;
+            W = _w;
         }
         public UInt32 this[uint index]
         {
@@ -154,7 +334,7 @@ namespace EngineNS
                 System.Diagnostics.Debug.Assert(index < 4);
                 unsafe
                 {
-                    fixed (uint* p = &x)
+                    fixed (uint* p = &X)
                     {
                         return p[index];
                     }
@@ -166,7 +346,7 @@ namespace EngineNS
                 System.Diagnostics.Debug.Assert(index < 4);
                 unsafe
                 {
-                    fixed (uint* p = &x)
+                    fixed (uint* p = &X)
                     {
                         p[index] = value;
                     }
@@ -194,7 +374,7 @@ namespace EngineNS
                 System.Diagnostics.Debug.Assert(col < 4);
                 unsafe
                 {
-                    fixed (uint* p = &x)
+                    fixed (uint* p = &X)
                     {
                         p[row * 4 + col] = value;
                     }
@@ -228,16 +408,16 @@ namespace EngineNS
         }
         [FieldOffset(0)]
         [Rtti.Meta]
-        public UInt32 x;
+        public UInt32 X;
         [FieldOffset(4)]
         [Rtti.Meta]
-        public UInt32 y;
+        public UInt32 Y;
         [FieldOffset(8)]
         [Rtti.Meta]
-        public UInt32 z;
+        public UInt32 Z;
         [FieldOffset(12)]
         [Rtti.Meta]
-        public UInt32 w;
+        public UInt32 W;
 
         [FieldOffset(0)]
         [Rtti.Meta]
@@ -294,26 +474,26 @@ namespace EngineNS
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct UInt8_2
     {
-        public byte x;
-        public byte y;
+        public byte X;
+        public byte Y;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct UInt8_3
     {
-        public byte x;
-        public byte y;
-        public byte z;
+        public byte X;
+        public byte Y;
+        public byte Z;
     }
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct UInt8_4
     {
         [Rtti.Meta]
-        public byte x;
+        public byte X;
         [Rtti.Meta]
-        public byte y;
+        public byte Y;
         [Rtti.Meta]
-        public byte z;
+        public byte Z;
         [Rtti.Meta]
-        public byte w;
+        public byte W;
     }
 }

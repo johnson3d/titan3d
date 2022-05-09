@@ -114,41 +114,41 @@ namespace EngineNS.Editor.ShaderCompiler
         private UHLSLInclude UserInclude;
         private Graphics.Pipeline.Shader.UMaterial Material;
         private Rtti.UTypeDesc MdfQueueType;
-        private string GetVertexStreamDefine(EVertexSteamType type)
+        private string GetVertexStreamDefine(EVertexStreamType type)
         {
             switch (type)
             {
-                case EVertexSteamType.VST_Position:
+                case EVertexStreamType.VST_Position:
                     return "USE_VS_Position";
-                case EVertexSteamType.VST_Normal:
+                case EVertexStreamType.VST_Normal:
                     return "USE_VS_Normal";
-                case EVertexSteamType.VST_Tangent:
+                case EVertexStreamType.VST_Tangent:
                     return "USE_VS_Tangent";
-                case EVertexSteamType.VST_Color:
+                case EVertexStreamType.VST_Color:
                     return "USE_VS_Color";
-                case EVertexSteamType.VST_UV:
+                case EVertexStreamType.VST_UV:
                     return "USE_VS_UV";
-                case EVertexSteamType.VST_LightMap:
+                case EVertexStreamType.VST_LightMap:
                     return "USE_VS_LightMap";
-                case EVertexSteamType.VST_SkinIndex:
+                case EVertexStreamType.VST_SkinIndex:
                     return "USE_VS_SkinIndex";
-                case EVertexSteamType.VST_SkinWeight:
+                case EVertexStreamType.VST_SkinWeight:
                     return "USE_VS_SkinWeight";
-                case EVertexSteamType.VST_TerrainIndex:
+                case EVertexStreamType.VST_TerrainIndex:
                     return "USE_VS_TerrainIndex";
-                case EVertexSteamType.VST_TerrainGradient:
+                case EVertexStreamType.VST_TerrainGradient:
                     return "USE_VS_TerrainGradient";
-                case EVertexSteamType.VST_InstPos:
+                case EVertexStreamType.VST_InstPos:
                     return "USE_VS_InstPos";
-                case EVertexSteamType.VST_InstQuat:
+                case EVertexStreamType.VST_InstQuat:
                     return "USE_VS_InstQuat";
-                case EVertexSteamType.VST_InstScale:
+                case EVertexStreamType.VST_InstScale:
                     return "USE_VS_InstScale";
-                case EVertexSteamType.VST_F4_1:
+                case EVertexStreamType.VST_F4_1:
                     return "USE_VS_F4_1";
-                case EVertexSteamType.VST_F4_2:
+                case EVertexStreamType.VST_F4_2:
                     return "USE_VS_F4_2";
-                case EVertexSteamType.VST_F4_3:
+                case EVertexStreamType.VST_F4_3:
                     return "USE_VS_F4_3";
             }
             return null;

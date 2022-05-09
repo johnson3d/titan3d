@@ -37,16 +37,16 @@ namespace EngineNS.Graphics.Pipeline.Common
             BasePass.Initialize(rc, debugName);
 
             var defines = new RHI.CShaderDefinitions();
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.x}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.z}");
+            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
+            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
+            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
             CSDesc_CountAvgBrightness = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
                 "CS_CountAvgBrightness", EShaderType.EST_ComputeShader, defines, null);
             CS_CountAvgBrightness = rc.CreateComputeShader(CSDesc_CountAvgBrightness);
 
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.x}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.z}");
+            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
+            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
+            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
             CSDesc_SetupAvgBrightness = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
                 "CS_SetupAvgBrightness", EShaderType.EST_ComputeShader, defines, null);
             CS_SetupAvgBrightness = rc.CreateComputeShader(CSDesc_SetupAvgBrightness);
@@ -138,8 +138,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                         CountAvgBrightnessDrawcall.mCoreObject.GetShaderRViewResources().BindCS(srvIdx->CSBindPoint, lightSRV.mCoreObject);
                     }
                     CountAvgBrightnessDrawcall.mCoreObject.SetDispatch(
-                        CoreDefine.Roundup(targetWidth, Dispatch_SetupDimArray2.x), 
-                        CoreDefine.Roundup(targetHeight, Dispatch_SetupDimArray2.y), 
+                        CoreDefine.Roundup(targetWidth, Dispatch_SetupDimArray2.X), 
+                        CoreDefine.Roundup(targetHeight, Dispatch_SetupDimArray2.Y), 
                         1);
                     CountAvgBrightnessDrawcall.BuildPass(cmd);
                     //uint targetWidth = (uint)lightSRV.PicDesc.Width;

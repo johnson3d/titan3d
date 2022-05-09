@@ -735,6 +735,11 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
+            //var ctrlPos = ParentGraph.CanvasToViewport(in prevStart);
+            //ctrlPos -= ImGuiAPI.GetWindowPos();
+            //ImGuiAPI.SetCursorPos(in ctrlPos);
+
+            //ImGuiAPI.InvisibleButton("canvas", prevEnd - prevStart, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonRight);
             mBezierCtrl.OnDrawCanvas(in prevStart, prevEnd - prevStart);
         }
     }

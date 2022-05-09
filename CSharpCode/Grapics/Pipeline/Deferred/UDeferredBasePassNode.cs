@@ -10,13 +10,13 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Deferred/DeferredOpaque.cginc", RName.ERNameType.Engine);
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position,
-                EVertexSteamType.VST_Normal,
-                EVertexSteamType.VST_Tangent,
-                EVertexSteamType.VST_UV,
-                EVertexSteamType.VST_Color};
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
+                EVertexStreamType.VST_Normal,
+                EVertexStreamType.VST_Tangent,
+                EVertexStreamType.VST_UV,
+                EVertexStreamType.VST_Color};
         }
     }
     public class UDeferredBasePassNode : Common.UBasePassNode

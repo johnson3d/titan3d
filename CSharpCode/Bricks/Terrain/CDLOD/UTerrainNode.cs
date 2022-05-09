@@ -483,24 +483,24 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             var nsPos = pos - this.Placement.AbsTransform.mPosition;
             Int32_2 result;
-            result.x = (int)(nsPos.X / LevelSize);
-            result.y = (int)(nsPos.Z / LevelSize);
+            result.X = (int)(nsPos.X / LevelSize);
+            result.Y = (int)(nsPos.Z / LevelSize);
             return result;
         }
         public UTerrainLevel GetLevel(in DVector3 pos)
         {
             var idxLevel = GetLevelIndex(in pos);
-            if (idxLevel.x < 0 || idxLevel.y < 0 || idxLevel.x >= NumOfLevelX || idxLevel.y >= NumOfLevelZ)
+            if (idxLevel.X < 0 || idxLevel.Y < 0 || idxLevel.X >= NumOfLevelX || idxLevel.Y >= NumOfLevelZ)
             {
                 return null;
             }
-            return Levels[idxLevel.y, idxLevel.x];
+            return Levels[idxLevel.Y, idxLevel.X];
         }
         Int32_2 CurrentActiveCenterLevel = new Int32_2(-1, -1);
         public bool SetActiveCenter(in DVector3 pos)
         {
             var idxLevel = GetLevelIndex(in pos);
-            if (idxLevel.x < 0 || idxLevel.y < 0 || idxLevel.x >= NumOfLevelX || idxLevel.y >= NumOfLevelZ)
+            if (idxLevel.X < 0 || idxLevel.Y < 0 || idxLevel.X >= NumOfLevelX || idxLevel.Y >= NumOfLevelZ)
             {
                 return false;
             }
@@ -511,14 +511,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             CurrentActiveCenterLevel = idxLevel;
 
-            var curLevel = Levels[idxLevel.y, idxLevel.x];
+            var curLevel = Levels[idxLevel.Y, idxLevel.X];
             curLevel.LoadLevelData(LevelStreaming, true);
 
-            int xMin = idxLevel.x - ActiveLevel;
-            int xMax = idxLevel.x + ActiveLevel;
+            int xMin = idxLevel.X - ActiveLevel;
+            int xMax = idxLevel.X + ActiveLevel;
 
-            int zMin = idxLevel.y - ActiveLevel;
-            int zMax = idxLevel.y + ActiveLevel;
+            int zMin = idxLevel.Y - ActiveLevel;
+            int zMax = idxLevel.Y + ActiveLevel;
 
             int ActiveNum = 1 + 2 * ActiveLevel;
             for (int i = 0; i < ActiveNum; i++)

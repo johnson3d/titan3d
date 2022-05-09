@@ -340,9 +340,7 @@ namespace EngineNS.IO
                 }
                 else
                 {
-                    var uv0 = new Vector2(0, 0);
-                    var uv1 = new Vector2(1, 1);
-                    cmdlist.AddImage(Task.Result.mTextureRSV.GetTextureHandle().ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                    cmdlist.AddImage(Task.Result.mTextureRSV.GetTextureHandle().ToPointer(), in start, in end, in Vector2.Zero, in Vector2.One, 0xFFFFFFFF);
                 }
             }
         }

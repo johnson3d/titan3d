@@ -76,9 +76,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             BasePass.Initialize(rc, debugName);
 
             var defines = new RHI.CShaderDefinitions();
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.x}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.z}");
+            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
+            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
+            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
 
             CSDesc_SetupTileData = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/ScreenSpace/Tiling.compute", RName.ERNameType.Engine),
                 "CS_SetupTileData", EShaderType.EST_ComputeShader, defines, null);
@@ -115,7 +115,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 SetupTileDataDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, TileUAV.mCoreObject);
             }
-            SetupTileDataDrawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(TileX, Dispatch_SetupDimArray2.x), CoreDefine.Roundup(TileY, Dispatch_SetupDimArray2.y), 1);
+            SetupTileDataDrawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(TileX, Dispatch_SetupDimArray2.X), CoreDefine.Roundup(TileY, Dispatch_SetupDimArray2.Y), 1);
 
             PushLightToTileDataDrawcall = rc.CreateComputeDrawcall();
             PushLightToTileDataDrawcall.mCoreObject.SetComputeShader(CS_PushLightToTileData.mCoreObject);
@@ -129,7 +129,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 PushLightToTileDataDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, TileUAV.mCoreObject);
             }
-            PushLightToTileDataDrawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(TileX, Dispatch_SetupDimArray2.x), CoreDefine.Roundup(TileY, Dispatch_SetupDimArray2.y), 1);
+            PushLightToTileDataDrawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(TileX, Dispatch_SetupDimArray2.X), CoreDefine.Roundup(TileY, Dispatch_SetupDimArray2.Y), 1);
         }
         public override void Cleanup()
         {
@@ -195,8 +195,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                     ConfigCBuffer.SetValue(idx, in LightNum);
                 }
                 UInt32_2 tile;
-                tile.x = TileX;
-                tile.y = TileY;
+                tile.X = TileX;
+                tile.Y = TileY;
                 idx = ConfigCBuffer.mCoreObject.FindVar("TileNum");
                 ConfigCBuffer.SetValue(idx, in tile);
 

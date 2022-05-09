@@ -146,10 +146,10 @@ namespace EngineNS.Graphics.Mesh.Modifier
                     mF41VB.mCoreObject.UpdateGPUBuffData(cmd, p, (UInt32)(sizeof(UInt32_4) * mdf.mCurNumber));
                 }
 
-                mAttachVBs.mCoreObject.BindVertexBuffer(EVertexSteamType.VST_InstPos, mPosVB.mCoreObject);
-                mAttachVBs.mCoreObject.BindVertexBuffer(EVertexSteamType.VST_InstQuat, mRotateVB.mCoreObject);
-                mAttachVBs.mCoreObject.BindVertexBuffer(EVertexSteamType.VST_InstScale, mScaleVB.mCoreObject);
-                mAttachVBs.mCoreObject.BindVertexBuffer(EVertexSteamType.VST_F4_1, mF41VB.mCoreObject);
+                mAttachVBs.mCoreObject.BindVertexBuffer(EVertexStreamType.VST_InstPos, mPosVB.mCoreObject);
+                mAttachVBs.mCoreObject.BindVertexBuffer(EVertexStreamType.VST_InstQuat, mRotateVB.mCoreObject);
+                mAttachVBs.mCoreObject.BindVertexBuffer(EVertexStreamType.VST_InstScale, mScaleVB.mCoreObject);
+                mAttachVBs.mCoreObject.BindVertexBuffer(EVertexStreamType.VST_F4_1, mF41VB.mCoreObject);
             }
 
             public void PushInstance(UInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in UInt32_4 f41, uint hitProxyId)

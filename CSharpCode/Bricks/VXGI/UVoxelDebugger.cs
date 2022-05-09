@@ -10,9 +10,9 @@ namespace EngineNS.Bricks.VXGI
         {
             UpdateShaderCode();
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position, };
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position, };
         }
         protected override void UpdateShaderCode()
         {
@@ -122,9 +122,9 @@ namespace EngineNS.Bricks.VXGI
 
             CollectVxDebuggerDrawcall = rc.CreateComputeDrawcall();
             CollectVxDebuggerDrawcall.mCoreObject.SetComputeShader(CS_CollectVxDebugger.mCoreObject);
-            CollectVxDebuggerDrawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(VxSceneX, Dispatch_SetupDimArray3.x), 
-                CoreDefine.Roundup(VxSceneY, Dispatch_SetupDimArray3.y), 
-                CoreDefine.Roundup(VxSceneZ, Dispatch_SetupDimArray3.z));
+            CollectVxDebuggerDrawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(VxSceneX, Dispatch_SetupDimArray3.X), 
+                CoreDefine.Roundup(VxSceneY, Dispatch_SetupDimArray3.Y), 
+                CoreDefine.Roundup(VxSceneZ, Dispatch_SetupDimArray3.Z));
 
             // renwind test
             srvIdx = CSDesc_CollectVxDebugger.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxPool");
@@ -247,9 +247,9 @@ namespace EngineNS.Bricks.VXGI
                 "CS_SetupVxDebugger", EShaderType.EST_ComputeShader, defines, null);
             CS_SetupVxDebugger = rc.CreateComputeShader(CSDesc_SetupVxDebugger);
 
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray3.x}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray3.y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray3.z}");
+            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray3.X}");
+            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray3.Y}");
+            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray3.Z}");
             CSDesc_CollectVxDebugger = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine),
                 "CS_CollectVxDebugger", EShaderType.EST_ComputeShader, defines, null);
             CS_CollectVxDebugger = rc.CreateComputeShader(CSDesc_CollectVxDebugger);

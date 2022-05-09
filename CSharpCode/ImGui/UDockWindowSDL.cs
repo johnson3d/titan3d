@@ -316,7 +316,7 @@ namespace EngineNS.EGui
                 vbDesc.CPUAccess = (UInt32)ECpuAccess.CAS_WRITE;
                 vbDesc.ByteWidth = (uint)(totalVBSize * 1.5f);
                 rhiData.VertexBuffer = rc.CreateVertexBuffer(in vbDesc);
-                rhiData.GeomMesh.mCoreObject.BindVertexBuffer(EVertexSteamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
+                rhiData.GeomMesh.mCoreObject.BindVertexBuffer(EVertexStreamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
             }
 
             uint totalIBSize = (uint)(draw_data.TotalIdxCount * sizeof(ushort));
@@ -351,7 +351,7 @@ namespace EngineNS.EGui
             rhiData.IndexBuffer.mCoreObject.UpdateGPUBuffData(rhiData.CmdList.mCoreObject,
                 rhiData.DataIB.UnsafeAddressAt(0).ToPointer(), (uint)(indexOffsetInElements * sizeof(ushort)));
 
-            rhiData.GeomMesh.mCoreObject.BindVertexBuffer(EVertexSteamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
+            rhiData.GeomMesh.mCoreObject.BindVertexBuffer(EVertexStreamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
             rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
 
             // Setup orthographic projection matrix into our constant buffer

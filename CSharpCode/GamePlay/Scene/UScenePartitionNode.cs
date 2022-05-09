@@ -50,7 +50,7 @@ namespace EngineNS.GamePlay.Scene
         public bool SetActiveCenter(in DVector3 pos)
         {
             var idxLevel = GetLevelIndex(in pos);
-            if (idxLevel.x < 0 || idxLevel.y < 0 || idxLevel.x >= NumOfLevelX || idxLevel.y >= NumOfLevelZ)
+            if (idxLevel.X < 0 || idxLevel.Y < 0 || idxLevel.X >= NumOfLevelX || idxLevel.Y >= NumOfLevelZ)
             {
                 return false;
             }
@@ -61,11 +61,11 @@ namespace EngineNS.GamePlay.Scene
             }
             CurrentActiveCenterLevel = idxLevel;
 
-            int xMin = idxLevel.x - ActiveLevel;
-            int xMax = idxLevel.x + ActiveLevel;
+            int xMin = idxLevel.X - ActiveLevel;
+            int xMax = idxLevel.X + ActiveLevel;
 
-            int zMin = idxLevel.y - ActiveLevel;
-            int zMax = idxLevel.y + ActiveLevel;
+            int zMin = idxLevel.Y - ActiveLevel;
+            int zMax = idxLevel.Y + ActiveLevel;
             int activeX = 0, activeZ = 0;
             for(int i = xMin; i <= xMax; i++, activeX++)
             {
@@ -156,18 +156,18 @@ namespace EngineNS.GamePlay.Scene
         {
             var nsPos = pos - this.Placement.AbsTransform.mPosition;
             Int32_2 result;
-            result.x = (int)(nsPos.X / LevelSize);
-            result.y = (int)(nsPos.Z / LevelSize);
+            result.X = (int)(nsPos.X / LevelSize);
+            result.Y = (int)(nsPos.Z / LevelSize);
             return result;
         }
         public UScenePartitionLevel GetLevel(in DVector3 pos)
         {
             var idxLevel = GetLevelIndex(in pos);
-            if (idxLevel.x < 0 || idxLevel.y < 0 || idxLevel.x >= NumOfLevelX || idxLevel.y >= NumOfLevelZ)
+            if (idxLevel.X < 0 || idxLevel.Y < 0 || idxLevel.X >= NumOfLevelX || idxLevel.Y >= NumOfLevelZ)
             {
                 return null;
             }
-            return Levels[idxLevel.y, idxLevel.x];
+            return Levels[idxLevel.Y, idxLevel.X];
         }
     }
 }

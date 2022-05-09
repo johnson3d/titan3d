@@ -31,7 +31,7 @@ namespace EngineNS.Editor
                 if (i.AssetName == name)
                 {
                     editor = i;
-                    break;
+                    return;
                 }
             }
             if (editor == null)

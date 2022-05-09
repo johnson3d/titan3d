@@ -10,9 +10,9 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/pick/HitProxy.cginc", RName.ERNameType.Engine);
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position};
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position};
         }
     }
     public class UHitproxyNode : URenderGraphNode

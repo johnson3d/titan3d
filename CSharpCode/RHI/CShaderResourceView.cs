@@ -492,7 +492,7 @@ namespace EngineNS.RHI
                     ar.WriteNoSize(pngData, (int)memStream.Position);
                     attr.ReleaseWriter(ref ar);
                 }
-                desc.MipSizes.Add(new Int32_2() { x = width, y = height });
+                desc.MipSizes.Add(new Int32_2() { X = width, Y = height });
                 height = height / 2;
                 width = width / 2;
                 if ((height == 0 && width == 0))
@@ -634,8 +634,8 @@ namespace EngineNS.RHI
 
                 var texDesc = new ITexture2DDesc();
                 texDesc.SetDefault();
-                texDesc.Width = (uint)desc.MipSizes[desc.MipLevel - mipLevel].x;
-                texDesc.Height = (uint)desc.MipSizes[desc.MipLevel - mipLevel].y;
+                texDesc.Width = (uint)desc.MipSizes[desc.MipLevel - mipLevel].X;
+                texDesc.Height = (uint)desc.MipSizes[desc.MipLevel - mipLevel].Y;
                 texDesc.MipLevels = (uint)mipLevel;
                 texDesc.InitData = pInitData;
                 switch (colorComp)

@@ -384,4 +384,156 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("MeshMorph", "Float3\\Morph", UPgcGraph.PgcEditorKeyword)]
+    public class UFloat3Morph : UOpNode
+    {
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn InXYZ { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn XBezierPin { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn YBezierPin { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn ZBezierPin { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutXYZ { get; set; } = new PinOut();
+
+        public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+
+        public enum EFactorAxis
+        {
+            FactorX,
+            FactorY,
+            FactorZ,
+        }
+        [Rtti.Meta]
+        public EFactorAxis FactorAxis { get; set; } = EFactorAxis.FactorY;
+        public UFloat3Morph()
+        {
+            Icon.Size = new Vector2(25, 25);
+            Icon.Color = 0xFF00FF00;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
+
+            AddInput(InXYZ, "XYZ", XYZBufferCreator);
+            AddInput(XBezierPin, "XBezier", DefaultInputDesc, "Bezier");
+            AddInput(YBezierPin, "YBezier", DefaultInputDesc, "Bezier");
+            AddInput(ZBezierPin, "ZBezier", DefaultInputDesc, "Bezier");
+            AddOutput(OutXYZ, " XYZ", XYZBufferCreator);
+        }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            if (OutXYZ == pin)
+            {
+                var graph = ParentGraph as UPgcGraph;
+                var buffer = graph.BufferCache.FindBuffer(InXYZ);
+                if (buffer != null)
+                {
+                    return buffer.BufferCreator;
+                }
+            }
+            return base.GetOutBufferCreator(pin);
+        }
+        public override bool OnProcedure(UPgcGraph graph)
+        {
+            var xbzNode = GetInputNode(graph, XBezierPin) as UBezier;
+            var ybzNode = GetInputNode(graph, YBezierPin) as UBezier;
+            var zbzNode = GetInputNode(graph, ZBezierPin) as UBezier;
+
+            var xyzSrc = graph.BufferCache.FindBuffer(InXYZ);
+            var result = graph.BufferCache.FindBuffer(OutXYZ);
+
+            Vector3 xyzMin = Vector3.MaxValue;
+            Vector3 xyzMax = Vector3.MinValue;
+            for (int i = 0; i < result.Depth; i++)
+            {
+                for (int j = 0; j < result.Height; j++)
+                {
+                    for (int k = 0; k < result.Width; k++)
+                    {
+                        ref var pos = ref xyzSrc.GetPixel<Vector3>(k, j, i);
+
+                        xyzMax = Vector3.Maximize(in xyzMax, in pos);
+                        xyzMin = Vector3.Minimize(in xyzMin, in pos);
+                    }
+                }
+            }
+
+            var range = xyzMax - xyzMin;
+            for (int i = 0; i < result.Depth; i++)
+            {
+                for (int j = 0; j < result.Height; j++)
+                {
+                    for (int k = 0; k < result.Width; k++)
+                    {
+                        ref var pos = ref xyzSrc.GetPixel<Vector3>(k, j, i);
+
+                        Vector3 dstPos = pos;
+                        switch (FactorAxis)
+                        {
+                            case EFactorAxis.FactorX:
+                                {
+                                    //if (xbzNode != null)
+                                    {
+                                        var rate = (pos.X - xyzMin.X) / range.X;
+                                        if (xbzNode != null)
+                                        {
+                                            var fMulvalue = BezierCalculate.ValueOnBezier(ybzNode.BzPoints, rate);
+                                            dstPos.Y = dstPos.Y * fMulvalue.Y;
+                                        }
+                                        if (zbzNode != null)
+                                        {
+                                            var fMulvalue = BezierCalculate.ValueOnBezier(zbzNode.BzPoints, rate);
+                                            dstPos.Z = dstPos.Z * fMulvalue.Y;
+                                        }
+                                    }
+                                }
+                                break;
+                            case EFactorAxis.FactorY:
+                                {
+                                    //if (ybzNode != null)
+                                    {
+                                        var rate = (pos.Y - xyzMin.Y) / range.Y;
+                                        if (xbzNode != null)
+                                        {
+                                            var fMulvalue = BezierCalculate.ValueOnBezier(xbzNode.BzPoints, rate);
+                                            dstPos.X = dstPos.X * fMulvalue.Y;
+                                        }
+                                        if (zbzNode != null)
+                                        {
+                                            var fMulvalue = BezierCalculate.ValueOnBezier(zbzNode.BzPoints, rate);
+                                            dstPos.Z = dstPos.Z * fMulvalue.Y;
+                                        }
+                                    }
+                                }
+                                break;
+                            case EFactorAxis.FactorZ:
+                                {
+                                    //if (zbzNode != null)
+                                    {
+                                        var rate = (pos.Z - xyzMin.Z) / range.Z;
+                                        if (xbzNode != null)
+                                        {
+                                            var fMulvalue = BezierCalculate.ValueOnBezier(xbzNode.BzPoints, rate);
+                                            dstPos.X = dstPos.X * fMulvalue.Y;
+                                        }
+                                        if (ybzNode != null)
+                                        {
+                                            var fMulvalue = BezierCalculate.ValueOnBezier(zbzNode.BzPoints, rate);
+                                            dstPos.Y = dstPos.Y * fMulvalue.Y;
+                                        }
+                                    }
+                                }
+                                break;
+                        }
+
+                        result.SetPixel<Vector3>(k, j, i, in dstPos);
+                    }
+                }
+            }
+
+            xyzSrc.LifeCount--;
+            return true;
+        }
+    }
 }

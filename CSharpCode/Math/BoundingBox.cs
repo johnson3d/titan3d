@@ -12,6 +12,7 @@ namespace EngineNS
     //[System.ComponentModel.TypeConverter( typeof(EngineNS.Design.BoundingBoxConverter) )]
 	public struct BoundingBox : System.IEquatable<BoundingBox>
     {
+        public static readonly BoundingBox Empty = new BoundingBox(new Vector3(float.MaxValue), new Vector3(float.MinValue));
         /// <summary>
         /// 最小顶点
         /// </summary>

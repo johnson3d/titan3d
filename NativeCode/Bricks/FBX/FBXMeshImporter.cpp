@@ -779,13 +779,13 @@ namespace AssetImportAndExport
 			//set stream
 			{
 
-				mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexSteamType::VST_Position, posStream, (UINT)((UINT)sizeof(v3dxVector3) * renderVertexCount), sizeof(v3dxVector3), 0);
+				mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexStreamType::VST_Position, posStream, (UINT)((UINT)sizeof(v3dxVector3) * renderVertexCount), sizeof(v3dxVector3), 0);
 				if (hasVertexColor)
-					mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexSteamType::VST_Color, vertexColorStream, (UINT)((UINT)sizeof(DWORD) * renderVertexCount), sizeof(DWORD), 0);
-				mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexSteamType::VST_Normal, normalStream, (UINT)((UINT)sizeof(v3dxVector3) * renderVertexCount), sizeof(v3dxVector3), 0);
-				mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexSteamType::VST_UV, uvStream, (UINT)((UINT)sizeof(v3dxVector2) * renderVertexCount), sizeof(v3dxVector2), 0);
-				mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexSteamType::VST_LightMap, lightMapStream, (UINT)((UINT)sizeof(v3dxVector2) * renderVertexCount), sizeof(v3dxVector2), 0);
-				mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexSteamType::VST_Tangent, tangentStream, (UINT)((UINT)sizeof(v3dVector4_t) * renderVertexCount), sizeof(v3dVector4_t), 0);
+					mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexStreamType::VST_Color, vertexColorStream, (UINT)((UINT)sizeof(DWORD) * renderVertexCount), sizeof(DWORD), 0);
+				mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexStreamType::VST_Normal, normalStream, (UINT)((UINT)sizeof(v3dxVector3) * renderVertexCount), sizeof(v3dxVector3), 0);
+				mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexStreamType::VST_UV, uvStream, (UINT)((UINT)sizeof(v3dxVector2) * renderVertexCount), sizeof(v3dxVector2), 0);
+				mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexStreamType::VST_LightMap, lightMapStream, (UINT)((UINT)sizeof(v3dxVector2) * renderVertexCount), sizeof(v3dxVector2), 0);
+				mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexStreamType::VST_Tangent, tangentStream, (UINT)((UINT)sizeof(v3dVector4_t) * renderVertexCount), sizeof(v3dVector4_t), 0);
 				if (isIndex32)
 				{
 					mMeshPrimitives->SetGeomtryMeshIndex(rc, renderIndex32, polyVertexCount * sizeof(UINT), EIndexBufferType::IBT_Int32, 0);
@@ -796,8 +796,8 @@ namespace AssetImportAndExport
 				}
 				if (meshDesc->HaveSkin)
 				{
-					mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexSteamType::VST_SkinIndex, skinIndexsStream, 4 * renderVertexCount * sizeof(BYTE), 4 * sizeof(BYTE), 0);
-					mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexSteamType::VST_SkinWeight, skinWeightsStream, 4 * renderVertexCount * sizeof(float), 4 * sizeof(float), 0);
+					mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexStreamType::VST_SkinIndex, skinIndexsStream, 4 * renderVertexCount * sizeof(BYTE), 4 * sizeof(BYTE), 0);
+					mMeshPrimitives->SetGeomtryMeshStream(rc, EVertexStreamType::VST_SkinWeight, skinWeightsStream, 4 * renderVertexCount * sizeof(float), 4 * sizeof(float), 0);
 				}
 			}
 

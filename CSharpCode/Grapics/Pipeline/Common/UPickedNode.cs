@@ -10,11 +10,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/pick/pick_setup.cginc", RName.ERNameType.Engine);
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position,
-                EVertexSteamType.VST_Normal,
-                EVertexSteamType.VST_Tangent,};
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
+                EVertexStreamType.VST_Normal,
+                EVertexStreamType.VST_Tangent,};
         }
     }
     public class UPickedNode : URenderGraphNode

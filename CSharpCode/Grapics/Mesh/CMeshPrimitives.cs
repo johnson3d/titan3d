@@ -145,7 +145,7 @@ namespace EngineNS.Graphics.Mesh
                         {
                             var tmp = new CMeshDataProvider();
 
-                            var ok = tmp.mCoreObject.LoadFromMeshPrimitive(xnd.RootNode.mCoreObject, EVertexSteamType.VST_FullMask);
+                            var ok = tmp.mCoreObject.LoadFromMeshPrimitive(xnd.RootNode.mCoreObject, EVertexStreamType.VST_FullMask);
                             if (ok == 0)
                                 return false;
 

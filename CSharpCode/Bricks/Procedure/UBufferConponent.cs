@@ -263,8 +263,8 @@ namespace EngineNS.Bricks.Procedure
                                 float alt = pSlice[i] - minHeight;
                                 float rate = alt / range;
                                 ushort value = (ushort)(rate * (float)ushort.MaxValue);
-                                tarPixels[i].x = (byte)(value & 0xFF);
-                                tarPixels[i].y = (byte)((value >> 8) & 0xFF);
+                                tarPixels[i].X = (byte)(value & 0xFF);
+                                tarPixels[i].Y = (byte)((value >> 8) & 0xFF);
                             }
                             fixed (UInt8_2* p = &tarPixels[0])
                             {
@@ -345,16 +345,8 @@ namespace EngineNS.Bricks.Procedure
                     for (int i = 0; i < Count; i++)
                     {
                         var tmp = pSlice[i] - minHeight;
-                        if (tmp.X > 0)
-                        {
-                            int xx = 0;
-                        }
                         tmp = tmp * 255.0f;
                         tmp = tmp / hRange;
-                        if (tmp.X > 0)
-                        {
-                            int xx = 0;
-                        }
                         //tarPixels[i].X = (byte)(((pSlice[i].X - minHeight.X) / hRange.) * 255.0f);
                         //tarPixels[i].Y = (byte)(((pSlice[i].Y - minHeight) / hRange) * 255.0f);
                         //tarPixels[i].Z = (byte)(((pSlice[i].Z - minHeight) / hRange) * 255.0f);

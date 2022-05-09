@@ -42,10 +42,10 @@ namespace EngineNS.Graphics.Mesh
         {
             var meshBuilder = new Graphics.Mesh.CMeshDataProvider();
             var builder = meshBuilder.mCoreObject;
-            uint streams = (uint)((1 << (int)EVertexSteamType.VST_Position) | 
-                (1 << (int)EVertexSteamType.VST_Normal) | 
-                (1 << (int)EVertexSteamType.VST_Color) | 
-                (1 << (int)EVertexSteamType.VST_UV));
+            uint streams = (uint)((1 << (int)EVertexStreamType.VST_Position) | 
+                (1 << (int)EVertexStreamType.VST_Normal) | 
+                (1 << (int)EVertexStreamType.VST_Color) | 
+                (1 << (int)EVertexStreamType.VST_UV));
             builder.Init(streams, EIndexBufferType.IBT_Int16, 1);
 
             var aabb = new BoundingBox(x, y, z, x + xSize, y + ySize, z + zSize);
@@ -175,8 +175,8 @@ namespace EngineNS.Graphics.Mesh
         {
             var meshBuilder = new Graphics.Mesh.CMeshDataProvider();
             var builder = meshBuilder.mCoreObject;
-            uint streams = (uint)((1 << (int)EVertexSteamType.VST_Position) |
-                (1 << (int)EVertexSteamType.VST_Color));
+            uint streams = (uint)((1 << (int)EVertexStreamType.VST_Position) |
+                (1 << (int)EVertexStreamType.VST_Color));
             builder.Init(streams, EIndexBufferType.IBT_Int16, 1);
 
             var aabb = new BoundingBox(x, y, z, x + xSize, y + ySize, z + zSize);
@@ -249,10 +249,10 @@ namespace EngineNS.Graphics.Mesh
         {
             var meshBuilder = new Graphics.Mesh.CMeshDataProvider();
             var builder = meshBuilder.mCoreObject;
-            uint streams = (uint)((1 << (int)EVertexSteamType.VST_Position) |
-                (1 << (int)EVertexSteamType.VST_Normal) |
-                (1 << (int)EVertexSteamType.VST_Color) |
-                (1 << (int)EVertexSteamType.VST_UV));
+            uint streams = (uint)((1 << (int)EVertexStreamType.VST_Position) |
+                (1 << (int)EVertexStreamType.VST_Normal) |
+                (1 << (int)EVertexStreamType.VST_Color) |
+                (1 << (int)EVertexStreamType.VST_UV));
             builder.Init(streams, EIndexBufferType.IBT_Int16, 1);
 
             var dpDesc = new DrawPrimitiveDesc();
@@ -407,22 +407,22 @@ namespace EngineNS.Graphics.Mesh
                         if (stack == 0)
                         {
                             /* top stack is triangle fan */
-                            faces[(int)face].x = 0;
-                            faces[(int)face].y = slice + 1;
-                            faces[(int)face].z = slice;
+                            faces[(int)face].X = 0;
+                            faces[(int)face].Y = slice + 1;
+                            faces[(int)face].Z = slice;
                             face++;
                         }
                         else
                         {
                             /* stacks in between top and bottom are quad strips */
-                            faces[(int)face].x = SphereVertexIndex(slices, slice - 1, stack - 1);
-                            faces[(int)face].y = SphereVertexIndex(slices, slice, stack - 1);
-                            faces[(int)face].z = SphereVertexIndex(slices, slice - 1, stack);
+                            faces[(int)face].X = SphereVertexIndex(slices, slice - 1, stack - 1);
+                            faces[(int)face].Y = SphereVertexIndex(slices, slice, stack - 1);
+                            faces[(int)face].Z = SphereVertexIndex(slices, slice - 1, stack);
                             face++;
 
-                            faces[(int)face].x = SphereVertexIndex(slices, slice, stack - 1);
-                            faces[(int)face].y = SphereVertexIndex(slices, slice, stack);
-                            faces[(int)face].z = SphereVertexIndex(slices, slice - 1, stack);
+                            faces[(int)face].X = SphereVertexIndex(slices, slice, stack - 1);
+                            faces[(int)face].Y = SphereVertexIndex(slices, slice, stack);
+                            faces[(int)face].Z = SphereVertexIndex(slices, slice - 1, stack);
                             face++;
                         }
                     }
@@ -432,21 +432,21 @@ namespace EngineNS.Graphics.Mesh
 
                 if (stack == 0)
                 {
-                    faces[(int)face].x = 0;
-                    faces[(int)face].y = 1;
-                    faces[(int)face].z = slice;
+                    faces[(int)face].X = 0;
+                    faces[(int)face].Y = 1;
+                    faces[(int)face].Z = slice;
                     face++;
                 }
                 else
                 {
-                    faces[(int)face].x = SphereVertexIndex(slices, slice - 1, stack - 1);
-                    faces[(int)face].y = SphereVertexIndex(slices, 0, stack - 1);
-                    faces[(int)face].z = SphereVertexIndex(slices, slice - 1, stack);
+                    faces[(int)face].X = SphereVertexIndex(slices, slice - 1, stack - 1);
+                    faces[(int)face].Y = SphereVertexIndex(slices, 0, stack - 1);
+                    faces[(int)face].Z = SphereVertexIndex(slices, slice - 1, stack);
                     face++;
 
-                    faces[(int)face].x = SphereVertexIndex(slices, 0, stack - 1);
-                    faces[(int)face].y = SphereVertexIndex(slices, 0, stack);
-                    faces[(int)face].z = SphereVertexIndex(slices, slice - 1, stack);
+                    faces[(int)face].X = SphereVertexIndex(slices, 0, stack - 1);
+                    faces[(int)face].Y = SphereVertexIndex(slices, 0, stack);
+                    faces[(int)face].Z = SphereVertexIndex(slices, slice - 1, stack);
                     face++;
                 }
             }
@@ -463,23 +463,23 @@ namespace EngineNS.Graphics.Mesh
             /* bottom stack is triangle fan */
             for (slice = 1; slice < slices; slice++)
             {
-                faces[(int)face].x = SphereVertexIndex(slices, slice - 1, stack - 1);
-                faces[(int)face].y = SphereVertexIndex(slices, slice, stack - 1);
-                faces[(int)face].z = vertex;
+                faces[(int)face].X = SphereVertexIndex(slices, slice - 1, stack - 1);
+                faces[(int)face].Y = SphereVertexIndex(slices, slice, stack - 1);
+                faces[(int)face].Z = vertex;
                 face++;
             }
 
-            faces[(int)face].x = SphereVertexIndex(slices, slice - 1, stack - 1);
-            faces[(int)face].y = SphereVertexIndex(slices, 0, stack - 1);
-            faces[(int)face].z = vertex;
+            faces[(int)face].X = SphereVertexIndex(slices, slice - 1, stack - 1);
+            faces[(int)face].Y = SphereVertexIndex(slices, 0, stack - 1);
+            faces[(int)face].Z = vertex;
 
             //=======================
             var meshBuilder = new Graphics.Mesh.CMeshDataProvider();
             var builder = meshBuilder.mCoreObject;
-            uint streams = (uint)((1 << (int)EVertexSteamType.VST_Position) |
-                (1 << (int)EVertexSteamType.VST_Normal) |
-                (1 << (int)EVertexSteamType.VST_Color) |
-                (1 << (int)EVertexSteamType.VST_UV));
+            uint streams = (uint)((1 << (int)EVertexStreamType.VST_Position) |
+                (1 << (int)EVertexStreamType.VST_Normal) |
+                (1 << (int)EVertexStreamType.VST_Color) |
+                (1 << (int)EVertexStreamType.VST_UV));
 
             if (number_of_faces * 3 >= UInt16.MaxValue)
                 builder.Init(streams, EIndexBufferType.IBT_Int32, 1);
@@ -500,7 +500,7 @@ namespace EngineNS.Graphics.Mesh
 
             for (int i = 0; i < number_of_faces; i++)
             {
-                builder.AddTriangle(faces[i].x, faces[i].y, faces[i].z);
+                builder.AddTriangle(faces[i].X, faces[i].Y, faces[i].Z);
             }
 
             builder.PushAtomLOD(0, &dpDesc);
@@ -573,15 +573,15 @@ namespace EngineNS.Graphics.Mesh
 
                 if (slice > 0)
                 {
-                    faces[(int)face].x = 0;
-                    faces[(int)face].y = slice;
-                    faces[(int)(face++)].z = slice + 1;
+                    faces[(int)face].X = 0;
+                    faces[(int)face].Y = slice;
+                    faces[(int)(face++)].Z = slice + 1;
                 }
             }
 
-            faces[(int)face].x = 0;
-            faces[(int)face].y = slice;
-            faces[(int)(face++)].z = 1;
+            faces[(int)face].X = 0;
+            faces[(int)face].Y = slice;
+            faces[(int)(face++)].Z = 1;
 
             for (stack = 1; stack <= stacks + 1; stack++)
             {
@@ -599,25 +599,25 @@ namespace EngineNS.Graphics.Mesh
 
                     if (stack > 1 && slice > 0)
                     {
-                        faces[(int)face].x = SphereVertexIndex(slices, slice - 1, stack - 1);
-                        faces[(int)face].y = SphereVertexIndex(slices, slice - 1, stack);
-                        faces[(int)(face++)].z = SphereVertexIndex(slices, slice, stack - 1);
+                        faces[(int)face].X = SphereVertexIndex(slices, slice - 1, stack - 1);
+                        faces[(int)face].Y = SphereVertexIndex(slices, slice - 1, stack);
+                        faces[(int)(face++)].Z = SphereVertexIndex(slices, slice, stack - 1);
 
-                        faces[(int)face].x = SphereVertexIndex(slices, slice, stack - 1);
-                        faces[(int)face].y = SphereVertexIndex(slices, slice - 1, stack);
-                        faces[(int)(face++)].z = SphereVertexIndex(slices, slice, stack);
+                        faces[(int)face].X = SphereVertexIndex(slices, slice, stack - 1);
+                        faces[(int)face].Y = SphereVertexIndex(slices, slice - 1, stack);
+                        faces[(int)(face++)].Z = SphereVertexIndex(slices, slice, stack);
                     }
                 }
 
                 if (stack > 1)
                 {
-                    faces[(int)face].x = SphereVertexIndex(slices, slice - 1, stack - 1);
-                    faces[(int)face].y = SphereVertexIndex(slices, slice - 1, stack);
-                    faces[(int)(face++)].z = SphereVertexIndex(slices, 0, stack - 1);
+                    faces[(int)face].X = SphereVertexIndex(slices, slice - 1, stack - 1);
+                    faces[(int)face].Y = SphereVertexIndex(slices, slice - 1, stack);
+                    faces[(int)(face++)].Z = SphereVertexIndex(slices, 0, stack - 1);
 
-                    faces[(int)face].x = SphereVertexIndex(slices, 0, stack - 1);
-                    faces[(int)face].y = SphereVertexIndex(slices, slice - 1, stack);
-                    faces[(int)(face++)].z = SphereVertexIndex(slices, 0, stack);
+                    faces[(int)face].X = SphereVertexIndex(slices, 0, stack - 1);
+                    faces[(int)face].Y = SphereVertexIndex(slices, slice - 1, stack);
+                    faces[(int)(face++)].Z = SphereVertexIndex(slices, 0, stack);
                 }
 
                 if (stack < stacks + 1)
@@ -640,9 +640,9 @@ namespace EngineNS.Graphics.Mesh
 
                 if (slice > 0)
                 {
-                    faces[(int)face].x = SphereVertexIndex(slices, slice - 1, stack);
-                    faces[(int)face].y = number_of_vertices - 1;
-                    faces[(int)(face++)].z = SphereVertexIndex(slices, slice, stack);
+                    faces[(int)face].X = SphereVertexIndex(slices, slice - 1, stack);
+                    faces[(int)face].Y = number_of_vertices - 1;
+                    faces[(int)(face++)].Z = SphereVertexIndex(slices, slice, stack);
                 }
             }
 
@@ -656,17 +656,17 @@ namespace EngineNS.Graphics.Mesh
             pUV[vertex].X = 0;
             pUV[vertex].Y = 0;
 
-            faces[(int)face].x = SphereVertexIndex(slices, slice - 1, stack);
-            faces[(int)face].y = number_of_vertices - 1;
-            faces[(int)face].z = SphereVertexIndex(slices, 0, stack);
+            faces[(int)face].X = SphereVertexIndex(slices, slice - 1, stack);
+            faces[(int)face].Y = number_of_vertices - 1;
+            faces[(int)face].Z = SphereVertexIndex(slices, 0, stack);
 
             //=======================
             var meshBuilder = new Graphics.Mesh.CMeshDataProvider();
             var builder = meshBuilder.mCoreObject;
-            uint streams = (uint)((1 << (int)EVertexSteamType.VST_Position) |
-                (1 << (int)EVertexSteamType.VST_Normal) |
-                (1 << (int)EVertexSteamType.VST_Color) |
-                (1 << (int)EVertexSteamType.VST_UV));
+            uint streams = (uint)((1 << (int)EVertexStreamType.VST_Position) |
+                (1 << (int)EVertexStreamType.VST_Normal) |
+                (1 << (int)EVertexStreamType.VST_Color) |
+                (1 << (int)EVertexStreamType.VST_UV));
 
             if (number_of_faces * 3 >= UInt16.MaxValue)
                 builder.Init(streams, EIndexBufferType.IBT_Int32, 1);
@@ -699,7 +699,7 @@ namespace EngineNS.Graphics.Mesh
             for (int i = 0; i < number_of_faces; i++)
             {
                 //builder.AddTriangle(faces[i].x, faces[i].y, faces[i].z);
-                builder.AddTriangle(faces[i].x, faces[i].z, faces[i].y);
+                builder.AddTriangle(faces[i].X, faces[i].Z, faces[i].Y);
             }
 
             builder.PushAtomLOD(0, &dpDesc);
@@ -756,25 +756,25 @@ namespace EngineNS.Graphics.Mesh
 
             for (i = 0; i < numfaces - sides * 2; ++i)
             {
-                faces[(int)i].x = ((i % 2)!=0) ? i / 2 + sides : i / 2;
-                faces[(int)i].y = (((i / 2 + 1) % sides)!=0) ? i / 2 + 1 : i / 2 + 1 - sides;
-                faces[(int)i].z = (((i + 1) % (sides * 2))!=0) ? (i + 1) / 2 + sides : (i + 1) / 2;
+                faces[(int)i].X = ((i % 2)!=0) ? i / 2 + sides : i / 2;
+                faces[(int)i].Y = (((i / 2 + 1) % sides)!=0) ? i / 2 + 1 : i / 2 + 1 - sides;
+                faces[(int)i].Z = (((i + 1) % (sides * 2))!=0) ? (i + 1) / 2 + sides : (i + 1) / 2;
             }
 
             for (j = 0; i < numfaces; ++i, ++j)
             {
-                faces[(int)i].x = ((i % 2)!=0) ? j / 2 : i / 2;
-                faces[(int)i].y = (((i / 2 + 1) % sides)!=0) ? i / 2 + 1 : i / 2 + 1 - sides;
-                faces[(int)i].z = i == numfaces - 1 ? 0 : (j + 1) / 2;
+                faces[(int)i].X = ((i % 2)!=0) ? j / 2 : i / 2;
+                faces[(int)i].Y = (((i / 2 + 1) % sides)!=0) ? i / 2 + 1 : i / 2 + 1 - sides;
+                faces[(int)i].Z = i == numfaces - 1 ? 0 : (j + 1) / 2;
             }
 
             //=======================
             var meshBuilder = new Graphics.Mesh.CMeshDataProvider();
             var builder = meshBuilder.mCoreObject;
-            uint streams = (uint)((1 << (int)EVertexSteamType.VST_Position) |
-                (1 << (int)EVertexSteamType.VST_Normal) |
-                (1 << (int)EVertexSteamType.VST_Color) |
-                (1 << (int)EVertexSteamType.VST_UV));
+            uint streams = (uint)((1 << (int)EVertexStreamType.VST_Position) |
+                (1 << (int)EVertexStreamType.VST_Normal) |
+                (1 << (int)EVertexStreamType.VST_Color) |
+                (1 << (int)EVertexStreamType.VST_UV));
 
             if (numfaces * 3 >= UInt16.MaxValue)
                 builder.Init(streams, EIndexBufferType.IBT_Int32, 1);
@@ -796,7 +796,7 @@ namespace EngineNS.Graphics.Mesh
 
             for (i = 0; i < numfaces; i++)
             {
-                builder.AddTriangle(faces[i].x, faces[i].y, faces[i].z);
+                builder.AddTriangle(faces[i].X, faces[i].Y, faces[i].Z);
             }
 
             builder.PushAtomLOD(0, &dpDesc);
@@ -1112,10 +1112,10 @@ namespace EngineNS.Graphics.Mesh
             //=======================
             var meshBuilder = new Graphics.Mesh.CMeshDataProvider();
             var builder = meshBuilder.mCoreObject;
-            uint streams = (uint)((1 << (int)EVertexSteamType.VST_Position) |
-                (1 << (int)EVertexSteamType.VST_Normal) |
-                (1 << (int)EVertexSteamType.VST_Color) |
-                (1 << (int)EVertexSteamType.VST_UV));
+            uint streams = (uint)((1 << (int)EVertexStreamType.VST_Position) |
+                (1 << (int)EVertexStreamType.VST_Normal) |
+                (1 << (int)EVertexStreamType.VST_Color) |
+                (1 << (int)EVertexStreamType.VST_UV));
 
             if (tris.Length >= UInt16.MaxValue)
                 builder.Init(streams, EIndexBufferType.IBT_Int32, 1);
@@ -1188,7 +1188,7 @@ namespace EngineNS.Graphics.Mesh
         {
             var meshBuilder = new Graphics.Mesh.CMeshDataProvider();
             var builder = meshBuilder.mCoreObject;
-            uint streams = (uint)(1 << (int)EVertexSteamType.VST_Position);
+            uint streams = (uint)(1 << (int)EVertexStreamType.VST_Position);
             builder.Init(streams, EIndexBufferType.IBT_Int32, 1);
             for (ushort i = 0; i < NumZ + 1; i++)
             {
@@ -1235,10 +1235,10 @@ namespace EngineNS.Graphics.Mesh
         {//reference:DrawGridline
             CMeshDataProvider meshBuilder = new Graphics.Mesh.CMeshDataProvider();
             var builder = meshBuilder.mCoreObject;
-            uint streams = (uint)((1 << (int)EVertexSteamType.VST_Position) |
-                (1 << (int)EVertexSteamType.VST_Normal) |
-                (1 << (int)EVertexSteamType.VST_Color) |
-                (1 << (int)EVertexSteamType.VST_UV));
+            uint streams = (uint)((1 << (int)EVertexStreamType.VST_Position) |
+                (1 << (int)EVertexStreamType.VST_Normal) |
+                (1 << (int)EVertexStreamType.VST_Color) |
+                (1 << (int)EVertexStreamType.VST_UV));
             builder.Init(streams, EIndexBufferType.IBT_Int32, 1);
 
             var dpDesc = new DrawPrimitiveDesc();
@@ -1307,10 +1307,10 @@ namespace EngineNS.Graphics.Mesh
         {
             var meshBuilder = new Graphics.Mesh.CMeshDataProvider();
             var builder = meshBuilder.mCoreObject;
-            uint streams = (uint)((1 << (int)EVertexSteamType.VST_Position) |
-                (1 << (int)EVertexSteamType.VST_Normal) |
-                (1 << (int)EVertexSteamType.VST_Color) |
-                (1 << (int)EVertexSteamType.VST_UV));
+            uint streams = (uint)((1 << (int)EVertexStreamType.VST_Position) |
+                (1 << (int)EVertexStreamType.VST_Normal) |
+                (1 << (int)EVertexStreamType.VST_Color) |
+                (1 << (int)EVertexStreamType.VST_UV));
             builder.Init(streams, EIndexBufferType.IBT_Int16, 1);
 
             var halfWidth = width * 0.5f;
@@ -1367,10 +1367,10 @@ namespace EngineNS.Graphics.Mesh
         {
             var meshBuilder = new Graphics.Mesh.CMeshDataProvider();
             var builder = meshBuilder.mCoreObject;
-            uint streams = (uint)((1 << (int)EVertexSteamType.VST_Position) |
-                (1 << (int)EVertexSteamType.VST_Normal) |
-                (1 << (int)EVertexSteamType.VST_Color) |
-                (1 << (int)EVertexSteamType.VST_UV));
+            uint streams = (uint)((1 << (int)EVertexStreamType.VST_Position) |
+                (1 << (int)EVertexStreamType.VST_Normal) |
+                (1 << (int)EVertexStreamType.VST_Color) |
+                (1 << (int)EVertexStreamType.VST_UV));
             builder.Init(streams, EIndexBufferType.IBT_Int16, 1);
 
             var dpDesc = new DrawPrimitiveDesc();

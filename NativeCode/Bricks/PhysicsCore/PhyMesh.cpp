@@ -42,14 +42,14 @@ IMeshDataProvider* PhyTriMesh::CreateMeshProvider()
 	bool isIndex16;
 	if (mMesh->getTriangleMeshFlags() & physx::PxTriangleMeshFlag::Enum::e16_BIT_INDICES)
 	{
-		result->Init((1<<EVertexSteamType::VST_Position) | 
-			(1<<EVertexSteamType::VST_Color), EIndexBufferType::IBT_Int16, 1);
+		result->Init((1<<EVertexStreamType::VST_Position) | 
+			(1<<EVertexStreamType::VST_Color), EIndexBufferType::IBT_Int16, 1);
 		isIndex16 = true;
 	}
 	else
 	{
-		result->Init((1 << EVertexSteamType::VST_Position) |
-			(1 << EVertexSteamType::VST_Color), EIndexBufferType::IBT_Int32, 1);
+		result->Init((1 << EVertexStreamType::VST_Position) |
+			(1 << EVertexStreamType::VST_Color), EIndexBufferType::IBT_Int32, 1);
 		isIndex16 = false;
 	}
 
@@ -63,7 +63,7 @@ IMeshDataProvider* PhyTriMesh::CreateMeshProvider()
 	
 	DrawPrimitiveDesc dpDesc;
 	dpDesc.SetDefault();
-	IBlobObject* pColorBlob = result->GetStream(EVertexSteamType::VST_Color);
+	IBlobObject* pColorBlob = result->GetStream(EVertexStreamType::VST_Color);
 	DWORD* pColor = (DWORD*)pColorBlob->GetData();
 	/*USHORT maxMtlIdx = 0;
 	for (int i = 0; i < nbTri; i++)

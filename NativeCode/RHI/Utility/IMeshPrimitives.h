@@ -62,7 +62,7 @@ public:
 	void PushAtomLOD(UINT index, const DrawPrimitiveDesc* desc);
 	UINT GetAtomLOD(UINT index);
 	UINT GetLodLevel(UINT index, float lod);
-	vBOOL SetGeomtryMeshStream(IRenderContext* rc, EVertexSteamType stream, void* data, UINT size, UINT stride, UINT cpuAccess);
+	vBOOL SetGeomtryMeshStream(IRenderContext* rc, EVertexStreamType stream, void* data, UINT size, UINT stride, UINT cpuAccess);
 	vBOOL SetGeomtryMeshIndex(IRenderContext* rc, void* data, UINT size, EIndexBufferType type, UINT cpuAccess);
 	void SetAABB(v3dxBox3& aabb)
 	{
@@ -75,7 +75,7 @@ public:
 	static void CalcNormals32(OUT std::vector<v3dxVector3>& normals, const v3dxVector3* pos, UINT nVert, const UINT* triangles, UINT nTri);
 	static void CalcNormals16(OUT std::vector<v3dxVector3>& normals, const v3dxVector3* pos, UINT nVert, const USHORT* triangles, UINT nTri);
 private:
-	AutoRef<IVertexBuffer> LoadVB(IRenderContext* rc, XndAttribute* pAttr, UINT stride, TimeKeys& tkeys, UINT& resSize, EVertexSteamType stream);
+	AutoRef<IVertexBuffer> LoadVB(IRenderContext* rc, XndAttribute* pAttr, UINT stride, TimeKeys& tkeys, UINT& resSize, EVertexStreamType stream);
 	void SaveVB(IRenderContext* rc, XndAttribute* pAttr, IVertexBuffer* vb, TimeKeys& tkeys, UINT stride);
 protected:
 	std::string				mName;
@@ -116,7 +116,7 @@ public:
 	vBOOL InitFromMesh(IRenderContext* rc, IMeshPrimitives* mesh);
 	vBOOL Init(DWORD streams, EIndexBufferType ibType, int atom);
 
-	vBOOL LoadFromMeshPrimitive(XndNode* pNode, EVertexSteamType streams);
+	vBOOL LoadFromMeshPrimitive(XndNode* pNode, EVertexStreamType streams);
 	
 	void GetAABB(v3dxBox3* box) {
 		*box = mAABB;
@@ -127,7 +127,7 @@ public:
 	UINT GetVertexNumber() const;
 	UINT GetPrimitiveNumber() const;
 	UINT GetAtomNumber() const;
-	IBlobObject* GetStream(EVertexSteamType index);
+	IBlobObject* GetStream(EVertexStreamType index);
 	IBlobObject* GetIndices();
 
 	vBOOL GetAtom(UINT index, UINT lod, DrawPrimitiveDesc* desc) const;
@@ -144,9 +144,9 @@ public:
 	vBOOL GetTriangle(int index, UINT* vA, UINT* vB, UINT* vC);
 	vBOOL GetAtomTriangle(UINT atom, UINT index, UINT* vA, UINT* vB, UINT* vC);
 	int IntersectTriangle(const v3dxVector3* scale, const v3dxVector3* vStart, const v3dxVector3* vEnd, VHitResult* result);
-	void* GetVertexPtr(EVertexSteamType stream, UINT index);
+	void* GetVertexPtr(EVertexStreamType stream, UINT index);
 
-	UINT GetStreamStride(EVertexSteamType stream);
+	UINT GetStreamStride(EVertexStreamType stream);
 
 	UINT AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector2* uv, DWORD color);
 	
@@ -159,7 +159,7 @@ public:
 	vBOOL ToMesh(IRenderContext* rc, IMeshPrimitives* mesh);
 
 private:
-	void LoadVB(XndAttribute* pAttr, UINT stride, EVertexSteamType stream);
+	void LoadVB(XndAttribute* pAttr, UINT stride, EVertexStreamType stream);
 };
 
 NS_END

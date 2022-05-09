@@ -10,9 +10,9 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/SSM.cginc", RName.ERNameType.Engine);
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position};
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position};
         }
         public override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
         {

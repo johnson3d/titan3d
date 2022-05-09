@@ -38,14 +38,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             UpdatePermutation();
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position,
-                EVertexSteamType.VST_Normal,
-                EVertexSteamType.VST_Tangent,
-                EVertexSteamType.VST_Color,
-                EVertexSteamType.VST_LightMap,
-                EVertexSteamType.VST_UV,};
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
+                EVertexStreamType.VST_Normal,
+                EVertexStreamType.VST_Tangent,
+                EVertexStreamType.VST_Color,
+                EVertexStreamType.VST_LightMap,
+                EVertexStreamType.VST_UV,};
         }
     }
     public class UTranslucentShading : Shader.UShadingEnv
@@ -54,14 +54,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Deferred/DeferredTranslucent.cginc", RName.ERNameType.Engine);
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position,
-                EVertexSteamType.VST_Normal,
-                EVertexSteamType.VST_Tangent,
-                EVertexSteamType.VST_Color,
-                EVertexSteamType.VST_LightMap,
-                EVertexSteamType.VST_UV,};
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
+                EVertexStreamType.VST_Normal,
+                EVertexStreamType.VST_Tangent,
+                EVertexStreamType.VST_Color,
+                EVertexStreamType.VST_LightMap,
+                EVertexStreamType.VST_UV,};
         }
     }
     public class UForwordNode : Common.UBasePassNode

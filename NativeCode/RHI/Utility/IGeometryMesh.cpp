@@ -78,7 +78,7 @@ vBOOL IGeometryMesh::ApplyGeometry(ICommandList* cmd, IDrawCall* pass, vBOOL bIm
 	return TRUE;
 }
 
-UINT GetVBStride(EVertexSteamType type)
+UINT GetVBStride(EVertexStreamType type)
 {
 	switch (type)
 	{
@@ -196,7 +196,7 @@ IGeometryMesh* IGeometryMesh::MergeGeoms(IRenderContext* rc, IGeometryMesh** mes
 	IVertexBufferDesc vbDesc;
 	for (int i = 0; i < VST_Number; i++)
 	{
-		vbDesc.Stride = GetVBStride((EVertexSteamType)i);
+		vbDesc.Stride = GetVBStride((EVertexStreamType)i);
 		if (i == VST_Position)
 		{
 			vbDesc.ByteWidth = (UINT)vertPos.size() * sizeof(v3dxVector3);
@@ -204,7 +204,7 @@ IGeometryMesh* IGeometryMesh::MergeGeoms(IRenderContext* rc, IGeometryMesh** mes
 			vbDesc.InitData = pAddr;
 			vbDesc.Stride = sizeof(v3dxVector3);
 			auto nvb = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
-			result->BindVertexBuffer((EVertexSteamType)i, nvb);
+			result->BindVertexBuffer((EVertexStreamType)i, nvb);
 		}
 		else
 		{
@@ -214,7 +214,7 @@ IGeometryMesh* IGeometryMesh::MergeGeoms(IRenderContext* rc, IGeometryMesh** mes
 
 			vbDesc.InitData = &verts[i][0];
 			auto nvb = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
-			result->BindVertexBuffer((EVertexSteamType)i, nvb);
+			result->BindVertexBuffer((EVertexStreamType)i, nvb);
 		}
 	}
 	IIndexBufferDesc ibDesc;

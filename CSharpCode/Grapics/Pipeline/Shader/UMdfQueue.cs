@@ -37,7 +37,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             mCoreObject = IMdfQueue.CreateInstance();
         }
-        public abstract EVertexSteamType[] GetNeedStreams();
+        public abstract EVertexStreamType[] GetNeedStreams();
         //{
         //    return new EVertexSteamType[] { EVertexSteamType.VST_Position, };
         //}

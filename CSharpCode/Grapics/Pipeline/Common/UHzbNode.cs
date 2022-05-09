@@ -52,9 +52,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             BasePass.Initialize(rc, debugName);
 
             var defines = new RHI.CShaderDefinitions();
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.x}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.z}");
+            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
+            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
+            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
 
             CSDesc_Setup = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine),
                 "CS_Setup", EShaderType.EST_ComputeShader, defines, null);
@@ -72,7 +72,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (CS_Setup == null)
                 return;
             SetupDrawcall.mCoreObject.SetComputeShader(CS_Setup.mCoreObject);
-            SetupDrawcall.mCoreObject.SetDispatch(MaxSRVWidth / Dispatch_SetupDimArray2.x, MaxSRVHeight / Dispatch_SetupDimArray2.y, 1);
+            SetupDrawcall.mCoreObject.SetDispatch(MaxSRVWidth / Dispatch_SetupDimArray2.X, MaxSRVHeight / Dispatch_SetupDimArray2.Y, 1);
 
             var srvIdx = CSDesc_Setup.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "DstBuffer");
             if (srvIdx != (IShaderBinder*)0)
@@ -114,7 +114,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var drawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDrawcall();
                 MipsDrawcalls[i - 1] = drawcall;
                 drawcall.mCoreObject.SetComputeShader(CS_DownSample.mCoreObject);
-                drawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(width, Dispatch_SetupDimArray2.x), CoreDefine.Roundup(height, Dispatch_SetupDimArray2.y), 1);
+                drawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(width, Dispatch_SetupDimArray2.X), CoreDefine.Roundup(height, Dispatch_SetupDimArray2.Y), 1);
                 srvIdx = CSDesc_DownSample.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "SrcBuffer");
                 if (srvIdx != (IShaderBinder*)0)
                 {

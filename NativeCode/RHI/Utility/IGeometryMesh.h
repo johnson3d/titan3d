@@ -8,7 +8,7 @@
 NS_BEGIN
 
 enum TR_ENUM()
-EVertexSteamType : UINT32
+	EVertexStreamType : UINT32
 {
 	VST_Position,
 	VST_Normal,
@@ -31,7 +31,7 @@ EVertexSteamType : UINT32
 };
 
 enum TR_ENUM()
-EVertexShaderOutType
+	EVertexShaderOutType
 {
 	VOT_Position,
 	VOT_Normal,//float3
@@ -58,7 +58,7 @@ class ICommandList;
 class IDrawCall;
 
 class TR_CLASS()
-IVertexArray : public VIUnknown
+	IVertexArray : public VIUnknown
 {
 public:
 	ENGINE_RTTI(IVertexArray);
@@ -76,10 +76,10 @@ public:
 
 	void ApplyVBs(ICommandList* cmd, IDrawCall* pass, vBOOL bImm);
 
-	inline IVertexBuffer* GetVertexBuffer(EVertexSteamType index) {
+	inline IVertexBuffer* GetVertexBuffer(EVertexStreamType index) {
 		return VertexBuffers[index];
 	}
-	void BindVertexBuffer(EVertexSteamType index, IVertexBuffer* vb)
+	void BindVertexBuffer(EVertexStreamType index, IVertexBuffer* vb)
 	{
 		if (VertexBuffers[index] == vb)
 			return;
@@ -110,14 +110,14 @@ public:
 	~IGeometryMesh();
 	virtual void InvalidateResource() override;
 
-	inline IVertexBuffer* GetVertexBuffer(EVertexSteamType index) {
+	inline IVertexBuffer* GetVertexBuffer(EVertexStreamType index) {
 		return VertexBuffers[index];
 	}
 	inline IIndexBuffer* GetIndexBuffer() {
 		return IndexBuffer;
 	}
 
-	virtual void BindVertexBuffer(EVertexSteamType index, IVertexBuffer* vb)
+	virtual void BindVertexBuffer(EVertexStreamType index, IVertexBuffer* vb)
 	{
 		if (VertexBuffers[index] == vb)
 			return;

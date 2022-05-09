@@ -28,14 +28,14 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             this.UpdatePermutation();
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position,
-                EVertexSteamType.VST_Normal,
-                EVertexSteamType.VST_Tangent,
-                EVertexSteamType.VST_Color,
-                EVertexSteamType.VST_LightMap,
-                EVertexSteamType.VST_UV,};
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
+                EVertexStreamType.VST_Normal,
+                EVertexStreamType.VST_Tangent,
+                EVertexStreamType.VST_Color,
+                EVertexStreamType.VST_LightMap,
+                EVertexStreamType.VST_UV,};
         }
         public UPermutationItem DisableAO
         {

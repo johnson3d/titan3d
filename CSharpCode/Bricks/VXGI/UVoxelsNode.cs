@@ -161,30 +161,30 @@ namespace EngineNS.Bricks.VXGI
             defines.mCoreObject.AddDefine("VxSceneY", $"{VxSceneY}");
             defines.mCoreObject.AddDefine("VxSceneZ", $"{VxSceneZ}");
 
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.x}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray1.y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray1.z}");
+            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.X}");
+            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray1.Y}");
+            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray1.Z}");
             CSDesc_SetupVxAllocator = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/VXGI/VoxelAllocator.compute", RName.ERNameType.Engine), 
                 "CS_SetupVxAllocator", EShaderType.EST_ComputeShader, defines, null);
             CS_SetupVxAllocator = rc.CreateComputeShader(CSDesc_SetupVxAllocator);
 
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.x}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.z}");
+            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
+            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
+            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
             CSDesc_SetupVxScene = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/VXGI/VoxelAllocator.compute", RName.ERNameType.Engine),
                 "CS_SetupVxScene", EShaderType.EST_ComputeShader, defines, null);
             CS_SetupVxScene = rc.CreateComputeShader(CSDesc_SetupVxScene);
 
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.x}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.z}");
+            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
+            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
+            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
             CSDesc_InjectVoxels = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/VXGI/VoxelInject.compute", RName.ERNameType.Engine),
                 "CS_InjectVoxels", EShaderType.EST_ComputeShader, defines, null);
             CS_InjectVoxels = rc.CreateComputeShader(CSDesc_InjectVoxels);
 
-            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray3.x}");
-            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray3.y}");
-            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray3.z}");
+            defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray3.X}");
+            defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray3.Y}");
+            defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray3.Z}");
             CSDesc_EraseVoxelGroup = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/VXGI/VoxelInject.compute", RName.ERNameType.Engine),
                 "CS_EraseVoxelGroup", EShaderType.EST_ComputeShader, defines, null);
             CS_EraseVoxelGroup = rc.CreateComputeShader(CSDesc_EraseVoxelGroup);
@@ -214,7 +214,7 @@ namespace EngineNS.Bricks.VXGI
             
             SetupVxAllocatorDrawcall = rc.CreateComputeDrawcall();
             SetupVxAllocatorDrawcall.mCoreObject.SetComputeShader(CS_SetupVxAllocator.mCoreObject);
-            SetupVxAllocatorDrawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(VxGroupPoolSize, Dispatch_SetupDimArray1.x), 1, 1);
+            SetupVxAllocatorDrawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(VxGroupPoolSize, Dispatch_SetupDimArray1.X), 1, 1);
             var srvIdx = CSDesc_SetupVxAllocator.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxAllocator");
             if (srvIdx != (IShaderBinder*)0)
             {
@@ -229,9 +229,9 @@ namespace EngineNS.Bricks.VXGI
             SetupVxSceneDrawcall = rc.CreateComputeDrawcall();
             SetupVxSceneDrawcall.mCoreObject.SetComputeShader(CS_SetupVxScene.mCoreObject);
             SetupVxSceneDrawcall.mCoreObject.SetDispatch(
-                CoreDefine.Roundup(VxSceneX, Dispatch_SetupDimArray2.x), 
-                CoreDefine.Roundup(VxSceneY, Dispatch_SetupDimArray2.y), 
-                CoreDefine.Roundup(VxSceneZ, Dispatch_SetupDimArray2.z));            
+                CoreDefine.Roundup(VxSceneX, Dispatch_SetupDimArray2.X), 
+                CoreDefine.Roundup(VxSceneY, Dispatch_SetupDimArray2.Y), 
+                CoreDefine.Roundup(VxSceneZ, Dispatch_SetupDimArray2.Z));            
             srvIdx = CSDesc_SetupVxScene.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxScene");
             if (srvIdx != (IShaderBinder*)0)
             {
@@ -327,15 +327,15 @@ namespace EngineNS.Bricks.VXGI
             }
             var eraseStartPos = (oBox.Minimum - VxSceneBox.Minimum) / VxGroupSize;
 
-            EraseVxStart.x = (UInt32)eraseStartPos.X;
-            EraseVxStart.y = (UInt32)eraseStartPos.Y;
-            EraseVxStart.z = (UInt32)eraseStartPos.Z;
+            EraseVxStart.X = (UInt32)eraseStartPos.X;
+            EraseVxStart.Y = (UInt32)eraseStartPos.Y;
+            EraseVxStart.Z = (UInt32)eraseStartPos.Z;
 
             var eraseSize = oBox.GetSize() / VxGroupSize;
 
-            VxEraseGroupSize.x = (UInt32)eraseSize.X;
-            VxEraseGroupSize.y = (UInt32)eraseSize.Y;
-            VxEraseGroupSize.z = (UInt32)eraseSize.Z;
+            VxEraseGroupSize.X = (UInt32)eraseSize.X;
+            VxEraseGroupSize.Y = (UInt32)eraseSize.Y;
+            VxEraseGroupSize.Z = (UInt32)eraseSize.Z;
             
         }
         bool bTestErase = false;
@@ -437,7 +437,7 @@ namespace EngineNS.Bricks.VXGI
                             var cmd = BasePass.DrawCmdList;
 
                             #region erase voxelgroups
-                            if (VxEraseGroupSize.AnyNotZero())
+                            if (VxEraseGroupSize != UInt32_3.Zero)
                             {
                                 var srvIdx  = CSDesc_EraseVoxelGroup.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "GpuSceneDesc");
                                 if (srvIdx != (IShaderBinder*)0)
@@ -447,9 +447,9 @@ namespace EngineNS.Bricks.VXGI
                                 }
 
                                 EraseVoxelGroupDrawcall.mCoreObject.SetDispatch(
-                                    CoreDefine.Roundup(VxEraseGroupSize.x, Dispatch_SetupDimArray3.x),
-                                    CoreDefine.Roundup(VxEraseGroupSize.y, Dispatch_SetupDimArray3.y),
-                                    CoreDefine.Roundup(VxEraseGroupSize.z, Dispatch_SetupDimArray3.z));
+                                    CoreDefine.Roundup(VxEraseGroupSize.X, Dispatch_SetupDimArray3.X),
+                                    CoreDefine.Roundup(VxEraseGroupSize.Y, Dispatch_SetupDimArray3.Y),
+                                    CoreDefine.Roundup(VxEraseGroupSize.Z, Dispatch_SetupDimArray3.Z));
                                 EraseVoxelGroupDrawcall.BuildPass(cmd);
                                 //cmd.SetComputeShader(CS_EraseVoxelGroup.mCoreObject);
                                 //var srvIdx = CSDesc_EraseVoxelGroup.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
@@ -487,7 +487,7 @@ namespace EngineNS.Bricks.VXGI
                                 //    CoreDefine.Roundup(VxEraseGroupSize.y, Dispatch_SetupDimArray3.y),
                                 //    CoreDefine.Roundup(VxEraseGroupSize.z, Dispatch_SetupDimArray3.z));
 
-                                VxEraseGroupSize.SetZero();
+                                VxEraseGroupSize = UInt32_3.Zero;
                             }
                             #endregion
 
@@ -515,8 +515,8 @@ namespace EngineNS.Bricks.VXGI
                                 }
 
                                 InjectVoxelsDrawcall.mCoreObject.SetDispatch(
-                                    CoreDefine.Roundup(DiffuseRTWidth, Dispatch_SetupDimArray2.x),
-                                    CoreDefine.Roundup(DiffuseRTHeight, Dispatch_SetupDimArray2.y),
+                                    CoreDefine.Roundup(DiffuseRTWidth, Dispatch_SetupDimArray2.X),
+                                    CoreDefine.Roundup(DiffuseRTHeight, Dispatch_SetupDimArray2.Y),
                                     1);
                                 InjectVoxelsDrawcall.BuildPass(cmd);
                                 //cmd.SetComputeShader(CS_InjectVoxels.mCoreObject);

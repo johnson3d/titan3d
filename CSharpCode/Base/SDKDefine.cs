@@ -8,6 +8,72 @@ namespace EngineNS
     {
         public const float Epsilon = 0.00001f;
         public const float DEpsilon = 0.00001f;
+        public static int Max(int left, int right)
+        {
+            if (left > right)
+            {
+                return left;
+            }
+            else
+            {
+                return right;
+            }
+        }
+        public static int Min(int left, int right)
+        {
+            if (left < right)
+            {
+                return left;
+            }
+            else
+            {
+                return right;
+            }
+        }
+        public static uint Max(uint left, uint right)
+        {
+            if (left > right)
+            {
+                return left;
+            }
+            else
+            {
+                return right;
+            }
+        }
+        public static uint Min(uint left, uint right)
+        {
+            if (left < right)
+            {
+                return left;
+            }
+            else
+            {
+                return right;
+            }
+        }
+        public static float Max(float left, float right)
+        {
+            if (left > right)
+            {
+                return left;
+            }
+            else
+            {
+                return right;
+            }
+        }
+        public static float Min(float left, float right)
+        {
+            if (left < right)
+            {
+                return left;
+            }
+            else
+            {
+                return right;
+            }
+        }
         public static bool FloatEuqal(float f1, float f2, float epsilon)
         {
             return Math.Abs(f2 - f1) < epsilon;

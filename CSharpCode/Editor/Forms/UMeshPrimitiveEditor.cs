@@ -75,9 +75,13 @@ namespace EngineNS.Editor.Forms
         public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(name);
+            Mesh = arg as Graphics.Mesh.CMeshPrimitives;
             if (Mesh == null)
-                return false;
+            {
+                Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(name);
+                if (Mesh == null)
+                    return false;
+            }
 
             PreviewViewport.Title = $"Mesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;

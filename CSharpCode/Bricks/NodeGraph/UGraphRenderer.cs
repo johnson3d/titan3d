@@ -45,13 +45,13 @@ namespace EngineNS.Bricks.NodeGraph
                     ImGuiAPI.Text("/");
                 }
             }
-            if (ImGuiAPI.BeginChild("Graph", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (ImGuiAPI.BeginChild("Graph", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
                 var vpMin = ImGuiAPI.GetWindowContentRegionMin();
                 var vpMax = ImGuiAPI.GetWindowContentRegionMax();
 
                 Vector2 sz = new Vector2(-1,-1);
-                ImGuiAPI.InvisibleButton("ClientContent", sz, ImGuiButtonFlags_.ImGuiButtonFlags_None);
+                //ImGuiAPI.InvisibleButton("ClientContent", sz, ImGuiButtonFlags_.ImGuiButtonFlags_None);
                 sz.X = vpMax.X - vpMin.X;
                 sz.Y = vpMax.Y - vpMin.Y;
 

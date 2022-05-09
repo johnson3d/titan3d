@@ -19,12 +19,12 @@ namespace EngineNS.Graphics.Mesh
 
             UpdateShaderCode();
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position,
-                EVertexSteamType.VST_Normal,
-                EVertexSteamType.VST_SkinIndex,
-                EVertexSteamType.VST_SkinWeight};
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
+                EVertexStreamType.VST_Normal,
+                EVertexStreamType.VST_SkinIndex,
+                EVertexStreamType.VST_SkinWeight};
         }
         public override void CopyFrom(UMdfQueue mdf)
         {

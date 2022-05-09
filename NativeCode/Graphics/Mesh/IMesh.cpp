@@ -44,7 +44,7 @@ void GetEngineVertexLayout(std::vector<LayoutElement>& GLayouts)
 {
 	if (GLayouts.size() == 0)
 	{
-		GLayouts.resize(EVertexSteamType::VST_Number);
+		GLayouts.resize(EVertexStreamType::VST_Number);
 		LayoutElement tmpElem;
 		//VST_Position,
 		tmpElem.SemanticName = "POSITION";

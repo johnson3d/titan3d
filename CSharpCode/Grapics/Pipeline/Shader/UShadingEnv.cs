@@ -193,7 +193,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //}
             return result;
         }
-        public abstract EVertexSteamType[] GetNeedStreams();
+        public abstract EVertexStreamType[] GetNeedStreams();
         public virtual void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall) { }
         public FPermutationId mCurrentPermutationId;
         public FPermutationId CurrentPermutationId
@@ -223,9 +223,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/DummyShading.cginc", RName.ERNameType.Engine);
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position, };
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position, };
         }
     }
     public class UShadingEnvManager : UModule<UEngine>

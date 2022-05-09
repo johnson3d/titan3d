@@ -19,11 +19,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             UpdateShaderCode();
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position, 
-                EVertexSteamType.VST_Normal,
-                EVertexSteamType.VST_UV,};
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position, 
+                EVertexStreamType.VST_Normal,
+                EVertexStreamType.VST_UV,};
         }
         public override void CopyFrom(UMdfQueue mdf)
         {

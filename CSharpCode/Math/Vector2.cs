@@ -153,6 +153,8 @@ namespace EngineNS
 		        }
 	        }
         }
+        public readonly static Vector2 MaxValue = new Vector2(float.MaxValue, float.MaxValue);
+        public readonly static Vector2 MinValue = new Vector2(float.MinValue, float.MinValue);
         public readonly static Vector2 Zero = new Vector2(0, 0);
         public readonly static Vector2 One = new Vector2(1, 1);
         [Rtti.Meta]
@@ -980,7 +982,7 @@ namespace EngineNS
         /// <param name="right">二维向量</param>
         /// <returns>返回最小化后的向量</returns>
         [Rtti.Meta]
-        public static Vector2 Minimize( Vector2 left, Vector2 right )
+        public static Vector2 Minimize(in Vector2 left,in Vector2 right )
 	    {
             Vector2 vector;
 		    vector.X = (left.X < right.X) ? left.X : right.X;
@@ -994,7 +996,7 @@ namespace EngineNS
         /// <param name="right">二维向量</param>
         /// <param name="result">最小化后的向量</param>
         [Rtti.Meta]
-        public static void Minimize( ref Vector2 left, ref Vector2 right, out Vector2 result )
+        public static void Minimize(in Vector2 left, in Vector2 right, out Vector2 result )
 	    {
             Vector2 r;
 		    r.X = (left.X < right.X) ? left.X : right.X;
@@ -1009,7 +1011,7 @@ namespace EngineNS
         /// <param name="right">二维向量</param>
         /// <returns>返回最大化后的向量</returns>
         [Rtti.Meta]
-        public static Vector2 Maximize( Vector2 left, Vector2 right )
+        public static Vector2 Maximize(in Vector2 left, in Vector2 right )
 	    {
             Vector2 vector;
 		    vector.X = (left.X > right.X) ? left.X : right.X;
@@ -1023,7 +1025,7 @@ namespace EngineNS
         /// <param name="right">二维向量</param>
         /// <param name="result">最大化后的向量</param>
         [Rtti.Meta]
-        public static void Maximize( ref Vector2 left, ref Vector2 right, out Vector2 result )
+        public static void Maximize(in Vector2 left, in Vector2 right, out Vector2 result )
 	    {
             Vector2 r;
 		    r.X = (left.X > right.X) ? left.X : right.X;
@@ -1037,7 +1039,7 @@ namespace EngineNS
         /// <param name="left">二维向量</param>
         /// <param name="right">二维向量</param>
         /// <returns>返回计算后的向量</returns>
-        public static Vector2 operator + ( Vector2 left, Vector2 right )
+        public static Vector2 operator + (in Vector2 left, in Vector2 right )
 	    {
             Vector2 result;
             result.X = left.X + right.X;
@@ -1050,7 +1052,7 @@ namespace EngineNS
         /// <param name="left">二维向量</param>
         /// <param name="right">二维向量</param>
         /// <returns>返回计算后的向量</returns>
-	    public static Vector2 operator - ( Vector2 left, Vector2 right )
+	    public static Vector2 operator - (in Vector2 left, in Vector2 right )
 	    {
             Vector2 result;
             result.X = left.X - right.X;
@@ -1062,43 +1064,35 @@ namespace EngineNS
         /// </summary>
         /// <param name="value">二维向量</param>
         /// <returns>返回计算后的向量</returns>
-        public static Vector2 operator - ( Vector2 value )
+        public static Vector2 operator - (in Vector2 value )
 	    {
             Vector2 result;
             result.X = -value.X;
             result.Y = -value.Y;
             return result;
 	    }
-        /// <summary>
-        /// 重载"*"号运算符
-        /// </summary>
-        /// <param name="value">二维向量</param>
-        /// <param name="scale">乘数</param>
-        /// <returns>返回计算后的向量</returns>
-        public static Vector2 operator * ( Vector2 value, float scale )
+        public static Vector2 operator *(in Vector2 value, in Vector2 scale)
+        {
+            Vector2 result;
+            result.X = value.X * scale.X;
+            result.Y = value.Y * scale.Y;
+            return result;
+        }
+        public static Vector2 operator * (in Vector2 value, float scale )
 	    {
             Vector2 result;
             result.X = value.X * scale;
             result.Y = value.Y * scale;
             return result;
 	    }
-        /// <summary>
-        /// 重载"*"号运算符
-        /// </summary>
-        /// <param name="scale">乘数</param>
-        /// <param name="vec">二维向量</param>
-        /// <returns>返回计算后的向量</returns>
-        public static Vector2 operator * ( float scale, Vector2 vec )
-	    {
-		    return vec * scale;
-	    }
-        /// <summary>
-        /// 重载"/"号运算符
-        /// </summary>
-        /// <param name="value">二维向量</param>
-        /// <param name="scale">除数</param>
-        /// <returns>返回计算后的向量</returns>
-        public static Vector2 operator / ( Vector2 value, float scale )
+        public static Vector2 operator /(in Vector2 value, in Vector2 scale)
+        {
+            Vector2 result;
+            result.X = value.X / scale.X;
+            result.Y = value.Y / scale.Y;
+            return result;
+        }
+        public static Vector2 operator / (in Vector2 value, float scale )
 	    {
             Vector2 result;
             result.X = value.X / scale;
@@ -1111,7 +1105,7 @@ namespace EngineNS
         /// <param name="left">二维向量</param>
         /// <param name="right">二维向量</param>
         /// <returns>如果两个向量相等返回true，否则返回false</returns>
-        public static bool operator == ( Vector2 left, Vector2 right )
+        public static bool operator == (in Vector2 left, in Vector2 right )
 	    {
             return left.Equals(right);
             //return Equals( left, right );
@@ -1122,7 +1116,7 @@ namespace EngineNS
         /// <param name="left">二维向量</param>
         /// <param name="right">二维向量</param>
         /// <returns>如果两个向量不相等返回true，否则返回false</returns>
-        public static bool operator != ( Vector2 left, Vector2 right )
+        public static bool operator != (in Vector2 left, in Vector2 right )
 	    {
             return !left.Equals(right);
 		    //return !Equals( left, right );
@@ -1157,7 +1151,7 @@ namespace EngineNS
         {
             return new Vector2((float)X, (float)Y);
         }
-        public static DVector2 operator +(DVector2 left, DVector2 right)
+        public static DVector2 operator +(in DVector2 left, in DVector2 right)
         {
             DVector2 result;
             result.X = left.X + right.X;

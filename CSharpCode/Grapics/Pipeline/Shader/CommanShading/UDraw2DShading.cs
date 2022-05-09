@@ -10,10 +10,10 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         {
             CodeName = RName.GetRName("shaders/slate/slategui.cginc", RName.ERNameType.Engine);
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position,
-                EVertexSteamType.VST_UV,};
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
+                EVertexStreamType.VST_UV,};
         }
         public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
         {
@@ -38,10 +38,10 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         {
             CodeName = RName.GetRName("shaders/shadingenv/sys/copy2d.shadingenv", RName.ERNameType.Engine);
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position,
-                EVertexSteamType.VST_UV,};
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
+                EVertexStreamType.VST_UV,};
         }
         public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
         {
@@ -85,10 +85,10 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         {
             CodeName = RName.GetRName("shaders/shadingenv/sys/rect2d.shadingenv", RName.ERNameType.Engine);
         }
-        public override EVertexSteamType[] GetNeedStreams()
+        public override EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexSteamType[] { EVertexSteamType.VST_Position,
-                EVertexSteamType.VST_UV,};
+            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
+                EVertexStreamType.VST_UV,};
         }
         public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
         {
