@@ -581,22 +581,19 @@ void BlingSpec(half4 flo4 , half intensity , half powIn , half4 worldNorm , half
 	BlingSpec = (half)pow(VLdN , powIn) * texlum ;
 }
 
-half3 smoothstep3D(half3 InColor )
+half3 smoothstep3D(half3 minValue, half3 maxValue, half3 InColor )
 {	
-	half3 OutColor ;
+	return (half3)smoothstep(minValue, maxValue, InColor);
+	/*half3 OutColor ;
 	OutColor.x = (half)smoothstep( 0 , 1 , InColor.x );
 	OutColor.y = (half)smoothstep( 0 , 1 , InColor.y );
 	OutColor.z = (half)smoothstep( 0 , 1 , InColor.z );
-	return OutColor ;
+	return OutColor ;*/
 }
 
 half3 floor3D(half3 InColor)
 {
-	half3 OutColor;
-	OutColor.x = (half)floor(InColor.x);
-	OutColor.y = (half)floor(InColor.y);
-	OutColor.z = (half)floor(InColor.z);
-	return OutColor;
+	return floor(InColor);
 }
 
 //void CartoonColorFliter(half4 InColor, half steps, half threshold , out half4 OutColor )

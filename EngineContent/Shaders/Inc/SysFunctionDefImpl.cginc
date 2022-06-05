@@ -5,6 +5,13 @@ float3 GetTerrainDiffuse(float2 uv, PS_INPUT input)
 }
 #endif
 
+#if !defined(Def_GetTerrainNormal)
+float3 GetTerrainNormal(float2 uv, PS_INPUT input)
+{
+	return float3(1, 1, 1);
+}
+#endif
+
 #if !defined(Def_GetInstanceData)
 VSInstantData GetInstanceData(VS_INPUT input)
 {

@@ -238,5 +238,6 @@ Texture2D gDefaultTextue2D;
 SamplerState gDefaultSamplerState;
 
 float3 GetTerrainDiffuse(float2 uv, PS_INPUT input);
+float3 GetTerrainNormal(float2 uv, PS_INPUT input);
 
 #endif //_VertexLayout_cginc_
