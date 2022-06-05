@@ -50,6 +50,13 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/CsValueList.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/DrawPrimitiveDesc.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FCsDictionaryIterator.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FRttiConstructor.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FRttiMethodBase.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FRttiMethodParameter.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FRttiProperty.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FRttiStruct.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FRttiType.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FRttiTypeConverter.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FVarAttribute.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/GraphicsProfiler.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IAttachmentDesc.cpp2cs.cpp" />
@@ -159,7 +166,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/KMeamsVector3.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/LayoutElement.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/MacroDefine.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/MemberDesc.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/MemStreamReader.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/MemStreamWriter.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/Perlin.cpp2cs.cpp" />
@@ -193,15 +199,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/QNodeBase.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/QTree.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RenderTargetBlendDesc.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiConstructor.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiEnum.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiEnumManager.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiMethodBase.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiParameter.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiStruct.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiStructManager.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiType.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/RttiTypeConverter.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/SamplerBindInfo.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/SampResult.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ShaderReflector.cpp2cs.cpp" />

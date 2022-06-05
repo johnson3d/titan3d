@@ -71,6 +71,7 @@ namespace EngineNS
         public RName DefaultMaterial { get; set; }// = RName.GetRName("UTest/ttt.material");
         [Rtti.Meta]
         public RName DefaultMaterialInstance { get; set; }// = RName.GetRName("UTest/box_wite.uminst");
+        [Rtti.Meta]
         [RName.PGRName(FilterExts = Bricks.CodeBuilder.UMacross.AssetExt, MacrossType = typeof(GamePlay.UMacrossGame))]
         public RName PlayGameName { get; set; }
     }

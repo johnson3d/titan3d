@@ -10,8 +10,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.CodeBuilder.ShaderNode.Control.HLSLMethod.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.Node.UOpNode.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.NodeGraph.UNodeGraph.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.Node.UBezier.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.Node.UProgram.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UBufferConponent.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UPgcGraph.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UPgcGraphProgram.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UPgcNodeBase.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Terrain.CDLOD.UTerrainMaterialId.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IAction.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IActor.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IInventory.macross.cs" />
@@ -19,7 +25,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IItemContain.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Converter.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.CustomConvert.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.IGameBase.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.UGameInstance.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.UMacrossGame.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.UViewportSlate.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Macross.BaseClass.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Macross.SubClass1.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Macross.SubClass2.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Macross.UMacrossTestClass.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.MathHelper.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Profiler.Log.macross.cs" />

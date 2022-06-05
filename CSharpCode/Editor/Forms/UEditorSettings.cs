@@ -24,6 +24,10 @@ namespace EngineNS.Editor.Forms
             {
                 return UEngine.Instance.Config;
             }
+            set
+            {
+                UEngine.Instance.Config = value;
+            }
         }
         public void Cleanup() { }
         public bool Visible { get; set; } = true;
