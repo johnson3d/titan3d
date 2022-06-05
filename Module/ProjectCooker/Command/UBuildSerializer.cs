@@ -50,15 +50,15 @@ namespace ProjectCooker.Command
                             codeWriter.PushBrackets();
                             {
                                 codeWriter.AddLine($"var hostObject = ({i.Value.ClassType.FullName.Replace('+', '.')})InHostObject;");
-                                foreach (var k in j.Value.Fields)
+                                foreach (var k in j.Value.Propertys)
                                 {
                                     if (k.FieldType.SystemType.GetInterface("ISerializer") != null)
                                     {
-                                        codeWriter.AddLine($"EngineNS.IO.ISerializer tmp_{k.FieldName};");
-                                        codeWriter.AddLine($"ar.Read(out tmp_{k.FieldName}, hostObject);");
+                                        codeWriter.AddLine($"EngineNS.IO.ISerializer tmp_{k.PropertyName};");
+                                        codeWriter.AddLine($"ar.Read(out tmp_{k.PropertyName}, hostObject);");
                                         if (k.PropInfo != null && k.PropInfo.CanWrite && k.PropInfo.SetMethod.IsPublic)
                                         {
-                                            codeWriter.AddLine($"hostObject.{k.FieldName} = ({k.PropInfo.PropertyType.FullName.Replace('+', '.')})tmp_{k.FieldName};");
+                                            codeWriter.AddLine($"hostObject.{k.PropertyName} = ({k.PropInfo.PropertyType.FullName.Replace('+', '.')})tmp_{k.PropertyName};");
                                         }
                                         else
                                         {
@@ -66,7 +66,7 @@ namespace ProjectCooker.Command
                                             {
                                                 codeWriter.AddLine($"var typeDef = EngineNS.Rtti.UTypeDesc.TypeOf(typeof({k.PropInfo.PropertyType.FullName.Replace('+','.')}));");                                           
                                                 codeWriter.AddLine($"var meta = EngineNS.Rtti.UClassMetaManager.Instance.GetMeta(typeDef);");
-                                                codeWriter.AddLine($"meta?.CopyObjectMetaField(hostObject.{k.FieldName}, tmp_{k.FieldName});");
+                                                codeWriter.AddLine($"meta?.CopyObjectMetaField(hostObject.{k.PropertyName}, tmp_{k.PropertyName});");
                                             }
                                             codeWriter.PopBrackets();
                                         }
@@ -78,15 +78,15 @@ namespace ProjectCooker.Command
                                         var lstType = $"System.Collections.Generic.List<{innerType.FullName.Replace('+', '.')}>";
                                         if (k.PropInfo.CanWrite)
                                         {
-                                            codeWriter.AddLine($"var tmp_{k.FieldName} = new {lstType}();");
+                                            codeWriter.AddLine($"var tmp_{k.PropertyName} = new {lstType}();");
                                         }
                                         else
                                         {
-                                            codeWriter.AddLine($"var tmp_{k.FieldName} = hostObject.{k.FieldName};");
-                                            codeWriter.AddLine($"if(tmp_{k.FieldName} == null)");
+                                            codeWriter.AddLine($"var tmp_{k.PropertyName} = hostObject.{k.PropertyName};");
+                                            codeWriter.AddLine($"if(tmp_{k.PropertyName} == null)");
                                             codeWriter.PushBrackets();
                                             {
-                                                codeWriter.AddLine($"tmp_{k.FieldName} = new {lstType}();");
+                                                codeWriter.AddLine($"tmp_{k.PropertyName} = new {lstType}();");
                                             }
                                             codeWriter.PopBrackets();
                                         }
@@ -103,12 +103,12 @@ namespace ProjectCooker.Command
                                                 codeWriter.AddLine($"string elemTypeStr;");
                                                 codeWriter.AddLine($"ar.Read(out elemTypeStr);");
                                                 codeWriter.AddLine($"var skipPoint = EngineNS.IO.SerializerHelper.GetSkipOffset(ar);");
-                                                codeWriter.AddLine($"{innerType.FullName} elem_lst_{k.FieldName};");
+                                                codeWriter.AddLine($"{innerType.FullName} elem_lst_{k.PropertyName};");
                                                 codeWriter.AddLine($"for (int j = 0; j < count; j++)");
                                                 codeWriter.PushBrackets();
                                                 {
-                                                    codeWriter.AddLine($"ar.Read(out elem_lst_{k.FieldName});");
-                                                    codeWriter.AddLine($"tmp_{k.FieldName}.Add(elem_lst_{k.FieldName});");
+                                                    codeWriter.AddLine($"ar.Read(out elem_lst_{k.PropertyName});");
+                                                    codeWriter.AddLine($"tmp_{k.PropertyName}.Add(elem_lst_{k.PropertyName});");
                                                 }
                                                 codeWriter.PopBrackets();
                                             }
@@ -128,7 +128,7 @@ namespace ProjectCooker.Command
                                                     {
                                                         codeWriter.AddLine($"var elemType = Rtti.UTypeDesc.TypeOf(elemTypeStr).SystemType;");
                                                         codeWriter.AddLine($"var e = ({innerType.FullName.Replace('+','.')})EngineNS.IO.SerializerHelper.ReadObject(ar, elemType, hostObject);");
-                                                        codeWriter.AddLine($"tmp_{k.FieldName}.Add(e);");
+                                                        codeWriter.AddLine($"tmp_{k.PropertyName}.Add(e);");
                                                     }
                                                     codeWriter.PopBrackets();
                                                     codeWriter.AddLine($"catch (Exception ex)");
@@ -152,15 +152,15 @@ namespace ProjectCooker.Command
                                         var dictType = $"System.Collections.Generic.Dictionary<{keyType.FullName.Replace('+', '.')}, {valueType.FullName.Replace('+', '.')}>";
                                         if (k.PropInfo.CanWrite)
                                         {
-                                            codeWriter.AddLine($"var tmp_{k.FieldName} = new {dictType}();");
+                                            codeWriter.AddLine($"var tmp_{k.PropertyName} = new {dictType}();");
                                         }
                                         else
                                         {
-                                            codeWriter.AddLine($"var tmp_{k.FieldName} = hostObject.{k.FieldName};");
-                                            codeWriter.AddLine($"if(tmp_{k.FieldName} == null)");
+                                            codeWriter.AddLine($"var tmp_{k.PropertyName} = hostObject.{k.PropertyName};");
+                                            codeWriter.AddLine($"if(tmp_{k.PropertyName} == null)");
                                             codeWriter.PushBrackets();
                                             {
-                                                codeWriter.AddLine($"tmp_{k.FieldName} = new {dictType}();");
+                                                codeWriter.AddLine($"tmp_{k.PropertyName} = new {dictType}();");
                                             }
                                             codeWriter.PopBrackets();
                                         }
@@ -182,14 +182,14 @@ namespace ProjectCooker.Command
                                                 codeWriter.AddLine($"ar.Read(out elemValueTypeStr);");
                                                 codeWriter.AddLine($"var skipPoint = EngineNS.IO.SerializerHelper.GetSkipOffset(ar);");
 
-                                                codeWriter.AddLine($"{keyType.FullName} elem_key_{k.FieldName};");
-                                                codeWriter.AddLine($"{valueType.FullName} elem_value_{k.FieldName};");
+                                                codeWriter.AddLine($"{keyType.FullName} elem_key_{k.PropertyName};");
+                                                codeWriter.AddLine($"{valueType.FullName} elem_value_{k.PropertyName};");
                                                 codeWriter.AddLine($"for (int j = 0; j < count; j++)");
                                                 codeWriter.PushBrackets();
                                                 {
-                                                    codeWriter.AddLine($"ar.Read(out elem_key_{k.FieldName});");
-                                                    codeWriter.AddLine($"ar.Read(out elem_value_{k.FieldName});");
-                                                    codeWriter.AddLine($"tmp_{k.FieldName}[elem_key_{k.FieldName}] = elem_value_{k.FieldName};");
+                                                    codeWriter.AddLine($"ar.Read(out elem_key_{k.PropertyName});");
+                                                    codeWriter.AddLine($"ar.Read(out elem_value_{k.PropertyName});");
+                                                    codeWriter.AddLine($"tmp_{k.PropertyName}[elem_key_{k.PropertyName}] = elem_value_{k.PropertyName};");
                                                 }
                                                 codeWriter.PopBrackets();
                                             }
@@ -202,7 +202,7 @@ namespace ProjectCooker.Command
                                                 codeWriter.AddLine($"ar.Read(out elemKeyTypeStr);");
                                                 codeWriter.AddLine($"var skipPoint = EngineNS.IO.SerializerHelper.GetSkipOffset(ar);");
 
-                                                codeWriter.AddLine($"{keyType.FullName} elem_key_{k.FieldName};");
+                                                codeWriter.AddLine($"{keyType.FullName} elem_key_{k.PropertyName};");
                                                 codeWriter.AddLine($"for (int j = 0; j < count; j++)");
                                                 codeWriter.PushBrackets();
                                                 {
@@ -211,9 +211,9 @@ namespace ProjectCooker.Command
                                                     codeWriter.AddLine($"var skipPoint1 = EngineNS.IO.SerializerHelper.GetSkipOffset(ar);");
                                                     codeWriter.AddLine($"var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;"); 
 
-                                                    codeWriter.AddLine($"ar.Read(out elem_key_{k.FieldName});");
+                                                    codeWriter.AddLine($"ar.Read(out elem_key_{k.PropertyName});");
                                                     codeWriter.AddLine($"var value = ({valueType.FullName.Replace('+', '.')})EngineNS.IO.SerializerHelper.ReadObject(ar, elemValueType, hostObject);");
-                                                    codeWriter.AddLine($"tmp_{k.FieldName}[elem_key_{k.FieldName}] = value;");
+                                                    codeWriter.AddLine($"tmp_{k.PropertyName}[elem_key_{k.PropertyName}] = value;");
                                                 }
                                                 codeWriter.PopBrackets();
                                             }
@@ -226,7 +226,7 @@ namespace ProjectCooker.Command
                                                 codeWriter.AddLine($"ar.Read(out elemValueTypeStr);");
                                                 codeWriter.AddLine($"var skipPoint = EngineNS.IO.SerializerHelper.GetSkipOffset(ar);");
 
-                                                codeWriter.AddLine($"{valueType.FullName} elem_value_{k.FieldName};");
+                                                codeWriter.AddLine($"{valueType.FullName} elem_value_{k.PropertyName};");
                                                 codeWriter.AddLine($"for (int j = 0; j < count; j++)");
                                                 codeWriter.PushBrackets();
                                                 {
@@ -236,8 +236,8 @@ namespace ProjectCooker.Command
                                                     codeWriter.AddLine($"var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;");
 
                                                     codeWriter.AddLine($"var key = ({keyType.FullName.Replace('+', '.')})EngineNS.IO.SerializerHelper.ReadObject(ar, elemKeyType, hostObject);");
-                                                    codeWriter.AddLine($"ar.Read(out elem_value_{k.FieldName});");                                                    
-                                                    codeWriter.AddLine($"tmp_{k.FieldName}[key] = elem_value_{k.FieldName};");
+                                                    codeWriter.AddLine($"ar.Read(out elem_value_{k.PropertyName});");                                                    
+                                                    codeWriter.AddLine($"tmp_{k.PropertyName}[key] = elem_value_{k.PropertyName};");
                                                 }
                                                 codeWriter.PopBrackets();
                                             }
@@ -260,7 +260,7 @@ namespace ProjectCooker.Command
 
                                                     codeWriter.AddLine($"var key = ({keyType.FullName.Replace('+', '.')})EngineNS.IO.SerializerHelper.ReadObject(ar, elemKeyType, hostObject);");
                                                     codeWriter.AddLine($"var value = ({valueType.FullName.Replace('+', '.')})EngineNS.IO.SerializerHelper.ReadObject(ar, elemValueType, hostObject);");
-                                                    codeWriter.AddLine($"tmp_{k.FieldName}[key] = value;");
+                                                    codeWriter.AddLine($"tmp_{k.PropertyName}[key] = value;");
                                                 }
                                                 codeWriter.PopBrackets();
                                             }
@@ -270,22 +270,22 @@ namespace ProjectCooker.Command
                                     }
                                     else if (IsValueType(k.FieldType.SystemType) || k.FieldType.SystemType == typeof(string))
                                     {
-                                        codeWriter.AddLine($"{k.FieldType.FullName.Replace('+', '.')} tmp_{k.FieldName};");
-                                        codeWriter.AddLine($"ar.Read(out tmp_{k.FieldName});");
+                                        codeWriter.AddLine($"{k.FieldType.FullName.Replace('+', '.')} tmp_{k.PropertyName};");
+                                        codeWriter.AddLine($"ar.Read(out tmp_{k.PropertyName});");
                                     }
                                     else
                                     {
-                                        codeWriter.AddLine($"{k.FieldType.FullName.Replace('+', '.')} tmp_{k.FieldName};");
-                                        codeWriter.AddLine($"tmp_{k.FieldName} = ({k.FieldType.FullName.Replace('+', '.')})EngineNS.IO.SerializerHelper.ReadObject(ar, typeof({k.FieldType.FullName.Replace('+', '.')}), hostObject);");
+                                        codeWriter.AddLine($"{k.FieldType.FullName.Replace('+', '.')} tmp_{k.PropertyName};");
+                                        codeWriter.AddLine($"tmp_{k.PropertyName} = ({k.FieldType.FullName.Replace('+', '.')})EngineNS.IO.SerializerHelper.ReadObject(ar, typeof({k.FieldType.FullName.Replace('+', '.')}), hostObject);");
                                     }
                                     
                                     if (k.PropInfo != null && k.PropInfo.CanWrite && k.PropInfo.SetMethod.IsPublic)
                                     {
-                                        codeWriter.AddLine($"hostObject.{k.FieldName} = tmp_{k.FieldName};");
+                                        codeWriter.AddLine($"hostObject.{k.PropertyName} = tmp_{k.PropertyName};");
                                     }
                                     else
                                     {
-                                        codeWriter.AddLine($"//hostObject.{k.FieldName} = tmp_{k.FieldName};");
+                                        codeWriter.AddLine($"//hostObject.{k.PropertyName} = tmp_{k.PropertyName};");
                                     }
                                 }
                             }

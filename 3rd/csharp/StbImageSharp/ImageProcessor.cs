@@ -35,6 +35,51 @@ namespace StbImageSharp
             }
             return result;
         }
+        public static unsafe ImageResult StretchBlt(uint targetWidth, uint targetHeight, ImageResult src, uint SrcX, uint SrcY, uint SrcW, uint SrcH)
+        {
+            System.Diagnostics.Debug.Assert(src.Comp == ColorComponents.RedGreenBlueAlpha);
+            ImageResult result = new ImageResult();
+            uint hW = targetWidth;
+            uint hH = targetHeight;
+            if (SrcX >= src.Width)
+            {
+                SrcX = (uint)src.Width - 1;
+            }
+            if (SrcY >= src.Height)
+            {
+                SrcY = (uint)src.Height - 1;
+            }
+            if (SrcX + SrcW >= src.Width)
+            {
+                SrcW = (uint)src.Width - SrcX;
+            }
+            if (SrcY + SrcH >= src.Height)
+            {
+                SrcH = (uint)src.Height - SrcY;
+            }
+            float scaleX = (float)SrcW / (float)hW;
+            float scaleY = (float)SrcH / (float)hH;
+            result.Width = (int)hW;
+            result.Height = (int)hH;
+            result.SourceComp = src.SourceComp;
+            result.Comp = src.Comp;
+            result.Data = new byte[hW * hH * 4];
+            fixed (byte* pSrc = &src.Data[0])
+            fixed (byte* pTar = &result.Data[0])
+            {
+                byte* curTar = pTar;
+                for (int i = 0; i < hH; i++)
+                {
+                    for (int j = 0; j < hW; j++)
+                    {
+                        uint color = GetSamplerStride4(pSrc, src.Width, src.Height, (int)SrcX + (int)((float)j * scaleX), (int)SrcY + (int)((float)i * scaleY));
+                        ((uint*)curTar)[j] = color;
+                    }
+                    curTar += result.Width * 4;
+                }
+            }
+            return result;
+        }
         private static int[,] sampler = new int[3, 3]
         {
                 { 10, 20, 10},

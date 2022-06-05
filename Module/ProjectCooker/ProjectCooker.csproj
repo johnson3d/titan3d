@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Engine.Console\Engine.Console.csproj" />
+    <ProjectReference Include="..\Engine.Window\Engine.Window.csproj" />
   </ItemGroup>
 
 </Project>

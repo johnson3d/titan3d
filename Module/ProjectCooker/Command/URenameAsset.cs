@@ -67,7 +67,6 @@ namespace ProjectCooker.Command
                     {
                         return await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(name);
                     }
-                    break;
                 case ".material":
                     {
 
@@ -105,7 +104,7 @@ namespace ProjectCooker.Command
                 }
             }
 
-            var ametaPath = ameta.GetAssetName().Address + IO.IAssetMeta.MetaExt;
+            var ametaPath = ameta.GetAssetName().Address + EngineNS.IO.IAssetMeta.MetaExt;
             ameta.SetAssetName(tar);
             ameta.SaveAMeta();
             System.IO.File.Delete(ametaPath);

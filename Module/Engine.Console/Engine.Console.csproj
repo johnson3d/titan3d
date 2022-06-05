@@ -75,6 +75,16 @@
   <Import Project="..\..\CSharpCode\Bricks\VXGI\VXGI.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\PhysicsCore\PhysicsCore.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\SourceControl\SourceControl.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\FarShadow\FarShadow.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Input\Input.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\NodeGraph\NodeGraph.projitems" Label="Shared" />
+  <Import Project="..\..\3rd\csharp\NvTriStrip\NvTriStrip.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Particle\Particle.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\RenderPolicyEditor\RenderPolicyEditor.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\ProjectGen\ProjectGen.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\StateMachine\StateMachine.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Terrain\Terrain.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\VirtualTexture\VirtualTexture.projitems" Label="Shared" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9.0" />

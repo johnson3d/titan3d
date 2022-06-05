@@ -31,6 +31,19 @@ namespace CSharpCodeTools.Macross
                 return false;
             }
         }
+        public bool IsGeneric
+        {
+            get
+            {
+                return MethodSyntax.ConstraintClauses.Count > 0;
+                //foreach (var i in MethodSyntax.ConstraintClauses)
+                //{
+                //    //if (i.Constraints. == "where")
+                //        return true;
+                //}
+                //return false;
+            }
+        }
         public bool IsAsync
         {
             get
@@ -133,7 +146,7 @@ namespace CSharpCodeTools.Macross
     }
     class UMacrossClassDefine : UClassCodeBase
     {
-        public List<UMacrossFunction> Functions = new List<UMacrossFunction>();
+        public List<UMacrossFunction> Functions { get; } = new List<UMacrossFunction>();
         public override void GenCode(string dir)
         {
             if (Functions.Count == 0)
@@ -165,12 +178,34 @@ namespace CSharpCodeTools.Macross
                         var isAsync = i.IsAsync;
                         if (isAsync)
                             asyncStr = "async ";
+                        else
+                            asyncStr = "unsafe ";
                         var funName = i.GetDefineString(this);
+                        string constraint = "";
+                        string genericDef = "";
+                        if (i.IsGeneric)
+                        {
+                            genericDef = "<";
+                            foreach (var j in i.MethodSyntax.ConstraintClauses)
+                            {
+                                if (genericDef == "<")
+                                {
+                                    genericDef += j.Name.ToString();
+                                }
+                                else
+                                {
+                                    genericDef += "," + j.Name.ToString();
+                                }
+                                constraint += j.ToString() + " ";
+                            }
+                            genericDef += ">";
+                        }
+                        
                         AddLine($"private static EngineNS.Macross.UMacrossBreak macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()} = new EngineNS.Macross.UMacrossBreak(\"{funName}\");");
                         if (i.ParamenterCount > 0)
-                            AddLine($"public {isStatic}{asyncStr}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text}(string nodeName, {i.GetParameterDefine()})");
+                            AddLine($"public {isStatic}{asyncStr}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text} {genericDef}(string nodeName, {i.GetParameterDefine()}) {constraint}");
                         else
-                            AddLine($"public {isStatic}{asyncStr}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text}(string nodeName)");
+                            AddLine($"public {isStatic}{asyncStr}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text} {genericDef}(string nodeName) {constraint}");
                         PushBrackets();
                         {
                             bool hasOut = false;
@@ -195,7 +230,7 @@ namespace CSharpCodeTools.Macross
                             PopBrackets();
 
                             bool needReturen = false;
-                            if (i.MethodSyntax.ReturnType.ToString() == "void" || i.MethodSyntax.ReturnType.ToString() == "System.Void")
+                            if (i.MethodSyntax.ReturnType.ToString() == "void" || i.MethodSyntax.ReturnType.ToString() == "System.Void" || i.MethodSyntax.ReturnType.ToString() == "System.Threading.Tasks.Task")
                             {
                                 if (isAsync)
                                     AddLine($"await {i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
@@ -206,9 +241,9 @@ namespace CSharpCodeTools.Macross
                             {
                                 needReturen = true;
                                 if (isAsync)
-                                    AddLine($"var _return_value = await {i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
+                                    AddLine($"var _return_value = await {i.MethodSyntax.Identifier.Text}{genericDef}({i.GetParameterCallee()});");
                                 else
-                                    AddLine($"var _return_value = {i.MethodSyntax.Identifier.Text}({i.GetParameterCallee()});");
+                                    AddLine($"var _return_value = {i.MethodSyntax.Identifier.Text}{genericDef}({i.GetParameterCallee()});");
                             }
 
                             if (hasOut)

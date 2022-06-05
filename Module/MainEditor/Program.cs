@@ -61,7 +61,7 @@ namespace MainEditor
             var cfg = FindArgument(args, "config=");
             Console.WriteLine($"Config={cfg}");
             
-            EngineNS.UEngine.StartEngine(new EngineNS.UEngine(), cfg);
+            var task = EngineNS.UEngine.StartEngine(new EngineNS.UEngine(), cfg);
 
             while (true)
             {

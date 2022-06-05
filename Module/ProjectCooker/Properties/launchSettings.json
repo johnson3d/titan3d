@@ -2,7 +2,7 @@
   "profiles": {
     "ProjectCooker": {
       "commandName": "Project",
-      "commandLineArgs": "ExeCmd=BuildSerializer DS_Port=5555 CookCfg=$(SolutionDir)content\\EngineConfigForCook.cfg Serializer_Path=$(SolutionDir)codegen\\Serializer\\Engine",
+      "commandLineArgs": "ExeCmd=SaveAsLastest AssetType=Scene+Mesh+Material+MaterialInst CookCfg=$(SolutionDir)content\\EngineConfigForCook.cfg ",
       "workingDirectory": "..\\..\\binaries\\",
       "nativeDebugging": true
     }

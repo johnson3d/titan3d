@@ -51,23 +51,60 @@ namespace CSharpCodeTools.Macross
             //}
             //return false;
         }
-        protected override void OnVisitMethod(UClassCodeBase kls, MethodDeclarationSyntax method)
+        public static AttributeSyntax HasAttribute(MethodDeclarationSyntax method, string[] attrNames)
         {
             foreach (var j in method.AttributeLists)
             {
                 foreach (var k in j.Attributes)
                 {
                     var attributeName = k.Name.NormalizeWhitespace().ToFullString();
-                    if (attributeName.EndsWith("MetaAttribute") || attributeName.EndsWith("Meta"))
+                    foreach(var n in attrNames)
                     {
-                        var tmp = new UMacrossFunction();
-                        tmp.MethodSyntax = method;
-                        var klsDeffine = kls as UMacrossClassDefine;
-                        klsDeffine.Functions.Add(tmp);
-                        break;
+                        if (attributeName.EndsWith(n))
+                        {
+                            return k;
+                        }
                     }
                 }
             }
+            return null;
+        }
+        protected override void OnVisitMethod(UClassCodeBase kls, MethodDeclarationSyntax method)
+        {
+            var attr = HasAttribute(method, new string[] { "MetaAttribute", "Meta" });
+            if (attr != null)
+            {
+                if (attr.ArgumentList != null)
+                {
+                    foreach (var i in attr.ArgumentList.Arguments)
+                    {
+                        var argStr = i.ToFullString();
+                        if (argStr.Contains("ManualMarshal"))
+                        {
+                            return;
+                        }
+                    }
+                }
+                var tmp = new UMacrossFunction();
+                tmp.MethodSyntax = method;
+                var klsDeffine = kls as UMacrossClassDefine;
+                klsDeffine.Functions.Add(tmp);
+            }
+            //foreach (var j in method.AttributeLists)
+            //{
+            //    foreach (var k in j.Attributes)
+            //    {
+            //        var attributeName = k.Name.NormalizeWhitespace().ToFullString();
+            //        if (attributeName.EndsWith("MetaAttribute") || attributeName.EndsWith("Meta"))
+            //        {
+            //            var tmp = new UMacrossFunction();
+            //            tmp.MethodSyntax = method;
+            //            var klsDeffine = kls as UMacrossClassDefine;
+            //            klsDeffine.Functions.Add(tmp);
+            //            break;
+            //        }
+            //    }
+            //}
         }
     }
 }

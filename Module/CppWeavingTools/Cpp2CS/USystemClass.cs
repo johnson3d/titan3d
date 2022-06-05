@@ -91,6 +91,7 @@ namespace CppWeaving.Cpp2CS
 			RegClass("float", new USystemTypeStruct() { CppName = "float", CSName = "float", RetPodName = "float" });
 			RegClass("double", new USystemTypeStruct() { CppName = "float", CSName = "double", RetPodName = "double" });
 
+			RegClass("Hash64", new USystemTypeStruct() { CppName = "Hash64", CSName = "EngineNS.Hash64", RetPodName = "Hash64_t" });
 			RegClass("v3dxVector2", new USystemTypeStruct() { CppName = "v3dxVector2", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
 			RegClass("v3dxVector3", new USystemTypeStruct() { CppName = "v3dxVector3", CSName = "EngineNS.Vector3", RetPodName = "v3dVector3_t" });
 			RegClass("v3dxDVector3", new USystemTypeStruct() { CppName = "v3dxDVector3", CSName = "EngineNS.DVector3", RetPodName = "v3dDVector3_t" });
