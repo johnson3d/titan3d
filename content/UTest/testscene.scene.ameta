@@ -2,12 +2,22 @@
 <Root Type="EngineNS.GamePlay.Scene.USceneAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="a00c461a-6cda-478a-8ff7-0f27abd247a7" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.UScene&#xA;Hahah" />
-  <Icon Type="EngineNS.EGui.UVAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
     <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
     <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="6">
+    <e_0 Value="Game,utest/mesh/skysphere001.ums,d654ba19-6ad2-4dcc-8255-7e650faf6527" />
+    <e_1 Value="Game,utest/puppet/mesh/puppet.ums,f96719f6-83b6-4bd6-87f2-547a6cf50c04" />
+    <e_2 Value="Game,utest/brdf_test/chair2.ums,5e719504-b5a0-4b08-bfb1-03c410445a57" />
+    <e_3 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
+    <e_4 Value="Engine,axis/movex.vms,c206157e-5913-4eda-9525-ee9757928eac" />
+    <e_5 Value="Engine,axis/axis_x_d.uminst,0e36af8e-17c6-44aa-84b8-7a211e95a730" />
+  </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.UScene@EngineCore" />
 </Root>

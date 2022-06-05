@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="bc3c0fba-c5f7-4c79-ad88-7c09531cb90b" />
+  <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.UMacrossGame@EngineCore" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.CodeBuilder.UMacross&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,utest/deferred.rpolicy,6bec2549-4d63-4af4-90eb-ec4cda04da9b" />
+    <e_1 Value="Game,utest/testscene.scene,a00c461a-6cda-478a-8ff7-0f27abd247a7" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.UMacross@EngineCore" />
+</Root>

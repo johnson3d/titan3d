@@ -4,8 +4,12 @@
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
-    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="5">
       <e_0 Value="0,0,1,1" />
+      <e_1 Value="0,0,1,1" />
+      <e_2 Value="0,0,1,1" />
+      <e_3 Value="0,0,1,1" />
+      <e_4 Value="0,0,1,1" />
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
     <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
@@ -13,7 +17,7 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
     <e_0 Value="Game,utest/puppet/mesh/puppet.vms,66e4ead5-7b51-4c89-9a27-fe37f61514e8" />
-    <e_1 Value="Game,utest/ddd.uminst,da21bb21-134c-4d00-bdbb-00459e7a91c1" />
+    <e_1 Value="Game,utest/puppet/texture/gra.uminst,6e6c974c-ca58-49b8-9bd7-77e6148722fc" />
     <e_2 Value="Game,utest/ground.uminst,333fadf5-5a6d-48aa-86a8-e6ebff8b6d85" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMaterialMesh@EngineCore" />

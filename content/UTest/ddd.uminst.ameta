@@ -12,8 +12,9 @@
     <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
     <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Game,utest/taxi.srv,d6b2c4d5-f2de-4225-bf01-a82fb9e2144d" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,utest/ttt.material,4099c4b0-f565-4347-820a-7644edc4a0d5" />
+    <e_1 Value="Game,utest/taxi.srv,d6b2c4d5-f2de-4225-bf01-a82fb9e2144d" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" />
 </Root>

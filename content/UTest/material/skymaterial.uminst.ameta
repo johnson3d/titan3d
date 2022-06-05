@@ -13,8 +13,9 @@
     <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
     <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Game,utest/texture/sky_ocean.srv,698f0871-785e-4281-a976-677bdeb16109" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Engine,material/sysdft.material,8c2e9c64-ae7a-4172-9e64-114a3d36cc40" />
+    <e_1 Value="Game,utest/texture/sky_ocean.srv,698f0871-785e-4281-a976-677bdeb16109" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" />
 </Root>

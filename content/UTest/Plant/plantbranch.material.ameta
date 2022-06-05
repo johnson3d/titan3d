@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.UMaterialAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="44007e03-adeb-44b7-a985-4d0cc23d1633" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="3">
+      <e_0 Value="0,0,1,1" />
+      <e_1 Value="0,0,1,1" />
+      <e_2 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,utest/plant/fir_01_plant/t_fir_alba_bark_01_bc.srv,008d4fd2-d08d-4469-b41a-5c3dd0e595bd" />
+    <e_1 Value="Game,utest/plant/fir_01_plant/t_fir_bark_01_n.srv,c00a3d30-0755-4719-9c67-6ce8eb0dfded" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" />
+</Root>

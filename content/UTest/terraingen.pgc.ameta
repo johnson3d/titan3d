@@ -4,13 +4,33 @@
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Procedure.UPgcAsset&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
-    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="11">
       <e_0 Value="0,0,1,1" />
+      <e_1 Value="0,0,1,1" />
+      <e_2 Value="0,0,1,1" />
+      <e_3 Value="0,0,1,1" />
+      <e_4 Value="0,0,1,1" />
+      <e_5 Value="0,0,1,1" />
+      <e_6 Value="0,0,1,1" />
+      <e_7 Value="0,0,1,1" />
+      <e_8 Value="0,0,1,1" />
+      <e_9 Value="0,0,1,1" />
+      <e_10 Value="0,0,1,1" />
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
     <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
     <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="9">
+    <e_0 Value="Game,utest/pgc/terrain_bz_height.macross,ba13d1ec-8f3a-48b7-9f86-031cc04d5742" />
+    <e_1 Value="Game,utest/pgc/terraingen.macross,318c3ff6-c3c8-4e00-bb54-c3c2abaa73a2" />
+    <e_2 Value="Game,utest/texture/ground_04_n.srv,58caafa4-d323-47ad-a36d-3c0eac7d0397" />
+    <e_3 Value="Game,utest/texture/ground_04.srv,92048bc1-bdc1-4cb1-87aa-05a0499abab4" />
+    <e_4 Value="Game,utest/texture/ground6_nmp.srv,d005108e-4752-4aad-bb02-dcf0d8a8eb14" />
+    <e_5 Value="Game,utest/texture/ground6.srv,e4a4a66c-b97a-4113-b16a-c45e9d72fcfd" />
+    <e_6 Value="Game,utest/texture/ground8_nmp.srv,a70b5d9b-9473-463b-b82e-f1b3e9660bc9" />
+    <e_7 Value="Game,utest/texture/ground8.srv,2ea1a338-2ae4-4c7a-a4d2-672fe6909556" />
+    <e_8 Value="Engine,uestyle/graph/regularnode_color_spill.srv,93a1da79-f14a-45b5-9cb6-ab42f6c52dad" />
+  </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcAsset@EngineCore" />
 </Root>

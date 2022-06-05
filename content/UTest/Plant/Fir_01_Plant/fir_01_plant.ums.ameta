@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.UMaterialMeshAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="04431abc-430f-45e2-8f6b-cfe2fe8407a5" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="7">
+      <e_0 Value="0,0,1,1" />
+      <e_1 Value="0,0,1,1" />
+      <e_2 Value="0,0,1,1" />
+      <e_3 Value="0,0,1,1" />
+      <e_4 Value="0,0,1,1" />
+      <e_5 Value="0,0,1,1" />
+      <e_6 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Value="Game,utest/plant/fir_01_plant/fir_01_plant.vms,b1365a90-6ad2-4819-bed3-faf9ae49ae52" />
+    <e_1 Value="Game,utest/plant/fir_01_plant/leaf.uminst,ceaf5c79-bbab-47ac-a137-6632405489b6" />
+    <e_2 Value="Game,utest/plant/fir_01_plant/branch.uminst,243cedad-54d9-4bd2-a82f-7e7a62654d08" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMaterialMesh@EngineCore" />
+</Root>
