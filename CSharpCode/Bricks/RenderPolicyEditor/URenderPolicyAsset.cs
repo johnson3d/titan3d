@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             //纹理不会引用别的资产
             return false;
         }
-        public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
         {
             var start = ImGuiAPI.GetItemRectMin();
             var end = start + sz;
@@ -30,13 +30,17 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             Vector2 tpos;
             tpos.Y = start.Y + sz.Y - tsz.Y;
             tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
-            ImGuiAPI.PushClipRect(in start, in end, true);
+            //ImGuiAPI.PushClipRect(in start, in end, true);
 
             end.Y -= tsz.Y;
             OnDrawSnapshot(in cmdlist, ref start, ref end);
+            cmdlist.AddRect(in start, in end, (uint)EGui.UCoreStyles.Instance.SnapBorderColor.ToArgb(),
+                EGui.UCoreStyles.Instance.SnapRounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll, EGui.UCoreStyles.Instance.SnapThinkness);
 
             cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
-            ImGuiAPI.PopClipRect();
+            //ImGuiAPI.PopClipRect();
+
+            DrawPopMenu(ContentBrowser);
         }
         public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
@@ -45,7 +49,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         public override void OnShowIconTimout(int time)
         {
-            
+            base.OnShowIconTimout(time);
         }
     }
     [Rtti.Meta]
@@ -107,6 +111,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             if (IO.FileManager.LoadXmlToObject(name.Address, result.PolicyGraph) == false)
                 return null;
 
+            result.PolicyGraph.AssetName = name;
             return result;
         }
         [Rtti.Meta]

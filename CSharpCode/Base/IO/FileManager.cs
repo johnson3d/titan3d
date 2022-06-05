@@ -11,8 +11,10 @@ namespace EngineNS.IO
             InitDirectory();
             SetSysDir(ESystemDir.MetaData, "metadata");
             SetSysDir(ESystemDir.Effect, "effect");
+            SetSysDir(ESystemDir.Shader, "shader");
             SureDirectory(GetPath(ERootDir.Engine, ESystemDir.MetaData));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.Effect));
+            SureDirectory(GetPath(ERootDir.Cache, ESystemDir.Shader));
         }
         partial void InitDirectory();
         public enum ERootDir
@@ -31,6 +33,7 @@ namespace EngineNS.IO
         {
             MetaData,
             Effect,
+            Shader,
             Count,
         }
         public string[] Roots = new string[(int)ERootDir.Count];
@@ -51,6 +54,16 @@ namespace EngineNS.IO
         public string GetPath(ERootDir root, ESystemDir type)
         {
             return Roots[(int)root] + SysDirs[(int)type] + "/";
+        }
+        public ERootDir GetRootDirType(string path)
+        {
+            path = GetValidDirectory(path);
+            for (ERootDir i= ERootDir.Game; i< ERootDir.Count; i++)
+            {
+                if (path.StartsWith(GetRoot(i)))
+                    return i;
+            }
+            return ERootDir.Count;
         }
         public static string GetValidDirectory(string path)
         {
@@ -126,11 +139,13 @@ namespace EngineNS.IO
         }
         public static void DeleteDirectory(string path, bool recursive = true)
         {
-            System.IO.Directory.Delete(path, recursive);
+            if(System.IO.Directory.Exists(path))
+                System.IO.Directory.Delete(path, recursive);
         }
         public static void DeleteFile(string path)
         {
-            System.IO.File.Delete(path);
+            if(System.IO.File.Exists(path))
+                System.IO.File.Delete(path);
         }
         public static void CopyFile(string src, string tar)
         {

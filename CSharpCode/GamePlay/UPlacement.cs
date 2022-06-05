@@ -6,9 +6,9 @@ namespace EngineNS.GamePlay
 {
     public partial class UPlacementBase : IO.ISerializer
     {
-        public UPlacementBase(Scene.UNode node)
+        public UPlacementBase()
         {
-            HostNode = node;
+            //HostNode = node;
         }
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
@@ -83,7 +83,7 @@ namespace EngineNS.GamePlay
             }
         }
 
-        public Scene.UNode HostNode { get; private set; }
+        public Scene.UNode HostNode { get; set; }
         public virtual ref FTransform AbsTransform
         {
             get
@@ -95,8 +95,7 @@ namespace EngineNS.GamePlay
 
     public partial class UIdentityPlacement : UPlacementBase
     {
-        public UIdentityPlacement(Scene.UNode node)
-            : base(node)
+        public UIdentityPlacement()
         {
             
         }
@@ -112,8 +111,7 @@ namespace EngineNS.GamePlay
 
     public partial class UPlacement : UIdentityPlacement
     {
-        public UPlacement(Scene.UNode hostNode)
-            : base(hostNode)
+        public UPlacement()
         {
             mTransformData.InitData();
             mIsIdentity = true;

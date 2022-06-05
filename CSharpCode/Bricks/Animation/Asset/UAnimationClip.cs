@@ -19,7 +19,7 @@ namespace EngineNS.Animation.Asset
             //必须是TextureAsset
             return true;
         }
-        public override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        public override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
         {
             base.OnDraw(in cmdlist, in sz, ContentBrowser);
         }
@@ -180,13 +180,13 @@ namespace EngineNS.Animation.Asset
                 //mDesc.Desc.SetDefault();
                 //PGAsset.SingleTarget = mDesc;
             }
-            public override unsafe void OnDraw(EGui.Controls.ContentBrowser ContentBrowser)
+            public override unsafe void OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
             {
                 FBXCreateCreateDraw(ContentBrowser);
             }
 
             //for just create a clip as a property animation not from fbx 
-            public unsafe void SimpleCreateDraw(EGui.Controls.ContentBrowser ContentBrowser)
+            public unsafe void SimpleCreateDraw(EGui.Controls.UContentBrowser ContentBrowser)
             {
 
             }
@@ -195,7 +195,7 @@ namespace EngineNS.Animation.Asset
                 return false;
             }
 
-            public unsafe partial void FBXCreateCreateDraw(EGui.Controls.ContentBrowser ContentBrowser);
+            public unsafe partial void FBXCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
         }
         #endregion
 

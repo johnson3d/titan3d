@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace EngineNS.Rtti
 {
@@ -23,6 +22,7 @@ namespace EngineNS.Rtti
             R = 1 << 23
         }
         public System.Type FilterType;//参数类型为Type的时候，macross用来筛选可选择类型
+        public System.Type[] TypeList;
         public EArgumentFilter ConvertOutArguments;//最高位是控制返回值，其他是参数的顺序 
         
     }
@@ -53,6 +53,8 @@ namespace EngineNS.Rtti
 
             DiscardWhenCooked = (1 << 6),//在cook资源中不序列化
             DiscardWhenRPC = (1 << 7),//在做RPC的时候不序列化
+
+            ManualMarshal = (1 << 8),
         }
         public int Order = 0;
         public EMetaFlags Flags = 0;
@@ -303,7 +305,7 @@ namespace EngineNS.Rtti
             {
                 EngineNS.IO.FileManager.CreateDirectory(tmpPath);
             }
-            var txtFilepath = EngineNS.IO.FileManager.CombinePath(tmpPath, $"typename.txt");
+            var txtFilepath = EngineNS.IO.FileManager.CombinePath(tmpPath, $"typedesc.txt");
             EngineNS.IO.FileManager.WriteAllText(txtFilepath, ClassType.TypeString);
         }
         public UMetaVersion BuildCurrentVersion()
@@ -360,8 +362,13 @@ namespace EngineNS.Rtti
             {
                 public MetaParameterAttribute Meta;
                 private System.Reflection.ParameterInfo ParamInfo;
+                public System.Reflection.ParameterInfo GetParamInfo()
+                {
+                    return ParamInfo;
+                }
                 public Rtti.UTypeDesc ParameterType;
                 public bool IsParamArray = false;
+                public bool IsDelegate = false;
                 public string Name;
                 public Bricks.CodeBuilder.EMethodArgumentAttribute ArgumentAttribute = Bricks.CodeBuilder.EMethodArgumentAttribute.Default;
                 public object DefaultValue = null;
@@ -377,6 +384,7 @@ namespace EngineNS.Rtti
                     Name = info.Name;
                     var att = info.GetCustomAttributes(typeof(System.ParamArrayAttribute), true);
                     IsParamArray = (att.Length > 0);
+                    IsDelegate = typeof(Delegate).IsAssignableFrom(info.ParameterType);
                     if (info.IsOut)
                     {
                         ArgumentAttribute = Bricks.CodeBuilder.EMethodArgumentAttribute.Out;
@@ -421,6 +429,10 @@ namespace EngineNS.Rtti
             public List<object> InheritCustomAttributes;
 
             private string DeclarName;
+            public System.Reflection.MethodInfo GetMethod()
+            {
+                return Method;
+            }
             public void Init(System.Reflection.MethodInfo method)
             {
                 Method = method;
@@ -480,7 +492,8 @@ namespace EngineNS.Rtti
                 var attrs = param.GetCustomAttributes(typeof(MetaParameterAttribute), false);
                 if (attrs.Length == 0)
                     return null;
-                return attrs[index] as MetaParameterAttribute;
+                //return attrs[index] as MetaParameterAttribute;
+                return attrs[0] as MetaParameterAttribute;
             }
             public override string ToString()
             {
@@ -507,11 +520,32 @@ namespace EngineNS.Rtti
                     retVal = new List<object>(CustomAttributes.Count + InheritCustomAttributes.Count);
                     for(int i=0; i<CustomAttributes.Count; i++)
                     {
-                        if(CustomAttributes[i].GetType() == type)
+                        //var data = (CustomAttributes[i] as System.Reflection.CustomAttributeData);
+                        //if (data != null)
+                        //{
+                        //    if (data.AttributeType == type)
+                        //        retVal.Add(CustomAttributes[i]);
+                        //}
+                        //else
+                        //{
+
+                        //}
+                        if (CustomAttributes[i].GetType() == type)
                             retVal.Add(CustomAttributes[i]);
                     }
                     for(int i=0; i<InheritCustomAttributes.Count; i++)
                     {
+                        //var data = (InheritCustomAttributes[i] as System.Reflection.CustomAttributeData);
+                        //if (data != null)
+                        //{
+                        //    if (data.AttributeType == type)
+                        //        retVal.Add(InheritCustomAttributes[i]);
+                        //}
+                        //else
+                        //{
+                        //    if (InheritCustomAttributes[i].GetType() == type)
+                        //        retVal.Add(InheritCustomAttributes[i]);
+                        //}
                         if (InheritCustomAttributes[i].GetType() == type)
                             retVal.Add(InheritCustomAttributes[i]);
                     }
@@ -521,6 +555,17 @@ namespace EngineNS.Rtti
                     retVal = new List<object>(CustomAttributes.Count);
                     for(int i=0; i<CustomAttributes.Count; i++)
                     {
+                        //var data = (CustomAttributes[i] as System.Reflection.CustomAttributeData);
+                        //if (data != null)
+                        //{
+                        //    if (data.AttributeType == type)
+                        //        retVal.Add(CustomAttributes[i]);
+                        //}
+                        //else
+                        //{
+                        //    if (CustomAttributes[i].GetType() == type)
+                        //        retVal.Add(CustomAttributes[i]);
+                        //}
                         if (CustomAttributes[i].GetType() == type)
                             retVal.Add(CustomAttributes[i]);
                     }
@@ -532,9 +577,13 @@ namespace EngineNS.Rtti
             {
                 if (ReturnType == null)
                     return false;
-                if (ReturnType.IsEqual(typeof(void)))
+                if (ReturnType.IsEqual(typeof(void)) || ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)))
                     return false;
                 return true;
+            }
+            public bool IsAsync()
+            {
+                return (ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)) || ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)));
             }
         }
         public List<MethodMeta> Methods { get; } = new List<MethodMeta>();
@@ -691,6 +740,39 @@ namespace EngineNS.Rtti
             BuildMethods();
         }
     }
+
+    public class UMetaVersionMeta : IO.IAssetMeta
+    {
+        public override string GetAssetExtType()
+        {
+            return ".metadata";
+        }
+        public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
+        {
+            return null;
+        }
+        public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
+        {
+            var start = ImGuiAPI.GetItemRectMin();
+            var end = start + sz;
+
+            var name = IO.FileManager.GetPureName(GetAssetName().Name);
+            var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
+            Vector2 tpos;
+            tpos.Y = start.Y + sz.Y - tsz.Y;
+            tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
+            ImGuiAPI.PushClipRect(in start, in end, true);
+
+            end.Y -= tsz.Y;
+            OnDrawSnapshot(in cmdlist, ref start, ref end);
+            cmdlist.AddRect(in start, in end, (uint)EGui.UCoreStyles.Instance.SnapBorderColor.ToArgb(),
+                EGui.UCoreStyles.Instance.SnapRounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll, EGui.UCoreStyles.Instance.SnapThinkness);
+
+            cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
+            ImGuiAPI.PopClipRect();
+        }
+    }
+    [Editor.UAssetEditor(EditorType = typeof(Editor.UMetaVersionViewer))]
     public class UMetaVersion
     {
         public UMetaVersion(UClassMeta kls)
@@ -842,7 +924,7 @@ namespace EngineNS.Rtti
                         var kls = EngineNS.IO.FileManager.GetDirectories(j, "*.*", false);
                         foreach (var k in kls)
                         {
-                            var tmpPath = EngineNS.IO.FileManager.CombinePath(k, $"typename.txt");
+                            var tmpPath = EngineNS.IO.FileManager.CombinePath(k, $"typedesc.txt");
                             var strName = EngineNS.IO.FileManager.ReadAllText(tmpPath);
                             if (strName == null)
                                 continue;
@@ -960,6 +1042,7 @@ namespace EngineNS.Rtti
         {
             foreach (var i in UTypeDescManager.Instance.Services)
             {
+                var klsColloector = new List<UClassMeta>();
                 foreach(var j in i.Value.Types)
                 {
                     MetaAttribute meta;
@@ -983,8 +1066,13 @@ namespace EngineNS.Rtti
                     }
                     else
                     {
-                        var ver = kls.BuildCurrentVersion();
+                        klsColloector.Add(kls);
+                        //var ver = kls.BuildCurrentVersion();
                     }
+                }
+                foreach(var j in klsColloector)
+                {
+                    var ver = j.BuildCurrentVersion();
                 }
             }
         }
@@ -1098,4 +1186,6 @@ namespace EngineNS.Rtti
             return null;
         }
     }
+
+    
 }

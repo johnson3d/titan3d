@@ -62,7 +62,7 @@ namespace EngineNS.Graphics.Pipeline
         #endregion
 
         public UPresentWindow NativeWindow;
-        public virtual EGui.Slate.UWorldViewportSlate GetWorldViewportSlate() { return null; }
+        //public virtual EGui.Slate.UWorldViewportSlate GetWorldViewportSlate() { return null; }
 
         public IntPtr mImGuiContext;
         public EGui.UDockWindowSDL.UImDrawDataRHI mDrawData = new EGui.UDockWindowSDL.UImDrawDataRHI();
@@ -83,7 +83,7 @@ namespace EngineNS.Graphics.Pipeline
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
             return NativeWindow.CreateNativeWindow(title, x, y, w, h, sdl_flags) != IntPtr.Zero;
         }
-        public virtual async Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName, Type rpType = null)
+        public virtual async Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName)
         {
             await Thread.AsyncDummyClass.DummyFunc();
 
@@ -401,9 +401,9 @@ namespace EngineNS.Graphics.Pipeline
             UEngine.Instance.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName, Type rpType)
+        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName)
         {
-            await base.InitializeApplication(rc, rpName, rpType);
+            await base.InitializeApplication(rc, rpName);
             
             UEngine.Instance.TickableManager.AddTickable(this);
             return true;

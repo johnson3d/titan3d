@@ -480,7 +480,7 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
                 string retStr = "return";
                 if (data.Method.ReturnValue != null)
                 {
-                    retStr += data.Method.ReturnValue.VariableName + ";";
+                    retStr += " " + data.Method.ReturnValue.VariableName + ";";
                 }
                 else
                 {

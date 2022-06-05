@@ -13,7 +13,7 @@ namespace EngineNS.IO
 
         }
         //导入的窗口渲染接口
-        public virtual void OnDraw(EGui.Controls.ContentBrowser ContentBrowser)
+        public virtual void OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
         {
 
         }
@@ -33,7 +33,7 @@ namespace EngineNS.IO
         protected IAsset mAsset;
         protected string mName;
         protected EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
-        protected EGui.Controls.TypeSelector TypeSlt = new EGui.Controls.TypeSelector();
+        protected EGui.Controls.UTypeSelector TypeSlt = new EGui.Controls.UTypeSelector();
         protected System.Threading.Tasks.Task<bool> PGAssetInitTask;
         public RName GetAssetRName()
         {
@@ -53,12 +53,13 @@ namespace EngineNS.IO
             mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IAsset;
             PGAsset.Target = mAsset;
         }
-        public override unsafe void OnDraw(EGui.Controls.ContentBrowser ContentBrowser)
+        public override unsafe void OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
         {
             if (bPopOpen == false)
                 ImGuiAPI.OpenPopup($"New {TypeSlt.BaseType.Name}", ImGuiPopupFlags_.ImGuiPopupFlags_None);
 
             var visible = true;
+            ImGuiAPI.SetNextWindowSize(new Vector2(200, 500), ImGuiCond_.ImGuiCond_FirstUseEver);
             if (ImGuiAPI.BeginPopupModal($"New {TypeSlt.BaseType.Name}", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 ImGuiAPI.Text($"New {TypeSlt.BaseType.Name}");
@@ -107,15 +108,6 @@ namespace EngineNS.IO
 
                 ImGuiAPI.Separator();
 
-                if (PGAssetInitTask != null && !PGAssetInitTask.IsCompleted)
-                {
-                }
-                else
-                {
-                    PGAsset.OnDraw(false, false, false);
-                    PGAssetInitTask = null;
-                }
-
                 if (CheckAsset())
                 {
                     if (ImGuiAPI.Button("Create Asset", &sz))
@@ -137,6 +129,16 @@ namespace EngineNS.IO
                     ImGuiAPI.CloseCurrentPopup();
                     ContentBrowser.mAssetImporter = null;
                 }
+
+                if (PGAssetInitTask != null && !PGAssetInitTask.IsCompleted)
+                {
+                }
+                else
+                {
+                    PGAsset.OnDraw(false, false, false);
+                    PGAssetInitTask = null;
+                }
+                
                 ImGuiAPI.EndPopup();
             }
         }
@@ -243,28 +245,9 @@ namespace EngineNS.IO
         {
             return true;
         }
-        //在ContentBrowser里面渲染Asset信息
-        //public unsafe virtual void OnDraw(ref ImDrawList cmdlist, ref Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
-        //{
-        //    var start = ImGuiAPI.GetItemRectMin();
-        //    var end = start + sz;
-        //    //icon.OnDraw(ref cmdlist, ref start, ref end);
-        //    var name = IO.FileManager.GetPureName(mAssetName.Name);
-        //    var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
-        //    Vector2 tpos;
-        //    tpos.Y = start.Y + sz.Y - tsz.Y;
-        //    tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
-        //    ImGuiAPI.PushClipRect(&start, &end, true);
-        //    cmdlist.AddText(&tpos, 0xFFFF00FF, name, null);
-        //    ImGuiAPI.PopClipRect();
-        //}
-        //public virtual void OnShowIconTimout(int time)
-        //{
-
-        //}
         EGui.UIProxy.MenuItemProxy.MenuState mDeleteMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
-        public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
         {
             var start = ImGuiAPI.GetItemRectMin();
             var end = start + sz;
@@ -279,9 +262,20 @@ namespace EngineNS.IO
             end.Y -= tsz.Y;
             OnDrawSnapshot(in cmdlist, ref start, ref end);
 
+            //var titleImg = UEngine.Instance.UIManager.GetUIProxy("uestyle/graph/regularnode_shadow_selected.srv", new Thickness(18.0f / 64.0f)) as EGui.UIProxy.ImageProxy;
+            //if (titleImg != null)
+            //    titleImg.OnDraw(cmdlist, in start, in end);
+
+            cmdlist.AddRect(in start, in end, (uint)EGui.UCoreStyles.Instance.SnapBorderColor.ToArgb(), 
+                EGui.UCoreStyles.Instance.SnapRounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll, EGui.UCoreStyles.Instance.SnapThinkness);
+
             cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
             //ImGuiAPI.PopClipRect();
 
+            DrawPopMenu(ContentBrowser);
+        }
+        protected virtual void DrawPopMenu(EGui.Controls.UContentBrowser ContentBrowser)
+        {
             var createNewAssetValueStore = ContentBrowser.CreateNewAssets;
             if (ImGuiAPI.BeginPopupContextItem(mAssetName.Address, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
             {
@@ -289,6 +283,12 @@ namespace EngineNS.IO
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 Support.UAnyPointer menuData = new Support.UAnyPointer();
 
+                if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, ref drawList, ref menuData, ref mDeleteMenuState))
+                {
+                    var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+                    var rn = RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType);
+                    var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UAssetReferViewer), rn, this);
+                }
                 if (EGui.UIProxy.MenuItemProxy.MenuItem("Delete", null, false, null, ref drawList, ref menuData, ref mDeleteMenuState))
                 {
                     try
@@ -302,7 +302,7 @@ namespace EngineNS.IO
                     ContentBrowser.CreateNewAssets = createNewAssetValueStore;
                 }
 
-                if(OnDrawContextMenu(ref drawList))
+                if (OnDrawContextMenu(ref drawList))
                     ContentBrowser.CreateNewAssets = createNewAssetValueStore;
                 ImGuiAPI.EndPopup();
             }
@@ -357,9 +357,22 @@ namespace EngineNS.IO
         [Rtti.Meta]
         public Guid AssetId { get; set; }
         [Rtti.Meta]
-        public List<RName> RefAssetRNames { get; } = new List<RName>();
+        public List<RName> RefAssetRNames { get; set; } = new List<RName>();
 
         public long ShowIconTime;
+
+        public void AddReferenceAsset(RName rn)
+        {
+            if (rn == null)
+                return;
+            if (RefAssetRNames.Contains(rn))
+                return;
+            RefAssetRNames.Add(rn);
+        }
+        public virtual void OnDragTo(Graphics.Pipeline.UViewportSlate vpSlate)
+        {
+            
+        }
     }
     public class UAssetMetaManager
     {

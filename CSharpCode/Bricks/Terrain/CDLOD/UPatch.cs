@@ -60,7 +60,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             tMaterials[0] = terrain.Material;
 
             var tWireFrameMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
-            tWireFrameMaterials[0] = (terrain as UTerrain).WireFrameMaterial;
+            tWireFrameMaterials[0] = (terrain as UTerrainSystem).WireFrameMaterial;
 
             TerrainMesh = new Graphics.Mesh.UMesh[terrain.GridMipLevels.Length];
             WireFrameTerrainMesh = new Graphics.Mesh.UMesh[terrain.GridMipLevels.Length];
@@ -186,13 +186,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             switch (Level.GetTerrainNode().Terrain.ShowMode)
             {
-                case UTerrain.EShowMode.Normal:
+                case UTerrainSystem.EShowMode.Normal:
                     rp.VisibleMeshes.Add(TerrainMesh[CurrentLOD]);
                     break;
-                case UTerrain.EShowMode.WireFrame:
+                case UTerrainSystem.EShowMode.WireFrame:
                     rp.VisibleMeshes.Add(WireFrameTerrainMesh[CurrentLOD]);
                     break;
-                case UTerrain.EShowMode.Both:
+                case UTerrainSystem.EShowMode.Both:
                     {
                         rp.VisibleMeshes.Add(TerrainMesh[CurrentLOD]);
                         rp.VisibleMeshes.Add(WireFrameTerrainMesh[CurrentLOD]);

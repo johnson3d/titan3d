@@ -159,20 +159,7 @@ namespace EngineNS
         public double GetMaxSide()
         {
             var sz = GetSize();
-            if (sz.X >= sz.Y)
-            {
-                if (sz.X >= sz.Z)
-                    return sz.X;
-                else
-                    return sz.Z;
-            }
-            else
-            {
-                if (sz.Y >= sz.Z)
-                    return sz.Y;
-                else
-                    return sz.Z;
-            }
+            return Math.Max(sz.X, Math.Max(sz.Y, sz.Z));
         }
         public static ContainmentType Contains(in DBoundingBox box1, in DBoundingBox box2)
         {

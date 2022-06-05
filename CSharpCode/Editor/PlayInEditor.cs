@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EngineNS.Bricks.Input.Control;
+using EngineNS.Bricks.Input.Device.Keyboard;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -27,8 +29,9 @@ namespace EngineNS
 {
     public partial class UEngine
     {
+
         public Editor.UPIEModule PIEModule { get; } = new Editor.UPIEModule();
-        public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(Graphics.Pipeline.USlateApplication application, Type rpType, RName main)
+        public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(Graphics.Pipeline.USlateApplication application, RName main)
         {
             if (this.GameInstance != null)
                 return false;
@@ -36,15 +39,25 @@ namespace EngineNS
             var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current);
             UEngine.Instance.MacrossModule.ReloadAssembly(root + "/net5.0/GameProject.dll");
 
-            this.GameInstance = new GamePlay.UGameBase();
-            this.GameInstance.McObject.Name = main;
+            this.GameInstance = new GamePlay.UGameInstance();
+            this.GameInstance.WorldViewportSlate.Title = $"Game:{main.Name}";
 
+            this.GameInstance.McObject.Name = main;
             var ret = await this.GameInstance.BeginPlay();
-            var igame = this.GameInstance.McObject.Get();
-            igame.WorldViewportSlate.Title = $"Game:{main.Name}";
-            UEngine.Instance.TickableManager.AddTickable(igame);
+            
+            UEngine.Instance.TickableManager.AddTickable(this.GameInstance);
+
+            UEngine.Instance.InputSystem.Mouse.ShowCursor = false;
+            var esc = IControl.Create<UKey>(new UKey.UKeyData() { Keycode = Bricks.Input.Keycode.KEY_ESCAPE });
+            esc.TriggerPress += (ITriggerControl sender)=>
+                                {
+                                    UEngine.Instance.InputSystem.Mouse.ShowCursor = true;
+                                    EndPlayInEditor();
+                                };
+
             return ret;
         }
+
         public void EndPlayInEditor()
         {
             var wr =  EndPlayInEditor_Impl();
@@ -74,8 +87,7 @@ namespace EngineNS
             if (this.GameInstance == null)
                 return null;
 
-            var igame = this.GameInstance.McObject.Get();
-            UEngine.Instance?.TickableManager.RemoveTickable(igame);
+            UEngine.Instance?.TickableManager.RemoveTickable(this.GameInstance);
             this.GameInstance.BeginDestroy();
             var wr = new WeakReference(this.GameInstance);
             this.GameInstance = null;

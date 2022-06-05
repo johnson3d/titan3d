@@ -310,6 +310,14 @@ namespace EngineNS.Thread.Async
         }
         public void StartPools(int count)
         {
+            if (count == -1)
+            {
+                count = System.Environment.ProcessorCount - 2;
+                if (count <= 0)
+                {
+                    count = 1;
+                }
+            }
             ContextPools = new ThreadPool[count];
             for (int i = 0; i < count; i++)
             {
@@ -381,26 +389,28 @@ namespace EngineNS.Thread.Async
         }
         public void RunOn(FPostEvent evt, EAsyncTarget target = EAsyncTarget.AsyncIO)
         {
-            ContextThread ctx = GetContext(target);
-
             var eh = mRunOnPEAllocator.QueryObjectSync();
-            
             eh.PostAction = evt;
             eh.ContinueThread = null;
             eh.AsyncType = EAsyncType.ParallelTasks;
-            if (ctx != null)
-            {
-                lock (ctx.PriorityEvents)
-                {
-                    ctx.PriorityEvents.Enqueue(eh);
-                }
-            }
-            else
+
+            if (target == EAsyncTarget.TPools)
             {
                 lock (TPoolEvents)
                 {
                     TPoolEvents.Enqueue(eh);
                     mTPoolTrigger.Set();
+                }
+            }
+            else
+            {
+                ContextThread ctx = GetContext(target);
+                if (ctx != null)
+                {
+                    lock (ctx.PriorityEvents)
+                    {
+                        ctx.PriorityEvents.Enqueue(eh);
+                    }
                 }
             }
         }

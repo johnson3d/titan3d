@@ -56,8 +56,11 @@ namespace EngineNS.GamePlay.Scene
         }
         public override bool OnTickLogic(UWorld world, URenderPolicy policy)
         {
-            if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == false)
-                return true;
+            //if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == false)
+            //    return true;
+
+            //if ((rp.CullFilters & GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == 0)
+            //    return true;
 
             var tmp = Spline;
             if (tmp == null)
@@ -211,9 +214,9 @@ namespace EngineNS.GamePlay.Scene
             UpdateAABB();
             Parent?.UpdateAABB();
         }
-        public override void OnNodeLoaded()
+        public override void OnNodeLoaded(UNode parent)
         {
-            base.OnNodeLoaded();
+            base.OnNodeLoaded(parent);
             UpdateAbsTransform();
         }
         public override void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
@@ -234,7 +237,10 @@ namespace EngineNS.GamePlay.Scene
             if (mDebugSplineMesh == null)
                 return;
 
-            if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == false)
+            //if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == false)
+            //    return;
+
+            if ((rp.CullFilters & GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == 0)
                 return;
 
             if (DebugSplineMesh != null)

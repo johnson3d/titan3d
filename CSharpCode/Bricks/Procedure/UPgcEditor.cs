@@ -160,7 +160,7 @@ namespace EngineNS.Bricks.Procedure
         }
         protected void DrawToolBar()
         {
-            var btSize = new Vector2(64, 64);
+            var btSize = Vector2.Zero;
             if (ImGuiAPI.Button("Save", in btSize))
             {
                 var noused = Save();
@@ -194,21 +194,24 @@ namespace EngineNS.Bricks.Procedure
             var size = new Vector2(-1, -1);
             if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-                var winClass = new ImGuiWindowClass();
-                winClass.UnsafeCallConstructor();
-                var sz = ImGuiAPI.GetWindowSize();
-                sz.Y = sz.X;
-                ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
-                if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                if (ImGuiAPI.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                {
+                    ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+                    var winClass = new ImGuiWindowClass();
+                    winClass.UnsafeCallConstructor();
+                    var sz = ImGuiAPI.GetWindowSize();
+                    sz.Y = sz.X;
+                    ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
+                    winClass.UnsafeCallDestructor();
+                }   
+                if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     NodePropGrid.OnDraw(true, false, false);
                 }
-                if (ImGuiAPI.CollapsingHeader("EditorProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                if (ImGuiAPI.CollapsingHeader("EditorProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     GraphPropGrid.OnDraw(true, false, false);
                 }
-                winClass.UnsafeCallDestructor();
             }
             ImGuiAPI.EndChild();
         }

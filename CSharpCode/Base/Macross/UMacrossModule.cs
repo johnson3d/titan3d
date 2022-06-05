@@ -9,6 +9,11 @@ namespace EngineNS.Macross
         public RName Name { get; set; }
         public uint Version { get; protected set; }
         public virtual object InnerObject { get; set; }
+        public virtual void Clear(UMacrossModule module)
+        {
+            Version = 0;
+            InnerObject = null;
+        }
         public virtual void Reset(UMacrossModule module)
         {
             Version = 0;
@@ -24,6 +29,15 @@ namespace EngineNS.Macross
         {
             var result = new UMacrossGetter<T>();
             UEngine.Instance.MacrossModule.AddGetter(result);
+            return result;
+        }
+        public static UMacrossGetter<T> UnsafeNewInstance(uint ver, object innerObj, bool addGetter = false)
+        {
+            var result = new UMacrossGetter<T>();
+            if (addGetter)
+                UEngine.Instance.MacrossModule.AddGetter(result);
+            result.Version = ver;
+            result.InnerObject = innerObj;
             return result;
         }
 
@@ -46,7 +60,11 @@ namespace EngineNS.Macross
         {
             Version = 0;
             var newObj = module.NewInnerObject<T>(Name);
-            Rtti.UClassMetaManager.Instance.GetMeta(typeof(T).FullName).CopyObjectMetaField(newObj, mInnerObject);
+            if (mInnerObject != null)
+            {
+                var meta = Rtti.UClassMetaManager.Instance.GetMeta(Rtti.UTypeDescGetter<T>.TypeDesc);
+                meta?.CopyObjectMetaField(newObj, mInnerObject);
+            }
             InnerObject = newObj;
         }
     }
@@ -67,22 +85,35 @@ namespace EngineNS.Macross
         partial void CreateAssemblyLoader(ref IAssemblyLoader loader);
         public void ReloadAssembly(string assemblyPath)
         {
-            var hostAlcWeakRef = UEngine.Instance.MacrossModule.mAssembly;
-
-            UEngine.Instance.MacrossModule.ReloadAssembly_Impl(assemblyPath);
-
-            if (hostAlcWeakRef != null)
+            try
             {
-                for (int i = 0; hostAlcWeakRef.IsAlive && (i < 10); i++)
-                {
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                }
+                if (!IO.FileManager.FileExists(assemblyPath))
+                    return;
+                var hostAlcWeakRef = UEngine.Instance.MacrossModule.mAssembly;
 
-                if (hostAlcWeakRef.IsAlive)
+                UEngine.Instance.MacrossModule.ReloadAssembly_Impl(assemblyPath);
+
+                if (hostAlcWeakRef != null)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Core", "MacrossModule Assembly unload failed, Check assembly reference please");
+                    for (int i = 0; hostAlcWeakRef.IsAlive && (i < 10); i++)
+                    {
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
+                    }
+
+                    if (hostAlcWeakRef.IsAlive)
+                    {
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Core", "MacrossModule Assembly unload failed, Check assembly reference please");
+                    }
                 }
+                else
+                {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "MacrossModule Assembly unload successed");
+                }
+            }
+            catch (Exception)
+            {
+
             }
         }
         private void ReloadAssembly_Impl(string assemblyPath)
@@ -91,7 +122,9 @@ namespace EngineNS.Macross
             CreateAssemblyLoader(ref loader);
             if (loader == null)
                 return;
-            var newAssembly = loader.LoadAssembly(assemblyPath);
+            var pdbPath = IO.FileManager.RemoveExtName(assemblyPath);
+            pdbPath += ".tpdb";
+            var newAssembly = loader.LoadAssembly(assemblyPath, pdbPath);
 
             Rtti.UTypeDescManager.ServiceManager manager;
             Rtti.AssemblyDesc desc;

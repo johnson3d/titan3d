@@ -17,6 +17,7 @@ namespace EngineNS.Editor
         }
         public void Cleanup()
         {
+            PresentWindow?.UnregEventProcessor(this);
             RenderPolicy?.Cleanup();
             RenderPolicy = null;
         }
@@ -24,7 +25,7 @@ namespace EngineNS.Editor
         {
             RenderPolicy = policy;
 
-            await RenderPolicy.Initialize(null);
+            //await RenderPolicy.Initialize(null);
 
             CameraController.ControlCamera(RenderPolicy.DefaultCamera);
 
@@ -51,7 +52,7 @@ namespace EngineNS.Editor
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
         }
         bool Initialized = false;
-        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, Rtti.UTypeDesc policyType, float zMin, float zMax)
+        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, float zMin, float zMax)
         {
             Graphics.Pipeline.URenderPolicy policy = null;
             var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName);
@@ -59,10 +60,6 @@ namespace EngineNS.Editor
             {
                 policy = rpAsset.CreateRenderPolicy();
             }
-            if (policy == null)
-            {
-                policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.URenderPolicy;
-            }            
             await policy.Initialize(null);
 
             if (OnInitialize == null)
@@ -71,8 +68,14 @@ namespace EngineNS.Editor
             }
             await OnInitialize(this, application, policy, zMin, zMax);
 
-            RenderPolicy.OnResize(ClientSize.X, ClientSize.Y);
-
+            if (ClientSize.X == 0 || ClientSize.Y == 0)
+            {
+                RenderPolicy.OnResize(1, 1);
+            }
+            else
+            {
+                RenderPolicy.OnResize(ClientSize.X, ClientSize.Y);
+            }
             Initialized = true;
         }
         protected override void OnClientChanged(bool bSizeChanged)
@@ -82,6 +85,16 @@ namespace EngineNS.Editor
             {
                 RenderPolicy?.OnResize(vpSize.X, vpSize.Y);                
             }
+        }
+        public RName PreviewAsset { get; set; } = null;
+        public override void OnDrawViewportUI(in Vector2 startDrawPos) 
+        {
+            if (PreviewAsset != null && ImGuiAPI.Button("S"))
+            {
+                Editor.USnapshot.Save(PreviewAsset, UEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+            }
+            if (ShowWorldAxis)
+                DrawWorldAxis(this.CameraController.Camera);
         }
         protected override IntPtr GetShowTexture()
         {
@@ -170,6 +183,11 @@ namespace EngineNS.Editor
             }
         }
         GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
+        public GamePlay.UWorld.UVisParameter VisParameter
+        {
+            get => mVisParameter;
+        }
+
         public void TickLogic(int ellapse)
         {
             if (Initialized == false)

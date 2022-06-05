@@ -22,8 +22,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public LinkDesc NewExecPinDesc()
         {
+            var styles = UNodeGraphStyles.DefaultStyles;
+
             var result = new LinkDesc();
-            result.Icon.Size = new Vector2(25, 25);
+            result.Icon.TextureName = RName.GetRName(styles.PinConnectedExecImg, RName.ERNameType.Engine);
+            result.Icon.Size = new Vector2(12, 16);
+            result.DisconnectIcon.TextureName = RName.GetRName(styles.PinDisconnectedExecImg, RName.ERNameType.Engine);
+            result.DisconnectIcon.Size = new Vector2(12, 16);
+
             result.ExtPadding = 10;
             result.LineColor = 0xFFFFFFFF;
             result.LineThinkness = 6;
@@ -32,8 +38,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public LinkDesc NewInOutPinDesc()
         {
+            var styles = UNodeGraphStyles.DefaultStyles;
+
             var result = new LinkDesc();
-            result.Icon.Size = new Vector2(20, 20);
+            result.Icon.TextureName = RName.GetRName(styles.PinConnectedVarImg, RName.ERNameType.Engine);
+            result.Icon.Size = new Vector2(15, 11);
+            result.DisconnectIcon.TextureName = RName.GetRName(styles.PinDisconnectedVarImg, RName.ERNameType.Engine);
+            result.DisconnectIcon.Size = new Vector2(15, 11);
+
             result.ExtPadding = 0;
             result.LineThinkness = 3;
             result.LineColor = 0xFFFF0000;

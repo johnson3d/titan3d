@@ -141,19 +141,13 @@ namespace EngineNS.EGui.UIProxy
                     Icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in textColor);
             }
             ImGuiAPI.EndGroup();
-            if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) && isMouseHover)
+            if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false) && isMouseHover)
             {
-                isMouseDown = true;
                 Action?.Invoke();
                 retValue = true;
             }
-            else
-                isMouseDown = false;
-
-            if (ImGuiAPI.IsMouseHoveringRect(in hitRectMin, in hitRectMax, true))
-                isMouseHover = true;
-            else
-                isMouseHover = false;
+            isMouseDown = ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) && isMouseHover;
+            isMouseHover = ImGuiAPI.IsMouseHoveringRect(in hitRectMin, in hitRectMax, true);
 
             return retValue;
         }

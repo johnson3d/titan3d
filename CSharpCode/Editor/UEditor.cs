@@ -21,12 +21,12 @@ namespace EngineNS.Editor
         }
         [Rtti.Meta]
         public string GameAssembly { get; set; }
-        [Rtti.Meta]
-        public GamePlay.UWorld.UVisParameter.EVisCullFilter CullFilters { get; set; } = GamePlay.UWorld.UVisParameter.EVisCullFilter.All;
-        public bool IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter filters)
-        {
-            return (CullFilters & filters) == filters;
-        }
+        //[Rtti.Meta]
+        //public GamePlay.UWorld.UVisParameter.EVisCullFilter CullFilters { get; set; } = GamePlay.UWorld.UVisParameter.EVisCullFilter.All;
+        //public bool IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter filters)
+        //{
+        //    return (CullFilters & filters) == filters;
+        //}
     }
 
     public partial class UEditor : UModule<UEngine>
@@ -53,6 +53,7 @@ namespace EngineNS.Editor
             }
 
             var gameAssembly = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + Config.GameAssembly;
+            
             UEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
 
             await RNamePopupContentBrowser.Initialize();

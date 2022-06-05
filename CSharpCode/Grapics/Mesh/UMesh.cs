@@ -7,7 +7,21 @@ namespace EngineNS.Graphics.Mesh
 {
     public class UMesh
     {
-        public GamePlay.Scene.UNode HostNode;
+        public GamePlay.Scene.UNode HostNode { get; set; }
+        bool mIsCastShadow = false;
+        public bool IsCastShadow 
+        { 
+            get
+            {
+                if (HostNode != null)
+                    return HostNode.IsCastShadow;
+                return mIsCastShadow;
+            }
+            set
+            {
+                mIsCastShadow = value;
+            }
+        }
         public UMaterialMesh MaterialMesh { get; private set; }
         public Pipeline.Shader.UMdfQueue MdfQueue { get; private set; }
         RHI.CConstantBuffer mPerMeshCBuffer;
@@ -30,7 +44,7 @@ namespace EngineNS.Graphics.Mesh
                 {
                     ObjectFlags_2Bit &= (~1);
                 }
-                PerMeshCBuffer.SetValue(RHI.CConstantBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                PerMeshCBuffer?.SetValue(RHI.CConstantBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
             }
         }
         public bool IsUnlit
@@ -59,6 +73,9 @@ namespace EngineNS.Graphics.Mesh
                 if (mPerMeshCBuffer == null)
                 {
                     var effect = UEngine.Instance.GfxDevice.EffectManager.DummyEffect;
+                    if (effect.ShaderIndexer.cbPerMesh == uint.MaxValue)
+                        return null;
+                    
                     mPerMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(effect.ShaderProgram, effect.ShaderIndexer.cbPerMesh);
                     if (OnAfterCBufferCreated != null)
                     {
@@ -102,7 +119,17 @@ namespace EngineNS.Graphics.Mesh
                 for (Pipeline.URenderPolicy.EShadingType i = Pipeline.URenderPolicy.EShadingType.BasePass;
                     i < Pipeline.URenderPolicy.EShadingType.Count; i++)
                 {
-                    var shading = policy.GetPassShading(i, mesh, atom, node);
+                    Graphics.Pipeline.Shader.UShadingEnv shading = null;
+                    try
+                    {
+                        shading = policy.GetPassShading(i, mesh, atom, node);
+                    }
+                    catch(Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Mesh", "policy.GetPassShading except");
+                        continue;
+                    }
                     if (shading != null)
                     {
                         var drawcall = await UEngine.Instance.GfxDevice.RenderContext.CreateDrawCall(shading, Material.ParentMaterial, mesh.MdfQueue);
@@ -269,10 +296,14 @@ namespace EngineNS.Graphics.Mesh
             public unsafe virtual RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, UMesh mesh, int atom, Pipeline.URenderPolicy policy,
                 Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
             {
+                if (Material == null)
+                    return null;
                 if (Material != mesh.MaterialMesh.Materials[atom] || 
                     Material.SerialId != MaterialSerialId)
                 {
                     Material = mesh.MaterialMesh.Materials[atom];
+                    if (Material == null)
+                        return null;
                     MaterialSerialId = Material.SerialId;
                     ResetDrawCalls();
                 }
@@ -491,6 +522,9 @@ namespace EngineNS.Graphics.Mesh
             Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
         {
             if (atom >= Atoms.Length)
+                return null;
+
+            if (this.MaterialMesh.Mesh.mCoreObject.IsValidPointer == false)
                 return null;
 
             return Atoms[atom].GetDrawCall(targetView, this, atom, policy, shadingType, node);

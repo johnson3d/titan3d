@@ -103,7 +103,7 @@ namespace EngineNS.Editor.Forms
                 AnimationClip.SaveAssetTo(AnimationClip.AssetName);
                 var unused = UEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(AnimationClip.AssetName);
 
-                USnapshot.Save(AnimationClip.AssetName, AnimationClip.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                //USnapshot.Save(AnimationClip.AssetName, AnimationClip.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Reload", in btSize))
@@ -150,9 +150,10 @@ namespace EngineNS.Editor.Forms
             if (AnimationClip == null)
                 return false;
 
+            PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialMesh:{name}";
             //PreviewViewport.OnInitialize = Initialize_PreviewMesh;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, 0, 1);
 
             AnimationClipPropGrid.Target = AnimationClip;
             UEngine.Instance.TickableManager.AddTickable(this);

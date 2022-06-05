@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainMaterial.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainMdfQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainPlant.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UQTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UTerrainModule.cs" />
   </ItemGroup>

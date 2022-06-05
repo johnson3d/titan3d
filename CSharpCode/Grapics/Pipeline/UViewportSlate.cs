@@ -4,9 +4,20 @@ using SDL2;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public class UViewportSlate : IEventProcessor
+    public partial class UViewportSlate : IEventProcessor
     {
-        public GamePlay.UWorld World { get; protected set; } = new GamePlay.UWorld();
+        public UViewportSlate()
+        {
+            World = new GamePlay.UWorld(this);
+            UEngine.Instance.ViewportSlateManager.AddViewport(this);
+        }
+        ~UViewportSlate()
+        {
+            PresentWindow?.UnregEventProcessor(this);
+            UEngine.Instance?.ViewportSlateManager.RemoveViewport(this);
+        }
+        [Rtti.Meta()]
+        public GamePlay.UWorld World { get; protected set; } 
         public void SetCameraOffset(in DVector3 offset)
         {
             World.CameraOffset = offset;
@@ -14,7 +25,18 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual string Title { get; set; } = "Game";
         protected bool mVisible = true;
-        public bool Visible { get => mVisible; set => mVisible = value; }
+        public bool Visible
+        {
+            get => mVisible;
+            set
+            {
+                if (value == mVisible)
+                    return;
+                mVisible = value;
+                if (value == false)
+                    OnVieportClosed();
+            }
+        }
         public uint DockId { get; set; }
         public Vector2 ViewportPos { get; protected set; }
         public Vector2 WindowPos { get; protected set; }
@@ -47,6 +69,7 @@ namespace EngineNS.Graphics.Pipeline
         public bool IsMouseIn = false;
 
         protected Graphics.Pipeline.UPresentWindow mPresentWindow;
+        public Graphics.Pipeline.UPresentWindow PresentWindow { get => mPresentWindow; }
         public enum EVieportType
         {
             Window,
@@ -60,6 +83,8 @@ namespace EngineNS.Graphics.Pipeline
         public bool IsHoverGuiItem { get; set; }
         public virtual unsafe void OnDraw()
         {
+            if (mVisible == false)
+                return;
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             var sz = new Vector2(-1);
             //ImGuiAPI.SetNextWindowSize(ref sz, ImGuiCond_.ImGuiCond_FirstUseEver);
@@ -68,7 +93,11 @@ namespace EngineNS.Graphics.Pipeline
             switch(VieportType)
             {
                 case EVieportType.Window:
-                    bShow = ImGuiAPI.Begin(Title, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+                    //bShow = ImGuiAPI.Begin(Title, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+                    {
+                        bool vis = true;
+                        bShow = ImGuiAPI.Begin(Title, ref vis, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+                    }
                     break;
                 case EVieportType.WindowWithClose:
                     bShow = ImGuiAPI.Begin(Title, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
@@ -131,8 +160,8 @@ namespace EngineNS.Graphics.Pipeline
                 if (showTexture != IntPtr.Zero)
                 {
                     var drawlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());
-                    var uv1 = new Vector2(0, 0);
-                    var uv2 = new Vector2(1, 1);
+                    var uv1 = Vector2.Zero;
+                    var uv2 = Vector2.One;
                     unsafe
                     {
                         min = min + pos;
@@ -178,9 +207,51 @@ namespace EngineNS.Graphics.Pipeline
                 OnVieportClosed();
             }
         }
+        public Vector2 WorldAxis { get; set; } = new Vector2(80, 50);
+        public bool ShowWorldAxis { get; set; } = true;
+        public void DrawWorldAxis(CCamera camera)
+        {
+            var cmdlst = ImGuiAPI.GetWindowDrawList();
+            //var camera = this.CameraController.Camera;
+
+            var winPos = ImGuiAPI.GetWindowPos();
+            var vpMin = ImGuiAPI.GetWindowContentRegionMin();
+            var vpMax = ImGuiAPI.GetWindowContentRegionMax();
+            var DrawOffset = new Vector2();
+            DrawOffset.SetValue(winPos.X + vpMin.X, winPos.Y + vpMin.Y);
+
+            var viewMtx = camera.mCoreObject.GetViewProjection();
+            var xVec = Vector3.TransformNormal(in Vector3.Right, in viewMtx);
+            var yVec = Vector3.TransformNormal(in Vector3.Up, in viewMtx);
+            var zVec = Vector3.TransformNormal(in Vector3.Forward, in viewMtx);
+            xVec.Normalize();
+            yVec.Normalize();
+            zVec.Normalize();
+
+            var v2X = xVec.GetXY();
+            var v2Y = yVec.GetXY();
+            var v2Z = zVec.GetXY();
+
+            v2X *= 60;
+            v2Y *= 60;
+            v2Z *= 60;
+
+            v2X.Y *= -1;
+            v2Y.Y *= -1;
+            v2Z.Y *= -1;
+
+            var v2Center = new Vector2(WorldAxis.X, this.ClientSize.Y - WorldAxis.Y) + DrawOffset;
+            cmdlst.AddLine(in v2Center, v2Center + v2X, (uint)Color.Red.ToAbgr(), 1);
+            cmdlst.AddLine(in v2Center, v2Center + v2Y, (uint)Color.Green.ToAbgr(), 1);
+            cmdlst.AddLine(in v2Center, v2Center + v2Z, (uint)Color.Blue.ToAbgr(), 1);
+
+            cmdlst.AddText(v2Center + v2X, (uint)Color.Red.ToAbgr(), "x", null);
+            cmdlst.AddText(v2Center + v2Y, (uint)Color.Green.ToAbgr(), "y", null);
+            cmdlst.AddText(v2Center + v2Z, (uint)Color.Blue.ToAbgr(), "z", null);
+        }
         protected virtual void OnVieportClosed()
         {
-
+            //mPresentWindow.UnregEventProcessor(this);
         }
         protected virtual void OnClientChanged(bool bSizeChanged)
         {
@@ -238,9 +309,10 @@ namespace EngineNS.Graphics.Pipeline
         }
         public delegate System.Threading.Tasks.Task FOnInitialize(UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax);
         public FOnInitialize OnInitialize = null;
-        public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, Rtti.UTypeDesc policyType, float zMin, float zMax)
+        [Rtti.Meta]
+        public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, float zMin, float zMax)
         {
-            var policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.URenderPolicy;
+            var policy = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy();
             if (OnInitialize != null)
             {
                 await OnInitialize(this, application, policy, zMin, zMax);
@@ -248,5 +320,77 @@ namespace EngineNS.Graphics.Pipeline
             await this.World.InitWorld();
             SetCameraOffset(in DVector3.Zero);
         }
+    }
+    public class UViewportSlateManager
+    {
+        public List<WeakReference<UViewportSlate>> Viewports { get; } = new List<WeakReference<UViewportSlate>>();
+        public UViewportSlate GetPressedViewport()
+        {
+            foreach (var i in Viewports)
+            {
+                UViewportSlate t;
+                if (i.TryGetTarget(out t) == false)
+                {
+                    continue;
+                }
+                else
+                {
+                    if (t.IsDrawing && t.IsMouseIn)
+                    {
+                        return t;
+                    }
+                }
+            }
+            return null;
+        }
+        public void AddViewport(UViewportSlate slate)
+        {
+            var rmv = new List<WeakReference<UViewportSlate>>();
+            foreach (var i in Viewports)
+            {
+                UViewportSlate t;
+                if (i.TryGetTarget(out t) == false)
+                {
+                    rmv.Add(i);
+                    continue;
+                }
+                else if (t == slate)
+                    return;
+            }
+            Viewports.Add(new WeakReference<UViewportSlate>(slate));
+            foreach (var i in rmv)
+            {
+                Viewports.Remove(i);
+            }
+        }
+        public void RemoveViewport(UViewportSlate slate)
+        {
+            var rmv = new List<WeakReference<UViewportSlate>>();
+            foreach (var i in Viewports)
+            {
+                UViewportSlate t;
+                if (i.TryGetTarget(out t) == false)
+                {
+                    rmv.Add(i);
+                    continue;
+                }
+                else if (t == slate)
+                {
+                    rmv.Add(i);
+                }
+            }
+            foreach (var i in rmv)
+            {
+                Viewports.Remove(i);
+            }
+        }
+    }
+}
+
+namespace EngineNS
+{
+    partial class UEngine
+    {
+        public Graphics.Pipeline.UViewportSlateManager ViewportSlateManager { get; } = new Graphics.Pipeline.UViewportSlateManager();
     }
 }

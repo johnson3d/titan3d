@@ -92,5 +92,18 @@ namespace EngineNS.Bricks.Particle
                 i.Update(particleSystem, elpased);                
             }
         }
+
+        public UNebulaParticle CloneNebula()
+        {
+            var result = new UNebulaParticle();
+            result.AssetName = AssetName;
+            foreach (var i in Emitter)
+            {
+                result.Emitter.Add(i.Key, i.Value.CloneEmitter());
+            }
+            UEngine.Instance.NebulaTemplateManager.UpdateShaders(result);
+            return result;
+            //return this;
+        }
     }
 }

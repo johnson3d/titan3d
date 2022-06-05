@@ -8,8 +8,6 @@ namespace EngineNS.EGui.Slate
     public class UWorldViewportSlate : Graphics.Pipeline.UViewportSlate
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
-        public Graphics.Pipeline.Shader.CommanShading.UCopy2DPolicy Draw2ViewportPolicy { get; } = new Graphics.Pipeline.Shader.CommanShading.UCopy2DPolicy();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
         public RHI.CViewPort Viewport { get; } = new RHI.CViewPort();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
         public RHI.CScissorRect ScissorRect { get; } = new RHI.CScissorRect();
@@ -30,6 +28,7 @@ namespace EngineNS.EGui.Slate
         }
         public void Cleanup()
         {
+            PresentWindow?.UnregEventProcessor(this);
             World?.Cleanup();
             World = null;
             RenderPolicy?.Cleanup();
@@ -46,17 +45,13 @@ namespace EngineNS.EGui.Slate
 
             CameraController.ControlCamera(RenderPolicy.DefaultCamera);
         }
-        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, Rtti.UTypeDesc policyType, float zMin, float zMax)
+        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, float zMin, float zMax)
         {
             URenderPolicy policy = null;
             var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName);
             if (rpAsset != null)
             {
                 policy = rpAsset.CreateRenderPolicy();
-            }
-            if (policy == null)
-            {
-                policy = Rtti.UTypeDescManager.CreateInstance(policyType) as Graphics.Pipeline.URenderPolicy;
             }
             await InitializeImpl(application, policy, zMin, zMax);
         }
@@ -183,6 +178,10 @@ namespace EngineNS.EGui.Slate
         }
         #endregion
         GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
+        public GamePlay.UWorld.UVisParameter VisParameter
+        {
+            get => mVisParameter;
+        }
         protected virtual void TickOnFocus()
         {
             float step = (UEngine.Instance.ElapseTickCount * 0.001f) * CameraMoveSpeed;
@@ -270,6 +269,9 @@ namespace EngineNS.EGui.Slate
         {
             if (mAxis != null)
                 mAxisOperated = mAxis.OnDrawUI(this, startDrawPos);
+
+            if (ShowWorldAxis)
+                DrawWorldAxis(this.CameraController.Camera);
         }
     }
 }

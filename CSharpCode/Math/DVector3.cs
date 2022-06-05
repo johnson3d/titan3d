@@ -68,6 +68,8 @@ namespace EngineNS
         public readonly static DVector3 Forward = new DVector3(0f, 0f, -1f);
         public readonly static DVector3 Backward = new DVector3(0f, 0f, 1f);
 
+        public readonly static DVector3 MaxValue = new DVector3(double.MaxValue, double.MaxValue, double.MaxValue);
+        public readonly static DVector3 MinValue = new DVector3(double.MinValue, double.MinValue, double.MinValue);
         public double X;
         public double Y;
         public double Z;
@@ -104,6 +106,20 @@ namespace EngineNS
             //    X.ToString(System.Globalization.CultureInfo.CurrentCulture), 
             //    Y.ToString(System.Globalization.CultureInfo.CurrentCulture), 
             //    Z.ToString(System.Globalization.CultureInfo.CurrentCulture));
+        }
+        public static DVector3 FromString(string text)
+        {
+            try
+            {
+                var segs = text.Split(',');
+                return new DVector3(System.Convert.ToDouble(segs[0]),
+                    System.Convert.ToDouble(segs[1]),
+                    System.Convert.ToDouble(segs[2]));
+            }
+            catch
+            {
+                return DVector3.Zero;
+            }
         }
         public override int GetHashCode()
         {

@@ -764,7 +764,8 @@ namespace EngineNS.IO
 
                 var prop = xml.CreateElement($"{i.PropertyName}", xml.NamespaceURI);
                 var attr = xml.CreateAttribute($"Type");
-                attr.Value = i.FieldTypeStr;
+                //attr.Value = i.FieldTypeStr;
+                attr.Value = Rtti.UTypeDesc.TypeOf(fv.GetType()).TypeString;
                 prop.Attributes.Append(attr);
 
                 if (i.PropInfo.PropertyType.IsValueType || i.PropInfo.PropertyType == typeof(string))
@@ -851,7 +852,7 @@ namespace EngineNS.IO
             if (obj == null && thisType == null)
                 return;
             if (obj == null)
-                obj = Rtti.UTypeDescManager.CreateInstance(thisType);
+                obj = Rtti.UTypeDescManager.CreateInstance(thisType);            
             (obj as ISerializer)?.OnPreRead(paramObject, hostObject, true);
             foreach (System.Xml.XmlElement i in node.ChildNodes)
             {
@@ -864,6 +865,22 @@ namespace EngineNS.IO
                     continue;
 
                 object readOnlyObject = null;
+                if (prop.PropertyType == typeof(object))
+                {
+                    if (typeAttr == Rtti.UTypeDescGetter<Rtti.UTypeDesc>.TypeDesc.TypeString)
+                    {
+                        var valueAttr = i.GetAttribute("Value");
+                        if (string.IsNullOrEmpty(valueAttr))
+                        {
+                            continue;
+                        }
+                        var v = Rtti.UTypeDesc.TypeOf(valueAttr);
+                        if (prop.CanWrite)
+                            prop.SetValue(obj, v);
+                        continue;
+                    }
+                }
+
                 if (prop.PropertyType == typeof(RName))
                 {
                     var valueAttr = i.GetAttribute("Value");
@@ -1055,6 +1072,9 @@ namespace EngineNS.IO
                 }
                 else
                 {
+                    var tempType = Rtti.UTypeDescManager.Instance.GetTypeFromString(typeAttr);
+                    if (tempType != null)
+                        type = tempType;
                     var subObject = readOnlyObject;
                     if (subObject == null)
                         subObject = Rtti.UTypeDescManager.CreateInstance(type);

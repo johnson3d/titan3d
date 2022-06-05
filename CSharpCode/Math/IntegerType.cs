@@ -16,6 +16,11 @@ namespace EngineNS
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct Int32_2 : IEquatable<Int32_2>
     {
+        public readonly static Int32_2 Zero = new Int32_2(0, 0);
+        public readonly static Int32_2 One = new Int32_2(1, 1);
+        public readonly static Int32_2 MaxValue = new Int32_2(int.MaxValue, int.MaxValue);
+        public readonly static Int32_2 MinValue = new Int32_2(int.MinValue, int.MinValue);
+
         public int X;
         public int Y;
         public Int32_2(int InX, int InY)
@@ -50,6 +55,70 @@ namespace EngineNS
         public static bool operator !=(in Int32_2 left, in Int32_2 right)
         {
             return !left.Equals(right);
+        }
+        public static Int32_2 Maximize(in Int32_2 left, in Int32_2 right)
+        {
+            Int32_2 vector;
+            vector.X = (left.X > right.X) ? left.X : right.X;
+            vector.Y = (left.Y > right.Y) ? left.Y : right.Y;
+            return vector;
+        }
+        public static Int32_2 Minimize(in Int32_2 left, in Int32_2 right)
+        {
+            Int32_2 vector;
+            vector.X = (left.X < right.X) ? left.X : right.X;
+            vector.Y = (left.Y < right.Y) ? left.Y : right.Y;
+            return vector;
+        }
+
+        public static Int32_2 operator +(in Int32_2 left, in Int32_2 right)
+        {
+            Int32_2 result;
+            result.X = left.X + right.X;
+            result.Y = left.Y + right.Y;
+            return result;
+        }
+        public static Int32_2 operator -(in Int32_2 left, in Int32_2 right)
+        {
+            Int32_2 result;
+            result.X = left.X - right.X;
+            result.Y = left.Y - right.Y;
+            return result;
+        }
+        public static Int32_2 operator +(in Int32_2 value)
+        {
+            Int32_2 result;
+            result.X = +value.X;
+            result.Y = +value.Y;
+            return result;
+        }
+        public static Int32_2 operator *(in Int32_2 value, int scale)
+        {
+            Int32_2 result;
+            result.X = value.X * scale;
+            result.Y = value.Y * scale;
+            return result;
+        }
+        public static Int32_2 operator *(in Int32_2 left, in Int32_2 right)
+        {
+            Int32_2 result;
+            result.X = left.X * right.X;
+            result.Y = left.Y * right.Y;
+            return result;
+        }
+        public static Int32_2 operator /(in Int32_2 left, in Int32_2 right)
+        {
+            Int32_2 result;
+            result.X = left.X / right.X;
+            result.Y = left.Y / right.Y;
+            return result;
+        }
+        public static Int32_2 operator /(in Int32_2 value, int scale)
+        {
+            Int32_2 result;
+            result.X = value.X / scale;
+            result.Y = value.Y / scale;
+            return result;
         }
     }
     [StructLayout(LayoutKind.Sequential, Pack = 4)]

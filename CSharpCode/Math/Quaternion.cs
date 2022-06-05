@@ -4,14 +4,87 @@ using System.Globalization;
 
 namespace EngineNS
 {
-    /// <summary>
-    /// 旋转四元数结构体
-    /// </summary>
+    [Quaternion.QuaternionEditor]
     [System.Serializable]
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
     //[System.ComponentModel.TypeConverter( typeof(EngineNS.Design.QuaternionConverter) )]
     public struct Quaternion : System.IEquatable<Quaternion>
     {
+        public class QuaternionEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        {
+            public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
+            {
+                this.Expandable = true;
+                bool retValue = false;
+                newValue = info.Value;
+                //var saved = v;
+                var index = ImGuiAPI.TableGetColumnIndex();
+                var width = ImGuiAPI.GetColumnWidth(index);
+                ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
+                //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
+                var minValue = float.MinValue;
+                var maxValue = float.MaxValue;
+                var multiValue = info.Value as EGui.Controls.PropertyGrid.PropertyMultiValue;
+                if (multiValue != null && multiValue.HasDifferentValue())
+                {
+                    //var v = (Quaternion)info.Value;
+                    //var el = v.ToEuler();
+                    //Vector3 angle;
+                    //angle.X = CoreDefine.Radian_To_Angle(el.X).X;
+                    //angle.Y = CoreDefine.Radian_To_Angle(el.Y).X;
+                    //angle.Z = CoreDefine.Radian_To_Angle(el.Z).X;
+
+                    //ImGuiAPI.Text(multiValue.MultiValueString);
+
+                    //EditorInfo tmpInfo = info;
+                    //tmpInfo.Value = angle;
+                    if (multiValue.DrawVector<Vector4>(in info) && !info.Readonly)
+                    {
+                        //angle = (Vector3)tmpInfo.Value;
+                        //el.X = CoreDefine.Angle_To_Tadian(angle.X, 0, 0);
+                        //el.Y = CoreDefine.Angle_To_Tadian(angle.Y, 0, 0);
+                        //el.Z = CoreDefine.Angle_To_Tadian(angle.Z, 0, 0);
+
+                        //info.Value = el;
+
+                        newValue = multiValue;
+                        retValue = true;
+                    }
+                }
+                else
+                {
+                    var v = (Quaternion)info.Value;
+                    var el = v.ToEuler();
+                    Vector3 angle;
+                    angle.X = CoreDefine.Radian_To_Angle(el.X).X;
+                    angle.Y = CoreDefine.Radian_To_Angle(el.Y).X;
+                    angle.Z = CoreDefine.Radian_To_Angle(el.Z).X;
+                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&angle, 3, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    //ImGuiAPI.InputFloat3(TName.FromString2("##", info.Name).ToString(), (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
+                    //ImGuiAPI.PopStyleVar(1);
+                    if (changed && !info.Readonly)//(v != saved)
+                    {
+                        el.X = CoreDefine.Angle_To_Tadian(angle.X, 0, 0);
+                        el.Y = CoreDefine.Angle_To_Tadian(angle.Y, 0, 0);
+                        el.Z = CoreDefine.Angle_To_Tadian(angle.Z, 0, 0);
+                        newValue = Quaternion.FromEuler(in el);
+                        retValue = true;
+                    }
+
+                    if (Vector4.Vector4EditorAttribute.OnDrawVectorValue<Vector3>(in info, ref angle, ref angle) && !info.Readonly)
+                    {
+                        el.X = CoreDefine.Angle_To_Tadian(angle.X, 0, 0);
+                        el.Y = CoreDefine.Angle_To_Tadian(angle.Y, 0, 0);
+                        el.Z = CoreDefine.Angle_To_Tadian(angle.Z, 0, 0);
+                        newValue = Quaternion.FromEuler(in el);
+                        retValue = true;
+                    }
+
+                }
+                return retValue;
+            }
+        }
+
         #region Member
         /// <summary>
         /// X值
@@ -46,6 +119,21 @@ namespace EngineNS
             //return String.Format(CultureInfo.CurrentCulture, "X:{0} Y:{1} Z:{2} W:{3}", X.ToString(CultureInfo.CurrentCulture),
             //    Y.ToString(CultureInfo.CurrentCulture), Z.ToString(CultureInfo.CurrentCulture),
             //    W.ToString(CultureInfo.CurrentCulture));
+        }
+        public static Quaternion FromString(string text)
+        {
+            try
+            {
+                var segs = text.Split(',');
+                return new Quaternion(System.Convert.ToSingle(segs[0]),
+                    System.Convert.ToSingle(segs[1]),
+                    System.Convert.ToSingle(segs[2]),
+                    System.Convert.ToSingle(segs[3]));
+            }
+            catch
+            {
+                return Quaternion.Identity;
+            }
         }
         /// <summary>
         /// 获取对象的哈希值

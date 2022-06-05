@@ -75,6 +75,10 @@ namespace EngineNS
             //    Y.ToString(System.Globalization.CultureInfo.CurrentCulture), 
             //    Z.ToString(System.Globalization.CultureInfo.CurrentCulture));
         }
+        public Vector2 GetXY()
+        {
+            return new Vector2(X, Y);
+        }
         public static Vector3 FromString(string text)
         {
             try
@@ -86,7 +90,7 @@ namespace EngineNS
             }
             catch
             {
-                return new Vector3();
+                return Vector3.Zero;
             }
         }
         public DVector3 AsDVector()
@@ -216,8 +220,8 @@ namespace EngineNS
         public readonly static Vector3 Down = new Vector3(0f, -1f, 0f);
         public readonly static Vector3 Right = new Vector3(1f, 0f, 0f);
         public readonly static Vector3 Left = new Vector3(-1f, 0f, 0f);
-        public readonly static Vector3 Forward = new Vector3(0f, 0f, -1f);
-        public readonly static Vector3 Backward = new Vector3(0f, 0f, 1f);
+        public readonly static Vector3 Forward = new Vector3(0f, 0f, 1f);
+        public readonly static Vector3 Backward = new Vector3(0f, 0f, -1f);
 
         public readonly static Vector3 MaxValue = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
         public readonly static Vector3 MinValue = new Vector3(float.MinValue, float.MinValue, float.MinValue);

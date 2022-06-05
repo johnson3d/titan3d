@@ -7,16 +7,18 @@ using System.Runtime.InteropServices;
 
 namespace EngineNS.Profiler
 {
+    [Flags]
     public enum ELogTag
     {
         [Description("消息")]
-        Info,
+        Info = 1,
         [Description("警告")]
-        Warning,
+        Warning = 1 << 1,
         [Description("错误")]
-        Error,
+        Error = 1 << 2,
         [Description("严重")]
-        Fatal,
+        Fatal = 1 << 3,
+        All = Info | Warning | Error | Fatal,
     }
     public unsafe partial class Log
     {

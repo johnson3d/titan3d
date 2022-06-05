@@ -38,10 +38,11 @@ namespace EngineNS.Editor.Forms
                 return;
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
 
-            Vector2 size = new Vector2(0,0);
+            var size = new Vector2(800, 600);
+            ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
             if (ImGuiAPI.Begin("CpuProfiler", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                DockId =  ImGuiAPI.GetWindowDockID();
+                DockId = ImGuiAPI.GetWindowDockID();
                 if (ImGuiAPI.BeginTabBar("CPU", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
                 {
                     foreach (var i in ProfilerThreadNames)
@@ -55,7 +56,7 @@ namespace EngineNS.Editor.Forms
                                 mRpcProfilerData = Profiler.URpcProfiler.GetProfilerData(i);
                             }
 
-                            if (ImGuiAPI.BeginTable("TimeScope", 5, ImGuiTableFlags_.ImGuiTableFlags_Resizable, in size, 0.0f))
+                            if (ImGuiAPI.BeginTable("TimeScope", 5, ImGuiTableFlags_.ImGuiTableFlags_Resizable, in Vector2.Zero, 0.0f))
                             {
                                 ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
                                 ImGuiAPI.TableSetColumnIndex(0);

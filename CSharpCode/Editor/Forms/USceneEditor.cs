@@ -8,6 +8,12 @@ namespace EngineNS.Editor.Forms
     {
         public class USceneEditorViewport : EGui.Slate.UWorldViewportSlate
         {
+            public EGui.Controls.PropertyGrid.PropertyGrid NodeInspector = new EGui.Controls.PropertyGrid.PropertyGrid();
+            public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, float zMin, float zMax)
+            {
+                await base.Initialize(application, policyName, zMin, zMax);
+                await NodeInspector.Initialize();
+            }
             public override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
             {
                 base.OnHitproxySelected(proxy);
@@ -22,12 +28,14 @@ namespace EngineNS.Editor.Forms
                 {
                     this.ShowBoundVolumes(true, node);
                 }
+
+                NodeInspector.Target = proxy;
             }
         }
         public class USceneEditorOutliner : UWorldOutliner
         {
-            public USceneEditorOutliner(bool regRoot)
-                : base(regRoot)
+            public USceneEditorOutliner(EGui.Slate.UWorldViewportSlate viewport, bool regRoot)
+                : base(viewport, regRoot)
             {
 
             }            
@@ -44,8 +52,123 @@ namespace EngineNS.Editor.Forms
 
         public GamePlay.Scene.UScene Scene;
         public USceneEditorViewport PreviewViewport = new USceneEditorViewport();
-        public USceneEditorOutliner mWorldOutliner = new USceneEditorOutliner(false);
+        public USceneEditorOutliner mWorldOutliner;
+        
         public EGui.Controls.PropertyGrid.PropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
+        public void InitMainMenu()
+        {
+            mMenuItems = new List<EGui.UIProxy.MenuItemProxy>()
+            {
+                new EGui.UIProxy.MenuItemProxy()
+                {
+                    MenuName = "View",
+                    IsTopMenuItem = true,
+                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+                    {
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "DisableShadow",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                PreviewViewport.RenderPolicy.DisableShadow = !PreviewViewport.RenderPolicy.DisableShadow;
+                                item.Selected = PreviewViewport.RenderPolicy.DisableShadow;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "DisableAO",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                PreviewViewport.RenderPolicy.DisableAO = !PreviewViewport.RenderPolicy.DisableAO;
+                                item.Selected = PreviewViewport.RenderPolicy.DisableAO;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "DisableHDR",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                PreviewViewport.RenderPolicy.DisableHDR = !this.PreviewViewport.RenderPolicy.DisableHDR;
+                                item.Selected = PreviewViewport.RenderPolicy.DisableHDR;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "DisablePointLight",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                //var prop = this.WorldViewportSlate.RenderPolicy.GetType().GetProperty("DisablePointLight");
+                                //if(prop !=null && prop.PropertyType==typeof(bool))
+                                //{
+                                //    bool value = (bool)prop.GetValue(this.WorldViewportSlate.RenderPolicy);
+                                //    value = !value;
+                                //    prop.SetValue(this.WorldViewportSlate.RenderPolicy, value);
+                                //    item.CheckBox = value;
+                                //}
+                                PreviewViewport.RenderPolicy.DisablePointLight = !PreviewViewport.RenderPolicy.DisablePointLight;
+                                item.Selected = PreviewViewport.RenderPolicy.DisablePointLight;
+                            },
+                        },
+                    },
+                },
+                new EGui.UIProxy.MenuItemProxy()
+                {
+                    MenuName = "Illumination",
+                    IsTopMenuItem = true,
+                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+                    {
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "VoxelDebugger",
+                            Selected = true,
+                            //Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            //{
+                            //    var vxNode = this.WorldViewportSlate.RenderPolicy.FindFirstNode<Bricks.VXGI.UVoxelsNode>();
+                            //    if(vxNode!=null)
+                            //    {
+                            //        vxNode.DebugVoxels = !vxNode.DebugVoxels;
+                            //        item.Selected = vxNode.DebugVoxels;
+                            //    }
+                            //},
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "ResetVoxels",
+
+                            //Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            //{
+                            //    var vxNode = this.WorldViewportSlate.RenderPolicy.FindFirstNode<Bricks.VXGI.UVoxelsNode>();
+                            //    if(vxNode!=null)
+                            //    {
+                            //        vxNode.SetEraseBox(in vxNode.VxSceneBox);
+                            //    }
+                            //},
+                        },
+                    },
+                },
+            };
+        }
+        private void DrawMainMenu()
+        {
+            if (ImGuiAPI.BeginMenuBar())
+            {
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                for (int i = 0; i < mMenuItems.Count; i++)
+                {
+                    mMenuItems[i].OnDraw(in drawList, in Support.UAnyPointer.Default);
+                }
+                ImGuiAPI.EndMenuBar();
+            }
+        }
+        public USceneEditor()
+        {
+            mWorldOutliner = new USceneEditorOutliner(PreviewViewport, false);
+        }
         ~USceneEditor()
         {
             Cleanup();
@@ -60,6 +183,8 @@ namespace EngineNS.Editor.Forms
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
             await ScenePropGrid.Initialize();
+
+            InitMainMenu();
             return true;
         }
         public Graphics.Pipeline.IRootForm GetRootForm()
@@ -70,7 +195,7 @@ namespace EngineNS.Editor.Forms
         {
             viewport.RenderPolicy = policy;
 
-            await viewport.RenderPolicy.Initialize(null);
+            //await viewport.RenderPolicy.Initialize(null);
 
             await viewport.World.InitWorld();
 
@@ -81,11 +206,12 @@ namespace EngineNS.Editor.Forms
         }
         public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
+            AssetName = name;
+            //PreviewViewport.PreviewAsset = name;
             PreviewViewport.Title = $"Scene:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, 0, 1);
 
-            AssetName = name;
             Scene = await UEngine.Instance.SceneManager.GetScene(PreviewViewport.World, name);
             if (Scene == null)
                 return false;
@@ -95,7 +221,6 @@ namespace EngineNS.Editor.Forms
 
             ScenePropGrid.Target = Scene;
 
-            mWorldOutliner.mWorld = PreviewViewport.World;
             mWorldOutliner.Title = $"Outliner:{name}";
 
             UEngine.Instance.TickableManager.AddTickable(this);
@@ -103,6 +228,8 @@ namespace EngineNS.Editor.Forms
         }
         public void OnCloseEditor()
         {
+            //UEngine.Instance.EventProcessorManager.UnregProcessor(PreviewViewport);
+            PreviewViewport.NodeInspector.Target = null;
             UEngine.Instance.TickableManager.RemoveTickable(this);
             Cleanup();
         }
@@ -117,9 +244,12 @@ namespace EngineNS.Editor.Forms
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
-                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+            if (ImGuiAPI.Begin(AssetName.Name, ref mVisible, 
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
+                ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
             {
+                DrawMainMenu();
+
                 if (ImGuiAPI.IsWindowDocked())
                 {
                     DockId = ImGuiAPI.GetWindowDockID();
@@ -157,23 +287,31 @@ namespace EngineNS.Editor.Forms
         }
         protected void DrawToolBar()
         {
-            var btSize = new Vector2(64, 64);
+            var btSize = Vector2.Zero;
             if (ImGuiAPI.Button("Save", in btSize))
             {
-                Action action = async () =>
-                {
-                    Scene.ClearChildren();
-                    await EngineNS.Editor.UMetaViewEditor.TestCreateScene(PreviewViewport.World, Scene);
-                    Scene.SaveAssetTo(AssetName);
-                };
-                action();
-                
+                Scene.SaveAssetTo(AssetName);
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Button("Snapshot", in btSize))
+            {
                 USnapshot.Save(AssetName, Scene.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Reload", in btSize))
             {
+                if (Scene != null)
+                    Scene.Parent = null;
 
+                System.Action action = async () =>
+                {
+                    var saved = Scene;
+                    Scene = await GamePlay.Scene.UScene.LoadScene(PreviewViewport.World, AssetName);
+                    Scene.Parent = PreviewViewport.World.Root;
+
+                    saved.Cleanup();
+                };
+                action();
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Undo", in btSize))
@@ -185,17 +323,94 @@ namespace EngineNS.Editor.Forms
             {
 
             }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Button("Test", in btSize))
+            {
+                Scene.ClearChildren();
+                var task = EngineNS.Editor.UMainEditorApplication.TestCreateScene(PreviewViewport, PreviewViewport.World, Scene);
+            }
+            ImGuiAPI.SameLine(0, 15);
+            ImGuiAPI.BeginGroup();
+            for (int i = 0; i < (int)GamePlay.UWorld.UVisParameter.EVisCullFilter.FilterTypeCount; i++)
+            {
+                var type = (GamePlay.UWorld.UVisParameter.EVisCullFilter)(1 << i);
+                ImGuiAPI.SameLine(0, -1);
+                bool checkValue = (PreviewViewport.VisParameter.CullFilters & type) != 0;
+                var name = type.ToString();
+                if (name == "FilterTypeCount")
+                {
+                    name = GamePlay.UWorld.UVisParameter.FilterTypeCountAs;
+                }
+                if (ImGuiAPI.Checkbox(name, ref checkValue))
+                {
+                    if (checkValue)
+                    {
+                        PreviewViewport.VisParameter.CullFilters |= type;
+                    }
+                    else
+                    {
+                        PreviewViewport.VisParameter.CullFilters &= (~type);
+                    }
+                }
+            }
+            ImGuiAPI.EndGroup();
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
         {
             var sz = new Vector2(-1);
             if (ImGuiAPI.BeginChild("LeftView", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                if (ImGuiAPI.BeginTabBar("SceneTab", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
                 {
-                    ScenePropGrid.OnDraw(true, false, false);
-                }
-                mWorldOutliner.DrawAsChildWindow(ref sz);
+                    if (ImGuiAPI.BeginTabItem("Scene", null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
+                    {
+                        if (ImGuiAPI.CollapsingHeader("Camera", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                        {
+                            float v = PreviewViewport.CameraMoveSpeed;
+                            ImGuiAPI.SliderFloat("KeyMove", ref v, 1.0f, 150.0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                            PreviewViewport.CameraMoveSpeed = v;
+
+                            v = PreviewViewport.CameraMouseWheelSpeed;
+                            ImGuiAPI.InputFloat("WheelMove", ref v, 0.1f, 1.0f, "%.3f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                            PreviewViewport.CameraMouseWheelSpeed = v;
+
+                            var zN = PreviewViewport.CameraController.Camera.mCoreObject.mZNear;
+                            var zF = PreviewViewport.CameraController.Camera.mCoreObject.mZFar;
+                            ImGuiAPI.SliderFloat("ZNear", ref zN, 0.1f, 100.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                            ImGuiAPI.SliderFloat("ZFar", ref zF, 10.0f, 10000.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                            if (zN != PreviewViewport.CameraController.Camera.mCoreObject.mZNear ||
+                                zF != PreviewViewport.CameraController.Camera.mCoreObject.mZFar)
+                            {
+                                PreviewViewport.CameraController.Camera.SetZRange(zN, zF);
+                            }
+
+                            var camPos = PreviewViewport.CameraController.Camera.mCoreObject.GetPosition();
+                            var saved = camPos;
+                            ImGuiAPI.InputDouble($"X", ref camPos.X, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                            ImGuiAPI.InputDouble($"Y", ref camPos.Y, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                            ImGuiAPI.InputDouble($"Z", ref camPos.Z, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                            if (saved != camPos)
+                            {
+                                var lookAt = PreviewViewport.CameraController.Camera.mCoreObject.GetLookAt();
+                                var up = PreviewViewport.CameraController.Camera.mCoreObject.GetUp();
+                                PreviewViewport.CameraController.Camera.mCoreObject.LookAtLH(in camPos, lookAt - saved + camPos, up);
+                            }
+                        }
+                        if (ImGuiAPI.CollapsingHeader("Scene", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                        {
+                            ScenePropGrid.OnDraw(true, false, false);
+                        }
+                        mWorldOutliner.DrawAsChildWindow(ref sz);
+
+                        ImGuiAPI.EndTabItem();
+                    }
+                    if (ImGuiAPI.BeginTabItem("Node", null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
+                    {
+                        PreviewViewport.NodeInspector.OnDraw(true, false, false);
+                        ImGuiAPI.EndTabItem();
+                    }
+                    ImGuiAPI.EndTabBar();
+                }   
             }
             ImGuiAPI.EndChild();
         }

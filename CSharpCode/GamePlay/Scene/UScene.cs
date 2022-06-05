@@ -60,6 +60,7 @@ namespace EngineNS.GamePlay.Scene
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
                 return false;
 
+            World = world;
             //ParentScene = GetNearestParentScene();
 
             var task = mMemberTickables.InitializeMembers(this);
@@ -71,6 +72,11 @@ namespace EngineNS.GamePlay.Scene
         }
         ~UScene()
         {
+            Cleanup();
+        }
+        public void Cleanup()
+        {
+            ClearChildren();
             UEngine.Instance?.SceneManager.UnloadScene(this.AssetName);
         }
         public USceneData SceneData
@@ -153,6 +159,13 @@ namespace EngineNS.GamePlay.Scene
         public const uint SceneDescAttributeFlags = 1;
         public void SaveAssetTo(RName name)
         {
+            var ameta = this.GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta();
+            }
+
             var typeStr = Rtti.UTypeDesc.TypeStr(GetType());
             var xndHolder = new EngineNS.IO.CXndHolder(typeStr, 1, 0);
             var xnd = xndHolder;
@@ -189,7 +202,6 @@ namespace EngineNS.GamePlay.Scene
                 UScene scene = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(xnd.RootNode.Name)) as UScene;
                 if (scene == null)
                     return null;
-                scene.World = world;
 
                 var ar = descAttr.GetReader(null);
                 ar.Tag = scene;
@@ -197,6 +209,11 @@ namespace EngineNS.GamePlay.Scene
                 try
                 {
                     ar.ReadTo(desc, scene);
+                    if (await scene.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
+                    {
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
+                        return null;
+                    }
                 }
                 catch(Exception ex)
                 {
@@ -232,6 +249,17 @@ namespace EngineNS.GamePlay.Scene
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
             ameta.RefAssetRNames.Clear();
+
+            UpdateNodeAssetReferences(this, ameta);
+        }
+        protected void UpdateNodeAssetReferences(UNode node, IO.IAssetMeta ameta)
+        {
+            node.AddAssetReferences(ameta);
+            foreach (var i in node.Children)
+            {
+                i.AddAssetReferences(ameta);
+                UpdateNodeAssetReferences(i, ameta);
+            }
         }
         #endregion
 
@@ -239,6 +267,10 @@ namespace EngineNS.GamePlay.Scene
         public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
             mMemberTickables.TickLogic(this, UEngine.Instance.ElapseTickCount);
+            return true;
+        }
+        public override unsafe bool IsTreeContain(DVector3* localStart, DVector3* dir, DBoundingBox* pBox)
+        {
             return true;
         }
     }
@@ -252,6 +284,7 @@ namespace EngineNS.GamePlay.Scene
         public Dictionary<RName, WeakReference<UScene>> Scenes { get; } = new Dictionary<RName, WeakReference<UScene>>();
         public async System.Threading.Tasks.Task<UScene> GetScene(GamePlay.UWorld world, RName name)
         {
+            //return await UScene.LoadScene(world, name);
             UScene scene;
             WeakReference<UScene> result;
             if (Scenes.TryGetValue(name, out result))
@@ -290,7 +323,8 @@ namespace EngineNS.GamePlay.Scene
         {
             if (name == null)
                 return;
-            Scenes.Remove(name);
+            if (Scenes.ContainsKey(name))
+                Scenes.Remove(name);
         }
     }
 }

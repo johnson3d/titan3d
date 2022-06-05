@@ -7,11 +7,9 @@ namespace EngineNS.Bricks.Particle
     public class UNebulaShader
     {
         public static readonly UInt32_3 Dispatch_SetupDimArray1 = new UInt32_3(32, 1, 1);
-        public RHI.CShaderDesc CSDesc_Particle_Update;
-        public RHI.CComputeShader CS_Particle_Update;
+        public Graphics.Pipeline.Shader.UShader Particle_Update;
 
-        public RHI.CShaderDesc CSDesc_Particle_SetupParameters;
-        public RHI.CComputeShader CS_Particle_SetupParameters;
+        public Graphics.Pipeline.Shader.UShader Particle_SetupParameters;
 
         public IParticleEmitter Emitter;
         public RName NebulaName;
@@ -80,13 +78,11 @@ namespace EngineNS.Bricks.Particle
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var incProvider = new UNebulaInclude();
             incProvider.Host = this;
-            CSDesc_Particle_Update = rc.CreateShaderDesc(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine),
+            Particle_Update = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine),
                 "CS_Particle_Update", EShaderType.EST_ComputeShader, defines, incProvider);
-            CS_Particle_Update = rc.CreateComputeShader(CSDesc_Particle_Update);
 
-            CSDesc_Particle_SetupParameters = rc.CreateShaderDesc(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine),
+            Particle_SetupParameters = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine),
                 "CS_Particle_SetupParameters", EShaderType.EST_ComputeShader, defines, incProvider);
-            CS_Particle_SetupParameters = rc.CreateComputeShader(CSDesc_Particle_SetupParameters);
         }
     }
     public class UNebulaShaderManager
@@ -101,7 +97,7 @@ namespace EngineNS.Bricks.Particle
 
         public RHI.CShaderResourceView RandomPoolSrv;
         public UNebulaShaderManager NebulaShaderManager { get; } = new UNebulaShaderManager();
-        public Dictionary<Hash160, UNebulaParticle> Particles { get; } = new Dictionary<Hash160, UNebulaParticle>();
+        public Dictionary<RName, UNebulaParticle> Particles { get; } = new Dictionary<RName, UNebulaParticle>();
         public float RandomSignedUnit()//[-1,1]
         {
             return ((float)mRandom.NextDouble() - 0.5f) * 2.0f;
@@ -140,10 +136,45 @@ namespace EngineNS.Bricks.Particle
             }
             return true;
         }
-        public async System.Threading.Tasks.Task<bool> GetParticle(RName name)
+        public async System.Threading.Tasks.Task<UNebulaParticle> GetParticle(RName name)
         {
-            await Thread.AsyncDummyClass.DummyFunc();
-            return true;
+            if (name == null)
+                return null;
+            UNebulaParticle result;
+            if (Particles.TryGetValue(name, out result))
+                return result.CloneNebula();
+
+            {//temp code
+                result = new UNebulaParticle();
+                result.AssetName = name;
+                var Emitter = result.AddEmitter(typeof(Simple.USimpleEmitter), "emitter0") as Simple.USimpleEmitter;
+                Emitter.IsGpuDriven = true;
+
+                var umesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("utest/mesh/unit_sphere.ums"));
+                var mesh = new Graphics.Mesh.UMesh();
+                mesh.Initialize(umesh, Rtti.UTypeDescGetter<Simple.USimpleMdfQueue>.TypeDesc);
+                Emitter.InitEmitter(UEngine.Instance.GfxDevice.RenderContext, mesh, 1024);
+
+                var sphereShape = new Bricks.Particle.UShapeSphere();
+                sphereShape.Radius = 10.0f;
+                sphereShape.Thinness = 0.1f;
+                var boxShape = new Bricks.Particle.UShapeBox();
+                boxShape.Thinness = 0.2f;
+                Emitter.EmitterShapes.Add(sphereShape);
+                Emitter.EmitterShapes.Add(boxShape);
+                var ef1 = new UAcceleratedEffector();
+                ef1.Acceleration = new Vector3(0, -0.1f, 0);
+                Emitter.AddEffector("default", ef1);
+                Emitter.SetCurrentQueue("default");
+
+                var nblMdf = mesh.MdfQueue as Simple.USimpleMdfQueue;
+                nblMdf.Emitter = Emitter;
+
+                UEngine.Instance.NebulaTemplateManager.UpdateShaders(result);
+            }
+
+            Particles.Add(name, result);
+            return result.CloneNebula();
         }
         public void UpdateShaders(UNebulaParticle particle)
         {

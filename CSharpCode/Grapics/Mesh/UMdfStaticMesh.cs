@@ -114,7 +114,7 @@ namespace EngineNS.Graphics.Mesh
             codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref codeString);
 
             var code = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCodeProvider(mdfSourceName);
-            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{code.SourceCode.AsText.GetHashCode()}", ref codeString);
+            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash.APHash(code.SourceCode.AsText)}", ref codeString);
 
             SourceCode = new IO.CMemStreamWriter();
             SourceCode.SetText(codeString);

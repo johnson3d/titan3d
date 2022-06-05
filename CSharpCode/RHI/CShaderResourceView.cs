@@ -61,7 +61,7 @@ namespace EngineNS.RHI
             //纹理不会引用别的资产
             return false;
         }
-        public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.ContentBrowser ContentBrowser)
+        public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
         {
             var start = ImGuiAPI.GetItemRectMin();
             var end = start + sz;
@@ -71,13 +71,17 @@ namespace EngineNS.RHI
             Vector2 tpos;
             tpos.Y = start.Y + sz.Y - tsz.Y;
             tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
-            ImGuiAPI.PushClipRect(in start, in end, true);
+            //ImGuiAPI.PushClipRect(in start, in end, true);
 
             end.Y -= tsz.Y;
             OnDrawSnapshot(in cmdlist, ref start, ref end);
+            cmdlist.AddRect(in start, in end, (uint)EGui.UCoreStyles.Instance.SnapBorderColor.ToArgb(),
+                EGui.UCoreStyles.Instance.SnapRounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll, EGui.UCoreStyles.Instance.SnapThinkness);
 
             cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
-            ImGuiAPI.PopClipRect();
+            //ImGuiAPI.PopClipRect();
+
+            DrawPopMenu(ContentBrowser);
         }
         public override void OnShowIconTimout(int time)
         {
@@ -119,7 +123,7 @@ namespace EngineNS.RHI
         {
             System.Threading.Interlocked.Increment(ref NumOfInstance);
         }
-        ~CShaderResourceView()
+        ~CShaderResourceView()  
         {
             System.Threading.Interlocked.Decrement(ref NumOfInstance);
         }
@@ -186,11 +190,12 @@ namespace EngineNS.RHI
                 var noused = PGAsset.Initialize();
                 PGAsset.Target = mDesc;
             }
-            public override unsafe void OnDraw(EGui.Controls.ContentBrowser ContentBrowser)
+            public override unsafe void OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import SRV", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                 var visible = true;
+                ImGuiAPI.SetNextWindowSize(new Vector2(200, 500), ImGuiCond_.ImGuiCond_FirstUseEver);
                 if (ImGuiAPI.BeginPopupModal($"Import SRV", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var sz = new Vector2(-1, 0);
@@ -257,13 +262,7 @@ namespace EngineNS.RHI
                         }
                     }
 
-                    ImGuiAPI.Separator();
-
-                    PGAsset.OnDraw(false, false, false);
-
-                    ImGuiAPI.Separator();
-
-                    sz = new Vector2(0, 0);
+                    sz = Vector2.Zero;
                     if (bFileExisting == false)
                     {
                         if (ImGuiAPI.Button("Create Asset", in sz))
@@ -281,6 +280,11 @@ namespace EngineNS.RHI
                         ImGuiAPI.CloseCurrentPopup();
                         ContentBrowser.mAssetImporter = null;
                     }
+
+                    ImGuiAPI.Separator();
+
+                    PGAsset.OnDraw(false, false, false);
+                    
                     ImGuiAPI.EndPopup();
                 }
             }

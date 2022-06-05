@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Rtti;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -25,6 +26,7 @@ namespace EngineNS.Bricks.CodeBuilder
         class UVariableDeclarationCodeGen : ICodeObjectGen
         {
             public bool IsClassMember = false;
+            public bool IsProperty = false;
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
                 var varDec = obj as UVariableDeclaration;
@@ -35,13 +37,19 @@ namespace EngineNS.Bricks.CodeBuilder
                     codeStr += "private ";
                 }
                 codeStr += data.CodeGen.GetTypeString(varDec.VariableType) + " " + varDec.VariableName;
-                if(varDec.InitValue != null)
+                if(IsProperty)
+                {
+                    codeStr += " { get; set; }";
+                }
+                if (varDec.InitValue != null)
                 {
                     codeStr += " = ";
                     var initClsGen = data.CodeGen.GetCodeObjectGen(varDec.InitValue.GetType());
                     initClsGen.GenCodes(varDec.InitValue, ref codeStr, ref data);
+                    codeStr += ";";
                 }
-                codeStr += ";";
+                else if (!IsProperty)
+                    codeStr += ";";
                 data.CodeGen.AddLine(codeStr, ref sourceCode);
 
                 if(varDec.Next != null)
@@ -73,24 +81,33 @@ namespace EngineNS.Bricks.CodeBuilder
                         methodDecStr += "private ";
                         break;
                 }
-                methodDecStr += (methodDec.ReturnValue != null) ? data.CodeGen.GetTypeString(methodDec.ReturnValue.VariableType) : "void" + " " + data.Method.MethodName + "(";
+                string unsafePosCode = "@@@unsafe@@@";
+                methodDecStr += unsafePosCode;
+                if (methodDec.IsOverride)
+                    methodDecStr += "override ";
+                if (methodDec.IsAsync)
+                {
+                    methodDecStr += "async System.Threading.Tasks.Task";
+                    methodDecStr += ((methodDec.ReturnValue != null) ? ("<" + data.CodeGen.GetTypeString(methodDec.ReturnValue.VariableType) + ">") : "");
+                }
+                else
+                    methodDecStr += ((methodDec.ReturnValue != null) ? data.CodeGen.GetTypeString(methodDec.ReturnValue.VariableType) : "void");
+                methodDecStr += " " + data.Method.MethodName + "(";
                 for(int i= 0; i<methodDec.Arguments.Count; i++)
                 {
                     switch(methodDec.Arguments[i].OperationType)
                     {
-                        case EMethodArgumentAttribute.Default:
-                            methodDecStr += methodDec.Arguments[i].VariableName + ",";
-                            break;
                         case EMethodArgumentAttribute.In:
-                            methodDecStr += "in " + methodDec.Arguments[i].VariableName + ",";
+                            methodDecStr += "in ";
                             break;
                         case EMethodArgumentAttribute.Out:
-                            methodDecStr += "out " + methodDec.Arguments[i].VariableName + ",";
+                            methodDecStr += "out ";
                             break;
                         case EMethodArgumentAttribute.Ref:
-                            methodDecStr += "ref " + methodDec.Arguments[i].VariableName + ",";
+                            methodDecStr += "ref ";
                             break;
                     }
+                    methodDecStr += data.CodeGen.GetTypeString(methodDec.Arguments[i].VariableType) + " " + methodDec.Arguments[i].VariableName + ",";
                 }
                 if (methodDec.Arguments.Count > 0)
                     methodDecStr = methodDecStr.TrimEnd(',');
@@ -98,6 +115,8 @@ namespace EngineNS.Bricks.CodeBuilder
                 data.CodeGen.AddLine(methodDecStr, ref sourceCode);
                 data.CodeGen.PushSegment(ref sourceCode, in data);
                 {
+                    string awaitDummyPosCode = "@@@await@@@";
+                    data.CodeGen.AddLine(awaitDummyPosCode, ref sourceCode);
                     if(methodDec.ReturnValue != null)
                     {
                         var retValGen = data.CodeGen.GetCodeObjectGen(methodDec.ReturnValue.GetType());
@@ -134,6 +153,17 @@ namespace EngineNS.Bricks.CodeBuilder
                         var retCode = "return " + methodDec.ReturnValue.VariableName + ";";
                         data.CodeGen.AddLine(retCode, ref sourceCode);
                     }
+                    var unsafeIdx = sourceCode.LastIndexOf(unsafePosCode);
+                    sourceCode = sourceCode.Remove(unsafeIdx, unsafePosCode.Length);
+                    if (methodDec.HasUnsafeCode || methodDec.IsUnsafe)
+                        sourceCode = sourceCode.Insert(unsafeIdx, "unsafe ");
+
+                    var awaitDummyIdx = sourceCode.LastIndexOf(awaitDummyPosCode);
+                    sourceCode = sourceCode.Remove(awaitDummyIdx, awaitDummyPosCode.Length);
+                    if (!methodDec.HasAwaitCode && methodDec.IsAsync)
+                        sourceCode = sourceCode.Insert(awaitDummyIdx, "await EngineNS.Thread.AsyncDummyClass.DummyFunc();");
+                    else
+                        sourceCode = sourceCode.Remove(awaitDummyIdx, data.CodeGen.CurIndentStr.Length);
                 }
                 data.CodeGen.PopSegment(ref sourceCode, in data);
                 data.Method.ResetRuntimeData();
@@ -146,6 +176,11 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 var classDec = obj as UClassDeclaration;
                 var codeGen = data.CodeGen as UCSharpCodeGenerator;
+                if(data.Namespace != null)
+                {
+                    data.CodeGen.AddLine("namespace " + data.Namespace.Namespace, ref sourceCode);
+                    data.CodeGen.PushSegment(ref sourceCode);
+                }
                 GenCommentCodes(classDec.Comment, ref data, ref sourceCode);
                 data.CodeGen.AddLine("[EngineNS.Macross.UMacross]", ref sourceCode);
                 string tempCode = "";
@@ -161,9 +196,9 @@ namespace EngineNS.Bricks.CodeBuilder
                         break;
                 }
                 if (classDec.IsStruct)
-                    tempCode += "struct ";
+                    tempCode += "partial struct ";
                 else
-                    tempCode += "class ";
+                    tempCode += "partial class ";
 
                 tempCode += classDec.ClassName;
                 if(classDec.SupperClassNames.Count > 0)
@@ -180,11 +215,14 @@ namespace EngineNS.Bricks.CodeBuilder
                 {
                     for(int i=0; i<classDec.Properties.Count; i++)
                     {
+                        data.CodeGen.AddLine("[EngineNS.Rtti.Meta]", ref sourceCode);
                         var mem = classDec.Properties[i];
                         var memCodeGen = data.CodeGen.GetCodeObjectGen(mem.GetType()) as UVariableDeclarationCodeGen;
                         memCodeGen.IsClassMember = true;
+                        memCodeGen.IsProperty = true;
                         memCodeGen.GenCodes(mem, ref sourceCode, ref data);
                         memCodeGen.IsClassMember = false;
+                        memCodeGen.IsProperty = false;
                     }
 
                     for(int i=0; i<classDec.Methods.Count; i++)
@@ -194,6 +232,10 @@ namespace EngineNS.Bricks.CodeBuilder
                     }
                 }
                 data.CodeGen.PopSegment(ref sourceCode, in data);
+                if(data.Namespace != null)
+                {
+                    data.CodeGen.PopSegment(ref sourceCode);
+                }
             }
         }
 
@@ -251,33 +293,92 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         class UMethodInvokeStatementCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenInvokeExpression(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
                 var methodInvokeExp = obj as UMethodInvokeStatement;
-                string invokeStr = "";
-                if(methodInvokeExp.ReturnValue != null)
-                {
-                    invokeStr += methodInvokeExp.ReturnValue.VariableName + " = ";
-                }
+                if (methodInvokeExp.IsAsync)
+                    sourceCode += "await ";
                 if(methodInvokeExp.Host != null)
                 {
                     var hostGen = data.CodeGen.GetCodeObjectGen(methodInvokeExp.Host.GetType());
-                    hostGen.GenCodes(methodInvokeExp.Host, ref invokeStr, ref data);
-                    invokeStr += ".";
+                    hostGen.GenCodes(methodInvokeExp.Host, ref sourceCode, ref data);
+                    sourceCode += ".";
                 }
-                invokeStr += methodInvokeExp.MethodName + "(";
+                sourceCode += methodInvokeExp.MethodName + "(";
                 if(methodInvokeExp.Arguments.Count > 0)
                 {
                     for(int i=0; i<methodInvokeExp.Arguments.Count; i++)
                     {
                         var argExp = data.CodeGen.GetCodeObjectGen(methodInvokeExp.Arguments[i].GetType());
-                        argExp.GenCodes(methodInvokeExp.Arguments[i], ref invokeStr, ref data);
-                        invokeStr += ",";
+                        argExp.GenCodes(methodInvokeExp.Arguments[i], ref sourceCode, ref data);
+                        sourceCode += ",";
                     }
-                    invokeStr = invokeStr.TrimEnd(',');
+                    sourceCode = sourceCode.TrimEnd(',');
                 }
-                invokeStr += ");";
+                sourceCode += ")";
+
+            }
+            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            {
+                var methodInvokeExp = obj as UMethodInvokeStatement;
+                string invokeStr = "";
+                if (methodInvokeExp.ReturnValue != null)
+                {
+                    invokeStr += methodInvokeExp.ReturnValue.VariableName + " = ";
+                    if (methodInvokeExp.ForceCastReturnType)
+                        invokeStr += "(" + data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + ")";
+                }
+                GenInvokeExpression(obj, ref invokeStr, ref data);
+                invokeStr += ";";
                 data.CodeGen.AddLine(invokeStr, ref sourceCode);
+
+                if (methodInvokeExp.IsUnsafe)
+                    data.Method.HasUnsafeCode = true;
+                if (methodInvokeExp.IsAsync)
+                    data.Method.HasAwaitCode = true;
+            }
+        }
+
+        class ULambdaExpressionCodeGen : ICodeObjectGen
+        {
+            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            {
+                var exp = obj as ULambdaExpression;
+                if(exp.MethodInvoke != null && exp.LambdaArguments.Count == exp.MethodInvoke.Arguments.Count)
+                {
+                    sourceCode += exp.MethodInvoke.MethodName;
+                }
+                else
+                {
+                    if (exp.IsAsync)
+                        sourceCode += "(async (";
+                    else
+                        sourceCode += "((";
+                    if(exp.LambdaArguments.Count > 0)
+                    {
+                        for(int i=0; i<exp.LambdaArguments.Count; i++)
+                        {
+                            var argExp = data.CodeGen.GetCodeObjectGen(exp.LambdaArguments[i].GetType());
+                            argExp.GenCodes(exp.LambdaArguments[i], ref sourceCode, ref data);
+                            sourceCode += ",";
+                        }
+                        sourceCode = sourceCode.TrimEnd(',');
+                    }
+                    sourceCode += ")=> { ";
+                    if(exp.MethodInvoke != null)
+                    {
+                        if(exp.ReturnType != null)
+                            sourceCode += "return ";
+                        var bodyCodeGen = data.CodeGen.GetCodeObjectGen(exp.MethodInvoke.GetType()) as UMethodInvokeStatementCodeGen;
+                        bodyCodeGen.GenInvokeExpression(exp.MethodInvoke, ref sourceCode, ref data);
+                        sourceCode += ";";
+                    }
+                    else if(exp.ReturnType != null)
+                    {
+                        sourceCode += "return default(" + data.CodeGen.GetTypeString(exp.ReturnType) + ");";
+                    }
+                    sourceCode += " })";
+                }
             }
         }
 
@@ -436,6 +537,8 @@ namespace EngineNS.Bricks.CodeBuilder
                     primitiveExp.Type.IsEqual(typeof(Vector3)) ||
                     primitiveExp.Type.IsEqual(typeof(Vector4)))
                     sourceCode += primitiveExp.Type.FullName + "(" + primitiveExp.GetValueString() + ")";
+                else if (primitiveExp.Type.IsEqual(typeof(string)))
+                    sourceCode += $"\"{primitiveExp.GetValueString()}\"";
                 else
                     sourceCode += primitiveExp.GetValueString();
             }
@@ -446,9 +549,102 @@ namespace EngineNS.Bricks.CodeBuilder
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
                 var castExp = obj as UCastExpression;
-                sourceCode += "(" + data.CodeGen.GetTypeString(castExp.TargetType) + ")";
+
+                var baseExp = castExp.Expression as UCastExpression;
+                while(true)
+                {
+                    if (baseExp != null)
+                    {
+                        if (baseExp.SourceType == castExp.TargetType)
+                        {
+                            var eGen = data.CodeGen.GetCodeObjectGen(baseExp.Expression.GetType());
+                            eGen.GenCodes(baseExp.Expression, ref sourceCode, ref data);
+                            return;
+                        }
+                    }
+                    else
+                        break;
+
+                    baseExp = baseExp.Expression as UCastExpression;
+                }
+
+                string srcExpStr = "";
                 var expGen = data.CodeGen.GetCodeObjectGen(castExp.Expression.GetType());
-                expGen.GenCodes(castExp.Expression, ref sourceCode, ref data);
+                expGen.GenCodes(castExp.Expression, ref srcExpStr, ref data);
+                if (castExp.TargetType.IsEqual(typeof(sbyte)))
+                {
+                    if(castExp.SourceType.IsEqual(typeof(string)))
+                        sourceCode += $"System.Convert.ToSByte({srcExpStr})";
+                    else
+                        sourceCode += $"(System.SByte)({srcExpStr})";
+                }
+                else if (castExp.TargetType.IsEqual(typeof(Int16)))
+                {
+                    if (castExp.SourceType.IsEqual(typeof(string)))
+                        sourceCode += $"System.Convert.ToInt16({srcExpStr})";
+                    else
+                        sourceCode += $"(System.Int16)({srcExpStr})";
+                }
+                else if (castExp.TargetType.IsEqual(typeof(Int32)))
+                {
+                    if (castExp.SourceType.IsEqual(typeof(string)))
+                        sourceCode += $"System.Convert.ToInt32({srcExpStr})";
+                    else
+                        sourceCode += $"(System.Int32)({srcExpStr})";
+                }
+                else if (castExp.TargetType.IsEqual(typeof(Int64)))
+                {
+                    if (castExp.SourceType.IsEqual(typeof(string)))
+                        sourceCode += $"System.Convert.ToInt64({srcExpStr})";
+                    else
+                        sourceCode += $"(System.Int64)({srcExpStr})";
+                }
+                else if (castExp.TargetType.IsEqual(typeof(byte)))
+                {
+                    if (castExp.SourceType.IsEqual(typeof(string)))
+                        sourceCode += $"System.Convert.ToByte({srcExpStr})";
+                    else
+                        sourceCode += $"(System.Byte)({srcExpStr})";
+                }
+                else if (castExp.TargetType.IsEqual(typeof(UInt16)))
+                {
+                    if (castExp.SourceType.IsEqual(typeof(string)))
+                        sourceCode += $"System.Convert.ToUInt16({srcExpStr})";
+                    else
+                        sourceCode += $"(System.UInt16)({srcExpStr})";
+                }
+                else if (castExp.TargetType.IsEqual(typeof(UInt32)))
+                {
+                    if (castExp.SourceType.IsEqual(typeof(string)))
+                        sourceCode += $"System.Convert.ToUInt32({srcExpStr})";
+                    else
+                        sourceCode += $"(System.UInt32)({srcExpStr})";
+                }
+                else if (castExp.TargetType.IsEqual(typeof(UInt64)))
+                {
+                    if (castExp.SourceType.IsEqual(typeof(string)))
+                        sourceCode += $"System.Convert.ToUInt64({srcExpStr})";
+                    else
+                        sourceCode += $"(System.UInt64)({srcExpStr})";
+                }
+                else if (castExp.TargetType.IsEqual(typeof(float)))
+                {
+                    if (castExp.SourceType.IsEqual(typeof(string)))
+                        sourceCode += $"System.Convert.ToSingle({srcExpStr})";
+                    else
+                        sourceCode += $"(System.Single)({srcExpStr})";
+                }
+                else if (castExp.TargetType.IsEqual(typeof(double)))
+                {
+                    if (castExp.SourceType.IsEqual(typeof(string)))
+                        sourceCode += $"System.Convert.ToDouble({srcExpStr})";
+                    else
+                        sourceCode += $"(System.Double)({srcExpStr})";
+                }
+                else if(castExp.TargetType.IsEqual(typeof(string)))
+                    sourceCode += $"System.Convert.ToString({srcExpStr})";
+                else
+                    sourceCode += $"(({data.CodeGen.GetTypeString(castExp.TargetType)}){srcExpStr})";
             }
         }
 
@@ -507,7 +703,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 string retStr = "return";
                 if(data.Method.ReturnValue != null)
                 {
-                    retStr += data.Method.ReturnValue.VariableName + ";";
+                    retStr += " " + data.Method.ReturnValue.VariableName + ";";
                 }
                 else
                 {
@@ -537,9 +733,9 @@ namespace EngineNS.Bricks.CodeBuilder
                 data.CodeGen.PopSegment(ref sourceCode, in data);
                 for(int i=0; i<ifExp.ElseIfs.Count; i++)
                 {
-                    string elseIfStr = "elseif (";
+                    string elseIfStr = "else if (";
                     var elseIfCondGen = data.CodeGen.GetCodeObjectGen(ifExp.ElseIfs[i].Condition.GetType());
-                    elseIfCondGen.GenCodes(ifExp.ElseIfs[i].Condition, ref sourceCode, ref data);
+                    elseIfCondGen.GenCodes(ifExp.ElseIfs[i].Condition, ref elseIfStr, ref data);
                     elseIfStr += ")";
                     data.CodeGen.AddLine(elseIfStr, ref sourceCode);
                     data.CodeGen.PushSegment(ref sourceCode, in data);
@@ -573,7 +769,7 @@ namespace EngineNS.Bricks.CodeBuilder
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
                 var forExp = obj as UForLoopStatement;
-                string forStr = "for (" + forExp.LoopIndexName + " = ";
+                string forStr = "for (var " + forExp.LoopIndexName + " = ";
                 var beginGen = data.CodeGen.GetCodeObjectGen(forExp.BeginExpression.GetType());
                 beginGen.GenCodes(forExp.BeginExpression, ref forStr, ref data);
                 forStr += "; " + forExp.LoopIndexName + (forExp.IncludeEnd ? " <= " : " < ");
@@ -586,8 +782,11 @@ namespace EngineNS.Bricks.CodeBuilder
                 data.CodeGen.AddLine(forStr, ref sourceCode);
                 data.CodeGen.PushSegment(ref sourceCode, in data);
                 {
-                    var bodyGen = data.CodeGen.GetCodeObjectGen(forExp.LoopBody.GetType());
-                    bodyGen.GenCodes(forExp.LoopBody, ref sourceCode, ref data);
+                    if(forExp.LoopBody != null)
+                    {
+                        var bodyGen = data.CodeGen.GetCodeObjectGen(forExp.LoopBody.GetType());
+                        bodyGen.GenCodes(forExp.LoopBody, ref sourceCode, ref data);
+                    }
                 }
                 data.CodeGen.PopSegment(ref sourceCode, in data);
 
@@ -611,8 +810,11 @@ namespace EngineNS.Bricks.CodeBuilder
                 data.CodeGen.AddLine(whileStr, ref sourceCode);
                 data.CodeGen.PushSegment(ref sourceCode, in data);
                 {
-                    var bodyGen = data.CodeGen.GetCodeObjectGen(whileExp.LoopBody.GetType());
-                    bodyGen.GenCodes(whileExp.LoopBody, ref sourceCode, ref data);
+                    if(whileExp.LoopBody != null)
+                    {
+                        var bodyGen = data.CodeGen.GetCodeObjectGen(whileExp.LoopBody.GetType());
+                        bodyGen.GenCodes(whileExp.LoopBody, ref sourceCode, ref data);
+                    }
                 }
                 data.CodeGen.PopSegment(ref sourceCode, in data);
             }
@@ -671,6 +873,7 @@ namespace EngineNS.Bricks.CodeBuilder
         USelfReferenceExpressionCodeGen mSelfReferenceExpressionCodeGen = new USelfReferenceExpressionCodeGen();
         UMethodInvokeArgumentExpressionCodeGen mMethodInvokeArgumentExpressionCodeGen = new UMethodInvokeArgumentExpressionCodeGen();
         UMethodInvokeStatementCodeGen mMethodInvokeStatementCodeGen = new UMethodInvokeStatementCodeGen();
+        ULambdaExpressionCodeGen mLambdaExpressionCodeGen = new ULambdaExpressionCodeGen();
         UAssignOperatorStatementCodeGen mAssignOperatorStatementCodeGen = new UAssignOperatorStatementCodeGen();
         UBinaryOperatorExpressionCodeGen mBinaryOperatorExpressionCodeGen = new UBinaryOperatorExpressionCodeGen();
         UUnaryOperatorExpressionCodeGen mUnaryOperatorExpressionCodeGen = new UUnaryOperatorExpressionCodeGen();
@@ -708,6 +911,8 @@ namespace EngineNS.Bricks.CodeBuilder
                 return mMethodInvokeArgumentExpressionCodeGen;
             else if (type.IsEqual(typeof(UMethodInvokeStatement)))
                 return mMethodInvokeStatementCodeGen;
+            else if (type.IsEqual(typeof(ULambdaExpression)))
+                return mLambdaExpressionCodeGen;
             else if (type.IsEqual(typeof(UAssignOperatorStatement)))
                 return mAssignOperatorStatementCodeGen;
             else if (type.IsEqual(typeof(UBinaryOperatorExpression)))
@@ -745,6 +950,54 @@ namespace EngineNS.Bricks.CodeBuilder
             else if (type.IsEqual(typeof(UExpressionStatement)))
                 return mExpressionStatementCodeGen;
             return null;
+        }
+
+        public override string GetTypeString(UTypeReference t)
+        {
+            if (t.TypeDesc != null)
+                return GetTypeString(t.TypeDesc);
+            else
+                return t.TypeFullName;
+        }
+        static string GetTypeString(System.Type type)
+        {
+            if (type == null)
+                return "";
+
+            if (type.IsGenericType)
+            {
+                string retValue = type.Namespace + "." + type.Name;
+                var agTypes = type.GetGenericArguments();
+                if (agTypes.Length == 0)
+                    return retValue;
+
+                retValue = retValue.Replace("`" + type.GetGenericArguments().Length, "");
+                var agStr = "";
+                for (int i = 0; i < agTypes.Length; i++)
+                {
+                    if (i == 0)
+                        agStr = GetTypeString(agTypes[i]);
+                    else
+                        agStr += "," + GetTypeString(agTypes[i]);
+                }
+                retValue += "<" + agStr + ">";
+                return retValue;
+            }
+            else if (type.IsGenericParameter)
+                return type.Name;
+            else
+                return type.FullName.Replace("+", ".");
+        }
+        public override string GetTypeString(UTypeDesc t)
+        {
+            if (t == null)
+                return "";
+            if (t.SystemType != null)
+            {
+                return GetTypeString(t.SystemType);
+            }
+            else
+                return t.FullName;
         }
     }
 

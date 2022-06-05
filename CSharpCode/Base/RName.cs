@@ -11,6 +11,7 @@ namespace EngineNS
         public class PGRNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
             public string FilterExts;   // "ext1" / "ext1,ext2"
+            public System.Type MacrossType;
             EGui.UIProxy.ComboBox mComboBox;
 
             class DrawData
@@ -80,6 +81,7 @@ namespace EngineNS
                 var contentBrowserSize = new Vector2(500, 600);
                 ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Always);
                 UEngine.Instance.EditorInstance.RNamePopupContentBrowser.ExtNames = FilterExts;
+                UEngine.Instance.EditorInstance.RNamePopupContentBrowser.MacrossBase = Rtti.UTypeDesc.TypeOf(MacrossType);
                 UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset = null;
                 mComboBox.OnDraw(in drawList, in anyPt);
                 if(UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset != null &&
@@ -100,7 +102,7 @@ namespace EngineNS
                     var sz = new Vector2(0, 0);
                     if (ImGuiAPI.Button("<", in sz))
                     {
-                        mDrawData.NewValue = EGui.Controls.ContentBrowser.GlobalSelectedAsset.GetAssetName();
+                        mDrawData.NewValue = EGui.Controls.UContentBrowser.GlobalSelectedAsset.GetAssetName();
                     }
                     ImGuiAPI.SameLine(0, 8);
                     if (ImGuiAPI.Button("-", in sz))

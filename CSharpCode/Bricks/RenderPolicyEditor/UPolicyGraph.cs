@@ -68,7 +68,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
 
                 var iPin = new PinIn();
                 iPin.Name = pin.Name;
-                iPin.Link = NewInOutPinDesc("GraphNode");
+                iPin.LinkDesc = NewInOutPinDesc("GraphNode");
                 AddPinIn(iPin);
             }
             Outputs.Clear();
@@ -78,7 +78,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
 
                 var oPin = new PinOut();
                 oPin.Name = pin.Name;
-                oPin.Link = NewInOutPinDesc("GraphNode");
+                oPin.LinkDesc = NewInOutPinDesc("GraphNode");
                 AddPinOut(oPin);
             }
         }

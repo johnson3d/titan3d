@@ -18,7 +18,9 @@ namespace EngineNS.GamePlay.Scene
                 data = new UGridNodeData();
             }
             await base.InitializeNode(world, data, EBoundVolumeType.Box, placementType);
-            SetStyle(ENodeStyles.DiscardAABB | ENodeStyles.VisibleFollowParent);
+            SetStyle(ENodeStyles.DiscardAABB | ENodeStyles.VisibleFollowParent | ENodeStyles.Transient);
+
+            //this.ViewportSlate = world.;
             return true;
         }
         public Graphics.Pipeline.UViewportSlate ViewportSlate;
@@ -124,6 +126,11 @@ namespace EngineNS.GamePlay.Scene
                 this.Placement.Scale = new Vector3((float)Radii);
             }
             return true;
+        }
+
+        public override void AddAssetReferences(IO.IAssetMeta ameta)
+        {
+            ameta.AddReferenceAsset(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));
         }
     }
 }

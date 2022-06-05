@@ -6,5 +6,6 @@ namespace EngineNS.Bricks.Input.Device
 {
     public interface IInputDevice
     {
+        public void Tick();
     }
 }

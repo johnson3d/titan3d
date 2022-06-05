@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Graphics.Mesh;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -17,6 +18,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 LODRangeFloat.Add(950.0f);
             }
             [Rtti.Meta]
+            public int MipLevels { get; set; } = 6;
+            [Rtti.Meta]
             public int NumOfLevelX { get; set; } = 100;
             [Rtti.Meta]
             public int NumOfLevelZ { get; set; } = 100;
@@ -27,12 +30,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             [Rtti.Meta]
             public int ActiveLevel = 1;
             public List<float> LODRangeFloat = new List<float>();
+            [Rtti.Meta]
+            [RName.PGRName(FilterExts = Procedure.UPgcAsset.AssetExt)]
+            public RName PgcName { get; set; }
         }
-        public UTerrain Terrain
-        {
-            get;
-            protected set;
-        }
+        
+        public UTerrainSystem Terrain { get; } = new UTerrainSystem();
         public int NumOfLevelX;
         public int NumOfLevelZ;
         public int ActiveLevel;
@@ -56,6 +59,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         } = 64;
         public float GridSize = 1.0f;
         public float TexUVScale = 64.0f / 1024.0f;
+        public float MaterialIdUVStep = 1.0f / 1024.0f;//TerrainMaterialIdManager
+        public float DiffuseUVStep = 1.0f / 1024.0f;// (1.0f / 1024.0f) * 16.0f;//TerrainMaterialIdManager
         public override bool IsAcceptShadow
         {
             get
@@ -77,6 +82,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public DVector3 EyeCenter;
         public Vector3 EyeLocalCenter;
 
+        Hash160 mTerrainGenHash;
+        public Hash160 TerrainGenHash
+        {
+            get
+            {
+                return mTerrainGenHash;
+            }
+        }
         Bricks.Procedure.UPgcAsset mTerrainGen;
         public Bricks.Procedure.UPgcAsset TerrainGen
         {
@@ -87,13 +100,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 #pragma warning disable CS0162
                     if (true)
                     {
-                        mTerrainGen = Procedure.UPgcAsset.LoadAsset(RName.GetRName("UTest/terraingen.pgc"));
-                        var hmNode = mTerrainGen.AssetGraph.FindFirstNode("HeightMappingNode") as Procedure.Node.UHeightMappingNode;
-                        if (hmNode != null)
-                        {
-                            TerrainMaterialIdManager = hmNode.MaterialIdManager;
-                            TerrainMaterialIdManager.BuildSRV(UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
-                        }
+                        
                     }
                     else
                     {
@@ -187,7 +194,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
                 return false;
 
-            Terrain = world.TerrainMB.Terrain;
+            if (await Terrain.Initialize(GetNodeData<UTerrainData>().MipLevels) == false)
+                return false;
+
             var trData = data as UTerrainData;
             PatchSide = trData.PatchSide;
             PatchSize = trData.PatchSize;
@@ -219,6 +228,26 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             RVTextureArray.CreateRVT(64, 64, 1, EPixelFormat.PXF_R8G8B8A8_UNORM, 256);
             var cmd = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList();
             RVTextureArray.PushTexture2D(cmd, RName.GetRName("utest/texture/xsl.srv"));
+
+            mTerrainGen = Procedure.UPgcAsset.LoadAsset(trData.PgcName);// RName.GetRName("UTest/terraingen.pgc"));            
+            {
+                var pgcText = IO.FileManager.ReadAllText(trData.PgcName.Address);
+                var refAssets = mTerrainGen.GetAMeta().RefAssetRNames;
+                refAssets.Sort();
+                foreach (var i in refAssets)
+                {
+                    pgcText += i.ToString();//todo:Asset Hash
+                }
+                mTerrainGenHash = Hash160.CreateHash160(pgcText);
+            }
+            var hmNode = mTerrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.UMaterialIdMapNode;
+            if (hmNode != null)
+            {
+                TerrainMaterialIdManager = hmNode.MaterialIdManager;
+                TerrainMaterialIdManager.BuildSRV(UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                await hmNode.SureMaterialResources();
+            }
+
             return true;
         }
 
@@ -246,6 +275,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             varIndex = TerrainCBuffer.mCoreObject.FindVar("TexUVScale");
             TerrainCBuffer.SetValue(varIndex, TexUVScale);
+
+            varIndex = TerrainCBuffer.mCoreObject.FindVar("MaterialIdUVStep");
+            TerrainCBuffer.SetValue(varIndex, MaterialIdUVStep);
+
+            varIndex = TerrainCBuffer.mCoreObject.FindVar("DiffuseUVStep");
+            TerrainCBuffer.SetValue(varIndex, DiffuseUVStep);
 
             varIndex = TerrainCBuffer.mCoreObject.FindVar("MorphLODs");
             for (int i = 0; i < MorphRange.Length; i++)
@@ -437,6 +472,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
         private uint CameralOffsetSerialId = 0;
+        public override void GetHitProxyDrawMesh(List<UMesh> meshes)
+        {
+            foreach (var i in ActiveLevels)
+            {
+                if (i == null)
+                    continue;
+                i.LevelData?.PlantManager.GetHitProxyDrawMesh(meshes);
+            }
+        }
         public override void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
         {
             if (rp.World.CameralOffsetSerialId != CameralOffsetSerialId)
@@ -464,6 +508,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             foreach (var i in VisiblePatches)
             {
                 i.OnGatherVisibleMeshes(rp);
+            }
+
+            foreach (var i in ActiveLevels)
+            {
+                if (i == null)
+                    continue;
+                i.LevelData?.PlantManager.OnGatherVisibleMeshes(rp);
             }
         }
         public List<UPatch> VisiblePatches = new List<UPatch>();

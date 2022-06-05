@@ -32,11 +32,19 @@ namespace EngineNS.Bricks.NodeGraph
     public class LinkDesc
     {
         public EGui.UUvAnim Icon { get; set; } = new EGui.UUvAnim();
+        public EGui.UUvAnim DisconnectIcon { get; set; } = new EGui.UUvAnim();
         public uint LineColor { get; set; } = 0xFFFF0000; // 0xFF00FFFF
         public float LineThinkness { get; set; } = 3.0f;
         public float ExtPadding { get; set; } = 10;
         
         public List<string> CanLinks { get; } = new List<string>();
+
+        public void SetColor(uint color, bool withIcon = true)
+        {
+            LineColor = color;
+            Icon.Color = color;
+            DisconnectIcon.Color = color;
+        }
     }
     public class NodePin
     {
@@ -49,12 +57,22 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
         public UNodeBase HostNode { get; set; }
-        public LinkDesc Link { get; set; }
-
+        public LinkDesc LinkDesc { get; set; }
+        
         public Vector2 Position { get; set; }
         public Vector2 Size { get; set; }
         public bool MultiLinks { get; set; }
         public object Tag { get; set; }
+
+        public Vector2 HotPosition;
+        public Vector2 HotSize;
+        public Vector2 NamePosition;
+        public Vector2 EditValuePosition;
+
+        public string GroupName;
+        public bool ShowIcon = true;
+        public bool ShowName = true;
+
         public bool IsHit(float x, float y)
         {
             if (x<Position.X || y<Position.Y || x >= Position.X + Size.X || y >= Position.Y + Size.Y)
@@ -73,15 +91,26 @@ namespace EngineNS.Bricks.NodeGraph
     }
     public class PinIn : NodePin
     {
-        public EGui.Controls.NodeGraph.EditableValue EditValue { get; set; } = null;
+        [Rtti.Meta]
+        public UEditableValue EditValue { get; set; } = null;
     }
     public class PinOut : NodePin
     {
     }
 
+    public interface IBeforeExecNode
+    {
+        public PinIn BeforeExec { get; set; }
+    }
+    public interface IAfterExecNode
+    {
+        public PinOut AfterExec { get; set; }
+    }
 
     public class UNodeBase : IO.ISerializer
     {
+        public bool LayoutDirty { get; set; } = true;
+
         public bool HasError = false;
         public GraphException CodeExcept;
         public void ResetErrors()
@@ -126,6 +155,51 @@ namespace EngineNS.Bricks.NodeGraph
         public List<PinOut> Outputs { get; } = new List<PinOut>();
 
         public object UserData;
+        public class UInputEditableValueInfo : IO.BaseSerializer
+        {
+            [Rtti.Meta]
+            public string PinName { get; set; }
+            [Rtti.Meta]
+            public object Value 
+            { 
+                get; 
+                set; 
+            }
+        }
+
+        [Rtti.Meta(Order = 1)]
+        public List<UInputEditableValueInfo> InputEditableValues
+        {
+            get
+            {
+                var result = new List<UInputEditableValueInfo>();
+                foreach(var i in Inputs)
+                {
+                    if (i.EditValue != null)
+                    {
+                        var t = new UInputEditableValueInfo();
+                        t.PinName = i.Name;
+                        t.Value = i.EditValue.Value;
+                        result.Add(t);
+                    }
+                }
+                return result;
+            }
+            set
+            {
+                foreach (var i in value)
+                {
+                    var pin = this.FindPinIn(i.PinName);
+                    if (pin != null)
+                    {
+                        if (pin.EditValue != null)
+                        {
+                            pin.EditValue.Value = i.Value;
+                        }
+                    }
+                }
+            }
+        }
 
         public UNodeBase()
         {
@@ -151,6 +225,10 @@ namespace EngineNS.Bricks.NodeGraph
         {
             unsafe
             {
+                if(ImGuiAPI.GetCurrentContext()==IntPtr.Zero.ToPointer())
+                {
+                    return Vector2.One;
+                }
                 if (ImGuiAPI.GetFont().IsValidPointer == false)
                 {
                     EngineNS.Vector2 tmp;
@@ -163,7 +241,11 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public virtual void OnPositionChanged()
         {
-            var styles = EGui.Controls.NodeGraph.NodeGraphStyles.DefaultStyles;
+            LayoutDirty = true;
+        }
+        public virtual void UpdateLayout()
+        {
+            var styles = UNodeGraphStyles.DefaultStyles;
             float fNodeW = 0;
             float fNodeH = 0;
             float lineWidth = 0;
@@ -177,6 +259,7 @@ namespace EngineNS.Bricks.NodeGraph
             SetIfBigger(ref lineHeight, nameSize.Y);
             TitleHeight = lineHeight;
             fNodeH += TitleHeight;
+            fNodeH += styles.TitlePadding.Y;
 
             var lines = Math.Max(Inputs.Count, Outputs.Count);
             for (int i = 0; i < lines; i++)
@@ -187,64 +270,92 @@ namespace EngineNS.Bricks.NodeGraph
                 if (i < Inputs.Count)
                 {
                     var inIcon = styles.PinInStyle.Image;
-                    if (Inputs[i].Link != null)
+                    if (Inputs[i].LinkDesc != null)
                     {
-                        if (Inputs[i].Link.Icon != null)
+                        if (Inputs[i].LinkDesc.Icon != null)
                         {
-                            inIcon = Inputs[i].Link.Icon;
+                            inIcon = Inputs[i].LinkDesc.Icon;
                         }
                     }
 
-                    lineWidth += styles.PinInStyle.Offset;
-                    Inputs[i].Position = Position + new Vector2(lineWidth, fNodeH);
+                    var offset = styles.PinInStyle.Offset + styles.PinPadding;
+                    lineWidth += offset;
+                    Inputs[i].Position = Position + new Vector2(offset, fNodeH);
                     Inputs[i].Size = inIcon.Size;
 
-                    lineWidth += inIcon.Size.X;
-                    lineWidth += styles.PinSpacing;
                     nameSize = CalcTextSize(Inputs[i].Name);
+                    var inputSize = Inputs[i].Size;
+                    SetIfBigger(ref inputSize.Y, nameSize.Y);
+                    inputSize.X += styles.PinSpacing;
+                    inputSize.X += nameSize.X;
+                    Inputs[i].Size = inputSize;
+                    lineWidth += inputSize.X;
 
                     //lineWidth += styles.MinSpaceInOut;
 
-                    SetIfBigger(ref lineHeight, inIcon.Size.Y);
-                    SetIfBigger(ref lineHeight, nameSize.Y);
+                    SetIfBigger(ref lineHeight, Inputs[i].Size.Y);
 
-                    if (Inputs[i].Link != null)
+                    if (Inputs[i].LinkDesc != null)
                     {
-                        SetIfBigger(ref extPadding, Inputs[i].Link.ExtPadding);
+                        SetIfBigger(ref extPadding, Inputs[i].LinkDesc.ExtPadding);
                     }
+                    if(Inputs[i].EditValue != null)
+                    {
+                        var editWidth = Inputs[i].EditValue.ControlWidth + styles.PinSpacing;
+                        lineWidth += editWidth;
+                        inputSize.X += editWidth;
+                        var editHeight = Inputs[i].EditValue.ControlHeight;
+                        SetIfBigger(ref inputSize.Y, editHeight);
+                        SetIfBigger(ref lineHeight, inputSize.Y);
+                        Inputs[i].Size = inputSize;
+                    }
+
+                    Inputs[i].HotPosition = new Vector2(
+                        Inputs[i].Position.X,
+                        Inputs[i].Position.Y + (Inputs[i].Size.Y - inIcon.Size.Y) * 0.5f + 2.0f);
+                    Inputs[i].HotSize = inIcon.Size;
+                    Inputs[i].NamePosition = new Vector2(
+                        Inputs[i].HotPosition.X + Inputs[i].HotSize.X + styles.PinSpacing,
+                        Inputs[i].Position.Y + (Inputs[i].Size.Y - nameSize.Y) * 0.5f);
+
+                    Inputs[i].EditValuePosition = Inputs[i].NamePosition + new Vector2(styles.PinSpacing + nameSize.X, 0);
                 }
                 if (i < Outputs.Count)
                 {
                     var inIcon = styles.PinOutStyle.Image;
-                    if (Outputs[i].Link != null)
+                    if (Outputs[i].LinkDesc != null)
                     {
-                        if (Outputs[i].Link.Icon != null)
+                        if (Outputs[i].LinkDesc.Icon != null)
                         {
-                            inIcon = Outputs[i].Link.Icon;
+                            inIcon = Outputs[i].LinkDesc.Icon;
                         }
                     }
-                    lineWidth += styles.PinOutStyle.Offset;
-                    Outputs[i].Position = new Vector2(styles.PinOutStyle.Offset, Position.Y + fNodeH);
+                    lineWidth += styles.PinOutStyle.Offset + styles.PinPadding;
+                    Outputs[i].Position = new Vector2(styles.PinOutStyle.Offset + styles.PinPadding, Position.Y + fNodeH);
                     Outputs[i].Size = inIcon.Size;
+                    Outputs[i].HotSize = inIcon.Size;
 
-                    lineWidth += inIcon.Size.X;
-                    lineWidth += styles.PinSpacing;
                     nameSize = CalcTextSize(Outputs[i].Name);
+                    var outputSize = Outputs[i].Size;
+                    SetIfBigger(ref outputSize.Y, nameSize.Y);
+                    outputSize.X += styles.PinSpacing;
+                    outputSize.X += nameSize.X;
+                    Outputs[i].Size = outputSize;
+                    lineWidth += outputSize.X;
                     //lineWidth += styles.MinSpaceInOut;
 
-                    SetIfBigger(ref lineHeight, inIcon.Size.Y);
-                    SetIfBigger(ref lineHeight, nameSize.Y);
+                    SetIfBigger(ref lineHeight, Outputs[i].Size.Y);
 
-                    if (Outputs[i].Link != null)
+                    if (Outputs[i].LinkDesc != null)
                     {
-                        SetIfBigger(ref extPadding, Outputs[i].Link.ExtPadding);
+                        SetIfBigger(ref extPadding, Outputs[i].LinkDesc.ExtPadding);
                     }
                 }
 
                 SetIfBigger(ref fNodeW, lineWidth);
                 fNodeH += (lineHeight + styles.PinPadding + extPadding);
             }
-            Size = new Vector2(fNodeW + PrevSize.X, fNodeH);
+            Size = new Vector2(fNodeW + PrevSize.X + styles.MinSpaceInOut, fNodeH);
             if (fNodeH - TitleHeight < PrevSize.Y)
             {
                 Size = new Vector2(Size.X, TitleHeight + PrevSize.Y);
@@ -253,6 +364,15 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 float oldValue = Outputs[i].Position.X;
                 Outputs[i].Position = new Vector2(Position.X + Size.X - oldValue - Outputs[i].Size.X, Outputs[i].Position.Y);
+
+                Outputs[i].HotPosition = new Vector2(
+                    Outputs[i].Position.X + Outputs[i].Size.X - Outputs[i].HotSize.X,
+                    Outputs[i].Position.Y + (Outputs[i].Size.Y - Outputs[i].HotSize.Y) * 0.5f + 2.0f);
+
+                nameSize = CalcTextSize(Outputs[i].Name);
+                Outputs[i].NamePosition = new Vector2(
+                    Outputs[i].Position.X,
+                    Outputs[i].Position.Y + (Outputs[i].Size.Y - nameSize.Y) * 0.5f);
             }
         }
         public bool IsHit(float x, float y)
@@ -320,11 +440,11 @@ namespace EngineNS.Bricks.NodeGraph
         {
             if (InNode == this)
                 return false;
-            if (oPin.Link != null && iPin.Link != null)
+            if (oPin.LinkDesc != null && iPin.LinkDesc != null)
             {
-                foreach (var i in oPin.Link.CanLinks)
+                foreach (var i in oPin.LinkDesc.CanLinks)
                 {
-                    foreach (var j in iPin.Link.CanLinks)
+                    foreach (var j in iPin.LinkDesc.CanLinks)
                     {
                         if (i == j)
                             return true;
@@ -341,11 +461,11 @@ namespace EngineNS.Bricks.NodeGraph
         {
             if (OutNode == this)
                 return false;
-            if (oPin.Link != null && iPin.Link != null)
+            if (oPin.LinkDesc != null && iPin.LinkDesc != null)
             {
-                foreach (var i in oPin.Link.CanLinks)
+                foreach (var i in oPin.LinkDesc.CanLinks)
                 {
-                    foreach (var j in iPin.Link.CanLinks)
+                    foreach (var j in iPin.LinkDesc.CanLinks)
                     {
                         if (i == j)
                             return true;
@@ -367,6 +487,20 @@ namespace EngineNS.Bricks.NodeGraph
                     return pin;
             }
             Inputs.Add(pin);
+            return pin;
+        }
+        public PinIn InsertPinIn(int idx, PinIn pin)
+        {
+            if(idx < 0 || idx >= Inputs.Count)
+                return AddPinIn(pin);
+
+            pin.HostNode = this;
+            foreach (var i in Inputs)
+            {
+                if (i == pin)
+                    return pin;
+            }
+            Inputs.Insert(idx, pin);
             return pin;
         }
         public void RemovePinIn(PinIn pin)
@@ -411,8 +545,8 @@ namespace EngineNS.Bricks.NodeGraph
         {
             OnPreviewDrawAction?.Invoke(this, in prevStart, in prevEnd, cmdlist);
         }
-        public Action<UNodeBase, EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles, ImDrawList> OnAfterDrawAction;
-        public virtual void OnAfterDraw(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles, ImDrawList cmdlist)
+        public Action<UNodeBase, UNodeGraphStyles, ImDrawList> OnAfterDrawAction;
+        public virtual void OnAfterDraw(UNodeGraphStyles styles, ImDrawList cmdlist)
         {
             OnAfterDrawAction?.Invoke(this, styles, cmdlist);
         }
@@ -446,6 +580,11 @@ namespace EngineNS.Bricks.NodeGraph
         {
             OnDoubleClickAction?.Invoke(this);
         }
+        public Action<UNodeBase, NodePin> OnOnDoubleClickedPinAction;
+        public virtual void OnDoubleClickedPin(NodePin hitPin)
+        {
+            OnOnDoubleClickedPinAction?.Invoke(this, hitPin);
+        }
         public Action<UNodeBase, NodePin> OnLButtonClickedAction;
         public virtual void OnLButtonClicked(NodePin hitPin)
         {
@@ -470,6 +609,20 @@ namespace EngineNS.Bricks.NodeGraph
                 return GetOutPinTypeAction(pin);
             return null;
         }
+        public Func<PinIn, Rtti.UTypeDesc> GetInPinTypeAction;
+        public virtual Rtti.UTypeDesc GetInPinType(PinIn pin)
+        {
+            if (GetInPinTypeAction != null)
+                return GetInPinTypeAction(pin);
+            return null;
+        }
+        public Rtti.UTypeDesc GetPinType<T>(T pin)
+        {
+            if (typeof(T) == typeof(PinIn))
+                return GetInPinType(pin as PinIn);
+            else
+                return GetOutPinType(pin as PinOut);
+        }
         public virtual void BuildStatements(ref BuildCodeStatementsData data) 
         {
             throw new InvalidOperationException("Invalid build statements");
@@ -477,6 +630,11 @@ namespace EngineNS.Bricks.NodeGraph
         public virtual CodeBuilder.UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data) 
         {
             throw new NotImplementedException("Invalid get expression");
+        }
+        public Action<UNodeBase> OnRemoveNodeAction;
+        public virtual void OnRemoveNode()
+        {
+            OnRemoveNodeAction?.Invoke(this);
         }
 
         #endregion

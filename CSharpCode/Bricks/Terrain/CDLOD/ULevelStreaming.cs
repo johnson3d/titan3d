@@ -14,6 +14,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             lock (this)
             {
+                IsStreaming = false;
                 StreamingLevels.Clear();
 
                 foreach (var i in UnloadingLevels)
@@ -27,12 +28,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 UnloadingLevels.Clear();
             }
         }
+        protected bool IsStreaming = true;
         public HashSet<UTerrainLevel> StreamingLevels = new HashSet<UTerrainLevel>();
         public List<UTerrainLevel> UnloadingLevels = new List<UTerrainLevel>();
         public void PushStreamingLevel(UTerrainLevel level, bool bForce)
         {
             lock (this)
             {
+                if (IsStreaming == false)
+                    return;
                 if (UnloadingLevels.Contains(level))
                 {
                     UnloadingLevels.Remove(level);
@@ -46,12 +50,18 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 {
                     if (bForce)
                     {
-                        StreamingLevels.Remove(level);
-                        var LevelData = new UTerrainLevelData();
-                        var task1 = LevelData.CreateLevelData(level, bForce);
-                        task1.Wait();
-                        level.LevelData = LevelData;
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "LevelStreaming", $"({level.LevelX},{level.LevelX})Level ForceLoad in async streaming == 1");
+                        var t1 = Support.Time.GetTickCount();
+                        while (level.LevelData != null)
+                        {
+                            var t2 = Support.Time.GetTickCount();
+                            if (t2 - t1 > 1000 * 15)
+                            {
+                                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "LevelStreaming", $"CreateLevelData({level.LevelX},{level.LevelX}, force = true) time out");
+                                return;
+                            }
+                            System.Threading.Thread.Sleep(10);
+                        }
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "LevelStreaming", $"CreateLevelData({level.LevelX},{level.LevelX})Level ForceLoad in async streaming == 1");
                     }
                     return;
                 }
@@ -70,12 +80,18 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             else
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "LevelStreaming", $"({level.LevelX},{level.LevelX})Level ForceLoad in async streaming == 2");
+                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "LevelStreaming", $"CreateLevelData({level.LevelX},{level.LevelX})Level ForceLoad in async streaming == 2");
             }
 
             lock (this)
             {
                 StreamingLevels.Remove(level);
+                if (IsStreaming == false)
+                {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "LevelStreaming", $"CreateLevelData({level.LevelX},{level.LevelX}): IsStreaming == false");
+                    level.LevelData?.Cleanup();
+                    level.LevelData = null;
+                }
             }
         }
         public void PushUnloadLevel(UTerrainLevel level)

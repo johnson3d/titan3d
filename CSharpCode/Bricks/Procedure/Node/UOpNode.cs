@@ -28,520 +28,10 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return result;
         }
-        [Rtti.Meta]
-        public UPgcNodeBase GetInputNode(UPgcGraph graph, int index)
-        {
-            var linker = graph.FindInLinkerSingle(Inputs[index]);
-            if (linker == null)
-                return null;
-            return linker.OutNode as UPgcNodeBase;
-        }
-        [Rtti.Meta]
-        public UPgcNodeBase GetInputNode(UPgcGraph graph, PinIn pin)
-        {
-            var linker = graph.FindInLinkerSingle(pin);
-            if (linker == null)
-                return null;
-            return linker.OutNode as UPgcNodeBase;
-        }
-    }
-    public class UImageLoader : UPgcNodeBase
-    {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinOut RgbPin { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinOut RedPin { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinOut GreenPin { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinOut BluePin { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinOut AlphaPin { get; set; } = new PinOut();
-
-        public UBufferCreator RgbBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UImageLoader()
-        {
-            PrevSize = new Vector2(100, 100);
-
-            Icon.Size = new Vector2(25, 25);
-            Icon.Color = 0xFF00FF00;
-            TitleColor = 0xFF204020;
-            BackColor = 0x80808080;
-
-            AddOutput(RgbPin, "RGB", RgbBufferCreator);
-            AddOutput(RedPin, "R", DefaultBufferCreator);
-            AddOutput(GreenPin, "G", DefaultBufferCreator);
-            AddOutput(BluePin, "B", DefaultBufferCreator);
-            AddOutput(AlphaPin, "A", DefaultBufferCreator);
-        }
-        ~UImageLoader()
-        {
-            if (TextureSRV != null)
-            {
-                TextureSRV?.FreeTextureHandle();
-                TextureSRV = null;
-            }
-        }
-        RName mImageName;
-        [Rtti.Meta]
-        [RName.PGRName(FilterExts = RHI.CShaderResourceView.AssetExt)]
-        public RName ImageName
-        {
-            get => mImageName;
-            set
-            {
-                mImageName = value;
-                System.Action exec = async () =>
-                {
-                    TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
-                };
-                exec();
-            }
-        }
-        private RHI.CShaderResourceView TextureSRV;
-        public override int PreviewResultIndex
-        {
-            get => mPreviewResultIndex;
-            set
-            {
-                mPreviewResultIndex = 0;
-            }
-        }
-        public override unsafe bool InitProcedure(UPgcGraph graph)
-        {
-            if (ImageName == null)
-                return false;
-
-            StbImageSharp.ImageResult image = null;
-
-            using (var xnd = IO.CXndHolder.LoadXnd(ImageName.Address))
-            {
-                if (xnd == null)
-                    return false;
-
-                var pngAttr = xnd.RootNode.TryGetAttribute("Png");
-                if (pngAttr.IsValidPointer == false)
-                    return false;
-
-                var ar = pngAttr.GetReader(null);
-                byte[] data;
-                ar.ReadNoSize(out data, (int)pngAttr.GetReaderLength());
-                pngAttr.ReleaseReader(ref ar);
-
-                using (var memStream = new System.IO.MemoryStream(data, false))
-                {
-                    image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                    if (image == null)
-                        return false;
-                }
-            }
-
-            DefaultBufferCreator.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
-            if (image != null)
-            {
-                UBufferConponent red = null;
-                UBufferConponent green = null;
-                UBufferConponent blue = null;
-                UBufferConponent alpha = null;
-                int PixelSize = 0;
-                int LineSize = 0;
-                switch (image.Comp)
-                {
-                    case StbImageSharp.ColorComponents.RedGreenBlue:
-                        {
-                            PixelSize = 3;
-                            LineSize = 3 * image.Width;
-                            LineSize = (int)CoreDefine.Roundup((uint)LineSize, 4);
-
-                            DefaultBufferCreator.XSize = image.Width;
-                            DefaultBufferCreator.YSize = image.Height;
-                            DefaultBufferCreator.ZSize = 1;
-                            
-                            red = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
-                            green = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
-                            blue = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
-
-                            var rgb = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(image.Width, image.Height, 1));
-
-                            graph.BufferCache.RegBuffer(RedPin, red);
-                            graph.BufferCache.RegBuffer(GreenPin, green);
-                            graph.BufferCache.RegBuffer(BluePin, blue);
-
-                            graph.BufferCache.RegBuffer(RgbPin, rgb);
-
-                            fixed (byte* p = &image.Data[0])
-                            {
-                                for (int i = 0; i < image.Height; i++)
-                                {
-                                    for (int j = 0; j < image.Width; j++)
-                                    {
-                                        var rgbValue = new Vector3();
-                                        float v = (float)p[LineSize * i + j * PixelSize] / 256.0f;
-                                        rgbValue.X = v;
-                                        red.SetPixel(j, i, v);
-
-                                        v = (float)p[LineSize * i + j * PixelSize + 1] / 256.0f;
-                                        rgbValue.Y = v;
-                                        green.SetPixel(j, i, v);
-
-                                        v = (float)p[LineSize * i + j * PixelSize + 2] / 256.0f;
-                                        rgbValue.Y = v;
-                                        blue.SetPixel(j, i, v);
-
-                                        rgb.SetPixel<Vector3>(j, i, in rgbValue);
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case StbImageSharp.ColorComponents.RedGreenBlueAlpha:
-                        {
-                            PixelSize = 4;
-                            LineSize = 4 * image.Width;
-
-                            DefaultBufferCreator.XSize = image.Width;
-                            DefaultBufferCreator.YSize = image.Height;
-                            DefaultBufferCreator.ZSize = 1;
-
-                            red = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
-                            green = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
-                            blue = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
-                            alpha = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
-
-                            var rgb = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(image.Width, image.Height, 1));
-
-                            graph.BufferCache.RegBuffer(RedPin, red);
-                            graph.BufferCache.RegBuffer(GreenPin, green);
-                            graph.BufferCache.RegBuffer(BluePin, blue);                            
-                            graph.BufferCache.RegBuffer(AlphaPin, alpha);
-
-                            graph.BufferCache.RegBuffer(RgbPin, rgb);
-
-                            fixed (byte* p = &image.Data[0])
-                            {
-                                for (int i = 0; i < image.Height; i++)
-                                {
-                                    for (int j = 0; j < image.Width; j++)
-                                    {
-                                        var rgbValue = new Vector3();
-                                        float v = (float)p[LineSize * i + j * PixelSize] / 255.0f;
-                                        rgbValue.X = v;
-                                        blue.SetPixel(j, i, v);
-
-                                        v = (float)p[LineSize * i + j * PixelSize + 1] / 255.0f;
-                                        rgbValue.Y = v;
-                                        green.SetPixel(j, i, v);
-
-                                        v = (float)p[LineSize * i + j * PixelSize + 2] / 255.0f;
-                                        rgbValue.Z = v;
-                                        red.SetPixel(j, i, v);
-
-                                        v = (float)p[LineSize * i + j * PixelSize + 3] / 255.0f;
-                                        alpha.SetPixel(j, i, v);
-
-                                        rgb.SetPixel<Vector3>(j, i, in rgbValue);
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                }
-            }
-
-            return true;
-        }
-
-        public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
-        {
-            if (TextureSRV == null)
-                return;
-
-            var uv0 = new Vector2(0, 0);
-            var uv1 = new Vector2(1, 1);
-            unsafe
-            {
-                cmdlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-            }
-        }
     }
     
-    public class UBinocular : UOpNode
-    {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinIn LeftPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinIn RightPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinOut ResultPin { get; set; } = new PinOut();
-        public UBinocular()
-        {
-            Icon.Size = new Vector2(25, 25);
-            Icon.Color = 0xFF00FF00;
-            TitleColor = 0xFF204020;
-            BackColor = 0x80808080;
-
-            AddInput(LeftPin, " Left", DefaultInputDesc);
-            AddInput(RightPin, " Right", DefaultInputDesc);
-            AddOutput(ResultPin, " Result", DefaultBufferCreator);
-        }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
-        {
-            if (ResultPin == pin)
-            {
-                var graph = ParentGraph as UPgcGraph;
-                var buffer = graph.BufferCache.FindBuffer(LeftPin);
-                if (buffer != null)
-                {
-                    return buffer.BufferCreator;
-                }
-            }
-            return base.GetOutBufferCreator(pin);
-        }
-    }
-
-    public class UCopyRect : UAnyTypeMonocular
-    {
-        [Rtti.Meta]
-        public int X { get; set; } = 0;
-        [Rtti.Meta]
-        public int Y { get; set; } = 0;
-        [Rtti.Meta]
-        public int Z { get; set; } = 0;
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
-        {
-            var graph = this.ParentGraph as UPgcGraph;
-            var result = UBufferCreator.CreateInstance(DefaultBufferCreator.BufferType,
-                DefaultBufferCreator.XSize,
-                DefaultBufferCreator.YSize,
-                DefaultBufferCreator.ZSize);
-            if (result.XSize == -1)
-            {
-                result.XSize = graph.DefaultCreator.XSize;
-            }
-            if (result.YSize == -1)
-            {
-                result.YSize = graph.DefaultCreator.YSize;
-            }
-            if (result.ZSize == -1)
-            {
-                result.ZSize = graph.DefaultCreator.ZSize;
-            }
-            return result;
-        }
-        public unsafe override bool OnProcedure(UPgcGraph graph)
-        {
-            var curComp = graph.BufferCache.FindBuffer(SrcPin);
-            var resultComp = graph.BufferCache.FindBuffer(ResultPin);
-            for (int i = 0; i < resultComp.Depth; i++)
-            {
-                for (int j = 0; j < resultComp.Height; j++)
-                {
-                    for (int k = 0; k < resultComp.Width; k++)
-                    {
-                        var srcAddress = curComp.GetSuperPixelAddress(X + k, Y + j, Z + i);
-
-                        resultComp.SetSuperPixelAddress(k, j, i, srcAddress);
-                    }
-                }
-            }
-            curComp.LifeCount--;
-            return true;
-        }
-    }
-
-    public class UStretch : UAnyTypeMonocular
-    {
-        
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
-        {
-            var graph = this.ParentGraph as UPgcGraph;
-            var result = UBufferCreator.CreateInstance(DefaultBufferCreator.BufferType,
-                DefaultBufferCreator.XSize,
-                DefaultBufferCreator.YSize,
-                DefaultBufferCreator.ZSize);
-            if (result.XSize == -1)
-            {
-                result.XSize = graph.DefaultCreator.XSize;
-            }
-            if (result.YSize == -1)
-            {
-                result.YSize = graph.DefaultCreator.YSize;
-            }
-            if (result.ZSize == -1)
-            {
-                result.ZSize = graph.DefaultCreator.ZSize;
-            }
-            return result;
-        }
-        public unsafe override bool OnProcedure(UPgcGraph graph)
-        {
-            var left = graph.BufferCache.FindBuffer(SrcPin);
-            var resultComp = graph.BufferCache.FindBuffer(ResultPin);
-            var Op = resultComp.PixelOperator;
-            var tarType = resultComp.BufferCreator.ElementType;
-            var srcType = left.BufferCreator.ElementType;
-            for (int i = 0; i < resultComp.Depth; i++)
-            {
-                for (int j = 0; j < resultComp.Height; j++)
-                {
-                    for (int k = 0; k < resultComp.Width; k++)
-                    {
-                        float x = (float)(k * left.Width) / (float)resultComp.Width;
-                        float y = (float)(j * left.Height) / (float)resultComp.Height;
-                        float z = (float)(i * left.Depth) / (float)resultComp.Depth;
-                        
-                        Op.Copy(tarType, resultComp.GetSuperPixelAddress(k, j, i), srcType, left.GetSuperPixelAddress((int)x, (int)y, (int)z));
-                    }
-                }
-            }
-
-            left.LifeCount--;
-            return true;
-        }
-    }
-
-    public class UMulValue : UAnyTypeMonocular
-    {
-        public UMulValue()
-        {
-            PrevSize = new Vector2(70, 30);
-        }
-        [Rtti.Meta]
-        public float Value { get; set; } = 1.0f;
-        public unsafe override bool OnProcedure(UPgcGraph graph)
-        {
-            var left = graph.BufferCache.FindBuffer(SrcPin);
-            var result = graph.BufferCache.FindBuffer(ResultPin);
-            var op = result.PixelOperator;
-
-            var MulValue = Value;
-            var resultType = result.BufferCreator.ElementType;
-            var leftType = left.BufferCreator.ElementType;
-            var rightType = Rtti.UTypeDescGetter<float>.TypeDesc;
-            for (int i = 0; i < result.Depth; i++)
-            {
-                for (int j = 0; j < result.Height; j++)
-                {
-                    for (int k = 0; k < result.Width; k++)
-                    {
-                        op.Mul(resultType, result.GetSuperPixelAddress(k, j, i), leftType, left.GetSuperPixelAddress(k, j, i), rightType, & MulValue);
-                    }
-                }
-            }
-
-            left.LifeCount--;
-            return true;
-        }
-
-        public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
-        {
-            base.OnPreviewDraw(in prevStart, in prevEnd, cmdlist);
-
-            unsafe
-            {
-                cmdlist.AddText(in prevStart, 0xFFFFFFFF, $"{Value}", null);
-            }
-        }
-    }
-
-    public class USmoothGaussion : UMonocular
-    {
-        static float[,] BlurMatrix = 
-        {
-            { 0.0947416f, 0.118318f, 0.0947416f },
-            { 0.118318f, 0.147761f, 0.118318f },
-            { 0.0947416f, 0.118318f, 0.0947416f }
-        };
-        [Rtti.Meta]
-        public bool ClampBorder { get; set; } = true;
-        public override bool OnProcedure(UPgcGraph graph)
-        {
-            //for (int n = 0; n < SmoothNum; n++)
-            {
-                var curComp = graph.BufferCache.FindBuffer(SrcPin);
-                var resultComp = graph.BufferCache.FindBuffer(ResultPin);
-                float[,] pixels = new float[3, 3];
-                for (int i = 0; i < curComp.Height; i++)
-                {
-                    for (int j = 0; j < curComp.Width; j++)
-                    {
-                        var center = curComp.GetPixel<float>(j, i);
-                        pixels[1, 1] = center;
-
-                        {//line1
-                            if (curComp.IsValidPixel(j - 1, i - 1))
-                                pixels[0, 0] = curComp.GetPixel<float>(j - 1, i - 1);
-                            else
-                                pixels[0, 0] = center;
-
-                            if (curComp.IsValidPixel(j, i - 1))
-                                pixels[0, 1] = curComp.GetPixel<float>(j, i - 1);
-                            else
-                                pixels[0, 1] = center;
-
-                            if (curComp.IsValidPixel(j + 1, i - 1))
-                                pixels[0, 2] = curComp.GetPixel<float>(j + 1, i - 1);
-                            else
-                                pixels[0, 2] = center;
-                        }
-
-                        {//line2
-                            if (curComp.IsValidPixel(j - 1, i))
-                                pixels[1, 0] = curComp.GetPixel<float>(j - 1, i);
-                            else
-                                pixels[1, 0] = center;
-
-                            if (curComp.IsValidPixel(j + 1, i))
-                                pixels[1, 2] = curComp.GetPixel<float>(j + 1, i);
-                            else
-                                pixels[1, 2] = center;
-                        }
-
-                        {//line3
-                            if (curComp.IsValidPixel(j - 1, i + 1))
-                                pixels[2, 0] = curComp.GetPixel<float>(j - 1, i + 1);
-                            else
-                                pixels[2, 0] = center;
-
-                            if (curComp.IsValidPixel(j, i + 1))
-                                pixels[2, 1] = curComp.GetPixel<float>(j, i + 1);
-                            else
-                                pixels[2, 1] = center;
-
-                            if (curComp.IsValidPixel(j + 1, i + 1))
-                                pixels[2, 2] = curComp.GetPixel<float>(j + 1, i + 1);
-                            else
-                                pixels[2, 2] = center;
-                        }
-
-                        float value = pixels[0, 0] * BlurMatrix[0, 0] + pixels[0, 1] * BlurMatrix[0, 1] + pixels[0, 2] * BlurMatrix[0, 2]
-                            + pixels[1, 0] * BlurMatrix[1, 0] + pixels[1, 1] * BlurMatrix[1, 1] + pixels[1, 2] * BlurMatrix[1, 2]
-                            + pixels[2, 0] * BlurMatrix[2, 0] + pixels[2, 1] * BlurMatrix[2, 1] + pixels[2, 2] * BlurMatrix[2, 2];
-                        if (ClampBorder)
-                        {
-                            if (i == 0 || j == 0 || i == curComp.Height - 1 || j == curComp.Width - 1)
-                            {
-                                resultComp.SetPixel(j, i, center);
-                            }
-                            else
-                            {
-                                resultComp.SetPixel(j, i, value);
-                            }
-                        }
-                        else
-                        {
-                            resultComp.SetPixel(j, i, value);
-                        }
-                    }
-                }
-
-                curComp.LifeCount--;
-            }
-            
-            return true;
-        }
-    }
-    public class UNoisePerlin : UOpNode
+    [Bricks.CodeBuilder.ContextMenu("Perlin", "Float1\\Perlin", UPgcGraph.PgcEditorKeyword)]
+    public partial class UNoisePerlin : UOpNode
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut ResultPin { get; set; } = new PinOut();
@@ -552,7 +42,7 @@ namespace EngineNS.Bricks.Procedure.Node
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddOutput(ResultPin, " Result", DefaultBufferCreator);
+            AddOutput(ResultPin, "Result", DefaultBufferCreator);
         }
         int mOctaves = 3;
         [Rtti.Meta]
@@ -615,6 +105,8 @@ namespace EngineNS.Bricks.Procedure.Node
 
         [Rtti.Meta]
         public float GridSize { get; set; } = 1.0f;
+        [Rtti.Meta]
+        public float Border { get; set; } = 3.0f;
         protected Support.CPerlin mPerlin;
         protected void UpdatePerlin()
         {
@@ -628,23 +120,46 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
-            var resultComp = graph.BufferCache.FindBuffer(ResultPin);
+            if (TryLoadOutBufferFromCache(graph, ResultPin))
+                return true;
 
+            var resultComp = graph.BufferCache.FindBuffer(ResultPin);
             float XScale = 1.0f * GridSize / (resultComp.Width - 1);
             float YScale = 1.0f * GridSize / (resultComp.Height - 1);
-            for (int i = 0; i < resultComp.Height; i++)
+            //for (int i = 0; i < resultComp.Height; i++)
+            //{
+            //    for (int j = 0; j < resultComp.Width; j++)
+            //    {
+            //        var value = (float)mPerlin.mCoreObject.Get(StartPosition.X + GridSize * j + XScale * j, StartPosition.Z + GridSize * i + YScale * i);
+            //        resultComp.SetSuperPixelAddress(j, i, 0, &value);
+            //    }
+            //}
+            resultComp.DispatchPixels((result, x, y, z) =>
             {
-                for (int j = 0; j < resultComp.Width; j++)
-                {
-                    var value = (float)mPerlin.mCoreObject.Get(StartPosition.X + GridSize * j + XScale * j, StartPosition.Z + GridSize * i + YScale * i);
-                    resultComp.SetSuperPixelAddress(j, i, 0, &value);
-                }
-            }
+                var value = (float)mPerlin.mCoreObject.Get(StartPosition.X + GridSize * x + XScale * x, StartPosition.Z + GridSize * y + YScale * y);
+                resultComp.SetSuperPixelAddress(x, y, 0, &value);
+            }, true);
+
+            this.SaveOutBufferToCache(graph, ResultPin);
             return true;
         }
-    }
 
-    public class UBezier : UOpNode
+        public override Hash160 GetOutBufferHash(PinOut pin)
+        {
+            if (pin == ResultPin)
+            {
+                string hashStr = $"{StartPosition.ToString()}_{Octaves}_{Freq}_{Amptitude}_{Seed}_{SamplerSize}_{GridSize}_{Border}";
+                return Hash160.CreateHash160(hashStr);
+            }
+            return Hash160.Emtpy;
+        }
+        public override void OnAfterProcedure(UPgcGraph graph)
+        {
+            
+        }
+    }
+    [Bricks.CodeBuilder.ContextMenu("Bezier", "Function\\Bezier", UPgcGraph.PgcEditorKeyword)]
+    public partial class UBezier : UOpNode
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut ResultPin { get; set; } = new PinOut();
@@ -686,6 +201,12 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
         [Rtti.Meta]
+        public float RangeX
+        {
+            get => MaxX - MinX;
+        }
+
+        [Rtti.Meta]
         public float MinY
         {
             get => mBezierCtrl.MinY;
@@ -703,10 +224,14 @@ namespace EngineNS.Bricks.Procedure.Node
                 mBezierCtrl.MaxY = value;
             }
         }
-        [Rtti.Meta]
-        public List<BezierPointBase> BzPoints 
+        public float RangeY
         {
-            get => mBezierCtrl.BezierPoints; 
+            get => MaxY - MinY;
+        }
+        [Rtti.Meta]
+        public List<BezierPointBase> BzPoints
+        {
+            get => mBezierCtrl.BezierPoints;
             set
             {
                 mBezierCtrl.BezierPoints = value;
@@ -723,15 +248,32 @@ namespace EngineNS.Bricks.Procedure.Node
         public UBezier()
         {
             PrevSize = new Vector2(200, 60);
-            
+
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddOutput(ResultPin, " Result", DefaultBufferCreator, "Bezier");
+            AddOutput(ResultPin, "Result", DefaultBufferCreator, "Bezier");
 
             mBezierCtrl.Initialize(MinX, MinY, MaxX, MaxY);
+        }
+        public override Hash160 GetOutBufferHash(PinOut pin)
+        {
+            if (pin == ResultPin)
+            {
+                string hashStr = "";
+                hashStr += MinX;
+                hashStr += MaxX;
+                hashStr += MinY;
+                hashStr += MaxX;
+                foreach (var i in BzPoints)
+                {
+                    hashStr += i.ToString();
+                }
+                return Hash160.CreateHash160(hashStr);
+            }
+            return Hash160.Emtpy;
         }
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
@@ -742,267 +284,21 @@ namespace EngineNS.Bricks.Procedure.Node
             //ImGuiAPI.InvisibleButton("canvas", prevEnd - prevStart, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonRight);
             mBezierCtrl.OnDrawCanvas(in prevStart, prevEnd - prevStart);
         }
-    }
-
-    public class UStretchBlt : UBinocular
-    {
         [Rtti.Meta]
-        public uint SrcX { get; set; } = 0;
-        [Rtti.Meta]
-        public uint SrcY { get; set; } = 0;
-        [Rtti.Meta]
-        public int SrcW { get; set; } = -1;
-        [Rtti.Meta]
-        public int SrcH { get; set; } = -1;
-
-        [Rtti.Meta]
-        public uint DstX { get; set; } = 0;
-        [Rtti.Meta]
-        public uint DstY { get; set; } = 0;
-        [Rtti.Meta]
-        public int DstW { get; set; } = -1;
-        [Rtti.Meta]
-        public int DstH { get; set; } = -1;
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        public float GetY(float x)
         {
-            if (ResultPin == pin)
-            {
-                var graph = ParentGraph as UPgcGraph;
-                var buffer = graph.BufferCache.FindBuffer(LeftPin);
-                if (buffer != null)
-                {
-                    return buffer.BufferCreator;
-                }
-            }
-            return base.GetOutBufferCreator(pin);
-        }
-        public unsafe override bool OnProcedure(UPgcGraph graph)
-        {
-            var left = graph.BufferCache.FindBuffer(LeftPin);
-            var right = graph.BufferCache.FindBuffer(RightPin);
-            var resultComp = graph.BufferCache.FindBuffer(ResultPin);
-            //Copy Left to Result
-            var op = resultComp.PixelOperator;
-            var tarType = resultComp.BufferCreator.ElementType;
-            var srcType = left.BufferCreator.ElementType;
-            for (int i = 0; i < resultComp.Height; i++)
-            {
-                for (int j = 0; j < resultComp.Width; j++)
-                {
-                    op.Copy(tarType, resultComp.GetSuperPixelAddress(j, i, 0), srcType, left.GetSuperPixelAddress(j, i, 0));
-                }
-            }
-            int width = DstW;
-            int height = DstH;
-            if (width < 0)
-            {
-                width = left.Width - (int)SrcX;
-            }
-            if (height < 0)
-            {
-                height = left.Height - (int)SrcY;
-            }
-            int srcwidth = SrcW;
-            int srcheight = SrcH;
-            if (srcwidth < 0)
-            {
-                srcwidth = right.Width - (int)DstX;
-            }
-            if (srcheight < 0)
-            {
-                srcheight = right.Height - (int)DstY;
-            }
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    float x = (float)(j * srcwidth) / (float)width;
-                    float y = (float)(i * srcheight) / (float)height;
-
-                    op.Copy(tarType, resultComp.GetSuperPixelAddress((int)DstX + j, (int)DstY + i, 0),
-                        srcType, right.GetSuperPixelAddress((int)SrcX + (int)x, (int)SrcY + (int)y, 0));
-                }
-            }
-
-            left.LifeCount--;
-            right.LifeCount--;
-            return true;
+            var vzValue = BezierCalculate.ValueOnBezier(BzPoints, x);
+            return vzValue.Y;
         }
     }
-    public class UPixelAdd : UBinocular
-    {
-        public unsafe override bool OnProcedure(UPgcGraph graph)
-        {
-            var left = graph.BufferCache.FindBuffer(LeftPin);
-            var right = graph.BufferCache.FindBuffer(RightPin);
-            if (right != null)
-            {
-                if (GetInputBufferCreator(LeftPin).ElementType != GetInputBufferCreator(RightPin).ElementType 
-                    && left.Depth != right.Depth)
-                {
-                    left.LifeCount--;
-                    right.LifeCount--;
-                    return false;
-                }
-            }
 
-            var result = graph.BufferCache.FindBuffer(ResultPin);
-            var resultType = result.BufferCreator.ElementType;
-            var leftType = left.BufferCreator.ElementType;
-            var rightType = right.BufferCreator.ElementType;
-            for (int i = 0; i < result.Depth; i++)
-            {
-                for (int j = 0; j < result.Height; j++)
-                {
-                    for (int k = 0; k < result.Width; k++)
-                    {
-                        float l_x = (float)(k * left.Width) / (float)result.Width;
-                        float l_y = (float)(j * left.Height) / (float)result.Height;
-
-                        float r_x = (float)(k * right.Width) / (float)result.Width;
-                        float r_y = (float)(j * right.Height) / (float)result.Height;
-                        result.PixelOperator.Add(resultType, result.GetSuperPixelAddress(k, j, i), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, i), rightType, right.GetSuperPixelAddress((int)r_x, (int)r_y, i));
-                    }
-                }
-            }
-            left.LifeCount--;
-            if (right != null)
-                right.LifeCount--;
-            return true;
-        }
-    }
-    public class UPixelSub : UBinocular
-    {
-        public unsafe override bool OnProcedure(UPgcGraph graph)
-        {
-            var left = graph.BufferCache.FindBuffer(LeftPin);
-            var right = graph.BufferCache.FindBuffer(RightPin);
-            if (right != null)
-            {
-                if (GetInputBufferCreator(LeftPin).ElementType != GetInputBufferCreator(RightPin).ElementType
-                    && left.Depth != right.Depth)
-                {
-                    left.LifeCount--;
-                    right.LifeCount--;
-                    return false;
-                }
-            }
-
-            var result = graph.BufferCache.FindBuffer(ResultPin);
-            var resultType = result.BufferCreator.ElementType;
-            var leftType = left.BufferCreator.ElementType;
-            var rightType = right.BufferCreator.ElementType;
-            for (int i = 0; i < result.Depth; i++)
-            {
-                for (int j = 0; j < result.Height; j++)
-                {
-                    for (int k = 0; k < result.Width; k++)
-                    {
-                        float l_x = (float)(k * left.Width) / (float)result.Width;
-                        float l_y = (float)(j * left.Height) / (float)result.Height;
-
-                        float r_x = (float)(k * right.Width) / (float)result.Width;
-                        float r_y = (float)(j * right.Height) / (float)result.Height;
-                        result.PixelOperator.Sub(resultType, result.GetSuperPixelAddress(k, j, i), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, i), rightType, right.GetSuperPixelAddress((int)r_x, (int)r_y, i));
-                    }
-                }
-            }
-            left.LifeCount--;
-            if (right != null)
-                right.LifeCount--;
-            return true;
-        }
-    }
-    public class UPixelMul : UBinocular
-    {
-        public unsafe override bool OnProcedure(UPgcGraph graph)
-        {
-            var left = graph.BufferCache.FindBuffer(LeftPin);
-            var right = graph.BufferCache.FindBuffer(RightPin);
-            if (right != null)
-            {
-                if (GetInputBufferCreator(LeftPin).ElementType != GetInputBufferCreator(RightPin).ElementType
-                    && left.Depth != right.Depth)
-                {
-                    left.LifeCount--;
-                    right.LifeCount--;
-                    return false;
-                }
-            }
-
-            var result = graph.BufferCache.FindBuffer(ResultPin);
-            var resultType = result.BufferCreator.ElementType;
-            var leftType = left.BufferCreator.ElementType;
-            var rightType = right.BufferCreator.ElementType;
-            for (int i = 0; i < result.Depth; i++)
-            {
-                for (int j = 0; j < result.Height; j++)
-                {
-                    for (int k = 0; k < result.Width; k++)
-                    {
-                        float l_x = (float)(k * left.Width) / (float)result.Width;
-                        float l_y = (float)(j * left.Height) / (float)result.Height;
-
-                        float r_x = (float)(k * right.Width) / (float)result.Width;
-                        float r_y = (float)(j * right.Height) / (float)result.Height;
-                        result.PixelOperator.Mul(resultType, result.GetSuperPixelAddress(k, j, i), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, i), rightType, right.GetSuperPixelAddress((int)r_x, (int)r_y, i));
-                    }
-                }
-            }
-            left.LifeCount--;
-            if (right != null)
-                right.LifeCount--;
-            return true;
-        }
-    }
-    public class UPixelDiv : UBinocular
-    {
-        public unsafe override bool OnProcedure(UPgcGraph graph)
-        {
-            var left = graph.BufferCache.FindBuffer(LeftPin);
-            var right = graph.BufferCache.FindBuffer(RightPin);
-            if (right != null)
-            {
-                if (GetInputBufferCreator(LeftPin).ElementType != GetInputBufferCreator(RightPin).ElementType
-                    && left.Depth != right.Depth)
-                {
-                    left.LifeCount--;
-                    right.LifeCount--;
-                    return false;
-                }
-            }
-
-            var result = graph.BufferCache.FindBuffer(ResultPin);
-            var resultType = result.BufferCreator.ElementType;
-            var leftType = left.BufferCreator.ElementType;
-            var rightType = right.BufferCreator.ElementType;
-            for (int i = 0; i < result.Depth; i++)
-            {
-                for (int j = 0; j < result.Height; j++)
-                {
-                    for (int k = 0; k < result.Width; k++)
-                    {
-                        float l_x = (float)(k * left.Width) / (float)result.Width;
-                        float l_y = (float)(j * left.Height) / (float)result.Height;
-
-                        float r_x = (float)(k * right.Width) / (float)result.Width;
-                        float r_y = (float)(j * right.Height) / (float)result.Height;
-                        result.PixelOperator.Div(resultType, result.GetSuperPixelAddress(k, j, i), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, i), rightType, right.GetSuperPixelAddress((int)r_x, (int)r_y, i));
-                    }
-                }
-            }
-            left.LifeCount--;
-            if (right != null)
-                right.LifeCount--;
-            return true;
-        }
-    }
     /*
      0 1 2
      3 c 4
      5 6 7
      */
-    public class UCalcNormal : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("CalcNormal", "Function\\CalcNormal", UPgcGraph.PgcEditorKeyword)]
+    public partial class UCalcNormal : UPgcNodeBase
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinIn HFieldPin { get; set; } = new PinIn(); 
@@ -1019,7 +315,7 @@ namespace EngineNS.Bricks.Procedure.Node
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddInput(HFieldPin, " Height", DefaultInputDesc);
+            AddInput(HFieldPin, "Height", DefaultInputDesc);
             AddOutput(XPin, "X", DefaultBufferCreator);
             AddOutput(YPin, "Y", DefaultBufferCreator);
             AddOutput(ZPin, "Z", DefaultBufferCreator);
@@ -1154,7 +450,8 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
-    public class UNormalize3D : UPgcNodeBase
+    [Bricks.CodeBuilder.ContextMenu("Normalize3D", "Function\\Normalize3D", UPgcGraph.PgcEditorKeyword)]
+    public partial class UNormalize3D : UPgcNodeBase
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinIn InXPin { get; set; } = new PinIn();
@@ -1175,9 +472,9 @@ namespace EngineNS.Bricks.Procedure.Node
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddInput(InXPin, " InX", DefaultInputDesc);
-            AddInput(InYPin, " InY", DefaultInputDesc);
-            AddInput(InZPin, " InZ", DefaultInputDesc);
+            AddInput(InXPin, "InX", DefaultInputDesc);
+            AddInput(InYPin, "InY", DefaultInputDesc);
+            AddInput(InZPin, "InZ", DefaultInputDesc);
             AddOutput(XPin, "X", DefaultBufferCreator);
             AddOutput(YPin, "Y", DefaultBufferCreator);
             AddOutput(ZPin, "Z", DefaultBufferCreator);
@@ -1232,127 +529,8 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
-    public class UPreviewImage : UPgcNodeBase
-    {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinIn InXYZPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinIn InXPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinIn InYPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinIn InZPin { get; set; } = new PinIn();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinOut XYZPin { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinOut XPin { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinOut YPin { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinOut ZPin { get; set; } = new PinOut();
-
-        public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UPreviewImage()
-        {
-            PrevSize = new Vector2(100, 100);
-
-            Icon.Size = new Vector2(25, 25);
-            Icon.Color = 0xFF00FF00;
-            TitleColor = 0xFF204020;
-            BackColor = 0x80808080;
-
-            AddInput(InXYZPin, " InXYZ", XYZBufferCreator);
-            AddInput(InXPin, " InX", DefaultInputDesc);
-            AddInput(InYPin, " InY", DefaultInputDesc);
-            AddInput(InZPin, " InZ", DefaultInputDesc);
-
-            AddOutput(XYZPin, " XYZ", XYZBufferCreator);
-            AddOutput(XPin, "X", DefaultBufferCreator);
-            AddOutput(YPin, "Y", DefaultBufferCreator);
-            AddOutput(ZPin, "Z", DefaultBufferCreator);
-        }
-        public override int PreviewResultIndex
-        {
-            get => mPreviewResultIndex;
-            set
-            {
-                mPreviewResultIndex = -1;
-            }
-        }
-        public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
-        {
-            if (PreviewSRV == null)
-                return;
-
-            var uv0 = new Vector2(0, 0);
-            var uv1 = new Vector2(1, 1);
-            unsafe
-            {
-                cmdlist.AddImage(PreviewSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-            }
-        }
-        public override UBufferCreator GetOutBufferCreator(PinOut pin)
-        {
-            return base.GetOutBufferCreator(pin);
-        }
-        public override bool OnProcedure(UPgcGraph graph)
-        {
-            var xyzSrc = graph.BufferCache.FindBuffer(InXYZPin) as USuperBuffer<Vector3, FFloat3Operator>;
-            var xSrc = graph.BufferCache.FindBuffer(InXPin) as USuperBuffer<float, FFloatOperator>;
-            var ySrc = graph.BufferCache.FindBuffer(InYPin) as USuperBuffer<float, FFloatOperator>;
-            var zSrc = graph.BufferCache.FindBuffer(InZPin) as USuperBuffer<float, FFloatOperator>;
-
-            if (xyzSrc != null)
-            {
-                graph.BufferCache.RegBuffer(XYZPin, xyzSrc);
-            }
-            if (xSrc != null)
-            {
-                graph.BufferCache.RegBuffer(XPin, xSrc);
-            }
-            if (ySrc != null)
-            {
-                graph.BufferCache.RegBuffer(YPin, ySrc);
-            }
-            if (zSrc != null)
-            {
-                graph.BufferCache.RegBuffer(ZPin, zSrc);
-            }
-
-            if (graph.GraphEditor != null)
-            {
-                var norMap = new Bricks.Procedure.UImage2D();
-
-                if (xyzSrc != null)
-                {
-                    norMap.Initialize(xyzSrc.Width, xyzSrc.Height,
-                        xyzSrc,
-                        null,
-                        0);
-                }
-                else
-                {
-                    norMap.Initialize(xSrc.Width, xSrc.Height,
-                        xSrc,
-                        ySrc,
-                        zSrc,
-                        null);
-                }
-
-                if (PreviewSRV != null)
-                {
-                    PreviewSRV?.FreeTextureHandle();
-                    PreviewSRV = null;
-                }
-                PreviewSRV = norMap.CreateRGBA8Texture2D();
-            }
-            return true;
-        }
-    }
-    public class USdfCalculator : UMonocular
-    {
-    }
-
+    
+    [Bricks.CodeBuilder.ContextMenu("RootNode", "RootNode", UPgcGraph.PgcEditorKeyword)]
     public class UEndingNode : UOpNode
     {
         public UEndingNode()
@@ -1372,28 +550,76 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             set
             {
-                foreach(var i in Inputs)
+                if (value > Inputs.Count)
                 {
-                    this.ParentGraph.RemoveLinkedIn(i);
-                }
-                foreach (var i in Outputs)
-                {
-                    this.ParentGraph.RemoveLinkedOut(i);
-                }
-                this.Inputs.Clear();
-                this.Outputs.Clear();
-                for (int i = 0; i < value; i++)
-                {
-                    var inPin = new PinIn();            
-                    var inputDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-                    AddInput(inPin, $"in{i}", inputDesc);
+                    var delta = value - this.Inputs.Count;
+                    for (int i = 0; i < delta; i++)
+                    {
+                        var inPin = new PinIn();
+                        var inputDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+                        var num = Inputs.Count;
+                        AddInput(inPin, $"in{num}", inputDesc);
 
-                    var outPin = new PinOut();
-                    AddOutput(outPin, $"out{i}", inputDesc);
-                }
+                        var outPin = new PinOut();
+                        AddOutput(outPin, $"out{num}", inputDesc);
+                    }
 
-                OnPositionChanged();
+                    OnPositionChanged();
+                }
+                else
+                {
+                    foreach (var i in Inputs)
+                    {
+                        this.ParentGraph.RemoveLinkedIn(i);
+                    }
+                    foreach (var i in Outputs)
+                    {
+                        this.ParentGraph.RemoveLinkedOut(i);
+                    }
+                    this.Inputs.Clear();
+                    this.Outputs.Clear();
+                    for (int i = 0; i < value; i++)
+                    {
+                        var inPin = new PinIn();
+                        var inputDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+                        AddInput(inPin, $"in{i}", inputDesc);
+
+                        var outPin = new PinOut();
+                        AddOutput(outPin, $"out{i}", inputDesc);
+                    }
+
+                    OnPositionChanged();
+                }
             }
+        }
+        public class UPinInfoEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        {
+            int PinIndex = 0;
+            string CanLinkType = "value";
+            public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
+            {
+                newValue = info.Value;
+                var node = info.ObjectInstance as UEndingNode;
+                ImGuiAPI.PushID("PinInfoEditor");
+                ImGuiAPI.InputInt("Pin", ref PinIndex, 0, 0, ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                ImGuiAPI.InputText("Type", ref CanLinkType);
+                if (ImGuiAPI.Button("OK"))
+                {
+                    if (PinIndex > 0 && PinIndex < node.Inputs.Count)
+                    {
+                        node.Inputs[PinIndex].LinkDesc.CanLinks.Clear();
+                        node.Inputs[PinIndex].LinkDesc.CanLinks.Add(CanLinkType);
+                    }
+                }
+                
+                ImGuiAPI.PopID();
+                return false;
+            }
+        }
+        [UPinInfoEditorAttribute]
+        public int PinInfoEditor
+        {
+            get { return 0; }
         }
         public override bool IsMatchLinkedPin(UBufferCreator input, UBufferCreator output)
         {
@@ -1431,18 +657,6 @@ namespace EngineNS.Bricks.Procedure.Node
             //    }
             //}
             return true;
-        }
-    }
-}
-
-namespace EngineNS.UTest
-{
-    [UTest.UTest]
-    public class UTest_Procedure
-    {
-        public void UnitTestEntrance()
-        {
-
         }
     }
 }

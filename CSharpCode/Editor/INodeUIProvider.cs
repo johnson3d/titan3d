@@ -11,6 +11,7 @@ namespace EngineNS.Editor
         string NodeName { get; }
         bool Selected { get; set; }
         bool DrawNode(UTreeNodeDrawer tree, int index);
+        GamePlay.UWorld GetWorld();
     }
     public class UTreeNodeDrawer
     {

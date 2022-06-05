@@ -22,7 +22,15 @@ namespace EngineNS.Graphics.Mesh.Modifier
     public class UInstanceModifier
     {
         uint mCurNumber = 0;
+        public uint CurNumber
+        {
+            get => mCurNumber;
+        }
         uint mMaxNumber = 0;
+        public uint MaxNumber
+        {
+            get => mMaxNumber;
+        }
         public class UInstantVBs
         {
             public Vector3[] mPosData = null;
@@ -152,7 +160,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 mAttachVBs.mCoreObject.BindVertexBuffer(EVertexStreamType.VST_F4_1, mF41VB.mCoreObject);
             }
 
-            public void PushInstance(UInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in UInt32_4 f41, uint hitProxyId)
+            public uint PushInstance(UInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in UInt32_4 f41, uint hitProxyId)
             {
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
                 SureBuffers(mdf, mdf.mCurNumber + 1);
@@ -165,7 +173,26 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 mRotateData[mdf.mCurNumber] = quat;
                 mF41Data[mdf.mCurNumber] = f41;
 
+                var result = mdf.mCurNumber;
                 mdf.mCurNumber++;
+                return result;
+            }
+            public unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, UInt32_4* f41, uint* hitProxyId)
+            {
+                if (pos != IntPtr.Zero.ToPointer())
+                    mPosData[index] = *pos;
+                if (scale != IntPtr.Zero.ToPointer())
+                {
+                    mScaleData[index].X = scale->X;
+                    mScaleData[index].Y = scale->Y;
+                    mScaleData[index].Z = scale->Z;
+                }
+                if (hitProxyId != IntPtr.Zero.ToPointer())
+                    mScaleData[index].W = *hitProxyId;
+                if (quat != IntPtr.Zero.ToPointer())
+                    mRotateData[index] = *quat;
+                if (f41 != IntPtr.Zero.ToPointer())
+                    mF41Data[index] = *f41;
             }
         }        
         public UInstantVBs InstantVBs;
@@ -228,7 +255,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 srvDesc.Buffer.NumElements = mdf.mMaxNumber;
                 InstantSRV = UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(in srvDesc);
             }
-            public void PushInstance(UInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in UInt32_4 f41, uint hitProxId)
+            public uint PushInstance(UInstanceModifier mdf, in Vector3 pos, in Vector3 scale, in Quaternion quat, in UInt32_4 f41, uint hitProxyId)
             {
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
 
@@ -243,9 +270,26 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 InstData[mdf.mCurNumber].Quat = quat;
                 InstData[mdf.mCurNumber].Scale = scale;
                 InstData[mdf.mCurNumber].UserData = f41;
-                InstData[mdf.mCurNumber].HitProxyId = hitProxId;
+                InstData[mdf.mCurNumber].HitProxyId = hitProxyId;
 
+                var result = mdf.mCurNumber;
                 mdf.mCurNumber++;
+
+                IsDirty = true;
+                return result;
+            }
+            public unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, UInt32_4* f41, uint* hitProxyId)
+            {
+                if (pos != IntPtr.Zero.ToPointer())
+                    InstData[index].Position = *pos;
+                if (quat != IntPtr.Zero.ToPointer())
+                    InstData[index].Quat = *quat;
+                if (scale != IntPtr.Zero.ToPointer())
+                    InstData[index].Scale = *scale;
+                if (f41 != IntPtr.Zero.ToPointer())
+                    InstData[index].UserData = *f41;
+                if (hitProxyId != IntPtr.Zero.ToPointer())
+                    InstData[index].HitProxyId = *hitProxyId;
 
                 IsDirty = true;
             }
@@ -307,15 +351,27 @@ namespace EngineNS.Graphics.Mesh.Modifier
             }
         }
 
-        public void PushInstance(in Vector3 pos, in Vector3 scale, in Quaternion quat, in UInt32_4 f41, uint hitProxyId)
+        public uint PushInstance(in Vector3 pos, in Vector3 scale, in Quaternion quat, in UInt32_4 f41, uint hitProxyId)
         {
             if (InstantSSBO != null)
             {
-                InstantSSBO.PushInstance(this, in pos, in scale, in quat, in f41, hitProxyId);
+                return InstantSSBO.PushInstance(this, in pos, in scale, in quat, in f41, hitProxyId);
             }
             else if (InstantVBs != null)
             {
-                InstantVBs.PushInstance(this, in pos, in scale, in quat, in f41, hitProxyId);
+                return InstantVBs.PushInstance(this, in pos, in scale, in quat, in f41, hitProxyId);
+            }
+            return uint.MaxValue;
+        }
+        public unsafe void SetInstance(uint index, Vector3* pos, Vector3* scale, Quaternion* quat, UInt32_4* f41, uint* hitProxyId)
+        {
+            if (InstantSSBO != null)
+            {
+                InstantSSBO.SetInstance(index, pos, scale, quat, f41, hitProxyId);
+            }
+            else if (InstantVBs != null)
+            {
+                InstantVBs.SetInstance(index, pos, scale, quat, f41, hitProxyId);
             }
         }
 

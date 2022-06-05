@@ -148,6 +148,8 @@ namespace EngineNS.Bricks.Procedure.Node
         internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
+            if (MeshName == null)
+                return;
             if (Task == null)
             {
                 Task = Editor.USnapshot.Load(MeshName.Address + ".snap");
@@ -269,6 +271,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var ctrlPos = prevStart;
             ctrlPos -= ImGuiAPI.GetWindowPos();
             ImGuiAPI.SetCursorPos(in ctrlPos);
+            ImGuiAPI.PushID($"{this.NodeId.ToString()}");
             if (ImGuiAPI.Button("ShowMesh"))
             {
                 var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
@@ -281,6 +284,7 @@ namespace EngineNS.Bricks.Procedure.Node
                     var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UMeshEditor), rn, PreviewMesh);
                 }
             }
+            ImGuiAPI.PopID();
             //if (PreviewSRV == null)
             //    return;
 

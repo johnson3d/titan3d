@@ -33,6 +33,15 @@ namespace EngineNS.EGui.UIProxy
                 }
             }
         }
+        public IUIProxyBase GetUIProxy(string key, in EngineNS.Thickness uvMargin)
+        {
+            IUIProxyBase item = null;
+            if (mDic.TryGetValue(key, out item))
+                return item;
+            item = new EGui.UIProxy.BoxImageProxy(RName.GetRName(key, RName.ERNameType.Engine), uvMargin);
+            mDic.Add(key, item);
+            return item;
+        }
 
         public override void Cleanup(UEngine host)
         {

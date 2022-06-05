@@ -788,6 +788,10 @@ namespace EngineNS
         {
             return (((int)(B)) | ((int)(G) << 8) | ((int)(R << 16)) | ((int)(A << 24)));
         }
+        public int ToAbgr()
+        {
+            return (((int)(R)) | ((int)(G) << 8) | ((int)(B << 16)) | ((int)(A << 24)));
+        }
         [Rtti.Meta]
         public Color4 ToColor4Float()
         {

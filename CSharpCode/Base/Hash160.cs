@@ -376,6 +376,15 @@ namespace EngineNS
             }
             return result;
         }
+        public static unsafe Hash160 CreateHash160(void* pAttr, uint length)
+        {
+            var bytes = new byte[length];
+            fixed (byte* p = &bytes[0])
+            {
+                CoreSDK.MemoryCopy(p, pAttr, length);
+            }
+            return CreateHash160(bytes);
+        }
         public override string ToString()
         {
             string result = "";

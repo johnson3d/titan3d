@@ -72,6 +72,8 @@ namespace EngineNS.CodeCompiler
                     {
                         try
                         {
+                            if (IO.FileManager.FileExists(pdbFile))
+                                IO.FileManager.DeleteFile(pdbFile);
                             using (var fs = new FileStream(pdbFile, FileMode.Create))
                             {
                                 fs.Write(pdbStream.ToArray());
@@ -85,6 +87,14 @@ namespace EngineNS.CodeCompiler
                 }
                 else
                 {
+                    foreach (var i in emitResult.Diagnostics)
+                    {
+                        System.Diagnostics.Debug.WriteLine(i.ToString());
+                    }
+                    foreach (var i in emitResult.Diagnostics)
+                    {
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Macross", i.ToString());
+                    }
                     retValue = false;
                 }
             }

@@ -60,12 +60,10 @@ namespace EngineNS.Graphics.Pipeline.Common
         public RHI.CUnorderedAccessView TileUAV;
         public RHI.CShaderResourceView TileSRV;
 
-        private RHI.CShaderDesc CSDesc_SetupTileData;
-        private RHI.CComputeShader CS_SetupTileData;
+        private Graphics.Pipeline.Shader.UShader SetupTileData;
         private RHI.CComputeDrawcall SetupTileDataDrawcall;
 
-        private RHI.CShaderDesc CSDesc_PushLightToTileData;
-        private RHI.CComputeShader CS_PushLightToTileData;
+        private Graphics.Pipeline.Shader.UShader PushLightToTileData;
         private RHI.CComputeDrawcall PushLightToTileDataDrawcall;
 
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
@@ -80,17 +78,15 @@ namespace EngineNS.Graphics.Pipeline.Common
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
 
-            CSDesc_SetupTileData = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/ScreenSpace/Tiling.compute", RName.ERNameType.Engine),
-                "CS_SetupTileData", EShaderType.EST_ComputeShader, defines, null);
-            CS_SetupTileData = rc.CreateComputeShader(CSDesc_SetupTileData);
-
-            CSDesc_PushLightToTileData = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/ScreenSpace/Tiling.compute", RName.ERNameType.Engine),
-                "CS_PushLightToTileData", EShaderType.EST_ComputeShader, defines, null);
-            CS_PushLightToTileData = rc.CreateComputeShader(CSDesc_PushLightToTileData);
+            SetupTileData = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Compute/ScreenSpace/Tiling.compute", RName.ERNameType.Engine),
+                "CS_SetupTileData", EShaderType.EST_ComputeShader, defines);
+            
+            PushLightToTileData = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Compute/ScreenSpace/Tiling.compute", RName.ERNameType.Engine),
+                "CS_PushLightToTileData", EShaderType.EST_ComputeShader, defines);
         }
         private unsafe void ResetComputeDrawcall(URenderPolicy policy)
         {
-            if (CS_SetupTileData == null)
+            if (SetupTileData == null)
                 return;
             var rc = UEngine.Instance.GfxDevice.RenderContext;
 
@@ -98,19 +94,19 @@ namespace EngineNS.Graphics.Pipeline.Common
             var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCBuffer;
 
             SetupTileDataDrawcall = rc.CreateComputeDrawcall();
-            SetupTileDataDrawcall.mCoreObject.SetComputeShader(CS_SetupTileData.mCoreObject);
-            var srvIdx = CSDesc_SetupTileData.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
+            SetupTileDataDrawcall.mCoreObject.SetComputeShader(SetupTileData.CS_Shader.mCoreObject);
+            var srvIdx = SetupTileData.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
             if (srvIdx != (IShaderBinder*)0)
             {
                 SetupTileDataDrawcall.mCoreObject.GetCBufferResources().BindCS(srvIdx->m_CSBindPoint, ConfigCBuffer.mCoreObject);
             }
-            srvIdx = CSDesc_SetupTileData.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerCamera");
+            srvIdx = SetupTileData.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerCamera");
             if (srvIdx != (IShaderBinder*)0)
             {
                 var camera = policy.DefaultCamera;
                 SetupTileDataDrawcall.mCoreObject.GetCBufferResources().BindCS(srvIdx->m_CSBindPoint, camera.PerCameraCBuffer.mCoreObject);
             }
-            srvIdx = CSDesc_SetupTileData.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "DstBuffer");
+            srvIdx = SetupTileData.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "DstBuffer");
             if (srvIdx != (IShaderBinder*)0)
             {
                 SetupTileDataDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, TileUAV.mCoreObject);
@@ -118,13 +114,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             SetupTileDataDrawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(TileX, Dispatch_SetupDimArray2.X), CoreDefine.Roundup(TileY, Dispatch_SetupDimArray2.Y), 1);
 
             PushLightToTileDataDrawcall = rc.CreateComputeDrawcall();
-            PushLightToTileDataDrawcall.mCoreObject.SetComputeShader(CS_PushLightToTileData.mCoreObject);
-            srvIdx = CSDesc_PushLightToTileData.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
+            PushLightToTileDataDrawcall.mCoreObject.SetComputeShader(PushLightToTileData.CS_Shader.mCoreObject);
+            srvIdx = PushLightToTileData.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
             if (srvIdx != (IShaderBinder*)0)
             {
                 PushLightToTileDataDrawcall.mCoreObject.GetCBufferResources().BindCS(srvIdx->m_CSBindPoint, ConfigCBuffer.mCoreObject);
             }            
-            srvIdx = CSDesc_PushLightToTileData.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "DstBuffer");
+            srvIdx = PushLightToTileData.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "DstBuffer");
             if (srvIdx != (IShaderBinder*)0)
             {
                 PushLightToTileDataDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, TileUAV.mCoreObject);
@@ -205,7 +201,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             
             #region Setup
             {
-                var srvIdx = CSDesc_SetupTileData.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "DepthBuffer");
+                var srvIdx = SetupTileData.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "DepthBuffer");
                 if (srvIdx != (IShaderBinder*)0)
                 {
                     var depth = this.GetAttachBuffer(DepthPinIn);
@@ -241,7 +237,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             #region PushLights
             {
-                var srvIdx = CSDesc_PushLightToTileData.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GpuScene_PointLights");
+                var srvIdx = PushLightToTileData.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GpuScene_PointLights");
                 if (srvIdx != (IShaderBinder*)0)
                 {
                     var attachBuffer = this.GetAttachBuffer(PointLightsPinIn);

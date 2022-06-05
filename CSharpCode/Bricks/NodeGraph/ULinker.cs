@@ -78,6 +78,9 @@ namespace EngineNS.Bricks.NodeGraph
                     {
                         inNode.OnLoadLinker(this);
                         outNode.OnLoadLinker(this);
+                        
+                        inNode.UpdateLayout();
+                        outNode.UpdateLayout();
                     }
                 }
             }

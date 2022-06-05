@@ -129,6 +129,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             return null;
         }
+        public override void UpdateAMetaReferences(IO.IAssetMeta ameta)
+        {
+            ameta.RefAssetRNames.Clear();
+            ameta.AddReferenceAsset(MaterialName);
+            foreach (var i in UsedRSView)
+            {
+                if (i.Value == null)
+                    continue;
+                ameta.AddReferenceAsset(i.Value);
+            }
+        }
         #endregion        
         public static UMaterialInstance CreateMaterialInstance(UMaterial mtl)
         {
@@ -208,6 +219,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 System.Action exec = async () =>
                 {
                     ParentMaterial = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value.MaterialName);
+                    if (ParentMaterial == null)
+                    {
+                        ParentMaterial = UEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
+                    }
                     bool isMatch = true;
                     #region UniformVars match parent
                     if (mUsedUniformVars.Count != ParentMaterial.UsedUniformVars.Count)

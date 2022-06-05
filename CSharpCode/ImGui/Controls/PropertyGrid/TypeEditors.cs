@@ -779,7 +779,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         if (dict.GetType().GenericTypeArguments.Length == 1)
                         {
                             var listElementType = dict.GetType().GenericTypeArguments[0];
-                            var typeSlt = new EGui.Controls.TypeSelector();
+                            var typeSlt = new EGui.Controls.UTypeSelector();
                             typeSlt.BaseType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(listElementType.FullName);
                             typeSlt.OnDraw(150, 6);
                             if (typeSlt.SelectedType != null)

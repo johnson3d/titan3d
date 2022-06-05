@@ -6,9 +6,17 @@ namespace EngineNS.Editor.Forms
 {
     public class UWorldOutliner : UTreeNodeDrawer, Graphics.Pipeline.IRootForm
     {
-        public GamePlay.UWorld mWorld;
-        public UWorldOutliner(bool regRoot = true)
+        public GamePlay.UWorld World
         {
+            get
+            {
+                return WorldViewportState.World;
+            }
+        }
+        public EGui.Slate.UWorldViewportSlate WorldViewportState { get; set; }
+        public UWorldOutliner(EGui.Slate.UWorldViewportSlate viewport, bool regRoot = true)
+        {
+            WorldViewportState = viewport;
             if (regRoot)
                 Editor.UMainEditorApplication.RegRootForm(this);
         }
@@ -34,9 +42,9 @@ namespace EngineNS.Editor.Forms
                 {
                     DockId = ImGuiAPI.GetWindowDockID();
                 }
-                if (mWorld != null)
+                if (World != null)
                 {
-                    DrawTree(mWorld.Root, 0);
+                    DrawTree(World.Root, 0);
                 }
             }
             if (OnDrawMenu != null)
@@ -54,13 +62,9 @@ namespace EngineNS.Editor.Forms
                 {
                     DockId = ImGuiAPI.GetWindowDockID();
                 }
-                if (mWorld == null)
+                if (World != null)
                 {
-                    mWorld = (UEngine.Instance.GfxDevice.MainWindow as UMainEditorApplication)?.WorldViewportSlate.World;
-                }
-                if (mWorld != null)
-                {
-                    DrawTree(mWorld.Root, 0);
+                    DrawTree(World.Root, 0);
                 }
             }
             if (OnDrawMenu != null)
@@ -147,6 +151,12 @@ namespace EngineNS.Editor.Forms
                 if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
                 {
                     mNodeMenuShow = true;
+                    if (ImGuiAPI.MenuItem($"Goto", null, false, true))
+                    {
+                        var camera = WorldViewportState.CameraController.Camera;
+                        var radius = (node.AABB.GetMaxSide()) *  5.0f;
+                        camera.LookAtLH(node.Placement.Position - camera.GetDirection().AsDVector() * radius, node.Placement.Position, Vector3.Up);
+                    }
                     if (ImGuiAPI.BeginMenu("AddChild", true))
                     {
                         var typeDesc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(GamePlay.Scene.UNode).FullName);
@@ -156,7 +166,7 @@ namespace EngineNS.Editor.Forms
                         {
                             var ntype = Rtti.UTypeDesc.TypeOf(meta.ClassType.TypeString);
                             var newNode = Rtti.UTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.USceneActorNode;
-                            await newNode.InitializeNode(mWorld, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                            await newNode.InitializeNode(World, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
                             //var newNode = await node.ParentScene.NewNode(mWorld, meta.ClassType.TypeString, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
                             newNode.NodeData.Name = $"Node_{newNode.SceneId}";
                             newNode.Parent = node;
@@ -175,7 +185,7 @@ namespace EngineNS.Editor.Forms
                                     nodeData = Rtti.UTypeDescManager.CreateInstance((attrs[0] as GamePlay.Scene.UNodeAttribute).NodeDataType) as GamePlay.Scene.UNodeData;
                                     prefix = (attrs[0] as GamePlay.Scene.UNodeAttribute).DefaultNamePrefix;
                                 }
-                                await newNode.InitializeNode(mWorld, nodeData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                                await newNode.InitializeNode(World, nodeData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
                                 //var newNode = await node.ParentScene.NewNode(mWorld, i.ClassType.TypeString, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
                                 newNode.NodeData.Name = $"{prefix}_{newNode.SceneId}";
                                 newNode.Parent = node;
@@ -186,7 +196,7 @@ namespace EngineNS.Editor.Forms
 
                     if (ImGuiAPI.MenuItem($"Delete", null, false, true))
                     {
-                        if (mWorld.Root != node)
+                        if (World.Root != node)
                         {
                             node.Parent = null;
                         }
@@ -205,11 +215,12 @@ namespace EngineNS.Editor.Forms
         }
         protected override void OnNodeUI_LClick(INodeUIProvider provider)
         {
-            var appliction = UEngine.Instance.GfxDevice.MainWindow as EngineNS.Editor.UMainEditorApplication;
-            if (appliction == null)
-                return;
-            appliction.mMainInspector.PropertyGrid.Target = provider;
-            appliction.WorldViewportSlate.OnHitproxySelected((GamePlay.Scene.UNode)provider);
+            //var appliction = UEngine.Instance.GfxDevice.MainWindow as EngineNS.Editor.UMainEditorApplication;
+            //if (appliction == null)
+            //    return;
+            //appliction.mMainInspector.PropertyGrid.Target = provider;
+            //appliction.WorldViewportSlate.OnHitproxySelected((GamePlay.Scene.UNode)provider);
+            provider?.GetWorld()?.CurViewport?.OnHitproxySelected((GamePlay.Scene.UNode)provider);
         }
     }
 }

@@ -50,13 +50,12 @@ namespace EngineNS.GamePlay.Controller
         float YawDelta = 0;
         private void OnMouseMotion_OnValueUpdate(UValueAction2D sender, Vector2 value)
         {
-            if (mPreMousePt.X != float.MaxValue)
+            if (mPreMousePt != value)
             {
-                PitchDelta = -(value.Y - mPreMousePt.Y);
-                YawDelta = value.X - mPreMousePt.X;
+                PitchDelta = -value.Y;
+                YawDelta = value.X;
+                mPreMousePt = value;
             }
-
-            mPreMousePt = value;
         }
 
         float HInput = 0;

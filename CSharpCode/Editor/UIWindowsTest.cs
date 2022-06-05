@@ -16,7 +16,7 @@ namespace EngineNS.Editor
         public bool BoolValue { get; set; } = true;
         public ValueType ValueType { get; set; }
     }
-    public class PropertyGridTestClass
+    public class PropertyGridTestClass : EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public PropertyGridTestClass NewTest { get; set; }
         public ValueType ValueType { get; set; }
@@ -84,9 +84,45 @@ namespace EngineNS.Editor
 
             RNameValue = RName.GetRName("UTest/ground.uminst");
         }
+
+        [Category("Ext")]
+        public bool ShowExtPro { get; set; } = true;
+        [Category("Ext")]
+        public string ExtStringPro { get; set; } = "this is ext property";
+        [Category("Ext")]
+        public string ExtCategoryChangeTest { get; set; } = "this origin category is Ext";
+
+        public void GetProperties(ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            var pros = TypeDescriptor.GetProperties(this);
+            var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            //collection.InitValue(this,  pros, parentIsValueType);
+            foreach(PropertyDescriptor prop in pros)
+            {
+                if(!ShowExtPro)
+                {
+                    if (prop.Name == "ExtStringPro")
+                        continue;
+                    if (prop.Name == "ExtCategoryChangeTest")
+                        continue;
+                }
+                var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                proDesc.InitValue(this, thisType, prop, parentIsValueType);
+                if(prop.Name == "ExtCategoryChangeTest")
+                {
+                    proDesc.Category = "Ext2";
+                }
+                if(!proDesc.IsBrowsable)
+                {
+                    proDesc.ReleaseObject();
+                    continue;
+                }
+                collection.Add(proDesc);
+            }
+        }
     }
 
-    public class UIWindowsTest
+    public class UIWindowsTest : EngineNS.Graphics.Pipeline.IRootForm
     {
         public void Cleanup()
         {
@@ -96,7 +132,7 @@ namespace EngineNS.Editor
             }
         }
 
-        public async void Initialized()
+        public async Task<bool> Initialize()
         {
             await EngineNS.Thread.AsyncDummyClass.DummyFunc();
 
@@ -299,6 +335,8 @@ namespace EngineNS.Editor
             {
                 meshEditor,
             };
+
+            return true;
         }
 
         List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
@@ -308,6 +346,10 @@ namespace EngineNS.Editor
         //bool hover = false;
 
         UInt32 mMainDockId;
+
+        public bool Visible { get; set; }
+        public uint DockId { get; set; }
+        public ImGuiCond_ DockCond { get; set; }
 
         public unsafe void OnDraw()
         {

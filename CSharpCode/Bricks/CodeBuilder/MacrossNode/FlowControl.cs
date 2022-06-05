@@ -1,12 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     [ContextMenu("Sequence", "FlowControl\\Sequence", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class SequenceNode : UNodeBase
+    public partial class SequenceNode : UNodeBase, IBeforeExecNode
     {
+        int mSequenceCount = 0;
+        [Rtti.Meta]
+        public int SequenceCount 
+        {
+            get => mSequenceCount;
+            set
+            {
+                mSequenceCount = value;
+                for(int i=0; i < mSequenceCount; i++)
+                    AddSequencePin();
+
+                OnPositionChanged();
+            }
+        }
         public PinIn BeforeExec { get; set; } = new PinIn();
 
         public SequenceNode()
@@ -17,51 +32,60 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             TitleColor = MacrossStyles.Instance.FlowControlTitleColor;
             BackColor = MacrossStyles.Instance.BGColor;
 
-            AddPin.Name = "AddPin";
-            AddPin.Link = MacrossStyles.Instance.NewExecPinDesc();
-            AddPin.Link.CanLinks.Clear();
+            FirstPin.Name = "Pin0";
+            FirstPin.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
 
             BeforeExec.Name = " >>";
-            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
-            AddPinOut(AddPin);
+            AddPinOut(FirstPin);
         }
-        public PinOut AddPin { get; set; } = new PinOut();
+        public PinOut FirstPin { get; set; } = new PinOut();
         public List<PinOut> Sequences = new List<PinOut>();
-        public override void OnLButtonClicked(NodePin clickedPin)
+
+        void AddSequencePin()
         {
-            if (clickedPin == AddPin)
-            {
-                var aPin = new PinOut();
-                aPin.Name = $"Pin{Sequences.Count}";
-                aPin.Link = MacrossStyles.Instance.NewExecPinDesc();
-                Sequences.Add(aPin);
-                AddPinOut(aPin);
-            }
+            var aPin = new PinOut();
+            aPin.Name = $"Pin{Sequences.Count + 1}";
+            aPin.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
+            Sequences.Add(aPin);
+            AddPinOut(aPin);
         }
         public override void OnShowPinMenu(NodePin pin)
         {
-            if (ImGuiAPI.MenuItem($"DeletePin", null, false, true))
+            if(ImGuiAPI.MenuItem("AddPin", null, false, true))
             {
-                var addedPin = pin as PinOut;
-                if (Sequences.Contains(addedPin))
+                AddSequencePin();
+                mSequenceCount = Sequences.Count;
+                OnPositionChanged();
+            }
+            if(pin != FirstPin && pin != BeforeExec)
+            {
+                if (ImGuiAPI.MenuItem($"DeletePin", null, false, true))
                 {
-                    ParentGraph.RemoveLinkedOut(addedPin);
-                    RemovePinOut(addedPin);
-                    Sequences.Remove(addedPin);
-
-                    //ParentGraph.mMenuShowPin = null;
-                    //ParentGraph.mMenuType = EGui.Controls.NodeGraph.NodeGraph.EMenuType.None;
-
-                    for (int i = 0; i < Sequences.Count; i++)
+                    var addedPin = pin as PinOut;
+                    if (Sequences.Contains(addedPin))
                     {
-                        Sequences[i].Name = $"Pin{i}";
+                        ParentGraph.RemoveLinkedOut(addedPin);
+                        RemovePinOut(addedPin);
+                        Sequences.Remove(addedPin);
+
+                        //ParentGraph.mMenuShowPin = null;
+                        //ParentGraph.mMenuType = EGui.Controls.NodeGraph.NodeGraph.EMenuType.None;
+
+                        for (int i = 0; i < Sequences.Count; i++)
+                        {
+                            Sequences[i].Name = $"Pin{i}";
+                        }
                     }
                 }
             }
         }
         public override void BuildStatements(ref BuildCodeStatementsData data)
         {
+            var firstLinker = data.NodeGraph.GetFirstLinker(FirstPin);
+            if (firstLinker != null)
+                firstLinker.InPin.HostNode.BuildStatements(ref data);
             for(int i=0; i<Sequences.Count; i++)
             {
                 var linker = data.NodeGraph.GetFirstLinker(Sequences[i]);
@@ -71,10 +95,25 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     [ContextMenu("if", "FlowControl\\If", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class IfNode : UNodeBase
+    public partial class IfNode : UNodeBase, IBeforeExecNode, IAfterExecNode
     {
         public PinIn BeforeExec { get; set; } = new PinIn();
         public PinOut AfterExec { get; set; } = new PinOut();
+
+        int mConditionCount = 1;
+        [Rtti.Meta]
+        public int ConditionCount
+        {
+            get => mConditionCount;
+            set
+            {
+                mConditionCount = value;
+                for(int i=1; i<mConditionCount; i++)
+                    AddConditionResultPair();
+
+                OnPositionChanged();
+            }
+        }
 
         public IfNode()
         {
@@ -83,6 +122,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Icon.Color = 0xFF0fEF30;
             TitleColor = MacrossStyles.Instance.FlowControlTitleColor;
             BackColor = MacrossStyles.Instance.BGColor;
+
+            BeforeExec.Name = " >>";
+            AfterExec.Name = ">> ";
+            BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
+            AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
+            AddPinIn(BeforeExec);
+            AddPinOut(AfterExec);
 
             //ConditionPin.Name = "bool";
             //ConditionPin.Link = MacrossStyles.Instance.NewInOutPinDesc();
@@ -94,14 +140,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             AddConditionResultPair();
 
             FalsePin.Name = "False";
-            FalsePin.Link = MacrossStyles.Instance.NewExecPinDesc();
-
-            BeforeExec.Name = " >>";
-            AfterExec.Name = ">> ";
-            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
-            AfterExec.Link = MacrossStyles.Instance.NewExecPinDesc();
-            AddPinIn(BeforeExec);
-            AddPinOut(AfterExec);
+            FalsePin.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
 
             //AddPinIn(ConditionPin);
             //AddPinOut(TruePin);
@@ -109,15 +148,20 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         void AddConditionResultPair()
         {
+            RemovePinOut(FalsePin);
+
             var pinIn = AddPinIn(new PinIn()
             {
-                Name = "Condition",
+                Name = "Condition" + ConditionResultPairs.Count,
             });
             var pinOut = AddPinOut(new PinOut()
             {
-                Name = "True",
+                Name = "True" + ConditionResultPairs.Count,
             });
+            pinOut.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             ConditionResultPairs.Add(new KeyValuePair<PinIn, PinOut>(pinIn, pinOut));
+
+            AddPinOut(FalsePin);
         }
         //public PinIn ConditionPin { get; set; } = new PinIn();
         //public PinOut TruePin { get; set; } = new PinOut();
@@ -140,6 +184,34 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
             return true;
+        }
+
+        public override void OnShowPinMenu(NodePin pin)
+        {
+            if(ImGuiAPI.MenuItem("AddCondition", null, false, true))
+            {
+                AddConditionResultPair();
+                mConditionCount = ConditionResultPairs.Count;
+                OnPositionChanged();
+            }
+            if(pin != FalsePin && pin != BeforeExec && pin != AfterExec && pin != ConditionResultPairs[0].Key)
+            {
+                if(ImGuiAPI.MenuItem("DeletePin", null, false, true))
+                {
+                    for(int i=1; i<ConditionResultPairs.Count; i++)
+                    {
+                        if(pin == ConditionResultPairs[i].Key)
+                        {
+                            ParentGraph.RemoveLinkedOut(ConditionResultPairs[i].Value);
+                            ParentGraph.RemoveLinkedIn(ConditionResultPairs[i].Key);
+                            RemovePinIn(ConditionResultPairs[i].Key);
+                            RemovePinOut(ConditionResultPairs[i].Value);
+                            ConditionResultPairs.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         //public override IExpression GetExpr(UMacrossMethodGraph funGraph, ICodeGen cGen, bool bTakeResult)
@@ -217,7 +289,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             data.CurrentStatements.Add(ifStatement);
             for(int i=0; i<ConditionResultPairs.Count; i++)
             {
-                var condition = data.NodeGraph.GetOppositePinExpression(ConditionResultPairs[i].Key, ref data);
+                UExpressionBase condition;
+                if (data.NodeGraph.PinHasLinker(ConditionResultPairs[i].Key))
+                    condition = data.NodeGraph.GetOppositePinExpression(ConditionResultPairs[i].Key, ref data);
+                else
+                    condition = new UPrimitiveExpression(true);
                 var node = data.NodeGraph.GetOppositePinNode(ConditionResultPairs[i].Value);
                 var trueStatement = new UExecuteSequenceStatement();
                 if(node != null)
@@ -259,7 +335,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     [ContextMenu("return", "FlowControl\\Return", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class ReturnNode : UNodeBase
+    public partial class ReturnNode : UNodeBase, IBeforeExecNode
     {
         public PinIn BeforeExec { get; set; } = new PinIn();
 
@@ -278,7 +354,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             BackColor = MacrossStyles.Instance.BGColor;
 
             BeforeExec.Name = " >>";
-            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
         }
         public void Initialize(UMacrossMethodGraph methodGraph)
@@ -385,6 +461,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             for(int i=0; i<Inputs.Count; i++)
             {
+                if (Inputs[i] == BeforeExec)
+                    continue;
+
                 var exp = data.NodeGraph.GetOppositePinExpression(Inputs[i], ref data);
                 var st = new UAssignOperatorStatement()
                 {
@@ -434,18 +513,30 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //}
     }
     [ContextMenu("forloop", "FlowControl\\For", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class ForLoopNode : UNodeBase
+    public partial class ForLoopNode : UNodeBase, IBeforeExecNode, IAfterExecNode
     {
+        [Browsable(false)]
         public PinIn BeginIdxPin;
+        [Browsable(false)]
         public PinIn EndIdxPin;
+        [Browsable(false)]
         public PinIn StepPin;
+        [Browsable(false)]
         public PinOut IndexPin;
+        [Browsable(false)]
         public PinOut LoopBodyPin;
-        public Int64 BeginIdx;
-        public Int64 EndIdx;
-        public Int64 StepIdx;
+
+        [Rtti.Meta]
+        public Int64 BeginIdx { get; set; } = 0;
+        [Rtti.Meta]
+        public Int64 EndIdx { get; set; } = 1;
+        [Rtti.Meta]
+        public Int64 StepIdx { get; set; } = 1;
+
         static string mLoopIdxName = "loopIndex";
+        [Browsable(false)]
         public PinIn BeforeExec { get; set; } = new PinIn();
+        [Browsable(false)]
         public PinOut AfterExec { get; set; } = new PinOut();
 
         public ForLoopNode()
@@ -460,8 +551,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             BeforeExec.Name = " >>";
             AfterExec.Name = ">> ";
-            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
-            AfterExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
+            AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
             AddPinOut(AfterExec);
             BeginIdxPin = AddPinIn(new PinIn() { Name = "BeginIdx" });
@@ -470,6 +561,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             IndexPin = AddPinOut(new PinOut() { Name = "Index" });
             LoopBodyPin = AddPinOut(new PinOut() { Name = "LoopBody" });
+            LoopBodyPin.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
+        }
+
+        public override object GetPropertyEditObject()
+        {
+            return this;
         }
 
         public override void BuildStatements(ref BuildCodeStatementsData data)
@@ -518,7 +615,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     [ContextMenu("whileloop", "FlowControl\\While", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class WhileNode : UNodeBase
+    public partial class WhileNode : UNodeBase, IBeforeExecNode, IAfterExecNode
     {
         public PinIn ConditionPin;
         public PinOut LoopBodyPin;
@@ -533,20 +630,27 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             BeforeExec.Name = " >>";
             AfterExec.Name = ">> ";
-            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
-            AfterExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
+            AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
             AddPinOut(AfterExec);
             ConditionPin = AddPinIn(new PinIn() { Name = "Condition" });
+            ConditionPin.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+            ConditionPin.LinkDesc.CanLinks.Add("Value");
+
             LoopBodyPin = AddPinOut(new PinOut() { Name = "LoopBody" });
+            LoopBodyPin.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
         }
 
         public override void BuildStatements(ref BuildCodeStatementsData data)
         {
             var whileStatement = new UWhileLoopStatement();
             data.CurrentStatements.Add(whileStatement);
-            var conditionExp = data.NodeGraph.GetOppositePinExpression(ConditionPin, ref data);
-            whileStatement.Condition = conditionExp;
+            if (data.NodeGraph.PinHasLinker(ConditionPin))
+                whileStatement.Condition = data.NodeGraph.GetOppositePinExpression(ConditionPin, ref data);
+            else
+                whileStatement.Condition = new UPrimitiveExpression(false);
+
             var bodyNode = data.NodeGraph.GetOppositePinNode(LoopBodyPin);
             if(bodyNode != null)
             {
@@ -564,14 +668,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     [ContextMenu("continue", "FlowControl\\Continue", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class ContinueNode : UNodeBase
+    public partial class ContinueNode : UNodeBase, IBeforeExecNode
     {
         public PinIn BeforeExec { get; set; } = new PinIn();
         public ContinueNode()
         {
             Name = "Continue";
             BeforeExec.Name = " >>";
-            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
         }
         public override void BuildStatements(ref BuildCodeStatementsData data)
@@ -580,14 +684,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     [ContextMenu("break", "FlowControl\\Break", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class BreakNode : UNodeBase
+    public partial class BreakNode : UNodeBase, IBeforeExecNode
     {
         public PinIn BeforeExec { get; set; } = new PinIn();
         public BreakNode()
         {
             Name = "Break";
             BeforeExec.Name = " >>";
-            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
         }
         public override void BuildStatements(ref BuildCodeStatementsData data)

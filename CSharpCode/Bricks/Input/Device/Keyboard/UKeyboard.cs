@@ -248,8 +248,11 @@ namespace EngineNS.Bricks.Input.Device.Keyboard
         UKey Key_APP2 = IControl.Create<UKey>(new UKey.UKeyData() { Keycode = Keycode.KEY_APP2 });
         UKey Key_AUDIOREWIND = IControl.Create<UKey>(new UKey.UKeyData() { Keycode = Keycode.KEY_AUDIOREWIND });
         UKey Key_AUDIOFASTFORWARD = IControl.Create<UKey>(new UKey.UKeyData() { Keycode = Keycode.KEY_AUDIOFASTFORWARD });
-
         #endregion Key Define
 
+        public void Tick()
+        {
+            
+        }
     }
 }

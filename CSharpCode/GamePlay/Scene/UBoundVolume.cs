@@ -13,16 +13,16 @@ namespace EngineNS.GamePlay.Scene
 
     public class UBoundVolume : IO.ISerializer
     {
-        public UBoundVolume(UNode node)
+        public UBoundVolume()
         {
-            HostNode = node;
+            
         }
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             HostNode = tagObject as UNode;
         }
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
-        public UNode HostNode { get; private set; } = null;
+        public UNode HostNode { get; set; } = null;
         public BoundingBox mLocalAABB;
         public BoundingBox LocalAABB
         {
@@ -60,12 +60,7 @@ namespace EngineNS.GamePlay.Scene
         //}
     }
     public class UBoxBV : UBoundVolume
-    {
-        public UBoxBV(UNode node)
-            : base(node)
-        {
-
-        }        
+    {     
         public Vector3 mExtent = new Vector3(1,1,1);        
         protected override void OnVolumeChanged()
         {
@@ -74,11 +69,6 @@ namespace EngineNS.GamePlay.Scene
     }
     public class USphereBV : UBoundVolume
     {
-        public USphereBV(UNode node)
-            : base(node)
-        {
-
-        }
         Vector3 mCenter;
         [Rtti.Meta]
         public Vector3 Center

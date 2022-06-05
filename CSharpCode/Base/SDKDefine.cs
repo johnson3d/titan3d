@@ -8,6 +8,8 @@ namespace EngineNS
     {
         public const float Epsilon = 0.00001f;
         public const float DEpsilon = 0.00001f;
+        public const float PI = 3.14159f;
+        public const float TWO_PI = PI * 2.0f;
         public static int Max(int left, int right)
         {
             if (left > right)
@@ -74,6 +76,34 @@ namespace EngineNS
                 return right;
             }
         }
+        public static float Angle_To_Tadian(float degree, float min, float second)
+        {
+            float flag = (degree < 0) ? -1.0f : 1.0f;
+            if (degree < 0)
+            {
+                degree = degree * (-1.0f);
+            }
+            float angle = degree + min / 60 + second / 3600;
+            float result = flag * (angle * PI) / 180;
+            return result;
+        }
+        public static Vector3 Radian_To_Angle(float rad)
+        {
+            float flag = (rad < 0) ? -1.0f : 1.0f;
+            if (rad < 0)
+            {
+                rad = rad * (-1.0f);
+            }
+            float result = (rad * 180) / PI;
+            float degree = (float)((int)result);
+            float min = (result - degree) * 60;
+            float second = (min - (int)(min)) * 60;
+            Vector3 ang;
+            ang.X = flag * degree;
+            ang.Y = (int)(min);
+            ang.Z = second;
+            return ang;
+        }
         public static bool FloatEuqal(float f1, float f2, float epsilon)
         {
             return Math.Abs(f2 - f1) < epsilon;
@@ -84,11 +114,13 @@ namespace EngineNS
         }
         public static float FloatLerp(float f1, float f2, float lp)
         {
-            return f1 * lp + (1.0f - lp) * f2;
+            return f1 + (f2 - f1) * lp;
+            //return f1 * lp + (1.0f - lp) * f2;
         }
         public static double DoubleLerp(double f1, double f2, double lp)
         {
-            return f1 * lp + (1.0 - lp) * f2;
+            return f1 + (f2 - f1) * lp;
+            //return f1 * lp + (1.0 - lp) * f2;
         }
         public static int Clamp(int a, int min, int max)
         {

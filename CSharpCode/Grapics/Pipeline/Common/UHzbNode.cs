@@ -32,12 +32,10 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         public Graphics.Pipeline.UDrawBuffers BasePass = new Graphics.Pipeline.UDrawBuffers();
 
-        private RHI.CShaderDesc CSDesc_Setup;
-        private RHI.CComputeShader CS_Setup;
+        private Graphics.Pipeline.Shader.UShader Setup;
         private RHI.CComputeDrawcall SetupDrawcall;
 
-        private RHI.CShaderDesc CSDesc_DownSample;
-        private RHI.CComputeShader CS_DownSample;
+        private Graphics.Pipeline.Shader.UShader DownSample;
         private RHI.CComputeDrawcall[] MipsDrawcalls;
         ~UHzbNode()
         {
@@ -56,25 +54,23 @@ namespace EngineNS.Graphics.Pipeline.Common
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
 
-            CSDesc_Setup = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine),
-                "CS_Setup", EShaderType.EST_ComputeShader, defines, null);
-            CS_Setup = rc.CreateComputeShader(CSDesc_Setup);
+            Setup = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine),
+                "CS_Setup", EShaderType.EST_ComputeShader, defines);
 
-            CSDesc_DownSample = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine),
-                "CS_DownSample", EShaderType.EST_ComputeShader, defines, null);
-            CS_DownSample = rc.CreateComputeShader(CSDesc_DownSample);
+            DownSample = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine),
+                "CS_DownSample", EShaderType.EST_ComputeShader, defines);
 
             SetupDrawcall = rc.CreateComputeDrawcall();
             //ResetComputeDrawcall(policy);
         }
         private unsafe void ResetComputeDrawcall(URenderPolicy policy)
         {
-            if (CS_Setup == null)
+            if (Setup == null)
                 return;
-            SetupDrawcall.mCoreObject.SetComputeShader(CS_Setup.mCoreObject);
+            SetupDrawcall.mCoreObject.SetComputeShader(Setup.CS_Shader.mCoreObject);
             SetupDrawcall.mCoreObject.SetDispatch(MaxSRVWidth / Dispatch_SetupDimArray2.X, MaxSRVHeight / Dispatch_SetupDimArray2.Y, 1);
 
-            var srvIdx = CSDesc_Setup.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "DstBuffer");
+            var srvIdx = Setup.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "DstBuffer");
             if (srvIdx != (IShaderBinder*)0)
             {
                 SetupDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, HzbMipsUAVs[0].mCoreObject);
@@ -113,15 +109,15 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 var drawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDrawcall();
                 MipsDrawcalls[i - 1] = drawcall;
-                drawcall.mCoreObject.SetComputeShader(CS_DownSample.mCoreObject);
+                drawcall.mCoreObject.SetComputeShader(DownSample.CS_Shader.mCoreObject);
                 drawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(width, Dispatch_SetupDimArray2.X), CoreDefine.Roundup(height, Dispatch_SetupDimArray2.Y), 1);
-                srvIdx = CSDesc_DownSample.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "SrcBuffer");
+                srvIdx = DownSample.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "SrcBuffer");
                 if (srvIdx != (IShaderBinder*)0)
                 {
                     drawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, HzbMipsUAVs[i - 1].mCoreObject);
                 }
 
-                srvIdx = CSDesc_DownSample.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "DstBuffer");
+                srvIdx = DownSample.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "DstBuffer");
                 if (srvIdx != (IShaderBinder*)0)
                 {
                     drawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, HzbMipsUAVs[i].mCoreObject);
@@ -200,11 +196,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
         {
-            if (CS_Setup == null)
+            if (Setup == null)
                 return;
             var cmd = BasePass.DrawCmdList;
 
-            var srvIdx = CSDesc_Setup.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "DepthBuffer");
+            var srvIdx = Setup.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "DepthBuffer");
             if (srvIdx != (IShaderBinder*)0)
             {
                 var depth = this.GetAttachBuffer(this.DepthPinIn).Srv;

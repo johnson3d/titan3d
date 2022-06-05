@@ -281,7 +281,10 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public override void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
         {
-            if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug) == false)
+            //if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug) == false)
+            //    return;
+
+            if ((rp.CullFilters & GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug) == 0)
                 return;
 
             if (rp.VisibleNodes != null)

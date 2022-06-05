@@ -95,7 +95,7 @@ namespace EngineNS.Editor.Forms
         }
         protected void DrawToolBar()
         {
-            var btSize = new Vector2(64, 64);
+            var btSize = Vector2.Zero;
             if (ImGuiAPI.Button("Mipmap", in btSize))
             {
                 StbImageSharp.ImageResult image;
@@ -121,6 +121,34 @@ namespace EngineNS.Editor.Forms
                 {
                     RHI.CShaderResourceView.SaveTexture(xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);
                     xnd.SaveXnd(AssetName.Address);
+                }
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Button("SavePng", in btSize))
+            {
+                StbImageSharp.ImageResult image;
+
+                using (var xnd = IO.CXndHolder.LoadXnd(AssetName.Address))
+                {
+                    var pngAttr = xnd.RootNode.TryGetAttribute("Png");
+
+                    var ar = pngAttr.GetReader(null);
+                    byte[] data;
+                    ar.ReadNoSize(out data, (int)pngAttr.GetReaderLength());
+                    pngAttr.ReleaseReader(ref ar);
+
+                    using (var memStream = new System.IO.MemoryStream(data, false))
+                    {
+                        image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                        if (image == null)
+                            return;
+                    }
+
+                    using (var memStream = new System.IO.FileStream(AssetName.Address + ".png", System.IO.FileMode.OpenOrCreate))
+                    {
+                        var writer = new StbImageWriteSharp.ImageWriter();
+                        writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+                    }
                 }
             }
         }
@@ -160,6 +188,7 @@ namespace EngineNS.Editor.Forms
                 min1 = min1 + pos;
                 max1 = max1 + pos;
                 drawlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
+                drawlist.AddRect(in min1, in max1, 0xFF00FF00, 0, ImDrawFlags_.ImDrawFlags_None, 0);
             }
             ImGuiAPI.EndChild();
         }

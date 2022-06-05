@@ -7,6 +7,16 @@ namespace EngineNS
 {
     public unsafe partial struct ImGuiAPI
     {
+        public static unsafe Graphics.Pipeline.UPresentWindow GetWindowViewportData()
+        {
+            var viewport = ImGuiAPI.GetWindowViewport();
+            if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
+                return null;
+            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
+            var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
+
+            return myWindow;
+        }
         public static void GotoColumns(int index)
         {
             index = index % GetColumnsCount();
@@ -44,7 +54,7 @@ namespace EngineNS
         {
             if (text == null)
                 text = "";
-            using (var buffer = BigStackBuffer.CreateInstance((text.Length + 1) * 2))
+            using (var buffer = BigStackBuffer.CreateInstance((text.Length + 1) * 4))
             {
                 buffer.SetText(text);
                 bool changed = false;

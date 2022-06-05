@@ -79,16 +79,50 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var funcMenu = CanvasMenus.AddMenuItem("Function", null, null);
             foreach(var i in kls.Methods)
             {
-                funcMenu.AddMenuItem(i.MethodName, null,
-                    (UMenuItem item, object sender) =>
+                var attrs = i.GetMethod().GetCustomAttributes(typeof(Bricks.CodeBuilder.ShaderNode.Control.UserCallNodeAttribute), false);
+                var menuAtts = i.GetMethod().GetCustomAttributes(typeof(ContextMenuAttribute), true);
+                UMenuItem.FMenuAction action = (UMenuItem item, object sender) =>
+                                {
+                                    Control.CallNode node;
+                                    if (attrs.Length > 0)
+                                    {
+                                        var data = (attrs[0] as Bricks.CodeBuilder.ShaderNode.Control.UserCallNodeAttribute);
+                                        node = Rtti.UTypeDescManager.CreateInstance(data.CallNodeType, null) as Control.CallNode;
+                                        node.Initialize(i);
+                                    }
+                                    else
+                                    {
+                                        node = Control.CallNode.NewMethodNode(i);
+                                    }
+                                    node.Name = i.MethodName;
+                                    node.UserData = this;
+                                    node.Position = PopMenuPosition;
+                                    SetDefaultActionForNode(node);
+                                    this.AddNode(node);
+                                };
+                if(menuAtts.Length > 0)
+                {
+                    var parentMenu = funcMenu;
+                    var att = menuAtts[0] as ContextMenuAttribute;
+                    if (!att.HasKeyString(MaterialEditorKeyword))
+                        continue;
+                    for(var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
                     {
-                        var node = Control.CallNode.NewMethodNode(i);
-                        node.Name = i.MethodName;
-                        node.UserData = this;
-                        node.Position = PopMenuPosition;
-                        SetDefaultActionForNode(node);
-                        this.AddNode(node);
-                    });
+                        var menuStr = att.MenuPaths[menuIdx];
+                        string nodeName = null;
+                        GetNodeNameAndMenuStr(menuStr, this, ref nodeName, ref menuStr);
+                        if (menuIdx < att.MenuPaths.Length - 1)
+                            parentMenu = parentMenu.AddMenuItem(menuStr, null, null);
+                        else
+                        {
+                            parentMenu.AddMenuItem(menuStr, att.FilterStrings, null, action);
+                        }
+                    }
+                }
+                else
+                {
+                    funcMenu.AddMenuItem(i.MethodName, null, action);
+                }
             }
             var uniformVarMenus = CanvasMenus.AddMenuItem("UniformVars", null, null);
             var perFrameMenus = uniformVarMenus.AddMenuItem("PerFrame", null, null);
@@ -253,9 +287,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             node.OnLButtonClickedAction = NodeLButtonClickedAction;
             node.OnLinkedFromAction = NodeOnLinkedFrom;
             //node.OnPreReadAction = NodeOnPreRead;
+
+            node.UserData = this;
         }
         //int Seed = 5;
-        public override void OnDrawAfter(Bricks.NodeGraph.UGraphRenderer renderer, EGui.Controls.NodeGraph.NodeGraphStyles styles, ImDrawList cmdlist)
+        public override void OnDrawAfter(Bricks.NodeGraph.UGraphRenderer renderer, UNodeGraphStyles styles, ImDrawList cmdlist)
         {
             //var O = WindowPos + new Vector2(GraphViewSize.X / 2, GraphViewSize.Y);
 
@@ -307,11 +343,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         private void NodeOnLinkedFrom(UNodeBase node, PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             var funcGraph = ParentGraph as UMaterialGraph;
-            if (funcGraph == null || oPin.Link == null || iPin.Link == null)
+            if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)
             {
                 return;
             }
-            if (iPin.Link.CanLinks.Contains("Value"))
+            if (iPin.LinkDesc.CanLinks.Contains("Value"))
             {
                 funcGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
             }

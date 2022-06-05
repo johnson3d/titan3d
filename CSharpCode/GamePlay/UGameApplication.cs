@@ -6,10 +6,11 @@ namespace EngineNS.GamePlay
 {
     public class UGameApplication : Graphics.Pipeline.USlateApplication, ITickable
     {
-        public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
-        {
-            return UEngine.Instance.GameInstance?.McObject.Get().WorldViewportSlate;
-        }
+        public UGameInstance GameInstance;
+        //public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
+        //{
+        //    return GameInstance.WorldViewportSlate;
+        //}
         public override void Cleanup()
         {
             Graphics.Pipeline.USlateApplication.ClearRootForms();
@@ -17,17 +18,17 @@ namespace EngineNS.GamePlay
             UEngine.Instance.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName, Type rpType)
+        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName)
         {
-            await base.InitializeApplication(rc, rpName, rpType);
-            await UEngine.Instance.StartPlayInEditor(this, typeof(EngineNS.Graphics.Pipeline.Mobile.UMobileEditorFSPolicy), EngineNS.RName.GetRName("Demo0.mcrs"));
+            await base.InitializeApplication(rc, rpName);
+            await UEngine.Instance.StartPlayInEditor(this, rpName);
 
             UEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
         protected unsafe override void OnDrawUI()
         {
-            var worldSlate = UEngine.Instance.GameInstance?.McObject.Get().WorldViewportSlate;
+            var worldSlate = GameInstance.WorldViewportSlate;
             worldSlate.IsSetViewportPos = true;            
             worldSlate.GameViewportPos = new Vector2(0);
             worldSlate.GameViewportSize = this.NativeWindow.GetWindowSize();

@@ -34,7 +34,7 @@ namespace EngineNS
     public partial class UEngineConfig
     {
         [Rtti.Meta]
-        public int NumOfThreadPool { get; set; } = 3;
+        public int NumOfThreadPool { get; set; } = -1;
         [Rtti.Meta]
         public int Interval { get; set; } = 15;
         [Rtti.Meta]
@@ -56,8 +56,6 @@ namespace EngineNS
         [Rtti.Meta]
         public string MainWindowType { get; set; }// = Rtti.TypeManager.Instance.GetTypeStringFromType(typeof(Editor.MainEditorWindow));
         [Rtti.Meta]
-        public string MainWindowRPolicy { get; set; }// = Rtti.TypeManager.Instance.GetTypeStringFromType(typeof(Graphics.Pipeline.Mobile.UMobileFSPolicy));
-        [Rtti.Meta]
         public RName MainRPolicyName { get; set; }
         [Rtti.Meta]
         public string RpcRootType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.UTest.UTest_Rpc));
@@ -73,6 +71,8 @@ namespace EngineNS
         public RName DefaultMaterial { get; set; }// = RName.GetRName("UTest/ttt.material");
         [Rtti.Meta]
         public RName DefaultMaterialInstance { get; set; }// = RName.GetRName("UTest/box_wite.uminst");
+        [RName.PGRName(FilterExts = Bricks.CodeBuilder.UMacross.AssetExt, MacrossType = typeof(GamePlay.UMacrossGame))]
+        public RName PlayGameName { get; set; }
     }
     public partial class URuntimeConfig
     {
@@ -113,18 +113,18 @@ namespace EngineNS
         {
             get;
         } = new Profiler.UNativeMemory();
-        public static void StartEngine(UEngine engine, string cfgFile = null)
+        public static async System.Threading.Tasks.Task<bool> StartEngine(UEngine engine, string cfgFile = null)
         {
             System.Threading.Thread.CurrentThread.Name = "Main";
             mInstance = engine;
-            mInstance.PreInitEngine(cfgFile);
+            return await mInstance.PreInitEngine(cfgFile);
         }
         static unsafe void NativeAssertEvent(void* arg0, void* arg1, int arg2)
         {
             System.Diagnostics.Debug.Assert(false);
         }
         static unsafe CoreSDK.FDelegate_FAssertEvent OnNativeAssertEvent = NativeAssertEvent;
-        public bool PreInitEngine(string cfgFile=null)
+        public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile=null)
         {
             RttiStructManager.GetInstance().BuildRtti();
 
@@ -135,15 +135,14 @@ namespace EngineNS
             var t1 = Support.Time.HighPrecision_GetTickCount();
             EngineNS.Rtti.UTypeDescManager.Instance.InitTypes();
             var t2 = Support.Time.HighPrecision_GetTickCount();
-            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Collect Type Info:{(t2-t1)/1000} ms");
+            
             EngineNS.Rtti.UClassMetaManager.Instance.LoadMetas();
             var t3 = Support.Time.HighPrecision_GetTickCount();
-            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Load Rtti MetaDatas:{(t3 - t2) / 1000} ms");
+            
             EngineNS.Profiler.Log.InitLogger();
             UEngine.Instance.AssetMetaManager.LoadMetas();
             var t4 = Support.Time.HighPrecision_GetTickCount();
-            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Load AssetMetas:{(t4 - t3) / 1000} ms");
-
+            
             EngineNS.UCs2CppBase.InitializeNativeCoreProvider();
 
             StartSystemThreads();
@@ -160,26 +159,32 @@ namespace EngineNS
                 Config.DefaultMaterial = RName.GetRName("material/SysDft.material", RName.ERNameType.Engine);
                 Config.DefaultMaterialInstance = RName.GetRName("material/box_wite.uminst", RName.ERNameType.Game);
                 Config.MainWindowType = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Editor.UMainEditorApplication));
-                Config.MainWindowRPolicy = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Pipeline.Mobile.UMobileEditorFSPolicy));
+                Config.MainRPolicyName = RName.GetRName("utest/deferred.rpolicy", RName.ERNameType.Game);
                 IO.FileManager.SaveObjectToXml(cfgFile, Config);
             }
 
             GatherModules();
 
-            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", "PreInitEngine OK");
-            System.Action action = async () =>
+            await base.InitializeModules();
+
             {
-                await base.InitializeModules();
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
-                if (Config.DoUnitTest)
-                {
-                    t2 = Support.Time.HighPrecision_GetTickCount();
-                    EngineNS.UTest.UnitTestManager.DoUnitTests();
-                    t3 = Support.Time.HighPrecision_GetTickCount();
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Unit Test:{(t3-t2)/1000} ms");
-                }
-            };
-            action();
+                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Collect Type Info:{(t2 - t1) / 1000} ms");
+
+                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Load Rtti MetaDatas:{(t3 - t2) / 1000} ms");
+
+                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Load AssetMetas:{(t4 - t3) / 1000} ms");
+
+                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", "PreInitEngine OK");
+            }
+
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            if (Config.DoUnitTest)
+            {
+                t2 = Support.Time.HighPrecision_GetTickCount();
+                EngineNS.UTest.UnitTestManager.DoUnitTests();
+                t3 = Support.Time.HighPrecision_GetTickCount();
+                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Unit Test:{(t3 - t2) / 1000} ms");
+            }
 
             var tEnd = Support.Time.HighPrecision_GetTickCount();
             Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Engine PreInit Time:{(tEnd - t1) / 1000} ms");

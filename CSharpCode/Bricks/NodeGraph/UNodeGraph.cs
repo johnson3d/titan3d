@@ -23,7 +23,7 @@ namespace EngineNS.Bricks.NodeGraph
         }
     }
 
-    public class UNodeGraph : IO.ISerializer
+    public partial class UNodeGraph : IO.ISerializer
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
@@ -34,6 +34,8 @@ namespace EngineNS.Bricks.NodeGraph
             UpdatePinMenus();
         }
         public virtual void SetDefaultActionForNode(UNodeBase node) { }
+        [Rtti.Meta]
+        public RName AssetName { get; set; }
         [Rtti.Meta]
         public string GraphName { get; set; } = "NodeGraph";
         [Rtti.Meta]
@@ -68,6 +70,7 @@ namespace EngineNS.Bricks.NodeGraph
             Nodes.Clear();
             Linkers.Clear();
         }
+        [Rtti.Meta]
         public UNodeBase FindFirstNode(string name)
         {
             foreach (var i in Nodes)
@@ -361,6 +364,20 @@ namespace EngineNS.Bricks.NodeGraph
                 return null;
             return linker.InPin;
         }
+        public Rtti.UTypeDesc GetOppositePinType(PinIn pin)
+        {
+            var linker = GetFirstLinker(pin);
+            if (linker == null)
+                return null;
+            return linker.OutPin.HostNode.GetOutPinType(linker.OutPin);
+        }
+        public Rtti.UTypeDesc GetOppositePinType(PinOut pin)
+        {
+            var linker = GetFirstLinker(pin);
+            if (linker == null)
+                return null;
+            return linker.InPin.HostNode.GetInPinType(linker.InPin);
+        }
 
         public UNodeBase AddNode(UNodeBase node)
         {
@@ -377,6 +394,7 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public void RemoveNode(UNodeBase node)
         {
+            node.OnRemoveNode();
             foreach (var i in node.Inputs)
             {
                 RemoveLinkedIn(i);
@@ -471,6 +489,7 @@ namespace EngineNS.Bricks.NodeGraph
             Canvas,
             Node,
             Pin,
+            Object,
         };
 
         public EGraphMenu CurMenuType;
@@ -479,6 +498,7 @@ namespace EngineNS.Bricks.NodeGraph
         public UMenuItem CanvasMenus = new UMenuItem();
         public UMenuItem NodeMenus = new UMenuItem();
         public UMenuItem PinMenus = new UMenuItem();
+        public UMenuItem ObjectMenus = new UMenuItem();
 
         public bool CanvasMenuDirty = false;
         public virtual void UpdateCanvasMenus()
@@ -525,8 +545,14 @@ namespace EngineNS.Bricks.NodeGraph
                         Rtti.UTypeDesc.CanCast(PopMenuPressObject.GetType(), typeof(NodePin)))
                     {
                         this.RemoveLink(this.PopMenuPressObject as NodePin);
+                        PopMenuPressObject = null;
                     }
                 });
+        }
+        public bool PinLinkMenuDirty = false;
+        public virtual void UpdatePinLinkMenu()
+        {
+            //PopMenuPressObject
         }
 
         public virtual bool IsKeydown(EKey key)
@@ -606,7 +632,6 @@ namespace EngineNS.Bricks.NodeGraph
         {
             ButtonPress[(int)EMouseButton.Left] = true;
             PressPosition = ViewportRateToCanvas(in screenPos);
-
             var hit = HitObject(PressPosition.X, PressPosition.Y);
             if (hit == null)
             {
@@ -631,9 +656,12 @@ namespace EngineNS.Bricks.NodeGraph
                 }
                 else if (Rtti.UTypeDesc.CanCast(pKls, typeof(NodePin)))
                 {
-                    LinkingOp.StartPin = hit as NodePin;
-                    LinkingOp.HoverPin = hit as NodePin;
+                    var pin = hit as NodePin;
+                    LinkingOp.StartPin = pin;
+                    LinkingOp.HoverPin = pin;
                     LinkingOp.BlockingEnd = PressPosition;
+                    PopMenuPressObject = pin.HostNode.GetPinType(pin);
+                    PinLinkMenuDirty = true;
                 }
             }
             else
@@ -723,6 +751,15 @@ namespace EngineNS.Bricks.NodeGraph
                                 else
                                 {
                                     pressNode = hit as UNodeBase;
+                                }
+                            }
+                            else
+                            {
+                                // 打开该pin关联的菜单
+                                PopMenuPosition = ViewportRateToCanvas(in screenPos);
+                                if(PopMenuPressObject != null && PopMenuPressObject != this)
+                                {
+                                    CurMenuType = EGraphMenu.Object;
                                 }
                             }
                         }
@@ -933,6 +970,12 @@ namespace EngineNS.Bricks.NodeGraph
                 var node = hit as UNodeBase;
                 node.OnDoubleClick();
             }
+            else if(Rtti.UTypeDesc.CanCast(pKls, typeof(NodePin)))
+            {
+                var pin = hit as NodePin;
+                if(pin != null)
+                    pin.HostNode.OnDoubleClickedPin(pin);
+            }
         }
         public void RightDoubleClicked(in Vector2 screenPos)
         {
@@ -945,29 +988,15 @@ namespace EngineNS.Bricks.NodeGraph
         #endregion
 
         #region override
-        public virtual void OnDrawAfter(Bricks.NodeGraph.UGraphRenderer renderer, EGui.Controls.NodeGraph.NodeGraphStyles styles, ImDrawList cmdlist)
+        public virtual void OnDrawAfter(Bricks.NodeGraph.UGraphRenderer renderer, UNodeGraphStyles styles, ImDrawList cmdlist)
         {
 
         }
-        public virtual unsafe void OnBeforeDrawMenu(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles)
+        public virtual unsafe void OnBeforeDrawMenu(UNodeGraphStyles styles)
         {
-            if(CanvasMenuDirty)
-            {
-                UpdateCanvasMenus();
-                CanvasMenuDirty = false;
-            }
-            if(NodeMenuDirty)
-            {
-                UpdateNodeMenus();
-                NodeMenuDirty = false;
-            }
-            if(PinMenuDirty)
-            {
-                UpdatePinMenus();
-                PinMenuDirty = false;
-            }
+
         }
-        public virtual unsafe void OnAfterDrawMenu(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles)
+        public virtual unsafe void OnAfterDrawMenu(UNodeGraphStyles styles)
         {
 
         }

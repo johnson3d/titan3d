@@ -610,7 +610,7 @@ namespace EngineNS.EGui
         }
         #endregion
         #region Renderer
-        class ViewportData
+        public class ViewportData
         {
             public Graphics.Pipeline.UPresentWindow PresentWindow;
             

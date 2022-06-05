@@ -42,7 +42,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             BackColor = 0x80808080;
 
             OutTex.Name = "texture";
-            OutTex.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutTex.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutTex);
         }
         ~Texture2D()
@@ -88,11 +88,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public override void BuildStatements(ref BuildCodeStatementsData data)
         {
             var material = data.UserData as UMaterial;
-            var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
-            tmp.Name = this.Name;
-            var texNode = this;
-            tmp.Value = texNode.AssetName;
-            material.UsedRSView.Add(tmp);
+            if(material.FindSRV(this.Name) == null)
+            {
+                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+                tmp.Name = this.Name;
+                var texNode = this;
+                tmp.Value = texNode.AssetName;
+                material.UsedRSView.Add(tmp);
+            }
         }
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
@@ -115,7 +118,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             BackColor = 0x80808080;
 
             OutTex.Name = "texture";
-            OutTex.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutTex.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutTex);
         }
         public override Rtti.UTypeDesc GetOutPinType(PinOut pin)

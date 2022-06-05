@@ -187,6 +187,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                 for (int j = 0; j < i.Atoms.Length; j++)
                 {
+                    if (i.Atoms[j].Material == null)
+                        continue;
                     var layer = i.Atoms[j].Material.RenderLayer;
                     if (layer == ERenderLayer.RL_Opaque)
                         continue;

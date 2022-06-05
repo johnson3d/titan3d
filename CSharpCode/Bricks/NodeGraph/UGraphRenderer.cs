@@ -6,6 +6,35 @@ namespace EngineNS.Bricks.NodeGraph
 {
     public class UGraphRenderer : Graphics.Pipeline.IGuiModule
     {
+        public UGraphRenderer()
+        {
+            var styles = UNodeGraphStyles.DefaultStyles;
+
+            if (UEngine.Instance.UIManager[styles.NodeBodyImg] == null)
+                UEngine.Instance.UIManager[styles.NodeBodyImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeBodyImg, RName.ERNameType.Engine), new Thickness(16.0f / 64.0f, 25.0f / 64.0f, 16.0f / 64.0f, 16.0f / 64.0f));
+            if (UEngine.Instance.UIManager[styles.NodeTitleImg] == null)
+                UEngine.Instance.UIManager[styles.NodeTitleImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeTitleImg, RName.ERNameType.Engine), new Thickness(12.0f / 64.0f));
+            if (UEngine.Instance.UIManager[styles.NodeColorSpillImg] == null)
+                UEngine.Instance.UIManager[styles.NodeColorSpillImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeColorSpillImg, RName.ERNameType.Engine), new Thickness(8.0f / 64.0f, 3.0f / 32.0f, 0, 0));
+            if (UEngine.Instance.UIManager[styles.NodeTitleHighlightImg] == null)
+                UEngine.Instance.UIManager[styles.NodeTitleHighlightImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeTitleHighlightImg, RName.ERNameType.Engine), new Thickness(16.0f / 64.0f, 1.0f, 16.0f / 64.0f, 0.0f));
+            if (UEngine.Instance.UIManager[styles.NodeShadowImg] == null)
+                UEngine.Instance.UIManager[styles.NodeShadowImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeShadowImg, RName.ERNameType.Engine), new Thickness(18.0f / 64.0f));
+            if (UEngine.Instance.UIManager[styles.NodeShadowSelectedImg] == null)
+                UEngine.Instance.UIManager[styles.NodeShadowSelectedImg] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(styles.NodeShadowSelectedImg, RName.ERNameType.Engine), new Thickness(18.0f / 64.0f));
+
+            if (UEngine.Instance.UIManager[styles.PinConnectedVarImg] == null)
+                UEngine.Instance.UIManager[styles.PinConnectedVarImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinConnectedVarImg, RName.ERNameType.Engine));
+            if (UEngine.Instance.UIManager[styles.PinDisconnectedVarImg] == null)
+                UEngine.Instance.UIManager[styles.PinDisconnectedVarImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinDisconnectedVarImg, RName.ERNameType.Engine));
+            if (UEngine.Instance.UIManager[styles.PinConnectedExecImg] == null)
+                UEngine.Instance.UIManager[styles.PinConnectedExecImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinConnectedExecImg, RName.ERNameType.Engine));
+            if (UEngine.Instance.UIManager[styles.PinDisconnectedExecImg] == null)
+                UEngine.Instance.UIManager[styles.PinDisconnectedExecImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinDisconnectedExecImg, RName.ERNameType.Engine));
+            if (UEngine.Instance.UIManager[styles.PinHoverCueImg] == null)
+                UEngine.Instance.UIManager[styles.PinHoverCueImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinHoverCueImg, RName.ERNameType.Engine));
+        }
+
         UNodeGraph mGraph = null;
         List<UNodeGraph> mGraphInherit { get; } = new List<UNodeGraph>();
         Vector2 DrawOffset;
@@ -25,10 +54,26 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
         }
+        protected Vector2 GraphSize;
         public void OnDraw()
         {
             if (mGraph == null)
                 return;
+            if (mGraph.AssetName != null)
+            {
+                if (ImGuiAPI.Button("Snap"))
+                {
+                    var presentWindow = ImGuiAPI.GetWindowViewportData();
+                    if (presentWindow != null)
+                    {
+                        var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(mGraph.AssetName);
+                        var cmdlst = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList();
+                        Editor.USnapshot.Save(mGraph.AssetName, ameta, presentWindow.SwapChain.mCoreObject.GetBackBuffer(0), cmdlst, 
+                            (uint)DrawOffset.X, (uint)DrawOffset.Y, (uint)GraphSize.X, (uint)GraphSize.Y);
+                    }
+                }
+                ImGuiAPI.SameLine(0, -1);
+            }
             for (int i = 0; i < mGraphInherit.Count; i++)
             {
                 if (i != 0)
@@ -37,7 +82,8 @@ namespace EngineNS.Bricks.NodeGraph
                 }
                 if (ImGuiAPI.Button(mGraphInherit[i].GraphName))
                 {
-                    mGraph.ChangeGraph(mGraphInherit[i]);
+                    //mGraph.ChangeGraph(mGraphInherit[i]);
+                    SetGraph(mGraphInherit[i]);
                 }
                 if (i < mGraphInherit.Count - 1)
                 {
@@ -45,7 +91,7 @@ namespace EngineNS.Bricks.NodeGraph
                     ImGuiAPI.Text("/");
                 }
             }
-            if (ImGuiAPI.BeginChild("Graph", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+            if (ImGuiAPI.BeginChild("Graph", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
             {
                 var vpMin = ImGuiAPI.GetWindowContentRegionMin();
                 var vpMax = ImGuiAPI.GetWindowContentRegionMax();
@@ -54,6 +100,7 @@ namespace EngineNS.Bricks.NodeGraph
                 //ImGuiAPI.InvisibleButton("ClientContent", sz, ImGuiButtonFlags_.ImGuiButtonFlags_None);
                 sz.X = vpMax.X - vpMin.X;
                 sz.Y = vpMax.Y - vpMin.Y;
+                GraphSize = sz;
 
                 var winPos = ImGuiAPI.GetWindowPos();
                 DrawOffset.SetValue(winPos.X + vpMin.X, winPos.Y + vpMin.Y);
@@ -66,13 +113,30 @@ namespace EngineNS.Bricks.NodeGraph
                 {
                     mGraph.SetPhysicalSizeVP(sz.X, sz.Y);
                 }
-                foreach (var i in mGraph.Nodes)
+
+                // draw grid
+                var styles = UNodeGraphStyles.DefaultStyles;
+                cmd.AddRectFilled(DrawOffset, DrawOffset + sz, styles.GridBackgroundColor, 0, ImDrawFlags_.ImDrawFlags_None);
+                var step = styles.GridStep / mGraph.ScaleVP;
+                var hCount = (int)(sz.X / step);
+                var vCount = (int)(sz.Y / step);
+                var gridStart = CanvasToDraw(new Vector2(0, 0));// - DrawOffset;
+                var offSet = (winPos - gridStart) / step;
+                for (int i=(int)offSet.X; i<hCount + offSet.X; i++)
                 {
-                    if (mGraph.IsInViewport(i))
-                    {
-                        DrawNode(cmd, i);
-                    }
+                    cmd.AddLine(
+                        new Vector2(gridStart.X + i * step, winPos.Y),
+                        new Vector2(gridStart.X + i * step, winPos.Y + sz.Y),
+                        (i % 8 == 0) ? styles.GridSplitLineColor : styles.GridNormalLineColor, 1.0f);
                 }
+                for (int i = (int)offSet.Y; i < vCount + offSet.Y; i++)
+                {
+                    cmd.AddLine(
+                        new Vector2(winPos.X, gridStart.Y + i * step),
+                        new Vector2(winPos.X + sz.X, gridStart.Y + i * step),
+                        (i % 8 == 0) ? styles.GridSplitLineColor : styles.GridNormalLineColor, 1.0f);
+                }
+
                 for (int i = 0; i < mGraph.Linkers.Count;)
                 {
                     var cur = mGraph.Linkers[i];
@@ -85,12 +149,19 @@ namespace EngineNS.Bricks.NodeGraph
                     i++;
                 }
 
+                foreach (var i in mGraph.Nodes)
+                {
+                    if (mGraph.IsInViewport(i))
+                    {
+                        DrawNode(cmd, i);
+                    }
+                }
+
                 if (mGraph.LinkingOp.StartPin != null)
                 {
                     var mPos = ImGuiAPI.GetMousePos();
                 }
 
-                var styles = EGui.Controls.NodeGraph.NodeGraphStyles.DefaultStyles;
                 mGraph.OnDrawAfter(this, styles, cmd);
                 DrawPopMenu();
             }
@@ -166,7 +237,7 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public void DrawImage(ImDrawList cmdlist, EGui.UUvAnim icon, in Vector2 rcMin, in Vector2 rcMax)
         {
-            cmdlist.AddRectFilled(in rcMin, in rcMax, icon.Color, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
+            icon.OnDraw(ref cmdlist, rcMin, rcMax, 0);
         }
         public Vector2 CanvasToDraw(in Vector2 pos)
         {
@@ -174,31 +245,62 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public void DrawNode(ImDrawList cmdlist, UNodeBase node)
         {
-            var styles = EGui.Controls.NodeGraph.NodeGraphStyles.DefaultStyles;
-            var start = CanvasToDraw(node.Position);
-            var end = CanvasToDraw(node.Position + node.Size);
+            if(node.LayoutDirty)
+            {
+                node.UpdateLayout();
+                node.LayoutDirty = false;
+            }
+            var styles = UNodeGraphStyles.DefaultStyles;
+            var nodeStart = CanvasToDraw(node.Position);
+            var nodeEnd = CanvasToDraw(node.Position + node.Size);
 
             ImGuiAPI.SetWindowFontScale(1.0f / node.ParentGraph.ScaleVP);
 
-            cmdlist.AddRectFilled(in start, in end, node.BackColor, 0, 0);
+            var shadowExt = new Vector2(12, 12);
+            //cmdlist.AddRectFilled(in nodeStart, in nodeEnd, node.BackColor, 0, 0);
+            if (node.Selected)
+            {
+                var selImg = UEngine.Instance.UIManager[styles.NodeShadowSelectedImg] as EGui.UIProxy.ImageProxy;
+                if(selImg != null)
+                    selImg.OnDraw(cmdlist, nodeStart - shadowExt, nodeEnd + shadowExt);
+            }
+            else
+            {
+                var shadowImg = UEngine.Instance.UIManager[styles.NodeShadowImg] as EGui.UIProxy.ImageProxy;
+                if(shadowImg != null)
+                    shadowImg.OnDraw(cmdlist, nodeStart - shadowExt, nodeEnd + shadowExt);
+            }
+            var nodeBodyImg = UEngine.Instance.UIManager[styles.NodeBodyImg] as EGui.UIProxy.ImageProxy;
+            if(nodeBodyImg != null)
+                nodeBodyImg.OnDraw(cmdlist, nodeStart, nodeEnd);
+
             var endTitle = mGraph.CanvasToViewport(node.Position + new Vector2(node.Size.X, node.TitleHeight)) + DrawOffset;
-            cmdlist.AddRectFilled(in start, in endTitle, node.TitleColor, 0, 0);
+            //cmdlist.AddRectFilled(in nodeStart, in endTitle, node.TitleColor, 0, 0);
 
             {//DrawTitle
-                var curStart = node.Position;
-                {//Draw Node Icon
+                var titleImg = UEngine.Instance.UIManager[styles.NodeTitleImg] as EGui.UIProxy.ImageProxy;
+                if(titleImg != null)
+                    titleImg.OnDraw(cmdlist, nodeStart, endTitle);
+                var colorSpillImg = UEngine.Instance.UIManager[styles.NodeColorSpillImg] as EGui.UIProxy.ImageProxy;
+                if(colorSpillImg != null)
+                    colorSpillImg.OnDraw(cmdlist, nodeStart, endTitle, node.TitleColor);
+                var titleHighlightImg = UEngine.Instance.UIManager[styles.NodeTitleHighlightImg] as EGui.UIProxy.ImageProxy;
+                if (titleHighlightImg != null)
+                    titleHighlightImg.OnDraw(cmdlist, nodeStart, endTitle);
+                //var curStart = node.Position;
+                //{//Draw Node Icon
 
-                    curStart.X += styles.IconOffset.X;
-                    var drawStart = CanvasToDraw(curStart);
-                    var drawEnd = CanvasToDraw(curStart + node.Icon.Size);
-                    DrawImage(cmdlist, node.Icon, in drawStart, in drawEnd);
+                    //    curStart.X += styles.IconOffset.X;
+                    //    var drawStart = CanvasToDraw(curStart);
+                    //    var drawEnd = CanvasToDraw(curStart + node.Icon.Size);
+                    //    DrawImage(cmdlist, node.Icon, in drawStart, in drawEnd);
 
-                    curStart.X += node.Icon.Size.X;
-                }
+                    //    curStart.X += node.Icon.Size.X;
+                    //}
 
                 //Draw Node Name
                 {
-                    var drawStart = CanvasToDraw(curStart);
+                    var drawStart = CanvasToDraw(node.Position + styles.TitlePadding);
                     cmdlist.AddText(in drawStart, 0xFFFFFFFF, node.Name, null);
                 }
             }
@@ -212,47 +314,94 @@ namespace EngineNS.Bricks.NodeGraph
                 node.OnPreviewDraw(in start1, in end1, cmdlist);
             }
 
-            if (node.Selected)
-            {//Draw Selected Rect
-                cmdlist.AddRect(in start, in end, 0xFFFF00FF, 3, ImDrawFlags_.ImDrawFlags_None, 1.0f);
-            }
-
-            var nodeStart = CanvasToDraw(node.Position);
-            var nodeEnd = CanvasToDraw(node.Position + node.Size);
-            foreach (var i in node.Inputs)
+            string lastGroup = null;
+            ImGuiAPI.PushID($"{node.NodeId.ToString()}");
+            Vector2 groupStart = Vector2.Zero, groupEnd = Vector2.Zero;
+            for(int i=0; i<node.Inputs.Count; i++)
             {
-                start = CanvasToDraw(i.Position);
-                end = CanvasToDraw(i.Position + i.Size);
+                var inPin = node.Inputs[i];
 
-                var nameSize = UNodeBase.CalcTextSize(i.Name);
-                var textPos = new Vector2(nodeStart.X - nameSize.X - styles.PinPadding - styles.PinInStyle.TextOffset, start.Y);
-                if(!string.IsNullOrEmpty(i.Name))
-                    cmdlist.AddText(textPos, 0xFFFFFFFF, i.Name, null);
-                if (i.Link != null && i.Link.Icon != null)
+                var start = CanvasToDraw(inPin.HotPosition);
+                var end = CanvasToDraw(inPin.HotPosition + inPin.HotSize);
+                var pinEnd = CanvasToDraw(inPin.Position + inPin.Size);
+                groupEnd = new Vector2(Math.Max(pinEnd.X, groupEnd.X), Math.Max(pinEnd.Y, groupEnd.Y));
+                if (!string.IsNullOrEmpty(inPin.GroupName) && (lastGroup != inPin.GroupName))
                 {
-                    DrawImage(cmdlist, i.Link.Icon, start, end);
+                    if (!string.IsNullOrEmpty(lastGroup))
+                    {
+                        cmdlist.AddLine(groupStart, new Vector2(groupEnd.X, groupStart.Y), 0xFFFFFFFF, 1);
+                        cmdlist.AddLine(new Vector2(groupStart.X, groupEnd.Y), groupEnd, 0xFFFFFFFF, 1);
+                        //cmdlist.AddRect(groupStart, groupEnd, 0xFF0000FF, 0, ImDrawFlags_.ImDrawFlags_None, 1);
+                    }
+                    groupStart = CanvasToDraw(inPin.Position);
+                    groupEnd = pinEnd;
+                    lastGroup = inPin.GroupName;
                 }
-                else
+                if(i == (node.Inputs.Count - 1))
                 {
-                    DrawImage(cmdlist, styles.PinInStyle.Image, start, end);
+                    if (!string.IsNullOrEmpty(lastGroup))
+                    {
+                        cmdlist.AddLine(groupStart, new Vector2(groupEnd.X, groupStart.Y), 0xFFFFFFFF, 1);
+                        cmdlist.AddLine(new Vector2(groupStart.X, groupEnd.Y), groupEnd, 0xFFFFFFFF, 1);
+                        //cmdlist.AddRect(groupStart, groupEnd, 0xFF0000FF, 0, ImDrawFlags_.ImDrawFlags_None, 1);
+                    }
+                }
+                if(inPin.ShowIcon)
+                {
+                    if(mGraph.PinHasLinker(inPin))
+                    {
+                        if (inPin.LinkDesc != null && inPin.LinkDesc.Icon != null)
+                            DrawImage(cmdlist, inPin.LinkDesc.Icon, start, end);
+                        else
+                            DrawImage(cmdlist, styles.PinInStyle.Image, start, end);
+                    }
+                    else
+                    {
+                        if (inPin.LinkDesc != null && inPin.LinkDesc.DisconnectIcon != null)
+                            DrawImage(cmdlist, inPin.LinkDesc.DisconnectIcon, start, end);
+                        else
+                            DrawImage(cmdlist, styles.PinInStyle.DisconnectImage, start, end);
+                    }
+                }
+                if(!string.IsNullOrEmpty(inPin.Name) && inPin.ShowName)
+                {
+                    start = CanvasToDraw(inPin.NamePosition);
+                    cmdlist.AddText(start, 0xFFFFFFFF, inPin.Name, null);
+                }
+				if (inPin.EditValue != null)
+                {
+                    var pos = CanvasToDraw(inPin.EditValuePosition) - ImGuiAPI.GetWindowPos();
+                    ImGuiAPI.SetCursorPos(pos);
+                    inPin.EditValue.OnDraw(node, inPin, styles, 1/mGraph.ScaleVP);
                 }
             }
+            ImGuiAPI.PopID();
 
             foreach (var i in node.Outputs)
             {
-                start = CanvasToDraw(i.Position);
-                end = CanvasToDraw(i.Position + i.Size);
-
-                var textPos = new Vector2(nodeEnd.X + styles.PinPadding + styles.PinInStyle.TextOffset, start.Y);
-                if (!string.IsNullOrEmpty(i.Name))
-                    cmdlist.AddText(textPos, 0xFFFFFFFF, i.Name, null);
-                if (i.Link != null && i.Link.Icon != null)
+                var start = CanvasToDraw(i.HotPosition);
+                var end = CanvasToDraw(i.HotPosition + i.HotSize);
+                if(i.ShowIcon)
                 {
-                    DrawImage(cmdlist, i.Link.Icon, start, end);
+                    if (mGraph.PinHasLinker(i))
+                    {
+                        if (i.LinkDesc != null && i.LinkDesc.Icon != null)
+                            DrawImage(cmdlist, i.LinkDesc.Icon, start, end);
+                        else
+                            DrawImage(cmdlist, styles.PinInStyle.Image, start, end);
+                    }
+                    else
+                    {
+                        if (i.LinkDesc != null && i.LinkDesc.DisconnectIcon != null)
+                            DrawImage(cmdlist, i.LinkDesc.DisconnectIcon, start, end);
+                        else
+                            DrawImage(cmdlist, styles.PinInStyle.DisconnectImage, start, end);
+                    }
                 }
-                else
+                if (!string.IsNullOrEmpty(i.Name) && i.ShowName)
                 {
-                    DrawImage(cmdlist, styles.PinInStyle.Image, start, end);
+                    start = CanvasToDraw(i.NamePosition);
+                    cmdlist.AddText(start, 0xFFFFFFFF, i.Name, null);
                 }
             }
 
@@ -266,8 +415,8 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public void DrawLinker(ImDrawList cmdlist, UPinLinker linker)
         {
-            var p1_v = linker.OutPin.Position + linker.OutPin.Size * 0.5f;
-            var p4_v = linker.InPin.Position + linker.InPin.Size * 0.5f;
+            var p1_v = linker.OutPin.HotPosition + linker.OutPin.HotSize * 0.5f;
+            var p4_v = linker.InPin.HotPosition + linker.InPin.HotSize * 0.5f;
             var p1 = new Vector2(p1_v.X, p1_v.Y);
             var p4 = new Vector2(p4_v.X, p4_v.Y);
             var delta = p4_v - p1_v;
@@ -277,20 +426,20 @@ namespace EngineNS.Bricks.NodeGraph
             var p2 = new Vector2(p1.X + delta.X * 0.5f, p1.Y);
             var p3 = new Vector2(p4.X - delta.X * 0.5f, p4.Y);
 
-            var styles = EGui.Controls.NodeGraph.NodeGraphStyles.DefaultStyles;
+            var styles = UNodeGraphStyles.DefaultStyles;
             int num_segs = (int)(delta.Length() / styles.BezierPixelPerSegement + 1);
 
             var lineColor = styles.LinkerColor;
-            if (linker.OutPin.Link != null)
-                lineColor = linker.OutPin.Link.LineColor;
-            else if (linker.InPin.Link != null)
-                lineColor = linker.InPin.Link.LineColor;
+            if (linker.OutPin.LinkDesc != null)
+                lineColor = linker.OutPin.LinkDesc.LineColor;
+            else if (linker.InPin.LinkDesc != null)
+                lineColor = linker.InPin.LinkDesc.LineColor;
 
             var thinkness = styles.LinkerThinkness;
-            if (linker.OutPin.Link != null)
-                thinkness = linker.OutPin.Link.LineThinkness;
-            else if (linker.InPin.Link != null)
-                thinkness = linker.InPin.Link.LineThinkness;
+            if (linker.OutPin.LinkDesc != null)
+                thinkness = linker.OutPin.LinkDesc.LineThinkness;
+            else if (linker.InPin.LinkDesc != null)
+                thinkness = linker.InPin.LinkDesc.LineThinkness;
 
             p1 = mGraph.CanvasToViewport(in p1);
             p2 = mGraph.CanvasToViewport(in p2);
@@ -304,21 +453,21 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public void DrawLinkingOp(ImDrawList cmdlist)
         {
-            var styles = EGui.Controls.NodeGraph.NodeGraphStyles.DefaultStyles;
+            var styles = UNodeGraphStyles.DefaultStyles;
             var LinkingOp = mGraph.LinkingOp;
             var p4 = mGraph.LinkingOp.BlockingEnd;
             Vector2 p1;
             float ControlLength = 0;
             if (LinkingOp.StartPin.GetType() == typeof(PinIn))
             {
-                p1 = LinkingOp.StartPin.Position + LinkingOp.StartPin.Size * 0.5f;
+                p1 = LinkingOp.StartPin.HotPosition + LinkingOp.StartPin.HotSize * 0.5f;
                 var delta = p4 - p1;
                 delta.X = Math.Abs(delta.X);
                 ControlLength = delta.X * 0.5f;
             }
             else
             {
-                p1 = LinkingOp.StartPin.Position + LinkingOp.StartPin.Size * 0.5f;
+                p1 = LinkingOp.StartPin.HotPosition + LinkingOp.StartPin.HotSize * 0.5f;
                 var delta = p4 - p1;
                 delta.X = Math.Abs(delta.X);
                 ControlLength = delta.X * (-0.5f);
@@ -352,32 +501,45 @@ namespace EngineNS.Bricks.NodeGraph
         {
             if (mGraph.CurMenuType == UNodeGraph.EGraphMenu.None)
                 return;
-            var styles = EGui.Controls.NodeGraph.NodeGraphStyles.DefaultStyles;
+            var styles = UNodeGraphStyles.DefaultStyles;
             
-            if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
+            if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonLeft) ||
+                ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
             {
+                mGraph.OnBeforeDrawMenu(styles);
                 switch (mGraph.CurMenuType)
                 {
                     case UNodeGraph.EGraphMenu.Canvas:
                         {
-                            mGraph.OnBeforeDrawMenu(styles);
+                            if (mGraph.CanvasMenuDirty)
+                            {
+                                mGraph.UpdateCanvasMenus();
+                                mGraph.CanvasMenuDirty = false;
+                            }
                             var width = ImGuiAPI.GetColumnWidth(0);
                             var drawList = ImGuiAPI.GetWindowDrawList();
                             EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref mCanvasMenuFilterStr, width);
-                            if(mGraph.CanvasMenuDirty)
-                                mGraph.UpdateCanvasMenus();
                             for(var childIdx = 0; childIdx < mGraph.CanvasMenus.SubMenuItems.Count; childIdx++)
                                 DrawMenu(mGraph.CanvasMenus.SubMenuItems[childIdx], mCanvasMenuFilterStr.ToLower());
-                            mGraph.OnAfterDrawMenu(styles);
                         }
                         break;
                     case UNodeGraph.EGraphMenu.Node:
-                        for(var childIdx = 0; childIdx < mGraph.NodeMenus.SubMenuItems.Count; childIdx++)
+                        if (mGraph.NodeMenuDirty)
+                        {
+                            mGraph.UpdateNodeMenus();
+                            mGraph.NodeMenuDirty = false;
+                        }
+                        for (var childIdx = 0; childIdx < mGraph.NodeMenus.SubMenuItems.Count; childIdx++)
                             DrawMenu(mGraph.NodeMenus.SubMenuItems[childIdx], mCanvasMenuFilterStr.ToLower());
                         break;
                     case UNodeGraph.EGraphMenu.Pin:
                         {
-                            for(var childIdx = 0; childIdx < mGraph.PinMenus.SubMenuItems.Count; childIdx++)
+                            if (mGraph.PinMenuDirty)
+                            {
+                                mGraph.UpdatePinMenus();
+                                mGraph.PinMenuDirty = false;
+                            }
+                            for (var childIdx = 0; childIdx < mGraph.PinMenus.SubMenuItems.Count; childIdx++)
                                 DrawMenu(mGraph.PinMenus.SubMenuItems[childIdx], mCanvasMenuFilterStr.ToLower());
                             var pressPin = mGraph.PopMenuPressObject as NodePin;
                             if (pressPin != null)
@@ -386,9 +548,24 @@ namespace EngineNS.Bricks.NodeGraph
                             }
                         }
                         break;
+                    case UNodeGraph.EGraphMenu.Object:
+                        {
+                            if(mGraph.PinLinkMenuDirty)
+                            {
+                                mGraph.UpdatePinLinkMenu();
+                                mGraph.PinLinkMenuDirty = false;
+                            }
+                            var width = ImGuiAPI.GetColumnWidth(0);
+                            var drawList = ImGuiAPI.GetWindowDrawList();
+                            EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref mCanvasMenuFilterStr, width);
+                            for (var childIdx = 0; childIdx < mGraph.ObjectMenus.SubMenuItems.Count; childIdx++)
+                                DrawMenu(mGraph.ObjectMenus.SubMenuItems[childIdx], mCanvasMenuFilterStr.ToLower());
+                        }
+                        break;
                     default:
                         break;
                 };
+                mGraph.OnAfterDrawMenu(styles);
                 ImGuiAPI.EndPopup();
             }
             else
@@ -418,6 +595,8 @@ namespace EngineNS.Bricks.NodeGraph
                         {
                             item.Action(item, mGraph.PopMenuPressObject);
                             ImGuiAPI.CloseCurrentPopup();
+                            mGraph.CurMenuType = UNodeGraph.EGraphMenu.Node;
+                            mGraph.LinkingOp.StartPin = null;
                         }
                     }
                 }

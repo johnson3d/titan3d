@@ -212,7 +212,7 @@ namespace EngineNS.EGui
         }
         [Rtti.Meta]
         [System.ComponentModel.Browsable(false)]
-        public List<Vector4> FrameUVs { get; } = new List<Vector4>();
+        public List<Vector4> FrameUVs { get; set; } = new List<Vector4>();
         int mCurFrame = 0;
         public int CurFrame 
         {

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -159,6 +160,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public void SaveClassGraph(RName rn)
         {
+            var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            if (ameta != null)
+            {
+                var tmp = new UMacross();
+                tmp.AssetName = rn;
+                tmp.UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta();
+            }
+            
             var xml = new System.Xml.XmlDocument();
             var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
             xml.AppendChild(xmlRoot);
@@ -196,6 +206,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 object pThis = this;
                 IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
 
+                var nsName = IO.FileManager.GetBaseDirectory(rn.Name).TrimEnd('/').Replace("/", ".");
+                if (Regex.IsMatch(nsName, "[A-Za-z0-9_]"))
+                    DefClass.Namespace = new UNamespaceDeclaration("NS_" + nsName);
+                else
+                {
+                    DefClass.Namespace = new UNamespaceDeclaration("NS_" + ((UInt32)nsName.GetHashCode()).ToString());
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Macross", $"Get namespace failed, {rn.Name} has invalid char!");
+                }    
                 DefClass.ClearMethods();
                 var funcFiles = IO.FileManager.GetFiles(rn.Address, "*.func", false);
                 for (int i = 0; i < funcFiles.Length; i++)
@@ -208,25 +226,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         IO.SerializerHelper.ReadObjectMetaFields(null, funcXml.LastChild as System.Xml.XmlElement, ref pFuncGraph, null);
                         for(int methodIdx = 0; methodIdx < funcGraph.MethodDatas.Count; methodIdx++)
                         {
+                            //if (funcGraph.MethodDatas[methodIdx].IsDelegate)
+                            //    continue;
                             DefClass.AddMethod(funcGraph.MethodDatas[methodIdx].MethodDec);
                         }
-                        for (var nodeIdx = 0; nodeIdx < funcGraph.Nodes.Count; nodeIdx++)
-                        {
-                            var node = funcGraph.Nodes[nodeIdx];
-                            node.UserData = this;
-                            funcGraph.SetDefaultActionForNode(node);
-                            var methodNode = node as MethodNode;
-                            if (methodNode == null)
-                                continue;
 
-                            for (int methodIdx = 0; methodIdx < DefClass.Methods.Count; methodIdx++)
-                            {
-                                if (methodNode.MethodMeta == MethodNode.GetMethodMeta(DefClass.Methods[methodIdx]))
-                                {
-                                    methodNode.MethodDesc = DefClass.Methods[methodIdx];
-                                }
-                            }
-                        }
                         Methods.Add(funcGraph);
                     }
                     catch (System.Exception e)
@@ -237,6 +241,31 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 for(int i=0; i<Methods.Count; i++)
                 {
                     Methods[i].CanvasMenuDirty = true;
+
+                    for (var nodeIdx = 0; nodeIdx < Methods[i].Nodes.Count; nodeIdx++)
+                    {
+                        var node = Methods[i].Nodes[nodeIdx];
+                        node.UserData = this;
+                        Methods[i].SetDefaultActionForNode(node);
+                        var methodNode = node as MethodNode;
+                        if (methodNode == null)
+                            continue;
+
+                        for (int methodIdx = 0; methodIdx < DefClass.Methods.Count; methodIdx++)
+                        {
+                            var meta = MethodNode.GetMethodMeta(DefClass.Methods[methodIdx]);
+                            var metaWithoutNS = meta;
+                            if(DefClass.Namespace != null)
+                            {
+                                metaWithoutNS = meta.Replace(DefClass.Namespace.Namespace + ".", "");
+                            }
+                            if (methodNode.MethodMeta == meta || methodNode.MethodMeta == metaWithoutNS)
+                            {
+                                methodNode.MethodDesc = DefClass.Methods[methodIdx];
+                            }
+                        }
+                        methodNode.SetDelegateGraph(this);
+                    }
                 }
             }
 
@@ -253,8 +282,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 string code = "";
                 mCSCodeGen.GenerateClassCode(DefClass, ref code);
-
                 SaveCSFile(code);
+                GenerateAssemblyDescCreateInstanceCode();
 
                 EngineNS.UEngine.Instance.MacrossManager.GenerateProjects();
                 return code;
@@ -273,6 +302,43 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 Profiler.Log.WriteException(ex);
                 return "";
+            }
+        }
+
+        void GenerateAssemblyDescCreateInstanceCode()
+        {
+            var projFolder = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + IO.FileManager.GetParentPathName(UEngine.Instance.EditorInstance.Config.GameProject);
+            var assemblyFileName = projFolder + "/Assembly.cs";
+            string assemblyDescCodes = "";
+            using(var sr = new System.IO.StreamReader(assemblyFileName, Encoding.UTF8, true))
+            {
+                assemblyDescCodes = sr.ReadToEnd();
+            }
+
+            var startKeyword = "#region MacrossGenerated Start";
+            var idx = assemblyDescCodes.IndexOf(startKeyword);
+            var startIdx = idx + startKeyword.Length + 1;
+            var keyStr = $"if (name == RName.GetRName(\"{this.AssetName.Name}\", {this.AssetName.RNameType.GetType().FullName.Replace("+", ".")}.{this.AssetName.RNameType.ToString()}))";
+            var keyIdx = assemblyDescCodes.IndexOf(keyStr, idx);
+            var tab = "                ";
+            var str = tab + keyStr + "\r\n";
+            str += tab + "{\r\n";
+            str += $"{tab}    return new {DefClass.GetFullName()}();\r\n";
+            str += tab + "}\r\n";
+            if (keyIdx < 0)
+            {
+                assemblyDescCodes = assemblyDescCodes.Insert(startIdx, str);
+            }
+            else
+            {
+                keyIdx -= tab.Length;
+                var endIdx = assemblyDescCodes.IndexOf("}\r\n", keyIdx) + "}\r\n".Length;
+                assemblyDescCodes = assemblyDescCodes.Remove(keyIdx, endIdx - keyIdx);
+                assemblyDescCodes = assemblyDescCodes.Insert(keyIdx, str);
+            }
+            using(var sw = new System.IO.StreamWriter(assemblyFileName, false, Encoding.UTF8))
+            {
+                sw.Write(assemblyDescCodes);
             }
         }
 
@@ -296,11 +362,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameAssembly;
             arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OutputFile, assemblyFile));
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.PdbFile, assemblyFile.Replace(".dll", ".pdb")));
+            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.PdbFile, assemblyFile.Replace(".dll", ".tpdb")));
             arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.Outputkind, OutputKind.DynamicallyLinkedLibrary.ToString()));
             arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OptimizationLevel, OptimizationLevel.Debug.ToString()));
+            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.AllowUnsafe, "true"));
 
-            if(CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray()))
+            if (CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray()))
             {
                 UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
                 var typeDesc = DefClass.TryGetTypeDesc();
@@ -430,6 +497,31 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 DraggingMember = null;
             }
         }
+
+        public void RemoveMethod(UMacrossMethodGraph method)
+        {
+            if (AssetName != null)
+            {
+                IO.FileManager.DeleteFile($"{AssetName.Address}/{method.Name}.func");
+            }
+            Methods.Remove(method);
+            for (int methodIdx = 0; methodIdx < method.MethodDatas.Count; methodIdx++)
+                DefClass.RemoveMethod(method.MethodDatas[methodIdx].MethodDec);
+            for (int itemIdx = 0; itemIdx < mOverrideMethodMenuItems.Count; itemIdx++)
+            {
+                for (int dataIdx = 0; dataIdx < method.MethodDatas.Count; dataIdx++)
+                {
+                    if (mOverrideMethodMenuItems[itemIdx].MenuName == method.MethodDatas[dataIdx].MethodDec.GetKeyword())
+                    {
+                        mOverrideMethodMenuItems[itemIdx].Visible = true;
+                    }
+                }
+            }
+
+            OpenFunctions.Remove(method);
+
+        }
+
         EGui.UIProxy.MenuItemProxy.MenuState mNewMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         EGui.UIProxy.MenuItemProxy.MenuState mOverrideMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected unsafe void OnLeftWindow()
@@ -445,8 +537,49 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 var membersTreeNodeResult = ImGuiAPI.TreeNodeEx("Members", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap);
                 ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
-                if(EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
+                if (EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
                 {
+                    ImGuiAPI.OpenPopup("MacrossMemTypeSelPopup", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                }
+                Type selectedType = null;
+                // 临时这样写一下，后面主要在PropertyGrid中修改类型
+                if (ImGuiAPI.BeginPopup("MacrossMemTypeSelPopup", ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                {
+                    var drawList = ImGuiAPI.GetWindowDrawList();
+                    var menuData = new Support.UAnyPointer();
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("SByte", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(SByte);
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Byte", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(Byte);
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Int16", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(Int16);
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("UInt16", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(UInt16);
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Int32", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(Int32);
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("UInt32", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(UInt32);
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Int64", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(Int64);
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("UInt64", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(UInt64);
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("float", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(float);
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("double", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(double);
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("string", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(string);
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Vector2", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(Vector2);
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Vector3", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(Vector3);
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Vector4", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                        selectedType = typeof(Vector4);
+
+                    ImGuiAPI.EndPopup();
+                }
+                if(selectedType != null)
+                { 
                     var num = 0;
                     while (true)
                     {
@@ -465,7 +598,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     }
 
                     var mb = new UVariableDeclaration();
-                    mb.VariableType = new UTypeReference(typeof(int));
+                    mb.VariableType = new UTypeReference(selectedType);
                     mb.VariableName = $"Member_{num}";
                     mb.VisitMode = EVisisMode.Local;
                     DefClass.Properties.Add(mb);
@@ -494,7 +627,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             if (memberTreeNodeClicked)
                             {
                                 PGMember.Target = mem;
-                                DraggingMember = MemberVar.NewMemberVar(DefClass, mem.VariableName);
+                                DraggingMember = MemberVar.NewMemberVar(DefClass, mem.VariableName,
+                                    UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LCTRL) ? false : true);
                                 DraggingMember.UserData = this;
                                 IsDraggingMember = false;
                             }
@@ -561,6 +695,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     for(int i=Methods.Count - 1; i>=0; i--)
                     {
                         var method = Methods[i];
+                        if (method.IsDelegateGraph())
+                            continue;
                         var methodTreeNodeResult = ImGuiAPI.TreeNodeEx(method.Name, flags);
                         ImGuiAPI.SameLine(0, EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X);
                         var methodTreeNodeDoubleClicked = ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
@@ -575,23 +711,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         EGui.UIProxy.MessageBox.Draw(keyName, $"Are you sure to delete {method.Name}?", EGui.UIProxy.MessageBox.EButtonType.YesNo,
                         () =>
                         {
-                            if (AssetName != null)
-                                IO.FileManager.DeleteFile($"{AssetName.Address}/{method.Name}.func");
-                            Methods.Remove(method);
-                            for(int methodIdx = 0; methodIdx < method.MethodDatas.Count; methodIdx++)
-                                DefClass.RemoveMethod(method.MethodDatas[methodIdx].MethodDec);
-                            for(int itemIdx = 0; itemIdx < mOverrideMethodMenuItems.Count; itemIdx++)
-                            {
-                                for(int dataIdx = 0; dataIdx < method.MethodDatas.Count; dataIdx++)
-                                {
-                                    if(mOverrideMethodMenuItems[itemIdx].MenuName == method.MethodDatas[dataIdx].MethodDec.GetKeyword())
-                                    {
-                                        mOverrideMethodMenuItems[itemIdx].Visible = true;
-                                    }
-                                }
-                            }
-
-                            OpenFunctions.Remove(method);
+                            RemoveMethod(method);
                         }, null);
 
                         if (methodTreeNodeResult)
@@ -630,11 +750,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var itMax = ImGuiAPI.GetItemRectSize();
                 vMin.Y += itMax.Y;
                 var sz = vMax - vMin;
-                foreach (var i in OpenFunctions)
+                for (int i = 0; i < OpenFunctions.Count; i++)
                 {
-                    if (ImGuiAPI.BeginTabItem(i.Name, ref i.VisibleInClassGraphTables, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
+                    if (ImGuiAPI.BeginTabItem(OpenFunctions[i].Name, ref OpenFunctions[i].VisibleInClassGraphTables, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
                     {
-                        DrawFunctionGraph(i, sz);
+                        DrawFunctionGraph(OpenFunctions[i], sz);
 
                         ImGuiAPI.EndTabItem();
                     }

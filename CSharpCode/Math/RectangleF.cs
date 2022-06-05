@@ -179,4 +179,69 @@ namespace EngineNS
             return base.GetHashCode();
         }
     }
+
+    public struct Interpolation
+    {
+        public static float BarycentricInterpolation(in Vector3 uvw, float v0, float v1, float v2)
+        {
+            return uvw.X * v0 + uvw.Y * v1 + uvw.Z * v2;
+        }
+        public static Vector2 BarycentricInterpolation(in Vector3 uvw, in Vector2 v0, in Vector2 v1, in Vector2 v2)
+        {
+            return v0 * uvw.X + v1 * uvw.Y + v2 * uvw.Z;
+        }
+        public static Vector3 BarycentricInterpolation(in Vector3 uvw, in Vector3 v0, in Vector3 v1, in Vector3 v2) 
+        {
+            return uvw.X * v0 + uvw.Y * v1 + uvw.Z * v2;
+        }
+        public static Vector4 BarycentricInterpolation(in Vector3 uvw, in Vector4 v0, in Vector4 v1, in Vector4 v2)
+        {
+            return uvw.X * v0 + uvw.Y * v1 + uvw.Z * v2;
+        }
+    }
+    public struct FSquareSurface
+    {
+        public readonly static FSquareSurface Identity = new FSquareSurface();
+        public Vector4 UV_0_0;//nor:xyz,height:w
+        public Vector4 UV_1_0;
+        public Vector4 UV_0_1;
+        public Vector4 UV_1_1;
+        public static FSquareSurface Maximize(in FSquareSurface left, in FSquareSurface right)
+        {
+            FSquareSurface result;
+            result.UV_0_0 = Vector4.Maximize(in left.UV_0_0, in right.UV_0_0);
+            result.UV_1_0 = Vector4.Maximize(in left.UV_1_0, in right.UV_1_0);
+            result.UV_0_1 = Vector4.Maximize(in left.UV_0_1, in right.UV_0_1);
+            result.UV_1_1 = Vector4.Maximize(in left.UV_1_1, in right.UV_1_1);
+            return result;
+        }
+        public static FSquareSurface Minimize(in FSquareSurface left, in FSquareSurface right)
+        {
+            FSquareSurface result;
+            result.UV_0_0 = Vector4.Minimize(in left.UV_0_0, in right.UV_0_0);
+            result.UV_1_0 = Vector4.Minimize(in left.UV_1_0, in right.UV_1_0);
+            result.UV_0_1 = Vector4.Minimize(in left.UV_0_1, in right.UV_0_1);
+            result.UV_1_1 = Vector4.Minimize(in left.UV_1_1, in right.UV_1_1);
+            return result;
+        }
+        public Vector4 GetPoint(float u, float v)//u,v [0-1]
+        {
+            if (v >= u)
+            {
+                Vector3 uvw;
+                uvw.X = u;
+                uvw.Y = (1 - v);
+                uvw.Z = 1 - uvw.X - uvw.Y;
+                return Interpolation.BarycentricInterpolation(in uvw, in UV_1_1, in UV_0_0, in UV_0_1);
+            }
+            else
+            {
+                Vector3 uvw;
+                uvw.X = 1 - u;
+                uvw.Y = v;
+                uvw.Z = 1 - uvw.X - uvw.Y;
+                return Interpolation.BarycentricInterpolation(in uvw, in UV_0_0, in UV_1_1, in UV_1_0);
+            }
+        }
+    }
 }

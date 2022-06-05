@@ -11,8 +11,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public object ValueData;
         public PropertyGrid PGKeyData = new PropertyGrid();
         public PropertyGrid PGValueData = new PropertyGrid();
-        public EGui.Controls.TypeSelector KeyTypeSlt = new EGui.Controls.TypeSelector();
-        public EGui.Controls.TypeSelector ValueTypeSlt = new EGui.Controls.TypeSelector();
+        public EGui.Controls.UTypeSelector KeyTypeSlt = new EGui.Controls.UTypeSelector();
+        public EGui.Controls.UTypeSelector ValueTypeSlt = new EGui.Controls.UTypeSelector();
         public bool CreateFinished = false;
         public unsafe void OnDraw(string ctrlId)
         {

@@ -263,10 +263,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                 UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_13px);
 
-                Vector2 size = Vector2.Zero;
-                if(ImGuiAPI.BeginChild($"{PGName}_Properties", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                Vector2 size = Vector2.InvmUnitXY;
+                //Vector2 size = Vector2.Zero;
+                if (ImGuiAPI.BeginChild($"{PGName}_Properties", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
-                    Vector2 outerSize = Vector2.Zero;
+                    size = ImGuiAPI.GetWindowSize();
+                    //Vector2 outerSize = Vector2.Zero;
                     //if (ImGuiAPI.BeginTable("PGTable", 2, mTabFlags, ref outerSize, 0.0f))
                     //{
                     //    ImGuiAPI.TableSetupColumn(TName.FromString("Name").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
@@ -547,9 +549,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                             if (changed)
                                             {
                                                 propDesc.SetValue(ref target, newValue);
+                                                retValue = true;
                                                 if(propDesc.ParentIsValueType)
                                                 {
-                                                    retValue = true;
                                                     targetNewValue = target;
                                                 }
                                             }
@@ -582,9 +584,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                             if (changed)
                                             {
                                                 propDesc.SetValue(ref target, newValue);
+                                                retValue = true;
                                                 if(propDesc.ParentIsValueType)
                                                 {
-                                                    retValue = true;
                                                     targetNewValue = target;
                                                 }
                                             }
@@ -618,9 +620,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                     if (valueChanged)
                                     {
                                         propDesc.SetValue(ref target, newValue);
+                                        retValue = true;
                                         if(propDesc.ParentIsValueType)
                                         {
-                                            retValue = true;
                                             targetNewValue = target;
                                         }
                                     }
@@ -661,6 +663,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.PopStyleColor(1);
             ImGuiAPI.PopStyleVar(1);
 
+            if(retValue)
+            {
+                mDrawTargetDic.Remove(target);
+            }
             return retValue;
         }
         static void PushPGEditorStyleValues()

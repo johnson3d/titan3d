@@ -4,290 +4,26 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure
 {
-    public class UBufferCreator : IO.BaseSerializer
-    {
-        public static UBufferCreator CreateInstance<TBuffer>(int x, int y, int z) 
-            where TBuffer : UBufferConponent
-        {
-            var result = new UBufferCreator();
-            result.BufferType = Rtti.UTypeDesc.TypeOf<TBuffer>();
-            result.XSize = x;
-            result.YSize = y;
-            result.ZSize = z;
-            return result;
-        }
-        public static UBufferCreator CreateInstance(Rtti.UTypeDesc bufferType, int x, int y, int z)
-        {
-            var result = new UBufferCreator();
-            result.BufferType = bufferType;
-            result.XSize = x;
-            result.YSize = y;
-            result.ZSize = z;
-            return result;
-        }
-        public UBufferCreator Clone()
-        {
-            var  result = new UBufferCreator();
-            result.BufferType = BufferType;
-            result.XSize = XSize;
-            result.YSize = YSize;
-            result.ZSize = ZSize;
-            return result;
-        }
-        Rtti.UTypeDesc mElementType;
-        [EGui.Controls.PropertyGrid.PGTypeEditor(null, FilterMode = 0)]
-        public Rtti.UTypeDesc ElementType
-        {
-            get
-            {
-                if (mElementType == null)
-                {
-                    if (mBufferType == null)
-                        return null;
-                    var tmp = Rtti.UTypeDescManager.CreateInstance(mBufferType) as UBufferConponent;
-                    if (tmp != null)
-                        mElementType = tmp.PixelOperator.ElementType;
-                }
-                return mElementType;
-            }
-            private set
-            {
-                mElementType = value;
-            }
-        }
-        Rtti.UTypeDesc mBufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
-        [Rtti.Meta]
-        //[IO.UTypeDescSerializer()]
-        [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(UBufferConponent), FilterMode = EGui.Controls.TypeSelector.EFilterMode.IncludeObjectType)]
-        public Rtti.UTypeDesc BufferType 
-        { 
-            get=> mBufferType; 
-            set
-            {
-                mBufferType = value;
-                var tmp = Rtti.UTypeDescManager.CreateInstance(value) as UBufferConponent;
-                if (tmp != null)
-                {
-                    ElementType = tmp.PixelOperator.ElementType;
-                }
-                else
-                {
-                    mBufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
-                }
-            }
-        }
-        [Rtti.Meta]
-        public int XSize { get; set; } = 1;
-        [Rtti.Meta]
-        public int YSize { get; set; } = 1;
-        [Rtti.Meta]
-        public int ZSize { get; set; } = 1;
-    }
-
-    public partial class UPgcNodeBase : UNodeBase
+    [Macross.UMacross]
+    public partial class UPgcGraphProgram
     {
         [Rtti.Meta]
-        public UBufferCreator DefaultInputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        [Rtti.Meta]
-        public UBufferCreator DefaultBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public int RootDistance;
-        protected int mPreviewResultIndex = -1;
-        protected RHI.CShaderResourceView PreviewSRV;
-        ~UPgcNodeBase()
+        public virtual bool OnNodeInitialized(UPgcGraph graph, UPgcNodeBase node)
         {
-            if (PreviewSRV != null)
-            {
-                PreviewSRV?.FreeTextureHandle();
-                PreviewSRV = null;
-            }
-        }
-        public override void OnMouseStayPin(NodePin stayPin)
-        {
-            var creator = stayPin.Tag as UBufferCreator;
-            if (creator != null)
-            {
-                EGui.Controls.CtrlUtility.DrawHelper($"{creator.ElementType.ToString()}");
-            }
-        }
-        public void AddInput(PinIn pin, string name, UBufferCreator desc, string linkType = "Value")
-        {
-            pin.Name = name;
-            pin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc(linkType);
-
-            pin.Tag = desc;
-            AddPinIn(pin);
-        }
-        public void AddOutput(PinOut pin, string name, UBufferCreator desc, string linkType = "Value")
-        {
-            pin.Name = name;
-            pin.Link = UPgcEditorStyles.Instance.NewInOutPinDesc(linkType);
-
-            pin.Tag = desc;
-            AddPinOut(pin);
+            return true;
         }
         [Rtti.Meta]
-        public virtual int PreviewResultIndex { 
-            get => mPreviewResultIndex;
-            set
-            {
-                if (mPreviewResultIndex == value)
-                    return;
-                mPreviewResultIndex = value;
-                if (value >= 0)
-                {
-                    PrevSize = new Vector2(100, 100);
-                }
-                else
-                {
-                    PrevSize = Vector2.Zero;
-                }
-                OnPositionChanged();
-            }
-        }
-        public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
-        {
-            if (mPreviewResultIndex < 0)
-                return;
-
-            if (PreviewSRV == null)
-                return;
-
-            var uv0 = new Vector2(0, 0);
-            var uv1 = new Vector2(1, 1);
-            unsafe
-            {
-                cmdlist.AddImage(PreviewSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-            }
-        }
-        public UBufferCreator GetInputBufferCreator(PinIn pin)
-        {
-            return pin.Tag as UBufferCreator;
-        }
-        public virtual UBufferCreator GetOutBufferCreator(PinOut pin)
-        {
-            //return pin.Tag as UBufferCreator;
-            return DefaultBufferCreator;
-        }
-        public virtual UBufferConponent GetResultBuffer(int index)
-        {
-            if (index < 0 || index >= Outputs.Count)
-                return null;
-            var graph = ParentGraph as UPgcGraph;
-            return graph.BufferCache.FindBuffer(Outputs[index]);
-        }
-        public virtual bool InitProcedure(UPgcGraph graph)
+        public virtual bool OnNodeProcedureFinished(UPgcGraph graph, UPgcNodeBase node)
         {
             return true;
-        }
-        public bool DoProcedure(UPgcGraph graph)
-        {
-            var ret = OnProcedure(graph);
-            if (graph.GraphEditor != null)
-            {
-                if (mPreviewResultIndex >= 0)
-                {
-                    if (PreviewSRV != null)
-                    {
-                        PreviewSRV?.FreeTextureHandle();
-                        PreviewSRV = null;
-                    }
-
-                    var previewBuffer = GetResultBuffer(mPreviewResultIndex);
-                    if (previewBuffer != null)
-                    {
-                        if (previewBuffer.BufferCreator.ElementType == Rtti.UTypeDescGetter<float>.TypeDesc)
-                        {
-                            float minV = float.MaxValue;
-                            float maxV = float.MinValue;
-                            previewBuffer.GetRangeUnsafe<float, FFloatOperator>(out minV, out maxV);
-                            PreviewSRV = previewBuffer.CreateAsHeightMapTexture2D(minV, maxV, EPixelFormat.PXF_R16_FLOAT, true);
-                        }
-                        else if (previewBuffer.BufferCreator.ElementType == Rtti.UTypeDescGetter<Vector3>.TypeDesc)
-                        {
-                            Vector3 minV = Vector3.MaxValue;
-                            Vector3 maxV = Vector3.MinValue;
-                            previewBuffer.GetRangeUnsafe<Vector3, FFloat3Operator>(out minV, out maxV);
-                            //float fMax = maxV.GetMaxValue();
-                            //float fMin = minV.GetMinValue();
-                            PreviewSRV = previewBuffer.CreateVector3Texture2D(minV, maxV);
-                        }
-                    }
-                }
-            }
-            return ret;
-        }
-        public virtual bool OnProcedure(UPgcGraph graph)
-        {
-            return true;
-        }
-        public override void OnLButtonClicked(NodePin clickedPin)
-        {
-            var graph = this.ParentGraph as UPgcGraph;
-
-            if (graph != null && graph.GraphEditor != null)
-            {
-                graph.GraphEditor.NodePropGrid.Target = this;
-            }
-        }
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
-        {
-            if (iPin.Link.CanLinks.Contains("Value"))
-            {
-                ParentGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
-            }
-        }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
-        {
-            if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
-                return false;
-            var input = iPin.Tag as UBufferCreator;
-            var output = oPin.Tag as UBufferCreator;
-
-            if (IsMatchLinkedPin(input, output) == false)
-            {
-                return false;
-            }
-            return true;
-        }
-        public virtual bool IsMatchLinkedPin(UBufferCreator input, UBufferCreator output)
-        {
-            if (input.ElementType != output.ElementType)
-            {
-                return false;
-            }
-            if (input.XSize > output.XSize)
-            {
-                return false;
-            }
-            if (input.YSize > output.YSize)
-            {
-                return false;
-            }
-            if (input.ZSize > output.ZSize)
-            {
-                return false;
-            }
-            return true;
-        }
-        [Rtti.Meta()]
-        public UBufferConponent FindBuffer(string name)
-        {
-            var graph = this.ParentGraph as UPgcGraph;
-            var pin = this.FindPinIn(name) as NodePin;
-            if (pin == null)
-            {
-                pin = this.FindPinOut(name);
-                if (pin == null)
-                {
-                    return null;
-                }
-            }
-            return graph.BufferCache.FindBuffer(pin);
         }
     }
-    public class UPgcGraph : UNodeGraph
+    public partial class UPgcGraph : UNodeGraph
     {
         public const string PgcEditorKeyword = "PGC";
+        public bool IsTryCacheBuffer { get; set; } = false;
+        [Rtti.Meta]
+        public uint Version { get; set; } = 0;
         [Rtti.Meta]
         public UBufferCreator DefaultCreator { get; set; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(1, 1, 1);
 
@@ -306,191 +42,6 @@ namespace EngineNS.Bricks.Procedure
         {
             CanvasMenus.SubMenuItems.Clear();
             CanvasMenus.Text = "Canvas";
-
-            CanvasMenus.AddMenuItem(
-            $"UserNode", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UUserNode();
-                node.Name = "UUserNode";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            CanvasMenus.AddMenuItem(
-            $"Bezier", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UBezier();
-                node.Name = "Bezeir";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            CanvasMenus.AddMenuItem(
-            $"ImageLoader", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UImageLoader();
-                node.Name = "ImageLoader";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            CanvasMenus.AddMenuItem(
-            $"PreviewImage", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UPreviewImage();
-                node.Name = "PreviewImage";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            CanvasMenus.AddMenuItem(
-            $"HeightMappingNode", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UHeightMappingNode();
-                node.Name = "HeightMappingNode";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            }); 
-
-            CanvasMenus.AddMenuItem(
-            $"CopyRect", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UCopyRect();
-                node.Name = "CopyRect";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            CanvasMenus.AddMenuItem(
-            $"Stretch", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UStretch();
-                node.Name = "Stretch";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            CanvasMenus.AddMenuItem(
-            $"StretchBlt", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UStretchBlt();
-                node.Name = "StretchBlt";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            CanvasMenus.AddMenuItem(
-            $"MulValue", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UMulValue();
-                node.Name = "MulValue";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            CanvasMenus.AddMenuItem(
-            $"SmoothGaussion", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.USmoothGaussion();
-                node.Name = "SmoothGaussion";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            CanvasMenus.AddMenuItem(
-            $"NoisePerlin", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UNoisePerlin();
-                node.Name = "NoisePerlin";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            CanvasMenus.AddMenuItem(
-            $"PixelAdd", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UPixelAdd();
-                node.Name = "PixelAdd";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            CanvasMenus.AddMenuItem(
-            $"PixelSub", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UPixelSub();
-                node.Name = "PixelSub";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            CanvasMenus.AddMenuItem(
-            $"PixelMul", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UPixelMul();
-                node.Name = "PixelMul";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            CanvasMenus.AddMenuItem(
-            $"PixelDiv", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UPixelDiv();
-                node.Name = "PixelDiv";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-            CanvasMenus.AddMenuItem(
-            $"CalcNormal", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UCalcNormal();
-                node.Name = "CalcNormal";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-            CanvasMenus.AddMenuItem(
-            $"Normalize3D", null,
-            (UMenuItem item, object sender) =>
-            {
-                var node = new Node.UNormalize3D();
-                node.Name = "Normalize3D";
-                node.Position = PopMenuPosition;
-                this.AddNode(node);
-            });
-
-            //foreach (var i in GraphNodeTypes)
-            //{
-            //    CanvasMenus.AddMenuItem(
-            //    $"{i.FullName}", null,
-            //    (UMenuItem item, object sender) =>
-            //    {
-            //        var node = new UPolicyNode();
-            //        var rgNode = Rtti.UTypeDescManager.CreateInstance(i) as Graphics.Pipeline.Common.URenderGraphNode;
-            //        //rgNode.RenderGraph = this;
-            //        rgNode.InitNodePins();
-            //        node.InitNode(rgNode);
-            //        node.Name = rgNode.Name;
-            //        node.Position = PopMenuPosition;
-            //        this.AddNode(node);
-            //    });
-            //}
 
             foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
             {
@@ -591,5 +142,47 @@ namespace EngineNS.Bricks.Procedure
             });
             return allNodes;
         }
+        #region Macross
+        [Rtti.Meta]
+        [RName.PGRName(FilterExts = CodeBuilder.UMacross.AssetExt, MacrossType = typeof(UPgcGraphProgram))]
+        public RName ProgramName
+        {
+            get
+            {
+                if (mMcProgram == null)
+                    return null;
+                return mMcProgram.Name;
+            }
+            set
+            {
+                if (mMcProgram == null)
+                {
+                    mMcProgram = Macross.UMacrossGetter<UPgcGraphProgram>.NewInstance();
+                }
+                mMcProgram.Name = value;
+            }
+        }
+        Macross.UMacrossGetter<UPgcGraphProgram> mMcProgram;
+        public Macross.UMacrossGetter<UPgcGraphProgram> McProgram
+        {
+            get
+            {
+                return mMcProgram;
+            }
+        }
+        [Rtti.Meta]
+        public UBufferConponent RegBuffer(PinOut pin, UBufferConponent buffer)
+        {
+            return this.BufferCache.RegBuffer(pin, buffer);
+        }
+        [Rtti.Meta]
+        public UPgcNodeBase FindPgcNodeByName(string name,
+            [Rtti.MetaParameter(FilterType = typeof(UPgcNodeBase),
+            ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
+            System.Type type)
+        {
+            return this.FindFirstNode(name) as UPgcNodeBase;
+        }
+        #endregion
     }
 }

@@ -76,9 +76,10 @@ namespace EngineNS.Editor.Forms
                     return false;
             }
 
+            PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialMesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMesh;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, 0, 1);
 
             MeshPropGrid.Target = Mesh;
             UEngine.Instance.TickableManager.AddTickable(this);
@@ -146,7 +147,7 @@ namespace EngineNS.Editor.Forms
                 Mesh.SaveAssetTo(Mesh.AssetName);
                 var unused = UEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(Mesh.AssetName);
 
-                USnapshot.Save(Mesh.AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                //USnapshot.Save(Mesh.AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Reload", in btSize))

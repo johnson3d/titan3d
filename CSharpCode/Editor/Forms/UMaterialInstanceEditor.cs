@@ -92,9 +92,10 @@ namespace EngineNS.Editor.Forms
             ActionRecorder.ClearRecords();
             Material.ActionRecorder = ActionRecorder;
 
+            PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"Material:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, 0, 1);
 
             MaterialPropGrid.Target = Material;
             UEngine.Instance.TickableManager.AddTickable(this);
@@ -165,7 +166,7 @@ namespace EngineNS.Editor.Forms
                 Material.SerialId++;
                 var unused = UEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Material.AssetName);
 
-                USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                //USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Reload", in btSize))

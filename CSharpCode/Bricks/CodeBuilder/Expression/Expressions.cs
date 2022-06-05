@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.CodeBuilder
     public class UTypeReference : IO.ISerializer
     {
         string mTypeFullName;
-        [Rtti.Meta]
+        [Rtti.Meta(Order = 1)]
         public string TypeFullName
         {
             get
@@ -63,15 +63,19 @@ namespace EngineNS.Bricks.CodeBuilder
             }
             set
             {
-                mTypeDesc = Rtti.UTypeDesc.TypeOf(value);
                 if (mTypeDesc == null)
-                    mTypeFullName = value;
+                    mTypeDesc = Rtti.UTypeDesc.TypeOfFullName(value);
+                else if (mTypeDesc.FullName != value)
+                    mTypeDesc = Rtti.UTypeDesc.TypeOfFullName(value);
+                mTypeFullName = value;
             }
         }
         Rtti.UTypeDesc mTypeDesc;
+        [Rtti.Meta(Order = 0)]
         public Rtti.UTypeDesc TypeDesc
         {
-            get { return mTypeDesc; }
+            get => mTypeDesc;
+            set => mTypeDesc = value;
         }
         bool mIsEnum = false;
         [Rtti.Meta]
@@ -88,6 +92,19 @@ namespace EngineNS.Bricks.CodeBuilder
                 mIsEnum = value;
             }
         }
+
+        public bool IsPointer
+        {
+            get
+            {
+                if (mTypeDesc != null)
+                    return mTypeDesc.IsPointer;
+                return false;
+            }
+        }
+
+        public bool IsTask => (mTypeDesc.IsEqual(typeof(System.Threading.Tasks.Task)) || mTypeDesc.IsSubclassOf(typeof(System.Threading.Tasks.Task)));
+
         public UTypeReference(string typeFullName, bool isEnum = false)
         {
             mTypeFullName = typeFullName;
@@ -117,11 +134,11 @@ namespace EngineNS.Bricks.CodeBuilder
             if (typeR == null)
                 return false;
 
-            return typeR.mTypeFullName == mTypeFullName;
+            return typeR.TypeFullName == TypeFullName;
         }
         public override int GetHashCode()
         {
-            return mTypeFullName.GetHashCode();
+            return TypeFullName.GetHashCode();
         }
         public override string ToString()
         {
@@ -309,10 +326,29 @@ namespace EngineNS.Bricks.CodeBuilder
         public UCommentStatement Comment { get; set; }
         [Rtti.Meta]
         public bool IsOverride { get; set; } = false;
+        [Rtti.Meta]
+        public bool IsAsync { get; set; } = false;
+
+        public bool IsUnsafe
+        {
+            get
+            {
+                if (ReturnValue != null && ReturnValue.VariableType.IsPointer)
+                    return true;
+                for(int i=0; i<Arguments.Count; i++)
+                {
+                    if (Arguments[i].VariableType.IsPointer)
+                        return true;
+                }
+                return false;
+            }
+        }
 
         public UExecuteSequenceStatement MethodBody = new UExecuteSequenceStatement();
         public int MethodSegmentDeep = 0;
         public bool ReturnHasGenerated = false;
+        public bool HasUnsafeCode = false;
+        public bool HasAwaitCode = false;
 
         public UClassDeclaration HostClass;
 
@@ -320,22 +356,21 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             MethodSegmentDeep = 0;
             ReturnHasGenerated = false;
+            HasUnsafeCode = false;
+            HasAwaitCode = false;
         }
 
-        string mKeyword = "";
         public string GetKeyword()
         {
-            if (!string.IsNullOrEmpty(mKeyword))
-                return mKeyword;
-            mKeyword = ((ReturnValue != null) ? ReturnValue.VariableType.TypeFullName : "") + " " + MethodName + "(";
+            var keyword = ((ReturnValue != null) ? ReturnValue.VariableType.TypeFullName : "") + " " + MethodName + "(";
             for(int i=0; i<Arguments.Count; i++)
             {
-                mKeyword += //Arguments[i].OperationType.ToString() + " " +
+                keyword += //Arguments[i].OperationType.ToString() + " " +
                           //(Arguments[i].IsParamArray ? "param " : "") +
                           Arguments[i].VariableType.TypeFullName + ",";
             }
-            mKeyword = mKeyword.TrimEnd(',') + ")";
-            return mKeyword;
+            keyword = keyword.TrimEnd(',') + ")";
+            return keyword;
         }
 
         public static string GetKeyword(System.Reflection.MethodInfo method)
@@ -369,13 +404,25 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             var retVal = new UMethodDeclaration();
             retVal.IsOverride = true;
-            if(method.ReturnType != typeof(void))
+            if ((method.ReturnType != typeof(void)) && (method.ReturnType != typeof(System.Threading.Tasks.Task)))
             {
+                var retType = method.ReturnType;
+                if (method.ReturnType.BaseType == typeof(System.Threading.Tasks.Task))
+                {
+                    retType = method.ReturnType.GetGenericArguments()[0];
+                    retVal.IsAsync = true;
+                }
+
                 retVal.ReturnValue = new UVariableDeclaration()
                 {
-                    VariableType = new UTypeReference(method.ReturnType),
+                    VariableType = new UTypeReference(retType),
+                    InitValue = new UDefaultValueExpression(retType),
+                    VariableName = "ret_" + (UInt32)Guid.NewGuid().ToString().GetHashCode(),
                 };
             }
+            else if (method.ReturnType.BaseType == typeof(System.Threading.Tasks.Task))
+                retVal.IsAsync = true;
+
             retVal.MethodName = method.Name;
             var parameters = method.GetParameters();
             retVal.Arguments = new List<UMethodArgumentDeclaration>(parameters.Length);
@@ -389,13 +436,24 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             var retVal = new UMethodDeclaration();
             retVal.IsOverride = true;
-            if(method.ReturnType.IsEqual(typeof(void)))
+            if(!method.ReturnType.IsEqual(typeof(void)) && !method.ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)))
             {
+                var retType = method.ReturnType;
+                if(retType.IsSubclassOf(typeof(System.Threading.Tasks.Task)))
+                {
+                    retType = Rtti.UTypeDesc.TypeOf(method.ReturnType.GetGenericArguments()[0]);
+                    retVal.IsAsync = true;
+                }
                 retVal.ReturnValue = new UVariableDeclaration()
                 {
-                    VariableType = new UTypeReference(method.ReturnType),
+                    VariableType = new UTypeReference(retType),
+                    InitValue = new UDefaultValueExpression(retType),
+                    VariableName = "ret_" + (UInt32)Guid.NewGuid().ToString().GetHashCode(),
                 };
             }
+            else if(method.ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)))
+                retVal.IsAsync = true;
+
             retVal.MethodName = method.MethodName;
             var parameters = method.Parameters;
             retVal.Arguments = new List<UMethodArgumentDeclaration>(parameters.Length);
@@ -603,9 +661,10 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    public class UClassReferenceExpression : UExpressionBase
+    public class UClassReferenceExpression : UExpressionBase, IO.ISerializer
     {
-        public Rtti.UTypeDesc Class;
+        [Rtti.Meta]
+        public Rtti.UTypeDesc Class { get; set; }
         public override bool Equals(object obj)
         {
             var cRef = obj as UClassReferenceExpression;
@@ -617,17 +676,29 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return Class.GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
-            return "ref(" + Class.ToString() + ")";
+            return "ref(" + Class?.ToString() + ")";
         }
     }
 
-    public class UVariableReferenceExpression : UExpressionBase
+    public class UVariableReferenceExpression : UExpressionBase, IO.ISerializer
     {
-        public UExpressionBase Host;
-        public string VariableName = "Unknow";
-        public bool IsProperty = false;
+        [Rtti.Meta]
+        public UExpressionBase Host { get; set; }
+        [Rtti.Meta]
+        public string VariableName { get; set; } = "Unknow";
+        [Rtti.Meta]
+        public bool IsProperty { get; set; } = false;
 
         public UVariableReferenceExpression()
         {
@@ -654,6 +725,15 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
             return ((Host != null) ? Host.ToString() : "") + "." + VariableName;
@@ -679,10 +759,12 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    public class UMethodInvokeArgumentExpression : UExpressionBase
+    public class UMethodInvokeArgumentExpression : UExpressionBase, IO.ISerializer
     {
-        public UExpressionBase Expression;
-        public EMethodArgumentAttribute OperationType = EMethodArgumentAttribute.Default;
+        [Rtti.Meta]
+        public UExpressionBase Expression;// { get; set; }
+        [Rtti.Meta]
+        public EMethodArgumentAttribute OperationType { get; set; } = EMethodArgumentAttribute.Default;
 
         public override bool Equals(object obj)
         {
@@ -695,19 +777,38 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return Expression.GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
             return "arg(" + Expression.ToString() + ")";
         }
     }
 
-    public class UMethodInvokeStatement : UStatementBase
+    public class UMethodInvokeStatement : UStatementBase, IO.ISerializer
     {
-        public UExpressionBase Host;
-        public string MethodName = "Unknow";
-        public List<UMethodInvokeArgumentExpression> Arguments = new List<UMethodInvokeArgumentExpression>();
-        public UVariableDeclaration ReturnValue;
-
+        [Rtti.Meta]
+        public UExpressionBase Host { get; set; }
+        [Rtti.Meta]
+        public string MethodName { get; set; } = "Unknow";
+        [Rtti.Meta]
+        public List<UMethodInvokeArgumentExpression> Arguments { get; set; } = new List<UMethodInvokeArgumentExpression>();
+        [Rtti.Meta]
+        public UVariableDeclaration ReturnValue { get; set; }
+        [Rtti.Meta]
+        public bool ForceCastReturnType { get; set; } = false;
+        [Rtti.Meta]
+        public bool IsAsync { get; set; } = false;
+        [Rtti.Meta]
+        public bool IsUnsafe { get; set; } = false;
+        
         public UMethodInvokeStatement() { }
         public UMethodInvokeStatement(string methodName, UVariableDeclaration retValue, UExpressionBase host, params UMethodInvokeArgumentExpression[] arguments)
         {
@@ -745,6 +846,15 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
             string retStr = "";
@@ -760,10 +870,32 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    public class UAssignOperatorStatement : UStatementBase
+    public class ULambdaExpression : UExpressionBase, IO.ISerializer
     {
-        public UExpressionBase To;
-        public UExpressionBase From;
+        [Rtti.Meta]
+        public UTypeReference ReturnType { get; set; }
+        [Rtti.Meta]
+        public List<UMethodInvokeArgumentExpression> LambdaArguments { get; set; } = new List<UMethodInvokeArgumentExpression>();
+        [Rtti.Meta]
+        public UMethodInvokeStatement MethodInvoke { get; set; }
+        [Rtti.Meta]
+        public bool IsAsync { get; set; } = false;
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+    }
+
+    public class UAssignOperatorStatement : UStatementBase, IO.ISerializer
+    {
+        [Rtti.Meta]
+        public UExpressionBase To { get; set; }
+        [Rtti.Meta]
+        public UExpressionBase From { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -777,13 +909,22 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
             return To.ToString() + "=" + From.ToString();
         }
     }
 
-    public class UBinaryOperatorExpression : UExpressionBase
+    public class UBinaryOperatorExpression : UExpressionBase, IO.ISerializer
     {
         public enum EBinaryOperation
         {
@@ -807,9 +948,12 @@ namespace EngineNS.Bricks.CodeBuilder
             GreaterThan,
             GreaterThanOrEqual,
         }
-        public EBinaryOperation Operation = EBinaryOperation.Add;
-        public UExpressionBase Left;
-        public UExpressionBase Right;
+        [Rtti.Meta]
+        public EBinaryOperation Operation { get; set; } = EBinaryOperation.Add;
+        [Rtti.Meta]
+        public UExpressionBase Left { get; set; }
+        [Rtti.Meta]
+        public UExpressionBase Right { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -828,9 +972,17 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return Left.ToString() + " " + Operation.ToString() + " " + Right.ToString();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
     }
 
-    public class UUnaryOperatorExpression : UExpressionBase
+    public class UUnaryOperatorExpression : UExpressionBase, IO.ISerializer
     {
         public enum EUnaryOperation
         {
@@ -838,8 +990,10 @@ namespace EngineNS.Bricks.CodeBuilder
             BooleanNot,
             BitwiseNot,
         }
-        public EUnaryOperation Operation = EUnaryOperation.Negative;
-        public UExpressionBase Value;
+        [Rtti.Meta]
+        public EUnaryOperation Operation { get; set; } = EUnaryOperation.Negative;
+        [Rtti.Meta]
+        public UExpressionBase Value { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -857,12 +1011,22 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return Operation.ToString() + "(" + Value.ToString() + ")";
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
     }
 
-    public class UIndexerOperatorExpression : UExpressionBase
+    public class UIndexerOperatorExpression : UExpressionBase, IO.ISerializer
     {
-        public UExpressionBase Target;
-        public List<UExpressionBase> Indices = new List<UExpressionBase>();
+        [Rtti.Meta]
+        public UExpressionBase Target { get; set; }
+        [Rtti.Meta]
+        public List<UExpressionBase> Indices { get; set; } = new List<UExpressionBase>();
 
         public override bool Equals(object obj)
         {
@@ -882,6 +1046,15 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
             var retVal = Target.ToString();
@@ -891,18 +1064,24 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    public class UPrimitiveExpression : UExpressionBase
+    public class UPrimitiveExpression : UExpressionBase, IO.ISerializer
     {
-        protected Support.UAnyValue Value;
-        protected System.Enum EnumValue = null;
-        public Rtti.UTypeDesc Type;
+        [Rtti.Meta(Order = 0)]
+        public Rtti.UTypeDesc Type { get; set; }
+        string mValueStr;
+        [Rtti.Meta]
+        protected string ValueStr 
+        {
+            get => mValueStr;
+            set => mValueStr = value;
+        }
 
         public override bool Equals(object obj)
         {
             var p = obj as UPrimitiveExpression;
             if (p == null)
                 return false;
-            return Value.IsEqual(p.Value) && (EnumValue == p.EnumValue);
+            return (mValueStr == p.mValueStr);
         }
         public override int GetHashCode()
         {
@@ -910,147 +1089,148 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         public override string ToString()
         {
-            if (EnumValue != null)
-                return EnumValue.ToString();
-            return Value.ToString();
+            return mValueStr;
         }
 
         public UPrimitiveExpression(Byte val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Byte));
-            Value.SetUI8(val);
+            mValueStr = val.ToString();
         }
         public UPrimitiveExpression(UInt16 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(UInt16));
-            Value.SetUI16(val);
+            mValueStr = val.ToString();
         }
         public UPrimitiveExpression(UInt32 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(UInt32));
-            Value.SetUI32(val);
+            mValueStr = val.ToString();
         }
         public UPrimitiveExpression(UInt64 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(UInt64));
-            Value.SetUI64(val);
+            mValueStr = val.ToString();
         }
         public UPrimitiveExpression(SByte val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(SByte));
-            Value.SetI8(val);
+            mValueStr = val.ToString();
         }
         public UPrimitiveExpression(Int16 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Int16));
-            Value.SetI16(val);
+            mValueStr = val.ToString();
         }
         public UPrimitiveExpression(Int32 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Int32));
-            Value.SetI32(val);
+            mValueStr = val.ToString();
         }
         public UPrimitiveExpression(Int64 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Int64));
-            Value.SetI64(val);
+            mValueStr = val.ToString();
         }
         public UPrimitiveExpression(float val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(float));
-            Value.SetF32(val);
+            mValueStr = val.ToString();
         }
         public UPrimitiveExpression(double val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(double));
-            Value.SetF64(val);
+            mValueStr = val.ToString();
         }
         public UPrimitiveExpression(string val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(string));
-            Value.SetName(val);
+            mValueStr = val;
         }
         public UPrimitiveExpression(bool val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(bool));
-            Value.SetValue(val);
+            mValueStr = val.ToString();
+            if (val)
+                mValueStr = "true";
+            else
+                mValueStr = "false";
         }
         public UPrimitiveExpression(Vector2 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Vector2));
-            Value.SetValue(val);
+            mValueStr = val.ToString();
         }
         public UPrimitiveExpression(Vector3 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Vector3));
-            Value.SetValue(val);
+            mValueStr = val.ToString();
         }
         public UPrimitiveExpression(Vector4 val)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(Vector4));
-            Value.SetValue(val);
+            mValueStr = val.ToString();
         }
         public UPrimitiveExpression(Rtti.UTypeDesc type, object value)
         {
             Type = type;
-            if (type.IsEnum)
-                EnumValue = (System.Enum)value;
-            else if (type.IsEqual(typeof(SByte)))
-                Value.SetValue((sbyte)value);
-            else if (type.IsEqual(typeof(Int16)))
-                Value.SetValue((Int16)value);
-            else if (type.IsEqual(typeof(Int32)))
-                Value.SetValue((Int32)value);
-            else if (type.IsEqual(typeof(Int64)))
-                Value.SetValue((Int64)value);
-            else if (type.IsEqual(typeof(byte)))
-                Value.SetValue((byte)value);
-            else if (type.IsEqual(typeof(UInt16)))
-                Value.SetValue((UInt16)value);
-            else if (type.IsEqual(typeof(UInt32)))
-                Value.SetValue((UInt32)value);
-            else if (type.IsEqual(typeof(UInt64)))
-                Value.SetValue((UInt64)value);
-            else if (type.IsEqual(typeof(float)))
-                Value.SetValue((float)value);
-            else if (type.IsEqual(typeof(double)))
-                Value.SetValue((double)value);
-            else if (type.IsEqual(typeof(string)))
-                Value.SetName((string)value);
-            else if (type.IsEqual(typeof(Vector2)))
-                Value.SetValue((Vector2)value);
-            else if (type.IsEqual(typeof(Vector3)))
-                Value.SetValue((Vector3)value);
-            else if (type.IsEqual(typeof(Vector4)))
-                Value.SetValue((Vector4)value);
-        }
+            if (value == null)
+            {
+                ValueStr = "null";
+            }
+            else if (type == Rtti.UTypeDescGetter<bool>.TypeDesc)
+            {
+                var v = (bool)value;
+                ValueStr = v ? "true" : "false";
+            }
+            else if (type == Rtti.UTypeDescGetter<RName>.TypeDesc)
+            {
+                var v = (RName)value;
 
+                ValueStr = $"EngineNS.RName.GetRName(\"{v.Name}\", EngineNS.RName.ERNameType.{v.RNameType})";
+            }
+            else if(type == Rtti.UTypeDescGetter<System.Type>.TypeDesc)
+            {
+                var typeDesc = (Rtti.UTypeDesc)value;
+                ValueStr = $"typeof({typeDesc.FullName})";
+            }
+            else
+            {
+                ValueStr = value.ToString();
+            }
+        }
         public void SetValue<T>(T value) where T : unmanaged
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(T));
-            Value.SetValue(value);
+            ValueStr = value.ToString();
         }
         public void SetValue(string value)
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(string));
-            Value.SetName(value);
-        }
-        public void GetValue<T>(ref T value) where T : unmanaged
-        {
-            Value.GetValue(ref value);
+            ValueStr = value;
         }
         public string GetValueString()
         {
-            if (EnumValue != null)
-                return EnumValue.ToString();
-            return Value.ToString();
+            return ValueStr;
+        }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
         }
     }
 
-    public class UCastExpression : UExpressionBase
+    public class UCastExpression : UExpressionBase, IO.ISerializer
     {
-        public UTypeReference TargetType;
-        public UExpressionBase Expression;
+        [Rtti.Meta]
+        public UTypeReference TargetType { get; set; }
+        [Rtti.Meta]
+        public UTypeReference SourceType { get; set; }
+        [Rtti.Meta]
+        public UExpressionBase Expression { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -1064,16 +1244,27 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
             return "(" + TargetType.ToString() + ")" + Expression.ToString();
         }
     }
 
-    public class UCreateObjectExpression : UExpressionBase
+    public class UCreateObjectExpression : UExpressionBase, IO.ISerializer
     {
-        public string TypeName;
-        public List<UExpressionBase> Parameters = new List<UExpressionBase>();
+        [Rtti.Meta]
+        public string TypeName { get; set; }
+        [Rtti.Meta]
+        public List<UExpressionBase> Parameters { get; set; } = new List<UExpressionBase>();
 
         public override bool Equals(object obj)
         {
@@ -1095,6 +1286,15 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
             var retVal = TypeName + "(";
@@ -1105,9 +1305,10 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    public class UDefaultValueExpression : UExpressionBase
+    public class UDefaultValueExpression : UExpressionBase, IO.ISerializer
     {
-        public UTypeReference Type;
+        [Rtti.Meta]
+        public UTypeReference Type { get; set; }
         public UDefaultValueExpression() { }
         public UDefaultValueExpression(Rtti.UTypeDesc type)
         {
@@ -1133,6 +1334,15 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return Type.GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
             return "default " + Type.ToString();
@@ -1158,9 +1368,10 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    public class UExecuteSequenceStatement : UStatementBase
+    public class UExecuteSequenceStatement : UStatementBase, IO.ISerializer
     {
-        public List<UStatementBase> Sequence = new List<UStatementBase>();
+        [Rtti.Meta]
+        public List<UStatementBase> Sequence { get; set; } = new List<UStatementBase>();
 
         public override bool Equals(object obj)
         {
@@ -1180,6 +1391,15 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
             var retStr = "";
@@ -1209,12 +1429,16 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    public class UIfStatement : UStatementBase
+    public class UIfStatement : UStatementBase, IO.ISerializer
     {
-        public UExpressionBase Condition;
-        public UStatementBase TrueStatement;
-        public UStatementBase FalseStatement;
-        public List<UIfStatement> ElseIfs;
+        [Rtti.Meta]
+        public UExpressionBase Condition { get; set; }
+        [Rtti.Meta]
+        public UStatementBase TrueStatement { get; set; }
+        [Rtti.Meta]
+        public UStatementBase FalseStatement { get; set; }
+        [Rtti.Meta]
+        public List<UIfStatement> ElseIfs { get; set; } = new List<UIfStatement>();
 
         public override bool Equals(object obj)
         {
@@ -1236,6 +1460,15 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
             var retVal = "if(" + Condition.ToString() + ")";
@@ -1249,14 +1482,20 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    public class UForLoopStatement : UStatementBase
+    public class UForLoopStatement : UStatementBase, IO.ISerializer
     {
-        public bool IncludeEnd = false;
-        public string LoopIndexName;
-        public UExpressionBase BeginExpression;
-        public UExpressionBase EndExpression;
-        public UExpressionBase StepExpression;
-        public UStatementBase LoopBody;
+        [Rtti.Meta]
+        public bool IncludeEnd { get; set; } = false;
+        [Rtti.Meta]
+        public string LoopIndexName { get; set; }
+        [Rtti.Meta]
+        public UExpressionBase BeginExpression { get; set; }
+        [Rtti.Meta]
+        public UExpressionBase EndExpression { get; set; }
+        [Rtti.Meta]
+        public UExpressionBase StepExpression { get; set; }
+        [Rtti.Meta]
+        public UStatementBase LoopBody { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -1275,6 +1514,15 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
             return "for(" + LoopIndexName + "=" + BeginExpression.ToString() +
@@ -1284,10 +1532,12 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    public class UWhileLoopStatement : UStatementBase
+    public class UWhileLoopStatement : UStatementBase, IO.ISerializer
     {
-        public UExpressionBase Condition;
-        public UStatementBase LoopBody;
+        [Rtti.Meta]
+        public UExpressionBase Condition { get; set; }
+        [Rtti.Meta]
+        public UStatementBase LoopBody { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -1300,6 +1550,15 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
             return "while(" + Condition.ToString() + "){" + LoopBody.ToString() + "}";
@@ -1372,10 +1631,12 @@ namespace EngineNS.Bricks.CodeBuilder
             return "/*" + CommentString + "*/";
         }
     }
-    public class UExpressionStatement : UStatementBase
+    public class UExpressionStatement : UStatementBase, IO.ISerializer
     {
-        public UExpressionBase Expression;
-        public UStatementBase NextStatement;
+        [Rtti.Meta]
+        public UExpressionBase Expression { get; set; }
+        [Rtti.Meta]
+        public UStatementBase NextStatement { get; set; }
         public UExpressionStatement(UExpressionBase exp)
         {
             Expression = exp;
@@ -1399,6 +1660,15 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
+
+        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
+
         public override string ToString()
         {
             return Expression.ToString() + ((NextStatement != null) ? NextStatement.ToString() : "");

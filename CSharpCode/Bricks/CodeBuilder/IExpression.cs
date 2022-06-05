@@ -194,7 +194,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 ImGuiAPI.SetNextItemWidth(-1);
                 TypeSlt.AssemblyFilter = AssemblyFilter;
                 TypeSlt.FilterMode = FilterMode;
-                TypeSlt.FilterMode |= EGui.Controls.TypeSelector.EFilterMode.ExcludeNoMeta;// .SearchFromMetas = true;
+                TypeSlt.FilterMode |= EGui.Controls.UTypeSelector.EFilterMode.ExcludeNoMeta;// .SearchFromMetas = true;
                 TypeSlt.BaseType = BaseType;
                 var typeStr = info.Value as string;
                 TypeSlt.SelectedType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeStr);

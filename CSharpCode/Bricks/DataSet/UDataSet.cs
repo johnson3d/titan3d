@@ -89,7 +89,7 @@ namespace EngineNS.UTest
             var obj = dataSet.MainTable.GetData(0) as TestDataType;
             UTest.UnitTestManager.TAssert(obj.A == 1, "");
 
-            dataSet.SaveDataSetToExcel(RName.GetRName("UTest/dataset/testdatatype_1.xls").Address);
+            //dataSet.SaveDataSetToExcel(RName.GetRName("UTest/dataset/testdatatype_1.xls").Address);
         }
     }
 }

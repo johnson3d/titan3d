@@ -34,10 +34,15 @@ namespace EngineNS
             {
                 if (i.IsModuleRun(UEngine.Instance.PlayMode) == false)
                     continue;
-                if(false == await i.Initialize(host))
+
+                var t1 = Support.Time.HighPrecision_GetTickCount();
+                if (false == await i.Initialize(host))
                 {
                     Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Engine", $"Module {i.GetType()} init failed");
                 }
+                var t2 = Support.Time.HighPrecision_GetTickCount();
+
+                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"InitializeModules {i.GetType().FullName}:{(t2 - t1) / 1000} ms");
             }
         }
         protected void TickModules()

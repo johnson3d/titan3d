@@ -84,7 +84,7 @@ namespace EngineNS.Bricks.Input.Device.Mouse
 
     }
 
-    public delegate void MouseMotionEvent(UControlEvent sender, int X, int Y);
+    public delegate void MouseMotionEvent(UControlEvent sender, int X, int Y, int DeltaX, int DeltaY);
     public class UMouseMotionEvent : UControlEvent
     {
         public class UMouseMotionEventData : UControlEventData
@@ -105,7 +105,7 @@ namespace EngineNS.Bricks.Input.Device.Mouse
 
         public override void OnTrigging(ref Event e)
         {
-            EventFire?.Invoke(this, e.MouseMotion.X, e.MouseMotion.Y);
+            EventFire?.Invoke(this, e.MouseMotion.X, e.MouseMotion.Y, e.MouseMotion.xRel, e.MouseMotion.yRel);
         }
         public override void RegSelf(UInputSystem inputSystem)
         {
@@ -233,9 +233,9 @@ namespace EngineNS.Bricks.Input.Device.Mouse
             }
         }
 
-        private void OnMouseMotionEvent_EventFire(UControlEvent sender, int X, int Y)
+        private void OnMouseMotionEvent_EventFire(UControlEvent sender, int X, int Y, int DeltaX, int DeltaY)
         {
-            Value = new Vector2(X, Y);
+            Value = new Vector2(DeltaX, DeltaY);
         }
 
         public void BeforeTick()

@@ -108,6 +108,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if (!CoreSDK.IsNullPointer(index))
                 drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
 
+            index = reflector.GetShaderBinder(EShaderBindType.SBT_Srv, "NormalTextureArray");
+            if (!CoreSDK.IsNullPointer(index))
+            {
+                var srv = pat.Level.GetTerrainNode().TerrainMaterialIdManager.NormalTextureArraySRV;
+                if (srv != null)
+                    drawcall.mCoreObject.BindShaderSrv(index, srv.mCoreObject);
+            }
+            index = reflector.GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_NormalTextureArray");
+            if (!CoreSDK.IsNullPointer(index))
+                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+
             var cbIndex = reflector.GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerPatch");
             if (!CoreSDK.IsNullPointer(index))
             {

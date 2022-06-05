@@ -46,6 +46,8 @@ namespace EngineNS.Bricks.CodeBuilder
 
     public partial class UMacrossAMeta : IO.IAssetMeta
     {
+        [Rtti.Meta]
+        public string BaseTypeStr { get; set; }
         public override string GetAssetExtType()
         {
             return UMacross.AssetExt;
@@ -90,7 +92,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 mSelectedType = null;
             }
 
-            public override unsafe void OnDraw(ContentBrowser contentBrowser)
+            public override unsafe void OnDraw(UContentBrowser contentBrowser)
             {
                 //base.OnDraw(contentBrowser);
                 
@@ -226,21 +228,54 @@ namespace EngineNS.Bricks.CodeBuilder
 
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
+            ameta.RefAssetRNames.Clear();
+            var macrossMeta = (ameta as UMacrossAMeta);
+            if (macrossMeta != null && mSelectedType != null)
+                macrossMeta.BaseTypeStr = mSelectedType.TypeString;
 
+            var graph = new MacrossNode.UMacrossEditor();
+            graph.LoadClassGraph(this.AssetName);
+            foreach (var i in graph.Methods)
+            {
+                foreach (var j in i.Nodes)
+                {
+                    var n = j as Bricks.CodeBuilder.MacrossNode.MethodNode;
+                    if (n == null)
+                        continue;
+                    foreach (var pin in n.Inputs)
+                    {
+                        if (pin.EditValue == null)
+                            continue;
+                        var rnm = pin.EditValue.Value as RName;
+                        if (rnm != null)
+                        {
+                            ameta.AddReferenceAsset(rnm);
+                        }
+                    }
+                }
+            }
         }
 
         UTypeDesc mSelectedType = null;
+        public MacrossNode.UMacrossEditor MacrossEditor = null;
         public void SaveAssetTo(RName name)
         {
+            //var ameta = GetAMeta();
+            //if (ameta != null)
+            //{
+            //    UpdateAMetaReferences(ameta);
+            //    ameta.SaveAMeta();
+            //}
             IO.FileManager.CreateDirectory(name.Address);
 
-            var graph = new MacrossNode.UMacrossEditor();
-            graph.AssetName = name;
-            graph.DefClass.ClassName = name.PureName;
-            graph.DefClass.Namespace = new UNamespaceDeclaration(IO.FileManager.GetParentPathName(name.Name).TrimEnd('/').Replace('/', '.'));
+            if (MacrossEditor == null)
+                MacrossEditor = new MacrossNode.UMacrossEditor();
+            MacrossEditor.AssetName = name;
+            MacrossEditor.DefClass.ClassName = name.PureName;
+            MacrossEditor.DefClass.Namespace = new UNamespaceDeclaration(IO.FileManager.GetParentPathName(name.Name).TrimEnd('/').Replace('/', '.'));
             if (mSelectedType != null)
-                graph.DefClass.SupperClassNames.Add(mSelectedType.FullName);
-            graph.SaveClassGraph(name);
+                MacrossEditor.DefClass.SupperClassNames.Add(mSelectedType.FullName);
+            MacrossEditor.SaveClassGraph(name);
         }
     }
 }

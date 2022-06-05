@@ -84,7 +84,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public string Category
         {
             get;
-            private set;
+            set;
         }
 
         public bool ParentIsValueType
@@ -924,7 +924,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             if (mProperties.Count < Count + 1)
             {
-                ResizeList(Count + 1);
+                ResizeList(Count + 10);
             }
 
             if (mProperties[Count] != null)
@@ -1039,17 +1039,24 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         var objTypeDesc = Rtti.UTypeDesc.TypeOf(objType);
                         PropertyDescriptorCollection pros;
                         var tc = TypeDescriptor.GetConverter(objIns);
+                        var tempProperties = PropertyDescCollectionPool.QueryObjectSync();
                         if (tc == null || !tc.GetPropertiesSupported())
                         {
-                            if (objIns is ICustomTypeDescriptor)
-                                pros = ((ICustomTypeDescriptor)instance).GetProperties();
+                            if (objIns is IPropertyCustomization)
+                            {
+                                ((IPropertyCustomization)objIns).GetProperties(ref tempProperties, parentIsValueType);
+                            }
                             else
+                            {
                                 pros = TypeDescriptor.GetProperties(objIns);
+                                tempProperties.InitValue(objIns, objTypeDesc, pros, parentIsValueType);
+                            }
                         }
                         else
+                        {
                             pros = tc.GetProperties(objIns);
-                        var tempProperties = PropertyDescCollectionPool.QueryObjectSync();
-                        tempProperties.InitValue(objIns, objTypeDesc, pros, parentIsValueType);
+                            tempProperties.InitValue(objIns, objTypeDesc, pros, parentIsValueType);
+                        }
 
                         // 相同属性合并
                         if (properties == null)
@@ -1108,17 +1115,24 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     var insTypeDesc = Rtti.UTypeDesc.TypeOf(insType);
                     PropertyDescriptorCollection pros;
                     var tc = TypeDescriptor.GetConverter(instance);
+                    properties = PropertyDescCollectionPool.QueryObjectSync();
                     if (tc == null || !tc.GetPropertiesSupported())
                     {
-                        if (instance is ICustomTypeDescriptor)
-                            pros = ((ICustomTypeDescriptor)instance).GetProperties();
+                        if (instance is IPropertyCustomization)
+                        {
+                            ((IPropertyCustomization)instance).GetProperties(ref properties, parentIsValueType);
+                        }
                         else
+                        {
                             pros = TypeDescriptor.GetProperties(instance);
+                            properties.InitValue(instance, insTypeDesc, pros, parentIsValueType);
+                        }
                     }
                     else
+                    {
                         pros = tc.GetProperties(instance);
-                    properties = PropertyDescCollectionPool.QueryObjectSync();
-                    properties.InitValue(instance, insTypeDesc, pros, parentIsValueType);
+                        properties.InitValue(instance, insTypeDesc, pros, parentIsValueType);
+                    }
 
                     var fls = insType.GetFields(getFieldsFlag);
                     fields = PropertyDescCollectionPool.QueryObjectSync();

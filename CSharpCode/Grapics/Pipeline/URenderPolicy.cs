@@ -245,6 +245,47 @@ namespace EngineNS.Graphics.Pipeline
 
     public class UDeferredPolicyBase : URenderPolicy
     {
+        #region Feature On/Off
+        public override bool DisableShadow
+        {
+            get => mDisableShadow;
+            set
+            {
+                mDisableShadow = value;
+                var shading = this.FindFirstNode<Deferred.UDeferredDirLightingNode>()?.ScreenDrawPolicy.mBasePassShading as Deferred.UDeferredDirLightingShading;
+                //var shading = DirLightingNode.ScreenDrawPolicy.mBasePassShading as UDeferredDirLightingShading;
+                shading?.SetDisableShadow(value);
+            }
+        }
+        public override bool DisablePointLight
+        {
+            get
+            {
+                return mDisablePointLight;
+            }
+            set
+            {
+                mDisablePointLight = value;
+                var shading = this.FindFirstNode<Deferred.UDeferredDirLightingNode>()?.ScreenDrawPolicy.mBasePassShading as Deferred.UDeferredDirLightingShading;
+                //var shading = DirLightingNode.ScreenDrawPolicy.mBasePassShading as UDeferredDirLightingShading;
+                shading?.SetDisablePointLights(value);
+            }
+        }
+        public override bool DisableHDR
+        {
+            get
+            {
+                return mDisableHDR;
+            }
+            set
+            {
+                mDisableHDR = value;
+                var shading = this.FindFirstNode<Deferred.UDeferredDirLightingNode>()?.ScreenDrawPolicy.mBasePassShading as Deferred.UDeferredDirLightingShading;
+                //var shading = DirLightingNode.ScreenDrawPolicy.mBasePassShading as UDeferredDirLightingShading;
+                shading?.SetDisableHDR(value);
+            }
+        }
+        #endregion
         Deferred.UDeferredBasePassNode mBasePassNode;
         Deferred.UDeferredBasePassNode BasePassNode
         {
@@ -357,6 +398,32 @@ namespace EngineNS.Graphics.Pipeline
     }
     public class UForwordPolicyBase : URenderPolicy
     {
+        public override bool DisableAO
+        {
+            get => mDisableAO;
+            set
+            {
+                mDisableAO = value;
+                var finalShading = FindFirstNode<Mobile.UFinalCopyNode>()?.ScreenDrawPolicy.mBasePassShading as Mobile.UFinalCopyShading;
+                if (finalShading != null)
+                {
+                    finalShading.SetDisableAO(value);
+                }
+            }
+        }
+        public override bool DisableHDR
+        {
+            get
+            {
+                return mDisableHDR;
+            }
+            set
+            {
+                mDisableHDR = value;
+                var shading = FindFirstNode<Mobile.UFinalCopyNode>().ScreenDrawPolicy.mBasePassShading as Mobile.UFinalCopyShading;
+                shading?.SetDisableHDR(value);
+            }
+        }
         Mobile.UMobileOpaqueNode mBasePassNode;
         Mobile.UMobileOpaqueNode BasePassNode
         {

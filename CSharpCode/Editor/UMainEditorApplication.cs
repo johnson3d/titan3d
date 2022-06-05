@@ -1,6 +1,11 @@
-﻿using System;
+﻿//#define UseWindowTest
+
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Xml;
+using System.Xml.Linq;
 using SDL2;
 
 namespace EngineNS.Editor
@@ -11,52 +16,51 @@ namespace EngineNS.Editor
         
         public UMainEditorApplication()
         {
+            mLogWatcher = new EGui.Controls.ULogWatcher();
             mCpuProfiler = new Editor.Forms.UCpuProfiler();
-            mMetaViewer = new Editor.UMetaViewEditor();            
             mMainInspector = new Forms.UInspector();
-            WorldViewportSlate = new UEditorWorldViewportSlate(true);
-            mWorldOutliner = new Editor.Forms.UWorldOutliner();
+            //WorldViewportSlate = new UEditorWorldViewportSlate(true);
+            //mWorldOutliner = new Editor.Forms.UWorldOutliner(WorldViewportSlate);
 
             mBrickManager = new Bricks.ProjectGen.UBrickManager();
-            mEditorSettings = new Forms.UEditorSettings();
-            mEditorSettings.ViewportSlate = this.WorldViewportSlate;
-            //mWorldOutliner.TestUWorldOutliner(this);
+            mEditorSettings = new Forms.UEditorSettings();            
         }
         private bool IsVisible = true;
-        public Editor.Forms.UWorldOutliner mWorldOutliner;
+        //public Editor.Forms.UWorldOutliner mWorldOutliner;
+        public EGui.Controls.ULogWatcher mLogWatcher;
         public Editor.Forms.UCpuProfiler mCpuProfiler;
         public Editor.Forms.UInspector mMainInspector;
-        public Editor.UMetaViewEditor mMetaViewer = null;
         public Bricks.ProjectGen.UBrickManager mBrickManager = null;
         public Editor.Forms.UEditorSettings mEditorSettings;
 
-        public UEditorWorldViewportSlate WorldViewportSlate = null;
-        public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
-        {
-            return WorldViewportSlate;
-        }
-        public EGui.Controls.ContentBrowser ContentBrowser = new EGui.Controls.ContentBrowser();
+        //public UEditorWorldViewportSlate WorldViewportSlate = null;
+        //public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
+        //{
+        //    return WorldViewportSlate;
+        //}
+        public EGui.Controls.UContentBrowser ContentBrowser = new EGui.Controls.UContentBrowser();
         public override void Cleanup()
         {
             Graphics.Pipeline.USlateApplication.ClearRootForms();
             UEngine.Instance?.TickableManager.RemoveTickable(this);
+#if (UseWindowTest)
             mWinTest.Cleanup();
+#endif
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName, Type rpType)
+        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName)
         {
-            await base.InitializeApplication(rc, rpName, rpType);
+            await base.InitializeApplication(rc, rpName);
 
             await ContentBrowser.Initialize();
             Editor.UMainEditorApplication.RegRootForm(ContentBrowser);
 
-            await mMetaViewer.Initialize();
-
-            await WorldViewportSlate.Initialize(this, rpName, Rtti.UTypeDesc.TypeOf(rpType), 0, 1);
+            //await WorldViewportSlate.Initialize(this, rpName, 0, 1);
 
             await mMainInspector.Initialize();
 
             await mEditorSettings.Initialize();
+            //UEngine.Instance.Config.PlayGameName = RName.GetRName("utest/test_game01.macross");
 
             mMainInspector.PropertyGrid.PGName = "MainInspector";
             mMainInspector.PropertyGrid.Target = EGui.UIProxy.StyleConfig.Instance;// WorldViewportSlate;
@@ -65,8 +69,10 @@ namespace EngineNS.Editor
 
             EGui.UIProxy.StyleConfig.Instance.ResetStyle();
             /////////////////////////////////
-            mWinTest.Initialized();
-            //Editor.UMainEditorApplication.RegRootForm(mWinTest);
+#if (UseWindowTest)
+            mWinTest.Initialize();
+            Editor.UMainEditorApplication.RegRootForm(mWinTest);
+#endif
             /////////////////////////////////
 
             InitMainMenu();
@@ -127,16 +133,16 @@ namespace EngineNS.Editor
                     IsTopMenuItem = true,
                     SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
                     {
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "WorldOutliner",
-                            Selected = true,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                            {
-                                mWorldOutliner.Visible = !mWorldOutliner.Visible;
-                                item.Selected = mWorldOutliner.Visible;
-                            },
-                        },
+                        //new EGui.UIProxy.MenuItemProxy()
+                        //{
+                        //    MenuName = "WorldOutliner",
+                        //    Selected = true,
+                        //    Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                        //    {
+                        //        mWorldOutliner.Visible = !mWorldOutliner.Visible;
+                        //        item.Selected = mWorldOutliner.Visible;
+                        //    },
+                        //},
                         new EGui.UIProxy.MenuItemProxy()
                         {
                             MenuName = "CpuProfiler",
@@ -161,16 +167,6 @@ namespace EngineNS.Editor
                         },
                         new EGui.UIProxy.MenuItemProxy()
                         {
-                            MenuName = "MetaViewer",
-                            Selected = true,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                            {
-                                mMetaViewer.Visible = !mMetaViewer.Visible;
-                                item.Selected = mMetaViewer.Visible;
-                            },
-                        },
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
                             MenuName = "BrickManager",
                             Selected = false,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
@@ -185,196 +181,6 @@ namespace EngineNS.Editor
                         },
                     },
                 },
-                new EGui.UIProxy.MenuItemProxy()
-                {
-                    MenuName = "View",
-                    IsTopMenuItem = true,
-                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
-                    {
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "DisableShadow",
-                            Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                            {
-                                this.WorldViewportSlate.RenderPolicy.DisableShadow = !this.WorldViewportSlate.RenderPolicy.DisableShadow;
-                                item.Selected = this.WorldViewportSlate.RenderPolicy.DisableShadow;
-                            },
-                        },
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "DisableAO",
-                            Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                            {
-                                this.WorldViewportSlate.RenderPolicy.DisableAO = !this.WorldViewportSlate.RenderPolicy.DisableAO;
-                                item.Selected = this.WorldViewportSlate.RenderPolicy.DisableAO;
-                            },
-                        },
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "DisableHDR",
-                            Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                            {
-                                this.WorldViewportSlate.RenderPolicy.DisableHDR = !this.WorldViewportSlate.RenderPolicy.DisableHDR;
-                                item.Selected = this.WorldViewportSlate.RenderPolicy.DisableHDR;
-                            },
-                        },
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "DisablePointLight",
-                            Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                            {
-                                //var prop = this.WorldViewportSlate.RenderPolicy.GetType().GetProperty("DisablePointLight");
-                                //if(prop !=null && prop.PropertyType==typeof(bool))
-                                //{
-                                //    bool value = (bool)prop.GetValue(this.WorldViewportSlate.RenderPolicy);
-                                //    value = !value;
-                                //    prop.SetValue(this.WorldViewportSlate.RenderPolicy, value);
-                                //    item.CheckBox = value;
-                                //}
-                                this.WorldViewportSlate.RenderPolicy.DisablePointLight = !this.WorldViewportSlate.RenderPolicy.DisablePointLight;
-                                item.Selected = this.WorldViewportSlate.RenderPolicy.DisablePointLight;
-                            },
-                        },
-                        #region del code
-                        //new EGui.UIProxy.MenuItemProxy()
-                        //{
-                        //    MenuName = "Forward",
-                        //    Selected = false,
-                        //    Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                        //    {
-                        //        var saved = this.WorldViewportSlate.RenderPolicy;
-                        //        //var policy = new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy();                                
-                        //        //await policy.Initialize(saved.DefaultCamera);
-                        //        //policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
-                        //        Graphics.Pipeline.URenderPolicy policy = null;
-                        //        var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(RName.GetRName("utest/forword.rpolicy"));
-                        //        if (rpAsset != null)
-                        //        {
-                        //            policy = rpAsset.CreateRenderPolicy();
-                        //        }
-                        //        await policy.Initialize(saved.DefaultCamera);
-                        //        policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
-                        //        policy.AddCamera("MainCamera", saved.DefaultCamera);
-                        //        policy.SetDefaultCamera("MainCamera");
-
-                        //        this.WorldViewportSlate.RenderPolicy = policy;
-                        //        saved.Cleanup();
-
-                        //        //policy.VoxelsNode.ResetDebugMeshNode(this.WorldViewportSlate.World);
-                        //    },
-                        //},
-                        //new EGui.UIProxy.MenuItemProxy()
-                        //{
-                        //    MenuName = "Deferred",
-                        //    Selected = false,
-                        //    Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                        //    {
-                        //        var saved = this.WorldViewportSlate.RenderPolicy;
-                        //        //var policy = new Graphics.Pipeline.Deferred.UDeferredPolicy();
-                        //        //await policy.Initialize(saved.DefaultCamera);
-                        //        //policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
-                        //        Graphics.Pipeline.URenderPolicy policy = null;
-                        //        var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(RName.GetRName("utest/deferred.rpolicy"));
-                        //        if (rpAsset != null)
-                        //        {
-                        //            policy = rpAsset.CreateRenderPolicy();
-                        //        }
-                        //        await policy.Initialize(saved.DefaultCamera);
-                        //        policy.OnResize(this.WorldViewportSlate.ClientSize.X, this.WorldViewportSlate.ClientSize.Y);
-                        //        policy.AddCamera("MainCamera", saved.DefaultCamera);
-                        //        policy.SetDefaultCamera("MainCamera");
-
-                        //        this.WorldViewportSlate.RenderPolicy = policy;
-                        //        saved.Cleanup();
-
-                        //        //policy.VoxelsNode.ResetDebugMeshNode(this.WorldViewportSlate.World);
-                        //    },
-                        //},
-                        #endregion
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "ShowLightDebugger",
-                            Selected = UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug),
-                            Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                            {
-                                if(UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug))
-                                {
-                                    UEngine.Instance.EditorInstance.Config.CullFilters &= ~GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug;
-                                }
-                                else
-                                {
-                                    UEngine.Instance.EditorInstance.Config.CullFilters |= GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug;
-                                }
-
-                                item.Selected = UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug);
-                            },
-                        },
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "ShowPxDebugger",
-                            Selected = UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug),
-                            Action = async (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                            {
-                                if(UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug))
-                                {
-                                    UEngine.Instance.EditorInstance.Config.CullFilters &= ~GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug;
-                                }
-                                else
-                                {
-                                    UEngine.Instance.EditorInstance.Config.CullFilters |= GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug;
-                                }
-                                item.Selected = UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug);
-                            },
-                        },
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "EditPolicy",
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                            {
-                                this.mMainInspector.PropertyGrid.Target = WorldViewportSlate.RenderPolicy;
-                            },
-                        },
-                    },
-                },
-                new EGui.UIProxy.MenuItemProxy()
-                {
-                    MenuName = "Illumination",
-                    IsTopMenuItem = true,
-                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
-                    {
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "VoxelDebugger",
-                            Selected = true,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                            {
-                                var vxNode = this.WorldViewportSlate.RenderPolicy.FindFirstNode<Bricks.VXGI.UVoxelsNode>();
-                                if(vxNode!=null)
-                                {
-                                    vxNode.DebugVoxels = !vxNode.DebugVoxels;
-                                    item.Selected = vxNode.DebugVoxels;
-                                }
-                            },
-                        },
-                        new EGui.UIProxy.MenuItemProxy()
-                        {
-                            MenuName = "ResetVoxels",
-
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
-                            {
-                                var vxNode = this.WorldViewportSlate.RenderPolicy.FindFirstNode<Bricks.VXGI.UVoxelsNode>();
-                                if(vxNode!=null)
-                                {
-                                    vxNode.SetEraseBox(in vxNode.VxSceneBox);
-                                }
-                            },
-                        },
-                    },
-                },
             };
         }
 
@@ -382,15 +188,15 @@ namespace EngineNS.Editor
         bool _showDemoWindow = false;
         public float LeftWidth = 0;
         public float CenterWidth = 0;
-        public float RightWidth = 0;
 
         ////////////////////////
+#if (UseWindowTest)
         UIWindowsTest mWinTest = new UIWindowsTest();
+#endif
         ////////////////////////
 
         public uint LeftDockId { get; private set; } = 0;
         public uint CenterDockId { get; private set; } = 0;
-        public uint RightDockId { get; private set; } = 0;
 
         public UInt32 ActiveViewportId = UInt32.MaxValue;
         protected unsafe override void OnDrawUI()
@@ -423,14 +229,11 @@ namespace EngineNS.Editor
             {
                 LeftDockId = ImGuiAPI.GetID("LeftDocker");
                 CenterDockId = ImGuiAPI.GetID("CenterDocker");
-                RightDockId = ImGuiAPI.GetID("RightDocker");
 
                 mCpuProfiler.DockId = CenterDockId;
                 mClrProfiler.DockId = CenterDockId;
-                mMetaViewer.DockId = RightDockId;
-                WorldViewportSlate.DockId = CenterDockId;
-                mWorldOutliner.DockId = LeftDockId;
-                mMainInspector.DockId = RightDockId;
+                //WorldViewportSlate.DockId = CenterDockId;
+                //mWorldOutliner.DockId = LeftDockId;
                 ContentBrowser.DockId = CenterDockId;
                 mBrickManager.DockId = CenterDockId;
                 mEditorSettings.DockId = LeftDockId;
@@ -465,7 +268,7 @@ namespace EngineNS.Editor
                     DrawToolBar();
 
                     ImGuiAPI.Separator();
-                    ImGuiAPI.Columns(3, null, true);
+                    ImGuiAPI.Columns(2, null, true);
                     if (LeftWidth == 0)
                     {
                         ImGuiAPI.SetColumnWidth(0, wsz.X * 0.15f);
@@ -477,32 +280,20 @@ namespace EngineNS.Editor
                     LeftWidth = ImGuiAPI.GetColumnWidth(0);
                     ImGuiAPI.NextColumn();
 
-                    if (RightWidth == 0)
-                    {
-                        CenterWidth = ImGuiAPI.GetColumnWidth(1);
-                        RightWidth = ImGuiAPI.GetColumnWidth(2);
-                        ImGuiAPI.SetColumnWidth(1, wsz.X * 0.70f);
-                        //if (CenterWidth + RightWidth > 200)
-                        //{
-                        //    ImGuiAPI.SetColumnWidth(1, CenterWidth + RightWidth - 200);
-                        //}
-                    }
                     DrawCenter(ref min, ref max);
                     CenterWidth = ImGuiAPI.GetColumnWidth(1);
-                    ImGuiAPI.NextColumn();
-
-                    DrawRight(ref min, ref max);
-                    RightWidth = ImGuiAPI.GetColumnWidth(2);
                     ImGuiAPI.NextColumn();
 
                     ImGuiAPI.Columns(1, null, true);
                 }
                 ImGuiAPI.End();
 
-                WorldViewportSlate.DockId = CenterDockId;
+                //WorldViewportSlate.DockId = CenterDockId;
 
                 DrawRootForms();
+#if (UseWindowTest)
                 mWinTest.OnDraw();
+#endif
 
                 AssetEditorManager.OnDraw();
             }
@@ -604,10 +395,51 @@ namespace EngineNS.Editor
         }
         private unsafe void DrawToolBar()
         {
-            var btSize = new Vector2(64, 64);
-            ImGuiAPI.Button("New", in btSize);
+            var btSize = Vector2.Zero;
+            if (ImGuiAPI.Button("CompileMacross", in btSize))
+            {
+                var csFiles = new List<string>(IO.FileManager.GetFiles(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game), "*.cs"));
+                var projectPath = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProjectPath;
+                csFiles.AddRange(IO.FileManager.GetFiles(projectPath, "*.cs"));
+                List<string> arguments = new List<string>();
+                for (int i = 0; i < csFiles.Count; ++i)
+                    arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFiles[i]));
+
+                var projectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject;
+                var projDef = XDocument.Load(projectFile);
+                var references = projDef.Element("Project").Elements("ItemGroup").Elements("Reference").Select(refElem => refElem.Value);
+                foreach (var reference in references)
+                {
+                    arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile, projectPath + reference));
+                }
+                //var references = projDef.Element(projDef.n) 
+
+                var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameAssembly;
+                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OutputFile, assemblyFile));
+                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.PdbFile, assemblyFile.Replace(".dll", ".tpdb")));
+                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.Outputkind, Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary.ToString()));
+                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OptimizationLevel, Microsoft.CodeAnalysis.OptimizationLevel.Debug.ToString()));
+                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.AllowUnsafe, "true"));
+
+                if (CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray()))
+                {
+                    UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
+                }
+                //var gameAssembly = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameAssembly;
+
+                //UEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
+            }
             ImGuiAPI.SameLine(0, -1);
-            ImGuiAPI.Button("Save", in btSize);
+            if (ImGuiAPI.Button("Play", in btSize))
+            {
+                var task = OnPlayGame(UEngine.Instance.Config.PlayGameName);
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (ImGuiAPI.Button("Stop", in btSize))
+            {
+
+            }
+
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Cap", in btSize))
             {
@@ -649,32 +481,251 @@ namespace EngineNS.Editor
         }
         protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
         {
-            var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            //var size = new Vector2(-1, -1);
+            //if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            //{
+            //    ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+            //    var winClass = new ImGuiWindowClass();
+            //    winClass.UnsafeCallConstructor();
+            //    var sz = new Vector2(0.0f, 0.0f);
+            //    ImGuiAPI.DockSpace(RightDockId, in sz, dockspace_flags, in winClass);
+            //    winClass.UnsafeCallDestructor();
+            //}
+            //ImGuiAPI.EndChild();
+        }
+        #endregion
+
+        async System.Threading.Tasks.Task OnPlayGame(RName assetName)
+        {
+            await UEngine.Instance.StartPlayInEditor(UEngine.Instance.GfxDevice.MainWindow, assetName);
+        }
+        #region TestCode
+        public static async System.Threading.Tasks.Task TestCreateScene(Graphics.Pipeline.UViewportSlate vpSlate,GamePlay.UWorld world, GamePlay.Scene.UNode root, bool hideTerrain = false)
+        {
+            var materials = new Graphics.Pipeline.Shader.UMaterialInstance[2];
+            materials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ddd.uminst"));
+            materials[1] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ground.uminst"));
+            if (materials[0] == null)
+                return;
             {
-                ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-                var winClass = new ImGuiWindowClass();
-                winClass.UnsafeCallConstructor();
-                var sz = new Vector2(0.0f, 0.0f);
-                ImGuiAPI.DockSpace(RightDockId, in sz, dockspace_flags, in winClass);
-                winClass.UnsafeCallDestructor();
+                var meshData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
+                meshData.MeshName = RName.GetRName("utest/mesh/skysphere001.ums");
+                var meshNode = new GamePlay.Scene.USkyNode();
+                await meshNode.InitializeNode(world, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                meshNode.Parent = root;
+                meshNode.Placement.Scale = new Vector3(800.0f);
+                meshNode.Placement.Position = DVector3.Zero;
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                meshNode.NodeData.Name = "SkySphere";
+                meshNode.IsAcceptShadow = false;
+                meshNode.IsCastShadow = false;
             }
-            ImGuiAPI.EndChild();
+
+            {
+                var meshData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
+                meshData.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
+                meshData.CollideName = RName.GetRName("utest/puppet/mesh/puppet.vms");
+                var meshNode = new GamePlay.Scene.UMeshNode();
+                await meshNode.InitializeNode(world, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                meshNode.Parent = root;
+                meshNode.Placement.SetTransform(new DVector3(0, 0, 0), new Vector3(0.01f), Quaternion.Identity);
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.NodeData.Name = "Robot0";
+                meshNode.IsAcceptShadow = false;
+                meshNode.IsCastShadow = true;
+
+                {
+                    var mesh1 = new Graphics.Mesh.UMesh();
+                    await mesh1.Initialize(RName.GetRName("utest/puppet/mesh/puppet.ums"), Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfSkinMesh)));
+                    var meshData1 = new GamePlay.Scene.UMeshNode.UMeshNodeData();
+                    var meshNode1 = new GamePlay.Scene.UMeshNode();
+                    await meshNode1.InitializeNode(world, meshData1, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                    meshNode1.Mesh = mesh1;
+                    meshNode1.NodeData.Name = "Robot1";
+                    meshNode1.Parent = meshNode;
+                    meshNode1.Placement.SetTransform(new DVector3(3, 3, 3), new Vector3(0.01f), Quaternion.RotationAxis(Vector3.UnitY, (float)Math.PI / 4));
+                    meshNode1.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent;
+                    meshNode1.IsAcceptShadow = false;
+                    meshNode1.IsCastShadow = true;
+
+                    (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
+                    (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfSkinMesh));
+                    (meshNode1.NodeData as GamePlay.Scene.UMeshNode.UMeshNodeData).AtomType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMesh.UAtom));
+
+                    var gameplayMacrossNodeData = new EngineNS.GamePlay.GamePlayMacross.UGamePlayMacrossNode.UGamePlayMacrossNodeData();
+                    gameplayMacrossNodeData.MacrossName = RName.GetRName("utest/puppet/testgameplay.macross");
+                    
+                    {
+                        var gamePlayMacrossNode = new GamePlay.GamePlayMacross.UGamePlayMacrossNode();
+                        await gamePlayMacrossNode.InitializeNode(world, gameplayMacrossNodeData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+                        gamePlayMacrossNode.Parent = meshNode1;
+                        //await gameplayMacrossNodeData.McGamePlay.Get().ConstructAnimGraph(meshNode1);
+                    }
+
+                    //await EngineNS.GamePlay.GamePlayMacross.UGamePlayMacrossNode.AddGamePlayMacrossNodeNode(world, meshNode, gameplayMacrossNodeData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+                }
+            }
+
+            {
+                var meshData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
+                meshData.MeshName = RName.GetRName("utest/brdf_test/chair2.ums");
+                //meshData.CollideName = RName.GetRName("utest/puppet/mesh/puppet.vms");
+                var meshNode = new GamePlay.Scene.UMeshNode();
+                await meshNode.InitializeNode(world, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                meshNode.Parent = root;
+                meshNode.Placement.SetTransform(new DVector3(0, 10, 0), new Vector3(1.0f), Quaternion.Identity);
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.NodeData.Name = "Robot_Chair";
+                meshNode.IsAcceptShadow = false;
+                meshNode.IsCastShadow = true;
+            }
+
+            {
+                var meshData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
+                meshData.MeshName = RName.GetRName("utest/brdf_test/chair2.ums");
+                //meshData.CollideName = RName.GetRName("utest/puppet/mesh/puppet.vms");
+                var meshNode = new GamePlay.Scene.UMeshNode();
+                await meshNode.InitializeNode(world, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                meshNode.Parent = root;
+                meshNode.Placement.SetTransform(new DVector3(0, 10, 0), new Vector3(1.0f), Quaternion.Identity);
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.NodeData.Name = "Robot_Chair_Far";
+                meshNode.IsAcceptShadow = false;
+                meshNode.IsCastShadow = true;
+
+                meshNode.Placement.Position = new DVector3(1024 * 100, 0, 0);
+            }
+
+            //var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
+            //materials1[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ddd.uminst"));
+
+            ////var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
+            ////var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeSphere(2.5f, 100, 100, 0xfffffff).ToMesh();
+            //var cookMeshProvider = Graphics.Mesh.CMeshDataProvider.MakeCylinder(2.0f, 0.5f, 3.0f, 100, 100, 0xfffffff);
+            //var cookedMesh = cookMeshProvider.ToMesh();
+            ////var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeTorus(2.0f, 3.0f, 100, 300, 0xfffffff).ToMesh(); 
+            ////var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeCapsule(1.0f, 4.0f, 100, 100, 100, Graphics.Mesh.CMeshDataProvider.ECapsuleUvProfile.Aspect, 0xfffffff).ToMesh();
+            //{
+            //    var mesh2 = new Graphics.Mesh.UMesh();
+            //    var colorVar = materials1[0].FindVar("clr4_0");
+            //    if (colorVar != null)
+            //    {
+            //        colorVar.SetValue(new Vector4(1, 0, 1, 1));
+            //    }
+            //    var ok1 = mesh2.Initialize(cookedMesh, materials1, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
+            //    if (ok1)
+            //    {
+            //        var boxNode = await GamePlay.Scene.UMeshNode.AddMeshNode(world, root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh2,
+            //            DVector3.Zero, Vector3.UnitXYZ, Quaternion.Identity);
+            //        boxNode.NodeData.Name = "MakeMeshNode";
+            //        boxNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+            //        boxNode.IsCastShadow = true;
+            //        boxNode.IsAcceptShadow = true;
+
+            //        //var pxNode = new Bricks.PhysicsCore.URigidBodyNode();
+            //        //var rgData = new Bricks.PhysicsCore.URigidBodyNode.URigidBodyNodeData();
+            //        //rgData.PxActorType = EPhyActorType.PAT_Static;
+            //        //var pc = UEngine.Instance.PhyModue.PhyContext;
+
+            //        //var pxTriMesh = pc.CookTriMesh(cookMeshProvider, null, null, null);
+            //        //var pxMtls = new Bricks.PhysicsCore.UPhyMaterial[1];
+            //        //pxMtls[0] = pc.PhyMaterialManager.DefaultMaterial;
+            //        ////var pxShape = pc.CreateShapeTriMesh(pxMtls, pxTriMesh, Vector3.UnitXYZ, Quaternion.Identity);
+            //        //var pxShape = pc.CreateShapeBox(pxMtls[0], new Vector3(20,30,10));
+            //        //pxShape.mCoreObject.SetFlag(EPhysShapeFlag.eVISUALIZATION, true);
+            //        //pxShape.mCoreObject.SetFlag(EPhysShapeFlag.eSCENE_QUERY_SHAPE, true);
+            //        //pxShape.mCoreObject.SetFlag(EPhysShapeFlag.eSIMULATION_SHAPE, true);
+            //        //rgData.PxShapes.Add(pxShape);
+            //        //await pxNode.InitializeNode(world, rgData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacementBase));
+            //        //pxNode.Parent = boxNode;
+
+            //        boxNode.Placement.Position = new DVector3(0, 0, 0);
+            //    }
+            //}
+
+            {
+                var nebulaData = new Bricks.Particle.Simple.USimpleNebulaNode.USimpleNebulaNodeData();
+                //nebulaData.MeshName = RName.GetRName("utest/mesh/unit_sphere.ums");
+                nebulaData.NebulaName = RName.GetRName("utest/particle001.nebula");
+                var meshNode = new Bricks.Particle.Simple.USimpleNebulaNode();
+                await meshNode.InitializeNode(world, nebulaData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                meshNode.Parent = root;
+                meshNode.Placement.Position = DVector3.Zero;
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                meshNode.NodeData.Name = "NebulaParticle";
+                meshNode.IsAcceptShadow = false;
+                meshNode.IsCastShadow = false;
+            }
+
+            {
+                var lightData = new GamePlay.Scene.UPointLightNode.ULightNodeData();
+                lightData.Name = "PointLight0";
+                lightData.Intensity = 100.0f;
+                lightData.Radius = 20.0f;
+                lightData.Color = new Vector3(1, 0, 0);
+                var lightNode = GamePlay.Scene.UPointLightNode.AddPointLightNode(world, root, lightData, new DVector3(10, 10, 10));
+            }
+
+            if (hideTerrain == false)
+            {
+                var terrainNode = new Bricks.Terrain.CDLOD.UTerrainNode();
+                var terrainData = new Bricks.Terrain.CDLOD.UTerrainNode.UTerrainData();
+                terrainData.Name = "TerrainGen";
+                terrainData.PgcName = RName.GetRName("UTest/terraingen.pgc");
+                await terrainNode.InitializeNode(world, terrainData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                terrainNode.Parent = root;
+                terrainNode.Placement.Position = DVector3.Zero;
+                terrainNode.IsAcceptShadow = true;
+                terrainNode.SetActiveCenter(in DVector3.Zero);
+            }
+
+            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(world, root);
+            //gridNode.SetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+
+            gridNode.ViewportSlate = vpSlate;
+
+            var dirLightNode = new GamePlay.Scene.UDirLightNode();
+            await dirLightNode.InitializeNode(world, new GamePlay.Scene.UDirLightNode.UDirLightNodeData(), GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+            dirLightNode.NodeData.Name = $"DirLight";
+            dirLightNode.Parent = root;
+
+            dirLightNode.Placement.Scale = new Vector3(10, 10, 10);
+
+            //dirLightNode.Placement.Quat = Quaternion.RotationYawPitchRoll((float)Math.PI * 0.25f, (float)Math.PI * 0.25f, 0);
+            var toVec = new Vector3(-1, -1, -1);
+            toVec.Normalize();
+            dirLightNode.Placement.Quat = Quaternion.RotationFrowTwoVector(in Vector3.UnitZ, in toVec);
+        }
+
+        public static async System.Threading.Tasks.Task TestCreateCharacter(GamePlay.UWorld world, GamePlay.Scene.UNode root, bool hideTerrain = false)
+        {
+            var characterController = new GamePlay.Controller.UCharacterController();
+            var player = new GamePlay.Player.UPlayer();
+            var playerData = new GamePlay.Player.UPlayer.UPlayerData() { CharacterController = characterController };
+            await player.InitializeNode(world, playerData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+            player.Parent = root;
+
+            var character = new GamePlay.Character.UCharacter();
+            await character.InitializeNode(world, new GamePlay.Character.UCharacter.UCharacterData(), GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+            characterController.ControlledCharacter = character;
+            var movement = new GamePlay.Movemnet.UMovement();
+            movement.Parent = character;
+
         }
         #endregion
 
         #region Tick
         public void TickLogic(int ellapse)
         {
-            WorldViewportSlate.TickLogic(ellapse);
+            //WorldViewportSlate.TickLogic(ellapse);
         }
         public void TickRender(int ellapse)
         {
-            WorldViewportSlate.TickRender(ellapse);
+            //WorldViewportSlate.TickRender(ellapse);
         }
         public void TickSync(int ellapse)
         {
-            WorldViewportSlate.TickSync(ellapse);
+            //WorldViewportSlate.TickSync(ellapse);
 
             OnDrawSlate();
         }

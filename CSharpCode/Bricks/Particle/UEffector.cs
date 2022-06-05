@@ -11,6 +11,7 @@ namespace EngineNS.Bricks.Particle
         string GetParametersDefine();
         string GetHLSL();
         void SetCBuffer(uint index, RHI.CConstantBuffer CBuffer);
+        IEffector CloneEffector();
     }
     public class UEffector<FParticle> : IEffector where FParticle : unmanaged
     {
@@ -38,6 +39,10 @@ namespace EngineNS.Bricks.Particle
         {
 
         }
+        public virtual IEffector CloneEffector()
+        {
+            return null;
+        }
     }
 
     public class UAcceleratedEffector : IEffector
@@ -48,6 +53,12 @@ namespace EngineNS.Bricks.Particle
             public Vector3 Acceleration;
             public uint FAcceleratedEffector_Pad0;
         };
+        public virtual IEffector CloneEffector()
+        {
+            var result = new UAcceleratedEffector();
+            result.mAcceleratedEffector = mAcceleratedEffector;
+            return result;
+        }
         public string Name
         {
             get { return "Accelerated"; }

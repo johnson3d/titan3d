@@ -164,6 +164,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         private async System.Threading.Tasks.Task SetCurrentPolicy()
         {
+            /*
             var mainWindow = UEngine.Instance.GfxDevice.MainWindow as EngineNS.Editor.UMainEditorApplication;
             var saved = mainWindow.WorldViewportSlate.RenderPolicy;
             //var policy = new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy();                                
@@ -182,6 +183,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
 
             mainWindow.WorldViewportSlate.RenderPolicy = policy;
             saved.Cleanup();
+            */
 
             UEngine.Instance.Config.MainRPolicyName = AssetName;
         }
@@ -229,17 +231,20 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             var size = new Vector2(-1, -1);
             if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-                var winClass = new ImGuiWindowClass();
-                winClass.UnsafeCallConstructor();
-                var sz = ImGuiAPI.GetWindowSize();
-                sz.Y = sz.X;
-                ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
+                if (ImGuiAPI.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                {
+                    ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+                    var winClass = new ImGuiWindowClass();
+                    winClass.UnsafeCallConstructor();
+                    var sz = ImGuiAPI.GetWindowSize();
+                    sz.Y = sz.X;
+                    ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
+                    winClass.UnsafeCallDestructor();
+                }
                 if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     NodePropGrid.OnDraw(true, false, false);
                 }
-                winClass.UnsafeCallDestructor();
             }
             ImGuiAPI.EndChild();
         }

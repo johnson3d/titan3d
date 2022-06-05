@@ -10,11 +10,11 @@ namespace EngineNS.Bricks.Particle.Editor
         public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             var funcGraph = ParentGraph as UParticleGraph;
-            if (funcGraph == null || oPin.Link == null || iPin.Link == null)
+            if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)
             {
                 return;
             }
-            if (iPin.Link.CanLinks.Contains("Value"))
+            if (iPin.LinkDesc.CanLinks.Contains("Value"))
             {
                 funcGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
             }
@@ -26,8 +26,8 @@ namespace EngineNS.Bricks.Particle.Editor
         public PinOut Effectors { get; set; } = new PinOut();
         public UEmitterNode()
         {
-            Shapes.Link = UParticleEditor.NewInOutPinDesc();
-            Effectors.Link = UParticleEditor.NewInOutPinDesc();
+            Shapes.LinkDesc = UParticleEditor.NewInOutPinDesc();
+            Effectors.LinkDesc = UParticleEditor.NewInOutPinDesc();
             Shapes.Name = "Shapes";
             Effectors.Name = "Effectors";
 
@@ -47,8 +47,8 @@ namespace EngineNS.Bricks.Particle.Editor
         public PinOut Right { get; set; } = new PinOut();
         public UEmitShapeNode()
         {
-            Left.Link = UParticleEditor.NewInOutPinDesc();
-            Right.Link = UParticleEditor.NewInOutPinDesc();
+            Left.LinkDesc = UParticleEditor.NewInOutPinDesc();
+            Right.LinkDesc = UParticleEditor.NewInOutPinDesc();
             Left.Name = "in";
             Right.Name = "out";
 
@@ -81,8 +81,8 @@ namespace EngineNS.Bricks.Particle.Editor
         public PinOut Right { get; set; } = new PinOut();
         public UEffectorNode()
         {
-            Left.Link = UParticleEditor.NewInOutPinDesc();
-            Right.Link = UParticleEditor.NewInOutPinDesc();
+            Left.LinkDesc = UParticleEditor.NewInOutPinDesc();
+            Right.LinkDesc = UParticleEditor.NewInOutPinDesc();
             Left.Name = "in";
             Right.Name = "out";
 

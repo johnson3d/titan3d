@@ -91,12 +91,10 @@ namespace EngineNS.Bricks.VXGI
         public RHI.CShaderResourceView SrvVoxelDebugger;
         public RHI.CUnorderedAccessView UavVxIndirectDebugDraws;
 
-        private RHI.CShaderDesc CSDesc_SetupVxDebugger;
-        private RHI.CComputeShader CS_SetupVxDebugger;
+        private Graphics.Pipeline.Shader.UShader SetupVxDebugger;
         private RHI.CComputeDrawcall SetupVxDebuggerDrawcall;
 
-        private RHI.CShaderDesc CSDesc_CollectVxDebugger;
-        private RHI.CComputeShader CS_CollectVxDebugger;
+        private Graphics.Pipeline.Shader.UShader CollectVxDebugger;
         private RHI.CComputeDrawcall CollectVxDebuggerDrawcall;
 
         public Graphics.Mesh.UMesh VxDebugMesh;
@@ -106,54 +104,54 @@ namespace EngineNS.Bricks.VXGI
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             SetupVxDebuggerDrawcall = rc.CreateComputeDrawcall();
-            SetupVxDebuggerDrawcall.mCoreObject.SetComputeShader(CS_SetupVxDebugger.mCoreObject);
+            SetupVxDebuggerDrawcall.mCoreObject.SetComputeShader(SetupVxDebugger.CS_Shader.mCoreObject);
             SetupVxDebuggerDrawcall.mCoreObject.SetDispatch(1, 1, 1);
 
-            var srvIdx = CSDesc_SetupVxDebugger.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbGBufferDesc");///???
+            var srvIdx = SetupVxDebugger.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbGBufferDesc");///???
             if (srvIdx != (IShaderBinder*)0)
             {
                 SetupVxDebuggerDrawcall.mCoreObject.GetCBufferResources().BindCS(srvIdx->m_CSBindPoint, CBuffer.mCoreObject);
             }
-            srvIdx = CSDesc_SetupVxDebugger.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxIndirectDebugDraws");
+            srvIdx = SetupVxDebugger.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxIndirectDebugDraws");
             if (srvIdx != (IShaderBinder*)0)
             {
                 SetupVxDebuggerDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, UavVxIndirectDebugDraws.mCoreObject);
             }
 
             CollectVxDebuggerDrawcall = rc.CreateComputeDrawcall();
-            CollectVxDebuggerDrawcall.mCoreObject.SetComputeShader(CS_CollectVxDebugger.mCoreObject);
+            CollectVxDebuggerDrawcall.mCoreObject.SetComputeShader(CollectVxDebugger.CS_Shader.mCoreObject);
             CollectVxDebuggerDrawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(VxSceneX, Dispatch_SetupDimArray3.X), 
                 CoreDefine.Roundup(VxSceneY, Dispatch_SetupDimArray3.Y), 
                 CoreDefine.Roundup(VxSceneZ, Dispatch_SetupDimArray3.Z));
 
             // renwind test
-            srvIdx = CSDesc_CollectVxDebugger.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxPool");
+            srvIdx = CollectVxDebugger.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxPool");
             if (srvIdx != (IShaderBinder*)0)
             {
                 CollectVxDebuggerDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, UavVoxelPool.mCoreObject);
             }
-            srvIdx = CSDesc_CollectVxDebugger.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxScene");
+            srvIdx = CollectVxDebugger.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxScene");
             if (srvIdx != (IShaderBinder*)0)
             {
                 CollectVxDebuggerDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, UavVoxelScene.mCoreObject);
             }
-            srvIdx = CSDesc_CollectVxDebugger.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxIndirectDebugDraws");
+            srvIdx = CollectVxDebugger.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VxIndirectDebugDraws");
             if (srvIdx != (IShaderBinder*)0)
             {
                 CollectVxDebuggerDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, UavVxIndirectDebugDraws.mCoreObject);
             }
 
-            srvIdx = CSDesc_CollectVxDebugger.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
+            srvIdx = CollectVxDebugger.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
             if (srvIdx != (IShaderBinder*)0)
             {
                 CollectVxDebuggerDrawcall.mCoreObject.GetCBufferResources().BindCS(srvIdx->m_CSBindPoint, CBuffer.mCoreObject);
             }
-            srvIdx = CSDesc_CollectVxDebugger.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VoxelGroupDebugger");
+            srvIdx = CollectVxDebugger.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VoxelGroupDebugger");
             if (srvIdx != (IShaderBinder*)0)
             {
                 CollectVxDebuggerDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, UavVoxelGroupDebugger.mCoreObject);
             }
-            srvIdx = CSDesc_CollectVxDebugger.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VoxelDebugger");
+            srvIdx = CollectVxDebugger.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "VoxelDebugger");
             if (srvIdx != (IShaderBinder*)0)
             {
                 CollectVxDebuggerDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, UavVoxelDebugger.mCoreObject);
@@ -243,16 +241,14 @@ namespace EngineNS.Bricks.VXGI
             defines.mCoreObject.AddDefine("DispatchX", $"2");
             defines.mCoreObject.AddDefine("DispatchY", $"1");
             defines.mCoreObject.AddDefine("DispatchZ", $"1");
-            CSDesc_SetupVxDebugger = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine),
-                "CS_SetupVxDebugger", EShaderType.EST_ComputeShader, defines, null);
-            CS_SetupVxDebugger = rc.CreateComputeShader(CSDesc_SetupVxDebugger);
-
+            SetupVxDebugger = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Compute/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine),
+                "CS_SetupVxDebugger", EShaderType.EST_ComputeShader, defines);
+            
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray3.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray3.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray3.Z}");
-            CSDesc_CollectVxDebugger = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine),
+            CollectVxDebugger = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Compute/VXGI/VxVisualDebugger.compute", RName.ERNameType.Engine),
                 "CS_CollectVxDebugger", EShaderType.EST_ComputeShader, defines, null);
-            CS_CollectVxDebugger = rc.CreateComputeShader(CSDesc_CollectVxDebugger);
 
             VxDebugMesh = new Graphics.Mesh.UMesh();
             var rect = Graphics.Mesh.CMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);

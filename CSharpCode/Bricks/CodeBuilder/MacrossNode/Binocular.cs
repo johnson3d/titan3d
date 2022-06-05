@@ -37,9 +37,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Right.Name = " R";
             Result.Name = "= ";
 
-            Left.Link = MacrossStyles.Instance.NewInOutPinDesc();
-            Right.Link = MacrossStyles.Instance.NewInOutPinDesc();
-            Result.Link = MacrossStyles.Instance.NewInOutPinDesc();
+            Left.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+            Right.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+            Result.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
             
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -51,9 +51,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             AddPinIn(Right);
             AddPinOut(Result);
 
-            Left.Link.CanLinks.Add("Value");
-            Right.Link.CanLinks.Add("Value");
-            Result.Link.CanLinks.Add("Value");
+            Left.LinkDesc.CanLinks.Add("Value");
+            Right.LinkDesc.CanLinks.Add("Value");
+            Result.LinkDesc.CanLinks.Add("Value");
 
             EditObject = new BinocularEditObject();
             EditObject.Host = this;
@@ -77,7 +77,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
-            if (pin != null && pin != Result)
+            if (pin == null || pin != Result)
                 return null;
             var binOp = new UBinaryOperatorExpression()
             {
@@ -184,7 +184,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
     }
-    [ContextMenu("add,+", "Operation\\+", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("add,+", "Operation\\+", UMacross.MacrossEditorKeyword)]
     public partial class AddNode : ValueOpNode
     {
         public AddNode()

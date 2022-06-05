@@ -335,16 +335,16 @@ namespace EngineNS.EGui.UIEditor
             {
                 System.IO.File.WriteAllText(EditableFormData.Instance.CSharpCodeFile, FormCode);
             }
-            var cr = EngineNS.EGui.CSharpCompiler.CompilerImGuiCode(EditableFormData.Instance.CSharpCodeFile);
-            if (cr != null)
-            {
-                var kls = cr.CompiledAssembly.GetType($"{NameSpace}.{Name}");
-                if (kls != null)
-                {
-                    EditableFormData.Instance.EditorDrawForm = Rtti.UTypeDescManager.CreateInstance(kls) as UIFormBase;
-                    EditableFormData.Instance.EditorDrawForm.BindTarget = this;
-                }
-            }
+            //var cr = EngineNS.EGui.CSharpCompiler.CompilerImGuiCode(EditableFormData.Instance.CSharpCodeFile);
+            //if (cr != null)
+            //{
+            //    var kls = cr.CompiledAssembly.GetType($"{NameSpace}.{Name}");
+            //    if (kls != null)
+            //    {
+            //        EditableFormData.Instance.EditorDrawForm = Rtti.UTypeDescManager.CreateInstance(kls) as UIFormBase;
+            //        EditableFormData.Instance.EditorDrawForm.BindTarget = this;
+            //    }
+            //}
         }
         private void GenElementDataCode()
         {

@@ -24,31 +24,31 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Position = new Vector2(100, 100);
 
             Albedo.Name = "Albedo ";
-            Albedo.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();            
+            Albedo.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();            
             this.AddPinIn(Albedo);
 
             Emissive.Name = "Emissive ";
-            Emissive.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            Emissive.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(Emissive);
 
             Normal.Name = "Normal ";
-            Normal.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            Normal.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(Normal);
 
             Metallic.Name = "Metallic ";
-            Metallic.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            Metallic.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(Metallic);
 
             Rough.Name = "Rough ";
-            Rough.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            Rough.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(Rough);
 
             Alpha.Name = "Alpha ";
-            Alpha.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            Alpha.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(Alpha);
 
             AlphaTest.Name = "AlphaTest ";
-            AlphaTest.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            AlphaTest.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(AlphaTest);
         }
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]

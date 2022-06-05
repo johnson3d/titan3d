@@ -10,23 +10,22 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Controls\BezierControl.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controls\ContentBrowser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\UContentBrowser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\CtrlUtility.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\NodeBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\NodeGraph.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controls\NodeGraph\PinLinker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\Attributes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\KeyValueCreator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PGRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PropertyCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\PropertyGrid.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PropertyGrid\TypeEditors.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controls\TypeSelector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\UItemDragging.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\UTypeSelector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\UAssetSelector.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CSharpCompiler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\ULogWatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiAPI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Slate\UBaseRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Slate\UWorldViewportSlate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UCoreStyles.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UDockWindowSDL.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIEditor\EditableFormData.cs" />

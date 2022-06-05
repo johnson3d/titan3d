@@ -278,10 +278,6 @@ namespace EngineNS.EGui.Controls
                 }
                 mHoverPointIdx = -1;
             }
-            else
-            {
-                int xxx = 0;
-            }
 
             for (int i=0; i<BezierPoints.Count; i+=2)
             {

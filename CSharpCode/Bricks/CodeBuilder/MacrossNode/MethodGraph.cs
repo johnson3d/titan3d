@@ -4,7 +4,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class UMethodStartNode : UNodeBase
+    public partial class UMethodStartNode : UNodeBase, IAfterExecNode
     {
         public PinOut AfterExec { get; set; } = new PinOut();
         string mMethodDecKeyword;
@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             BackColor = 0x80808080;
 
             AfterExec.Name = ">> ";
-            AfterExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             Position = new Vector2(100, 100);
         }
         private void Initialize(UMacrossMethodGraph graph, UMethodDeclaration methodDec)
@@ -75,6 +75,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public List<PinOut> Arguments = new List<PinOut>();
         public void UpdateMethodDefine(UMethodDeclaration methodDec)
         {
+            mMethodDecKeyword = methodDec.GetKeyword();
+
             for (int i = 0; i < methodDec.Arguments.Count; i++)
             {
                 if(methodDec.Arguments[i].VariableName == null)
@@ -146,6 +148,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     //}
                 }
             }
+
+            OnPositionChanged();
         }
         public override void BuildStatements(ref BuildCodeStatementsData data)
         {
@@ -168,18 +172,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 nextNode.BuildStatements(ref data);
                 //funGraph.Function.Body.PushExpr(nextNode.GetExpr(funGraph, cGen, false));
             }
-
-            if (data.MethodDec.ReturnValue != null)
-            {
-                data.CurrentStatements.Add(new UReturnStatement());
-                //var retOp = new ReturnOp();
-                //var newOp = new NewObjectOp();
-                //newOp.Type = funGraph.Function.ReturnType;
-                //retOp.ReturnExpr = newOp;
-                //funGraph.Function.Body.PushExpr(retOp);
-            }
         }
 
+        public override CodeBuilder.UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            for(int i=0; i<Arguments.Count; i++)
+            {
+                if(pin == Arguments[i])
+                {
+                    return new UVariableReferenceExpression(Arguments[i].Name);
+                }
+            }
+            return null;
+        }
         public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
             for (int i = 0; i < Arguments.Count; i++)
@@ -194,6 +199,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            for(int i=0; i<Arguments.Count; i++)
+            {
+                if(stayPin == Arguments[i])
+                {
+                    var argType = (UTypeReference)(Arguments[i].Tag);
+                    var typeDesc = argType.TypeDesc;
+                    if (typeDesc != null)
+                        EGui.Controls.CtrlUtility.DrawHelper($"{typeDesc.FullName}");
+                }
+            }
+        }
     }
     public class MethodData : IO.ISerializer
     {
@@ -201,45 +219,52 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         [Rtti.Meta]
         public UMethodDeclaration MethodDec { get; set; }
         public Rtti.UClassMeta.MethodMeta Method;
+        [Rtti.Meta]
+        public bool IsDelegate { get; set; } = false;
 
-        public static MethodData CreateFromMethod(UMacrossMethodGraph graph, System.Reflection.MethodInfo method)
+        public string GetMethodName()
         {
-            MethodData methodData = new MethodData();
-            methodData.MethodDec = new UMethodDeclaration()
-            {
-                IsOverride = true,
-                MethodName = method.Name,
-            };
-
-            foreach (var param in method.GetParameters())
-            {
-                var argDec = new UMethodArgumentDeclaration()
-                {
-                    VariableType = new UTypeReference(param.ParameterType),
-                    VariableName = param.Name,
-                    OperationType = EMethodArgumentAttribute.Default,
-                };
-                if (param.IsOut)
-                    argDec.OperationType = EMethodArgumentAttribute.Out;
-                else if (param.IsIn)
-                    argDec.OperationType = EMethodArgumentAttribute.In;
-                else if (param.ParameterType.IsByRef)
-                    argDec.OperationType = EMethodArgumentAttribute.Ref;
-                methodData.MethodDec.Arguments.Add(argDec);
-            }
-
-            if(method.ReturnType != typeof(void))
-            {
-                methodData.MethodDec.ReturnValue = new UVariableDeclaration()
-                {
-                    VariableType = new UTypeReference(method.ReturnType),
-                    VariableName = method.Name + "_ReturnValue",
-                };
-            }
-
-            methodData.StartNode = UMethodStartNode.NewStartNode(graph, methodData.MethodDec);
-            return methodData;
+            return MethodDec.MethodName;
         }
+
+        //public static MethodData CreateFromMethod(UMacrossMethodGraph graph, System.Reflection.MethodInfo method)
+        //{
+        //    MethodData methodData = new MethodData();
+        //    methodData.MethodDec = new UMethodDeclaration()
+        //    {
+        //        IsOverride = true,
+        //        MethodName = method.Name,
+        //    };
+
+        //    foreach (var param in method.GetParameters())
+        //    {
+        //        var argDec = new UMethodArgumentDeclaration()
+        //        {
+        //            VariableType = new UTypeReference(param.ParameterType),
+        //            VariableName = param.Name,
+        //            OperationType = EMethodArgumentAttribute.Default,
+        //        };
+        //        if (param.IsOut)
+        //            argDec.OperationType = EMethodArgumentAttribute.Out;
+        //        else if (param.IsIn)
+        //            argDec.OperationType = EMethodArgumentAttribute.In;
+        //        else if (param.ParameterType.IsByRef)
+        //            argDec.OperationType = EMethodArgumentAttribute.Ref;
+        //        methodData.MethodDec.Arguments.Add(argDec);
+        //    }
+
+        //    if(method.ReturnType != typeof(void))
+        //    {
+        //        methodData.MethodDec.ReturnValue = new UVariableDeclaration()
+        //        {
+        //            VariableType = new UTypeReference(method.ReturnType),
+        //            VariableName = method.Name + "_ReturnValue",
+        //        };
+        //    }
+
+        //    methodData.StartNode = UMethodStartNode.NewStartNode(graph, methodData.MethodDec);
+        //    return methodData;
+        //}
         public static MethodData CreateFromMethod(UMacrossMethodGraph graph, UMethodDeclaration method)
         {
             MethodData methodData = new MethodData();
@@ -314,6 +339,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             for(int i=0; i<MethodDatas.Count; i++)
             {
                 MethodDatas[i].MethodDec.MethodBody.Sequence.Clear();
+                MethodDatas[i].MethodDec.LocalVariables.Clear();
                 BuildCodeStatementsData data = new BuildCodeStatementsData()
                 {
                     ClassDec = classDesc,
@@ -369,6 +395,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             get;
             set;
         } = new List<MethodData>();
+
+        public bool IsDelegateGraph()
+        {
+            for (int i = 0; i < MethodDatas.Count; i++)
+            {
+                if (MethodDatas[i].IsDelegate)
+                    return true;
+            }
+            return false;
+        }
+
         private uint _mCurSerialId = 0; 
         protected uint GenSerialId()
         {
@@ -455,13 +492,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     });
             }
 
+            var selfMenu = CanvasMenus.AddMenuItem("Self", null, null);
             for (int i = 0; i < MacrossEditor.DefClass.SupperClassNames.Count; i++)
             {
                 var classMeta = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(MacrossEditor.DefClass.SupperClassNames[i]);
                 if (classMeta == null)
                     continue;
 
-                UpdateMenuWithClassMeta(classMeta);
+                UpdateMenuWithClassMeta(classMeta, selfMenu);
             }
 
             var selfNode = CanvasMenus.AddMenuItem("Self", null, null);
@@ -469,7 +507,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var selfMeta = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(MacrossEditor.DefClass.GetFullName());
                 if (selfMeta != null)
                 {
-                    UpdateMenuWithClassMeta(selfMeta);
+                    UpdateMenuWithClassMeta(selfMeta, selfMenu);
                 }
             }
             //var selfNode = CanvasMenus.AddMenuItem("Self", null, null);
@@ -493,7 +531,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //}
         }
 
-        private void UpdateMenuWithClassMeta(Rtti.UClassMeta classMeta)
+        private void UpdateMenuWithClassMeta(Rtti.UClassMeta classMeta, UMenuItem menu)
         {
             for (int proIdx = 0; proIdx < classMeta.CurrentVersion.Propertys.Count; proIdx++)
             {
@@ -513,9 +551,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
                 if (menuPath == null)
                 {
-                    menuPath = new string[] { "Self", pro.PropertyName };
+                    menuPath = new string[] { pro.PropertyName };
                 }
-                var parentMenu = CanvasMenus;
+                var parentMenu = menu;
                 for (var menuIdx = 0; menuIdx < menuPath.Length; menuIdx++)
                 {
                     var menuStr = menuPath[menuIdx];
@@ -525,28 +563,49 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         parentMenu = parentMenu.AddMenuItem(menuStr, null, null);
                     else
                     {
-                        parentMenu.AddMenuItem(menuStr, filterStr, null,
-                            (UMenuItem item, object sender) =>
-                            {
-                                var node = ClassPropertyVar.NewClassProperty(pro, true);
-                                if (nodeName != null)
-                                    node.Name = nodeName;
-                                node.UserData = MacrossEditor;
-                                node.Position = PopMenuPosition;
-                                SetDefaultActionForNode(node);
-                                this.AddNode(node);
-                            });
-                        parentMenu.AddMenuItem(menuStr, filterStr, null,
-                            (UMenuItem item, object sender) =>
-                            {
-                                var node = ClassPropertyVar.NewClassProperty(pro, false);
-                                if (nodeName != null)
-                                    node.Name = nodeName;
-                                node.UserData = MacrossEditor;
-                                node.Position = PopMenuPosition;
-                                SetDefaultActionForNode(node);
-                                this.AddNode(node);
-                            });
+                        if(proInfo.CanRead)
+                        {
+                            parentMenu.AddMenuItem("Get " + menuStr, filterStr, null,
+                                (UMenuItem item, object sender) =>
+                                {
+                                    var node = ClassPropertyVar.NewClassProperty(pro, true);
+                                    if (nodeName != null)
+                                        node.Name = nodeName;
+                                    node.UserData = MacrossEditor;
+                                    node.Position = PopMenuPosition;
+                                    SetDefaultActionForNode(node);
+                                    this.AddNode(node);
+
+                                    if (LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                    {
+                                        var outPin = LinkingOp.StartPin as PinOut;
+                                        AddLink(outPin, node.Self, true);
+                                    }
+                                });
+                        }
+                        if(proInfo.CanWrite)
+                        {
+                            parentMenu.AddMenuItem("Set " + menuStr, filterStr, null,
+                                (UMenuItem item, object sender) =>
+                                {
+                                    var node = ClassPropertyVar.NewClassProperty(pro, false);
+                                    if (nodeName != null)
+                                        node.Name = nodeName;
+                                    node.UserData = MacrossEditor;
+                                    node.Position = PopMenuPosition;
+                                    SetDefaultActionForNode(node);
+                                    this.AddNode(node);
+
+                                    if (LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                    {
+                                        var outPin = LinkingOp.StartPin as PinOut;
+                                        AddLink(outPin, node.Self, true);
+                                        var afterNode = outPin.HostNode as IAfterExecNode;
+                                        if (afterNode != null)
+                                            AddLink(afterNode.AfterExec, node.BeforeExec, true);
+                                    }
+                                });
+                        }
                     }
                 }
             }
@@ -564,8 +623,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     filterStr = att.FilterStrings;
                 }
                 if (menuPath == null)
-                    menuPath = new string[] { "Self", fieldInfo.Name };
-                var parentMenu = CanvasMenus;
+                    menuPath = new string[] { fieldInfo.Name };
+                var parentMenu = menu;
                 for (var menuIdx = 0; menuIdx < menuPath.Length; menuIdx++)
                 {
                     var menuStr = menuPath[menuIdx];
@@ -575,7 +634,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         parentMenu = parentMenu.AddMenuItem(menuStr, null, null);
                     else
                     {
-                        parentMenu.AddMenuItem(menuStr, filterStr, null,
+                        parentMenu.AddMenuItem("Get " + menuStr, filterStr, null,
                             (UMenuItem item, object sender) =>
                             {
                                 var node = ClassFieldVar.NewClassMemberVar(field, true);
@@ -585,8 +644,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 node.Position = PopMenuPosition;
                                 SetDefaultActionForNode(node);
                                 this.AddNode(node);
+
+                                if (LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                {
+                                    var outPin = LinkingOp.StartPin as PinOut;
+                                    AddLink(outPin, node.Self, true);
+                                }
                             });
-                        parentMenu.AddMenuItem(menuStr, filterStr, null,
+                        parentMenu.AddMenuItem("Set " + menuStr, filterStr, null,
                             (UMenuItem item, object sender) =>
                             {
                                 var node = ClassFieldVar.NewClassMemberVar(field, false);
@@ -596,6 +661,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 node.Position = PopMenuPosition;
                                 SetDefaultActionForNode(node);
                                 this.AddNode(node);
+
+                                if (LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                {
+                                    var outPin = LinkingOp.StartPin as PinOut;
+                                    AddLink(outPin, node.Self, true);
+                                    var afterNode = outPin.HostNode as IAfterExecNode;
+                                    if (afterNode != null)
+                                        AddLink(afterNode.AfterExec, node.BeforeExec, true);
+                                }
                             });
                     }
                 }
@@ -613,8 +687,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     filterStr = att.FilterStrings;
                 }
                 if (menuPath == null)
-                    menuPath = new string[] { "Self", method.MethodName };
-                var parentMenu = CanvasMenus;
+                    menuPath = new string[] { method.MethodName };
+                var parentMenu = menu;
                 for (var menuIdx = 0; menuIdx < menuPath.Length; menuIdx++)
                 {
                     var menuStr = menuPath[menuIdx];
@@ -634,6 +708,54 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 node.Position = PopMenuPosition;
                                 SetDefaultActionForNode(node);
                                 this.AddNode(node);
+
+                                if(LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                {
+                                    var outPin = LinkingOp.StartPin as PinOut;
+                                    AddLink(outPin, node.Self, true);
+                                    var afterNode = outPin.HostNode as IAfterExecNode;
+                                    if (afterNode != null)
+                                        AddLink(afterNode.AfterExec, node.BeforeExec, true);
+                                }
+                            });
+                    }
+                }
+            }
+        }
+
+        public override void UpdatePinLinkMenu()
+        {
+            ObjectMenus.SubMenuItems.Clear();
+            ObjectMenus.Text = "Object";
+
+            var type = PopMenuPressObject as Rtti.UTypeDesc;
+            if (type == null)
+                return;
+            var classMeta = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(type.FullName);
+            if (classMeta != null)
+            {
+                UpdateMenuWithClassMeta(classMeta, ObjectMenus);
+                // only down cast here
+                for(int i=0; i<classMeta.SubClasses.Count; i++)
+                {
+                    var subClass = classMeta.SubClasses[i];
+                    if (subClass != null)
+                    {
+                        var clsTypeName = subClass.ClassType.FullName;
+                        ObjectMenus.AddMenuItem($"Cast to {clsTypeName}", clsTypeName, null,
+                            (UMenuItem item, object sender) =>
+                            {
+                                var node = TypeConverterVar.NewTypeConverterVar(classMeta, subClass);
+                                node.UserData = MacrossEditor;
+                                node.Position = PopMenuPosition;
+                                SetDefaultActionForNode(node);
+                                this.AddNode(node);
+
+                                if(LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                {
+                                    var outPin = LinkingOp.StartPin as PinOut;
+                                    AddLink(outPin, node.Left, true);
+                                }
                             });
                     }
                 }
@@ -650,7 +772,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         Bricks.CodeBuilder.MacrossNode.MethodSelector mMethodSelector = new Bricks.CodeBuilder.MacrossNode.MethodSelector();
         MacrossSelector KlassSelector = new MacrossSelector();
-        public override void OnAfterDrawMenu(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles)
+        public override void OnAfterDrawMenu(UNodeGraphStyles styles)
         {
             mMethodSelector.mSltMember = null;
             mMethodSelector.mSltField = null;
@@ -674,7 +796,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 this.AddNode(node);
             }
         }
-        public override void OnDrawAfter(Bricks.NodeGraph.UGraphRenderer renderer, EGui.Controls.NodeGraph.NodeGraphStyles styles, ImDrawList cmdlist)
+        public override void OnDrawAfter(Bricks.NodeGraph.UGraphRenderer renderer, UNodeGraphStyles styles, ImDrawList cmdlist)
         {
             var mousePt = ImGuiAPI.GetMousePos() - ImGuiAPI.GetWindowPos();
             if (mousePt.X < 0 || mousePt.Y < 0)
@@ -739,7 +861,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return true;
         }
-        public override unsafe void OnBeforeDrawMenu(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles)
+        public override unsafe void OnBeforeDrawMenu(UNodeGraphStyles styles)
         {
             base.OnBeforeDrawMenu(styles);
             if (PopKlassSelector)
@@ -847,7 +969,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
                 else
                 {
-                    LinkingOp.StartPin = null;
+                    if(CurMenuType != EGraphMenu.Object)
+                        LinkingOp.StartPin = null;
                     LinkingOp.HoverPin = null;
                     LinkingOp.IsBlocking = false;
                     PopKlassSelector = false;
@@ -861,12 +984,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         private void NodeOnLinkedTo(UNodeBase node, PinOut oPin, UNodeBase InNode, PinIn iPin)
         {
             var funcGraph = ParentGraph as UMacrossMethodGraph;
-            if (funcGraph == null || oPin.Link == null || iPin.Link == null)
+            if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)
             {
                 return;
             }
 
-            if (oPin.Link.CanLinks.Contains("Exec"))// || oPin.Link.CanLinks.Contains("Bool"))
+            if (oPin.LinkDesc.CanLinks.Contains("Exec"))// || oPin.Link.CanLinks.Contains("Bool"))
             {
                 funcGraph.RemoveLinkedOutExcept(oPin, InNode, iPin.Name);
                 //funcGraph.AddLink(this, oPin.Name, InNode, iPin.Name, false);
@@ -875,11 +998,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         private void NodeOnLinkedFrom(UNodeBase node, PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             var funcGraph = ParentGraph as UMacrossMethodGraph;
-            if (funcGraph == null || oPin.Link == null || iPin.Link == null)
+            if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)
             {
                 return;
             }
-            if (iPin.Link.CanLinks.Contains("Value"))
+            if (iPin.LinkDesc.CanLinks.Contains("Value"))
             {
                 funcGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
                 //funcGraph.AddLink(OutNode, oPin.Name, this, iPin.Name, false);

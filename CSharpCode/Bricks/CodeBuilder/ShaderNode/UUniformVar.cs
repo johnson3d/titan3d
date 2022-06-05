@@ -21,7 +21,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             //Name = $"{Value}";
 
             Out.Name = "v";
-            Out.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            Out.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(Out);
         }
         public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
@@ -81,6 +81,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         //    }
         //    return null;
         //}
+
+        public override void BuildStatements(ref BuildCodeStatementsData data)
+        {
+        }
 
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {

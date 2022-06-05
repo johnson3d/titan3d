@@ -286,9 +286,19 @@ namespace EngineNS.Support
                     return System.Convert.ToDouble(text);
                 else if (type == typeof(string))
                     return text;
+                else if (type == typeof(RName))
+                {
+                    var segs = text.Split(':');
+                    var eType = (RName.ERNameType)TConvert.ToEnumValue(typeof(RName.ERNameType), segs[1]);
+                    return RName.GetRName(segs[0], eType);
+                }
                 else if (type == typeof(Guid))
                 {
                     return Guid.Parse(text);
+                }
+                else if (type == typeof(FTransform))
+                {
+                    return FTransform.Parse(text);
                 }
                 else if (type.IsEnum)
                 {
@@ -299,6 +309,13 @@ namespace EngineNS.Support
                     var desc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(text);
                     if (desc != null)
                         return desc.SystemType;
+                    return null;
+                }
+                else if (type == typeof(Rtti.UTypeDesc))
+                {
+                    var desc = Rtti.UTypeDesc.TypeOf(text);
+                    if (desc != null)
+                        return desc;
                     return null;
                 }
                 else

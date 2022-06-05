@@ -206,11 +206,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InXYZW);
                 pinNode.BuildStatements(ref data);
 
-                data.CurrentStatements.Add(new UAssignOperatorStatement()
+                var assignStatment = new UAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
                     To = new UVariableReferenceExpression(Name),
-                });
+                };
+                if(!data.CurrentStatements.Contains(assignStatment))
+                    data.CurrentStatements.Add(assignStatment);
             }
             if (data.NodeGraph.PinHasLinker(InX))
             {
@@ -218,11 +220,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InX);
                 pinNode.BuildStatements(ref data);
 
-                data.CurrentStatements.Add(new UAssignOperatorStatement()
+                var assignStatment = new UAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression(Name),
-                });
+                    To = new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name)),
+                };
+                if(!data.CurrentStatements.Contains(assignStatment))
+                    data.CurrentStatements.Add(assignStatment);
             }
             if (data.NodeGraph.PinHasLinker(InY))
             {
@@ -230,11 +234,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InY);
                 pinNode.BuildStatements(ref data);
 
-                data.CurrentStatements.Add(new UAssignOperatorStatement()
+                var assignStatment = new UAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression(Name),
-                });
+                    To = new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name)),
+                };
+                if(!data.CurrentStatements.Contains(assignStatment))
+                    data.CurrentStatements.Add(assignStatment);
             }
             if (data.NodeGraph.PinHasLinker(InZ))
             {
@@ -242,11 +248,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InZ);
                 pinNode.BuildStatements(ref data);
 
-                data.CurrentStatements.Add(new UAssignOperatorStatement()
+                var assignStatment = new UAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression(Name),
-                });
+                    To = new UVariableReferenceExpression("z", new UVariableReferenceExpression(Name)),
+                };
+                if(!data.CurrentStatements.Contains(assignStatment))
+                    data.CurrentStatements.Add(assignStatment);
             }
             if (data.NodeGraph.PinHasLinker(InW))
             {
@@ -322,35 +330,35 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             //Name = $"{Value}";
 
             InXYZW.Name = "in ";
-            InXYZW.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InXYZW.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InXYZW);
             InX.Name = "x ";
-            InX.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InX);
             InY.Name = "y ";
-            InY.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InY);
             InZ.Name = "z ";
-            InZ.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InZ);
             InW.Name = "w ";
-            InW.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InW.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InW);
 
             OutXYZW.Name = " xyzw";
-            OutXYZW.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXYZW.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutXYZW);
             OutX.Name = " x";
-            OutX.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutX);
             OutY.Name = " y";
-            OutY.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutY);
             OutZ.Name = " z";
-            OutZ.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutZ);
             OutW.Name = " w";
-            OutW.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutW.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutW);
         }
     }
@@ -361,7 +369,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         {
             PrevSize = new Vector2(100, 100);
             OutXYZ.Name = " xyz";
-            OutXYZ.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXYZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutXYZ);
         }
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]

@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         {
             var material = data.UserData as UMaterial;
             var varNode = this;
-            if (varNode.IsUniform)
+            if (varNode.IsUniform && (material.FindVar(Name) == null))
             {
                 var type = this.GetType();
                 var valueProp = type.GetProperty("Value");
@@ -187,11 +187,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             //Name = $"{Value}";
 
             InX.Name = "x";
-            InX.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InX);
 
             OutX.Name = "x";
-            OutX.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutX);
         }
         //public override void PreGenExpr()
@@ -253,11 +253,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InX);
                 pinNode.BuildStatements(ref data);
 
-                data.CurrentStatements.Add(new UAssignOperatorStatement()
+                var assignStatement = new UAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
                     To = new UVariableReferenceExpression(Name),
-                });
+                };
+                if(!data.CurrentStatements.Contains(assignStatement))
+                    data.CurrentStatements.Add(assignStatement);
             }
 
             if(!data.MethodDec.HasLocalVariable(Name))

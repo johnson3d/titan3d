@@ -12,6 +12,7 @@ namespace EngineNS.Bricks.Particle
 
         }
         public unsafe abstract void UpdateLocation(IParticleEmitter emitter, FParticleBase* particle);
+        public abstract UShape CloneShape();
     }
     public class UShapeBox : UShape
     {
@@ -117,6 +118,12 @@ namespace EngineNS.Bricks.Particle
         {
             CBuffer.SetValue($"EmitShape{index}", in mShapeBox);
         }
+        public override UShape CloneShape()
+        {
+            var result = new UShapeBox();
+            result.mShapeBox = mShapeBox;
+            return result;
+        }
     }
     public class UShapeSphere : UShape
     {
@@ -165,6 +172,12 @@ namespace EngineNS.Bricks.Particle
         public override void SetCBuffer(uint index, RHI.CConstantBuffer CBuffer)
         {
             CBuffer.SetValue($"EmitShape{index}", in mShapeSphere);
+        }
+        public override UShape CloneShape()
+        {
+            var result = new UShapeSphere();
+            result.mShapeSphere = mShapeSphere;
+            return result;
         }
     }
 }

@@ -271,7 +271,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             cmdlist.ClearMeshDrawPassArray();            
             foreach (var i in mVisParameter.VisibleMeshes)
             {
-                if (i.HostNode == null || i.HostNode.IsCastShadow == false)
+                if (i.IsCastShadow == false)
                     continue;
                 if (i.Atoms == null)
                     continue;

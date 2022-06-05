@@ -48,7 +48,7 @@ namespace EngineNS.Rtti
         {
             get
             {
-                return SystemType.FullName;
+                return SystemType?.FullName;
             }
         }
         public string Name
@@ -56,6 +56,21 @@ namespace EngineNS.Rtti
             get
             {
                 return SystemType.Name;
+            }
+        }
+        public string NickName
+        {
+            get
+            {
+                if (SystemType.IsGenericType == false)
+                    return SystemType.Name;
+                var args = SystemType.GetGenericArguments();
+                string name = SystemType.Name;
+                foreach(var i in args)
+                {
+                    name += "." + i.Name;
+                }
+                return name;
             }
         }
         public string Namespace
@@ -69,6 +84,8 @@ namespace EngineNS.Rtti
         public bool IsEnum => SystemType.IsEnum;
         public bool IsArray => SystemType.IsArray;
         public bool IsSealed => SystemType.IsSealed;
+        public bool IsDelegate => typeof(Delegate).IsAssignableFrom(SystemType);
+        public bool IsPointer => SystemType.IsPointer;
         string mTypeString;
         public static System.Reflection.FieldInfo GetField(System.Type type, string name)
         {
@@ -115,6 +132,7 @@ namespace EngineNS.Rtti
         {
             if (type == null)
                 return null;
+
             var typeStr = UTypeDescManager.Instance.GetTypeStringFromType(type);
             return TypeOf(typeStr);
         }
@@ -151,6 +169,10 @@ namespace EngineNS.Rtti
         public bool IsSubclassOf(Type type)
         {
             return SystemType.IsSubclassOf(type);
+        }
+        public Type[] GetGenericArguments()
+        {
+            return SystemType.GetGenericArguments();
         }
         public object[] GetCustomAttributes(Type type, bool inherit)
         {
@@ -244,6 +266,8 @@ namespace EngineNS.Rtti
         #endregion
         public static object CreateInstance(Rtti.UTypeDesc t, params object[] args)
         {
+            if (t == null)
+                return null;
             return CreateInstance(t.SystemType, args);
         }
         public static object CreateInstance(System.Type t, object[] args = null)
@@ -313,6 +337,8 @@ namespace EngineNS.Rtti
                 var tps = desc.Assembly.GetTypes();
                 foreach (var i in tps)
                 {
+                    if (i.IsGenericType)
+                        continue;
                     RegType(i, desc);
                     foreach (var j in i.GetProperties())
                     {
@@ -470,7 +496,7 @@ namespace EngineNS.Rtti
                 {
                     return t;
                 }
-            }            
+            }
                 
             return null;
         }

@@ -155,11 +155,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InXY);
                 pinNode.BuildStatements(ref data);
 
-                data.CurrentStatements.Add(new UAssignOperatorStatement()
+                var assignStatement = new UAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
                     To = new UVariableReferenceExpression(Name),
-                });
+                };
+                if(!data.CurrentStatements.Contains(assignStatement))
+                    data.CurrentStatements.Add(assignStatement);
             }
             if(data.NodeGraph.PinHasLinker(InX))
             {
@@ -167,11 +169,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InX);
                 pinNode.BuildStatements(ref data);
 
-                data.CurrentStatements.Add(new UAssignOperatorStatement()
+                var assignStatement = new UAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression(Name),
-                });
+                    To = new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name)),
+                };
+                if(!data.CurrentStatements.Contains(assignStatement))
+                    data.CurrentStatements.Add(assignStatement);
             }
             if (data.NodeGraph.PinHasLinker(InY))
             {
@@ -179,11 +183,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InY);
                 pinNode.BuildStatements(ref data);
 
-                data.CurrentStatements.Add(new UAssignOperatorStatement()
+                var assignStatement = new UAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression(Name),
-                });
+                    To = new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name)),
+                };
+                if(!data.CurrentStatements.Contains(assignStatement))
+                    data.CurrentStatements.Add(assignStatement);
             }
 
             if (!data.MethodDec.HasLocalVariable(Name))
@@ -235,23 +241,23 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             //Name = $"{Value}";
 
             InXY.Name = "in ";
-            InXY.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InXY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InXY);
             InX.Name = "x ";
-            InX.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InX);
             InY.Name = "y ";
-            InY.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InY);
 
             OutXY.Name = " xy";
-            OutXY.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutXY);
             OutX.Name = " x";
-            OutX.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutX);
             OutY.Name = " y";
-            OutY.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutY);
         }
     }

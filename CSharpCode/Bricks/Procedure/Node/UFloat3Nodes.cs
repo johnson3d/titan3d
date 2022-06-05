@@ -200,23 +200,40 @@ namespace EngineNS.Bricks.Procedure.Node
             float minHeight, maxHeight;
             heightFiels.GetRangeUnsafe<float, FFloatOperator>(out minHeight, out maxHeight);
             //float range = HeightRange;// maxHeight - minHeight;
-            for (int i = 1; i < heightFiels.Height - 1; i++)
+            xyzResult.DispatchPixels((result, x, y, z) =>
             {
-                for (int j = 1; j < heightFiels.Width - 1; j++)
-                {
-                    float altInfo = heightFiels.GetPixel<float>(j, i);
-                    float v_du = heightFiels.GetPixel<float>(j + 1, i);
-                    float v_dv = heightFiels.GetPixel<float>(j, i + 1);
+                if (x >= result.Width - 1 || y >= result.Height - 1)
+                    return;
+                float altInfo = heightFiels.GetPixel<float>(x, y);
+                float v_du = heightFiels.GetPixel<float>(x + 1, y);
+                float v_dv = heightFiels.GetPixel<float>(x, y + 1);
 
-                    var A = new Vector3(GridSize, (v_du - altInfo), 0);
-                    var B = new Vector3(0, (v_dv - altInfo), -GridSize);
+                var A = new Vector3(GridSize, (v_du - altInfo), 0);
+                var B = new Vector3(0, (v_dv - altInfo), -GridSize);
 
-                    var n = Vector3.Cross(A, B);
-                    n = Vector3.Normalize(n);
+                var n = Vector3.Cross(A, B);
+                n = Vector3.Normalize(n);
 
-                    xyzResult.SetPixel(j, i, n);
-                }
-            }
+                xyzResult.SetPixel(x, y, n);
+            }, true);
+
+            //for (int i = 1; i < heightFiels.Height - 1; i++)
+            //{
+            //    for (int j = 1; j < heightFiels.Width - 1; j++)
+            //    {
+            //        float altInfo = heightFiels.GetPixel<float>(j, i);
+            //        float v_du = heightFiels.GetPixel<float>(j + 1, i);
+            //        float v_dv = heightFiels.GetPixel<float>(j, i + 1);
+
+            //        var A = new Vector3(GridSize, (v_du - altInfo), 0);
+            //        var B = new Vector3(0, (v_dv - altInfo), -GridSize);
+
+            //        var n = Vector3.Cross(A, B);
+            //        n = Vector3.Normalize(n);
+
+            //        xyzResult.SetPixel(j, i, n);
+            //    }
+            //}
             heightFiels.LifeCount--;
             return true;
         }
@@ -297,87 +314,168 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             var curComp = graph.BufferCache.FindBuffer(SrcPin);
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
-            Vector3[,] pixels = new Vector3[3, 3];
-            for (int i = 0; i < curComp.Height; i++)
+            resultComp.DispatchPixels((result, x, y, z) =>
             {
-                for (int j = 0; j < curComp.Width; j++)
+                unsafe
                 {
-                    var center = curComp.GetPixel<Vector3>(j, i);
-                    pixels[1, 1] = center;
+                    var pixels = stackalloc Vector3[9];
+                    var center = curComp.GetPixel<Vector3>(x, y);
+                    pixels[1 * 3 + 1] = center;
 
                     {//line1
-                        if (curComp.IsValidPixel(j - 1, i - 1))
-                            pixels[0, 0] = curComp.GetPixel<Vector3>(j - 1, i - 1);
+                        if (curComp.IsValidPixel(x - 1, y - 1))
+                            pixels[0 * 3 + 0] = curComp.GetPixel<Vector3>(x - 1, y - 1);
                         else
-                            pixels[0, 0] = center;
+                            pixels[0 * 3 + 0] = center;
 
-                        if (curComp.IsValidPixel(j, i - 1))
-                            pixels[0, 1] = curComp.GetPixel<Vector3>(j, i - 1);
+                        if (curComp.IsValidPixel(x, y - 1))
+                            pixels[0 * 3 + 1] = curComp.GetPixel<Vector3>(x, y - 1);
                         else
-                            pixels[0, 1] = center;
+                            pixels[0 * 3 + 1] = center;
 
-                        if (curComp.IsValidPixel(j + 1, i - 1))
-                            pixels[0, 2] = curComp.GetPixel<Vector3>(j + 1, i - 1);
+                        if (curComp.IsValidPixel(x + 1, y - 1))
+                            pixels[0 * 3 + 2] = curComp.GetPixel<Vector3>(x + 1, y - 1);
                         else
-                            pixels[0, 2] = center;
+                            pixels[0 * 3 + 2] = center;
                     }
 
                     {//line2
-                        if (curComp.IsValidPixel(j - 1, i))
-                            pixels[1, 0] = curComp.GetPixel<Vector3>(j - 1, i);
+                        if (curComp.IsValidPixel(x - 1, y))
+                            pixels[1 * 3 + 0] = curComp.GetPixel<Vector3>(x - 1, y);
                         else
-                            pixels[1, 0] = center;
+                            pixels[1 * 3 + 0] = center;
 
-                        if (curComp.IsValidPixel(j + 1, i))
-                            pixels[1, 2] = curComp.GetPixel<Vector3>(j + 1, i);
+                        if (curComp.IsValidPixel(x + 1, y))
+                            pixels[1 * 3 + 2] = curComp.GetPixel<Vector3>(x + 1, y);
                         else
-                            pixels[1, 2] = center;
+                            pixels[1 * 3 + 2] = center;
                     }
 
                     {//line3
-                        if (curComp.IsValidPixel(j - 1, i + 1))
-                            pixels[2, 0] = curComp.GetPixel<Vector3>(j - 1, i + 1);
+                        if (curComp.IsValidPixel(x - 1, y + 1))
+                            pixels[2 * 3 + 0] = curComp.GetPixel<Vector3>(x - 1, y + 1);
                         else
-                            pixels[2, 0] = center;
+                            pixels[2 * 3 + 0] = center;
 
-                        if (curComp.IsValidPixel(j, i + 1))
-                            pixels[2, 1] = curComp.GetPixel<Vector3>(j, i + 1);
+                        if (curComp.IsValidPixel(x, y + 1))
+                            pixels[2 * 3 + 1] = curComp.GetPixel<Vector3>(x, y + 1);
                         else
-                            pixels[2, 1] = center;
+                            pixels[2 * 3 + 1] = center;
 
-                        if (curComp.IsValidPixel(j + 1, i + 1))
-                            pixels[2, 2] = curComp.GetPixel<Vector3>(j + 1, i + 1);
+                        if (curComp.IsValidPixel(x + 1, y + 1))
+                            pixels[2 * 3 + 2] = curComp.GetPixel<Vector3>(x + 1, y + 1);
                         else
-                            pixels[2, 2] = center;
+                            pixels[2 * 3 + 2] = center;
                     }
 
                     Vector3 value;
-                    value.X = pixels[0, 0].X * BlurMatrix[0, 0] + pixels[0, 1].X * BlurMatrix[0, 1] + pixels[0, 2].X * BlurMatrix[0, 2]
-                        + pixels[1, 0].X * BlurMatrix[1, 0] + pixels[1, 1].X * BlurMatrix[1, 1] + pixels[1, 2].X * BlurMatrix[1, 2]
-                        + pixels[2, 0].X * BlurMatrix[2, 0] + pixels[2, 1].X * BlurMatrix[2, 1] + pixels[2, 2].X * BlurMatrix[2, 2];
-                    value.Y = pixels[0, 0].Y * BlurMatrix[0, 0] + pixels[0, 1].Y * BlurMatrix[0, 1] + pixels[0, 2].Y * BlurMatrix[0, 2]
-                        + pixels[1, 0].Y * BlurMatrix[1, 0] + pixels[1, 1].Y * BlurMatrix[1, 1] + pixels[1, 2].Y * BlurMatrix[1, 2]
-                        + pixels[2, 0].Y * BlurMatrix[2, 0] + pixels[2, 1].Y * BlurMatrix[2, 1] + pixels[2, 2].Y * BlurMatrix[2, 2];
-                    value.Z = pixels[0, 0].Z * BlurMatrix[0, 0] + pixels[0, 1].Z * BlurMatrix[0, 1] + pixels[0, 2].Z * BlurMatrix[0, 2]
-                        + pixels[1, 0].Z * BlurMatrix[1, 0] + pixels[1, 1].Z * BlurMatrix[1, 1] + pixels[1, 2].Z * BlurMatrix[1, 2]
-                        + pixels[2, 0].Z * BlurMatrix[2, 0] + pixels[2, 1].Z * BlurMatrix[2, 1] + pixels[2, 2].Z * BlurMatrix[2, 2];
+                    value.X = pixels[0 * 3 + 0].X * BlurMatrix[0, 0] + pixels[0 * 3 + 1].X * BlurMatrix[0, 1] + pixels[0 * 3 + 2].X * BlurMatrix[0, 2]
+                        + pixels[1 * 3 + 0].X * BlurMatrix[1, 0] + pixels[1 * 3 + 1].X * BlurMatrix[1, 1] + pixels[1 * 3 + 2].X * BlurMatrix[1, 2]
+                        + pixels[2 * 3 + 0].X * BlurMatrix[2, 0] + pixels[2 * 3 + 1].X * BlurMatrix[2, 1] + pixels[2 * 3 + 2].X * BlurMatrix[2, 2];
+                    value.Y = pixels[0 * 3 + 0].Y * BlurMatrix[0, 0] + pixels[0 * 3 + 1].Y * BlurMatrix[0, 1] + pixels[0 * 3 + 2].Y * BlurMatrix[0, 2]
+                        + pixels[1 * 3 + 0].Y * BlurMatrix[1, 0] + pixels[1 * 3 + 1].Y * BlurMatrix[1, 1] + pixels[1 * 3 + 2].Y * BlurMatrix[1, 2]
+                        + pixels[2 * 3 + 0].Y * BlurMatrix[2, 0] + pixels[2 * 3 + 1].Y * BlurMatrix[2, 1] + pixels[2 * 3 + 2].Y * BlurMatrix[2, 2];
+                    value.Z = pixels[0 * 3 + 0].Z * BlurMatrix[0, 0] + pixels[0 * 3 + 1].Z * BlurMatrix[0, 1] + pixels[0 * 3 + 2].Z * BlurMatrix[0, 2]
+                        + pixels[1 * 3 + 0].Z * BlurMatrix[1, 0] + pixels[1 * 3 + 1].Z * BlurMatrix[1, 1] + pixels[1 * 3 + 2].Z * BlurMatrix[1, 2]
+                        + pixels[2 * 3 + 0].Z * BlurMatrix[2, 0] + pixels[2 * 3 + 1].Z * BlurMatrix[2, 1] + pixels[2 * 3 + 2].Z * BlurMatrix[2, 2];
                     if (ClampBorder)
                     {
-                        if (i == 0 || j == 0 || i == curComp.Height - 1 || j == curComp.Width - 1)
+                        if (x == 0 || y == 0 || x == curComp.Height - 1 || y == curComp.Width - 1)
                         {
-                            resultComp.SetPixel(j, i, center);
+                            result.SetPixel(x, y, center);
                         }
                         else
                         {
-                            resultComp.SetPixel(j, i, value);
+                            result.SetPixel(x, y, value);
                         }
                     }
                     else
                     {
-                        resultComp.SetPixel(j, i, value);
+                        result.SetPixel(x, y, value);
                     }
                 }
-            }
+            }, true);
+            //Vector3[,] pixels = new Vector3[3, 3];
+            //for (int i = 0; i < curComp.Height; i++)
+            //{
+            //    for (int j = 0; j < curComp.Width; j++)
+            //    {
+            //        var center = curComp.GetPixel<Vector3>(j, i);
+            //        pixels[1, 1] = center;
+
+            //        {//line1
+            //            if (curComp.IsValidPixel(j - 1, i - 1))
+            //                pixels[0, 0] = curComp.GetPixel<Vector3>(j - 1, i - 1);
+            //            else
+            //                pixels[0, 0] = center;
+
+            //            if (curComp.IsValidPixel(j, i - 1))
+            //                pixels[0, 1] = curComp.GetPixel<Vector3>(j, i - 1);
+            //            else
+            //                pixels[0, 1] = center;
+
+            //            if (curComp.IsValidPixel(j + 1, i - 1))
+            //                pixels[0, 2] = curComp.GetPixel<Vector3>(j + 1, i - 1);
+            //            else
+            //                pixels[0, 2] = center;
+            //        }
+
+            //        {//line2
+            //            if (curComp.IsValidPixel(j - 1, i))
+            //                pixels[1, 0] = curComp.GetPixel<Vector3>(j - 1, i);
+            //            else
+            //                pixels[1, 0] = center;
+
+            //            if (curComp.IsValidPixel(j + 1, i))
+            //                pixels[1, 2] = curComp.GetPixel<Vector3>(j + 1, i);
+            //            else
+            //                pixels[1, 2] = center;
+            //        }
+
+            //        {//line3
+            //            if (curComp.IsValidPixel(j - 1, i + 1))
+            //                pixels[2, 0] = curComp.GetPixel<Vector3>(j - 1, i + 1);
+            //            else
+            //                pixels[2, 0] = center;
+
+            //            if (curComp.IsValidPixel(j, i + 1))
+            //                pixels[2, 1] = curComp.GetPixel<Vector3>(j, i + 1);
+            //            else
+            //                pixels[2, 1] = center;
+
+            //            if (curComp.IsValidPixel(j + 1, i + 1))
+            //                pixels[2, 2] = curComp.GetPixel<Vector3>(j + 1, i + 1);
+            //            else
+            //                pixels[2, 2] = center;
+            //        }
+
+            //        Vector3 value;
+            //        value.X = pixels[0, 0].X * BlurMatrix[0, 0] + pixels[0, 1].X * BlurMatrix[0, 1] + pixels[0, 2].X * BlurMatrix[0, 2]
+            //            + pixels[1, 0].X * BlurMatrix[1, 0] + pixels[1, 1].X * BlurMatrix[1, 1] + pixels[1, 2].X * BlurMatrix[1, 2]
+            //            + pixels[2, 0].X * BlurMatrix[2, 0] + pixels[2, 1].X * BlurMatrix[2, 1] + pixels[2, 2].X * BlurMatrix[2, 2];
+            //        value.Y = pixels[0, 0].Y * BlurMatrix[0, 0] + pixels[0, 1].Y * BlurMatrix[0, 1] + pixels[0, 2].Y * BlurMatrix[0, 2]
+            //            + pixels[1, 0].Y * BlurMatrix[1, 0] + pixels[1, 1].Y * BlurMatrix[1, 1] + pixels[1, 2].Y * BlurMatrix[1, 2]
+            //            + pixels[2, 0].Y * BlurMatrix[2, 0] + pixels[2, 1].Y * BlurMatrix[2, 1] + pixels[2, 2].Y * BlurMatrix[2, 2];
+            //        value.Z = pixels[0, 0].Z * BlurMatrix[0, 0] + pixels[0, 1].Z * BlurMatrix[0, 1] + pixels[0, 2].Z * BlurMatrix[0, 2]
+            //            + pixels[1, 0].Z * BlurMatrix[1, 0] + pixels[1, 1].Z * BlurMatrix[1, 1] + pixels[1, 2].Z * BlurMatrix[1, 2]
+            //            + pixels[2, 0].Z * BlurMatrix[2, 0] + pixels[2, 1].Z * BlurMatrix[2, 1] + pixels[2, 2].Z * BlurMatrix[2, 2];
+            //        if (ClampBorder)
+            //        {
+            //            if (i == 0 || j == 0 || i == curComp.Height - 1 || j == curComp.Width - 1)
+            //            {
+            //                resultComp.SetPixel(j, i, center);
+            //            }
+            //            else
+            //            {
+            //                resultComp.SetPixel(j, i, value);
+            //            }
+            //        }
+            //        else
+            //        {
+            //            resultComp.SetPixel(j, i, value);
+            //        }
+            //    }
+            //}
 
             curComp.LifeCount--;
 
@@ -419,7 +517,7 @@ namespace EngineNS.Bricks.Procedure.Node
             AddInput(XBezierPin, "XBezier", DefaultInputDesc, "Bezier");
             AddInput(YBezierPin, "YBezier", DefaultInputDesc, "Bezier");
             AddInput(ZBezierPin, "ZBezier", DefaultInputDesc, "Bezier");
-            AddOutput(OutXYZ, " XYZ", XYZBufferCreator);
+            AddOutput(OutXYZ, "XYZ", XYZBufferCreator);
         }
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
@@ -533,6 +631,76 @@ namespace EngineNS.Bricks.Procedure.Node
             }
 
             xyzSrc.LifeCount--;
+            return true;
+        }
+    }
+    [Bricks.CodeBuilder.ContextMenu("Transform", "Float3\\Transform", UPgcGraph.PgcEditorKeyword)]
+    public class UFloat3Transform : UOpNode
+    {
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn InXYZ { get; set; } = new PinIn();        
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinOut OutXYZ { get; set; } = new PinOut();
+        FTransform mTransform = FTransform.Identity;
+        [Rtti.Meta]
+        public FTransform Transform 
+        { 
+            get => mTransform; 
+            set { mTransform = value; } 
+        }
+        public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UFloat3Transform()
+        {
+            Icon.Size = new Vector2(25, 25);
+            Icon.Color = 0xFF00FF00;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
+
+            AddInput(InXYZ, "XYZ", XYZBufferCreator);
+            AddOutput(OutXYZ, "XYZ", XYZBufferCreator);
+        }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            if (OutXYZ == pin)
+            {
+                var graph = ParentGraph as UPgcGraph;
+                var buffer = graph.BufferCache.FindBuffer(InXYZ);
+                if (buffer != null)
+                {
+                    return buffer.BufferCreator;
+                }
+            }
+            return base.GetOutBufferCreator(pin);
+        }
+        public override bool OnProcedure(UPgcGraph graph)
+        {
+            var xyzSrc = graph.BufferCache.FindBuffer(InXYZ);
+            var result = graph.BufferCache.FindBuffer(OutXYZ);
+
+            Vector3 xyzMin = Vector3.MaxValue;
+            Vector3 xyzMax = Vector3.MinValue;
+            var matrix = mTransform.ToMatrixWithScale(in DVector3.Zero);
+            result.DispatchPixels((result, x, y, z) =>
+            {
+                ref var pos = ref xyzSrc.GetPixel<Vector3>(x, y, z);
+                //var rPos = mTransform.TransformPosition(in pos)
+                var rPos = Vector3.TransformCoordinate(in pos, in matrix);
+                result.SetPixel<Vector3>(x, y, z, in rPos);
+            }, true);
+
+            //for (int i = 0; i < result.Depth; i++)
+            //{
+            //    for (int j = 0; j < result.Height; j++)
+            //    {
+            //        for (int k = 0; k < result.Width; k++)
+            //        {
+            //            ref var pos = ref xyzSrc.GetPixel<Vector3>(k, j, i);
+            //            //var rPos = mTransform.TransformPosition(in pos)
+            //            var rPos = Vector3.TransformCoordinate(in pos, in matrix);
+            //            result.SetPixel<Vector3>(k, j, i, in rPos);
+            //        }
+            //    }
+            //}
             return true;
         }
     }

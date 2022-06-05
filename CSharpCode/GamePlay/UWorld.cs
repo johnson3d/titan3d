@@ -29,8 +29,10 @@ namespace EngineNS.GamePlay
 
     public partial class UWorld
     {
-        public UWorld()
+        public Graphics.Pipeline.UViewportSlate CurViewport { get; set; }
+        public UWorld(Graphics.Pipeline.UViewportSlate viewport)
         {
+            CurViewport = viewport;
             mMemberTickables.CollectMembers(this);
 
             mOnVisitNode_GatherVisibleMeshesAll = this.OnVisitNode_GatherVisibleMeshesAll;
@@ -91,9 +93,12 @@ namespace EngineNS.GamePlay
                 LightDebug = (1 << 1),
                 PhyxDebug = (1 << 2),
                 UtilityDebug = (1 << 3),
+                FilterTypeCount = 4,
+
                 EditorObject = LightDebug | PhyxDebug | UtilityDebug,
                 All = 0xFFFFFFFF,
             }
+            public const string FilterTypeCountAs = "PhyxDebug";
             public EVisCull CullType = EVisCull.Normal;
             public EVisCullFilter CullFilters = EVisCullFilter.All;
             public UWorld World;

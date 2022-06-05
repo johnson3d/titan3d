@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 using EngineNS;
@@ -92,14 +93,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     {
         
         public string AssemblyFilter = null;
-        public TypeSelector.EFilterMode FilterMode = TypeSelector.EFilterMode.IncludeObjectType | TypeSelector.EFilterMode.IncludeValueType;
+        public UTypeSelector.EFilterMode FilterMode = UTypeSelector.EFilterMode.IncludeObjectType | UTypeSelector.EFilterMode.IncludeValueType;
 
         public Rtti.UTypeDesc BaseType;
         public PGTypeEditorAttribute(System.Type baseType)
         {
             BaseType = Rtti.UTypeDesc.TypeOf(baseType);
         }
-        protected static EGui.Controls.TypeSelector TypeSlt = new EGui.Controls.TypeSelector();
+        protected static EGui.Controls.UTypeSelector TypeSlt = new EGui.Controls.UTypeSelector();
         public override bool OnDraw(in EditorInfo info, out object newValue)
         {
             newValue = info.Value;
@@ -139,6 +140,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             return false;
         }
+    }
+
+    public interface IPropertyCustomization
+    {
+        void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType);
     }
 
     public class PGProvider

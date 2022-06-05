@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
-    public class UTerrain
+    public class UTerrainSystem
     {
         public enum EShowMode
         {

@@ -12,6 +12,10 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             Name = "GpuSceneNode";
         }
+        ~UGpuSceneNode()
+        {
+            Cleanup();
+        }
         public override void Cleanup()
         {
             PointLights.Cleanup();
@@ -158,22 +162,34 @@ namespace EngineNS.Graphics.Pipeline.Common
             public bool Initialize(bool gpuWrite)
             {
                 IsGpuWrite = gpuWrite;
+                Cleanup();
                 DataArray = Support.UNativeArray<T>.CreateInstance();
                 return true;
             }
+            public UGpuDataArray()
+            {
+                
+            }
+            ~UGpuDataArray()
+            {
+                Cleanup();
+            }
             public void Cleanup()
             {
-                DataArray.Clear();
-                DataArray.Dispose();
+                if (GpuBuffer != null)
+                {
+                    DataArray.Clear();
+                    DataArray.Dispose();
 
-                DataUAV?.Dispose();
-                DataUAV = null;
+                    DataUAV?.Dispose();
+                    DataUAV = null;
 
-                DataSRV?.Dispose();
-                DataSRV = null;
+                    DataSRV?.Dispose();
+                    DataSRV = null;
 
-                GpuBuffer?.Dispose();
-                GpuBuffer = null;
+                    GpuBuffer?.Dispose();
+                    GpuBuffer = null;
+                }
             }
             public UInt16 PushData(in T data)
             {

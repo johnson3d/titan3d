@@ -96,9 +96,9 @@ namespace EngineNS.GamePlay.Scene
                 return mDebugMesh;
             }
         }
-        public override void OnNodeLoaded()
+        public override void OnNodeLoaded(UNode parent)
         {
-            base.OnNodeLoaded();
+            base.OnNodeLoaded(parent);
             UpdateAbsTransform();
         }
         public override void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
@@ -117,7 +117,9 @@ namespace EngineNS.GamePlay.Scene
                 rp.VisibleNodes.Add(this);
             }
 
-            if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == false)
+            //if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == false)
+            //    return;
+            if ((rp.CullFilters & GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == 0)
                 return;
 
             if (DebugMesh != null)
@@ -242,9 +244,9 @@ namespace EngineNS.GamePlay.Scene
                 return mDebugMesh;
             }
         }
-        public override void OnNodeLoaded()
+        public override void OnNodeLoaded(UNode parent)
         {
-            base.OnNodeLoaded();
+            base.OnNodeLoaded(parent);
             UpdateAbsTransform();
 
             var world = this.GetWorld();
@@ -264,7 +266,10 @@ namespace EngineNS.GamePlay.Scene
         }
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {
-            if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == false)
+            //if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == false)
+            //    return;
+
+            if ((rp.CullFilters & UWorld.UVisParameter.EVisCullFilter.LightDebug) == 0)
                 return;
 
             if (DebugMesh != null)
@@ -306,6 +311,12 @@ namespace EngineNS.GamePlay.Scene
             {
                 mDebugMesh.IsDrawHitproxy = false;
             }
+        }
+
+        public override void AddAssetReferences(IO.IAssetMeta ameta)
+        {
+            ameta.AddReferenceAsset(RName.GetRName("axis/movex.vms", RName.ERNameType.Engine));
+            ameta.AddReferenceAsset(RName.GetRName("axis/axis_x_d.uminst", RName.ERNameType.Engine));
         }
     }
 }

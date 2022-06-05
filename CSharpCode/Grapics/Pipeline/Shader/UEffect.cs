@@ -383,13 +383,94 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return isOK;
         }
     }
+    public class UShader
+    {
+        public const string AssetExt = ".shader";
+        public RHI.CShaderDesc Desc;
+        public RHI.CComputeShader CS_Shader;
+        public RHI.CVertexShader VS_Shader;
+        public RHI.CPixelShader PS_Shader;
+        public unsafe static UShader Load(Hash160 hash)
+        {
+            var path = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Cache, IO.FileManager.ESystemDir.Shader);
+            var file = path + hash.ToString() + UShader.AssetExt;
+            using (var xnd = IO.CXndHolder.LoadXnd(file))
+            {
+                if (xnd == null)
+                    return null;
+                
+                var descAttr = xnd.RootNode.mCoreObject.TryGetAttribute("Desc");
+                if (descAttr.IsValidPointer == false)
+                    return null;
+                var vsNode = xnd.RootNode.mCoreObject.TryGetChildNode("ShaderDesc");
+                if (vsNode.IsValidPointer == false)
+                    return null;
+                var ar = descAttr.GetReader(null);
+                EShaderType shaderType = EShaderType.EST_ComputeShader;
+                ar.Read(out shaderType);
+                descAttr.ReleaseReader(ref ar);
+
+                UShader result = new UShader();
+                result.Desc = new RHI.CShaderDesc(shaderType);
+                if (result.Desc.mCoreObject.LoadXnd(vsNode) == 0)
+                    return null;
+
+                var rc = UEngine.Instance.GfxDevice.RenderContext;
+                switch (shaderType)
+                {
+                    case EShaderType.EST_ComputeShader:
+                        {
+                            result.CS_Shader = rc.CreateComputeShader(result.Desc);
+                        }
+                        break;
+                    case EShaderType.EST_VertexShader:
+                        {
+                            result.VS_Shader = rc.CreateVertexShader(result.Desc);
+                        }
+                        break;
+                    case EShaderType.EST_PixelShader:
+                        {
+                            result.PS_Shader = rc.CreatePixelShader(result.Desc);
+                        }
+                        break;
+                }
+
+                return result;
+            }
+        }
+        public unsafe void SaveTo(Hash160 hash)
+        {
+            var path = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Cache, IO.FileManager.ESystemDir.Shader);
+            var file = path + hash.ToString() + UShader.AssetExt;
+            var xnd = new IO.CXndHolder("UShader", 0, 0);
+
+            var descAttr = new XndAttribute(xnd.RootNode.mCoreObject.GetOrAddAttribute("Desc", 0, 0));
+            var ar = descAttr.GetWriter(30);
+            //ar.Write(Desc);
+            ar.Write(Desc.mCoreObject.GetShaderType());
+            descAttr.ReleaseWriter(ref ar);
+
+            using (var vsNode = xnd.mCoreObject.NewNode("ShaderDesc", 0, 0))
+            {
+                xnd.RootNode.mCoreObject.AddNode(vsNode);
+                Desc.mCoreObject.Save2Xnd(vsNode, 0xffffffff);
+            }
+
+            xnd.SaveXnd(file);
+        }
+    }
     public class UEffectManager
     {
         public UEffect DummyEffect;
         public async System.Threading.Tasks.Task<bool> Initialize(UGfxDevice device)
         {
-            DummyEffect = await UEffect.CreateEffect(UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(), 
-                new UShadingEnv.FPermutationId(0), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
+            DummyEffect = await this.GetEffect(UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
+
+            if (DummyEffect == null)
+            {
+                DummyEffect = await UEffect.CreateEffect(UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(),
+                   new UShadingEnv.FPermutationId(0), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
+            }
             if (DummyEffect == null)
                 return false;
             return true;
@@ -401,6 +482,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         private Thread.UAwaitSessionManager<Hash160, UEffect> mCreatingSession = new Thread.UAwaitSessionManager<Hash160, UEffect>();
         public Dictionary<Hash160, UEffect> Effects { get; } = new Dictionary<Hash160, UEffect>();
+        public Dictionary<Hash160, UShader> Shaders { get; } = new Dictionary<Hash160, UShader>();
+        public UShader TryGetShader(Hash160 hash)
+        {
+            lock (Effects)
+            {
+                UShader result;
+                if (Shaders.TryGetValue(hash, out result))
+                    return result;
+
+                return null;
+            }
+        }
         public UEffect TryGetEffect(Hash160 hash)
         {
             lock (Effects)
@@ -499,6 +592,58 @@ namespace EngineNS.Graphics.Pipeline.Shader
             finally
             {
                 mCreatingSession.FinishSession(hash, session, result);
+            }
+        }
+        public UShader GetShader(RName shader, string entry, EShaderType type, RHI.CShaderDefinitions defines, EngineNS.Editor.ShaderCompiler.UHLSLInclude inc = null)
+        {
+            var hashStr = shader.ToString();
+            hashStr += entry;
+            hashStr += defines.mCoreObject.NativeSuper.GetHash64().ToString();
+            var hash = Hash160.CreateHash160(hashStr);
+            lock (Effects)
+            {
+                UShader result;
+                if (Shaders.TryGetValue(hash, out result))
+                    return result;
+
+                result = UShader.Load(hash);
+                if (result != null)
+                {
+                    Shaders.Add(hash, result);
+                    return result;
+                }
+
+                var rc = UEngine.Instance.GfxDevice.RenderContext;
+                result = new UShader();
+                result.Desc = rc.CreateShaderDesc(shader, entry, type, defines, inc);
+                switch (type)
+                {
+                    case EShaderType.EST_ComputeShader:
+                        {
+                            result.CS_Shader = rc.CreateComputeShader(result.Desc);
+                        }
+                        break;
+                    case EShaderType.EST_VertexShader:
+                        {
+                            result.VS_Shader = rc.CreateVertexShader(result.Desc);
+                        }
+                        break;
+                    case EShaderType.EST_PixelShader:
+                        {
+                            result.PS_Shader = rc.CreatePixelShader(result.Desc);
+                        }
+                        break;
+                }
+
+                Shaders.Add(hash, result);
+
+                UEngine.Instance.EventPoster.RunOn(() =>
+                {
+                    result.SaveTo(hash);
+                    return true;
+                }, Thread.Async.EAsyncTarget.AsyncIO);
+
+                return result;
             }
         }
     }

@@ -22,12 +22,10 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         public Graphics.Pipeline.UDrawBuffers BasePass = new Graphics.Pipeline.UDrawBuffers();
 
-        private RHI.CShaderDesc CSDesc_SetupAvgBrightness;
-        private RHI.CComputeShader CS_SetupAvgBrightness;
+        private Graphics.Pipeline.Shader.UShader SetupAvgBrightness;
         private RHI.CComputeDrawcall SetupAvgBrightnessDrawcall;
 
-        private RHI.CShaderDesc CSDesc_CountAvgBrightness;
-        private RHI.CComputeShader CS_CountAvgBrightness;
+        private Graphics.Pipeline.Shader.UShader CountAvgBrightness;
         private RHI.CComputeDrawcall CountAvgBrightnessDrawcall;
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
@@ -40,36 +38,34 @@ namespace EngineNS.Graphics.Pipeline.Common
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
-            CSDesc_CountAvgBrightness = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
-                "CS_CountAvgBrightness", EShaderType.EST_ComputeShader, defines, null);
-            CS_CountAvgBrightness = rc.CreateComputeShader(CSDesc_CountAvgBrightness);
+            CountAvgBrightness = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
+                "CS_CountAvgBrightness", EShaderType.EST_ComputeShader, defines);
 
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
-            CSDesc_SetupAvgBrightness = rc.CreateShaderDesc(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
-                "CS_SetupAvgBrightness", EShaderType.EST_ComputeShader, defines, null);
-            CS_SetupAvgBrightness = rc.CreateComputeShader(CSDesc_SetupAvgBrightness);
+            SetupAvgBrightness = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
+                "CS_SetupAvgBrightness", EShaderType.EST_ComputeShader, defines);
 
             ResetComputeDrawcall(policy);
         }
         private unsafe void ResetComputeDrawcall(URenderPolicy policy)
         {
-            if (CS_SetupAvgBrightness == null)
+            if (SetupAvgBrightness == null)
                 return;
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var gpuScene = policy.GetGpuSceneNode();
             
             SetupAvgBrightnessDrawcall = rc.CreateComputeDrawcall();
-            SetupAvgBrightnessDrawcall.mCoreObject.SetComputeShader(CS_SetupAvgBrightness.mCoreObject);
+            SetupAvgBrightnessDrawcall.mCoreObject.SetComputeShader(SetupAvgBrightness.CS_Shader.mCoreObject);
             SetupAvgBrightnessDrawcall.mCoreObject.SetDispatch(1, 1, 1);
             
-            var srvIdx = CSDesc_SetupAvgBrightness.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerFrame");
+            var srvIdx = SetupAvgBrightness.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerFrame");
             if (srvIdx != (IShaderBinder*)0)
             {
                 SetupAvgBrightnessDrawcall.mCoreObject.GetCBufferResources().BindCS(srvIdx->m_CSBindPoint, UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject);
             }
-            srvIdx = CSDesc_SetupAvgBrightness.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
+            srvIdx = SetupAvgBrightness.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
             if (srvIdx != (IShaderBinder*)0)
             {
                 SetupAvgBrightnessDrawcall.mCoreObject.GetCBufferResources().BindCS(srvIdx->m_CSBindPoint, gpuScene.PerGpuSceneCBuffer.mCoreObject);
@@ -79,7 +75,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             //if (lightSRV != null)
             {
                 CountAvgBrightnessDrawcall = rc.CreateComputeDrawcall();
-                CountAvgBrightnessDrawcall.mCoreObject.SetComputeShader(CS_CountAvgBrightness.mCoreObject);
+                CountAvgBrightnessDrawcall.mCoreObject.SetComputeShader(CountAvgBrightness.CS_Shader.mCoreObject);
             }
         }
         public override void Cleanup()
@@ -97,7 +93,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var cmd = BasePass.DrawCmdList;
             #region Setup
             {
-                var srvIdx = CSDesc_SetupAvgBrightness.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "GpuSceneDesc");
+                var srvIdx = SetupAvgBrightness.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "GpuSceneDesc");
                 if (srvIdx != (IShaderBinder*)0)
                 {
                     var attachment = this.GetAttachBuffer(GpuScenePinInOut);
@@ -132,7 +128,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     var lightSRV = attachment.Srv;
                     uint targetWidth = (uint)lightSRV.PicDesc.Width;
                     uint targetHeight = (uint)lightSRV.PicDesc.Height;
-                    var srvIdx = CSDesc_CountAvgBrightness.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "TargetBuffer");
+                    var srvIdx = CountAvgBrightness.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "TargetBuffer");
                     if (srvIdx != (IShaderBinder*)0)
                     {
                         CountAvgBrightnessDrawcall.mCoreObject.GetShaderRViewResources().BindCS(srvIdx->CSBindPoint, lightSRV.mCoreObject);

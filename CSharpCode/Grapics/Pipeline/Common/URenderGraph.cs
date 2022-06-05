@@ -498,11 +498,31 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public virtual void BeginTickLogic(GamePlay.UWorld world)
         {
-
+            if (NodeLayers != null)
+            {
+                foreach (var i in NodeLayers)
+                {
+                    foreach (var j in i)
+                    {
+                        if (j.Enable)
+                            j.BeginTickLogic(world, this as URenderPolicy, true);
+                    }
+                }
+            }
         }
         public virtual void EndTickLogic(GamePlay.UWorld world)
         {
-
+            if (NodeLayers != null)
+            {
+                foreach (var i in NodeLayers)
+                {
+                    foreach (var j in i)
+                    {
+                        if (j.Enable)
+                            j.EndTickLogic(world, this as URenderPolicy, true);
+                    }
+                }
+            }
         }
         public virtual void TickLogic(GamePlay.UWorld world)
         {

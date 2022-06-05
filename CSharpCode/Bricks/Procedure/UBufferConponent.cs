@@ -4,18 +4,126 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure
 {
-    public class UBufferConponent
+    public class UBufferCreator : IO.BaseSerializer
+    {
+        public static UBufferCreator CreateInstance<TBuffer>(int x, int y, int z)
+            where TBuffer : UBufferConponent
+        {
+            var result = new UBufferCreator();
+            result.BufferType = Rtti.UTypeDesc.TypeOf<TBuffer>();
+            result.XSize = x;
+            result.YSize = y;
+            result.ZSize = z;
+            return result;
+        }
+        public static UBufferCreator CreateInstance(Rtti.UTypeDesc bufferType, int x, int y, int z)
+        {
+            var result = new UBufferCreator();
+            result.BufferType = bufferType;
+            result.XSize = x;
+            result.YSize = y;
+            result.ZSize = z;
+            return result;
+        }
+        public UBufferCreator Clone()
+        {
+            var result = new UBufferCreator();
+            result.BufferType = BufferType;
+            result.XSize = XSize;
+            result.YSize = YSize;
+            result.ZSize = ZSize;
+            return result;
+        }
+        public int GetElementTypeSize()
+        {
+            return System.Runtime.InteropServices.Marshal.SizeOf(ElementType);
+        }
+        Rtti.UTypeDesc mElementType;
+        [EGui.Controls.PropertyGrid.PGTypeEditor(null, FilterMode = 0)]
+        public Rtti.UTypeDesc ElementType
+        {
+            get
+            {
+                if (mElementType == null)
+                {
+                    if (mBufferType == null)
+                        return null;
+                    var tmp = Rtti.UTypeDescManager.CreateInstance(mBufferType) as UBufferConponent;
+                    if (tmp != null)
+                        mElementType = tmp.PixelOperator.ElementType;
+                }
+                return mElementType;
+            }
+            private set
+            {
+                mElementType = value;
+            }
+        }
+        Rtti.UTypeDesc mBufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
+        [Rtti.Meta]
+        //[IO.UTypeDescSerializer()]
+        [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(UBufferConponent), FilterMode = EGui.Controls.UTypeSelector.EFilterMode.IncludeObjectType)]
+        public Rtti.UTypeDesc BufferType
+        {
+            get => mBufferType;
+            set
+            {
+                mBufferType = value;
+                var tmp = Rtti.UTypeDescManager.CreateInstance(value) as UBufferConponent;
+                if (tmp != null)
+                {
+                    ElementType = tmp.PixelOperator.ElementType;
+                }
+                else
+                {
+                    mBufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
+                }
+            }
+        }
+        [Rtti.Meta]
+        public int XSize { get; set; } = 1;
+        [Rtti.Meta]
+        public int YSize { get; set; } = 1;
+        [Rtti.Meta]
+        public int ZSize { get; set; } = 1;
+    }
+    public partial class UBufferConponent
     {
         public UBufferCreator BufferCreator { get; private set; }
         public virtual ISuperPixelOperatorBase PixelOperator { get => null; }
         public int LifeCount { get; set; } = 0;
-        public int Width { get; private set; }
-        public int Height { get; private set; }
-        public int Depth { get; private set; }
+        public int Width 
+        { 
+            get
+            {
+                if (BufferCreator == null)
+                    return 0;
+                return BufferCreator.XSize;
+            }
+        }
+        public int Height 
+        {
+            get
+            {
+                if (BufferCreator == null)
+                    return 0;
+                return BufferCreator.YSize;
+            }
+        }
+        public int Depth 
+        {
+            get
+            {
+                if (BufferCreator == null)
+                    return 0;
+                return BufferCreator.ZSize;
+            }
+        }
         public int Pitch { get; private set; }
         public int Slice { get; private set; }
         public int ElementSize { get; private set; }
-        public BigStackBuffer SuperPixels;
+        //public BigStackBuffer SuperPixels;
+        public Support.CBlobObject SuperPixels = new Support.CBlobObject();
         protected UBufferConponent()
         {
 
@@ -24,29 +132,129 @@ namespace EngineNS.Bricks.Procedure
         {
             SuperPixels.Dispose();
         }
+
+        public unsafe Hash160 CalcPixelHash()
+        {
+            return Hash160.CreateHash160(SuperPixels.mCoreObject.GetData(), SuperPixels.mCoreObject.GetSize());
+        }
+        public void SaveToCache(string name, in Hash160 dataHash)
+        {
+            var xnd = new IO.CXndHolder("PgcBuffer", 0, 0);
+            unsafe
+            {
+                SaveXnd(xnd, xnd.RootNode.mCoreObject, in dataHash);
+            }
+            xnd.SaveXnd(name);
+        }
+        public bool LoadFromCache(string name, in Hash160 testHash)
+        {
+            using (var xnd = IO.CXndHolder.LoadXnd(name))
+            {
+                if (xnd == null)
+                    return false;
+
+                unsafe
+                {
+                    return LoadXnd(xnd.RootNode.mCoreObject, in testHash);
+                }
+            }
+        }
+        public unsafe void SaveXnd(IO.CXndHolder xnd, XndNode node, in Hash160 dataHash)
+        {
+            using(var attr = xnd.NewAttribute("BufferCreator", 0, 0))
+            {
+                var ar = attr.GetWriter(30);
+                ar.Write(dataHash);
+                ar.Write(ElementSize);
+                ar.Write(BufferCreator);
+                attr.ReleaseWriter(ref ar);
+                node.AddAttribute(attr);
+            }
+
+            using(var attr = xnd.NewAttribute("BufferData", 0, 0))
+            {   
+                var ar = attr.GetWriter(SuperPixels.mCoreObject.GetSize());
+                int bfSize = ElementSize * BufferCreator.XSize* BufferCreator.YSize* BufferCreator.ZSize;
+                ar.WritePtr(SuperPixels.mCoreObject.GetData(), bfSize);
+                attr.ReleaseWriter(ref ar);
+                node.AddAttribute(attr);
+            }
+        }
+        public unsafe bool LoadXnd(XndNode node, in Hash160 testHash)
+        {
+            var attr = node.TryGetAttribute("BufferCreator");
+            if (attr.IsValidPointer)
+            {
+                var ar = attr.GetReader(this);
+                Hash160 dataHash;
+                ar.Read(out dataHash);
+                int elemSize;
+                ar.Read(out elemSize);
+                IO.ISerializer creator;
+                ar.Read(out creator, this);
+                attr.ReleaseReader(ref ar);
+
+                if (dataHash != testHash)
+                    return false;
+
+                var bfCreator = creator as UBufferCreator;
+                if (bfCreator == null && BufferCreator.BufferType != bfCreator.BufferType)
+                    return false;
+                
+                attr = node.TryGetAttribute("BufferData");
+                if (attr.IsValidPointer)
+                {
+                    BufferCreator.XSize = bfCreator.XSize;
+                    BufferCreator.YSize = bfCreator.YSize;
+                    BufferCreator.ZSize = bfCreator.ZSize;
+
+                    Pitch = bfCreator.XSize * ElementSize;
+                    Slice = Pitch * bfCreator.YSize;
+
+                    ar = attr.GetReader(this);
+                    int bfSize = elemSize * BufferCreator.XSize * BufferCreator.YSize * BufferCreator.ZSize;
+                    SuperPixels.mCoreObject.ReSize((uint)bfSize);
+                    ar.ReadPtr(SuperPixels.mCoreObject.GetData(), bfSize);
+                    attr.ReleaseReader(ref ar);
+
+                    //var t1 = Support.Time.HighPrecision_GetTickCount();
+                    //var contentHash = CalcPixelHash();
+                    //var t2 = Support.Time.HighPrecision_GetTickCount();
+                    return true;
+                }
+            }
+            return false;
+        }
+
         #region CppMemBuffer
         public unsafe static UBufferConponent CreateInstance(in UBufferCreator creator)
         {
             var result = Rtti.UTypeDescManager.CreateInstance(creator.BufferType) as UBufferConponent;
             result.BufferCreator = creator.Clone();
-            var elemSize = System.Runtime.InteropServices.Marshal.SizeOf(result.PixelOperator.ElementType.SystemType); 
-            result.CreateBuffer(elemSize, creator.XSize, creator.YSize, creator.ZSize, IntPtr.Zero.ToPointer());
+            result.CreateBuffer(creator.ElementType, creator.XSize, creator.YSize, creator.ZSize, IntPtr.Zero.ToPointer());
             return result;
         }
-        public unsafe void CreateBuffer(int elementSize, int xSize, int ySize, int zSize, void* initValue)
+        public unsafe void CreateBuffer(Rtti.UTypeDesc type, int xSize, int ySize, int zSize, void* initValue)
         {
-            Width = xSize;
-            Height = ySize;
-            Depth = zSize;
+            int elementSize = System.Runtime.InteropServices.Marshal.SizeOf(type.SystemType);
+            if (BufferCreator == null)
+            {   
+                BufferCreator = UBufferCreator.CreateInstance(type, xSize, ySize, zSize);
+            }
+            BufferCreator.XSize = xSize;
+            BufferCreator.YSize = ySize;
+            BufferCreator.ZSize = zSize;
 
             ElementSize = elementSize;
-            SuperPixels.Dispose();
             Pitch = xSize * ElementSize;
             Slice = Pitch * ySize;
-            SuperPixels = BigStackBuffer.CreateInstance(Slice * zSize);
+            //SuperPixels.Dispose();
+            //SuperPixels = BigStackBuffer.CreateInstance(Slice * zSize);
+            SuperPixels.mCoreObject.ReSize((uint)(Slice * zSize));
             if (initValue != IntPtr.Zero.ToPointer())
             {
-                var pBuffer = (byte*)SuperPixels.GetBuffer();
+                //var pBuffer = (byte*)SuperPixels.GetBuffer();
+                var pBuffer = (byte*)SuperPixels.mCoreObject.GetData();
                 for (int i = 0; i < xSize * ySize * zSize; i++)
                 {
                     CoreSDK.MemoryCopy(&pBuffer[i * ElementSize], initValue, (uint)ElementSize);
@@ -57,7 +265,8 @@ namespace EngineNS.Bricks.Procedure
         {
             if (x < 0 || x >= Width || y < 0 || y >= Height || z < 0 || z >= Depth)
                 return null;
-            var pBuffer = (byte*)SuperPixels.GetBuffer();
+            //var pBuffer = (byte*)SuperPixels.GetBuffer();
+            var pBuffer = (byte*)SuperPixels.mCoreObject.GetData();
             //return &pBuffer[(z * (Width * Depth) + Width * y + x) * ElementSize];
             return &pBuffer[Slice * z + y * Pitch + x * ElementSize];
         }
@@ -65,32 +274,17 @@ namespace EngineNS.Bricks.Procedure
         {
             if (x < 0 || x >= Width || y < 0 || y >= Height || z < 0 || z >= Depth)
                 return;
-            var pBuffer = (byte*)SuperPixels.GetBuffer();
+            //var pBuffer = (byte*)SuperPixels.GetBuffer();
+            var pBuffer = (byte*)SuperPixels.mCoreObject.GetData();
             CoreSDK.MemoryCopy(&pBuffer[Slice * z + y * Pitch + x * ElementSize], valueAddress, (uint)ElementSize);
         }
         public unsafe byte* GetSliceAddress(int index)
         {
             return GetSuperPixelAddress(0, 0, index);
         }
-        public static unsafe bool CopyData(UBufferConponent src, UBufferConponent dst)
-        {
-            if (src.Width != dst.Width ||
-                src.Height != dst.Height)
-                return false;
-            for (int i = 0; i < src.Depth; i++)
-            {
-                for (int j = 0; j < src.Height; j++)
-                {
-                    for (int k = 0; k < src.Width; k++)
-                    {
-                        dst.SetSuperPixelAddress(k, j, i, src.GetSuperPixelAddress(k, j, i));
-                    }
-                }
-            }
-            return true;
-        }
         #endregion
 
+        [Rtti.Meta]
         public bool IsValidPixel(int x, int y = 0, int z = 0)
         {
             if (x < 0 || x >= Width ||
@@ -100,6 +294,108 @@ namespace EngineNS.Bricks.Procedure
                 return false;
             }
             return true;
+        }
+        public enum EPixelSamplerMode
+        {
+            Clamp,
+            Wrap,
+        }
+        public ref T GetPixel<T>(in Vector3 uvw, EPixelSamplerMode mode = EPixelSamplerMode.Clamp) where T : unmanaged
+        {
+            int x = (int)(uvw.X * (float)Width);
+            int y = (int)(uvw.Y * (float)Height);
+            int z = (int)(uvw.Z * (float)Depth);
+            if (x >= Width)
+            {
+                switch (mode)
+                {
+                    case EPixelSamplerMode.Clamp:
+                        x = Width - 1;
+                        break;
+                    case EPixelSamplerMode.Wrap:
+                        x = x % Width;
+                        break;
+                }
+            }
+            if (y >= Height)
+            {
+                switch (mode)
+                {
+                    case EPixelSamplerMode.Clamp:
+                        y = Height - 1;
+                        break;
+                    case EPixelSamplerMode.Wrap:
+                        y = y % Height;
+                        break;
+                }
+            }
+            if (z >= Depth)
+            {
+                switch (mode)
+                {
+                    case EPixelSamplerMode.Clamp:
+                        z = Depth - 1;
+                        break;
+                    case EPixelSamplerMode.Wrap:
+                        z = z % Depth;
+                        break;
+                }
+            }
+            unsafe
+            {
+                var pAddr = (T*)GetSuperPixelAddress(x, y, z);
+                return ref *pAddr;
+            }
+        }
+        public void SetPixel<T>(in Vector3 uvw, in T value, EPixelSamplerMode mode = EPixelSamplerMode.Clamp) where T : unmanaged
+        {
+            int x = (int)(uvw.X * (float)Width);
+            int y = (int)(uvw.Y * (float)Height);
+            int z = (int)(uvw.Z * (float)Depth);
+            if (x >= Width)
+            {
+                switch (mode)
+                {
+                    case EPixelSamplerMode.Clamp:
+                        x = Width - 1;
+                        break;
+                    case EPixelSamplerMode.Wrap:
+                        x = x % Width;
+                        break;
+                }
+            }
+            if (y >= Height)
+            {
+                switch (mode)
+                {
+                    case EPixelSamplerMode.Clamp:
+                        y = Height - 1;
+                        break;
+                    case EPixelSamplerMode.Wrap:
+                        y = y % Height;
+                        break;
+                }
+            }
+            if (z >= Depth)
+            {
+                switch (mode)
+                {
+                    case EPixelSamplerMode.Clamp:
+                        z = Depth - 1;
+                        break;
+                    case EPixelSamplerMode.Wrap:
+                        z = z % Depth;
+                        break;
+                }
+            }
+            unsafe
+            {
+                System.Diagnostics.Debug.Assert(sizeof(T) == ElementSize);
+                fixed (T* pAddr = &value)
+                {
+                    SetSuperPixelAddress(x, y, z, (byte*)pAddr);
+                }
+            }
         }
         public ref T GetPixel<T>(int x, int y, int z) where T : unmanaged
         {
@@ -117,6 +413,7 @@ namespace EngineNS.Bricks.Procedure
         {
             unsafe
             {
+                System.Diagnostics.Debug.Assert(sizeof(T) == ElementSize);
                 fixed (T* pAddr = &value)
                 {
                     SetSuperPixelAddress(x, y, z, (byte*)pAddr);
@@ -134,6 +431,7 @@ namespace EngineNS.Bricks.Procedure
         {
             unsafe
             {
+                System.Diagnostics.Debug.Assert(sizeof(T) == ElementSize);
                 fixed (T* pAddr = &value)
                 {
                     SetSuperPixelAddress(x, y, 0, (byte*)pAddr);
@@ -151,13 +449,26 @@ namespace EngineNS.Bricks.Procedure
         {
             unsafe
             {
+                System.Diagnostics.Debug.Assert(sizeof(T) == ElementSize);
                 fixed (T* pAddr = &value)
                 {
                     SetSuperPixelAddress(x, 0, 0, (byte*)pAddr);
                 }
             }
         }
-
+        public unsafe T* AddPixel<T>(in T value, int y = 0, int z = 0) where T : unmanaged
+        {
+            System.Diagnostics.Debug.Assert(sizeof(T) == ElementSize);
+            this.BufferCreator.XSize++;
+            return SuperPixels.PushValue(in value);
+        }
+        public unsafe void ResizePixels(int x = 0, int y = 1, int z = 1)
+        {
+            this.BufferCreator.XSize = x;
+            this.BufferCreator.YSize = y;
+            this.BufferCreator.ZSize = z;
+            this.CreateBuffer(PixelOperator.ElementType, x, y, z, IntPtr.Zero.ToPointer());
+        }
         public unsafe void GetRangeUnsafe<T, TOperator>(out T minValue, out T maxValue) 
             where T : unmanaged
             where TOperator : ISuperPixelOperator<T>, new()
@@ -183,7 +494,71 @@ namespace EngineNS.Bricks.Procedure
                 }
             }   
         }
+        public virtual unsafe RHI.CShaderResourceView CreateVector3Texture2D(Vector3 minHeight, Vector3 maxHeight)
+        {
+            RHI.CTexture2D texture;
+            if (minHeight.X >= 0 && minHeight.X <= 1 && maxHeight.X >= 0 && maxHeight.X <= 1)
+            {
+                minHeight.X = 0;
+                maxHeight.X = 1;
+            }
+            if (minHeight.Y >= 0 && minHeight.Y <= 1 && maxHeight.Y >= 0 && maxHeight.Y <= 1)
+            {
+                minHeight.Y = 0;
+                maxHeight.Y = 1;
+            }
+            if (minHeight.Z >= 0 && minHeight.Z <= 1 && maxHeight.Z >= 0 && maxHeight.Z <= 1)
+            {
+                minHeight.Z = 0;
+                maxHeight.Z = 1;
+            }
+            var hRange = maxHeight - minHeight;
+            unsafe
+            {
+                var desc = new ITexture2DDesc();
+                desc.SetDefault();
+                desc.Width = (uint)Width;
+                desc.Height = (uint)Height;
+                desc.MipLevels = 1;
+                desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                ImageInitData initData = new ImageInitData();
+                initData.SetDefault();
+                desc.InitData = &initData;
+                {
+                    var Count = Width * Height;
+                    var tarPixels = new Byte4[Count];
+                    var pSlice = (Vector3*)this.GetSliceAddress(0);
+                    for (int i = 0; i < Count; i++)
+                    {
+                        var tmp = pSlice[i] - minHeight;
+                        tmp = tmp * 255.0f;
+                        tmp = tmp / hRange;
+                        //tarPixels[i].X = (byte)(((pSlice[i].X - minHeight.X) / hRange.) * 255.0f);
+                        //tarPixels[i].Y = (byte)(((pSlice[i].Y - minHeight) / hRange) * 255.0f);
+                        //tarPixels[i].Z = (byte)(((pSlice[i].Z - minHeight) / hRange) * 255.0f);
+                        tarPixels[i].X = (byte)tmp.X;
+                        tarPixels[i].Y = (byte)tmp.Y;
+                        tarPixels[i].Z = (byte)tmp.Z;
+                        tarPixels[i].W = 255;
+                    }
+                    fixed (Byte4* p = &tarPixels[0])
+                    {
+                        initData.SysMemPitch = desc.Width * (uint)sizeof(Byte4);
+                        initData.pSysMem = p;
+                        texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture2D(in desc);
+                    }
+                }
 
+                var rsvDesc = new IShaderResourceViewDesc();
+                rsvDesc.SetTexture2D();
+                rsvDesc.Type = ESrvType.ST_Texture2D;
+                rsvDesc.mGpuBuffer = texture.mCoreObject;
+                rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                rsvDesc.Texture2D.MipLevels = desc.MipLevels;
+                var result = UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(in rsvDesc);
+                return result;
+            }
+        }
         public virtual unsafe RHI.CShaderResourceView CreateAsHeightMapTexture2D(float minHeight, float maxHeight, EPixelFormat format = EPixelFormat.PXF_R32_FLOAT, bool bNomalized = false)
         {
             RHI.CTexture2D texture;
@@ -308,81 +683,234 @@ namespace EngineNS.Bricks.Procedure
             }
         }
 
-        public virtual unsafe RHI.CShaderResourceView CreateVector3Texture2D(Vector3 minHeight, Vector3 maxHeight)
+        #region Macross
+        public delegate void FOnPerPixel(UBufferConponent result, int x, int y, int z);
+        [Rtti.Meta]
+        public void DispatchPixels(FOnPerPixel onPerPiexel, bool bMultThread = false)
         {
-            RHI.CTexture2D texture;
-            if (minHeight.X >= 0 && minHeight.X <= 1 && maxHeight.X >= 0 && maxHeight.X <= 1)
+            if (bMultThread == false)
             {
-                minHeight.X = 0;
-                maxHeight.X = 1;
-            }
-            if (minHeight.Y >= 0 && minHeight.Y <= 1 && maxHeight.Y >= 0 && maxHeight.Y <= 1)
-            {
-                minHeight.Y = 0;
-                maxHeight.Y = 1;
-            }
-            if (minHeight.Z >= 0 && minHeight.Z <= 1 && maxHeight.Z >= 0 && maxHeight.Z <= 1)
-            {
-                minHeight.Z = 0;
-                maxHeight.Z = 1;
-            }
-            var hRange = maxHeight - minHeight;
-            unsafe
-            {
-                var desc = new ITexture2DDesc();
-                desc.SetDefault();
-                desc.Width = (uint)Width;
-                desc.Height = (uint)Height;
-                desc.MipLevels = 1;
-                desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
-                ImageInitData initData = new ImageInitData();
-                initData.SetDefault();
-                desc.InitData = &initData;
+                for (int i = 0; i < Depth; i++)
                 {
-                    var Count = Width * Height;
-                    var tarPixels = new Byte4[Count];
-                    var pSlice = (Vector3*)this.GetSliceAddress(0);
-                    for (int i = 0; i < Count; i++)
+                    for (int j = 0; j < Height; j++)
                     {
-                        var tmp = pSlice[i] - minHeight;
-                        tmp = tmp * 255.0f;
-                        tmp = tmp / hRange;
-                        //tarPixels[i].X = (byte)(((pSlice[i].X - minHeight.X) / hRange.) * 255.0f);
-                        //tarPixels[i].Y = (byte)(((pSlice[i].Y - minHeight) / hRange) * 255.0f);
-                        //tarPixels[i].Z = (byte)(((pSlice[i].Z - minHeight) / hRange) * 255.0f);
-                        tarPixels[i].X = (byte)tmp.X;
-                        tarPixels[i].Y = (byte)tmp.Y;
-                        tarPixels[i].Z = (byte)tmp.Z;
-                        tarPixels[i].W = 255;
+                        for (int k = 0; k < Width; k++)
+                        {
+                            onPerPiexel(this, k, j, i);
+                        }
                     }
-                    fixed (Byte4* p = &tarPixels[0])
+                }
+            }
+            else
+            {
+                var evt = new System.Threading.AutoResetEvent(false);
+                var smp = Thread.ASyncSemaphore.CreateSemaphore(Depth * Height * Width, evt);
+                
+                if (Depth == 1 && Height == 1)
+                {
+                    for (int i = 0; i < Depth; i++)
                     {
-                        initData.SysMemPitch = desc.Width * (uint)sizeof(Byte4);
-                        initData.pSysMem = p;
-                        texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture2D(in desc);
+                        for (int j = 0; j < Height; j++)
+                        {
+                            for (int k = 0; k < Width; k++)
+                            {
+                                int x = k;
+                                int y = j;
+                                int z = i;
+                                UEngine.Instance.EventPoster.RunOn(() =>
+                                {
+                                    onPerPiexel(this, x, y, z);
+                                    smp.Release();
+                                    return null;
+                                }, Thread.Async.EAsyncTarget.TPools);
+                            }
+                        }
+                    }
+                }
+                else if (Depth == 1)
+                {
+                    for (int i = 0; i < Depth; i++)
+                    {
+                        for (int j = 0; j < Height; j++)
+                        {
+                            int y = j;
+                            int z = i;
+                            UEngine.Instance.EventPoster.RunOn(() =>
+                            {
+                                for (int k = 0; k < Width; k++)
+                                {
+                                    onPerPiexel(this, k, y, z);
+                                    smp.Release();
+                                }
+                                return null;
+                            }, Thread.Async.EAsyncTarget.TPools);
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < Depth; i++)
+                    {
+                        int z = i;
+                        UEngine.Instance.EventPoster.RunOn(() =>
+                        {
+                            for (int j = 0; j < Height; j++)
+                            {
+                                for (int k = 0; k < Width; k++)
+                                {
+                                    onPerPiexel(this, k, j, i);
+                                    smp.Release();
+                                }
+                            }
+                            return null;
+                        }, Thread.Async.EAsyncTarget.TPools);
                     }
                 }
 
-                var rsvDesc = new IShaderResourceViewDesc();
-                rsvDesc.SetTexture2D();
-                rsvDesc.Type = ESrvType.ST_Texture2D;
-                rsvDesc.mGpuBuffer = texture.mCoreObject;
-                rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
-                rsvDesc.Texture2D.MipLevels = desc.MipLevels;
-                var result = UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(in rsvDesc);
-                return result;
+                smp.Wait(int.MaxValue);
+                smp.FreeSemaphore();
             }
         }
-        //public void GetMaxAbs(out float maxValue)
-        //{
-        //    maxValue = float.MinValue;
-        //    for (int i = 0; i < Pixels.Length; i++)
-        //    {
-        //        var f = Pixels[i];
-        //        if (Math.Abs(f) > maxValue)
-        //            maxValue = f;
-        //    }
-        //}
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.ManualMarshal)]
+        public static unsafe bool CopyData(UBufferConponent src, UBufferConponent dst)
+        {
+            if (src.Width != dst.Width ||
+                src.Height != dst.Height)
+                return false;
+            for (int i = 0; i < src.Depth; i++)
+            {
+                for (int j = 0; j < src.Height; j++)
+                {
+                    for (int k = 0; k < src.Width; k++)
+                    {
+                        dst.SetSuperPixelAddress(k, j, i, src.GetSuperPixelAddress(k, j, i));
+                    }
+                }
+            }
+            return true;
+        }
+        public unsafe bool macross_CopyData(string nodeName, UBufferConponent src, UBufferConponent dst)
+        {
+            using (var stackframe = EngineNS.Macross.UMacrossStackTracer.CurrentFrame)
+            {
+                if (stackframe != null)
+                {
+                    //stackframe.SetWatchVariable(nodeName + ":name", name);
+                }
+            }
+            var _return_value = CopyData(src, dst);
+            return _return_value;
+        }
+        [Rtti.Meta]
+        public Vector3 GetUVW(int x, int y, int z)
+        {
+            Vector3 result;
+            result.X = (float)x / (float)Width;
+            result.Y = (float)y / (float)Height;
+            result.Z = (float)z / (float)Depth;
+            return result;
+        }
+        [Rtti.Meta]
+        public Vector3 GetClampedUVW(int x, int y, int z)
+        {
+            Vector3 result;
+            result.X = CoreDefine.Clamp((float)x / (float)Width, 0, 1);
+            result.Y = CoreDefine.Clamp((float)y / (float)Height, 0, 1);
+            result.Z = CoreDefine.Clamp((float)z / (float)Depth, 0, 1);
+            return result;
+        }
+        [Rtti.Meta]
+        public unsafe object GetSuperPixelAddressEX(int x, int y, int z,
+           [Rtti.MetaParameter(TypeList = new System.Type[]
+                {
+                    typeof(float), typeof(Vector2), typeof(Vector3)
+                },
+            ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
+            System.Type retType)
+        {
+            if (retType.IsValueType == false)
+                return null;
+            if (x < 0 || x >= Width || y < 0 || y >= Height || z < 0 || z >= Depth)
+                return null;
+            //var pBuffer = (byte*)SuperPixels.GetBuffer();
+            var pBuffer = (byte*)SuperPixels.mCoreObject.GetData();
+            //return &pBuffer[(z * (Width * Depth) + Width * y + x) * ElementSize];
+            var ptr = &pBuffer[Slice * z + y * Pitch + x * ElementSize];
+            if (retType == typeof(float))
+            {
+                return *(float*)ptr;
+            }
+            else if (retType == typeof(Vector2))
+            {
+                return *(Vector2*)ptr;
+            }
+            else if (retType == typeof(Vector3))
+            {
+                return *(Vector3*)ptr;
+            }
+            return null;
+        }
+        [Rtti.Meta]
+        public float GetFloat1(int x, int y, int z)
+        {
+            return GetPixel<float>(x, y, z);
+        }
+        [Rtti.Meta]
+        public void SetFloat1(int x, int y, int z, float v)
+        {
+            SetPixel<float>(x, y, z, v);
+        }
+        [Rtti.Meta]
+        public Vector2 GetFloat2(int x, int y, int z)
+        {
+            return GetPixel<Vector2>(x, y, z);
+        }
+        [Rtti.Meta]
+        public void SetFloat2(int x, int y, int z, Vector2 v)
+        {
+            SetPixel<Vector2>(x, y, z, in v);
+        }
+        [Rtti.Meta]
+        public Vector3 GetFloat3(int x, int y, int z)
+        {
+            return GetPixel<Vector3>(x, y, z);
+        }
+        [Rtti.Meta]
+        public void SetFloat3(int x, int y, int z, Vector3 v)
+        {
+            SetPixel<Vector3>(x, y, z, in v);
+        }
+        [Rtti.Meta]
+        public int GetInt1(int x, int y, int z)
+        {
+            return GetPixel<int>(x, y, z);
+        }
+        [Rtti.Meta]
+        public void SetInt1(int x, int y, int z, int v)
+        {
+            SetPixel<int>(x, y, z, v);
+        }
+        [Rtti.Meta]
+        public Int32_2 GetInt2(int x, int y, int z)
+        {
+            return GetPixel<Int32_2>(x, y, z);
+        }
+        [Rtti.Meta]
+        public void SetInt2(int x, int y, int z, Int32_2 v)
+        {
+            SetPixel<Int32_2>(x, y, z, in v);
+        }
+        [Rtti.Meta]
+        public Int32_3 GetInt3(int x, int y, int z)
+        {
+            return GetPixel<Int32_3>(x, y, z);
+        }
+        [Rtti.Meta]
+        public void SetInt3(int x, int y, int z, Int32_3 v)
+        {
+            SetPixel<Int32_3>(x, y, z, in v);
+        }
+        #endregion
     }
     public class USuperBuffer<T, TOperator> : UBufferConponent where T : unmanaged 
         where TOperator : ISuperPixelOperator<T>, new()
@@ -393,7 +921,7 @@ namespace EngineNS.Bricks.Procedure
         {
             fixed (T* pAddr = &initValue)
             {
-                CreateBuffer(sizeof(T), xSize, ySize, zSize, pAddr);
+                CreateBuffer(Rtti.UTypeDescGetter<T>.TypeDesc, xSize, ySize, zSize, pAddr);
             }
         }
         public unsafe ref T GetSuperPixel(int x, int y, int z)

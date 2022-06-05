@@ -209,8 +209,8 @@ namespace EngineNS.Bricks.Particle
             {
                 mParticleUpdateDrawcall = rc.CreateComputeDrawcall();
 
-                var cbIndex = Shader.CSDesc_Particle_Update.mCoreObject.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbParticleDesc");
-                CBuffer = rc.CreateConstantBuffer2(Shader.CSDesc_Particle_Update, cbIndex);
+                var cbIndex = Shader.Particle_Update.Desc.mCoreObject.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbParticleDesc");
+                CBuffer = rc.CreateConstantBuffer2(Shader.Particle_Update.Desc, cbIndex);
                 CBuffer.SetValue(ref ParticleRandomPoolSize, UEngine.Instance.NebulaTemplateManager.ShaderRandomPoolSize);
                 var dpDesc = emitter.Mesh.MaterialMesh.Mesh.mCoreObject.GetAtom(0, 0);
                 CBuffer.SetValue(ref Draw_IndexCountPerInstance, dpDesc->m_NumPrimitives * 3);
@@ -219,7 +219,7 @@ namespace EngineNS.Bricks.Particle
                 CBuffer.SetValue(ref Draw_StartInstanceLocation, 0);
                 CBuffer.SetValue(ref ParticleMaxSize, emitter.MaxParticle);
 
-                mParticleUpdateDrawcall.SetComputeShader(Shader.CS_Particle_Update);
+                mParticleUpdateDrawcall.SetComputeShader(Shader.Particle_Update.CS_Shader);
                 mParticleUpdateDrawcall.BindCBuffer("cbParticleDesc", CBuffer);
                 mParticleUpdateDrawcall.BindSrv("bfRandomPool", UEngine.Instance.NebulaTemplateManager.RandomPoolSrv);
 
@@ -259,7 +259,7 @@ namespace EngineNS.Bricks.Particle
             if (mParticleSetupDrawcall == null)
             {
                 mParticleSetupDrawcall = rc.CreateComputeDrawcall();
-                mParticleSetupDrawcall.SetComputeShader(Shader.CS_Particle_SetupParameters);
+                mParticleSetupDrawcall.SetComputeShader(Shader.Particle_SetupParameters.CS_Shader);
                 mParticleSetupDrawcall.BindCBuffer("cbParticleDesc", CBuffer);                
             }
             mParticleSetupDrawcall.BindUav("bfCurAlives", gpuResources.CurAlivesUav);
@@ -334,6 +334,7 @@ namespace EngineNS.Bricks.Particle
     }
     public interface IParticleEmitter
     {
+        IParticleEmitter CloneEmitter();
         void InitEmitter(RHI.CRenderContext rc, Graphics.Mesh.UMesh mesh, uint maxParticle);
         void Cleanup();
         bool SetCurrentQueue(string name);
@@ -361,6 +362,10 @@ namespace EngineNS.Bricks.Particle
         where FParticle : unmanaged
         where FParticleSystem : unmanaged
     {
+        public virtual IParticleEmitter CloneEmitter()
+        {
+            return null;
+        }
         public bool IsGpuDriven { get; set; } = false;
         public FParticleSystem SystemData = default;
         public Dictionary<string, UEffectorQueue> EffectorQueues { get; } = new Dictionary<string, UEffectorQueue>();

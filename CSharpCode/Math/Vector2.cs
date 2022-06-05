@@ -157,6 +157,7 @@ namespace EngineNS
         public readonly static Vector2 MinValue = new Vector2(float.MinValue, float.MinValue);
         public readonly static Vector2 Zero = new Vector2(0, 0);
         public readonly static Vector2 One = new Vector2(1, 1);
+        public readonly static Vector2 NegativeOne = new Vector2(-1, -1);
         [Rtti.Meta]
         public static Vector2 UnitX { get { return mUnitX; } }
         public readonly static Vector2 mUnitX = new Vector2(1, 0);
@@ -246,15 +247,16 @@ namespace EngineNS
         /// 二维向量的单位化
         /// </summary>
         [Rtti.Meta]
-        public void Normalize()
+        public float Normalize()
         {
             float length = Length();
 		    if( length == 0 )
-			    return;
+			    return 0;
 		    float num = 1 / length;
 		    X *= num;
 		    Y *= num;
-	    }
+            return length;
+        }
         /// <summary>
         /// 两个向量的和
         /// </summary>

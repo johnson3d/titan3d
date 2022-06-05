@@ -48,7 +48,8 @@ namespace EngineNS.GamePlay.Scene
                     SetHitProxySubTree(HitProxy);
                     break;
                 case Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent:
-                    UEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(this);
+                    if (oldValue != Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent)
+                        UEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(this);
                     if (Parent != null)
                     {
                         HitProxy = Parent.HitProxy;
@@ -69,6 +70,11 @@ namespace EngineNS.GamePlay.Scene
                     i.OnHitProxyChanged();
                 }
             }
+        }
+
+        public virtual void AddAssetReferences(IO.IAssetMeta ameta)
+        {
+
         }
     }
 }

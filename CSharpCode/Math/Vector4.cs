@@ -304,45 +304,34 @@ namespace EngineNS
         /// 只读属性，0向量
         /// </summary>
         [Rtti.Meta]
-        public static Vector4 Zero { get { return mZero; } }
-        static Vector4 mZero = new Vector4(0, 0, 0, 0);
-        /// <summary>
-        /// 只读属性，X轴的方向向量
-        /// </summary>
-
+        public readonly static Vector4 Zero = new Vector4(0, 0, 0, 0);
         [Rtti.Meta]
-        public static Vector4 UnitX { get { return mUnitX; } }
-        static Vector4 mUnitX = new Vector4(1, 0, 0, 0);
-        /// <summary>
-        /// 只读属性，Y轴的方向向量
-        /// </summary>
-
+        public readonly static Vector4 UnitX = new Vector4(1, 0, 0, 0);
+        
         [Rtti.Meta]
-        public static Vector4 UnitY { get { return mUnitY; } }
-        static Vector4 mUnitY = new Vector4(0, 1, 0, 0);
-        /// <summary>
-        /// 只读属性，Z轴的方向向量
-        /// </summary>
+        public readonly static Vector4 UnitY = new Vector4(0, 1, 0, 0);
         [Rtti.Meta]
-        public static Vector4 UnitZ { get { return mUnitZ; } }
-        static Vector4 mUnitZ = new Vector4(0, 0, 1, 0);
-        /// <summary>
-        /// 只读属性，W轴的方向向量
-        /// </summary>
+        public readonly static Vector4 UnitZ = new Vector4(0, 0, 1, 0);
         [Rtti.Meta]
-        public static Vector4 UnitW { get { return mUnitW; } }
-        static Vector4 mUnitW = new Vector4(0, 0, 0, 1);
-        /// <summary>
-        /// 只读属性，平面的方向向量
-        /// </summary>
+        public readonly static Vector4 UnitW = new Vector4(0, 0, 0, 1);
         [Rtti.Meta]
-        public static Vector4 UnitXYZW { get { return mUnitXYZW; } }
-        static Vector4 mUnitXYZW = new Vector4(1, 1, 1, 1);
+        public readonly static Vector4 One = new Vector4(1, 1, 1, 1);
+        public readonly static Vector4 MaxValue = new Vector4(float.MaxValue, float.MaxValue, float.MaxValue, float.MaxValue);
+        public readonly static Vector4 MinValue = new Vector4(float.MinValue, float.MinValue, float.MinValue, float.MinValue);
         /// <summary>
         /// 只读属性，该对象的所占内存大小
         /// </summary>
         [Rtti.Meta]
-        public static int SizeInBytes { get { return System.Runtime.InteropServices.Marshal.SizeOf(typeof(Vector4)); } }
+        public static int SizeInBytes 
+        { 
+            get 
+            {
+                unsafe
+                {
+                    return sizeof(Vector4);
+                }
+            } 
+        }
         #endregion
 
         #region Constructure
@@ -448,6 +437,56 @@ namespace EngineNS
 		    return ( value1.X == value2.X && value1.Y == value2.Y && value1.Z == value2.Z && value1.W == value2.W );
 	    }
         #endregion
+        public static Vector4 Minimize(in Vector4 left, in Vector4 right)
+        {
+            Vector4 vector;
+            vector.X = (left.X < right.X) ? left.X : right.X;
+            vector.Y = (left.Y < right.Y) ? left.Y : right.Y;
+            vector.Z = (left.Z < right.Z) ? left.Z : right.Z;
+            vector.W = (left.W < right.W) ? left.W : right.W;
+            return vector;
+        }
+        public static void Minimize(in Vector4 left, in Vector4 right, out Vector4 result)
+        {
+            result.X = (left.X < right.X) ? left.X : right.X;
+            result.Y = (left.Y < right.Y) ? left.Y : right.Y;
+            result.Z = (left.Z < right.Z) ? left.Z : right.Z;
+            result.W = (left.W < right.W) ? left.W : right.W;
+        }
+        public static Vector4 Maximize(in Vector4 left, in Vector4 right)
+        {
+            Vector4 vector;
+            vector.X = (left.X > right.X) ? left.X : right.X;
+            vector.Y = (left.Y > right.Y) ? left.Y : right.Y;
+            vector.Z = (left.Z > right.Z) ? left.Z : right.Z;
+            vector.W = (left.W > right.W) ? left.W : right.W;
+            return vector;
+        }
+        public static void Maximize(in Vector4 left, in Vector4 right, out Vector4 result)
+        {
+            result.X = (left.X > right.X) ? left.X : right.X;
+            result.Y = (left.Y > right.Y) ? left.Y : right.Y;
+            result.Z = (left.Z > right.Z) ? left.Z : right.Z;
+            result.W = (left.W > right.W) ? left.W : right.W;
+        }
+        public static Vector4 operator *(in Vector4 left, in Vector4 right)
+        {
+            Vector4 result;
+            result.X = left.X * right.X;
+            result.Y = left.Y * right.Y;
+            result.Z = left.Z * right.Z;
+            result.W = left.W * right.W;
+            return result;
+        }
+        public static Vector4 operator /(in Vector4 left, in Vector4 right)
+        {
+            Vector4 result;
+            result.X = left.X / right.X;
+            result.Y = left.Y / right.Y;
+            result.Z = left.Z / right.Z;
+            result.W = left.W / right.W;
+            return result;
+        }
         /// <summary>
         /// 对象的长度
         /// </summary>
@@ -1179,66 +1218,6 @@ namespace EngineNS
 		    }
 
 		    return results;
-	    }
-        /// <summary>
-        /// 最小化
-        /// </summary>
-        /// <param name="left">向量对象</param>
-        /// <param name="right">向量对象</param>
-        /// <returns>返回最小的向量</returns>
-        [Rtti.Meta]
-        public static Vector4 Minimize(in Vector4 left, in Vector4 right )
-	    {
-            Vector4 vector;
-		    vector.X = (left.X < right.X) ? left.X : right.X;
-		    vector.Y = (left.Y < right.Y) ? left.Y : right.Y;
-		    vector.Z = (left.Z < right.Z) ? left.Z : right.Z;
-		    vector.W = (left.W < right.W) ? left.W : right.W;
-		    return vector;
-	    }
-        /// <summary>
-        /// 最小化
-        /// </summary>
-        /// <param name="left">向量对象</param>
-        /// <param name="right">向量对象</param>
-        /// <param name="result">最小的向量</param>
-        [Rtti.Meta]
-        public static void Minimize(in Vector4 left, in Vector4 right, out Vector4 result )
-	    {
-		    result.X = (left.X < right.X) ? left.X : right.X;
-		    result.Y = (left.Y < right.Y) ? left.Y : right.Y;
-		    result.Z = (left.Z < right.Z) ? left.Z : right.Z;
-		    result.W = (left.W < right.W) ? left.W : right.W;
-	    }
-        /// <summary>
-        /// 最大化
-        /// </summary>
-        /// <param name="left">向量对象</param>
-        /// <param name="right">向量对象</param>
-        /// <returns>返回最大的向量</returns>
-        [Rtti.Meta]
-        public static Vector4 Maximize(in Vector4 left, in Vector4 right )
-	    {
-            Vector4 vector;
-		    vector.X = (left.X > right.X) ? left.X : right.X;
-		    vector.Y = (left.Y > right.Y) ? left.Y : right.Y;
-		    vector.Z = (left.Z > right.Z) ? left.Z : right.Z;
-		    vector.W = (left.W > right.W) ? left.W : right.W;
-		    return vector;
-	    }
-        /// <summary>
-        /// 最大化
-        /// </summary>
-        /// <param name="left">向量对象</param>
-        /// <param name="right">向量对象</param>
-        /// <param name="result">最大的向量</param>
-        [Rtti.Meta]
-        public static void Maximize( ref Vector4 left, ref Vector4 right, out Vector4 result )
-	    {
-		    result.X = (left.X > right.X) ? left.X : right.X;
-		    result.Y = (left.Y > right.Y) ? left.Y : right.Y;
-		    result.Z = (left.Z > right.Z) ? left.Z : right.Z;
-		    result.W = (left.W > right.W) ? left.W : right.W;
 	    }
         /// <summary>
         /// 重载"+"号运算符

@@ -20,6 +20,33 @@ namespace EngineNS.Bricks.Particle.Simple
     }
     public class USimpleEmitter : Bricks.Particle.UEmitter<FSimpleParticle, FSimpleParticleSystem>
     {
+        public override IParticleEmitter CloneEmitter()
+        {
+            var emt = new USimpleEmitter();
+            emt.IsGpuDriven = IsGpuDriven;
+            var mesh = new Graphics.Mesh.UMesh();
+            mesh.Initialize(Mesh.MaterialMesh, Rtti.UTypeDescGetter<Simple.USimpleMdfQueue>.TypeDesc); //mesh.MdfQueue
+            emt.InitEmitter(UEngine.Instance.GfxDevice.RenderContext, mesh, 1024);
+
+            foreach (var i in EmitterShapes)
+            {
+                var shp = i.CloneShape();
+                emt.EmitterShapes.Add(shp);
+            }
+
+            foreach (var i in EffectorQueues)
+            {
+                foreach (var j in i.Value.Effectors)
+                {
+                    emt.AddEffector(i.Key, j.CloneEffector());
+                }
+            }
+
+            var nblMdf = mesh.MdfQueue as Simple.USimpleMdfQueue;
+            nblMdf.Emitter = emt;
+
+            return emt;
+        }
         public override unsafe void InitEmitter(RHI.CRenderContext rc, Graphics.Mesh.UMesh mesh, uint maxParticle)
         {
             SystemData.BaseData.Flags = 0;
@@ -101,6 +128,10 @@ namespace EngineNS.Bricks.Particle.Simple
     }
     public class USimpleNebulaNode : UNebulaNode<FSimpleParticle, FSimpleParticleSystem, USimpleEmitter, USimpleMdfQueue>
     {
+        public class USimpleNebulaNodeData : UNebulaNodeData
+        {
+        }
+
         public override async Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var dd = CoreDefine.RoundUpPow2(512, 32);
@@ -108,26 +139,25 @@ namespace EngineNS.Bricks.Particle.Simple
             nebulaData.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(USimpleMdfQueue));
 
             await base.InitializeNode(world, data, bvType, placementType);
+            //var Emitter = NebulaParticle.AddEmitter(typeof(USimpleEmitter), "emitter0") as USimpleEmitter;
+            //Emitter.IsGpuDriven = true;
+            //Emitter.InitEmitter(UEngine.Instance.GfxDevice.RenderContext, this.Mesh, 1024);
+            //var sphereShape = new Bricks.Particle.UShapeSphere();
+            //sphereShape.Radius = 10.0f;
+            //sphereShape.Thinness = 0.1f;
+            //var boxShape = new Bricks.Particle.UShapeBox();
+            //boxShape.Thinness = 0.2f;
+            //Emitter.EmitterShapes.Add(sphereShape);
+            //Emitter.EmitterShapes.Add(boxShape);
+            //var ef1 = new UAcceleratedEffector();
+            //ef1.Acceleration = new Vector3(0, -0.1f, 0);
+            //Emitter.AddEffector("default", ef1);            
+            //Emitter.SetCurrentQueue("default");
 
-            var Emitter = NebulaParticle.AddEmitter(typeof(USimpleEmitter), "emitter0") as USimpleEmitter;
-            Emitter.IsGpuDriven = true;
-            Emitter.InitEmitter(UEngine.Instance.GfxDevice.RenderContext, this.Mesh, 1024);
-            var sphereShape = new Bricks.Particle.UShapeSphere();
-            sphereShape.Radius = 10.0f;
-            sphereShape.Thinness = 0.1f;
-            var boxShape = new Bricks.Particle.UShapeBox();
-            boxShape.Thinness = 0.2f;
-            Emitter.EmitterShapes.Add(sphereShape);
-            Emitter.EmitterShapes.Add(boxShape);
-            var ef1 = new UAcceleratedEffector();
-            ef1.Acceleration = new Vector3(0, -0.1f, 0);
-            Emitter.AddEffector("default", ef1);            
-            Emitter.SetCurrentQueue("default");
+            //var nblMdf = this.Mesh.MdfQueue as USimpleMdfQueue;
+            //nblMdf.Emitter = Emitter;
 
-            var nblMdf = this.Mesh.MdfQueue as USimpleMdfQueue;
-            nblMdf.Emitter = Emitter;
-
-            UEngine.Instance.NebulaTemplateManager.UpdateShaders(NebulaParticle);
+            //UEngine.Instance.NebulaTemplateManager.UpdateShaders(NebulaParticle);
 
             return true;
         }

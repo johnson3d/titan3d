@@ -4,7 +4,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 {
-    [Obsolete]
+    //[Obsolete]
     public class UserCallNodeAttribute : Attribute
     {
         public Type CallNodeType;
@@ -40,7 +40,15 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
         public static CallNode NewMethodNode(Rtti.UClassMeta.MethodMeta m)
         {
-            var result = new CallNode();
+            CallNode result = null;
+            if (m.MethodName == "Sample2D")
+            {
+                result = new Sample2DNode();
+            }
+            else
+            {
+                result = new CallNode();
+            }
             result.Initialize(m);
             return result;
         }
@@ -58,7 +66,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             if (!m.ReturnType.IsEqual(typeof(void)))
             {
                 Result = new PinOut();
-                Result.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+                Result.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
                 Result.Name = "Result";
                 AddPinOut(Result);
             }
@@ -78,8 +86,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 if(!i.IsOut)
                 {
                     var pin = new PinIn();
-                    pin.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
-                    pin.Link.CanLinks.Add("Value");
+                    pin.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+                    pin.LinkDesc.CanLinks.Add("Value");
                     pin.Name = i.Name;
                     pin.Tag = i.ParameterType;
                     AddPinIn(pin);
@@ -88,8 +96,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 if(i.IsOut || i.IsRef)
                 {
                     var pinOut = new PinOut();
-                    pinOut.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
-                    pinOut.Link.CanLinks.Add("Value");
+                    pinOut.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+                    pinOut.LinkDesc.CanLinks.Add("Value");
                     pinOut.Name = i.Name;
                     pinOut.Tag = i.ParameterType;
                     AddPinOut(pinOut);
@@ -469,6 +477,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                         var inPin = pinData.PinIn;
                         if(data.NodeGraph.PinHasLinker(inPin))
                         {
+                            var opNode = data.NodeGraph.GetOppositePinNode(inPin);
+                            opNode.BuildStatements(ref data);
                             exp = data.NodeGraph.GetOppositePinExpression(inPin, ref data);
                         }
                         else
@@ -482,7 +492,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     {
                         var inPin = pinData.PinIn;
                         if (data.NodeGraph.PinHasLinker(inPin))
+                        {
+                            var opNode = data.NodeGraph.GetOppositePinNode(inPin);
+                            opNode.BuildStatements(ref data);
                             exp = data.NodeGraph.GetOppositePinExpression(inPin, ref data);
+                        }
                         else
                             exp = GetNoneLinkedParameterExp(inPin, argIdx, ref data);
                     }
@@ -520,7 +534,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 {
                     OperationType = Arguments[i].OpType,
                 };
-                GenArgumentCodes(i, ref data, out arg.Expression, beforeSt, afterSt);
+                UExpressionBase exp;
+                GenArgumentCodes(i, ref data, out exp, beforeSt, afterSt);
+                arg.Expression = exp;
                 methodInvokeExp.Arguments.Add(arg);
             }
 

@@ -33,6 +33,8 @@ namespace EngineNS.Bricks.Input
         
         public bool[] Keyboards = new bool[(int)Scancode.NUM_SCANCODES];
 
+        public Device.Mouse.UMouse Mouse;
+
         public UInputSystem()
         {
             Initialize();
@@ -45,6 +47,8 @@ namespace EngineNS.Bricks.Input
             {
                 EventTriggerDic.Add((EventType)enumValue, new UEventTrigger());
             }
+
+            Mouse = new Device.Mouse.UMouse();
             return true;
         }
         public Scancode GetScancodeFromKey(Keycode keyCode)
@@ -62,15 +66,13 @@ namespace EngineNS.Bricks.Input
 
         public unsafe int Tick(UEngine engine)
         {
-            SDL.SDL_Event sdlEvt;
-            Event evt;
-            while (SDL.SDL_PollEvent(out sdlEvt) != 0)
+            while (SDL.SDL_PollEvent(out var sdlEvt) != 0)
             {
                 if (ImGuiAPI.GetCurrentContext() != (void*)0)
                 {
                     EGui.UDockWindowSDL.ImGui_ImplSDL2_ProcessEvent(in sdlEvt);
                 }
-                MappedEvent(in sdlEvt, out evt);
+                MappedEvent(in sdlEvt, out var evt);
                 if (evt.Type == EventType.QUIT)
                 {
                     return -1;
@@ -79,14 +81,14 @@ namespace EngineNS.Bricks.Input
                 UpdateKeyboardState(evt);
                 if (EventTriggerDic.ContainsKey(evt.Type))
                 {
-                    UEventTrigger trigger = null;
-                    if (EventTriggerDic.TryGetValue(evt.Type, out trigger))
+                    if (EventTriggerDic.TryGetValue(evt.Type, out var trigger))
                     {
                         trigger.Trigging(evt);
                     }
                 }
             }
-            foreach(var control in TickableControls)
+
+            foreach (var control in TickableControls)
             {
                 control.Tick();
             }
@@ -95,6 +97,7 @@ namespace EngineNS.Bricks.Input
             {
                 action.Tick();
             }
+            Mouse.Tick();
             return 0;
         }
 
@@ -130,8 +133,7 @@ namespace EngineNS.Bricks.Input
         {
             if (EventTriggerDic.ContainsKey(eventType))
             {
-                UEventTrigger trigger = null;
-                if (EventTriggerDic.TryGetValue(eventType, out trigger))
+                if (EventTriggerDic.TryGetValue(eventType, out var trigger))
                 {
                     trigger.Events.Add(evt);
                     return true;

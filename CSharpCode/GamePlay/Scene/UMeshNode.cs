@@ -250,9 +250,9 @@ namespace EngineNS.GamePlay.Scene
                 action();
             }
         }
-        public override void OnNodeLoaded()
+        public override void OnNodeLoaded(UNode parent)
         {
-            base.OnNodeLoaded();
+            base.OnNodeLoaded(parent);
 
             UpdateAbsTransform();
             var meshData = NodeData as UMeshNodeData;
@@ -295,7 +295,7 @@ namespace EngineNS.GamePlay.Scene
                 action();
             }
         }
-        private uint CameralOffsetSerialId = 0;
+        protected uint CameralOffsetSerialId = 0;
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {
             if (mMesh == null)
@@ -339,13 +339,17 @@ namespace EngineNS.GamePlay.Scene
             get => mMeshDataProvider;
             set => mMeshDataProvider = value;
         }
-        public unsafe override bool OnLineCheckTriangle(in Vector3 start, in Vector3 end, ref VHitResult result)
+        public unsafe override bool OnLineCheckTriangle(in DVector3 start, in DVector3 end, ref VHitResult result)
         {
             if (mMeshDataProvider == null)
                 return false;
 
-            fixed(Vector3* pStart = &start)
-            fixed (Vector3* pEnd = &end)
+            var startf = start.ToSingleVector3();
+            var endf = end.ToSingleVector3();
+            var pStart = &startf;
+            var pEnd = &endf;
+            //fixed (DVector3* pStart = &start)
+            //fixed (DVector3* pEnd = &end)
             fixed (VHitResult* pResult = &result)
             {
                 if (Placement.HasScale)
@@ -361,6 +365,12 @@ namespace EngineNS.GamePlay.Scene
                 }
                 return false;
             }
+        }
+
+        public override void AddAssetReferences(IO.IAssetMeta ameta)
+        {
+            if (MeshName != null)
+                ameta.AddReferenceAsset(MeshName);
         }
     }
 }

@@ -25,6 +25,7 @@ namespace EngineNS.GamePlay
         }
         protected override void OnVieportClosed()
         {
+            mPresentWindow?.UnregEventProcessor(this);
             UEngine.Instance.EndPlayInEditor();
         }
         public bool IsSetViewportPos = false;

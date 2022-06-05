@@ -36,10 +36,17 @@ namespace EngineNS
         {
 
         }
-        public BezierPointBase(EngineNS.Vector2 pos, EngineNS.Vector2 ctrlPt)
+        public BezierPointBase(in EngineNS.Vector2 pos, in EngineNS.Vector2 ctrlPt)
         {
             Position = pos;
             ControlPoint = ctrlPt;
+        }
+        public override string ToString()
+        {
+            string result = "";
+            result += Position.ToString();
+            result += ControlPoint.ToString();
+            return result;
         }
     }
     public class BezierCalculate

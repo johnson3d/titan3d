@@ -51,7 +51,20 @@ namespace EngineNS
 
         public override string ToString()
         {
-            return $"[Position({mPosition.ToString()}),Scale({mScale.ToString()}),Quat({mQuat.ToString()})]";
+            //return $"[Position({mPosition.ToString()}),Scale({mScale.ToString()}),Quat({mQuat.ToString()})]";
+            return $"({mPosition.ToString()}),({mScale.ToString()}),({mQuat.ToString()})";
+        }
+        public static FTransform Parse(string text)
+        {
+            FTransform result = FTransform.Identity;
+            var segs = text.Split("),(");
+            var posStr = segs[0].Substring(1);
+            result.mPosition = DVector3.FromString(posStr);
+            var scaleStr = segs[1];
+            result.mScale= Vector3.FromString(scaleStr);
+            var quatStr = segs[2].Substring(0, segs[2].Length - 1);
+            result.mQuat = Quaternion.FromString(quatStr);
+            return result;
         }
         public void InitData()
         {
@@ -91,8 +104,11 @@ namespace EngineNS
         public Vector3 mScale;//为了Hierarchical计算方便，我们设定mScale在Transform中只影响本节点而不传递，如果需要整体放缩，在Node上新增一个ScaleMatrix
         public Quaternion mQuat;
 
+        [Rtti.Meta]
         public DVector3 Position { get => mPosition; set => mPosition = value; }
+        [Rtti.Meta]
         public Vector3 Scale { get => mScale; set => mScale = value; }
+        [Rtti.Meta]
         public Quaternion Quat { get => mQuat; set => mQuat = value; }
 
         #region Matrix
@@ -296,6 +312,7 @@ namespace EngineNS
         #endregion
 
         #region Transform
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.ManualMarshal)]
         public static void Multiply(out FTransform OutTransform, in FTransform A, in FTransform B)
         {
             if (A.mScale.HasNagative() || B.mScale.HasNagative())

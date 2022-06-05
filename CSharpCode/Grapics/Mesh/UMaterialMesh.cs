@@ -27,6 +27,24 @@ namespace EngineNS.Graphics.Mesh
             base.OnDrawSnapshot(in cmdlist, ref start, ref end);
             cmdlist.AddText(in start, 0xFFFFFFFF, "ums", null);
         }
+        public override void OnDragTo(Graphics.Pipeline.UViewportSlate vpSlate)
+        {
+            var worldViewport = vpSlate as EGui.Slate.UWorldViewportSlate;
+            if (worldViewport != null)
+            {
+                var start = worldViewport.CameraController.Camera.GetPosition();
+                Vector3 dir = Vector3.Zero;
+                var msPt = ImGuiAPI.GetMousePos();
+                msPt = worldViewport.Window2Viewport(msPt);
+                worldViewport.CameraController.Camera.GetPickRay(ref dir, msPt.X, msPt.Y, worldViewport.ClientSize.X, worldViewport.ClientSize.Y);
+                var end = start + dir.AsDVector() * 1000.0f;
+                VHitResult htResult = new VHitResult();
+                if (worldViewport.World.Root.LineCheck(in start, in end, ref htResult))
+                {
+                    return;
+                }
+            }
+        }
     }
     [Rtti.Meta]
     [UMaterialMesh.Import]
@@ -170,6 +188,11 @@ namespace EngineNS.Graphics.Mesh
                 System.Action exec = async () =>
                 {
                     Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
+                    if (Mesh.mCoreObject.IsValidPointer == false)
+                    {
+                        AssetState = IO.EAssetState.LoadFailed;
+                        return;
+                    }
                     AssetState = IO.EAssetState.LoadFinished;
                 };
                 exec();
@@ -287,24 +310,31 @@ namespace EngineNS.Graphics.Mesh
 
                     if (rn != old)
                     {
-                        if (umesh.AssetState != IO.EAssetState.Loading)
+                        if (rn == null)
                         {
-                            umesh.AssetState = IO.EAssetState.Loading;
-                            int IndexOfMaterial = i;
-                            System.Action exec = async () =>
+                            materials[i] = UEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
+                        }
+                        else
+                        {
+                            if (umesh.AssetState != IO.EAssetState.Loading)
                             {
-                                if (rn.ExtName == Pipeline.Shader.UMaterialInstance.AssetExt)
+                                umesh.AssetState = IO.EAssetState.Loading;
+                                int IndexOfMaterial = i;
+                                System.Action exec = async () =>
                                 {
-                                    materials[IndexOfMaterial] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
-                                }
-                                else if (rn.ExtName == Pipeline.Shader.UMaterial.AssetExt)
-                                {
-                                    materials[IndexOfMaterial] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
-                                }
-                                umesh.AssetState = IO.EAssetState.LoadFinished;
-                                var mesh = (UMaterialMesh)info.HostPropertyGrid.Target;
-                            };
-                            exec();
+                                    if (rn.ExtName == Pipeline.Shader.UMaterialInstance.AssetExt)
+                                    {
+                                        materials[IndexOfMaterial] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
+                                    }
+                                    else if (rn.ExtName == Pipeline.Shader.UMaterial.AssetExt)
+                                    {
+                                        materials[IndexOfMaterial] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
+                                    }
+                                    umesh.AssetState = IO.EAssetState.LoadFinished;
+                                    var mesh = (UMaterialMesh)info.HostPropertyGrid.Target;
+                                };
+                                exec();
+                            }
                         }
                     }
                     if (treeNodeRet)
@@ -338,7 +368,10 @@ namespace EngineNS.Graphics.Mesh
                 tmp.MeshName = this.Mesh.AssetName;
                 for (int i = 0; i < Materials.Length; i++)
                 {
-                    tmp.Materials.Add(Materials[i].AssetName);
+                    if (Materials[i] == null)
+                        tmp.Materials.Add(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
+                    else
+                        tmp.Materials.Add(Materials[i].AssetName);
                 }
                 return tmp;
             }
@@ -361,8 +394,14 @@ namespace EngineNS.Graphics.Mesh
                     {
                         if (i < value.Materials.Count)
                         {
-                            var mtl = await mtlMgr.GetMaterialInstance(value.Materials[i]);
-                            Materials[i] = mtl;
+                            if (value.Materials[i].ExtName == Graphics.Pipeline.Shader.UMaterial.AssetExt)
+                            {
+                                Materials[i] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value.Materials[i]);
+                            }
+                            else if (value.Materials[i].ExtName == Graphics.Pipeline.Shader.UMaterialInstance.AssetExt)
+                            {
+                                Materials[i] = await mtlMgr.GetMaterialInstance(value.Materials[i]);
+                            }
                         }
                     }
 
@@ -420,6 +459,15 @@ namespace EngineNS.Graphics.Mesh
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
             return ok;
+        }
+        public UMaterialMesh TryGetMaterialMesh(RName name)
+        {
+            if (name == null)
+                return null;
+            UMaterialMesh result;
+            if (Meshes.TryGetValue(name, out result))
+                return result;
+            return null;
         }
         public async System.Threading.Tasks.Task<UMaterialMesh> GetMaterialMesh(RName name)
         {

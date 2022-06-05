@@ -78,6 +78,10 @@ namespace EngineNS.Thread
             {
                 Waiter.WaitOne(milliseconds);
             }
+            else
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Thread", $"ASyncSemaphore.Waiter is null");
+            }
         }
         public async System.Threading.Tasks.Task Await()
         {

@@ -53,7 +53,7 @@ namespace EngineNS.Bricks.Particle.Editor
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(NebulaParticle.AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            if (ImGuiAPI.Begin(AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
                 if (ImGuiAPI.IsWindowDocked())
@@ -109,7 +109,7 @@ namespace EngineNS.Bricks.Particle.Editor
             var btSize = new Vector2(64, 64);
             if (ImGuiAPI.Button("Save", in btSize))
             {
-                
+                //EngineNS.Editor.USnapshot.Save(NebulaParticle.AssetName, NebulaParticle.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Compile", in btSize))
@@ -126,22 +126,30 @@ namespace EngineNS.Bricks.Particle.Editor
             var size = new Vector2(-1, -1);
             if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
+                if (ImGuiAPI.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                {
+                    PreviewViewport.Visible = true;
+                    ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+                    var winClass = new ImGuiWindowClass();
+                    winClass.UnsafeCallConstructor();
+                    var sz = ImGuiAPI.GetWindowSize();
+                    sz.Y = sz.X;
+                    ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
+                    winClass.UnsafeCallDestructor();
+                }
+                else
+                {
+                    PreviewViewport.Visible = false;
+                }
                 if (ImGuiAPI.CollapsingHeader("ParticleStruct", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     ParticleStructBuilder.OnDraw();
                 }
-
-                ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-                var winClass = new ImGuiWindowClass();
-                winClass.UnsafeCallConstructor();
-                var sz = ImGuiAPI.GetWindowSize();
-                sz.Y = sz.X;
-                ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
                 if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     NodePropGrid.OnDraw(true, false, false);
                 }
-                winClass.UnsafeCallDestructor();
+                
             }
             ImGuiAPI.EndChild();
         }
@@ -200,30 +208,43 @@ namespace EngineNS.Bricks.Particle.Editor
 
             (viewport as EngineNS.Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            var materials = new Graphics.Pipeline.Shader.UMaterial[1];
-            materials[0] = UEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
-            if (materials[0] == null)
-                return;
-            var mesh = new Graphics.Mesh.UMesh();
-            var rect = Graphics.Mesh.CMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
-            var rectMesh = rect.ToMesh();
-            var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-            if (ok)
-            {
-                //mesh.SetWorldMatrix(ref Matrix.mIdentity);
-                //viewport.RenderPolicy.VisibleMeshes.Add(mesh);
+            var nebulaData = new Bricks.Particle.Simple.USimpleNebulaNode.USimpleNebulaNodeData();
+            nebulaData.NebulaName = AssetName;
+            var meshNode = new Bricks.Particle.Simple.USimpleNebulaNode();
+            await meshNode.InitializeNode(viewport.World, nebulaData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+            meshNode.Parent = viewport.World.Root;
+            meshNode.Placement.Position = DVector3.Zero;
+            meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+            meshNode.NodeData.Name = "NebulaParticle";
+            meshNode.IsAcceptShadow = false;
+            meshNode.IsCastShadow = false;
 
-                var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
-                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
-                meshNode.NodeData.Name = "PreviewObject";
-                meshNode.IsAcceptShadow = false;
-                meshNode.IsCastShadow = true;
-            }
+            NebulaParticle = meshNode.NebulaParticle;
 
-            var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
-            float radius = aabb.GetMaxSide();
+            //var materials = new Graphics.Pipeline.Shader.UMaterial[1];
+            //materials[0] = UEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
+            //if (materials[0] == null)
+            //    return;
+            //var mesh = new Graphics.Mesh.UMesh();
+            //var rect = Graphics.Mesh.CMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
+            //var rectMesh = rect.ToMesh();
+            //var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            //if (ok)
+            //{
+            //    //mesh.SetWorldMatrix(ref Matrix.mIdentity);
+            //    //viewport.RenderPolicy.VisibleMeshes.Add(mesh);
+
+            //    var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+            //    meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+            //    meshNode.NodeData.Name = "PreviewObject";
+            //    meshNode.IsAcceptShadow = false;
+            //    meshNode.IsCastShadow = true;
+            //}
+
+            var aabb = meshNode.AABB;
+            var radius = (float)aabb.GetMaxSide();
             BoundingSphere sphere;
-            sphere.Center = aabb.GetCenter();
+            sphere.Center = aabb.GetCenter().ToSingleVector3();
             sphere.Radius = radius;
             policy.DefaultCamera.AutoZoom(ref sphere);
             //this.RenderPolicy.GBuffers.SunLightColor = new Vector3(1, 1, 1);
@@ -250,14 +271,12 @@ namespace EngineNS.Bricks.Particle.Editor
             AssetName = name;
             IsStarting = false;
 
-            NebulaParticle = new UNebulaParticle();
-            NebulaParticle.AssetName = name;
-
             await NodePropGrid.Initialize();
 
+            PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"NebulaPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, 0, 1);
 
             UEngine.Instance.TickableManager.AddTickable(this);
 

@@ -22,10 +22,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             SetPin.Name = "Set";
             GetPin.Name = "Get";
-            SetPin.Link = MacrossStyles.Instance.NewInOutPinDesc();
-            GetPin.Link = MacrossStyles.Instance.NewInOutPinDesc();
-            SetPin.Link.CanLinks.Add("Dummy");
-            GetPin.Link.CanLinks.Add("Value");
+            SetPin.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+            GetPin.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+            SetPin.LinkDesc.CanLinks.Add("Value");
+            GetPin.LinkDesc.CanLinks.Add("Value");
 
             //AddPinIn(SetPin);
             //AddPinOut(GetPin);
@@ -34,7 +34,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             if (VarType == null)
                 return;
-            EGui.Controls.CtrlUtility.DrawHelper($"VarType:{VarType.ToString()}");
+            if (stayPin == GetPin || stayPin == SetPin)
+                EGui.Controls.CtrlUtility.DrawHelper($"VarType:{VarType.ToString()}");
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
@@ -101,13 +102,35 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    return base.GetOutPinType(pin);
         //}
     }
-
-    public partial class MemberVar : VarNode
+    [ContextMenu("null", "Data\\POD\\null", UMacross.MacrossEditorKeyword)]
+    public partial class NullNode : UNodeBase
     {
-        public static MemberVar NewMemberVar(UClassDeclaration kls, string varName)
+        public PinOut OutPin { get; set; } = new PinOut();
+        public NullNode()
+        {
+            AddPinOut(OutPin);
+        }
+
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            return new UNullValueExpression();
+        }
+
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        {
+            return Rtti.UTypeDescGetter<object>.TypeDesc;
+        }
+    }
+
+    public partial class MemberVar : VarNode, IAfterExecNode, IBeforeExecNode
+    {
+        public PinOut AfterExec { get; set; } = new PinOut();
+        public PinIn BeforeExec { get; set; } = new PinIn();
+
+        public static MemberVar NewMemberVar(UClassDeclaration kls, string varName, bool isGet)
         {
             var result = new MemberVar();
-            result.Initialize(kls, varName);
+            result.Initialize(kls, varName, isGet);
             return result;
         }
         public MemberVar()
@@ -116,22 +139,41 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             TitleColor = MacrossStyles.Instance.VarTitleColor;
             BackColor = MacrossStyles.Instance.VarBGColor;
         }
-        private void Initialize(UClassDeclaration kls, string varName)
+        private void Initialize(UClassDeclaration kls, string varName, bool isGet)
         {
             mDefClass = kls;
-            MemberName = varName;
+            IsGet = isGet;
+            if(MemberName != varName)
+                MemberName = varName;
+
+            VarType = kls.TryGetTypeDesc();
+
+            if (isGet)
+                AddPinOut(GetPin);
+            else
+            {
+                BeforeExec.Name = " >>";
+                AfterExec.Name = ">> ";
+                BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
+                AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
+                AddPinIn(BeforeExec);
+                AddPinOut(AfterExec);
+
+                AddPinIn(SetPin);
+                AddPinOut(GetPin);
+            }
+            OnPositionChanged();
         }
         public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             base.OnPreRead(tagObject, hostObject, fromXml);
-            var klsGraph = tagObject as UMacrossEditor;
+            var klsGraph = hostObject as UMacrossMethodGraph;
             if (klsGraph == null)
                 return;
-
-            mDefClass = klsGraph.DefClass;
+            mDefClass = klsGraph.MacrossEditor.DefClass;
         }
         private UClassDeclaration mDefClass;
-        [Rtti.Meta]
+        [Rtti.Meta(Order = 1)]
         public string MemberName
         {
             get
@@ -148,10 +190,72 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     VarType = Var.VariableType.TypeDesc;
                     Name = Var.VariableName;
                 }
+                Initialize(mDefClass, MemberName, IsGet);
             }
         }
+        bool mIsGet = true;
+        [Rtti.Meta(Order = 0)]
+        public bool IsGet
+        {
+            get => mIsGet;
+            set => mIsGet = value;
+        }
+
+        public override void BuildStatements(ref BuildCodeStatementsData data)
+        {
+            if (IsGet)
+                return;
+
+            if (!data.NodeGraph.PinHasLinker(SetPin))
+                return;
+            var assignSt = new UAssignOperatorStatement();
+            var srcExp = data.NodeGraph.GetOppositePinExpression(SetPin, ref data);
+            var oppoType = data.NodeGraph.GetOppositePinType(SetPin);
+            var curType = GetInPinType(SetPin);
+            if (oppoType != curType)
+            {
+                srcExp = new UCastExpression()
+                {
+                    TargetType = new UTypeReference(curType),
+                    SourceType = new UTypeReference(oppoType),
+                    Expression = srcExp,
+                };
+            }
+            assignSt.From = srcExp;
+            assignSt.To = new UVariableReferenceExpression()
+            {
+                VariableName = MemberName,
+                IsProperty = true,
+            };
+            data.CurrentStatements.Add(assignSt);
+
+            var oppoNode = data.NodeGraph.GetOppositePinNode(AfterExec);
+            if (oppoNode != null)
+                oppoNode.BuildStatements(ref data);
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            return new UVariableReferenceExpression()
+            {
+                VariableName = MemberName,
+                IsProperty = true,
+            };
+        }
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        {
+            if(Var != null)
+                return Var.VariableType.TypeDesc;
+            return null;
+        }
+        public override Rtti.UTypeDesc GetInPinType(PinIn pin)
+        {
+            if (Var != null)
+                return Var.VariableType.TypeDesc;
+            return null;
+        }
+
     }
-    public partial class ClassPropertyVar : VarNode, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class ClassPropertyVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode
     {
         public static ClassPropertyVar NewClassProperty(Rtti.UClassMeta.PropertyMeta meta, bool isGet)
         {
@@ -220,8 +324,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             BackColor = MacrossStyles.Instance.VarBGColor;
             BeforeExec.Name = " >>";
             AfterExec.Name = ">> ";
-            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
-            AfterExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
+            AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
         }
         private void Initialize(Rtti.UClassMeta.PropertyMeta pro, bool isGet)
         {
@@ -231,8 +335,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             mIsGet = isGet;
             Name = (isGet ? "Get " : "Set ") + pro.PropertyName;
+            VarType = pro.FieldType;
+            System.Diagnostics.Debug.Assert(Rtti.UTypeDesc.TypeOf(pro.PropInfo.PropertyType) == pro.FieldType);
 
-            if(isGet && pro.PropInfo.CanRead)
+            if (isGet && pro.PropInfo.CanRead)
             {
                 var getMethod = pro.PropInfo.GetGetMethod();
                 if(getMethod.IsStatic == false)
@@ -252,19 +358,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 AddPinIn(BeforeExec);
                 AddPinOut(AfterExec);
 
-                SetPin = new PinIn();
-                SetPin.EditValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, pro.PropInfo.PropertyType, SetPin);
-                AddPinIn(SetPin);
-
                 var setMethod = pro.PropInfo.GetSetMethod();
                 if(setMethod.IsStatic == false)
                 {
                     Self = new PinIn();
-                    Self.Link = MacrossStyles.Instance.NewInOutPinDesc();
-                    Self.Link.CanLinks.Add("Value");
+                    Self.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+                    Self.LinkDesc.CanLinks.Add("Value");
                     Self.Name = "Self";
                     AddPinIn(Self);
                 }
+
+                SetPin = new PinIn();
+                SetPin.EditValue = UEditableValue.CreateEditableValue(this, pro.PropInfo.PropertyType, SetPin);
+                AddPinIn(SetPin);
 
                 GetPin = new PinOut();
                 AddPinOut(GetPin);
@@ -272,7 +378,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override void OnMouseStayPin(NodePin stayPin)
         {
-            base.OnMouseStayPin(stayPin);
+            if(stayPin == Self)
+            {
+                EGui.Controls.CtrlUtility.DrawHelper(HostClass.ClassType.FullName);
+            }
+            else if(stayPin == SetPin || stayPin == GetPin)
+            {
+                EGui.Controls.CtrlUtility.DrawHelper(ClassProperty.FieldType.FullName);
+            }
         }
         UExpressionBase GetHostExpression(ref BuildCodeStatementsData data)
         {
@@ -298,7 +411,21 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             var assignSt = new UAssignOperatorStatement();
             if (data.NodeGraph.PinHasLinker(SetPin))
-                assignSt.From = data.NodeGraph.GetOppositePinExpression(SetPin, ref data);
+            {
+                var srcExp = data.NodeGraph.GetOppositePinExpression(SetPin, ref data);
+                var oppoType = data.NodeGraph.GetOppositePinType(SetPin);
+                var curType = GetInPinType(SetPin);
+                if (oppoType != curType)
+                {
+                    srcExp = new UCastExpression()
+                    {
+                        TargetType = new UTypeReference(curType),
+                        SourceType = new UTypeReference(oppoType),
+                        Expression = srcExp,
+                    };
+                }
+                assignSt.From = srcExp;
+            }
             else
                 assignSt.From = new UPrimitiveExpression(SetPin.EditValue.ValueType, SetPin.EditValue.Value);
 
@@ -309,6 +436,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 IsProperty = true,
             };
             data.CurrentStatements.Add(assignSt);
+
+            var oppoNode = data.NodeGraph.GetOppositePinNode(AfterExec);
+            if (oppoNode != null)
+                oppoNode.BuildStatements(ref data);
         }
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
@@ -323,13 +454,22 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             };
         }
 
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
 
         }
+
+        public override Rtti.UTypeDesc GetInPinType(PinIn pin)
+        {
+            return ClassProperty.FieldType;
+        }
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        {
+            return ClassProperty.FieldType;
+        }
     }
 
-    public partial class ClassFieldVar : VarNode, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class ClassFieldVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode
     {   
         public static ClassFieldVar NewClassMemberVar(Rtti.UClassMeta.FieldMeta meta, bool isGet)
         {
@@ -399,8 +539,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             BackColor = MacrossStyles.Instance.VarBGColor;
             BeforeExec.Name = " >>";
             AfterExec.Name = ">> ";
-            BeforeExec.Link = MacrossStyles.Instance.NewExecPinDesc();
-            AfterExec.Link = MacrossStyles.Instance.NewExecPinDesc();
+            BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
+            AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
         }
         private void Initialize(Rtti.UClassMeta.FieldMeta m, bool isGet)
         {
@@ -418,7 +558,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 AddPinIn(Self);
             }
 
-            if(isGet)
+            VarType = Rtti.UTypeDesc.TypeOf(m.Field.FieldType);
+            if (isGet)
             {
                 GetPin = new PinOut();
                 AddPinOut(GetPin);
@@ -430,7 +571,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 SetPin = new PinIn()
                 {
-                    EditValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, m.Field.FieldType, SetPin),
+                    EditValue = UEditableValue.CreateEditableValue(this, m.Field.FieldType, SetPin),
                 };
                 AddPinIn(SetPin);
 
@@ -506,6 +647,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    }
         //    return result;
         //}
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            if (stayPin == Self)
+            {
+                EGui.Controls.CtrlUtility.DrawHelper(HostClass.ClassType.FullName);
+            }
+            else if (stayPin == SetPin || stayPin == GetPin)
+            {
+                EGui.Controls.CtrlUtility.DrawHelper(ClassField.Field.FieldType.FullName);
+            }
+        }
+
         UExpressionBase GetHostExpression(ref BuildCodeStatementsData data)
         {
             UExpressionBase hostExp = null;
@@ -530,7 +683,21 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             var assignSt = new UAssignOperatorStatement();
             if (data.NodeGraph.PinHasLinker(SetPin))
-                assignSt.From = data.NodeGraph.GetOppositePinExpression(SetPin, ref data);
+            {
+                var srcExp = data.NodeGraph.GetOppositePinExpression(SetPin, ref data);
+                var oppoType = data.NodeGraph.GetOppositePinType(SetPin);
+                var curType = GetInPinType(SetPin);
+                if (oppoType != curType)
+                {
+                    srcExp = new UCastExpression()
+                    {
+                        TargetType = new UTypeReference(curType),
+                        SourceType = new UTypeReference(oppoType),
+                        Expression = srcExp,
+                    };
+                }
+                assignSt.From = srcExp;
+            }
             else
                 assignSt.From = new UPrimitiveExpression(SetPin.EditValue.ValueType, SetPin.EditValue.Value);
 
@@ -541,6 +708,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 IsProperty = false,
             };
             data.CurrentStatements.Add(assignSt);
+
+            var oppoNode = data.NodeGraph.GetOppositePinNode(AfterExec);
+            if (oppoNode != null)
+                oppoNode.BuildStatements(ref data);
         }
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
@@ -555,78 +726,89 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             };
         }
 
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
 
+        }
+
+        public override Rtti.UTypeDesc GetInPinType(PinIn pin)
+        {
+            return Rtti.UTypeDesc.TypeOf(ClassField.Field.FieldType);
+        }
+        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        {
+            return Rtti.UTypeDesc.TypeOf(ClassField.Field.FieldType);
         }
     }
     
     public partial class LocalVar : VarNode
     {
+        protected UEditableValue EditValue;
         public LocalVar()
         {
-            Var = new UVariableDeclaration();
-            Var.VisitMode = EVisisMode.Local;
-            Var.VariableType = new UTypeReference(typeof(int));
+            //Var = new UVariableDeclaration();
+            //Var.VisitMode = EVisisMode.Local;
+            //Var.VariableType = new UTypeReference(typeof(int));
 
-            Name = Var.VariableName;
+            //Name = Var.VariableName;
             Icon = MacrossStyles.Instance.LocalVarIcon;
             TitleColor = MacrossStyles.Instance.VarTitleColor;
             BackColor = MacrossStyles.Instance.VarBGColor;
 
-            EditObject = new LVarEditObject();
-            EditObject.Host = this;
+            //EditObject = new LVarEditObject();
+            //EditObject.Host = this;
+            AddPinOut(GetPin);
         }
-        [Rtti.Meta]
-        public UVariableDeclaration LVar
-        {
-            get { return Var; }
-            set
-            {
-                Var = value;
-                Name = Var.VariableName;
-                if (SetPin.EditValue != null)
-                {
-                    SetPin.EditValue.Value = Var.InitValue;
-                }
-            }
-        }
-        LVarEditObject EditObject;
-        private class LVarEditObject
-        {
-            public LocalVar Host;
-            public string VarName
-            {
-                get { return Host.Name; }
-                set => Host.Name = value;
-            }
-            public string Comment { get; set; }
-            public string CurrentType
-            {
-                get
-                {
-                    if (Host.VarType == null)
-                        return null;
-                    return Host.VarType.FullName;
-                }
-            }
-        }
+        //[Rtti.Meta]
+        //public UVariableDeclaration LVar
+        //{
+        //    get { return Var; }
+        //    set
+        //    {
+        //        Var = value;
+        //        Name = Var.VariableName;
+        //        if (SetPin.EditValue != null)
+        //        {
+        //            SetPin.EditValue.Value = Var.InitValue;
+        //        }
+        //    }
+        //}
+        //LVarEditObject EditObject;
+        //private class LVarEditObject
+        //{
+        //    public LocalVar Host;
+        //    public string VarName
+        //    {
+        //        get { return Host.Name; }
+        //        set => Host.Name = value;
+        //    }
+        //    public string Comment { get; set; }
+        //    public string CurrentType
+        //    {
+        //        get
+        //        {
+        //            if (Host.VarType == null)
+        //                return null;
+        //            return Host.VarType.FullName;
+        //        }
+        //    }
+        //}
         public override object GetPropertyEditObject()
         {
-            return EditObject;
+            return SetPin.EditValue;
         }
     }
-    [ContextMenu("AnyVar", "Data\\AnyVar@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class AnyVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    //[ContextMenu("AnyVar", "Data\\AnyVar@_serial@", UMacross.MacrossEditorKeyword)]
+    public partial class AnyVar : LocalVar, UEditableValue.IValueEditNotify
     {
         public AnyVar()
         {
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(System.Type), SetPin) as EGui.Controls.NodeGraph.TypeSelectorEValue;
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(System.Type), SetPin) as UTypeSelectorEValue;
             edtValue.Selector.BaseType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(object).FullName);
             SetPin.EditValue = edtValue;
             Var.InitValue = new UNullValueExpression();
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
             VarType = ev.Value as Rtti.UTypeDesc;
         }
@@ -642,7 +824,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set
             {
                 VarType = Rtti.UTypeDesc.TypeOf(value);
-                var edtValue = SetPin.EditValue as EGui.Controls.NodeGraph.TypeSelectorEValue;
+                var edtValue = EditValue as UTypeSelectorEValue;
                 if (edtValue != null)
                 {
                     edtValue.Selector.SelectedType = VarType;
@@ -652,312 +834,619 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
     }
-    [ContextMenu("SByte", "Data\\POD\\SByte@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class SByteLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    [ContextMenu("Bool", "Data\\POD\\Bool@_serial@", UMacross.MacrossEditorKeyword)]
+    public partial class BoolLVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        bool mValue;
+        [Rtti.Meta]
+        public bool Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
+        public BoolLVar()
+        {
+            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(bool).FullName);
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(bool), SetPin);
+            edtValue.Value = false;
+            SetPin.EditValue = edtValue;
+        }
+        public void OnValueChanged(UEditableValue ev)
+        {
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((SByte)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((SByte)ev.Value);
+            mValue = (bool)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (bool)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
+        }
+    }
+    [ContextMenu("SByte", "Data\\POD\\SByte@_serial@", UMacross.MacrossEditorKeyword)]
+    public partial class SByteLVar : LocalVar, UEditableValue.IValueEditNotify
+    {
+        SByte mValue;
+        [Rtti.Meta]
+        public SByte Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public SByteLVar()
         {
             VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(sbyte).FullName);
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(sbyte), SetPin);
-            edtValue.Value = 0;
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(sbyte), SetPin);
+            edtValue.Value = (sbyte)0;
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((SByte)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((SByte)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((SByte)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((SByte)ev.Value);
+            mValue = (SByte)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (SByte)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
     [ContextMenu("Int16", "Data\\POD\\Int16@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class Int16LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class Int16LVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        Int16 mValue;
+        [Rtti.Meta]
+        public Int16 Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public Int16LVar()
         {
             VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Int16).FullName);
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(Int16), SetPin);
-            edtValue.Value = 0;
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(Int16), SetPin);
+            edtValue.Value = (Int16)0;
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((Int16)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((Int16)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((Int16)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((Int16)ev.Value);
+            mValue = (Int16)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (Int16)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
     [ContextMenu("Int32", "Data\\POD\\Int32@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class Int32LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class Int32LVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        Int32 mValue;
+        [Rtti.Meta]
+        public Int32 Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public Int32LVar()
         {
             VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Int32).FullName);
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(Int32), SetPin);
-            edtValue.Value = 0;
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(Int32), SetPin);
+            edtValue.Value = (Int32)0;
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((Int32)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((Int32)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((Int32)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((Int32)ev.Value);
+            mValue = (Int32)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (Int32)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
     [ContextMenu("Int64", "Data\\POD\\Int64@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class Int64LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class Int64LVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        Int64 mValue;
+        [Rtti.Meta]
+        public Int64 Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public Int64LVar()
         {
             VarType = Rtti.UTypeDescGetter<Int64>.TypeDesc;
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(Int64), SetPin);
-            edtValue.Value = 0;
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(Int64), SetPin);
+            edtValue.Value = (Int64)0;
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((Int64)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((Int64)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((Int64)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((Int64)ev.Value);
+            mValue = (Int64)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (Int64)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
     [ContextMenu("Byte", "Data\\POD\\Byte@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class ByteLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class ByteLVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        Byte mValue;
+        [Rtti.Meta]
+        public Byte Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public ByteLVar()
         {
             VarType = Rtti.UTypeDescGetter<byte>.TypeDesc;
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(byte), SetPin);
-            edtValue.Value = 0;
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(byte), SetPin);
+            edtValue.Value = (byte)0;
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((Byte)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((Byte)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((Byte)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((Byte)ev.Value);
+            mValue = (Byte)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (Byte)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
     [ContextMenu("UInt16", "Data\\POD\\UInt16@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class UInt16LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class UInt16LVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        UInt16 mValue;
+        [Rtti.Meta]
+        public UInt16 Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public UInt16LVar()
         {
             VarType = Rtti.UTypeDescGetter<UInt16>.TypeDesc;
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(UInt16), SetPin);
-            edtValue.Value = 0;
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(UInt16), SetPin);
+            edtValue.Value = (UInt16)0;
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((UInt16)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((UInt16)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((UInt16)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((UInt16)ev.Value);
+            mValue = (UInt16)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (UInt16)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
     [ContextMenu("UInt32", "Data\\POD\\UInt32@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class UInt32LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class UInt32LVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        UInt32 mValue;
+        [Rtti.Meta]
+        public UInt32 Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public UInt32LVar()
         {
             VarType = Rtti.UTypeDescGetter<UInt32>.TypeDesc;
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(UInt32), SetPin);
-            edtValue.Value = 0;
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(UInt32), SetPin);
+            edtValue.Value = (UInt32)0;
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((UInt32)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((UInt32)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((UInt32)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((UInt32)ev.Value);
+            mValue = (UInt32)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (UInt32)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
     [ContextMenu("UInt64", "Data\\POD\\UInt64@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class UInt64LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class UInt64LVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        UInt64 mValue;
+        [Rtti.Meta]
+        public UInt64 Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public UInt64LVar()
         {
             VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(UInt64).FullName);
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(UInt64), SetPin);
-            edtValue.Value = 0;
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(UInt64), SetPin);
+            edtValue.Value = (UInt64)0;
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((UInt64)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((UInt64)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((UInt64)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((UInt64)ev.Value);
+            mValue = (UInt64)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (UInt64)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
     [ContextMenu("float", "Data\\POD\\Float@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class FloatLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class FloatLVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        float mValue;
+        [Rtti.Meta]
+        public float Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public FloatLVar()
         {
             VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(float).FullName);
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(float), SetPin);
-            edtValue.Value = 0;
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(float), SetPin);
+            edtValue.Value = (float)0;
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((float)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((float)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((float)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((float)ev.Value);
+            mValue = (float)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (float)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
     [ContextMenu("double", "Data\\POD\\Double@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class DoubleLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class DoubleLVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        double mValue;
+        [Rtti.Meta]
+        public double Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public DoubleLVar()
         {
             VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(double).FullName);
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(double), SetPin);
-            edtValue.Value = 0;
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(double), SetPin);
+            edtValue.Value = (double)0;
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((double)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((double)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((double)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((double)ev.Value);
+            mValue = (double)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (double)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
     [ContextMenu("string", "Data\\POD\\String@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class StringLVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class StringLVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        string mValue;
+        [Rtti.Meta]
+        public string Value 
+        {
+            get => mValue;
+            set
+            {
+                if(mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public StringLVar()
         {
             VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(string).FullName);
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(string), SetPin);
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(string), SetPin);
             edtValue.Value = "";
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((string)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((string)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((string)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((string)ev.Value);
+            mValue = (string)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (string)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
     [ContextMenu("Vector2", "Data\\POD\\BaseData\\Vector2@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class Vector2LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class Vector2LVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        Vector2 mValue;
+        [Rtti.Meta]
+        public Vector2 Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public Vector2LVar()
         {
             VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Vector2).FullName);
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(Vector2), SetPin);
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(Vector2), SetPin);
             edtValue.Value = new Vector2(0, 0);
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((Vector2)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((Vector2)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((Vector2)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((Vector2)ev.Value);
+            mValue = (Vector2)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (Vector2)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
     [ContextMenu("Vector3", "Data\\POD\\BaseData\\Vector3@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class Vector3LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class Vector3LVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        Vector3 mValue;
+        [Rtti.Meta]
+        public Vector3 Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public Vector3LVar()
         {
             VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Vector3).FullName);
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(Vector3), SetPin);
+            var edtValue = UEditableValue.CreateEditableValue(this, typeof(Vector3), SetPin);
             edtValue.Value = new Vector3(0, 0, 0);
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((Vector3)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((Vector3)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((Vector3)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((Vector3)ev.Value);
+            mValue = (Vector3)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (Vector3)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
     [ContextMenu("Vector4", "Data\\POD\\BaseData\\Vector4@_serial@", UMacross.MacrossEditorKeyword)]
-    public partial class Vector4LVar : LocalVar, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class Vector4LVar : LocalVar, UEditableValue.IValueEditNotify
     {
+        Vector4 mValue;
+        [Rtti.Meta]
+        public Vector4 Value
+        {
+            get => mValue;
+            set
+            {
+                if (mValue != value)
+                    SetPin.EditValue.Value = value;
+                mValue = value;
+            }
+        }
+
         public Vector4LVar()
         {
             VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Vector4).FullName);
-            var edtValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, Rtti.UTypeDesc.TypeOf(typeof(Vector4)), SetPin);
+            var edtValue = UEditableValue.CreateEditableValue(this, Rtti.UTypeDesc.TypeOf(typeof(Vector4)), SetPin);
             edtValue.Value = new Vector4(0, 0, 0, 0);
             SetPin.EditValue = edtValue;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
+        public void OnValueChanged(UEditableValue ev)
         {
-            var exp = Var.InitValue as UPrimitiveExpression;
-            if (exp == null)
-            {
-                exp = new UPrimitiveExpression((Vector4)ev.Value);
-                Var.InitValue = exp;
-            }
-            else
-                exp.SetValue((Vector4)ev.Value);
+            //var exp = Var.InitValue as UPrimitiveExpression;
+            //if (exp == null)
+            //{
+            //    exp = new UPrimitiveExpression((Vector4)ev.Value);
+            //    Var.InitValue = exp;
+            //}
+            //else
+            //    exp.SetValue((Vector4)ev.Value);
+            mValue = (Vector4)ev.Value;
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            mValue = (Vector4)SetPin.EditValue.Value;
+            return new UPrimitiveExpression(Value);
         }
     }
 
@@ -1111,5 +1600,5 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     //}
     #endregion
 
-    
+
 }

@@ -9,6 +9,15 @@ namespace EngineNS.Graphics.Pipeline
     {
         public override async System.Threading.Tasks.Task<bool> Initialize(UEngine engine)
         {
+            if(engine.Config.RHIType == ERHIType.RHT_VirtualDevice)
+            {
+                if (await InitGPU(engine, 0, ERHIType.RHT_VirtualDevice, IntPtr.Zero, engine.Config.HasDebugLayer) == false)
+                {
+                    return false;
+                }
+                return true;
+            }
+
             if (SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING) == -1)
                 return false;
 
@@ -43,9 +52,8 @@ namespace EngineNS.Graphics.Pipeline
             SlateRenderer = new EGui.Slate.UBaseRenderer();
             await SlateRenderer.Initialize();
 
-            System.Type rpType = Rtti.UTypeDesc.TypeOf(engine.Config.MainWindowRPolicy).SystemType;
             //engine.Config.MainRPolicyName = RName.GetRName("UTest/testrendergraph.rpolicy");
-            await MainWindow.InitializeApplication(RenderContext, engine.Config.MainRPolicyName, rpType);
+            await MainWindow.InitializeApplication(RenderContext, engine.Config.MainRPolicyName);
             var ws = MainWindow.NativeWindow.WindowSize;
             MainWindow.OnResize(ws.X, ws.Y);
 

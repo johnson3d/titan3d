@@ -19,7 +19,40 @@ namespace EngineNS.GamePlay.GamePlayMacross
     {
         public class UGamePlayMacrossNodeData : UNodeData
         {
-            public UGameplayMacross GamePlayMacross = null;
+            [Rtti.Meta]
+            [RName.PGRName(FilterExts = Bricks.CodeBuilder.UMacross.AssetExt, MacrossType = typeof(UGameplayMacross))]
+            public RName MacrossName
+            {
+                get
+                {
+                    if (mMcGamePlay == null)
+                        return null;
+                    return mMcGamePlay.Name;
+                }
+                set
+                {
+                    //if (value == null)
+                    //{
+                    //    var gameplayMacross = new EngineNS.GamePlay.GamePlayMacross.UTestGameplayMacross();
+                    //    mMcGamePlay = Macross.UMacrossGetter<UGameplayMacross>.UnsafeNewInstance(UEngine.Instance.MacrossModule.Version, gameplayMacross, false);
+                    //    //var task = gameplayMacross.ConstructAnimGraph(meshNode1);
+                    //    return;
+                    //}
+                    if (mMcGamePlay == null)
+                    {
+                        mMcGamePlay = Macross.UMacrossGetter<UGameplayMacross>.NewInstance();
+                    }
+                    mMcGamePlay.Name = value;
+                }
+            }
+            Macross.UMacrossGetter<UGameplayMacross> mMcGamePlay;
+            public Macross.UMacrossGetter<UGameplayMacross> McGamePlay
+            {
+                get
+                {
+                    return mMcGamePlay;
+                }
+            }
             public UMeshNode AnimatedMeshNode = null;
         }
         public override async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
@@ -31,22 +64,44 @@ namespace EngineNS.GamePlay.GamePlayMacross
             }
             return true;
         }
+        public override UNode Parent
+        {
+            set
+            {
+                base.Parent = value;
+                var meshNode = value as UMeshNode;
+                if (meshNode != null)
+                {
+                    var task = GetNodeData<UGamePlayMacrossNodeData>().McGamePlay.Get().ConstructAnimGraph(meshNode);
+                }
+            }
+        }
         public override void TickLogic(UWorld world, URenderPolicy policy)
         {
-            var macrossNodeData = NodeData as UGamePlayMacrossNodeData;
-            macrossNodeData.GamePlayMacross.TickLogic(world.DeltaTimeSecond);
-            macrossNodeData.GamePlayMacross.TickAnimation(world.DeltaTimeSecond);
-            macrossNodeData.GamePlayMacross.EvaluateAnimation(world.DeltaTimeSecond);
+            var macrossNodeData = GetNodeData<UGamePlayMacrossNodeData>();
+            var gameplay = macrossNodeData?.McGamePlay?.Get();
+            if (gameplay == null)
+                return;
+            gameplay.TickLogic(world.DeltaTimeSecond);
+            gameplay.TickAnimation(world.DeltaTimeSecond);
+            gameplay.EvaluateAnimation(world.DeltaTimeSecond);
+
             base.TickLogic(world, policy);
         }
-        public static async System.Threading.Tasks.Task<UGamePlayMacrossNode> AddGamePlayMacrossNodeNode(GamePlay.UWorld world, UNode parent, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override void OnNodeLoaded(UNode parent)
         {
-            var node = new UGamePlayMacrossNode();
-            await node.InitializeNode(world, data, bvType, placementType);
-            node.Parent = parent;
-
-            return node;
+            base.OnNodeLoaded(parent);
+            var animMesh = parent as UMeshNode;
+            var task =GetNodeData<UGamePlayMacrossNodeData>().McGamePlay.Get().ConstructAnimGraph(animMesh);
         }
+        //public static async System.Threading.Tasks.Task<UGamePlayMacrossNode> AddGamePlayMacrossNodeNode(GamePlay.UWorld world, UNode parent, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        //{
+        //    var node = new UGamePlayMacrossNode();
+        //    await node.InitializeNode(world, data, bvType, placementType);
+        //    node.Parent = parent;
+
+        //    return node;
+        //}
     }
     [UMacross]
     public class UGameplayMacross
@@ -60,7 +115,22 @@ namespace EngineNS.GamePlay.GamePlayMacross
         }
         public async virtual Task<bool> ConstructAnimGraph(UMeshNode animatedMeshNode)
         {
-            return false;
+            //return false;
+            var animatablePose = animatedMeshNode?.Mesh?.MaterialMesh?.Mesh?.PartialSkeleton?.CreatePose() as EngineNS.Animation.SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
+            var skinMDfQueue = animatedMeshNode.Mesh.MdfQueue as EngineNS.Graphics.Mesh.UMdfSkinMesh;
+            mMeshSpaceRuntimePose = URuntimePoseUtility.CreateMeshSpaceRuntimePose(animatablePose);
+            skinMDfQueue.SkinModifier.RuntimeMeshSpacePose = mMeshSpaceRuntimePose;
+
+            mGamePlayStateMachine = new UGamePlayStateMachine();
+            var idleState = new UGamePlayState(mGamePlayStateMachine);
+            idleState.LogicalState = new ULogicalState(mGamePlayStateMachine);
+            var idleAnimState = new UAnimationState(mGamePlayStateMachine);
+            idleAnimState.Animation = await EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"));
+            idleAnimState.Initialize();
+            idleAnimState.mExtractPoseFromClipCommand.SetExtractedPose(ref animatablePose);
+            idleState.AnimationState = idleAnimState;
+            mGamePlayStateMachine.SetDefaultState(idleState);
+            return true;
         }
 
         public virtual void TickLogic(float elapseSecnod)
@@ -74,10 +144,20 @@ namespace EngineNS.GamePlay.GamePlayMacross
         }
         public virtual void EvaluateAnimation(float elapseSecnod)
         {
+            //FConstructAnimationCommandTreeContext context = new FConstructAnimationCommandTreeContext();
+            //UAnimationCommand<ULocalSpaceRuntimePose> cmd = null;
+            //var root = mGamePlayStateMachine.ConstructAnimationCommandTree(cmd, ref context);
+            //context.CmdExecuteStack.Execute();
+
+            //test code 
+            if (mGamePlayStateMachine.CurrentState == null)
+                return;
             FConstructAnimationCommandTreeContext context = new FConstructAnimationCommandTreeContext();
+            context.Create();
             UAnimationCommand<ULocalSpaceRuntimePose> cmd = null;
             var root = mGamePlayStateMachine.ConstructAnimationCommandTree(cmd, ref context);
             context.CmdExecuteStack.Execute();
+            URuntimePoseUtility.ConvetToMeshSpaceRuntimePose(ref mMeshSpaceRuntimePose, root.OutPose);
         }
     }
 

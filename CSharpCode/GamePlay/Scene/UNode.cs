@@ -61,8 +61,8 @@ namespace EngineNS.GamePlay.Scene
             {
                 if (NodeData.Placement == null && placementType != null)
                 {
-                    var args = new object[] { this };
-                    NodeData.Placement = Rtti.UTypeDescManager.CreateInstance(placementType, args) as UPlacementBase;
+                    NodeData.Placement = Rtti.UTypeDescManager.CreateInstance(placementType) as UPlacementBase;
+                    NodeData.Placement.HostNode = this;
                     switch (bvType)
                     {
                         case EBoundVolumeType.None:
@@ -72,14 +72,16 @@ namespace EngineNS.GamePlay.Scene
                             break;
                         case EBoundVolumeType.Box:
                             {
-                                var boxBV = new UBoxBV(this);
+                                var boxBV = new UBoxBV();
+                                boxBV.HostNode = this;
                                 boxBV.LocalAABB = new BoundingBox(Vector3.Zero);
                                 NodeData.BoundVolume = boxBV;
                             }
                             break;
                         case EBoundVolumeType.Sphere:
                             {
-                                var sphereBV = new USphereBV(this);
+                                var sphereBV = new USphereBV();
+                                sphereBV.HostNode = this;
                                 sphereBV.Center = Vector3.Zero;
                                 sphereBV.Radius = 1;
                                 NodeData.BoundVolume = sphereBV;
@@ -115,6 +117,7 @@ namespace EngineNS.GamePlay.Scene
             SelfInvisible = (1 << 9),
             ChildrenInvisible = (1 << 10),
             SceneManaged = (1 << 11),
+            Transient = (1 << 12),
             Invisible = SelfInvisible | ChildrenInvisible,
         }
         public ENodeStyles NodeStyles
@@ -312,7 +315,7 @@ namespace EngineNS.GamePlay.Scene
                 return Placement.AbsTransform.Position;
             }
         }
-        public UPlacementBase Placement
+        public virtual UPlacementBase Placement
         {
             get { return NodeData?.Placement; }
         }
@@ -405,6 +408,9 @@ namespace EngineNS.GamePlay.Scene
         {
             foreach(var i in Children)
             {
+                if (i.HasStyle(ENodeStyles.Transient))
+                    continue;
+
                 var typeStr = Rtti.UTypeDesc.TypeStr(i.GetType());
                 using (var nd = xnd.NewNode(typeStr, 1, 0))
                 {
@@ -441,16 +447,28 @@ namespace EngineNS.GamePlay.Scene
                     continue;
                 }
                 UNodeData nodeData = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(attr.Name)) as UNodeData;
-                var nd = await scene.NewNode(world, cldTypeStr, nodeData, EBoundVolumeType.None, null);
+                var nd = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(cldTypeStr)) as UNode;
+                if (nd == null || nodeData == null)
+                {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
+                    continue;
+                }
                 var ar = attr.GetReader(scene);
                 IO.ISerializer data = nodeData;
                 try
                 {
                     ar.Tag = nd;
                     ar.ReadTo(data, this);
-                    nd.NodeData = data as UNodeData;
 
-                    nd.OnNodeLoaded();
+                    var ok = await nd.InitializeNode(world, nodeData, EBoundVolumeType.None, null);
+                    if (ok == false)
+                    {
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
+                        continue;
+                    }
+                    //nd.NodeData = data as UNodeData;
+
+                    nd.OnNodeLoaded(this);
                 }
                 catch (Exception ex)
                 {
@@ -465,7 +483,7 @@ namespace EngineNS.GamePlay.Scene
             }
             return true;
         }
-        public virtual void OnNodeLoaded()
+        public virtual void OnNodeLoaded(UNode parent)
         {
             
         }
@@ -482,7 +500,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public void UpdateAbsTransform()
         {
-            if (NodeData == null || Placement == null)
+            //if (NodeData == null || Placement == null)
+            if (Placement == null)
                 return;
             if (Parent == null)
             {
@@ -576,11 +595,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public bool LineCheck(in DVector3 start, in DVector3 end, ref VHitResult result)
         {
-            float Near, Far;
-            var vNear = new Vector3();
-            var vFar = new Vector3();
-            var localStart = Placement.AbsTransform.InverseTransformPositionNoScale(in start).ToSingleVector3();
-            var localEnd = Placement.AbsTransform.InverseTransformPositionNoScale(in end).ToSingleVector3();
+            var localStart = Placement.AbsTransform.InverseTransformPositionNoScale(in start);
+            var localEnd = Placement.AbsTransform.InverseTransformPositionNoScale(in end);
             //var localStart = Vector3.TransformCoordinate(start, Placement.AbsTransformInv);
             //var localEnd = Vector3.TransformCoordinate(end, Placement.AbsTransformInv);
             //if (!Vector3.Equals(in localStart1, in localStart, 0.001f) ||
@@ -590,12 +606,16 @@ namespace EngineNS.GamePlay.Scene
             //}
             unsafe
             {
-                var aabb = AABB.ToSingleAABB();
-                //fixed (BoundingBox* pBox = &AABB)
+                //var aabb = AABB.ToSingleAABB();
+                fixed (DBoundingBox* pBox = &AABB)
                 {
-                    BoundingBox* pBox = &aabb;
+                    //BoundingBox* pBox = &aabb;
                     var dir = localEnd - localStart;
-                    if (/*AABB.IsEmpty()==false && */IDllImportApi.v3dxLineIntersectBox3(&Near, &vNear, &Far, &vFar, &localStart, &dir, pBox) == 0)
+                    //if (/*AABB.IsEmpty()==false && */IDllImportApi.v3dxLineIntersectBox3(&Near, &vNear, &Far, &vFar, &localStart, &dir, pBox) == 0)
+                    //{
+                    //    return false;
+                    //}
+                    if (IsTreeContain(&localStart, &dir, pBox) == false)
                     {
                         return false;
                     }
@@ -621,7 +641,18 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public virtual bool OnLineCheckTriangle(in Vector3 start, in Vector3 end, ref VHitResult result)
+        public virtual unsafe bool IsTreeContain(DVector3* localStart, DVector3* dir, DBoundingBox* pBox)
+        {
+            double Near, Far;
+            var vNear = new DVector3();
+            var vFar = new DVector3();
+            if (/*AABB.IsEmpty()==false && */IDllImportApi.v3dxLineIntersectDBox3(&Near, &vNear, &Far, &vFar, localStart, dir, pBox) == 0)
+            {
+                return false;
+            }
+            return true;
+        }
+        public virtual bool OnLineCheckTriangle(in DVector3 start, in DVector3 end, ref VHitResult result)
         {
             //todo: perface test            
             return false;

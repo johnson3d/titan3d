@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Controller\EditorCameraController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UAnimationClipEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\UAssetReferViewer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UCpuProfiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UEditorSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UFileDialog.cs" />

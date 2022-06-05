@@ -12,8 +12,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public uint FunctionBGColor = 0x80808080;
         public LinkDesc NewInOutPinDesc(string linkType = "Value")
         {
+            var styles = UNodeGraphStyles.DefaultStyles;
+
             var result = new LinkDesc();
-            result.Icon.Size = new Vector2(20, 20);
+            result.Icon.TextureName = RName.GetRName(styles.PinConnectedVarImg, RName.ERNameType.Engine);
+            result.Icon.Size = new Vector2(15, 11);
+            result.DisconnectIcon.TextureName = RName.GetRName(styles.PinDisconnectedVarImg, RName.ERNameType.Engine);
+            result.DisconnectIcon.Size = new Vector2(15, 11);
+
             result.ExtPadding = 0;
             result.LineThinkness = 3;
             result.LineColor = 0xFFFF0000;
@@ -167,9 +173,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             MaterialPropGrid.IsReadOnly = true;
             MaterialPropGrid.Target = Material;
 
+            PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, 0, 1);
 
             await PreviewPropGrid.Initialize();
             PreviewPropGrid.PGName = $"PGMaterialPreview:{AssetName}";
@@ -323,7 +330,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Material.SaveAssetTo(Material.AssetName);
             Material.SerialId++;
 
-            Editor.USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+            //Editor.USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
 
             if (await UEngine.Instance.GfxDevice.MaterialManager.ReloadMaterial(Material.AssetName))
             {
@@ -338,12 +345,22 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var size = new Vector2(-1, -1);
             if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-                var winClass = new ImGuiWindowClass();
-                winClass.UnsafeCallConstructor();
-                var sz = ImGuiAPI.GetWindowSize();
-                sz.Y = sz.X;
-                ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
+                if (ImGuiAPI.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                {
+                    ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+                    var winClass = new ImGuiWindowClass();
+                    winClass.UnsafeCallConstructor();
+                    var sz = ImGuiAPI.GetWindowSize();
+                    sz.Y = sz.X;
+                    ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
+                    winClass.UnsafeCallDestructor();
+                    this.PreviewViewport.Visible = true;
+                }
+                else
+                {
+                    this.PreviewViewport.Visible = false;
+                }
+                    
                 if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     NodePropGrid.OnDraw(true, false, false);
@@ -356,7 +373,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 {
                     PreviewPropGrid.OnDraw(true, false, false);
                 }
-                winClass.UnsafeCallDestructor();
             }
             ImGuiAPI.EndChild();
         }

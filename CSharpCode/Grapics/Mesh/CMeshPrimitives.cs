@@ -49,13 +49,13 @@ namespace EngineNS.Graphics.Mesh
                 //mDesc.Desc.SetDefault();
                 //PGAsset.SingleTarget = mDesc;
             }
-            public override unsafe void OnDraw(EGui.Controls.ContentBrowser ContentBrowser)
+            public override unsafe void OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
             {
                 //we also can import from other types
                 FBXCreateCreateDraw(ContentBrowser);
             }
 
-            public unsafe partial void FBXCreateCreateDraw(EGui.Controls.ContentBrowser ContentBrowser);
+            public unsafe partial void FBXCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
         }
         public CMeshPrimitives()
         {
@@ -64,6 +64,11 @@ namespace EngineNS.Graphics.Mesh
         public CMeshPrimitives(IMeshPrimitives iMeshPrimitives)
         {
             mCoreObject = iMeshPrimitives;
+            System.Diagnostics.Debug.Assert(mCoreObject.IsValidPointer);
+        }
+        public override void Dispose()
+        {
+            base.Dispose();
         }
         public IO.IAssetMeta CreateAMeta()
         {
@@ -80,6 +85,12 @@ namespace EngineNS.Graphics.Mesh
         }
         public void SaveAssetTo(RName name)
         {
+            var ameta = this.GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta();
+            }
             //这里需要存盘的情况很少，正常来说vms是fbx导入的时候生成的，不是保存出来的
             var rc = UEngine.Instance?.GfxDevice.RenderContext;
             var xnd = new IO.CXndHolder("CMeshPrimitives", 0, 0);

@@ -41,7 +41,7 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             viewport.RenderPolicy = policy;
 
-            await viewport.RenderPolicy.Initialize(null);
+            //await viewport.RenderPolicy.Initialize(null);
 
             await viewport.World.InitWorld();
 
@@ -85,9 +85,10 @@ namespace EngineNS.Bricks.PhysicsCore
             if (TriMesh == null)
                 return false;
 
+            PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"PxTriMesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMesh;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, Rtti.UTypeDesc.TypeOf(UEngine.Instance.Config.MainWindowRPolicy), 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, 0, 1);
             UEngine.Instance.TickableManager.AddTickable(this);
 
             TriMeshPropGrid.Target = TriMesh;
@@ -151,7 +152,7 @@ namespace EngineNS.Bricks.PhysicsCore
             var btSize = new Vector2(64, 64);
             if (ImGuiAPI.Button("SaveSnap", in btSize))
             {
-                Editor.USnapshot.Save(TriMesh.AssetName, TriMesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                //Editor.USnapshot.Save(TriMesh.AssetName, TriMesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)

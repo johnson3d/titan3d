@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             BackColor = 0x80808080;
 
             OutSampler.Name = "sampler";
-            OutSampler.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutSampler.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinOut(OutSampler);
 
             mDesc.SetDefault();
@@ -48,11 +48,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public override void BuildStatements(ref BuildCodeStatementsData data)
         {
             var material = data.UserData as UMaterial;
-            var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
-            tmp.Name = this.Name;
-            var sampNode = this;
-            tmp.Value = sampNode.Desc;
-            material.UsedSamplerStates.Add(tmp);
+            if(material.FindSampler(this.Name) == null)
+            {
+                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+                tmp.Name = this.Name;
+                var sampNode = this;
+                tmp.Value = sampNode.Desc;
+                material.UsedSamplerStates.Add(tmp);
+            }
         }
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {

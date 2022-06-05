@@ -29,10 +29,10 @@ namespace EngineNS.EGui.Controls
             get => mContentBrowser.ExtNames;
             set => mContentBrowser.ExtNames = value;
         }
-        ContentBrowser mContentBrowser;
+        UContentBrowser mContentBrowser;
         public UAssetSelector()
         {
-            mContentBrowser = new ContentBrowser()
+            mContentBrowser = new UContentBrowser()
             {
                 CreateNewAssets = false,
                 ItemSelectedAction = (asset) =>

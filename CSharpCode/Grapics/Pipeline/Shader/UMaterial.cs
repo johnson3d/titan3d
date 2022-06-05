@@ -174,8 +174,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 if (i.Value == null)
                     continue;
-                if (ameta.RefAssetRNames.Contains(i.Value) == false)
-                    ameta.RefAssetRNames.Add(i.Value);
+                ameta.AddReferenceAsset(i.Value);
             }
         }
         public virtual void SaveAssetTo(RName name)

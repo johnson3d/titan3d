@@ -5,12 +5,11 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 {
-    [Obsolete]
     public class Binocular : UNodeBase
     {
         public Rtti.UTypeDesc LeftType;
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public EBinocularOp Op { get; set; }
+        public UBinaryOperatorExpression.EBinaryOperation Op { get; set; }
         [Rtti.Meta]
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public string LeftTypeString
@@ -32,7 +31,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         public PinIn Right { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut Result { get; set; } = new PinOut();
-        public Binocular(EBinocularOp InOp)
+        public Binocular(UBinaryOperatorExpression.EBinaryOperation InOp)
         {
             Op = InOp;
 
@@ -40,27 +39,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             Right.Name = " R";
             Result.Name = "= ";
 
-            Left.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            Right.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            Result.Link = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            Left.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            Right.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            Result.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
 
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
-            Name = "[Obsolete]" + Bricks.CodeBuilder.CSharp.CSGen.GetOp(InOp);
 
             AddPinIn(Left);
             AddPinIn(Right);
             AddPinOut(Result);
-        }
-        public override void OnPropertyRead(object root, PropertyInfo prop, bool fromXml)
-        {
-            base.OnPropertyRead(root, prop, fromXml);
-            if(prop.Name == "Name")
-            {
-                Name = "[Obsolete]" + Name;
-            }
         }
         public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
@@ -104,13 +94,31 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 
         //    return binOp;
         //}
+        public override void BuildStatements(ref BuildCodeStatementsData data)
+        {
+            if (data.NodeGraph.PinHasLinker(Left))
+                data.NodeGraph.GetOppositePinNode(Left).BuildStatements(ref data);
+            if(data.NodeGraph.PinHasLinker(Right))
+                data.NodeGraph.GetOppositePinNode(Right).BuildStatements(ref data);
+        }
+        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            if (pin == null || pin != Result)
+                return null;
+            var binOp = new UBinaryOperatorExpression()
+            {
+                Operation = this.Op,
+                Left = data.NodeGraph.GetOppositePinExpression(Left, ref data),
+                Right = data.NodeGraph.GetOppositePinExpression(Right, ref data),
+            };
+            return binOp;
+        }
     }
 
     #region ValueOp
-    [Obsolete]
     public class ValueOpNode : Binocular
     {
-        public ValueOpNode(EBinocularOp op)
+        public ValueOpNode(UBinaryOperatorExpression.EBinaryOperation op)
             : base(op)
         {
         }
@@ -164,60 +172,60 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             }
         }
     }
-    [Obsolete]
+    [ContextMenu("add,+", "Operation\\+", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public class AddNode : ValueOpNode
     {
         public AddNode()
-            : base(EBinocularOp.Add)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Add)
         {
         }
     }
-    [Obsolete]
+    [ContextMenu("subtraction,-", "Operation\\-", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public class SubNode : ValueOpNode
     {
         public SubNode()
-            : base(EBinocularOp.Sub)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Subtract)
         {
         }
     }
-    [Obsolete]
+    [ContextMenu("multiplication,*", "Operation\\*", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public class MulNode : ValueOpNode
     {
         public MulNode()
-            : base(EBinocularOp.Mul)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Multiply)
         {
         }
     }
-    [Obsolete]
+    [ContextMenu("division,/", "Operation\\/", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public class DivNode : ValueOpNode
     {
         public DivNode()
-            : base(EBinocularOp.Div)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Divide)
         {
         }
     }
-    [Obsolete]
+    [ContextMenu("mod,%", "Operation\\%", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public class ModNode : ValueOpNode
     {
         public ModNode()
-            : base(EBinocularOp.Mod)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Modulus)
         {
         }
     }
-    [Obsolete]
+    [ContextMenu("bitand,&", "Operation\\&", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public class BitAndNode : ValueOpNode
     {
         public BitAndNode()
-            : base(EBinocularOp.BitAnd)
+            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseAnd)
         {
 
         }
     }
-    [Obsolete]
+    [ContextMenu("bitor,|", "Operation\\|", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public class BitOrNode : ValueOpNode
     {
         public BitOrNode()
-            : base(EBinocularOp.BitOr)
+            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseOr)
         {
         }
     }

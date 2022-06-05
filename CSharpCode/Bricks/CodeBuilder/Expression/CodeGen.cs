@@ -33,6 +33,16 @@ namespace EngineNS.Bricks.CodeBuilder
         protected string mSegmentStartStr = "";
         protected string mSegmentEndStr = "";
         protected string mIndentStr = "";
+        public string CurIndentStr
+        {
+            get
+            {
+                string retVal = "";
+                for (byte i = 0; i < mIndentCount; i++)
+                    retVal += mIndentStr;
+                return retVal;
+            }
+        }
         
         public void PushIndent()
         {
@@ -104,7 +114,7 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 return true;
             }
-            else if (left.IsSubclassOf(right))
+            else if (left.IsSubclassOf(right) || right.IsSubclassOf(left))
             {
                 return true;
             }

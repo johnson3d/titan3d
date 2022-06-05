@@ -10,7 +10,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public PinIn Left { get; set; } = new PinIn();
         public PinOut Result { get; set; } = new PinOut();
     }
-    public partial class TypeConverterVar : Monocular, EGui.Controls.NodeGraph.EditableValue.IValueEditNotify
+    public partial class TypeConverterVar : Monocular//, UEditableValue.IValueEditNotify
     {
         public static TypeConverterVar NewTypeConverterVar(Rtti.UClassMeta src, Rtti.UClassMeta tar)
         {
@@ -20,31 +20,32 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var result = new TypeConverterVar();
             result.SrcType = src;
             result.TarType = tar;
-            var typeSlt = result.ToType.EditValue as EGui.Controls.NodeGraph.TypeSelectorEValue;
-            typeSlt.Selector.BaseType = src.ClassType;
-            typeSlt.Selector.SelectedType = tar.ClassType;
-            typeSlt.Value = tar.ClassType;
-            result.OnValueChanged(typeSlt);
-            
+            //var typeSlt = result.ToType.EditValue as UTypeSelectorEValue;
+            //typeSlt.Selector.BaseType = src.ClassType;
+            //typeSlt.Selector.SelectedType = tar.ClassType;
+            //typeSlt.Value = tar.ClassType;
+            //result.OnValueChanged(typeSlt);
+            result.Name = "As " + tar.ClassMetaName;
+
             return result;
         }
         public Rtti.UClassMeta SrcType;
         public Rtti.UClassMeta TarType;
-        public PinIn ToType { get; set; } = new PinIn();
+        //public PinIn ToType { get; set; } = new PinIn();
         public TypeConverterVar()
         {
             Left.Name = " Src";
-            ToType.Name = " Type";
-            Result.Name = "As ";
+            //ToType.Name = " Type";
+            Result.Name = "Target ";
 
-            Left.Link = MacrossStyles.Instance.NewInOutPinDesc();
-            ToType.Link = MacrossStyles.Instance.NewInOutPinDesc();
-            Result.Link = MacrossStyles.Instance.NewInOutPinDesc();
-            Left.Link.CanLinks.Add("Value");
-            ToType.Link.CanLinks.Add("Dummy");
-            Result.Link.CanLinks.Add("Value");
+            Left.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+            //ToType.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+            Result.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+            Left.LinkDesc.CanLinks.Add("Value");
+            //ToType.LinkDesc.CanLinks.Add("Dummy");
+            Result.LinkDesc.CanLinks.Add("Value");
 
-            ToType.EditValue = EGui.Controls.NodeGraph.EditableValue.CreateEditableValue(this, typeof(System.Type), ToType);
+            //ToType.EditValue = UEditableValue.CreateEditableValue(this, typeof(System.Type), ToType);
 
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
@@ -53,7 +54,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Name = "As";
 
             AddPinIn(Left);
-            AddPinIn(ToType);
+            //AddPinIn(ToType);
             AddPinOut(Result);
         }
         [Rtti.Meta]
@@ -83,11 +84,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 TarType = Rtti.UClassMetaManager.Instance.GetMeta(value.TarType);
                 if (TarType == null)
                     TarType = SrcType;
-                var typeSlt = ToType.EditValue as EGui.Controls.NodeGraph.TypeSelectorEValue;
-                typeSlt.Selector.BaseType = SrcType.ClassType;
-                typeSlt.Selector.SelectedType = TarType.ClassType;
-                typeSlt.Value = TarType.ClassType;
-                OnValueChanged(typeSlt);
+                //var typeSlt = ToType.EditValue as UTypeSelectorEValue;
+                //typeSlt.Selector.BaseType = SrcType.ClassType;
+                //typeSlt.Selector.SelectedType = TarType.ClassType;
+                //typeSlt.Value = TarType.ClassType;
+                //OnValueChanged(typeSlt);
+                Name = "As " + TarType.ClassMetaName;
             }
         }
         //public override IExpression GetExpr(UMacrossMethodGraph funGraph, ICodeGen cGen, bool bTakeResult)
@@ -114,15 +116,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return null;
             var exp = new UCastExpression()
             {
+                SourceType = new UTypeReference(SrcType.ClassType),
                 TargetType = new UTypeReference(TarType.ClassType),
                 Expression = data.NodeGraph.GetOppositePinExpression(Left, ref data),
             };
             return exp;
         }
-        public void OnValueChanged(EGui.Controls.NodeGraph.EditableValue ev)
-        {
-            TarType = Rtti.UClassMetaManager.Instance.GetMeta(ev.Value as Rtti.UTypeDesc);
-        }
+        //public void OnValueChanged(UEditableValue ev)
+        //{
+        //    TarType = Rtti.UClassMetaManager.Instance.GetMeta(ev.Value as Rtti.UTypeDesc);
+        //}
         public override void OnLoadLinker(UPinLinker linker)
         {
             base.OnLoadLinker(linker);
@@ -153,34 +156,34 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             return true;
         }
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
-        {
-            base.OnLinkedFrom(iPin, OutNode, oPin);
+        //public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        //{
+        //    base.OnLinkedFrom(iPin, OutNode, oPin);
 
-            if (iPin == Left)
-            {
-                var nodeExpr = OutNode as UNodeBase;
-                if (nodeExpr == null)
-                    return;
+        //    if (iPin == Left)
+        //    {
+        //        var nodeExpr = OutNode as UNodeBase;
+        //        if (nodeExpr == null)
+        //            return;
 
-                var typeSlt = ToType.EditValue as EGui.Controls.NodeGraph.TypeSelectorEValue;
+        //        var typeSlt = ToType.EditValue as UTypeSelectorEValue;
 
-                var newType = Rtti.UClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeStr(nodeExpr.GetOutPinType(oPin)));
-                if (newType != null && !newType.CanConvertFrom(TarType))
-                {//类型改变，且不能转换到目标
-                    this.ParentGraph.RemoveLinkedOut(this.Result);
-                    SrcType = newType;
-                    typeSlt.Selector.BaseType = SrcType.ClassType;
-                    typeSlt.Selector.SelectedType = SrcType.ClassType;
-                    typeSlt.Value = SrcType.ClassType;
-                    OnValueChanged(typeSlt);
-                }
-                else
-                {
-                    SrcType = newType;
-                    typeSlt.Selector.BaseType = SrcType.ClassType;
-                }
-            }
-        }
+        //        var newType = Rtti.UClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeStr(nodeExpr.GetOutPinType(oPin)));
+        //        if (newType != null && !newType.CanConvertFrom(TarType))
+        //        {//类型改变，且不能转换到目标
+        //            this.ParentGraph.RemoveLinkedOut(this.Result);
+        //            SrcType = newType;
+        //            typeSlt.Selector.BaseType = SrcType.ClassType;
+        //            typeSlt.Selector.SelectedType = SrcType.ClassType;
+        //            typeSlt.Value = SrcType.ClassType;
+        //            OnValueChanged(typeSlt);
+        //        }
+        //        else
+        //        {
+        //            SrcType = newType;
+        //            typeSlt.Selector.BaseType = SrcType.ClassType;
+        //        }
+        //    }
+        //}
     }
 }
