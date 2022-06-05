@@ -416,6 +416,11 @@ void IVKCommandList::SetRenderPipeline(IRenderPipeline* pipeline, EPrimitiveType
 	((IVKRenderPipeline*)pipeline)->OnSetPipeline(this, dpType);
 }
 
+vBOOL IVKCommandList::CreateReadableTexture2D(ITexture2D** ppTexture, ITexture2D* tex, IFrameBuffers* pFrameBuffers)
+{
+	return FALSE;
+}
+
 vBOOL IVKCommandList::CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers)
 {
 	return FALSE;

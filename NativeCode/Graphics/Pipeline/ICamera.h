@@ -138,6 +138,10 @@ public:
 	v3dxMatrix4 GetToViewPortMatrix() const {
 		return mLogicData->mToViewPortMatrix;
 	}
+	TR_FUNCTION(SV_SupressGC)
+	v3dxMatrix4 GetViewPortOffsetMatrix() const {
+		return mLogicData->mViewPortOffsetMatrix;
+	}
 	TR_FUNCTION()
 	void UpdateConstBufferData(IRenderContext* rc, vBOOL bImm);
 protected:

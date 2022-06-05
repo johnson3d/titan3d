@@ -48,7 +48,7 @@ static_assert(sizeof(bool)==1,"");
 //template<>
 //RttiStruct AuxRttiStruct<VIUnknown>::Instance;
 
-RttiStruct::RttiStruct()
+FRttiStruct::FRttiStruct()
 {
 	IsEnum = false;
 	EnumDesc = nullptr;	
@@ -57,7 +57,7 @@ RttiStruct::RttiStruct()
 	RttiStructManager::GetInstance()->RegStructType(this);
 }
 
-void MemberDesc::SetValue(void* pHost, const void* pValueAddress) const
+void FRttiProperty::SetValue(void* pHost, const void* pValueAddress) const
 {
 	auto pAddr = GetValueAddress(pHost);
 	MemberType.SetValue(pAddr, pValueAddress);
@@ -71,7 +71,7 @@ void MemberDesc::SetValue(void* pHost, const void* pValueAddress) const
 	}
 }
 
-void RttiType::SetValue(void* pTar, const void* pSrc) const
+void FRttiType::SetValue(void* pTar, const void* pSrc) const
 {
 	if (NumOfPointer > 0)
 	{
@@ -88,12 +88,12 @@ AuxRttiBuilderBase::AuxRttiBuilderBase()
 	RttiStructManager::GetInstance()->RegStructBuilder(this);
 }
 
-const RttiStruct* VIUnknownBase::GetRtti() const
+const FRttiStruct* VIUnknownBase::GetRtti() const
 {
 	return AuxRttiStruct<VIUnknownBase>::GetClassObject();
 }
 
-VIUnknownBase* VIUnknownBase::CastTo(RttiStruct* type)
+VIUnknownBase* VIUnknownBase::CastTo(FRttiStruct* type)
 {
 	return (VIUnknownBase*)type->DownCast(this, GetRtti());
 }
@@ -137,7 +137,7 @@ RttiEnum* RttiEnumManager::FindEnum(const char* name)
 	return nullptr;
 }
 
-void RttiStruct::Init()
+void FRttiStruct::Init()
 {
 	//RttiStructManager::GetInstance()->RegStructType(GetFullName().c_str(), this);
 
@@ -149,7 +149,7 @@ void RttiStruct::Init()
 	fun();*/
 }
 
-bool RttiStruct::IsA(RttiStruct* pTar)
+bool FRttiStruct::IsA(FRttiStruct* pTar)
 {
 	if (this == pTar)
 		return true;
@@ -166,7 +166,7 @@ void RttiStructManager::RegStructBuilder(AuxRttiBuilderBase* builder)
 	StructBuilders.push_back(builder);
 }
 
-void RttiStructManager::RegStructType(RttiStruct* type)
+void RttiStructManager::RegStructType(FRttiStruct* type)
 {
 	AllStructTyps.push_back(type);
 	
@@ -198,6 +198,7 @@ struct Test_ConstantVarDesc : public VIUnknown, public v3dxVector3
 	vBOOL			Dirty;
 	std::string*	TestString;
 	int				Test[5];
+	std::vector<int> TestVector;
 	void SetDirty(std::string d)
 	{
 		if (d == "true")
@@ -263,6 +264,7 @@ StructBegin(Test_ConstantVarDesc, EngineNS)
 	StructMember(Name);
 	StructMember(TestString);
 	StructMember(Test);
+	StructMember_StdVector(TestVector);
 
 	Struct_Method(SetDirty);
 	{
@@ -335,10 +337,23 @@ void TestReflection()
 	FArgumentStream result;
 	result.Reset();
 	
-	auto constructor = rtti->FindConstructor(std::vector<RttiType>());
+	auto constructor = rtti->FindConstructor(std::vector<FRttiType>());
 	FArgumentStream createArgs;
 	Test_ConstantVarDesc* tmp = (Test_ConstantVarDesc*)constructor->CreateInstance(createArgs);
 	method->Invoke(tmp, args, result);
+
+	auto vectorMember = rtti->FindMember("TestVector");
+	if (vectorMember->CreateEnumator() != nullptr)
+	{
+		auto pEnumator = vectorMember->CreateEnumator();
+		pEnumator->Reset(&tmp->TestVector);
+		while (pEnumator->MoveNext())
+		{
+			auto e = *(int*)pEnumator->Current();
+			if (e == -1)
+				break;
+		}
+	}
 
 	auto pMemberName = rtti->FindMember("Name");
 	std::string tt = *pMemberName->GetValueAddress<std::string>(tmp);
@@ -419,7 +434,7 @@ void RttiStructManager::FinalCleanup()
 	RttiEnumManager::GetInstance()->FinalCleanup();
 }
 
-RttiStruct* RttiStructManager::FindStruct(const char* name)
+FRttiStruct* RttiStructManager::FindStruct(const char* name)
 {
 	for (auto i : AllStructTyps)
 	{

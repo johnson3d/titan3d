@@ -11,6 +11,9 @@
 *********************************************************************/
 #include "v3dxMath.h"
 
+#include "v3dxDVector3.h"
+#include "v3dxDBox3.h"
+
 #include "v3dxPoly3.h"
 #include "v3dxSegment3.h"
 #include "v3dxBox3.h"
@@ -1019,6 +1022,215 @@ extern "C"
 		return FALSE;
 	}
 
+	VFX_API vBOOL v3dxLineIntersectDBox3(double* pfT_n,
+		v3dxDVector3* pvPoint_n,
+		double* pfT_f,
+		v3dxDVector3* pvPoint_f,
+		const v3dxDVector3* pvFrom,
+		const v3dxDVector3* pvDir,
+		const v3dxDBox3* pBox)
+	{
+		v3dxDVector3 vDir;
+		v3dxDVec3Normalize(&vDir, pvDir);
+		const v3dxDVector3& vMin = pBox->Min();
+		const v3dxDVector3& vMax = pBox->Max();
+
+		int nIntersect = 0;
+		struct InSectPos {
+			v3dxDVector3 vPos;
+			double		f;
+		};
+		InSectPos vRet[2];
+
+		//Proj_x
+		v3dxDVector3 vP1, vP2;
+		double fT1 = (vMin.x - pvFrom->x) / vDir.x;
+		double fT2 = (vMax.x - pvFrom->x) / vDir.x;
+		vP1.x = vMin.x;
+		vP1.y = pvFrom->y + vDir.y * fT1;
+		vP1.z = pvFrom->z + vDir.z * fT1;
+
+		vP2.x = vMax.x;
+		vP2.y = pvFrom->y + vDir.y * fT2;
+		vP2.z = pvFrom->z + vDir.z * fT2;
+
+		if ((vP1.y > vMax.y && vP2.y > vMax.y) || (vP1.y < vMin.y && vP2.y < vMin.y) ||
+			(vP1.z > vMax.z && vP2.z > vMax.z) || (vP1.z < vMin.z && vP2.z < vMin.z))
+		{
+			return FALSE;
+		}
+		else
+		{
+			if (vP1.y < vMax.y && vP1.y > vMin.y && vP1.z < vMax.z && vP1.z > vMin.z)
+			{
+				vRet[nIntersect].vPos = vP1;
+				vRet[nIntersect].f = fT1;
+				nIntersect++;
+			}
+			if (vP2.y < vMax.y && vP2.y > vMin.y && vP2.z < vMax.z && vP2.z > vMin.z)
+			{
+				vRet[nIntersect].vPos = vP2;
+				vRet[nIntersect].f = fT2;
+				nIntersect++;
+			}
+			if (nIntersect == 2)
+			{
+				if (vRet[0].f > vRet[1].f)
+				{
+					*pvPoint_n = vRet[1].vPos;
+					*pfT_n = vRet[1].f;
+					*pvPoint_f = vRet[0].vPos;
+					*pfT_f = vRet[0].f;
+				}
+				else
+				{
+					*pvPoint_n = vRet[0].vPos;
+					*pfT_n = vRet[0].f;
+					*pvPoint_f = vRet[1].vPos;
+					*pfT_f = vRet[1].f;
+				}
+				return TRUE;
+			}
+		}
+
+		//Proj_y
+		fT1 = (vMin.y - pvFrom->y) / vDir.y;
+		fT2 = (vMax.y - pvFrom->y) / vDir.y;
+		vP1.x = pvFrom->x + vDir.x * fT1;
+		vP1.y = vMin.y;
+		vP1.z = pvFrom->z + vDir.z * fT1;
+
+		vP2.x = pvFrom->x + vDir.x * fT2;
+		vP2.y = vMax.y;
+		vP2.z = pvFrom->z + vDir.z * fT2;
+
+		if ((vP1.x > vMax.x && vP2.x > vMax.x) || (vP1.x < vMin.x && vP2.x < vMin.x) ||
+			(vP1.z > vMax.z && vP2.z > vMax.z) || (vP1.z < vMin.z && vP2.z < vMin.z))
+		{
+			return FALSE;
+		}
+		else
+		{
+			if (vP1.x < vMax.x && vP1.x > vMin.x && vP1.z < vMax.z && vP1.z > vMin.z)
+			{
+				vRet[nIntersect].vPos = vP1;
+				vRet[nIntersect].f = fT1;
+				nIntersect++;
+			}
+			if (nIntersect == 2)
+			{
+				if (vRet[0].f > vRet[1].f)
+				{
+					*pvPoint_n = vRet[1].vPos;
+					*pfT_n = vRet[1].f;
+					*pvPoint_f = vRet[0].vPos;
+					*pfT_f = vRet[0].f;
+				}
+				else
+				{
+					*pvPoint_n = vRet[0].vPos;
+					*pfT_n = vRet[0].f;
+					*pvPoint_f = vRet[1].vPos;
+					*pfT_f = vRet[1].f;
+				}
+				return TRUE;
+			}
+			if (vP2.x < vMax.x && vP2.x > vMin.x && vP2.z < vMax.z && vP2.z > vMin.z)
+			{
+				vRet[nIntersect].vPos = vP2;
+				vRet[nIntersect].f = fT2;
+				nIntersect++;
+			}
+			if (nIntersect == 2)
+			{
+				if (vRet[0].f > vRet[1].f)
+				{
+					*pvPoint_n = vRet[1].vPos;
+					*pfT_n = vRet[1].f;
+					*pvPoint_f = vRet[0].vPos;
+					*pfT_f = vRet[0].f;
+				}
+				else
+				{
+					*pvPoint_n = vRet[0].vPos;
+					*pfT_n = vRet[0].f;
+					*pvPoint_f = vRet[1].vPos;
+					*pfT_f = vRet[1].f;
+				}
+				return TRUE;
+			}
+		}
+
+		//Proj_z
+		fT1 = (vMin.z - pvFrom->z) / vDir.z;
+		fT2 = (vMax.z - pvFrom->z) / vDir.z;
+		vP1.x = pvFrom->x + vDir.x * fT1;
+		vP1.y = pvFrom->y + vDir.y * fT1;
+		vP1.z = vMin.z;
+
+		vP2.x = pvFrom->x + vDir.x * fT2;
+		vP2.y = pvFrom->y + vDir.y * fT2;
+		vP2.z = vMax.z;
+
+		if ((vP1.x > vMax.x && vP2.x > vMax.x) || (vP1.x < vMin.x && vP2.x < vMin.x) ||
+			(vP1.y > vMax.y && vP2.y > vMax.y) || (vP1.y < vMin.y && vP2.y < vMin.y))
+		{
+			return FALSE;
+		}
+		else
+		{
+			if (vP1.x < vMax.x && vP1.x > vMin.x && vP1.y < vMax.y && vP1.y > vMin.y)
+			{
+				vRet[nIntersect].vPos = vP1;
+				vRet[nIntersect].f = fT1;
+				nIntersect++;
+			}
+			if (nIntersect == 2)
+			{
+				if (vRet[0].f > vRet[1].f)
+				{
+					*pvPoint_n = vRet[1].vPos;
+					*pfT_n = vRet[1].f;
+					*pvPoint_f = vRet[0].vPos;
+					*pfT_f = vRet[0].f;
+				}
+				else
+				{
+					*pvPoint_n = vRet[0].vPos;
+					*pfT_n = vRet[0].f;
+					*pvPoint_f = vRet[1].vPos;
+					*pfT_f = vRet[1].f;
+				}
+				return TRUE;
+			}
+			if (vP2.x < vMax.x && vP2.x > vMin.x && vP2.y < vMax.y && vP2.y > vMin.y)
+			{
+				vRet[nIntersect].vPos = vP2;
+				vRet[nIntersect].f = fT2;
+				nIntersect++;
+			}
+			if (nIntersect == 2)
+			{
+				if (vRet[0].f > vRet[1].f)
+				{
+					*pvPoint_n = vRet[1].vPos;
+					*pfT_n = vRet[1].f;
+					*pvPoint_f = vRet[0].vPos;
+					*pfT_f = vRet[0].f;
+				}
+				else
+				{
+					*pvPoint_n = vRet[0].vPos;
+					*pfT_n = vRet[0].f;
+					*pvPoint_f = vRet[1].vPos;
+					*pfT_f = vRet[1].f;
+				}
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
 
 
 	VFX_API vBOOL v3dxLineIntersectBox3_v2( float *pfT_n,

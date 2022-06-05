@@ -663,6 +663,76 @@ void IGLCommandList::SetRenderPipeline(IRenderPipeline* pipeline, EPrimitiveType
 	pipeline->GetGpuProgram()->ApplyShaders(this);	
 }
 
+vBOOL IGLCommandList::CreateReadableTexture2D(ITexture2D** ppTexture, ITexture2D* tex, IFrameBuffers* pFrameBuffers)
+{
+	auto srcTex2D = (IGLTexture2D*)tex;
+
+	IGLTexture2D* pGLTexture = (IGLTexture2D*)(*ppTexture);
+	bool needCreateTexture = false;
+	if (pGLTexture == nullptr)
+	{
+		needCreateTexture = true;
+	}
+	else
+	{
+		if (pGLTexture->mTextureDesc.Width != srcTex2D->mTextureDesc.Width ||
+			pGLTexture->mTextureDesc.Height != srcTex2D->mTextureDesc.Height)
+		{
+			needCreateTexture = true;
+		}
+	}
+
+	GLSdk* sdk = mCmdList;
+	UINT RowPitch = ((srcTex2D->mTextureDesc.Width * GetPixelByteWidth(srcTex2D->mTextureDesc.Format) + 3) / 4) * 4;
+	GLsizeiptr PboSize = RowPitch * srcTex2D->mTextureDesc.Height;
+
+	std::shared_ptr<GLSdk::GLBufferId> pBufferId;
+	if (needCreateTexture)
+	{
+		pBufferId = std::shared_ptr<GLSdk::GLBufferId>(sdk->GenBufferId());
+		/*sdk->PushCommand([=]()->void
+		{
+			int xxx = 0;
+		}, nullptr);*/
+		sdk->BindBuffer(GL_PIXEL_PACK_BUFFER, pBufferId);
+		sdk->BufferData(GL_PIXEL_PACK_BUFFER, PboSize, 0, GL_STATIC_READ);
+		sdk->BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+	}
+	else
+	{
+		pBufferId = pGLTexture->mGlesTexture2D;
+	}
+
+	{
+		((IGLFrameBuffers*)pFrameBuffers)->ApplyBuffers(sdk);
+
+		sdk->BindBuffer(GL_PIXEL_PACK_BUFFER, pBufferId);
+		{
+			GLint internalFormat;
+			GLint format;
+			GLenum type;
+			FormatToGL(srcTex2D->mTextureDesc.Format, internalFormat, format, type);
+			sdk->ReadPixels(0, 0, srcTex2D->mTextureDesc.Width, srcTex2D->mTextureDesc.Height, format, GL_UNSIGNED_BYTE, 0);
+		}
+
+		sdk->BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+		//sdk->BindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	if (needCreateTexture)
+	{
+		Safe_Release(pGLTexture);
+		pGLTexture = new IGLTexture2D();
+		pGLTexture->mTextureDesc = srcTex2D->mTextureDesc;
+		pGLTexture->mIsReadable = true;
+		pGLTexture->mGlesTexture2D = pBufferId;
+
+		*ppTexture = pGLTexture;
+	}
+
+	return TRUE;
+}
+
 vBOOL IGLCommandList::CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers)
 {
 	if (src->mSrvDesc.Type != ST_Texture2D)

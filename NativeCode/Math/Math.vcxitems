@@ -20,6 +20,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxColor4.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxConvex.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxCylinder.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxDBox3.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxFrustum.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxIntersectFunction.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxLine.cpp" />
@@ -49,6 +50,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxColor4.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxConvex.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxCylinder.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxDBox3.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxDVector3.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxFrustum.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxIntersectFunction.h" />

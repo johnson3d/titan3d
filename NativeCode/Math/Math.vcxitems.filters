@@ -27,6 +27,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxConvex.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)IntegerType.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxTransform.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)v3dxDBox3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxBezier.h" />
@@ -76,6 +77,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)IntegerType.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxTransform.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)v3dxDVector3.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)v3dxDBox3.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="inl">

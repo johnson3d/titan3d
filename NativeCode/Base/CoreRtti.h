@@ -22,64 +22,13 @@ NS_BEGIN
 //#define NEW_INHEAD new(__FILE__, __LINE__)
 #define NEW_INHEAD new
 
-class VIUnknown;
-struct RttiStruct;
 typedef VNameString RttiNameString;
-struct RttiType;
+struct FRttiStruct;
+struct FRttiType;
 static const char* EngineNSString = "EngineNS";
 static const char* EngineNSStringEx = "EngineNS::";
 
-struct FArgumentStream
-{
-	FArgumentStream()
-		: mReadPosition(0)
-	{
-	}
-	size_t				mReadPosition;
-	std::vector<BYTE>	mArguments;
-	void Reset()
-	{
-		mReadPosition = 0;
-		mArguments.clear();
-	}
-};
-
-template <typename ArgType>
-inline FArgumentStream& operator <<(FArgumentStream& stream, const ArgType& v)
-{
-	auto size = stream.mArguments.size();
-	stream.mArguments.resize(size + sizeof(ArgType));
-	memcpy(&stream.mArguments[size], &v, sizeof(ArgType));
-	return stream;
-}
-template <typename ArgType>
-inline FArgumentStream& operator >>(FArgumentStream& stream, ArgType& v)
-{
-	memcpy(&v, &stream.mArguments[stream.mReadPosition], sizeof(ArgType));
-	stream.mReadPosition += sizeof(ArgType);
-	return stream;
-}
-template <>
-inline FArgumentStream& operator <<(FArgumentStream& stream, const std::string& v)
-{
-	auto len = (int)v.length();
-	stream << len;
-	auto size = stream.mArguments.size();
-	stream.mArguments.resize(size + sizeof(char) * len);
-	memcpy(&stream.mArguments[size], v.c_str(), sizeof(char) * len);
-	return stream;
-}
-template <>
-inline FArgumentStream& operator >>(FArgumentStream& stream, std::string& v)
-{
-	int len = 0;
-	stream >> len;
-	v.resize(len);
-	memcpy(&v[0], &stream.mArguments[stream.mReadPosition], sizeof(char) * len);
-	stream.mReadPosition += sizeof(char) * len;
-	return stream;
-}
-
+//IUnknownBase:====================================================================================
 class TR_CLASS()
 	VIUnknownBase
 {
@@ -116,71 +65,29 @@ public:
 	}
 	virtual void DeleteThis();
 
-	virtual const RttiStruct* GetRtti() const;
+	virtual const FRttiStruct* GetRtti() const;
 
 	template<class _CastType>
 	_CastType* CastTo();
-	VIUnknownBase* CastTo(RttiStruct* type);
+	VIUnknownBase* CastTo(FRttiStruct* type);
 
-	virtual void OnPropertyChanged([[maybe_unused]] const RttiNameString& name, [[maybe_unused]] const RttiType& type) {}
+	virtual void OnPropertyChanged([[maybe_unused]] const RttiNameString& name, [[maybe_unused]] const FRttiType& type) {}
 };
 
-template<typename _Type>
-struct VTypeHelper
-{
-	enum
-	{
-		TypeSizeOf = sizeof(_Type),
-	};
-	static void AssignOperator(void* pTar, void*& pSrc)
-	{
-		*(_Type*)pTar = *(_Type*)pSrc;
-	}
-	template<int _Size>
-	struct VArrayElement
-	{
-		enum
-		{
-			Result = _Size / TypeSizeOf,
-		};
-	};
-};
-
-template<>
-struct VTypeHelper<void>
-{
-	enum
-	{
-		TypeSizeOf = 0,
-	};
-	static void AssignOperator(void* pTar, void*& pSrc)
-	{
-
-	}
-	template<int _Size>
-	struct VArrayElement
-	{
-		enum
-		{
-			Result = 1,
-		};
-	};
-};
-
-#define ENGINE_RTTI(name) virtual const RttiStruct* GetRtti() const override\
+#define ENGINE_RTTI(name) virtual const FRttiStruct* GetRtti() const override\
 	{ \
 		return AuxRttiStruct<name>::GetClassObject(); \
 	}\
 	TR_DECL(name)
 
-#define ENGINE_RTTI_IMPL(name) //RttiStruct AuxRttiStruct<name>::Instance;
+#define ENGINE_RTTI_IMPL(name) //FRttiStruct AuxRttiStruct<name>::Instance;
 
 struct FMetaBase : public VIUnknownBase
 {
-	virtual const RttiStruct* GetRtti() const = 0;
+	virtual const FRttiStruct* GetRtti() const = 0;
 };
 
-struct RttiMetaInfo
+struct FRttiMetaInfo
 {
 	std::vector<FMetaBase*> MetaInfos;
 	void AddMeta(FMetaBase* value)
@@ -193,7 +100,7 @@ struct RttiMetaInfo
 		value->AddRef();
 		MetaInfos.push_back(value);
 	}
-	FMetaBase* GetFirstMeta(RttiStruct* rtti) const
+	FMetaBase* GetFirstMeta(FRttiStruct* rtti) const
 	{
 		for (auto& i : MetaInfos)
 		{
@@ -212,18 +119,19 @@ struct RttiMetaInfo
 		}
 		MetaInfos.clear();
 	}
-	virtual ~RttiMetaInfo()
+	virtual ~FRttiMetaInfo()
 	{
 		CleanupMetas();
 	}
 };
 
+//RttiEnum:====================================================================================
 struct TR_CLASS()
-	RttiEnum : public RttiMetaInfo
+	RttiEnum : public FRttiMetaInfo
 {
 	RttiNameString				Name;
 	RttiNameString				NameSpace;
-	struct EnumMemberDesc : public RttiMetaInfo
+	struct EnumMemberDesc : public FRttiMetaInfo
 	{
 		RttiNameString		Name;
 		int					Value;
@@ -238,7 +146,6 @@ struct TR_CLASS()
 		Members.push_back(tmp);
 		return &Members[Members.size() - 1];
 	}
-
 	const char* GetName() const {
 		return Name.c_str();
 	}
@@ -316,8 +223,9 @@ StructEnd(void)
 AuxRttiEnum<name> AuxRttiEnum<name>::Instance;\
 AuxRttiStruct<name> AuxRttiStruct<name>::Instance;
 
+//RttiType:====================================================================================
 struct TR_CLASS()
-RttiType
+	FRttiType
 {
 	/*RttiType()
 	{
@@ -326,11 +234,12 @@ RttiType
 		IsRefer = false;
 		ArrayElements = 0;
 	}*/
-	RttiStruct*			Type;
+	FRttiStruct*			Type;
 	int					NumOfPointer;
+	bool				IsAutoRef;
 	bool				IsRefer;
 	unsigned int		ArrayElements;
-	bool operator == (const RttiType& rh) const {
+	bool operator == (const FRttiType& rh) const {
 		if (IsRefer != rh.IsRefer ||
 			NumOfPointer != rh.NumOfPointer ||
 			Type != rh.Type)
@@ -339,7 +248,7 @@ RttiType
 		}
 		return true;
 	}
-	bool operator != (const RttiType& rh) const {
+	bool operator != (const FRttiType& rh) const {
 		return !(this->operator==(rh));
 	}
 	template<typename _Type>
@@ -350,28 +259,28 @@ RttiType
 };
 
 struct TR_CLASS()
-RttiParameter
+	FRttiMethodParameter
 {
 	RttiNameString		Name;
-	RttiType			ParameterType;
+	FRttiType			ParameterType;
 	
 	template<typename _Type>
-	static RttiParameter BuildParameter(const char* name);
+	static FRttiMethodParameter BuildParameter(const char* name);
 };
 
 struct TR_CLASS()
-	RttiMethodBase : public RttiMetaInfo
+	FRttiMethodBase : public FRttiMetaInfo
 {
-	RttiMethodBase()
+	FRttiMethodBase()
 	{
 		IsStatic = false;
 		IsConst = false;
 		ThisClass = nullptr;
 	}
 	RttiNameString		Name;
-	RttiStruct* ThisClass;
-	RttiType			ResultType;
-	std::vector<RttiParameter>	Arguments;
+	FRttiStruct* ThisClass;
+	FRttiType			ResultType;
+	std::vector<FRttiMethodParameter>	Arguments;
 	bool				IsStatic;
 	bool				IsConst;
 
@@ -386,7 +295,7 @@ struct TR_CLASS()
 	{
 
 	}
-	bool MatchArgument(const RttiStruct * returnType, const std::vector<RttiStruct*>&args) const
+	bool MatchArgument(const FRttiStruct * returnType, const std::vector<FRttiStruct*>&args) const
 	{
 		if (returnType != ResultType.Type)
 			return false;
@@ -402,15 +311,15 @@ struct TR_CLASS()
 };
 
 struct TR_CLASS()
-	RttiConstructor : public RttiMetaInfo
+	FRttiConstructor : public FRttiMetaInfo
 {
 	template <class _ThisType, class... ArgTypes>
 	static _ThisType* CreateInstance(ArgTypes... args)
 	{
 		return new _ThisType(args...);
 	}
-	std::vector<RttiParameter> mArguments;
-	bool MatchArgument(const std::vector<RttiType>&args) const
+	std::vector<FRttiMethodParameter> mArguments;
+	bool MatchArgument(const std::vector<FRttiType>&args) const
 	{
 		if (args.size() != mArguments.size())
 			return false;
@@ -428,7 +337,7 @@ struct TR_CLASS()
 };
 
 struct TR_CLASS()
-	RttiTypeConverter
+	FRttiTypeConverter
 {
 	template<class SuperType, class ThisType>
 	SuperType* CastTo(ThisType* ptr) const
@@ -451,13 +360,13 @@ struct TR_CLASS()
 			return nullptr;
 		}
 	}
-	virtual ~RttiTypeConverter() {};
+	virtual ~FRttiTypeConverter() {};
 	virtual void* CastInvoke(void* ptr) const = 0;
 	virtual void* DownCastInvoke(void* ptr) const = 0;
 };
 
 template<class _Type, class _BaseType>
-struct AuxRttiTypeConverter : public RttiTypeConverter
+struct AuxRttiTypeConverter : public FRttiTypeConverter
 {
 	virtual void* CastInvoke(void* ptr) const override
 	{
@@ -469,11 +378,12 @@ struct AuxRttiTypeConverter : public RttiTypeConverter
 	}
 };
 
+struct VIEnumerator;
 struct TR_CLASS()
-	MemberDesc : public RttiMetaInfo
+	FRttiProperty : public FRttiMetaInfo
 {
-	RttiStruct*			DeclareClass;
-	RttiType			MemberType;
+	FRttiStruct*			DeclareClass;
+	FRttiType			MemberType;
 	unsigned int		Offset;
 	unsigned int		Size;
 	RttiNameString		MemberName;
@@ -487,10 +397,70 @@ struct TR_CLASS()
 		return ((char*)pThis + Offset);
 	}
 	void SetValue(void* pHost, const void* pValueAddress) const;
+	virtual AutoRef<VIEnumerator> CreateEnumator() const
+	{
+		return nullptr;
+	}
+};
+
+struct VIEnumerator : public VIUnknownBase
+{
+	virtual FRttiStruct* GetElementType() = 0;
+
+	virtual void* Current() = 0;
+	virtual bool MoveNext() = 0;
+	virtual void Reset(void* container) = 0;
+};
+
+template <typename _T>
+struct FVectorEnumerator : public VIEnumerator
+{
+	std::vector<_T>* Container;
+	typename std::vector<typename _T>::iterator Iterator;
+	FVectorEnumerator()
+	{
+		Container = nullptr;
+	}
+
+	virtual FRttiStruct* GetElementType() override;
+	virtual void* Current() override
+	{
+		return &(*Iterator);
+	}
+	virtual bool MoveNext() override
+	{
+		if (Iterator == Container->end())
+			return false;
+		Iterator++;
+		return true;
+	}
+	virtual void Reset(void* container) override
+	{
+		Container = ((std::vector<_T>*)container);
+		Iterator = Container->begin();
+	}
+};
+
+struct FEnumatorProperty : public FRttiProperty
+{
+	FRttiType		ElementType;
+};
+
+template <typename _T>
+struct AuxVectorEnumatorProperty : public FEnumatorProperty
+{
+	AuxVectorEnumatorProperty()
+	{
+		ElementType.BuildType<_T>();
+	}
+	virtual AutoRef<VIEnumerator> CreateEnumator() const override
+	{
+		return MakeWeakRef(new FVectorEnumerator<_T>());
+	}
 };
 
 struct TR_CLASS()
-	RttiStruct : public RttiMetaInfo
+	FRttiStruct : public FRttiMetaInfo
 {
 	RttiNameString				Name;
 	RttiNameString				NameSpace;
@@ -504,8 +474,8 @@ struct TR_CLASS()
 
 	struct FBaseType
 	{
-		RttiStruct*			ClassType;
-		RttiTypeConverter*	TypeConverter;
+		FRttiStruct*			ClassType;
+		FRttiTypeConverter*	TypeConverter;
 	};
 	std::vector<FBaseType>		BaseTypes;
 	struct TupleVisitor
@@ -532,11 +502,11 @@ struct TR_CLASS()
 		ForeachTypeList<ThisType, TupleVisitor, sizeof...(ArgTypes), ArgTypes...>::Visit(this, (ThisType*)nullptr);
 	}
 
-	std::vector<MemberDesc*>		Members;
-	std::vector<RttiMethodBase*>	Methods;
-	std::vector<RttiConstructor*>	Constructors;
-	RttiStruct();
-	virtual ~RttiStruct()
+	std::vector<FRttiProperty*>		Members;
+	std::vector<FRttiMethodBase*>	Methods;
+	std::vector<FRttiConstructor*>	Constructors;
+	FRttiStruct();
+	virtual ~FRttiStruct()
 	{
 		Cleanup();
 	}
@@ -568,7 +538,7 @@ struct TR_CLASS()
 
 		CleanupMetas();
 	}
-	bool IsA(RttiStruct * pTar);
+	bool IsA(FRttiStruct * pTar);
 	vBOOL GetIsEnum() const {
 		return IsEnum ? 1 : 0;
 	}
@@ -596,13 +566,13 @@ struct TR_CLASS()
 		}
 		return -1;
 	}
-	const RttiType* GetMemberType(unsigned int index) const {
+	const FRttiType* GetMemberType(unsigned int index) const {
 		return &Members[index]->MemberType;
 	}
 	const char* GetMemberName(unsigned int index) const {
 		return Members[index]->MemberName.c_str();
 	}
-	const MemberDesc* FindMember(const char* name) const {
+	const FRttiProperty* FindMember(const char* name) const {
 		for (const auto& i : Members)
 		{
 			if (i->MemberName == name)
@@ -621,7 +591,7 @@ struct TR_CLASS()
 		}
 		return -1;
 	}
-	const RttiMethodBase* FindMethod(const char* name) const {
+	const FRttiMethodBase* FindMethod(const char* name) const {
 		for (auto i : Methods)
 		{
 			if (i->Name == name)
@@ -629,7 +599,7 @@ struct TR_CLASS()
 		}
 		return nullptr;
 	}
-	const RttiMethodBase* FindMethodWithArguments(const char* name, const RttiStruct * returnType, const std::vector<RttiStruct*>&args) const {
+	const FRttiMethodBase* FindMethodWithArguments(const char* name, const FRttiStruct * returnType, const std::vector<FRttiStruct*>&args) const {
 		for (auto i : Methods)
 		{
 			if (i->Name == name && i->MatchArgument(returnType, args))
@@ -639,7 +609,7 @@ struct TR_CLASS()
 		}
 		return nullptr;
 	}
-	const RttiConstructor* FindConstructor(const std::vector<RttiType>& args) const
+	const FRttiConstructor* FindConstructor(const std::vector<FRttiType>& args) const
 	{
 		for (auto i : Constructors)
 		{
@@ -649,7 +619,7 @@ struct TR_CLASS()
 		return nullptr;
 	}
 
-	const RttiTypeConverter* FindBaseConverter(RttiStruct* baseType)
+	const FRttiTypeConverter* FindBaseConverter(FRttiStruct* baseType)
 	{
 		for (auto i : BaseTypes)
 		{
@@ -660,7 +630,7 @@ struct TR_CLASS()
 		}
 		return nullptr;
 	}
-	void* CastSuper(void* ptr, const RttiStruct* baseType) const
+	void* CastSuper(void* ptr, const FRttiStruct* baseType) const
 	{
 		if(this == baseType)
 			return ptr;
@@ -680,7 +650,7 @@ struct TR_CLASS()
 		}
 		return nullptr;
 	}
-	void* DownCast(void* ptr, const RttiStruct* fromType) const
+	void* DownCast(void* ptr, const FRttiStruct* fromType) const
 	{
 		if (this == fromType)
 			return ptr;
@@ -700,13 +670,13 @@ struct TR_CLASS()
 		return nullptr;
 	}
 	template<typename _MemberType>
-	MemberDesc* PushMember(unsigned int offset, unsigned int size, const char* name)
+	FRttiProperty* PushMember(unsigned int offset, unsigned int size, const char* name)
 	{
 		//using noConstType = typename std::remove_const<_MemberType>::type;
 		//using realType = typename std::remove_all_extents<noConstType>::type;
 		//using pureType = typename remove_all_ref_ptr<realType>::type;
 
-		MemberDesc* desc = new MemberDesc();
+		FRttiProperty* desc = new FRttiProperty();
 		desc->MemberType.BuildType<_MemberType>();
 		desc->MemberName = name;
 		desc->Offset = offset;
@@ -716,11 +686,16 @@ struct TR_CLASS()
 		Members.push_back(desc);
 		return desc;
 	}
-	RttiMethodBase* PushMethod(RttiMethodBase * method) {
+
+	void PushMember(FRttiProperty* prop)
+	{
+		Members.push_back(prop);
+	}
+	FRttiMethodBase* PushMethod(FRttiMethodBase * method) {
 		Methods.push_back(method);
 		return method;
 	}
-	RttiConstructor* PushConstructor(RttiConstructor* method) {
+	FRttiConstructor* PushConstructor(FRttiConstructor* method) {
 		Constructors.push_back(method);
 		return method;
 	}
@@ -731,22 +706,27 @@ struct TR_CLASS()
 template<typename Type>
 struct AuxRttiStruct
 {
-	static RttiStruct		Instance;
-	static RttiStruct* GetClassObject() {
+	static FRttiStruct		Instance;
+	static FRttiStruct* GetClassObject() {
 		return &Instance;
 	}
 };
 
 template<typename Type>
-RttiStruct		AuxRttiStruct<Type>::Instance;
+FRttiStruct		AuxRttiStruct<Type>::Instance;
 
 template<typename Type>
-RttiStruct* GetClassObject() {
+FRttiStruct* GetClassObject() {
 	return AuxRttiStruct<Type>::GetClassObject();
 }
 
+template<typename Type>
+FRttiStruct* FVectorEnumerator<Type>::GetElementType(){
+	return GetClassObject<Type>();
+}
+
 template<class _MetaType>
-_MetaType* RttiMetaInfo::GetFirstMeta() const
+_MetaType* FRttiMetaInfo::GetFirstMeta() const
 {
 	return (_MetaType*)GetFirstMeta(GetClassObject<_MetaType>());
 }
@@ -758,11 +738,11 @@ _CastType* VIUnknownBase::CastTo()
 }
 
 template<typename T, typename ArgType>
-void RttiStruct::TupleVisitor::VisitElement(void* pArg, const T&, const ArgType*)
+void FRttiStruct::TupleVisitor::VisitElement(void* pArg, const T&, const ArgType*)
 {
-	auto kls = (RttiStruct*)pArg;
+	auto kls = (FRttiStruct*)pArg;
 
-	RttiStruct::FBaseType baseType;
+	FRttiStruct::FBaseType baseType;
 	baseType.ClassType = AuxRttiStruct<T>::GetClassObject();
 	baseType.TypeConverter = new AuxRttiTypeConverter<ArgType, T>();
 	kls->BaseTypes.push_back(baseType);
@@ -773,7 +753,7 @@ struct AuxRttiBuilderBase
 	AuxRttiBuilderBase();
 	virtual void BuildRtti() = 0;
 	template<class Type>
-	void BuildClassInfo(RttiStruct* rtti, const char* name, const char* space)
+	void BuildClassInfo(FRttiStruct* rtti, const char* name, const char* space)
 	{
 		rtti->BuildClassInfo<Type>(name, space);
 	}
@@ -782,33 +762,33 @@ struct AuxRttiBuilderBase
 template<class Type>
 struct AuxRttiBuilder;
 
-struct RttiStruct;
+struct FRttiStruct;
 
 class TR_CLASS()
 RttiStructManager
 {
 	std::vector<AuxRttiBuilderBase*>	StructBuilders;
-	std::vector<RttiStruct*>			AllStructTyps;
+	std::vector<FRttiStruct*>			AllStructTyps;
 public:
 	void RegStructBuilder(AuxRttiBuilderBase* builder);
-	void RegStructType(RttiStruct* type);
+	void RegStructType(FRttiStruct* type);
 	static RttiStructManager* GetInstance();
 	
 	~RttiStructManager();
 	void BuildRtti();
 	void FinalCleanup();
 
-	RttiStruct* FindStruct(const char* name);
+	FRttiStruct* FindStruct(const char* name);
 	unsigned int GetStructNumber() {
 		return (unsigned int)AllStructTyps.size();
 	}
-	RttiStruct* GetStruct(unsigned int index) {
+	FRttiStruct* GetStruct(unsigned int index) {
 		return AllStructTyps[index];
 	}
 };
 
 template <class _ThisType, class _ResultType, class... ArgTypes>
-struct RttiMethodImpl : public RttiMethodBase
+struct RttiMethodImpl : public FRttiMethodBase
 {
 	typedef _ResultType(_ThisType::* FunctionType)(ArgTypes... args);
 	typedef _ResultType(_ThisType::* FunctionTypeConst)(ArgTypes... args) const;
@@ -825,12 +805,12 @@ struct RttiMethodImpl : public RttiMethodBase
 		template<typename T>
 		static void VisitElement(void* pArg, const T&, const void*)
 		{
-			auto method = (RttiMethodBase*)pArg;
-			RttiType tmp;
+			auto method = (FRttiMethodBase*)pArg;
+			FRttiType tmp;
 			tmp.IsRefer = VIsReferType<T>::ResultValue;
 			tmp.NumOfPointer = TypePointerCounter<T>::Value;
 			tmp.Type = AuxRttiStruct<typename remove_all_ref_ptr<T>::type>::GetClassObject();
-			RttiParameter prm;
+			FRttiMethodParameter prm;
 			//prm.Name = 
 			prm.ParameterType = tmp;
 			method->Arguments.push_back(prm);
@@ -1342,19 +1322,19 @@ struct RttiMethodImpl : public RttiMethodBase
 };
 
 template <class _ThisType, class... ArgTypes>
-struct RttiConstructorImpl : public RttiConstructor
+struct RttiConstructorImpl : public FRttiConstructor
 {
 	struct TupleVisitor
 	{
 		template<typename T>
 		static void VisitElement(void* pArg, const T&, void*)
 		{
-			auto method = (RttiConstructor*)pArg;
-			RttiType tmp;
+			auto method = (FRttiConstructor*)pArg;
+			FRttiType tmp;
 			tmp.IsRefer = VIsReferType<T>::ResultValue;
 			tmp.NumOfPointer = TypePointerCounter<T>::Value;
 			tmp.Type = AuxRttiStruct<typename remove_all_ref_ptr<T>::type>::GetClassObject();
-			RttiParameter prm;
+			FRttiMethodParameter prm;
 			//prm.Name = 
 			prm.ParameterType = tmp;
 			method->mArguments.push_back(prm);
@@ -1451,9 +1431,9 @@ struct AuxRttiBuilder<CombineFullName(ns, Type)> : public AuxRttiBuilderBase\
 		auto pRtti = AuxRttiStruct<ThisType>::GetClassObject();\
 		pRtti->Cleanup();\
 		BuildClassInfo<ThisType>(pRtti, #Type, #ns);\
-		MemberDesc* __current_member = nullptr;\
-		RttiMethodBase* __current_method = nullptr;\
-		RttiConstructor* __current_constructor = nullptr;
+		FRttiProperty* __current_member = nullptr;\
+		FRttiMethodBase* __current_method = nullptr;\
+		FRttiConstructor* __current_constructor = nullptr;
 
 #define  __vsizeof(_type, _name) sizeof(((_type*)nullptr)->_name)
 
@@ -1467,6 +1447,17 @@ struct AuxRttiBuilder<CombineFullName(ns, Type)> : public AuxRttiBuilderBase\
 			using declType = decltype(((ThisType*)nullptr)->_name);\
 			__current_member = pRtti->PushMember<declType>(__voffsetof(ThisType, _name), __vsizeof(ThisType, _name), #_name);\
 		}
+
+#define StructMember_StdVector(name) \
+	{\
+		using VectorType = decltype(((ThisType*)0)->name);\
+		auto prop = new AuxVectorEnumatorProperty<VectorType::value_type>();\
+		prop->MemberName = #name;\
+		prop->Offset = offsetof(ThisType, name);\
+		prop->MemberType.BuildType<VectorType>();\
+		pRtti->PushMember(prop);\
+		__current_member = prop;\
+	}
 
 #define Struct_Method(name) __current_method = pRtti->PushMethod(new RttiMethodImpl(#name, &CombineFullName(ThisType,name)));
 #define Struct_MethodEX(name, RType, ...) __current_method = pRtti->PushMethod(new RttiMethodImpl<ThisType,RType,##__VA_ARGS__>(#name, &CombineFullName(ThisType,name)));
@@ -1486,7 +1477,7 @@ struct AuxRttiBuilder<CombineFullName(ns, Type)> : public AuxRttiBuilderBase\
 AuxRttiBuilder<Type> AuxRttiBuilder<Type>::Instance;
 
 template<typename T>
-void MemberDesc::SetValue(void* pThis, const T& v) const
+void FRttiProperty::SetValue(void* pThis, const T& v) const
 {
 	if (MemberType.IsType<T>() == false)
 	{
@@ -1496,7 +1487,7 @@ void MemberDesc::SetValue(void* pThis, const T& v) const
 	//MemberType.Type->AssignOperator((BYTE*)pThis + Offset, v);
 }
 template<typename T>
-T* MemberDesc::GetValueAddress(void* pThis) const
+T* FRttiProperty::GetValueAddress(void* pThis) const
 {
 	if (MemberType.IsType<T>() == false)
 	{
@@ -1507,7 +1498,7 @@ T* MemberDesc::GetValueAddress(void* pThis) const
 }
 
 template<typename _Type>
-void RttiType::BuildType()
+void FRttiType::BuildType()
 {
 	using noConstType = typename std::remove_const<_Type>::type;
 	using realType = typename std::remove_all_extents<noConstType>::type;
@@ -1516,12 +1507,13 @@ void RttiType::BuildType()
 	Type = &AuxRttiStruct<pureType>::Instance;
 
 	IsRefer = std::is_reference<_Type>::value;
+	IsAutoRef = (VIsAutoRef::TypeTest((_Type*)nullptr) == 2);
 	NumOfPointer = TypePointerCounter<_Type>::Value;
 	ArrayElements = sizeof(_Type) / sizeof(pureType);
 }
 
 template<typename _Type>
-bool RttiType::IsType() const
+bool FRttiType::IsType() const
 {
 	using noConstType = typename std::remove_const<_Type>::type;
 	using realType = typename std::remove_all_extents<noConstType>::type;
@@ -1543,9 +1535,9 @@ bool RttiType::IsType() const
 }
 
 template<typename _Type>
-RttiParameter RttiParameter::BuildParameter(const char* name)
+FRttiMethodParameter FRttiMethodParameter::BuildParameter(const char* name)
 {
-	RttiParameter result;
+	FRttiMethodParameter result;
 	result.Name = name;
 	result.ParameterType.BuildType<_Type>();
 

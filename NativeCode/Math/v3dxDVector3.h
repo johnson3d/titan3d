@@ -59,5 +59,21 @@ public:
 		vRet.z = vect1.z - vect2.z;
 		return vRet;
 	}
+	friend inline v3dxDVector3 operator *(const v3dxDVector3& vect1, double fValue)
+	{
+		v3dxDVector3 vRet;
+		vRet.x = vect1.x * fValue;
+		vRet.y = vect1.y * fValue;
+		vRet.z = vect1.z * fValue;
+		return vRet;
+	}
+	friend inline v3dxDVector3 operator / (const v3dxDVector3& vect1, double fValue)
+	{
+		v3dxDVector3 vRet;
+		vRet.x = vect1.x / fValue;
+		vRet.y = vect1.y / fValue;
+		vRet.z = vect1.z / fValue;
+		return vRet;
+	}
 };
 #pragma pack(pop)

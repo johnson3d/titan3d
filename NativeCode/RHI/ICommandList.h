@@ -178,6 +178,7 @@ public:
 	virtual void VSSetSampler(UINT32 Index, ISamplerState* Sampler) = 0;
 	virtual void PSSetSampler(UINT32 Index, ISamplerState* Sampler) = 0;
 	virtual void SetRenderPipeline(IRenderPipeline* pipeline, EPrimitiveType dpType) = 0;
+	virtual vBOOL CreateReadableTexture2D(ITexture2D** ppTexture, ITexture2D* tex, IFrameBuffers* pFrameBuffers) = 0;
 	virtual vBOOL CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers) = 0;
 
 	virtual void BeginEvent(const char* info) = 0;

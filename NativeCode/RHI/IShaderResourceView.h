@@ -151,7 +151,7 @@ struct TR_CLASS(SV_LayoutStruct = 8, SV_Manual)
 		memset(this, 0, sizeof(IShaderResourceViewDesc));
 		Type = ST_Texture2D;
 		mGpuBuffer = nullptr;
-		Format = PXF_B8G8R8A8_UNORM;
+		Format = PXF_R8G8B8A8_UNORM;
 		ViewDimension = SRV_DIMENSION_TEXTURE2D;
 		Texture2D.MipLevels = 0;
 	}
@@ -160,7 +160,7 @@ struct TR_CLASS(SV_LayoutStruct = 8, SV_Manual)
 		memset(this, 0, sizeof(IShaderResourceViewDesc));
 		Type = ST_Texture2DArray;
 		mGpuBuffer = nullptr;
-		Format = PXF_B8G8R8A8_UNORM;
+		Format = PXF_R8G8B8A8_UNORM;
 		ViewDimension = SRV_DIMENSION_TEXTURE2DARRAY;
 		Texture2DArray.MipLevels = 0;
 	}

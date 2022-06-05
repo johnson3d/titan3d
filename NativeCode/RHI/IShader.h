@@ -24,7 +24,7 @@ inline EShaderType GetShaderTypeFrom(std::string sm)
 }
 
 class TR_CLASS()
-IShaderDesc : public VIUnknown
+	IShaderDesc : public VIUnknown
 {
 private:
 	std::vector<BYTE>		Codes;
@@ -90,7 +90,7 @@ public:
 };
 
 class TR_CLASS()
-IShader : public IRenderResource
+	IShader : public IRenderResource
 {
 protected:
 	AutoRef<IShaderDesc>		mDesc;
@@ -107,28 +107,24 @@ public:
 	}
 };
 
-class TR_CLASS(SV_Dispose=self->Release())
-IShaderDefinitions : public VIUnknown
+class TR_CLASS(SV_Dispose = self->Release())
+	IShaderDefinitions : public VIUnknown
 {
 public:
 	ENGINE_RTTI(IShaderDefinitions);
 	std::vector<MacroDefine>	Definitions;
 	
-	TR_CONSTRUCTOR()
 	IShaderDefinitions()
 	{
 
 	}
-	TR_FUNCTION()
 	void AddDefine(const char* name, const char* value);
-	TR_FUNCTION()
 	const MacroDefine* FindDefine(const char* name) const;
-	TR_FUNCTION()
 	void ClearDefines();
-	TR_FUNCTION()
 	void RemoveDefine(const char* name);
-	TR_FUNCTION()
 	void MergeDefinitions(IShaderDefinitions* def);
+
+	virtual Hash64 GetHash64() override;
 };
 
 NS_END

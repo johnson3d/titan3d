@@ -8,13 +8,17 @@
 #include <cstring>
 #include <string>
 
-struct Hash64
+struct Hash64_t
+{
+	unsigned long long Int64Value;
+};
+
+struct Hash64 : public Hash64_t
 {
 	Hash64()
 	{
 		Int64Value = 0;
 	}
-	unsigned long long Int64Value;
 	static Hash64	Empty;
 };
 

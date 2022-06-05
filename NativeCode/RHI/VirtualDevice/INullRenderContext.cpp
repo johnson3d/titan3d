@@ -138,9 +138,18 @@ IShaderResourceView* INullRenderContext::CreateShaderResourceView(const IShaderR
 //{
 //	return nullptr;
 //}
+
+class INullGpuBuffer : public IGpuBuffer
+{
+public:
+	virtual void* GetHWBuffer() const
+	{
+		return nullptr;
+	}
+};
 IGpuBuffer* INullRenderContext::CreateGpuBuffer(const IGpuBufferDesc* desc, void* pInitData)
 {
-	return nullptr;
+	return new INullGpuBuffer();
 }
 IUnorderedAccessView* INullRenderContext::CreateUnorderedAccessView(IGpuBuffer* pBuffer, const IUnorderedAccessViewDesc* desc)
 {

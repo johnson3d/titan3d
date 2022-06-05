@@ -1,6 +1,7 @@
 #pragma once
 #include <tuple>
 #include <string>
+#include <vector>
 
 //#define EngineNS Titan3D
 #define NS_BEGIN namespace EngineNS{
@@ -36,6 +37,271 @@
 						friend struct AuxRttiBuilder<type>;
 
 NS_BEGIN
+
+struct FArgumentStream
+{
+	FArgumentStream()
+		: mReadPosition(0)
+	{
+	}
+	size_t				mReadPosition;
+	std::vector<unsigned char>	mArguments;
+	void Reset()
+	{
+		mReadPosition = 0;
+		mArguments.clear();
+	}
+};
+
+template <typename ArgType>
+inline FArgumentStream& operator <<(FArgumentStream& stream, const ArgType& v)
+{
+	auto size = stream.mArguments.size();
+	stream.mArguments.resize(size + sizeof(ArgType));
+	memcpy(&stream.mArguments[size], &v, sizeof(ArgType));
+	return stream;
+}
+template <typename ArgType>
+inline FArgumentStream& operator >>(FArgumentStream& stream, ArgType& v)
+{
+	memcpy(&v, &stream.mArguments[stream.mReadPosition], sizeof(ArgType));
+	stream.mReadPosition += sizeof(ArgType);
+	return stream;
+}
+template <>
+inline FArgumentStream& operator <<(FArgumentStream& stream, const std::string& v)
+{
+	auto len = (int)v.length();
+	stream << len;
+	auto size = stream.mArguments.size();
+	stream.mArguments.resize(size + sizeof(char) * len);
+	memcpy(&stream.mArguments[size], v.c_str(), sizeof(char) * len);
+	return stream;
+}
+template <>
+inline FArgumentStream& operator >>(FArgumentStream& stream, std::string& v)
+{
+	int len = 0;
+	stream >> len;
+	v.resize(len);
+	memcpy(&v[0], &stream.mArguments[stream.mReadPosition], sizeof(char) * len);
+	stream.mReadPosition += sizeof(char) * len;
+	return stream;
+}
+
+template<typename _Type>
+struct VTypeHelper
+{
+	enum
+	{
+		TypeSizeOf = sizeof(_Type),
+	};
+	static void AssignOperator(void* pTar, void*& pSrc)
+	{
+		*(_Type*)pTar = *(_Type*)pSrc;
+	}
+	template<int _Size>
+	struct VArrayElement
+	{
+		enum
+		{
+			Result = _Size / TypeSizeOf,
+		};
+	};
+};
+
+template<>
+struct VTypeHelper<void>
+{
+	enum
+	{
+		TypeSizeOf = 0,
+	};
+	static void AssignOperator(void* pTar, void*& pSrc)
+	{
+
+	}
+	template<int _Size>
+	struct VArrayElement
+	{
+		enum
+		{
+			Result = 1,
+		};
+	};
+};
+
+template<class TYPE>
+inline void Safe_Delete(TYPE*& p) {
+	if (p == NULL)
+	{
+		return;
+	}
+	TYPE* refPtr = p;
+	p = NULL;
+	delete refPtr;
+	refPtr = NULL;
+}
+
+template<class TYPE>
+inline void Safe_DeleteArray(TYPE*& p) {
+	if (p == NULL)
+	{
+		return;
+	}
+	TYPE* refPtr = p;
+	p = NULL;
+	delete[] refPtr;
+	refPtr = NULL;
+}
+
+template<typename T>
+void Safe_Release(T*& p)
+{
+	if (p == NULL)
+		return;
+	p->Release();
+	p = nullptr;
+}
+
+template<class T>
+class AutoRef
+{
+	T* Ptr;
+public:
+	AutoRef()
+	{
+		Ptr = nullptr;
+	}
+	static AutoRef<T> _MakeWeakRef(T* ptr)
+	{
+		AutoRef<T> result;
+		result.Ptr = ptr;
+		return result;
+	}
+	AutoRef(T* ptr)
+	{
+		Ptr = ptr;
+		if (Ptr != nullptr)
+			Ptr->AddRef();
+	}
+	AutoRef(const AutoRef<T>& rh)
+	{
+		Ptr = rh.Ptr;
+		if (Ptr != nullptr)
+			Ptr->AddRef();
+	}
+	~AutoRef()
+	{
+		Safe_Release(Ptr);
+	}
+	void StrongRef(T* ptr)
+	{
+		if (ptr)
+			ptr->AddRef();
+		Safe_Release(Ptr);
+		Ptr = ptr;
+	}
+	void WeakRef(T* ptr)
+	{
+		Safe_Release(Ptr);
+		Ptr = ptr;
+	}
+	void Clear()
+	{
+		Safe_Release(Ptr);
+	}
+	AutoRef<T>& operator = (const AutoRef<T>& rh)
+	{
+		Safe_Release(Ptr);
+		Ptr = rh.Ptr;
+		if (Ptr != nullptr)
+			Ptr->AddRef();
+		return *this;
+	}
+	/*AutoRef<T>& operator = (T* rh)
+	{
+		if (rh != nullptr)
+			rh->AddRef();
+		Safe_Release(Ptr);
+		Ptr = rh;
+		return *this;
+	}*/
+	bool operator==(T* rh) const
+	{
+		return (Ptr == rh);
+	}
+	bool operator !=(T* rv) const
+	{
+		return (Ptr != rv);
+	}
+
+	T* operator->() const
+	{
+		return Ptr;
+	}
+	/*T* operator->()
+	{
+		return Ptr;
+	}
+	const T* operator->() const
+	{
+		return Ptr;
+	}*/
+	template<class ConverType>
+	ConverType* UnsafeConvertTo() const
+	{
+#if PLATFORM_WIN
+		return dynamic_cast<ConverType*>(Ptr);
+#else
+		return (ConverType*)(Ptr);
+#endif
+	}
+	template<class ConverType>
+	inline AutoRef<ConverType> As()  const {
+		AutoRef<ConverType> result;
+		result.StrongRef(UnsafeConvertTo<ConverType>());
+		return result;
+	}
+	template<class ConverType>
+	operator AutoRef<ConverType>() const
+	{
+		AutoRef<ConverType> result;
+		result.StrongRef(Ptr);
+		return result;
+	}
+	operator T* () const
+	{
+		return Ptr;
+	}
+	T* GetPtr() {
+		return Ptr;
+	}
+	const T* GetPtr() const {
+		return Ptr;
+	}
+};
+
+template<class T>
+inline AutoRef<T> MakeWeakRef(T* ptr)
+{
+	return AutoRef<T>::_MakeWeakRef(ptr);
+}
+
+struct VIsAutoRef
+{
+	template<typename Type>
+	constexpr static char TypeTest(const Type*)
+	{
+		return 1;
+	}
+	template<typename Type>
+	constexpr static char TypeTest(const AutoRef<Type>*)
+	{
+		return 2;
+	}
+};
+
 
 template<typename Type>
 inline Type VGetTypeDefault()
@@ -126,6 +392,9 @@ struct TFunction_traits<R(ClassType::*)(Args...) const> : public TFunction_trait
 
 template <typename T>
 struct remove_all_ref_ptr { typedef T type; };
+
+template<typename T>
+struct remove_all_ref_ptr<AutoRef<T>> : public remove_all_ref_ptr<T>{};
 
 template <typename T>
 struct remove_all_ref_ptr<const T> : public remove_all_ref_ptr<T> { };

@@ -17,7 +17,7 @@ ISwapChainDesc
 	{
 		Width = 0;
 		Height = 0;
-		Format = PXF_B8G8R8A8_UNORM;
+		Format = PXF_R8G8B8A8_UNORM;
 		ColorSpace = COLOR_SPACE_SRGB_NONLINEAR;
 		WindowHandle = nullptr;
 	}

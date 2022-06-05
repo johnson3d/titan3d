@@ -86,6 +86,11 @@ void INullCommandList::CSDispatchIndirect(IGpuBuffer* pBufferForArgs, UINT32 Ali
 
 }
 
+vBOOL INullCommandList::CreateReadableTexture2D(ITexture2D** ppTexture, ITexture2D* text, IFrameBuffers* pFrameBuffers)
+{
+	return FALSE;
+}
+
 vBOOL INullCommandList::CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers)
 {
 	return FALSE;

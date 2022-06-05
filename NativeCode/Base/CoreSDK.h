@@ -6,39 +6,6 @@
 
 NS_BEGIN
 
-template<class TYPE>
-inline void Safe_Delete(TYPE * & p) {
-	if (p == NULL)
-	{
-		return;
-	}
-	TYPE* refPtr = p;
-	p = NULL;
-	delete refPtr;
-	refPtr = NULL;
-}
-
-template<class TYPE>
-inline void Safe_DeleteArray(TYPE * & p) {
-	if (p == NULL)
-	{
-		return;
-	}
-	TYPE* refPtr = p;
-	p = NULL;
-	delete[] refPtr;
-	refPtr = NULL;
-}
-
-template<typename T>
-void Safe_Release(T*& p)
-{
-	if (p == NULL)
-		return;
-	p->Release();
-	p = nullptr;
-}
-
 struct UAnyValue;
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)

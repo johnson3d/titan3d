@@ -496,6 +496,62 @@ void ID11CommandList::SetRenderPipeline(IRenderPipeline* pipeline, EPrimitiveTyp
 	((ID11RenderPipeline*)pipeline)->ApplyState(this);
 	pipeline->GetGpuProgram()->ApplyShaders(this);
 }
+vBOOL ID11CommandList::CreateReadableTexture2D(ITexture2D** ppTexture, ITexture2D* tex, IFrameBuffers* pFrameBuffers)
+{
+	ID3D11Texture2D* pSrcTexture = ((ID11Texture2D*)tex)->m_pDX11Texture2D;
+
+	D3D11_TEXTURE2D_DESC desc;
+	pSrcTexture->GetDesc(&desc);
+
+	auto pD11Texture = (ID11Texture2D*)(*ppTexture);
+	bool needCreateTexture = false;
+	if (pD11Texture == nullptr)
+	{
+		needCreateTexture = true;
+	}
+	else
+	{
+		if (pD11Texture->mTextureDesc.Width != desc.Width ||
+			pD11Texture->mTextureDesc.Height != desc.Height)
+		{
+			needCreateTexture = true;
+		}
+	}
+
+	ID3D11Texture2D* memTexture = nullptr;
+	if (needCreateTexture)
+	{
+		desc.BindFlags = 0;
+		desc.Usage = D3D11_USAGE_STAGING;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
+
+		auto rc = (ID11RenderContext*)this->GetContext();
+		auto pDevice = rc->mDevice;
+		auto hr = pDevice->CreateTexture2D(&desc, nullptr, &memTexture);
+		if (FAILED(hr))
+		{
+			return FALSE;
+		}
+	}
+	else
+	{
+		memTexture = pD11Texture->m_pDX11Texture2D;
+	}
+
+	mDeferredContext->CopyResource(memTexture, pSrcTexture);
+
+	if (needCreateTexture)
+	{
+		Safe_Release(pD11Texture);
+		pD11Texture = new ID11Texture2D();
+		pD11Texture->InitD11Texture2D(memTexture);
+		memTexture->Release();
+
+		*ppTexture = pD11Texture;
+	}
+
+	return TRUE;
+}
 vBOOL ID11CommandList::CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers)
 {
 	auto d11Src = (ID11ShaderResourceView*)src;

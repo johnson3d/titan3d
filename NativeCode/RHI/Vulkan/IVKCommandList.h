@@ -50,6 +50,7 @@ public:
 	virtual void VSSetSampler(UINT32 Index, ISamplerState* Sampler) override;
 	virtual void PSSetSampler(UINT32 Index, ISamplerState* Sampler) override;
 	virtual void SetRenderPipeline(IRenderPipeline* pipeline, EPrimitiveType dpType) override;
+	virtual vBOOL CreateReadableTexture2D(ITexture2D** ppTexture, ITexture2D* tex, IFrameBuffers* pFrameBuffers) override;
 	virtual vBOOL CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers) override;
 
 	virtual void BeginEvent(const char* info) override;

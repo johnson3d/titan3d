@@ -294,7 +294,9 @@ class v3dxLine3;
 class v3dxQuaternion;
 
 class v3dxVector3;
+class v3dxDVector3;
 class v3dxBox3;
+class v3dxDBox3;
 class v3dxPlane3;
 class v3dxSegment3;
 class v3dxPoly3;
@@ -436,6 +438,14 @@ inline v3dVector3_t* v3dxVec3Normalize(v3dVector3_t *pOut,const v3dVector3_t* pv
 	pOut->z = pvt->z / fLen;
 	return pOut;
 #endif
+}
+
+inline v3dDVector3_t* v3dxDVec3Normalize(v3dDVector3_t* pOut, const v3dDVector3_t* pvt) {
+	double fLen = sqrt(pvt->x * pvt->x + pvt->y * pvt->y + pvt->z * pvt->z);
+	pOut->x = pvt->x / fLen;
+	pOut->y = pvt->y / fLen;
+	pOut->z = pvt->z / fLen;
+	return pOut;
 }
 
 inline float v3dxVec4Dot(v3dVector4_t *v1,const v3dVector4_t* v2){
@@ -1247,6 +1257,15 @@ extern "C"
 							 const v3dxVector3 *pvDir,
 							 const v3dxBox3* pBox
 							 );
+
+	 VFX_API vBOOL v3dxLineIntersectDBox3(double* pfT_n,
+		 v3dxDVector3* pvPoint_n,
+		 double* pfT_f,
+		 v3dxDVector3* pvPoint_f,
+		 const v3dxDVector3* pvFrom,
+		 const v3dxDVector3* pvDir,
+		 const v3dxDBox3* pBox
+	 );
 
 	 VFX_API vBOOL v3dxLineIntersectBox3_v2( float *pfT_n,
 										 v3dxVector3 *pvPoint_n,

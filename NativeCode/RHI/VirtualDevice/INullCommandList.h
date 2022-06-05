@@ -30,6 +30,7 @@ public:
 	virtual void CSSetConstantBuffer(UINT32 Index, IConstantBuffer* cbuffer) override;
 	virtual void CSDispatch(UINT x, UINT y, UINT z) override;
 	virtual void CSDispatchIndirect(IGpuBuffer* pBufferForArgs, UINT32 AlignedByteOffsetForArgs) override;
+	virtual vBOOL CreateReadableTexture2D(ITexture2D** ppTexture, ITexture2D* text, IFrameBuffers* pFrameBuffers) override;
 	virtual vBOOL CreateReadableTexture2D(ITexture2D** ppTexture, IShaderResourceView* src, IFrameBuffers* pFrameBuffers) override;
 
 	virtual void SetScissorRect(IScissorRect* sr)  override

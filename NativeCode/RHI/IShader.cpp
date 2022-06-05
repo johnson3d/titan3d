@@ -270,4 +270,15 @@ const MacroDefine* IShaderDefinitions::FindDefine(const char* name) const
 	}
 	return nullptr;
 }
+
+Hash64 IShaderDefinitions::GetHash64()
+{
+	std::string text = "";
+	for (auto i = Definitions.begin(); i != Definitions.end(); i++)
+	{
+		text += i->Name;
+		text += i->Definition;
+	}
+	return HashHelper::CalcHash64(text.c_str(), (int)text.size());
+}
 NS_END
