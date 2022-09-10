@@ -274,11 +274,19 @@ public:
 	{
 		return Ptr;
 	}
+	template <class _ParentType>
+	operator _ParentType* () const
+	{
+		return Ptr;
+	}
 	T* GetPtr() {
 		return Ptr;
 	}
 	const T* GetPtr() const {
 		return Ptr;
+	}
+	T** GetAddressOf() {
+		return &Ptr;
 	}
 };
 

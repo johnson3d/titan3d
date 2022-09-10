@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{e97fbdb3-cc33-4498-b368-a27fd851289a}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX11Buffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX11CommandList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX11FrameBuffers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX11GpuDevice.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX11Event.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX11GpuState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX11PreHead.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX11Shader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX11InputAssembly.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX11Buffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX11CommandList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX11FrameBuffers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX11GpuDevice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX11Event.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX11GpuState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX11PreHead.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX11Shader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX11InputAssembly.h" />
+  </ItemGroup>
+</Project>

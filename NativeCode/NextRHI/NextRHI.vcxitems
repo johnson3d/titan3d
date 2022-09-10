@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{06f46e42-7261-47cb-8830-50228f2bd899}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxBuffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxCommandList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxDrawcall.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxEffect.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxFrameBuffers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxGeomMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxGpuDevice.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxEvent.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxGpuState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxInputAssembly.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxShader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NxRHIDefine.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxBuffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxCommandList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxDrawcall.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxEffect.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxFrameBuffers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxGeomMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxGpuDevice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxEvent.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxGpuState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxInputAssembly.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxRHI.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxShader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NxRHIDefine.h" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,37 @@
+#pragma once
+#include "../NxEffect.h"
+#include "VKPreHead.h"
+
+NS_BEGIN
+
+namespace NxRHI
+{
+	class VKShaderEffect : public IShaderEffect
+	{
+	public:
+		VKShaderEffect();
+		~VKShaderEffect();
+		virtual void BuildState(IGpuDevice* device) override;
+		virtual void Commit(ICommandList* cmdlist, IGraphicDraw* drawcall) override;
+	public:
+		TObjectHandle<VKGpuDevice>		mDeviceRef;
+		
+		VkPipelineLayout				mPipelineLayout = nullptr;
+	};
+
+	class VKComputeEffect : public IComputeEffect
+	{
+	public:
+		VKComputeEffect();
+		~VKComputeEffect();
+		virtual void BuildState(IGpuDevice* device) override;
+		virtual void Commit(ICommandList* cmdlist) override;
+	public:
+		TObjectHandle<VKGpuDevice>		mDeviceRef;
+
+		VkPipelineLayout				mPipelineLayout = nullptr;
+		VkPipeline						mComputePipeline = nullptr;
+	};
+}
+
+NS_END

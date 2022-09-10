@@ -6,6 +6,10 @@
 
 NS_BEGIN
 
+namespace NxRHI
+{
+	struct FShaderDesc;
+}
 struct UAnyValue;
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
@@ -23,9 +27,9 @@ TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention
 typedef void (*FFreeManagedObjectGCHandle)(void* handle);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void* (*FGetManagedObjectFromGCHandle)(void* handle);
-class IShaderDesc;
+
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
-typedef void (*FOnShaderTranslated)(IShaderDesc* shaderDesc);
+typedef void (*FOnShaderTranslated)(NxRHI::FShaderDesc* shaderDesc);
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void (* FAssertEvent)(const void* str, const void* file, int line);
@@ -37,6 +41,7 @@ public:
 	static FWriteLogString mWriteLogString;
 	static FAssertEvent mAssertEvent;
 public:
+	static int GetPixelFormatByteWidth(EPixelFormat fmt);
 	static void Print2Console(TR_META(SV_NoStringConverter = true) char* txt, bool newLine);
 	static void Print2Console2(const char* txt, bool newLine);
 	static void SetAssertEvent(FAssertEvent fn);
@@ -51,6 +56,7 @@ public:
 	static void DumpNativeMemoryState(const char* name, vBOOL dumpUnknown);
 	static void* MemoryCopy(void* tar, void* src, UINT size);
 	static int MemoryCmp(void* tar, void* src, UINT size);
+	static void* MemorySet(void* tar, int val, UINT size);
 	static void SDK_StrCpy(void* tar, const void* src, UINT tarSize);
 	static UINT SDK_StrLen(const void* s);
 	static int SDK_StrCmp(const void* s1, const void* s2);

@@ -18,7 +18,7 @@ class vfxObjectLocker;
 NS_BEGIN
 
 struct ObjectHandle;
-struct IResourceState;
+struct FResourceState;
 
 class TR_CLASS()
 	VIUnknown : public VIUnknownBase
@@ -171,8 +171,8 @@ public:
 
 #define EngineIsCleared VDefferedDeleteManager::GetInstance()->GetIsCleared()==1
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-EStreamingState
+enum TR_ENUM()
+	EResourceState
 {
 	SS_Unknown,
 	SS_Invalid,
@@ -184,24 +184,24 @@ EStreamingState
 	SS_Killed
 };
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-IResourceState
+struct TR_CLASS(SV_LayoutStruct = 8)
+	FResourceState
 {
-	EStreamingState		mStreamState;
+	EResourceState		mStreamState;
 	INT64				mAccessTime;
 	unsigned int		mResourceSize;
 
-	IResourceState()
+	FResourceState()
 	{
 		mStreamState = SS_Invalid;
 		mAccessTime = 0;
 		mResourceSize = 0;
 	}
-	inline EStreamingState GetStreamState()
+	inline EResourceState GetStreamState()
 	{
 		return mStreamState;
 	}
-	inline void SetStreamState(EStreamingState state)
+	inline void SetStreamState(EResourceState state)
 	{
 		mStreamState = state;
 	}
@@ -219,8 +219,24 @@ IResourceState
 	}
 };
 
-enum TR_ENUM(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-EPlatformType
+class TR_CLASS()
+	IResourceBase : public VIUnknownBase
+{
+public:
+	virtual void SetDebugName(const char* name) {}
+	virtual FResourceState* GetResourceState() {
+		return nullptr;
+	}
+	virtual void InvalidateResource() {
+		return;
+	}
+	virtual bool RestoreResource(VIUnknown* pDevice) {
+		return true;
+	}
+};
+
+enum TR_ENUM()
+	EPlatformType
 {
 	PLTF_Windows = (1 << 0),
 	PLTF_Android = (1 << 1),
@@ -230,8 +246,8 @@ EPlatformType
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef bool(*FOnManagedObjectHolderDestroy)(void* handle);
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-IManagedObjectHolder
+class TR_CLASS()
+	IManagedObjectHolder
 {
 	static FOnManagedObjectHolderDestroy OnManagedObjectHolderDestroy;
 public:

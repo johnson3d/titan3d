@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{2508205e-97e6-40b9-9bc1-32e602967674}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)VKBuffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VKCommandList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VKDrawcall.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VKEffect.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VKEvent.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VKFrameBuffers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VKGpuDevice.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VKGpuState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VKInputAssembly.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VKPreHead.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)VKShader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)VKBuffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VKCommandList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VKDrawcall.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VKEffect.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VKEvent.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VKFrameBuffers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VKGpuDevice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VKGpuState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VKInputAssembly.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VKPreHead.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)VKShader.h" />
+  </ItemGroup>
+</Project>

@@ -74,6 +74,11 @@ FFreeManagedObjectGCHandle CoreSDK::FreeManagedObjectGCHandle = nullptr;
 FGetManagedObjectFromGCHandle CoreSDK::GetManagedObjectFromGCHandle = nullptr;
 FOnShaderTranslated CoreSDK::OnShaderTranslated = nullptr;
 
+int CoreSDK::GetPixelFormatByteWidth(EPixelFormat fmt)
+{
+	return GetPixelByteWidth(fmt);
+}
+
 void CoreSDK::SetAssertEvent(FAssertEvent fn)
 {
 	mAssertEvent = fn;
@@ -193,6 +198,10 @@ void* CoreSDK::MemoryCopy(void* tar, void* src, UINT size)
 int CoreSDK::MemoryCmp(void* tar, void* src, UINT size)
 {
 	return memcmp(tar, src, size);
+}
+void* CoreSDK::MemorySet(void* tar, int val, UINT size)
+{
+	return memset(tar, val, size);
 }
 
 void* CoreSDK::Alloc(unsigned int size, const char* file, int line)

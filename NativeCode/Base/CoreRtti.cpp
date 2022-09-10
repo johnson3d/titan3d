@@ -219,7 +219,7 @@ struct Test_ConstantVarDesc : public VIUnknown, public v3dxVector3
 
 	}
 private:
-	typedef void (Test_ConstantVarDesc::MemberCall)(Test_ConstantVarDesc*);
+	typedef void (FnMemberCall)(Test_ConstantVarDesc*);
 	friend struct AuxRttiBuilder<Test_ConstantVarDesc>;
 	void AAAA(Test_ConstantVarDesc*)
 	{
@@ -227,7 +227,8 @@ private:
 	}
 	void TestSetDirty(std::string d, int c)
 	{
-		std::function<Test_ConstantVarDesc::MemberCall> a;
+		FnMemberCall aa;
+		std::function<FnMemberCall> a;
 		a = std::bind(&Test_ConstantVarDesc::AAAA, new Test_ConstantVarDesc(), std::placeholders::_1);
 		if (d == "true")
 			Dirty = 1;

@@ -416,7 +416,7 @@ template <typename _T>
 struct FVectorEnumerator : public VIEnumerator
 {
 	std::vector<_T>* Container;
-	typename std::vector<typename _T>::iterator Iterator;
+	typename std::vector<_T>::iterator VectorIterator;
 	FVectorEnumerator()
 	{
 		Container = nullptr;
@@ -425,19 +425,19 @@ struct FVectorEnumerator : public VIEnumerator
 	virtual FRttiStruct* GetElementType() override;
 	virtual void* Current() override
 	{
-		return &(*Iterator);
+		return &(*VectorIterator);
 	}
 	virtual bool MoveNext() override
 	{
-		if (Iterator == Container->end())
+		if (VectorIterator == Container->end())
 			return false;
-		Iterator++;
+		VectorIterator++;
 		return true;
 	}
 	virtual void Reset(void* container) override
 	{
 		Container = ((std::vector<_T>*)container);
-		Iterator = Container->begin();
+		VectorIterator = Container->begin();
 	}
 };
 
@@ -1474,6 +1474,7 @@ struct AuxRttiBuilder<CombineFullName(ns, Type)> : public AuxRttiBuilderBase\
 		pRtti->Init();\
 	}\
 };\
+FRttiStruct AuxRttiStruct<Type>::Instance;\
 AuxRttiBuilder<Type> AuxRttiBuilder<Type>::Instance;
 
 template<typename T>

@@ -5,7 +5,7 @@
 class vfxEvent
 {
 public:
-	VStringA mName;
+	std::string mName;
 	vBOOL	mIsValid;
 	pthread_mutex_t mMutex;
 	pthread_cond_t mCond;

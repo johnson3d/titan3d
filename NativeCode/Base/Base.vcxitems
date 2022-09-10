@@ -14,9 +14,12 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)allocator\PagedAllocator.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)BaseHead.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)BlobObject.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)cityhash\city.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)cityhash\citycrc.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)CommonTypes.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)CoreRtti.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)CoreSDK.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)CSharpAPI.h" />
@@ -49,11 +52,13 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)r2m\file_2_memory.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)r2m\res_2_memory.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)r2m\VPakFile.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)sdf\sdf_8ssedt.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)string\vfxHashString.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)string\vfxstring.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)thread\vfxcritical.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)thread\vfxevent.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)thread\vfxthread.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)thread\vfxThreadDispatcher.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)timekeys\TimeKeys.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)TypeUtility.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)vfxsampcounter.h" />
@@ -61,6 +66,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)xnd\vfxxnd.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)allocator\PagedAllocator.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)BlobObject.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)cityhash\city.cc" />
     <ClCompile Include="$(MSBuildThisFileDirectory)CoreRtti.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)CoreSDK.cpp" />
@@ -87,10 +94,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)r2m\F2MManager.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)r2m\file_2_memory.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)r2m\VPakFile.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)sdf\sdf_8ssedt.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)string\vfxstring.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)thread\vfxcritical.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)thread\vfxevent.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)thread\vfxthread.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)thread\vfxThreadDispatcher.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)timekeys\TimeKeys.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)vfxsampcounter.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)xnd\vfxxnd.cpp" />

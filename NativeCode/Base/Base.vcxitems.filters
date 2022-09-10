@@ -78,6 +78,16 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)cityhash\city.cc">
       <Filter>cityhash</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)sdf\sdf_8ssedt.cpp">
+      <Filter>sdf</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)BlobObject.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)allocator\PagedAllocator.cpp">
+      <Filter>allocator</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)thread\vfxThreadDispatcher.cpp">
+      <Filter>thread</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)BaseHead.h" />
@@ -197,6 +207,17 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)cityhash\citycrc.h">
       <Filter>cityhash</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)sdf\sdf_8ssedt.h">
+      <Filter>sdf</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)CommonTypes.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)BlobObject.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)allocator\PagedAllocator.h">
+      <Filter>allocator</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)thread\vfxThreadDispatcher.h">
+      <Filter>thread</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="io">
@@ -237,6 +258,12 @@
     </Filter>
     <Filter Include="cityhash">
       <UniqueIdentifier>{fc9bda83-fb26-4518-992d-9f8deb0422de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sdf">
+      <UniqueIdentifier>{3e67be04-f3fe-4177-adce-59fab41418c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="allocator">
+      <UniqueIdentifier>{183ee525-19f0-4ecc-bfc3-245c5b9f8fc7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

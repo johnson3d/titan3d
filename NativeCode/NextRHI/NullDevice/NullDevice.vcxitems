@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{955f58dd-eae0-4dd8-9e4b-cb695020e752}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)NullBuffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NullCommandList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NullEvent.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NullFrameBuffers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NullGpuDevice.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NullGpuState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NullInputAssembly.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NullPreHead.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NullShader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)NullBuffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NullCommandList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NullEvent.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NullFrameBuffers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NullGpuDevice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NullGpuState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NullInputAssembly.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NullPreHead.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NullShader.h" />
+  </ItemGroup>
+</Project>

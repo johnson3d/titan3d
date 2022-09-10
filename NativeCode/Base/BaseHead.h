@@ -24,6 +24,8 @@
 #define HasModule_Terrain
 #define HasModule_RenderDoc
 #define HasModule_Particle
+#define HasModule_MathLib
+#define HasModule_NextRHI
 
 #include <WinSock2.h>
 #include <mswsock.h>
@@ -57,6 +59,8 @@
 #define HasModule_MeshSimplify
 #define HasModule_Terrain
 #define HasModule_Particle
+#define HasModule_MathLib
+#define HasModule_NextRHI
 
 #include <jni.h>
 #include <errno.h>
@@ -78,25 +82,6 @@
 #include "vfxtypes_nw.h"
 #endif
 
-#ifdef abs
-#undef abs
-#endif
-
-typedef int	vBOOL;
-
-#if !defined(PLATFORM_WIN)
-#  define WINAPI 
-#endif
-
-#define __voffsetof(_Struct,_Member) ((size_t)(&(((_Struct*)nullptr)->_Member)))
-#define __vstatic_cast(_Pointor,_Struct,_Member) ((_Struct*)(((size_t)(_Pointor))-__voffsetof(_Struct,_Member)))
-#	define vT(x)	x
-
-#ifndef _countof
-#	define _countof(array)	(sizeof(array) / sizeof(array[0]))
-#endif
-
-
 #include <vector>
 #include <list>
 #include <map>
@@ -114,6 +99,23 @@ typedef int	vBOOL;
 #include <clocale>	/// std::setlocale
 #include <cstdlib>	/// std::wcstombs, std::mbstowcs
 
+#include "CommonTypes.h"
+
+#ifdef abs
+#undef abs
+#endif
+
+#if !defined(PLATFORM_WIN)
+#  define WINAPI 
+#endif
+
+#define __voffsetof(_Struct,_Member) ((size_t)(&(((_Struct*)nullptr)->_Member)))
+#define __vstatic_cast(_Pointor,_Struct,_Member) ((_Struct*)(((size_t)(_Pointor))-__voffsetof(_Struct,_Member)))
+#	define vT(x)	x
+
+#ifndef _countof
+#	define _countof(array)	(sizeof(array) / sizeof(array[0]))
+#endif
 
 #define ENGINENS_BUFFER_SIZE 65536
 
@@ -146,18 +148,3 @@ inline void _vfxTraceA(LPCSTR lpszFormat, ...)
 #else
 #		define VFX_API
 #endif
-
-//typedef char SByte;
-//#define SByte char
-#define Wchar16 unsigned short
-#define Wchar32 unsigned int
-
-typedef char Int8;
-typedef SHORT Int16;
-typedef INT Int32;
-typedef INT64 Int64;
-
-typedef BYTE UInt8;
-typedef USHORT UInt16;
-typedef UINT UInt32;
-typedef UINT64 UInt64;

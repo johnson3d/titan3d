@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{5755f6e4-767b-41d9-99c3-a9b574f1c9a6}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX12Buffer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX12CommandList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX12Effect.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX12Event.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX12FrameBuffers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX12GpuDevice.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX12GpuState.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX12InputAssembly.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX12PreHead.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX12Shader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX12Buffer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX12CommandList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX12Effect.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX12Event.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX12FrameBuffers.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX12GpuDevice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX12GpuState.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX12InputAssembly.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX12PreHead.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX12Shader.h" />
+  </ItemGroup>
+</Project>

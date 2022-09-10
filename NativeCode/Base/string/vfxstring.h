@@ -193,6 +193,10 @@ inline bool operator!=(const VNameString& lh, const VNameString& rh)
 {
 	return lh.Index != rh.Index;
 }
+inline bool operator<(const VNameString& lh, const VNameString& rh)
+{
+	return lh.Index < rh.Index;
+}
 inline bool operator==(const VNameString& lh, const char* rh)
 {
 	if (rh == nullptr)
