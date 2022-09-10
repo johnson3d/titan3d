@@ -1,1 +1,0 @@
-EngineNS.Bricks.CodeBuilder.MacrossNode.BoolNode@EngineCore

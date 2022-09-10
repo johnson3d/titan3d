@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_354450030 Type="EngineNS.Animation.Asset.UAnimationChunk@EngineCore">
-  <AnimatedHierarchy Type="EngineNS.Animation.Base.UAnimHierarchy@EngineCore" Order="0" />
-  <AnimCurvesList Type="System.Collections.Generic.Dictionary&lt;System.Guid@Unknown,EngineNS.Animation.Curve.ICurve@EngineCore,&gt;@Unknown" Order="0" />
-  <RescouceName Type="EngineNS.RName@EngineCore" Order="0" />
-</Hash_354450030>

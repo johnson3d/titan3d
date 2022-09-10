@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_1228549612 Type="EngineNS.Bricks.CodeBuilder.ShaderNode.Operator.ModNode@EngineCore">
-  <LeftTypeString Type="System.String@Unknown" Order="0" />
-  <Name Type="System.String@Unknown" Order="0" />
-  <NodeId Type="System.Guid@Unknown" Order="0" />
-  <Position Type="EngineNS.Vector2@EngineCore" Order="0" />
-</Hash_1228549612>

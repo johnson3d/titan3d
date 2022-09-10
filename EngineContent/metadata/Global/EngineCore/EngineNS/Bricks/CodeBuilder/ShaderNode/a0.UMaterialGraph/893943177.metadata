@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_893943177 Type="EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialGraph@EngineCore">
-  <GraphName Type="System.String@Unknown" Order="0" />
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.EGui.Controls.NodeGraph.NodeBase@EngineCore,&gt;@Unknown" Order="0" />
-  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.EGui.Controls.NodeGraph.PinLinker@EngineCore,&gt;@Unknown" Order="1" />
-  <ReadSignal Type="System.Boolean@Unknown" Order="100" />
-</Hash_893943177>

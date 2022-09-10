@@ -1,1 +1,0 @@
-EngineNS.Bricks.CodeBuilder.ShaderNode.Var.VarColor4@EngineCore
