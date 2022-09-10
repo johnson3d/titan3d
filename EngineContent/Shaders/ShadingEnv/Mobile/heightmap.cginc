@@ -1,5 +1,5 @@
 
-cbuffer cbPerTerrain
+cbuffer cbPerTerrain DX_AUTOBIND
 {
 	float3 StartPosition;
 	float GridSize;
@@ -7,11 +7,11 @@ cbuffer cbPerTerrain
 	float UVStep;
 };
 
-Texture2D		HeightMapTexture DX_NOBIND;
-SamplerState	Samp_HeightMapTexture DX_NOBIND;
+Texture2D		HeightMapTexture DX_AUTOBIND;
+SamplerState	Samp_HeightMapTexture DX_AUTOBIND;
 
-Texture2D		NormalMapTexture DX_NOBIND;
-SamplerState	Samp_NormalMapTexture DX_NOBIND;
+Texture2D		NormalMapTexture DX_AUTOBIND;
+SamplerState	Samp_NormalMapTexture DX_AUTOBIND;
 
 half3 GetPosition(half x, half z, out half2 uv, out half3 nor)
 {

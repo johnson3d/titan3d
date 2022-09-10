@@ -28,22 +28,15 @@
 
 #pragma once
 
+#include <cstdint>
 #include <functional>
 
-#if defined(__clang__)
-#define SC_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-#define SC_SYMBOL_IMPORT
-#elif defined(__GNUC__)
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-#define SC_SYMBOL_EXPORT __attribute__((__dllexport__))
-#define SC_SYMBOL_IMPORT __attribute__((__dllimport__))
-#else
-#define SC_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-#define SC_SYMBOL_IMPORT
-#endif
-#elif defined(_MSC_VER)
 #define SC_SYMBOL_EXPORT __declspec(dllexport)
 #define SC_SYMBOL_IMPORT __declspec(dllimport)
+#else
+#define SC_SYMBOL_EXPORT __attribute__((visibility("default")))
+#define SC_SYMBOL_IMPORT
 #endif
 
 #ifdef SHADER_CONDUCTOR_SOURCE
@@ -110,7 +103,7 @@ namespace ShaderConductor
         Blob& operator=(const Blob& other);
         Blob& operator=(Blob&& other) noexcept;
 
-        void Reset();
+        void Reset() noexcept;
         void Reset(const void* data, uint32_t size);
 
         const void* Data() const noexcept;
@@ -125,43 +118,97 @@ namespace ShaderConductor
     {
     public:
         class ReflectionImpl;
+        struct VariableDesc;
+
+        class SC_API ConstantBuffer
+        {
+            friend class ReflectionImpl;
+
+        public:
+            ConstantBuffer() noexcept;
+            ConstantBuffer(const ConstantBuffer& other);
+            ConstantBuffer(ConstantBuffer&& other) noexcept;
+            ~ConstantBuffer() noexcept;
+
+            ConstantBuffer& operator=(const ConstantBuffer& other);
+            ConstantBuffer& operator=(ConstantBuffer&& other) noexcept;
+
+            bool Valid() const noexcept;
+
+            const char* Name() const noexcept;
+            uint32_t Size() const noexcept;
+
+            uint32_t NumVariables() const noexcept;
+            const VariableDesc* VariableByIndex(uint32_t index) const noexcept;
+            const VariableDesc* VariableByName(const char* name) const noexcept;
+        private:
+            class ConstantBufferImpl;
+            ConstantBufferImpl* m_impl = nullptr;
+        };
+
+        class SC_API VariableType
+        {
+            friend class ConstantBuffer;
+
+        public:
+            enum class DataType
+            {
+                Void,
+
+                Bool,
+                Int,
+                Uint,
+                Float,
+
+                Half,
+                Int16,
+                Uint16,
+
+                Struct,
+            };
+
+        public:
+            VariableType() noexcept;
+            VariableType(const VariableType& other);
+            VariableType(VariableType&& other) noexcept;
+            ~VariableType() noexcept;
+
+            VariableType& operator=(const VariableType& other);
+            VariableType& operator=(VariableType&& other) noexcept;
+
+            bool Valid() const noexcept;
+
+            const char* Name() const noexcept;
+            DataType Type() const noexcept;
+            uint32_t Rows() const noexcept;     // Number of rows (for matrices, 1 for other numeric, 0 if not applicable)
+            uint32_t Columns() const noexcept;  // Number of columns (for vectors & matrices, 1 for other numeric, 0 if not applicable)
+            uint32_t Elements() const noexcept; // Number of elements (0 if not an array)
+            uint32_t ElementStride() const noexcept;
+
+            uint32_t NumMembers() const noexcept;
+            const VariableDesc* MemberByIndex(uint32_t index) const noexcept;
+            const VariableDesc* MemberByName(const char* name) const noexcept;
+
+        private:
+            class VariableTypeImpl;
+            VariableTypeImpl* m_impl = nullptr;
+        };
 
         struct ResourceDesc
         {
             char name[256];          // Name of the resource
             ShaderResourceType type; // Type of resource (e.g. texture, cbuffer, etc.)
-            uint32_t bindPoint;      // Starting bind point
-            uint32_t bindCount;      // Number of contiguous bind points (for arrays)
-        };
-
-        enum class VariableType
-        {
-            Bool,
-            Int,
-            Uint,
-            Float,
-
-            Half,
-            Int16,
-            Uint16,
-        };
-
-        struct VariableTypeDesc
-        {
-            char name[256];
-            VariableType type;
-            uint32_t rows;          // Number of rows (for matrices, 1 for other numeric, 0 if not applicable)
-            uint32_t columns;       // Number of columns (for vectors & matrices, 1 for other numeric, 0 if not applicable)
-            uint32_t elements;      // Number of elements (0 if not an array)
-            uint32_t elementStride;
+            uint32_t space;
+            uint32_t bindPoint; // Starting bind point
+            uint32_t bindCount; // Number of contiguous bind points (for arrays)
         };
 
         struct VariableDesc
         {
             char name[256];
-            VariableTypeDesc type;
-            uint32_t startOffset; // Offset in cbuffer
-            uint32_t size;        // Size of the variable
+            VariableType type;
+            uint32_t offset; // Offset in cbuffer or stuct
+            uint32_t size;   // Size of the variable
         };
 
         enum class ComponentMask : uint8_t
@@ -177,7 +224,7 @@ namespace ShaderConductor
             char semantic[256];
             uint32_t semanticIndex;
             uint32_t location;
-            VariableType componentType;
+            VariableType::DataType componentType;
             ComponentMask mask;
         };
 
@@ -190,10 +237,10 @@ namespace ShaderConductor
             Triangles,
             TriangleStrip,
 
-            Lines_Adj,
-            LineStrip_Adj,
-            Triangles_Adj,
-            TriangleStrip_Adj,
+            LinesAdj,
+            LineStripAdj,
+            TrianglesAdj,
+            TriangleStripAdj,
 
             Patches_1_CtrlPoint,
             Patches_2_CtrlPoint,
@@ -234,8 +281,8 @@ namespace ShaderConductor
             Undefined,
             Point,
             Line,
-            Triangle_CW,
-            Triangle_CCW,
+            TriangleCW,
+            TriangleCCW,
         };
 
         enum class TessellatorPartitioning
@@ -243,8 +290,8 @@ namespace ShaderConductor
             Undefined,
             Integer,
             Pow2,
-            Fractional_Odd = 3,
-            Fractional_Even = 4,
+            FractionalOdd,
+            FractionalEven,
         };
 
         enum class TessellatorDomain
@@ -255,31 +302,34 @@ namespace ShaderConductor
             Quad,
         };
 
-        class SC_API ConstantBuffer
+        class SC_API Function
         {
-        public:
-            class ConstantBufferImpl;
+            friend class ReflectionImpl;
 
         public:
-            ConstantBuffer() noexcept;
-            ConstantBuffer(const ConstantBuffer& other);
-            ConstantBuffer(ConstantBuffer&& other) noexcept;
-            ~ConstantBuffer() noexcept;
+            Function() noexcept;
+            Function(const Function& other);
+            Function(Function&& other) noexcept;
+            ~Function() noexcept;
 
-            ConstantBuffer& operator=(const ConstantBuffer& other);
-            ConstantBuffer& operator=(ConstantBuffer&& other) noexcept;
+            Function& operator=(const Function& other);
+            Function& operator=(Function&& other) noexcept;
 
             bool Valid() const noexcept;
 
             const char* Name() const noexcept;
-            uint32_t Size() const noexcept;
 
-            uint32_t NumVariables() const noexcept;
-            const VariableDesc& VariableByIndex(uint32_t index) const;
-            const VariableDesc& VariableByName(const char* name) const;
+            uint32_t NumResources() const noexcept;
+            const ResourceDesc* ResourceByIndex(uint32_t index) const noexcept;
+            const ResourceDesc* ResourceByName(const char* name) const noexcept;
+
+            uint32_t NumConstantBuffers() const noexcept;
+            const ConstantBuffer* ConstantBufferByIndex(uint32_t index) const noexcept;
+            const ConstantBuffer* ConstantBufferByName(const char* name) const noexcept;
 
         private:
-            ConstantBufferImpl* m_impl = nullptr;
+            class FunctionImpl;
+            FunctionImpl* m_impl = nullptr;
         };
 
     public:
@@ -294,34 +344,42 @@ namespace ShaderConductor
         bool Valid() const noexcept;
 
         uint32_t NumResources() const noexcept;
-        const ResourceDesc& ResourceByIndex(uint32_t index) const;
-        const ResourceDesc& ResourceByName(const char* name) const;
+        const ResourceDesc* ResourceByIndex(uint32_t index) const noexcept;
+        const ResourceDesc* ResourceByName(const char* name) const noexcept;
 
-        const ConstantBuffer& ConstantBufferByIndex(uint32_t index) const;
-        const ConstantBuffer& ConstantBufferByName(const char* name) const;
+        uint32_t NumConstantBuffers() const noexcept;
+        const ConstantBuffer* ConstantBufferByIndex(uint32_t index) const noexcept;
+        const ConstantBuffer* ConstantBufferByName(const char* name) const noexcept;
 
         uint32_t NumInputParameters() const noexcept;
-        const SignatureParameterDesc& InputParameter(uint32_t index) const;
+        const SignatureParameterDesc* InputParameter(uint32_t index) const noexcept;
         uint32_t NumOutputParameters() const noexcept;
-        const SignatureParameterDesc& OutputParameter(uint32_t index) const;
+        const SignatureParameterDesc* OutputParameter(uint32_t index) const noexcept;
 
         PrimitiveTopology GSHSInputPrimitive() const noexcept;
         PrimitiveTopology GSOutputTopology() const noexcept;
         uint32_t GSMaxNumOutputVertices() const noexcept;
-        uint32_t GSInstanceCount() const noexcept;
+        uint32_t GSNumInstances() const noexcept;
 
         TessellatorOutputPrimitive HSOutputPrimitive() const noexcept;
         TessellatorPartitioning HSPartitioning() const noexcept;
 
         TessellatorDomain HSDSTessellatorDomain() const noexcept;
         uint32_t HSDSNumPatchConstantParameters() const noexcept;
-        const SignatureParameterDesc& HSDSPatchConstantParameter(uint32_t index) const;
+        const SignatureParameterDesc* HSDSPatchConstantParameter(uint32_t index) const noexcept;
         uint32_t HSDSNumConrolPoints() const noexcept;
 
         uint32_t CSBlockSizeX() const noexcept;
         uint32_t CSBlockSizeY() const noexcept;
         uint32_t CSBlockSizeZ() const noexcept;
 
+        uint32_t NumFunctions() const noexcept;
+        const Function* FunctionByIndex(uint32_t index) const noexcept;
+        const Function* FunctionByName(const char* name) const noexcept;
+
+        // modify by johnson3d
+        void* GetD3D12ShaderReflection() const noexcept;
+        // end modify
     private:
         ReflectionImpl* m_impl = nullptr;
     };
@@ -331,12 +389,12 @@ namespace ShaderConductor
     public:
         struct ShaderModel
         {
-            uint8_t major_ver : 6;
-            uint8_t minor_ver : 2;
+            uint8_t major_ver;
+            uint8_t minor_ver;
 
             uint32_t FullVersion() const noexcept
             {
-                return (major_ver << 2) | minor_ver;
+                return (major_ver << 8) | minor_ver;
             }
 
             bool operator<(const ShaderModel& other) const noexcept
@@ -387,6 +445,9 @@ namespace ShaderConductor
             int shiftAllSamplersBindings = 0;
             int shiftAllCBuffersBindings = 0;
             int shiftAllUABuffersBindings = 0;
+
+            bool needReflection = false;
+            bool stripReflection = false;               //renderdoc needs those infomations, default value is false
         };
 
         struct TargetDesc
@@ -410,8 +471,7 @@ namespace ShaderConductor
         struct DisassembleDesc
         {
             ShadingLanguage language;
-            const uint8_t* binary;
-            uint32_t binarySize;
+            Blob binary;
         };
 
         struct ModuleDesc
@@ -436,18 +496,37 @@ namespace ShaderConductor
         static ResultDesc Disassemble(const DisassembleDesc& source);
 
         // Currently only Dxil on Windows supports linking
-        static bool LinkSupport();
+        static bool LinkSupport() noexcept;
         static ResultDesc Link(const LinkDesc& modules, const Options& options, const TargetDesc& target);
     };
 
-    inline Reflection::ComponentMask& operator|=(Reflection::ComponentMask& lhs, Reflection::ComponentMask rhs)
+    inline Reflection::ComponentMask& operator|=(Reflection::ComponentMask& lhs, Reflection::ComponentMask rhs) noexcept
     {
         lhs = static_cast<Reflection::ComponentMask>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
         return lhs;
     }
-    inline constexpr Reflection::ComponentMask operator|(Reflection::ComponentMask lhs, Reflection::ComponentMask rhs)
+    inline constexpr Reflection::ComponentMask operator|(Reflection::ComponentMask lhs, Reflection::ComponentMask rhs) noexcept
     {
         return static_cast<Reflection::ComponentMask>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
+    }
+
+    inline Reflection::ComponentMask& operator&=(Reflection::ComponentMask& lhs, Reflection::ComponentMask rhs) noexcept
+    {
+        lhs = static_cast<Reflection::ComponentMask>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+        return lhs;
+    }
+    inline constexpr Reflection::ComponentMask operator&(Reflection::ComponentMask lhs, Reflection::ComponentMask rhs) noexcept
+    {
+        return static_cast<Reflection::ComponentMask>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+    }
+
+    inline bool HasAllFlags(Reflection::ComponentMask flags, Reflection::ComponentMask contains) noexcept
+    {
+        return (static_cast<uint8_t>(flags) & static_cast<uint8_t>(contains)) == static_cast<uint8_t>(contains);
+    }
+    inline bool HasAnyFlags(Reflection::ComponentMask flags, Reflection::ComponentMask contains) noexcept
+    {
+        return (static_cast<uint8_t>(flags) & static_cast<uint8_t>(contains)) != 0;
     }
 } // namespace ShaderConductor
 

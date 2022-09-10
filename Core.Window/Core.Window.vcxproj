@@ -23,7 +23,7 @@
     <ProjectGuid>{AD0E23E3-ECA5-4E52-B69D-BB6E669C48C6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>CoreWindow</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -59,10 +59,6 @@
     <Import Project="..\NativeCode\ImGui\ImGui.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Base\Base.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Math\Math.vcxitems" Label="Shared" />
-    <Import Project="..\NativeCode\RHI\D3D11\D3D11.vcxitems" Label="Shared" />
-    <Import Project="..\NativeCode\RHI\OpenGL\OpenGL.vcxitems" Label="Shared" />
-    <Import Project="..\NativeCode\RHI\RHI.vcxitems" Label="Shared" />
-    <Import Project="..\NativeCode\RHI\VirtualDevice\VirtualDevice.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\Image.Shared\Image.Shared.vcxitems" Label="Shared" />
     <Import Project="..\codegen\NativeBinder\CodeGen.vcxitems" Label="Shared" />
@@ -82,8 +78,13 @@
     <Import Project="..\NativeCode\Bricks\MeshSimplify\MeshSimplify.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Terrain\Terrain.vcxitems" Label="Shared" />
-    <Import Project="..\NativeCode\RHI\Vulkan\Vulkan.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Particle\Particle.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\MathLib\MathLib.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\NextRHI\NextRHI.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\NextRHI\Dx11\Dx11.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\NextRHI\NullDevice\NullDevice.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\NextRHI\Dx12\Dx12.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\NextRHI\Vulkan\Vulkan.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -132,7 +133,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>Core.Window.def</ModuleDefinitionFile>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/eigen;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -146,7 +147,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -183,7 +184,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/eigen;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -199,7 +200,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;c:\aaa;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;c:\aaa;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -209,7 +210,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;..\3rd\native\PhysX-4.1\physx\Lib\windows\release;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/eigen;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;../3rd/native/eigen-3.4.0;..\3rd\native\PhysX-4.1\physx\Lib\windows\release;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;spirv-cross-c-shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
@@ -232,8 +233,16 @@ $(SolutionDir)CS_Rpc_Engine.bat</Command>
   </ItemGroup>
   <ItemGroup>
     <None Include="Core.Window.def" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\WinPixEventRuntime.1.0.220124001\build\WinPixEventRuntime.targets" Condition="Exists('..\packages\WinPixEventRuntime.1.0.220124001\build\WinPixEventRuntime.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\WinPixEventRuntime.1.0.220124001\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WinPixEventRuntime.1.0.220124001\build\WinPixEventRuntime.targets'))" />
+  </Target>
 </Project>

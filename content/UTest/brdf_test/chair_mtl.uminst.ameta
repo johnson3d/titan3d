@@ -9,8 +9,6 @@
       <e_1 Value="0,0,1,1" />
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
-    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
-    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
     <e_0 Value="Game,utest/brdf_test/brdf_test.material,ea44e959-44bd-4020-a1ac-521b4d7a3e15" />

@@ -32,11 +32,11 @@ half3 GetColor(uint data)
 	return half3(r, g, b);
 }
 
-RWStructuredBuffer<uint> VxPool DX_NOBIND;//: register(u1);
-RWStructuredBuffer<int> VxAllocator DX_NOBIND;//register(u2);
-RWStructuredBuffer<int> VxScene DX_NOBIND;//register(u3);
+RWStructuredBuffer<uint> VxPool DX_AUTOBIND;//: register(u1);
+RWStructuredBuffer<int> VxAllocator DX_AUTOBIND;//register(u2);
+RWStructuredBuffer<int> VxScene DX_AUTOBIND;//register(u3);
 
-cbuffer cbGBufferDesc DX_NOBIND// : register(b10)
+cbuffer cbGBufferDesc DX_AUTOBIND// : register(b10)
 {
 	float3		VxStartPosition;
 	int			VxDebugger_IndexCountPerInstance; 

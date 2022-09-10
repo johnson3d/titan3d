@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.RHI.CShaderResourceViewAMeta@EngineCore">
+<Root Type="EngineNS.NxRHI.USrViewAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="bc762b59-45ae-4d3b-bb50-c6e63327c8dc" />
-  <Description Type="System.String@Unknown" Value="This is a EngineNS.RHI.CShaderResourceView&#xA;" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
@@ -12,5 +12,5 @@
     <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.RHI.CShaderResourceView@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.USrView@EngineCore" />
 </Root>

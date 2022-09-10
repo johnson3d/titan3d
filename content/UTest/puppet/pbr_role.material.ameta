@@ -10,8 +10,6 @@
       <e_2 Value="0,0,1,1" />
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
-    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
-    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
     <e_0 Value="Game,utest/puppet/texture/puppet_gra.srv,45326077-58f6-49d7-ba15-e402054afa1e" />

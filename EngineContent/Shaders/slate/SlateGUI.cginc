@@ -19,8 +19,8 @@ struct PS_INPUT
     VK_LOCATION(3) float2 uv  : TEXCOORD0;
 };
 
-VK_BIND(0) Texture2D FontTexture DX_NOBIND;
-VK_BIND(1) sampler Samp_FontTexture DX_NOBIND;
+VK_BIND(0) Texture2D FontTexture DX_AUTOBIND;
+VK_BIND(1) sampler Samp_FontTexture DX_AUTOBIND;
 
 PS_INPUT VS_Main(VS_INPUT input)
 {

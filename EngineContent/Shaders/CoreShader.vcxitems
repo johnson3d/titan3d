@@ -16,6 +16,9 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\NebulaParticle.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\ParticleCommon.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Terrain\Common.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Terrain\GrassModifier.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Terrain\TerrainCDLOD.cginc" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerCamera.cginc" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerFrame.cginc" />
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerMaterial.cginc" />
@@ -64,7 +67,6 @@
     <None Include="$(MSBuildThisFileDirectory)MobileSky.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)MobileTranslucent.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)Modifier\TerrainCDLOD.cginc" />
     <None Include="$(MSBuildThisFileDirectory)PickedBlurH.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)PickedBlurV.shadingenv" />
     <None Include="$(MSBuildThisFileDirectory)PickedHollow.shadingenv" />

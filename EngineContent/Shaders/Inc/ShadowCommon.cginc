@@ -78,5 +78,12 @@ half DoPCF4x4(float2 SMUV, ShadowFilterData SFD)
 	return PCF4x4(alpha, SMValueR0, SMValueR1, SMValueR2, SMValueR3);
 }
 
+ half GetESMValue(float2 SMUV, ShadowFilterData SFD, float ESM_C)
+{
+	half2 TexelPos = (half2)(SMUV * SFD.mShadowMapSizeAndRcp.xy);
+	half shadowdepth = (half)SFD.mShadowMap.SampleLevel(SFD.mShadowMapSampler, float2(TexelPos) * SFD.mShadowMapSizeAndRcp.zw, 0).r;;
+	float Shadow = saturate( exp( -ESM_C * ( shadowdepth - SFD.mViewer2ShadowDepth ) ));
+	return 1 - Shadow;
+}
 
 #endif

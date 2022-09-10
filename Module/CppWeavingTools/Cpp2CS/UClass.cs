@@ -76,7 +76,6 @@ namespace CppWeaving.Cpp2CS
             {
                 VisitorClassName = Name + "_Visitor";
             }
-
             if (string.IsNullOrEmpty(VisitorNS) == false)
             {
                 VisitorName = VisitorNS + "::" + VisitorClassName;

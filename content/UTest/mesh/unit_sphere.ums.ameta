@@ -10,11 +10,9 @@
       <e_2 Value="0,0,1,1" />
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
-    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
-    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
-    <e_0 Value="Engine,mesh/base/sphere.vms,d10ee00a-40c9-4e34-8e37-9c18adc9fdde" />
+    <e_0 Value="Engine,mesh/base/sphere.vms,00000000-0000-0000-0000-000000000000" />
     <e_1 Value="Game,utest/ddd.uminst,da21bb21-134c-4d00-bdbb-00459e7a91c1" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMaterialMesh@EngineCore" />

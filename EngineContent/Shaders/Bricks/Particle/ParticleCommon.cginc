@@ -55,7 +55,7 @@ struct UShapeSphere
 	float		Thinness;
 };
 
-cbuffer cbParticleDesc DX_NOBIND
+cbuffer cbParticleDesc DX_AUTOBIND
 {
 	float		ParticleElapsedTime;
 	uint		ParticleRandomSeed;

@@ -1,9 +1,9 @@
 #include "VXGICommon.compute"
 
 //RWTexture2D<float4> GBufferDiffuseAndDepth : register(u5);
-Texture2D<float4> GBufferAbedo DX_NOBIND;//(t0);
-Texture2D<float2> GBufferDepth DX_NOBIND;//register(t1);
-Texture2D<float4> GBufferShadowMask DX_NOBIND;//register(t2);
+Texture2D<float4> GBufferAbedo DX_AUTOBIND;//(t0);
+Texture2D<float2> GBufferDepth DX_AUTOBIND;//register(t1);
+Texture2D<float4> GBufferShadowMask DX_AUTOBIND;//register(t2);
 
 float4 GetPixel(uint3 id)
 {

@@ -40,6 +40,7 @@ typedef enum {
   shaderc_env_version_vulkan_1_0 = ((1u << 22)),
   shaderc_env_version_vulkan_1_1 = ((1u << 22) | (1 << 12)),
   shaderc_env_version_vulkan_1_2 = ((1u << 22) | (2 << 12)),
+  shaderc_env_version_vulkan_1_3 = ((1u << 22) | (3 << 12)),
   // For OpenGL, use the number from #version in shaders.
   // TODO(dneto): Currently no difference between OpenGL 4.5 and 4.6.
   // See glslang/Standalone/Standalone.cpp
@@ -60,7 +61,8 @@ typedef enum {
   shaderc_spirv_version_1_2 = 0x010200u,
   shaderc_spirv_version_1_3 = 0x010300u,
   shaderc_spirv_version_1_4 = 0x010400u,
-  shaderc_spirv_version_1_5 = 0x010500u
+  shaderc_spirv_version_1_5 = 0x010500u,
+  shaderc_spirv_version_1_6 = 0x010600u
 } shaderc_spirv_version;
 
 #ifdef __cplusplus

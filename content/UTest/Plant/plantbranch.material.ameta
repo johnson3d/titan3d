@@ -10,8 +10,6 @@
       <e_2 Value="0,0,1,1" />
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
-    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
-    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Game,utest/plant/fir_01_plant/t_fir_alba_bark_01_bc.srv,008d4fd2-d08d-4469-b41a-5c3dd0e595bd" />

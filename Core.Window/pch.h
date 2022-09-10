@@ -19,6 +19,6 @@
 #include "../NativeCode/Base/csharp/CsBinder.h"
 
 
-#include "../NativeCode/RHI/RHI.h"
+#include "../NativeCode/NextRHI/NxRHI.h"
 
 #endif //PCH_H

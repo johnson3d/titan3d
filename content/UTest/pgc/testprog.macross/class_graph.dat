@@ -152,7 +152,7 @@
                 <TypeFullName Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UBufferConponent" />
               </Type>
             </InitValue>
-            <VariableName Type="System.String@Unknown" Value="tmp_r_FindBuffer_4184920967" />
+            <VariableName Type="System.String@Unknown" Value="tmp_r_FindBuffer_4158856752" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Bricks.Procedure.UBufferConponent@EngineCore" />

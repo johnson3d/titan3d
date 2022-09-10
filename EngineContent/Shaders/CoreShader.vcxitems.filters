@@ -55,6 +55,9 @@
     <Filter Include="Bricks\Particle">
       <UniqueIdentifier>{8b33271d-5d00-47ba-a8da-a80ff6c64ee0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Bricks\Terrain">
+      <UniqueIdentifier>{98493c97-a395-4984-9681-117246df33b9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -309,9 +312,6 @@
     <None Include="$(MSBuildThisFileDirectory)Inc\MonteCarlo.cginc">
       <Filter>Inc</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Modifier\TerrainCDLOD.cginc">
-      <Filter>Modifier</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)slate\SlateGUI.cginc">
       <Filter>Slate</Filter>
     </None>
@@ -323,6 +323,15 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)Inc\SysFunctionDefImpl.cginc">
       <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Terrain\GrassModifier.cginc">
+      <Filter>Bricks\Terrain</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Terrain\TerrainCDLOD.cginc">
+      <Filter>Bricks\Terrain</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Terrain\Common.cginc">
+      <Filter>Bricks\Terrain</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

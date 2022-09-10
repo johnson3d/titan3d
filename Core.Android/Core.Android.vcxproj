@@ -98,9 +98,7 @@
     <Import Project="..\NativeCode\Base\Base.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Math\Math.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Graphics\Mesh\Mesh.vcxitems" Label="Shared" />
-    <Import Project="..\NativeCode\RHI\OpenGL\OpenGL.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Graphics\Pipeline\Pipeline.vcxitems" Label="Shared" />
-    <Import Project="..\NativeCode\RHI\RHI.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\TextConverter\TextConverter.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Animation\Animation.vcxitems" Label="Shared" />

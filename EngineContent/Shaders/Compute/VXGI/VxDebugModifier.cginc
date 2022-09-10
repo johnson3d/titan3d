@@ -8,7 +8,7 @@ struct FVoxelDebugger
 	float		Pad0;
 };
 
-StructuredBuffer<FVoxelDebugger> VxDebugInstanceSRV DX_NOBIND;//: register(t13);
+StructuredBuffer<FVoxelDebugger> VxDebugInstanceSRV DX_AUTOBIND;//: register(t13);
 void DoVoxelDebugMeshVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
 {
 	FVoxelDebugger vx = VxDebugInstanceSRV[vert.vInstanceId];

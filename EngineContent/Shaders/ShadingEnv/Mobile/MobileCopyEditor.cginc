@@ -19,23 +19,23 @@
 
 #include "../../Inc/FXAAMobile.cginc"
 
-Texture2D gBaseSceneView DX_NOBIND;
-SamplerState Samp_gBaseSceneView DX_NOBIND;
+Texture2D gBaseSceneView DX_AUTOBIND;
+SamplerState Samp_gBaseSceneView DX_AUTOBIND;
 
-Texture2D gBloomTex DX_NOBIND;
-SamplerState Samp_gBloomTex DX_NOBIND;
+Texture2D gBloomTex DX_AUTOBIND;
+SamplerState Samp_gBloomTex DX_AUTOBIND;
 
-Texture2D gPickedTex DX_NOBIND;
-SamplerState Samp_gPickedTex DX_NOBIND;
+Texture2D gPickedTex DX_AUTOBIND;
+SamplerState Samp_gPickedTex DX_AUTOBIND;
 
-Texture2D GVignette DX_NOBIND;
-SamplerState Samp_GVignette DX_NOBIND;
+Texture2D GVignette DX_AUTOBIND;
+SamplerState Samp_GVignette DX_AUTOBIND;
 
-Texture2D gSunShaft DX_NOBIND;
-SamplerState Samp_gSunShaft DX_NOBIND;
+Texture2D gSunShaft DX_AUTOBIND;
+SamplerState Samp_gSunShaft DX_AUTOBIND;
 
-Texture2D gMobileAoTex DX_NOBIND;
-SamplerState Samp_gMobileAoTex DX_NOBIND;
+Texture2D gMobileAoTex DX_AUTOBIND;
+SamplerState Samp_gMobileAoTex DX_AUTOBIND;
 
 PS_INPUT VS_Main(VS_INPUT input)
 {

@@ -60,7 +60,7 @@ namespace ProjectCooker.Command
         async System.Threading.Tasks.Task ProcTextures()
         {
             var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Game);
-            var files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.RHI.CShaderResourceView.AssetExt, true);
+            var files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.NxRHI.USrView.AssetExt, true);
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
@@ -70,7 +70,7 @@ namespace ProjectCooker.Command
             }
 
             root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Engine);
-            files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.RHI.CShaderResourceView.AssetExt, true);
+            files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.NxRHI.USrView.AssetExt, true);
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);

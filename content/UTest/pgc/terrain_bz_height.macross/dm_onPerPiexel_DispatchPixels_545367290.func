@@ -64,7 +64,40 @@
         </Arguments>
         <IsAsync Type="System.Boolean@Unknown" Value="False" />
         <IsOverride Type="System.Boolean@Unknown" Value="False" />
-        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
+        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="2">
+          <e_0 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
+              <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+                <IsEnum Type="System.Boolean@Unknown" Value="False" />
+                <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Vector3@EngineCore" />
+                <TypeFullName Type="System.String@Unknown" Value="EngineNS.Vector3" />
+              </Type>
+            </InitValue>
+            <VariableName Type="System.String@Unknown" Value="tmp_r_GetUVW_504025461" />
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+              <IsEnum Type="System.Boolean@Unknown" Value="False" />
+              <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Vector3@EngineCore" />
+              <TypeFullName Type="System.String@Unknown" Value="EngineNS.Vector3" />
+            </VariableType>
+            <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+          </e_0>
+          <e_1 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
+              <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+                <IsEnum Type="System.Boolean@Unknown" Value="False" />
+                <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Single@Unknown" />
+                <TypeFullName Type="System.String@Unknown" Value="System.Single" />
+              </Type>
+            </InitValue>
+            <VariableName Type="System.String@Unknown" Value="tmp_r_GetY_4154552476" />
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+              <IsEnum Type="System.Boolean@Unknown" Value="False" />
+              <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Single@Unknown" />
+              <TypeFullName Type="System.String@Unknown" Value="System.Single" />
+            </VariableType>
+            <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+          </e_1>
+        </LocalVariables>
         <MethodName Type="System.String@Unknown" Value="dm_onPerPiexel_DispatchPixels_545367290" />
         <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
       </MethodDec>
@@ -119,11 +152,12 @@
     </e_1>
     <e_2 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassFieldVar@EngineCore">
       <IsGet Type="System.Boolean@Unknown" Value="True" />
-      <Name Type="System.String@Unknown" Value="X" />
+      <Name Type="System.String@Unknown" Value="Get X" />
       <NodeId Type="System.Guid@Unknown" Value="a90fe75d-aa05-4b66-a698-60c6be51421c" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="704,239" />
       <ClassFieldMeta Type="System.String@Unknown" Value="EngineNS.Vector3@EngineCore#X" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassFieldVar.TSaveData@EngineCore" />
     </e_2>
     <e_3 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
       <InputControlWidth Type="System.Single@Unknown" Value="60" />

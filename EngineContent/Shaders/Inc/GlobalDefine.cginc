@@ -6,44 +6,44 @@
 #endif
 
 #define RHI_DX11 1
-#define RHI_DX12 1
-#define RHI_GL 2
-#define RHI_MTL 3
-#define RHI_VK 4
+#define RHI_DX12 2
+#define RHI_GL 3
+#define RHI_MTL 4
+#define RHI_VK 5
 
-#define VSStage 0
-#define PSStage 1
-#define CSStage 2
+//#define VSStage 0
+//#define PSStage 1
+//#define CSStage 2
 
 #define Combine3(a,b,c) a##b##c
 #define Combine2(a,b) Combine3(a,b,)
 
 #if RHI_TYPE == RHI_DX11
-	#define DX_NOBIND
+	#define DX_AUTOBIND
 	#define DX_BIND_B(n) : register(b##n)
 	#define DX_BIND_T(n) : register(t##n)
 	#define DX_BIND_S(s) : register(s##n)
 	#define DX_BIND_U(n) : register(u##n)
 #elif RHI_TYPE == RHI_DX12
-	#define DX_NOBIND : register(Combine2(space,ShaderStage))
+	#define DX_AUTOBIND : register(Combine2(space,ShaderStage))
 	#define DX_BIND_B(n) : register(b##n, Combine2(space,ShaderStage))
 	#define DX_BIND_T(n) : register(t##n, Combine2(space,ShaderStage))
 	#define DX_BIND_S(n) : register(s##n, Combine2(space,ShaderStage))
 	#define DX_BIND_U(n) : register(u##n, Combine2(space,ShaderStage))
 #elif RHI_TYPE == RHI_VK
-	#define DX_NOBIND : register(Combine2(space,ShaderStage))
+	#define DX_AUTOBIND : register(Combine2(space,ShaderStage))
 	#define DX_BIND_B(n) : register(b##n, Combine2(space,ShaderStage))
 	#define DX_BIND_T(n) : register(t##n, Combine2(space,ShaderStage))
 	#define DX_BIND_S(n) : register(s##n, Combine2(space,ShaderStage))
 	#define DX_BIND_U(n) : register(u##n, Combine2(space,ShaderStage))
 #elif RHI_TYPE == RHI_MTL
-	#define DX_NOBIND : register(Combine2(space,ShaderStage))
+	#define DX_AUTOBIND : register(Combine2(space,ShaderStage))
 	#define DX_BIND_B(n) : register(b##n, Combine2(space,ShaderStage))
 	#define DX_BIND_T(n) : register(t##n, Combine2(space,ShaderStage))
 	#define DX_BIND_S(n) : register(s##n, Combine2(space,ShaderStage))
 	#define DX_BIND_U(n) : register(u##n, Combine2(space,ShaderStage))
 #else
-	#define DX_NOBIND 
+	#define DX_AUTOBIND 
 	#define DX_BIND_B(n) 
 	#define DX_BIND_T(n) 
 	#define DX_BIND_S(n) 
@@ -51,6 +51,10 @@
 #endif
 
 #if RHI_TYPE == RHI_DX11
+	#define VK_BIND(n) 
+	#define VK_LOCATION(n) 
+	#define VK_OFFSET(n) 
+#elif RHI_TYPE == RHI_DX12
 	#define VK_BIND(n) 
 	#define VK_LOCATION(n) 
 	#define VK_OFFSET(n) 

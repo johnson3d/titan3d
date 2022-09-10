@@ -124,7 +124,8 @@ namespace CppWeaving
 			var subPath = Namespace.Replace(".", "/");
 			if (subPath.Length > 0)
 				subPath += "/";
-			var file = dir + "/" + subPath + Name + GetFileExt();
+            
+            var file = dir + "/" + subPath + Name + $"_{APHash(Namespace)}" + GetFileExt();
             
             SureDirectory(dir + "/" + subPath);
 

@@ -18,8 +18,6 @@
       <e_10 Value="0,0,1,1" />
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
-    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
-    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="9">
     <e_0 Value="Game,utest/pgc/terrain_bz_height.macross,ba13d1ec-8f3a-48b7-9f86-031cc04d5742" />
@@ -30,7 +28,7 @@
     <e_5 Value="Game,utest/texture/ground6.srv,e4a4a66c-b97a-4113-b16a-c45e9d72fcfd" />
     <e_6 Value="Game,utest/texture/ground8_nmp.srv,a70b5d9b-9473-463b-b82e-f1b3e9660bc9" />
     <e_7 Value="Game,utest/texture/ground8.srv,2ea1a338-2ae4-4c7a-a4d2-672fe6909556" />
-    <e_8 Value="Engine,uestyle/graph/regularnode_color_spill.srv,93a1da79-f14a-45b5-9cb6-ab42f6c52dad" />
+    <e_8 Value="Engine,uestyle/graph/regularnode_color_spill.srv,00000000-0000-0000-0000-000000000000" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcAsset@EngineCore" />
 </Root>

@@ -34,5 +34,6 @@
     <None Include="Core.Window.def">
       <Filter>源文件</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

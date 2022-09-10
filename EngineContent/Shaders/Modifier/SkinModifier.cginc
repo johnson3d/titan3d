@@ -1,5 +1,5 @@
 
-cbuffer cbSkinMesh DX_NOBIND//
+cbuffer cbSkinMesh DX_AUTOBIND//
 {
 	float4 AbsBonePos[360];
 	float4 AbsBoneQuat[360];

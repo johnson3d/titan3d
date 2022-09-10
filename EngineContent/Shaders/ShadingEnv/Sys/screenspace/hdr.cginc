@@ -75,8 +75,8 @@ float3 ToneMap3(float3 color)
 }
 
 
-Texture2D GSourceTarget DX_NOBIND;
-SamplerState Samp_GSourceTarget DX_NOBIND;
+Texture2D GSourceTarget DX_AUTOBIND;
+SamplerState Samp_GSourceTarget DX_AUTOBIND;
 
 PS_INPUT VS_Main(VS_INPUT input)
 {

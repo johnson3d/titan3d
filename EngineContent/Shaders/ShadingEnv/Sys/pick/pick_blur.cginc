@@ -5,8 +5,8 @@
 
 #include "../../../Inc/SysFunctionDefImpl.cginc"
 
-Texture2D SourceTexture DX_NOBIND;
-SamplerState Samp_SourceTexture DX_NOBIND;
+Texture2D SourceTexture DX_AUTOBIND;
+SamplerState Samp_SourceTexture DX_AUTOBIND;
 
 PS_INPUT VS_Main(VS_INPUT input)
 {

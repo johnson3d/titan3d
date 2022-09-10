@@ -23,9 +23,25 @@ namespace MainEditor
                 var ev3 = Environment.GetEnvironmentVariable("CORECLR_PROFILER_PATH_64");
                 Console.WriteLine($"CORECLR_PROFILER_PATH_64:{ev3}");
             }
+
+            System.IO.StreamWriter consoleWriter = null;
+            System.IO.FileStream ostrm = null;
 #if PWindow
+            //try
+            //{
+            //    ostrm = new System.IO.FileStream("./console.out", System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write);
+            //    consoleWriter = new System.IO.StreamWriter(ostrm);
+            //    System.Console.SetOut(consoleWriter);
+            //}
+            //catch
+            //{
+
+            //}
+            
             var handle = GetConsoleWindow();
             ShowWindow(handle, 0);
+            //ShowWindow(handle, 1);
+            //EngineNS.EigenUtility.TestJacobi();
 #endif
 
             WeakReference wr = Main_Impl(args);
@@ -36,18 +52,24 @@ namespace MainEditor
             }
 
             int GCTimes = 0;
-            while (EngineNS.RHI.CShaderResourceView.NumOfInstance > 0)
+            while (EngineNS.NxRHI.USrView.NumOfInstance > 0)
             {
                 if (GCTimes >= 20)
                 {
-                    Console.WriteLine($"CSV.NumOfInstance = {EngineNS.RHI.CShaderResourceView.NumOfInstance}/{EngineNS.RHI.CShaderResourceView.NumOfGCHandle}");
-                    System.Diagnostics.Trace.WriteLine($"CSV.NumOfInstance = {EngineNS.RHI.CShaderResourceView.NumOfInstance}/{EngineNS.RHI.CShaderResourceView.NumOfGCHandle}");
+                    Console.WriteLine($"CSV.NumOfInstance = {EngineNS.NxRHI.USrView.NumOfInstance}/{EngineNS.NxRHI.USrView.NumOfGCHandle}");
+                    System.Diagnostics.Trace.WriteLine($"CSV.NumOfInstance = {EngineNS.NxRHI.USrView.NumOfInstance}/{EngineNS.NxRHI.USrView.NumOfGCHandle}");
                     //Thread.Sleep(1000 * 30);
                     break;
                 }
                 System.GC.Collect();
                 System.GC.WaitForPendingFinalizers();
                 GCTimes++;
+            }
+
+            if (consoleWriter != null)
+            {
+                consoleWriter.Close();
+                ostrm.Close();
             }
         }
         static WeakReference Main_Impl(string[] args)
@@ -60,8 +82,15 @@ namespace MainEditor
             }
             var cfg = FindArgument(args, "config=");
             Console.WriteLine($"Config={cfg}");
-            
-            var task = EngineNS.UEngine.StartEngine(new EngineNS.UEngine(), cfg);
+
+            bool bRenderDoc = false;
+            var useRenderdoc = FindArgument(args, "use_renderdoc=");
+            if (useRenderdoc != null && useRenderdoc == "true")
+            {
+                bRenderDoc = true;
+            }
+
+            var task = EngineNS.UEngine.StartEngine(new EngineNS.UEngine(), cfg, bRenderDoc);
 
             while (true)
             {

@@ -1,6 +1,6 @@
 
 #if HW_VS_STRUCTUREBUFFER == 1
-StructuredBuffer<VSInstantData> VSInstantDataArray DX_NOBIND;//: register(t13);
+StructuredBuffer<VSInstantData> VSInstantDataArray DX_AUTOBIND;//: register(t13);
 VSInstantData GetInstanceData(VS_INPUT input)
 {
 	VSInstantData result = VSInstantDataArray[input.vInstanceId];

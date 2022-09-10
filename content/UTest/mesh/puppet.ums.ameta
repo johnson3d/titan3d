@@ -8,13 +8,11 @@
       <e_0 Value="0,0,1,1" />
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
-    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
-    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
     <e_0 Value="Game,utest/mesh/puppet.vms,dcc880ca-e2e4-455f-9208-5f99a2aad338" />
     <e_1 Value="Game,utest/ddd.uminst,da21bb21-134c-4d00-bdbb-00459e7a91c1" />
-    <e_2 Value="Game,utest/ground.uminst,333fadf5-5a6d-48aa-86a8-e6ebff8b6d85" />
+    <e_2 Value="Game,utest/ddd.uminst,da21bb21-134c-4d00-bdbb-00459e7a91c1" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMaterialMesh@EngineCore" />
 </Root>

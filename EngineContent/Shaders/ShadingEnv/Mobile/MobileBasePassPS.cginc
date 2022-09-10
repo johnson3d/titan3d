@@ -1,16 +1,16 @@
 #ifndef _MobileBasePassPS_H_
 #define _MobileBasePassPS_H_
 
-Texture2D gEnvMap DX_NOBIND;
-SamplerState Samp_gEnvMap DX_NOBIND;
+Texture2D gEnvMap DX_AUTOBIND;
+SamplerState Samp_gEnvMap DX_AUTOBIND;
 
-Texture2D gEyeEnvMap DX_NOBIND;
-SamplerState Samp_gEyeEnvMap DX_NOBIND;
+Texture2D gEyeEnvMap DX_AUTOBIND;
+SamplerState Samp_gEyeEnvMap DX_AUTOBIND;
 
-Texture2D		gShadowMap DX_NOBIND;
-SamplerState	Samp_gShadowMap DX_NOBIND;
+Texture2D		gShadowMap DX_AUTOBIND;
+SamplerState	Samp_gShadowMap DX_AUTOBIND;
 
-StructuredBuffer<FTileData> TilingBuffer DX_NOBIND;
+StructuredBuffer<FTileData> TilingBuffer DX_AUTOBIND;
 
 struct PS_OUTPUT
 {
@@ -96,7 +96,11 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		{
 			mSFD.mViewer2ShadowDepth = (half)ShadowMapUV.z;
 			
+			#if USE_ESM
+			ShadowValue = GetESMValue(ShadowMapUV.xy, mSFD, 10);
+			#else
 			ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
+			#endif
 			//ShadowValue = NoFiltering(ShadowMapUV.xy, mSFD);
 			
 			half FadeValue = (half)saturate(PerPixelViewerDistance * gFadeParam.x + gFadeParam.y);
@@ -113,7 +117,11 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 
 			mSFD.mViewer2ShadowDepth = (half)ShadowMapUV.z;
 
+			#if USE_ESM
+			ShadowValue = GetESMValue(ShadowMapUV.xy, mSFD, 10);
+			#else
 			ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
+			#endif
 
 			half FadeValue = (half)saturate(PerPixelViewerDistance * gFadeParam.x + gFadeParam.y);
 			ShadowValue = lerp(ShadowValue, 1.0h, FadeValue);

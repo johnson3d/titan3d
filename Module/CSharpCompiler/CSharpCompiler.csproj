@@ -61,8 +61,6 @@
 
   <Import Project="..\..\CSharpCode\Bricks\Procedure\Procedure.projitems" Label="Shared" />
 
-  <Import Project="..\..\CSharpCode\RHI\RHI.projitems" Label="Shared" />
-
   <Import Project="..\..\CSharpCode\Rtti\Rtti.projitems" Label="Shared" />
 
   <Import Project="..\..\3rd\csharp\StbImageSharp\StbImageSharp.projitems" Label="Shared" />

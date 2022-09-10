@@ -22,31 +22,31 @@
 
 #include "../../Inc/SysFunctionDefImpl.cginc"
 
-Texture2D DepthBuffer DX_NOBIND;
-SamplerState Samp_DepthBuffer DX_NOBIND;
+Texture2D DepthBuffer DX_AUTOBIND;
+SamplerState Samp_DepthBuffer DX_AUTOBIND;
 
-Texture2D GBufferRT0 DX_NOBIND;
-SamplerState Samp_GBufferRT0 DX_NOBIND;
+Texture2D GBufferRT0 DX_AUTOBIND;
+SamplerState Samp_GBufferRT0 DX_AUTOBIND;
 
-Texture2D GBufferRT1 DX_NOBIND;
-SamplerState Samp_GBufferRT1 DX_NOBIND;
+Texture2D GBufferRT1 DX_AUTOBIND;
+SamplerState Samp_GBufferRT1 DX_AUTOBIND;
 
-Texture2D GBufferRT2 DX_NOBIND;
-SamplerState Samp_GBufferRT2 DX_NOBIND;
+Texture2D GBufferRT2 DX_AUTOBIND;
+SamplerState Samp_GBufferRT2 DX_AUTOBIND;
 
-Texture2D GShadowMap DX_NOBIND;
-SamplerState Samp_GShadowMap DX_NOBIND;
+Texture2D GShadowMap DX_AUTOBIND;
+SamplerState Samp_GShadowMap DX_AUTOBIND;
 
-Texture2D gEnvMap DX_NOBIND;
-SamplerState Samp_gEnvMap DX_NOBIND;
+Texture2D gEnvMap DX_AUTOBIND;
+SamplerState Samp_gEnvMap DX_AUTOBIND;
 
-Texture2D GVignette DX_NOBIND;
-SamplerState Samp_GVignette DX_NOBIND;
+Texture2D GVignette DX_AUTOBIND;
+SamplerState Samp_GVignette DX_AUTOBIND;
 
-Texture2D GPickedTex DX_NOBIND;
-SamplerState Samp_GPickedTex DX_NOBIND;
+Texture2D GPickedTex DX_AUTOBIND;
+SamplerState Samp_GPickedTex DX_AUTOBIND;
 
-StructuredBuffer<FTileData> TilingBuffer DX_NOBIND;
+StructuredBuffer<FTileData> TilingBuffer DX_AUTOBIND;
 
 float GetDepth(float2 uv)
 {
@@ -157,7 +157,11 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 		mSFD.mViewer2ShadowDepth = (half)ShadowMapUV.z;
 
-		ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
+#if USE_ESM
+	ShadowValue = GetESMValue(ShadowMapUV.xy, mSFD, 10);//GetESMValue(float2 SMUV, float CurrentDepth, ShadowFilterData SFD, float ESM_C)
+#else
+	ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
+#endif
 
 		if (ShadowValue < 1.0f)
 			output.RT0.a = 0.0h;

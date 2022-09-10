@@ -247,6 +247,7 @@
       <Position Type="EngineNS.Vector2@EngineCore" Value="859.4,228.4" />
       <ClassFieldMeta Type="System.String@Unknown" Value="EngineNS.Vector3@EngineCore#X" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassFieldVar.TSaveData@EngineCore" />
     </e_3>
     <e_4 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
       <InputControlWidth Type="System.Single@Unknown" Value="30" />

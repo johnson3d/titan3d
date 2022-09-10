@@ -14,8 +14,8 @@ struct FGpuSceneDesc
 	int				FreeGroupIndex;
 };
 
-RWStructuredBuffer<FGpuSceneDesc> GpuSceneDesc DX_NOBIND;
-StructuredBuffer<FGpuSceneDesc> GpuSceneDescSRV DX_NOBIND;
+RWStructuredBuffer<FGpuSceneDesc> GpuSceneDesc DX_AUTOBIND;
+StructuredBuffer<FGpuSceneDesc> GpuSceneDescSRV DX_AUTOBIND;
 
 struct FPointLight
 {
@@ -86,7 +86,7 @@ half3 PointLightShading(FPointLight light, float3 WorldPos, half3 V, half3 N, ha
 #define TileSize 32
 #define MaxNumOfPointLight 32
 
-StructuredBuffer<FPointLight> GpuScene_PointLights DX_NOBIND;
+StructuredBuffer<FPointLight> GpuScene_PointLights DX_AUTOBIND;
 
 struct FTileData
 {
@@ -98,7 +98,7 @@ struct FTileData
 	uint PointLights[MaxNumOfPointLight];
 };
 
-cbuffer cbPerGpuScene DX_NOBIND
+cbuffer cbPerGpuScene DX_AUTOBIND
 {
 	uint2		TileNum;
 	uint		LightNum;

@@ -8,11 +8,11 @@
 
 #include "../../../Inc/SysFunctionDefImpl.cginc"
 
-Texture2D gPickedSetUpTex DX_NOBIND;
-SamplerState Samp_gPickedSetUpTex DX_NOBIND;
+Texture2D gPickedSetUpTex DX_AUTOBIND;
+SamplerState Samp_gPickedSetUpTex DX_AUTOBIND;
 
-Texture2D gPickedBlurTex DX_NOBIND;
-SamplerState Samp_gPickedBlurTex DX_NOBIND;
+Texture2D gPickedBlurTex DX_AUTOBIND;
+SamplerState Samp_gPickedBlurTex DX_AUTOBIND;
 
 PS_INPUT VS_Main(VS_INPUT input)
 {

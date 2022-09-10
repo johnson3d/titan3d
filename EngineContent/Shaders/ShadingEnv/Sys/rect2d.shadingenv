@@ -5,7 +5,7 @@
 
 #include "../../Inc/SysFunctionDefImpl.cginc"
 
-cbuffer cbPerShadingEnv DX_NOBIND// : register(b4)
+cbuffer cbPerShadingEnv DX_AUTOBIND// : register(b4)
 {
 	matrix RenderMatrix;
 	float4 RenderColor;

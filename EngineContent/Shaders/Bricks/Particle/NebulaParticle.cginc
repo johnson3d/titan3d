@@ -1,13 +1,15 @@
 #include "ParticleCommon.cginc"
 
-StructuredBuffer<FParticle>			sbParticleInstance DX_NOBIND;
-ByteAddressBuffer					sbAlives DX_NOBIND;
+StructuredBuffer<FParticle>			sbParticleInstance DX_AUTOBIND;
+ByteAddressBuffer					sbAlives DX_AUTOBIND;
+//StructuredBuffer<float>				sbAlives DX_AUTOBIND;
 
 void DoNebulaModifierVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
 {
 	//float3 Pos = vert.vInstPos.xyz + QuatRotatePosition(vert.vPosition * vert.vInstScale.xyz, vert.vInstQuat);
 	
 	uint idx = sbAlives.Load(vert.vInstanceId * 4 + 16);
+	//uint idx = sbAlives[vert.vInstanceId * 4 + 16];
 	FParticle inst = sbParticleInstance[idx];
 	float3 Pos = inst.Location + vert.vPosition.xyz * inst.Scale;
 	vsOut.vPosition.xyz = Pos;
