@@ -33,7 +33,7 @@ public:
 	IBlobObject* GetCookedData() {
 		return &mCookedData;
 	}
-	IMeshDataProvider* CreateMeshProvider();
+	NxRHI::FMeshDataProvider* CreateMeshProvider();
 
 	bool ModifySamples(UINT startCol, UINT startRow, 
 			UINT nbCols, UINT nbRows, void* pData, UINT dataStride, float convexEdgeThreshold,

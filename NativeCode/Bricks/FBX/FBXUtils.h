@@ -1,5 +1,5 @@
 #pragma once
-#include "../../RHI/PreHead.h"
+#include "../../NextRHI/NxRHI.h"
 #include "fbxsdk.h"
 
 namespace AssetImportAndExport::FBX

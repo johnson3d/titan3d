@@ -1,10 +1,10 @@
 #pragma once
 #include "../../Base/IUnknown.h"
+#include "../../Base/BlobObject.h"
 #include "../../Base/debug//vfxdebug.h"
 #include "../../Math/v3dxVector3.h"
 #include "../../Math/v3dxQuaternion.h"
-#include "../../RHI/IRenderResource.h"
-#include "../../RHI/Utility/IMeshPrimitives.h"
+#include "../../NextRHI/NxRHI.h"
 
 #include "../../../3rd/native/PhysX-4.1/physx/include/PxPhysics.h"
 #include "../../../3rd/native/PhysX-4.1/physx/include/PxPhysicsAPI.h"

@@ -41,8 +41,8 @@ public:
 
 	PhyHeightfield* CookHeightfield(int nbColumns, int nbRows, PhyHeightFieldSample* pData, float convexEdgeThreshold = 0.0f, bool bNoBoundaryEdge = true);
 
-	PhyConvexMesh* CookConvexMesh(IMeshDataProvider* mesh);
-	PhyTriMesh* CookTriMesh(IMeshDataProvider* mesh, IBlobObject* uvblob, IBlobObject* faceblob, IBlobObject* posblob);
+	PhyConvexMesh* CookConvexMesh(NxRHI::FMeshDataProvider* mesh);
+	PhyTriMesh* CookTriMesh(NxRHI::FMeshDataProvider* mesh, IBlobObject* uvblob, IBlobObject* faceblob, IBlobObject* posblob);
 };
 
 NS_END

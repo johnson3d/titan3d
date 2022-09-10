@@ -11,16 +11,6 @@ ICamera::ICamera()
 	mIsOrtho = false;
 	mWidth = 0;
 	mHeight = 0;
-	mPositionId = -1;
-	mLookAtId = -1;
-	mDirectionId = -1;
-	mRightId = -1;
-	mUpId = -1;
-	mViewMatrixId = -1;
-	mViewInverseId = -1;
-	mProjectionMatrixId = -1;
-	mID_ZFar = -1;
-	mCameraOffset = -1;
 	
 	mLogicData = new CameraData();
 	mRenderData = new CameraData();
@@ -44,76 +34,47 @@ ICamera::~ICamera()
 
 void ICamera::Cleanup()
 {
-	if(mCBuffer!=nullptr)
-		mCBuffer->Cleanup();
-}
-
-void ICamera::BindConstBuffer(IRenderContext* rc, IConstantBuffer* cb)
-{
-	mCBuffer.StrongRef(cb);
-
-	if (mCBuffer != nullptr)
-	{
-		mPositionId = mCBuffer->FindVar("CameraPosition");
-		mLookAtId = mCBuffer->FindVar("CameraLookAt");
-		mDirectionId = mCBuffer->FindVar("CameraDirection");
-		mRightId = mCBuffer->FindVar("CameraRight");
-		mUpId = mCBuffer->FindVar("CameraUp");
-		mViewMatrixId = mCBuffer->FindVar("CameraViewMatrix");
-		mViewInverseId = mCBuffer->FindVar("CameraViewInverse");
-		mViewProjectionId = mCBuffer->FindVar("ViewPrjMtx");
-		mViewProjectionInverseId = mCBuffer->FindVar("ViewPrjInvMtx");
-		mProjectionMatrixId = mCBuffer->FindVar("PrjMtx");
-		mProjectionInverseId = mCBuffer->FindVar("PrjInvMtx");
-
-		mID_ZNear = mCBuffer->FindVar("gZNear");
-		mID_ZFar = mCBuffer->FindVar("gZFar");
-
-		mCameraOffset = mCBuffer->FindVar("CameraOffset");
-
-		UpdateConstBufferData(rc, TRUE);
-	}
-}
-
-void ICamera::UpdateConstBufferData(IRenderContext* rc, vBOOL bImm)
-{
-	v3dxMatrix4 tempM;
 	
+}
+
+void ICamera::UpdateConstBufferData(NxRHI::ICbView* buffer)
+{
+	auto pBinder = buffer->GetShaderBinder();
+	v3dxMatrix4 tempM;	
 	memcpy(mRenderData, mLogicData, sizeof(CameraData));
-	if (mCBuffer != nullptr)
+	if (pBinder != nullptr)
 	{
 		auto pos = mLogicData->GetLocalPosition();
-		mCBuffer->SetVarValuePtr(mPositionId, &pos, sizeof(pos), 0);
+		buffer->SetValue(pBinder->FindField("CameraPosition"), pos);
 		auto lookat = mLogicData->GetLocalLookAt();
-		mCBuffer->SetVarValuePtr(mLookAtId, &lookat, sizeof(lookat), 0);
-		mCBuffer->SetVarValuePtr(mDirectionId, &mLogicData->mDirection, sizeof(mLogicData->mDirection), 0);
-		mCBuffer->SetVarValuePtr(mRightId, &mLogicData->mRight, sizeof(mLogicData->mRight), 0);
-		mCBuffer->SetVarValuePtr(mUpId, &mLogicData->mUp, sizeof(mLogicData->mUp), 0);
+		buffer->SetValue(pBinder->FindField("CameraLookAt"), lookat);
+		buffer->SetValue(pBinder->FindField("CameraDirection"), mLogicData->mDirection);
+		buffer->SetValue(pBinder->FindField("CameraRight"), mLogicData->mRight);
+		buffer->SetValue(pBinder->FindField("CameraUp"), mLogicData->mUp);
 		v3dxTransposeMatrix4(&tempM, &mLogicData->mViewMatrix);
-		mCBuffer->SetVarValuePtr(mViewMatrixId, &tempM, sizeof(tempM), 0);
+		buffer->SetValue(pBinder->FindField("CameraViewMatrix"), tempM);
 		v3dxTransposeMatrix4(&tempM, &mLogicData->mViewInverse);
-		mCBuffer->SetVarValuePtr(mViewInverseId, &tempM, sizeof(tempM), 0);
+		buffer->SetValue(pBinder->FindField("CameraViewInverse"), tempM);
 		v3dxTransposeMatrix4(&tempM, &mLogicData->mViewProjection);
-		mCBuffer->SetVarValuePtr(mViewProjectionId, &tempM, sizeof(tempM), 0);
+		buffer->SetValue(pBinder->FindField("ViewPrjMtx"), tempM);
 		v3dxTransposeMatrix4(&tempM, &mLogicData->mViewProjectionInverse);
-		mCBuffer->SetVarValuePtr(mViewProjectionInverseId, &tempM, sizeof(tempM), 0);
+		buffer->SetValue(pBinder->FindField("ViewPrjInvMtx"), tempM);
 
 		v3dxTransposeMatrix4(&tempM, &mLogicData->mProjectionMatrix);
-		mCBuffer->SetVarValuePtr(mProjectionMatrixId, &tempM, sizeof(tempM), 0);
+		buffer->SetValue(pBinder->FindField("PrjMtx"), tempM);
 		v3dxTransposeMatrix4(&tempM, &mLogicData->mProjectionInverse);
-		mCBuffer->SetVarValuePtr(mProjectionInverseId, &tempM, sizeof(tempM), 0);
+		buffer->SetValue(pBinder->FindField("PrjInvMtx"), tempM);
 
-		/*if (mZFar > 500.0f)
-		{
-			mZFar = 500.0f;
-		}*/
-		mCBuffer->SetVarValuePtr(mID_ZNear, &mZNear, sizeof(mZNear), 0);
-		mCBuffer->SetVarValuePtr(mID_ZFar, &mZFar, sizeof(mZFar), 0);
+		buffer->SetValue(pBinder->FindField("gZNear"), mZNear);
+		buffer->SetValue(pBinder->FindField("gZFar"), mZFar);
 
 		auto cameraOffset = GetMatrixStartPosition().ToSingleVector();
-		mCBuffer->SetVarValuePtr(mCameraOffset, &cameraOffset, sizeof(cameraOffset), 0);
+		buffer->SetValue(pBinder->FindField("CameraOffset"), cameraOffset);
 
-		mCBuffer->UpdateDrawPass(rc->GetImmCommandList(), bImm);
+		/*auto cmd = rc->GetCmdQueue()->GetIdleCmdlist(true);
+		mCBuffer->FlushDirty(cmd);
+		rc->GetCmdQueue()->QueueCommit(1, &cmd);
+		rc->GetCmdQueue()->ReleaseIdleCmdlist(cmd, true);*/
 	}
 }
 

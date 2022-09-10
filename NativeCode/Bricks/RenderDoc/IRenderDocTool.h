@@ -4,24 +4,33 @@
 
 NS_BEGIN
 
+namespace NxRHI
+{
+	class IGpuDevice;
+}
 class IRenderContext;
 class TR_CLASS()
 	IRenderDocTool : public VIUnknown
 {
 	RENDERDOC_API_1_4_0* mApi;
-	TObjectHandle<IRenderContext>	mRenderContext;
-	void*							mHWDevice;
+	NxRHI::IGpuDevice*					mRenderContext = nullptr;
+	void*								mHWDevice = nullptr;
+	char								mTempLogFile[512];
+	void*								mActiveWndHandle = nullptr;
 public:
 	static IRenderDocTool* GetInstance();
 	IRenderDocTool();
-	void InitTool(IRenderContext * rc);
+	void InitRenderDoc();
+	void SetGpuDevice(NxRHI::IGpuDevice* rc);
 
 	void SetActiveWindow(void* wndHandle);
 	void TriggerCapture();
-	void StartFrameCapture(void* wndHandle);
+	void StartFrameCapture();
 	bool IsFrameCapturing();
-	UINT EndFrameCapture(void* wndHandle);
-	UINT DiscardFrameCapture(void* wndHandle);
+	UINT EndFrameCapture();
+	UINT DiscardFrameCapture();
+
+	const char* GetCapture(UINT idx, UINT64* timestamp);
 };
 
 NS_END

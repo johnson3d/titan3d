@@ -652,6 +652,10 @@ public:
 	{
 		return ImGui::ArrowButton(str_id, dir);
 	}
+	static void			 Arrow(ImDrawList* draw_list, const ImVec2* pos, ImU32 col, ImGuiDir_ dir, float scale)
+	{
+		ImGui::RenderArrow(draw_list, *pos, col, dir, scale);
+	}
 	static void          Image(ImTextureID user_texture_id, const ImVec2* size, const ImVec2* uv0/* = &ImVec2(0, 0)*/, const ImVec2* uv1/* = &ImVec2(1, 1)*/, const ImVec4* tint_col/* = &ImVec4(1, 1, 1, 1)*/, const ImVec4* border_col/* = &ImVec4(0, 0, 0, 0)*/)
 	{
 		return ImGui::Image(user_texture_id, *size, *uv0, *uv1, *tint_col, *border_col);

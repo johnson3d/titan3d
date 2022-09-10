@@ -6,6 +6,7 @@
 
 NS_BEGIN
 
+
 void IParticleSystemAttribute::BuildAttributes(UINT AlignSize)
 {	
 	UINT packOffset = 0;
@@ -13,7 +14,7 @@ void IParticleSystemAttribute::BuildAttributes(UINT AlignSize)
 	for (size_t i = 0; i < NamedAttributes.size(); i++)
 	{
 		UINT size = 0;
-		size = GetShaderVarTypeSize(NamedAttributes[i].Type);
+		size = 0;// (UINT)NxRHI::FShaderVarDesc::GetShaderVarTypeSize(NamedAttributes[i].Type)* NamedAttributes[i].Columns;
 
 		if (size >= 16)
 		{

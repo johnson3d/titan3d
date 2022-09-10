@@ -1,12 +1,13 @@
 #include "PhyHeightfield.h"
 #include "PhyContext.h"
-#include "../../RHI/IRenderContext.h"
-#include "../../RHI/Utility/IMeshPrimitives.h"
+#include "../../NextRHI/NxRHI.h"
 #include "../../Base/xnd/vfxxnd.h"
 
 #define new VNEW
 
 NS_BEGIN
+
+using namespace NxRHI;
 
 PhyHeightfield::~PhyHeightfield()
 {
@@ -36,7 +37,7 @@ bool PhyHeightfield::CreateFromCookedData(PhyContext* ctx, void* cookedData, UIN
 	return true;
 }
 
-IMeshDataProvider* PhyHeightfield::CreateMeshProvider()
+FMeshDataProvider* PhyHeightfield::CreateMeshProvider()
 {
 	return nullptr;
 }

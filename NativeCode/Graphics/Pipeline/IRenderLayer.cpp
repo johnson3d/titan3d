@@ -4,9 +4,5 @@
 
 NS_BEGIN
 
-void IRenderLayer::DrawPrimitives(ICommandList* cmdlist)
-{
-
-}
 
 NS_END

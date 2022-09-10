@@ -19,6 +19,8 @@ using namespace physx;
 
 NS_BEGIN
 
+using namespace NxRHI;
+
 ENGINE_RTTI_IMPL(EngineNS::PhyContext);
 
 class PxVictoryAllocator : public physx::PxAllocatorCallback
@@ -421,7 +423,7 @@ PhyShape* PhyContext::CreateShapeHeightfield(PhyMaterial** material, int NumOfMt
 	return ret;
 }
 
-PhyConvexMesh* PhyContext::CookConvexMesh(IMeshDataProvider* mesh)
+PhyConvexMesh* PhyContext::CookConvexMesh(FMeshDataProvider* mesh)
 {
 	auto blobVB = mesh->GetStream(VST_Position);
 	
@@ -446,7 +448,7 @@ PhyConvexMesh* PhyContext::CookConvexMesh(IMeshDataProvider* mesh)
 	return result;
 }
 
-PhyTriMesh* PhyContext::CookTriMesh(IMeshDataProvider* mesh, IBlobObject* uvblob, IBlobObject* faceblob, IBlobObject* posblob)
+PhyTriMesh* PhyContext::CookTriMesh(FMeshDataProvider* mesh, IBlobObject* uvblob, IBlobObject* faceblob, IBlobObject* posblob)
 {
 	auto blobVB = mesh->GetStream(VST_Position);
 
@@ -459,7 +461,7 @@ PhyTriMesh* PhyContext::CookTriMesh(IMeshDataProvider* mesh, IBlobObject* uvblob
 	{
 		for (UINT i = 0; i < mesh->GetAtomNumber(); i++)
 		{
-			const DrawPrimitiveDesc* dpDesc = mesh->GetAtom(i, 0);
+			const FMeshAtomDesc* dpDesc = mesh->GetAtom(i, 0);
 			for (UINT j = 0; j < dpDesc->NumPrimitives; j++)
 			{
 				mtlTabs.push_back((USHORT)i);
@@ -473,7 +475,7 @@ PhyTriMesh* PhyContext::CookTriMesh(IMeshDataProvider* mesh, IBlobObject* uvblob
 	meshDesc.points.stride = sizeof(v3dxVector3);
 
 	//meshDesc.flags |= physx::PxMeshFlag::eFLIPNORMALS;
-	if (mesh->IBType == IBT_Int32)
+	if (mesh->IsIndex32)
 	{
 		meshDesc.triangles.stride = sizeof(physx::PxU32) * 3;
 		meshDesc.triangles.count = blobIB->GetSize() / meshDesc.triangles.stride;

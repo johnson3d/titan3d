@@ -4,19 +4,21 @@
 
 NS_BEGIN
 
+using namespace NxRHI;
+
 IMesh::IMesh()
 {
 
 }
 
-void IMesh::Initialize(IMeshPrimitives* mesh, IMdfQueue* mdf)
+void IMesh::Initialize(NxRHI::FMeshPrimitives* mesh, IMdfQueue* mdf)
 {
-	mGeoms.StrongRef(mesh);
-	mMdfQueue.StrongRef(mdf);
-	mVertexArray = MakeWeakRef(new IVertexArray());
+	mGeoms = mesh;
+	mMdfQueue = mdf;
+	mVertexArray = MakeWeakRef(new NxRHI::FVertexArray());
 }
 
-void IMesh::SetInputStreams(IVertexArray* draw)
+void IMesh::SetInputStreams(NxRHI::FVertexArray* draw)
 {
 	if (mVertexArray == nullptr)
 		return;
@@ -40,12 +42,12 @@ IMesh* IMesh::CloneMesh()
 }
 
 
-void GetEngineVertexLayout(std::vector<LayoutElement>& GLayouts)
+void GetEngineVertexLayout(std::vector<NxRHI::FLayoutElement>& GLayouts)
 {
 	if (GLayouts.size() == 0)
 	{
 		GLayouts.resize(EVertexStreamType::VST_Number);
-		LayoutElement tmpElem;
+		FLayoutElement tmpElem;
 		//VST_Position,
 		tmpElem.SemanticName = "POSITION";
 		tmpElem.SemanticIndex = 0;
@@ -208,20 +210,11 @@ void GetEngineVertexLayout(std::vector<LayoutElement>& GLayouts)
 	}
 }
 
-IInputLayoutDesc* IMesh::CreateInputLayoutDesc(UINT streams)
+FInputLayoutDesc* IMesh::CreateInputLayoutDesc(UINT streams)
 {
-	auto result = new IInputLayoutDesc();
+	auto result = new FInputLayoutDesc();
 	GetEngineVertexLayout(result->Layouts);
 	return result;
-	
-	//for (int i = 0; i < VST_Number; i++)
-	//{
-	//	if (streams & (1 << i))
-	//	{
-	//		//result->AddElement()
-	//	}
-	//}
-	//return result;
 }
 
 NS_END

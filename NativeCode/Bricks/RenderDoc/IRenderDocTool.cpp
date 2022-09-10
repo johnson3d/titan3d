@@ -1,6 +1,7 @@
 #include "IRenderDocTool.h"
-#include "../../../NativeCode/RHI/D3D11/ID11RenderContext.h"
-#include "../../../NativeCode/RHI/Vulkan/IVKRenderContext.h"
+#include "../../../NativeCode/NextRHI/Dx11/DX11GpuDevice.h"
+#include "../../../NativeCode/NextRHI/Dx12/DX12GpuDevice.h"
+#include "../../../NativeCode/NextRHI/Vulkan/VKGpuDevice.h"
 
 #define new VNEW
 
@@ -18,28 +19,8 @@ IRenderDocTool::IRenderDocTool()
 	mHWDevice = nullptr;
 }
 
-void IRenderDocTool::InitTool(IRenderContext* rc)
+void IRenderDocTool::InitRenderDoc()
 {
-	if (mApi != nullptr)
-		return;
-	mRenderContext.FromObject(rc);
-
-	switch (rc->GetRHIType())
-	{
-		case RHT_D3D11:
-		{
-			mHWDevice = ((ID11RenderContext*)rc)->mDevice;
-		}
-		break;
-		case RHT_VULKAN:
-		{
-			mHWDevice = ((IVKRenderContext*)rc)->mPhysicalDevice;
-		}
-		break;
-		default:
-			break;
-	}
-	
 	// At init, on windows
 	auto rdModule = LoadLibraryA("renderdoc.dll");
 	if (HMODULE mod = GetModuleHandleA("renderdoc.dll"))
@@ -51,10 +32,37 @@ void IRenderDocTool::InitTool(IRenderContext* rc)
 	}
 }
 
+void IRenderDocTool::SetGpuDevice(NxRHI::IGpuDevice* rc)
+{
+	mRenderContext = rc;
+
+	switch (rc->Desc.RhiType)
+	{
+		case NxRHI::ERhiType::RHI_D3D11:
+		{
+			mHWDevice = ((NxRHI::DX11GpuDevice*)rc)->mDevice;
+		}
+		break;
+		case NxRHI::ERhiType::RHI_D3D12:
+		{
+			mHWDevice = ((NxRHI::DX12GpuDevice*)rc)->mDevice;
+		}
+		break;
+		case NxRHI::ERhiType::RHI_VK:
+		{
+			mHWDevice = RENDERDOC_DEVICEPOINTER_FROM_VKINSTANCE(((NxRHI::VKGpuDevice*)rc)->GetVkInstance());
+		}
+		break;
+		default:
+			break;
+	}
+}
+
 void IRenderDocTool::SetActiveWindow(void* wndHandle)
 {
 	if (mApi == nullptr)
 		return;
+	mActiveWndHandle = wndHandle;
 	mApi->SetActiveWindow(mHWDevice, wndHandle);
 }
 
@@ -65,11 +73,11 @@ void IRenderDocTool::TriggerCapture()
 	mApi->TriggerCapture();
 }
 
-void IRenderDocTool::StartFrameCapture(void* wndHandle)
+void IRenderDocTool::StartFrameCapture()
 {
 	if (mApi == nullptr)
 		return;
-	mApi->StartFrameCapture(mHWDevice, wndHandle);
+	mApi->StartFrameCapture(mHWDevice, mActiveWndHandle);
 }
 
 bool IRenderDocTool::IsFrameCapturing()
@@ -79,18 +87,35 @@ bool IRenderDocTool::IsFrameCapturing()
 	return mApi->IsFrameCapturing() ? true : false;
 }
 
-UINT IRenderDocTool::EndFrameCapture(void* wndHandle)
+UINT IRenderDocTool::EndFrameCapture()
 {
 	if (mApi == nullptr)
 		return 0;
-	return mApi->EndFrameCapture(mHWDevice, wndHandle);
+	return mApi->EndFrameCapture(mHWDevice, mActiveWndHandle);
 }
 
-UINT IRenderDocTool::DiscardFrameCapture(void* wndHandle)
+UINT IRenderDocTool::DiscardFrameCapture()
 {
 	if (mApi == nullptr)
 		return 0;
-	return mApi->DiscardFrameCapture(mHWDevice, wndHandle);
+	return mApi->DiscardFrameCapture(mHWDevice, mActiveWndHandle);
+}
+
+const char* IRenderDocTool::GetCapture(UINT idx, UINT64* timestamp)
+{
+	if (mApi == nullptr)
+		return 0;
+
+	uint32_t LogPathLength = 512;
+	memset(mTempLogFile, 0, sizeof(mTempLogFile));
+	if (mApi->GetCapture(idx, mTempLogFile, &LogPathLength, timestamp))
+	{
+		return mTempLogFile;
+	}
+	else
+	{
+		return "";
+	}
 }
 
 NS_END

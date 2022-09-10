@@ -1,8 +1,7 @@
 #pragma once
 #include "FBX.h"
-#include "../../RHI/PreHead.h"
 #include "fbxsdk.h"
-#include "../../RHI/RHI.h"
+#include "../../NextRHI/NxRHI.h"
 #include "FBXImporter.h"
 #include "../../Math/v3dxColor4.h"
 #include "../../Graphics/Mesh/Modifier/ISkinModifier.h"

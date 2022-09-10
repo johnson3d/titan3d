@@ -1,5 +1,5 @@
 #pragma once
-#include "../../RHI/PreHead.h"
+#include "../../NextRHI/NxRHI.h"
 #include "../../Base/string/vfxstring.h"
 #include "../../Math/v3dxMatrix4.h"
 

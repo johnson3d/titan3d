@@ -1,11 +1,11 @@
 #pragma once
-#include "../../RHI/RHI.h"
+#include "../../NextRHI/NxRHI.h"
 #include "Modifier/IModifier.h"
 
 NS_BEGIN
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-IMdfQueue : public VIUnknown
+class TR_CLASS()
+	IMdfQueue : public VIUnknown
 {
 public:
 	std::vector<AutoRef<IModifier>>		mMdfQueue;

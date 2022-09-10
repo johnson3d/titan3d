@@ -1,12 +1,12 @@
 #pragma once
-#include "../../RHI/RHI.h"
+#include "../../NextRHI/NxRHI.h"
 #include "../../Math/v3dxFrustum.h"
 #include "../../Math/v3dxDVector3.h"
 
 NS_BEGIN
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-ICamera : public VIUnknown
+class TR_CLASS()
+	ICamera : public VIUnknown
 {
 public:
 	struct CameraData
@@ -48,143 +48,106 @@ public:
 public:
 	ENGINE_RTTI(ICamera);
 
-	TR_CONSTRUCTOR()
 	ICamera();
 	~ICamera();
 
 	virtual void Cleanup() override;
 
-	TR_FUNCTION()
-	void BindConstBuffer(IRenderContext* rc, IConstantBuffer* cb);
-
-	TR_FUNCTION(SV_SupressGC)
 	void PerspectiveFovLH(float fov, float width, float height, float zMin, float zMax);
-	TR_FUNCTION(SV_SupressGC)
 	void MakeOrtho(float w, float h, float zn, float zf);
-	TR_FUNCTION(SV_SupressGC)
 	void DoOrthoProjectionForShadow(float w, float h, float znear, float zfar, float TexelOffsetNdcX, float TexelOffsetNdcY);
-	TR_FUNCTION(SV_SupressGC)
 	void LookAtLH(const v3dxDVector3* eye, const v3dxDVector3* lookAt, const v3dxVector3* up);
 
-	TR_FUNCTION(SV_SupressGC)
 	vBOOL GetPickRay(v3dxVector3* pvPickRay, float x, float y, float sw, float sh);
 	
-	TR_FUNCTION(SV_SupressGC)
 	v3dxFrustum* GetFrustum() {
 		return &mFrustum;
 	}
 
-	TR_FUNCTION(SV_SupressGC)
-		v3dxDVector3 GetMatrixStartPosition() const {
+	v3dxDVector3 GetMatrixStartPosition() const {
 		return mLogicData->mMatrixStartPosition;
 	}
-	TR_FUNCTION(SV_SupressGC)
-		void SetMatrixStartPosition(const v3dxDVector3* pos){
+	void SetMatrixStartPosition(const v3dxDVector3* pos){
 		mLogicData->mMatrixStartPosition = *pos;
 	}
-	TR_FUNCTION(SV_SupressGC)
-		v3dxDVector3 GetPosition() const{
+	v3dxDVector3 GetPosition() const{
 		return mLogicData->mPosition;
 	}
-	TR_FUNCTION(SV_SupressGC)
-		v3dxVector3 GetLocalPosition() const {
+	v3dxVector3 GetLocalPosition() const {
 		return mLogicData->GetLocalPosition();
 	}
-	TR_FUNCTION(SV_SupressGC)
-		v3dxDVector3 GetLookAt() const{
+	v3dxDVector3 GetLookAt() const{
 		return mLogicData->mLookAt;
 	}
-	TR_FUNCTION(SV_SupressGC)
-		v3dxVector3 GetLocalLookAt() const {
+	v3dxVector3 GetLocalLookAt() const {
 		return mLogicData->GetLocalLookAt();
 	}
-	TR_FUNCTION(SV_SupressGC)
 	v3dxVector3 GetDirection() const {
 		return mLogicData->mDirection;
 	}
-	TR_FUNCTION(SV_SupressGC)
 	v3dxVector3 GetRight() const {
 		return mLogicData->mRight;
 	}
-	TR_FUNCTION(SV_SupressGC)
 	v3dxVector3 GetUp() const {
 		return mLogicData->mUp;
 	}
-	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetViewMatrix() const {
 		return mLogicData->mViewMatrix;
 	}
-	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetViewInverse() const {
 		return mLogicData->mViewInverse;
 	}
-	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetProjectionMatrix() const {
 		return mLogicData->mProjectionMatrix;
 	}
-	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetProjectionInverse() const {
 		return mLogicData->mProjectionInverse;
 	}
-	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetViewProjection() const {
 		return mLogicData->mViewProjection;
 	}
-	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetViewProjectionInverse() const {
 		return mLogicData->mViewProjectionInverse;
 	}
-	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetToViewPortMatrix() const {
 		return mLogicData->mToViewPortMatrix;
 	}
-	TR_FUNCTION(SV_SupressGC)
 	v3dxMatrix4 GetViewPortOffsetMatrix() const {
 		return mLogicData->mViewPortOffsetMatrix;
 	}
-	TR_FUNCTION()
-	void UpdateConstBufferData(IRenderContext* rc, vBOOL bImm);
+	void UpdateConstBufferData(NxRHI::ICbView* buffer);
 protected:
 	void UpdateFrustum();
 	void UpdateFrustumOrtho();
 protected:
-	AutoRef<IConstantBuffer>	mCBuffer;
-	TR_MEMBER(SV_ReadOnly)
 	float					mFov;
-	TR_MEMBER(SV_ReadOnly)
 	float					mZNear;
-	TR_MEMBER(SV_ReadOnly)
 	float					mZFar;
-	TR_MEMBER(SV_ReadOnly)
 	float					mAspect;
 
 	v3dxFrustum				mFrustum;
-	TR_MEMBER(SV_ReadOnly)
 	bool					mIsOrtho;
-	TR_MEMBER(SV_ReadOnly)
 	float					mWidth;
-	TR_MEMBER(SV_ReadOnly)
 	float					mHeight;
 
 public:
-	
-	UINT					mPositionId;
-	UINT					mLookAtId;
-	UINT					mDirectionId;
-	UINT					mRightId;
-	UINT					mUpId;
-	UINT					mViewMatrixId;
-	UINT					mViewInverseId;
-	UINT					mProjectionMatrixId;
-	UINT					mProjectionInverseId;
-	UINT					mViewProjectionId;
-	UINT					mViewProjectionInverseId;
-	UINT					mID_ZNear;
-	UINT					mID_ZFar;
-	UINT					mCameraOffset;
+	CameraData*				mLogicData = nullptr;
+	CameraData*				mRenderData = nullptr;
 
-	CameraData*				mLogicData;
-	CameraData*				mRenderData;
+	/*const NxRHI::FShaderVarDesc* mPositionId = nullptr;
+	const NxRHI::FShaderVarDesc* mLookAtId = nullptr;
+	const NxRHI::FShaderVarDesc* mDirectionId = nullptr;
+	const NxRHI::FShaderVarDesc* mRightId = nullptr;
+	const NxRHI::FShaderVarDesc* mUpId = nullptr;
+	const NxRHI::FShaderVarDesc* mViewMatrixId = nullptr;
+	const NxRHI::FShaderVarDesc* mViewInverseId = nullptr;
+	const NxRHI::FShaderVarDesc* mProjectionMatrixId = nullptr;
+	const NxRHI::FShaderVarDesc* mProjectionInverseId = nullptr;
+	const NxRHI::FShaderVarDesc* mViewProjectionId = nullptr;
+	const NxRHI::FShaderVarDesc* mViewProjectionInverseId = nullptr;
+	const NxRHI::FShaderVarDesc* mID_ZNear = nullptr;
+	const NxRHI::FShaderVarDesc* mID_ZFar = nullptr;
+	const NxRHI::FShaderVarDesc* mCameraOffset = nullptr;*/
 };
 
 NS_END

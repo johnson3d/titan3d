@@ -23,7 +23,7 @@ public:
 	IBlobObject* GetCookedData() {
 		return &mCookedData;
 	}
-	IMeshDataProvider* CreateMeshProvider();
+	NxRHI::FMeshDataProvider* CreateMeshProvider();
 };
 
 class TR_CLASS()

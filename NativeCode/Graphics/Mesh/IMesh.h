@@ -1,34 +1,28 @@
 #pragma once
-#include "../../RHI/RHI.h"
+#include "../../NextRHI/NxRHI.h"
 #include "IMdfQueue.h"
 
 NS_BEGIN
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-IMesh : public VIUnknown
+class TR_CLASS()
+	IMesh : public VIUnknown
 {
 protected:
-	AutoRef<IMeshPrimitives>			mGeoms;
+	AutoRef<NxRHI::FMeshPrimitives>			mGeoms;
 	AutoRef<IMdfQueue>					mMdfQueue;
-	AutoRef<IVertexArray>				mVertexArray;
+	AutoRef<NxRHI::FVertexArray>				mVertexArray;
 public:
-	TR_CONSTRUCTOR()
 	IMesh();
-	TR_FUNCTION()
-	void Initialize(IMeshPrimitives* mesh, IMdfQueue* mdf);
-	TR_FUNCTION()
-	void SetInputStreams(IVertexArray* draw);
+	void Initialize(NxRHI::FMeshPrimitives* mesh, IMdfQueue* mdf);
+	void SetInputStreams(NxRHI::FVertexArray* draw);
 
-	TR_FUNCTION()
 	IMdfQueue* GetMdfQuque() {
 		return mMdfQueue;
 	}
 
-	TR_FUNCTION()
 	IMesh* CloneMesh();
 
-	TR_FUNCTION()
-	static IInputLayoutDesc* CreateInputLayoutDesc(UINT streams);
+	static NxRHI::FInputLayoutDesc* CreateInputLayoutDesc(UINT streams);
 };
 
 NS_END

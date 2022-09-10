@@ -1,13 +1,14 @@
 #include "IShaderConductor.h"
-#include "../../RHI/IShader.h"
-#include "../../RHI/ShaderReflector.h"
+#include "../../NextRHI/NxRHI.h"
 #include "../../Base/io/vfxfile.h"
 #include "../../Base/io/MemStream.h"
 #include "../../Base/CoreSDK.h"
-#include "../../../3rd/native/ShaderConductor/Include/ShaderConductor/SpirvPostProcess.hpp"
+//#include "../../../3rd/native/ShaderConductor/Include/ShaderConductor/SpirvPostProcess.hpp"
 
 #if defined(PLATFORM_WIN)
-#include "D3D11/D11PreHead.h"
+#include "../../NextRHI/Dx11/DX11PreHead.h"
+#include "../../NextRHI/Dx12/DX12Shader.h"
+#include "../../NextRHI/Vulkan/VKShader.h"
 #pragma comment(lib, "ShaderConductor.lib")
 #endif
 
@@ -15,11 +16,11 @@
 
 #if defined(PLATFORM_WIN)
 using namespace EngineNS;
-
+using namespace EngineNS::NxRHI;
 
 struct UEngineInclude : public ID3DInclude
 {
-	IShaderConductor* ShaderConductor;
+	NxRHI::FShaderCompiler* ShaderConductor;
 	std::map<LPCVOID, std::string> Data2FileMap;
 	virtual COM_DECLSPEC_NOTHROW HRESULT STDMETHODCALLTYPE Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
 	{
@@ -36,7 +37,7 @@ struct UEngineInclude : public ID3DInclude
 			//todo: not windows platform
 			root = pFileName;
 		}
-		auto ar = ShaderConductor->GetShaderCodeStream((void*)root.c_str());
+		auto ar = ShaderConductor->GetShaderCodeStream(root.c_str());
 		if (ar == nullptr)
 		{
 			VFX_LTRACE(ELTT_Graphics, "Include %s failed", root.c_str());
@@ -45,8 +46,8 @@ struct UEngineInclude : public ID3DInclude
 			return S_OK;
 		}
 
-		*ppData = ar->GetPointer();
-		*pBytes = (UINT)ar->Tell();
+		*ppData = ar->GetSourceCode();
+		*pBytes = ar->GetSize();
 
 		auto dir = GetPath(root);
 		Data2FileMap.insert(std::make_pair(*ppData, dir));
@@ -109,20 +110,20 @@ IShaderConductor* IShaderConductor::GetInstance()
 //	}
 //}
 
-bool IShaderConductor::CompileShader(IShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm,
-			const IShaderDefinitions* defines, bool bDebugShader, EShaderLanguage sl)
+bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm,
+			const NxRHI::IShaderDefinitions* defines, bool bDebugShader, NxRHI::EShaderLanguage sl)
 {
 	if (sl == EShaderLanguage::SL_DXBC)
 	{
 #if defined(PLATFORM_WIN)
-		MemStreamWriter* ar = GetShaderCodeStream((void*)shader);
+		auto ar = compiler->GetShaderCodeStream(shader);
 		if (ar == nullptr)
 			return false;
 
-		std::vector<D3D10_SHADER_MACRO> d11macros;
+		std::vector<D3D_SHADER_MACRO> d11macros;
 		if (defines != nullptr)
 		{
-			D3D10_SHADER_MACRO tmp;
+			D3D_SHADER_MACRO tmp;
 			for (size_t i = 0; i < defines->Definitions.size(); i++)
 			{	
 				tmp.Name = defines->Definitions[i].Name.c_str();
@@ -141,15 +142,13 @@ bool IShaderConductor::CompileShader(IShaderDesc* desc, const char* shader, cons
 		std::string shaderTarget;
 		switch (type)
 		{
-		case EngineNS::EST_UnknownShader:
-			break;
-		case EngineNS::EST_VertexShader:
+		case EShaderType::SDT_VertexShader:
 			shaderTarget = "vs_";
 			break;
-		case EngineNS::EST_PixelShader:
+		case EShaderType::SDT_PixelShader:
 			shaderTarget = "ps_";
 			break;
-		case EngineNS::EST_ComputeShader:
+		case EShaderType::SDT_ComputeShader:
 			shaderTarget = "cs_";
 			break;
 		default:
@@ -166,9 +165,9 @@ bool IShaderConductor::CompileShader(IShaderDesc* desc, const char* shader, cons
 		ID3DBlob* pBlob;
 		ID3DBlob* pError;
 		AutoPtr<UEngineInclude> engineInc(new UEngineInclude());
-		engineInc->ShaderConductor = this;
+		engineInc->ShaderConductor = compiler;
 		engineInc->Data2FileMap.insert(std::make_pair(nullptr, UEngineInclude::GetPath(shader)));
-		auto hr = D3DCompile(ar->GetPointer(), ar->Tell(), shader, pMacros, engineInc, entry, shaderTarget.c_str(), dwShaderFlags, 0, &pBlob, &pError);
+		auto hr = D3DCompile(ar->GetSourceCode(), ar->GetSize(), shader, pMacros, engineInc, entry, shaderTarget.c_str(), dwShaderFlags, 0, &pBlob, &pError);
 		if (pError != NULL)
 		{
 			VFX_LTRACE(ELTT_Graphics, (char*)pError->GetBufferPointer());
@@ -190,7 +189,7 @@ bool IShaderConductor::CompileShader(IShaderDesc* desc, const char* shader, cons
 		sl == EShaderLanguage::SL_GLSL ||
 		sl == EShaderLanguage::SL_METAL)
 	{
-		CompileHLSL(desc, shader, entry, type, sm, defines, sl);
+		CompileHLSL(compiler, desc, shader, entry, type, sm, defines, sl);
 	}
 
 	if (sl == EShaderLanguage::SL_SPIRV)
@@ -200,84 +199,23 @@ bool IShaderConductor::CompileShader(IShaderDesc* desc, const char* shader, cons
 	return true;
 }
 
-struct MySpirvCallback : ShaderConductor::SpirvCallback
-{
-	EShaderType ShaderStage;
-	virtual bool Remapping(const char* name, ShaderConductor::SpirvResourceType type, uint32_t set, uint32_t binding, 
-					uint32_t& outSet, uint32_t& outBinding) override 
-	{
-		outSet = set;
-		outBinding = binding;
-		UINT baseBinding = 0;
-		switch (ShaderStage)
-		{
-			case EngineNS::EST_UnknownShader:
-				break;
-			case EngineNS::EST_VertexShader:
-				baseBinding = 0;
-				break;
-			case EngineNS::EST_PixelShader:
-				baseBinding = 50;
-				break;
-			case EngineNS::EST_ComputeShader:
-				break;
-			default:
-				break;
-		}
-		
-		switch (type)
-		{
-			case ShaderConductor::SpirvResourceType::StageInput:
-				baseBinding = 0;
-				break;
-			case ShaderConductor::SpirvResourceType::StageOutput:
-				baseBinding = 0;
-				break;
-			case ShaderConductor::SpirvResourceType::UniformBuffer:
-				break;
-			case ShaderConductor::SpirvResourceType::SampledImage:
-				break;
-			case ShaderConductor::SpirvResourceType::SeparateImage:
-				break;
-			case ShaderConductor::SpirvResourceType::SeparateSampler:
-				break;
-			case ShaderConductor::SpirvResourceType::StorageBuffer:
-				break;
-			case ShaderConductor::SpirvResourceType::StorageImage:
-				break;
-			case ShaderConductor::SpirvResourceType::AtomicCounter:
-				break;
-			case ShaderConductor::SpirvResourceType::AccelerationStructures:
-				break;
-			default:
-				break;
-		}
-
-		outSet = set;
-		outBinding = baseBinding + binding;
-		return true;
-	}
-};
-
-bool IShaderConductor::CompileHLSL(IShaderDesc* desc, const char* hlsl, const char* entry, EShaderType type, std::string sm,
-	const IShaderDefinitions* defines, EShaderLanguage sl)
+bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, FShaderDesc* desc, const char* hlsl, const char* entry, EShaderType type, std::string sm,
+	const IShaderDefinitions* defines, NxRHI::EShaderLanguage sl)
 {
 #if defined(PLATFORM_WIN)
-	MemStreamWriter* ar = GetShaderCodeStream((void*)hlsl);
-	std::string codeText((const char*)ar->GetPointer(), (size_t)ar->Tell());
+	auto ar = compiler->GetShaderCodeStream(hlsl);
+	std::string codeText((const char*)ar->GetSourceCode(), (size_t)ar->GetSize());
 	
 	ShaderConductor::ShaderStage stage = ShaderConductor::ShaderStage::VertexShader;
 	switch (type)
 	{
-	case EngineNS::EST_UnknownShader:
-		break;
-	case EngineNS::EST_VertexShader:
+	case EShaderType::SDT_VertexShader:
 		stage = ShaderConductor::ShaderStage::VertexShader;
 		break;
-	case EngineNS::EST_PixelShader:
+	case EShaderType::SDT_PixelShader:
 		stage = ShaderConductor::ShaderStage::PixelShader;
 		break;
-	case EngineNS::EST_ComputeShader:
+	case EShaderType::SDT_ComputeShader:
 		stage = ShaderConductor::ShaderStage::ComputeShader;
 		break;
 	default:
@@ -312,29 +250,30 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, const char* hlsl, const ch
 	src.fileName = hlsl;
 	src.loadIncludeCallback = [=](const char* includeName)->ShaderConductor::Blob
 	{
-		MemStreamWriter* ar_inc = GetShaderCodeStream((void*)includeName);
+		auto ar_inc = compiler->GetShaderCodeStream(includeName);
 		
 		if (ar_inc != nullptr)
-			return ShaderConductor::Blob(ar_inc->GetPointer(), static_cast<uint32_t>(ar_inc->Tell()));
+			return ShaderConductor::Blob(ar_inc->GetSourceCode(), static_cast<uint32_t>(ar_inc->GetSize()));
 		else
 			return ShaderConductor::Blob(nullptr, static_cast<uint32_t>(0));
 	};
 
-	ShaderConductor::MacroDefine defs[32];
+	std::vector<ShaderConductor::MacroDefine> defs;
 	if (defines != nullptr)
 	{
-		src.numDefines = (int)defines->Definitions.size();
-		src.defines = defs;
+		defs.resize(defines->Definitions.size());
 		for (size_t i = 0; i < defines->Definitions.size(); i++)
 		{
 			defs[i].name = defines->Definitions[i].Name.c_str();
 			defs[i].value = defines->Definitions[i].Definition.c_str();
 		}
+		src.numDefines = (int)defs.size();
+		src.defines = &defs[0];
 	}
 	else
 	{
 		src.numDefines = 0;
-		src.defines = defs;
+		src.defines = nullptr;
 	}
 
 	ShaderConductor::Compiler::Options opt;
@@ -345,33 +284,40 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, const char* hlsl, const ch
 	opt.shiftAllSamplersBindings = 0;
 	opt.shiftAllCBuffersBindings = 0;
 	opt.shiftAllUABuffersBindings = 0;
+	opt.needReflection = true;
 
 	std::vector<ShaderConductor::Compiler::TargetDesc> dest;
-	std::vector < ShaderConductor::Compiler::ResultDesc> result;
+	std::vector<ShaderConductor::Compiler::ResultDesc> result;
 
-	ShaderConductor::Compiler::TargetDesc tmp;
-	ShaderConductor::Compiler::ResultDesc tmp2;
+	ShaderConductor::Compiler::TargetDesc tmp{};
+	ShaderConductor::Compiler::ResultDesc tmp2{};
 
-	tmp.version = essl_version.c_str();
 	tmp.asModule = false;
 	
 	switch (sl)
 	{
-		case EngineNS::SL_DXBC:
+		case NxRHI::EShaderLanguage::SL_DXBC:
 			break;
-		case EngineNS::SL_DXIL:
+		case NxRHI::EShaderLanguage::SL_DXIL:
+			tmp.version = "6_2";
+			tmp.language = ShaderConductor::ShadingLanguage::Dxil;
+			dest.push_back(tmp);
+			result.push_back(tmp2);
 			break;
-		case EngineNS::SL_GLSL:
+		case NxRHI::EShaderLanguage::SL_GLSL:
+			tmp.version = essl_version.c_str();
 			tmp.language = ShaderConductor::ShadingLanguage::Essl;
 			dest.push_back(tmp);
 			result.push_back(tmp2);
 			break;
-		case EngineNS::SL_SPIRV:
+		case NxRHI::EShaderLanguage::SL_SPIRV:
+			//tmp.version = "6_2";
 			tmp.language = ShaderConductor::ShadingLanguage::SpirV;
 			dest.push_back(tmp);
 			result.push_back(tmp2);
 			break;
-		case EngineNS::SL_METAL:
+		case NxRHI::EShaderLanguage::SL_METAL:
+			//tmp.version = "6_2";
 			tmp.language = ShaderConductor::ShadingLanguage::Msl_iOS;
 			dest.push_back(tmp);
 			result.push_back(tmp2);
@@ -388,7 +334,7 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, const char* hlsl, const ch
 		if (tmp.hasError == false && tmp.errorWarningMsg.Size() != 0)
 		{
 			auto s0 = std::string((char*)tmp.errorWarningMsg.Data(), tmp.errorWarningMsg.Size());
-			if (s0.find("Inc/FXAAMobile.cginc:") == std::string::npos)
+			//if (s0.find("Inc/FXAAMobile.cginc:") == std::string::npos)
 			{
 				VFX_LTRACE(ELTT_Graphics, "CrossPlatform Shader Warning:%s\r\n", s0.c_str());
 			}
@@ -409,7 +355,20 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, const char* hlsl, const ch
 		}
 		else
 		{
-			if(dest[i].language == ShaderConductor::ShadingLanguage::Essl)
+			if (dest[i].language == ShaderConductor::ShadingLanguage::Dxil)
+			{
+				auto& finalResult = result[i];
+				size_t sz = finalResult.target.Size();
+				desc->DxIL.resize(sz);
+				memcpy(&desc->DxIL[0], (char*)finalResult.target.Data(), finalResult.target.Size());			
+
+				auto pDx12Reflection = (ID3D12ShaderReflection*)finalResult.reflection.GetD3D12ShaderReflection();
+				if (pDx12Reflection != nullptr)
+				{
+					DX12Shader::Reflect(desc, pDx12Reflection);
+				}
+			}
+			else if(dest[i].language == ShaderConductor::ShadingLanguage::Essl)
 			{
 				desc->Es300Code = std::string((char*)result[i].target.Data(), result[i].target.Size());
 			}
@@ -419,13 +378,15 @@ bool IShaderConductor::CompileHLSL(IShaderDesc* desc, const char* hlsl, const ch
 			}
 			else if (dest[i].language == ShaderConductor::ShadingLanguage::SpirV)
 			{
-				MySpirvCallback cb;
-				cb.ShaderStage = type;
+				//MySpirvCallback cb;
+				//cb.ShaderStage = type;
 				//auto finalResult = ProcessSpirv(result[i], &cb);
 				auto& finalResult = result[i];
-				size_t sz = finalResult.target.Size() / sizeof(UINT);
+				size_t sz = finalResult.target.Size();
 				desc->SpirV.resize(sz);
 				memcpy(&desc->SpirV[0], (char*)finalResult.target.Data(), finalResult.target.Size());
+
+				VKShader::Reflect(desc);
 			}
 		}
 	}

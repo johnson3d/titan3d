@@ -1,17 +1,15 @@
 #pragma once
 #include "IModifier.h"
-#include "../../../RHI/IConstantBuffer.h"
-#include "../../../RHI/Utility/IMeshPrimitives.h"
+#include "../../../NextRHI/NxRHI.h"
 
 NS_BEGIN
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
+class TR_CLASS()
 	ISkinModifier : public IModifier
 {
 public:
-	TR_CONSTRUCTOR()
-		ISkinModifier();
-	virtual void SetInputStreams(IMeshPrimitives * mesh, IVertexArray * vao);
+	ISkinModifier();
+	virtual void SetInputStreams(NxRHI::FMeshPrimitives * mesh, NxRHI::FVertexArray * vao);
 	virtual void GetInputStreams(UINT * pOutStreams);
 	virtual void GetProvideStreams(UINT * pOutStreams);
 };

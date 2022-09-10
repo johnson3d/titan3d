@@ -4,40 +4,40 @@
 
 NS_BEGIN
 
-void ISkinModifier::SetInputStreams(IMeshPrimitives* mesh, IVertexArray* vao)
+void ISkinModifier::SetInputStreams(NxRHI::FMeshPrimitives* mesh, NxRHI::FVertexArray* vao)
 {
 	auto geom = mesh->GetGeomtryMesh();
 
-	auto vb = geom->GetVertexBuffer(VST_Position);
-	vao->BindVertexBuffer(VST_Position, vb);
+	auto vb = geom->GetVertexBuffer(NxRHI::VST_Position);
+	vao->BindVB(NxRHI::VST_Position, vb);
 
-	vb = geom->GetVertexBuffer(VST_Normal);
-	vao->BindVertexBuffer(VST_Normal, vb);
+	vb = geom->GetVertexBuffer(NxRHI::VST_Normal);
+	vao->BindVB(NxRHI::VST_Normal, vb);
 
-	vb = geom->GetVertexBuffer(VST_Tangent);
-	vao->BindVertexBuffer(VST_Tangent, vb);
+	vb = geom->GetVertexBuffer(NxRHI::VST_Tangent);
+	vao->BindVB(NxRHI::VST_Tangent, vb);
 
-	vb = geom->GetVertexBuffer(VST_UV);
-	vao->BindVertexBuffer(VST_UV, vb);
+	vb = geom->GetVertexBuffer(NxRHI::VST_UV);
+	vao->BindVB(NxRHI::VST_UV, vb);
 
-	vb = geom->GetVertexBuffer(VST_Color);
-	vao->BindVertexBuffer(VST_Color, vb);
+	vb = geom->GetVertexBuffer(NxRHI::VST_Color);
+	vao->BindVB(NxRHI::VST_Color, vb);
 
-	vb = geom->GetVertexBuffer(VST_SkinIndex);
-	vao->BindVertexBuffer(VST_SkinIndex, vb);
+	vb = geom->GetVertexBuffer(NxRHI::VST_SkinIndex);
+	vao->BindVB(NxRHI::VST_SkinIndex, vb);
 
-	vb = geom->GetVertexBuffer(VST_SkinWeight);
-	vao->BindVertexBuffer(VST_SkinWeight, vb);
+	vb = geom->GetVertexBuffer(NxRHI::VST_SkinWeight);
+	vao->BindVB(NxRHI::VST_SkinWeight, vb);
 }
 
 void ISkinModifier::GetInputStreams(UINT* pOutStreams)
 {
-	*pOutStreams |= ((1 << VST_Position) | (1 << VST_Normal) | (1 << VST_Tangent) | (1 << VST_UV) | (1 << VST_Color) | (1 << VST_SkinIndex) | (1 << VST_SkinWeight));
+	*pOutStreams |= ((1 << NxRHI::VST_Position) | (1 << NxRHI::VST_Normal) | (1 << NxRHI::VST_Tangent) | (1 << NxRHI::VST_UV) | (1 << NxRHI::VST_Color) | (1 << NxRHI::VST_SkinIndex) | (1 << NxRHI::VST_SkinWeight));
 }
 
 void ISkinModifier::GetProvideStreams(UINT* pOutStreams)
 {
-	*pOutStreams |= ((1 << VOT_Position) | (1 << VOT_Normal) | (1 << VOT_Tangent) | (1 << VOT_WorldPos) | (1 << VOT_UV) | (1 << VOT_Color) | (1 << VST_SkinIndex) | (1 << VST_SkinWeight));
+	*pOutStreams |= ((1 << NxRHI::VOT_Position) | (1 << NxRHI::VOT_Normal) | (1 << NxRHI::VOT_Tangent) | (1 << NxRHI::VOT_WorldPos) | (1 << NxRHI::VOT_UV) | (1 << NxRHI::VOT_Color) | (1 << NxRHI::VST_SkinIndex) | (1 << NxRHI::VST_SkinWeight));
 }
 
 //bool ISkinModifier::FlushSkinPose(IConstantBuffer* cb, int AbsBonePos, int AbsBoneQuat, IPartialSkeleton* partialSkeleton,ISkeletonPose* skeletonPose)

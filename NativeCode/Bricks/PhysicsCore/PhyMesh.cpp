@@ -1,12 +1,13 @@
 #include "PhyMesh.h"
 #include "PhyContext.h"
-#include "../../RHI/IRenderContext.h"
-#include "../../RHI/Utility/IMeshPrimitives.h"
+#include "../../NextRHI/NxRHI.h"
 #include "../../Base/xnd/vfxxnd.h"
 
 #define new VNEW
 
 NS_BEGIN
+
+using namespace NxRHI;
 
 PhyTriMesh::~PhyTriMesh()
 {
@@ -36,20 +37,20 @@ bool PhyTriMesh::CreateFromCookedData(PhyContext* ctx, void* cookedData, UINT si
 	return true;
 }
 
-IMeshDataProvider* PhyTriMesh::CreateMeshProvider()
+FMeshDataProvider* PhyTriMesh::CreateMeshProvider()
 {
-	IMeshDataProvider* result = new IMeshDataProvider();
+	auto result = new FMeshDataProvider();
 	bool isIndex16;
 	if (mMesh->getTriangleMeshFlags() & physx::PxTriangleMeshFlag::Enum::e16_BIT_INDICES)
 	{
 		result->Init((1<<EVertexStreamType::VST_Position) | 
-			(1<<EVertexStreamType::VST_Color), EIndexBufferType::IBT_Int16, 1);
+			(1<<EVertexStreamType::VST_Color), false, 1);
 		isIndex16 = true;
 	}
 	else
 	{
 		result->Init((1 << EVertexStreamType::VST_Position) |
-			(1 << EVertexStreamType::VST_Color), EIndexBufferType::IBT_Int32, 1);
+			(1 << EVertexStreamType::VST_Color), true, 1);
 		isIndex16 = false;
 	}
 
@@ -61,7 +62,7 @@ IMeshDataProvider* PhyTriMesh::CreateMeshProvider()
 		result->AddVertex(&pPos[i], nullptr, nullptr, 0);
 	}
 	
-	DrawPrimitiveDesc dpDesc;
+	FMeshAtomDesc dpDesc;
 	dpDesc.SetDefault();
 	IBlobObject* pColorBlob = result->GetStream(EVertexStreamType::VST_Color);
 	DWORD* pColor = (DWORD*)pColorBlob->GetData();
@@ -127,7 +128,7 @@ IMeshDataProvider* PhyTriMesh::CreateMeshProvider()
 		}
 	}
 	dpDesc.NumPrimitives = nbTri;
-	result->PushAtomLOD(0, &dpDesc);
+	result->PushAtomLOD(0, dpDesc);
 	auto bounds = mMesh->getLocalBounds();
 	v3dxBox3 aabb;
 	aabb.minbox = *(v3dxVector3*)&bounds.minimum;

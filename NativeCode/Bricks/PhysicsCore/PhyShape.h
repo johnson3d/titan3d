@@ -5,8 +5,6 @@ NS_BEGIN
 
 class PhyScene;
 class PhyActor;
-class IMeshPrimitives;
-class IRenderContext;
 struct PhyFilterData;
 class PhyMaterial;
 
@@ -114,9 +112,9 @@ public:
 	bool IfSetTriMeshScaling(const v3dxVector3* scale, const v3dxQuaternion* scaleRot);
 
 	TR_MEMBER(SV_NoBind = true)
-	IMeshPrimitives* IfGetTriMesh(IRenderContext* rc);
+	NxRHI::FMeshPrimitives* IfGetTriMesh(NxRHI::IGpuDevice* rc);
 	TR_MEMBER(SV_NoBind = true)
-	IMeshPrimitives* IfGetConvexMesh(IRenderContext* rc);
+	NxRHI::FMeshPrimitives* IfGetConvexMesh(NxRHI::IGpuDevice* rc);
 
 	int GetTrianglesRemap(int index);
 };

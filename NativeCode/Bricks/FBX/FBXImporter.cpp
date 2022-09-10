@@ -178,9 +178,10 @@ namespace AssetImportAndExport::FBX
 		mFBXFileImportDesc = new FBXFileImportDesc();
 		auto info = importer->GetFileHeaderInfo();
 		auto time = info->mCreationTimeStamp;
-		char* charName = new char[strlen(info->mCreator.Buffer()) + 1];
+		/*char* charName = new char[strlen(info->mCreator.Buffer()) + 1];
 		strcpy_s(charName, strlen(info->mCreator.Buffer()) + 1, info->mCreator.Buffer());
-		mFBXFileImportDesc->Creater = VNameString(charName);
+		mFBXFileImportDesc->Creater = VNameString(charName);*/
+		mFBXFileImportDesc->Creater = VNameString(info->mCreator.Buffer());
 		FbxSystemUnit SceneSystemUnit = scene->GetGlobalSettings().GetSystemUnit();
 		mFBXFileImportDesc->FileSystemUnit = GetSystemUnitType(SceneSystemUnit);
 		mFBXFileImportDesc->ScaleFactor = (float)FbxSystemUnit::m.GetConversionFactorFrom(SceneSystemUnit);
@@ -188,9 +189,10 @@ namespace AssetImportAndExport::FBX
 		auto indexStart = mFilename.find_last_of('\\');
 		auto indexEnd = mFilename.find_last_of('.');
 		auto pureFileName = mFilename.substr(indexStart + 1, indexEnd - indexStart - 1);
-		charName = new char[pureFileName.size() + 1];
+		/*charName = new char[pureFileName.size() + 1];
 		strcpy_s(charName, pureFileName.size() + 1, pureFileName.c_str());
-		mFBXFileImportDesc->FileName = VNameString(charName);
+		mFBXFileImportDesc->FileName = VNameString(charName);*/
+		mFBXFileImportDesc->FileName = VNameString(pureFileName.c_str());
 	}
 
 	void FBXImporter::ExtractFBXOBjectDescs(fbxsdk::FbxScene* scene)
@@ -237,6 +239,10 @@ namespace AssetImportAndExport::FBX
 			{
 				mFBXFileImportDesc->Anims[i] = animDescs[i];
 			}
+			for (auto& i : animDescs)
+			{
+				delete i;
+			}
 			animDescs.clear();
 		}
 
@@ -253,9 +259,10 @@ namespace AssetImportAndExport::FBX
 				auto mesh = (FbxMesh*)att;
 				FBXMeshImportDesc* meshDesc = new FBXMeshImportDesc();
 				auto strName = FBXDataConverter::ConvertToStdString(node->GetName());
-				auto charName = new char[strName.size() + 1];
+				/*auto charName = new char[strName.size() + 1];
 				strcpy_s(charName, strName.size() + 1, strName.c_str());
-				meshDesc->Name = charName;
+				meshDesc->Name = charName;*/
+				meshDesc->Name = strName.c_str();
 				//meshDesc->Hash = HashHelper::APHash(meshDesc->Name);
 				meshDesc->Type = (EFBXObjectType)attType;
 				meshDesc->FBXNode = node;

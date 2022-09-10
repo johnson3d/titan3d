@@ -3,8 +3,7 @@
 #include "../../Base/debug//vfxdebug.h"
 #include "../../Math/v3dxVector3.h"
 #include "../../Math/v3dxQuaternion.h"
-#include "../../RHI/IRenderResource.h"
-#include "../../RHI/Utility/IMeshPrimitives.h"
+#include "../../NextRHI/NxRHI.h"
 
 NS_BEGIN
 
@@ -23,7 +22,8 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 	FVarAttribute
 {
 	VNameString		Name;
-	EShaderVarType	Type;
+	NxRHI::EShaderVarType	Type;
+	UINT			Columns;
 	UINT			Offset;
 };
 
@@ -32,7 +32,7 @@ class TR_CLASS()
 {
 	std::vector<FVarAttribute>		NamedAttributes;
 
-	void AddAttribute(const char* name, EShaderVarType type)
+	void AddAttribute(const char* name, NxRHI::EShaderVarType type)
 	{
 		FVarAttribute tmp;
 		tmp.Name = name;

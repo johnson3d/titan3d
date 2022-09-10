@@ -1,8 +1,7 @@
 #pragma once
 #include "FBX.h"
-#include "../../RHI/PreHead.h"
 #include "fbxsdk.h"
-#include "../../RHI/RHI.h"
+#include "../../NextRHI/NxRHI.h"
 #include "FBXImporter.h"
 #include "../../Math/v3dxColor4.h"
 #include "../../Graphics/Mesh/Modifier/ISkinModifier.h"
@@ -125,7 +124,7 @@ namespace AssetImportAndExport
 				~FBXMeshImporter();
 			public:
 				
-				EngineNS::IMeshPrimitives* GetMeshPrimitives() 
+				NxRHI::FMeshPrimitives* GetMeshPrimitives() 
 				{ 
 					if (HasProcessed)
 					{
@@ -141,11 +140,11 @@ namespace AssetImportAndExport
 					}
 					return nullptr;
 				};
-				EFBXImportResult Process(EngineNS::IRenderContext* rc);
+				EFBXImportResult Process(NxRHI::IGpuDevice* rc);
 				//v3dxMatrix4 ComputeTotalMatrix(FbxNode* Node, FbxScene* scene);
 				void RecursionCalculateBone(FbxNode* boneNode, FBXSkeletonDesc* skeleton);
 			protected:
-				EngineNS::IMeshPrimitives* mMeshPrimitives = nullptr;
+				NxRHI::FMeshPrimitives* mMeshPrimitives = nullptr;
 				FBXSkeletonDesc* mSkeletonDesc = nullptr;
 				//EngineNS::ISkinModifier* mSkinModifier;
 			protected:

@@ -2,8 +2,7 @@
 #include "PhyScene.h"
 #include "PhyActor.h"
 #include "PhyMaterial.h"
-#include "../../RHI/IRenderContext.h"
-#include "../../RHI/Utility/IMeshPrimitives.h"
+#include "../../NextRHI/NxRHI.h"
 
 #define new VNEW
 
@@ -14,6 +13,8 @@
 NS_BEGIN
 
 ENGINE_RTTI_IMPL(EngineNS::PhyShape);
+
+using namespace NxRHI;
 
 PhyShape::PhyShape()
 {
@@ -340,7 +341,7 @@ bool PhyShape::IfSetTriMeshScaling(const v3dxVector3* scale, const v3dxQuaternio
 	return false;
 }
 
-IMeshPrimitives* PhyShape::IfGetTriMesh(IRenderContext* rc)
+FMeshPrimitives* PhyShape::IfGetTriMesh(IGpuDevice* rc)
 {
 	if (mType != PST_TriangleMesh)
 		return nullptr;
@@ -351,59 +352,68 @@ IMeshPrimitives* PhyShape::IfGetTriMesh(IRenderContext* rc)
 		if (false == mShape->getTriangleMeshGeometry(geom))
 			return nullptr;
 
-		auto result = new IMeshPrimitives();
+		auto result = new FMeshPrimitives();
 		result->Init(rc, "", 1);
 		UINT nVert = geom.triangleMesh->getNbVertices();
 		UINT nTri = geom.triangleMesh->getNbTriangles();
 		auto pVert = geom.triangleMesh->getVertices();
 
-		IVertexBufferDesc vbDesc;
-		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
-		vbDesc.Stride = sizeof(v3dxVector3);
-		vbDesc.InitData = (void*)pVert;
-		auto vbPos = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
-		result->GetGeomtryMesh()->BindVertexBuffer(VST_Position, vbPos);
+		FVbvDesc vbvDesc;
+		vbvDesc.Stride = sizeof(v3dxVector3);
+		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
+		vbvDesc.InitData = (void*)pVert;
+		auto vbPos = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Position, vbPos);
 
 		std::vector<v3dxVector3> normals;
 		auto ibflags = geom.triangleMesh->getTriangleMeshFlags();
 		if (ibflags == physx::PxTriangleMeshFlag::e16_BIT_INDICES)
 		{
-			IIndexBufferDesc ibDesc;
-			ibDesc.ByteWidth = sizeof(USHORT) * nTri * 3;
-			ibDesc.Type = IBT_Int16;
+			result->GetGeomtryMesh()->IsIndex32 = false;
+			FBufferDesc ibDesc;
+			ibDesc.SetDefault();
+			ibDesc.Size = sizeof(USHORT) * nTri * 3;
+			ibDesc.StructureStride = sizeof(USHORT);
 			ibDesc.InitData = (void*)geom.triangleMesh->getTriangles();
-			auto ib = MakeWeakRef(rc->CreateIndexBuffer(&ibDesc));
+			auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc));
+			FIbvDesc ibvDesc;
+			ibvDesc.Stride = ibDesc.StructureStride;
+			ibvDesc.Size = ibDesc.Size;
+			auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc));
 			result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
-			IMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
+			FMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
 		}
 		else
 		{
-			IIndexBufferDesc ibDesc;
-			ibDesc.ByteWidth = sizeof(UINT) * nTri * 3;
-			ibDesc.Type = IBT_Int32;
+			result->GetGeomtryMesh()->IsIndex32 = true;
+			FBufferDesc ibDesc;
+			ibDesc.Size = sizeof(UINT) * nTri * 3;
+			ibDesc.StructureStride = sizeof(UINT);
 			ibDesc.InitData = (void*)geom.triangleMesh->getTriangles();
-			auto ib = MakeWeakRef(rc->CreateIndexBuffer(&ibDesc));
+			auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc));
+			FIbvDesc ibvDesc;
+			ibvDesc.Stride = ibDesc.StructureStride;
+			ibvDesc.Size = ibDesc.Size;
+			auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc));
 			result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
-			IMeshPrimitives::CalcNormals32(normals, (const v3dxVector3*)pVert, nVert, (UINT*)ibDesc.InitData, nTri);
+			FMeshPrimitives::CalcNormals32(normals, (const v3dxVector3*)pVert, nVert, (UINT*)ibDesc.InitData, nTri);
 		}
 
-		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
-		vbDesc.Stride = sizeof(v3dxVector3);
-		vbDesc.InitData = (void*)&normals[0];
-		auto vbNor = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
-		result->GetGeomtryMesh()->BindVertexBuffer(VST_Normal, vbNor);
+		vbvDesc.Stride = sizeof(v3dxVector3);
+		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
+		vbvDesc.InitData = (void*)&normals[0];
+		auto vbNor = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Normal, vbNor);
 
-		DrawPrimitiveDesc desc;
+		FMeshAtomDesc desc;
 		desc.NumPrimitives = nTri;
-		result->PushAtomLOD(0, &desc);
+		result->PushAtom(0, desc);
 
 		result->GetResourceState()->SetResourceSize((UINT)nVert * sizeof(v3dxVector3) * 2);
 		result->GetResourceState()->SetStreamState(SS_Valid);
 		
-		result->GetGeomtryMesh()->mIsDirty = TRUE;
-
 		return result;
 	}
 	else
@@ -412,65 +422,75 @@ IMeshPrimitives* PhyShape::IfGetTriMesh(IRenderContext* rc)
 		if (false == mShape->getTriangleMeshGeometry(geom))
 			return nullptr;
 
-		auto result = new IMeshPrimitives();
+		auto result = new FMeshPrimitives();
 		result->Init(rc, "", 1);
 		UINT nVert = geom.triangleMesh->getNbVertices();
 		UINT nTri = geom.triangleMesh->getNbTriangles();
 		auto pVert = geom.triangleMesh->getVertices();
 
-		IVertexBufferDesc vbDesc;
-		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
-		vbDesc.Stride = sizeof(v3dxVector3);
-		vbDesc.InitData = (void*)pVert;
-		auto vbPos = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
-		result->GetGeomtryMesh()->BindVertexBuffer(VST_Position, vbPos);
+		FVbvDesc vbvDesc;
+		vbvDesc.Stride = sizeof(v3dxVector3);
+		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
+		vbvDesc.InitData = (void*)pVert;
+		auto vbPos = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Position, vbPos);
 
 		std::vector<v3dxVector3> normals;
 		auto ibflags = geom.triangleMesh->getTriangleMeshFlags();
 		if (ibflags == physx::PxTriangleMeshFlag::e16_BIT_INDICES)
 		{
-			IIndexBufferDesc ibDesc;
-			ibDesc.ByteWidth = sizeof(USHORT) * nTri * 3;
-			ibDesc.Type = IBT_Int16;
+			result->GetGeomtryMesh()->IsIndex32 = false;
+			FBufferDesc ibDesc;
+			ibDesc.Size = sizeof(USHORT) * nTri * 3;
+			ibDesc.StructureStride = sizeof(USHORT);
 			ibDesc.InitData = (void*)geom.triangleMesh->getTriangles();
-			auto ib = MakeWeakRef(rc->CreateIndexBuffer(&ibDesc));
+			auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc));
+			FIbvDesc ibvDesc;
+			ibvDesc.Stride = ibDesc.StructureStride;
+			ibvDesc.Size = ibDesc.Size;
+			auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc));
 			result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
-			IMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
+			FMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
 		}
 		else
 		{
-			IIndexBufferDesc ibDesc;
-			ibDesc.ByteWidth = sizeof(UINT) * nTri * 3;
-			ibDesc.Type = IBT_Int32;
+			result->GetGeomtryMesh()->IsIndex32 = true;
+			FBufferDesc ibDesc;
+			ibDesc.Size = sizeof(UINT) * nTri * 3;
+			ibDesc.StructureStride = sizeof(USHORT);
 			ibDesc.InitData = (void*)geom.triangleMesh->getTriangles();
-			auto ib = MakeWeakRef(rc->CreateIndexBuffer(&ibDesc));
+			auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc));
+			FIbvDesc ibvDesc;
+			ibvDesc.Stride = ibDesc.StructureStride;
+			ibvDesc.Size = ibDesc.Size;
+			auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc));
 			result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
-			IMeshPrimitives::CalcNormals32(normals, (const v3dxVector3*)pVert, nVert, (UINT*)ibDesc.InitData, nTri);
+			FMeshPrimitives::CalcNormals32(normals, (const v3dxVector3*)pVert, nVert, (UINT*)ibDesc.InitData, nTri);
 		}
 
-		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
-		vbDesc.Stride = sizeof(v3dxVector3);
-		vbDesc.InitData = (void*)&normals[0];
-		auto vbNor = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
-		result->GetGeomtryMesh()->BindVertexBuffer(VST_Normal, vbNor);
+		vbvDesc.Stride = sizeof(v3dxVector3);
+		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
+		vbvDesc.InitData = (void*)&normals[0];
+		auto vbNor = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Normal, vbNor);
 
-		DrawPrimitiveDesc desc;
+		FMeshAtomDesc desc;
 		desc.NumPrimitives = nTri;
-		result->PushAtomLOD(0, &desc);
+		result->PushAtom(0, desc);
 
 		result->GetResourceState()->SetResourceSize((UINT)nVert * sizeof(v3dxVector3) * 2);
 		result->GetResourceState()->SetStreamState(SS_Valid);
 		//result->GetResourceState()->SetKeepValid(TRUE);
 
-		result->GetGeomtryMesh()->mIsDirty = TRUE;
+		//result->GetGeomtryMesh()->mIsDirty = TRUE;
 
 		return result;
 	}
 }
 
-IMeshPrimitives* PhyShape::IfGetConvexMesh(IRenderContext* rc)
+FMeshPrimitives* PhyShape::IfGetConvexMesh(IGpuDevice* rc)
 {
 	if (mType != PST_Convex)
 		return nullptr;
@@ -481,16 +501,16 @@ IMeshPrimitives* PhyShape::IfGetConvexMesh(IRenderContext* rc)
 		if (false == mShape->getConvexMeshGeometry(geom))
 			return nullptr;
 
-		auto result = new IMeshPrimitives();
+		auto result = new FMeshPrimitives();
 		UINT nVert = geom.convexMesh->getNbVertices();
 		auto pVert = geom.convexMesh->getVertices();
 
-		IVertexBufferDesc vbDesc;
-		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
-		vbDesc.Stride = sizeof(v3dxVector3);
-		vbDesc.InitData = (void*)pVert;
-		auto vbPos = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
-		result->GetGeomtryMesh()->BindVertexBuffer(VST_Position, vbPos);
+		FVbvDesc vbvDesc;
+		vbvDesc.Stride = sizeof(v3dxVector3);
+		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
+		vbvDesc.InitData = (void*)pVert;
+		auto vbPos = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Position, vbPos);
 
 		std::vector<v3dxVector3> normals;
 		const BYTE* indexBuffer = geom.convexMesh->getIndexBuffer();
@@ -523,24 +543,28 @@ IMeshPrimitives* PhyShape::IfGetConvexMesh(IRenderContext* rc)
 
 		UINT nTri = (UINT)indices.size() / 3;
 
-		IIndexBufferDesc ibDesc;
-		ibDesc.ByteWidth = sizeof(USHORT) * nTri * 3;
-		ibDesc.Type = IBT_Int16;
+		FBufferDesc ibDesc;
+		ibDesc.Size = sizeof(USHORT) * nTri * 3;
+		ibDesc.StructureStride = sizeof(USHORT);
 		ibDesc.InitData = &indices[0];
-		auto ib = MakeWeakRef(rc->CreateIndexBuffer(&ibDesc));
+		auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc));
+		FIbvDesc ibvDesc;
+		ibvDesc.Stride = ibDesc.StructureStride;
+		ibvDesc.Size = ibDesc.Size;
+		auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc));
 		result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
-		IMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
+		FMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
 
-		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
-		vbDesc.Stride = sizeof(v3dxVector3);
-		vbDesc.InitData = (void*)&normals[0];
-		auto vbNor = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
-		result->GetGeomtryMesh()->BindVertexBuffer(VST_Normal, vbNor);
+		vbvDesc.Stride = sizeof(v3dxVector3);
+		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
+		vbvDesc.InitData = (void*)&normals[0];
+		auto vbNor = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Normal, vbNor);
 
-		DrawPrimitiveDesc desc;
+		FMeshAtomDesc desc;
 		desc.NumPrimitives = nTri;
-		result->PushAtomLOD(0, &desc);
+		result->PushAtom(0, desc);
 
 		result->GetResourceState()->SetResourceSize((UINT)nVert * sizeof(v3dxVector3) * 2);
 		result->GetResourceState()->SetStreamState(SS_Valid);
@@ -554,16 +578,16 @@ IMeshPrimitives* PhyShape::IfGetConvexMesh(IRenderContext* rc)
 		if (false == mShape->getConvexMeshGeometry(geom))
 			return nullptr;
 
-		auto result = new IMeshPrimitives();
+		auto result = new FMeshPrimitives();
 		UINT nVert = geom.convexMesh->getNbVertices();
 		auto pVert = geom.convexMesh->getVertices();
 
-		IVertexBufferDesc vbDesc;
-		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
-		vbDesc.Stride = sizeof(v3dxVector3);
-		vbDesc.InitData = (void*)pVert;
-		auto vbPos = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
-		result->GetGeomtryMesh()->BindVertexBuffer(VST_Position, vbPos);
+		FVbvDesc vbvDesc;
+		vbvDesc.Stride = sizeof(v3dxVector3);
+		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
+		vbvDesc.InitData = (void*)pVert;
+		auto vbPos = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Position, vbPos);
 
 		std::vector<v3dxVector3> normals;
 		const BYTE* indexBuffer = geom.convexMesh->getIndexBuffer();
@@ -596,24 +620,28 @@ IMeshPrimitives* PhyShape::IfGetConvexMesh(IRenderContext* rc)
 
 		UINT nTri = (UINT)indices.size() / 3;
 
-		IIndexBufferDesc ibDesc;
-		ibDesc.ByteWidth = sizeof(USHORT) * nTri * 3;
-		ibDesc.Type = IBT_Int16;
+		FBufferDesc ibDesc;
+		ibDesc.Size = sizeof(USHORT) * nTri * 3;
+		ibDesc.StructureStride = sizeof(USHORT);
 		ibDesc.InitData = &indices[0];
-		auto ib = MakeWeakRef(rc->CreateIndexBuffer(&ibDesc));
+		auto ibBuffer = MakeWeakRef(rc->CreateBuffer(&ibDesc));
+		FIbvDesc ibvDesc;
+		ibvDesc.Stride = ibDesc.StructureStride;
+		ibvDesc.Size = ibDesc.Size;
+		auto ib = MakeWeakRef(rc->CreateIBV(ibBuffer, &ibvDesc));
 		result->GetGeomtryMesh()->BindIndexBuffer(ib);
 
-		IMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
+		FMeshPrimitives::CalcNormals16(normals, (const v3dxVector3*)pVert, nVert, (USHORT*)ibDesc.InitData, nTri);
 
-		vbDesc.ByteWidth = sizeof(v3dxVector3) * nVert;
-		vbDesc.Stride = sizeof(v3dxVector3);
-		vbDesc.InitData = (void*)&normals[0];
-		auto vbNor = MakeWeakRef(rc->CreateVertexBuffer(&vbDesc));
-		result->GetGeomtryMesh()->BindVertexBuffer(VST_Normal, vbNor);
+		vbvDesc.Stride = sizeof(v3dxVector3);
+		vbvDesc.Size = sizeof(v3dxVector3) * nVert;
+		vbvDesc.InitData = (void*)&normals[0];
+		auto vbNor = MakeWeakRef(rc->CreateVBV(nullptr, &vbvDesc));
+		result->GetGeomtryMesh()->VertexArray->BindVB(VST_Normal, vbNor);
 
-		DrawPrimitiveDesc desc;
+		FMeshAtomDesc desc;
 		desc.NumPrimitives = nTri;
-		result->PushAtomLOD(0, &desc);
+		result->PushAtom(0, desc);
 
 		result->GetResourceState()->SetResourceSize((UINT)nVert * sizeof(v3dxVector3) * 2);
 		result->GetResourceState()->SetStreamState(SS_Valid);

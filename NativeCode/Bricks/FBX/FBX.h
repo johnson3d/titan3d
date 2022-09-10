@@ -1,5 +1,5 @@
 #pragma once
-#include "../../RHI/PreHead.h"
+#include "../../NextRHI/NxRHI.h"
 #include "fbxsdk.h"
 #include "../../Base/CoreSDK.h"
 #include "../../Base/String/vfxstring.h"
