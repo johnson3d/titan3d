@@ -26,6 +26,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //必须是TextureAsset
             return true;
         }
+        protected override Color GetBorderColor()
+        {
+            return Color.Gold;
+        }
         public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
             base.OnDrawSnapshot(in cmdlist, ref start, ref end);
@@ -38,7 +42,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
     public partial class UMaterial : IO.ISerializer, IO.IAsset, IShaderCodeProvider
     {
         public const string AssetExt = ".material";
-
+        public UMaterial()
+        {
+            mPipelineDesc.SetDefault();
+        }
         public bool IsEditingMaterial { get; set; }
 
         #region SystemVar
@@ -127,8 +134,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public Hash160 GetHash()
         {
-            string result = DefineCode?.AsText;
-            result += SourceCode?.AsText;
+            string result = DefineCode?.TextCode;
+            result += SourceCode?.TextCode;
             mMaterialHash = Hash160.CreateHash160(result);
             return mMaterialHash;
         }
@@ -141,7 +148,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 mSerialId = value;
                 if (PerMaterialCBuffer != null)
-                    this.UpdateUniformVars(PerMaterialCBuffer);
+                    this.UpdateUniformVars(PerMaterialCBuffer, PerMaterialCBuffer.ShaderBinder);
             }
         }
         public class MaterialImportAttribute : IO.CommonCreateAttribute
@@ -150,10 +157,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 base.DoCreate(dir, type, ext);
 
-                var material = (mAsset as UMaterial);                
-                material.Blend.m_RenderTarget0.SetDefault();
-                material.Blend.m_RenderTarget1.SetDefault();
-                material.Blend.m_RenderTarget2.SetDefault();
+                var material = (mAsset as UMaterial);
+                material.mPipelineDesc.SetDefault();
                 material.UpdateShaderCode(true);
             }
         }
@@ -306,21 +311,21 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             foreach (var i in this.UsedRSView)
             {
-                codeBuilder.AddLine($"{i.ShaderType} {i.Name} DX_NOBIND;", ref sourceCode);
+                codeBuilder.AddLine($"{i.ShaderType} {i.Name} DX_AUTOBIND;", ref sourceCode);
             }
 
             foreach (var i in this.UsedSamplerStates)
             {
-                codeBuilder.AddLine($"SamplerState {i.Name} DX_NOBIND;", ref sourceCode);
+                codeBuilder.AddLine($"SamplerState {i.Name} DX_AUTOBIND;", ref sourceCode);
             }
 
-            codeBuilder.AddLine("void DO_VS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)", ref sourceCode);
-            codeBuilder.PushSegment(ref sourceCode);
-            codeBuilder.PopSegment(ref sourceCode);
+            //Defines.AddDefine("USE_VS_UV", "1");
+            //Defines.AddDefine("USE_VS_Color", "1");
 
             if (EmptyMaterial)
             {
-                this.HLSLCode = "void DO_PS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)\n"+
+                this.HLSLCode = "void DO_VS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)\n{\n}\n";
+                this.HLSLCode += "void DO_PS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)\n"+
                     "{\n" +
                         "mtl.mAlbedo = float3(0.5,0.5,0.5);\n" +
                         "mtl.mMetallic = 1.0f;\n" +
@@ -341,6 +346,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 sourceCode += this.HLSLCode;
                 //codeBuilder.AppendCode(this.HLSLCode, false, true);
+                if (sourceCode.IndexOf("DO_VS_MATERIAL_IMPL") < 0)
+                {
+                    codeBuilder.AddLine("void DO_VS_MATERIAL_IMPL(in PS_INPUT input, inout MTL_OUTPUT mtl)", ref sourceCode);
+                    codeBuilder.PushSegment(ref sourceCode);
+                    codeBuilder.PopSegment(ref sourceCode);
+                }
             }
 
             codeBuilder.AddLine("#undef DO_VS_MATERIAL", ref sourceCode);
@@ -381,7 +392,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
 
             codeBuilder.AddLine("#endif//_Material_H_", ref sourceCode);
-            SourceCode.SetText(sourceCode);
+            SourceCode.TextCode = sourceCode;
 
             string uniformVarsCode = "";
             foreach (var i in this.UsedUniformVars)
@@ -395,16 +406,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     uniformVarsCode += $"{i.VarType} {i.Name};";
                 }
             }
-            DefineCode.SetText(uniformVarsCode);
+            DefineCode.TextCode = uniformVarsCode;
 
-            PerMaterialCBuffer = null;
+            mPerMaterialCBuffer = null;
 
             mMaterialHash = GetHash();
         }
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public IO.CMemStreamWriter DefineCode { get; } = new IO.CMemStreamWriter();
+        public NxRHI.UShaderCode DefineCode { get; } = new NxRHI.UShaderCode();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public IO.CMemStreamWriter SourceCode { get; } = new IO.CMemStreamWriter();
+        public NxRHI.UShaderCode SourceCode { get; } = new NxRHI.UShaderCode();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public NxRHI.UShaderDefinitions Defines { get; } = new NxRHI.UShaderDefinitions();
 
         #region Data
         
@@ -441,7 +454,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             public string Name { get; set; }
             RName mValue;
             [Rtti.Meta]
-            [RName.PGRName(FilterExts = RHI.CShaderResourceView.AssetExt)]
+            [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
             public RName Value
             {
                 get => mValue;
@@ -462,6 +475,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 result.mValue = mValue;
                 return result;
             }
+            public object SrvObject { get; set; } = null;
         }
         protected List<NameRNamePair> mUsedRSView = new List<NameRNamePair>();
         [Rtti.Meta]
@@ -489,12 +503,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             return UsedRSView[index]?.Name;
         }
-        public virtual async System.Threading.Tasks.Task<RHI.CShaderResourceView> GetSRV(int index)
+        public virtual async System.Threading.Tasks.Task<NxRHI.USrView> GetSRV(int index)
         {
+            var srv = UsedRSView[index].SrvObject as NxRHI.USrView;
+            if (srv != null)
+                return srv;
             return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(UsedRSView[index].Value);
         }
-        public RHI.CShaderResourceView TryGetSRV(int index)
+        public NxRHI.USrView TryGetSRV(int index)
         {
+            var srv = UsedRSView[index].SrvObject as NxRHI.USrView;
+            if (srv != null)
+                return srv;
             return UEngine.Instance.GfxDevice.TextureManager.TryGetTexture(UsedRSView[index].Value);
         }
         #endregion
@@ -512,9 +532,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             UMaterial HostMaterial;
             [Rtti.Meta()]
             public string Name { get; set; }
-            internal ISamplerStateDesc mValue;
+            internal NxRHI.FSamplerDesc mValue;
             [Rtti.Meta]
-            public ISamplerStateDesc Value
+            public NxRHI.FSamplerDesc Value
             {
                 get => mValue;
                 set
@@ -533,7 +553,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return result;
             }
         }
-        List<NameSamplerStateDescPair> mUsedSamplerStates = new List<NameSamplerStateDescPair>();
+        protected List<NameSamplerStateDescPair> mUsedSamplerStates = new List<NameSamplerStateDescPair>();
         [Rtti.Meta]
         [Category("Variable")]
         public List<NameSamplerStateDescPair> UsedSamplerStates { get => mUsedSamplerStates; }
@@ -550,7 +570,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             return mUsedSamplerStates[index].Name;
         }
-        public RHI.CSamplerState GetSampler(int index)
+        public NxRHI.USampler GetSampler(int index)
         {
             if (mUsedSamplerStates[index].mValue.m_AddressU == 0)
             {
@@ -665,38 +685,76 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             return UsedUniformVars[index]?.Name;
         }
-        internal virtual void UpdateUniformVars(RHI.CConstantBuffer cBuffer)
+        internal unsafe virtual void UpdateUniformVars(NxRHI.UCbView cBuffer, NxRHI.FShaderBinder binder)
         {
             foreach (var i in UsedUniformVars)
             {
-                var index = cBuffer.mCoreObject.FindVar(i.Name);
-                var desc = new ConstantVarDesc();
-                cBuffer.mCoreObject.GetVarDesc(index, ref desc);
+                var desc = binder.FindField(i.Name);
                 switch (desc.Type)
                 {
-                    case EShaderVarType.SVT_Float1:
+                    case NxRHI.EShaderVarType.SVT_Float:
                         {
-                            float v = System.Convert.ToSingle(i.Value);
-                            cBuffer.SetValue(index, in v);
+                            switch (desc.Columns)
+                            {
+                                case 1:
+                                    {
+                                        var v = System.Convert.ToSingle(i.Value);
+                                        cBuffer.SetValue(desc, in v);
+                                    }
+                                    break;
+                                case 2:
+                                    {
+                                        var v = Vector2.FromString(i.Value);
+                                        cBuffer.SetValue(desc, in v);
+                                    }
+                                    break;
+                                case 3:
+                                    {
+                                        var v = Vector3.FromString(i.Value);
+                                        cBuffer.SetValue(desc, in v);
+                                    }
+                                    break;
+                                case 4:
+                                    {
+                                        var v = Vector4.FromString(i.Value);
+                                        cBuffer.SetValue(desc, in v);
+                                    }
+                                    break;
+                            }
                         }
                         break;
-                    case EShaderVarType.SVT_Float2:
+                    case NxRHI.EShaderVarType.SVT_Int:
                         {
-                            Vector2 v = Vector2.FromString(i.Value);
-                            cBuffer.SetValue(index, in v);
+                            switch (desc.Columns)
+                            {
+                                case 1:
+                                    {
+                                        var v = System.Convert.ToInt32(i.Value);
+                                        cBuffer.SetValue(desc, in v);
+                                    }
+                                    break;
+                                case 2:
+                                    {
+                                        var v = Vector2.FromString(i.Value);
+                                        cBuffer.SetValue(desc, in v);
+                                    }
+                                    break;
+                                case 3:
+                                    {
+                                        var v = Vector3.FromString(i.Value);
+                                        cBuffer.SetValue(desc, in v);
+                                    }
+                                    break;
+                                case 4:
+                                    {
+                                        var v = Vector4.FromString(i.Value);
+                                        cBuffer.SetValue(desc, in v);
+                                    }
+                                    break;
+                            }
                         }
                         break;
-                    case EShaderVarType.SVT_Float3:
-                        {
-                            Vector3 v = Vector3.FromString(i.Value);
-                            cBuffer.SetValue(index, in v);
-                        }
-                        break;
-                    case EShaderVarType.SVT_Float4:
-                        {
-                            Vector4 v = Vector4.FromString(i.Value);
-                            cBuffer.SetValue(index, in v);
-                        }
+                    default:
                         break;
                 }
             }
@@ -706,94 +764,70 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #endregion
 
         #region RHIResource
-        [Browsable(false)]
-        public RHI.CConstantBuffer PerMaterialCBuffer { get; set; }
-        [Rtti.Meta]
-        [Category("State")]
-        public IRasterizerStateDesc Rasterizer
+        protected NxRHI.FGpuPipelineDesc mPipelineDesc;
+        NxRHI.UGpuPipeline mPipeline;
+        public NxRHI.UGpuPipeline Pipeline
         {
             get
             {
-                if (RasterizerState == null)
-                {
-                    IRasterizerStateDesc desc = new IRasterizerStateDesc();
-                    desc.SetDefault();
-                    return desc;
-                }
-                return RasterizerState.Desc;
-            }
-            set
-            {
-                GamePlay.Action.UAction.OnChanged(this, this, "Rasterizer", Rasterizer, value);
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
-                RasterizerState = UEngine.Instance.GfxDevice.RasterizerStateManager.GetPipelineState(rc, in value);
-                SerialId++;
+                if (mPipeline == null)
+                    UpdatePipeline();
+                return mPipeline;
             }
         }
-        protected RHI.CRasterizerState mRasterizerState;
-        [Browsable(false)]
-        public virtual RHI.CRasterizerState RasterizerState
+        private void UpdatePipeline()
         {
-            get => mRasterizerState;
-            protected set => mRasterizerState = value;
+            mPipeline = UEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, in mPipelineDesc);
         }
-        [Rtti.Meta]
-        [Category("State")]
-        public IDepthStencilStateDesc DepthStencil
+        NxRHI.UCbView mPerMaterialCBuffer;
+        [Browsable(false)]
+        public NxRHI.UCbView PerMaterialCBuffer 
         {
             get
             {
-                if (mDepthStencilState == null)
-                {
-                    IDepthStencilStateDesc desc = new IDepthStencilStateDesc();
-                    desc.SetDefault();
-                    return desc;
-                }
-                return mDepthStencilState.Desc;
-            }
-            set
-            {
-                GamePlay.Action.UAction.OnChanged(this, this, "DepthStencil", DepthStencil, value);
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
-                DepthStencilState = UEngine.Instance.GfxDevice.DepthStencilStateManager.GetPipelineState(rc, in value);
-                SerialId++;
+                return mPerMaterialCBuffer;
             }
         }
-        protected RHI.CDepthStencilState mDepthStencilState;
-        [Browsable(false)]
-        public virtual RHI.CDepthStencilState DepthStencilState
+        public bool CreateCBuffer(UEffect effect)
         {
-            get => mDepthStencilState;
-            protected set => mDepthStencilState = value;
+            var binder = effect.ShaderEffect.FindBinder("cbPerMaterial");
+            if (binder == null)
+                return false;
+            mPerMaterialCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+            return true;
         }
         [Rtti.Meta]
         [Category("State")]
-        public IBlendStateDesc Blend
+        public NxRHI.FRasterizerDesc Rasterizer
         {
-            get
-            {
-                if (BlendState == null)
-                {
-                    IBlendStateDesc desc = new IBlendStateDesc();
-                    desc.SetDefault();
-                    return desc;
-                }
-                return BlendState.Desc;
-            }
+            get => mPipelineDesc.m_Rasterizer;
             set
             {
-                GamePlay.Action.UAction.OnChanged(this, this, "Blend", Blend, value);
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
-                BlendState = UEngine.Instance.GfxDevice.BlendStateManager.GetPipelineState(rc, in value);
-                SerialId++;
+                mPipelineDesc.m_Rasterizer = value; 
+                UpdatePipeline();
+            }
+    }
+        [Rtti.Meta]
+        [Category("State")]
+        public NxRHI.FDepthStencilDesc DepthStencil
+        {
+            get => mPipelineDesc.m_DepthStencil;
+            set
+            {
+                mPipelineDesc.m_DepthStencil = value;
+                UpdatePipeline();
             }
         }
-        protected RHI.CBlendState mBlendState;
-        [Browsable(false)]
-        public virtual RHI.CBlendState BlendState
+        [Rtti.Meta]
+        [Category("State")]
+        public NxRHI.FBlendDesc Blend
         {
-            get => mBlendState;
-            protected set => mBlendState = value;
+            get => mPipelineDesc.m_Blend;
+            set
+            {
+                mPipelineDesc.m_Blend = value;
+                UpdatePipeline();
+            }
         }
         #endregion
     }
@@ -808,7 +842,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             await Thread.AsyncDummyClass.DummyFunc();
             ScreenMaterial = new UMaterial();
 
-            var dsDesc = new IDepthStencilStateDesc();
+            var dsDesc = new NxRHI.FDepthStencilDesc();
             dsDesc.SetDefault();
             dsDesc.m_DepthEnable = 0;
             dsDesc.m_DepthWriteMask = 0;

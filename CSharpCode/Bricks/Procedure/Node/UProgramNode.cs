@@ -11,7 +11,7 @@ namespace EngineNS.Bricks.Procedure.Node
         [Rtti.Meta]
         public string TypeValue { get; set; } = "Value";
         [Rtti.Meta]
-        public UBufferCreator BufferCreator { get; set; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, - 1, -1);
+        public UBufferCreator BufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, - 1, -1);
     }
     [Macross.UMacross]
     public partial class UProgram
@@ -42,7 +42,7 @@ namespace EngineNS.Bricks.Procedure.Node
     }
 
     [Bricks.CodeBuilder.ContextMenu("Program", "Program", UPgcGraph.PgcEditorKeyword)]
-    public partial class UProgramNode : UOpNode
+    public partial class UProgramNode : UPgcNodeBase
     {
         public UProgramNode()
         {
@@ -196,7 +196,7 @@ namespace EngineNS.Bricks.Procedure.Node
             ImGuiAPI.PushID($"{this.NodeId.ToString()}");
             if (ImGuiAPI.Button("OpenMacross"))
             {
-                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+                var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                 if (mainEditor != null)
                 {
                     if (ProgramName != null)
@@ -240,6 +240,17 @@ namespace EngineNS.Bricks.Procedure.Node
                     }
                 }
             }
+        }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            for (int i = 0; i < Outputs.Count; i++)
+            {
+                if (pin == Outputs[i])
+                {
+                    return UserOutputs[i].BufferCreator;
+                }
+            }
+            return null;
         }
     }
 }

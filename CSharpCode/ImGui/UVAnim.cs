@@ -25,7 +25,7 @@ namespace EngineNS.EGui
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
-            if (ameta.GetAssetExtType() == RHI.CShaderResourceView.AssetExt)
+            if (ameta.GetAssetExtType() == NxRHI.USrView.AssetExt)
                 return true;
             //必须是TextureAsset
             return false;
@@ -72,7 +72,7 @@ namespace EngineNS.EGui
 
             cmdlist.AddText(in start, 0xFFFFFFFF, "UVAnim", null);
         }
-        System.Threading.Tasks.Task<RHI.CShaderResourceView> SnapTask;
+        System.Threading.Tasks.Task<NxRHI.USrView> SnapTask;
     }
     [Rtti.Meta]
     [UUvAnim.Import]
@@ -101,13 +101,11 @@ namespace EngineNS.EGui
 
             Vector4 uv = new Vector4(0,0,1,1);
             FrameUVs.Add(uv);
-            CurFrame = 0;
         }
         public UUvAnim()
         {
             Vector4 uv = new Vector4(0, 0, 1, 1);
             FrameUVs.Add(uv);
-            CurFrame = 0;
         }
         #region IAsset
         public IO.IAssetMeta CreateAMeta()
@@ -126,8 +124,10 @@ namespace EngineNS.EGui
             if (uvAnimAMeta != null)
             {
                 uvAnimAMeta.TextureName = TextureName;
-                uvAnimAMeta.SnapUVStart = this.UVCoord;
-                uvAnimAMeta.SnapUVEnd = this.UVCoord + this.UVSize;
+                Vector2 uvStart, uvEnd;
+                this.GetUV(0, out uvStart, out uvEnd);
+                uvAnimAMeta.SnapUVStart = uvStart;
+                uvAnimAMeta.SnapUVEnd = uvEnd;
             }
             ameta.RefAssetRNames.Clear();
             if (TextureName != null)
@@ -190,7 +190,7 @@ namespace EngineNS.EGui
         [Rtti.Meta]
         public Vector2 Size { get; set; } = new Vector2(50, 50);
         RName mTextureName;
-        public RHI.CShaderResourceView mTexture;
+        public NxRHI.USrView mTexture;
         [Rtti.Meta]
         public RName TextureName 
         { 
@@ -211,27 +211,13 @@ namespace EngineNS.EGui
             }
         }
         [Rtti.Meta]
-        [System.ComponentModel.Browsable(false)]
         public List<Vector4> FrameUVs { get; set; } = new List<Vector4>();
-        int mCurFrame = 0;
-        public int CurFrame 
-        {
-            get => mCurFrame;
-            set
-            {
-                mCurFrame = value;
-                if (mCurFrame < 0)
-                    mCurFrame = 0;
-                if (mCurFrame >= FrameUVs.Count)
-                    mCurFrame = 0;
-            }
-        }
         public void GetUV(int frame, out Vector2 min, out Vector2 max)
         {
             if (FrameUVs.Count == 0)
             {
                 min = Vector2.Zero;
-                max = Vector2.mUnitXY;
+                max = Vector2.One;
                 return;
             }
             if (frame >= FrameUVs.Count || frame < 0)
@@ -240,47 +226,13 @@ namespace EngineNS.EGui
             }
             min.X = FrameUVs[frame].X;
             min.Y = FrameUVs[frame].Y;
-            max.X = FrameUVs[frame].Z;
-            max.Y = FrameUVs[frame].W;
-        }
-        [Rtti.Meta]
-        public Vector2 UVCoord 
-        {
-            get
-            {
-                if (FrameUVs.Count <= CurFrame)
-                    return Vector2.Zero;
-                return new Vector2(FrameUVs[CurFrame].X, FrameUVs[CurFrame].Y);
-            }
-            set
-            {
-                if (FrameUVs.Count <= CurFrame)
-                    return;
-                var tmp = FrameUVs[CurFrame];
-                FrameUVs[CurFrame] = new Vector4(value.X, value.Y, tmp.Z, tmp.W);
-            }
-        }
-        [Rtti.Meta]
-        public Vector2 UVSize
-        {
-            get
-            {
-                if (FrameUVs.Count <= CurFrame)
-                    return Vector2.UnitXY;
-                return new Vector2(FrameUVs[CurFrame].Z, FrameUVs[CurFrame].W);
-            }
-            set
-            {
-                if (FrameUVs.Count <= CurFrame)
-                    return;
-                var tmp = FrameUVs[CurFrame];
-                FrameUVs[CurFrame] = new Vector4(tmp.X, tmp.Y, value.X, value.Y);
-            }
+            max.X = FrameUVs[frame].X + FrameUVs[frame].Z;
+            max.Y = FrameUVs[frame].Y + FrameUVs[frame].W;
         }
         [EGui.Controls.PropertyGrid.UByte4ToColor4PickerEditor]
         [Rtti.Meta]
         public UInt32 Color { get; set; } = 0xFFFFFFFF;
-        public void OnDraw(ref ImDrawList cmdlist, in Vector2 rectMin, in Vector2 rectMax, int frame)
+        public void OnDraw(ImDrawList cmdlist, in Vector2 rectMin, in Vector2 rectMax, int frame)
         {
             if (mTexture != null)
             {

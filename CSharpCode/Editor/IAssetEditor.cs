@@ -59,7 +59,7 @@ namespace EngineNS.Editor
                     }
                     else
                     {
-                        var application = UEngine.Instance.GfxDevice.MainWindow as EngineNS.Editor.UMainEditorApplication;
+                        var application = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
                         form.DockId = application.CenterDockId;
                         form.DockCond = ImGuiCond_.ImGuiCond_Appearing;
                     }

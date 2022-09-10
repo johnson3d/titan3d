@@ -181,7 +181,7 @@ namespace EngineNS.GamePlay
 
             ref var aabb = ref node.AABB;
             var size = aabb.GetSize();
-            var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeBoxWireframe((float)aabb.Minimum.X, (float)aabb.Minimum.Y, (float)aabb.Minimum.Z,
+            var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeBoxWireframe((float)aabb.Minimum.X, (float)aabb.Minimum.Y, (float)aabb.Minimum.Z,
                 (float)size.X, (float)size.Y, (float)size.Z).ToMesh();
             var mesh2 = new Graphics.Mesh.UMesh();
 

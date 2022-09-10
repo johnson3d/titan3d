@@ -18,7 +18,9 @@ namespace EngineNS.Editor.Forms
         {
             WorldViewportState = viewport;
             if (regRoot)
-                Editor.UMainEditorApplication.RegRootForm(this);
+                UEngine.RootFormManager.RegRootForm(this);
+
+            UpdateAddNodeMenu();
         }
 
         public void Cleanup()
@@ -123,9 +125,9 @@ namespace EngineNS.Editor.Forms
                 }
             }   
         }
-        protected override bool OnDrawNode(INodeUIProvider provider, int index)
+        protected override bool OnDrawNode(INodeUIProvider provider, int index, int NumOfChild)
         {
-            return provider.DrawNode(this, index);
+            return provider.DrawNode(this, index, NumOfChild);
             //ImGuiTreeNodeFlags_ flags = 0;
             //if (provider.Selected)
             //    flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
@@ -134,8 +136,112 @@ namespace EngineNS.Editor.Forms
             //ImGuiAPI.Text(provider.NodeName);
             //return ret;
         }
+        #region PopMenu
         System.Action OnDrawMenu = null;
+        GamePlay.Scene.UNode mAddToNode;
         bool mNodeMenuShow = false;
+        bool mAddNodeMenuFilterFocused = false;
+        string mAddNodeMenuFilterStr = "";
+        public Bricks.NodeGraph.UMenuItem mAddNodeMenus = new Bricks.NodeGraph.UMenuItem();
+        static void GetNodeNameAndMenuStr(in string menuString, ref string nodeName, ref string menuName)
+        {
+            menuName = menuString;
+            nodeName = menuName;
+        }
+        private async System.Threading.Tasks.Task<GamePlay.Scene.UNode> NewNode(Rtti.UClassMeta i)
+        {
+            if (mAddToNode == null)
+                return null;
+            var ntype = Rtti.UTypeDesc.TypeOf(i.ClassType.TypeString);
+            var newNode = Rtti.UTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.USceneActorNode;
+            var attrs = newNode.GetType().GetCustomAttributes(typeof(GamePlay.Scene.UNodeAttribute), false);
+            GamePlay.Scene.UNodeData nodeData = null;
+            string prefix = "Node";
+            if (attrs.Length > 0)
+            {
+                nodeData = Rtti.UTypeDescManager.CreateInstance((attrs[0] as GamePlay.Scene.UNodeAttribute).NodeDataType) as GamePlay.Scene.UNodeData;
+                prefix = (attrs[0] as GamePlay.Scene.UNodeAttribute).DefaultNamePrefix;
+            }
+            await newNode.InitializeNode(World, nodeData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+            newNode.NodeData.Name = $"{prefix}_{newNode.SceneId}";
+            newNode.Parent = mAddToNode;
+            return newNode;
+        }
+        public void UpdateAddNodeMenu()
+        {
+            mAddNodeMenus = new Bricks.NodeGraph.UMenuItem();
+            var typeDesc = Rtti.UTypeDescGetter<GamePlay.Scene.UNode>.TypeDesc;
+            var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeDesc);
+            var subClasses = meta.SubClasses;
+            foreach (var i in subClasses)
+            {
+                var atts = i.ClassType.SystemType.GetCustomAttributes(typeof(Bricks.CodeBuilder.ContextMenuAttribute), true);
+                if (atts.Length > 0)
+                {
+                    var parentMenu = mAddNodeMenus;
+                    var att = atts[0] as Bricks.CodeBuilder.ContextMenuAttribute;
+
+                    if (!att.HasKeyString(GamePlay.Scene.UNode.EditorKeyword))
+                        continue;
+
+                    for (var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
+                    {
+                        var menuStr = att.MenuPaths[menuIdx];
+                        string nodeName = null;
+                        GetNodeNameAndMenuStr(menuStr, ref nodeName, ref menuStr);
+                        if (menuIdx < att.MenuPaths.Length - 1)
+                            parentMenu = parentMenu.AddMenuItem(menuStr, null, null);
+                        else
+                        {
+                            parentMenu.AddMenuItem(menuStr, att.FilterStrings, null,
+                                (item, sender) =>
+                                {
+                                    NewNode(i);
+                                });
+                        }
+                    }
+                }
+            }
+        }
+        private void DrawMenu(Bricks.NodeGraph.UMenuItem item, string filter = "")
+        {
+            if (!item.FilterCheck(filter))
+                return;
+
+            if (item.OnMenuDraw != null)
+            {
+                item.OnMenuDraw(item, this);
+                return;
+            }
+
+            if (item.SubMenuItems.Count == 0)
+            {
+                if (!string.IsNullOrEmpty(item.Text))
+                {
+                    ImGuiAPI.TreeNodeEx(item.Text, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen);
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    {
+                        if (item.Action != null)
+                        {
+                            item.Action(item, null);
+                            ImGuiAPI.CloseCurrentPopup();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (ImGuiAPI.TreeNode(item.Text))
+                {
+                    for (int menuIdx = 0; menuIdx < item.SubMenuItems.Count; menuIdx++)
+                    {
+                        DrawMenu(item.SubMenuItems[menuIdx], filter);
+                    }
+                    ImGuiAPI.TreePop();
+                }
+            }
+        }
+        #endregion
         protected override void OnNodeUI_RClick(INodeUIProvider provider)
         {
             var node = provider as GamePlay.Scene.UNode;
@@ -150,6 +256,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
                 {
+                    mAddToNode = node;
                     mNodeMenuShow = true;
                     if (ImGuiAPI.MenuItem($"Goto", null, false, true))
                     {
@@ -159,38 +266,11 @@ namespace EngineNS.Editor.Forms
                     }
                     if (ImGuiAPI.BeginMenu("AddChild", true))
                     {
-                        var typeDesc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(GamePlay.Scene.UNode).FullName);
-                        var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeDesc);
-                        var subClasses = meta.SubClasses;
-                        if (ImGuiAPI.MenuItem(meta.ClassType.FullName, null, false, true))
-                        {
-                            var ntype = Rtti.UTypeDesc.TypeOf(meta.ClassType.TypeString);
-                            var newNode = Rtti.UTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.USceneActorNode;
-                            await newNode.InitializeNode(World, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-                            //var newNode = await node.ParentScene.NewNode(mWorld, meta.ClassType.TypeString, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-                            newNode.NodeData.Name = $"Node_{newNode.SceneId}";
-                            newNode.Parent = node;
-                        }
-                        foreach (var i in subClasses)
-                        {
-                            if (ImGuiAPI.MenuItem(i.ClassType.FullName, null, false, true))
-                            {
-                                var ntype = Rtti.UTypeDesc.TypeOf(i.ClassType.TypeString);
-                                var newNode = Rtti.UTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.USceneActorNode;
-                                var attrs = newNode.GetType().GetCustomAttributes(typeof(GamePlay.Scene.UNodeAttribute), false);
-                                GamePlay.Scene.UNodeData nodeData = null;
-                                string prefix = "Node";
-                                if (attrs.Length > 0)
-                                {
-                                    nodeData = Rtti.UTypeDescManager.CreateInstance((attrs[0] as GamePlay.Scene.UNodeAttribute).NodeDataType) as GamePlay.Scene.UNodeData;
-                                    prefix = (attrs[0] as GamePlay.Scene.UNodeAttribute).DefaultNamePrefix;
-                                }
-                                await newNode.InitializeNode(World, nodeData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-                                //var newNode = await node.ParentScene.NewNode(mWorld, i.ClassType.TypeString, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-                                newNode.NodeData.Name = $"{prefix}_{newNode.SceneId}";
-                                newNode.Parent = node;
-                            }
-                        }
+                        var drawList = ImGuiAPI.GetWindowDrawList();
+                        EGui.UIProxy.SearchBarProxy.OnDraw(ref mAddNodeMenuFilterFocused, in drawList, "search item", ref mAddNodeMenuFilterStr, -1);
+                        for (var childIdx = 0; childIdx < mAddNodeMenus.SubMenuItems.Count; childIdx++)
+                            DrawMenu(mAddNodeMenus.SubMenuItems[childIdx], mAddNodeMenuFilterStr.ToLower());
+
                         ImGuiAPI.EndMenu();
                     }
 
@@ -205,6 +285,7 @@ namespace EngineNS.Editor.Forms
                 }
                 else
                 {
+                    mAddToNode = null;
                     if (mNodeMenuShow)
                     {
                         OnDrawMenu = null;

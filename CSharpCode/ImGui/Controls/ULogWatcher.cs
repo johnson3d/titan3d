@@ -8,7 +8,7 @@ namespace EngineNS.EGui.Controls
     {
         public ULogWatcher()
         {
-            Editor.UMainEditorApplication.RegRootForm(this);
+            UEngine.RootFormManager.RegRootForm(this);
             Profiler.Log.OnReportLog += OnReportLog;
 
             UpdateCategoryFilters();
@@ -96,76 +96,80 @@ namespace EngineNS.EGui.Controls
                 }
                 #endregion
 
-                lock (mNewLogs)
+                if (ImGuiAPI.BeginChild("LogContent", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
-                    foreach(var i in mNewLogs)
+                    lock (mNewLogs)
                     {
-                        mLogInfos.Enqueue(i);
-                    }
-                    mNewLogs.Clear();
-                    int total = mNewLogs.Count + mLogInfos.Count;
-                    if (total > MaxLogs)
-                    {
-                        total = total - MaxLogs;
-                        while (total>=0 && mLogInfos.Count>0)
+                        foreach (var i in mNewLogs)
                         {
-                            mLogInfos.Dequeue();
+                            mLogInfos.Enqueue(i);
+                        }
+                        mNewLogs.Clear();
+                        int total = mNewLogs.Count + mLogInfos.Count;
+                        if (total > MaxLogs)
+                        {
+                            total = total - MaxLogs;
+                            while (total >= 0 && mLogInfos.Count > 0)
+                            {
+                                mLogInfos.Dequeue();
+                            }
                         }
                     }
-                }
-                
-                if (ImGuiAPI.BeginTable("Logs", 5, ImGuiTableFlags_.ImGuiTableFlags_Resizable, in Vector2.Zero, 0.0f))
-                {
-                    ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
-                    ImGuiAPI.TableSetColumnIndex(0);
-                    ImGuiAPI.Text("Tag");
-                    ImGuiAPI.TableSetColumnIndex(1);
-                    ImGuiAPI.Text("Category");
-                    ImGuiAPI.TableSetColumnIndex(2);
-                    ImGuiAPI.Text("Content");
-                    ImGuiAPI.TableSetColumnIndex(3);
-                    ImGuiAPI.Text("Source");
-                    ImGuiAPI.TableSetColumnIndex(4);
-                    ImGuiAPI.Text("Line");
-                    foreach (var i in mLogInfos)
+
+                    if (ImGuiAPI.BeginTable("Logs", 5, ImGuiTableFlags_.ImGuiTableFlags_Resizable, in Vector2.Zero, 0.0f))
                     {
-                        if ((TagFilters & i.Tag) == 0)
-                            continue;
-
-                        if (IsCategory(i.Category) == false)
-                            continue;
-
-                        var clr = Vector4.One;
-                        switch (i.Tag)
-                        {
-                            case Profiler.ELogTag.Info:
-                                clr = UCoreStyles.Instance.LogInfoColor.ToColor4Float();
-                                break;
-                            case Profiler.ELogTag.Warning:
-                                clr = UCoreStyles.Instance.LogWarningColor.ToColor4Float();
-                                break;
-                            case Profiler.ELogTag.Error:
-                                clr = UCoreStyles.Instance.LogErrorColor.ToColor4Float();
-                                break;
-                            case Profiler.ELogTag.Fatal:
-                                clr = UCoreStyles.Instance.LogFatalColor.ToColor4Float();
-                                break;
-                        }
-
-                        ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
+                        ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
                         ImGuiAPI.TableSetColumnIndex(0);
-                        ImGuiAPI.TextColored(in clr, i.Tag.ToString());
+                        ImGuiAPI.Text("Tag");
                         ImGuiAPI.TableSetColumnIndex(1);
-                        ImGuiAPI.Text(i.Category);
+                        ImGuiAPI.Text("Category");
                         ImGuiAPI.TableSetColumnIndex(2);
-                        ImGuiAPI.Text(i.LogText);
+                        ImGuiAPI.Text("Content");
                         ImGuiAPI.TableSetColumnIndex(3);
-                        ImGuiAPI.Text(i.SourceFile);
+                        ImGuiAPI.Text("Source");
                         ImGuiAPI.TableSetColumnIndex(4);
-                        ImGuiAPI.Text(i.SourceLine.ToString());
+                        ImGuiAPI.Text("Line");
+                        foreach (var i in mLogInfos)
+                        {
+                            if ((TagFilters & i.Tag) == 0)
+                                continue;
+
+                            if (IsCategory(i.Category) == false)
+                                continue;
+
+                            var clr = Vector4.One;
+                            switch (i.Tag)
+                            {
+                                case Profiler.ELogTag.Info:
+                                    clr = UCoreStyles.Instance.LogInfoColor.ToColor4Float();
+                                    break;
+                                case Profiler.ELogTag.Warning:
+                                    clr = UCoreStyles.Instance.LogWarningColor.ToColor4Float();
+                                    break;
+                                case Profiler.ELogTag.Error:
+                                    clr = UCoreStyles.Instance.LogErrorColor.ToColor4Float();
+                                    break;
+                                case Profiler.ELogTag.Fatal:
+                                    clr = UCoreStyles.Instance.LogFatalColor.ToColor4Float();
+                                    break;
+                            }
+
+                            ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
+                            ImGuiAPI.TableSetColumnIndex(0);
+                            ImGuiAPI.TextColored(in clr, i.Tag.ToString());
+                            ImGuiAPI.TableSetColumnIndex(1);
+                            ImGuiAPI.Text(i.Category);
+                            ImGuiAPI.TableSetColumnIndex(2);
+                            ImGuiAPI.Text(i.LogText);
+                            ImGuiAPI.TableSetColumnIndex(3);
+                            ImGuiAPI.Text(i.SourceFile);
+                            ImGuiAPI.TableSetColumnIndex(4);
+                            ImGuiAPI.Text(i.SourceLine.ToString());
+                        }
+                        ImGuiAPI.EndTable();
                     }
-                    ImGuiAPI.EndTable();
                 }
+                ImGuiAPI.EndChild();
             }
             ImGuiAPI.End();
         }

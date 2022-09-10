@@ -19,7 +19,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         public bool IsAllowInputNull { get; set; } = false;
         public URenderGraphNode HostNode { get; set; }
 
-        public UAttachmentDesc Attachement = new UAttachmentDesc();        
+        public UAttachmentDesc Attachement = new UAttachmentDesc();
+        public UAttachBuffer ImportedBuffer = null;
         public static URenderGraphPin CreateInput(string name)
         {
             var result = new URenderGraphPin();
@@ -75,7 +76,19 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public int TempRootDistance = 0;
         public bool Enable { get; set; } = true;
-        public virtual string Name { get; set; }
+        private string mName;
+        public virtual string Name 
+        {
+            get => mName;
+            set
+            {
+                mName = value;
+                foreach (var i in OutputGraphPins)
+                {
+                    i.Attachement.AttachmentName = FHashText.Create($"{Name}->{i.Name}");
+                }
+            }
+        }
         public URenderGraph RenderGraph { get; internal set; }
         protected List<URenderGraphPin> InputGraphPins { get; } = new List<URenderGraphPin>();
         protected List<URenderGraphPin> OutputGraphPins { get; } = new List<URenderGraphPin>();
@@ -93,7 +106,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 return OutputGraphPins.Count;
             }
         }
-        public bool AddInput(URenderGraphPin pin, EGpuBufferViewType needTypes)
+        public bool AddInput(URenderGraphPin pin, NxRHI.EBufferType needTypes)
         {
             if (pin.PinType != URenderGraphPin.EPinType.Input)
                 return false;
@@ -107,7 +120,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             InputGraphPins.Add(pin);
             return true;
         }
-        public bool AddOutput(URenderGraphPin pin, EGpuBufferViewType provideTypes)
+        public bool AddOutput(URenderGraphPin pin, NxRHI.EBufferType provideTypes)
         {
             if (pin.PinType != URenderGraphPin.EPinType.Output)
                 return false;
@@ -122,7 +135,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             OutputGraphPins.Add(pin);
             return true;
         }
-        public bool AddInputOutput(URenderGraphPin pin, EGpuBufferViewType needTypes)
+        public bool AddInputOutput(URenderGraphPin pin, NxRHI.EBufferType needTypes)
         {
             if (pin.PinType != URenderGraphPin.EPinType.InputOutput)
                 return false;
@@ -214,10 +227,6 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         }
         public virtual void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
-        {
-
-        }
-        public virtual void TickRender(URenderPolicy policy)
         {
 
         }
@@ -498,6 +507,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public virtual void BeginTickLogic(GamePlay.UWorld world)
         {
+            FrameBuild();
+
             if (NodeLayers != null)
             {
                 foreach (var i in NodeLayers)
@@ -526,9 +537,9 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public virtual void TickLogic(GamePlay.UWorld world)
         {
-            FrameBuild();
+            //FrameBuild();
 
-            BeginTickLogic(world);
+            //BeginTickLogic(world);
             if (NodeLayers != null)
             {
                 foreach (var i in NodeLayers)
@@ -540,21 +551,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     }
                 }
             }
-            EndTickLogic(world);
-        }
-        public virtual void TickRender()
-        {
-            if (NodeLayers != null)
-            {
-                foreach (var i in NodeLayers)
-                {
-                    foreach (var j in i)
-                    {
-                        if (j.Enable)
-                            j.TickRender((URenderPolicy)this);
-                    }
-                }
-            }
+            //EndTickLogic(world);
         }
         public virtual void TickSync()
         {

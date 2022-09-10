@@ -14,9 +14,9 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            AddInput(DepthPinIn, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Dsv);
+            AddInput(DepthPinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
             HzbPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
-            AddOutput(HzbPinOut, EGpuBufferViewType.GBVT_Srv);
+            AddOutput(HzbPinOut, NxRHI.EBufferType.BFT_SRV);
         }
         public override void FrameBuild()
         {
@@ -26,17 +26,17 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public readonly UInt32_3 Dispatch_SetupDimArray2 = new UInt32_3(32, 32, 1);
 
-        public RHI.CTexture2D HzbTexture;
-        public RHI.CShaderResourceView HzbSRV;
-        public RHI.CUnorderedAccessView[] HzbMipsUAVs;
+        public NxRHI.UTexture HzbTexture;
+        public NxRHI.USrView HzbSRV;
+        public NxRHI.UUaView[] HzbMipsUAVs;
 
         public Graphics.Pipeline.UDrawBuffers BasePass = new Graphics.Pipeline.UDrawBuffers();
 
-        private Graphics.Pipeline.Shader.UShader Setup;
-        private RHI.CComputeDrawcall SetupDrawcall;
+        private NxRHI.UComputeEffect Setup;
+        private NxRHI.UComputeDraw SetupDrawcall;
 
-        private Graphics.Pipeline.Shader.UShader DownSample;
-        private RHI.CComputeDrawcall[] MipsDrawcalls;
+        private NxRHI.UComputeEffect DownSample;
+        private NxRHI.UComputeDraw[] MipsDrawcalls;
         ~UHzbNode()
         {
             Cleanup();
@@ -49,31 +49,31 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             BasePass.Initialize(rc, debugName);
 
-            var defines = new RHI.CShaderDefinitions();
+            var defines = new NxRHI.UShaderDefinitions();
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
 
-            Setup = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine),
-                "CS_Setup", EShaderType.EST_ComputeShader, defines);
+            Setup = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine).Address,
+                "CS_Setup", NxRHI.EShaderType.SDT_ComputeShader, null, null, null, defines, null);
 
-            DownSample = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine),
-                "CS_DownSample", EShaderType.EST_ComputeShader, defines);
+            DownSample = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/GpuDriven/Hzb.compute", RName.ERNameType.Engine).Address,
+                "CS_DownSample", NxRHI.EShaderType.SDT_ComputeShader, null, null, null, defines, null);
 
-            SetupDrawcall = rc.CreateComputeDrawcall();
+            SetupDrawcall = rc.CreateComputeDraw();
             //ResetComputeDrawcall(policy);
         }
         private unsafe void ResetComputeDrawcall(URenderPolicy policy)
         {
             if (Setup == null)
                 return;
-            SetupDrawcall.mCoreObject.SetComputeShader(Setup.CS_Shader.mCoreObject);
-            SetupDrawcall.mCoreObject.SetDispatch(MaxSRVWidth / Dispatch_SetupDimArray2.X, MaxSRVHeight / Dispatch_SetupDimArray2.Y, 1);
+            SetupDrawcall.SetComputeEffect(Setup);
+            SetupDrawcall.SetDispatch(MaxSRVWidth / Dispatch_SetupDimArray2.X, MaxSRVHeight / Dispatch_SetupDimArray2.Y, 1);
 
-            var srvIdx = Setup.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "DstBuffer");
-            if (srvIdx != (IShaderBinder*)0)
+            var srvIdx = SetupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "DstBuffer");
+            if (srvIdx.IsValidPointer)
             {
-                SetupDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, HzbMipsUAVs[0].mCoreObject);
+                SetupDrawcall.BindUav(srvIdx, HzbMipsUAVs[0]);
             }
 
             if (HzbMipsUAVs == null)
@@ -86,7 +86,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     i.Dispose();
                 }
             }
-            MipsDrawcalls = new RHI.CComputeDrawcall[HzbMipsUAVs.Length - 1];
+            MipsDrawcalls = new NxRHI.UComputeDraw[HzbMipsUAVs.Length - 1];
             uint width = MaxSRVWidth / 2;
             uint height = MaxSRVHeight / 2;
             for (int i = 1; i < HzbMipsUAVs.Length; i++)
@@ -107,20 +107,20 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     height = 1;
                 }
-                var drawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDrawcall();
+                var drawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
                 MipsDrawcalls[i - 1] = drawcall;
-                drawcall.mCoreObject.SetComputeShader(DownSample.CS_Shader.mCoreObject);
-                drawcall.mCoreObject.SetDispatch(CoreDefine.Roundup(width, Dispatch_SetupDimArray2.X), CoreDefine.Roundup(height, Dispatch_SetupDimArray2.Y), 1);
-                srvIdx = DownSample.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "SrcBuffer");
-                if (srvIdx != (IShaderBinder*)0)
+                drawcall.SetComputeEffect(DownSample);
+                drawcall.SetDispatch(CoreDefine.Roundup(width, Dispatch_SetupDimArray2.X), CoreDefine.Roundup(height, Dispatch_SetupDimArray2.Y), 1);
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "SrcBuffer");
+                if (srvIdx.IsValidPointer)
                 {
-                    drawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, HzbMipsUAVs[i - 1].mCoreObject);
+                    drawcall.BindUav(srvIdx, HzbMipsUAVs[i - 1]);
                 }
 
-                srvIdx = DownSample.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "DstBuffer");
-                if (srvIdx != (IShaderBinder*)0)
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "DstBuffer");
+                if (srvIdx.IsValidPointer)
                 {
-                    drawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, HzbMipsUAVs[i].mCoreObject);
+                    drawcall.BindUav(srvIdx, HzbMipsUAVs[i]);
                 }
             }
         }
@@ -163,33 +163,32 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
 
-            HzbMipsUAVs = new RHI.CUnorderedAccessView[RHI.CShaderResourceView.CalcMipLevel((int)x, (int)y, true)];
-            var dsTexDesc = new ITexture2DDesc();
+            HzbMipsUAVs = new NxRHI.UUaView[NxRHI.USrView.CalcMipLevel((int)x, (int)y, true)];
+            var dsTexDesc = new NxRHI.FTextureDesc();
             dsTexDesc.SetDefault();
             dsTexDesc.Width = (uint)x;
             dsTexDesc.Height = (uint)y;
             dsTexDesc.MipLevels = (uint)HzbMipsUAVs.Length;
             dsTexDesc.Format = EPixelFormat.PXF_R16G16_TYPELESS;
-            dsTexDesc.BindFlags = (UInt32)(EBindFlags.BF_SHADER_RES | EBindFlags.BF_UNORDERED_ACCESS);
+            dsTexDesc.BindFlags = NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV;
             HzbTexture?.Dispose();
-            HzbTexture = rc.CreateTexture2D(in dsTexDesc);
+            HzbTexture = rc.CreateTexture(in dsTexDesc);
 
-            var srvDesc = new IShaderResourceViewDesc();
+            var srvDesc = new NxRHI.FSrvDesc();
             srvDesc.SetTexture2D();
-            srvDesc.Type = ESrvType.ST_Texture2D;
+            srvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
             srvDesc.Format = EPixelFormat.PXF_R16G16_UNORM;
-            srvDesc.mGpuBuffer = HzbTexture.mCoreObject;
             srvDesc.Texture2D.MipLevels = dsTexDesc.MipLevels;
             HzbSRV?.Dispose();
-            HzbSRV = rc.CreateShaderResourceView(in srvDesc);
+            HzbSRV = rc.CreateSRV(HzbTexture, in srvDesc);
 
             for (int i = 0; i < HzbMipsUAVs.Length; i++)
             {
-                var uavDesc = new IUnorderedAccessViewDesc();
+                var uavDesc = new NxRHI.FUavDesc();
                 uavDesc.SetTexture2D();
                 uavDesc.Format = EPixelFormat.PXF_R16G16_UNORM;
                 uavDesc.Texture2D.MipSlice = (uint)i;
-                HzbMipsUAVs[i] = rc.CreateUnorderedAccessView(HzbTexture.mCoreObject, in uavDesc);
+                HzbMipsUAVs[i] = rc.CreateUAV(HzbTexture, in uavDesc);
             }
 
             ResetComputeDrawcall(policy);
@@ -200,85 +199,27 @@ namespace EngineNS.Graphics.Pipeline.Common
                 return;
             var cmd = BasePass.DrawCmdList;
 
-            var srvIdx = Setup.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "DepthBuffer");
-            if (srvIdx != (IShaderBinder*)0)
+            var srvIdx = SetupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");
+            if (srvIdx.IsValidPointer)
             {
                 var depth = this.GetAttachBuffer(this.DepthPinIn).Srv;
-                SetupDrawcall.mCoreObject.GetShaderRViewResources().BindCS(srvIdx->CSBindPoint, depth.mCoreObject);
+                SetupDrawcall.BindSrv(srvIdx, depth);
             }
-            SetupDrawcall.BuildPass(cmd);
+            SetupDrawcall.Commit(cmd);
 
             if (MipsDrawcalls != null)
             {
                 for (int i = 0; i < MipsDrawcalls.Length; i++)
                 {
-                    MipsDrawcalls[i].BuildPass(cmd);
+                    MipsDrawcalls[i].Commit(cmd);
                 }
             }
-            //cmd.SetComputeShader(CS_Setup.mCoreObject);
-            //var srvIdx  = CSDesc_Setup.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "DepthBuffer");
-            //if (srvIdx != (IShaderBinder*)0)
-            //{
-            //    var depth = policy.GetBasePassNode().GBuffers.DepthStencilSRV;
-            //    cmd.CSSetShaderResource(srvIdx->CSBindPoint, depth.mCoreObject);
-            //}
-
-            //srvIdx = CSDesc_Setup.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "DstBuffer");
-            //if (srvIdx != (IShaderBinder*)0)
-            //{
-            //    cmd.CSSetUnorderedAccessView(srvIdx->m_CSBindPoint, HzbMipsUAVs[0].mCoreObject, &nUavInitialCounts);
-            //}
-
-            //cmd.CSDispatch(MaxSRVWidth / Dispatch_SetupDimArray2.x, MaxSRVHeight / Dispatch_SetupDimArray2.y, 1);
-
-            //uint width = MaxSRVWidth/2;
-            //uint height = MaxSRVHeight/2;
-            //for (int i = 1; i < HzbMipsUAVs.Length; i++)
-            //{
-            //    cmd.SetComputeShader(CS_DownSample.mCoreObject);
-            //    var srvIdx = CSDesc_DownSample.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "SrcBuffer");
-            //    if (srvIdx != (IShaderBinder*)0)
-            //    {
-            //        cmd.CSSetUnorderedAccessView(srvIdx->m_CSBindPoint, HzbMipsUAVs[i - 1].mCoreObject, &nUavInitialCounts);
-            //    }
-
-            //    srvIdx = CSDesc_DownSample.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "DstBuffer");
-            //    if (srvIdx != (IShaderBinder*)0)
-            //    {
-            //        cmd.CSSetUnorderedAccessView(srvIdx->m_CSBindPoint, HzbMipsUAVs[i].mCoreObject, &nUavInitialCounts);
-            //    }
-                
-            //    cmd.CSDispatch(CoreDefine.Roundup(width, Dispatch_SetupDimArray2.x), CoreDefine.Roundup(height, Dispatch_SetupDimArray2.y), 1);
-
-            //    if (width > 1)
-            //    {
-            //        width = width / 2;
-            //    }
-            //    else
-            //    {
-            //        width = 1;
-            //    }
-            //    if (height > 1)
-            //    {
-            //        height = height / 2;
-            //    }
-            //    else
-            //    {
-            //        height = 1;
-            //    }
-            //}
 
             if (cmd.BeginCommand())
             {
                 cmd.EndCommand();
             }
-        }
-        public unsafe override void TickRender(Graphics.Pipeline.URenderPolicy policy)
-        {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-
-            var cmdlist_hp = BasePass.CommitCmdList.mCoreObject;
-            cmdlist_hp.Commit(rc.mCoreObject);
+            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }
         public unsafe override void TickSync(Graphics.Pipeline.URenderPolicy policy)
         {

@@ -35,7 +35,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void InitNodePins()
         {
             ResultPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
-            AddOutput(ResultPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Uav);
+            AddOutput(ResultPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
         public unsafe override void FrameBuild()
         {

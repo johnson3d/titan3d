@@ -6,7 +6,7 @@ using EngineNS.Bricks.NodeGraph;
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     [ContextMenu("Sequence", "FlowControl\\Sequence", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class SequenceNode : UNodeBase, IBeforeExecNode
+    public partial class SequenceNode : UNodeBase, IBeforeExecNode, IBreakableNode
     {
         int mSequenceCount = 0;
         [Rtti.Meta]
@@ -41,6 +41,20 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             AddPinOut(FirstPin);
         }
         public PinOut FirstPin { get; set; } = new PinOut();
+
+        public string BreakerName => "breaker_sequence_" + (uint)NodeId.GetHashCode();
+
+        EBreakerState mBreakerState = EBreakerState.Hidden;
+        public EBreakerState BreakerState
+        {
+            get => mBreakerState;
+            set
+            {
+                mBreakerState = value;
+                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+            }
+        }
+
         public List<PinOut> Sequences = new List<PinOut>();
 
         void AddSequencePin()
@@ -93,12 +107,75 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     linker.InPin.HostNode.BuildStatements(ref data);
             }
         }
+
+        public void LightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = true;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.LightDebuggerLine();
+            }
+        }
+
+        public void UnLightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = false;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.UnLightDebuggerLine();
+            }
+        }
+
+        public void AddMenuItems(UMenuItem parentItem)
+        {
+            parentItem.AddMenuItem("Add Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Enable;
+                });
+            parentItem.AddMenuItem("Remove Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Hidden;
+                });
+        }
     }
     [ContextMenu("if", "FlowControl\\If", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class IfNode : UNodeBase, IBeforeExecNode, IAfterExecNode
+    public partial class IfNode : UNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
     {
         public PinIn BeforeExec { get; set; } = new PinIn();
         public PinOut AfterExec { get; set; } = new PinOut();
+
+        public string BreakerName => "breaker_if_" + (uint)NodeId.GetHashCode();
+        EBreakerState mBreakerState = EBreakerState.Hidden;
+        public EBreakerState BreakerState
+        {
+            get => mBreakerState;
+            set
+            {
+                mBreakerState = value;
+                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+            }
+        }
+        public void AddMenuItems(UMenuItem parentItem)
+        {
+            parentItem.AddMenuItem("Add Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Enable;
+                });
+            parentItem.AddMenuItem("Remove Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Hidden;
+                });
+        }
 
         int mConditionCount = 1;
         [Rtti.Meta]
@@ -214,6 +291,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            for (int i = 0; i < ConditionResultPairs.Count; i++)
+            {
+                if(stayPin == ConditionResultPairs[i].Key)
+                {
+                    EGui.Controls.CtrlUtility.DrawHelper(GetRuntimeValueString(stayPin.Name + "_" + (uint)NodeId.GetHashCode()));
+                }
+            }
+        }
+
         //public override IExpression GetExpr(UMacrossMethodGraph funGraph, ICodeGen cGen, bool bTakeResult)
         //{
         //    var ifOp = new IfOp();
@@ -285,8 +373,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //}
         public override void BuildStatements(ref BuildCodeStatementsData data)
         {
+            var nodeId = (uint)NodeId.GetHashCode();
             var ifStatement = new UIfStatement();
-            data.CurrentStatements.Add(ifStatement);
             for(int i=0; i<ConditionResultPairs.Count; i++)
             {
                 UExpressionBase condition;
@@ -317,7 +405,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     };
                     ifStatement.ElseIfs.Add(elseIfStatement);
                 }
+
+                data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+                {
+                    VariableType = new UTypeReference(typeof(bool)),
+                    VariableName = ConditionResultPairs[i].Key.Name + "_" + nodeId,
+                    VariableValue = condition,
+                });
             }
+
+            AddDebugBreakerStatement(BreakerName, ref data);
+
+            data.CurrentStatements.Add(ifStatement);
             var falseStatement = new UExecuteSequenceStatement();
             ifStatement.FalseStatement = falseStatement;
             var falseNode = data.NodeGraph.GetOppositePinNode(FalsePin);
@@ -333,11 +432,60 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (nextNode != null)
                 nextNode.BuildStatements(ref data);
         }
+
+        public void LightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = true;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.LightDebuggerLine();
+            }
+        }
+
+        public void UnLightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = false;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.UnLightDebuggerLine();
+            }
+        }
     }
     [ContextMenu("return", "FlowControl\\Return", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class ReturnNode : UNodeBase, IBeforeExecNode
+    public partial class ReturnNode : UNodeBase, IBeforeExecNode, IBreakableNode
     {
         public PinIn BeforeExec { get; set; } = new PinIn();
+
+        public string BreakerName => "breaker_return_" + (uint)NodeId.GetHashCode();
+        EBreakerState mBreakerState = EBreakerState.Hidden;
+        public EBreakerState BreakerState
+        {
+            get => mBreakerState;
+            set
+            {
+                mBreakerState = value;
+                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+            }
+        }
+        public void AddMenuItems(UMenuItem parentItem)
+        {
+            parentItem.AddMenuItem("Add Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Enable;
+                });
+            parentItem.AddMenuItem("Remove Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Hidden;
+                });
+        }
 
         public static ReturnNode NewReturnNode(UMacrossMethodGraph funGraph)
         {
@@ -368,7 +516,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 var retPin = AddPinIn(new PinIn()
                 {
-                    Name = data.MethodDec.ReturnValue.VariableName
+                    Name = data.MethodDec.ReturnValue.VariableName,
+                    Tag = data.MethodDec.ReturnValue.VariableType,
                 });
             }
             for(int i=0; i<data.MethodDec.Arguments.Count; i++)
@@ -379,7 +528,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     var pin = AddPinIn(new PinIn()
                     {
-                        Name = argDec.VariableName
+                        Name = argDec.VariableName,
+                        Tag = argDec.VariableType,
                     });
                 }
             }
@@ -425,6 +575,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //    return;
 
             //EGui.Controls.CtrlUtility.DrawHelper(ReturnType);
+            for(int i=0; i<Inputs.Count; i++)
+            {
+                if (Inputs[i] == BeforeExec)
+                    continue;
+
+                var valueString = GetRuntimeValueString(Inputs[i].Name + "_" + (uint)NodeId.GetHashCode());
+                var typeString = (Inputs[i].Tag as UTypeReference).TypeFullName;
+                EGui.Controls.CtrlUtility.DrawHelper($"{valueString}({typeString})");
+            }
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
@@ -471,7 +630,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     To = new UVariableReferenceExpression(Inputs[i].Name)
                 };
                 data.CurrentStatements.Add(st);
+
+                data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+                {
+                    VariableType = Inputs[i].Tag as UTypeReference,
+                    VariableName = Inputs[i].Name + "_" + (uint)NodeId.GetHashCode(),
+                    VariableValue = new UVariableReferenceExpression(Inputs[i].Name)
+                });
             }
+            AddDebugBreakerStatement(BreakerName, ref data);
             data.CurrentStatements.Add(new UReturnStatement());
         }
         //public override IExpression GetExpr(UMacrossMethodGraph funGraph, ICodeGen cGen, bool bTakeResult)
@@ -511,9 +678,33 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         //    return expr;
         //}
+
+        public void LightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = true;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.LightDebuggerLine();
+            }
+        }
+
+        public void UnLightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = false;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.UnLightDebuggerLine();
+            }
+        }
     }
     [ContextMenu("forloop", "FlowControl\\For", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class ForLoopNode : UNodeBase, IBeforeExecNode, IAfterExecNode
+    public partial class ForLoopNode : UNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
     {
         [Browsable(false)]
         public PinIn BeginIdxPin;
@@ -539,6 +730,31 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         [Browsable(false)]
         public PinOut AfterExec { get; set; } = new PinOut();
 
+        public string BreakerName => "breaker_for_" + (uint)NodeId.GetHashCode();
+
+        EBreakerState mBreakerState = EBreakerState.Hidden;
+        public EBreakerState BreakerState
+        {
+            get => mBreakerState;
+            set
+            {
+                mBreakerState = value;
+                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+            }
+        }
+        public void AddMenuItems(UMenuItem parentItem)
+        {
+            parentItem.AddMenuItem("Add Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Enable;
+                });
+            parentItem.AddMenuItem("Remove Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Hidden;
+                });
+        }
         public ForLoopNode()
         {
             BeginIdx = 0;
@@ -569,33 +785,74 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return this;
         }
 
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            var nodeId = (uint)NodeId.GetHashCode();
+            if(stayPin == BeginIdxPin)
+                EGui.Controls.CtrlUtility.DrawHelper(GetRuntimeValueString(stayPin.Name + "_" + nodeId));
+            else if(stayPin == EndIdxPin)
+                EGui.Controls.CtrlUtility.DrawHelper(GetRuntimeValueString(stayPin.Name + "_" + nodeId));
+            else if(stayPin == StepPin)
+                EGui.Controls.CtrlUtility.DrawHelper(GetRuntimeValueString(stayPin.Name + "_" + nodeId));
+            else if(stayPin == IndexPin)
+                EGui.Controls.CtrlUtility.DrawHelper(GetRuntimeValueString(mLoopIdxName + "_" + nodeId));
+        }
+
         public override void BuildStatements(ref BuildCodeStatementsData data)
         {
+            var nodeId = (uint)NodeId.GetHashCode();
             var forStatement = new UForLoopStatement()
             {
                 LoopIndexName = mLoopIdxName,
             };
-            data.CurrentStatements.Add(forStatement);
             var beginIdxExp = data.NodeGraph.GetOppositePinExpression(BeginIdxPin, ref data);
             if (beginIdxExp != null)
                 forStatement.BeginExpression = beginIdxExp;
             else
                 forStatement.BeginExpression = new UPrimitiveExpression(BeginIdx);
+            data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+            {
+                VariableType = new UTypeReference(typeof(UInt64)),
+                VariableName = BeginIdxPin.Name + "_" + nodeId,
+                VariableValue = forStatement.BeginExpression,
+            });
+
             var endIdxExp = data.NodeGraph.GetOppositePinExpression(EndIdxPin, ref data);
             if (endIdxExp != null)
                 forStatement.EndExpression = endIdxExp;
             else
                 forStatement.EndExpression = new UPrimitiveExpression(EndIdx);
+            data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+            {
+                VariableType = new UTypeReference(typeof(UInt64)),
+                VariableName = EndIdxPin.Name + "_" + nodeId,
+                VariableValue = forStatement.EndExpression,
+            });
+
             var stepExp = data.NodeGraph.GetOppositePinExpression(StepPin, ref data);
             if (stepExp != null)
                 forStatement.StepExpression = stepExp;
             else
                 forStatement.StepExpression = new UPrimitiveExpression(StepIdx);
+            data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+            {
+                VariableType = new UTypeReference(typeof(UInt64)),
+                VariableName = StepPin.Name + "_" + nodeId,
+                VariableValue = forStatement.StepExpression,
+            });
 
+            AddDebugBreakerStatement(BreakerName, ref data);
+            data.CurrentStatements.Add(forStatement);
             var bodyNode = data.NodeGraph.GetOppositePinNode(LoopBodyPin);
             if(bodyNode != null)
             {
                 var bodyStatements = new UExecuteSequenceStatement();
+                bodyStatements.Sequence.Add(new UDebuggerSetWatchVariable()
+                {
+                    VariableType = new UTypeReference(typeof(UInt64)),
+                    VariableName = mLoopIdxName + "_" + nodeId,
+                    VariableValue = new UVariableReferenceExpression(mLoopIdxName),
+                });
                 forStatement.LoopBody = bodyStatements;
                 var loopData = new BuildCodeStatementsData();
                 data.CopyTo(ref loopData);
@@ -613,15 +870,64 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return new UVariableReferenceExpression(mLoopIdxName);
             return null;
         }
+
+        public void LightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = true;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.LightDebuggerLine();
+            }
+        }
+
+        public void UnLightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = false;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.UnLightDebuggerLine();
+            }
+        }
     }
     [ContextMenu("whileloop", "FlowControl\\While", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class WhileNode : UNodeBase, IBeforeExecNode, IAfterExecNode
+    public partial class WhileNode : UNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
     {
         public PinIn ConditionPin;
         public PinOut LoopBodyPin;
         public PinIn BeforeExec { get; set; } = new PinIn();
         public PinOut AfterExec { get; set; } = new PinOut();
 
+        public string BreakerName => "breaker_while_" + (uint)NodeId.GetHashCode();
+
+        EBreakerState mBreakerState = EBreakerState.Hidden;
+        public EBreakerState BreakerState
+        {
+            get => mBreakerState;
+            set
+            {
+                mBreakerState = value;
+                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+            }
+        }
+        public void AddMenuItems(UMenuItem parentItem)
+        {
+            parentItem.AddMenuItem("Add Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Enable;
+                });
+            parentItem.AddMenuItem("Remove Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Hidden;
+                });
+        }
         public WhileNode()
         {
             Name = "While";
@@ -645,12 +951,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public override void BuildStatements(ref BuildCodeStatementsData data)
         {
             var whileStatement = new UWhileLoopStatement();
-            data.CurrentStatements.Add(whileStatement);
             if (data.NodeGraph.PinHasLinker(ConditionPin))
                 whileStatement.Condition = data.NodeGraph.GetOppositePinExpression(ConditionPin, ref data);
             else
                 whileStatement.Condition = new UPrimitiveExpression(false);
 
+            data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+            {
+                VariableType = new UTypeReference(typeof(bool)),
+                VariableName = ConditionPin.Name + "_" + (uint)NodeId.GetHashCode(),
+                VariableValue = whileStatement.Condition,
+            });
+            AddDebugBreakerStatement(BreakerName, ref data);
+            data.CurrentStatements.Add(whileStatement);
             var bodyNode = data.NodeGraph.GetOppositePinNode(LoopBodyPin);
             if(bodyNode != null)
             {
@@ -666,11 +979,68 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (nextNode != null)
                 nextNode.BuildStatements(ref data);
         }
+
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            if(stayPin == ConditionPin)
+            {
+                EGui.Controls.CtrlUtility.DrawHelper(GetRuntimeValueString(ConditionPin.Name + "_" + (uint)NodeId.GetHashCode()));
+            }
+        }
+
+        public void LightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = true;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.LightDebuggerLine();
+            }
+        }
+
+        public void UnLightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = false;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.UnLightDebuggerLine();
+            }
+        }
     }
     [ContextMenu("continue", "FlowControl\\Continue", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class ContinueNode : UNodeBase, IBeforeExecNode
+    public partial class ContinueNode : UNodeBase, IBeforeExecNode, IBreakableNode
     {
         public PinIn BeforeExec { get; set; } = new PinIn();
+
+        public string BreakerName => "breaker_continue_" + (uint)NodeId.GetHashCode();
+        EBreakerState mBreakerState = EBreakerState.Hidden;
+        public EBreakerState BreakerState
+        {
+            get => mBreakerState;
+            set
+            {
+                mBreakerState = value;
+                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+            }
+        }
+        public void AddMenuItems(UMenuItem parentItem)
+        {
+            parentItem.AddMenuItem("Add Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Enable;
+                });
+            parentItem.AddMenuItem("Remove Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Hidden;
+                });
+        }
         public ContinueNode()
         {
             Name = "Continue";
@@ -680,13 +1050,68 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override void BuildStatements(ref BuildCodeStatementsData data)
         {
+            AddDebugBreakerStatement(BreakerName, ref data);
             data.CurrentStatements.Add(new UContinueStatement());
+        }
+
+        public void LightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = true;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.LightDebuggerLine();
+            }
+        }
+
+        public void UnLightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = false;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.UnLightDebuggerLine();
+            }
+        }
+
+        public override object GetPropertyEditObject()
+        {
+            return null;
         }
     }
     [ContextMenu("break", "FlowControl\\Break", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
-    public partial class BreakNode : UNodeBase, IBeforeExecNode
+    public partial class BreakNode : UNodeBase, IBeforeExecNode, IBreakableNode
     {
         public PinIn BeforeExec { get; set; } = new PinIn();
+
+        public string BreakerName => "breaker_break_" + (uint)NodeId.GetHashCode();
+        EBreakerState mBreakerState = EBreakerState.Hidden;
+        public EBreakerState BreakerState
+        {
+            get => mBreakerState;
+            set
+            {
+                mBreakerState = value;
+                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+            }
+        }
+        public void AddMenuItems(UMenuItem parentItem)
+        {
+            parentItem.AddMenuItem("Add Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Enable;
+                });
+            parentItem.AddMenuItem("Remove Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Hidden;
+                });
+        }
         public BreakNode()
         {
             Name = "Break";
@@ -697,6 +1122,35 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public override void BuildStatements(ref BuildCodeStatementsData data)
         {
             data.CurrentStatements.Add(new UBreakStatement());
+        }
+
+        public void LightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = true;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.LightDebuggerLine();
+            }
+        }
+
+        public void UnLightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = false;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.UnLightDebuggerLine();
+            }
+        }
+
+        public override object GetPropertyEditObject()
+        {
+            return null;
         }
     }
 }

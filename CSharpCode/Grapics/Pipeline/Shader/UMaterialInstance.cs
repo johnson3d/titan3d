@@ -18,7 +18,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset
-            if (ameta.GetAssetExtType() == RHI.CShaderResourceView.AssetExt)
+            if (ameta.GetAssetExtType() == NxRHI.USrView.AssetExt)
                 return true;
             return false;
         }
@@ -31,6 +31,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             HasSnapshot = true;
             OnShowIconTimout(0);
+        }
+        protected override Color GetBorderColor()
+        {
+            return Color.Cyan;
         }
     }
     [Rtti.Meta]
@@ -187,9 +191,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 result.UsedUniformVars.Add(i.Clone(result));
             }
 
-            result.mRasterizerState = mRasterizerState;
-            result.mDepthStencilState = mDepthStencilState;
-            result.mBlendState = mBlendState;
+            result.mPipelineDesc = mPipelineDesc;
 
             result.SerialId++;
             return result;
@@ -295,6 +297,42 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         mUsedRSView = srvs;
                     }
                     #endregion
+
+                    #region Samppler match parent
+                    isMatch = true;
+                    if (mUsedSamplerStates.Count != ParentMaterial.UsedSamplerStates.Count)
+                    {
+                        isMatch = false;
+                    }
+                    else
+                    {
+                        for (int i = 0; i < mUsedSamplerStates.Count; i++)
+                        {
+                            if (mUsedSamplerStates[i].Name != ParentMaterial.UsedSamplerStates[i].Name)
+                            {
+                                isMatch = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (isMatch == false)
+                    {
+                        var srvs = new List<NameSamplerStateDescPair>();
+                        for (int i = 0; i < ParentMaterial.UsedSamplerStates.Count; i++)
+                        {
+                            var uuv = this.FindSampler(ParentMaterial.UsedSamplerStates[i].Name);
+                            if (uuv != null)
+                            {
+                                srvs.Add(uuv);
+                            }
+                            else
+                            {
+                                srvs.Add(ParentMaterial.UsedSamplerStates[i]);
+                            }
+                        }
+                        mUsedSamplerStates = srvs;
+                    }
+                    #endregion
                     AssetState = IO.EAssetState.LoadFinished;
                 };
                 exec();
@@ -364,41 +402,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 mSerialId = value;
                 if (PerMaterialCBuffer != null)
-                    this.UpdateUniformVars(PerMaterialCBuffer);
+                    this.UpdateUniformVars(PerMaterialCBuffer, PerMaterialCBuffer.ShaderBinder);
             }
         }
-        #region RHIResource        
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public override RHI.CRasterizerState RasterizerState
-        {
-            get
-            {
-                if (ParentMaterial != null && mRasterizerState == null)
-                    return ParentMaterial.RasterizerState;
-                return mRasterizerState;
-            }
-        }
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public override RHI.CDepthStencilState DepthStencilState
-        {
-            get
-            {
-                if (ParentMaterial != null && mDepthStencilState == null)
-                    return ParentMaterial.DepthStencilState;
-                return mDepthStencilState;
-            }
-        }
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public override RHI.CBlendState BlendState
-        {
-            get
-            {
-                if (ParentMaterial != null && mBlendState == null)
-                    return ParentMaterial.BlendState;
-                return mBlendState;
-            }
-        }
-        #endregion
     }
     public class UMaterialInstanceManager
     {
@@ -421,8 +427,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             mWireColorMateria = await CreateMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));// engine.Config.DefaultMaterialInstance);
             var rast = mWireColorMateria.Rasterizer;
-            rast.FillMode = EFillMode.FMD_WIREFRAME;
-            rast.CullMode = ECullMode.CMD_NONE;
+            rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
+            rast.CullMode = NxRHI.ECullMode.CMD_NONE;
             mWireColorMateria.Rasterizer = rast;
             mWireColorMateria.RenderLayer = ERenderLayer.RL_Translucent;
 

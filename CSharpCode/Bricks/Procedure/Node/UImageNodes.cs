@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
@@ -19,6 +20,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut AlphaPin { get; set; } = new PinOut();
 
         public UBufferCreator RgbBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UImageLoader()
         {
             PrevSize = new Vector2(100, 100);
@@ -29,10 +31,10 @@ namespace EngineNS.Bricks.Procedure.Node
             BackColor = 0x80808080;
 
             AddOutput(RgbPin, "RGB", RgbBufferCreator);
-            AddOutput(RedPin, "R", DefaultBufferCreator);
-            AddOutput(GreenPin, "G", DefaultBufferCreator);
-            AddOutput(BluePin, "B", DefaultBufferCreator);
-            AddOutput(AlphaPin, "A", DefaultBufferCreator);
+            AddOutput(RedPin, "R", Float1Desc);
+            AddOutput(GreenPin, "G", Float1Desc);
+            AddOutput(BluePin, "B", Float1Desc);
+            AddOutput(AlphaPin, "A", Float1Desc);
         }
         ~UImageLoader()
         {
@@ -44,7 +46,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         RName mImageName;
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = RHI.CShaderResourceView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
         public RName ImageName
         {
             get => mImageName;
@@ -58,7 +60,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 exec();
             }
         }
-        private RHI.CShaderResourceView TextureSRV;
+        private NxRHI.USrView TextureSRV;
         public override int PreviewResultIndex
         {
             get => mPreviewResultIndex;
@@ -70,6 +72,12 @@ namespace EngineNS.Bricks.Procedure.Node
         public override void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
             ameta.AddReferenceAsset(ImageName);
+        }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            if (RgbPin == pin)
+                return RgbBufferCreator;
+            return Float1Desc;
         }
         public override unsafe bool InitProcedure(UPgcGraph graph)
         {
@@ -100,7 +108,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 }
             }
 
-            DefaultBufferCreator.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
+            Float1Desc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
             if (image != null)
             {
                 UBufferConponent red = null;
@@ -117,9 +125,9 @@ namespace EngineNS.Bricks.Procedure.Node
                             LineSize = 3 * image.Width;
                             LineSize = (int)CoreDefine.Roundup((uint)LineSize, 4);
 
-                            DefaultBufferCreator.XSize = image.Width;
-                            DefaultBufferCreator.YSize = image.Height;
-                            DefaultBufferCreator.ZSize = 1;
+                            Float1Desc.XSize = image.Width;
+                            Float1Desc.YSize = image.Height;
+                            Float1Desc.ZSize = 1;
 
                             red = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
                             green = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
@@ -163,9 +171,9 @@ namespace EngineNS.Bricks.Procedure.Node
                             PixelSize = 4;
                             LineSize = 4 * image.Width;
 
-                            DefaultBufferCreator.XSize = image.Width;
-                            DefaultBufferCreator.YSize = image.Height;
-                            DefaultBufferCreator.ZSize = 1;
+                            Float1Desc.XSize = image.Width;
+                            Float1Desc.YSize = image.Height;
+                            Float1Desc.ZSize = 1;
 
                             red = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
                             green = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(image.Width, image.Height, 1));
@@ -249,6 +257,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut ZPin { get; set; } = new PinOut();
 
         public UBufferCreator XYZBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator Float1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat1Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UPreviewImage()
         {
             PrevSize = new Vector2(100, 100);
@@ -259,14 +269,14 @@ namespace EngineNS.Bricks.Procedure.Node
             BackColor = 0x80808080;
 
             AddInput(InXYZPin, "InXYZ", XYZBufferCreator);
-            AddInput(InXPin, "InX", DefaultInputDesc);
-            AddInput(InYPin, "InY", DefaultInputDesc);
-            AddInput(InZPin, "InZ", DefaultInputDesc);
+            AddInput(InXPin, "InX", Float1Desc);
+            AddInput(InYPin, "InY", Float1Desc);
+            AddInput(InZPin, "InZ", Float1Desc);
 
             AddOutput(XYZPin, "XYZ", XYZBufferCreator);
-            AddOutput(XPin, "X", DefaultBufferCreator);
-            AddOutput(YPin, "Y", DefaultBufferCreator);
-            AddOutput(ZPin, "Z", DefaultBufferCreator);
+            AddOutput(XPin, "X", OutputFloat1Desc);
+            AddOutput(YPin, "Y", OutputFloat1Desc);
+            AddOutput(ZPin, "Z", OutputFloat1Desc);
         }
         public override int PreviewResultIndex
         {
@@ -290,7 +300,11 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
-            return base.GetOutBufferCreator(pin);
+            if (pin == XYZPin)
+            {
+                return XYZBufferCreator;
+            }
+            return OutputFloat1Desc;
         }
         public override bool OnProcedure(UPgcGraph graph)
         {
@@ -346,9 +360,6 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
-    public partial class USdfCalculator : UMonocular
-    {
-    }
     [Bricks.CodeBuilder.ContextMenu("Surface", "Image\\Surface", UPgcGraph.PgcEditorKeyword)]
     public partial class UImageSurface : UPgcNodeBase
     {
@@ -381,13 +392,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 var buffer = graph.BufferCache.FindBuffer(HeightPin);
                 if (buffer != null)
                 {
-                    SurfCreator.XSize = buffer.BufferCreator.XSize;
-                    SurfCreator.YSize = buffer.BufferCreator.YSize;
-                    SurfCreator.ZSize = buffer.BufferCreator.ZSize;
+                    SurfCreator.SetSize(buffer.BufferCreator);
                     return SurfCreator;
                 }
             }
-            return base.GetOutBufferCreator(pin);
+            return null;
         }
         public override bool OnProcedure(UPgcGraph graph)
         {
@@ -471,6 +480,10 @@ namespace EngineNS.Bricks.Procedure.Node
             AddInput(SurfacePin, "Surface", HeightCreator, "Surface");
             AddOutput(ResultPin, "Result", HeightCreator);
         }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            return HeightCreator;
+        }
         public override bool OnProcedure(UPgcGraph graph)
         {
             var result = graph.BufferCache.FindBuffer(ResultPin) as USuperBuffer<float, FFloatOperator>;
@@ -487,6 +500,215 @@ namespace EngineNS.Bricks.Procedure.Node
                     result.SetFloat1(j, i, 0, h.W);
                 }
             }
+            return true;
+        }
+    }
+
+    public class UKernal : IO.BaseSerializer
+    {
+        public UKernal()
+        {
+            KernalDefine.HostNode = this;
+            UpdateKernal();
+        }
+        uint mKernalX = 3;
+        uint mKernalY = 3;
+        [Rtti.Meta]
+        public uint KernalX
+        {
+            get => mKernalX;
+            set
+            {
+                mKernalX = value;
+                UpdateKernal();
+            }
+        }
+        [Rtti.Meta]
+        public uint KernalY
+        {
+            get => mKernalY;
+            set
+            {
+                mKernalY = value;
+                UpdateKernal();
+            }
+        }
+        [Rtti.Meta]
+        [Browsable(false)]
+        public List<float> KernalValues { get; set; }
+        public class UKernalValueDefine
+        {
+            internal UKernal HostNode;
+            public class UValueEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+            {
+                public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
+                {
+                    newValue = info.Value;
+                    var nodeDef = newValue as UKernalValueDefine;
+                    var kernal = nodeDef.HostNode;
+                    for (int i = 0; i < kernal.KernalY; i++)
+                    {
+                        for (int j = 0; j < kernal.KernalX; j++)
+                        {
+                            float v = kernal.KernalValues[i * (int)kernal.KernalX + j];
+                            ImGuiAPI.SetNextItemWidth(100);
+                            if (ImGuiAPI.InputFloat($"##{i}_{j}", ref v, 0, 0, "%.3f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None))
+                            {
+                                kernal.KernalValues[i * (int)kernal.KernalX + j] = v;
+                            }
+                            if (j < kernal.KernalX - 1)
+                                ImGuiAPI.SameLine(0, 5);
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        [UKernalValueDefine.UValueEditor]
+        public UKernalValueDefine KernalDefine
+        {
+            get;
+        } = new UKernalValueDefine();
+        private void UpdateKernal()
+        {
+            if (KernalValues != null && KernalValues.Count == KernalX * KernalY)
+            {
+                return;
+            }
+            var kv = new List<float>();
+            for (int i = 0; i < KernalY; i++)
+            {
+                for (int j = 0; j < KernalX; j++)
+                {
+                    kv.Add(1.0f);
+                }
+            }
+            KernalValues = kv;
+        }
+        public float GetValue(float u, float v)
+        {
+            int x = (int)(u * KernalX);
+            int y = (int)(v * KernalY);
+            return KernalValues[y * (int)KernalX + x];
+        }
+        public struct FSamplerData
+        {
+            public float Value;
+            public int Flags;
+            public void SetValid(bool v)
+            {
+                if (v)
+                    Flags |= (1 << 0);
+                else
+                    Flags = Flags & (~(1 << 0));
+            }
+            public bool IsValid()
+            {
+                return (Flags & (1 << 0)) != 0;
+            }
+            public void SetZeroWeight(bool v)
+            {
+                if (v)
+                    Flags |= (1 << 1);
+                else
+                    Flags = Flags & (~(1 << 1));
+            }
+            public bool IsZeroWeight()
+            {
+                return (Flags & (1 << 1)) != 0;
+            }
+        }
+        public unsafe void Sampler(FSamplerData* tmpBuffer, int scale, UBufferConponent src, int x, int y, int z)
+        {
+            var sizeX = (int)KernalX * scale;
+            var sizeY = (int)KernalY * scale;
+            int sx = x - sizeX / 2;
+            int sy = y - sizeY / 2;
+            for (int i = 0; i < sizeY; i++)
+            {
+                for (int j = 0; j < sizeX; j++)
+                {
+                    if (src.IsValidPixel(sx + j, sy + i, z))
+                    {
+                        float u = (float)j / (float)(sizeX);
+                        float v = (float)i / (float)(sizeY);
+                        var testValue = GetValue(u, v);
+                        tmpBuffer[i * sizeX + j].SetZeroWeight(testValue == 0);
+                        tmpBuffer[i * sizeX + j].SetValid(true);
+                        float value = src.GetFloat1(sx + j, sy + i, z);
+                        if (testValue == 0)
+                            tmpBuffer[i * sizeX + j].Value = value;
+                        else
+                            tmpBuffer[i * sizeX + j].Value = value * testValue;
+                    }
+                    else
+                    {
+                        tmpBuffer[i * sizeX + j].Value = 0;
+                        tmpBuffer[i * sizeX + j].SetValid(false);
+                        tmpBuffer[i * sizeX + j].SetZeroWeight(true);
+                    }
+                }
+            }
+        }
+    }
+    [Bricks.CodeBuilder.ContextMenu("Erosion", "Image\\Erosion", UPgcGraph.PgcEditorKeyword)]
+    public class UErosion : UMonocular
+    {
+        [Rtti.Meta]
+        public UKernal Kernal { get; set; } = new UKernal();
+        [Rtti.Meta]
+        public int KernalScale { get; set; } = 1;
+        [Rtti.Meta]
+        public float DeltaLimit { get; set; } = 0.5f;
+        public float ErosionScale { get; set; } = 1.0f;
+        public unsafe override bool OnProcedure(UPgcGraph graph)
+        {
+            var left = graph.BufferCache.FindBuffer(SrcPin);
+            var result = graph.BufferCache.FindBuffer(ResultPin);
+            var op = result.PixelOperator;
+
+            var resultType = result.BufferCreator.ElementType;
+            var leftType = left.BufferCreator.ElementType;
+            var rightType = Rtti.UTypeDescGetter<float>.TypeDesc;
+
+            result.DispatchPixels((result, x, y, z) =>
+            {
+                unsafe
+                {
+                    int count = (int)(Kernal.KernalX * KernalScale * Kernal.KernalY * KernalScale);
+                    var tmpBuffer = stackalloc UKernal.FSamplerData[count];
+                    Kernal.Sampler(tmpBuffer, KernalScale, left, x, y, z);
+
+                    var ov = left.GetFloat1(x, y, z);
+                    float minValue = float.MaxValue;
+                    bool isErosion = false;
+                    for (int i = 0; i < count; i++)
+                    {
+                        if (tmpBuffer[i].IsValid() == false)
+                        {
+                            result.SetFloat1(x, y, z, ov);
+                            return;
+                        }
+                        else if (tmpBuffer[i].IsZeroWeight() == false)
+                        {
+                            var delta = ov - tmpBuffer[i].Value;
+                            if (delta > DeltaLimit)
+                            {
+                                isErosion = true;
+                            }
+                        }
+
+                        if (tmpBuffer[i].Value < minValue)
+                            minValue = tmpBuffer[i].Value;
+                    }
+                    if (isErosion)
+                        result.SetFloat1(x, y, z, minValue * ErosionScale);
+                    else
+                        result.SetFloat1(x, y, z, ov);
+                }
+            }, true);
+
+            left.LifeCount--;
             return true;
         }
     }

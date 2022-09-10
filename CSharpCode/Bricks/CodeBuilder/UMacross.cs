@@ -70,6 +70,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
+            UEngine.Instance.EditorInstance.MacrossIcon?.OnDraw(cmdlist, in start, in end, 0);
             cmdlist.AddText(in start, 0xFFFFFFFF, "Macross", null);
         }
     }

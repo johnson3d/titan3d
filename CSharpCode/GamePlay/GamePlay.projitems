@@ -28,6 +28,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UGridNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UMeshNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UNode_Editor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\USceneCapture.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UScenePartitionNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UPointLightNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\USkyNode.cs" />

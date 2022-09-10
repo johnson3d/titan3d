@@ -122,7 +122,22 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var v = System.Convert.ToSByte(info.Value);
-                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S8, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                float speed = 1.0f;
+                if(info.HostProperty != null)
+                {
+                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    if(vR != null)
+                    {
+                        minValue = (sbyte)vR.Min;
+                        maxValue = (sbyte)vR.Max;
+                    }
+                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    if(vStep != null)
+                    {
+                        speed = vStep.Step;
+                    }
+                }
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S8, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (changed && !info.Readonly)
                 {
                     newValue = v;
@@ -157,7 +172,22 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var v = System.Convert.ToInt16(info.Value);
-                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S16, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                float speed = 1.0f;
+                if (info.HostProperty != null)
+                {
+                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    if (vR != null)
+                    {
+                        minValue = (Int16)vR.Min;
+                        maxValue = (Int16)vR.Max;
+                    }
+                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    if (vStep != null)
+                    {
+                        speed = vStep.Step;
+                    }
+                }
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S16, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (!info.Readonly && changed)
                 {
                     newValue = v;
@@ -192,7 +222,22 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var v = System.Convert.ToInt32(info.Value);
-                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S32, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                float speed = 1.0f;
+                if (info.HostProperty != null)
+                {
+                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    if (vR != null)
+                    {
+                        minValue = (Int32)vR.Min;
+                        maxValue = (Int32)vR.Max;
+                    }
+                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    if (vStep != null)
+                    {
+                        speed = vStep.Step;
+                    }
+                }
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S32, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (!info.Readonly && changed)
                 {
                     newValue = v;
@@ -229,7 +274,22 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var v = System.Convert.ToInt64(info.Value);
-                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S64, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                float speed = 1.0f;
+                if (info.HostProperty != null)
+                {
+                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    if (vR != null)
+                    {
+                        minValue = (Int64)vR.Min;
+                        maxValue = (Int64)vR.Max;
+                    }
+                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    if (vStep != null)
+                    {
+                        speed = vStep.Step;
+                    }
+                }
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S64, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (!info.Readonly && changed)
                 {
                     newValue = v;
@@ -266,7 +326,22 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var v = System.Convert.ToByte(info.Value);
-                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U8, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                float speed = 1.0f;
+                if (info.HostProperty != null)
+                {
+                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    if (vR != null)
+                    {
+                        minValue = (byte)vR.Min;
+                        maxValue = (byte)vR.Max;
+                    }
+                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    if (vStep != null)
+                    {
+                        speed = vStep.Step;
+                    }
+                }
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U8, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (!info.Readonly && changed)
                 {
                     newValue = v;
@@ -303,7 +378,22 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var v = System.Convert.ToUInt16(info.Value);
-                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U16, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                float speed = 1.0f;
+                if (info.HostProperty != null)
+                {
+                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    if (vR != null)
+                    {
+                        minValue = (UInt16)vR.Min;
+                        maxValue = (UInt16)vR.Max;
+                    }
+                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    if (vStep != null)
+                    {
+                        speed = vStep.Step;
+                    }
+                }
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U16, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (!info.Readonly && changed)
                 {
                     newValue = v;
@@ -341,7 +431,22 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var v = System.Convert.ToUInt32(info.Value);
-                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U32, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                float speed = 1.0f;
+                if (info.HostProperty != null)
+                {
+                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    if (vR != null)
+                    {
+                        minValue = (UInt32)vR.Min;
+                        maxValue = (UInt32)vR.Max;
+                    }
+                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    if (vStep != null)
+                    {
+                        speed = vStep.Step;
+                    }
+                }
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U32, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (!info.Readonly && changed)
                 {
                     newValue = v;
@@ -378,7 +483,22 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var v = System.Convert.ToUInt64(info.Value);
-                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U64, &v, 1.0f, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                float speed = 1.0f;
+                if (info.HostProperty != null)
+                {
+                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    if (vR != null)
+                    {
+                        minValue = (UInt64)vR.Min;
+                        maxValue = (UInt64)vR.Max;
+                    }
+                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    if (vStep != null)
+                    {
+                        speed = vStep.Step;
+                    }
+                }
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U64, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (!info.Readonly && changed)
                 {
                     newValue = v;
@@ -415,7 +535,28 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var v = System.Convert.ToSingle(info.Value);
-                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_Float, &v, 0.1f, &minValue, &maxValue, "%.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                float speed = 1.0f;
+                string format = "%.6f";
+                if (info.HostProperty != null)
+                {
+                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    if (vR != null)
+                    {
+                        minValue = (float)vR.Min;
+                        maxValue = (float)vR.Max;
+                    }
+                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    if (vStep != null)
+                    {
+                        speed = vStep.Step;
+                    }
+                    var vFormat = info.HostProperty.GetAttribute<PGValueFormat>();
+                    if(vFormat != null)
+                    {
+                        format = vFormat.Format;
+                    }
+                }
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_Float, &v, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (!info.Readonly && changed)
                 {
                     newValue = v;
@@ -452,7 +593,24 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var v = System.Convert.ToDouble(info.Value);
-                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_Double, &v, .1f, &minValue, &maxValue, "%.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                float speed = 1.0f;
+                string format = "%.6f";
+                if (info.HostProperty != null)
+                {
+                    var vR = info.HostProperty.GetAttribute<PGValueRange>();
+                    if (vR != null)
+                    {
+                        minValue = (double)vR.Min;
+                        maxValue = (double)vR.Max;
+                    }
+                    var vStep = info.HostProperty.GetAttribute<PGValueChangeStep>();
+                    if (vStep != null)
+                        speed = vStep.Step;
+                    var vFormat = info.HostProperty.GetAttribute<PGValueFormat>();
+                    if (vFormat != null)
+                        format = vFormat.Format;
+                }
+                var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_Double, &v, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (!info.Readonly && changed)
                 {
                     newValue = v;
@@ -691,7 +849,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
                 IndentImageWidth = info.HostPropertyGrid.Indent,
                 IndentTextureUVMin = Vector2.Zero,
-                IndentTextureUVMax = Vector2.UnitXY,
+                IndentTextureUVMax = Vector2.One,
                 IndentColor = info.HostPropertyGrid.IndentColor,
                 HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                 Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
@@ -729,6 +887,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         HostPropertyGrid = info.HostPropertyGrid,
                         Flags = info.Flags,
                         Expand = treeNodeRet,
+                        HostProperty = info.HostProperty,
                     };
                     object newValue;
                     var changed = PropertyGrid.DrawPropertyGridItem(ref elementEditorInfo, out newValue);
@@ -821,7 +980,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
                 IndentImageWidth = info.HostPropertyGrid.Indent,
                 IndentTextureUVMin = Vector2.Zero,
-                IndentTextureUVMax = Vector2.UnitXY,
+                IndentTextureUVMax = Vector2.One,
                 IndentColor = info.HostPropertyGrid.IndentColor,
                 HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                 Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
@@ -891,6 +1050,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         HostPropertyGrid = info.HostPropertyGrid,
                         Flags = info.Flags,
                         Expand = treeNodeRet,
+                        HostProperty = info.HostProperty,
                     };
                     object newValue;
                     var changed = PropertyGrid.DrawPropertyGridItem(ref elementEditorInfo, out newValue);
@@ -998,7 +1158,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
                 IndentImageWidth = info.HostPropertyGrid.Indent,
                 IndentTextureUVMin = Vector2.Zero,
-                IndentTextureUVMax = Vector2.UnitXY,
+                IndentTextureUVMax = Vector2.One,
                 IndentColor = info.HostPropertyGrid.IndentColor,
                 HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                 Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
@@ -1043,6 +1203,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     HostPropertyGrid = info.HostPropertyGrid,
                     Flags = info.Flags,
                     Expand = treeNodeRet,
+                    HostProperty = info.HostProperty,
                 };
                 object newKeyValue;
                 if(PropertyGrid.DrawPropertyGridItem(ref keyEditorInfo, out newKeyValue))
@@ -1070,6 +1231,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     HostPropertyGrid = info.HostPropertyGrid,
                     Flags = info.Flags,
                     Expand = treeNodeRet,
+                    HostProperty = info.HostProperty,
                 };
                 object newValue;
                 if(PropertyGrid.DrawPropertyGridItem(ref valueEditorInfo, out newValue) && !info.Readonly)

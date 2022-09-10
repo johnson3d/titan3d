@@ -82,6 +82,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public Graphics.Mesh.UMesh Mesh;
             public Graphics.Mesh.UMdfInstanceStaticMesh InstanceMdf;
             public DVector3 InstanceOffset;
+            public bool CreateFinished = false;
             public async System.Threading.Tasks.Task Create(Bricks.Terrain.CDLOD.UTerrainNode trn, DVector3 levelOffset, UTerrainPlant desc)
             {
                 Terrain = trn;
@@ -100,6 +101,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 Mesh.SetWorldTransform(meshTrans, trn.GetWorld(), false);
                 //HitProxy.ConvertHitProxyIdToVector4();
                 //Mesh.SetHitproxy(in value);
+
+                CreateFinished = true;
             }
             public void PushInstance(UPlantInstance obj, int capacity)
             {
@@ -141,13 +144,28 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 type = new UPlantType();
                 var task = type.Create(trn, levelOffset, plant);
                 PlantTypes.Add(plant, type);
-                if (task.IsCompleted == false)
-                    return;
             }
-
-            var inst = new UPlantInstance();
-            inst.Placement.TransformData = trans;
-            type.PushInstance(inst, capacity);
+            if(type.CreateFinished == false)
+            {
+                var tempTrans = trans;
+                UEngine.Instance.EventPoster.RunOnUntilFinish((out bool isFinish)=>
+                {
+                    isFinish = type.CreateFinished;
+                    if(isFinish)
+                    {
+                        var inst = new UPlantInstance();
+                        inst.Placement.TransformData = tempTrans;
+                        type.PushInstance(inst, capacity);
+                    }
+                    return null;
+                }, Thread.Async.EAsyncTarget.Logic);
+            }
+            else
+            {
+                var inst = new UPlantInstance();
+                inst.Placement.TransformData = trans;
+                type.PushInstance(inst, capacity);
+            }
         }
         public void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
         {

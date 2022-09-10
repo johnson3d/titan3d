@@ -6,13 +6,14 @@ namespace EngineNS.Bricks.Procedure.Node
 {
     public class ULeftRightBuffer
     {
+        public USuperBuffer<sbyte, FSByteOperator> Mask;
         public UBufferConponent Left;
         public UBufferConponent Right;
         public Rtti.UTypeDesc ResultType;
         public Rtti.UTypeDesc LeftType;
         public Rtti.UTypeDesc RightType;
     }
-    public class UBinocular : UOpNode
+    public class UBinocular : UPgcNodeBase
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinIn LeftPin { get; set; } = new PinIn();
@@ -20,6 +21,12 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn RightPin { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut ResultPin { get; set; } = new PinOut();
+        [Rtti.Meta]
+        public UBufferCreator InputLeftDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        [Rtti.Meta]
+        public UBufferCreator InputRightDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        [Rtti.Meta]
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UBinocular()
         {
             Icon.Size = new Vector2(25, 25);
@@ -27,9 +34,41 @@ namespace EngineNS.Bricks.Procedure.Node
             TitleColor = 0xFF204020;
             BackColor = 0x80808080;
 
-            AddInput(LeftPin, "Left", DefaultInputDesc);
-            AddInput(RightPin, "Right", DefaultInputDesc);
-            AddOutput(ResultPin, "Result", DefaultBufferCreator);
+            AddInput(LeftPin, "Left", InputLeftDesc);
+            AddInput(RightPin, "Right", InputRightDesc);
+            AddOutput(ResultPin, "Result", OutputDesc);
+        }
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        {
+            if (iPin == LeftPin)
+            {
+                return true;
+            }
+            return base.CanLinkFrom(iPin, OutNode, oPin);
+        }
+        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        {
+            base.OnLinkedFrom(iPin, OutNode, oPin);
+
+            if (iPin == LeftPin)
+            {
+                var left = oPin.Tag as UBufferCreator;
+                var output = ResultPin.Tag as UBufferCreator;
+                var right = RightPin.Tag as UBufferCreator;
+
+                (LeftPin.Tag as UBufferCreator).BufferType = left.BufferType;
+
+                if (output.BufferType != left.BufferType)
+                {   
+                    output.BufferType = left.BufferType;
+                    this.ParentGraph.RemoveLinkedOut(ResultPin);
+                }
+                if (right.BufferType != left.BufferType)
+                {
+                    right.BufferType = left.BufferType;
+                    this.ParentGraph.RemoveLinkedIn(RightPin);
+                }
+            }   
         }
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
@@ -39,10 +78,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 var buffer = graph.BufferCache.FindBuffer(LeftPin);
                 if (buffer != null)
                 {
-                    return buffer.BufferCreator;
+                    OutputDesc.SetSize(buffer.BufferCreator);
+                    return OutputDesc;
                 }
             }
-            return base.GetOutBufferCreator(pin);
+            return null;
         }
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
@@ -67,32 +107,73 @@ namespace EngineNS.Bricks.Procedure.Node
                 rightType = right.BufferCreator.ElementType;
 
             var arg = new ULeftRightBuffer();
+            arg.Mask = null;
             arg.Left = left;
             arg.LeftType = leftType;
             arg.Right = right;
             arg.RightType = rightType;
             arg.ResultType = resultType;
             DispatchBuffer(graph, result, arg, true);
-            //for (int i = 0; i < result.Depth; i++)
-            //{
-            //    for (int j = 0; j < result.Height; j++)
-            //    {
-            //        for (int k = 0; k < result.Width; k++)
-            //        {
-            //            float l_x = (float)(k * left.Width) / (float)result.Width;
-            //            float l_y = (float)(j * left.Height) / (float)result.Height;
-            //            float l_z = (float)(i * left.Depth) / (float)result.Depth;
+            
+            left.LifeCount--;
+            if (right != null)
+                right.LifeCount--;
+            return true;
+        }
+    }
+    public class UBinocularWithMask : UBinocular
+    {
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn MaskPin { get; set; } = new PinIn();        
+        public UBinocularWithMask()
+        {
+            AddInput(MaskPin, "Mask", UBufferCreator.CreateInstance<USuperBuffer<sbyte, FSByteOperator>>(-1, -1, -1));
+        }
+        public bool IsMask(int x, int y, int z, USuperBuffer<sbyte, FSByteOperator> maskBuffer)
+        {
+            if (maskBuffer == null)
+                return true;
+            var uvw = maskBuffer.GetUVW(x, y, z);
+            return maskBuffer.GetPixel<sbyte>(in uvw) == 1;
+        }
+        public bool IsMask(in Vector3 uvw, USuperBuffer<sbyte, FSByteOperator> maskBuffer)
+        {
+            if (maskBuffer == null)
+                return true;
 
-            //            float r_x = (float)(k * right.Width) / (float)result.Width;
-            //            float r_y = (float)(j * right.Height) / (float)result.Height;
-            //            float r_z = (float)(i * right.Depth) / (float)result.Depth;
-            //            //result.PixelOperator.Add(resultType, result.GetSuperPixelAddress(k, j, i), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, i), rightType, right.GetSuperPixelAddress((int)r_x, (int)r_y, i));
-            //            result.PixelOperator.Add(resultType, result.GetSuperPixelAddress(k, j, i), leftType, 
-            //                left.GetSuperPixelAddress((int)l_x, (int)l_y, (int)l_z), rightType, 
-            //                right.GetSuperPixelAddress((int)r_x, (int)r_y, (int)r_z));
-            //        }
-            //    }
-            //}
+            return maskBuffer.GetPixel<sbyte>(in uvw) == 1;
+        }
+        public unsafe override bool OnProcedure(UPgcGraph graph)
+        {
+            var left = graph.BufferCache.FindBuffer(LeftPin);
+            var right = graph.BufferCache.FindBuffer(RightPin);
+            if (right != null)
+            {
+                if (GetInputBufferCreator(LeftPin).ElementType != GetInputBufferCreator(RightPin).ElementType
+                    && left.Depth != right.Depth)
+                {
+                    left.LifeCount--;
+                    right.LifeCount--;
+                    return false;
+                }
+            }
+
+            var result = graph.BufferCache.FindBuffer(ResultPin);
+            var resultType = result.BufferCreator.ElementType;
+            var leftType = left.BufferCreator.ElementType;
+            var rightType = leftType;
+            if (right != null)
+                rightType = right.BufferCreator.ElementType;
+
+            var arg = new ULeftRightBuffer();
+            arg.Mask = graph.BufferCache.FindBuffer(MaskPin) as USuperBuffer<sbyte, FSByteOperator>;
+            arg.Left = left;
+            arg.LeftType = leftType;
+            arg.Right = right;
+            arg.RightType = rightType;
+            arg.ResultType = resultType;
+            DispatchBuffer(graph, result, arg, true);
+
             left.LifeCount--;
             if (right != null)
                 right.LifeCount--;
@@ -100,7 +181,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Add", "BaseOp\\Add", UPgcGraph.PgcEditorKeyword)]
-    public class UPixelAdd : UBinocular
+    public class UPixelAdd : UBinocularWithMask
     {
         public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
         {
@@ -111,24 +192,21 @@ namespace EngineNS.Bricks.Procedure.Node
             var leftType = arg.LeftType;
             var rightType = arg.RightType;
 
-            float l_x = (float)(x * left.Width) / (float)result.Width;
-            float l_y = (float)(y * left.Height) / (float)result.Height;
-            float l_z = (float)(z * left.Depth) / (float)result.Depth;
-
-            if (right == null)
+            if (right == null || this.IsMask(x, y, z, arg.Mask) == false)
             {
-                result.PixelOperator.Copy(resultType, result.GetSuperPixelAddress(x, y, z), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, (int)l_z));
+                result.PixelOperator.Copy(resultType, result.GetSuperPixelAddress(x, y, z), 
+                    leftType, left.GetSuperPixelAddress(x, y, z));
                 return;
             }
 
-            float r_x = (float)(x * right.Width) / (float)result.Width;
-            float r_y = (float)(y * right.Height) / (float)result.Height;
-            float r_z = (float)(z * right.Depth) / (float)result.Depth;
-            result.PixelOperator.Add(resultType, result.GetSuperPixelAddress(x, y, z), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, (int)l_z), rightType, right.GetSuperPixelAddress((int)r_x, (int)r_y, (int)r_z));
+            var uvw = result.GetUVW(x, y, z);
+            result.PixelOperator.Add(resultType, result.GetSuperPixelAddress(x, y, z), 
+                leftType, left.GetSuperPixelAddress(x, y, z), 
+                rightType, right.GetSuperPixelAddress(in uvw));
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Sub", "BaseOp\\Sub", UPgcGraph.PgcEditorKeyword)]
-    public class UPixelSub : UBinocular
+    public class UPixelSub : UBinocularWithMask
     {
         public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
         {
@@ -139,18 +217,21 @@ namespace EngineNS.Bricks.Procedure.Node
             var leftType = arg.LeftType;
             var rightType = arg.RightType;
 
-            float l_x = (float)(x * left.Width) / (float)result.Width;
-            float l_y = (float)(y * left.Height) / (float)result.Height;
-            float l_z = (float)(z * left.Depth) / (float)result.Depth;
+            if (right == null || this.IsMask(x, y, z, arg.Mask) == false)
+            {
+                result.PixelOperator.Copy(resultType, result.GetSuperPixelAddress(x, y, z),
+                    leftType, left.GetSuperPixelAddress(x, y, z));
+                return;
+            }
 
-            float r_x = (float)(x * right.Width) / (float)result.Width;
-            float r_y = (float)(y * right.Height) / (float)result.Height;
-            float r_z = (float)(z * right.Depth) / (float)result.Depth;
-            result.PixelOperator.Sub(resultType, result.GetSuperPixelAddress(x, y, z), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, (int)l_z), rightType, right.GetSuperPixelAddress((int)r_x, (int)r_y, (int)r_z));
+            var uvw = result.GetUVW(x, y, z);
+            result.PixelOperator.Sub(resultType, result.GetSuperPixelAddress(x, y, z),
+                leftType, left.GetSuperPixelAddress(x, y, z),
+                rightType, right.GetSuperPixelAddress(in uvw));
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Mul", "BaseOp\\Mul", UPgcGraph.PgcEditorKeyword)]
-    public class UPixelMul : UBinocular
+    public class UPixelMul : UBinocularWithMask
     {
         public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
         {
@@ -161,18 +242,21 @@ namespace EngineNS.Bricks.Procedure.Node
             var leftType = arg.LeftType;
             var rightType = arg.RightType;
 
-            float l_x = (float)(x * left.Width) / (float)result.Width;
-            float l_y = (float)(y * left.Height) / (float)result.Height;
-            float l_z = (float)(z * left.Depth) / (float)result.Depth;
+            if (right == null || this.IsMask(x, y, z, arg.Mask) == false)
+            {
+                result.PixelOperator.Copy(resultType, result.GetSuperPixelAddress(x, y, z),
+                    leftType, left.GetSuperPixelAddress(x, y, z));
+                return;
+            }
 
-            float r_x = (float)(x * right.Width) / (float)result.Width;
-            float r_y = (float)(y * right.Height) / (float)result.Height;
-            float r_z = (float)(z * right.Depth) / (float)result.Depth;
-            result.PixelOperator.Mul(resultType, result.GetSuperPixelAddress(x, y, z), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, (int)l_z), rightType, right.GetSuperPixelAddress((int)r_x, (int)r_y, (int)r_z));
+            var uvw = result.GetUVW(x, y, z);
+            result.PixelOperator.Mul(resultType, result.GetSuperPixelAddress(x, y, z),
+                leftType, left.GetSuperPixelAddress(x, y, z),
+                rightType, right.GetSuperPixelAddress(in uvw));
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Div", "BaseOp\\Div", UPgcGraph.PgcEditorKeyword)]
-    public class UPixelDiv : UBinocular
+    public class UPixelDiv : UBinocularWithMask
     {
         public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
         {
@@ -183,17 +267,148 @@ namespace EngineNS.Bricks.Procedure.Node
             var leftType = arg.LeftType;
             var rightType = arg.RightType;
 
-            float l_x = (float)(x * left.Width) / (float)result.Width;
-            float l_y = (float)(y * left.Height) / (float)result.Height;
-            float l_z = (float)(z * left.Depth) / (float)result.Depth;
+            if (right == null || this.IsMask(x, y, z, arg.Mask) == false)
+            {
+                result.PixelOperator.Copy(resultType, result.GetSuperPixelAddress(x, y, z),
+                    leftType, left.GetSuperPixelAddress(x, y, z));
+                return;
+            }
 
-            float r_x = (float)(x * right.Width) / (float)result.Width;
-            float r_y = (float)(y * right.Height) / (float)result.Height;
-            float r_z = (float)(z * right.Depth) / (float)result.Depth;
-            result.PixelOperator.Div(resultType, result.GetSuperPixelAddress(x, y, z), leftType, left.GetSuperPixelAddress((int)l_x, (int)l_y, (int)l_z), rightType, right.GetSuperPixelAddress((int)r_x, (int)r_y, (int)r_z));
+            var uvw = result.GetUVW(x, y, z);
+            result.PixelOperator.Div(resultType, result.GetSuperPixelAddress(x, y, z),
+                leftType, left.GetSuperPixelAddress(x, y, z),
+                rightType, right.GetSuperPixelAddress(in uvw));
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("Max", "BaseOp\\Max", UPgcGraph.PgcEditorKeyword)]
+    public class UPixelMax : UBinocularWithMask
+    {
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        {
+            var arg = tag as ULeftRightBuffer;
+            var left = arg.Left;
+            var right = arg.Right;
+            var resultType = arg.ResultType;
+            var leftType = arg.LeftType;
+            var rightType = arg.RightType;
 
+            if (right == null || this.IsMask(x, y, z, arg.Mask) == false)
+            {
+                result.PixelOperator.Copy(resultType, result.GetSuperPixelAddress(x, y, z),
+                    leftType, left.GetSuperPixelAddress(x, y, z));
+                return;
+            }
+
+            var uvw = result.GetUVW(x, y, z);
+            result.PixelOperator.Max(result.GetSuperPixelAddress(x, y, z),
+                left.GetSuperPixelAddress(x, y, z),
+                right.GetSuperPixelAddress(in uvw));
+        }
+    }
+    [Bricks.CodeBuilder.ContextMenu("Min", "BaseOp\\Min", UPgcGraph.PgcEditorKeyword)]
+    public class UPixelMin : UBinocularWithMask
+    {
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        {
+            var arg = tag as ULeftRightBuffer;
+            var left = arg.Left;
+            var right = arg.Right;
+            var resultType = arg.ResultType;
+            var leftType = arg.LeftType;
+            var rightType = arg.RightType;
+
+            if (right == null || this.IsMask(x, y, z, arg.Mask) == false)
+            {
+                result.PixelOperator.Copy(resultType, result.GetSuperPixelAddress(x, y, z),
+                    leftType, left.GetSuperPixelAddress(x, y, z));
+                return;
+            }
+
+            var uvw = result.GetUVW(x, y, z);
+            result.PixelOperator.Min(result.GetSuperPixelAddress(x, y, z),
+                left.GetSuperPixelAddress(x, y, z),
+                right.GetSuperPixelAddress(in uvw));
+        }
+    }
+    [Bricks.CodeBuilder.ContextMenu("Lerp", "BaseOp\\Lerp", UPgcGraph.PgcEditorKeyword)]
+    public class UPixelLerp : UBinocularWithMask
+    {
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn FactorPin { get; set; } = new PinIn();
+        public UPixelLerp()
+        {
+            AddInput(FactorPin, "Factor", UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1));
+        }
+        public unsafe override bool OnProcedure(UPgcGraph graph)
+        {
+            var mask = graph.BufferCache.FindBuffer(MaskPin) as USuperBuffer<sbyte, FSByteOperator>;
+            var factor = graph.BufferCache.FindBuffer(FactorPin) as USuperBuffer<sbyte, FSByteOperator>;
+            var left = graph.BufferCache.FindBuffer(LeftPin);
+            var right = graph.BufferCache.FindBuffer(RightPin);
+            if (right != null)
+            {
+                if (GetInputBufferCreator(LeftPin).ElementType != GetInputBufferCreator(RightPin).ElementType
+                    && left.Depth != right.Depth)
+                {
+                    left.LifeCount--;
+                    right.LifeCount--;
+                    return false;
+                }
+            }
+
+            var result = graph.BufferCache.FindBuffer(ResultPin);
+            var resultType = result.BufferCreator.ElementType;
+            var leftType = left.BufferCreator.ElementType;
+            var rightType = leftType;
+            if (right != null)
+                rightType = right.BufferCreator.ElementType;
+
+            result.DispatchPixels((target, x, y, z) =>
+            {
+                if (this.IsMask(x, y, z, mask) == false)
+                {
+                    result.PixelOperator.Copy(resultType, result.GetSuperPixelAddress(x, y, z),
+                        leftType, left.GetSuperPixelAddress(x, y, z));
+                    return;
+                }
+
+                var uvw = result.GetUVW(x, y, z);
+
+                float f = 1.0f;
+                if (factor != null)
+                    f = factor.GetPixel<float>(in uvw);
+                result.PixelOperator.Lerp(resultType, result.GetSuperPixelAddress(x, y, z),
+                    leftType, left.GetSuperPixelAddress(x, y, z),
+                    rightType, right.GetSuperPixelAddress(in uvw), f);
+            }, true);
+
+            left.LifeCount--;
+            if (right != null)
+                right.LifeCount--;
+            return true;
+        }
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        {
+            var arg = tag as ULeftRightBuffer;
+            var left = arg.Left;
+            var right = arg.Right;
+            var resultType = arg.ResultType;
+            var leftType = arg.LeftType;
+            var rightType = arg.RightType;
+
+            if (right == null || this.IsMask(x, y, z, arg.Mask) == false)
+            {
+                result.PixelOperator.Copy(resultType, result.GetSuperPixelAddress(x, y, z),
+                    leftType, left.GetSuperPixelAddress(x, y, z));
+                return;
+            }
+
+            var uvw = result.GetUVW(x, y, z);
+            result.PixelOperator.Div(resultType, result.GetSuperPixelAddress(x, y, z),
+                leftType, left.GetSuperPixelAddress(x, y, z),
+                rightType, right.GetSuperPixelAddress(in uvw));
+        }
+    }
     [Bricks.CodeBuilder.ContextMenu("StretchBlt", "BaseOp\\StretchBlt", UPgcGraph.PgcEditorKeyword)]
     public class UStretchBlt : UBinocular
     {

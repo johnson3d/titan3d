@@ -15,8 +15,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)UMdfSkinMesh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UMdfStaticMesh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UMesh.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CMeshDataProvider.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CMeshPrimitives.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UMeshDataProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UMeshPrimitives.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Modifier\CStaticModifier.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -30,80 +30,86 @@ namespace EngineNS.Bricks.Particle
     public class UGpuParticleResources
     {
         public static uint BufferHeadSize = 4;//uint 
-        public RHI.CGpuBuffer ParticlesBuffer;
-        public RHI.CUnorderedAccessView ParticlesUav;
-        public RHI.CShaderResourceView ParticlesSrv;
+        public NxRHI.UBuffer ParticlesBuffer;
+        public NxRHI.UUaView ParticlesUav;
+        public NxRHI.USrView ParticlesSrv;
 
-        public RHI.CGpuBuffer FreeParticlesBuffer;
-        public RHI.CUnorderedAccessView FreeParticlesUav;
+        public NxRHI.UBuffer FreeParticlesBuffer;
+        public NxRHI.UUaView FreeParticlesUav;
 
-        public RHI.CGpuBuffer TempReturnParticlesBuffer;
-        public RHI.CUnorderedAccessView TempReturnParticlesUav;
+        public NxRHI.UBuffer TempReturnParticlesBuffer;
+        public NxRHI.UUaView TempReturnParticlesUav;
 
-        public RHI.CGpuBuffer SystemDataBuffer;
-        public RHI.CUnorderedAccessView SystemDataUav;
+        public NxRHI.UBuffer SystemDataBuffer;
+        public NxRHI.UUaView SystemDataUav;
 
-        public RHI.CGpuBuffer CurAlivesBuffer;
-        public RHI.CUnorderedAccessView CurAlivesUav;
-        public RHI.CShaderResourceView CurAlivesSrv;
+        public NxRHI.UBuffer CurAlivesBuffer;
+        public NxRHI.UUaView CurAlivesUav;
+        public NxRHI.USrView CurAlivesSrv;
 
-        public RHI.CGpuBuffer BackendAlivesBuffer;
-        public RHI.CUnorderedAccessView BackendAlivesUav;
-        public RHI.CShaderResourceView BackendAlivesSrv;
+        public NxRHI.UBuffer BackendAlivesBuffer;
+        public NxRHI.UUaView BackendAlivesUav;
+        public NxRHI.USrView BackendAlivesSrv;
 
-        public RHI.CGpuBuffer DispatchArgBuffer;
-        public RHI.CUnorderedAccessView DispatchArgUav;
+        public NxRHI.UBuffer DispatchArgBuffer;
+        public NxRHI.UUaView DispatchArgUav;
 
-        public RHI.CGpuBuffer DrawArgBuffer;
-        public RHI.CUnorderedAccessView DrawArgUav;
+        public NxRHI.UBuffer DrawArgBuffer;
+        public NxRHI.UUaView DrawArgUav;
         public unsafe void Initialize<FParticle, FParticleSystem>(UEmitter<FParticle, FParticleSystem> emitter, in FParticleSystem sysData) 
             where FParticle : unmanaged
             where FParticleSystem : unmanaged
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            var bfDesc = new IGpuBufferDesc();
-            bfDesc.SetMode(false, true);
-            bfDesc.StructureByteStride = (uint)sizeof(FParticle);
-            bfDesc.ByteWidth = (uint)sizeof(FParticle) * emitter.MaxParticle;
+            var bfDesc = new NxRHI.FBufferDesc();
+            bfDesc.SetDefault();
+            bfDesc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV;
+            bfDesc.StructureStride = (uint)sizeof(FParticle);
+            bfDesc.Size = (uint)sizeof(FParticle) * emitter.MaxParticle;
             {
-                var pAddr = (FParticle*)CoreSDK.Alloc(bfDesc.ByteWidth, "Nebula", 0);                
+                var pAddr = (FParticle*)CoreSDK.Alloc(bfDesc.Size, "Nebula", 0);                
                 for (uint i = 0; i < emitter.MaxParticle; i++)
                 {
                     ((FParticleBase*)&pAddr[i])->RandomSeed = (uint)emitter.RandomNext();
                 }
-                ParticlesBuffer = rc.CreateGpuBuffer(in bfDesc, (IntPtr)pAddr);
+                bfDesc.InitData = pAddr;
+                ParticlesBuffer = rc.CreateBuffer(in bfDesc);
                 CoreSDK.Free(pAddr);
             }
 
-            var uavDesc = new IUnorderedAccessViewDesc();
-            uavDesc.SetBuffer();
+            var uavDesc = new NxRHI.FUavDesc();
+            uavDesc.SetBuffer(0);
             uavDesc.Buffer.FirstElement = 0;
             uavDesc.Buffer.NumElements = emitter.MaxParticle;
-            ParticlesUav = rc.CreateUnorderedAccessView(ParticlesBuffer, in uavDesc);
+            uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+            ParticlesUav = rc.CreateUAV(ParticlesBuffer, in uavDesc);
 
-            var srvDesc = new IShaderResourceViewDesc();
-            srvDesc.SetBuffer();
-            srvDesc.mGpuBuffer = ParticlesBuffer.mCoreObject;
+            var srvDesc = new NxRHI.FSrvDesc();
+            srvDesc.SetBuffer(0);
             srvDesc.Buffer.NumElements = emitter.MaxParticle;
-            ParticlesSrv = rc.CreateShaderResourceView(in srvDesc);
+            srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+            ParticlesSrv = rc.CreateSRV(ParticlesBuffer, in srvDesc);
 
             {
-                bfDesc.StructureByteStride = (uint)sizeof(FParticleSystem);
-                bfDesc.ByteWidth = (uint)sizeof(FParticleSystem) * 1;
+                bfDesc.StructureStride = (uint)sizeof(FParticleSystem);
+                bfDesc.Size = (uint)sizeof(FParticleSystem) * 1;
                 fixed (FParticleSystem* pAddr = &sysData)
                 {
-                    SystemDataBuffer = rc.CreateGpuBuffer(in bfDesc, (IntPtr)pAddr);
+                    bfDesc.InitData = pAddr;
+                    SystemDataBuffer = rc.CreateBuffer(in bfDesc);
                 }
 
                 uavDesc.Buffer.FirstElement = 0;
                 uavDesc.Buffer.NumElements = 1;
-                SystemDataUav = rc.CreateUnorderedAccessView(SystemDataBuffer, in uavDesc);
+                uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                SystemDataUav = rc.CreateUAV(SystemDataBuffer, in uavDesc);
             }
 
-            {
-                bfDesc.MiscFlags = (UInt32)(EResourceMiscFlag.BUFFER_ALLOW_RAW_VIEWS);
-                bfDesc.StructureByteStride = (uint)sizeof(uint);
-                bfDesc.ByteWidth = (uint)sizeof(uint) * (emitter.MaxParticle + BufferHeadSize);
+            bfDesc.Type |= NxRHI.EBufferType.BFT_RAW;
+            {   
+                bfDesc.MiscFlags = NxRHI.EResourceMiscFlag.RM_BUFFER_ALLOW_RAW_VIEWS;
+                bfDesc.StructureStride = (uint)sizeof(uint);
+                bfDesc.Size = (uint)sizeof(uint) * (emitter.MaxParticle + BufferHeadSize);
                 var initData = new uint[emitter.MaxParticle + BufferHeadSize];
                 initData[0] = emitter.MaxParticle;
                 initData[1] = 0;
@@ -115,62 +121,77 @@ namespace EngineNS.Bricks.Particle
                 }
                 fixed (uint* pAddr = &initData[0])
                 {
-                    FreeParticlesBuffer = rc.CreateGpuBuffer(in bfDesc, (IntPtr)pAddr);
+                    bfDesc.InitData = pAddr;
+                    FreeParticlesBuffer = rc.CreateBuffer(in bfDesc);
                 }
-                TempReturnParticlesBuffer = rc.CreateGpuBuffer(in bfDesc, IntPtr.Zero);
+                bfDesc.InitData = IntPtr.Zero.ToPointer();
+                TempReturnParticlesBuffer = rc.CreateBuffer(in bfDesc);
 
+                uavDesc.SetBuffer(1); 
                 uavDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
-                uavDesc.Buffer.Flags = (UInt32)EUAVBufferFlag.UAV_FLAG_RAW;
                 uavDesc.Buffer.FirstElement = 0;
                 uavDesc.Buffer.NumElements = emitter.MaxParticle + BufferHeadSize;
-                FreeParticlesUav = rc.CreateUnorderedAccessView(FreeParticlesBuffer, in uavDesc);
-                TempReturnParticlesUav = rc.CreateUnorderedAccessView(TempReturnParticlesBuffer, in uavDesc);
+                uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                FreeParticlesUav = rc.CreateUAV(FreeParticlesBuffer, in uavDesc);
+                TempReturnParticlesUav = rc.CreateUAV(TempReturnParticlesBuffer, in uavDesc);
             }
             
             {
-                bfDesc.MiscFlags = (UInt32)(EResourceMiscFlag.BUFFER_ALLOW_RAW_VIEWS);
+                bfDesc.MiscFlags = (NxRHI.EResourceMiscFlag.RM_BUFFER_ALLOW_RAW_VIEWS);
 
-                bfDesc.StructureByteStride = (uint)sizeof(uint);
-                bfDesc.ByteWidth = (uint)sizeof(uint) * (emitter.MaxParticle + BufferHeadSize);
-                CurAlivesBuffer = rc.CreateGpuBuffer(in bfDesc, IntPtr.Zero);
-                BackendAlivesBuffer = rc.CreateGpuBuffer(in bfDesc, IntPtr.Zero);
+                bfDesc.StructureStride = (uint)sizeof(uint);
+                bfDesc.Size = (uint)sizeof(uint) * (emitter.MaxParticle + BufferHeadSize);
+                bfDesc.InitData = IntPtr.Zero.ToPointer();
+                CurAlivesBuffer = rc.CreateBuffer(in bfDesc);
+                BackendAlivesBuffer = rc.CreateBuffer(in bfDesc);
 
+                uavDesc.SetBuffer(1);
                 uavDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
-                uavDesc.Buffer.Flags = (UInt32)EUAVBufferFlag.UAV_FLAG_RAW;
+                //uavDesc.Buffer.Flags = (UInt32)EUAVBufferFlag.UAV_FLAG_RAW;
                 uavDesc.Buffer.FirstElement = 0;
                 uavDesc.Buffer.NumElements = (emitter.MaxParticle + BufferHeadSize);
-                CurAlivesUav = rc.CreateUnorderedAccessView(CurAlivesBuffer, in uavDesc);
-                BackendAlivesUav = rc.CreateUnorderedAccessView(BackendAlivesBuffer, in uavDesc);
+                uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                CurAlivesUav = rc.CreateUAV(CurAlivesBuffer, in uavDesc);
+                BackendAlivesUav = rc.CreateUAV(BackendAlivesBuffer, in uavDesc);
 
+                //srvDesc.Buffer.FirstElement = 0;
+                //srvDesc.Buffer.ElementWidth = (uint)sizeof(float);
+                //srvDesc.Buffer.NumElements = emitter.MaxParticle + BufferHeadSize;
+                srvDesc.SetBuffer(1);
                 srvDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
-                srvDesc.mGpuBuffer = CurAlivesBuffer.mCoreObject;
                 srvDesc.Buffer.NumElements = emitter.MaxParticle + BufferHeadSize;
-                CurAlivesSrv = rc.CreateShaderResourceView(in srvDesc);
-                srvDesc.mGpuBuffer = BackendAlivesBuffer.mCoreObject;
-                BackendAlivesSrv = rc.CreateShaderResourceView(in srvDesc);
+                srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                CurAlivesSrv = rc.CreateSRV(CurAlivesBuffer, in srvDesc);
+                BackendAlivesSrv = rc.CreateSRV(BackendAlivesBuffer, in srvDesc);
             }
 
             {
-                bfDesc.MiscFlags = (UInt32)(EResourceMiscFlag.DRAWINDIRECT_ARGS | EResourceMiscFlag.BUFFER_ALLOW_RAW_VIEWS);
+                bfDesc.Type |= NxRHI.EBufferType.BFT_IndirectArgs;
+                bfDesc.MiscFlags = (NxRHI.EResourceMiscFlag.RM_DRAWINDIRECT_ARGS | NxRHI.EResourceMiscFlag.RM_BUFFER_ALLOW_RAW_VIEWS);
 
-                bfDesc.StructureByteStride = (uint)sizeof(uint);
-                bfDesc.ByteWidth = (uint)sizeof(uint) * 3;
+                bfDesc.StructureStride = (uint)sizeof(uint);
+                bfDesc.Size = (uint)sizeof(uint) * 3;
                 var pInitData = stackalloc uint[3];
                 pInitData[0] = 1;
                 pInitData[1] = 1;
                 pInitData[2] = 1;
-                DispatchArgBuffer = rc.CreateGpuBuffer(in bfDesc, (IntPtr)pInitData);
-                bfDesc.ByteWidth = (uint)sizeof(uint) * 5;
-                DrawArgBuffer = rc.CreateGpuBuffer(in bfDesc, IntPtr.Zero);
+                bfDesc.InitData = pInitData;
+                DispatchArgBuffer = rc.CreateBuffer(in bfDesc);
+                bfDesc.Size = (uint)sizeof(uint) * 5;
+                bfDesc.InitData = IntPtr.Zero.ToPointer();
+                DrawArgBuffer = rc.CreateBuffer(in bfDesc);
 
+                uavDesc.SetBuffer(1);
                 uavDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
-                uavDesc.Buffer.Flags = (UInt32)EUAVBufferFlag.UAV_FLAG_RAW;
+                //uavDesc.Buffer.Flags = (UInt32)EUAVBufferFlag.UAV_FLAG_RAW;
                 uavDesc.Buffer.FirstElement = 0;
                 uavDesc.Buffer.NumElements = 3;
-                DispatchArgUav = rc.CreateUnorderedAccessView(DispatchArgBuffer, in uavDesc);
+                uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                DispatchArgUav = rc.CreateUAV(DispatchArgBuffer, in uavDesc);
                 uavDesc.Buffer.NumElements = 5;
-                DrawArgUav = rc.CreateUnorderedAccessView(DrawArgBuffer, in uavDesc);                
+                DrawArgUav = rc.CreateUAV(DrawArgBuffer, in uavDesc);                
             }
+            bfDesc.Type &= (~NxRHI.EBufferType.BFT_RAW);
         }
         public void Cleanup()
         {
@@ -188,38 +209,31 @@ namespace EngineNS.Bricks.Particle
         public string Name;
         public List<IEffector> Effectors { get; } = new List<IEffector>();
         public UNebulaShader Shader { get; set; }
-        public RHI.CConstantBuffer CBuffer;
-        public RHI.CComputeDrawcall mParticleUpdateDrawcall;
-        public RHI.CComputeDrawcall mParticleSetupDrawcall;
-        #region VarIndex
-        private static RHI.FNameVarIndex ParticleRandomPoolSize = new RHI.FNameVarIndex("ParticleRandomPoolSize");
-        private static RHI.FNameVarIndex Draw_IndexCountPerInstance = new RHI.FNameVarIndex("Draw_IndexCountPerInstance");
-        private static RHI.FNameVarIndex Draw_StartIndexLocation = new RHI.FNameVarIndex("Draw_StartIndexLocation");
-        private static RHI.FNameVarIndex Draw_BaseVertexLocation = new RHI.FNameVarIndex("Draw_BaseVertexLocation");
-        private static RHI.FNameVarIndex Draw_StartInstanceLocation = new RHI.FNameVarIndex("Draw_StartInstanceLocation");
-        private static RHI.FNameVarIndex ParticleMaxSize = new RHI.FNameVarIndex("ParticleMaxSize");
-        private static RHI.FNameVarIndex ParticleElapsedTime = new RHI.FNameVarIndex("ParticleElapsedTime");
-        private static RHI.FNameVarIndex ParticleRandomSeed = new RHI.FNameVarIndex("ParticleRandomSeed"); 
-        #endregion
-        public unsafe void UpdateComputeDrawcall(RHI.CRenderContext rc, IParticleEmitter emitter)
+        public NxRHI.UCbView CBuffer;
+        public NxRHI.UComputeDraw mParticleUpdateDrawcall;
+        public NxRHI.UComputeDraw mParticleSetupDrawcall;
+        
+        public unsafe void UpdateComputeDrawcall(NxRHI.UGpuDevice rc, IParticleEmitter emitter)
         {
             UGpuParticleResources gpuResources = emitter.GpuResources;
 
+            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
             if (mParticleUpdateDrawcall == null)
             {
-                mParticleUpdateDrawcall = rc.CreateComputeDrawcall();
+                mParticleUpdateDrawcall = rc.CreateComputeDraw();
+                coreBinder.CBPerParticle.UpdateFieldVar(Shader.Particle_Update.mComputeShader, "cbParticleDesc");
+                CBuffer = rc.CreateCBV(coreBinder.CBPerParticle.Binder.mCoreObject);
 
-                var cbIndex = Shader.Particle_Update.Desc.mCoreObject.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbParticleDesc");
-                CBuffer = rc.CreateConstantBuffer2(Shader.Particle_Update.Desc, cbIndex);
-                CBuffer.SetValue(ref ParticleRandomPoolSize, UEngine.Instance.NebulaTemplateManager.ShaderRandomPoolSize);
+                CBuffer.SetValue(coreBinder.CBPerParticle.ParticleRandomPoolSize, UEngine.Instance.NebulaTemplateManager.ShaderRandomPoolSize);
                 var dpDesc = emitter.Mesh.MaterialMesh.Mesh.mCoreObject.GetAtom(0, 0);
-                CBuffer.SetValue(ref Draw_IndexCountPerInstance, dpDesc->m_NumPrimitives * 3);
-                CBuffer.SetValue(ref Draw_StartIndexLocation, dpDesc->m_StartIndex);
-                CBuffer.SetValue(ref Draw_BaseVertexLocation, dpDesc->m_BaseVertexIndex);
-                CBuffer.SetValue(ref Draw_StartInstanceLocation, 0);
-                CBuffer.SetValue(ref ParticleMaxSize, emitter.MaxParticle);
+                CBuffer.SetValue(coreBinder.CBPerParticle.Draw_IndexCountPerInstance, dpDesc->m_NumPrimitives * 3);
+                CBuffer.SetValue(coreBinder.CBPerParticle.Draw_StartIndexLocation, dpDesc->m_StartIndex);
+                CBuffer.SetValue(coreBinder.CBPerParticle.Draw_BaseVertexLocation, dpDesc->m_BaseVertexIndex);
+                CBuffer.SetValue(coreBinder.CBPerParticle.Draw_StartInstanceLocation, 0);
+                CBuffer.SetValue(coreBinder.CBPerParticle.ParticleMaxSize, emitter.MaxParticle);
 
-                mParticleUpdateDrawcall.SetComputeShader(Shader.Particle_Update.CS_Shader);
+                mParticleUpdateDrawcall.SetComputeEffect(Shader.Particle_Update);
+
                 mParticleUpdateDrawcall.BindCBuffer("cbParticleDesc", CBuffer);
                 mParticleUpdateDrawcall.BindSrv("bfRandomPool", UEngine.Instance.NebulaTemplateManager.RandomPoolSrv);
 
@@ -231,11 +245,11 @@ namespace EngineNS.Bricks.Particle
                 mParticleUpdateDrawcall.BindUav("bfDrawArg", gpuResources.DrawArgUav);
                 mParticleUpdateDrawcall.BindUav("bfDispatchArg", gpuResources.DispatchArgUav);
 
-                mParticleUpdateDrawcall.SetDispatchIndirectBuffer(gpuResources.DispatchArgBuffer, 0);
+                mParticleUpdateDrawcall.BindIndirectDispatchArgsBuffer(gpuResources.DispatchArgBuffer);
             }
 
-            CBuffer.SetValue(ref ParticleElapsedTime, UEngine.Instance.ElapsedSecond);
-            CBuffer.SetValue(ref ParticleRandomSeed, emitter.RandomNext());
+            CBuffer.SetValue(coreBinder.CBPerParticle.ParticleElapsedTime, UEngine.Instance.ElapsedSecond);
+            CBuffer.SetValue(coreBinder.CBPerParticle.ParticleRandomSeed, emitter.RandomNext());
 
             emitter.SetCBuffer(CBuffer);
 
@@ -258,8 +272,8 @@ namespace EngineNS.Bricks.Particle
             
             if (mParticleSetupDrawcall == null)
             {
-                mParticleSetupDrawcall = rc.CreateComputeDrawcall();
-                mParticleSetupDrawcall.SetComputeShader(Shader.Particle_SetupParameters.CS_Shader);
+                mParticleSetupDrawcall = rc.CreateComputeDraw();
+                mParticleSetupDrawcall.SetComputeEffect(Shader.Particle_SetupParameters);
                 mParticleSetupDrawcall.BindCBuffer("cbParticleDesc", CBuffer);                
             }
             mParticleSetupDrawcall.BindUav("bfCurAlives", gpuResources.CurAlivesUav);
@@ -335,11 +349,11 @@ namespace EngineNS.Bricks.Particle
     public interface IParticleEmitter
     {
         IParticleEmitter CloneEmitter();
-        void InitEmitter(RHI.CRenderContext rc, Graphics.Mesh.UMesh mesh, uint maxParticle);
+        void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.UMesh mesh, uint maxParticle);
         void Cleanup();
         bool SetCurrentQueue(string name);
         void Update(UParticleGraphNode particleSystem, float elapsed);
-        unsafe void Flush2GPU(ICommandList cmd);
+        unsafe void Flush2GPU(NxRHI.ICommandList cmd);
         uint MaxParticle { get; }
         List<UShape> EmitterShapes { get; }
         Dictionary<string, UEffectorQueue> EffectorQueues { get; }
@@ -356,7 +370,7 @@ namespace EngineNS.Bricks.Particle
         Vector3 RandomVector(bool normalized = true);
         Graphics.Mesh.UMesh Mesh { get; set; }
 
-        void SetCBuffer(RHI.CConstantBuffer CBuffer);
+        void SetCBuffer(NxRHI.UCbView CBuffer);
     }
     public class UEmitter<FParticle, FParticleSystem> : AuxPtrType<IEmitter>, IParticleEmitter 
         where FParticle : unmanaged
@@ -458,7 +472,7 @@ namespace EngineNS.Bricks.Particle
             return "";
         }
         #endregion
-        public virtual unsafe void InitEmitter(RHI.CRenderContext rc, Graphics.Mesh.UMesh mesh, uint maxParticle)
+        public virtual unsafe void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.UMesh mesh, uint maxParticle)
         {
             MaxParticle = maxParticle;
             mCoreObject.InitEmitter((uint)sizeof(FParticle), maxParticle);
@@ -556,26 +570,25 @@ namespace EngineNS.Bricks.Particle
             CurrentQueue.UpdateComputeDrawcall(UEngine.Instance.GfxDevice.RenderContext, this);
 
             var cmdlist = particleSystem.BasePass.DrawCmdList;
-            CurrentQueue.mParticleUpdateDrawcall.BuildPass(cmdlist);
+            CurrentQueue.mParticleUpdateDrawcall.Commit(cmdlist);
             //CurrentQueue.mParticleSetupDrawcall.mCoreObject.BuildPass(cmdlist);
         }
-        public unsafe void Flush2GPU(ICommandList cmd)
+        public unsafe void Flush2GPU(NxRHI.ICommandList cmd)
         {
             if (mCoreObject.GetLiveNumber() == 0)
                 return;
             if (mGpuResources.ParticlesBuffer != null)
             {
-                mGpuResources.ParticlesBuffer.mCoreObject.UpdateBufferData(cmd, 16, mCoreObject.GetParticleAddress(), MaxParticle * (uint)sizeof(FParticle));
+                mGpuResources.ParticlesBuffer.UpdateGpuData(cmd, 16, mCoreObject.GetParticleAddress(), MaxParticle * (uint)sizeof(FParticle));
             }
             if (mGpuResources.CurAlivesBuffer != null)
             {
-                mGpuResources.CurAlivesBuffer.mCoreObject.UpdateBufferData(cmd, 16, mCoreObject.GetCurrentAliveAddress(), MaxParticle * (uint)sizeof(uint));//mCoreObject.GetLiveNumber()
+                mGpuResources.CurAlivesBuffer.UpdateGpuData(cmd, 16, mCoreObject.GetCurrentAliveAddress(), MaxParticle * (uint)sizeof(uint));//mCoreObject.GetLiveNumber()
             }
         }
-        private static RHI.FNameVarIndex SystemDataIndex = new RHI.FNameVarIndex("SystemData");
-        public void SetCBuffer(RHI.CConstantBuffer CBuffer)
+        public void SetCBuffer(NxRHI.UCbView CBuffer)
         {
-            CBuffer.SetValue(ref SystemDataIndex, in SystemData);
+            CBuffer.SetValue("SystemData", in SystemData);
         }
         #endregion
         public EParticleFlags HasFlags(in FParticleBase particle, EParticleFlags flags)

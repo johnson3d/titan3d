@@ -1,11 +1,30 @@
-﻿using System;
+﻿using EngineNS.EGui.Controls.PropertyGrid;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Bricks.NodeGraph
 {
-    public class UEditableValue : IO.BaseSerializer
+    public class UEditableValue : PGCustomValueEditorAttribute, IO.ISerializer, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
+        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+
+        }
+        public virtual void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml)
+        {
+
+        }
+        public virtual void OnWriteMember(IO.IWriter ar, IO.ISerializer obj, Rtti.UMetaVersion metaVersion)
+        {
+            IO.SerializerHelper.WriteMember(ar, obj, metaVersion);
+        }
+        public virtual void OnReadMember(IO.IReader ar, IO.ISerializer obj, Rtti.UMetaVersion metaVersion)
+        {
+            IO.SerializerHelper.ReadMember(ar, obj, metaVersion);
+        }
+
         public interface IValueEditNotify
         {
             void OnValueChanged(UEditableValue ev);
@@ -157,6 +176,18 @@ namespace EngineNS.Bricks.NodeGraph
                 return Value.ToString();
             }
         }
+
+        public override bool OnDraw(in EditorInfo info, out object newValue)
+        {
+            bool valueChanged = false;
+            EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.DrawTypeEditor(info, out newValue, out valueChanged);
+            if (valueChanged)
+            {
+                Value = newValue;
+                mNotify?.OnValueChanged(this);
+            }
+            return valueChanged;
+        }
         public float ControlWidth { get; set; } = 80;
         public float ControlHeight { get; set; } = 30;
         private static int GID_EditableValue = 0;
@@ -291,6 +322,28 @@ namespace EngineNS.Bricks.NodeGraph
                     ImGuiAPI.PopItemWidth();
                 }
             }
+        }
+
+        public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            var pros = TypeDescriptor.GetProperties(this);
+            var pro = pros.Find("Value", false);
+            var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+            proDesc.InitValue(this, Rtti.UTypeDesc.TypeOf(this.GetType()), pro, false);
+            proDesc.PropertyType = ValueType;
+            proDesc.CustomValueEditor = this;
+            collection.Add(proDesc);
+        }
+
+        public object GetPropertyValue(string propertyName)
+        {
+            return Value;
+        }
+
+        public void SetPropertyValue(string propertyName, object value)
+        {
+            Value = value;
+            mNotify?.OnValueChanged(this);
         }
     }
     public class UTypeSelectorEValue : UEditableValue

@@ -15,10 +15,15 @@ namespace EngineNS.Graphics.Pipeline
             Cleanup();
         }
         public bool IsCreatedByImGui = false;
-        public RHI.CSwapChain SwapChain { get; set; }
-        public UGraphicsBuffers SwapChainBuffer = new UGraphicsBuffers();
-        public RHI.CRenderPass SwapChainRenderPass;
-        public UDrawBuffers SwapChainPass = new UDrawBuffers();
+        public NxRHI.USwapChain SwapChain { get; set; }
+        
+        public void BeginFrame()
+        {
+            SwapChain.BeginFrame();
+        }
+        public void EndFrame()
+        {
+        }
         public override async System.Threading.Tasks.Task<bool> Initialize(string title, int x, int y, int w, int h)
         {
             if (false == await base.Initialize(title, x, y, w, h))
@@ -26,53 +31,40 @@ namespace EngineNS.Graphics.Pipeline
 
             return true;
         }
-        public unsafe void InitSwapChain(RHI.CRenderContext rc)
+        public unsafe void InitSwapChain(NxRHI.UGpuDevice rc)
         {
-            var scDesc = new ISwapChainDesc();
+            var scDesc = new NxRHI.FSwapChainDesc();
             scDesc.SetDefault();
+
+            if (rc.mCoreObject.IsSupportSwapchainFormat(EPixelFormat.PXF_R8G8B8A8_UNORM))
+            {
+                scDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+            }
+            else if (rc.mCoreObject.IsSupportSwapchainFormat(EPixelFormat.PXF_B8G8R8A8_UNORM))
+            {
+                scDesc.Format = EPixelFormat.PXF_B8G8R8A8_UNORM;
+            }
+            else
+            {
+                System.Diagnostics.Debug.Assert(false);
+            }
+            //scDesc.BufferCount = 1;
             int w, h;
             SDL.SDL_GetWindowSize(Window, out w, out h);
             scDesc.Width = (uint)w;
             scDesc.Height = (uint)h;
-            scDesc.WindowHandle = HWindow.ToPointer();
-            SwapChain = UEngine.Instance.GfxDevice.RenderContext.CreateSwapChain(ref scDesc);
-
-            SwapChainPass.Initialize(rc, "PresentSwapChain");
-
-            var SwapChainPassDesc = new IRenderPassDesc();
-            unsafe
-            {
-                SwapChainPassDesc.NumOfMRT = 1;
-                SwapChainPassDesc.AttachmentMRTs[0].IsSwapChain = 1;
-                SwapChainPassDesc.AttachmentMRTs[0].Format = SwapChain.mCoreObject.GetBackBuffer(0).mTextureDesc.Format;
-                SwapChainPassDesc.AttachmentMRTs[0].Samples = 1;
-                SwapChainPassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionClear;
-                SwapChainPassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
-                SwapChainPassDesc.m_AttachmentDepthStencil.Format = EPixelFormat.PXF_D24_UNORM_S8_UINT;
-                SwapChainPassDesc.m_AttachmentDepthStencil.Samples = 1;
-                SwapChainPassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
-                SwapChainPassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
-                SwapChainPassDesc.m_AttachmentDepthStencil.StencilLoadAction = FrameBufferLoadAction.LoadActionClear;
-                SwapChainPassDesc.m_AttachmentDepthStencil.StencilStoreAction = FrameBufferStoreAction.StoreActionStore;
-                //SwapChainPassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
-                //SwapChainPassDesc.mDepthClearValue = 1.0f;
-                //SwapChainPassDesc.mStencilClearValue = 0u;
-            }
-            SwapChainRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in SwapChainPassDesc);
-
-            SwapChainBuffer.Initialize(null, SwapChainRenderPass);
-            SwapChainBuffer.BindSwapChain(0, SwapChain);
-            SwapChainBuffer.UpdateFrameBuffers(w, h);
+            scDesc.OutputWindow = HWindow.ToPointer();
+            SwapChain = UEngine.Instance.GfxDevice.RenderContext.CreateSwapChain(in scDesc);
         }
         public EPixelFormat GetSwapchainFormat()
         {
-            return SwapChain.mCoreObject.GetBackBuffer(0).mTextureDesc.Format;
+            return SwapChain.mCoreObject.GetBackBuffer(0).Desc.Format;
         }
         public EPixelFormat GetSwapchainDSFormat()
         {
             return EPixelFormat.PXF_D24_UNORM_S8_UINT;
         }
-        public virtual async System.Threading.Tasks.Task<bool> InitializeGraphics(RHI.CRenderContext rc, Type rpType)
+        public virtual async System.Threading.Tasks.Task<bool> InitializeGraphics(NxRHI.UGpuDevice rc, Type rpType)
         {
             await Thread.AsyncDummyClass.DummyFunc();
 
@@ -82,56 +74,60 @@ namespace EngineNS.Graphics.Pipeline
         }
         public override void Cleanup()
         {
-            SwapChain?.Dispose();
-            SwapChain = null;
+            if (SwapChain != null)
+            {
+                SwapChain.RenderPass = null;
+                SwapChain.Dispose();
+                SwapChain = null;
+            }
 
             base.Cleanup();
         }
         public unsafe override void OnResize(float x, float y)
         {
             base.OnResize(x, y);
-            SwapChain?.OnResize(x, y);
 
-            if (SwapChainBuffer != null)
+            if (SwapChain == null)
+                return;
+
+            UEngine.Instance.EventPoster.PostTickSyncEvent(() =>
             {
-                SwapChainBuffer.OnResize(x, y);
-                
-                if (SwapChain != null)
-                {
-                    SwapChainBuffer.BindSwapChain(0, SwapChain);
-                    SwapChainBuffer.UpdateFrameBuffers(x, y);
-                }
-            }
+                if (SwapChain == null)
+                    return true;
+                UEngine.Instance.GfxDevice.RenderCmdQueue.Reset();
+                SwapChain.OnResize(x, y);
+                return true;
+            });
         }
         public virtual void TickLogic(int ellapse)
         {
-            var cmdlist = SwapChainPass.DrawCmdList;
-            if (cmdlist.BeginCommand())
-            {
-                var passClears = new IRenderPassClears();
-                passClears.SetDefault();
-                passClears.SetClearColor(0, new Color4(1, 0, 0, 0));
-
-                if (cmdlist.BeginRenderPass(null, SwapChainBuffer, in passClears, "PresentSwapChain"))
-                {
-                    cmdlist.BuildRenderPass(0);
-                    cmdlist.EndRenderPass();
-                }
-                cmdlist.EndCommand();
-            }
+            //var cmdlist = SwapChainPass.DrawCmdList;
+            //if (cmdlist.BeginCommand())
+            //{
+            //    var passClears = new NxRHI.FRenderPassClears();
+            //    passClears.SetDefault();
+            //    passClears.SetClearColor(0, new Color4(1, 0, 0, 0));
+            //    SwapChainBuffer.BuildFrameBuffers(null);
+            //    cmdlist.BeginPass(SwapChainBuffer.FrameBuffers, in passClears, "PresentSwapChain");
+            //    {
+            //        cmdlist.FlushDraws();
+            //    }
+            //    cmdlist.EndPass();
+            //    cmdlist.EndCommand();
+            //}
+            //UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
         }
         public unsafe virtual void TickRender(int ellapse)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            var cmdlist = SwapChainPass.CommitCmdList.mCoreObject;
-            cmdlist.Commit(rc.mCoreObject);
+            //var rc = UEngine.Instance.GfxDevice.RenderContext;
+            //var cmdlist = SwapChainPass.CommitCmdList.mCoreObject;
+            //cmdlist.Commit(rc.mCoreObject);
         }
         public virtual void TickSync(int ellapse)
         {
             OnDrawSlate();
 
-            SwapChain?.mCoreObject.Present(0, 0);
-            SwapChainPass?.SwapBuffer();
+            SwapChain?.Present(0, 0);
         }
         public virtual void OnDrawSlate()
         {

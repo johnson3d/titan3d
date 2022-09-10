@@ -15,23 +15,25 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
         public int Dimension = 64;
+        public bool IsWater = false;
         public UTerrainMdfQueue()
         {
             UpdateShaderCode();
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position, 
-                EVertexStreamType.VST_Normal,
-                EVertexStreamType.VST_UV,};
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_Normal,
+                NxRHI.EVertexStreamType.VST_UV,};
         }
         public override void CopyFrom(UMdfQueue mdf)
         {
             Dimension = (mdf as UTerrainMdfQueue).Dimension;
+            IsWater = (mdf as UTerrainMdfQueue).IsWater;
         }
         public override Hash160 GetHash()
         {
-            string CodeString = IO.FileManager.ReadAllText(RName.GetRName("shaders/Modifier/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address);
+            string CodeString = IO.FileManager.ReadAllText(RName.GetRName("shaders/Bricks/Terrain/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address);
             mMdfQueueHash = Hash160.CreateHash160(CodeString);
             return mMdfQueueHash;
         }
@@ -43,91 +45,87 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             codeBuilder.AddLine("#ifndef _UTerrainMdfQueue_CDLOD_INC_", ref sourceCode);
             codeBuilder.AddLine("#define _UTerrainMdfQueue_CDLOD_INC_", ref sourceCode);
-            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Modifier/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
+            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Bricks/Terrain/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
 
             codeBuilder.AddLine("#endif", ref sourceCode);
-            SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(sourceCode);
+            SourceCode = new NxRHI.UShaderCode();
+            SourceCode.TextCode = sourceCode;
         }
-        #region Index
-        private static RHI.FNameVarIndex StartPosition = new RHI.FNameVarIndex("StartPosition");
-        private static RHI.FNameVarIndex CurrentLOD = new RHI.FNameVarIndex("CurrentLOD");
-        private static RHI.FNameVarIndex EyeCenter = new RHI.FNameVarIndex("EyeCenter");
-        private static RHI.FNameVarIndex TexUVOffset = new RHI.FNameVarIndex("TexUVOffset"); 
-        #endregion
-        public unsafe override void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh)
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
-            if (drawcall.TagObject == null)
-            {
-                //这里可以缓存Effec里面各种VarIndex，不过这里只有两个需要每次都查找，而地形对象又不会太多，那就别缓存了
-            }
+            
             var pat = Patch;
             
-            SureCBuffer(drawcall.Effect);
+            SureCBuffer(drawcall.mCoreObject.GetShaderEffect());
 
-            var shaderProg = drawcall.Effect.ShaderProgram;
-            var reflector = shaderProg.mCoreObject.GetReflector();
-            var index = reflector.GetShaderBinder(EShaderBindType.SBT_Srv, "HeightMapTexture");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, pat.Level.HeightMapSRV.mCoreObject);
-            index = reflector.GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_HeightMapTexture");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, policy.ClampState.mCoreObject);// UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            var shaderProg = drawcall.mCoreObject.GetShaderEffect();
+            var index = shaderProg.FindBinder("HeightMapTexture");
+            if (index.IsValidPointer)
+            {
+                if (IsWater)
+                    drawcall.BindSRV(index, pat.Level.WaterHMapSRV);
+                else
+                    drawcall.BindSRV(index, pat.Level.HeightMapSRV);
+            }
+            index = shaderProg.FindBinder("Samp_HeightMapTexture");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, policy.ClampState);// UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
 
-            index = reflector.GetShaderBinder(EShaderBindType.SBT_Srv, "HeightMapTextureArray");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, pat.Level.GetTerrainNode().RVTextureArray.TexArraySRV.mCoreObject);
+            index = shaderProg.FindBinder("HeightMapTextureArray");
+            if (index.IsValidPointer)
+                drawcall.BindSRV(index, pat.Level.GetTerrainNode().RVTextureArray.TexArraySRV);
 
-            index = reflector.GetShaderBinder(EShaderBindType.SBT_Srv, "ArrayTextures[1]");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, pat.Level.HeightMapSRV.mCoreObject);
+            index = shaderProg.FindBinder("ArrayTextures[1]");
+            if (index.IsValidPointer)
+                drawcall.BindSRV(index, pat.Level.HeightMapSRV);
 
-            index = reflector.GetShaderBinder(EShaderBindType.SBT_Srv, "NormalMapTexture");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, pat.Level.NormalMapSRV.mCoreObject);
-            index = reflector.GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_NormalMapTexture");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, policy.ClampState.mCoreObject);// UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            index = shaderProg.FindBinder("NormalMapTexture");
+            if (index.IsValidPointer)
+                drawcall.BindSRV(index, pat.Level.NormalMapSRV);
+            index = shaderProg.FindBinder("Samp_NormalMapTexture");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, policy.ClampState);// UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
 
-            index = reflector.GetShaderBinder(EShaderBindType.SBT_Srv, "MaterialIdTexture");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, pat.Level.MaterialIdMapSRV.mCoreObject);
-            index = reflector.GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_MaterialIdTexture");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, policy.ClampPointState.mCoreObject);
+            index = shaderProg.FindBinder("MaterialIdTexture");
+            if (index.IsValidPointer)
+                drawcall.BindSRV(index, pat.Level.MaterialIdMapSRV);
+            index = shaderProg.FindBinder("Samp_MaterialIdTexture");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, policy.ClampPointState);
 
-            index = reflector.GetShaderBinder(EShaderBindType.SBT_Srv, "DiffuseTextureArray");
-            if (!CoreSDK.IsNullPointer(index))
+            index = shaderProg.FindBinder("DiffuseTextureArray");
+            if (index.IsValidPointer)
             {
                 var srv = pat.Level.GetTerrainNode().TerrainMaterialIdManager.DiffuseTextureArraySRV;
                 if (srv != null)
-                    drawcall.mCoreObject.BindShaderSrv(index, srv.mCoreObject);
+                    drawcall.BindSRV(index, srv);
             }
-            index = reflector.GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_DiffuseTextureArray");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            index = shaderProg.FindBinder("Samp_DiffuseTextureArray");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-            index = reflector.GetShaderBinder(EShaderBindType.SBT_Srv, "NormalTextureArray");
-            if (!CoreSDK.IsNullPointer(index))
+            index = shaderProg.FindBinder("NormalTextureArray");
+            if (index.IsValidPointer)
             {
                 var srv = pat.Level.GetTerrainNode().TerrainMaterialIdManager.NormalTextureArraySRV;
                 if (srv != null)
-                    drawcall.mCoreObject.BindShaderSrv(index, srv.mCoreObject);
+                    drawcall.BindSRV(index, srv);
             }
-            index = reflector.GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_NormalTextureArray");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            index = shaderProg.FindBinder("Samp_NormalTextureArray");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-            var cbIndex = reflector.GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerPatch");
-            if (!CoreSDK.IsNullPointer(index))
+            var cbIndex = shaderProg.FindBinder("cbPerPatch");
+            if (cbIndex.IsValidPointer)
             {
-                pat.PatchCBuffer.SetValue(ref StartPosition, in pat.StartPosition);
+                var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+                pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.StartPosition, in pat.StartPosition);
 
-                pat.PatchCBuffer.SetValue(ref CurrentLOD, pat.CurrentLOD);
+                pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.CurrentLOD, pat.CurrentLOD);
 
                 var terrain = pat.Level.GetTerrainNode();
-                pat.PatchCBuffer.SetValue(ref EyeCenter, terrain.EyeLocalCenter - pat.StartPosition);
+                pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.EyeCenter, terrain.EyeLocalCenter - pat.StartPosition);
 
                 //pat.TexUVOffset.X = (Patch.XInLevel * 64.0f) / 1024.0f;
                 //pat.TexUVOffset.Y = (Patch.ZInLevel * 64.0f) / 1024.0f;
@@ -138,29 +136,29 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 pat.TexUVOffset.X = ((float)Patch.XInLevel / (float)pat.Level.GetTerrainNode().PatchSide);
                 pat.TexUVOffset.Y = ((float)Patch.ZInLevel / (float)pat.Level.GetTerrainNode().PatchSide);
 
-                pat.PatchCBuffer.SetValue(ref TexUVOffset, in pat.TexUVOffset);
+                pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.TexUVOffset, in pat.TexUVOffset);
 
-                drawcall.mCoreObject.BindShaderCBuffer(cbIndex, pat.PatchCBuffer.mCoreObject);
+                drawcall.BindCBuffer(cbIndex, pat.PatchCBuffer);
             }
-            cbIndex = reflector.GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerTerrain");
-            if (!CoreSDK.IsNullPointer(index))
+            cbIndex = shaderProg.FindBinder("cbPerTerrain");
+            if (cbIndex.IsValidPointer)
             {
-                drawcall.mCoreObject.BindShaderCBuffer(cbIndex, pat.Level.Level.Node.TerrainCBuffer.mCoreObject);
+                drawcall.BindCBuffer(cbIndex, pat.Level.Level.Node.TerrainCBuffer);
             }
         }
-        private void SureCBuffer(UEffect effect)
+        private void SureCBuffer(NxRHI.IShaderEffect shaderProg)
         {
-            var shaderProg = effect.ShaderProgram;
+            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
             var pat = Patch;
             if (pat.PatchCBuffer == null)
             {
-                var cbIndex = shaderProg.mCoreObject.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerPatch");
-                pat.PatchCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(shaderProg, cbIndex);
+                coreBinder.CBPerTerrainPatch.UpdateFieldVar(shaderProg, "cbPerPatch");
+                pat.PatchCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerTerrainPatch.Binder.mCoreObject);
             }
             if (pat.Level.Level.Node.TerrainCBuffer == null)
             {
-                var cbIndex = shaderProg.mCoreObject.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerTerrain");
-                pat.Level.Level.Node.TerrainCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(shaderProg, cbIndex);
+                coreBinder.CBPerTerrain.UpdateFieldVar(shaderProg, "cbPerTerrain");
+                pat.Level.Level.Node.TerrainCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerTerrain.Binder.mCoreObject);
             }
         }
         public override Rtti.UTypeDesc GetPermutation(List<string> features)
@@ -186,7 +184,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             codeBuilder.AddLine("#ifndef _UTerrainMdfQueue_CDLOD_INC_", ref sourceCode);
             codeBuilder.AddLine("#define _UTerrainMdfQueue_CDLOD_INC_", ref sourceCode);
-            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Modifier/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
+            codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Bricks/Terrain/TerrainCDLOD.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
 
             codeBuilder.AddLine("#endif", ref sourceCode);
 
@@ -199,8 +197,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 
             }
 
-            SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(sourceCode);
+            SourceCode = new NxRHI.UShaderCode();
+            SourceCode.TextCode = sourceCode;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace EngineNS.Bricks.Particle
     public abstract class UShape
     {
         public virtual string Name { get; }
-        public virtual void SetCBuffer(uint index, RHI.CConstantBuffer cbuffer)
+        public virtual void SetCBuffer(uint index, NxRHI.UCbView cbuffer)
         {
 
         }
@@ -52,7 +52,7 @@ namespace EngineNS.Bricks.Particle
         #endregion
         public UShapeBox()
         {
-            mShapeBox.HalfExtent = Vector3.UnitXYZ;
+            mShapeBox.HalfExtent = Vector3.One;
             mShapeBox.Thinness = 1.0f;
         }
         public unsafe override void UpdateLocation(IParticleEmitter emitter, FParticleBase* particle)
@@ -114,7 +114,7 @@ namespace EngineNS.Bricks.Particle
             }
             particle->Location = Center + offset;
         }
-        public override void SetCBuffer(uint index, RHI.CConstantBuffer CBuffer)
+        public override void SetCBuffer(uint index, NxRHI.UCbView CBuffer)
         {
             CBuffer.SetValue($"EmitShape{index}", in mShapeBox);
         }
@@ -169,7 +169,7 @@ namespace EngineNS.Bricks.Particle
             offset = emitter.RandomVector() * (Radius - Radius * (Thinness * emitter.RandomUnit()));
             particle->Location = Center + offset;
         }
-        public override void SetCBuffer(uint index, RHI.CConstantBuffer CBuffer)
+        public override void SetCBuffer(uint index, NxRHI.UCbView CBuffer)
         {
             CBuffer.SetValue($"EmitShape{index}", in mShapeSphere);
         }

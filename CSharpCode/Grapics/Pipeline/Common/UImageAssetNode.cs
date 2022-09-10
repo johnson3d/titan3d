@@ -26,7 +26,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void InitNodePins()
         {
             ImagePinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
-            AddOutput(ImagePinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Uav);
+            AddOutput(ImagePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
             ImageName = RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine);
         }
@@ -35,7 +35,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(ImagePinOut);            
             attachement.Srv = ImageSrv;
         }
-        public RHI.CShaderResourceView ImageSrv;
+        public NxRHI.USrView ImageSrv;
         [Rtti.Meta]
         public RName ImageName
         {
@@ -50,9 +50,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                 System.Action action = async () =>
                 {
                     ImageSrv = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
-                    ImagePinOut.Attachement.Format = ImageSrv.mCoreObject.GetFormat();
-                    ImagePinOut.Attachement.Width = (uint)ImageSrv.mCoreObject.mTxDesc.Width;
-                    ImagePinOut.Attachement.Height = (uint)ImageSrv.mCoreObject.mTxDesc.Height;
+                    ImagePinOut.Attachement.Format = ImageSrv.SrvFormat;
+                    ImagePinOut.Attachement.Width = (uint)ImageSrv.PicDesc.Width;
+                    ImagePinOut.Attachement.Height = (uint)ImageSrv.PicDesc.Height;
                 };
                 action();
             }

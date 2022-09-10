@@ -10,11 +10,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/pick/pick_setup.cginc", RName.ERNameType.Engine);
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
-                EVertexStreamType.VST_Normal,
-                EVertexStreamType.VST_Tangent,};
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_Normal,
+                NxRHI.EVertexStreamType.VST_Tangent,};
         }
     }
     public class UPickedNode : URenderGraphNode
@@ -27,8 +27,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            AddOutput(PickedPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Rtv);
-            AddOutput(DepthPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Dsv);
+            AddOutput(PickedPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
+            AddOutput(DepthPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
         }
         public override void OnResize(URenderPolicy policy, float x, float y)
         {
@@ -52,7 +52,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public UPickSetupShading PickedShading = null;
         public UGraphicsBuffers PickedBuffer { get; protected set; } = new UGraphicsBuffers();
         public UDrawBuffers BasePass = new UDrawBuffers();
-        public RHI.CRenderPass RenderPass;
+        public NxRHI.URenderPass RenderPass;
 
         public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
@@ -63,25 +63,25 @@ namespace EngineNS.Graphics.Pipeline.Common
             BasePass.Initialize(rc, debugName);
             BasePass.SetDebugName("UPickedProxiableManager");
 
-            var PassDesc = new IRenderPassDesc();
+            var PassDesc = new NxRHI.FRenderPassDesc();
             unsafe
             {
                 PassDesc.NumOfMRT = 1;
                 PassDesc.AttachmentMRTs[0].Format = PickedPinOut.Attachement.Format;
                 PassDesc.AttachmentMRTs[0].Samples = 1;
-                PassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
+                PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 PassDesc.m_AttachmentDepthStencil.Format = DepthPinOut.Attachement.Format;
                 PassDesc.m_AttachmentDepthStencil.Samples = 1;
-                PassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
-                PassDesc.m_AttachmentDepthStencil.StencilLoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.m_AttachmentDepthStencil.StencilStoreAction = FrameBufferStoreAction.StoreActionStore;
+                PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 //PassDesc.mFBClearColorRT0 = new Color4(1, 0, 1, 0);
                 //PassDesc.mDepthClearValue = 1.0f;
                 //PassDesc.mStencilClearValue = 0u;
             }
-            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in PassDesc); 
+            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc); 
 
             PickedBuffer.Initialize(policy, RenderPass);
             PickedBuffer.SetRenderTarget(policy, 0, PickedPinOut);
@@ -102,9 +102,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
             var cmdlist = BasePass.DrawCmdList;
-            cmdlist.ClearMeshDrawPassArray();
-            cmdlist.SetViewport(PickedBuffer.ViewPort.mCoreObject);
-
+            cmdlist.ResetGpuDraws();
+            
             mPickedMeshes.Clear();
             foreach (var i in PickedManager.PickedProxies)
             {
@@ -121,33 +120,28 @@ namespace EngineNS.Graphics.Pipeline.Common
                     if (drawcall != null)
                     {
                         if (PickedBuffer.PerViewportCBuffer != null)
-                            drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.ShaderIndexer.cbPerViewport, PickedBuffer.PerViewportCBuffer.mCoreObject);
+                            drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, PickedBuffer.PerViewportCBuffer);
                         if (policy.DefaultCamera.PerCameraCBuffer != null)
-                            drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.ShaderIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer.mCoreObject);
+                            drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
 
-                        cmdlist.PushDrawCall(drawcall.mCoreObject);
+                        cmdlist.PushGpuDraw(drawcall.mCoreObject);
                     }
                 }
             }
 
             if(cmdlist.BeginCommand())
             {
-                var passClears = new IRenderPassClears();
+                cmdlist.SetViewport(in PickedBuffer.Viewport);
+                var passClears = new NxRHI.FRenderPassClears();
                 passClears.SetDefault();
                 passClears.SetClearColor(0, new Color4(1, 0, 1, 0));
-                if (cmdlist.BeginRenderPass(policy, PickedBuffer, in passClears, "Picked"))
-                {
-                    cmdlist.BuildRenderPass(0);
-                    cmdlist.EndRenderPass();
-                }
+                PickedBuffer.BuildFrameBuffers(policy);
+                cmdlist.BeginPass(PickedBuffer.FrameBuffers, in passClears, "Picked");
+                cmdlist.FlushDraws();
+                cmdlist.EndPass();
                 cmdlist.EndCommand();
             }
-        }
-        public unsafe override void TickRender(URenderPolicy policy)
-        {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            var cmdlist = BasePass.CommitCmdList.mCoreObject;
-            cmdlist.Commit(rc.mCoreObject);
+            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
         }
         public unsafe override void TickSync(URenderPolicy policy)
         {

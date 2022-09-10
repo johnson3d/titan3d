@@ -274,16 +274,24 @@ namespace EngineNS.Rtti
         internal string Path { get; set; }
         public bool LoadClass(string path)
         {
-            Path = path;
-            var versions = EngineNS.IO.FileManager.GetFiles(path, "*.metadata", false);
-            foreach(var i in versions)
+            try
             {
-                var filename = EngineNS.IO.FileManager.GetPureName(i);
-                var myXmlDoc = new System.Xml.XmlDocument();
-                myXmlDoc.Load(i);
-                var ver = new UMetaVersion(this);
-                ver.LoadVersion(System.Convert.ToUInt32(filename), myXmlDoc.LastChild);
-                MetaVersions[ver.MetaHash] = ver;
+                Path = path;
+                var versions = EngineNS.IO.FileManager.GetFiles(path, "*.metadata", false);
+                foreach (var i in versions)
+                {
+                    var filename = EngineNS.IO.FileManager.GetPureName(i);
+                    var myXmlDoc = new System.Xml.XmlDocument();
+                    myXmlDoc.Load(i);
+                    var ver = new UMetaVersion(this);
+                    ver.LoadVersion(System.Convert.ToUInt32(filename), myXmlDoc.LastChild);
+                    MetaVersions[ver.MetaHash] = ver;
+                }
+            }
+            catch (System.Exception)
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Fatal, "metadata", "meta load field in " + path);
+                return false;
             }
             return true;
         }
@@ -992,7 +1000,8 @@ namespace EngineNS.Rtti
                                 var meta = new UClassMeta(type);
                                 meta.LoadClass(k);
 
-                                mMetas.Add(meta.ClassMetaName, meta);
+                                //mMetas.Add(meta.ClassMetaName, meta);
+                                mMetas[meta.ClassMetaName] = meta;
                             }
                         }
                     }

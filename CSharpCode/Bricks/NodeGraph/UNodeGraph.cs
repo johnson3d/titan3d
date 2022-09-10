@@ -20,6 +20,7 @@ namespace EngineNS.Bricks.NodeGraph
             data.ClassDec = ClassDec;
             data.MethodDec = MethodDec;
             data.NodeGraph = NodeGraph;
+            data.CodeGen = CodeGen;
         }
     }
 
@@ -43,7 +44,7 @@ namespace EngineNS.Bricks.NodeGraph
         [Rtti.Meta(Order = 1)]
         public List<UPinLinker> Linkers { get; } = new List<UPinLinker>();
         
-        public ULinkingLine LinkingOp = new ULinkingLine();
+        public ULinkingLine LinkingOp { get; } = new ULinkingLine();
         public class FSelNodeState
         {
             public UNodeBase Node;
@@ -52,7 +53,7 @@ namespace EngineNS.Bricks.NodeGraph
         public List<FSelNodeState> SelectedNodes { get; } = new List<FSelNodeState>();
 
         public Dictionary<UNodeBase, UNodeGraph> SubGraphs;
-        public UNodeGraph ParentGraph;
+        public UNodeGraph ParentGraph { get; set; }
 
         public delegate void FOnChangeGraph(UNodeGraph graph);
         public FOnChangeGraph OnChangeGraph;
@@ -114,6 +115,8 @@ namespace EngineNS.Bricks.NodeGraph
             if (oPin.HostNode.CanLinkTo(oPin, iPin.HostNode, iPin) &&
                     iPin.HostNode.CanLinkFrom(iPin, oPin.HostNode, oPin))
             {
+                if(!iPin.MultiLinks)
+                    RemoveLink(iPin);
                 var result = new UPinLinker();
                 if (iPin != null)
                 {
@@ -469,8 +472,8 @@ namespace EngineNS.Bricks.NodeGraph
             Number,
         };
         public bool[] ButtonPress = new bool[(int)EMouseButton.Number];
-        protected Vector2 PressPosition;
-        protected Vector2 DragPosition;
+        public Vector2 PressPosition;
+        public Vector2 DragPosition;
 
         protected Vector2 PositionVP;
         protected Vector2 SizeVP;
@@ -481,7 +484,8 @@ namespace EngineNS.Bricks.NodeGraph
 
         protected bool IsZooming;
         protected Vector2 ZoomCenter;
-        protected bool IsMovingSelNodes;
+        protected bool mIsMovingSelNodes;
+        public bool IsMovingSelNodes => mIsMovingSelNodes;
 
         public enum EGraphMenu
         {
@@ -500,7 +504,7 @@ namespace EngineNS.Bricks.NodeGraph
         public UMenuItem PinMenus = new UMenuItem();
         public UMenuItem ObjectMenus = new UMenuItem();
 
-        public bool CanvasMenuDirty = false;
+        public bool CanvasMenuDirty = true;
         public virtual void UpdateCanvasMenus()
         {
             CanvasMenus.SubMenuItems.Clear();
@@ -557,6 +561,16 @@ namespace EngineNS.Bricks.NodeGraph
 
         public virtual bool IsKeydown(EKey key)
         {
+            switch(key)
+            {
+                case EKey.Ctl:
+                    return UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LCTRL) || UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_RCTRL);
+                case EKey.Shift:
+                    return UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LSHIFT) || UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_RSHIFT);
+                case EKey.Alt:
+                    return UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LALT) || UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_RALT);
+            }
+
             return false;
         }
         public object HitObject(float x, float y)
@@ -589,9 +603,9 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 ScaleVP = 2.0f;
             }
-            else if (ScaleVP < 0.3f)
+            else if (ScaleVP < 0.2f)
             {
-                ScaleVP = 0.5f;
+                ScaleVP = 0.2f;
             }
             SizeVP = PhysicalSizeVP * ScaleVP;
         }
@@ -628,6 +642,13 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
 
+        public void ResetButtonPress()
+        {
+            for(int i = 0; i < ButtonPress.Length; i++)
+            {
+                ButtonPress[i] = false;
+            }
+        }
         public void LeftPress(in Vector2 screenPos)
         {
             ButtonPress[(int)EMouseButton.Left] = true;
@@ -647,14 +668,15 @@ namespace EngineNS.Bricks.NodeGraph
                     if (node.IsHitTitle(PressPosition.X, PressPosition.Y))
                     {
                         AddSelected(node);
-                        IsMovingSelNodes = true;
+                        mIsMovingSelNodes = true;
                         foreach (var i in SelectedNodes)
                         {
                             i.MoveOffset = PressPosition - i.Node.Position;
                         }
                     }
                 }
-                else if (Rtti.UTypeDesc.CanCast(pKls, typeof(NodePin)))
+                else
+                if (Rtti.UTypeDesc.CanCast(pKls, typeof(NodePin)))
                 {
                     var pin = hit as NodePin;
                     LinkingOp.StartPin = pin;
@@ -672,7 +694,7 @@ namespace EngineNS.Bricks.NodeGraph
                     var node = hit as UNodeBase;
                     if (node.Selected && node.IsHitTitle(PressPosition.X, PressPosition.Y))
                     {
-                        IsMovingSelNodes = true;
+                        mIsMovingSelNodes = true;
                         foreach (var i in SelectedNodes)
                         {
                             i.MoveOffset = PressPosition - i.Node.Position;
@@ -691,39 +713,32 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 if (this.IsKeydown(EKey.Ctl))
                 {
+                    var start = Vector2.Minimize(PressPosition, DragPosition);
+                    var end = Vector2.Maximize(PressPosition, DragPosition);
                     List<UNodeBase> sels = new List<UNodeBase>();
                     GetSelectNodes(PressPosition, DragPosition, sels);
+                    foreach (var i in sels)
+                    {
+                        if (i.Selected)
+                            RemoveSelected(i);
+                        else
+                            AddSelected(i);
+                    }
+                }
+                else if (this.IsKeydown(EKey.Shift))
+                {
+                    var start = Vector2.Minimize(PressPosition, DragPosition);
+                    var end = Vector2.Maximize(PressPosition, DragPosition);
+                    List<UNodeBase> sels = new List<UNodeBase>();
+                    GetSelectNodes(start, end, sels);
                     foreach (var i in sels)
                     {
                         AddSelected(i);
                     }
                 }
-                else if (this.IsKeydown(EKey.Shift))
-                {
-                    var start = PressPosition;
-                    var end = DragPosition;
-                    if (start.X > end.X)
-                    {
-                        var save = end.X;
-                        end.X = start.X;
-                        start.X = save;
-                    }
-                    if (start.Y > end.Y)
-                    {
-                        var save = end.Y;
-                        end.Y = start.Y;
-                        start.Y = save;
-                    }
-                    List<UNodeBase> sels = new List<UNodeBase>();
-                    GetSelectNodes(start, end, sels);
-                    foreach (var i in sels)
-                    {
-                        RemoveSelected(i);
-                    }
-                }
                 else
                 {
-                    if (!IsMovingSelNodes)
+                    if (!mIsMovingSelNodes)
                     {
                         if (LinkingOp.StartPin != null)
                         {
@@ -829,7 +844,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
             ButtonPress[(int)EMouseButton.Left] = false;
-            IsMovingSelNodes = false;
+            mIsMovingSelNodes = false;
             if (OnLinkingUp(LinkingOp, pressNode))
             {
                 LinkingOp.StartPin = null;
@@ -852,13 +867,15 @@ namespace EngineNS.Bricks.NodeGraph
             if (PopMenuPressObject != null)
             {
                 var pKls = PopMenuPressObject.GetType();
-                if (pKls == typeof(PinIn ) || pKls == typeof(PinOut))
+                if (pKls == typeof(PinIn) || pKls == typeof(PinOut))
                 {
                     CurMenuType = EGraphMenu.Pin;
+                    PinMenuDirty = true;
                 }
                 else if (Rtti.UTypeDesc.CanCast(pKls, typeof(UNodeBase)))
                 {
                     CurMenuType = EGraphMenu.Node;
+                    NodeMenuDirty = true;
                 }
             }
             else
@@ -888,12 +905,23 @@ namespace EngineNS.Bricks.NodeGraph
         {
             DragPosition = ViewportRateToCanvas(in screenPos);
             var hit = HitObject(DragPosition.X, DragPosition.Y);
-            if (hit != null && Rtti.UTypeDesc.CanCast(hit.GetType(), typeof(NodePin)))
+            if (hit != null)
             {
-                LinkingOp.HoverPin = hit as NodePin;
-                if (LinkingOp.HoverPin != null)
+                if(Rtti.UTypeDesc.CanCast(hit.GetType(), typeof(NodePin)))
                 {
-                    LinkingOp.HoverPin.HostNode.OnMouseStayPin(LinkingOp.HoverPin);
+                    LinkingOp.HoverPin = hit as NodePin;
+                    if (LinkingOp.HoverPin != null)
+                    {
+                        LinkingOp.HoverPin.HostNode.OnMouseStayPin(LinkingOp.HoverPin);
+                    }
+                }
+                else if(Rtti.UTypeDesc.CanCast(hit.GetType(), typeof(UNodeBase)))
+                {
+                    var node = hit as UNodeBase;
+                    if(node.HasError && node.CodeExcept != null)
+                    {
+                        EGui.Controls.CtrlUtility.DrawHelper(node.CodeExcept.ErrorInfo);
+                    }
                 }
             }
 
@@ -905,7 +933,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             else if (ButtonPress[(int)EMouseButton.Left])
             {
-                if (IsMovingSelNodes)
+                if (mIsMovingSelNodes)
                 {
                     foreach (var i in SelectedNodes)
                     {
@@ -1010,5 +1038,70 @@ namespace EngineNS.Bricks.NodeGraph
 
         }
         #endregion
+
+        uint CurSerialId = uint.MaxValue;
+        public uint GenSerialId()
+        {
+            if (CurSerialId == uint.MaxValue)
+            {
+                CurSerialId = 0;
+                for (int i = 0; i < Nodes.Count; i++)
+                {
+                    var atts = Nodes[i].GetType().GetCustomAttributes(typeof(CodeBuilder.ContextMenuAttribute), false);
+                    if (atts == null || atts.Length <= 0)
+                        continue;
+
+                    var att = atts[0] as CodeBuilder.ContextMenuAttribute;
+                    if (att.MenuPaths.Length <= 0)
+                        continue;
+
+                    var menuString = att.MenuPaths[att.MenuPaths.Length - 1];
+                    var idx = menuString.IndexOf('@');
+                    if (idx >= 0)
+                    {
+                        var idxEnd = menuString.IndexOf('@', idx + 1);
+                        var subStr = menuString.Substring(idx + 1, idxEnd - idx - 1);
+                        subStr = subStr.Replace("serial", "");
+                        var tempStr = menuString.Remove(idx, idxEnd - idx + 1);
+                        tempStr = tempStr.Insert(idx, subStr);
+                        tempStr = Nodes[i].Name.Replace(tempStr, "");
+                        try
+                        {
+                            var id = System.Convert.ToUInt32(tempStr);
+                            if (id > CurSerialId)
+                                CurSerialId = id;
+                        }
+                        catch (System.Exception)
+                        {
+
+                        }
+                    }
+                }
+            }
+            return ++CurSerialId;
+        }
+        protected static string GetMenuName(in string menuString)
+        {
+            var idx = menuString.IndexOf('@');
+            if (idx >= 0)
+            {
+                var idxEnd = menuString.IndexOf('@', idx + 1);
+                return menuString.Remove(idx, idxEnd - idx + 1);
+            }
+            return menuString;
+        }
+        protected static string GetSerialFinalString(in string menuString, uint serialIdx)
+        {
+            var idx = menuString.IndexOf('@');
+            if (idx >= 0)
+            {
+                var idxEnd = menuString.IndexOf('@', idx + 1);
+                var subStr = menuString.Substring(idx + 1, idxEnd - idx - 1);
+                subStr = subStr.Replace("serial", serialIdx.ToString());
+                var menuName = menuString.Remove(idx, idxEnd - idx + 1);
+                return menuName.Insert(idx, subStr);
+            }
+            return null;
+        }
     }
 }

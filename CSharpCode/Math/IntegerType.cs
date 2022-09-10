@@ -18,6 +18,7 @@ namespace EngineNS
     {
         public readonly static Int32_2 Zero = new Int32_2(0, 0);
         public readonly static Int32_2 One = new Int32_2(1, 1);
+        public readonly static Int32_2 MinusOne = new Int32_2(-1, -1);
         public readonly static Int32_2 MaxValue = new Int32_2(int.MaxValue, int.MaxValue);
         public readonly static Int32_2 MinValue = new Int32_2(int.MinValue, int.MinValue);
 
@@ -153,6 +154,7 @@ namespace EngineNS
         public int Z;
         public readonly static Int32_3 Zero = new Int32_3(0, 0, 0);
         public readonly static Int32_3 One = new Int32_3(1, 1, 1);
+        public readonly static Int32_3 MinusOne = new Int32_3(-1, -1, -1);
         public readonly static Int32_3 MaxValue = new Int32_3(int.MaxValue, int.MaxValue, int.MaxValue);
         public readonly static Int32_3 MinValue = new Int32_3(int.MinValue, int.MinValue, int.MinValue);
 

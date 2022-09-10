@@ -31,9 +31,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         public PinIn Right { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut Result { get; set; } = new PinOut();
-        public Binocular(UBinaryOperatorExpression.EBinaryOperation InOp)
+        public Binocular(UBinaryOperatorExpression.EBinaryOperation InOp, string name)
         {
             Op = InOp;
+            Name = name;
 
             Left.Name = " L";
             Right.Name = " R";
@@ -118,8 +119,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
     #region ValueOp
     public class ValueOpNode : Binocular
     {
-        public ValueOpNode(UBinaryOperatorExpression.EBinaryOperation op)
-            : base(op)
+        public ValueOpNode(UBinaryOperatorExpression.EBinaryOperation op, string name)
+            : base(op, name)
         {
         }
         public override void OnMouseStayPin(NodePin stayPin)
@@ -148,7 +149,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 
                 if (testType.IsEqual(typeof(float)))
                     return true;
-                return ICodeGen.CanConvert(testType, LeftType);
+                return UCodeGeneratorBase.CanConvert(testType, LeftType);
             }
             return true;
         }
@@ -176,7 +177,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
     public class AddNode : ValueOpNode
     {
         public AddNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.Add)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Add, "+")
         {
         }
     }
@@ -184,7 +185,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
     public class SubNode : ValueOpNode
     {
         public SubNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.Subtract)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Subtract, "-")
         {
         }
     }
@@ -192,7 +193,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
     public class MulNode : ValueOpNode
     {
         public MulNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.Multiply)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Multiply, "*")
         {
         }
     }
@@ -200,7 +201,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
     public class DivNode : ValueOpNode
     {
         public DivNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.Divide)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Divide, "/")
         {
         }
     }
@@ -208,7 +209,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
     public class ModNode : ValueOpNode
     {
         public ModNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.Modulus)
+            : base(UBinaryOperatorExpression.EBinaryOperation.Modulus, "%")
         {
         }
     }
@@ -216,7 +217,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
     public class BitAndNode : ValueOpNode
     {
         public BitAndNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseAnd)
+            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseAnd, "&")
         {
 
         }
@@ -225,7 +226,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
     public class BitOrNode : ValueOpNode
     {
         public BitOrNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseOr)
+            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseOr, "|")
         {
         }
     }

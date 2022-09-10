@@ -14,8 +14,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            AddInput(SrcPinIn, EGpuBufferViewType.GBVT_Srv);
-            AddOutput(DestPinOut, EGpuBufferViewType.GBVT_Srv);
+            AddInput(SrcPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddOutput(DestPinOut, NxRHI.EBufferType.BFT_SRV);
         }
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
@@ -24,12 +24,12 @@ namespace EngineNS.Graphics.Pipeline.Common
             await base.Initialize(policy, debugName);
             BasePass.Initialize(rc, debugName);
 
-            mCopyDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDrawcall();
+            mCopyDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
         }
         public UAttachBuffer ResultBuffer;
         public bool IsCpuAceesResult { get; set; } = false;
         public UDrawBuffers BasePass = new UDrawBuffers();
-        public RHI.CCopyDrawcall mCopyDrawcall;
+        public NxRHI.UCopyDraw mCopyDrawcall;
         public override void FrameBuild()
         {
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(DestPinOut);
@@ -65,27 +65,26 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 var srcPin = GetAttachBuffer(SrcPinIn);
                 var tarPin = GetAttachBuffer(DestPinOut);
-                if (SrcPinIn.Attachement.Format == EPixelFormat.PXF_UNKNOWN)
-                {
-                    mCopyDrawcall.SetCopyBuffer(srcPin.Buffer.mCoreObject, 0, tarPin.Buffer.mCoreObject, 0, SrcPinIn.Attachement.Width * SrcPinIn.Attachement.Height);
-                }
-                else
-                {   
-                    mCopyDrawcall.SetCopyTexture2D(srcPin.Buffer.mCoreObject, 0, 0, 0, tarPin.Buffer.mCoreObject, 0, 0, 0, SrcPinIn.Attachement.Width, SrcPinIn.Attachement.Height);
-                }
 
-                mCopyDrawcall.BuildPass(cmdlist);
+                mCopyDrawcall.BindSrc(srcPin.Buffer);
+                mCopyDrawcall.BindSrc(tarPin.Buffer);
 
+                //if (SrcPinIn.Attachement.Format == EPixelFormat.PXF_UNKNOWN)
+                //{
+                //    //SetCopyBuffer(srcPin.Buffer.mCoreObject, 0, tarPin.Buffer.mCoreObject, 0, SrcPinIn.Attachement.Width * SrcPinIn.Attachement.Height);
+                //}
+                //else
+                //{   
+                //    mCopyDrawcall.SetCopyTexture2D(srcPin.Buffer.mCoreObject, 0, 0, 0, tarPin.Buffer.mCoreObject, 0, 0, 0, SrcPinIn.Attachement.Width, SrcPinIn.Attachement.Height);
+                //}
+
+                mCopyDrawcall.Commit(cmdlist);
 
                 cmdlist.EndCommand();
             }
+            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
         }
-        public override unsafe void TickRender(URenderPolicy policy)
-        {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            var cmdlist = BasePass.CommitCmdList.mCoreObject;
-            cmdlist.Commit(rc.mCoreObject);
-        }
+        
         public override unsafe void TickSync(URenderPolicy policy)
         {
             BasePass.SwapBuffer();

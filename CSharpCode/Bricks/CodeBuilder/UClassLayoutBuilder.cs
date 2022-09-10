@@ -7,7 +7,8 @@ namespace EngineNS.Bricks.CodeBuilder
     public class UVarAttribute
     {
         public string Name { get; set; }
-        public EShaderVarType Type { get; set; }
+        public NxRHI.EShaderVarType Type { get; set; }
+        public int Columns { get; set; }
         public uint Offset { get; set; }
     }
     public class UClassLayoutBuilder : Graphics.Pipeline.IGuiModule
@@ -18,7 +19,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public string TypeName { get => mTypeName; set => mTypeName = value; }
         public List<UVarAttribute> NamedAttributes { get; } = new List<UVarAttribute>();
         public uint Size;
-        public void AddAttribute(string name, EShaderVarType type)
+        public void AddAttribute(string name, NxRHI.EShaderVarType type)
         {
             var tmp = new UVarAttribute();
             tmp.Name = name;
@@ -45,7 +46,7 @@ namespace EngineNS.Bricks.CodeBuilder
             for (int i = 0; i < NamedAttributes.Count; i++)
             {
                 uint size = 0;
-                size = (uint)CoreSDK.GetShaderVarTypeSize(NamedAttributes[i].Type);
+                size = (uint)(CoreSDK.GetShaderVarTypeSize(NamedAttributes[i].Type) * NamedAttributes[i].Columns);
 
                 if (size >= 16)
                 {
@@ -98,7 +99,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 if (ImGuiAPI.Button("Add", in sz))
                 {
                     var tmp = new UVarAttribute();
-                    AddAttribute($"Member {NamedAttributes.Count}", EShaderVarType.SVT_Float1);
+                    AddAttribute($"Member {NamedAttributes.Count}", NxRHI.EShaderVarType.SVT_Float);
                 }
                 if (ImGuiAPI.Button("Remove", in sz))
                 {

@@ -11,26 +11,29 @@ namespace EngineNS.Graphics.Pipeline
             mCoreObject = ICamera.CreateInstance();
         }
         public UGraphicsBuffers.UTargetViewIdentifier TargetViewIdentifier = new UGraphicsBuffers.UTargetViewIdentifier();
-        RHI.CConstantBuffer mPerCameraCBuffer;
-        public RHI.CConstantBuffer PerCameraCBuffer
+        NxRHI.UCbView mPerCameraCBuffer;
+        public NxRHI.UCbView PerCameraCBuffer
         {
             get
             {
                 if (mPerCameraCBuffer == null)
                 {
-                    var effect = UEngine.Instance.GfxDevice.EffectManager.DummyEffect;
-                    mPerCameraCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(effect.ShaderProgram, effect.ShaderIndexer.cbPerCamera);
-                    mPerCameraCBuffer.mCoreObject.NativeSuper.SetDebugName($"Camera");
-                    mCoreObject.BindConstBuffer(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, mPerCameraCBuffer.mCoreObject);
+                    mPerCameraCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(UEngine.Instance.GfxDevice.CoreShaderBinder.CBufferCreator.cbPerCamera);
+                    mPerCameraCBuffer.SetDebugName($"Camera");
+                    //mCoreObject.BindConstBuffer(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, mPerCameraCBuffer.mCoreObject);
                 }
                 return mPerCameraCBuffer;
             }
         }
-        public void AutoZoom(ref BoundingSphere sphere)
+        public void AutoZoom(ref BoundingSphere sphere, bool bOptZRange = true)
         {
             var dist = (sphere.Radius) / (float)Math.Sin((float)this.mCoreObject.mFov);
             var eye = sphere.Center - this.mCoreObject.GetDirection() * dist;
             var up = this.mCoreObject.GetUp();
+            if (bOptZRange && this.ZFar < dist)
+            {
+                SetZRange(this.ZNear, 2.0f * dist);
+            }
             mCoreObject.LookAtLH(eye.AsDVector(), sphere.Center.AsDVector(), in up);
         }
         public void SetZRange(float zNear = 0.3f, float zFar = 1000.0f)
@@ -110,170 +113,12 @@ namespace EngineNS.Graphics.Pipeline
                 return mCoreObject.mHeight;
             }
         }
-        public uint PositionId
-        {
-            get
-            {
-                return mCoreObject.mPositionId;
-            }
-            set
-            {
-                mCoreObject.mPositionId = value;
-            }
-        }
-        public uint LookAtId
-        {
-            get
-            {
-                return mCoreObject.mLookAtId;
-            }
-            set
-            {
-                mCoreObject.mLookAtId = value;
-            }
-        }
-        public uint DirectionId
-        {
-            get
-            {
-                return mCoreObject.mDirectionId;
-            }
-            set
-            {
-                mCoreObject.mDirectionId = value;
-            }
-        }
-        public uint RightId
-        {
-            get
-            {
-                return mCoreObject.mRightId;
-            }
-            set
-            {
-                mCoreObject.mRightId = value;
-            }
-        }
-        public uint UpId
-        {
-            get
-            {
-                return mCoreObject.mUpId;
-            }
-            set
-            {
-                mCoreObject.mUpId = value;
-            }
-        }
-        public uint ViewMatrixId
-        {
-            get
-            {
-                return mCoreObject.mViewMatrixId;
-            }
-            set
-            {
-                mCoreObject.mViewMatrixId = value;
-            }
-        }
-        public uint ViewInverseId
-        {
-            get
-            {
-                return mCoreObject.mViewInverseId;
-            }
-            set
-            {
-                mCoreObject.mViewInverseId = value;
-            }
-        }
-        public uint ProjectionMatrixId
-        {
-            get
-            {
-                return mCoreObject.mProjectionMatrixId;
-            }
-            set
-            {
-                mCoreObject.mProjectionMatrixId = value;
-            }
-        }
-        public uint ProjectionInverseId
-        {
-            get
-            {
-                return mCoreObject.mProjectionInverseId;
-            }
-            set
-            {
-                mCoreObject.mProjectionInverseId = value;
-            }
-        }
-        public uint ViewProjectionId
-        {
-            get
-            {
-                return mCoreObject.mViewProjectionId;
-            }
-            set
-            {
-                mCoreObject.mViewProjectionId = value;
-            }
-        }
-        public uint ViewProjectionInverseId
-        {
-            get
-            {
-                return mCoreObject.mViewProjectionInverseId;
-            }
-            set
-            {
-                mCoreObject.mViewProjectionInverseId = value;
-            }
-        }
-        public uint ID_ZNear
-        {
-            get
-            {
-                return mCoreObject.mID_ZNear;
-            }
-            set
-            {
-                mCoreObject.mID_ZNear = value;
-            }
-        }
-        public uint ID_ZFar
-        {
-            get
-            {
-                return mCoreObject.mID_ZFar;
-            }
-            set
-            {
-                mCoreObject.mID_ZFar = value;
-            }
-        }
-        public uint CameraOffset
-        {
-            get
-            {
-                return mCoreObject.mCameraOffset;
-            }
-            set
-            {
-                mCoreObject.mCameraOffset = value;
-            }
-        }
         #endregion
         #region Function
 
         public void Cleanup()
         {
             mCoreObject.Cleanup();
-        }
-        public void BindConstBuffer(EngineNS.IRenderContext rc, EngineNS.IConstantBuffer cb)
-        {
-            mCoreObject.BindConstBuffer(rc, cb);
         }
         public void PerspectiveFovLH(float fov, float width, float height, float zMin, float zMax)
         {
@@ -388,9 +233,9 @@ namespace EngineNS.Graphics.Pipeline
         {
             return mCoreObject.GetToViewPortMatrix();
         }
-        public void UpdateConstBufferData(EngineNS.IRenderContext rc, int bImm)
+        public void UpdateConstBufferData(NxRHI.UGpuDevice rc)
         {
-            mCoreObject.UpdateConstBufferData(rc, bImm);
+            mCoreObject.UpdateConstBufferData(PerCameraCBuffer.mCoreObject);
         }
         #endregion
     }

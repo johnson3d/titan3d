@@ -47,7 +47,7 @@ namespace EngineNS.Bricks.Particle.Simple
 
             return emt;
         }
-        public override unsafe void InitEmitter(RHI.CRenderContext rc, Graphics.Mesh.UMesh mesh, uint maxParticle)
+        public override unsafe void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.UMesh mesh, uint maxParticle)
         {
             SystemData.BaseData.Flags = 0;
             base.InitEmitter(rc, mesh, maxParticle);
@@ -126,6 +126,8 @@ namespace EngineNS.Bricks.Particle.Simple
     {
         
     }
+    [Bricks.CodeBuilder.ContextMenu("SimpleNebulaNode ", "SimpleNebulaNode ", UNode.EditorKeyword)]
+    [UNode(NodeDataType = typeof(USimpleNebulaNode.USimpleNebulaNodeData), DefaultNamePrefix = "Nebula")]
     public class USimpleNebulaNode : UNebulaNode<FSimpleParticle, FSimpleParticleSystem, USimpleEmitter, USimpleMdfQueue>
     {
         public class USimpleNebulaNodeData : UNebulaNodeData

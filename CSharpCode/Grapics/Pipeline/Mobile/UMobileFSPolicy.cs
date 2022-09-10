@@ -44,7 +44,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         #endregion
         public UMobileOpaqueNode BasePassNode = new UMobileOpaqueNode();
         public Shadow.UShadowMapNode mShadowMapNode = new Shadow.UShadowMapNode();        
-        public override RHI.CShaderResourceView GetFinalShowRSV()
+        public override NxRHI.USrView GetFinalShowRSV()
         {
             return this.AttachmentCache.FindAttachement(BasePassNode.GBuffers.RenderTargets[0].Attachement.AttachmentName).Srv;
         }
@@ -68,7 +68,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             }
             return null;
         }
-        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom)
+        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
         {
             base.OnDrawCall(shadingType, drawcall, mesh, atom);
             if (shadingType == EShadingType.BasePass)
@@ -87,10 +87,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public unsafe override void TickLogic(GamePlay.UWorld world)
         {
             BasePassNode.TickLogic(world, this, true);
-        }
-        public unsafe override void TickRender()
-        {
-            BasePassNode.TickRender(this);
         }
         public unsafe override void TickSync()
         {

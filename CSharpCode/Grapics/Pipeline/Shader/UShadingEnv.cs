@@ -193,16 +193,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //}
             return result;
         }
-        public abstract EVertexStreamType[] GetNeedStreams();
-        public virtual void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall) { }
+        public abstract NxRHI.EVertexStreamType[] GetNeedStreams();
+        public virtual void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall) { }
         public FPermutationId mCurrentPermutationId;
         public FPermutationId CurrentPermutationId
         {
             get => mCurrentPermutationId;
         }
         public RName CodeName { get; set; }
-        public RHI.CConstantBuffer PerShadingCBuffer;                
-        public bool GetShaderDefines(in FPermutationId id, RHI.CShaderDefinitions defines)
+        public NxRHI.UCbView PerShadingCBuffer;                
+        public bool GetShaderDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
         {
             for (int i = 0; i < PermutationValues.Count; i++)
             {
@@ -212,7 +212,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             return true;
         }
-        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, URenderPolicy policy, Mesh.UMesh mesh)
+        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
             
         }
@@ -223,9 +223,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/DummyShading.cginc", RName.ERNameType.Engine);
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position, };
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position, };
         }
     }
     public class UShadingEnvManager : UModule<UEngine>
@@ -260,5 +260,24 @@ namespace EngineNS
     partial class UEngine
     {
         public Graphics.Pipeline.Shader.UShadingEnvManager ShadingEnvManager { get; } = new Graphics.Pipeline.Shader.UShadingEnvManager();
+    }
+
+    namespace NxRHI
+    {
+        public partial class UGraphicDraw
+        {
+            public Graphics.Pipeline.Shader.UEffect Effect { get; private set; }
+            internal Graphics.Pipeline.Shader.UShadingEnv.FPermutationId PermutationId;
+            public bool IsPermutationChanged()
+            {
+                var shading = Effect.ShadingEnv;
+                return PermutationId != shading.mCurrentPermutationId;
+            }
+            public void BindShaderEffect(Graphics.Pipeline.Shader.UEffect effect)
+            {
+                Effect = effect;
+                mCoreObject.BindShaderEffect(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, effect.ShaderEffect.mCoreObject);
+            }
+        }
     }
 }

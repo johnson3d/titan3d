@@ -1,6 +1,5 @@
 ﻿using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline;
-using EngineNS.RHI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,36 +14,36 @@ namespace EngineNS.Bricks.Particle
         {
             UpdateShaderCode();
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
-                EVertexStreamType.VST_Normal,
-                EVertexStreamType.VST_UV,};
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_Normal,
+                NxRHI.EVertexStreamType.VST_UV,};
         }
         public override void CopyFrom(Graphics.Pipeline.Shader.UMdfQueue mdf)
         {
             Emitter = (mdf as UParticleMdfQueue<FParticle, FParticleSystem>).Emitter;
         }
         public UEmitter<FParticle, FParticleSystem> Emitter;
-        public override unsafe void OnDrawCall(URenderPolicy.EShadingType shadingType, CDrawCall drawcall, URenderPolicy policy, UMesh mesh)
+        public override unsafe void OnDrawCall(URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh)
         {
             if (Emitter != null)
             {
-                drawcall.BindSrv("sbParticleInstance", Emitter.GpuResources.ParticlesSrv);
-                drawcall.BindSrv("sbAlives", Emitter.GpuResources.CurAlivesSrv);
+                drawcall.BindSRV(drawcall.FindBinder("sbParticleInstance"), Emitter.GpuResources.ParticlesSrv);
+                drawcall.BindSRV(drawcall.FindBinder("sbAlives"), Emitter.GpuResources.CurAlivesSrv);
                 
                 if (Emitter.IsGpuDriven)
                 {
-                    drawcall.SetIndirectDraw(Emitter.GpuResources.DrawArgBuffer, 0);
+                    drawcall.BindIndirectDrawArgsBuffer(Emitter.GpuResources.DrawArgBuffer, 0);
                 }
                 else
                 {
-                    drawcall.SetInstanceNumber((int)Emitter.mCoreObject.GetLiveNumber());
+                    drawcall.DrawInstance = Emitter.mCoreObject.GetLiveNumber();
                 }
             }
             else
             {
-                drawcall.SetInstanceNumber(1);
+                drawcall.DrawInstance = 1;
             }
         }
         public override Hash160 GetHash()
@@ -64,8 +63,8 @@ namespace EngineNS.Bricks.Particle
             codeBuilder.AddLine($"#include \"{RName.GetRName("shaders/Bricks/Particle/NebulaParticle.cginc", RName.ERNameType.Engine).Address}\"", ref sourceCode);
 
             codeBuilder.AddLine("#endif", ref sourceCode);
-            SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(sourceCode);
+            SourceCode = new NxRHI.UShaderCode();
+            SourceCode.TextCode = sourceCode;
         }
     }
 }

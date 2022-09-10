@@ -32,9 +32,9 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void InitNodePins()
         {
             GpuScenePinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
-            AddOutput(GpuScenePinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Uav);
+            AddOutput(GpuScenePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
             PointLightsPinOut.LifeMode = UAttachBuffer.ELifeMode.Imported;
-            AddOutput(PointLightsPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Uav);
+            AddOutput(PointLightsPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
         public unsafe override void FrameBuild()
         {
@@ -70,11 +70,11 @@ namespace EngineNS.Graphics.Pipeline.Common
             public float EyeAdapter;
             public int FreeGroupNum;
         }
-        public RHI.CGpuBuffer GpuSceneDescBuffer;
-        public RHI.CUnorderedAccessView GpuSceneDescUAV;
-        public RHI.CShaderResourceView GpuSceneDescSRV;
+        public NxRHI.UBuffer GpuSceneDescBuffer;
+        public NxRHI.UUaView GpuSceneDescUAV;
+        public NxRHI.USrView GpuSceneDescSRV;
 
-        public RHI.CConstantBuffer PerGpuSceneCBuffer;
+        public NxRHI.UCbView PerGpuSceneCBuffer { get; set; }
 
         #region SceneConfig
         float mExposure = 1.0f;
@@ -86,8 +86,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (PerGpuSceneCBuffer != null)
                 {
                     mExposure = value;
-                    var idx = PerGpuSceneCBuffer.mCoreObject.FindVar("Exposure");
-                    PerGpuSceneCBuffer.SetValue(idx, in mExposure);
+                    
+                    PerGpuSceneCBuffer.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.Exposure, in mExposure);
                 }
             }
         }
@@ -100,8 +100,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (PerGpuSceneCBuffer != null)
                 {
                     mEyeAdapterTimeRange = value;
-                    var idx = PerGpuSceneCBuffer.mCoreObject.FindVar("EyeAdapterTimeRange");
-                    PerGpuSceneCBuffer.SetValue(idx, in mEyeAdapterTimeRange);
+                    PerGpuSceneCBuffer.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.EyeAdapterTimeRange, in mEyeAdapterTimeRange);
                 }
             }
         }
@@ -114,8 +113,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 mHdrMiddleGrey = value;
                 if (PerGpuSceneCBuffer != null)
                 {
-                    var idx = PerGpuSceneCBuffer.mCoreObject.FindVar("HdrMiddleGrey");
-                    PerGpuSceneCBuffer.SetValue(idx, in mHdrMiddleGrey);
+                    PerGpuSceneCBuffer.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.HdrMiddleGrey, in mHdrMiddleGrey);
                 }
             }
         }
@@ -128,8 +126,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (PerGpuSceneCBuffer != null)
                 {
                     mHdrMaxLuminance = value;
-                    var idx = PerGpuSceneCBuffer.mCoreObject.FindVar("HdrMaxLuminance");
-                    PerGpuSceneCBuffer.SetValue(idx, in mHdrMaxLuminance);
+                    PerGpuSceneCBuffer.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.HdrMaxLuminance, in mHdrMaxLuminance);
                 }
             }
         }
@@ -142,8 +139,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (PerGpuSceneCBuffer != null)
                 {
                     mHdrMinLuminance = value;
-                    var idx = PerGpuSceneCBuffer.mCoreObject.FindVar("HdrMinLuminance");
-                    PerGpuSceneCBuffer.SetValue(idx, in mHdrMinLuminance);
+                    PerGpuSceneCBuffer.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.HdrMinLuminance, in mHdrMinLuminance);
                 }
             }
         }
@@ -154,10 +150,10 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             public Support.UNativeArray<T> DataArray;
             private uint GpuCapacity = 0;
-            public RHI.CGpuBuffer GpuBuffer;
+            public NxRHI.UBuffer GpuBuffer;
             public bool IsGpuWrite { get; private set; } = false;
-            public RHI.CUnorderedAccessView DataUAV;
-            public RHI.CShaderResourceView DataSRV;
+            public NxRHI.UUaView DataUAV;
+            public NxRHI.USrView DataSRV;
             private bool Dirty = false;
             public bool Initialize(bool gpuWrite)
             {
@@ -211,7 +207,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 Dirty = true;
                 DataArray.Clear();
             }
-            public unsafe void Flush2GPU(ICommandList cmd)
+            public unsafe void Flush2GPU(NxRHI.ICommandList cmd)
             {
                 if (Dirty == false)
                     return;
@@ -222,30 +218,40 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                     GpuCapacity = (uint)DataArray.Count + GpuCapacity / 2 + 1;
 
-                    var bfDesc = new IGpuBufferDesc();
+                    var bfDesc = new NxRHI.FBufferDesc();
+                    bfDesc.SetDefault();
+                    bfDesc.Size = (uint)sizeof(T) * GpuCapacity;
+                    bfDesc.StructureStride = (uint)sizeof(T);
+                    bfDesc.InitData = DataArray.UnsafeGetElementAddress(0);
                     if (IsGpuWrite)
-                        bfDesc.SetMode(false, true);
+                    {
+                        bfDesc.Type = NxRHI.EBufferType.BFT_UAV;
+                        bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
+                    }
                     else
-                        bfDesc.SetMode(true, false);
-                    bfDesc.m_ByteWidth = (uint)sizeof(T) * GpuCapacity;
-                    bfDesc.m_StructureByteStride = (uint)sizeof(T);
-                    GpuBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateGpuBuffer(in bfDesc, (IntPtr)DataArray.UnsafeGetElementAddress(0));
+                    {
+                        bfDesc.Type = NxRHI.EBufferType.BFT_SRV;
+                        bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
+                        bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
+                    }
+                    GpuBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
                     System.Diagnostics.Debug.Assert(GpuBuffer != null);
 
                     if (IsGpuWrite)
                     {
-                        var uavDesc = new IUnorderedAccessViewDesc();
-                        uavDesc.SetBuffer();
+                        var uavDesc = new NxRHI.FUavDesc();
+                        uavDesc.SetBuffer(0);
                         uavDesc.Buffer.NumElements = (uint)GpuCapacity;
-                        DataUAV = UEngine.Instance.GfxDevice.RenderContext.CreateUnorderedAccessView(GpuBuffer, in uavDesc);
+                        uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                        DataUAV = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
                     }
                     else
                     {
-                        var srvDesc = new IShaderResourceViewDesc();
-                        srvDesc.SetBuffer();
+                        var srvDesc = new NxRHI.FSrvDesc();
+                        srvDesc.SetBuffer(0);
                         srvDesc.Buffer.NumElements = (uint)GpuCapacity;
-                        srvDesc.mGpuBuffer = GpuBuffer.mCoreObject;
-                        DataSRV = UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(in srvDesc);
+                        srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
+                        DataSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
                     }
                 }
                 else
@@ -253,7 +259,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     if (IsGpuWrite == false)
                     {
                         if (DataArray.Count > 0)
-                            GpuBuffer.mCoreObject.UpdateBufferData(cmd, 0, DataArray.UnsafeGetElementAddress(0), (uint)(sizeof(T) * DataArray.Count));
+                            GpuBuffer.mCoreObject.UpdateGpuData(cmd, 0, DataArray.UnsafeGetElementAddress(0), (uint)(sizeof(T) * DataArray.Count));
                     }
                 }
             }
@@ -272,29 +278,33 @@ namespace EngineNS.Graphics.Pipeline.Common
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName);
 
-            var desc = new IGpuBufferDesc();
-            desc.SetMode(false, true);
+            var desc = new NxRHI.FBufferDesc();
+            desc.SetDefault();
+            desc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV;
             unsafe
             {
-                desc.m_ByteWidth = (uint)sizeof(FGpuSceneDesc);
-                desc.m_StructureByteStride = (uint)sizeof(FGpuSceneDesc);
+                desc.Size = (uint)sizeof(FGpuSceneDesc);
+                desc.StructureStride = (uint)sizeof(FGpuSceneDesc);
             }
-            GpuSceneDescBuffer = rc.CreateGpuBuffer(in desc, IntPtr.Zero);
-            var uavDesc = new IUnorderedAccessViewDesc();
-            uavDesc.SetBuffer();
+            GpuSceneDescBuffer = rc.CreateBuffer(in desc);
+            var uavDesc = new NxRHI.FUavDesc();
+            uavDesc.SetBuffer(0);
             uavDesc.Buffer.NumElements = (uint)1;
-            GpuSceneDescUAV = rc.CreateUnorderedAccessView(GpuSceneDescBuffer, in uavDesc);
+            uavDesc.Buffer.StructureByteStride = desc.StructureStride;
+            GpuSceneDescUAV = rc.CreateUAV(GpuSceneDescBuffer, in uavDesc);
 
-            var srvDesc = new IShaderResourceViewDesc();
-            srvDesc.SetBuffer();
+            var srvDesc = new NxRHI.FSrvDesc();
+            srvDesc.SetBuffer(0);
             srvDesc.Buffer.NumElements = (uint)1;
-            srvDesc.mGpuBuffer = GpuSceneDescBuffer.mCoreObject;
-            GpuSceneDescSRV = rc.CreateShaderResourceView(in srvDesc);
+            unsafe
+            {
+                srvDesc.Buffer.StructureByteStride = (uint)sizeof(FGpuSceneDesc);
+            }
+            GpuSceneDescSRV = rc.CreateSRV(GpuSceneDescBuffer, in srvDesc);
 
-            PointLights.Initialize(false);            
+            PointLights.Initialize(false);
 
-            var cbIndex = UEngine.Instance.GfxDevice.EffectManager.DummyEffect.ShaderProgram.mCoreObject.GetReflector().FindShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
-            PerGpuSceneCBuffer = rc.CreateConstantBuffer(UEngine.Instance.GfxDevice.EffectManager.DummyEffect.ShaderProgram, cbIndex);
+            PerGpuSceneCBuffer = rc.CreateCBV(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.Binder.mCoreObject);
 
             HdrMiddleGrey = 0.6f;
             HdrMinLuminance = 0.01f;
@@ -312,7 +322,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (policy.VisibleNodes == null)
                 return;
             var cmd = BasePass.DrawCmdList;
-
+            cmd.BeginCommand();
             PointLights.Clear();
             if (policy.DisablePointLight == false)
             {
@@ -333,18 +343,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                 PointLights.Flush2GPU(cmd.mCoreObject);
             }
             //if PerFrameCBuffer dirty :flush
-            UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject.UpdateDrawPass(cmd.mCoreObject, 1);
-            if (cmd.BeginCommand())
-            {
-                cmd.EndCommand();
-            }
-        }
-        public unsafe override void TickRender(Graphics.Pipeline.URenderPolicy policy)
-        {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject.FlushDirty(cmd.mCoreObject, false);
+            cmd.EndCommand();
 
-            var cmdlist_hp = BasePass.CommitCmdList.mCoreObject;
-            cmdlist_hp.Commit(rc.mCoreObject);
+            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }
         public unsafe override void TickSync(Graphics.Pipeline.URenderPolicy policy)
         {

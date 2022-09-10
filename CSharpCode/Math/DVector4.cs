@@ -4,9 +4,90 @@ using System.Text;
 
 namespace EngineNS
 {
+    [DVector4.DVector4Editor]
+    [DVector4.TypeConverter]
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 4)]
     public struct DVector4 : System.IEquatable<DVector4>
     {
+        public class TypeConverterAttribute : Support.TypeConverterAttributeBase
+        {
+            public override bool ConvertFromString(ref object obj, string text)
+            {
+                obj = DVector4.FromString(text);
+                return true;
+            }
+        }
+
+        public class DVector4EditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        {
+            public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
+            {
+                this.Expandable = true;
+                bool retValue = false;
+                newValue = info.Value;
+                var index = ImGuiAPI.TableGetColumnIndex();
+                var width = ImGuiAPI.GetColumnWidth(index);
+                ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
+                var minValue = double.MinValue;
+                var maxValue = double.MaxValue;
+                var multiValue = info.Value as EGui.Controls.PropertyGrid.PropertyMultiValue;
+                if (multiValue != null && multiValue.HasDifferentValue())
+                {
+                    ImGuiAPI.Text(multiValue.MultiValueString);
+                    if (multiValue.DrawDVector<DVector4>(in info) && !info.Readonly)
+                    {
+                        newValue = multiValue;
+                        retValue = true;
+                    }
+                }
+                else
+                {
+                    var v = (DVector4)info.Value;
+                    float speed = 0.1f;
+                    var format = "%.9lf";
+                    if (info.HostProperty != null)
+                    {
+                        var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueRange>();
+                        if (vR != null)
+                        {
+                            minValue = (double)vR.Min;
+                            maxValue = (double)vR.Max;
+                        }
+                        var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueChangeStep>();
+                        if (vStep != null)
+                        {
+                            speed = vStep.Step;
+                        }
+                        var vFormat = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueFormat>();
+                        if (vFormat != null)
+                            format = vFormat.Format;
+                    }
+                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Double, (double*)&v, 4, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    if (changed && !info.Readonly)
+                    {
+                        newValue = new DVector4(v.X, v.Y, v.Z, v.W);
+                        retValue = true;
+                    }
+
+                    if (Vector4.Vector4EditorAttribute.OnDrawDVectorValue<DVector4>(in info, ref v, ref v) && !info.Readonly)
+                    {
+                        newValue = v;
+                        retValue = true;
+                    }
+                }
+                return retValue;
+            }
+        }
+
+        public readonly static DVector4 Zero = new DVector4(0, 0, 0, 0);
+        public readonly static DVector4 UnitXYZW = new DVector4(1, 1, 1, 1);
+        public readonly static DVector4 UnitX = new DVector4(1, 0, 0, 0);
+        public readonly static DVector4 UnitY = new DVector4(0, 1, 0, 0);
+        public readonly static DVector4 UnitZ = new DVector4(0, 0, 1, 0);
+        public readonly static DVector4 UnitW = new DVector4(0, 0, 0, 1);
+
+        public readonly static DVector4 MaxValue = new DVector4(double.MaxValue, double.MaxValue, double.MaxValue, double.MaxValue);
+        public readonly static DVector4 MinValue = new DVector4(double.MinValue, double.MinValue, double.MinValue, double.MinValue);
         public double X;
         public double Y;
         public double Z;
@@ -53,6 +134,22 @@ namespace EngineNS
         public override string ToString()
         {
             return $"{X},{Y},{Z},{W}";
+        }
+        public static DVector4 FromString(string text)
+        {
+            try
+            {
+                var segs = text.Split(',');
+                return new DVector4(
+                    System.Convert.ToDouble(segs[0]),
+                    System.Convert.ToDouble(segs[1]),
+                    System.Convert.ToDouble(segs[2]),
+                    System.Convert.ToDouble(segs[3]));
+            }
+            catch
+            {
+                return DVector4.Zero;
+            }
         }
         public override int GetHashCode()
         {

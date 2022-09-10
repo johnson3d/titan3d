@@ -120,6 +120,27 @@ namespace EngineNS.Editor
                 collection.Add(proDesc);
             }
         }
+
+        public object GetPropertyValue(string propertyName)
+        {
+            var proInfo = this.GetType().GetProperty(propertyName);
+            if(proInfo != null)
+                return proInfo.GetValue(this);
+            var fieldInfo = this.GetType().GetField(propertyName);
+            if(fieldInfo != null)
+                return fieldInfo.GetValue(this);
+            return null;
+        }
+
+        public void SetPropertyValue(string propertyName, object value)
+        {
+            var proInfo = this.GetType().GetProperty(propertyName);
+            if (proInfo != null)
+                proInfo.SetValue(this, value);
+            var fieldInfo = this.GetType().GetField(propertyName);
+            if (fieldInfo != null)
+                fieldInfo.SetValue(this, value);
+        }
     }
 
     public class UIWindowsTest : EngineNS.Graphics.Pipeline.IRootForm
@@ -165,7 +186,7 @@ namespace EngineNS.Editor
                                 var tagDir = RName.GetRName("icons", RName.ERNameType.Engine);
                                 foreach(var file in files)
                                 {
-                                    RHI.CShaderResourceView.ImportAttribute.ImportImage(file, tagDir);
+                                    NxRHI.USrView.ImportAttribute.ImportImage(file, tagDir);
                                 }
                             },
                         },

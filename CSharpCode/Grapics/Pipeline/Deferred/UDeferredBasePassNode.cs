@@ -10,13 +10,13 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Deferred/DeferredOpaque.cginc", RName.ERNameType.Engine);
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
-                EVertexStreamType.VST_Normal,
-                EVertexStreamType.VST_Tangent,
-                EVertexStreamType.VST_UV,
-                EVertexStreamType.VST_Color};
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_Normal,
+                NxRHI.EVertexStreamType.VST_Tangent,
+                NxRHI.EVertexStreamType.VST_UV,
+                NxRHI.EVertexStreamType.VST_Color};
         }
     }
     public class UDeferredBasePassNode : Common.UBasePassNode
@@ -31,10 +31,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void InitNodePins()
         {
-            AddOutput(Rt0PinOut, EGpuBufferViewType.GBVT_Rtv | EGpuBufferViewType.GBVT_Srv);
-            AddOutput(Rt1PinOut, EGpuBufferViewType.GBVT_Rtv | EGpuBufferViewType.GBVT_Srv);
-            AddOutput(Rt2PinOut, EGpuBufferViewType.GBVT_Rtv | EGpuBufferViewType.GBVT_Srv);
-            AddOutput(DepthStencilPinOut, EGpuBufferViewType.GBVT_Dsv | EGpuBufferViewType.GBVT_Srv);
+            AddOutput(Rt0PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(Rt1PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(Rt2PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         }
         public override void FrameBuild()
         {
@@ -42,7 +42,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public UDeferredOpaque mOpaqueShading;
         public UDrawBuffers BasePass = new UDrawBuffers();
-        public RHI.CRenderPass RenderPass;
+        public NxRHI.URenderPass RenderPass;
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.AsyncDummyClass.DummyFunc();
@@ -50,33 +50,33 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, "BasePass");
 
-            var PassDesc = new IRenderPassDesc();
+            var PassDesc = new NxRHI.FRenderPassDesc();
             unsafe
             {
                 PassDesc.NumOfMRT = 3;
                 PassDesc.AttachmentMRTs[0].Format = Rt0PinOut.Attachement.Format;
                 PassDesc.AttachmentMRTs[0].Samples = 1;
-                PassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
+                PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 PassDesc.AttachmentMRTs[1].Format = Rt1PinOut.Attachement.Format;
                 PassDesc.AttachmentMRTs[1].Samples = 1;
-                PassDesc.AttachmentMRTs[1].LoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.AttachmentMRTs[1].StoreAction = FrameBufferStoreAction.StoreActionStore;
+                PassDesc.AttachmentMRTs[1].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 PassDesc.AttachmentMRTs[2].Format = Rt2PinOut.Attachement.Format;
                 PassDesc.AttachmentMRTs[2].Samples = 1;
-                PassDesc.AttachmentMRTs[2].LoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.AttachmentMRTs[2].StoreAction = FrameBufferStoreAction.StoreActionStore;
+                PassDesc.AttachmentMRTs[2].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.AttachmentMRTs[2].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 PassDesc.m_AttachmentDepthStencil.Format = DepthStencilPinOut.Attachement.Format;
                 PassDesc.m_AttachmentDepthStencil.Samples = 1;
-                PassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
-                PassDesc.m_AttachmentDepthStencil.StencilLoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.m_AttachmentDepthStencil.StencilStoreAction = FrameBufferStoreAction.StoreActionStore;
+                PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 //PassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
                 //PassDesc.mDepthClearValue = 1.0f;                
                 //PassDesc.mStencilClearValue = 0u;
             }
-            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in PassDesc);
+            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
             GBuffers.Initialize(policy, RenderPass);
             GBuffers.SetRenderTarget(policy, 0, Rt0PinOut);
@@ -103,7 +103,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            BasePass.DrawCmdList.ClearMeshDrawPassArray();
+            BasePass.DrawCmdList.ResetGpuDraws();
             //BasePass.DrawCmdList.SetViewport(GBuffers.ViewPort.mCoreObject);
             foreach (var i in policy.VisibleMeshes)
             {
@@ -123,31 +123,28 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     {
                         drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
                         
-                        BasePass.DrawCmdList.PushDrawCall(drawcall.mCoreObject);
+                        BasePass.DrawCmdList.PushGpuDraw(drawcall.mCoreObject);
                     }
                 }
             }
 
             var cmdlist = BasePass.DrawCmdList;
-            var passClears = new IRenderPassClears();
+            var passClears = new NxRHI.FRenderPassClears();
             passClears.SetDefault();
             passClears.SetClearColor(0, new Color4(1, 0, 0, 0));
             cmdlist.BeginCommand();
-            cmdlist.SetViewport(GBuffers.ViewPort.mCoreObject);
-            cmdlist.BeginRenderPass(policy, GBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
-            cmdlist.BuildRenderPass(0);
-            cmdlist.EndRenderPass();
+            cmdlist.SetViewport(in GBuffers.Viewport);
+            GBuffers.BuildFrameBuffers(policy);
+            cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
+            cmdlist.FlushDraws();
+            cmdlist.EndPass();
             cmdlist.EndCommand();
-        }
-        public override void TickRender(URenderPolicy policy)
-        {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            BasePass.CommitCmdList.mCoreObject.Commit(rc.mCoreObject);
+
+            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
         }
         public override void TickSync(URenderPolicy policy)
         {
             BasePass.SwapBuffer();
-            policy.DefaultCamera.mCoreObject.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
         }
     }
 }

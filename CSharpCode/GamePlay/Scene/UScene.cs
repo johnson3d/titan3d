@@ -48,6 +48,7 @@ namespace EngineNS.GamePlay.Scene
                 PGAssetInitTask = PGAsset.Initialize();
                 //mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType, new USceneData()) as IO.IAsset;
                 mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
+                var task = (mAsset as UScene).InitializeNode(null, new USceneData(), EBoundVolumeType.Box, typeof(UPlacement));
                 PGAsset.Target = mAsset;
             }
         }
@@ -273,6 +274,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return true;
         }
+
     }
 
     public class USceneManager : UModule<UEngine>
@@ -285,6 +287,7 @@ namespace EngineNS.GamePlay.Scene
         public async System.Threading.Tasks.Task<UScene> GetScene(GamePlay.UWorld world, RName name)
         {
             //return await UScene.LoadScene(world, name);
+            System.GC.Collect();
             UScene scene;
             WeakReference<UScene> result;
             if (Scenes.TryGetValue(name, out result))

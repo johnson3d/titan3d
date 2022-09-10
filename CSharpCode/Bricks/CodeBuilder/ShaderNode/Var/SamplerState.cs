@@ -37,8 +37,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         {
             return VarType;
         }
-        ISamplerStateDesc mDesc;
-        public ISamplerStateDesc Desc { get => mDesc; set => mDesc = value; }
+        NxRHI.FSamplerDesc mDesc;
+        public NxRHI.FSamplerDesc Desc { get => mDesc; set => mDesc = value; }
         //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
         //{
         //    var Var = new OpUseVar(this.Name, false);

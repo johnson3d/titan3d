@@ -17,6 +17,7 @@ namespace EngineNS.Thread.Async
         TPools,//塞在这个队列的异步处理，必须相互之间没有依赖，可以并行，因为线程池会有多条线程去取出来执行
     }
     public delegate object FPostEvent();
+    public delegate object FPostEventCondition(out bool bFinish);
     public delegate System.Threading.Tasks.Task<T> FAsyncPostEvent<T>();
     public delegate T FPostEventReturn<T>();
     internal enum EAsyncType
@@ -32,6 +33,7 @@ namespace EngineNS.Thread.Async
     {
         internal EAsyncType AsyncType = EAsyncType.Normal;
         public FPostEvent PostAction;
+        public FPostEventCondition PostActionCondition;
         public TaskAwaiter Awaiter;
         public ContextThread ContinueThread;
         public ContextThread AsyncTarget;
@@ -43,6 +45,7 @@ namespace EngineNS.Thread.Async
         {
             AsyncType = EAsyncType.Normal;
             PostAction = null;
+            PostActionCondition = null;
             Awaiter = null;
             ContinueThread = null;
             AsyncTarget = null;
@@ -414,6 +417,25 @@ namespace EngineNS.Thread.Async
                 }
             }
         }
+        public void RunOnUntilFinish(FPostEventCondition evt, EAsyncTarget target = EAsyncTarget.AsyncIO)
+        {
+            var eh = mRunOnPEAllocator.QueryObjectSync();
+            eh.PostActionCondition = evt;
+            eh.ContinueThread = null;
+            eh.AsyncType = EAsyncType.ParallelTasks;
+
+            if(target != EAsyncTarget.TPools)
+            {
+                ContextThread ctx = GetContext(target);
+                if(ctx != null)
+                {
+                    lock(ctx.RunUntilFinishEvents)
+                    {
+                        ctx.RunUntilFinishEvents.Add(eh);
+                    }
+                }
+            }
+        }
         public async System.Threading.Tasks.Task DelayTime(int time)
         {
             var eh = new PostEvent();
@@ -508,6 +530,30 @@ namespace EngineNS.Thread.Async
             var source = new System.Threading.Tasks.TaskCompletionSource<object>();
             await source.Task.AwaitPost(eh);
             smp = null;
+        }
+
+        public delegate bool FPostTickSync();
+        protected List<FPostTickSync> mPostTickSyncEvents = new List<FPostTickSync>();
+        public void PostTickSyncEvent(FPostTickSync evt)
+        {
+            lock (mPostTickSyncEvents)
+            {
+                mPostTickSyncEvents.Add(evt);
+            }
+        }
+        public void TickPostTickSyncEvents()
+        {
+            lock (mPostTickSyncEvents)
+            {
+                for (int i = 0; i < mPostTickSyncEvents.Count; i++)
+                {
+                    if (mPostTickSyncEvents[i]())
+                    {
+                        mPostTickSyncEvents.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
         }
     }
 

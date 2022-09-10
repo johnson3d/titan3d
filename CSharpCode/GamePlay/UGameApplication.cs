@@ -13,12 +13,10 @@ namespace EngineNS.GamePlay
         //}
         public override void Cleanup()
         {
-            Graphics.Pipeline.USlateApplication.ClearRootForms();
-
             UEngine.Instance.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName)
+        public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.UGpuDevice rc, RName rpName)
         {
             await base.InitializeApplication(rc, rpName);
             await UEngine.Instance.StartPlayInEditor(this, rpName);
@@ -33,7 +31,7 @@ namespace EngineNS.GamePlay
             worldSlate.GameViewportPos = new Vector2(0);
             worldSlate.GameViewportSize = this.NativeWindow.GetWindowSize();
 
-            DrawRootForms();
+            UEngine.RootFormManager.DrawRootForms();
         }
         #region Tick
         public virtual void TickLogic(int ellapse)
@@ -46,7 +44,7 @@ namespace EngineNS.GamePlay
         }
         public virtual void TickSync(int ellapse)
         {
-            OnDrawSlate();
+            //OnDrawSlate();
         }
         #endregion
     }

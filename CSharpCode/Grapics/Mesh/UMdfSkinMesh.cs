@@ -8,7 +8,7 @@ namespace EngineNS.Graphics.Mesh
     public class UMdfSkinMesh : Graphics.Pipeline.Shader.UMdfQueue
     {
         public Mesh.Modifier.CSkinModifier SkinModifier { get; set; }
-        public RHI.CConstantBuffer PerSkinMeshCBuffer { get; set; }
+        public NxRHI.UCbView PerSkinMeshCBuffer { get; set; }
         public UMdfSkinMesh()
         {
             SkinModifier = new Mesh.Modifier.CSkinModifier();
@@ -19,12 +19,12 @@ namespace EngineNS.Graphics.Mesh
 
             UpdateShaderCode();
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
-                EVertexStreamType.VST_Normal,
-                EVertexStreamType.VST_SkinIndex,
-                EVertexStreamType.VST_SkinWeight};
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_Normal,
+                NxRHI.EVertexStreamType.VST_SkinIndex,
+                NxRHI.EVertexStreamType.VST_SkinWeight};
         }
         public override void CopyFrom(UMdfQueue mdf)
         {
@@ -51,13 +51,13 @@ namespace EngineNS.Graphics.Mesh
             codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref codeString);
 
             var code = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCodeProvider(mdfSourceName);
-            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash.APHash(code.SourceCode.AsText)}", ref codeString);
+            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash.APHash(code.SourceCode.TextCode)}", ref codeString);
 
-            SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(codeString);
+            SourceCode = new NxRHI.UShaderCode();
+            SourceCode.TextCode = codeString;
             return codeString;
         }
-        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Pipeline.URenderPolicy policy, Mesh.UMesh mesh)
+        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, Mesh.UMesh mesh)
         {
             unsafe
             {
@@ -69,22 +69,26 @@ namespace EngineNS.Graphics.Mesh
                     var animPose = mesh.MaterialMesh.Mesh.PartialSkeleton.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.UAnimatableSkeletonPose;
                     runtimePose = Animation.SkeletonAnimation.Runtime.Pose.URuntimePoseUtility.CreateMeshSpaceRuntimePose(animPose);
                 }
-                
+
+                var shaderBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
                 if (PerSkinMeshCBuffer == null)
                 {
-                    PerSkinMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(drawcall.Effect.ShaderProgram, "cbSkinMesh");
+                    if (shaderBinder.CBPerSkinMesh.UpdateFieldVar(drawcall.ShaderEffect, "cbSkinMesh"))
+                    {
+                        PerSkinMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(shaderBinder.CBPerSkinMesh.Binder.mCoreObject);
+                    }
                 }
 
-                var binder = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbSkinMesh");
-                if (CoreSDK.IsNullPointer(binder))
+                var binder = drawcall.FindBinder("cbSkinMesh");
+                if (binder.IsValidPointer == false)
                 {
                     return;
                 }
-                drawcall.mCoreObject.BindShaderCBuffer(binder, PerSkinMeshCBuffer.mCoreObject);
+                drawcall.BindCBuffer(binder, PerSkinMeshCBuffer);
 
                 List<Vector4> tempPos = new List<Vector4>();
-                Vector4* absPos = (Vector4*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(0, length);
-                Quaternion* absQuat = (Quaternion*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(1, length);
+                Vector4* absPos = (Vector4*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.CBPerSkinMesh.AbsBonePos, (uint)length);
+                Quaternion* absQuat = (Quaternion*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.CBPerSkinMesh.AbsBoneQuat, (uint)length);
                 
                 foreach (var bone in bones)
                 {
@@ -136,7 +140,7 @@ namespace EngineNS.Graphics.Mesh
 
             }
 
-            SourceCode.SetText(codeString);
+            SourceCode.TextCode = codeString;
         }
     }
 }

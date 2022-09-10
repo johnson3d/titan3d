@@ -13,7 +13,7 @@ namespace EngineNS.Editor.Forms
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
-        public Graphics.Mesh.CMeshPrimitives Mesh;
+        public Graphics.Mesh.UMeshPrimitives Mesh;
         public Editor.UPreviewViewport PreviewViewport = new Editor.UPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~UMeshPrimitiveEditor()
@@ -75,7 +75,7 @@ namespace EngineNS.Editor.Forms
         public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            Mesh = arg as Graphics.Mesh.CMeshPrimitives;
+            Mesh = arg as Graphics.Mesh.UMeshPrimitives;
             if (Mesh == null)
             {
                 Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(name);
@@ -86,7 +86,7 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"Mesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
 
             MeshPropGrid.Target = Mesh;
             UEngine.Instance.TickableManager.AddTickable(this);
@@ -117,7 +117,7 @@ namespace EngineNS.Editor.Forms
                 }
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -214,7 +214,7 @@ namespace EngineNS.Editor.Forms
 namespace EngineNS.Graphics.Mesh
 {
     [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UMeshPrimitiveEditor))]
-    public partial class CMeshPrimitives
+    public partial class UMeshPrimitives
     {
     }
 }

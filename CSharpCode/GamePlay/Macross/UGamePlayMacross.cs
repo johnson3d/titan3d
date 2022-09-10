@@ -92,7 +92,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
         {
             base.OnNodeLoaded(parent);
             var animMesh = parent as UMeshNode;
-            var task =GetNodeData<UGamePlayMacrossNodeData>().McGamePlay.Get().ConstructAnimGraph(animMesh);
+            var task = GetNodeData<UGamePlayMacrossNodeData>().McGamePlay.Get().ConstructAnimGraph(animMesh);
         }
         //public static async System.Threading.Tasks.Task<UGamePlayMacrossNode> AddGamePlayMacrossNodeNode(GamePlay.UWorld world, UNode parent, UNodeData data, EBoundVolumeType bvType, Type placementType)
         //{

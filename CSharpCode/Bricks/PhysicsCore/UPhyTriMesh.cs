@@ -68,9 +68,9 @@ namespace EngineNS.Bricks.PhysicsCore
 
                 return base.DoImportAsset();
             }
-            Graphics.Mesh.CMeshPrimitives mMesh;
+            Graphics.Mesh.UMeshPrimitives mMesh;
             [Rtti.Meta]
-            [RName.PGRName(FilterExts=Graphics.Mesh.CMeshPrimitives.AssetExt)]
+            [RName.PGRName(FilterExts=Graphics.Mesh.UMeshPrimitives.AssetExt)]
             public RName MeshSource
             {
                 get
@@ -196,9 +196,9 @@ namespace EngineNS.Bricks.PhysicsCore
             set {; }
         }
 
-        public Graphics.Mesh.CMeshDataProvider ToMeshProvider()
+        public Graphics.Mesh.UMeshDataProvider ToMeshProvider()
         {
-            var meshProvider = new Graphics.Mesh.CMeshDataProvider(mCoreObject.CreateMeshProvider());
+            var meshProvider = new Graphics.Mesh.UMeshDataProvider(mCoreObject.CreateMeshProvider());
             return meshProvider;
         }
     }

@@ -224,7 +224,7 @@ namespace EngineNS.Editor.Forms
                 }
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -282,7 +282,7 @@ namespace EngineNS.Editor.Forms
             if (PreviewDockId == 0)
                 PreviewDockId = ImGuiAPI.GetID($"{AssetName}");
 
-            var size = Vector2.NegativeOne;
+            var size = Vector2.MinusOne;
             if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
@@ -308,7 +308,7 @@ namespace EngineNS.Editor.Forms
         }
         protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
         {
-            var size = Vector2.NegativeOne;
+            var size = Vector2.MinusOne;
             if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 GraphRenderer.OnDraw();

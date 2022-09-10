@@ -13,7 +13,7 @@ namespace EngineNS.Editor.Forms
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
-        public RHI.CShaderResourceView TextureSRV;
+        public NxRHI.USrView TextureSRV;
         public EGui.Controls.PropertyGrid.PropertyGrid TexturePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~UTextureViewer()
         {
@@ -119,7 +119,7 @@ namespace EngineNS.Editor.Forms
 
                 using (var xnd = new IO.CXndHolder("CShaderResourceView", 0, 0))
                 {
-                    RHI.CShaderResourceView.SaveTexture(xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);
+                    NxRHI.USrView.SaveTexture(xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);
                     xnd.SaveXnd(AssetName.Address);
                 }
             }
@@ -163,8 +163,7 @@ namespace EngineNS.Editor.Forms
         }
         protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
         {
-            var sz = new Vector2(-1);
-            if (ImGuiAPI.BeginChild("TextureView", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (ImGuiAPI.BeginChild("TextureView", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows))
                 {
@@ -199,10 +198,10 @@ namespace EngineNS.Editor.Forms
     }
 }
 
-namespace EngineNS.RHI
+namespace EngineNS.NxRHI
 {
     [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UTextureViewer))]
-    public partial class CShaderResourceView
+    public partial class USrView
     {
     }
 }

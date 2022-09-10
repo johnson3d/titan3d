@@ -28,13 +28,13 @@ namespace EngineNS.Bricks.Procedure
         public UBufferCreator DefaultCreator { get; set; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(1, 1, 1);
 
         public UPgcEditor GraphEditor;
-        public UPgcBufferCache BufferCache { get; } = new UPgcBufferCache();
+        public UPgcBufferCache BufferCache { get; set; } = new UPgcBufferCache();
         public Node.UEndingNode Root { get; set; }
         public UPgcGraph()
         {
-            UpdateCanvasMenus();
-            UpdateNodeMenus();
-            UpdatePinMenus();
+            //UpdateCanvasMenus();
+            //UpdateNodeMenus();
+            //UpdatePinMenus();
 
             //Root = new Buffer2D.UEndingNode();
         }
@@ -77,6 +77,38 @@ namespace EngineNS.Bricks.Procedure
                             }
                         }
                     }
+
+                    var expandAtts = typeDesc.GetCustomAttributes(typeof(ExpandableAttribute), false);
+                    if(expandAtts.Length > 0)
+                    {
+                        var att = expandAtts[0] as ExpandableAttribute;
+                        if (!att.HasKeyString(PgcEditorKeyword))
+                            continue;
+
+                        var parentMenu = CanvasMenus.AddMenuItem("Struct", null, null);
+                        parentMenu.AddMenuItem("Pack " + typeDesc.Name, typeDesc.Name, null,
+                            (UMenuItem item, object sender) =>
+                            {
+                                var node = new Node.UPackNode();
+                                node.Name = "Pack " + typeDesc.Name;
+                                node.Type = typeDesc;
+                                node.UserData = this;
+                                node.Position = PopMenuPosition;
+                                SetDefaultActionForNode(node);
+                                this.AddNode(node);
+                            });
+                        parentMenu.AddMenuItem("Unpack " + typeDesc.Name, typeDesc.Name, null,
+                            (UMenuItem item, object sender) =>
+                            {
+                                var node = new Node.UUnpackNode();
+                                node.Name = "Unpack " + typeDesc.Name;
+                                node.Type = typeDesc;
+                                node.UserData = this;
+                                node.Position = PopMenuPosition;
+                                SetDefaultActionForNode(node);
+                                this.AddNode(node);
+                            });
+                    }
                 }
             }
         }
@@ -94,15 +126,59 @@ namespace EngineNS.Bricks.Procedure
             //    nodeName = menuName.Insert(idx, subStr);
             //}
         }
-        public List<UPgcNodeBase> Compile()
+        public void Compile(UPgcNodeBase root, bool resetCache = true)
+        {
+            if (resetCache)
+                this.BufferCache.ResetCache();
+            var nodes = this.CompileGraph(root);
+            int NumOfLayer = 0;
+            foreach (var i in nodes)
+            {
+                if (i.RootDistance >= NumOfLayer)
+                    NumOfLayer = i.RootDistance;
+            }
+            NumOfLayer += 1;
+            List<UPgcNodeBase>[] Layers = new List<UPgcNodeBase>[NumOfLayer];
+            for (int i = 0; i < NumOfLayer; i++)
+            {
+                Layers[i] = new List<UPgcNodeBase>();
+            }
+
+            foreach (var i in nodes)
+            {
+                i.InitProcedure(this);
+
+                Layers[i.RootDistance].Add(i);
+            }
+            foreach (var i in nodes)
+            {
+                this.McProgram?.Get()?.OnNodeInitialized(this, i);
+            }
+
+            for (int i = Layers.Length - 1; i >= 0; i--)
+            {
+                foreach (var j in Layers[i])
+                {
+                    //AssetGraph.BufferCache .... clear
+                    //AssetGraph.BufferCache .... SaveBuffferToTempFile
+                    var t1 = Support.Time.HighPrecision_GetTickCount();
+                    j.DoProcedure(this);
+                    this.McProgram?.Get().OnNodeProcedureFinished(this, j);
+                    var t2 = Support.Time.HighPrecision_GetTickCount();
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Procedure", $"Node:{j.Name} = {(t2 - t1) / 1000000.0f}");
+                }
+            }
+        }
+        public List<UPgcNodeBase> CompileGraph(UPgcNodeBase root)
         {
             List<UPgcNodeBase> allNodes = new List<UPgcNodeBase>();
+            allNodes.Add(root);
             //foreach (UPgcNodeBase i in Nodes)
             //{
             //    //i.InitProcedure(this);
             //    allNodes.Add(i);
             //}
-            Root.InvTourNodeTree((pin, linker) =>
+            root.InvTourNodeTree((pin, linker) =>
             {
                 if (linker == null)
                     return true;
@@ -122,8 +198,8 @@ namespace EngineNS.Bricks.Procedure
                 return true;
             });
 
-            Root.RootDistance = 0;
-            Root.InvTourNodeTree((pin, linker) =>
+            root.RootDistance = 0;
+            root.InvTourNodeTree((pin, linker) =>
             {
                 if (linker == null)
                     return true;

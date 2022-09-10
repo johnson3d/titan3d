@@ -8,7 +8,7 @@ namespace EngineNS.EGui.Controls
     {
         public UItemDragging()
         {
-            Editor.UMainEditorApplication.RegRootForm(this);
+            UEngine.RootFormManager.RegRootForm(this);
         }
 
         public async System.Threading.Tasks.Task<bool> Initialize()
@@ -17,8 +17,8 @@ namespace EngineNS.EGui.Controls
             return true;
         }
         public void Cleanup() 
-        { 
-            Editor.UMainEditorApplication.UnregRootForm(this); 
+        {
+            UEngine.RootFormManager.UnregRootForm(this);
         }
         public bool Visible { get; set; } = true;
         public uint DockId { get; set; }

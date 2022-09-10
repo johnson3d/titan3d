@@ -28,14 +28,14 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             this.UpdatePermutation();
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
-                EVertexStreamType.VST_Normal,
-                EVertexStreamType.VST_Tangent,
-                EVertexStreamType.VST_Color,
-                EVertexStreamType.VST_LightMap,
-                EVertexStreamType.VST_UV,};
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_Normal,
+                NxRHI.EVertexStreamType.VST_Tangent,
+                NxRHI.EVertexStreamType.VST_Color,
+                NxRHI.EVertexStreamType.VST_LightMap,
+                NxRHI.EVertexStreamType.VST_UV,};
         }
         public UPermutationItem DisableAO
         {
@@ -61,10 +61,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             }
             return true;
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
+        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, URenderPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
 
@@ -74,53 +74,53 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 var node = Manager.FindFirstNode<UMobileForwordNodeBase>();
                 if (node != null)
                 {
-                    var index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "gEnvMap");
-                    if (!CoreSDK.IsNullPointer(index))
+                    var index = drawcall.FindBinder("gEnvMap");
+                    if (index.IsValidPointer)
                     {
                         var attachBuffer = node.GetAttachBuffer(node.EnvMapPinIn);
-                        drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                        drawcall.BindSRV(index, attachBuffer.Srv);
                     }
-                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_gEnvMap");
-                    if (!CoreSDK.IsNullPointer(index))
-                        drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+                    index = drawcall.FindBinder("Samp_gEnvMap");
+                    if (index.IsValidPointer)
+                        drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GVignette");
-                    if (!CoreSDK.IsNullPointer(index))
+                    index = drawcall.FindBinder("GVignette");
+                    if (index.IsValidPointer)
                     {
                         var attachBuffer = node.GetAttachBuffer(node.VignettePinIn);
-                        drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                        drawcall.BindSRV(index, attachBuffer.Srv);
                     }
-                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GVignette");
-                    if (!CoreSDK.IsNullPointer(index))
-                        drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+                    index = drawcall.FindBinder("Samp_GVignette");
+                    if (index.IsValidPointer)
+                        drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GShadowMap");
-                    if (!CoreSDK.IsNullPointer(index))
+                    index = drawcall.FindBinder("GShadowMap");
+                    if (index.IsValidPointer)
                     {
                         var attachBuffer = node.GetAttachBuffer(node.ShadowMapPinIn);
-                        drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                        drawcall.BindSRV(index, attachBuffer.Srv);
                     }
-                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GShadowMap");
-                    if (!CoreSDK.IsNullPointer(index))
-                        drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+                    index = drawcall.FindBinder("Samp_GShadowMap");
+                    if (index.IsValidPointer)
+                        drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
-                    if (!CoreSDK.IsNullPointer(index))
-                        drawcall.mCoreObject.BindShaderCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer.mCoreObject);
+                    index = drawcall.FindBinder("cbPerGpuScene");
+                    if (index.IsValidPointer)
+                        drawcall.BindCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer);
 
-                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "TilingBuffer");
-                    if (!CoreSDK.IsNullPointer(index))
+                    index = drawcall.FindBinder("TilingBuffer");
+                    if (index.IsValidPointer)
                     {
                         var attachBuffer = node.GetAttachBuffer(node.TileScreenPinIn);
-                        drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                        drawcall.BindSRV(index, attachBuffer.Srv);
                     }
 
-                    index = drawcall.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GpuScene_PointLights");
-                    if (!CoreSDK.IsNullPointer(index))
+                    index = drawcall.FindBinder("GpuScene_PointLights");
+                    if (index.IsValidPointer)
                     {
                         var attachBuffer = node.GetAttachBuffer(node.PointLightsPinIn);
                         if (attachBuffer.Srv != null)
-                            drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                            drawcall.BindSRV(index, attachBuffer.Srv);
                     }
                 }
             }
@@ -150,11 +150,11 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
         public override void InitNodePins()
         {
-            AddInput(ShadowMapPinIn, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Dsv);
-            AddInput(EnvMapPinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(VignettePinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(TileScreenPinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(PointLightsPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(ShadowMapPinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+            AddInput(EnvMapPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(VignettePinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(TileScreenPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(PointLightsPinIn, NxRHI.EBufferType.BFT_SRV);
         }
     }
 
@@ -171,14 +171,14 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             base.InitNodePins();
 
-            AddOutput(ColorPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Rtv);
-            AddOutput(DepthPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Dsv);
-            AddOutput(GizmosDepthPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Dsv);
+            AddOutput(ColorPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
+            AddOutput(DepthPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+            AddOutput(GizmosDepthPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
         }
         public UBasePassOpaque mOpaqueShading;
         public UPassDrawBuffers BasePass = new UPassDrawBuffers();
-        public RHI.CRenderPass RenderPass;
-        public RHI.CRenderPass GizmosRenderPass;
+        public NxRHI.URenderPass RenderPass;
+        public NxRHI.URenderPass GizmosRenderPass;
 
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
@@ -187,46 +187,46 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName);
 
-            var PassDesc = new IRenderPassDesc();
+            var PassDesc = new NxRHI.FRenderPassDesc();
             unsafe
             {
                 PassDesc.NumOfMRT = 1;
                 PassDesc.AttachmentMRTs[0].IsSwapChain = 0;
                 PassDesc.AttachmentMRTs[0].Format = ColorPinOut.Attachement.Format;
                 PassDesc.AttachmentMRTs[0].Samples = 1;
-                PassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
+                PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 PassDesc.m_AttachmentDepthStencil.Format = DepthPinOut.Attachement.Format;
                 PassDesc.m_AttachmentDepthStencil.Samples = 1;
-                PassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
-                PassDesc.m_AttachmentDepthStencil.StencilLoadAction = FrameBufferLoadAction.LoadActionClear;
-                PassDesc.m_AttachmentDepthStencil.StencilStoreAction = FrameBufferStoreAction.StoreActionStore;
+                PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 //PassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
                 //PassDesc.mDepthClearValue = 1.0f;
                 //PassDesc.mStencilClearValue = 0u;
             }
-            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in PassDesc);
-            var GizmosPassDesc = new IRenderPassDesc();
+            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+            var GizmosPassDesc = new NxRHI.FRenderPassDesc();
             unsafe
             {
                 GizmosPassDesc.NumOfMRT = 1;
                 GizmosPassDesc.AttachmentMRTs[0].IsSwapChain = 0;
                 GizmosPassDesc.AttachmentMRTs[0].Format = ColorPinOut.Attachement.Format;
                 GizmosPassDesc.AttachmentMRTs[0].Samples = 1;
-                GizmosPassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionDontCare;
-                GizmosPassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
+                GizmosPassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                GizmosPassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 GizmosPassDesc.m_AttachmentDepthStencil.Format = GizmosDepthPinOut.Attachement.Format;
                 GizmosPassDesc.m_AttachmentDepthStencil.Samples = 1;
-                GizmosPassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
-                GizmosPassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
-                GizmosPassDesc.m_AttachmentDepthStencil.StencilLoadAction = FrameBufferLoadAction.LoadActionClear;
-                GizmosPassDesc.m_AttachmentDepthStencil.StencilStoreAction = FrameBufferStoreAction.StoreActionStore;
+                GizmosPassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                GizmosPassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                GizmosPassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                GizmosPassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 //GizmosPassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
                 //GizmosPassDesc.mDepthClearValue = 1.0f;
                 //GizmosPassDesc.mStencilClearValue = 0u;
             }
-            GizmosRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in GizmosPassDesc);
+            GizmosRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in GizmosPassDesc);
 
             GBuffers.Initialize(policy, RenderPass);
             GBuffers.SetRenderTarget(policy, 0, ColorPinOut);
@@ -262,32 +262,33 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 GGizmosBuffers.OnResize(x, y);
             }
         }
-        protected void SetCBuffer(GamePlay.UWorld world, RHI.CConstantBuffer cBuffer, URenderPolicy mobilePolicy)
+        protected void SetCBuffer(GamePlay.UWorld world, NxRHI.UCbView cBuffer, URenderPolicy mobilePolicy)
         {
+            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
             var shadowNode = mobilePolicy.FindFirstNode<Shadow.UShadowMapNode>();
             if (shadowNode != null)
             {
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gFadeParam, in shadowNode.mFadeParam);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowTransitionScale, in shadowNode.mShadowTransitionScale);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowMapSizeAndRcp, in shadowNode.mShadowMapSizeAndRcp);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gViewer2ShadowMtx, in shadowNode.mViewer2ShadowMtx);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowDistance, in shadowNode.mShadowDistance);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gFadeParam, in shadowNode.mFadeParam);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScale, in shadowNode.mShadowTransitionScale);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowMapSizeAndRcp, in shadowNode.mShadowMapSizeAndRcp);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtx, in shadowNode.mViewer2ShadowMtx);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowDistance, in shadowNode.mShadowDistance);
             }
 
             var dirLight = world.DirectionLight;
             //dirLight.mDirection = MathHelper.RandomDirection();
             var dir = dirLight.Direction;
             var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightDirection_Leak, in gDirLightDirection_Leak);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gDirLightDirection_Leak, in gDirLightDirection_Leak);
             var gDirLightColor_Intensity = new Vector4(dirLight.mSunLightColor.X, dirLight.mSunLightColor.Y, dirLight.mSunLightColor.Z, dirLight.mSunLightIntensity);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightColor_Intensity, in gDirLightColor_Intensity);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gDirLightColor_Intensity, in gDirLightColor_Intensity);
 
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.mSkyLightColor, in dirLight.mSkyLightColor);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.mGroundLightColor, in dirLight.mGroundLightColor);
+            cBuffer.SetValue(coreBinder.CBPerViewport.mSkyLightColor, in dirLight.mSkyLightColor);
+            cBuffer.SetValue(coreBinder.CBPerViewport.mGroundLightColor, in dirLight.mGroundLightColor);
 
             float EnvMapMaxMipLevel = 1.0f;
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
         }
         public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
@@ -297,7 +298,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 SetCBuffer(world, cBuffer, mobilePolicy);
 
             BasePass.ClearMeshDrawPassArray();
-            BasePass.SetViewport(GBuffers.ViewPort);
+            BasePass.SetViewport(in GBuffers.Viewport);
 
             foreach (var i in policy.VisibleMeshes)
             {
@@ -322,23 +323,18 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             var cmdlist = BasePass.PassBuffers[(int)ERenderLayer.RL_Opaque].DrawCmdList;
 
-            var passClears = new IRenderPassClears();
+            var passClears = new NxRHI.FRenderPassClears();
             passClears.SetDefault();
             passClears.SetClearColor(0, new Color4(1, 0, 0, 0));
-            cmdlist.BeginRenderPass(policy, GBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
-            cmdlist.BuildRenderPass(0);
-            cmdlist.EndRenderPass();
+            GBuffers.BuildFrameBuffers(policy);
+            cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
+            cmdlist.FlushDraws();
+            cmdlist.EndPass();
             cmdlist.EndCommand();
-        }
-        public override void TickRender(URenderPolicy policy)
-        {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Commit(rc);
         }
         public override void TickSync(URenderPolicy policy)
         {
             BasePass.SwapBuffer();
-            policy.DefaultCamera.mCoreObject.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
         }
     }
 
@@ -356,10 +352,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             base.InitNodePins();
 
-            AddInputOutput(AlbedoPinInOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Rtv);
-            AddInputOutput(DepthPinInOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Dsv);
+            AddInputOutput(AlbedoPinInOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
+            AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
             
-            AddOutput(GizmosDepthPinOut, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Dsv);
+            AddOutput(GizmosDepthPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
         }
         public override void FrameBuild()
         {
@@ -367,8 +363,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public UBasePassTranslucent mTranslucentShading;
         public UPassDrawBuffers BasePass = new UPassDrawBuffers();
-        public RHI.CRenderPass RenderPass;
-        public RHI.CRenderPass GizmosRenderPass;
+        public NxRHI.URenderPass RenderPass;
+        public NxRHI.URenderPass GizmosRenderPass;
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.AsyncDummyClass.DummyFunc();
@@ -376,47 +372,47 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName);
 
-            var PassDesc = new IRenderPassDesc();
+            var PassDesc = new NxRHI.FRenderPassDesc();
             unsafe
             {
                 PassDesc.NumOfMRT = 1;
                 PassDesc.AttachmentMRTs[0].IsSwapChain = 0;
                 PassDesc.AttachmentMRTs[0].Format = AlbedoPinInOut.Attachement.Format;
                 PassDesc.AttachmentMRTs[0].Samples = 1;
-                PassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionDontCare;
-                PassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
+                PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 PassDesc.m_AttachmentDepthStencil.Format = DepthPinInOut.Attachement.Format;
                 PassDesc.m_AttachmentDepthStencil.Samples = 1;
-                PassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionDontCare;
-                PassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
-                PassDesc.m_AttachmentDepthStencil.StencilLoadAction = FrameBufferLoadAction.LoadActionDontCare;
-                PassDesc.m_AttachmentDepthStencil.StencilStoreAction = FrameBufferStoreAction.StoreActionStore;
+                PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 //PassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
                 //PassDesc.mDepthClearValue = 1.0f;
                 //PassDesc.mStencilClearValue = 0u;
             }
-            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in PassDesc);
+            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
-            var GizmosPassDesc = new IRenderPassDesc();
+            var GizmosPassDesc = new NxRHI.FRenderPassDesc();
             unsafe
             {
                 GizmosPassDesc.NumOfMRT = 1;
                 GizmosPassDesc.AttachmentMRTs[0].IsSwapChain = 0;
                 GizmosPassDesc.AttachmentMRTs[0].Format = AlbedoPinInOut.Attachement.Format;
                 GizmosPassDesc.AttachmentMRTs[0].Samples = 1;
-                GizmosPassDesc.AttachmentMRTs[0].LoadAction = FrameBufferLoadAction.LoadActionDontCare;
-                GizmosPassDesc.AttachmentMRTs[0].StoreAction = FrameBufferStoreAction.StoreActionStore;
+                GizmosPassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+                GizmosPassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 GizmosPassDesc.m_AttachmentDepthStencil.Format = GizmosDepthPinOut.Attachement.Format;
                 GizmosPassDesc.m_AttachmentDepthStencil.Samples = 1;
-                GizmosPassDesc.m_AttachmentDepthStencil.LoadAction = FrameBufferLoadAction.LoadActionClear;
-                GizmosPassDesc.m_AttachmentDepthStencil.StoreAction = FrameBufferStoreAction.StoreActionStore;
-                GizmosPassDesc.m_AttachmentDepthStencil.StencilLoadAction = FrameBufferLoadAction.LoadActionClear;
-                GizmosPassDesc.m_AttachmentDepthStencil.StencilStoreAction = FrameBufferStoreAction.StoreActionStore;
+                GizmosPassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                GizmosPassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+                GizmosPassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+                GizmosPassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 //GizmosPassDesc.mFBClearColorRT0 = new Color4(1, 0, 0, 0);
                 //GizmosPassDesc.mDepthClearValue = 1.0f;
                 //GizmosPassDesc.mStencilClearValue = 0u;
             }
-            GizmosRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<IRenderPassDesc>(rc, in GizmosPassDesc);
+            GizmosRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in GizmosPassDesc);
 
             GBuffers.Initialize(policy, RenderPass);
             GBuffers.SetRenderTarget(policy, 0, AlbedoPinInOut);
@@ -440,28 +436,29 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             base.Cleanup();
         }
-        protected void SetCBuffer(GamePlay.UWorld world, RHI.CConstantBuffer cBuffer, UMobileFSPolicy mobilePolicy)
+        protected void SetCBuffer(GamePlay.UWorld world, NxRHI.UCbView cBuffer, UMobileFSPolicy mobilePolicy)
         {
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gFadeParam, in mobilePolicy.mShadowMapNode.mFadeParam);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowTransitionScale, in mobilePolicy.mShadowMapNode.mShadowTransitionScale);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowMapSizeAndRcp, in mobilePolicy.mShadowMapNode.mShadowMapSizeAndRcp);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gViewer2ShadowMtx, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtx);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowDistance, in mobilePolicy.mShadowMapNode.mShadowDistance);
+            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+            cBuffer.SetValue(coreBinder.CBPerViewport.gFadeParam, in mobilePolicy.mShadowMapNode.mFadeParam);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScale, in mobilePolicy.mShadowMapNode.mShadowTransitionScale);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gShadowMapSizeAndRcp, in mobilePolicy.mShadowMapNode.mShadowMapSizeAndRcp);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtx, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtx);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gShadowDistance, in mobilePolicy.mShadowMapNode.mShadowDistance);
 
             var dirLight = world.DirectionLight;
             //dirLight.mDirection = MathHelper.RandomDirection();
             var dir = dirLight.Direction;
             var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightDirection_Leak, in gDirLightDirection_Leak);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gDirLightDirection_Leak, in gDirLightDirection_Leak);
             var gDirLightColor_Intensity = new Vector4(dirLight.mSunLightColor.X, dirLight.mSunLightColor.Y, dirLight.mSunLightColor.Z, dirLight.mSunLightIntensity);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightColor_Intensity, in gDirLightColor_Intensity);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gDirLightColor_Intensity, in gDirLightColor_Intensity);
 
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.mSkyLightColor, in dirLight.mSkyLightColor);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.mGroundLightColor, in dirLight.mGroundLightColor);
+            cBuffer.SetValue(coreBinder.CBPerViewport.mSkyLightColor, in dirLight.mSkyLightColor);
+            cBuffer.SetValue(coreBinder.CBPerViewport.mGroundLightColor, in dirLight.mGroundLightColor);
 
             float EnvMapMaxMipLevel = 1.0f;
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
         }
         public override void OnResize(URenderPolicy policy, float x, float y)
         {
@@ -486,7 +483,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             }
 
             BasePass.ClearMeshDrawPassArray();
-            BasePass.SetViewport(GBuffers.ViewPort);
+            BasePass.SetViewport(in GBuffers.Viewport);
 
             foreach (var i in policy.VisibleMeshes)
             {
@@ -508,15 +505,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     }
                 }
             }
-            var passClears = new IRenderPassClears();
+            var passClears = new NxRHI.FRenderPassClears();
             passClears.SetDefault();
             passClears.SetClearColor(0, new Color4(1, 0, 0, 0));
             BasePass.BuildTranslucentRenderPass(policy, in passClears, GBuffers, GGizmosBuffers);
-        }
-        public override void TickRender(URenderPolicy policy)
-        {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Commit(rc);
         }
         public override void TickSync(URenderPolicy policy)
         {

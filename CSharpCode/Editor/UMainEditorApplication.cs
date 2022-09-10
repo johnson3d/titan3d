@@ -41,19 +41,18 @@ namespace EngineNS.Editor
         public EGui.Controls.UContentBrowser ContentBrowser = new EGui.Controls.UContentBrowser();
         public override void Cleanup()
         {
-            Graphics.Pipeline.USlateApplication.ClearRootForms();
             UEngine.Instance?.TickableManager.RemoveTickable(this);
 #if (UseWindowTest)
             mWinTest.Cleanup();
 #endif
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName)
+        public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.UGpuDevice rc, RName rpName)
         {
             await base.InitializeApplication(rc, rpName);
 
             await ContentBrowser.Initialize();
-            Editor.UMainEditorApplication.RegRootForm(ContentBrowser);
+            UEngine.RootFormManager.RegRootForm(ContentBrowser);
 
             //await WorldViewportSlate.Initialize(this, rpName, 0, 1);
 
@@ -150,7 +149,7 @@ namespace EngineNS.Editor
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
                             {
                                 mCpuProfiler.Visible = !mCpuProfiler.Visible;
-                                var application = UEngine.Instance.GfxDevice.MainWindow as EngineNS.Editor.UMainEditorApplication;
+                                var application = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
                                 mCpuProfiler.DockId = application.CenterDockId;
                                 item.Selected = mCpuProfiler.Visible;
                             },
@@ -258,7 +257,7 @@ namespace EngineNS.Editor
                 ImGuiAPI.SetNextWindowPos(in mainPos, ImGuiCond_.ImGuiCond_FirstUseEver, in mainPos);
                 var wsz = new Vector2(1290, 800);
                 ImGuiAPI.SetNextWindowSize(in wsz, ImGuiCond_.ImGuiCond_FirstUseEver);
-                if (ImGuiAPI.Begin("T3D CoreEditor", ref IsVisible, //ImGuiWindowFlags_.ImGuiWindowFlags_NoMove |
+                if (ImGuiAPI.Begin(UEngine.Instance.Config.ConfigName, ref IsVisible, //ImGuiWindowFlags_.ImGuiWindowFlags_NoMove |
                     //ImGuiWindowFlags_.ImGuiWindowFlags_NoResize |
                     ImGuiWindowFlags_.ImGuiWindowFlags_NoCollapse |
                     ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
@@ -290,7 +289,7 @@ namespace EngineNS.Editor
 
                 //WorldViewportSlate.DockId = CenterDockId;
 
-                DrawRootForms();
+                UEngine.RootFormManager.DrawRootForms();
 #if (UseWindowTest)
                 mWinTest.OnDraw();
 #endif
@@ -443,9 +442,9 @@ namespace EngineNS.Editor
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Cap", in btSize))
             {
-                IRenderDocTool.GetInstance().InitTool(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
+                IRenderDocTool.GetInstance().SetGpuDevice(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
                 IRenderDocTool.GetInstance().SetActiveWindow(this.NativeWindow.HWindow.ToPointer());
-                IRenderDocTool.GetInstance().TriggerCapture();
+                UEngine.Instance.CaptureRenderDocFrame = 1;
             }
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
@@ -497,7 +496,7 @@ namespace EngineNS.Editor
 
         async System.Threading.Tasks.Task OnPlayGame(RName assetName)
         {
-            await UEngine.Instance.StartPlayInEditor(UEngine.Instance.GfxDevice.MainWindow, assetName);
+            await UEngine.Instance.StartPlayInEditor(UEngine.Instance.GfxDevice.SlateApplication, assetName);
         }
         #region TestCode
         public static async System.Threading.Tasks.Task TestCreateScene(Graphics.Pipeline.UViewportSlate vpSlate,GamePlay.UWorld world, GamePlay.Scene.UNode root, bool hideTerrain = false)
@@ -599,12 +598,12 @@ namespace EngineNS.Editor
             //var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
             //materials1[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ddd.uminst"));
 
-            ////var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
-            ////var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeSphere(2.5f, 100, 100, 0xfffffff).ToMesh();
-            //var cookMeshProvider = Graphics.Mesh.CMeshDataProvider.MakeCylinder(2.0f, 0.5f, 3.0f, 100, 100, 0xfffffff);
+            ////var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
+            ////var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeSphere(2.5f, 100, 100, 0xfffffff).ToMesh();
+            //var cookMeshProvider = Graphics.Mesh.UMeshDataProvider.MakeCylinder(2.0f, 0.5f, 3.0f, 100, 100, 0xfffffff);
             //var cookedMesh = cookMeshProvider.ToMesh();
-            ////var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeTorus(2.0f, 3.0f, 100, 300, 0xfffffff).ToMesh(); 
-            ////var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeCapsule(1.0f, 4.0f, 100, 100, 100, Graphics.Mesh.CMeshDataProvider.ECapsuleUvProfile.Aspect, 0xfffffff).ToMesh();
+            ////var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeTorus(2.0f, 3.0f, 100, 300, 0xfffffff).ToMesh(); 
+            ////var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeCapsule(1.0f, 4.0f, 100, 100, 100, Graphics.Mesh.UMeshDataProvider.ECapsuleUvProfile.Aspect, 0xfffffff).ToMesh();
             //{
             //    var mesh2 = new Graphics.Mesh.UMesh();
             //    var colorVar = materials1[0].FindVar("clr4_0");
@@ -727,7 +726,7 @@ namespace EngineNS.Editor
         {
             //WorldViewportSlate.TickSync(ellapse);
 
-            OnDrawSlate();
+            //OnDrawSlate();
         }
         #endregion
     }

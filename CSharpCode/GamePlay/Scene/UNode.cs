@@ -53,6 +53,7 @@ namespace EngineNS.GamePlay.Scene
     }
     public partial class UNode
     {
+        public const string EditorKeyword = "UNode";
         public virtual async System.Threading.Tasks.Task<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             NodeData = data;
@@ -458,7 +459,10 @@ namespace EngineNS.GamePlay.Scene
                 try
                 {
                     ar.Tag = nd;
-                    ar.ReadTo(data, this);
+                    if(false == ar.ReadTo(data, this))
+                    {
+                        continue;
+                    }
 
                     var ok = await nd.InitializeNode(world, nodeData, EBoundVolumeType.None, null);
                     if (ok == false)
@@ -475,11 +479,17 @@ namespace EngineNS.GamePlay.Scene
                     Profiler.Log.WriteException(ex);
                     Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"Scene({scene.AssetName}): Node({nd.NodeData?.Name}) load failed");
                 }
-                ar.Tag = null;
-                attr.ReleaseReader(ref ar);
+                finally
+                {
+                    ar.Tag = null;
+                    attr.ReleaseReader(ref ar);
 
-                nd.Parent = this;
-                await nd.LoadChildNode(world, scene, cld);
+                    if (nd.Placement != null)
+                    {
+                        nd.Parent = this;
+                        await nd.LoadChildNode(world, scene, cld);
+                    }
+                }
             }
             return true;
         }
@@ -560,6 +570,8 @@ namespace EngineNS.GamePlay.Scene
             foreach (var i in Children)
             {
                 if (i.HasStyle(ENodeStyles.DiscardAABB))
+                    continue;
+                if (i.Placement == null)
                     continue;
                 if (i.Placement.IsIdentity == false)
                 {
@@ -676,6 +688,33 @@ namespace EngineNS.GamePlay.Scene
             return true;
         }
         #endregion
+
+        public async System.Threading.Tasks.Task<UNode> CloneNode(UWorld world)
+        {
+            var data = Rtti.UTypeDescManager.CreateInstance(this.NodeData.GetType()) as UNodeData;
+            var meta = Rtti.UClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeOf(this.NodeData.GetType()));
+            meta.CopyObjectMetaField(data, NodeData);
+            var node = Rtti.UTypeDescManager.CreateInstance(this.GetType()) as UNode;
+            EBoundVolumeType bvType = EBoundVolumeType.None;
+            if (NodeData.BoundVolume != null)
+            {
+                var t = NodeData.BoundVolume.GetType();
+                if (t == typeof(UBoxBV))
+                {
+                    bvType = EBoundVolumeType.Box;
+                }
+                else if (t == typeof(USphereBV))
+                {
+                    bvType = EBoundVolumeType.Sphere;
+                }
+            }
+            await node.InitializeNode(world, data, bvType, this.Placement?.GetType());
+            node.Placement.Position = this.Placement.Position;
+            node.Placement.Quat = this.Placement.Quat;
+            node.Placement.Scale = this.Placement.Scale;
+            //node.BoundVolume
+            return node;
+        }
     }
     public partial class USceneActorNode : UNode
     {
@@ -690,6 +729,15 @@ namespace EngineNS.GamePlay.Scene
             return true;
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("SubTree", "SubTree", UNode.EditorKeyword)]
+    public partial class USubTreeRootNode : USceneActorNode
+    {
+        public override unsafe bool IsTreeContain(DVector3* localStart, DVector3* dir, DBoundingBox* pBox)
+        {
+            return true;
+        }
+    }
+
     public partial class ULightWeightNodeBase : UNode
     {
         public override bool IsSceneManagedType()

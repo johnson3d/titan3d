@@ -24,6 +24,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             var nodeExpr = OutNode as UNodeBase;
             var type = nodeExpr.GetOutPinType(oPin);
+            if (type == null)
+                return false;
 
             if (iPin == InXY)
             {

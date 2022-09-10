@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Editor.ShaderCompiler
 {
-    public class UShaderCode : Graphics.Pipeline.Shader.IShaderCodeProvider
+    public class UShaderSourceCode : Graphics.Pipeline.Shader.IShaderCodeProvider
     {
         public void Cleanup()
         {
@@ -13,7 +13,7 @@ namespace EngineNS.Editor.ShaderCompiler
         }
         public void CollectIncludes()
         {
-            var code = Support.UTextUtility.RemoveCStyleComments(SourceCode.AsText);
+            var code = Support.UTextUtility.RemoveCStyleComments(SourceCode.TextCode);
             int cur = 0;
             cur = code.IndexOf("#", cur);
             while (cur >=0 && cur < code.Length)
@@ -57,22 +57,22 @@ namespace EngineNS.Editor.ShaderCompiler
             string fullCode = code;
             foreach(var i in DependencyCodes)
             {
-                fullCode += i.SourceCode.AsText;
+                fullCode += i.SourceCode.TextCode;
             }
             CodeHash = Hash160.CreateHash160(fullCode);
             IsDirty = false;
         }
         public bool IsDirty { get; set; } = true;
         public RName CodeName { get; set; }
-        public IO.CMemStreamWriter DefineCode { get; private set; } = new IO.CMemStreamWriter();
-        public IO.CMemStreamWriter SourceCode { get; private set; } = new IO.CMemStreamWriter();
+        public NxRHI.UShaderCode DefineCode { get; private set; } = new NxRHI.UShaderCode();
+        public NxRHI.UShaderCode SourceCode { get; private set; } = new NxRHI.UShaderCode();
         public Hash160 CodeHash { get; private set; }
-        public List<UShaderCode> DependencyCodes { get; } = new List<UShaderCode>();
+        public List<UShaderSourceCode> DependencyCodes { get; } = new List<UShaderSourceCode>();
     }
     public class UShaderCodeManager
     {
         public static UShaderCodeManager Instance { get; } = new UShaderCodeManager();
-        public Dictionary<RName, UShaderCode> Codes { get; } = new Dictionary<RName, UShaderCode>();
+        public Dictionary<RName, UShaderSourceCode> Codes { get; } = new Dictionary<RName, UShaderSourceCode>();
         ~UShaderCodeManager()
         {
             Cleanup();
@@ -128,9 +128,9 @@ namespace EngineNS.Editor.ShaderCompiler
                 return GetShaderCode(name);
             }
         }
-        public UShaderCode GetShaderCode(RName name)
+        public UShaderSourceCode GetShaderCode(RName name)
         {
-            UShaderCode result;
+            UShaderSourceCode result;
             if (Codes.TryGetValue(name, out result))
                 return result;
 
@@ -142,14 +142,14 @@ namespace EngineNS.Editor.ShaderCompiler
             }
             return null;
         }
-        protected UShaderCode LoadCode(RName name)
+        protected UShaderSourceCode LoadCode(RName name)
         {
             if (IO.FileManager.FileExists(name.Address) == false)
                 return null;
 
             var code = IO.FileManager.ReadAllText(name.Address);
-            var result = new UShaderCode();
-            result.SourceCode.SetText(code);
+            var result = new UShaderSourceCode();
+            result.SourceCode.TextCode = code;
             result.CodeName = name;
             return result;
         }

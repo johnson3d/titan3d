@@ -72,6 +72,7 @@ namespace EngineNS.Bricks.NodeGraph
         public string PinConnectedExecImg = "uestyle/graph/execpin_connected.srv";
         public string PinDisconnectedExecImg = "uestyle/graph/execpin_disconnected.srv";
         public string PinHoverCueImg = "uestyle/graph/pin_hover_cue.srv";
+        public string BreakpointNodeImg = "uestyle/graph/ip_breakpoint.srv";
 
     }
 }

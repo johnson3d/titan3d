@@ -76,7 +76,7 @@ namespace EngineNS
 
     public partial class UTickableManager
     {
-        public List<ITickable> Tickables { get; } = new List<ITickable>();
+        public List<WeakReference<ITickable>> Tickables { get; } = new List<WeakReference<ITickable>>();
         public void Cleanup()
         {
             Tickables.Clear();
@@ -86,8 +86,16 @@ namespace EngineNS
         {
             lock(this)
             {
-                if (Tickables.Contains(tickable) == false)
-                    Tickables.Add(tickable);
+                foreach(var i in Tickables)
+                {
+                    ITickable cur;
+                    if(i.TryGetTarget(out cur))
+                    {
+                        if (tickable == cur)
+                            return;
+                    }
+                }
+                Tickables.Add(new WeakReference<ITickable>(tickable));
             }
         }
         [Rtti.Meta]
@@ -95,7 +103,18 @@ namespace EngineNS
         {
             lock (this)
             {
-                Tickables.Remove(tickable);
+                foreach (var i in Tickables)
+                {
+                    ITickable cur;
+                    if (i.TryGetTarget(out cur))
+                    {
+                        if (tickable == cur)
+                        {
+                            Tickables.Remove(i);
+                            return;
+                        }
+                    }
+                }
             }
         }
     }

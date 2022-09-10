@@ -23,6 +23,26 @@ namespace EngineNS.Bricks.CodeBuilder
             commentGen.GenCodes(comment, ref sourceCode, ref data);
         }
 
+        class UDebuggerSetWatchVariableCodeGen : ICodeObjectGen
+        {
+            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            {
+                var exp = obj as UDebuggerSetWatchVariable;
+                var codeStr = $"mFrame_{data.Method.MethodName}.SetWatchVariable(\"{exp.VariableName}\", ";
+                var varGen = data.CodeGen.GetCodeObjectGen(exp.VariableValue.GetType());
+                varGen.GenCodes(exp.VariableValue, ref codeStr, ref data);
+                codeStr += ");";
+                data.CodeGen.AddLine(codeStr, ref sourceCode);
+            }
+        }
+        class UDebuggerTryBreakCodeGen : ICodeObjectGen
+        {
+            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            {
+                var exp = obj as UDebuggerTryBreak;
+                data.CodeGen.AddLine($"{exp.BreakName}.TryBreak();", ref sourceCode);
+            }
+        }
         class UVariableDeclarationCodeGen : ICodeObjectGen
         {
             public bool IsClassMember = false;
@@ -65,6 +85,11 @@ namespace EngineNS.Bricks.CodeBuilder
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
                 var methodDec = obj as UMethodDeclaration;
+
+                // debugger code
+                var frameName = $"mFrame_{methodDec.MethodName}";
+                data.CodeGen.AddLine($"EngineNS.Macross.UMacrossStackFrame {frameName} = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName(\"{data.AssetName.Name}\", {data.AssetName.RNameType.GetType().FullName.Replace("+", ".")}.{data.AssetName.RNameType.ToString()}));", ref sourceCode);
+
                 GenCommentCodes(methodDec.Comment, ref data, ref sourceCode);
                 data.Method = methodDec;
                 data.CodeGen.AddLine("[EngineNS.Rtti.Meta]", ref sourceCode);
@@ -117,42 +142,49 @@ namespace EngineNS.Bricks.CodeBuilder
                 {
                     string awaitDummyPosCode = "@@@await@@@";
                     data.CodeGen.AddLine(awaitDummyPosCode, ref sourceCode);
-                    if(methodDec.ReturnValue != null)
+
+                    data.CodeGen.AddLine($"using(var guard_{methodDec.MethodName} = new EngineNS.Macross.UMacrossStackGuard({frameName}))", ref sourceCode);
+                    data.CodeGen.PushSegment(ref sourceCode, in data);
                     {
-                        var retValGen = data.CodeGen.GetCodeObjectGen(methodDec.ReturnValue.GetType());
-                        retValGen.GenCodes(methodDec.ReturnValue, ref sourceCode, ref data);
-                    }
-                    for(int i=0; i<methodDec.Arguments.Count; i++)
-                    {
-                        var arg = methodDec.Arguments[i];
-                        switch(arg.OperationType)
+                        if(methodDec.ReturnValue != null)
                         {
-                            case EMethodArgumentAttribute.Out:
-                                if (arg.InitValue != null)
-                                {
-                                    var argInitStr = arg.VariableName + " = ";
-                                    var argInitGen = data.CodeGen.GetCodeObjectGen(arg.InitValue.GetType());
-                                    argInitGen.GenCodes(arg.InitValue, ref argInitStr, ref data);
-                                    argInitStr += ";";
-                                    data.CodeGen.AddLine(argInitStr, ref sourceCode);
-                                }
-                                break;
+                            var retValGen = data.CodeGen.GetCodeObjectGen(methodDec.ReturnValue.GetType());
+                            retValGen.GenCodes(methodDec.ReturnValue, ref sourceCode, ref data);
+                        }
+                        for(int i=0; i<methodDec.Arguments.Count; i++)
+                        {
+                            var arg = methodDec.Arguments[i];
+                            switch(arg.OperationType)
+                            {
+                                case EMethodArgumentAttribute.Out:
+                                    if (arg.InitValue != null)
+                                    {
+                                        var argInitStr = arg.VariableName + " = ";
+                                        var argInitGen = data.CodeGen.GetCodeObjectGen(arg.InitValue.GetType());
+                                        argInitGen.GenCodes(arg.InitValue, ref argInitStr, ref data);
+                                        argInitStr += ";";
+                                        data.CodeGen.AddLine(argInitStr, ref sourceCode);
+                                    }
+                                    break;
+                            }
+                            data.CodeGen.AddLine($"{frameName}.SetWatchVariable(\"{arg.VariableName}\", {arg.VariableName});", ref sourceCode);
+                        }
+                        for(int i=0; i<methodDec.LocalVariables.Count; i++)
+                        {
+                            var localVarCodeGen = data.CodeGen.GetCodeObjectGen(methodDec.LocalVariables[i].GetType());
+                            localVarCodeGen.GenCodes(methodDec.LocalVariables[i], ref sourceCode, ref data);
+                        }
+
+                        var bodyCodeGen = data.CodeGen.GetCodeObjectGen(methodDec.MethodBody.GetType());
+                        bodyCodeGen.GenCodes(methodDec.MethodBody, ref sourceCode, ref data);
+
+                        if(!methodDec.ReturnHasGenerated && methodDec.ReturnValue != null)
+                        {
+                            var retCode = "return " + methodDec.ReturnValue.VariableName + ";";
+                            data.CodeGen.AddLine(retCode, ref sourceCode);
                         }
                     }
-                    for(int i=0; i<methodDec.LocalVariables.Count; i++)
-                    {
-                        var localVarCodeGen = data.CodeGen.GetCodeObjectGen(methodDec.LocalVariables[i].GetType());
-                        localVarCodeGen.GenCodes(methodDec.LocalVariables[i], ref sourceCode, ref data);
-                    }
-
-                    var bodyCodeGen = data.CodeGen.GetCodeObjectGen(methodDec.MethodBody.GetType());
-                    bodyCodeGen.GenCodes(methodDec.MethodBody, ref sourceCode, ref data);
-
-                    if(!methodDec.ReturnHasGenerated && methodDec.ReturnValue != null)
-                    {
-                        var retCode = "return " + methodDec.ReturnValue.VariableName + ";";
-                        data.CodeGen.AddLine(retCode, ref sourceCode);
-                    }
+                    data.CodeGen.PopSegment(ref sourceCode, in data);
                     var unsafeIdx = sourceCode.LastIndexOf(unsafePosCode);
                     sourceCode = sourceCode.Remove(unsafeIdx, unsafePosCode.Length);
                     if (methodDec.HasUnsafeCode || methodDec.IsUnsafe)
@@ -163,7 +195,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     if (!methodDec.HasAwaitCode && methodDec.IsAsync)
                         sourceCode = sourceCode.Insert(awaitDummyIdx, "await EngineNS.Thread.AsyncDummyClass.DummyFunc();");
                     else
-                        sourceCode = sourceCode.Remove(awaitDummyIdx, data.CodeGen.CurIndentStr.Length);
+                        sourceCode = sourceCode.Remove(awaitDummyIdx, data.CodeGen.CurIndentStr.Length + 1);
                 }
                 data.CodeGen.PopSegment(ref sourceCode, in data);
                 data.Method.ResetRuntimeData();
@@ -225,6 +257,14 @@ namespace EngineNS.Bricks.CodeBuilder
                         memCodeGen.IsProperty = false;
                     }
 
+                    for(int i=0; i<classDec.PreDefineVariables.Count; i++)
+                    {
+                        var gen = data.CodeGen.GetCodeObjectGen(classDec.PreDefineVariables[i].GetType()) as UVariableDeclarationCodeGen;
+                        gen.IsClassMember = true;
+                        gen.GenCodes(classDec.PreDefineVariables[i], ref sourceCode, ref data);
+                        gen.IsClassMember = false;
+                    }
+
                     for(int i=0; i<classDec.Methods.Count; i++)
                     {
                         var methodDecGen = data.CodeGen.GetCodeObjectGen(classDec.Methods[i].GetType());
@@ -244,7 +284,7 @@ namespace EngineNS.Bricks.CodeBuilder
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
                 var clsRefExp = obj as UClassReferenceExpression;
-                sourceCode += clsRefExp.Class.FullName.Replace("+", ".");
+                sourceCode += data.CodeGen.GetTypeString(clsRefExp.Class);
             }
         }
 
@@ -316,7 +356,6 @@ namespace EngineNS.Bricks.CodeBuilder
                     sourceCode = sourceCode.TrimEnd(',');
                 }
                 sourceCode += ")";
-
             }
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
@@ -328,6 +367,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     if (methodInvokeExp.ForceCastReturnType)
                         invokeStr += "(" + data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + ")";
                 }
+
                 GenInvokeExpression(obj, ref invokeStr, ref data);
                 invokeStr += ";";
                 data.CodeGen.AddLine(invokeStr, ref sourceCode);
@@ -536,11 +576,13 @@ namespace EngineNS.Bricks.CodeBuilder
                 if (primitiveExp.Type.IsEqual(typeof(Vector2)) ||
                     primitiveExp.Type.IsEqual(typeof(Vector3)) ||
                     primitiveExp.Type.IsEqual(typeof(Vector4)))
-                    sourceCode += primitiveExp.Type.FullName + "(" + primitiveExp.GetValueString() + ")";
+                    sourceCode += primitiveExp.Type.FullName + "(" + primitiveExp.ValueStr + ")";
                 else if (primitiveExp.Type.IsEqual(typeof(string)))
-                    sourceCode += $"\"{primitiveExp.GetValueString()}\"";
+                    sourceCode += $"\"{primitiveExp.ValueStr}\"";
+                else if (primitiveExp.Type.IsEqual(typeof(float)))
+                    sourceCode += primitiveExp.ValueStr + "f";
                 else
-                    sourceCode += primitiveExp.GetValueString();
+                    sourceCode += primitiveExp.ValueStr;
             }
         }
 
@@ -841,8 +883,11 @@ namespace EngineNS.Bricks.CodeBuilder
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
                 var commentExp = obj as UCommentStatement;
-                var comment = "//" + commentExp.CommentString;
-                data.CodeGen.AddLine(comment, ref sourceCode);
+                if(!string.IsNullOrEmpty(commentExp.CommentString))
+                {
+                    var comment = "//" + commentExp.CommentString;
+                    data.CodeGen.AddLine(comment, ref sourceCode);
+                }
             }
         }
 
@@ -865,6 +910,8 @@ namespace EngineNS.Bricks.CodeBuilder
             }
         }
 
+        UDebuggerSetWatchVariableCodeGen mDebuggerSetWatchVariableCodeGen = new UDebuggerSetWatchVariableCodeGen();
+        UDebuggerTryBreakCodeGen mDebuggerTryBreakCodeGen = new UDebuggerTryBreakCodeGen();
         UVariableDeclarationCodeGen mVariableDeclarationCodeGen = new UVariableDeclarationCodeGen();
         UMethodDeclarationCodeGen mMethodDeclarationCodeGen = new UMethodDeclarationCodeGen();
         UClassDeclarationCodeGen mClassDeclarationCodeGen = new UClassDeclarationCodeGen();
@@ -895,7 +942,11 @@ namespace EngineNS.Bricks.CodeBuilder
 
         public override ICodeObjectGen GetCodeObjectGen(Rtti.UTypeDesc type)
         {
-            if (type.IsEqual(typeof(UVariableDeclaration)))
+            if (type.IsEqual(typeof(UDebuggerSetWatchVariable)))
+                return mDebuggerSetWatchVariableCodeGen;
+            else if (type.IsEqual(typeof(UDebuggerTryBreak)))
+                return mDebuggerTryBreakCodeGen;
+            else if (type.IsEqual(typeof(UVariableDeclaration)))
                 return mVariableDeclarationCodeGen;
             else if (type.IsEqual(typeof(UMethodDeclaration)))
                 return mMethodDeclarationCodeGen;
@@ -959,42 +1010,13 @@ namespace EngineNS.Bricks.CodeBuilder
             else
                 return t.TypeFullName;
         }
-        static string GetTypeString(System.Type type)
-        {
-            if (type == null)
-                return "";
-
-            if (type.IsGenericType)
-            {
-                string retValue = type.Namespace + "." + type.Name;
-                var agTypes = type.GetGenericArguments();
-                if (agTypes.Length == 0)
-                    return retValue;
-
-                retValue = retValue.Replace("`" + type.GetGenericArguments().Length, "");
-                var agStr = "";
-                for (int i = 0; i < agTypes.Length; i++)
-                {
-                    if (i == 0)
-                        agStr = GetTypeString(agTypes[i]);
-                    else
-                        agStr += "," + GetTypeString(agTypes[i]);
-                }
-                retValue += "<" + agStr + ">";
-                return retValue;
-            }
-            else if (type.IsGenericParameter)
-                return type.Name;
-            else
-                return type.FullName.Replace("+", ".");
-        }
         public override string GetTypeString(UTypeDesc t)
         {
             if (t == null)
                 return "";
             if (t.SystemType != null)
             {
-                return GetTypeString(t.SystemType);
+                return Rtti.UTypeDesc.GetCSharpTypeNameString(t.SystemType);
             }
             else
                 return t.FullName;

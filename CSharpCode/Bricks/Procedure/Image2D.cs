@@ -174,21 +174,21 @@ namespace EngineNS.Bricks.Procedure
             }
         }
 
-        public RHI.CShaderResourceView CreateRGBA8Texture2D(bool bNormalized = true)
+        public NxRHI.USrView CreateRGBA8Texture2D(bool bNormalized = true)
         {
-            RHI.CTexture2D texture;
+            NxRHI.UTexture texture;
             unsafe
             {
-                var desc = new ITexture2DDesc();
+                var desc = new NxRHI.FTextureDesc();
                 desc.SetDefault();
                 desc.Width = (uint)Width;
                 desc.Height = (uint)Height;
                 desc.MipLevels = 1;
                 desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
-                ImageInitData initData = new ImageInitData();
+                var initData = new NxRHI.FMappedSubResource();
                 initData.SetDefault();
                 desc.InitData = &initData;
-                initData.SysMemPitch = desc.Width * (uint)sizeof(Byte4);
+                initData.m_RowPitch = desc.Width * (uint)sizeof(Byte4);
 
                 float minX = 0, maxX = 0;
                 if (CompX != null)
@@ -291,35 +291,34 @@ namespace EngineNS.Bricks.Procedure
                 }
                 fixed (Byte4* p = &pixels[0, 0])
                 {
-                    initData.pSysMem = p;
-                    texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture2D(in desc);
+                    initData.pData = p;
+                    texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
                 }
-                var rsvDesc = new IShaderResourceViewDesc();
+                var rsvDesc = new NxRHI.FSrvDesc();
                 rsvDesc.SetTexture2D();
-                rsvDesc.Type = ESrvType.ST_Texture2D;
-                rsvDesc.mGpuBuffer = texture.mCoreObject;
+                rsvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
                 rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
                 rsvDesc.Texture2D.MipLevels = desc.MipLevels;
-                var result = UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(in rsvDesc);
-                result.PicDesc = new RHI.CShaderResourceView.UPicDesc();
+                var result = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
+                result.PicDesc = new NxRHI.USrView.UPicDesc();
                 return result;
             }
         }
-        public RHI.CShaderResourceView CreateRGBA8Texture2DAsNormal()
+        public NxRHI.USrView CreateRGBA8Texture2DAsNormal()
         {
-            RHI.CTexture2D texture;
+            NxRHI.UTexture texture;
             unsafe
             {
-                var desc = new ITexture2DDesc();
+                var desc = new NxRHI.FTextureDesc();
                 desc.SetDefault();
                 desc.Width = (uint)Width;
                 desc.Height = (uint)Height;
                 desc.MipLevels = 1;
                 desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
-                ImageInitData initData = new ImageInitData();
+                var initData = new NxRHI.FMappedSubResource();
                 initData.SetDefault();
                 desc.InitData = &initData;
-                initData.SysMemPitch = desc.Width * (uint)sizeof(Byte4);
+                initData.m_RowPitch = desc.Width * (uint)sizeof(Byte4);
                 Byte4[,] pixels = new Byte4[Height, Width];
                 for (int i = 0; i < Height; i++)
                 {
@@ -351,17 +350,16 @@ namespace EngineNS.Bricks.Procedure
                 }
                 fixed (Byte4* p = &pixels[0, 0])
                 {
-                    initData.pSysMem = p;
-                    texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture2D(in desc);
+                    initData.pData = p;
+                    texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
                 }
-                var rsvDesc = new IShaderResourceViewDesc();
+                var rsvDesc = new NxRHI.FSrvDesc();
                 rsvDesc.SetTexture2D();
-                rsvDesc.Type = ESrvType.ST_Texture2D;
-                rsvDesc.mGpuBuffer = texture.mCoreObject;
+                rsvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
                 rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
                 rsvDesc.Texture2D.MipLevels = desc.MipLevels;
-                var result = UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(in rsvDesc);
-                result.PicDesc = new RHI.CShaderResourceView.UPicDesc();
+                var result = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
+                result.PicDesc = new NxRHI.USrView.UPicDesc();
                 return result;
             }
         }

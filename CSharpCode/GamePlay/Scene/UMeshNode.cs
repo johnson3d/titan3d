@@ -4,6 +4,7 @@ using System.ComponentModel;
 
 namespace EngineNS.GamePlay.Scene
 {
+    [Bricks.CodeBuilder.ContextMenu("MeshNode", "MeshNode", UNode.EditorKeyword)]
     [UNode(NodeDataType = typeof(UMeshNode.UMeshNodeData), DefaultNamePrefix = "Mesh")]
     public partial class UMeshNode : USceneActorNode
     {
@@ -126,7 +127,7 @@ namespace EngineNS.GamePlay.Scene
                 //    ObjectFlags_2Bit |= 1;
                 //else
                 //    ObjectFlags_2Bit &= (~1);
-                //mMesh.PerMeshCBuffer.SetValue(RHI.CConstantBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                //mMesh.PerMeshCBuffer.SetValue(NxRHI.UBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
                 mMesh.IsAcceptShadow = value;
             }
         }
@@ -258,7 +259,7 @@ namespace EngineNS.GamePlay.Scene
             var meshData = NodeData as UMeshNodeData;
             if (meshData == null || meshData.MeshName == null)
             {
-                var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
+                var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
                 var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
                 materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria;// UEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
                 //var colorVar = materials1[0].FindVar("clr4_0");
@@ -333,8 +334,8 @@ namespace EngineNS.GamePlay.Scene
             return true;
         }
 
-        Graphics.Mesh.CMeshDataProvider mMeshDataProvider;
-        public Graphics.Mesh.CMeshDataProvider MeshDataProvider
+        Graphics.Mesh.UMeshDataProvider mMeshDataProvider;
+        public Graphics.Mesh.UMeshDataProvider MeshDataProvider
         {
             get => mMeshDataProvider;
             set => mMeshDataProvider = value;

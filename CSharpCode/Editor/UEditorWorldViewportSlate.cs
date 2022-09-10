@@ -9,7 +9,7 @@ namespace EngineNS.Editor
         public UEditorWorldViewportSlate(bool regRoot)
         {
             if (regRoot)
-                Editor.UMainEditorApplication.RegRootForm(this);
+                UEngine.RootFormManager.RegRootForm(this);
             CameraController = new Controller.EditorCameraController();
             Title = "WorldEditor";
         }
@@ -28,7 +28,7 @@ namespace EngineNS.Editor
                 this.ShowBoundVolumes(true, node);
             }
 
-            var app = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+            var app = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
             if (app != null)
             {
                 app.mMainInspector.PropertyGrid.Target = proxy;
@@ -43,8 +43,8 @@ namespace EngineNS.Editor
                 if (root == null)
                     return;
                 Vector3 ray = new Vector3();
-                float sw = Viewport.mCoreObject.Width;
-                float sh = Viewport.mCoreObject.Height;
+                float sw = Viewport.Width;
+                float sh = Viewport.Height;
                 var mouse = Window2Viewport(new Vector2((float)e.button.x, (float)e.button.y));
                 if (0 != CameraController.Camera.mCoreObject.GetPickRay(ref ray, mouse.X, mouse.Y, sw, sh))
                 {

@@ -10,18 +10,18 @@ namespace EngineNS.Editor
         INodeUIProvider GetChildUI(int index);
         string NodeName { get; }
         bool Selected { get; set; }
-        bool DrawNode(UTreeNodeDrawer tree, int index);
+        bool DrawNode(UTreeNodeDrawer tree, int index, int NumOfChild);
         GamePlay.UWorld GetWorld();
     }
     public class UTreeNodeDrawer
     {
         public void DrawTree(INodeUIProvider provider, int index)
         {
-            var drawed = OnDrawNode(provider, index);
+            int count = provider.NumOfChildUI();
+            var drawed = OnDrawNode(provider, index, count);
             AfterNodeShow(provider, index);
             if (drawed)
-            {   
-                int count = provider.NumOfChildUI();
+            {
                 for (int i = 0; i < count; i++)
                 {
                     var cld = provider.GetChildUI(i);
@@ -42,9 +42,9 @@ namespace EngineNS.Editor
         {
 
         }
-        protected virtual bool OnDrawNode(INodeUIProvider provider, int index)
+        protected virtual bool OnDrawNode(INodeUIProvider provider, int index, int NumOfChild)
         {
-            return provider.DrawNode(this, index);
+            return provider.DrawNode(this, index, NumOfChild);
             //return ImGuiAPI.TreeNode(index.ToString(), provider.NodeName);
         }
         protected virtual void AfterNodeShow(INodeUIProvider provider, int index)
@@ -82,15 +82,27 @@ namespace EngineNS.GamePlay.Scene
         {
             return Children[index];
         }
-        public virtual bool DrawNode(Editor.UTreeNodeDrawer tree, int index)
+        public virtual bool DrawNode(Editor.UTreeNodeDrawer tree, int index, int NumOfChild)
         {
             ImGuiTreeNodeFlags_ flags = 0;
             if (this.Selected)
                 flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
-            var ret = ImGuiAPI.TreeNodeEx(index.ToString(), flags, "");
-            ImGuiAPI.SameLine(0, -3);
-            ImGuiAPI.Text(string.IsNullOrEmpty(NodeName) ? "EmptyName" : NodeName);
-            return ret;
+            if (NumOfChild == 0)
+            {
+                var ret = ImGuiAPI.TreeNodeEx(index.ToString(), flags | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf, "");
+
+                ImGuiAPI.SameLine(0, -3);
+                ImGuiAPI.Text(string.IsNullOrEmpty(NodeName) ? "EmptyName" : NodeName);
+                return ret;
+            }
+            else
+            {
+                var ret = ImGuiAPI.TreeNodeEx(index.ToString(), flags, "");
+
+                ImGuiAPI.SameLine(0, -3);
+                ImGuiAPI.Text(string.IsNullOrEmpty(NodeName) ? "EmptyName" : NodeName);
+                return ret;
+            }
         }
     }
 }

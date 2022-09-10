@@ -27,10 +27,15 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public string Name
         {
             get;
-            private set;
+            set;
         }
 
         string mDisplayName;
+        public string DisplayName
+        {
+            get => mDisplayName;
+            set => mDisplayName = value;
+        }
         public string GetDisplayName(object objIns)
         {
             if(CustomValueEditor != null && CustomValueEditor.Provider != null)
@@ -44,6 +49,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
 
         Rtti.UTypeDesc mPropertyType;
+        public Rtti.UTypeDesc PropertyType
+        {
+            get => mPropertyType;
+            set { mPropertyType = value; }
+        }
         public Type GetPropertyType(object objIns)
         {
             var proIns = GetValue(objIns, false);
@@ -59,6 +69,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
 
         bool mIsReadonly = false;
+        public bool IsReadonly 
+        { 
+            get=>mIsReadonly;
+            set { mIsReadonly = value; }
+        }
         public bool GetIsReadonly(object objIns)
         {
             if(CustomValueEditor != null && CustomValueEditor.Provider != null)
@@ -72,43 +87,52 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public string Description
         {
             get;
-            private set;
+            set;
         }
 
         public AttributeCollection Attributes
         {
             get;
-            private set;
+            set;
+        }
+        public T GetAttribute<T>() where T : Attribute
+        {
+            foreach(var attr in Attributes)
+            {
+                if (attr is T)
+                    return (T)attr;
+            }
+            return null;
         }
 
         public string Category
         {
             get;
             set;
-        }
+        } = "Misc";
 
         public bool ParentIsValueType
         {
             get;
-            private set;
+            set;
         }
 
         public bool IsBrowsable
         {
             get;
-            private set;
+            set;
         }
 
         public Rtti.UTypeDesc DeclaringType
         {
             get;
-            private set;
+            set;
         }
 
         public PGCustomValueEditorAttribute CustomValueEditor
         {
             get;
-            private set;
+            set;
         }
 
         PropertyMultiValue mMultiValue;
@@ -270,36 +294,52 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 mMultiValue.Cleanup();
                 foreach(var elem in (IEnumerable)objIns)
                 {
-                    var elemType = elem.GetType();
-                    var propertyInfo = elemType.GetProperty(Name);
-                    if (propertyInfo != null)
+                    var custom = elem as IPropertyCustomization;
+                    if (custom != null)
                     {
-                        var val = _ProGetValue(propertyInfo, elem, useProvider);
-                        mMultiValue.Values.Add(val);
+                        mMultiValue.Values.Add(custom.GetPropertyValue(Name));
                     }
-
-                    var fieldInfo = elemType.GetField(Name);
-                    if (fieldInfo != null)
+                    else
                     {
-                        var val = _FieldGetValue(fieldInfo, elem, useProvider);
-                        mMultiValue.Values.Add(val);
+                        var elemType = elem.GetType();
+                        var propertyInfo = elemType.GetProperty(Name);
+                        if (propertyInfo != null)
+                        {
+                            var val = _ProGetValue(propertyInfo, elem, useProvider);
+                            mMultiValue.Values.Add(val);
+                        }
+
+                        var fieldInfo = elemType.GetField(Name);
+                        if (fieldInfo != null)
+                        {
+                            var val = _FieldGetValue(fieldInfo, elem, useProvider);
+                            mMultiValue.Values.Add(val);
+                        }
                     }
                 }
                 return mMultiValue.GetValue();
             }
             else
             {
-                var insType = objIns.GetType();
-                var propertyInfo = insType.GetProperty(Name);
-                if (propertyInfo != null)
+                var custom = objIns as IPropertyCustomization;
+                if (custom != null)
                 {
-                    return _ProGetValue(propertyInfo, objIns, useProvider);
+                    return custom.GetPropertyValue(Name);
                 }
-
-                var fieldInfo = insType.GetField(Name);
-                if (fieldInfo != null)
+                else
                 {
-                    return _FieldGetValue(fieldInfo, objIns, useProvider);
+                    var insType = objIns.GetType();
+                    var propertyInfo = insType.GetProperty(Name);
+                    if (propertyInfo != null)
+                    {
+                        return _ProGetValue(propertyInfo, objIns, useProvider);
+                    }
+
+                    var fieldInfo = insType.GetField(Name);
+                    if (fieldInfo != null)
+                    {
+                        return _FieldGetValue(fieldInfo, objIns, useProvider);
+                    }
                 }
             }
 
@@ -314,7 +354,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 CustomValueEditor.Provider.SetValue(proIns, value);
             }
             else
-                pro.SetValue(objIns, value);
+            {
+                if (pro.CanWrite)
+                    pro.SetValue(objIns, value);
+            }
         }
         void _FieldSetValue(FieldInfo field, object objIns, object value, bool useProvider)
         {
@@ -343,14 +386,21 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         if (index >= multiValue.Values.Count)
                             continue;
 
-                        var elemType = elem.GetType();
-                        var propertyInfo = elemType.GetProperty(Name);
-                        if (propertyInfo != null)
-                            _ProSetValue(propertyInfo, elem, multiValue.Values[index], useProvider);
-                        var fieldInfo = elemType.GetField(Name);
-                        if (fieldInfo != null)
-                            _FieldSetValue(fieldInfo, elem, multiValue.Values[index], useProvider);
-
+                        var custom = elem as IPropertyCustomization;
+                        if (custom != null)
+                        {
+                            custom.SetPropertyValue(Name, multiValue.Values[index]);
+                        }
+                        else
+                        {
+                            var elemType = elem.GetType();
+                            var propertyInfo = elemType.GetProperty(Name);
+                            if (propertyInfo != null)
+                                _ProSetValue(propertyInfo, elem, multiValue.Values[index], useProvider);
+                            var fieldInfo = elemType.GetField(Name);
+                            if (fieldInfo != null)
+                                _FieldSetValue(fieldInfo, elem, multiValue.Values[index], useProvider);
+                        }
                         index++;
                     }
                 }
@@ -358,32 +408,48 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 {
                     foreach (var elem in (IEnumerable)objIns)
                     {
-                        var elemType = elem.GetType();
-                        var propertyInfo = elemType.GetProperty(Name);
-                        if (propertyInfo != null)
+                        var custom = elem as IPropertyCustomization;
+                        if (custom != null)
                         {
-                            _ProSetValue(propertyInfo, elem, value, useProvider);
+                            custom.SetPropertyValue(Name, value);
                         }
-                        var fieldInfo = elemType.GetField(Name);
-                        if (fieldInfo != null)
+                        else
                         {
-                            _FieldSetValue(fieldInfo, elem, value, useProvider);
+                            var elemType = elem.GetType();
+                            var propertyInfo = elemType.GetProperty(Name);
+                            if (propertyInfo != null)
+                            {
+                                _ProSetValue(propertyInfo, elem, value, useProvider);
+                            }
+                            var fieldInfo = elemType.GetField(Name);
+                            if (fieldInfo != null)
+                            {
+                                _FieldSetValue(fieldInfo, elem, value, useProvider);
+                            }
                         }
                     }
                 }
             }
             else
             {
-                var insType = objIns.GetType();
-                var propertyInfo = insType.GetProperty(Name);
-                if (propertyInfo != null)
+                var custom = objIns as IPropertyCustomization;
+                if (custom != null)
                 {
-                    _ProSetValue(propertyInfo, objIns, value, useProvider);
+                    custom.SetPropertyValue(Name, value);
                 }
-                var fieldInfo = insType.GetField(Name);
-                if (fieldInfo != null)
+                else
                 {
-                    _FieldSetValue(fieldInfo, objIns, value, useProvider);
+                    var insType = objIns.GetType();
+                    var propertyInfo = insType.GetProperty(Name);
+                    if (propertyInfo != null)
+                    {
+                        _ProSetValue(propertyInfo, objIns, value, useProvider);
+                    }
+                    var fieldInfo = insType.GetField(Name);
+                    if (fieldInfo != null)
+                    {
+                        _FieldSetValue(fieldInfo, objIns, value, useProvider);
+                    }
                 }
             }
 
@@ -418,7 +484,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             mIsReadonly = false;
             Description = default;
             Attributes = default;
-            Category = default;
+            Category = "Misc";
             ParentIsValueType = default;
             IsBrowsable = default;
             DeclaringType = default;            
@@ -557,7 +623,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
                     IndentImageWidth = info.HostPropertyGrid.Indent,
                     IndentTextureUVMin = Vector2.Zero,
-                    IndentTextureUVMax = Vector2.UnitXY,
+                    IndentTextureUVMax = Vector2.One,
                     IndentColor = info.HostPropertyGrid.IndentColor,
                     HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                     Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
@@ -672,7 +738,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
                     IndentImageWidth = info.HostPropertyGrid.Indent,
                     IndentTextureUVMin = Vector2.Zero,
-                    IndentTextureUVMax = Vector2.UnitXY,
+                    IndentTextureUVMax = Vector2.One,
                     IndentColor = info.HostPropertyGrid.IndentColor,
                     HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                     Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,

@@ -47,7 +47,26 @@ namespace EngineNS
                 else
                 {
                     var v = (Vector4)info.Value;
-                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 4, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    float speed = 0.1f;
+                    var format = "%.6f";
+                    if (info.HostProperty != null)
+                    {
+                        var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueRange>();
+                        if (vR != null)
+                        {
+                            minValue = (float)vR.Min;
+                            maxValue = (float)vR.Max;
+                        }
+                        var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueChangeStep>();
+                        if (vStep != null)
+                        {
+                            speed = vStep.Step;
+                        }
+                        var vFormat = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueFormat>();
+                        if (vFormat != null)
+                            format = vFormat.Format;
+                    }
+                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 4, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     //ImGuiAPI.PopStyleVar(1);
                     if (changed && !info.Readonly)//(v != saved)
                     {
@@ -79,7 +98,7 @@ namespace EngineNS
                         CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
                         IndentImageWidth = info.HostPropertyGrid.Indent,
                         IndentTextureUVMin = Vector2.Zero,
-                        IndentTextureUVMax = Vector2.UnitXY,
+                        IndentTextureUVMax = Vector2.One,
                         IndentColor = info.HostPropertyGrid.IndentColor,
                         HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                         Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
@@ -142,7 +161,7 @@ namespace EngineNS
                         CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
                         IndentImageWidth = info.HostPropertyGrid.Indent,
                         IndentTextureUVMin = Vector2.Zero,
-                        IndentTextureUVMax = Vector2.UnitXY,
+                        IndentTextureUVMax = Vector2.One,
                         IndentColor = info.HostPropertyGrid.IndentColor,
                         HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                         Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,

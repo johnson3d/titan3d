@@ -25,7 +25,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             InitializeManMenu();
             await PGMember.Initialize();
-            InitializeToolbar();
             return true;
         }
 
@@ -91,42 +90,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        EGui.UIProxy.Toolbar mToolbar = new EGui.UIProxy.Toolbar();
-        void InitializeToolbar()
-        {
-            mToolbar.AddToolbarItems(
-                new EGui.UIProxy.ToolbarIconButtonProxy()
-                {
-                    Name = "Save",
-                    Action = () =>
-                    {
-                        //SaveClassGraph(RName.GetRName("UTest/class_graph.xml"));
-                        SaveClassGraph(AssetName);
-                        GenerateCode();
-                        CompileCode();
-                    }
-                },
-                new EGui.UIProxy.ToolbarSeparator(),
-                new EGui.UIProxy.ToolbarIconButtonProxy()
-                {
-                    Name = "GenCode",
-                    Action = () =>
-                    {
-                        GenerateCode();
-                        CompileCode();
-                    }
-                },
-                new EGui.UIProxy.ToolbarSeparator(),
-                new EGui.UIProxy.ToolbarIconButtonProxy()
-                {
-                    Name = "ClassSettings",
-                    Action = ()=>
-                    {
-                        PGMember.Target = DefClass;
-                    }
-                }
-            );
-        }
         public Graphics.Pipeline.IRootForm GetRootForm()
         {
             return this;
@@ -281,7 +244,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
 
                 string code = "";
-                mCSCodeGen.GenerateClassCode(DefClass, ref code);
+                mCSCodeGen.GenerateClassCode(DefClass, AssetName, ref code);
                 SaveCSFile(code);
                 GenerateAssemblyDescCreateInstanceCode();
 
@@ -344,30 +307,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public void CompileCode()
         {
-            var csFiles = new List<string>(IO.FileManager.GetFiles(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game), "*.cs"));
-            var projectPath = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProjectPath;
-            csFiles.AddRange(IO.FileManager.GetFiles(projectPath, "*.cs"));
-            List<string> arguments = new List<string>();
-            for (int i=0; i<csFiles.Count; ++i)
-                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFiles[i]));
-
-            var projectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject;
-            var projDef = XDocument.Load(projectFile);
-            var references = projDef.Element("Project").Elements("ItemGroup").Elements("Reference").Select(refElem => refElem.Value);
-            foreach(var reference in references)
-            {
-                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile, projectPath + reference));
-            }
-            //var references = projDef.Element(projDef.n) 
-
             var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameAssembly;
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OutputFile, assemblyFile));
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.PdbFile, assemblyFile.Replace(".dll", ".tpdb")));
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.Outputkind, OutputKind.DynamicallyLinkedLibrary.ToString()));
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OptimizationLevel, OptimizationLevel.Debug.ToString()));
-            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.AllowUnsafe, "true"));
-
-            if (CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray()))
+            if (UEngine.Instance.MacrossModule.CompileCode(assemblyFile))
             {
                 UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
                 var typeDesc = DefClass.TryGetTypeDesc();
@@ -441,13 +382,72 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 ImGuiAPI.EndMenuBar();
             }
         }
+        struct STToolButtonData
+        {
+            public bool IsMouseDown;
+            public bool IsMouseHover;
+        }
+        STToolButtonData[] mToolBtnDatas = new STToolButtonData[7];
         public unsafe void OnDraw()
         {
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             if (ImGuiAPI.Begin($"Macross:{IO.FileManager.GetPureName(AssetName!=null? AssetName.Name :"NoName")}", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None| ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
-                mToolbar.OnDraw(in drawList, in Support.UAnyPointer.Default);
+
+                int toolBarItemIdx = 0;
+                var spacing = EGui.UIProxy.StyleConfig.Instance.ToolbarSeparatorThickness + EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X * 2;
+                EGui.UIProxy.Toolbar.BeginToolbar(in drawList);
+                if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, in Support.UAnyPointer.Default, 
+                    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Save"))
+                {
+                    SaveClassGraph(AssetName);
+                    GenerateCode();
+                    CompileCode();
+                }
+                toolBarItemIdx++;
+                EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+                if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, in Support.UAnyPointer.Default,
+                    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "GenCode", 0, spacing))
+                {
+                    GenerateCode();
+                    CompileCode();
+                }
+                toolBarItemIdx++;
+                EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+                if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, in Support.UAnyPointer.Default,
+                    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "ClassSettings", 0, spacing))
+                {
+                    PGMember.Target = DefClass;
+                }
+                toolBarItemIdx++;
+                // test ////////////////
+                //if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, in Support.UAnyPointer.Default,
+                //    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "DebugTest"))
+                //{
+                //    var result = UEngine.Instance.EventPoster.Post(() =>
+                //    {
+                //        var tt = UEngine.Instance.MacrossModule.NewInnerObject<Macross.UMacrossTestClass>(AssetName);
+                //        var methodInfo = tt.GetType().GetMethod("Method_0");
+                //        //tt.VirtualFunc3(5);
+                //        methodInfo?.Invoke(tt, null);
+
+                //        return true;
+                //    }, Thread.Async.EAsyncTarget.Logic);
+                //}
+                ////////////////////////
+                toolBarItemIdx++;
+                EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+                if(Macross.UMacrossDebugger.Instance.CurrrentBreak != null)
+                {
+                    if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, in Support.UAnyPointer.Default,
+                        ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Run", 0, spacing))
+                    {
+                        Macross.UMacrossDebugger.Instance.Run();
+                    }
+                }
+                
+                EGui.UIProxy.Toolbar.EndToolbar();
 
                 if (ImGuiAPI.IsWindowDocked())
                 {
@@ -455,7 +455,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -540,68 +540,34 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 if (EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
                 {
                     ImGuiAPI.OpenPopup("MacrossMemTypeSelPopup", ImGuiPopupFlags_.ImGuiPopupFlags_None);
-                }
-                Type selectedType = null;
-                // 临时这样写一下，后面主要在PropertyGrid中修改类型
-                if (ImGuiAPI.BeginPopup("MacrossMemTypeSelPopup", ImGuiWindowFlags_.ImGuiWindowFlags_None))
-                {
-                    var drawList = ImGuiAPI.GetWindowDrawList();
-                    var menuData = new Support.UAnyPointer();
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("SByte", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(SByte);
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Byte", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(Byte);
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Int16", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(Int16);
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("UInt16", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(UInt16);
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Int32", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(Int32);
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("UInt32", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(UInt32);
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Int64", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(Int64);
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("UInt64", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(UInt64);
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("float", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(float);
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("double", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(double);
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("string", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(string);
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Vector2", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(Vector2);
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Vector3", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(Vector3);
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("Vector4", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
-                        selectedType = typeof(Vector4);
-
-                    ImGuiAPI.EndPopup();
-                }
-                if(selectedType != null)
-                { 
-                    var num = 0;
-                    while (true)
-                    {
-                        bool bFind = false;
-                        for (int i = 0; i < DefClass.Properties.Count; i++)
+                    Type selectedType = typeof(int);
+                    if(selectedType != null)
+                    { 
+                        var num = 0;
+                        while (true)
                         {
-                            if (DefClass.Properties[i].VariableName == $"Member_{num}")
+                            bool bFind = false;
+                            for (int i = 0; i < DefClass.Properties.Count; i++)
                             {
-                                num++;
-                                bFind = true;
-                                break;
+                                if (DefClass.Properties[i].VariableName == $"Member_{num}")
+                                {
+                                    num++;
+                                    bFind = true;
+                                    break;
+                                }
                             }
+                            if (!bFind)
+                                break;
                         }
-                        if (!bFind)
-                            break;
-                    }
 
-                    var mb = new UVariableDeclaration();
-                    mb.VariableType = new UTypeReference(selectedType);
-                    mb.VariableName = $"Member_{num}";
-                    mb.VisitMode = EVisisMode.Local;
-                    DefClass.Properties.Add(mb);
+                        var mb = new UVariableDeclaration();
+                        mb.VariableType = new UTypeReference(selectedType);
+                        mb.VariableName = $"Member_{num}";
+                        mb.VisitMode = EVisisMode.Local;
+                        mb.InitValue = new UPrimitiveExpression(Rtti.UTypeDesc.TypeOf(selectedType), selectedType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(selectedType) : null);
+                        mb.Comment = new UCommentStatement("");
+                        DefClass.Properties.Add(mb);
+                    }
                 }
                 if (membersTreeNodeResult)
                 {
@@ -741,6 +707,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 PGMember.OnDraw(true, false, false);
             }
         }
+        Macross.UMacrossBreak mBreakerStore = null;
         protected unsafe void OnRightWindow()
         {
             var vMin = ImGuiAPI.GetWindowContentRegionMin();
@@ -750,11 +717,30 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var itMax = ImGuiAPI.GetItemRectSize();
                 vMin.Y += itMax.Y;
                 var sz = vMax - vMin;
+                bool breakerChanged = false;
+                if (mBreakerStore != Macross.UMacrossDebugger.Instance.CurrrentBreak)
+                {
+                    mBreakerStore = Macross.UMacrossDebugger.Instance.CurrrentBreak;
+                    breakerChanged = true;
+                }
                 for (int i = 0; i < OpenFunctions.Count; i++)
                 {
-                    if (ImGuiAPI.BeginTabItem(OpenFunctions[i].Name, ref OpenFunctions[i].VisibleInClassGraphTables, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
+                    var func = OpenFunctions[i];
+                    if(breakerChanged)
                     {
-                        DrawFunctionGraph(OpenFunctions[i], sz);
+                        for(int linkerIdx=0; linkerIdx < func.Linkers.Count; linkerIdx++)
+                        {
+                            func.Linkers[linkerIdx].InDebuggerLine = false;
+                        }
+                        if (mBreakerStore != null)
+                            func.GraphRenderer.BreakerName = mBreakerStore.BreakName;
+                        else
+                            func.GraphRenderer.BreakerName = "";
+                    }
+
+                    if (ImGuiAPI.BeginTabItem(func.Name, ref func.VisibleInClassGraphTables, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
+                    {
+                        DrawFunctionGraph(func, sz);
 
                         ImGuiAPI.EndTabItem();
                     }
@@ -819,3 +805,41 @@ namespace EngineNS.UTest
     }
 }
 
+namespace EngineNS.Macross
+{
+    public partial class UMacrossModule
+    {
+        public bool CompileCode(string assemblyFile)
+        {
+            bool success = false;
+            TryCompileCode(assemblyFile, ref success);
+            return success;
+        }
+        partial void TryCompileCode(string assemblyFile, ref bool success)
+        {
+            var csFiles = new List<string>(IO.FileManager.GetFiles(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game), "*.cs"));
+            var projectPath = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProjectPath;
+            csFiles.AddRange(IO.FileManager.GetFiles(projectPath, "*.cs"));
+            var arguments = new List<string>();
+            for (int i = 0; i < csFiles.Count; ++i)
+                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFiles[i]));
+
+            var projectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject;
+            var projDef = XDocument.Load(projectFile);
+            var references = projDef.Element("Project").Elements("ItemGroup").Elements("Reference").Select(refElem => refElem.Value);
+            foreach (var reference in references)
+            {
+                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile, projectPath + reference));
+            }
+            //var references = projDef.Element(projDef.n) 
+
+            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OutputFile, assemblyFile));
+            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.PdbFile, assemblyFile.Replace(".dll", ".tpdb")));
+            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.Outputkind, OutputKind.DynamicallyLinkedLibrary.ToString()));
+            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OptimizationLevel, OptimizationLevel.Debug.ToString()));
+            arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.AllowUnsafe, "true"));
+
+            success = CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray());
+        }
+    }
+}

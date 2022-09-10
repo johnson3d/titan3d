@@ -139,7 +139,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     ImageFile = RName.GetRName("icons/indentdec.srv", RName.ERNameType.Engine),
                     ImageSize = new Vector2(32, 2),
                     UVMin = Vector2.Zero,
-                    UVMax = Vector2.UnitXY,
+                    UVMax = Vector2.One,
                 };
             }
             if(mDropShadowDec == null)
@@ -149,7 +149,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     ImageFile = RName.GetRName("icons/shadowtop.srv", RName.ERNameType.Engine),
                     ImageSize = new Vector2(32, 2),
                     UVMin = Vector2.Zero,
-                    UVMax = Vector2.UnitXY,
+                    UVMax = Vector2.One,
                 };
             }
 
@@ -263,7 +263,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                 UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_13px);
 
-                Vector2 size = Vector2.InvmUnitXY;
+                Vector2 size = Vector2.MinusOne;
                 //Vector2 size = Vector2.Zero;
                 if (ImGuiAPI.BeginChild($"{PGName}_Properties", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
@@ -383,7 +383,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             CellPaddingYBegin = 0,
                             IndentImageWidth = Indent,
                             IndentTextureUVMin = Vector2.Zero,
-                            IndentTextureUVMax = Vector2.UnitXY,
+                            IndentTextureUVMax = Vector2.One,
                             IndentColor = IndentColor,
                             HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                             Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
@@ -477,6 +477,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 HostPropertyGrid = this,
                                 Flags = flags,
                                 RowHeight = propDesc.RowHeight,
+                                HostProperty = propDesc,
                             };
                             ImGuiTableRowData rowData = new ImGuiTableRowData()
                             {
@@ -486,7 +487,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 CellPaddingYBegin = BeginRowPadding,
                                 IndentImageWidth = Indent,
                                 IndentTextureUVMin = Vector2.Zero,
-                                IndentTextureUVMax = Vector2.UnitXY,
+                                IndentTextureUVMax = Vector2.One,
                                 IndentColor = IndentColor,
                                 HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                                 Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
@@ -650,7 +651,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             CellPaddingYBegin = BeginRowPadding,
                             IndentImageWidth = Indent,
                             IndentTextureUVMin = Vector2.Zero,
-                            IndentTextureUVMax = Vector2.UnitXY,
+                            IndentTextureUVMax = Vector2.One,
                             IndentColor = IndentColor,
                             HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                             Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,

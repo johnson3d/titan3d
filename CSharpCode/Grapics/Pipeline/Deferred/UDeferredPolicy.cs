@@ -109,7 +109,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             return HitproxyNode.GetHitProxyID(MouseX, MouseY);
         }
         #endregion
-        public override RHI.CShaderResourceView GetFinalShowRSV()
+        public override NxRHI.USrView GetFinalShowRSV()
         {
             var attachBuffer = Copy2SwapChainNode.FindAttachBuffer(Copy2SwapChainNode.ColorPinInOut);
             if (attachBuffer == null)
@@ -326,128 +326,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public override void EndTickLogic(GamePlay.UWorld world)
         {
             ParticleNode?.EndTickLogic(world, this, true);
-        }
-        public override void TickLogic(GamePlay.UWorld world)
-        {
-            base.TickLogic(world);
-
-            //BeginTickLogic(world);
-
-            //if (DisableShadow == false)
-            //    mShadowMapNode?.TickLogic(world, this, true);
-
-            //BasePassNode?.TickLogic(world, this, true);
-
-            //GpuSceneNode?.TickLogic(world, this, true);
-
-            //ScreenTilingNode?.TickLogic(world, this, false);
-
-            ////HzbNode?.TickLogic(world, this, false);
-
-            ////VoxelsNode?.TickLogic(world, this, true);
-
-            //HitproxyNode?.TickLogic(world, this, true);
-
-            //PickedNode?.TickLogic(world, this, true);
-
-            //PickBlurNode?.TickLogic(world, this, true);
-
-            //PickHollowNode?.TickLogic(world, this, true);
-
-            //DirLightingNode?.TickLogic(world, this, true);
-
-
-            //if (mDisableHDR == false)
-            //{
-            //    AvgBrightnessNode?.TickLogic(world, this, true);
-            //}
-
-            //ForwordNode?.TickLogic(world, this, true);
-            //ParticleNode?.TickLogic(world, this, true);
-
-            //if (mDisableHDR == false)
-            //{
-            //    //AvgBrightnessNode?.TickLogic(world, this, true);
-            //    HdrNode?.TickLogic(world, this, true);
-            //}
-
-            //EndTickLogic(world);
-        }
-        public unsafe override void TickRender()
-        {
-            base.TickRender();
-            //if (DisableShadow == false)
-            //    mShadowMapNode?.TickRender(this);
-
-            //BasePassNode?.TickRender(this);
-
-            //GpuSceneNode?.TickRender(this);
-
-            //ScreenTilingNode?.TickRender(this);
-
-            ////HzbNode?.TickRender(this);
-
-            ////VoxelsNode?.TickRender(this);
-
-            //HitproxyNode?.TickRender(this);
-
-            //PickedNode?.TickRender(this);
-
-            //PickBlurNode?.TickRender(this);
-
-            //PickHollowNode?.TickRender(this);
-
-            //DirLightingNode?.TickRender(this);
-
-            //if (mDisableHDR == false)
-            //{
-            //    AvgBrightnessNode?.TickRender(this);
-            //}
-
-            //ForwordNode?.TickRender(this);
-            //ParticleNode?.TickRender(this);
-
-            //if (mDisableHDR == false)
-            //{
-            //    //AvgBrightnessNode?.TickRender(this);
-            //    HdrNode?.TickRender(this);
-            //}
-        }
-        public unsafe override void TickSync()
-        {
-            base.TickSync();
-            //if (DisableShadow == false)
-            //    mShadowMapNode?.TickSync(this);
-
-            //BasePassNode?.TickSync(this);
-
-            //GpuSceneNode?.TickSync(this);
-
-            //ScreenTilingNode?.TickSync(this);
-
-            ////HzbNode?.TickSync(this);
-
-            ////VoxelsNode?.TickSync(this);
-
-            //HitproxyNode?.TickSync(this);
-
-            //PickedNode?.TickSync(this);
-
-            //PickBlurNode?.TickSync(this);
-
-            //PickHollowNode?.TickSync(this);
-
-            //DirLightingNode?.TickSync(this);
-
-            //ForwordNode?.TickSync(this);
-            //ParticleNode?.TickSync(this);
-
-            //if (mDisableHDR == false)
-            //{
-            //    AvgBrightnessNode?.TickSync(this);
-
-            //    HdrNode?.TickSync(this);
-            //}
         }
     }
 }

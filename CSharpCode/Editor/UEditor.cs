@@ -21,6 +21,10 @@ namespace EngineNS.Editor
         }
         [Rtti.Meta]
         public string GameAssembly { get; set; }
+        [Rtti.Meta]
+        public RName PhyMaterialIconName { get; set; }
+        [Rtti.Meta]
+        public RName MacrossIconName { get; set; }
         //[Rtti.Meta]
         //public GamePlay.UWorld.UVisParameter.EVisCullFilter CullFilters { get; set; } = GamePlay.UWorld.UVisParameter.EVisCullFilter.All;
         //public bool IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter filters)
@@ -32,7 +36,8 @@ namespace EngineNS.Editor
     public partial class UEditor : UModule<UEngine>
     {
         public UEditorConfig Config { get; set; } = new UEditorConfig();
-
+        public EGui.UUvAnim PhyMaterialIcon { get; set; }
+        public EGui.UUvAnim MacrossIcon { get; set; }
         public override void Cleanup(UEngine host)
         {
             RNamePopupContentBrowser?.Cleanup();
@@ -44,11 +49,12 @@ namespace EngineNS.Editor
         {
             var cfgFile = host.FileManager.GetRoot(IO.FileManager.ERootDir.Editor) + "EditorConfig.cfg";
             Config = IO.FileManager.LoadXmlToObject<UEditorConfig>(cfgFile);
-            if(Config == null)
+            if (Config == null)
             {
                 Config = new UEditorConfig();
                 Config.GameProject = "Module/GameProject/GameProject.csproj";
                 Config.GameAssembly = "binaries/net5.0/GameProject.dll";
+                Config.PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
                 IO.FileManager.SaveObjectToXml(cfgFile, Config);
             }
 
@@ -57,6 +63,23 @@ namespace EngineNS.Editor
             UEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
 
             await RNamePopupContentBrowser.Initialize();
+
+            return await base.Initialize(host);
+        }
+        public override async Task<bool> PostInitialize(UEngine host)
+        {
+            if (Config.PhyMaterialIconName == null)
+            {
+                Config.PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
+            }
+            PhyMaterialIcon = await UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(Config.PhyMaterialIconName);
+
+            if (Config.MacrossIconName == null)
+            {
+                Config.MacrossIconName = RName.GetRName("icons/macrossicon.uvanim", RName.ERNameType.Engine);
+            }
+            MacrossIcon = await UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(Config.MacrossIconName);
+
             return await base.Initialize(host);
         }
     }

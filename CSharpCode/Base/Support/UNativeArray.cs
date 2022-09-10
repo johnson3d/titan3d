@@ -177,5 +177,48 @@ namespace EngineNS.Support
                 }
             }
         }
+        public bool Contains(in T item)
+        {
+            var count = mCoreObject.GetCount();
+            if (count == 0)
+                return false;
+
+            unsafe
+            {
+                var ptr = mCoreObject.GetAddressAt(0);
+                if (((IntPtr)ptr) == IntPtr.Zero)
+                    return false;
+
+                for(int i= 0; i < count; i++)
+                {
+                    if (item.Equals(*(T*)(ptr + (i * sizeof(T)))))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+        public int IndexOf(in T item)
+        {
+            var count = mCoreObject.GetCount();
+            if (count == 0)
+                return -1;
+
+            unsafe
+            {
+                var ptr = mCoreObject.GetAddressAt(0);
+                if (((IntPtr)ptr) == IntPtr.Zero)
+                    return -1;
+
+                for (int i = 0; i < count; i++)
+                {
+                    if (item.Equals(*(T*)(ptr + (i * sizeof(T)))))
+                        return i;
+                }
+            }
+
+            return -1;
+
+        }
     }
 }

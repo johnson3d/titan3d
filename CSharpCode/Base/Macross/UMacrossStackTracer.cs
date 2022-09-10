@@ -13,6 +13,14 @@ namespace EngineNS.Macross
             set;
         }
         public Dictionary<string, Support.UAnyPointer> mFrameStates = new Dictionary<string, Support.UAnyPointer>();
+        public UMacrossStackFrame()
+        {
+
+        }
+        public UMacrossStackFrame(in RName name)
+        {
+            MacrossName = name;
+        }
         public void ClearDebugInfo()
         {
             foreach (var i in mFrameStates)
@@ -42,16 +50,20 @@ namespace EngineNS.Macross
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetWatchVariable(string name, object value)
         {
-            Support.UAnyPointer tmp;
-            if (mFrameStates.TryGetValue(name, out tmp))
-            {
-                tmp.SetValue(value);
-            }
-            else
-            {
-                tmp.SetValue(value);
-            }
+            Support.UAnyPointer tmp = new Support.UAnyPointer();
+            tmp.SetValue(value);
             mFrameStates[name] = tmp;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void SetWatchVariable(string name, void* value)
+        {
+            Support.UAnyPointer tmp = new Support.UAnyPointer();
+            tmp.Value.SetPointer((IntPtr)value);
+            mFrameStates[name] = tmp;
+        }
+        public bool HasWatchVariable(string name)
+        {
+            return mFrameStates.ContainsKey(name);
         }
         public object GetWatchVariable(string name)
         {

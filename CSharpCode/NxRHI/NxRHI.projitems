@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>d97f536c-7fe8-49bb-b9cb-4ba6ea85488c</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.NxRHI</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)UBuffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UCommandList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UDrawcall.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UFrameBuffers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UGeomMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UShaderEffect.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UGpuDevice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UGpuState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UInputAssembly.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UShader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UShaderCompiler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UTexture.cs" />
+  </ItemGroup>
+</Project>

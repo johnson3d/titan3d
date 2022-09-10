@@ -14,8 +14,8 @@ namespace EngineNS.Bricks.Particle
         }
         public override void InitNodePins()
         {
-            AddInputOutput(ColorPinInOut, EGpuBufferViewType.GBVT_Rtv | EGpuBufferViewType.GBVT_Srv);
-            AddInputOutput(DepthPinInOut, EGpuBufferViewType.GBVT_Dsv | EGpuBufferViewType.GBVT_Srv);
+            AddInputOutput(ColorPinInOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         }
         public Graphics.Pipeline.UDrawBuffers BasePass = new Graphics.Pipeline.UDrawBuffers();
         public async override System.Threading.Tasks.Task Initialize(Graphics.Pipeline.URenderPolicy policy,
@@ -31,18 +31,14 @@ namespace EngineNS.Bricks.Particle
         {
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
+            cmd.BeginEvent("NebulaUpdate");
         }
         public override unsafe void EndTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
         {
             var cmd = BasePass.DrawCmdList;
+            cmd.EndEvent();
             cmd.EndCommand();
-        }
-        public unsafe override void TickRender(Graphics.Pipeline.URenderPolicy policy)
-        {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-
-            var cmdlist_hp = BasePass.CommitCmdList.mCoreObject;
-            cmdlist_hp.Commit(rc.mCoreObject);
+            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }
         public unsafe override void TickSync(Graphics.Pipeline.URenderPolicy policy)
         {

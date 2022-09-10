@@ -4,7 +4,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class MethodNode : UNodeBase, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode
+    public partial class MethodNode : UNodeBase, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, IBreakableNode, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public PinOut Result = null;
         public PinIn Self = null;
@@ -160,8 +160,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             public List<DelegateArgumentSaveData> DelegateArgumentSaveDatas { get; set; } = new List<DelegateArgumentSaveData>();
         }
 
-        List<DelegateArgumentSaveData> mDelegateArgumentSaveDatas = new List<DelegateArgumentSaveData>();
-
         [Rtti.Meta(Order = 1)]
         public TSaveData SaveData
         {
@@ -292,6 +290,44 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         [Rtti.Meta]
         public float InputControlWidth { get; set; } = 60.0f;
+
+        public string BreakerName 
+        {
+            get
+            {
+                string methodName = "";
+                if (Method != null)
+                    methodName = Method.MethodName;
+                else if (MethodDesc != null)
+                    methodName = MethodDesc.MethodName;
+
+                return "breaker_" + methodName + "_" + (uint)NodeId.GetHashCode();
+            }
+        }
+        EBreakerState mBreakerState = EBreakerState.Hidden;
+        public EBreakerState BreakerState
+        { 
+            get => mBreakerState; 
+            set
+            {
+                mBreakerState = value;
+                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+            }
+        }
+        public void AddMenuItems(UMenuItem parentItem)
+        {
+            parentItem.AddMenuItem("Add Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Enable;
+                });
+            parentItem.AddMenuItem("Remove Breakpoint", null,
+                (UMenuItem item, object sender) =>
+                {
+                    BreakerState = EBreakerState.Hidden;
+                });
+        }
+
 
         void AddSubPinFromDelegate(System.Reflection.ParameterInfo info, string hostPinName, List<PinData> subPins)
         {
@@ -668,12 +704,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if (Result.Tag != null)
                 {
+                    string valueString = GetRuntimeValueString(GetReturnValueName());
+                    string typeString = "";
                     var cvtType = Result.Tag as Rtti.UTypeDesc;
                     if (cvtType != null)
                     {
-                        EGui.Controls.CtrlUtility.DrawHelper($"{cvtType.FullName}");
-                        return;
+                        typeString = cvtType.FullName;
                     }
+                    EGui.Controls.CtrlUtility.DrawHelper($"{valueString}({typeString})");
                 }
                 return;
             }
@@ -705,7 +743,60 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 if(type.IsDelegate)
                     EGui.Controls.CtrlUtility.DrawHelper($"Double click to open graph");
                 else
-                    EGui.Controls.CtrlUtility.DrawHelper($"{type.FullName}");
+                {
+                    var paramName = GetParamValueName(pin.Name);
+                    string helperString = GetRuntimeValueString(paramName);                    
+                    EGui.Controls.CtrlUtility.DrawHelper($"{helperString}({type.FullName})");
+                }
+            }
+        }
+        public override object GetPropertyEditObject()
+        {
+            return base.GetPropertyEditObject();
+        }
+        public void GetProperties(ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            for(int i=0; i<Arguments.Count; i++)
+            {
+                var pinIn = Arguments[i].PinIn;
+                if(pinIn != null && !((Rtti.UTypeDesc)pinIn.Tag).IsDelegate)
+                {
+                    var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                    proDesc.Name = pinIn.Name;
+                    proDesc.DisplayName = pinIn.Name;
+                    proDesc.PropertyType = (Rtti.UTypeDesc)pinIn.Tag;
+                    proDesc.CustomValueEditor = pinIn.EditValue;
+                    collection.Add(proDesc);
+                }
+            }
+        }
+        public object GetPropertyValue(string propertyName)
+        {
+            for(int i=0; i<Arguments.Count; i++)
+            {
+                var pinIn = Arguments[i].PinIn;
+                if (pinIn == null)
+                    continue;
+                if (pinIn.Name == propertyName && pinIn.EditValue != null)
+                {
+                    return pinIn.EditValue.Value;
+                }
+            }
+            return null;
+        }
+
+        public void SetPropertyValue(string propertyName, object value)
+        {
+            for(int i=0; i<Arguments.Count; i++)
+            {
+                var pinIn = Arguments[i].PinIn;
+                if (pinIn == null)
+                    continue;
+                if(pinIn.Name == propertyName && pinIn.EditValue != null)
+                {
+                    pinIn.EditValue.Value = value;
+                    OnValueChanged(pinIn.EditValue);
+                }
             }
         }
         public override void OnDoubleClickedPin(NodePin hitPin)
@@ -1031,12 +1122,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             exp = new UVariableReferenceExpression(paramName);
                             if (beforeStatements != null)
                             {
+                                var typeRef = new UTypeReference(pinType);
                                 var varDec = new UVariableDeclaration()
                                 {
-                                    VariableType = new UTypeReference(pinType),
+                                    VariableType = typeRef,
                                     VariableName = paramName,
                                 };
                                 beforeStatements.Add(varDec);
+                                beforeStatements.Add(new UDebuggerSetWatchVariable()
+                                {
+                                    VariableType = typeRef,
+                                    VariableName = paramName,
+                                    VariableValue = exp,
+                                });
                             }
                         }
                         break;
@@ -1077,54 +1175,90 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     if (((UVariableReferenceExpression)texp).IsProperty)
                                     {
                                         exp = new UVariableReferenceExpression(paramName);
+                                        var typeRef = new UTypeReference(pinType);
                                         if (beforeStatements != null)
                                         {
                                             var varDec = new UVariableDeclaration()
                                             {
-                                                VariableType = new UTypeReference(pinType),
+                                                VariableType = typeRef,
                                                 VariableName = paramName,
                                                 InitValue = fexp,
                                             };
                                             beforeStatements.Add(varDec);
+                                            beforeStatements.Add(new UDebuggerSetWatchVariable()
+                                            {
+                                                VariableType = typeRef,
+                                                VariableName = paramName,
+                                                VariableValue = exp,
+                                            });
                                         }
                                         if (afterStatements != null && pinData.OpType == EMethodArgumentAttribute.Ref)
                                         {
                                             var assign = new UAssignOperatorStatement()
                                             {
-                                                From = new UVariableReferenceExpression(paramName),
+                                                From = exp,
                                                 To = fexp,
                                             };
                                             afterStatements.Add(assign);
+                                            afterStatements.Add(new UDebuggerSetWatchVariable()
+                                            {
+                                                VariableType = typeRef,
+                                                VariableName = paramName,
+                                                VariableValue = exp,
+                                            });
                                         }
                                     }
                                     else
+                                    {
                                         exp = fexp;
+                                        var varName = ((UVariableReferenceExpression)texp).VariableName;
+                                        beforeStatements?.Add(new UDebuggerSetWatchVariable()
+                                        {
+                                            VariableType = new UTypeReference(pinType),
+                                            VariableName = varName,
+                                            VariableValue = exp,
+                                        });
+                                    }
                                 }
                                 else
                                 {
                                     exp = new UVariableReferenceExpression(paramName);
                                     if (beforeStatements != null)
                                     {
+                                        var typeRef = new UTypeReference(pinType);
                                         var varDec = new UVariableDeclaration()
                                         {
-                                            VariableType = new UTypeReference(pinType),
+                                            VariableType = typeRef,
                                             VariableName = paramName,
                                             InitValue = fexp,
                                         };
                                         beforeStatements.Add(varDec);
+                                        beforeStatements.Add(new UDebuggerSetWatchVariable()
+                                        {
+                                            VariableType = typeRef,
+                                            VariableName = paramName,
+                                            VariableValue = exp,
+                                        });
                                     }
                                 }
                             }
                             else
                             {
                                 exp = new UVariableReferenceExpression(paramName);
+                                var typeRef = new UTypeReference(pinType);
                                 var varDec = new UVariableDeclaration()
                                 {
-                                    VariableType = new UTypeReference(pinType),
+                                    VariableType = typeRef,
                                     VariableName = paramName,
                                     InitValue = GetNoneLinkedParameterExp(inPin, argIdx, ref data),
                                 };
                                 beforeStatements.Add(varDec);
+                                beforeStatements.Add(new UDebuggerSetWatchVariable()
+                                {
+                                    VariableType = typeRef,
+                                    VariableName = paramName,
+                                    VariableValue = exp,
+                                });
                             }
                         }
                         break;
@@ -1148,6 +1282,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             }
                             else
                                 exp = GetNoneLinkedParameterExp(inPin, argIdx, ref data);
+
+                            beforeStatements.Add(new UDebuggerSetWatchVariable()
+                            {
+                                VariableType = new UTypeReference(pinType),
+                                VariableName = GetParamValueName(inPin.Name),
+                                VariableValue = exp,
+                            });
                         }
                         break;
                 }
@@ -1231,8 +1372,20 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 methodInvokeExp.Arguments.Add(arg);
             }
             data.CurrentStatements.AddRange(beforeSt);
+            AddDebugBreakerStatement(BreakerName, ref data);
             data.CurrentStatements.Add(methodInvokeExp);
             data.CurrentStatements.AddRange(afterSt);
+
+            if (MethodDesc.ReturnValue != null)
+            {
+                var retName = GetReturnValueName();
+                data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+                {
+                    VariableType = MethodDesc.ReturnValue.VariableType,
+                    VariableName = retName,
+                    VariableValue = new UVariableReferenceExpression(retName),
+                });
+            }
 
             var nextNode = data.NodeGraph.GetOppositePinNode(AfterExec);
             if (nextNode != null)
@@ -1295,8 +1448,20 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 methodInvokeExp.Arguments.Add(arg);
             }
             data.CurrentStatements.AddRange(beforeSt);
+            AddDebugBreakerStatement(BreakerName, ref data);
             data.CurrentStatements.Add(methodInvokeExp);
             data.CurrentStatements.AddRange(afterSt);
+
+            if (method.HasReturnValue())
+            {
+                var retName = GetReturnValueName();
+                data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+                {
+                    VariableType = new UTypeReference(Result.Tag as Rtti.UTypeDesc),
+                    VariableName = retName,
+                    VariableValue = new UVariableReferenceExpression(retName),
+                });
+            }
 
             var nextNode = data.NodeGraph.GetOppositePinNode(AfterExec);
             if (nextNode != null)
@@ -1391,6 +1556,30 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
             return true;
+        }
+
+        public void LightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if(linker != null)
+            {
+                linker.InDebuggerLine = true;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if(node != null)
+                    node.LightDebuggerLine();
+            }
+        }
+
+        public void UnLightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if(linker != null)
+            {
+                linker.InDebuggerLine = false;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if(node != null)
+                    node.UnLightDebuggerLine();
+            }
         }
     }
     public class MethodSelector

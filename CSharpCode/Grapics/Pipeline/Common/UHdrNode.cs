@@ -10,15 +10,15 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/screenspace/hdr.cginc", RName.ERNameType.Engine);
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
-                EVertexStreamType.VST_UV,};
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
+        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, URenderPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
 
@@ -27,20 +27,20 @@ namespace EngineNS.Graphics.Pipeline.Common
             var lightSRV = node.GetAttachBuffer(node.ColorPinIn).Srv;
             var gpuSceneDescSRV = node.GetAttachBuffer(node.GpuScenePinIn).Srv;
             
-            var index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GSourceTarget");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, lightSRV.mCoreObject);
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GSourceTarget");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            var index = drawcall.FindBinder("GSourceTarget");
+            if (index.IsValidPointer)
+                drawcall.BindSRV(index, lightSRV);
+            index = drawcall.FindBinder("Samp_GSourceTarget");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GpuSceneDescSRV");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSrv(index, gpuSceneDescSRV.mCoreObject);
+            index = drawcall.FindBinder("GpuSceneDescSRV");
+            if (index.IsValidPointer)
+                drawcall.BindSRV(index, gpuSceneDescSRV);
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer.mCoreObject);
+            index = drawcall.FindBinder("cbPerGpuScene");
+            if (index.IsValidPointer)
+                drawcall.BindCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer);
         }
     }
     public class UHdrNode : USceenSpaceNode
@@ -57,8 +57,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            AddInput(ColorPinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(GpuScenePinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(GpuScenePinIn, NxRHI.EBufferType.BFT_SRV);
 
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
             base.InitNodePins();

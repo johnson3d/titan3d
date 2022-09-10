@@ -62,9 +62,14 @@ namespace EngineNS.GamePlay.Camera
             }
         }
 
+        private Quaternion Rotation = Quaternion.Identity;
+
         public override bool OnTickLogic(UWorld world, URenderPolicy policy)
         {
-            Placement.Position  = Placement.Quat * DVector3.Backward * ArmLength  + TargetOffset;
+            var position = Placement.AbsTransform.Position + Placement.Quat * DVector3.Backward * ArmLength;
+            var lookAt = Placement.AbsTransform.Position + TargetOffset;
+
+            Camera.LookAtLH(position, lookAt, Vector3.Up);
             return base.OnTickLogic(world, policy);
         }
         #region ICameraControlNode
@@ -89,3 +94,4 @@ namespace EngineNS.GamePlay.Camera
         #endregion ICameraControlNode
     }
 }
+

@@ -159,7 +159,7 @@ namespace EngineNS
         }
         public void StartFrame()
         {
-            ThreadLogic.mLogicBegin.Set();
+            ThreadLogic.LogicBegin.Set();
             ThreadRender.mRenderBegin.Set();
         }
         public void TryTickRender()
@@ -170,7 +170,16 @@ namespace EngineNS
                 {
                     try
                     {
-                        TickableManager.Tickables[i].TickRender(ElapseTickCount);
+                        ITickable cur;
+                        if (TickableManager.Tickables[i].TryGetTarget(out cur))
+                        {
+                            cur.TickRender(ElapseTickCount);
+                        }
+                        else
+                        {
+                            TickableManager.Tickables.RemoveAt(i);
+                            i--;
+                        }
                     }
                     catch(Exception ex)
                     {
@@ -191,7 +200,16 @@ namespace EngineNS
                 {
                     try
                     {
-                        TickableManager.Tickables[i].TickLogic(ElapseTickCount);
+                        ITickable cur;
+                        if (TickableManager.Tickables[i].TryGetTarget(out cur))
+                        {
+                            cur.TickLogic(ElapseTickCount);
+                        }
+                        else
+                        {
+                            TickableManager.Tickables.RemoveAt(i);
+                            i--;
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -212,7 +230,16 @@ namespace EngineNS
                 {
                     try
                     {
-                        TickableManager.Tickables[i].TickSync(ElapseTickCount);
+                        ITickable cur;
+                        if (TickableManager.Tickables[i].TryGetTarget(out cur))
+                        {
+                            cur.TickSync(ElapseTickCount);
+                        }
+                        else
+                        {
+                            TickableManager.Tickables.RemoveAt(i);
+                            i--;
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -228,6 +255,7 @@ namespace EngineNS
             try
             {
                 DrawSlateWindow();
+                UEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
                 if (this.PlayMode != EPlayMode.Game)
                 {
                     UEngine.Instance.AssetMetaManager.EditorCheckShowIconTimeout();

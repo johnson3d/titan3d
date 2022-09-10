@@ -10,14 +10,16 @@ namespace EngineNS.Bricks.CodeBuilder
         public UClassDeclaration Class;
         public UMethodDeclaration Method;
         public UCodeGeneratorBase CodeGen;
+        public RName AssetName;
         public object UserData;
 
-        public UCodeGeneratorData(UNamespaceDeclaration ns, UClassDeclaration cls, UCodeGeneratorBase codeGen)
+        public UCodeGeneratorData(UNamespaceDeclaration ns, UClassDeclaration cls, UCodeGeneratorBase codeGen, in RName assetName)
         {
             Namespace = ns;
             Class = cls;
             Method = null;
             CodeGen = codeGen;
+            AssetName = assetName;
             UserData = null;
         }
     }
@@ -91,15 +93,16 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return GetCodeObjectGen(Rtti.UTypeDesc.TypeOf(type));
         }
-        public void GenerateClassCode(UNamespaceDeclaration ns, UClassDeclaration cls, ref string code)
+        public void GenerateClassCode(UNamespaceDeclaration ns, UClassDeclaration cls, in RName assetName, ref string code)
         {
             var gen = GetCodeObjectGen(Rtti.UTypeDescGetter<UClassDeclaration>.TypeDesc);
-            var data = new UCodeGeneratorData(ns, cls, this);
+            var data = new UCodeGeneratorData(ns, cls, this, assetName);
             gen.GenCodes(cls, ref code, ref data);
+            cls.ResetRuntimeData();
         }
-        public void GenerateClassCode(UClassDeclaration cls, ref string code)
+        public void GenerateClassCode(UClassDeclaration cls, in RName assetName, ref string code)
         {
-            GenerateClassCode(cls.Namespace, cls, ref code);
+            GenerateClassCode(cls.Namespace, cls, assetName, ref code);
         }
 
         public static bool CanConvert(Rtti.UTypeDesc left, Rtti.UTypeDesc right)

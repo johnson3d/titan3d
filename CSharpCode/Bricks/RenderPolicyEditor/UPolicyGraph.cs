@@ -4,7 +4,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.RenderPolicyEditor
 {
-    public partial class UPolicyNode : UNodeBase
+    public partial class UPolicyNode : UNodeBase, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public UPolicyNode()
         {
@@ -101,6 +101,54 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                 graph.PolicyEditor.NodePropGrid.Target = this;
             }
         }
+        #region PG
+        public void GetProperties(ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            var pros = System.ComponentModel.TypeDescriptor.GetProperties(this);
+
+            //collection.InitValue(this,  pros, parentIsValueType);
+            foreach (System.ComponentModel.PropertyDescriptor prop in pros)
+            {
+                //var p = this.GetType().GetProperty(prop.Name);
+                //if (p == null)
+                //    continue;
+                if (prop.ComponentType != typeof(UPolicyNode) && !prop.ComponentType.IsSubclassOf(typeof(UPolicyNode)))
+                {
+                    continue;
+                }
+                var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                proDesc.InitValue(this, thisType, prop, parentIsValueType);
+                if (!proDesc.IsBrowsable)
+                {
+                    proDesc.ReleaseObject();
+                    continue;
+                }
+                collection.Add(proDesc);
+            }
+        }
+
+        public object GetPropertyValue(string propertyName)
+        {
+            var proInfo = this.GetType().GetProperty(propertyName);
+            if (proInfo != null)
+                return proInfo.GetValue(this);
+            var fieldInfo = this.GetType().GetField(propertyName);
+            if (fieldInfo != null)
+                return fieldInfo.GetValue(this);
+            return null;
+        }
+
+        public void SetPropertyValue(string propertyName, object value)
+        {
+            var proInfo = this.GetType().GetProperty(propertyName);
+            if (proInfo != null)
+                proInfo.SetValue(this, value);
+            var fieldInfo = this.GetType().GetField(propertyName);
+            if (fieldInfo != null)
+                fieldInfo.SetValue(this, value);
+        }
+        #endregion
     }
     public class UPolicyGraph : UNodeGraph
     {

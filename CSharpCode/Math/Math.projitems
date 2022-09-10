@@ -9,6 +9,9 @@
     <Import_RootNamespace>EngineNS</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Algorithm\DelaunayTriangle.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Algorithm\FastPoissonDisk.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Algorithm\Voronoi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bezier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bezier\BezierCalculate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BoundingBox.cs" />
@@ -34,7 +37,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Design\Vector3Converter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Vector4Converter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DMatrix.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DMatrix2x2.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DMatrix3x3.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DPlane.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DVector2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DVector3.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DVector4.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Half.cs" />
@@ -44,6 +50,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)IntegerType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MathHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Matrix.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Matrix2x2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Matrix3x2.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Matrix3x3.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plane.cs" />

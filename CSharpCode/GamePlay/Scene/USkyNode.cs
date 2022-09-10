@@ -5,6 +5,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
+    [Bricks.CodeBuilder.ContextMenu("Sky", "Sky", UNode.EditorKeyword)]
     [UNode(NodeDataType = typeof(UMeshNode.UMeshNodeData), DefaultNamePrefix = "Sky")]
     public class USkyNode : UMeshNode
     {

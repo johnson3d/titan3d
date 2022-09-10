@@ -44,6 +44,21 @@ namespace EngineNS
 
                 Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"InitializeModules {i.GetType().FullName}:{(t2 - t1) / 1000} ms");
             }
+
+            foreach (var i in mModules)
+            {
+                if (i.IsModuleRun(UEngine.Instance.PlayMode) == false)
+                    continue;
+
+                var t1 = Support.Time.HighPrecision_GetTickCount();
+                if (false == await i.PostInitialize(host))
+                {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Engine", $"Module {i.GetType()} PostInit failed");
+                }
+                var t2 = Support.Time.HighPrecision_GetTickCount();
+
+                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"PostInitializeModules {i.GetType().FullName}:{(t2 - t1) / 1000} ms");
+            }
         }
         protected void TickModules()
         {
@@ -104,6 +119,11 @@ namespace EngineNS
             return 0;
         }
         public virtual async System.Threading.Tasks.Task<bool> Initialize(THost host)
+        {
+            await Thread.AsyncDummyClass.DummyFunc();
+            return true;
+        }
+        public virtual async System.Threading.Tasks.Task<bool> PostInitialize(THost host)
         {
             await Thread.AsyncDummyClass.DummyFunc();
             return true;

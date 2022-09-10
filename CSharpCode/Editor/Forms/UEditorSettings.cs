@@ -8,7 +8,7 @@ namespace EngineNS.Editor.Forms
     {
         public UEditorSettings()
         {
-            Editor.UMainEditorApplication.RegRootForm(this);
+            UEngine.RootFormManager.RegRootForm(this);
         }
         public async System.Threading.Tasks.Task<bool> Initialize()
         {

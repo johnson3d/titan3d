@@ -21,13 +21,13 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            AddInputOutput(ColorPinInOut, EGpuBufferViewType.GBVT_Srv);
+            AddInputOutput(ColorPinInOut, NxRHI.EBufferType.BFT_SRV);
             HitIdPinIn.IsAllowInputNull = true;
-            AddInput(HitIdPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(HitIdPinIn, NxRHI.EBufferType.BFT_SRV);
             HzbPinIn.IsAllowInputNull = true;
-            AddInput(HzbPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(HzbPinIn, NxRHI.EBufferType.BFT_SRV);
             SavedPinIn0.IsAllowInputNull = true;
-            AddInput(SavedPinIn0, EGpuBufferViewType.GBVT_Srv);
+            AddInput(SavedPinIn0, NxRHI.EBufferType.BFT_SRV);
         }
         public override async Task Initialize(URenderPolicy policy, string debugName)
         {

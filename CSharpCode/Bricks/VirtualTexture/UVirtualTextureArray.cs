@@ -6,9 +6,9 @@ namespace EngineNS.Bricks.VirtualTexture
 {
     public class UVirtualTextureArray : UVirtualTextureBase
     {
-        public ITexture2DDesc ArrayDesc;
-        public RHI.CTexture2D Tex2DArray;
-        public RHI.CShaderResourceView TexArraySRV;
+        public NxRHI.FTextureDesc ArrayDesc;
+        public NxRHI.UTexture Tex2DArray;
+        public NxRHI.USrView TexArraySRV;
         public class UTextureLayer
         {
             public RName Name;
@@ -20,36 +20,36 @@ namespace EngineNS.Bricks.VirtualTexture
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             if (mipLevels == uint.MaxValue)
             {
-                mipLevels = (uint)RHI.CShaderResourceView.CalcMipLevel((int)width, (int)height, true) - 1;
+                mipLevels = (uint)NxRHI.USrView.CalcMipLevel((int)width, (int)height, true) - 1;
             }
-            IRenderContextCaps caps = new IRenderContextCaps();
-            rc.mCoreObject.GetRenderContextCaps(ref caps);
-            if (arraySize > (uint)caps.MaxTexture2DArray)
-            {
-                arraySize = (uint)caps.MaxTexture2DArray;
-            }
-            Textures = new UTextureLayer[arraySize];
+            //IRenderContextCaps caps = new IRenderContextCaps();
+            //rc.mCoreObject.GetRenderContextCaps(ref caps);
+            //if (arraySize > (uint)caps.MaxTexture2DArray)
+            //{
+            //    arraySize = (uint)caps.MaxTexture2DArray;
+            //}
+            //Textures = new UTextureLayer[arraySize];
 
-            ArrayDesc = new ITexture2DDesc();
-            ArrayDesc.SetDefault();
-            ArrayDesc.Width = width;
-            ArrayDesc.Height = height;
-            ArrayDesc.MipLevels = mipLevels;
-            ArrayDesc.ArraySize = arraySize;
-            ArrayDesc.Format = format;
-            Tex2DArray = rc.CreateTexture2D(in ArrayDesc);
+            //ArrayDesc = new NxRHI.FTextureDesc();
+            //ArrayDesc.SetDefault();
+            //ArrayDesc.Width = width;
+            //ArrayDesc.Height = height;
+            //ArrayDesc.MipLevels = mipLevels;
+            //ArrayDesc.ArraySize = arraySize;
+            //ArrayDesc.Format = format;
+            //Tex2DArray = rc.CreateTexture2D(in ArrayDesc);
 
-            var srvDesc = new IShaderResourceViewDesc();
-            srvDesc.SetTexture2D();
-            srvDesc.Type = ESrvType.ST_Texture2D;
-            srvDesc.Format = format;
-            srvDesc.mGpuBuffer = Tex2DArray.mCoreObject;
-            srvDesc.Texture2D.MipLevels = mipLevels;
+            //var srvDesc = new IShaderResourceViewDesc();
+            //srvDesc.SetTexture2D();
+            //srvDesc.Type = ESrvType.ST_Texture2D;
+            //srvDesc.Format = format;
+            //srvDesc.mGpuBuffer = Tex2DArray.mCoreObject;
+            //srvDesc.Texture2D.MipLevels = mipLevels;
 
-            TexArraySRV = rc.CreateShaderResourceView(in srvDesc);
+            //TexArraySRV = rc.CreateShaderResourceView(in srvDesc);
             return false;
         }        
-        public unsafe UTextureLayer PushTexture2D(ICommandList cmd, RName name)
+        public unsafe UTextureLayer PushTexture2D(NxRHI.UCommandList cmd, RName name)
         {
             int index = -1;
             for (int i = 0; i < Textures.Length; i++)
@@ -69,8 +69,8 @@ namespace EngineNS.Bricks.VirtualTexture
             }
             if (index == -1)
                 return null;
-            RHI.CShaderResourceView.UPicDesc txDesc = null;
-            StbImageSharp.ImageResult[] mipDatas = RHI.CShaderResourceView.LoadPngImageLevels(name, ArrayDesc.MipLevels, ref txDesc);
+            NxRHI.USrView.UPicDesc txDesc = null;
+            StbImageSharp.ImageResult[] mipDatas = NxRHI.USrView.LoadPngImageLevels(name, ArrayDesc.MipLevels, ref txDesc);
             if (mipDatas == null || mipDatas.Length == 0)
                 return null;
             if (mipDatas[0].Width != ArrayDesc.Width || mipDatas[0].Height != ArrayDesc.Height ||
@@ -81,13 +81,19 @@ namespace EngineNS.Bricks.VirtualTexture
             Textures[index].Name = name;
             Textures[index].ArrayIndex = index;
 
-            var pixelByte = RHI.CShaderResourceView.GetPixelByteWidth(ArrayDesc.Format);
+            var pixelByte = NxRHI.USrView.GetPixelByteWidth(ArrayDesc.Format);
             for (uint i = 0; i < ArrayDesc.MipLevels; i++)
             {
                 fixed (byte* pSrcData = &mipDatas[i].Data[0])
                 {
-                    Tex2DArray.GetTextureCore().UpdateMipData(cmd, (uint)index, i, 
-                        pSrcData, (uint)mipDatas[i].Width, (uint)mipDatas[i].Height, (uint)mipDatas[i].Width * pixelByte);
+                    var box = new NxRHI.FSubresourceBox();
+                    box.m_Front = 0;
+                    box.m_Back = 0;
+                    box.m_Left = 0;
+                    box.m_Right = (uint)mipDatas[i].Width;
+                    box.m_Top = 0;
+                    box.m_Bottom = (uint)mipDatas[i].Height;
+                    Tex2DArray.UpdateGpuData(cmd, (uint)i, pSrcData, &box, (uint)(mipDatas[i].Width * sizeof(uint)), (uint)(mipDatas[i].Width * mipDatas[i].Height * pixelByte));
                 }
             }
             return Textures[index];

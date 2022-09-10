@@ -24,7 +24,7 @@ namespace EngineNS.Graphics.Mesh
         }
         public UMaterialMesh MaterialMesh { get; private set; }
         public Pipeline.Shader.UMdfQueue MdfQueue { get; private set; }
-        RHI.CConstantBuffer mPerMeshCBuffer;
+        NxRHI.UCbView mPerMeshCBuffer;
         protected System.Action OnAfterCBufferCreated;
 
         int ObjectFlags_2Bit = 0;
@@ -44,7 +44,7 @@ namespace EngineNS.Graphics.Mesh
                 {
                     ObjectFlags_2Bit &= (~1);
                 }
-                PerMeshCBuffer?.SetValue(RHI.CConstantBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                PerMeshCBuffer?.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.ObjectFLags_2Bit, in ObjectFlags_2Bit);
             }
         }
         public bool IsUnlit
@@ -63,20 +63,19 @@ namespace EngineNS.Graphics.Mesh
                 {
                     ObjectFlags_2Bit &= (~(2));
                 }
-                PerMeshCBuffer.SetValue(RHI.CConstantBuffer.mPerMeshIndexer.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                PerMeshCBuffer.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.ObjectFLags_2Bit, in ObjectFlags_2Bit);
             }
         }
-        public RHI.CConstantBuffer PerMeshCBuffer 
+        public NxRHI.UCbView PerMeshCBuffer 
         {
             get
             {
                 if (mPerMeshCBuffer == null)
                 {
-                    var effect = UEngine.Instance.GfxDevice.EffectManager.DummyEffect;
-                    if (effect.ShaderIndexer.cbPerMesh == uint.MaxValue)
+                    var binder = UEngine.Instance.GfxDevice.CoreShaderBinder.CBufferCreator.cbPerMesh;
+                    mPerMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+                    if (mPerMeshCBuffer == null)
                         return null;
-                    
-                    mPerMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(effect.ShaderProgram, effect.ShaderIndexer.cbPerMesh);
                     if (OnAfterCBufferCreated != null)
                     {
                         OnAfterCBufferCreated();
@@ -104,7 +103,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 internal int State = 0;
                 public WeakReference<Pipeline.UGraphicsBuffers.UTargetViewIdentifier> TargetView;
-                public RHI.CDrawCall[] DrawCalls;
+                public NxRHI.UGraphicDraw[] DrawCalls;
                 //不同的View上可以有不同的渲染策略，同一个模型，可以渲染在不同视口上，比如装备预览的策略可以和GameView不一样
                 public Pipeline.URenderPolicy Policy;                
             }
@@ -115,7 +114,8 @@ namespace EngineNS.Graphics.Mesh
             {
                 if (atom >= mesh.MaterialMesh.Materials.Length)
                     return;
-                RHI.CDrawCall[] drawCalls = vdc.DrawCalls;
+                var device = UEngine.Instance.GfxDevice;
+                NxRHI.UGraphicDraw[] drawCalls = vdc.DrawCalls;
                 for (Pipeline.URenderPolicy.EShadingType i = Pipeline.URenderPolicy.EShadingType.BasePass;
                     i < Pipeline.URenderPolicy.EShadingType.Count; i++)
                 {
@@ -132,122 +132,70 @@ namespace EngineNS.Graphics.Mesh
                     }
                     if (shading != null)
                     {
-                        var drawcall = await UEngine.Instance.GfxDevice.RenderContext.CreateDrawCall(shading, Material.ParentMaterial, mesh.MdfQueue);
-                        if (drawcall == null || drawcall.Effect == null)
+                        var effect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(shading, Material.ParentMaterial, mesh.MdfQueue);
+                        if (effect == null)
                             continue;
-                        var reflector = drawcall.mCoreObject.GetReflector();
+                        var drawcall = UEngine.Instance.GfxDevice.RenderContext.CreateGraphicDraw();// (shading, Material.ParentMaterial, mesh.MdfQueue);
+                        drawcall.MeshAtom = (byte)atom;
+                        drawcall.MeshLOD = 0;
+                        drawcall.BindShaderEffect(effect);
+                        drawcall.BindGeomMesh(mesh.MaterialMesh.Mesh.mCoreObject.GetGeomtryMesh());
+                        drawcall.BindPipeline(Material.Pipeline);
+                        drawcall.PermutationId = shading.mCurrentPermutationId;
+
                         #region Textures
-                        unsafe
-                        {
-                            drawcall.mCoreObject.BindGeometry(mesh.MaterialMesh.Mesh.mCoreObject, (uint)atom, 0);
-                        }                
                         for (int j = 0; j < Material.NumOfSRV; j++)
                         {
                             var srv = await Material.GetSRV(j);
+                            if (srv == null)
+                                continue;
                             var varName = Material.GetNameOfSRV(j);                            
                             unsafe
                             {
-                                IShaderBinder* bindInfo = reflector.GetShaderBinder(EShaderBindType.SBT_Srv, varName);
-                                if (!CoreSDK.IsNullPointer(bindInfo) && srv != null)
-                                {
-                                    drawcall.mCoreObject.BindShaderSrv(bindInfo, srv.mCoreObject);
-                                }
+                                var binder = drawcall.FindBinder(varName);
+                                if (binder.IsValidPointer)
+                                    drawcall.BindSRV(binder, srv);
                             }
                         }
                         #endregion
 
                         #region Samplers
-                        unsafe
+                        for (int j = 0; j < Material.NumOfSampler; j++)
                         {
-                            for (int j = 0; j < Material.NumOfSampler; j++)
+                            var varName = Material.GetNameOfSampler(j);
+                            var sampler = Material.GetSampler(j);
+                            var binder = drawcall.FindBinder(varName);
+                            if (binder.IsValidPointer)
                             {
-                                var varName = Material.GetNameOfSampler(j);
-                                var sampler = Material.GetSampler(j);
-                                IShaderBinder* bindInfo = reflector.GetShaderBinder(EShaderBindType.SBT_Sampler, varName);
-                                if (!CoreSDK.IsNullPointer(bindInfo))
-                                {
-                                    drawcall.mCoreObject.BindShaderSampler(bindInfo, sampler.mCoreObject);
-                                }
-                                //else
-                                //{
-                                //    //System.Diagnostics.Debugger.Break();
-                                //    System.Diagnostics.Debug.WriteLine($"Sampler not find: {varName}");
-                                //}
+                                drawcall.BindSampler(binder, sampler);
                             }
-
-                            // renwind modified: debug code set globalSamplerState
-                            //var splDesc = new ISamplerStateDesc();
-                            //splDesc.SetDefault();
-                            //splDesc.Filter = ESamplerFilter.SPF_MIN_MAG_MIP_LINEAR;
-                            //splDesc.AddressU = EAddressMode.ADM_WRAP;
-                            //splDesc.AddressV = EAddressMode.ADM_WRAP;
-                            //splDesc.AddressW = EAddressMode.ADM_WRAP;
-                            //splDesc.MipLODBias = 0;
-                            //splDesc.MaxAnisotropy = 0;
-                            //splDesc.CmpMode = EComparisionMode.CMP_ALWAYS;
-                            //var rc = UEngine.Instance.GfxDevice.RenderContext;
-                            
-                            //var binder = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "gDefaultSamplerState");
-                            //if (binder!=(IShaderBinder*)0)
-                            //{
-                            //    var SamplerState = UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState;
-                            //    drawcall.mCoreObject.GetShaderSamplers().BindPS(binder->PSBindPoint, SamplerState.mCoreObject);
-                            //}
-
-                            // renwind modified: debug code set globalSamplerState
-                            //var splDesc = new ISamplerStateDesc();
-                            //splDesc.SetDefault();
-                            //splDesc.Filter = ESamplerFilter.SPF_MIN_MAG_MIP_LINEAR;
-                            //splDesc.AddressU = EAddressMode.ADM_WRAP;
-                            //splDesc.AddressV = EAddressMode.ADM_WRAP;
-                            //splDesc.AddressW = EAddressMode.ADM_WRAP;
-                            //splDesc.MipLODBias = 0;
-                            //splDesc.MaxAnisotropy = 0;
-                            //splDesc.CmpMode = EComparisionMode.CMP_ALWAYS;
-                            //var rc = UEngine.Instance.GfxDevice.RenderContext;
-                            //var SamplerState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(rc, ref splDesc);
-                            //samplers.mCoreObject.PSBindSampler(0, SamplerState.mCoreObject);
                         }
                         #endregion
 
                         #region CBuffer
                         unsafe
                         {
-                            var gpuProgram = drawcall.Effect.ShaderProgram;
-                            if (drawcall.Effect.ShaderIndexer.cbPerFrame != 0xFFFFFFFF && UEngine.Instance.GfxDevice.PerFrameCBuffer != null)
+                            var coreBinder = device.CoreShaderBinder;
+                            if (UEngine.Instance.GfxDevice.PerFrameCBuffer != null)
                             {
-                                drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.ShaderIndexer.cbPerFrame, UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject);
+                                drawcall.BindCBuffer(effect.BindIndexer.cbPerFrame, UEngine.Instance.GfxDevice.PerFrameCBuffer);
                             }
-                            if (drawcall.Effect.ShaderIndexer.cbPerMesh!= 0xFFFFFFFF)
+                            if (mesh.PerMeshCBuffer != null)
                             {
-                                drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.ShaderIndexer.cbPerMesh, mesh.PerMeshCBuffer.mCoreObject);
+                                drawcall.BindCBuffer(effect.BindIndexer.cbPerMesh, mesh.PerMeshCBuffer);
                             }
-                            if (drawcall.Effect.ShaderIndexer.cbPerMaterial != 0xFFFFFFFF)
+                            if (Material != null)
                             {
-                                if (Material != null)
+                                if (Material.PerMaterialCBuffer == null)
                                 {
-                                    if (Material.PerMaterialCBuffer == null)
-                                    {
-                                        var rc = UEngine.Instance.GfxDevice.RenderContext;
-                                        Material.PerMaterialCBuffer = rc.CreateConstantBuffer(gpuProgram, drawcall.Effect.ShaderIndexer.cbPerMaterial);
-                                    }
-                                    Material.UpdateUniformVars(Material.PerMaterialCBuffer);
-                                    drawcall.mCoreObject.BindShaderCBuffer(drawcall.Effect.ShaderIndexer.cbPerMaterial, Material.PerMaterialCBuffer.mCoreObject);
+                                    if (Material.CreateCBuffer(effect))
+                                        Material.UpdateUniformVars(Material.PerMaterialCBuffer, Material.PerMaterialCBuffer.ShaderBinder);
+                                }
+                                if (Material.PerMaterialCBuffer != null)
+                                {   
+                                    drawcall.BindCBuffer(effect.BindIndexer.cbPerMaterial, Material.PerMaterialCBuffer);
                                 }
                             }
-                        }
-                        #endregion
-
-                        #region State
-                        unsafe
-                        {
-                            var pipeline = new IRenderPipeline(drawcall.mCoreObject.GetPipeline());
-                            if (Material.RasterizerState != null)
-                                pipeline.BindRasterizerState(Material.RasterizerState.mCoreObject);
-                            if (Material.DepthStencilState != null)
-                                pipeline.BindDepthStencilState(Material.DepthStencilState.mCoreObject);
-                            if (Material.BlendState != null)
-                                pipeline.BindBlendState(Material.BlendState.mCoreObject);
                         }
                         #endregion
 
@@ -287,13 +235,13 @@ namespace EngineNS.Graphics.Mesh
                 {
                     drawCalls = new ViewDrawCalls();
                     drawCalls.TargetView = new WeakReference<Pipeline.UGraphicsBuffers.UTargetViewIdentifier>(id);
-                    drawCalls.DrawCalls = new RHI.CDrawCall[(int)Pipeline.URenderPolicy.EShadingType.Count];
+                    drawCalls.DrawCalls = new NxRHI.UGraphicDraw[(int)Pipeline.URenderPolicy.EShadingType.Count];
                     drawCalls.Policy = policy;
                     TargetViews.Add(drawCalls);
                 }
                 return drawCalls;
             }
-            public unsafe virtual RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, UMesh mesh, int atom, Pipeline.URenderPolicy policy,
+            public unsafe virtual NxRHI.UGraphicDraw GetDrawCall(Pipeline.UGraphicsBuffers targetView, UMesh mesh, int atom, Pipeline.URenderPolicy policy,
                 Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
             {
                 if (Material == null)
@@ -482,7 +430,7 @@ namespace EngineNS.Graphics.Mesh
             return true;
         }
 
-        public bool Initialize(CMeshPrimitives mesh, Pipeline.Shader.UMaterial[] materials,
+        public bool Initialize(UMeshPrimitives mesh, Pipeline.Shader.UMaterial[] materials,
             Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
             if (atomType == null)
@@ -518,7 +466,7 @@ namespace EngineNS.Graphics.Mesh
         //渲染原子Id
         //渲染策略policy
         //本次渲染的Shading模式
-        public RHI.CDrawCall GetDrawCall(Pipeline.UGraphicsBuffers targetView, int atom, Pipeline.URenderPolicy policy, 
+        public NxRHI.UGraphicDraw GetDrawCall(Pipeline.UGraphicsBuffers targetView, int atom, Pipeline.URenderPolicy policy, 
             Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
         {
             if (atom >= Atoms.Length)
@@ -533,18 +481,17 @@ namespace EngineNS.Graphics.Mesh
         {
             if (PerMeshCBuffer == null)
                 return;
-            var tm = PerMeshCBuffer.GetMatrix(PerMeshCBuffer.PerMeshIndexer.WorldMatrix);
-            var realPos = CameraOffset + tm.Translation - world.CameraOffset;
+            var tm = PerMeshCBuffer.GetValue<Matrix>(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
+            var realPos = WorldLocation - world.CameraOffset;
             tm.Translation = realPos.ToSingleVector3();
-            CameraOffset = world.CameraOffset;
             this.SetWorldMatrix(in tm);
         }
-        private DVector3 CameraOffset = DVector3.Zero;
+        private DVector3 WorldLocation = DVector3.Zero;
         public void SetWorldTransform(in FTransform transform, GamePlay.UWorld world, bool isNoScale)
         {
+            WorldLocation = transform.Position;
             if (world != null)
             {
-                CameraOffset = world.CameraOffset;
                 if (isNoScale == false)
                     this.SetWorldMatrix(transform.ToMatrixWithScale(in world.mCameraOffset));
                 else
@@ -552,7 +499,6 @@ namespace EngineNS.Graphics.Mesh
             }
             else
             {
-                CameraOffset = transform.Position;
                 if (isNoScale == false)
                     this.SetWorldMatrix(transform.ToMatrixWithScale(in transform.mPosition));
                 else
@@ -569,17 +515,17 @@ namespace EngineNS.Graphics.Mesh
                 {
                     if (saved != null)
                         saved();
-                    PerMeshCBuffer.SetMatrix(PerMeshCBuffer.PerMeshIndexer.WorldMatrix, in savedTM);
+                    PerMeshCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix, in savedTM);
                     var inv = Matrix.Invert(in savedTM);
-                    PerMeshCBuffer.SetMatrix(PerMeshCBuffer.PerMeshIndexer.WorldMatrixInverse, in inv);
+                    PerMeshCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrixInverse, in inv);
                 };
                 return;
             }   
-            PerMeshCBuffer.SetMatrix(PerMeshCBuffer.PerMeshIndexer.WorldMatrix, in tm);
+            PerMeshCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix, in tm);
             var inv = Matrix.Invert(in tm);
-            PerMeshCBuffer.SetMatrix(PerMeshCBuffer.PerMeshIndexer.WorldMatrixInverse, in inv);
+            PerMeshCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrixInverse, in inv);
         }
-        public void SetValue<T>(int index, in T value, uint elem = 0) where T : unmanaged
+        public void SetValue<T>(NxRHI.FShaderVarDesc index, in T value, int elem = 0) where T : unmanaged
         {
             if (PerMeshCBuffer == null)
             {
@@ -590,11 +536,11 @@ namespace EngineNS.Graphics.Mesh
                     if (saved != null)
                         saved();
 
-                    PerMeshCBuffer.SetValue(index, in savedValue, elem);
+                    PerMeshCBuffer.SetValue(index, elem, in savedValue);
                 };
                 return;
             }
-            PerMeshCBuffer.SetValue(index, in value, elem);
+            PerMeshCBuffer.SetValue(index, elem, in value);
         }
         public void SetHitproxy(in Vector4 value)
         {
@@ -607,11 +553,11 @@ namespace EngineNS.Graphics.Mesh
                     if (saved != null)
                         saved();
 
-                    PerMeshCBuffer.SetValue(PerMeshCBuffer.PerMeshIndexer.HitProxyId, in savedValue, 0);
+                    PerMeshCBuffer.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.HitProxyId, in savedValue);
                 };
                 return;
             }
-            PerMeshCBuffer.SetValue(PerMeshCBuffer.PerMeshIndexer.HitProxyId, in value, 0);
+            PerMeshCBuffer.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.HitProxyId, in value);
         }
     }
 }

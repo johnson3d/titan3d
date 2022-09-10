@@ -67,28 +67,34 @@ namespace EngineNS.Bricks.Procedure.Node
                 exec();
             }
         }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            if (pin == IndicesPin)
+                return IndexBufferCreator;
+            return Vec3BufferCreator;
+        }
         public unsafe override bool InitProcedure(UPgcGraph graph)
         {
             if (Mesh == null)
                 return false;
             var builder = Mesh.Mesh.MeshDataProvider.mCoreObject;
-            var pPos = (Vector3*)builder.GetStream(EVertexStreamType.VST_Position).GetData();
-            var pNor = (Vector3*)builder.GetStream(EVertexStreamType.VST_Normal).GetData();
-            var pUV = (Vector2*)builder.GetStream(EVertexStreamType.VST_UV).GetData();
+            var pPos = (Vector3*)builder.GetStream(NxRHI.EVertexStreamType.VST_Position).GetData();
+            var pNor = (Vector3*)builder.GetStream(NxRHI.EVertexStreamType.VST_Normal).GetData();
+            var pUV = (Vector2*)builder.GetStream(NxRHI.EVertexStreamType.VST_UV).GetData();
 
             int NunPfTrian = 0;
             for (uint i = 0; i < builder.GetAtomNumber(); i++)
             {
-                DrawPrimitiveDesc desc = new DrawPrimitiveDesc();
+                var desc = new NxRHI.FMeshAtomDesc();
 
-                builder.GetAtom(i, 0, ref desc);
+                desc = *builder.GetAtom(i, 0);
                 
                 NunPfTrian += (int)desc.NumPrimitives;
             }
             
             var idxBuffer = UBufferConponent.CreateInstance(UBufferCreator.CreateInstance<USuperBuffer<Int32_3, FInt3Operator>>(NunPfTrian, 1, 1));
             
-            if (Mesh.Mesh.MeshDataProvider.mCoreObject.IBType == EIndexBufferType.IBT_Int32)
+            if (Mesh.Mesh.MeshDataProvider.mCoreObject.IsIndex32)
             {
                 var pIndices = (int*)Mesh.Mesh.MeshDataProvider.mCoreObject.GetIndices().GetData();
                 for (int i = 0; i < (int)NunPfTrian; i++)
@@ -214,20 +220,20 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         protected unsafe void CreatePreviewMesh(RName rn, UPgcGraph graph)
         {
-            var meshBuilder = new Graphics.Mesh.CMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
             {
                 var indices = graph.BufferCache.FindBuffer(InIndices) as USuperBuffer<Int32_3, FInt3Operator>;
                 var pos = graph.BufferCache.FindBuffer(InPos) as USuperBuffer<Vector3, FFloat3Operator>;
                 var nor = graph.BufferCache.FindBuffer(InNor) as USuperBuffer<Vector3, FFloat3Operator>;
 
                 var builder = meshBuilder.mCoreObject;
-                uint streams = (uint)((1 << (int)EVertexStreamType.VST_Position) |
-                (1 << (int)EVertexStreamType.VST_Normal));
-                builder.Init((uint)streams, EIndexBufferType.IBT_Int32, 1);
+                uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
+                (1 << (int)NxRHI.EVertexStreamType.VST_Normal));
+                builder.Init((uint)streams, true, 1);
 
-                var dpDesc = new DrawPrimitiveDesc();
+                var dpDesc = new NxRHI.FMeshAtomDesc();
                 dpDesc.SetDefault();
-                dpDesc.PrimitiveType = EPrimitiveType.EPT_TriangleList;
+                dpDesc.PrimitiveType = NxRHI.EPrimitiveType.EPT_TriangleList;
                 dpDesc.NumPrimitives = 0;
 
                 var aabb = BoundingBox.Empty;
@@ -261,7 +267,7 @@ namespace EngineNS.Bricks.Procedure.Node
             matrials[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria;
             matrials[0].RenderLayer = Graphics.Pipeline.ERenderLayer.RL_Translucent;
             var rast = matrials[0].Rasterizer;
-            rast.FillMode = EFillMode.FMD_WIREFRAME;
+            rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
             matrials[0].Rasterizer = rast;
             PreviewMesh.Initialize(meshPrimitve, matrials);
         }
@@ -274,15 +280,7 @@ namespace EngineNS.Bricks.Procedure.Node
             ImGuiAPI.PushID($"{this.NodeId.ToString()}");
             if (ImGuiAPI.Button("ShowMesh"))
             {
-                var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
-                if (mainEditor != null)
-                {
-                    var rn = RName.GetRName(this.ParentGraph.GraphName, RName.ERNameType.Transient);
-                    if (PreviewMesh == null)
-                        return;
-                    
-                    var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UMeshEditor), rn, PreviewMesh);
-                }
+                var task = DoPreview();
             }
             ImGuiAPI.PopID();
             //if (PreviewSRV == null)
@@ -295,9 +293,38 @@ namespace EngineNS.Bricks.Procedure.Node
             //    cmdlist.AddImage(PreviewSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             //}
         }
+        public async System.Threading.Tasks.Task DoPreview()
+        {
+            //var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+            //if (mainEditor != null)
+            //{
+            //    var rn = RName.GetRName(this.ParentGraph.GraphName, RName.ERNameType.Transient);
+            //    if (PreviewMesh == null)
+            //        return;
+
+            //    var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UMeshEditor), rn, PreviewMesh);
+            //}
+
+            var graph = this.ParentGraph as UPgcGraph;
+            graph.Compile(this);
+
+            graph.GraphEditor.PreviewRoot.ClearChildren();
+            var viewport = graph.GraphEditor.PreviewViewport;
+
+            var mesh = new Graphics.Mesh.UMesh();
+            var ok = mesh.Initialize(PreviewMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            if (ok)
+            {
+                var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, graph.GraphEditor.PreviewRoot, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.NodeData.Name = "PreviewMesh";
+                meshNode.IsAcceptShadow = false;
+                meshNode.IsCastShadow = true;
+            }
+        }
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
-            return base.GetOutBufferCreator(pin);
+            return null;
         }
         public override bool OnProcedure(UPgcGraph graph)
         {
@@ -330,7 +357,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 CreatePreviewMesh(rn, graph);
                 //System.Action action = async () =>
                 //{
-                //    var TriMesh = Graphics.Mesh.CMeshDataProvider.MakeCylinder(2.0f, 0.5f, 3.0f, 100, 100, 0xfffffff);
+                //    var TriMesh = Graphics.Mesh.UMeshDataProvider.MakeCylinder(2.0f, 0.5f, 3.0f, 100, 100, 0xfffffff);
                 //    PreviewMesh = new Graphics.Mesh.UMaterialMesh();
                 //    var meshPrimitve = TriMesh.ToMesh();
                 //    var matrials = new Graphics.Pipeline.Shader.UMaterialInstance[1];

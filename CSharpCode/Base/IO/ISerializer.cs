@@ -844,8 +844,12 @@ namespace EngineNS.IO
             var typeDesc = Rtti.UTypeDesc.TypeOf(thisTypeStr);
             if (typeDesc == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "MetaData", $"{hostObject.GetType()}: MetaField({thisTypeStr}) Type Missing");
-                obj = Support.TConvert.ToObject(obj.GetType(), node.GetAttribute("Value"));
+                if (hostObject != null)
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "MetaData", $"{hostObject.GetType()}: MetaField({thisTypeStr}) Type Missing");
+                else
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "MetaData", $"null: MetaField({thisTypeStr}) Type Missing");
+                if (obj != null)
+                    obj = Support.TConvert.ToObject(obj.GetType(), node.GetAttribute("Value"));
                 return;
             }
             var thisType = typeDesc.SystemType;
@@ -948,7 +952,7 @@ namespace EngineNS.IO
                         typeAttr = j.GetAttribute("Type");
                         if (!string.IsNullOrEmpty(typeAttr))
                         {
-                            var elemType = Rtti.UTypeDesc.TypeOf(typeAttr).SystemType;
+                            var elemType = Rtti.UTypeDesc.TypeOf(typeAttr)?.SystemType;
                             if (elemType != null)
                                 keyType = elemType;
                         }

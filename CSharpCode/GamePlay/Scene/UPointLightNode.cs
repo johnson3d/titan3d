@@ -4,6 +4,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
+    [Bricks.CodeBuilder.ContextMenu("PointLight", "PointLight", UNode.EditorKeyword)]
     [UNode(NodeDataType = typeof(UPointLightNode.ULightNodeData), DefaultNamePrefix = "PointLight")]
     public partial class UPointLightNode : USceneActorNode
     {
@@ -185,6 +186,7 @@ namespace EngineNS.GamePlay.Scene
             set { }
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("DirLight", "DirLight", UNode.EditorKeyword)]
     [UNode(NodeDataType = typeof(UDirLightNode.UDirLightNodeData), DefaultNamePrefix = "Sun")]
     public partial class UDirLightNode : USceneActorNode
     {

@@ -25,30 +25,14 @@ namespace EngineNS
         {
             return ptr == (T*)0;
         }
-        public static int GetShaderVarTypeSize(EShaderVarType type)
+        public static int GetShaderVarTypeSize(NxRHI.EShaderVarType type)
         {
             switch (type)
             {
-                case EShaderVarType.SVT_Float1:
+                case NxRHI.EShaderVarType.SVT_Float:
                     return 4;
-                case EShaderVarType.SVT_Float2:
-                    return 8;
-                case EShaderVarType.SVT_Float3:
-                    return 12;
-                case EShaderVarType.SVT_Float4:
-                    return 16;
-                case EShaderVarType.SVT_Int1:
+                case NxRHI.EShaderVarType.SVT_Int:
                     return 4;
-                case EShaderVarType.SVT_Int2:
-                    return 8;
-                case EShaderVarType.SVT_Int3:
-                    return 12;
-                case EShaderVarType.SVT_Int4:
-                    return 16;
-                case EShaderVarType.SVT_Matrix4x4:
-                    return 64;
-                case EShaderVarType.SVT_Matrix3x3:
-                    return 36;
                 default:
                     return -1;
             }

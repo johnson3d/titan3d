@@ -8,7 +8,7 @@ namespace EngineNS.Editor.Forms
     {
         public UInspector()
         {
-            Graphics.Pipeline.USlateApplication.RegRootForm(this);
+            UEngine.RootFormManager.RegRootForm(this);
         }
         public bool Visible { get; set; } = true;
         public uint DockId { get => mPropertyGrid.DockId; set => mPropertyGrid.DockId = value; }

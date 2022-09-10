@@ -1,18 +1,89 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure
 {
-    public partial class UPgcNodeBase : UNodeBase
+    public abstract partial class UPgcNodeBase : UNodeBase, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
-        [Rtti.Meta]
-        public UBufferCreator DefaultInputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        [Rtti.Meta]
-        public UBufferCreator DefaultBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public int RootDistance;
         protected int mPreviewResultIndex = -1;
-        protected RHI.CShaderResourceView PreviewSRV;
+        public float ScaleForPreview { get; set; } = 1.0f;
+        protected NxRHI.USrView PreviewSRV;
+        public class UCompileButton
+        {
+            internal UPgcNodeBase HostNode;
+            public class UValueEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+            {
+                public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
+                {
+                    newValue = info.Value;
+                    var nodeDef = newValue as UCompileButton;
+                    
+                    if (ImGuiAPI.Button("Compile"))
+                    {
+                        var graph = nodeDef.HostNode.ParentGraph as UPgcGraph;
+
+                        graph.Compile(nodeDef.HostNode);
+                    }
+                    if (ImGuiAPI.Button("PreviewMesh"))
+                    {
+                        var task = nodeDef.HostNode.DoPreviewMesh();
+                    }
+                    return false;
+                }
+            }
+        }
+        public virtual async System.Threading.Tasks.Task DoPreviewMesh()
+        {
+            if (this.PreviewResultIndex < 0)
+                return;
+
+            var graph = this.ParentGraph as UPgcGraph;
+            graph.GraphEditor.PreviewRoot.ClearChildren();
+
+            var vms = Graphics.Mesh.UMeshDataProvider.MakeRect2D(0, 0, 100, 100, 0).ToMesh();
+            var mesh = new Graphics.Mesh.UMesh();
+
+            var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
+            materials1[0] = Graphics.Pipeline.Shader.UMaterialInstance.CreateMaterialInstance(
+                await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine))
+                );
+            var state = materials1[0].Rasterizer;
+            state.CullMode = NxRHI.ECullMode.CMD_NONE;
+            materials1[0].Rasterizer = state;
+            var srv = materials1[0].FindSRV("DiffuseTex");
+            if (srv != null)
+            {
+                srv.SrvObject = this.PreviewSRV;
+            }
+            mesh.Initialize(vms, materials1, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
+            var nodeData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
+            nodeData.Name = "TexturePreivew";
+            var prevMesh = await GamePlay.Scene.UMeshNode.AddMeshNode(graph.GraphEditor.PreviewViewport.World, graph.GraphEditor.PreviewRoot, 
+                    new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh,
+                    DVector3.Zero, Vector3.One, Quaternion.Identity);
+            prevMesh.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+            prevMesh.IsCastShadow = true;
+            prevMesh.IsAcceptShadow = true;
+
+            var aabb = mesh.MaterialMesh.Mesh.mCoreObject.mAABB;
+            float radius = aabb.GetMaxSide();
+            BoundingSphere sphere;
+            sphere.Center = aabb.GetCenter();
+            sphere.Radius = radius;
+            graph.GraphEditor.PreviewViewport.RenderPolicy.DefaultCamera.AutoZoom(ref sphere);
+        }
+        [UCompileButton.UValueEditor]
+        public UCompileButton CompileButton
+        {
+            get;
+        } = new UCompileButton();
+        public UPgcNodeBase()
+        {
+            CompileButton.HostNode = this;
+        }
         ~UPgcNodeBase()
         {
             if (PreviewSRV != null)
@@ -47,7 +118,7 @@ namespace EngineNS.Bricks.Procedure
             var creator = stayPin.Tag as UBufferCreator;
             if (creator != null)
             {
-                EGui.Controls.CtrlUtility.DrawHelper($"{creator.ElementType.ToString()}");
+                EGui.Controls.CtrlUtility.DrawHelper($"{creator.ElementType.Name}");
             }
         }
         [Rtti.Meta]
@@ -119,6 +190,8 @@ namespace EngineNS.Bricks.Procedure
         }
         public virtual bool IsMatchLinkedPin(UBufferCreator input, UBufferCreator output)
         {
+            if (input == output)
+                return true;
             if (input.ElementType != output.ElementType)
             {
                 return false;
@@ -202,20 +275,16 @@ namespace EngineNS.Bricks.Procedure
         {
             return pin.Tag as UBufferCreator;
         }
-        public virtual UBufferCreator GetOutBufferCreator(PinOut pin)
-        {
-            //return pin.Tag as UBufferCreator;
-            return DefaultBufferCreator;
-        }
-        public virtual UBufferConponent GetResultBuffer(int index)
+        public abstract UBufferCreator GetOutBufferCreator(PinOut pin);
+
+        #region procedure
+        public UBufferConponent GetResultBuffer(int index)
         {
             if (index < 0 || index >= Outputs.Count)
                 return null;
             var graph = ParentGraph as UPgcGraph;
             return graph.BufferCache.FindBuffer(Outputs[index]);
         }
-
-        #region procedure
         public virtual bool InitProcedure(UPgcGraph graph)
         {
             return true;
@@ -223,6 +292,12 @@ namespace EngineNS.Bricks.Procedure
         public bool DoProcedure(UPgcGraph graph)
         {
             var ret = OnProcedure(graph);
+            PreviewSRVProcedure(graph);
+            OnAfterProcedure(graph);
+            return ret;
+        }
+        protected virtual void PreviewSRVProcedure(UPgcGraph graph)
+        {
             if (graph.GraphEditor != null)
             {
                 if (mPreviewResultIndex >= 0)
@@ -241,7 +316,21 @@ namespace EngineNS.Bricks.Procedure
                             float minV = float.MaxValue;
                             float maxV = float.MinValue;
                             previewBuffer.GetRangeUnsafe<float, FFloatOperator>(out minV, out maxV);
-                            PreviewSRV = previewBuffer.CreateAsHeightMapTexture2D(minV, maxV, EPixelFormat.PXF_R16_FLOAT, true);
+                            PreviewSRV = previewBuffer.CreateAsHeightMapTexture2D(minV, maxV, EPixelFormat.PXF_R16_FLOAT, ScaleForPreview, true);
+                        }
+                        else if (previewBuffer.BufferCreator.ElementType == Rtti.UTypeDescGetter<sbyte>.TypeDesc)
+                        {
+                            sbyte minV = sbyte.MaxValue;
+                            sbyte maxV = sbyte.MinValue;
+                            previewBuffer.GetRangeUnsafe<sbyte, FSByteOperator>(out minV, out maxV);
+                            PreviewSRV = previewBuffer.CreateAsHeightMapTexture2D((float)minV, (float)maxV, EPixelFormat.PXF_R16_FLOAT, ScaleForPreview, true);
+                        }
+                        else if (previewBuffer.BufferCreator.ElementType == Rtti.UTypeDescGetter<Vector2>.TypeDesc)
+                        {
+                            Vector2 minV = Vector2.MaxValue;
+                            Vector2 maxV = Vector2.MinValue;
+                            previewBuffer.GetRangeUnsafe<Vector2, FFloat2Operator>(out minV, out maxV);
+                            PreviewSRV = previewBuffer.CreateVector2Texture2D(minV, maxV);
                         }
                         else if (previewBuffer.BufferCreator.ElementType == Rtti.UTypeDescGetter<Vector3>.TypeDesc)
                         {
@@ -254,11 +343,7 @@ namespace EngineNS.Bricks.Procedure
                         }
                     }
                 }
-
-
             }
-            OnAfterProcedure(graph);
-            return ret;
         }
         public virtual bool OnProcedure(UPgcGraph graph)
         {
@@ -403,6 +488,56 @@ namespace EngineNS.Bricks.Procedure
             if (linker == null)
                 return null;
             return linker.OutNode as UPgcNodeBase;
+        }
+        #endregion
+
+        #region PG
+        public void GetProperties(ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            var pros = System.ComponentModel.TypeDescriptor.GetProperties(this);
+
+            //collection.InitValue(this,  pros, parentIsValueType);
+            foreach (PropertyDescriptor prop in pros)
+            {
+                //var p = this.GetType().GetProperty(prop.Name);
+                //if (p == null)
+                //    continue;
+                if (prop.Name != "Name" && prop.Name != "NodeType" &&
+                    prop.ComponentType != typeof(UPgcNodeBase) && !prop.ComponentType.IsSubclassOf(typeof(UPgcNodeBase)))
+                {
+                    continue;
+                }
+                var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                proDesc.InitValue(this, thisType, prop, parentIsValueType);
+                if (!proDesc.IsBrowsable)
+                {
+                    proDesc.ReleaseObject();
+                    continue;
+                }
+                collection.Add(proDesc);
+            }
+        }
+
+        public object GetPropertyValue(string propertyName)
+        {
+            var proInfo = this.GetType().GetProperty(propertyName);
+            if (proInfo != null)
+                return proInfo.GetValue(this);
+            var fieldInfo = this.GetType().GetField(propertyName);
+            if (fieldInfo != null)
+                return fieldInfo.GetValue(this);
+            return null;
+        }
+
+        public void SetPropertyValue(string propertyName, object value)
+        {
+            var proInfo = this.GetType().GetProperty(propertyName);
+            if (proInfo != null && proInfo.CanWrite)
+                proInfo.SetValue(this, value);
+            var fieldInfo = this.GetType().GetField(propertyName);
+            if (fieldInfo != null)
+                fieldInfo.SetValue(this, value);
         }
         #endregion
     }

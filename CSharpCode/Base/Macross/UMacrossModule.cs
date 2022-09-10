@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Linq;
 
 namespace EngineNS.Macross
 {
@@ -83,12 +85,18 @@ namespace EngineNS.Macross
         }
         public List<WeakReference<UMacrossGetterBase>> mGetters = new List<WeakReference<UMacrossGetterBase>>();
         partial void CreateAssemblyLoader(ref IAssemblyLoader loader);
+        partial void TryCompileCode(string assemblyFile, ref bool success);
         public void ReloadAssembly(string assemblyPath)
         {
             try
             {
                 if (!IO.FileManager.FileExists(assemblyPath))
-                    return;
+                {
+                    bool success = false;
+                    TryCompileCode(assemblyPath, ref success);
+                    if(!success)
+                        return;
+                }
                 var hostAlcWeakRef = UEngine.Instance.MacrossModule.mAssembly;
 
                 UEngine.Instance.MacrossModule.ReloadAssembly_Impl(assemblyPath);

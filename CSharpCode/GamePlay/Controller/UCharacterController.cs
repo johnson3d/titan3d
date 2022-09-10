@@ -22,6 +22,8 @@ namespace EngineNS.GamePlay.Controller
         public Camera.ICameraControlNode CameraControlNode { get; set; }
         public UMovement MovementNode { get; set; }
 
+        public bool OrientCameraRoation = true;
+
         public override Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             UAxis2DAction axis2D = IAction.Create<UAxis2DAction>(new UAxis2DAction.UAxis2DActionData());
@@ -52,7 +54,7 @@ namespace EngineNS.GamePlay.Controller
         {
             if (mPreMousePt != value)
             {
-                PitchDelta = -value.Y;
+                PitchDelta = value.Y;
                 YawDelta = value.X;
                 mPreMousePt = value;
             }
@@ -65,8 +67,13 @@ namespace EngineNS.GamePlay.Controller
         {
             base.TickLogic(world, policy);
 
-            CameraControlNode.AddDelta(new Vector3(PitchDelta * 0.1f, 0, 0));
-            MovementNode.AngularVelocity = new DVector3(0, YawDelta * 0.1f, 0);
+            CameraControlNode.AddDelta(new Vector3(PitchDelta * 0.1f, YawDelta * 0.1f, 0));
+
+            //MovementNode.AngularVelocity = new DVector3(0, YawDelta * 0.1f, 0);
+            if (OrientCameraRoation)
+            {
+                ControlledCharacter.Placement.Quat = Quaternion.GetQuaternion(Vector3.Forward, -new DVector3(CameraControlNode.Camera.Direction.X, 0, CameraControlNode.Camera.Direction.Z).ToSingleVector3());
+            }
             PitchDelta = 0;
             YawDelta = 0;
 

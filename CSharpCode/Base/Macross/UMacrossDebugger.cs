@@ -36,20 +36,22 @@ namespace EngineNS.Macross
                 if (UMacrossDebugger.Instance.CurrrentBreak != null)
                     return;
                 StackTracer = UMacrossStackTracer.ThreadInstance;
+
                 BreakStackFrame = UMacrossStackTracer.CurrentFrame;
                 UMacrossDebugger.Instance.CurrrentBreak = this;
-                UMacrossDebugger.Instance.mBreakEvent.Reset();
-                UEngine.Instance.ThreadLogic.mMacrossDebug.Set();
+                UMacrossDebugger.Instance.BreakEvent.Reset();
+                UEngine.Instance.ThreadLogic.MacrossDebug.Set();
             }
-            UMacrossDebugger.Instance.mBreakEvent.WaitOne();
+            UMacrossDebugger.Instance.BreakEvent.WaitOne();
         }
     }
     public class UMacrossDebugger
     {
         public static UMacrossDebugger Instance = new UMacrossDebugger();
-        internal System.Threading.AutoResetEvent mBreakEvent = new System.Threading.AutoResetEvent(false);
+        internal System.Threading.AutoResetEvent BreakEvent { get; } = new System.Threading.AutoResetEvent(false);
         internal UMacrossBreak CurrrentBreak;
         public List<WeakReference<UMacrossBreak>> Breaks = new List<WeakReference<UMacrossBreak>>();
+        internal Dictionary<string, bool> mBreakEnableStore = new Dictionary<string, bool>();
         private bool mIsEnableDebugger = true;
         public bool IsEnableDebugger
         {
@@ -87,10 +89,23 @@ namespace EngineNS.Macross
                 var result = CurrrentBreak;
                 CurrrentBreak = null;
 
-                UEngine.Instance.ThreadLogic.mMacrossDebug.Reset();
-                mBreakEvent.Set();
+                UEngine.Instance.ThreadLogic.MacrossDebug.Reset();
+                BreakEvent.Set();
 
                 return result;
+            }
+        }
+        public void SetBreakEnable(string breakName, bool enable)
+        {
+            var breaker = FindBreak(breakName);
+            if(breaker != null)
+            {
+                breaker.Enable = enable;
+                mBreakEnableStore[breakName] = enable;
+            }
+            else
+            {
+                mBreakEnableStore[breakName] = enable;
             }
         }
         public void AddBreak(UMacrossBreak brk)
@@ -107,6 +122,11 @@ namespace EngineNS.Macross
                     }
                 }
                 Breaks.Add(new WeakReference<UMacrossBreak>(brk));
+                bool enable = false;
+                if(mBreakEnableStore.TryGetValue(brk.BreakName, out enable))
+                {
+                    brk.Enable = enable;
+                }
             }   
         }
         public void RemoveBreak(UMacrossBreak brk)

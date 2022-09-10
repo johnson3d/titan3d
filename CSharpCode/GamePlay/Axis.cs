@@ -184,7 +184,7 @@ namespace EngineNS.GamePlay
                 return await base.InitializeNode(world, data, bvType, placementType);
             }
 
-            public override bool DrawNode(UTreeNodeDrawer tree, int index)
+            public override bool DrawNode(UTreeNodeDrawer tree, int index, int NumOfChild)
             {
                 return false;
             }
@@ -242,7 +242,7 @@ namespace EngineNS.GamePlay
                 var meshNodeData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
                 DVector3 pos = DVector3.Zero;
                 Quaternion rot = Quaternion.Identity;
-                Vector3 scale = Vector3.UnitXYZ;
+                Vector3 scale = Vector3.One;
                 AxisType = type;
                 switch (AxisType)
                 {
@@ -789,7 +789,7 @@ namespace EngineNS.GamePlay
 
             mRootNode.Placement.Position = DVector3.Zero;
             mRootNode.Placement.Quat = Quaternion.Identity;
-            mRootNode.Placement.Scale = Vector3.UnitXYZ;
+            mRootNode.Placement.Scale = Vector3.One;
             var bb = mEdgeAxisBB;
             switch(mAxisSpace)
             {
@@ -949,7 +949,7 @@ namespace EngineNS.GamePlay
         async System.Threading.Tasks.Task InitializeDebugAssit()
         {
             var mesh = new Graphics.Mesh.UMesh();
-            var plane = Graphics.Mesh.CMeshDataProvider.MakePlane(1, 1);
+            var plane = Graphics.Mesh.UMeshDataProvider.MakePlane(1, 1);
             var planeMesh = plane.ToMesh();
             var planeMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
             var ok = mesh.Initialize(
@@ -974,7 +974,7 @@ namespace EngineNS.GamePlay
             }
 
             mesh = new Graphics.Mesh.UMesh();
-            var point = Graphics.Mesh.CMeshDataProvider.MakeBox(-0.05f, -0.05f, -0.05f, 0.1f, 0.1f, 0.1f);
+            var point = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.05f, -0.05f, -0.05f, 0.1f, 0.1f, 0.1f);
             var pointMesh = point.ToMesh();
             var pointMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Center);
             ok = mesh.Initialize(pointMesh, new Graphics.Pipeline.Shader.UMaterial[] { pointMaterial },
@@ -1334,7 +1334,7 @@ namespace EngineNS.GamePlay
                         for(var i = enAxisType.Edge_Start; i <= enAxisType.Edge_End; i++)
                         {
                             var size = GetScreenSizeInWorld(mAxisMeshDatas[(int)i].MeshNode.Placement.Position.ToSingleVector3(), 0.15f, viewport);
-                            mAxisMeshDatas[(int)i].MeshNode.Placement.Scale = size * Vector3.UnitXYZ;
+                            mAxisMeshDatas[(int)i].MeshNode.Placement.Scale = size * Vector3.One;
                         }
                     }
                     break;
@@ -1343,7 +1343,7 @@ namespace EngineNS.GamePlay
                     {
                         var camPos = mCameraController.Camera.mCoreObject.GetPosition();
                         mRootNodeScaleValue = (float)(mRootNode.Placement.Position - camPos).Length() * 0.15f;
-                        mRootNode.Placement.Scale = mRootNodeScaleValue * Vector3.UnitXYZ;
+                        mRootNode.Placement.Scale = mRootNodeScaleValue * Vector3.One;
                         mRotArrowAssetNode.Placement.Scale = mRootNode.Placement.Scale;
                     }
                     break;
@@ -2047,9 +2047,9 @@ namespace EngineNS.GamePlay
                 case enAxisType.Scale_XYZ:
                     {
                         Vector3 transAxis;
-                        Vector3.TransformNormal(in Vector3.UnitXYZ, in startTransMat, out transAxis);
+                        Vector3.TransformNormal(in Vector3.One, in startTransMat, out transAxis);
                         transAxis.Normalize();
-                        ScaleWithAxis(in newMouseLoc, in transAxis, in Vector3.UnitXYZ);
+                        ScaleWithAxis(in newMouseLoc, in transAxis, in Vector3.One);
                     }
                     break;
                 case enAxisType.Edge_X_Min:
@@ -2374,7 +2374,7 @@ namespace EngineNS.GamePlay
                 }
 
                 var mat = DMatrix.Identity;
-                var scale = origAxisDir * (float)len + Vector3.UnitXYZ;
+                var scale = origAxisDir * (float)len + Vector3.One;
                 //DMatrix.Transformation(mCurrentAxisStartTransform.Position,
                 //    mCurrentAxisStartTransform.Quat, in scale, mCurrentAxisStartTransform.Position, in Quaternion.Identity, in DVector3.Zero, out mat);
 
@@ -2433,7 +2433,7 @@ namespace EngineNS.GamePlay
                 var tempBB = mStartEdgeBB;
                 var center = tempBB.GetCenter();
                 var transCenter = center;
-                var scale = Vector3.UnitXYZ;
+                var scale = Vector3.One;
                 float scaleDelta = 1.0f;
                 var oldSize = tempBB.GetSize();
                 var ep = 0.0001f;
@@ -2457,7 +2457,7 @@ namespace EngineNS.GamePlay
                                         var posNodeRotInv = mPosNodeStartTransform.mQuat.Inverse();
                                         var scaleDir = Vector3.TransformCoordinate(edgeAxisDir, posNodeRotInv);
                                         scaleDir = new Vector3(Math.Abs(scaleDir.X), Math.Abs(scaleDir.Y), Math.Abs(scaleDir.Z));
-                                        scale = scaleDir * (scaleDelta - 1) + Vector3.UnitXYZ;
+                                        scale = scaleDir * (scaleDelta - 1) + Vector3.One;
                                     }
                                     break;
                             }
@@ -2482,7 +2482,7 @@ namespace EngineNS.GamePlay
                                         var posNodeRotInv = mPosNodeStartTransform.mQuat.Inverse();
                                         var scaleDir = Vector3.TransformCoordinate(edgeAxisDir, posNodeRotInv);
                                         scaleDir = new Vector3(Math.Abs(scaleDir.X), Math.Abs(scaleDir.Y), Math.Abs(scaleDir.Z));
-                                        scale = scaleDir * (scaleDelta - 1) + Vector3.UnitXYZ;
+                                        scale = scaleDir * (scaleDelta - 1) + Vector3.One;
                                     }
                                     break;
                             }
@@ -2507,7 +2507,7 @@ namespace EngineNS.GamePlay
                                         var posNodeRotInv = mPosNodeStartTransform.mQuat.Inverse();
                                         var scaleDir = Vector3.TransformCoordinate(edgeAxisDir, posNodeRotInv);
                                         scaleDir = new Vector3(Math.Abs(scaleDir.X), Math.Abs(scaleDir.Y), Math.Abs(scaleDir.Z));
-                                        scale = scaleDir * (scaleDelta - 1) + Vector3.UnitXYZ;
+                                        scale = scaleDir * (scaleDelta - 1) + Vector3.One;
                                     }
                                     break;
                             }
@@ -2532,7 +2532,7 @@ namespace EngineNS.GamePlay
                                         var posNodeRotInv = mPosNodeStartTransform.mQuat.Inverse();
                                         var scaleDir = Vector3.TransformCoordinate(edgeAxisDir, posNodeRotInv);
                                         scaleDir = new Vector3(Math.Abs(scaleDir.X), Math.Abs(scaleDir.Y), Math.Abs(scaleDir.Z));
-                                        scale = scaleDir * (scaleDelta - 1) + Vector3.UnitXYZ;
+                                        scale = scaleDir * (scaleDelta - 1) + Vector3.One;
                                     }
                                     break;
                             }
@@ -2557,7 +2557,7 @@ namespace EngineNS.GamePlay
                                         var posNodeRotInv = mPosNodeStartTransform.mQuat.Inverse();
                                         var scaleDir = Vector3.TransformCoordinate(edgeAxisDir, posNodeRotInv);
                                         scaleDir = new Vector3(Math.Abs(scaleDir.X), Math.Abs(scaleDir.Y), Math.Abs(scaleDir.Z));
-                                        scale = scaleDir * (scaleDelta - 1) + Vector3.UnitXYZ;
+                                        scale = scaleDir * (scaleDelta - 1) + Vector3.One;
                                     }
                                     break;
                             }
@@ -2582,7 +2582,7 @@ namespace EngineNS.GamePlay
                                         var posNodeRotInv = mPosNodeStartTransform.mQuat.Inverse();
                                         var scaleDir = Vector3.TransformCoordinate(edgeAxisDir, posNodeRotInv);
                                         scaleDir = new Vector3(Math.Abs(scaleDir.X), Math.Abs(scaleDir.Y), Math.Abs(scaleDir.Z));
-                                        scale = scaleDir * (scaleDelta - 1) + Vector3.UnitXYZ;
+                                        scale = scaleDir * (scaleDelta - 1) + Vector3.One;
                                     }
                                     break;
                             }
@@ -2593,7 +2593,7 @@ namespace EngineNS.GamePlay
                 DMatrix transMat = DMatrix.Identity;
 
                 DMatrix tempMat;
-                DMatrix.Transformation(in Vector3.UnitXYZ, in mCurrentAxisStartTransform.mQuat, in mCurrentAxisStartTransform.mPosition, out tempMat);
+                DMatrix.Transformation(in Vector3.One, in mCurrentAxisStartTransform.mQuat, in mCurrentAxisStartTransform.mPosition, out tempMat);
                 DVector3.TransformCoordinate(transCenter, in tempMat, out transCenter);
                 #region Debug
                 //mPointNode.Placement.Position = transCenter;

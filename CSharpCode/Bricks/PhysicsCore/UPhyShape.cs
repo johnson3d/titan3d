@@ -90,7 +90,7 @@ namespace EngineNS.Bricks.PhysicsCore
                         CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
                         IndentImageWidth = info.HostPropertyGrid.Indent,
                         IndentTextureUVMin = Vector2.Zero,
-                        IndentTextureUVMax = Vector2.UnitXY,
+                        IndentTextureUVMax = Vector2.One,
                         IndentColor = info.HostPropertyGrid.IndentColor,
                         HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                         Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,
@@ -150,7 +150,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 if (mDebugMesh == null)
                 {
-                    Graphics.Mesh.CMeshPrimitives meshPrimitive = null;
+                    Graphics.Mesh.UMeshPrimitives meshPrimitive = null;
                     switch (ShapeType)
                     {
                         case EPhysShapeType.PST_Plane:
@@ -158,20 +158,20 @@ namespace EngineNS.Bricks.PhysicsCore
                         case EPhysShapeType.PST_Box:
                             {
                                 var shape = this as UPhyBoxShape;
-                                meshPrimitive = Graphics.Mesh.CMeshDataProvider.MakeBox(-shape.HalfExtent.X, -shape.HalfExtent.Y, -shape.HalfExtent.Z,
+                                meshPrimitive = Graphics.Mesh.UMeshDataProvider.MakeBox(-shape.HalfExtent.X, -shape.HalfExtent.Y, -shape.HalfExtent.Z,
                                     shape.HalfExtent.X * 2.0f, shape.HalfExtent.Y * 2.0f, shape.HalfExtent.Z * 2.0f, 0xfffffff).ToMesh();
                             }
                             break;
                         case EPhysShapeType.PST_Sphere:
                             {
                                 var shape = this as UPhySphereShape;
-                                meshPrimitive = Graphics.Mesh.CMeshDataProvider.MakeSphere(shape.Radius, 20, 20, 0xfffffff).ToMesh();
+                                meshPrimitive = Graphics.Mesh.UMeshDataProvider.MakeSphere(shape.Radius, 20, 20, 0xfffffff).ToMesh();
                             }
                             break;
                         case EPhysShapeType.PST_Capsule:
                             {
                                 var shape = this as UPhyCapsuleShape;
-                                meshPrimitive = Graphics.Mesh.CMeshDataProvider.MakeCapsule(shape.Radius, shape.HalfHeight* 2, 10, 10, 100, Graphics.Mesh.CMeshDataProvider.ECapsuleUvProfile.Aspect, 0xfffffff).ToMesh();
+                                meshPrimitive = Graphics.Mesh.UMeshDataProvider.MakeCapsule(shape.Radius, shape.HalfHeight* 2, 10, 10, 100, Graphics.Mesh.UMeshDataProvider.ECapsuleUvProfile.Aspect, 0xfffffff).ToMesh();
                             }
                             break;
                         case EPhysShapeType.PST_Convex:

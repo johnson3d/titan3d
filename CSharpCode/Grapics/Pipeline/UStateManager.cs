@@ -10,7 +10,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             get;
         } = new Dictionary<Hash64, T>(new Hash64.EqualityComparer());
-        public T GetPipelineState<D>(RHI.CRenderContext rc, in D desc) where D : unmanaged
+        public T GetPipelineState<D>(NxRHI.UGpuDevice rc, in D desc) where D : unmanaged
         {
             Hash64 hash = new Hash64();
             unsafe
@@ -23,6 +23,8 @@ namespace EngineNS.Graphics.Pipeline
                     if (States.TryGetValue(hash, out state) == false)
                     {
                         state = CreateState(rc, p);
+                        if (state == null)
+                            return null;
                         States.Add(hash, state);
                     }
                     return state;
@@ -37,7 +39,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             States.Clear();
         }
-        protected unsafe virtual T CreateState(RHI.CRenderContext rc, void* desc)
+        protected unsafe virtual T CreateState(NxRHI.UGpuDevice rc, void* desc)
         {
             return null;
         }
@@ -46,100 +48,48 @@ namespace EngineNS.Graphics.Pipeline
 
         }
     }
-    public class UBlendStateManager : UStateManager<RHI.CBlendState>
+    public class UGpuPipelineManager : UStateManager<NxRHI.UGpuPipeline>
     {
-        RHI.CBlendState mDefaultState;
-        public RHI.CBlendState DefaultState 
-        { 
+        NxRHI.UGpuPipeline mDefaultState;
+        public NxRHI.UGpuPipeline DefaultState
+        {
             get
             {
                 if (mDefaultState == null)
                 {
-                    var desc = new IBlendStateDesc();
+                    var desc = new NxRHI.FGpuPipelineDesc();
                     desc.SetDefault();
-                    mDefaultState = UEngine.Instance.GfxDevice.BlendStateManager.GetPipelineState(
+                    mDefaultState = UEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(
                         UEngine.Instance.GfxDevice.RenderContext, in desc);
                 }
                 return mDefaultState;
             }
         }
-        protected unsafe override RHI.CBlendState CreateState(RHI.CRenderContext rc, void* desc)
+        protected unsafe override NxRHI.UGpuPipeline CreateState(NxRHI.UGpuDevice rc, void* desc)
         {
-            return rc.CreateBlendState(in *(IBlendStateDesc*)desc);
+            return rc.CreatePipeline(in *(NxRHI.FGpuPipelineDesc*)desc);
         }
-        protected override void ReleaseState(RHI.CBlendState state)
+        protected override void ReleaseState(NxRHI.UGpuPipeline state)
         {
-            state.Dispose();
+            state?.Dispose();
         }
     }
-    public class URasterizerStateManager : UStateManager<RHI.CRasterizerState>
+    public class USamplerStateManager : UStateManager<NxRHI.USampler>
     {
-        RHI.CRasterizerState mDefaultState;
-        public RHI.CRasterizerState DefaultState
+        NxRHI.USampler mDefaultState;
+        public NxRHI.USampler DefaultState
         {
             get
             {
                 if (mDefaultState == null)
                 {
-                    var desc = new IRasterizerStateDesc();
+                    var desc = new NxRHI.FSamplerDesc();
                     desc.SetDefault();
-                    mDefaultState = UEngine.Instance.GfxDevice.RasterizerStateManager.GetPipelineState(
-                        UEngine.Instance.GfxDevice.RenderContext, in desc);
-                }
-                return mDefaultState;
-            }
-        }
-        protected unsafe override RHI.CRasterizerState CreateState(RHI.CRenderContext rc, void* desc)
-        {
-            return rc.CreateRasterizerState(in *(IRasterizerStateDesc*)desc);
-        }
-        protected override void ReleaseState(RHI.CRasterizerState state)
-        {
-            state.Dispose();
-        }
-    }
-    public class UDepthStencilStateManager : UStateManager<RHI.CDepthStencilState>
-    {
-        RHI.CDepthStencilState mDefaultState;
-        public RHI.CDepthStencilState DefaultState
-        {
-            get
-            {
-                if (mDefaultState == null)
-                {
-                    var desc = new IDepthStencilStateDesc();
-                    desc.SetDefault();
-                    mDefaultState = UEngine.Instance.GfxDevice.DepthStencilStateManager.GetPipelineState(
-                        UEngine.Instance.GfxDevice.RenderContext, in desc);
-                }
-                return mDefaultState;
-            }
-        }
-        protected unsafe override RHI.CDepthStencilState CreateState(RHI.CRenderContext rc, void* desc)
-        {
-            return rc.CreateDepthStencilState(in *(IDepthStencilStateDesc*)desc);
-        }
-        protected override void ReleaseState(RHI.CDepthStencilState state)
-        {
-            state.Dispose();
-        }
-    }
-    public class USamplerStateManager : UStateManager<RHI.CSamplerState>
-    {
-        RHI.CSamplerState mDefaultState;
-        public RHI.CSamplerState DefaultState
-        {
-            get
-            {
-                if (mDefaultState == null)
-                {
-                    var desc = new ISamplerStateDesc();
-                    desc.SetDefault();
-                    desc.Filter = ESamplerFilter.SPF_MIN_MAG_MIP_LINEAR;
-                    desc.CmpMode = EComparisionMode.CMP_NEVER;
-                    desc.AddressU = EAddressMode.ADM_WRAP;
-                    desc.AddressV = EAddressMode.ADM_WRAP;
-                    desc.AddressW = EAddressMode.ADM_WRAP;
+                    desc.Filter = NxRHI.ESamplerFilter.SPF_MIN_MAG_MIP_LINEAR;
+                    desc.CmpMode = NxRHI.EComparisionMode.CMP_NEVER;
+                    desc.AddressU = NxRHI.EAddressMode.ADM_WRAP;
+                    desc.AddressV = NxRHI.EAddressMode.ADM_WRAP;
+                    desc.AddressW = NxRHI.EAddressMode.ADM_WRAP;
                     desc.MaxAnisotropy = 0;
                     desc.MipLODBias = 0;
                     desc.MinLOD = 0;
@@ -150,20 +100,20 @@ namespace EngineNS.Graphics.Pipeline
                 return mDefaultState;
             }
         }
-        RHI.CSamplerState mPointState;
-        public RHI.CSamplerState PointState
+        NxRHI.USampler mPointState;
+        public NxRHI.USampler PointState
         {
             get
             {
                 if (mPointState == null)
                 {
-                    var desc = new ISamplerStateDesc();
+                    var desc = new NxRHI.FSamplerDesc();
                     desc.SetDefault();
-                    desc.Filter = ESamplerFilter.SPF_MIN_MAG_MIP_POINT;
-                    desc.CmpMode = EComparisionMode.CMP_NEVER;
-                    desc.AddressU = EAddressMode.ADM_CLAMP;
-                    desc.AddressV = EAddressMode.ADM_CLAMP;
-                    desc.AddressW = EAddressMode.ADM_CLAMP;
+                    desc.Filter = NxRHI.ESamplerFilter.SPF_MIN_MAG_MIP_POINT;
+                    desc.CmpMode = NxRHI.EComparisionMode.CMP_NEVER;
+                    desc.AddressU = NxRHI.EAddressMode.ADM_CLAMP;
+                    desc.AddressV = NxRHI.EAddressMode.ADM_CLAMP;
+                    desc.AddressW = NxRHI.EAddressMode.ADM_CLAMP;
                     desc.MaxAnisotropy = 0;
                     desc.MipLODBias = 0;
                     desc.MinLOD = 0;
@@ -174,22 +124,43 @@ namespace EngineNS.Graphics.Pipeline
                 return mPointState;
             }
         }
-        protected unsafe override RHI.CSamplerState CreateState(RHI.CRenderContext rc, void* desc)
+        protected unsafe override NxRHI.USampler CreateState(NxRHI.UGpuDevice rc, void* desc)
         {
-            return rc.CreateSamplerState(in *(ISamplerStateDesc*)desc);
+            return rc.CreateSampler(in *(NxRHI.FSamplerDesc*)desc);
         }
-        protected override void ReleaseState(RHI.CSamplerState state)
+        protected override void ReleaseState(NxRHI.USampler state)
         {
             state.Dispose();
         }
     }
-    public class URenderPassManager : UStateManager<RHI.CRenderPass>
+    public class URenderPassManager : UStateManager<NxRHI.URenderPass>
     {
-        protected unsafe override RHI.CRenderPass CreateState(RHI.CRenderContext rc, void* desc)
+        //public NxRHI.URenderPass DefaultRenderPass { get; private set; }
+        public void Initialize(UEngine engine)
         {
-            return rc.CreateRenderPass(in *(IRenderPassDesc*)desc);
+            //var desc = new NxRHI.FRenderPassDesc();
+            //desc.SetDefault();
+            //unsafe
+            //{
+            //    desc.NumOfMRT = 1;
+            //    desc.AttachmentMRTs[0].Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+            //    desc.AttachmentMRTs[0].Samples = 1;
+            //    desc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            //    desc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            //    desc.m_AttachmentDepthStencil.Format = EPixelFormat.PXF_D16_UNORM;
+            //    desc.m_AttachmentDepthStencil.Samples = 1;
+            //    desc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            //    desc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            //    desc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            //    desc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            //}
+            //DefaultRenderPass = this.GetPipelineState(engine.GfxDevice.RenderContext, in desc);
         }
-        protected override void ReleaseState(RHI.CRenderPass state)
+        protected unsafe override NxRHI.URenderPass CreateState(NxRHI.UGpuDevice rc, void* desc)
+        {
+            return rc.CreateRenderPass(in *(NxRHI.FRenderPassDesc*)desc);
+        }
+        protected override void ReleaseState(NxRHI.URenderPass state)
         {
             state.Dispose();
         }
@@ -197,22 +168,21 @@ namespace EngineNS.Graphics.Pipeline
 
     public class UInputLayoutManager
     {
-        public Dictionary<UInt64, RHI.CInputLayout> States
+        public Dictionary<UInt64, NxRHI.UInputLayoutDesc> States
         {
             get;
-        } = new Dictionary<UInt64, RHI.CInputLayout>();
-        public RHI.CInputLayout GetPipelineState(RHI.CRenderContext rc, IInputLayoutDesc desc)
+        } = new Dictionary<UInt64, NxRHI.UInputLayoutDesc>();
+        public NxRHI.UInputLayoutDesc GetPipelineState(NxRHI.UGpuDevice rc, NxRHI.UInputLayoutDesc desc)
         {
             unsafe
             {
                 var key = desc.GetLayoutHash64();
                 {
-
-                    RHI.CInputLayout state;
+                    NxRHI.UInputLayoutDesc state;
                     if (States.TryGetValue(key, out state) == false)
                     {
-                        state = rc.CreateInputLayout(desc);
-                        States.Add(key, state);
+                        States.Add(key, desc);
+                        return desc;
                     }
                     return state;
                 }

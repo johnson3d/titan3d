@@ -73,6 +73,39 @@ namespace EngineNS.Rtti
                 return name;
             }
         }
+        public static string GetCSharpTypeNameString(System.Type type)
+        {
+            if (type == null)
+                return "";
+
+            if (type.IsGenericType)
+            {
+                string retValue = type.Namespace + "." + type.Name;
+                var agTypes = type.GetGenericArguments();
+                if (agTypes.Length == 0)
+                    return retValue;
+
+                retValue = retValue.Replace("`" + type.GetGenericArguments().Length, "");
+                var agStr = "";
+                for (int i = 0; i < agTypes.Length; i++)
+                {
+                    if (i == 0)
+                        agStr = GetCSharpTypeNameString(agTypes[i]);
+                    else
+                        agStr += "," + GetCSharpTypeNameString(agTypes[i]);
+                }
+                retValue += "<" + agStr + ">";
+                return retValue;
+            }
+            else if (type.IsGenericParameter)
+                return type.Name;
+            else
+                return type.FullName.Replace("+", ".");
+        }
+        public string CSharpTypeName
+        {
+            get { return GetCSharpTypeNameString(SystemType); }
+        }
         public string Namespace
         {
             get
@@ -497,8 +530,7 @@ namespace EngineNS.Rtti
                     return t;
                 }
             }
-                
-            return null;
+            return UMissingTypeManager.Instance.GetConvertType(typeStr);
         }
         public UTypeDesc GetTypeDescFromFullName(string fullName)
         {

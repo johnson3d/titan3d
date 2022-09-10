@@ -96,7 +96,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             if (materials[0] == null)
                 return;
             var mesh = new Graphics.Mesh.UMesh();
-            var rect = Graphics.Mesh.CMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
+            var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             var rectMesh = rect.ToMesh();
             var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
@@ -176,7 +176,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
 
             await PreviewPropGrid.Initialize();
             PreviewPropGrid.PGName = $"PGMaterialPreview:{AssetName}";
@@ -249,7 +249,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 }
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -293,16 +293,16 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
         protected void DrawToolBar()
         {
-            var btSize = new Vector2(64, 64);
-            if (ImGuiAPI.Button("Save", in btSize))
+            var btSize = new Vector2(48, 16);
+            if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 var noused = Save();
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Compile", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
             {
                 var code = GenHLSLCode();
-                System.Diagnostics.Trace.WriteLine(Material.DefineCode.AsText);
+                System.Diagnostics.Trace.WriteLine(Material.DefineCode.TextCode);
                 System.Diagnostics.Trace.WriteLine(code);
 
                 var xml = new System.Xml.XmlDocument();
@@ -407,11 +407,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             string code = "";
             UCodeGeneratorData genData = new UCodeGeneratorData()
             {
-                Method = MaterialOutput.Function,
+                Method = MaterialOutput.VSFunction,
                 CodeGen = mHLSLCodeGen,
                 UserData = Material,
             };
-            gen.GenCodes(MaterialOutput.Function, ref code, ref genData);
+            gen.GenCodes(MaterialOutput.VSFunction, ref code, ref genData);
+            genData = new UCodeGeneratorData()
+            {
+                Method = MaterialOutput.PSFunction,
+                CodeGen = mHLSLCodeGen,
+                UserData = Material,
+            };
+            gen.GenCodes(MaterialOutput.PSFunction, ref code, ref genData);
 
             Material.HLSLCode = code;
 

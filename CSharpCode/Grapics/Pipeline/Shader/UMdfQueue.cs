@@ -28,8 +28,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public virtual Hash160 GetHash()
         {
-            string result = DefineCode?.AsText;
-            result += SourceCode?.AsText;
+            string result = DefineCode?.TextCode;
+            result += SourceCode.TextCode;
             mMdfQueueHash = Hash160.CreateHash160(result);
             return mMdfQueueHash;
         }
@@ -37,7 +37,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             mCoreObject = IMdfQueue.CreateInstance();
         }
-        public abstract EVertexStreamType[] GetNeedStreams();
+        public abstract NxRHI.EVertexStreamType[] GetNeedStreams();
         //{
         //    return new EVertexSteamType[] { EVertexSteamType.VST_Position, };
         //}
@@ -46,8 +46,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         }
         public RName CodeName { get; set; }
-        public IO.CMemStreamWriter DefineCode { get; protected set; }
-        public IO.CMemStreamWriter SourceCode { get; protected set; }
+        public NxRHI.UShaderCode DefineCode { get; protected set; }
+        public NxRHI.UShaderCode SourceCode { get; protected set; }
         protected virtual string GetBaseBuilder(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
         {
             return "";
@@ -58,7 +58,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             GetBaseBuilder(codeBuilder);
         }
         
-        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, URenderPolicy policy, Mesh.UMesh mesh)
+        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
 
         }
@@ -72,7 +72,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     public class UMdf_Shadow
     {
     }
-    public class UMdf_NoShadow
+    public class UMdf_NoShadow : UMdf_Shadow
     {
 
     }

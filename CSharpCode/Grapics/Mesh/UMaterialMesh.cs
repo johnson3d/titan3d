@@ -27,6 +27,10 @@ namespace EngineNS.Graphics.Mesh
             base.OnDrawSnapshot(in cmdlist, ref start, ref end);
             cmdlist.AddText(in start, 0xFFFFFFFF, "ums", null);
         }
+        protected override Color GetBorderColor()
+        {
+            return Color.OrangeRed;
+        }
         public override void OnDragTo(Graphics.Pipeline.UViewportSlate vpSlate)
         {
             var worldViewport = vpSlate as EGui.Slate.UWorldViewportSlate;
@@ -121,7 +125,7 @@ namespace EngineNS.Graphics.Mesh
         {
 
         }
-        public bool Initialize(CMeshPrimitives mesh, Pipeline.Shader.UMaterial[] materials)
+        public bool Initialize(UMeshPrimitives mesh, Pipeline.Shader.UMaterial[] materials)
         {
             if (mesh.mCoreObject.GetAtomNumber() != materials.Length)
                 return false;
@@ -170,7 +174,7 @@ namespace EngineNS.Graphics.Mesh
                 return true;
             }
         }
-        [RName.PGRName(FilterExts = CMeshPrimitives.AssetExt)]
+        [RName.PGRName(FilterExts = UMeshPrimitives.AssetExt)]
         [ReadOnly(true)]
         public RName MeshName
         {
@@ -198,9 +202,9 @@ namespace EngineNS.Graphics.Mesh
                 exec();
             }
         }
-        CMeshPrimitives mMesh;
+        UMeshPrimitives mMesh;
         [Browsable(false)]
-        public CMeshPrimitives Mesh
+        public UMeshPrimitives Mesh
         {
             get => mMesh;
             internal set
@@ -281,7 +285,7 @@ namespace EngineNS.Graphics.Mesh
                         CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
                         IndentImageWidth = info.HostPropertyGrid.Indent,
                         IndentTextureUVMin = Vector2.Zero,
-                        IndentTextureUVMax = Vector2.UnitXY,
+                        IndentTextureUVMax = Vector2.One,
                         IndentColor = info.HostPropertyGrid.IndentColor,
                         HoverColor = EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor,
                         Flags = ImGuiTableRowFlags_.ImGuiTableRowFlags_None,

@@ -23,17 +23,6 @@ namespace EngineNS
         /// </summary>
         [Rtti.Meta]
         public Vector3 Maximum;
-
-        public Vector3 mMin
-        {
-            get => Minimum;
-            set => Minimum = value;
-        }
-        public Vector3 mMax
-        {
-            get => Maximum;
-            set => Maximum = value;
-        }
         public BoundingBox(float minX, float minY, float minZ, float maxX, float maxY, float maxZ)
         {
             Minimum.X = minX;
@@ -54,8 +43,8 @@ namespace EngineNS
         }
         public BoundingBox(Vector3 center, float extent = 1.0f)
         {
-            Minimum = center - Vector3.UnitXYZ * extent * 0.5f;
-            Maximum = center + Vector3.UnitXYZ * extent * 0.5f;
+            Minimum = center - Vector3.One * extent * 0.5f;
+            Maximum = center + Vector3.One * extent * 0.5f;
         }
         /// <summary>
         /// 带参构造函数

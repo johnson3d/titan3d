@@ -33,6 +33,8 @@ namespace EngineNS
     [Rtti.Meta]
     public partial class UEngineConfig
     {
+        public bool UseRenderDoc { get; set; } = false;
+        public string ConfigName;
         [Rtti.Meta]
         public int NumOfThreadPool { get; set; } = -1;
         [Rtti.Meta]
@@ -48,7 +50,7 @@ namespace EngineNS
         [Rtti.Meta]
         public bool DoUnitTest { get; set; } = true;
         [Rtti.Meta]
-        public ERHIType RHIType { get; set; } = ERHIType.RHT_D3D11;
+        public NxRHI.ERhiType RHIType { get; set; } = NxRHI.ERhiType.RHI_D3D11;
         [Rtti.Meta]
         public bool HasDebugLayer { get; set; } = false;
         [Rtti.Meta]
@@ -61,6 +63,8 @@ namespace EngineNS
         public string RpcRootType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.UTest.UTest_Rpc));
         [Rtti.Meta]
         public bool CookDXBC { get; set; } = true;
+        [Rtti.Meta]
+        public bool CookDXIL { get; set; } = false;
         [Rtti.Meta]
         public bool CookSPIRV { get; set; } = false;
         [Rtti.Meta]
@@ -114,18 +118,18 @@ namespace EngineNS
         {
             get;
         } = new Profiler.UNativeMemory();
-        public static async System.Threading.Tasks.Task<bool> StartEngine(UEngine engine, string cfgFile = null)
+        public static async System.Threading.Tasks.Task<bool> StartEngine(UEngine engine, string cfgFile, bool useRenderDoc)
         {
             System.Threading.Thread.CurrentThread.Name = "Main";
             mInstance = engine;
-            return await mInstance.PreInitEngine(cfgFile);
+            return await mInstance.PreInitEngine(cfgFile, useRenderDoc);
         }
         static unsafe void NativeAssertEvent(void* arg0, void* arg1, int arg2)
         {
             System.Diagnostics.Debug.Assert(false);
         }
         static unsafe CoreSDK.FDelegate_FAssertEvent OnNativeAssertEvent = NativeAssertEvent;
-        public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile=null)
+        public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile, bool useRenderDoc)
         {
             RttiStructManager.GetInstance().BuildRtti();
 
@@ -136,7 +140,8 @@ namespace EngineNS
             var t1 = Support.Time.HighPrecision_GetTickCount();
             EngineNS.Rtti.UTypeDescManager.Instance.InitTypes();
             var t2 = Support.Time.HighPrecision_GetTickCount();
-            
+
+            Rtti.UMissingTypeManager.Instance.Initialize();
             EngineNS.Rtti.UClassMetaManager.Instance.LoadMetas();
             var t3 = Support.Time.HighPrecision_GetTickCount();
             
@@ -163,6 +168,8 @@ namespace EngineNS
                 Config.MainRPolicyName = RName.GetRName("utest/deferred.rpolicy", RName.ERNameType.Game);
                 IO.FileManager.SaveObjectToXml(cfgFile, Config);
             }
+            Config.ConfigName = "Titan3D  [" + IO.FileManager.GetPureName(cfgFile) + "]";
+            Config.UseRenderDoc = useRenderDoc;
 
             GatherModules();
 
@@ -193,6 +200,7 @@ namespace EngineNS
         }
         [ThreadStatic]
         static Profiler.TimeScope Scope_Tick = Profiler.TimeScopeManager.GetTimeScope(typeof(UEngine), nameof(Tick));
+        public uint CaptureRenderDocFrame = uint.MaxValue;
         public bool Tick()
         {
             using(new Profiler.TimeScopeHelper(Scope_Tick))
@@ -209,7 +217,22 @@ namespace EngineNS
 
                 base.TickModules();
 
+                if (CaptureRenderDocFrame == 0)
+                    IRenderDocTool.GetInstance().StartFrameCapture();
                 this.ThreadMain.Tick();
+                if (CaptureRenderDocFrame == 0)
+                {
+                    IRenderDocTool.GetInstance().EndFrameCapture();
+                    ulong timeStamp = 0;
+                    var file = IRenderDocTool.GetInstance().GetCapture(0, ref timeStamp);
+                    if (!string.IsNullOrEmpty(file))
+                    {
+                        var tarFile = IO.FileManager.GetPureName(file) + ".rdc";
+                        System.IO.File.Move(file, FileManager.GetPath(IO.FileManager.ERootDir.Cache, IO.FileManager.ESystemDir.RenderDoc) + tarFile); 
+                    }
+                    CaptureRenderDocFrame = uint.MaxValue;
+                }
+                CaptureRenderDocFrame--;
 
                 base.EndFrameModules();
 
@@ -251,6 +274,7 @@ namespace EngineNS
 
             EngineNS.UCs2CppBase.FinalCleanupNativeCoreProvider();
             CoreSDK.FinalF2MManager();
+            RootFormManager.ClearRootForms();
             mInstance = null;
         }
     }

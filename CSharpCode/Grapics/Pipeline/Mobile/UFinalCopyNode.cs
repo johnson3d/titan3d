@@ -59,10 +59,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             this.UpdatePermutation();
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
-                EVertexStreamType.VST_UV,};
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_UV,};
         }
         public void SetDisableAO(bool value)
         {
@@ -84,43 +84,42 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             DisableHdr.SetValue(value);
             UpdatePermutation();
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
+        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, URenderPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
 
             var Manager = policy.TagObject as URenderPolicy;
 
             var node = Manager.FindFirstNode<UFinalCopyNode>();
-            var gpuProgram = drawcall.Effect.ShaderProgram;
-            var index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "gBaseSceneView");
-            if (!CoreSDK.IsNullPointer(index))
+            var index = drawcall.FindBinder("gBaseSceneView");
+            if (index.IsValidPointer)
             {
-                drawcall.mCoreObject.BindShaderSrv(index, node.GetAttachBuffer(node.ColorPinIn).Srv.mCoreObject);
+                drawcall.BindSRV(index, node.GetAttachBuffer(node.ColorPinIn).Srv);
             }
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_gBaseSceneView");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            index = drawcall.FindBinder("Samp_gBaseSceneView");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "gPickedTex");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.FindBinder("gPickedTex");
+            if (index.IsValidPointer)
             {
-                drawcall.mCoreObject.BindShaderSrv(index, node.GetAttachBuffer(node.PickPinIn).Srv.mCoreObject);
+                drawcall.BindSRV(index, node.GetAttachBuffer(node.PickPinIn).Srv);
             }
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_gPickedTex");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            index = drawcall.FindBinder("Samp_gPickedTex");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GVignette");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.FindBinder("GVignette");
+            if (index.IsValidPointer)
             {
-                drawcall.mCoreObject.BindShaderSrv(index, node.GetAttachBuffer(node.VignettePinIn).Srv.mCoreObject);
+                drawcall.BindSRV(index, node.GetAttachBuffer(node.VignettePinIn).Srv);
             }
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GVignette");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            index = drawcall.FindBinder("Samp_GVignette");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
         }
     }
     public class UFinalCopyNode : Common.USceenSpaceNode
@@ -136,10 +135,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public override void InitNodePins()
         {
-            AddInput(ColorPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
             //AddInput(DepthPinIn);
-            AddInput(PickPinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(VignettePinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(PickPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(VignettePinIn, NxRHI.EBufferType.BFT_SRV);
 
             base.InitNodePins();
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;

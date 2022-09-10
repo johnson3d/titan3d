@@ -376,7 +376,7 @@ namespace EngineNS.EGui.Controls
                 }
                 if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left) && ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                     {
                         var type = Rtti.UTypeDesc.TypeOf(ameta.TypeStr).SystemType;
@@ -451,7 +451,7 @@ namespace EngineNS.EGui.Controls
                     ImGuiAPI.SetColumnWidth(0, ((float)cltSize) * 0.3f);
                 }
 
-                if (ImGuiAPI.BeginChild("LeftWindow", in Vector2.InvmUnitXY, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                if (ImGuiAPI.BeginChild("LeftWindow", in Vector2.MinusOne, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                 {
                     var min = ImGuiAPI.GetWindowContentRegionMin();
                     var max = ImGuiAPI.GetWindowContentRegionMax();
@@ -477,7 +477,7 @@ namespace EngineNS.EGui.Controls
                     {
                         SureSearchBar();
                     }
-                    if (ImGuiAPI.BeginChild("RightWindow", in Vector2.InvmUnitXY, false, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysVerticalScrollbar))
+                    if (ImGuiAPI.BeginChild("RightWindow", in Vector2.MinusOne, false, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysVerticalScrollbar))
                     {
                         var min = ImGuiAPI.GetWindowContentRegionMin();
                         var max = ImGuiAPI.GetWindowContentRegionMax();

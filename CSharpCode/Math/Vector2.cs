@@ -50,7 +50,26 @@ namespace EngineNS
                 else
                 {
                     var v = (Vector2)info.Value;
-                    var changed = ImGuiAPI.DragScalarN2(name, ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 2, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    float speed = 0.1f;
+                    var format = "%.6f";
+                    if (info.HostProperty != null)
+                    {
+                        var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueRange>();
+                        if (vR != null)
+                        {
+                            minValue = (float)vR.Min;
+                            maxValue = (float)vR.Max;
+                        }
+                        var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueChangeStep>();
+                        if (vStep != null)
+                        {
+                            speed = vStep.Step;
+                        }
+                        var vFormat = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueFormat>();
+                        if (vFormat != null)
+                            format = vFormat.Format;
+                    }
+                    var changed = ImGuiAPI.DragScalarN2(name, ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 2, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     //ImGuiAPI.InputFloat2(, (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
                     //ImGuiAPI.PopStyleVar(1);
                     if (changed && !info.Readonly)//(v != saved)
@@ -157,18 +176,9 @@ namespace EngineNS
         public readonly static Vector2 MinValue = new Vector2(float.MinValue, float.MinValue);
         public readonly static Vector2 Zero = new Vector2(0, 0);
         public readonly static Vector2 One = new Vector2(1, 1);
-        public readonly static Vector2 NegativeOne = new Vector2(-1, -1);
-        [Rtti.Meta]
-        public static Vector2 UnitX { get { return mUnitX; } }
-        public readonly static Vector2 mUnitX = new Vector2(1, 0);
-        [Rtti.Meta]
-        public static Vector2 UnitY { get{ return mUnitY; } }
-        public readonly static Vector2 mUnitY = new Vector2(0, 1);
-        [Rtti.Meta]
-        public static Vector2 UnitXY { get { return mUnitXY; } }
-        public readonly static Vector2 mUnitXY = new Vector2(1, 1);
-        [Rtti.Meta]
-        public readonly static Vector2 InvmUnitXY = new Vector2(-1, -1);
+        public readonly static Vector2 MinusOne = new Vector2(-1, -1);        
+        public readonly static Vector2 UnitX = new Vector2(1, 0);        
+        public readonly static Vector2 UnitY = new Vector2(0, 1);        
         [Rtti.Meta]
         public static int SizeInBytes 
         { 
@@ -894,19 +904,18 @@ namespace EngineNS
             return result;
 	    }
         [Rtti.Meta]
-        public static void TransformCoordinate( ref Vector2 coord, ref Matrix transform, out Vector2 result )
+        public static void TransformCoordinate(in Vector2 coord, in Matrix3x3 transform, out Vector2 result )
 	    {
-            Vector4 vector;
+            Vector3 vector;
 
-		    vector.X = (coord.X * transform.M11) + (coord.Y * transform.M21) + transform.M41;
-		    vector.Y = (coord.X * transform.M12) + (coord.Y * transform.M22) + transform.M42;
-		    vector.Z = (coord.X * transform.M13) + (coord.Y * transform.M23) + transform.M43;
-		    vector.W = 1 / ((coord.X * transform.M14) + (coord.Y * transform.M24) + transform.M44);
+		    vector.X = (coord.X * transform.M11) + (coord.Y * transform.M21) + transform.M31;
+		    vector.Y = (coord.X * transform.M12) + (coord.Y * transform.M22) + transform.M32;
+		    vector.Z = 1 / ((coord.X * transform.M13) + (coord.Y * transform.M23) + transform.M33);
             
-            result.X = vector.X * vector.W;
-            result.Y = vector.Y * vector.W;
+            result.X = vector.X * vector.Z;
+            result.Y = vector.Y * vector.Z;
 	    }
-        public static Vector2[] TransformCoordinate( Vector2[] coords, ref Matrix transform )
+        public static Vector2[] TransformCoordinate(Vector2[] coords, in Matrix3x3 transform )
 	    {
 		    if( coords == null )
 			    throw new ArgumentNullException( "coordinates" );
@@ -917,18 +926,17 @@ namespace EngineNS
 
 		    for( int i = 0; i < count; i++ )
 		    {
-			    vector.X = (coords[i].X * transform.M11) + (coords[i].Y * transform.M21) + transform.M41;
-			    vector.Y = (coords[i].X * transform.M12) + (coords[i].Y * transform.M22) + transform.M42;
-			    vector.Z = (coords[i].X * transform.M13) + (coords[i].Y * transform.M23) + transform.M43;
-			    vector.W = 1 / ((coords[i].X * transform.M14) + (coords[i].Y * transform.M24) + transform.M44);
-                results[i].X = vector.X * vector.W;
-                results[i].Y = vector.Y * vector.W;
+			    vector.X = (coords[i].X * transform.M11) + (coords[i].Y * transform.M21) + transform.M31;
+			    vector.Y = (coords[i].X * transform.M12) + (coords[i].Y * transform.M22) + transform.M32;
+			    vector.Z = 1 / ((coords[i].X * transform.M13) + (coords[i].Y * transform.M23) + transform.M33);
+                results[i].X = vector.X * vector.Z;
+                results[i].Y = vector.Y * vector.Z;
 		    }
 
 		    return results;
 	    }
         [Rtti.Meta]
-        public static Vector2 TransformNormal( Vector2 normal, Matrix transform )
+        public static Vector2 TransformNormal(in Vector2 normal, in Matrix3x3 transform )
 	    {
             Vector2 vector;
 
@@ -944,7 +952,7 @@ namespace EngineNS
         /// <param name="transform">转换矩阵</param>
         /// <param name="result">转换后的向量</param>
         [Rtti.Meta]
-        public static void TransformNormal( ref Vector2 normal, ref Matrix transform, out Vector2 result )
+        public static void TransformNormal(in Vector2 normal, in Matrix3x3 transform, out Vector2 result )
 	    {
             Vector2 r;
 		    r.X = (normal.X * transform.M11) + (normal.Y * transform.M21);
@@ -958,7 +966,7 @@ namespace EngineNS
         /// <param name="normals">单位向量列表</param>
         /// <param name="transform">转换矩阵</param>
         /// <returns>返回转换后的向量列表</returns>
-        public static Vector2[] TransformNormal( Vector2[] normals, ref Matrix transform )
+        public static Vector2[] TransformNormal(Vector2[] normals, in Matrix3x3  transform )
 	    {
 		    if( normals == null )
 			    throw new ArgumentNullException( "normals" );
@@ -1140,25 +1148,60 @@ namespace EngineNS
         }
     }
 
-    public struct DVector2
-    {
-        public double X;
-        public double Y;
-        public DVector2(double x, double y)
-        {
-            X = x;
-            Y = y;
-        }
-        public Vector2 AsSingleVector()
-        {
-            return new Vector2((float)X, (float)Y);
-        }
-        public static DVector2 operator +(in DVector2 left, in DVector2 right)
-        {
-            DVector2 result;
-            result.X = left.X + right.X;
-            result.Y = left.Y + right.Y;
-            return result;
-        }
-    }
+    //public struct DVector2
+    //{
+    //    public double X;
+    //    public double Y;
+    //    public DVector2(double x, double y)
+    //    {
+    //        X = x;
+    //        Y = y;
+    //    }
+    //    public Vector2 AsSingleVector()
+    //    {
+    //        return new Vector2((float)X, (float)Y);
+    //    }
+    //    public static DVector2 operator +(in DVector2 left, in DVector2 right)
+    //    {
+    //        DVector2 result;
+    //        result.X = left.X + right.X;
+    //        result.Y = left.Y + right.Y;
+    //        return result;
+    //    }
+    //    public static DVector2 operator -(in DVector2 left, in DVector2 right)
+    //    {
+    //        DVector2 result;
+    //        result.X = left.X - right.X;
+    //        result.Y = left.Y - right.Y;
+    //        return result;
+    //    }
+    //    public static DVector2 operator *(in DVector2 value, in DVector2 scale)
+    //    {
+    //        DVector2 result;
+    //        result.X = value.X * scale.X;
+    //        result.Y = value.Y * scale.Y;
+    //        return result;
+    //    }
+    //    public static DVector2 operator *(in DVector2 value, double scale)
+    //    {
+    //        DVector2 result;
+    //        result.X = value.X * scale;
+    //        result.Y = value.Y * scale;
+    //        return result;
+    //    }
+    //    public static DVector2 operator /(in DVector2 value, in DVector2 scale)
+    //    {
+    //        DVector2 result;
+    //        result.X = value.X / scale.X;
+    //        result.Y = value.Y / scale.Y;
+    //        return result;
+    //    }
+    //    public static DVector2 operator /(in DVector2 value, double scale)
+    //    {
+    //        DVector2 result;
+    //        result.X = value.X / scale;
+    //        result.Y = value.Y / scale;
+    //        return result;
+    //    }
+    //}
 }

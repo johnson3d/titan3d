@@ -77,6 +77,7 @@ namespace EngineNS.Support
             V2,
             V3,
             V4,
+            Bool,
         }
         public unsafe void SetValue<T>(T v) where T : unmanaged
         {
@@ -144,6 +145,10 @@ namespace EngineNS.Support
             {
                 SetPointer(*(IntPtr*)&v);
             }
+            else if(typeof(T) == typeof(bool))
+            {
+                SetBool(*(bool*)&v);
+            }
             else
             {
                 SetStruct<T>(v);
@@ -198,6 +203,8 @@ namespace EngineNS.Support
                     return mV3 == val.mV3;
                 case EValueType.V4:
                     return mV4 == val.mV4;
+                case EValueType.Bool:
+                    return mBoolValue == val.mBoolValue;
             }
             return false;
         }
@@ -314,6 +321,13 @@ namespace EngineNS.Support
                     CopyData(p, sizeof(T));
                 }
             }
+            else if(typeof(T) == typeof(bool))
+            {
+                fixed(T* p = &v)
+                {
+                    CopyData(p, sizeof(T));
+                }
+            }
             else
             {
                 fixed (T* p = &v)
@@ -362,6 +376,8 @@ namespace EngineNS.Support
                     return mV3;
                 case EValueType.V4:
                     return mV4;
+                case EValueType.Bool:
+                    return mBoolValue;
                 default:
                     return null;
             }
@@ -406,6 +422,8 @@ namespace EngineNS.Support
                     return mV3.ToString();
                 case EValueType.V4:
                     return mV4.ToString();
+                case EValueType.Bool:
+                    return mBoolValue.ToString();
                 default:
                     return null;
             }
@@ -541,6 +559,9 @@ namespace EngineNS.Support
         [FieldOffset(4)]
         private Quaternion mV4;
         public Quaternion V4 { get => mV4; }
+        [FieldOffset(4)]
+        private bool mBoolValue;
+        public bool BoolValue { get => mBoolValue; }
 
         public void Dispose()
         {
@@ -698,6 +719,12 @@ namespace EngineNS.Support
             Dispose();
             mValueType = EValueType.V4;
             mV4 = v;
+        }
+        public void SetBool(bool v)
+        {
+            Dispose();
+            mValueType = EValueType.Bool;
+            mBoolValue = v;
         }
     }
     public struct UAnyPointer : IDisposable

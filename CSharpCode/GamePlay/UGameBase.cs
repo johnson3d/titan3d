@@ -34,7 +34,7 @@ namespace EngineNS.GamePlay
         }
         public virtual void TickRender(int ellapse)
         {
-            WorldViewportSlate?.TickRender(ellapse);
+            
         }
         public virtual void TickSync(int ellapse)
         {
@@ -78,13 +78,13 @@ namespace EngineNS.GamePlay
         {
             await WorldViewportSlate.Initialize(null, rPolicy, zMin, zMax);
             WorldViewportSlate.RenderPolicy.DisableShadow = false;
-            UEngine.Instance.GfxDevice.MainWindow.NativeWindow.RegEventProcessor(WorldViewportSlate);
+            UEngine.Instance.GfxDevice.SlateApplication.NativeWindow.RegEventProcessor(WorldViewportSlate);
         }
         [Rtti.Meta]
         public void FinalViewportSlate()
         {
-            UEngine.Instance.GfxDevice.MainWindow.NativeWindow.UnregEventProcessor(WorldViewportSlate);
-            Editor.UMainEditorApplication.UnregRootForm(WorldViewportSlate);
+            UEngine.Instance.GfxDevice.SlateApplication.NativeWindow.UnregEventProcessor(WorldViewportSlate);
+            UEngine.RootFormManager.UnregRootForm(WorldViewportSlate);
         }
 
         [Rtti.Meta]
@@ -103,19 +103,20 @@ namespace EngineNS.GamePlay
                 scene.Parent = world.Root;
 
                 //await CreateCharacter(WorldViewportSlate.World, WorldViewportSlate.World.Root);
-                await CreateCharacter(WorldViewportSlate.World);
+                await CreateCharacter(scene);
+                //world.CameraOffset = DVector3.Zero;
                 return true;
             }
             return false;
         }
         public GamePlay.Character.UCharacter ChiefPlayer;
         [Rtti.Meta]
-        public async System.Threading.Tasks.Task CreateCharacter(UWorld world)
+        public async System.Threading.Tasks.Task CreateCharacter(Scene.UScene scene)
         {
-            EngineNS.GamePlay.Scene.UNode root = world.Root;
+            EngineNS.GamePlay.Scene.UNode root = scene;
             var playerData = new EngineNS.GamePlay.Character.UCharacter.UCharacterData();
             ChiefPlayer = new EngineNS.GamePlay.Character.UCharacter();
-            await ChiefPlayer.InitializeNode(WorldViewportSlate.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await ChiefPlayer.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             ChiefPlayer.Parent = root;
             ChiefPlayer.NodeData.Name = "UActor";
             ChiefPlayer.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.None;
@@ -127,7 +128,7 @@ namespace EngineNS.GamePlay
             meshData1.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
             meshData1.AtomType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMesh.UAtom));
             var meshNode1 = new EngineNS.GamePlay.Scene.UMeshNode();
-            await meshNode1.InitializeNode(world, meshData1, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await meshNode1.InitializeNode(scene.World, meshData1, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             meshNode1.NodeData.Name = "Robot1";
             meshNode1.Parent = ChiefPlayer;
             meshNode1.Placement.SetTransform(new DVector3(0.0f), new Vector3(0.01f), Quaternion.Identity);
@@ -147,23 +148,23 @@ namespace EngineNS.GamePlay
             sapnd.Axises.Add(new EngineNS.Animation.Asset.BlendSpace.UBlendSpace_Axis("V"));
             sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"), Vector3.Zero));
             sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_walk_aim_f_loop_ip.animclip"), new Vector3(3, 0, 0)));
-            await EngineNS.Animation.SceneNode.UBlendSpaceAnimPlayNode.AddBlendSpace2DAnimPlayNode(world, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
+            await EngineNS.Animation.SceneNode.UBlendSpaceAnimPlayNode.AddBlendSpace2DAnimPlayNode(scene.World, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
 
             var characterController = new EngineNS.GamePlay.Controller.UCharacterController();
-            await characterController.InitializeNode(WorldViewportSlate.World, new EngineNS.GamePlay.Scene.UNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
-            characterController.Parent = world.Root;
+            await characterController.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.UNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            characterController.Parent = root;
             characterController.ControlledCharacter = ChiefPlayer;
 
             var movement = new EngineNS.GamePlay.Movemnet.UMovement();
-            await movement.InitializeNode(WorldViewportSlate.World, new EngineNS.GamePlay.Scene.UNodeData() { Name = "Movement" }, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await movement.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.UNodeData() { Name = "Movement" }, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             movement.Parent = ChiefPlayer;
 
             characterController.MovementNode = movement;
 
             var springArm = new EngineNS.GamePlay.Camera.UCameraSpringArm();
             var springArmData = new EngineNS.GamePlay.Camera.UCameraSpringArm.UCameraSpringArmData();
-            //springArmData.TargetOffset = DVector3.Up * 1.5f;
-            await springArm.InitializeNode(WorldViewportSlate.World, springArmData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            springArmData.TargetOffset = DVector3.Up * 1.5f;
+            await springArm.InitializeNode(scene.World, springArmData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
 
             springArm.Parent = ChiefPlayer;
 

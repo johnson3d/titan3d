@@ -42,7 +42,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             return FindFirstNode<Common.UGpuSceneNode>();
         }
-        public virtual RHI.CShaderResourceView GetFinalShowRSV()
+        public virtual NxRHI.USrView GetFinalShowRSV()
         {
             var attachBuffer = AttachmentCache.FindAttachement(in RootNode.GetOutput(0).Attachement.AttachmentName);
             if (attachBuffer == null)
@@ -55,6 +55,15 @@ namespace EngineNS.Graphics.Pipeline
             if (hitproxyNode == null)
                 return null;
             return hitproxyNode.GetHitproxy(MouseX, MouseY);
+        }
+
+        public override void TickSync()
+        {
+            base.TickSync();
+            foreach(var i in CameraAttachments)
+            {
+                i.Value.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
+            }
         }
         #region Turn On/Off
         protected bool mDisableShadow;
@@ -144,7 +153,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             return null;
         }
-        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom) 
+        public virtual void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom) 
         {
             mesh.MdfQueue.OnDrawCall(shadingType, drawcall, this, mesh);
         }
@@ -192,20 +201,20 @@ namespace EngineNS.Graphics.Pipeline
         }
 
         #region CommonState
-        RHI.CSamplerState mClampState;
-        public RHI.CSamplerState ClampState
+        NxRHI.USampler mClampState;
+        public NxRHI.USampler ClampState
         {
             get
             {
                 if (mClampState == null)
                 {
-                    var desc = new ISamplerStateDesc();
+                    var desc = new NxRHI.FSamplerDesc();
                     desc.SetDefault();
-                    desc.Filter = ESamplerFilter.SPF_MIN_MAG_MIP_LINEAR;
-                    desc.CmpMode = EComparisionMode.CMP_NEVER;
-                    desc.AddressU = EAddressMode.ADM_CLAMP;
-                    desc.AddressV = EAddressMode.ADM_CLAMP;
-                    desc.AddressW = EAddressMode.ADM_CLAMP;
+                    desc.Filter = NxRHI.ESamplerFilter.SPF_MIN_MAG_MIP_LINEAR;
+                    desc.CmpMode = NxRHI.EComparisionMode.CMP_NEVER;
+                    desc.AddressU = NxRHI.EAddressMode.ADM_CLAMP;
+                    desc.AddressV = NxRHI.EAddressMode.ADM_CLAMP;
+                    desc.AddressW = NxRHI.EAddressMode.ADM_CLAMP;
                     desc.MaxAnisotropy = 0;
                     desc.MipLODBias = 0;
                     desc.MinLOD = 0;
@@ -216,20 +225,20 @@ namespace EngineNS.Graphics.Pipeline
                 return mClampState;
             }
         }
-        RHI.CSamplerState mClampPointState;
-        public RHI.CSamplerState ClampPointState
+        NxRHI.USampler mClampPointState;
+        public NxRHI.USampler ClampPointState
         {
             get
             {
                 if (mClampPointState == null)
                 {
-                    var desc = new ISamplerStateDesc();
+                    var desc = new NxRHI.FSamplerDesc();
                     desc.SetDefault();
-                    desc.Filter = ESamplerFilter.SPF_MIN_MAG_MIP_POINT;
-                    desc.CmpMode = EComparisionMode.CMP_NEVER;
-                    desc.AddressU = EAddressMode.ADM_CLAMP;
-                    desc.AddressV = EAddressMode.ADM_CLAMP;
-                    desc.AddressW = EAddressMode.ADM_CLAMP;
+                    desc.Filter = NxRHI.ESamplerFilter.SPF_MIN_MAG_MIP_POINT;
+                    desc.CmpMode = NxRHI.EComparisionMode.CMP_NEVER;
+                    desc.AddressU = NxRHI.EAddressMode.ADM_CLAMP;
+                    desc.AddressV = NxRHI.EAddressMode.ADM_CLAMP;
+                    desc.AddressW = NxRHI.EAddressMode.ADM_CLAMP;
                     desc.MaxAnisotropy = 0;
                     desc.MipLODBias = 0;
                     desc.MinLOD = 0;

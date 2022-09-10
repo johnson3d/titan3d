@@ -13,11 +13,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             Both,
         }
         public EShowMode ShowMode { get; set; } = EShowMode.Normal;
+        public bool IsShowWater { get; set; } = false;
         public Graphics.Pipeline.Shader.UMaterial Material;
+        public Graphics.Pipeline.Shader.UMaterial WaterMaterial;
         public Graphics.Pipeline.Shader.UMaterial WireFrameMaterial;
         
         public int MipLevels { get; set; } = 6;
-        public Graphics.Mesh.CMeshPrimitives[] GridMipLevels;
+        public Graphics.Mesh.UMeshPrimitives[] GridMipLevels;
 
         public async System.Threading.Tasks.Task<bool> Initialize(int mipLevel)
         {
@@ -26,20 +28,22 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             Material = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("utest/material/terrainidmap.material"));
             Material.IsEditingMaterial = false;
 
-            //Material.UsedRSView[0].Value = RName.GetRName("UTest/texture/ground_01.srv");
-
             WireFrameMaterial = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
             WireFrameMaterial.IsEditingMaterial = false;
+
+            WaterMaterial = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("utest/material/terrainwater.material"));
+            WaterMaterial.IsEditingMaterial = false;
+
             var rast = WireFrameMaterial.Rasterizer;
-            rast.FillMode = EFillMode.FMD_WIREFRAME;
+            rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
             WireFrameMaterial.Rasterizer = rast;
 
-            GridMipLevels = new Graphics.Mesh.CMeshPrimitives[mipLevel];
+            GridMipLevels = new Graphics.Mesh.UMeshPrimitives[mipLevel];
             for (int i = 0; i < GridMipLevels.Length; i++)
             {
                 var size = (ushort)Math.Pow(2, GridMipLevels.Length - i - 1);
 
-                GridMipLevels[i] = Graphics.Mesh.CMeshDataProvider.MakeGridForTerrain(size, size).ToMesh();
+                GridMipLevels[i] = Graphics.Mesh.UMeshDataProvider.MakeGridForTerrain(size, size).ToMesh();
             }
             //Parameters.SureMiplevels(mipLevel);
             //Parameters.LODLevelCount = mipLevel;

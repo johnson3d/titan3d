@@ -4,9 +4,18 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure
 {
+    public class BufferTypeOperatorAttribute : Attribute
+    {
+        public Type OperatorType;
+        public BufferTypeOperatorAttribute(Type operatorType)
+        {
+            OperatorType = operatorType;
+        }
+    }
+
     public class UBufferCreator : IO.BaseSerializer
     {
-        public static UBufferCreator CreateInstance<TBuffer>(int x, int y, int z)
+        public static UBufferCreator CreateInstance<TBuffer>(int x = -1, int y = -1, int z = -1)
             where TBuffer : UBufferConponent
         {
             var result = new UBufferCreator();
@@ -16,7 +25,7 @@ namespace EngineNS.Bricks.Procedure
             result.ZSize = z;
             return result;
         }
-        public static UBufferCreator CreateInstance(Rtti.UTypeDesc bufferType, int x, int y, int z)
+        public static UBufferCreator CreateInstance(Rtti.UTypeDesc bufferType, int x = -1, int y = -1, int z = -1)
         {
             var result = new UBufferCreator();
             result.BufferType = bufferType;
@@ -34,12 +43,18 @@ namespace EngineNS.Bricks.Procedure
             result.ZSize = ZSize;
             return result;
         }
+        public void SetSize(UBufferCreator creator)
+        {
+            XSize = creator.XSize;
+            YSize = creator.YSize;
+            ZSize = creator.ZSize;
+        }
         public int GetElementTypeSize()
         {
             return System.Runtime.InteropServices.Marshal.SizeOf(ElementType);
         }
         Rtti.UTypeDesc mElementType;
-        [EGui.Controls.PropertyGrid.PGTypeEditor(null, FilterMode = 0)]
+        [EGui.Controls.PropertyGrid.PGTypeEditor(FilterMode = 0)]
         public Rtti.UTypeDesc ElementType
         {
             get
@@ -86,6 +101,43 @@ namespace EngineNS.Bricks.Procedure
         public int YSize { get; set; } = 1;
         [Rtti.Meta]
         public int ZSize { get; set; } = 1;
+
+        public static Type GetBufferOperatorType(Type type)
+        {
+            var atts = type.GetCustomAttributes(typeof(BufferTypeOperatorAttribute), false);
+            if(atts.Length != 0)
+            {
+                var att = atts[0] as BufferTypeOperatorAttribute;
+                return att.OperatorType;
+            }
+
+            if (type == typeof(float))
+                return typeof(FFloatOperator);
+            else if (type == typeof(Vector2))
+                return typeof(FFloat2Operator);
+            else if (type == typeof(Vector3))
+                return typeof(FFloat3Operator);
+            else if (type == typeof(Vector4))
+                return typeof(FFloat4Operator);
+            else if (type == typeof(int))
+                return typeof(FIntOperator);
+            else if (type == typeof(Int32_2))
+                return typeof(FInt2Operator);
+            else if (type == typeof(Int32_3))
+                return typeof(FInt3Operator);
+            else if (type == typeof(DVector3))
+                return typeof(FDouble3Operator);
+            else if (type == typeof(sbyte))
+                return typeof(FSByteOperator);
+            else if (type == typeof(FTransform))
+                return typeof(FTransformOperator);
+            else if (type == typeof(FSquareSurface))
+                return typeof(FSquareSurfaceOperator);
+            else if (type == typeof(Quaternion))
+                return typeof(FQuaternionOperator);
+
+            return null;
+        }
     }
     public partial class UBufferConponent
     {
@@ -122,7 +174,7 @@ namespace EngineNS.Bricks.Procedure
         public int Pitch { get; private set; }
         public int Slice { get; private set; }
         public int ElementSize { get; private set; }
-        //public BigStackBuffer SuperPixels;
+        public Vector3 UVWStep = Vector3.Zero;
         public Support.CBlobObject SuperPixels = new Support.CBlobObject();
         protected UBufferConponent()
         {
@@ -225,7 +277,270 @@ namespace EngineNS.Bricks.Procedure
             }
             return false;
         }
+        public virtual unsafe NxRHI.USrView CreateVector2Texture2D(Vector2 min, Vector2 max)
+        {
+            NxRHI.UTexture texture;
+            if(min.X >= 0 && min.X <= 1 && max.X >= 0 && max.X <= 1)
+            {
+                min.X = 0;
+                max.X = 1;
+            }
+            if(min.Y >= 0 && min.Y <= 1 && max.Y >= 0 && max.Y <= 1)
+            {
+                min.Y = 0;
+                min.Y = 1;
+            }
+            var hRange = max - min;
+            unsafe
+            {
+                var desc = new NxRHI.FTextureDesc();
+                desc.SetDefault();
+                desc.Width = (uint)Width;
+                desc.Height = (uint)Height;
+                desc.MipLevels = 1;
+                desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                var initData = new NxRHI.FMappedSubResource();
+                initData.SetDefault();
+                desc.InitData = &initData;
+                {
+                    var Count = Width * Height;
+                    var tarPixels = new Byte4[Count];
+                    var pSlice = (Vector2*)this.GetSliceAddress(0);
+                    for (int i = 0; i < Count; i++)
+                    {
+                        var tmp = pSlice[i] - min;
+                        tmp = tmp * 255.0f;
+                        tmp = tmp / hRange;
+                        tarPixels[i].X = (byte)tmp.X;
+                        tarPixels[i].Y = (byte)tmp.Y;
+                        tarPixels[i].Z = 0;
+                        tarPixels[i].W = 255;
+                    }
+                    fixed (Byte4* p = &tarPixels[0])
+                    {
+                        initData.RowPitch = desc.Width * (uint)sizeof(Byte4);
+                        initData.pData = p;
+                        texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                    }
+                }
 
+                var rsvDesc = new NxRHI.FSrvDesc();
+                rsvDesc.SetTexture2D();
+                rsvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
+                rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                rsvDesc.Texture2D.MipLevels = desc.MipLevels;
+                var result = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
+                return result;
+            }
+        }
+        public virtual unsafe NxRHI.USrView CreateVector3Texture2D(Vector3 minHeight, Vector3 maxHeight)
+        {
+            NxRHI.UTexture texture;
+            if (minHeight.X >= 0 && minHeight.X <= 1 && maxHeight.X >= 0 && maxHeight.X <= 1)
+            {
+                minHeight.X = 0;
+                maxHeight.X = 1;
+            }
+            if (minHeight.Y >= 0 && minHeight.Y <= 1 && maxHeight.Y >= 0 && maxHeight.Y <= 1)
+            {
+                minHeight.Y = 0;
+                maxHeight.Y = 1;
+            }
+            if (minHeight.Z >= 0 && minHeight.Z <= 1 && maxHeight.Z >= 0 && maxHeight.Z <= 1)
+            {
+                minHeight.Z = 0;
+                maxHeight.Z = 1;
+            }
+            var hRange = maxHeight - minHeight;
+            unsafe
+            {
+                var desc = new NxRHI.FTextureDesc();
+                desc.SetDefault();
+                desc.Width = (uint)Width;
+                desc.Height = (uint)Height;
+                desc.MipLevels = 1;
+                desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                var initData = new NxRHI.FMappedSubResource();
+                initData.SetDefault();
+                desc.InitData = &initData;
+                {
+                    var Count = Width * Height;
+                    var tarPixels = new Byte4[Count];
+                    var pSlice = (Vector3*)this.GetSliceAddress(0);
+                    for (int i = 0; i < Count; i++)
+                    {
+                        var tmp = pSlice[i] - minHeight;
+                        tmp = tmp * 255.0f;
+                        tmp = tmp / hRange;
+                        //tarPixels[i].X = (byte)(((pSlice[i].X - minHeight.X) / hRange.) * 255.0f);
+                        //tarPixels[i].Y = (byte)(((pSlice[i].Y - minHeight) / hRange) * 255.0f);
+                        //tarPixels[i].Z = (byte)(((pSlice[i].Z - minHeight) / hRange) * 255.0f);
+                        tarPixels[i].X = (byte)tmp.X;
+                        tarPixels[i].Y = (byte)tmp.Y;
+                        tarPixels[i].Z = (byte)tmp.Z;
+                        tarPixels[i].W = 255;
+                    }
+                    fixed (Byte4* p = &tarPixels[0])
+                    {
+                        initData.RowPitch = desc.Width * (uint)sizeof(Byte4);
+                        initData.pData = p;
+                        texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                    }
+                }
+
+                var rsvDesc = new NxRHI.FSrvDesc();
+                rsvDesc.SetTexture2D();
+                rsvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
+                rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                rsvDesc.Texture2D.MipLevels = desc.MipLevels;
+                var result = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
+                return result;
+            }
+        }
+        public virtual unsafe NxRHI.USrView CreateAsHeightMapTexture2D(float minHeight, float maxHeight, EPixelFormat format = EPixelFormat.PXF_R32_FLOAT, float finalScale = 1.0f, bool bNomalized = false)
+        {
+            NxRHI.UTexture texture;
+            if (minHeight >= 0 && minHeight <= 1 && maxHeight >= 0 && maxHeight <= 1)
+            {
+                minHeight = 0;
+                maxHeight = 1;
+            }
+            float hRange = maxHeight - minHeight;
+            unsafe
+            {
+                var desc = new NxRHI.FTextureDesc();
+                desc.SetDefault();
+                desc.Width = (uint)Width;
+                desc.Height = (uint)Height;
+                desc.MipLevels = 1;
+                desc.Format = format;
+                var initData = new NxRHI.FMappedSubResource();
+                initData.SetDefault();
+                desc.InitData = &initData;
+                switch (format)
+                {
+                    case EPixelFormat.PXF_R32_FLOAT:
+                        {
+                            var Count = Width * Height;
+                            var tarPixels = new float[Count];
+                            var pSlice = (float*)this.GetSliceAddress(0);
+                            for (int i = 0; i < Count; i++)
+                            {
+                                tarPixels[i] = pSlice[i] - minHeight;
+                                if (bNomalized)
+                                {
+                                    tarPixels[i] = tarPixels[i] / hRange;
+                                }
+                            }
+                            fixed (float* p = &tarPixels[0])
+                            {
+                                initData.RowPitch = desc.Width * sizeof(float);
+                                initData.pData = p;
+                                texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                            }
+                        }
+                        break;
+                    case EPixelFormat.PXF_R16_FLOAT:
+                        {//高度信息有2的11次方级别精度高度
+                            var Count = Width * Height;
+                            var tarPixels = new Half[Count];
+                            if (BufferCreator.ElementType == Rtti.UTypeDescGetter<float>.TypeDesc)
+                            {
+                                var pSlice = (float*)this.GetSliceAddress(0);
+                                for (int i = 0; i < Count; i++)
+                                {
+                                    //tarPixels[i] = HalfHelper.SingleToHalf(Pixels[i]);
+                                    if (bNomalized)
+                                    {
+                                        tarPixels[i] = HalfHelper.SingleToHalf((pSlice[i] - minHeight) * finalScale / hRange);
+                                    }
+                                    else
+                                    {
+                                        tarPixels[i] = HalfHelper.SingleToHalf((pSlice[i] - minHeight) * finalScale);
+                                    }
+                                }
+                                
+                            }
+                            else if (BufferCreator.ElementType == Rtti.UTypeDescGetter<sbyte>.TypeDesc)
+                            {
+                                var pSlice = (sbyte*)this.GetSliceAddress(0);
+                                for (int i = 0; i < Count; i++)
+                                {
+                                    //tarPixels[i] = HalfHelper.SingleToHalf(Pixels[i]);
+                                    if (bNomalized)
+                                    {
+                                        tarPixels[i] = HalfHelper.SingleToHalf(((float)pSlice[i] - minHeight) * finalScale / hRange);
+                                    }
+                                    else
+                                    {
+                                        tarPixels[i] = HalfHelper.SingleToHalf(((float)pSlice[i] - minHeight) * finalScale);
+                                    }
+                                }
+
+                            }
+                            fixed (Half* p = &tarPixels[0])
+                            {
+                                initData.RowPitch = (uint)(desc.Width * sizeof(Half));
+                                initData.pData = p;
+                                texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                            }
+                        }
+                        break;
+                    case EPixelFormat.PXF_R8G8_UNORM:
+                        {//如果希望表达更高的精度，而不是浪费在half上的指数位，可以RG8UNorm格式，让高度信息有65535级别
+                            var Count = Width * Height;
+                            var tarPixels = new UInt8_2[Width * Height];
+                            var pSlice = (float*)this.GetSliceAddress(0);
+                            float range = maxHeight - minHeight;
+                            for (int i = 0; i < Count; i++)
+                            {
+                                float alt = pSlice[i] - minHeight;
+                                float rate = alt / range;
+                                ushort value = (ushort)(rate * (float)ushort.MaxValue);
+                                tarPixels[i].X = (byte)(value & 0xFF);
+                                tarPixels[i].Y = (byte)((value >> 8) & 0xFF);
+                            }
+                            fixed (UInt8_2* p = &tarPixels[0])
+                            {
+                                initData.RowPitch = (uint)(desc.Width * sizeof(UInt8_2));
+                                initData.pData = p;
+                                texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                            }
+                        }
+                        break;
+                    case EPixelFormat.PXF_R8_UINT:
+                        {//如果希望表达更高的精度，而不是浪费在half上的指数位，可以RG8UNorm格式，让高度信息有65535级别
+                            var Count = Width * Height;
+                            var tarPixels = new Byte[Width * Height];
+                            var pSlice = (float*)this.GetSliceAddress(0);
+                            float range = maxHeight - minHeight;
+                            for (int i = 0; i < Count; i++)
+                            {
+                                var alt = (Byte)pSlice[i];
+                            }
+                            fixed (Byte* p = &tarPixels[0])
+                            {
+                                initData.RowPitch = (uint)(desc.Width * sizeof(Byte));
+                                initData.pData = p;
+                                texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                            }
+                        }
+                        break;
+                    default:
+                        return null;
+                }
+
+
+                var rsvDesc = new NxRHI.FSrvDesc();
+                rsvDesc.SetTexture2D();
+                rsvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
+                rsvDesc.Format = format;
+                rsvDesc.Texture2D.MipLevels = desc.MipLevels;
+                var result = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
+                return result;
+            }
+        }
+        
         #region CppMemBuffer
         public unsafe static UBufferConponent CreateInstance(in UBufferCreator creator)
         {
@@ -260,6 +575,10 @@ namespace EngineNS.Bricks.Procedure
                     CoreSDK.MemoryCopy(&pBuffer[i * ElementSize], initValue, (uint)ElementSize);
                 }
             }
+
+            UVWStep.X = 1.0f / (float)xSize;
+            UVWStep.Y = 1.0f / (float)ySize;
+            UVWStep.Z = 1.0f / (float)zSize;
         }
         public unsafe byte* GetSuperPixelAddress(int x, int y, int z)
         {
@@ -284,6 +603,7 @@ namespace EngineNS.Bricks.Procedure
         }
         #endregion
 
+        #region template
         [Rtti.Meta]
         public bool IsValidPixel(int x, int y = 0, int z = 0)
         {
@@ -295,24 +615,25 @@ namespace EngineNS.Bricks.Procedure
             }
             return true;
         }
-        public enum EPixelSamplerMode
+        public enum EPixelAddressMode
         {
             Clamp,
             Wrap,
         }
-        public ref T GetPixel<T>(in Vector3 uvw, EPixelSamplerMode mode = EPixelSamplerMode.Clamp) where T : unmanaged
+        public unsafe void* GetSuperPixelAddress(in Vector3 uvw, EPixelAddressMode mode = EPixelAddressMode.Clamp)
         {
-            int x = (int)(uvw.X * (float)Width);
-            int y = (int)(uvw.Y * (float)Height);
-            int z = (int)(uvw.Z * (float)Depth);
+            int x = CoreDefine.FloorToInt(uvw.X * (float)Width);
+            int y = CoreDefine.FloorToInt(uvw.Y * (float)Height);
+            int z = CoreDefine.FloorToInt(uvw.Z * (float)Depth);
             if (x >= Width)
+                if (x >= Width)
             {
                 switch (mode)
                 {
-                    case EPixelSamplerMode.Clamp:
+                    case EPixelAddressMode.Clamp:
                         x = Width - 1;
                         break;
-                    case EPixelSamplerMode.Wrap:
+                    case EPixelAddressMode.Wrap:
                         x = x % Width;
                         break;
                 }
@@ -321,10 +642,10 @@ namespace EngineNS.Bricks.Procedure
             {
                 switch (mode)
                 {
-                    case EPixelSamplerMode.Clamp:
+                    case EPixelAddressMode.Clamp:
                         y = Height - 1;
                         break;
-                    case EPixelSamplerMode.Wrap:
+                    case EPixelAddressMode.Wrap:
                         y = y % Height;
                         break;
                 }
@@ -333,21 +654,25 @@ namespace EngineNS.Bricks.Procedure
             {
                 switch (mode)
                 {
-                    case EPixelSamplerMode.Clamp:
+                    case EPixelAddressMode.Clamp:
                         z = Depth - 1;
                         break;
-                    case EPixelSamplerMode.Wrap:
+                    case EPixelAddressMode.Wrap:
                         z = z % Depth;
                         break;
                 }
             }
+            return GetSuperPixelAddress(x, y, z);
+        }
+        public ref T GetPixel<T>(in Vector3 uvw, EPixelAddressMode mode = EPixelAddressMode.Clamp) where T : unmanaged
+        {
             unsafe
             {
-                var pAddr = (T*)GetSuperPixelAddress(x, y, z);
+                var pAddr = (T*)GetSuperPixelAddress(in uvw, mode);//GetSuperPixelAddress(in uvw, mode);
                 return ref *pAddr;
             }
         }
-        public void SetPixel<T>(in Vector3 uvw, in T value, EPixelSamplerMode mode = EPixelSamplerMode.Clamp) where T : unmanaged
+        public void SetPixel<T>(in Vector3 uvw, in T value, EPixelAddressMode mode = EPixelAddressMode.Clamp) where T : unmanaged
         {
             int x = (int)(uvw.X * (float)Width);
             int y = (int)(uvw.Y * (float)Height);
@@ -356,10 +681,10 @@ namespace EngineNS.Bricks.Procedure
             {
                 switch (mode)
                 {
-                    case EPixelSamplerMode.Clamp:
+                    case EPixelAddressMode.Clamp:
                         x = Width - 1;
                         break;
-                    case EPixelSamplerMode.Wrap:
+                    case EPixelAddressMode.Wrap:
                         x = x % Width;
                         break;
                 }
@@ -368,10 +693,10 @@ namespace EngineNS.Bricks.Procedure
             {
                 switch (mode)
                 {
-                    case EPixelSamplerMode.Clamp:
+                    case EPixelAddressMode.Clamp:
                         y = Height - 1;
                         break;
-                    case EPixelSamplerMode.Wrap:
+                    case EPixelAddressMode.Wrap:
                         y = y % Height;
                         break;
                 }
@@ -380,10 +705,10 @@ namespace EngineNS.Bricks.Procedure
             {
                 switch (mode)
                 {
-                    case EPixelSamplerMode.Clamp:
+                    case EPixelAddressMode.Clamp:
                         z = Depth - 1;
                         break;
-                    case EPixelSamplerMode.Wrap:
+                    case EPixelAddressMode.Wrap:
                         z = z % Depth;
                         break;
                 }
@@ -494,194 +819,7 @@ namespace EngineNS.Bricks.Procedure
                 }
             }   
         }
-        public virtual unsafe RHI.CShaderResourceView CreateVector3Texture2D(Vector3 minHeight, Vector3 maxHeight)
-        {
-            RHI.CTexture2D texture;
-            if (minHeight.X >= 0 && minHeight.X <= 1 && maxHeight.X >= 0 && maxHeight.X <= 1)
-            {
-                minHeight.X = 0;
-                maxHeight.X = 1;
-            }
-            if (minHeight.Y >= 0 && minHeight.Y <= 1 && maxHeight.Y >= 0 && maxHeight.Y <= 1)
-            {
-                minHeight.Y = 0;
-                maxHeight.Y = 1;
-            }
-            if (minHeight.Z >= 0 && minHeight.Z <= 1 && maxHeight.Z >= 0 && maxHeight.Z <= 1)
-            {
-                minHeight.Z = 0;
-                maxHeight.Z = 1;
-            }
-            var hRange = maxHeight - minHeight;
-            unsafe
-            {
-                var desc = new ITexture2DDesc();
-                desc.SetDefault();
-                desc.Width = (uint)Width;
-                desc.Height = (uint)Height;
-                desc.MipLevels = 1;
-                desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
-                ImageInitData initData = new ImageInitData();
-                initData.SetDefault();
-                desc.InitData = &initData;
-                {
-                    var Count = Width * Height;
-                    var tarPixels = new Byte4[Count];
-                    var pSlice = (Vector3*)this.GetSliceAddress(0);
-                    for (int i = 0; i < Count; i++)
-                    {
-                        var tmp = pSlice[i] - minHeight;
-                        tmp = tmp * 255.0f;
-                        tmp = tmp / hRange;
-                        //tarPixels[i].X = (byte)(((pSlice[i].X - minHeight.X) / hRange.) * 255.0f);
-                        //tarPixels[i].Y = (byte)(((pSlice[i].Y - minHeight) / hRange) * 255.0f);
-                        //tarPixels[i].Z = (byte)(((pSlice[i].Z - minHeight) / hRange) * 255.0f);
-                        tarPixels[i].X = (byte)tmp.X;
-                        tarPixels[i].Y = (byte)tmp.Y;
-                        tarPixels[i].Z = (byte)tmp.Z;
-                        tarPixels[i].W = 255;
-                    }
-                    fixed (Byte4* p = &tarPixels[0])
-                    {
-                        initData.SysMemPitch = desc.Width * (uint)sizeof(Byte4);
-                        initData.pSysMem = p;
-                        texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture2D(in desc);
-                    }
-                }
-
-                var rsvDesc = new IShaderResourceViewDesc();
-                rsvDesc.SetTexture2D();
-                rsvDesc.Type = ESrvType.ST_Texture2D;
-                rsvDesc.mGpuBuffer = texture.mCoreObject;
-                rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
-                rsvDesc.Texture2D.MipLevels = desc.MipLevels;
-                var result = UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(in rsvDesc);
-                return result;
-            }
-        }
-        public virtual unsafe RHI.CShaderResourceView CreateAsHeightMapTexture2D(float minHeight, float maxHeight, EPixelFormat format = EPixelFormat.PXF_R32_FLOAT, bool bNomalized = false)
-        {
-            RHI.CTexture2D texture;
-            if (minHeight >= 0 && minHeight <= 1 && maxHeight >= 0 && maxHeight <= 1)
-            {
-                minHeight = 0;
-                maxHeight = 1;
-            }
-            float hRange = maxHeight - minHeight;
-            unsafe
-            {
-                var desc = new ITexture2DDesc();
-                desc.SetDefault();
-                desc.Width = (uint)Width;
-                desc.Height = (uint)Height;
-                desc.MipLevels = 1;
-                desc.Format = format;
-                ImageInitData initData = new ImageInitData();
-                initData.SetDefault();
-                desc.InitData = &initData;
-                switch (format)
-                {
-                    case EPixelFormat.PXF_R32_FLOAT:
-                        {
-                            var Count = Width * Height;
-                            var tarPixels = new float[Count];
-                            var pSlice = (float*)this.GetSliceAddress(0);
-                            for (int i = 0; i < Count; i++)
-                            {
-                                tarPixels[i] = pSlice[i] - minHeight;
-                                if (bNomalized)
-                                {
-                                    tarPixels[i] = tarPixels[i] / hRange;
-                                }
-                            }
-                            fixed (float* p = &tarPixels[0])
-                            {
-                                initData.SysMemPitch = desc.Width * sizeof(float);
-                                initData.pSysMem = p;
-                                texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture2D(in desc);
-                            }
-                        }
-                        break;
-                    case EPixelFormat.PXF_R16_FLOAT:
-                        {//高度信息有2的11次方级别精度高度
-                            var Count = Width * Height;
-                            var tarPixels = new Half[Count];
-                            var pSlice = (float*)this.GetSliceAddress(0);
-                            for (int i = 0; i < Count; i++)
-                            {
-                                //tarPixels[i] = HalfHelper.SingleToHalf(Pixels[i]);
-                                if (bNomalized)
-                                {
-                                    tarPixels[i] = HalfHelper.SingleToHalf((pSlice[i] - minHeight) / hRange);
-                                }
-                                else
-                                {
-                                    tarPixels[i] = HalfHelper.SingleToHalf(pSlice[i] - minHeight);
-                                }
-                            }
-                            fixed (Half* p = &tarPixels[0])
-                            {
-                                initData.SysMemPitch = (uint)(desc.Width * sizeof(Half));
-                                initData.pSysMem = p;
-                                texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture2D(in desc);
-                            }
-                        }
-                        break;
-                    case EPixelFormat.PXF_R8G8_UNORM:
-                        {//如果希望表达更高的精度，而不是浪费在half上的指数位，可以RG8UNorm格式，让高度信息有65535级别
-                            var Count = Width * Height;
-                            var tarPixels = new UInt8_2[Width * Height];
-                            var pSlice = (float*)this.GetSliceAddress(0);
-                            float range = maxHeight - minHeight;
-                            for (int i = 0; i < Count; i++)
-                            {
-                                float alt = pSlice[i] - minHeight;
-                                float rate = alt / range;
-                                ushort value = (ushort)(rate * (float)ushort.MaxValue);
-                                tarPixels[i].X = (byte)(value & 0xFF);
-                                tarPixels[i].Y = (byte)((value >> 8) & 0xFF);
-                            }
-                            fixed (UInt8_2* p = &tarPixels[0])
-                            {
-                                initData.SysMemPitch = (uint)(desc.Width * sizeof(UInt8_2));
-                                initData.pSysMem = p;
-                                texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture2D(in desc);
-                            }
-                        }
-                        break;
-                    case EPixelFormat.PXF_R8_UINT:
-                        {//如果希望表达更高的精度，而不是浪费在half上的指数位，可以RG8UNorm格式，让高度信息有65535级别
-                            var Count = Width * Height;
-                            var tarPixels = new Byte[Width * Height];
-                            var pSlice = (float*)this.GetSliceAddress(0);
-                            float range = maxHeight - minHeight;
-                            for (int i = 0; i < Count; i++)
-                            {
-                                var alt = (Byte)pSlice[i];
-                            }
-                            fixed (Byte* p = &tarPixels[0])
-                            {
-                                initData.SysMemPitch = (uint)(desc.Width * sizeof(Byte));
-                                initData.pSysMem = p;
-                                texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture2D(in desc);
-                            }
-                        }
-                        break;
-                    default:
-                        return null;
-                }
-
-
-                var rsvDesc = new IShaderResourceViewDesc();
-                rsvDesc.SetTexture2D();
-                rsvDesc.Type = ESrvType.ST_Texture2D;
-                rsvDesc.mGpuBuffer = texture.mCoreObject;
-                rsvDesc.Format = format;
-                rsvDesc.Texture2D.MipLevels = desc.MipLevels;
-                var result = UEngine.Instance.GfxDevice.RenderContext.CreateShaderResourceView(in rsvDesc);
-                return result;
-            }
-        }
+        #endregion
 
         #region Macross
         public delegate void FOnPerPixel(UBufferConponent result, int x, int y, int z);
@@ -771,6 +909,13 @@ namespace EngineNS.Bricks.Procedure
                 smp.FreeSemaphore();
             }
         }
+        [Rtti.Meta]
+        public UBufferConponent Clone()
+        {
+            var result = UBufferConponent.CreateInstance(this.BufferCreator);
+            CopyData(this, result);
+            return result;
+        }
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.ManualMarshal)]
         public static unsafe bool CopyData(UBufferConponent src, UBufferConponent dst)
         {
@@ -789,7 +934,7 @@ namespace EngineNS.Bricks.Procedure
             }
             return true;
         }
-        public unsafe bool macross_CopyData(string nodeName, UBufferConponent src, UBufferConponent dst)
+        public static unsafe bool macross_CopyData(string nodeName, UBufferConponent src, UBufferConponent dst)
         {
             using (var stackframe = EngineNS.Macross.UMacrossStackTracer.CurrentFrame)
             {
@@ -820,10 +965,28 @@ namespace EngineNS.Bricks.Procedure
             return result;
         }
         [Rtti.Meta]
+        public unsafe void* GetSuperPixelAddress(int x, int y, int z,
+           [Rtti.MetaParameter(TypeList = new System.Type[]
+                {
+                    typeof(float*), typeof(Vector2*), typeof(Vector3*)
+                },
+            ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
+            System.Type retType)
+        {
+            if (retType.IsValueType == false)
+                return null;
+            if (x < 0 || x >= Width || y < 0 || y >= Height || z < 0 || z >= Depth)
+                return null;
+            var pBuffer = (byte*)SuperPixels.mCoreObject.GetData();
+            var ptr = &pBuffer[Slice * z + y * Pitch + x * ElementSize];
+            return ptr;
+        }
+        [Rtti.Meta]
         public unsafe object GetSuperPixelAddressEX(int x, int y, int z,
            [Rtti.MetaParameter(TypeList = new System.Type[]
                 {
-                    typeof(float), typeof(Vector2), typeof(Vector3)
+                    typeof(float), typeof(Vector2), typeof(Vector3), typeof(DVector3), 
+                    typeof(Quaternion)
                 },
             ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type retType)
@@ -848,12 +1011,93 @@ namespace EngineNS.Bricks.Procedure
             {
                 return *(Vector3*)ptr;
             }
+            else if(retType == typeof(DVector3))
+            {
+                return *(DVector3*)ptr;
+            }
+            else if(retType == typeof(Quaternion))
+            {
+                return *(Quaternion*)ptr;
+            }
             return null;
         }
         [Rtti.Meta]
         public float GetFloat1(int x, int y, int z)
         {
             return GetPixel<float>(x, y, z);
+        }
+        public enum EBufferSamplerType
+        {
+            Point,
+            Linear,
+            Box,
+        }
+        [Rtti.Meta]
+        public float Sampler2DFloat1(in Vector3 uvw, EBufferSamplerType type = EBufferSamplerType.Point, EPixelAddressMode address = EPixelAddressMode.Wrap)
+        {
+            return Sampler2DFloat1(uvw.X, uvw.Y, uvw.Z, type, address);
+        }
+        [Rtti.Meta]
+        public float Sampler2DFloat1(float u, float v, float w = 0, EBufferSamplerType type = EBufferSamplerType.Point, EPixelAddressMode address = EPixelAddressMode.Wrap)
+        {
+            switch (type)
+            {
+                case EBufferSamplerType.Point:
+                    {
+                        var uvw = new Vector3(u, v, w);
+                        return GetPixel<float>(in uvw, address);
+                    }
+                case EBufferSamplerType.Linear:
+                    {
+                        var rx = CoreDefine.Mod(u, UVWStep.X);
+                        var ry = CoreDefine.Mod(v, UVWStep.Y);
+                        var rz = CoreDefine.Mod(w, UVWStep.Z);
+                        var bx = u - rx;
+                        var by = v - ry;
+                        var bz = v - rz;
+
+                        var v00 = GetPixel<float>(new Vector3(bx, by, bz), address);
+                        var v01 = GetPixel<float>(new Vector3(bx + UVWStep.X, by, bz), address);
+                        var v10 = GetPixel<float>(new Vector3(bx, by + UVWStep.Y, bz), address);
+                        var v11 = GetPixel<float>(new Vector3(bx + UVWStep.X, by + UVWStep.Y, bz), address);
+
+                        var lx = rx / UVWStep.X;
+                        var f1 = CoreDefine.Lerp(v00, v01, lx);
+                        var f2 = CoreDefine.Lerp(v10, v11, lx);
+                        return CoreDefine.Lerp(f1, f2, ry / UVWStep.Y);
+                    }
+                case EBufferSamplerType.Box:
+                    {
+                        var rx = CoreDefine.Mod(u, UVWStep.X);
+                        var ry = CoreDefine.Mod(v, UVWStep.Y);
+                        var rz = CoreDefine.Mod(w, UVWStep.Z);
+                        var bx = u - rx;
+                        var by = v - ry;
+                        var bz = v - rz;
+                        var lx = rx / UVWStep.X;
+                        var ly = ry / UVWStep.Y;
+                        var lz = rz / UVWStep.Z;
+
+                        var v000 = GetPixel<float>(new Vector3(bx, by, bz), address);
+                        var v010 = GetPixel<float>(new Vector3(bx + UVWStep.X, by, bz), address);
+                        var v100 = GetPixel<float>(new Vector3(bx, by + UVWStep.Y, bz), address);
+                        var v110 = GetPixel<float>(new Vector3(bx + UVWStep.X, by + UVWStep.Y, bz), address);
+                        var f10 = CoreDefine.Lerp(v000, v010, lx);
+                        var f20 = CoreDefine.Lerp(v100, v110, lx);
+                        var z0 = CoreDefine.Lerp(f10, f20, ly);
+
+                        var v001 = GetPixel<float>(new Vector3(bx, by, bz + UVWStep.Z), address);
+                        var v011 = GetPixel<float>(new Vector3(bx + UVWStep.X, by, bz + UVWStep.Z), address);
+                        var v101 = GetPixel<float>(new Vector3(bx, by + UVWStep.Y, bz + UVWStep.Z), address);
+                        var v111 = GetPixel<float>(new Vector3(bx + UVWStep.X, by + UVWStep.Y, bz + UVWStep.Z), address);
+                        var f11 = CoreDefine.Lerp(v001, v011, lx);
+                        var f21 = CoreDefine.Lerp(v101, v111, lx);
+                        var z1 = CoreDefine.Lerp(f11, f21, ly);
+
+                        return CoreDefine.Lerp(z0, z1, lz);
+                    }
+            }
+            return 0;
         }
         [Rtti.Meta]
         public void SetFloat1(int x, int y, int z, float v)
@@ -866,7 +1110,7 @@ namespace EngineNS.Bricks.Procedure
             return GetPixel<Vector2>(x, y, z);
         }
         [Rtti.Meta]
-        public void SetFloat2(int x, int y, int z, Vector2 v)
+        public void SetFloat2(int x, int y, int z, in Vector2 v)
         {
             SetPixel<Vector2>(x, y, z, in v);
         }
@@ -876,9 +1120,19 @@ namespace EngineNS.Bricks.Procedure
             return GetPixel<Vector3>(x, y, z);
         }
         [Rtti.Meta]
-        public void SetFloat3(int x, int y, int z, Vector3 v)
+        public void SetFloat3(int x, int y, int z, in Vector3 v)
         {
             SetPixel<Vector3>(x, y, z, in v);
+        }
+        [Rtti.Meta]
+        public DVector3 GetDouble3(int x, int y, int z)
+        {
+            return GetPixel<DVector3>(x, y, z);
+        }
+        [Rtti.Meta]
+        public void SetDouble3(int x, int y, int z, in DVector3 v)
+        {
+            SetPixel<DVector3>(x, y, z, in v);
         }
         [Rtti.Meta]
         public int GetInt1(int x, int y, int z)
@@ -896,7 +1150,7 @@ namespace EngineNS.Bricks.Procedure
             return GetPixel<Int32_2>(x, y, z);
         }
         [Rtti.Meta]
-        public void SetInt2(int x, int y, int z, Int32_2 v)
+        public void SetInt2(int x, int y, int z, in Int32_2 v)
         {
             SetPixel<Int32_2>(x, y, z, in v);
         }
@@ -906,7 +1160,7 @@ namespace EngineNS.Bricks.Procedure
             return GetPixel<Int32_3>(x, y, z);
         }
         [Rtti.Meta]
-        public void SetInt3(int x, int y, int z, Int32_3 v)
+        public void SetInt3(int x, int y, int z, in Int32_3 v)
         {
             SetPixel<Int32_3>(x, y, z, in v);
         }

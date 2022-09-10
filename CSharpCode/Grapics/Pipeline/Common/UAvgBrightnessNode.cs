@@ -14,19 +14,19 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            AddInputOutput(GpuScenePinInOut, EGpuBufferViewType.GBVT_Uav);
-            AddInput(ColorPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInputOutput(GpuScenePinInOut, NxRHI.EBufferType.BFT_UAV);
+            AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
         }
         public readonly UInt32_3 Dispatch_SetupDimArray1 = new UInt32_3(1, 1, 1);
         public readonly UInt32_3 Dispatch_SetupDimArray2 = new UInt32_3(32, 32, 1);
 
         public Graphics.Pipeline.UDrawBuffers BasePass = new Graphics.Pipeline.UDrawBuffers();
 
-        private Graphics.Pipeline.Shader.UShader SetupAvgBrightness;
-        private RHI.CComputeDrawcall SetupAvgBrightnessDrawcall;
+        private NxRHI.UComputeEffect SetupAvgBrightness;
+        private NxRHI.UComputeDraw SetupAvgBrightnessDrawcall;
 
-        private Graphics.Pipeline.Shader.UShader CountAvgBrightness;
-        private RHI.CComputeDrawcall CountAvgBrightnessDrawcall;
+        private NxRHI.UComputeEffect CountAvgBrightness;
+        private NxRHI.UComputeDraw CountAvgBrightnessDrawcall;
         public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
         {
             await Thread.AsyncDummyClass.DummyFunc();
@@ -34,18 +34,18 @@ namespace EngineNS.Graphics.Pipeline.Common
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName);
 
-            var defines = new RHI.CShaderDefinitions();
+            var defines = new NxRHI.UShaderDefinitions();
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
-            CountAvgBrightness = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
-                "CS_CountAvgBrightness", EShaderType.EST_ComputeShader, defines);
+            CountAvgBrightness = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine).Address,
+                "CS_CountAvgBrightness", NxRHI.EShaderType.SDT_ComputeShader, null, null, null, defines, null);
 
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
-            SetupAvgBrightness = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine),
-                "CS_SetupAvgBrightness", EShaderType.EST_ComputeShader, defines);
+            SetupAvgBrightness = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Compute/ScreenSpace/AvgBrightness.compute", RName.ERNameType.Engine).Address,
+                "CS_SetupAvgBrightness", NxRHI.EShaderType.SDT_ComputeShader, null, null ,null , defines, null);
 
             ResetComputeDrawcall(policy);
         }
@@ -56,26 +56,26 @@ namespace EngineNS.Graphics.Pipeline.Common
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var gpuScene = policy.GetGpuSceneNode();
             
-            SetupAvgBrightnessDrawcall = rc.CreateComputeDrawcall();
-            SetupAvgBrightnessDrawcall.mCoreObject.SetComputeShader(SetupAvgBrightness.CS_Shader.mCoreObject);
-            SetupAvgBrightnessDrawcall.mCoreObject.SetDispatch(1, 1, 1);
-            
-            var srvIdx = SetupAvgBrightness.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerFrame");
-            if (srvIdx != (IShaderBinder*)0)
+            SetupAvgBrightnessDrawcall = rc.CreateComputeDraw();
+            SetupAvgBrightnessDrawcall.SetComputeEffect(SetupAvgBrightness);
+            SetupAvgBrightnessDrawcall.SetDispatch(1, 1, 1);
+
+            var srvIdx = SetupAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerFrame");
+            if (srvIdx.IsValidPointer)
             {
-                SetupAvgBrightnessDrawcall.mCoreObject.GetCBufferResources().BindCS(srvIdx->m_CSBindPoint, UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject);
+                SetupAvgBrightnessDrawcall.BindCBuffer(srvIdx, UEngine.Instance.GfxDevice.PerFrameCBuffer);
             }
-            srvIdx = SetupAvgBrightness.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
-            if (srvIdx != (IShaderBinder*)0)
+            srvIdx = SetupAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
+            if (srvIdx.IsValidPointer)
             {
-                SetupAvgBrightnessDrawcall.mCoreObject.GetCBufferResources().BindCS(srvIdx->m_CSBindPoint, gpuScene.PerGpuSceneCBuffer.mCoreObject);
+                SetupAvgBrightnessDrawcall.BindCBuffer(srvIdx, gpuScene.PerGpuSceneCBuffer);
             }
 
             //var lightSRV = policy.QuerySRV("LightRT");
             //if (lightSRV != null)
             {
-                CountAvgBrightnessDrawcall = rc.CreateComputeDrawcall();
-                CountAvgBrightnessDrawcall.mCoreObject.SetComputeShader(CountAvgBrightness.CS_Shader.mCoreObject);
+                CountAvgBrightnessDrawcall = rc.CreateComputeDraw();
+                CountAvgBrightnessDrawcall.SetComputeEffect(CountAvgBrightness);
             }
         }
         public override void Cleanup()
@@ -93,30 +93,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             var cmd = BasePass.DrawCmdList;
             #region Setup
             {
-                var srvIdx = SetupAvgBrightness.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "GpuSceneDesc");
-                if (srvIdx != (IShaderBinder*)0)
+                var srvIdx = SetupAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
+                if (srvIdx.IsValidPointer)
                 {
                     var attachment = this.GetAttachBuffer(GpuScenePinInOut);
-                    SetupAvgBrightnessDrawcall.mCoreObject.GetUavResources().BindCS(srvIdx->m_CSBindPoint, attachment.Uav.mCoreObject);
+                    SetupAvgBrightnessDrawcall.BindUav(srvIdx, attachment.Uav);
                 }
-                SetupAvgBrightnessDrawcall.BuildPass(cmd);
-                //cmd.SetComputeShader(CS_SetupAvgBrightness.mCoreObject);
-                //var srvIdx = CSDesc_SetupAvgBrightness.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "GpuSceneDesc");
-                //if (srvIdx != (IShaderBinder*)0)
-                //{
-                //    cmd.CSSetUnorderedAccessView(srvIdx->m_CSBindPoint, gpuScene.GpuSceneDescUAV.mCoreObject, &nUavInitialCounts);
-                //}
-                //srvIdx = CSDesc_SetupAvgBrightness.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerFrame");
-                //if (srvIdx != (IShaderBinder*)0)
-                //{
-                //    cmd.CSSetConstantBuffer(srvIdx->m_CSBindPoint, UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject);
-                //}
-                //srvIdx = CSDesc_SetupAvgBrightness.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
-                //if (srvIdx != (IShaderBinder*)0)
-                //{
-                //    cmd.CSSetConstantBuffer(srvIdx->m_CSBindPoint, gpuScene.PerGpuSceneCBuffer.mCoreObject);
-                //}
-                //cmd.CSDispatch(1, 1, 1);
+                SetupAvgBrightnessDrawcall.Commit(cmd);
             }
             #endregion
 
@@ -128,30 +111,16 @@ namespace EngineNS.Graphics.Pipeline.Common
                     var lightSRV = attachment.Srv;
                     uint targetWidth = (uint)lightSRV.PicDesc.Width;
                     uint targetHeight = (uint)lightSRV.PicDesc.Height;
-                    var srvIdx = CountAvgBrightness.Desc.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "TargetBuffer");
-                    if (srvIdx != (IShaderBinder*)0)
+                    var srvIdx = CountAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "TargetBuffer");
+                    if (srvIdx.IsValidPointer)
                     {
-                        CountAvgBrightnessDrawcall.mCoreObject.GetShaderRViewResources().BindCS(srvIdx->CSBindPoint, lightSRV.mCoreObject);
+                        CountAvgBrightnessDrawcall.BindSrv(srvIdx, lightSRV);
                     }
-                    CountAvgBrightnessDrawcall.mCoreObject.SetDispatch(
+                    CountAvgBrightnessDrawcall.SetDispatch(
                         CoreDefine.Roundup(targetWidth, Dispatch_SetupDimArray2.X), 
                         CoreDefine.Roundup(targetHeight, Dispatch_SetupDimArray2.Y), 
                         1);
-                    CountAvgBrightnessDrawcall.BuildPass(cmd);
-                    //uint targetWidth = (uint)lightSRV.PicDesc.Width;
-                    //uint targetHeight = (uint)lightSRV.PicDesc.Height;
-                    //cmd.SetComputeShader(CS_CountAvgBrightness.mCoreObject);
-                    //var srvIdx = CSDesc_CountAvgBrightness.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "TargetBuffer");
-                    //if (srvIdx != (IShaderBinder*)0)
-                    //{
-                    //    cmd.CSSetShaderResource(srvIdx->CSBindPoint, lightSRV.mCoreObject);
-                    //}
-                    //srvIdx = CSDesc_SetupAvgBrightness.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Uav, "GpuSceneDesc");
-                    //if (srvIdx != (IShaderBinder*)0)
-                    //{
-                    //    cmd.CSSetUnorderedAccessView(srvIdx->m_CSBindPoint, gpuScene.GpuSceneDescUAV.mCoreObject, &nUavInitialCounts);
-                    //}
-                    //cmd.CSDispatch(CoreDefine.Roundup(targetWidth, Dispatch_SetupDimArray2.x), CoreDefine.Roundup(targetHeight, Dispatch_SetupDimArray2.y), 1);
+                    CountAvgBrightnessDrawcall.Commit(cmd);
                 }
             }
             #endregion
@@ -160,14 +129,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 cmd.EndCommand();
             }
+            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
         }
-        public override void TickRender(URenderPolicy policy)
-        {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-
-            var cmdlist_hp = BasePass.CommitCmdList.mCoreObject;
-            cmdlist_hp.Commit(rc.mCoreObject);
-        }
+        
         public override void TickSync(URenderPolicy policy)
         {
             BasePass.SwapBuffer();

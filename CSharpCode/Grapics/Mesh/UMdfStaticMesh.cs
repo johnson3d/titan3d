@@ -1,5 +1,4 @@
 ﻿using EngineNS.Graphics.Pipeline;
-using EngineNS.RHI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,7 +18,7 @@ namespace EngineNS.Graphics.Mesh
 
             UpdateShaderCode();
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
             return null;
         }
@@ -35,8 +34,8 @@ namespace EngineNS.Graphics.Mesh
 
             codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref codeString);
 
-            SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(codeString);
+            SourceCode = new NxRHI.UShaderCode();
+            SourceCode.TextCode = codeString;
             return codeString;
         }
         public override Rtti.UTypeDesc GetPermutation(List<string> features)
@@ -68,7 +67,7 @@ namespace EngineNS.Graphics.Mesh
 
             }
 
-            SourceCode.SetText(codeString);
+            SourceCode.TextCode = codeString;
         }
     }
 
@@ -89,15 +88,15 @@ namespace EngineNS.Graphics.Mesh
         {
             mInstanceModifier.SetMode(bSSBO);
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { 
-                EVertexStreamType.VST_Position,
-                EVertexStreamType.VST_Normal,
-                EVertexStreamType.VST_InstPos, 
-                EVertexStreamType.VST_InstQuat,
-                EVertexStreamType.VST_InstScale,
-                EVertexStreamType.VST_F4_1};
+            return new NxRHI.EVertexStreamType[] {
+                NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_Normal,
+                NxRHI.EVertexStreamType.VST_InstPos,
+                NxRHI.EVertexStreamType.VST_InstQuat,
+                NxRHI.EVertexStreamType.VST_InstScale,
+                NxRHI.EVertexStreamType.VST_F4_1};
         }
         protected override string GetBaseBuilder(Bricks.CodeBuilder.Backends.UHLSLCodeGenerator codeBuilder)
         {
@@ -114,14 +113,14 @@ namespace EngineNS.Graphics.Mesh
             codeBuilder.AddLine("#define MDFQUEUE_FUNCTION", ref codeString);
 
             var code = Editor.ShaderCompiler.UShaderCodeManager.Instance.GetShaderCodeProvider(mdfSourceName);
-            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash.APHash(code.SourceCode.AsText)}", ref codeString);
+            codeBuilder.AddLine($"//Hash for {mdfSourceName}:{UniHash.APHash(code.SourceCode.TextCode)}", ref codeString);
 
-            SourceCode = new IO.CMemStreamWriter();
-            SourceCode.SetText(codeString);
+            SourceCode = new NxRHI.UShaderCode();
+            SourceCode.TextCode = codeString;
 
             return codeString;
         }
-        public override void OnDrawCall(URenderPolicy.EShadingType shadingType, CDrawCall drawcall, URenderPolicy policy, UMesh mesh)
+        public override void OnDrawCall(URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, UMesh mesh)
         {
             mInstanceModifier?.OnDrawCall(shadingType, drawcall, policy, mesh);
         }
@@ -143,7 +142,7 @@ namespace EngineNS.Graphics.Mesh
 
             }
 
-            SourceCode.SetText(codeString);
+            SourceCode.TextCode = codeString;
         }
     }
 }

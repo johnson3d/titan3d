@@ -10,40 +10,40 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/pick/pick_hollow.cginc", RName.ERNameType.Engine);
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
-                EVertexStreamType.VST_UV,};
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
+        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, URenderPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
 
             var Manager = policy.TagObject as URenderPolicy;
             var pickHollowNode = Manager.FindFirstNode<Common.UPickHollowNode>();
             
-            var index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "gPickedSetUpTex");
-            if (!CoreSDK.IsNullPointer(index))
+            var index = drawcall.FindBinder("gPickedSetUpTex");
+            if (index.IsValidPointer)
             {
                 var attachBuffer = pickHollowNode.GetAttachBuffer(pickHollowNode.PickedPinIn);
-                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                drawcall.BindSRV(index, attachBuffer.Srv);
             }
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_gPickedSetUpTex");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            index = drawcall.FindBinder("Samp_gPickedSetUpTex");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "gPickedBlurTex");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.FindBinder("gPickedBlurTex");
+            if (index.IsValidPointer)
             {
                 var attachBuffer = pickHollowNode.GetAttachBuffer(pickHollowNode.BlurPinIn);
-                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                drawcall.BindSRV(index, attachBuffer.Srv);
             }
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_gPickedBlurTex");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            index = drawcall.FindBinder("Samp_gPickedBlurTex");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
         }
     }
     public class UPickHollowNode : USceenSpaceNode
@@ -56,8 +56,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            AddInput(PickedPinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(BlurPinIn, EGpuBufferViewType.GBVT_Srv);
+            AddInput(PickedPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(BlurPinIn, NxRHI.EBufferType.BFT_SRV);
             
             ResultPinOut.IsAutoResize = false;
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16G16_FLOAT;

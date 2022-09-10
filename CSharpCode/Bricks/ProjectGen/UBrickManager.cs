@@ -9,7 +9,7 @@ namespace EngineNS.Bricks.ProjectGen
     {
         public UBrickManager()
         {
-            Editor.UMainEditorApplication.RegRootForm(this);
+            UEngine.RootFormManager.RegRootForm(this);
         }
         public bool Visible { get; set; } = false;
         public uint DockId { get; set; }

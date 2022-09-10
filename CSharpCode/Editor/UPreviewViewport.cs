@@ -34,7 +34,7 @@ namespace EngineNS.Editor
             if (materials[0] == null)
                 return;
             var mesh = new Graphics.Mesh.UMesh();
-            var rect = Graphics.Mesh.CMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
+            var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             var rectMesh = rect.ToMesh();
             var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
@@ -61,6 +61,8 @@ namespace EngineNS.Editor
                 policy = rpAsset.CreateRenderPolicy();
             }
             await policy.Initialize(null);
+
+            await World.InitWorld();
 
             if (OnInitialize == null)
             {
@@ -91,7 +93,7 @@ namespace EngineNS.Editor
         {
             if (PreviewAsset != null && ImGuiAPI.Button("S"))
             {
-                Editor.USnapshot.Save(PreviewAsset, UEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                Editor.USnapshot.Save(PreviewAsset, UEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV());
             }
             if (ShowWorldAxis)
                 DrawWorldAxis(this.CameraController.Camera);
@@ -192,39 +194,39 @@ namespace EngineNS.Editor
         {
             if (Initialized == false)
                 return;
+            RenderPolicy?.BeginTickLogic(World);
+
             World.TickLogic(this.RenderPolicy, ellapse);
 
-            if (IsDrawing == false)
-                return;
-
-            if (this.IsFocused)
+            if (IsDrawing)
             {
-                TickOnFocus();
+                if (this.IsFocused)
+                {
+                    TickOnFocus();
+                }
+
+                mVisParameter.World = World;
+                mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
+                mVisParameter.VisibleNodes = RenderPolicy.VisibleNodes;
+                mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
+                World.GatherVisibleMeshes(mVisParameter);
+
+                RenderPolicy?.TickLogic(World);
             }
 
-            mVisParameter.World = World;
-            mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
-            mVisParameter.VisibleNodes = RenderPolicy.VisibleNodes;
-            mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
-            World.GatherVisibleMeshes(mVisParameter);
-
-            RenderPolicy?.TickLogic(World);
+            RenderPolicy?.EndTickLogic(World);
         }
         public void TickRender(int ellapse)
         {
-            if (Initialized == false)
-                return;
-            if (IsDrawing == false)
-                return;
-            RenderPolicy?.TickRender();
+            
         }
         public Action AfterTickSync;
         public void TickSync(int ellapse)
         {
             if (Initialized == false)
                 return;
-            if (IsDrawing == false)
-                return;
+            //if (IsDrawing == false)
+            //    return;
             RenderPolicy?.TickSync();
             if (AfterTickSync != null)
                 AfterTickSync();

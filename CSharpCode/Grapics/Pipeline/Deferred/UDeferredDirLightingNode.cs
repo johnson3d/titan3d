@@ -59,123 +59,122 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             this.UpdatePermutation();
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
-                EVertexStreamType.VST_UV,};
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
+        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, URenderPolicy policy, Mesh.UMesh mesh)
+        public unsafe override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.UMesh mesh)
         {
             base.OnDrawCall(shadingType, drawcall, policy, mesh);
 
             var Manager = policy.TagObject as URenderPolicy;
             var dirLightingNode = Manager.FindFirstNode<UDeferredDirLightingNode>();
 
-            var gpuProgram = drawcall.Effect.ShaderProgram;
-            var index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GBufferRT0");
-            if (!CoreSDK.IsNullPointer(index))
+            var index = drawcall.FindBinder("GBufferRT0");
+            if (index.IsValidPointer)
             {
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.Rt0PinIn);
-                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                drawcall.BindSRV(index, attachBuffer.Srv);
             }
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GBufferRT0");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState.mCoreObject);
+            index = drawcall.FindBinder("Samp_GBufferRT0");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GBufferRT1");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.FindBinder("GBufferRT1");
+            if (index.IsValidPointer)
             {
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.Rt1PinIn);
-                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                drawcall.BindSRV(index, attachBuffer.Srv);
             }
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GBufferRT1");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState.mCoreObject);
+            index = drawcall.FindBinder("Samp_GBufferRT1");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GBufferRT2");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.FindBinder("GBufferRT2");
+            if (index.IsValidPointer)
             {
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.Rt2PinIn);
-                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                drawcall.BindSRV(index, attachBuffer.Srv);
             }
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GBufferRT2");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState.mCoreObject);
+            index = drawcall.FindBinder("Samp_GBufferRT2");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "DepthBuffer");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.FindBinder("DepthBuffer");
+            if (index.IsValidPointer)
             {
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.DepthStencilPinIn);
-                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                drawcall.BindSRV(index, attachBuffer.Srv);
             }
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_DepthBuffer");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            index = drawcall.FindBinder("Samp_DepthBuffer");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GShadowMap");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.FindBinder("GShadowMap");
+            if (index.IsValidPointer)
             {
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.ShadowMapPinIn);
-                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                drawcall.BindSRV(index, attachBuffer.Srv);
             }
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GShadowMap");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            index = drawcall.FindBinder("Samp_GShadowMap");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "gEnvMap");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.FindBinder("gEnvMap");
+            if (index.IsValidPointer)
             {
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.EnvMapPinIn);
-                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                drawcall.BindSRV(index, attachBuffer.Srv);
             }
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_gEnvMap");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            index = drawcall.FindBinder("Samp_gEnvMap");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GVignette");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.FindBinder("GVignette");
+            if (index.IsValidPointer)
             {
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.VignettePinIn);
-                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                drawcall.BindSRV(index, attachBuffer.Srv);
             }
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GVignette");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            index = drawcall.FindBinder("Samp_GVignette");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GPickedTex");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.FindBinder("GPickedTex");
+            if (index.IsValidPointer)
             {
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.PickPinIn);
-                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                drawcall.BindSRV(index, attachBuffer.Srv);
             }
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_GPickedTex");
-            if (!CoreSDK.IsNullPointer(index))
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+            index = drawcall.FindBinder("Samp_GPickedTex");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.FindBinder("cbPerGpuScene");
+            if (index.IsValidPointer)
             {
                 //drawcall.mCoreObject.BindShaderCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer.mCoreObject);
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.GpuScenePinIn);
-                drawcall.mCoreObject.BindShaderCBuffer(index, attachBuffer.CBuffer.mCoreObject);
+                drawcall.BindCBuffer(index, attachBuffer.CBuffer);
             }
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "TilingBuffer");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.FindBinder("TilingBuffer");
+            if (index.IsValidPointer)
             {
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.TileScreenPinIn);
-                drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                drawcall.BindSRV(index, attachBuffer.Srv);
             }
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "GpuScene_PointLights");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.FindBinder("GpuScene_PointLights");
+            if (index.IsValidPointer)
             {
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.PointLightsPinIn);
                 if (attachBuffer.Srv != null)
-                    drawcall.mCoreObject.BindShaderSrv(index, attachBuffer.Srv.mCoreObject);
+                    drawcall.BindSRV(index, attachBuffer.Srv);
             }
         }
         public void SetDisableShadow(bool value)
@@ -229,25 +228,20 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void InitNodePins()
         {
-            AddInput(Rt0PinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(Rt1PinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(Rt2PinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(DepthStencilPinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(ShadowMapPinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(EnvMapPinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(VignettePinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(PickPinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(TileScreenPinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(PointLightsPinIn, EGpuBufferViewType.GBVT_Srv);
-            AddInput(GpuScenePinIn, EGpuBufferViewType.GBVT_Srv | EGpuBufferViewType.GBVT_Uav);
+            AddInput(Rt0PinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(Rt1PinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(Rt2PinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(DepthStencilPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(ShadowMapPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(EnvMapPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(VignettePinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(PickPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(TileScreenPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(PointLightsPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(GpuScenePinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R10G10B10A2_UNORM;
             base.InitNodePins();
-            //Setup by base class
-            //pin = AddOutput("LightingResult");
-            //{
-            //    pin.Attachement.AttachmentName = FHashText.Create($"{Name}->LightingResult");
-            //}
         }
         public override void FrameBuild()
         {
@@ -258,32 +252,33 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             await base.Initialize(policy, debugName);
             ScreenDrawPolicy.mBasePassShading = UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredDirLightingShading>();
         }
-        private void SetCBuffer(GamePlay.UWorld world, RHI.CConstantBuffer cBuffer, URenderPolicy mobilePolicy)
+        private void SetCBuffer(GamePlay.UWorld world, NxRHI.UCbView cBuffer, URenderPolicy mobilePolicy)
         {
+            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
             var shadowNode = mobilePolicy.FindFirstNode<Shadow.UShadowMapNode>();
             if (shadowNode != null)
             {
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gFadeParam, in shadowNode.mFadeParam);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowTransitionScale, in shadowNode.mShadowTransitionScale);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowMapSizeAndRcp, in shadowNode.mShadowMapSizeAndRcp);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gViewer2ShadowMtx, in shadowNode.mViewer2ShadowMtx);
-                cBuffer.SetValue(cBuffer.PerViewportIndexer.gShadowDistance, in shadowNode.mShadowDistance);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gFadeParam, in shadowNode.mFadeParam);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScale, in shadowNode.mShadowTransitionScale);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowMapSizeAndRcp, in shadowNode.mShadowMapSizeAndRcp);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtx, in shadowNode.mViewer2ShadowMtx);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowDistance, in shadowNode.mShadowDistance);
             }
 
             var dirLight = world.DirectionLight;
             //dirLight.mDirection = MathHelper.RandomDirection();
             var dir = dirLight.Direction;
             var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightDirection_Leak, in gDirLightDirection_Leak);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gDirLightDirection_Leak, in gDirLightDirection_Leak);
             var gDirLightColor_Intensity = new Vector4(dirLight.SunLightColor.X, dirLight.SunLightColor.Y, dirLight.SunLightColor.Z, dirLight.mSunLightIntensity);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gDirLightColor_Intensity, in gDirLightColor_Intensity);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gDirLightColor_Intensity, in gDirLightColor_Intensity);
 
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.mSkyLightColor, in dirLight.mSkyLightColor);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.mGroundLightColor, in dirLight.mGroundLightColor);
+            cBuffer.SetValue(coreBinder.CBPerViewport.mSkyLightColor, in dirLight.mSkyLightColor);
+            cBuffer.SetValue(coreBinder.CBPerViewport.mGroundLightColor, in dirLight.mGroundLightColor);
 
             float EnvMapMaxMipLevel = 1.0f;
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
-            cBuffer.SetValue(cBuffer.PerViewportIndexer.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
         }
         public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {

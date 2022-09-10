@@ -29,7 +29,7 @@ namespace EngineNS.GamePlay
         {
             get
             {
-                return Vector3.UnitXYZ;
+                return Vector3.One;
             }
             set
             {

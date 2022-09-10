@@ -230,9 +230,9 @@ namespace EngineNS.EGui.Controls
             //bool isHovered = ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             bool isHovered = false;
             var msPt = ImGuiAPI.GetMousePos();
-            int Border = 2;
-            if (msPt.X > (canvasP0.X - Border) && msPt.X < canvasP0.X + canvasSize.X + Border &&
-                msPt.Y > (canvasP0.Y - Border) && msPt.Y < canvasP0.Y + canvasSize.Y + Border)
+            int border = 2;
+            if (msPt.X > (canvasP0.X - border) && msPt.X < canvasP0.X + canvasSize.X + border &&
+                msPt.Y > (canvasP0.Y - border) && msPt.Y < canvasP0.Y + canvasSize.Y + border)
             {
                 isHovered = true;
             }
@@ -243,15 +243,14 @@ namespace EngineNS.EGui.Controls
             drawList.AddRectFilled(in canvasP0, in canvasP1, UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
             if(mShowGrid)
             {
-                var gridDelta = canvasP1 - canvasP0;
-                var columnDelta = gridDelta.X / mGridColumnCount;
+                var columnDelta = canvasSize.X / mGridColumnCount;
                 for(var x = canvasP0.X; x < canvasP1.X; x += columnDelta)
                 {
                     var p1 = new Vector2(x, canvasP0.Y);
                     var p2 = new Vector2(x, canvasP1.Y);
                     drawList.AddLine(in p1, in p2, UIProxy.StyleConfig.Instance.GridColor, 1.0f);
                 }
-                var rowDelta = gridDelta.Y / mGridRowCount;
+                var rowDelta = canvasSize.Y / mGridRowCount;
                 for(var y = canvasP0.Y; y < canvasP1.Y; y += rowDelta)
                 {
                     var p1 = new Vector2(canvasP0.X, y);
@@ -260,8 +259,6 @@ namespace EngineNS.EGui.Controls
                 }
             }
             drawList.AddRect(in canvasP0, in canvasP1, 0xFFFFFFFF, 0.0f, ImDrawFlags_.ImDrawFlags_None, 1.0f);
-            var sizeX = MaxX - MinX;
-            var sizeY = MaxY - MinY;
             var mousePosInCanvas = io.MousePos;
             var controlPtRangeSq = tempCtPointRadius * tempCtPointRadius;
             var ptRangeSq = tempPointRadius * tempPointRadius;

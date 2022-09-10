@@ -222,6 +222,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
         public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
+            if (pin == null)
+                return null;
+
             if (pin == Result)
             {
                 if (Result.Tag != null)

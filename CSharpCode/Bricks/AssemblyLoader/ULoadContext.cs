@@ -115,17 +115,24 @@ namespace EngineNS.Macross
                 byte[] buffer = new byte[sr.Length];
                 sr.Read(buffer, 0, buffer.Length);
                 var mrs = new System.IO.MemoryStream(buffer);
-                if (pdbPath != null && IO.FileManager.FileExists(pdbPath))
+                try
                 {
-                    using (FileStream pdbStream = new FileStream(pdbPath, FileMode.Open, FileAccess.Read))
+                    if (pdbPath != null && IO.FileManager.FileExists(pdbPath))
                     {
-                        var pdbBuffer = new byte[pdbStream.Length];
-                        pdbStream.Read(pdbBuffer, 0, pdbBuffer.Length);
-                        var pdbmrs = new System.IO.MemoryStream(pdbBuffer);
-                        return Loader.LoadFromStream(mrs, pdbmrs);
+                        using (FileStream pdbStream = new FileStream(pdbPath, FileMode.Open, FileAccess.Read))
+                        {
+                            var pdbBuffer = new byte[pdbStream.Length];
+                            pdbStream.Read(pdbBuffer, 0, pdbBuffer.Length);
+                            var pdbmrs = new System.IO.MemoryStream(pdbBuffer);
+                            return Loader.LoadFromStream(mrs, pdbmrs);
+                        }
+                    }
+                    else
+                    {
+                        return Loader.LoadFromStream(mrs);
                     }
                 }
-                else
+                catch (Exception)
                 {
                     return Loader.LoadFromStream(mrs);
                 }

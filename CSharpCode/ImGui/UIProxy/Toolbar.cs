@@ -46,20 +46,35 @@ namespace EngineNS.EGui.UIProxy
             var windowWidth = ImGuiAPI.GetWindowWidth();
             var rectMax = cursorPos + new Vector2(windowWidth, EGui.UIProxy.StyleConfig.Instance.ToolbarHeight);
             drawList.AddRectFilled(in cursorPos, in rectMax, EGui.UIProxy.StyleConfig.Instance.ToolbarBG, 0.0f, ImDrawFlags_.ImDrawFlags_None);
-            float itemOffset = 0;
-            float itemSpacing = -1;
+            //float itemOffset = 0;
+            //float itemSpacing = -1;
             ImGuiAPI.BeginGroup();
             for (int i = 0; i < ToolbarItems.Count; ++i)
             {
-                ImGuiAPI.SameLine(itemOffset, itemSpacing);
+                //ImGuiAPI.SameLine(itemOffset, itemSpacing);
                 //ImGuiAPI.SameLine(0, -1);
                 ToolbarItems[i].OnDraw(in drawList, in drawData);
-                itemOffset = ToolbarItems[i].NextItemOffset;
-                itemSpacing = ToolbarItems[i].NextItemSpacing;
+                //itemOffset = ToolbarItems[i].NextItemOffset;
+                //itemSpacing = ToolbarItems[i].NextItemSpacing;
             }
             ImGuiAPI.SetCursorScreenPos(in rectMax);
             ImGuiAPI.EndGroup();
             return true;
+        }
+
+        public static Vector2 RectMax;
+        public static void BeginToolbar(in ImDrawList drawList)
+        {
+            var cursorPos = ImGuiAPI.GetCursorScreenPos();
+            var windowWidth = ImGuiAPI.GetWindowWidth();
+            RectMax = cursorPos + new Vector2(windowWidth, EGui.UIProxy.StyleConfig.Instance.ToolbarHeight);
+            drawList.AddRectFilled(in cursorPos, in RectMax, EGui.UIProxy.StyleConfig.Instance.ToolbarBG, 0.0f, ImDrawFlags_.ImDrawFlags_None);
+            ImGuiAPI.BeginGroup();
+        }
+        public static void EndToolbar()
+        {
+            ImGuiAPI.SetCursorScreenPos(in RectMax);
+            ImGuiAPI.EndGroup();
         }
     }
 
@@ -88,6 +103,24 @@ namespace EngineNS.EGui.UIProxy
 
         public bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
         {
+            if(DrawButton(drawList, drawData, ref isMouseDown, ref isMouseHover, Icon, Name, NextItemOffset, NextItemSpacing))
+            {
+                Action?.Invoke();
+                return true;
+            }
+            return false;
+        }
+        public static bool DrawButton(in ImDrawList drawList, 
+                                  in Support.UAnyPointer drawData, 
+                                  ref bool isMouseDown, 
+                                  ref bool isMouseHover,
+                                  ImageProxy icon,
+                                  string name,
+                                  float itemOffset = 0,
+                                  float itemSpacing = -1)
+        {
+            ImGuiAPI.SameLine(itemOffset, itemSpacing);
+
             bool retValue = false;
             var cursorScrPos = ImGuiAPI.GetCursorScreenPos();
             ImGuiAPI.BeginGroup(); 
@@ -100,19 +133,19 @@ namespace EngineNS.EGui.UIProxy
 
             Vector2 hitRectMin = new Vector2(float.MaxValue, float.MaxValue);
             Vector2 hitRectMax = new Vector2(float.MinValue, float.MinValue); ;
-            if(Icon != null)
+            if(icon != null)
             {
-                tempScrPos.Y = cursorScrPos.Y + (StyleConfig.Instance.ToolbarHeight - Icon.ImageSize.Y) * 0.5f + clickDelta;
+                tempScrPos.Y = cursorScrPos.Y + (StyleConfig.Instance.ToolbarHeight - icon.ImageSize.Y) * 0.5f + clickDelta;
                 hitRectMin.X = cursorScrPos.X;
                 hitRectMin.Y = tempScrPos.Y;
-                Icon.OnDraw(in drawList, in tempScrPos);
+                icon.OnDraw(in drawList, in tempScrPos);
 
-                tempScrPos.X = cursorScrPos.X + Icon.ImageSize.X + StyleConfig.Instance.ToolbarButtonIconTextSpacing;
+                tempScrPos.X = cursorScrPos.X + icon.ImageSize.X + StyleConfig.Instance.ToolbarButtonIconTextSpacing;
                 hitRectMax.X = tempScrPos.X;
-                hitRectMax.Y = tempScrPos.Y + Icon.ImageSize.Y;
+                hitRectMax.Y = tempScrPos.Y + icon.ImageSize.Y;
             }
 
-            var textSize = ImGuiAPI.CalcTextSize(Name, false, -1);
+            var textSize = ImGuiAPI.CalcTextSize(name, false, -1);
             tempScrPos.Y = cursorScrPos.Y + (StyleConfig.Instance.ToolbarHeight - textSize.Y) * 0.5f + clickDelta;
             ImGuiAPI.SetCursorScreenPos(in tempScrPos);
             hitRectMin.X = System.Math.Min(hitRectMin.X, tempScrPos.X);
@@ -122,32 +155,31 @@ namespace EngineNS.EGui.UIProxy
             if(isMouseDown)
             {
                 var pressColor = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor_Press);
-                ImGuiAPI.TextColored(in pressColor, Name);
-                if(Icon != null)
-                    Icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in pressColor);
+                ImGuiAPI.TextColored(in pressColor, name);
+                if(icon != null)
+                    icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in pressColor);
             }
             else if(isMouseHover)
             {
                 var hoverColor = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor_Hover);
-                ImGuiAPI.TextColored(in hoverColor, Name);
-                if(Icon != null)
-                    Icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in hoverColor);
+                ImGuiAPI.TextColored(in hoverColor, name);
+                if(icon != null)
+                    icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in hoverColor);
             }
             else
             {
                 var textColor = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor);
-                ImGuiAPI.TextColored(in textColor, Name);
-                if (Icon != null)
-                    Icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in textColor);
+                ImGuiAPI.TextColored(in textColor, name);
+                if (icon != null)
+                    icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in textColor);
             }
             ImGuiAPI.EndGroup();
             if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false) && isMouseHover)
             {
-                Action?.Invoke();
                 retValue = true;
             }
-            isMouseDown = ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) && isMouseHover;
             isMouseHover = ImGuiAPI.IsMouseHoveringRect(in hitRectMin, in hitRectMax, true);
+            isMouseDown = ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) && isMouseHover;
 
             return retValue;
         }
@@ -167,6 +199,12 @@ namespace EngineNS.EGui.UIProxy
 
         public bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
         {
+            return DrawSeparator(drawList, drawData, NextItemOffset, NextItemSpacing);
+        }
+        public static bool DrawSeparator(in ImDrawList drawList, in Support.UAnyPointer drawData, float itemOffset = 0, float itemSpacing = -1)
+        {
+            ImGuiAPI.SameLine(itemOffset, itemSpacing);
+
             var cursorScrPos = ImGuiAPI.GetCursorScreenPos();
             cursorScrPos.X += StyleConfig.Instance.ToolbarSeparatorThickness * 0.5f;
             var maxPos = cursorScrPos + new Vector2(0, StyleConfig.Instance.ToolbarHeight);

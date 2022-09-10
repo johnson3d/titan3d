@@ -17,25 +17,66 @@ namespace EngineNS.Graphics.Pipeline
         Task<bool> Initialize();
         void Cleanup();
     }
-    public class USlateApplication
+    public class URootFormManager
     {
+        internal static URootFormManager Insance = new URootFormManager();
+        private URootFormManager()
+        {
+
+        }
         #region RootForms
-        private static List<IRootForm> AppendForms { get; } = new List<IRootForm>();
-        private static List<IRootForm> RootForms { get; } = new List<IRootForm>();
-        public static void RegRootForm(IRootForm form)
+        private List<WeakReference<IRootForm>> AppendForms { get; } = new List<WeakReference<IRootForm>>();
+        private List<WeakReference<IRootForm>> RootForms { get; } = new List<WeakReference<IRootForm>>();
+        public void RegRootForm(IRootForm form)
         {
-            if (AppendForms.Contains(form))
-                return;
-            if (RootForms.Contains(form))
-                return;
-            AppendForms.Add(form);
+            foreach (var i in AppendForms)
+            {
+                IRootForm rf;
+                if (i.TryGetTarget(out rf))
+                {
+                    if (rf == form)
+                        return;
+                }
+            }
+            foreach (var i in RootForms)
+            {
+                IRootForm rf;
+                if (i.TryGetTarget(out rf))
+                {
+                    if (rf == form)
+                        return;
+                }
+            }
+            AppendForms.Add(new WeakReference<IRootForm>(form));
         }
-        public static void UnregRootForm(IRootForm form)
+        public void UnregRootForm(IRootForm form)
         {
-            AppendForms.Remove(form);
-            RootForms.Remove(form);
+            foreach (var i in AppendForms)
+            {
+                IRootForm rf;
+                if (i.TryGetTarget(out rf))
+                {
+                    if (rf == form)
+                    {
+                        AppendForms.Remove(i);
+                        break;
+                    }
+                }
+            }
+            foreach (var i in RootForms)
+            {
+                IRootForm rf;
+                if (i.TryGetTarget(out rf))
+                {
+                    if (rf == form)
+                    {
+                        AppendForms.Remove(i);
+                        break;
+                    }
+                }
+            }
         }
-        public static void DrawRootForms()
+        public void DrawRootForms()
         {
             if (AppendForms.Count > 0)
             {
@@ -45,22 +86,47 @@ namespace EngineNS.Graphics.Pipeline
 
             for (int i = 0; i < RootForms.Count; i++)
             {
-                if (RootForms[i].Visible == false)
-                    continue;
-                RootForms[i].OnDraw();
+                IRootForm rf;
+                if (RootForms[i].TryGetTarget(out rf))
+                {
+                    if (rf.Visible == false)
+                        continue;
+                }
+                else
+                {
+                    RootForms.RemoveAt(i);
+                    i--;
+                }
+
+                rf.OnDraw();
             }
         }
-        public static void ClearRootForms()
+        public void ClearRootForms()
         {
             for (int i = 0; i < AppendForms.Count; i++)
-                AppendForms[i].Cleanup();
+            {
+                IRootForm rf;
+                if (AppendForms[i].TryGetTarget(out rf))
+                {
+                    rf.Cleanup();
+                }
+            }
             AppendForms.Clear();
             for (int i = 0; i < RootForms.Count; i++)
-                RootForms[i].Cleanup();
+            {
+                IRootForm rf;
+                if (RootForms[i].TryGetTarget(out rf))
+                {
+                    rf.Cleanup();
+                }
+            }
             RootForms.Clear();
         }
         #endregion
+    }
 
+    public class USlateApplication
+    {
         public UPresentWindow NativeWindow;
         //public virtual EGui.Slate.UWorldViewportSlate GetWorldViewportSlate() { return null; }
 
@@ -83,7 +149,7 @@ namespace EngineNS.Graphics.Pipeline
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
             return NativeWindow.CreateNativeWindow(title, x, y, w, h, sdl_flags) != IntPtr.Zero;
         }
-        public virtual async Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName)
+        public virtual async Task<bool> InitializeApplication(NxRHI.UGpuDevice rc, RName rpName)
         {
             await Thread.AsyncDummyClass.DummyFunc();
 
@@ -352,6 +418,8 @@ namespace EngineNS.Graphics.Pipeline
 
         public unsafe virtual void OnDrawSlate()
         {
+            if (mImGuiContext == IntPtr.Zero)
+                return;
             ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
 
             Update((UEngine.Instance.ElapseTickCount) / 1000.0f);
@@ -365,8 +433,8 @@ namespace EngineNS.Graphics.Pipeline
                     if (UEngine.Instance.Config.SupportMultWindows == false)
                     {
                         var draw_data = ImGuiAPI.GetDrawData();
-                        EGui.UDockWindowSDL.RenderImDrawData(ref *draw_data, NativeWindow.SwapChainBuffer, mDrawData);
-                        NativeWindow.SwapChain.mCoreObject.Present(0, 0);
+                        EGui.UDockWindowSDL.RenderImDrawData(ref *draw_data, NativeWindow, mDrawData);
+                        NativeWindow.SwapChain.Present(0, 0);
                     }
                 }
 
@@ -396,12 +464,10 @@ namespace EngineNS.Graphics.Pipeline
     {
         public override void Cleanup()
         {
-            Graphics.Pipeline.USlateApplication.ClearRootForms();
-
             UEngine.Instance.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(RHI.CRenderContext rc, RName rpName)
+        public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.UGpuDevice rc, RName rpName)
         {
             await base.InitializeApplication(rc, rpName);
             
@@ -428,7 +494,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             ImGuiAPI.End();
 
-            DrawRootForms();
+            UEngine.RootFormManager.DrawRootForms();
         }
         #region Tick
         public virtual void TickLogic(int ellapse)
@@ -441,8 +507,22 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void TickSync(int ellapse)
         {
-            OnDrawSlate();
+            //OnDrawSlate();
         }
         #endregion
+    }
+}
+
+namespace EngineNS 
+{ 
+    partial class UEngine
+    {
+        public static Graphics.Pipeline.URootFormManager RootFormManager 
+        { 
+            get
+            {
+                return Graphics.Pipeline.URootFormManager.Insance;
+            }
+        }
     }
 }

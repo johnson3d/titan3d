@@ -17,6 +17,7 @@ namespace EngineNS.Thread
             RenderMT();
 
             TickSync();
+            FContextTickableManager.GetInstance().ThreadTick();
         }
         private void BeforeFrame()
         {
@@ -43,16 +44,20 @@ namespace EngineNS.Thread
         }
         private void RenderMT()
         {
-            UEngine.Instance.ThreadLogic.mLogicEnd.Reset();
-            UEngine.Instance.ThreadLogic.mLogicBegin.Set();
+            UEngine.Instance.ThreadLogic.LogicEnd.Reset();
+            UEngine.Instance.ThreadLogic.LogicBegin.Set();
 
             UEngine.Instance.ThreadRHI.Tick();
 
             using (new Profiler.TimeScopeHelper(ScopeWaitTickLogic))
             {
-                System.Threading.WaitHandle.WaitAny(UEngine.Instance.ThreadLogic.LogicEndEvents);
+                var evtIndex = System.Threading.WaitHandle.WaitAny(UEngine.Instance.ThreadLogic.LogicEndEvents);
+                if (evtIndex == (int)ThreadLogic.EEndEvent.MacrossDebug)
+                {
+                    System.Diagnostics.Debug.Assert(Macross.UMacrossDebugger.Instance.CurrrentBreak != null);
+                }
                 //UEngine.Instance.ThreadLogic.mLogicEnd.WaitOne();
-                UEngine.Instance.ThreadLogic.mLogicEnd.Reset();
+                UEngine.Instance.ThreadLogic.LogicEnd.Reset();
             }
         }
     }

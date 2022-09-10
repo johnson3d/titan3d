@@ -9,6 +9,7 @@
     <Import_RootNamespace>EngineNS.Bricks.NodeGraph</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Attribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UEditableValue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UGraphRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ULinker.cs" />

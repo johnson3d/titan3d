@@ -8,10 +8,10 @@ namespace EngineNS.EGui.Slate
     {
         public Graphics.Pipeline.Shader.UEffect SlateEffect;
 
-        public RHI.CInputLayout InputLayout;
-        public RHI.CSamplerState SamplerState;
-        public RHI.CTexture2D FontTexture;
-        public RHI.CShaderResourceView FontSRV;
+        public NxRHI.UInputLayout InputLayout { get; private set; }
+        public NxRHI.USampler SamplerState;
+        public NxRHI.UTexture FontTexture;
+        public NxRHI.USrView FontSRV;
         public async System.Threading.Tasks.Task Initialize()
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
@@ -20,27 +20,29 @@ namespace EngineNS.EGui.Slate
                 UEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.USlateGUIShading>(),
                 UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
 
-            var iptDesc = new RHI.CInputLayoutDesc();
+            var iptDesc = new NxRHI.UInputLayoutDesc();
             unsafe
             {
                 iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
                 iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
                 iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
-                iptDesc.SetShaderDesc(SlateEffect.ShaderProgram);
+                //iptDesc.SetShaderDesc(SlateEffect.ShaderEffect);
             }
-            InputLayout = UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc.mCoreObject);
+            iptDesc.mCoreObject.SetShaderDesc(SlateEffect.DescVS.mCoreObject);
+            InputLayout = UEngine.Instance.GfxDevice.RenderContext.CreateInputLayout(iptDesc); //UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
 
-            var splDesc = new ISamplerStateDesc();
+            SlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
+
+            var splDesc = new NxRHI.FSamplerDesc();
             splDesc.SetDefault();
-            splDesc.Filter = ESamplerFilter.SPF_MIN_MAG_MIP_LINEAR;
-            splDesc.AddressU = EAddressMode.ADM_WRAP;
-            splDesc.AddressV = EAddressMode.ADM_WRAP;
-            splDesc.AddressW = EAddressMode.ADM_WRAP;
+            splDesc.Filter = NxRHI.ESamplerFilter.SPF_MIN_MAG_MIP_LINEAR;
+            splDesc.AddressU = NxRHI.EAddressMode.ADM_WRAP;
+            splDesc.AddressV = NxRHI.EAddressMode.ADM_WRAP;
+            splDesc.AddressW = NxRHI.EAddressMode.ADM_WRAP;
             splDesc.MipLODBias = 0;
             splDesc.MaxAnisotropy = 0;
-            splDesc.CmpMode = EComparisionMode.CMP_ALWAYS;
+            splDesc.CmpMode = NxRHI.EComparisionMode.CMP_ALWAYS;
             SamplerState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(rc, in splDesc);
-
         }
         public void Cleanup()
         {
@@ -86,9 +88,9 @@ namespace EngineNS.EGui.Slate
                 }
             }
             public ImFont Font;
-            public RHI.CTexture2D FontTexture;
-            RHI.CShaderResourceView mFontSRV;
-            public RHI.CShaderResourceView FontSRV
+            public NxRHI.UTexture FontTexture;
+            NxRHI.USrView mFontSRV;
+            public NxRHI.USrView FontSRV
             {
                 get => mFontSRV;
                 set
@@ -130,7 +132,7 @@ namespace EngineNS.EGui.Slate
             //initData.SysMemPitch = (uint)(width * bytesPerPixel);
 
             //var rc = UEngine.Instance.GfxDevice.RenderContext;
-            //var txDesc = new ITexture2DDesc();
+            //var txDesc = new NxRHI.FTextureDesc();
             //txDesc.SetDefault();
             //txDesc.Width = (uint)width;
             //txDesc.Height = (uint)height;
@@ -179,27 +181,27 @@ namespace EngineNS.EGui.Slate
             int width = 0, height = 0, bytesPerPixel = 0;
             io.Fonts.GetTexDataAsRGBA32(&pixels, ref width, ref height, ref bytesPerPixel);
 
-            ImageInitData initData = new ImageInitData();
-            initData.pSysMem = pixels;
-            initData.SysMemPitch = (uint)(width * bytesPerPixel);
+            var initData = new NxRHI.FMappedSubResource();
+            initData.pData = pixels;
+            initData.RowPitch = (uint)(width * bytesPerPixel);
+            initData.DepthPitch = (uint)(initData.RowPitch * height);
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            var txDesc = new ITexture2DDesc();
+            var txDesc = new NxRHI.FTextureDesc();
             txDesc.SetDefault();
             txDesc.Width = (uint)width;
             txDesc.Height = (uint)height;
             txDesc.MipLevels = 1;
             txDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
             txDesc.InitData = &initData;
-            fontData.FontTexture = rc.CreateTexture2D(in txDesc);
+            fontData.FontTexture = rc.CreateTexture(in txDesc);
 
-            var srvDesc = new IShaderResourceViewDesc();
+            var srvDesc = new NxRHI.FSrvDesc();
             srvDesc.SetTexture2D();
-            srvDesc.Type = ESrvType.ST_Texture2D;
+            srvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
             srvDesc.Format = txDesc.Format;
-            srvDesc.mGpuBuffer = fontData.FontTexture.mCoreObject;
             srvDesc.Texture2D.MipLevels = 1;
-            fontData.FontSRV = rc.CreateShaderResourceView(in srvDesc);
+            fontData.FontSRV = rc.CreateSRV(fontData.FontTexture, in srvDesc);
 
             io.Fonts.SetTexID(fontData.SRCGCHandle.ToPointer());
 

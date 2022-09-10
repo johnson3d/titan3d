@@ -20,6 +20,7 @@ namespace EngineNS.Bricks.NodeGraph
         UNodeGraph mGraph;
         public PinIn InPin { get; set; }
         public PinOut OutPin { get; set; }
+        public bool InDebuggerLine = false;
         public UNodeBase InNode
         {
             get

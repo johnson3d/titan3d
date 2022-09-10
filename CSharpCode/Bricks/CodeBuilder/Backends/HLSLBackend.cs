@@ -371,10 +371,10 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
                     case "uint2":
                     case "uint3":
                     case "uint4":
-                        sourceCode += typeStr + "(" + primitiveExp.GetValueString() + ")";
+                        sourceCode += typeStr + "(" + primitiveExp.ValueStr + ")";
                         break;
                     default:
-                        sourceCode += primitiveExp.GetValueString();
+                        sourceCode += primitiveExp.ValueStr;
                         break;
                 }
             }
@@ -612,8 +612,11 @@ namespace EngineNS.Bricks.CodeBuilder.Backends
             public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
             {
                 var commentExp = obj as UCommentStatement;
-                var comment = "//" + commentExp.CommentString;
-                data.CodeGen.AddLine(comment, ref sourceCode);
+                if(!string.IsNullOrEmpty(commentExp.CommentString))
+                {
+                    var comment = "//" + commentExp.CommentString;
+                    data.CodeGen.AddLine(comment, ref sourceCode);
+                }
             }
         }
 

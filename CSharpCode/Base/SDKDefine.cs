@@ -10,71 +10,58 @@ namespace EngineNS
         public const float DEpsilon = 0.00001f;
         public const float PI = 3.14159f;
         public const float TWO_PI = PI * 2.0f;
+        #region math
+        public static float Sqrt(float v)
+        {
+            return (float)Math.Sqrt(v);
+        }
+        public static double Sqrt(double v)
+        {
+            return Math.Sqrt(v);
+        }
+        public static int Abs(int v)
+        {
+            return Math.Abs(v);
+        }
+        public static float Abs(float v)
+        {
+            return Math.Abs(v);
+        }
+        public static double Abs(double v)
+        {
+            return Math.Abs(v);
+        }
+        public static float Mod(float v, float d)
+        {
+            return v % d;
+        }
+        public static double Mod(double v, double d)
+        {
+            return v % d;
+        }
         public static int Max(int left, int right)
         {
-            if (left > right)
-            {
-                return left;
-            }
-            else
-            {
-                return right;
-            }
-        }
-        public static int Min(int left, int right)
-        {
-            if (left < right)
-            {
-                return left;
-            }
-            else
-            {
-                return right;
-            }
+            return (left > right) ? left : right;
         }
         public static uint Max(uint left, uint right)
         {
-            if (left > right)
-            {
-                return left;
-            }
-            else
-            {
-                return right;
-            }
-        }
-        public static uint Min(uint left, uint right)
-        {
-            if (left < right)
-            {
-                return left;
-            }
-            else
-            {
-                return right;
-            }
+            return (left > right) ? left : right;
         }
         public static float Max(float left, float right)
         {
-            if (left > right)
-            {
-                return left;
-            }
-            else
-            {
-                return right;
-            }
+            return (left > right) ? left : right;
         }
+        public static int Min(int left, int right)
+        {
+            return (left < right) ? left : right;
+        }
+        public static uint Min(uint left, uint right)
+        {
+            return (left < right) ? left : right;
+        }       
         public static float Min(float left, float right)
         {
-            if (left < right)
-            {
-                return left;
-            }
-            else
-            {
-                return right;
-            }
+            return (left < right) ? left : right;
         }
         public static float Angle_To_Tadian(float degree, float min, float second)
         {
@@ -112,12 +99,12 @@ namespace EngineNS
         {
             return Math.Abs(f2 - f1) < epsilon;
         }
-        public static float FloatLerp(float f1, float f2, float lp)
+        public static float Lerp(float f1, float f2, float lp)
         {
             return f1 + (f2 - f1) * lp;
             //return f1 * lp + (1.0f - lp) * f2;
         }
-        public static double DoubleLerp(double f1, double f2, double lp)
+        public static double Lerp(double f1, double f2, double lp)
         {
             return f1 + (f2 - f1) * lp;
             //return f1 * lp + (1.0 - lp) * f2;
@@ -156,5 +143,22 @@ namespace EngineNS
             lh = rh;
             rh = tmp;
         }
+        public static float Floor(float v)
+        {
+            return (float)Math.Floor(v);
+        }
+        public static double Floor(double v)
+        {
+            return Math.Floor(v);
+        }
+        public static int FloorToInt(float v)
+        {
+            return (int)Math.Floor(v);
+        }
+        public static int FloorToInt(double v)
+        {
+            return (int)Math.Floor(v);
+        }
+        #endregion
     }
 }

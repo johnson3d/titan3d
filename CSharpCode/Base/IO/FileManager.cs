@@ -12,9 +12,11 @@ namespace EngineNS.IO
             SetSysDir(ESystemDir.MetaData, "metadata");
             SetSysDir(ESystemDir.Effect, "effect");
             SetSysDir(ESystemDir.Shader, "shader");
+            SetSysDir(ESystemDir.RenderDoc, "renderdoc");
             SureDirectory(GetPath(ERootDir.Engine, ESystemDir.MetaData));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.Effect));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.Shader));
+            SureDirectory(GetPath(ERootDir.Cache, ESystemDir.RenderDoc));
         }
         partial void InitDirectory();
         public enum ERootDir
@@ -34,6 +36,7 @@ namespace EngineNS.IO
             MetaData,
             Effect,
             Shader,
+            RenderDoc,
             Count,
         }
         public string[] Roots = new string[(int)ERootDir.Count];
@@ -139,13 +142,27 @@ namespace EngineNS.IO
         }
         public static void DeleteDirectory(string path, bool recursive = true)
         {
-            if(System.IO.Directory.Exists(path))
-                System.IO.Directory.Delete(path, recursive);
+            try
+            {
+                if (System.IO.Directory.Exists(path))
+                    System.IO.Directory.Delete(path, recursive);
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
         }
         public static void DeleteFile(string path)
         {
-            if(System.IO.File.Exists(path))
-                System.IO.File.Delete(path);
+            try
+            {
+                if (System.IO.File.Exists(path))
+                    System.IO.File.Delete(path);
+            }
+            catch(Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
         }
         public static void CopyFile(string src, string tar)
         {

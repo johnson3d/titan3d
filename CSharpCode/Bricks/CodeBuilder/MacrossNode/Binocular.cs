@@ -54,26 +54,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Left.LinkDesc.CanLinks.Add("Value");
             Right.LinkDesc.CanLinks.Add("Value");
             Result.LinkDesc.CanLinks.Add("Value");
-
-            EditObject = new BinocularEditObject();
-            EditObject.Host = this;
         }
         public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
             return LeftType;
         }
-        BinocularEditObject EditObject;
-        private class BinocularEditObject
-        {
-            public Binocular Host;
-            public string VarName
-            {
-                get { return Host.Name; }
-            }
-        }
         public override object GetPropertyEditObject()
         {
-            return EditObject;
+            return null;
         }
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
@@ -89,6 +77,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override void BuildStatements(ref BuildCodeStatementsData data)
         {
+            if(Left.HasLinker())
+            {
+                var pinNode = data.NodeGraph.GetOppositePinNode(Left);
+                pinNode.BuildStatements(ref data);
+            }
+            if(Right.HasLinker())
+            {
+                var pinNode = data.NodeGraph.GetOppositePinNode(Right);
+                pinNode.BuildStatements(ref data);
+            }
         }
         //public override IExpression GetExpr(UMacrossMethodGraph funGraph, ICodeGen cGen, bool bTakeResult)
         //{
@@ -192,7 +190,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
         }
     }
-    [ContextMenu("subtraction,-", "Operation\\-", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("subtraction,-", "Operation\\-", UMacross.MacrossEditorKeyword)]
     public partial class SubNode : ValueOpNode
     {
         public SubNode()
@@ -200,7 +198,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
         }
     }
-    [ContextMenu("multiplication,*", "Operation\\*", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("multiplication,*", "Operation\\*", UMacross.MacrossEditorKeyword)]
     public partial class MulNode : ValueOpNode
     {
         public MulNode()
@@ -208,7 +206,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
         }
     }
-    [ContextMenu("division,/", "Operation\\/", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("division,/", "Operation\\/", UMacross.MacrossEditorKeyword)]
     public partial class DivNode : ValueOpNode
     {
         public DivNode()
@@ -216,7 +214,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
         }
     }
-    [ContextMenu("mod,%", "Operation\\%", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("mod,%", "Operation\\%", UMacross.MacrossEditorKeyword)]
     public partial class ModNode : ValueOpNode
     {
         public ModNode()
@@ -224,7 +222,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
         }
     }
-    [ContextMenu("bitand,&", "Operation\\&", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("bitand,&", "Operation\\&", UMacross.MacrossEditorKeyword)]
     public partial class BitAndNode : ValueOpNode
     {
         public BitAndNode()
@@ -233,7 +231,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
          
         }
     }
-    [ContextMenu("bitor,|", "Operation\\|", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("bitor,|", "Operation\\|", UMacross.MacrossEditorKeyword)]
     public partial class BitOrNode : ValueOpNode
     {
         public BitOrNode()
@@ -274,8 +272,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public CmpNode(UBinaryOperatorExpression.EBinaryOperation op, string name)
             : base(op, name)
         {
-            EditObject = new CmpEditObject();
-            EditObject.Host = this;
         }
         public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
         {
@@ -333,28 +329,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return UCodeGeneratorBase.CanConvert(testType, LeftType);
             }
             return true;
-        }
-        CmpEditObject EditObject;
-        private class CmpEditObject
-        {
-            public CmpNode Host;
-            public string VarName
-            {
-                get { return Host.Name; }
-            }
-            public string LeftType
-            {
-                get
-                {
-                    if (Host.LeftType == null)
-                        return null;
-                    return Host.LeftType.FullName;
-                }
-            }
-        }
-        public override object GetPropertyEditObject()
-        {
-            return EditObject;
         }
     }
     [ContextMenu("equal,==", "Bool Operation\\==", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]

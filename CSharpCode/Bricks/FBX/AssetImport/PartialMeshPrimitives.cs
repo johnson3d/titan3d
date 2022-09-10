@@ -6,22 +6,22 @@ using System.Text;
 
 namespace EngineNS.Graphics.Mesh
 {
-    public partial class CMeshPrimitives
+    public partial class UMeshPrimitives
     {
         public partial class ImportAttribute : IO.CommonCreateAttribute
         {
             public ImportAttribute()
             {
-                ExtName = CMeshPrimitives.AssetExt;
+                ExtName = UMeshPrimitives.AssetExt;
             }
             AssetImportAndExport.FBX.FBXImporter mFBXImporter; //for now we only have one file to import
             string MeshType = "FBX";
-            CMeshDataProvider.UMakeBoxParameter BoxParameter = new CMeshDataProvider.UMakeBoxParameter();
-            CMeshDataProvider.UMakeRect2DParameter Rect2DParameter = new CMeshDataProvider.UMakeRect2DParameter();
-            CMeshDataProvider.UMakeSphereParameter SphereParameter = new CMeshDataProvider.UMakeSphereParameter();
-            CMeshDataProvider.UMakeCylinderParameter CylinderParameter = new CMeshDataProvider.UMakeCylinderParameter();
-            CMeshDataProvider.UMakeTorusParameter TorusParameter = new CMeshDataProvider.UMakeTorusParameter();
-            CMeshDataProvider.MakeCapsuleParameter CapsuleParameter = new CMeshDataProvider.MakeCapsuleParameter(); 
+            UMeshDataProvider.UMakeBoxParameter BoxParameter = new UMeshDataProvider.UMakeBoxParameter();
+            UMeshDataProvider.UMakeRect2DParameter Rect2DParameter = new UMeshDataProvider.UMakeRect2DParameter();
+            UMeshDataProvider.UMakeSphereParameter SphereParameter = new UMeshDataProvider.UMakeSphereParameter();
+            UMeshDataProvider.UMakeCylinderParameter CylinderParameter = new UMeshDataProvider.UMakeCylinderParameter();
+            UMeshDataProvider.UMakeTorusParameter TorusParameter = new UMeshDataProvider.UMakeTorusParameter();
+            UMeshDataProvider.MakeCapsuleParameter CapsuleParameter = new UMeshDataProvider.MakeCapsuleParameter(); 
 
             public unsafe partial void FBXCreateCreateDraw(UContentBrowser ContentBrowser)
             {
@@ -130,7 +130,7 @@ namespace EngineNS.Graphics.Mesh
                     bool nameChanged = ImGuiAPI.InputText("##in_rname", ref mName);
                     if (nameChanged)
                     {
-                        if (IO.FileManager.FileExists(mDir.Address + mName + RHI.CShaderResourceView.AssetExt))
+                        if (IO.FileManager.FileExists(mDir.Address + mName + UMeshPrimitives.AssetExt))
                             eErrorType = enErrorType.IsExisting;
                     }
                     ImGuiAPI.Separator();
@@ -150,15 +150,15 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Box":
                                     {
-                                        var mesh = CMeshDataProvider.MakeBox(BoxParameter.Position.X, BoxParameter.Position.Y, BoxParameter.Position.Z,
+                                        var mesh = UMeshDataProvider.MakeBox(BoxParameter.Position.X, BoxParameter.Position.Y, BoxParameter.Position.Z,
                                             BoxParameter.Extent.X, BoxParameter.Extent.Y, BoxParameter.Extent.Z, new Color4(BoxParameter.Color).ToArgb(), BoxParameter.FaceFlags);
 
                                         var name = this.GetAssetRName();
-                                        var ameta = new CMeshPrimitivesAMeta();
+                                        var ameta = new UMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(CMeshPrimitives));
-                                        ameta.Description = $"This is a {typeof(CMeshPrimitives).FullName}\n";
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
                                         ameta.SaveAMeta();
                                         UEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
@@ -169,15 +169,15 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Rect2D":
                                     {
-                                        var mesh = CMeshDataProvider.MakeRect2D(Rect2DParameter.Position.X, Rect2DParameter.Position.Y, 
+                                        var mesh = UMeshDataProvider.MakeRect2D(Rect2DParameter.Position.X, Rect2DParameter.Position.Y, 
                                             Rect2DParameter.Width, Rect2DParameter.Height, Rect2DParameter.Position.Z);
 
                                         var name = this.GetAssetRName();
-                                        var ameta = new CMeshPrimitivesAMeta();
+                                        var ameta = new UMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(CMeshPrimitives));
-                                        ameta.Description = $"This is a {typeof(CMeshPrimitives).FullName}\n";
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
                                         ameta.SaveAMeta();
                                         UEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
@@ -188,15 +188,15 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Sphere":
                                     {
-                                        var mesh = CMeshDataProvider.MakeSphere(SphereParameter.Radius, SphereParameter.Slices,
+                                        var mesh = UMeshDataProvider.MakeSphere(SphereParameter.Radius, SphereParameter.Slices,
                                             SphereParameter.Stacks, new Color4(SphereParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
-                                        var ameta = new CMeshPrimitivesAMeta();
+                                        var ameta = new UMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(CMeshPrimitives));
-                                        ameta.Description = $"This is a {typeof(CMeshPrimitives).FullName}\n";
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
                                         ameta.SaveAMeta();
                                         UEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
@@ -207,15 +207,15 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Cylinder":
                                     {
-                                        var mesh = CMeshDataProvider.MakeCylinder(CylinderParameter.Radius1, CylinderParameter.Radius2, CylinderParameter.Length,
+                                        var mesh = UMeshDataProvider.MakeCylinder(CylinderParameter.Radius1, CylinderParameter.Radius2, CylinderParameter.Length,
                                             CylinderParameter.Slices, CylinderParameter.Stacks, new Color4(CylinderParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
-                                        var ameta = new CMeshPrimitivesAMeta();
+                                        var ameta = new UMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(CMeshPrimitives));
-                                        ameta.Description = $"This is a {typeof(CMeshPrimitives).FullName}\n";
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
                                         ameta.SaveAMeta();
                                         UEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
@@ -226,15 +226,15 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Torus":
                                     {
-                                        var mesh = CMeshDataProvider.MakeTorus(TorusParameter.InnerRadius, TorusParameter.OutRadius2,
+                                        var mesh = UMeshDataProvider.MakeTorus(TorusParameter.InnerRadius, TorusParameter.OutRadius2,
                                             TorusParameter.Slices, TorusParameter.Rings, new Color4(TorusParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
-                                        var ameta = new CMeshPrimitivesAMeta();
+                                        var ameta = new UMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(CMeshPrimitives));
-                                        ameta.Description = $"This is a {typeof(CMeshPrimitives).FullName}\n";
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
                                         ameta.SaveAMeta();
                                         UEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
@@ -245,15 +245,15 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Capsule":
                                     {
-                                        var mesh = CMeshDataProvider.MakeCapsule(CapsuleParameter.Radius, CapsuleParameter.Depth,
+                                        var mesh = UMeshDataProvider.MakeCapsule(CapsuleParameter.Radius, CapsuleParameter.Depth,
                                             (int)CapsuleParameter.Latitudes, (int)CapsuleParameter.Longitudes, (int)CapsuleParameter.Rings, CapsuleParameter.UvProfile, new Color4(TorusParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
-                                        var ameta = new CMeshPrimitivesAMeta();
+                                        var ameta = new UMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(CMeshPrimitives));
-                                        ameta.Description = $"This is a {typeof(CMeshPrimitives).FullName}\n";
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
                                         ameta.SaveAMeta();
                                         UEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
@@ -306,7 +306,7 @@ namespace EngineNS.Graphics.Mesh
                             await CreateOrMergeSkeleton(rn, fbxSkeletonDesc);
                         }
                         {
-                            var rn = RName.GetRName(mDir.Name + meshName + CMeshPrimitives.AssetExt, mDir.RNameType);
+                            var rn = RName.GetRName(mDir.Name + meshName + UMeshPrimitives.AssetExt, mDir.RNameType);
                             CreateMesh(rn, meshImporter.GetMeshPrimitives(), hasSkin, meshImporter.GetSkeletonDesc());
                         }
                     }
@@ -337,17 +337,17 @@ namespace EngineNS.Graphics.Mesh
                     System.Diagnostics.Debug.Assert(false);
                 }
             }
-            private void CreateMesh(RName name, IMeshPrimitives meshPrimitives, bool hasSkin, AssetImportAndExport.FBX.FBXSkeletonDesc fbxSkeletonDesc)
+            private void CreateMesh(RName name, NxRHI.FMeshPrimitives meshPrimitives, bool hasSkin, AssetImportAndExport.FBX.FBXSkeletonDesc fbxSkeletonDesc)
             {
-                var ameta = new CMeshPrimitivesAMeta();
+                var ameta = new UMeshPrimitivesAMeta();
                 ameta.SetAssetName(name);
                 ameta.AssetId = Guid.NewGuid();
-                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(CMeshPrimitives));
-                ameta.Description = $"This is a {typeof(CMeshPrimitives).FullName}\n";
+                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
+                ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
                 ameta.SaveAMeta();
                 UEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
-                var cMeshPrimitives = new CMeshPrimitives(meshPrimitives);
+                var cMeshPrimitives = new UMeshPrimitives(meshPrimitives);
                 if (hasSkin)
                 {
                     cMeshPrimitives.PartialSkeleton = AssetImportAndExport.FBX.FBXMeshImportUtility.CreateSkinSkeleton(fbxSkeletonDesc);

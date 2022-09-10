@@ -50,6 +50,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             AlphaTest.Name = "AlphaTest ";
             AlphaTest.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(AlphaTest);
+
+            VertexOffset.Name = "VertexOffset ";
+            VertexOffset.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            this.AddPinIn(VertexOffset);
         }
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinIn Albedo { get; set; } = new PinIn();
@@ -66,6 +70,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public PinIn Alpha { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinIn AlphaTest { get; set; } = new PinIn();
+        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        public PinIn VertexOffset { get; set; } = new PinIn();
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
@@ -76,7 +82,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             if (iPin == Albedo ||
                 iPin == Emissive ||
-                iPin == Normal )
+                iPin == Normal ||
+                iPin == VertexOffset)
             {
                 if (!type.IsEqual(typeof(Vector3)))
                     return false;
@@ -197,32 +204,33 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         //[Obsolete]
         //public List<DefineVar> UniformVars { get; } = new List<DefineVar>();
 
-        public UMethodDeclaration Function { get; } = new UMethodDeclaration();
+        public UMethodDeclaration PSFunction { get; } = new UMethodDeclaration();
+        public UMethodDeclaration VSFunction { get; } = new UMethodDeclaration();
         public List<UVariableDeclaration> UniformVars { get; } = new List<UVariableDeclaration>();
         public override void BuildStatements(ref BuildCodeStatementsData data)
         {
             var graph = data.NodeGraph as UMaterialGraph;
-            Function.MethodName = "DO_PS_MATERIAL_IMPL";
-            Function.Arguments.Clear();
-            Function.Arguments.Add(
+            PSFunction.MethodName = "DO_PS_MATERIAL_IMPL";
+            PSFunction.Arguments.Clear();
+            PSFunction.Arguments.Add(
                 new UMethodArgumentDeclaration()
                 {
                     OperationType = EMethodArgumentAttribute.In,
                     VariableType = new UTypeReference("PS_INPUT"),
                     VariableName = "input",
                 });
-            Function.Arguments.Add(
+            PSFunction.Arguments.Add(
                 new UMethodArgumentDeclaration()
                 {
                     OperationType = EMethodArgumentAttribute.Ref,
                     VariableType = new UTypeReference("MTL_OUTPUT"),
                     VariableName = "mtl",
                 });
-            Function.LocalVariables.Clear();
+            PSFunction.LocalVariables.Clear();
             UniformVars.Clear();
-            Function.MethodBody.Sequence.Clear();
-            data.CurrentStatements = Function.MethodBody.Sequence;
-            data.MethodDec = Function;
+            PSFunction.MethodBody.Sequence.Clear();
+            data.CurrentStatements = PSFunction.MethodBody.Sequence;
+            data.MethodDec = PSFunction;
             if (Albedo.HasLinker())
             {
                 var linker = graph.FindInLinkerSingle(Albedo);
@@ -234,7 +242,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     From = exp,
                     To = new UVariableReferenceExpression("mAlbedo", new UVariableReferenceExpression("mtl")),
                 };
-                Function.MethodBody.Sequence.Add(assign);
+                PSFunction.MethodBody.Sequence.Add(assign);
             }
             if(Emissive.HasLinker())
             {
@@ -247,7 +255,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     From = exp,
                     To = new UVariableReferenceExpression("mEmissive", new UVariableReferenceExpression("mtl")),
                 };
-                Function.MethodBody.Sequence.Add(assign);
+                PSFunction.MethodBody.Sequence.Add(assign);
             }
             if (Normal.HasLinker())
             {
@@ -260,7 +268,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     From = exp,
                     To = new UVariableReferenceExpression("mNormal", new UVariableReferenceExpression("mtl")),
                 };
-                Function.MethodBody.Sequence.Add(assign);
+                PSFunction.MethodBody.Sequence.Add(assign);
             }
             if (Metallic.HasLinker())
             {
@@ -273,7 +281,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     From = exp,
                     To = new UVariableReferenceExpression("mMetallic", new UVariableReferenceExpression("mtl")),
                 };
-                Function.MethodBody.Sequence.Add(assign);
+                PSFunction.MethodBody.Sequence.Add(assign);
             }
             if (Rough.HasLinker())
             {
@@ -286,7 +294,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     From = exp,
                     To = new UVariableReferenceExpression("mRough", new UVariableReferenceExpression("mtl")),
                 };
-                Function.MethodBody.Sequence.Add(assign);
+                PSFunction.MethodBody.Sequence.Add(assign);
             }
             if (Alpha.HasLinker())
             {
@@ -299,7 +307,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     From = exp,
                     To = new UVariableReferenceExpression("mAlpha", new UVariableReferenceExpression("mtl")),
                 };
-                Function.MethodBody.Sequence.Add(assign);
+                PSFunction.MethodBody.Sequence.Add(assign);
             }
             if (AlphaTest.HasLinker())
             {
@@ -312,7 +320,40 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     From = exp,
                     To = new UVariableReferenceExpression("mAlphaTest", new UVariableReferenceExpression("mtl")),
                 };
-                Function.MethodBody.Sequence.Add(assign);
+                PSFunction.MethodBody.Sequence.Add(assign);
+            }
+
+            VSFunction.MethodName = "DO_VS_MATERIAL_IMPL";
+            VSFunction.Arguments.Clear();
+            VSFunction.Arguments.Add(
+                new UMethodArgumentDeclaration()
+                {
+                    OperationType = EMethodArgumentAttribute.In,
+                    VariableType = new UTypeReference("PS_INPUT"),
+                    VariableName = "input",
+                });
+            VSFunction.Arguments.Add(
+                new UMethodArgumentDeclaration()
+                {
+                    OperationType = EMethodArgumentAttribute.Ref,
+                    VariableType = new UTypeReference("MTL_OUTPUT"),
+                    VariableName = "mtl",
+                });
+            VSFunction.LocalVariables.Clear();
+            VSFunction.MethodBody.Sequence.Clear();
+            data.CurrentStatements = VSFunction.MethodBody.Sequence;
+            data.MethodDec = VSFunction;
+            if (VertexOffset.HasLinker())
+            {
+                var pinNode = graph.GetOppositePinNode(VertexOffset);
+                pinNode.BuildStatements(ref data);
+                var exp = graph.GetOppositePinExpression(VertexOffset, ref data);
+                var assign = new UAssignOperatorStatement()
+                {
+                    From = exp,
+                    To = new UVariableReferenceExpression("mVertexOffset", new UVariableReferenceExpression("mtl")),
+                };
+                VSFunction.MethodBody.Sequence.Add(assign);
             }
         }
     }

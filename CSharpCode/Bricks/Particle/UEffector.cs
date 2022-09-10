@@ -10,7 +10,7 @@ namespace EngineNS.Bricks.Particle
         unsafe void DoEffect(IParticleEmitter emitter, float elapsed, void* particle);
         string GetParametersDefine();
         string GetHLSL();
-        void SetCBuffer(uint index, RHI.CConstantBuffer CBuffer);
+        void SetCBuffer(uint index, NxRHI.UCbView CBuffer);
         IEffector CloneEffector();
     }
     public class UEffector<FParticle> : IEffector where FParticle : unmanaged
@@ -35,7 +35,7 @@ namespace EngineNS.Bricks.Particle
         {
             return "";
         }
-        public virtual void SetCBuffer(uint index, RHI.CConstantBuffer CBuffer)
+        public virtual void SetCBuffer(uint index, NxRHI.UCbView CBuffer)
         {
 
         }
@@ -101,7 +101,7 @@ namespace EngineNS.Bricks.Particle
             ref var cur = ref *(FParticleBase*)particle;
             cur.Location += Acceleration * elapsed * (1.0f + emitter.RandomUnit() * 2.5f);
         }
-        public void SetCBuffer(uint index, RHI.CConstantBuffer CBuffer)
+        public void SetCBuffer(uint index, NxRHI.UCbView CBuffer)
         {
             CBuffer.SetValue($"EffectorParameters{index}", in mAcceleratedEffector);
         }

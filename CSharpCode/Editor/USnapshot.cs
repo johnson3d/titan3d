@@ -6,64 +6,133 @@ namespace EngineNS.Editor
 {
     public class USnapshot
     {
-        public RHI.CShaderResourceView mTextureRSV;
-        public unsafe static void Save(RName rname, IO.IAssetMeta ameta, ITexture2D tex, ICommandList cmdlist_hp, uint x, uint y, uint w, uint h)
+        public NxRHI.USrView mTextureRSV;
+        public unsafe static void Save(RName rname, IO.IAssetMeta ameta, NxRHI.ITexture tex, uint x, uint y, uint w, uint h)
         {
             var file = rname.Address + ".snap";
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            var fence = rc.CreateFence();
-            ITexture2D* pTexture = (ITexture2D*)0;
-            cmdlist_hp.CreateReadableTexture2D((ITexture2D**)&pTexture, tex, new IFrameBuffers());
-            cmdlist_hp.Signal(fence.mCoreObject, 0);
-            var texture = new ITexture2D(pTexture);
-            UEngine.Instance.GfxDevice.RegFenceQuery(fence, (arg) =>
-            {
-                void* pData;
-                uint rowPitch;
-                uint depthPitch;
-                if (texture.MapMipmap(cmdlist_hp, 0, 0, &pData, &rowPitch, &depthPitch) != 0)
-                {
-                    var bufferData = new Support.CBlobObject();
-                    texture.BuildImageBlob(bufferData.mCoreObject, pData, rowPitch);
-                    texture.UnmapMipmap(cmdlist_hp, 0, 0);
+            var fenceDesc = new NxRHI.FFenceDesc();
+            fenceDesc.m_InitValue = 0;
+            var fence = rc.CreateFence(in fenceDesc, file);
+            var cpuDesc = tex.Desc;
+            cpuDesc.CpuAccess = NxRHI.ECpuAccess.CAS_READ;
+            cpuDesc.Usage = NxRHI.EGpuUsage.USAGE_STAGING;
+            cpuDesc.BindFlags = (NxRHI.EBufferType)0;
+            cpuDesc.InitData = (NxRHI.FMappedSubResource*)IntPtr.Zero.ToPointer();
 
-                    SavePng(ameta, file, bufferData, w, h, x, y);
+            NxRHI.FSubResourceFootPrint CopyBufferFootPrint = new NxRHI.FSubResourceFootPrint();
+            CopyBufferFootPrint.Width = cpuDesc.Width;
+            CopyBufferFootPrint.Height = cpuDesc.Height;
+            CopyBufferFootPrint.Depth = 1;
+            CopyBufferFootPrint.Format = cpuDesc.Format;
+            CopyBufferFootPrint.RowPitch = (uint)CoreSDK.GetPixelFormatByteWidth(CopyBufferFootPrint.Format) * cpuDesc.Width;
+            var pAlignment = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetGpuResourceAlignment();
+            if (CopyBufferFootPrint.RowPitch % pAlignment->TexturePitchAlignment > 0)
+            {
+                CopyBufferFootPrint.RowPitch = (CopyBufferFootPrint.RowPitch / pAlignment->TexturePitchAlignment + 1) * pAlignment->TexturePitchAlignment;
+            }
+            var texture = UEngine.Instance.GfxDevice.RenderContext.CreateTextureToCpuBuffer(in cpuDesc, in CopyBufferFootPrint);
+
+            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((im_cmd, name) =>
+            {
+                var dstTex = texture as NxRHI.UTexture;
+                var dstBf = texture as NxRHI.UBuffer;
+                if (dstTex != null)
+                {
+                    var box = new NxRHI.FSubresourceBox();
+                    im_cmd.CopyTextureRegion(dstTex.mCoreObject, 0, 0,0,0, tex, 0, in box);
                 }
-                texture.NativeSuper.NativeSuper.NativeSuper.Release();
-            });
+                else if (dstBf != null)
+                {
+                    im_cmd.CopyTextureToBuffer(dstBf.mCoreObject, in CopyBufferFootPrint, tex, 0);
+                }
+                UEngine.Instance.GfxDevice.RenderContext.CmdQueue.SignalFence(fence, 1);
+            }, "Copy Snap Texture");
+
+            UEngine.Instance.EventPoster.RunOn(() =>
+            {
+                fence.Wait(1);
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((im_cmd, name) =>
+                {
+                    var gpuDataBlob = new Support.CBlobObject();
+                    var bufferData = new Support.CBlobObject();
+                    texture.GetGpuBufferDataPointer().FetchGpuData(im_cmd, 0, gpuDataBlob.mCoreObject);
+                    NxRHI.ITexture.BuildImage2DBlob(bufferData.mCoreObject, gpuDataBlob.mCoreObject, cpuDesc);
+                    UEngine.Instance.EventPoster.RunOn(() =>
+                    {
+                        SavePng(ameta, file, bufferData);
+                        return null;
+                    }, Thread.Async.EAsyncTarget.AsyncEditor);
+                }, "Fetch");
+                return null;
+            }, Thread.Async.EAsyncTarget.AsyncEditor);
         }
-        public unsafe static void Save(RName rname, IO.IAssetMeta ameta, RHI.CShaderResourceView srv, ICommandList cmdlist_hp)
+        public unsafe static void Save(RName rname, IO.IAssetMeta ameta, NxRHI.USrView srv)
         {
             var file = rname.Address + ".snap";
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            var fence = rc.CreateFence();
-            ITexture2D* pTexture = (ITexture2D*)0;
-            cmdlist_hp.CreateReadableTexture2D((ITexture2D**)&pTexture, srv.mCoreObject, new IFrameBuffers());
-            cmdlist_hp.Signal(fence.mCoreObject, 0);
-            var texture = new ITexture2D(pTexture);
-            UEngine.Instance.GfxDevice.RegFenceQuery(fence, (arg) =>
-            {
-                void* pData;
-                uint rowPitch;
-                uint depthPitch;                
-                if (texture.MapMipmap(cmdlist_hp, 0, 0, &pData, &rowPitch, &depthPitch) != 0)
-                {
-                    var bufferData = new Support.CBlobObject();
-                    texture.BuildImageBlob(bufferData.mCoreObject, pData, rowPitch);
-                    texture.UnmapMipmap(cmdlist_hp, 0, 0);
+            var fenceDesc = new NxRHI.FFenceDesc();
+            fenceDesc.m_InitValue = 0;
+            var fence = rc.CreateFence(in fenceDesc, file);
+            var cpuDesc = srv.mCoreObject.GetBufferAsTexture().Desc;
+            cpuDesc.CpuAccess = NxRHI.ECpuAccess.CAS_READ;
+            cpuDesc.Usage = NxRHI.EGpuUsage.USAGE_STAGING;
+            cpuDesc.BindFlags = (NxRHI.EBufferType)0;
 
-                    SavePng(ameta, file, bufferData);
+            NxRHI.FSubResourceFootPrint CopyBufferFootPrint = new NxRHI.FSubResourceFootPrint();
+            CopyBufferFootPrint.Width = cpuDesc.Width;
+            CopyBufferFootPrint.Height = cpuDesc.Height;
+            CopyBufferFootPrint.Depth = 1;
+            CopyBufferFootPrint.Format = cpuDesc.Format;
+            CopyBufferFootPrint.RowPitch = (uint)CoreSDK.GetPixelFormatByteWidth(CopyBufferFootPrint.Format) * cpuDesc.Width;
+            var pAlignment = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetGpuResourceAlignment();
+            if (CopyBufferFootPrint.RowPitch % pAlignment->TexturePitchAlignment > 0)
+            {
+                CopyBufferFootPrint.RowPitch = (CopyBufferFootPrint.RowPitch / pAlignment->TexturePitchAlignment + 1) * pAlignment->TexturePitchAlignment;
+            }
+            var texture = UEngine.Instance.GfxDevice.RenderContext.CreateTextureToCpuBuffer(in cpuDesc, in CopyBufferFootPrint);
+
+            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((im_cmd, name) =>
+            {
+                var dstTex = texture as NxRHI.UTexture;
+                var dstBf = texture as NxRHI.UBuffer;
+                if (dstTex != null)
+                {
+                    var box = new NxRHI.FSubresourceBox();
+                    im_cmd.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, srv.mCoreObject.GetBufferAsTexture(), 0, in box);
                 }
-                texture.NativeSuper.NativeSuper.NativeSuper.Release();
-            });
+                else if (dstBf != null)
+                {
+                    im_cmd.CopyTextureToBuffer(dstBf.mCoreObject, in CopyBufferFootPrint, srv.mCoreObject.GetBufferAsTexture(), 0);
+                }
+                UEngine.Instance.GfxDevice.RenderContext.CmdQueue.SignalFence(fence, 1);
+            }, "Copy Snap SRV");
+
+            UEngine.Instance.EventPoster.RunOn(() =>
+            {
+                fence.Wait(1);
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((im_cmd, name) =>
+                {
+                    var gpuDataBlob = new Support.CBlobObject();
+                    var bufferData = new Support.CBlobObject();
+                    texture.GetGpuBufferDataPointer().FetchGpuData(im_cmd, 0, gpuDataBlob.mCoreObject);
+                    NxRHI.ITexture.BuildImage2DBlob(bufferData.mCoreObject, gpuDataBlob.mCoreObject, cpuDesc);
+                    UEngine.Instance.EventPoster.RunOn(() =>
+                    {
+                        SavePng(ameta, file, bufferData);
+                        return null;
+                    }, Thread.Async.EAsyncTarget.AsyncEditor);
+                }, "Fetch");
+                return null;
+            }, Thread.Async.EAsyncTarget.AsyncEditor);
         }
         public unsafe static bool SavePng(IO.IAssetMeta ameta, string file, Support.CBlobObject bufferData)
         {
             byte* pPixelData = (byte*)bufferData.mCoreObject.GetData();
             if (pPixelData == (byte*)0)
                 return false;
-            var pBitmapDesc = (PixelDesc*)pPixelData;
-            pPixelData += sizeof(PixelDesc);
+            var pBitmapDesc = (NxRHI.FPixelDesc*)pPixelData;
+            pPixelData += sizeof(NxRHI.FPixelDesc);
 
             using (var memStream = new System.IO.FileStream(file, System.IO.FileMode.OpenOrCreate))// .MemoryStream(pBitmapDesc->Stride * pBitmapDesc->Height))
             {
@@ -86,8 +155,8 @@ namespace EngineNS.Editor
             byte* pPixelData = (byte*)bufferData.mCoreObject.GetData();
             if (pPixelData == (byte*)0)
                 return false;
-            var pBitmapDesc = (PixelDesc*)pPixelData;
-            pPixelData += sizeof(PixelDesc);
+            var pBitmapDesc = (NxRHI.FPixelDesc*)pPixelData;
+            pPixelData += sizeof(NxRHI.FPixelDesc);
 
             using (var memStream = new System.IO.FileStream(file, System.IO.FileMode.OpenOrCreate))// .MemoryStream(pBitmapDesc->Stride * pBitmapDesc->Height))
             {

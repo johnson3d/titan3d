@@ -87,10 +87,14 @@ namespace EngineNS.Bricks.Particle
         }
         public void Update(UParticleGraphNode particleSystem, float elpased)
         {
+            //var cmdlist = particleSystem.BasePass.DrawCmdList;
+            //cmdlist.BeginCommand();
             foreach (var i in Emitter.Values)
             {
                 i.Update(particleSystem, elpased);                
             }
+            //cmdlist.EndCommand();
+            //UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
         }
 
         public UNebulaParticle CloneNebula()

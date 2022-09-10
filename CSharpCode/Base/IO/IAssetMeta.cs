@@ -247,6 +247,10 @@ namespace EngineNS.IO
         }
         EGui.UIProxy.MenuItemProxy.MenuState mDeleteMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
+        protected virtual Color GetBorderColor()
+        {
+            return EGui.UCoreStyles.Instance.SnapBorderColor;
+        }
         public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
         {
             var start = ImGuiAPI.GetItemRectMin();
@@ -266,7 +270,7 @@ namespace EngineNS.IO
             //if (titleImg != null)
             //    titleImg.OnDraw(cmdlist, in start, in end);
 
-            cmdlist.AddRect(in start, in end, (uint)EGui.UCoreStyles.Instance.SnapBorderColor.ToArgb(), 
+            cmdlist.AddRect(in start, in end, (uint)GetBorderColor().ToAbgr(), 
                 EGui.UCoreStyles.Instance.SnapRounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll, EGui.UCoreStyles.Instance.SnapThinkness);
 
             cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
@@ -285,7 +289,7 @@ namespace EngineNS.IO
 
                 if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, ref drawList, ref menuData, ref mDeleteMenuState))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     var rn = RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType);
                     var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UAssetReferViewer), rn, this);
                 }

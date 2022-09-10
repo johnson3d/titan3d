@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.EGui.Controls.PropertyGrid;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
@@ -122,10 +123,35 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    public partial class MemberVar : VarNode, IAfterExecNode, IBeforeExecNode
+    public partial class MemberVar : VarNode, UEditableValue.IValueEditNotify, IAfterExecNode, IBeforeExecNode, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public PinOut AfterExec { get; set; } = new PinOut();
         public PinIn BeforeExec { get; set; } = new PinIn();
+
+        public class TSaveData : IO.BaseSerializer
+        {
+            [Rtti.Meta]
+            public string DefaultValue { get; set; } = null;
+        }
+        [Rtti.Meta(Order = 2)]
+        public TSaveData SaveData
+        {
+            get
+            {
+                var tmp = new TSaveData();
+                if (SetPin.EditValue != null)
+                    tmp.DefaultValue = SetPin.EditValue.Value.ToString();
+                return tmp;
+            }
+            set
+            {
+                if (SetPin.EditValue != null)
+                {
+                    SetPin.EditValue.Value = Support.TConvert.ToObject(VarType, value.DefaultValue);
+                    OnValueChanged(SetPin.EditValue);
+                }
+            }
+        }
 
         public static MemberVar NewMemberVar(UClassDeclaration kls, string varName, bool isGet)
         {
@@ -146,7 +172,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if(MemberName != varName)
                 MemberName = varName;
 
-            VarType = kls.TryGetTypeDesc();
+            //VarType = kls.TryGetTypeDesc();
 
             if (isGet)
                 AddPinOut(GetPin);
@@ -158,6 +184,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
                 AddPinIn(BeforeExec);
                 AddPinOut(AfterExec);
+
+                if(Var != null)
+                    SetPin.EditValue = UEditableValue.CreateEditableValue(this, Var.VariableType.TypeDesc, SetPin);
 
                 AddPinIn(SetPin);
                 AddPinOut(GetPin);
@@ -189,6 +218,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     VarType = Var.VariableType.TypeDesc;
                     Name = Var.VariableName;
+                }
+                else
+                {
+                    HasError = true;
+                    CodeExcept = new GraphException(this, null, $"Member {value} not found");
                 }
                 Initialize(mDefClass, MemberName, IsGet);
             }
@@ -253,9 +287,72 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return Var.VariableType.TypeDesc;
             return null;
         }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            if (Var == null)
+                return;
+            if(stayPin == SetPin || stayPin == GetPin)
+            {
+                EGui.Controls.CtrlUtility.DrawHelper(Var.VariableType.TypeDesc.FullName);
+            }
+        }
 
+        public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            if (IsGet)
+                return;
+
+            var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+            proDesc.Name = Name;
+            proDesc.DisplayName = Name;
+            proDesc.PropertyType = VarType;
+            //proDesc.CustomValueEditor = SetPin.EditValue;
+            collection.Add(proDesc);
+        }
+
+        public object GetPropertyValue(string propertyName)
+        {
+            if (IsGet)
+                return null;
+            return SetPin.EditValue.Value;
+        }
+
+        public void SetPropertyValue(string propertyName, object value)
+        {
+            if (IsGet)
+                return;
+            SetPin.EditValue.Value = value;
+        }
+
+        public void OnValueChanged(UEditableValue ev)
+        {
+        }
+
+        public void LightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = true;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.LightDebuggerLine();
+            }
+        }
+
+        public void UnLightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = false;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.UnLightDebuggerLine();
+            }
+        }
     }
-    public partial class ClassPropertyVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode
+    public partial class ClassPropertyVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public static ClassPropertyVar NewClassProperty(Rtti.UClassMeta.PropertyMeta meta, bool isGet)
         {
@@ -315,6 +412,32 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return null;
             }
         }
+
+        public class TSaveData : IO.BaseSerializer
+        {
+            [Rtti.Meta]
+            public string DefaultValue { get; set; } = null;
+        }
+        [Rtti.Meta(Order = 2)]
+        public TSaveData SaveData
+        {
+            get
+            {
+                var tmp = new TSaveData();
+                if(SetPin.EditValue != null)
+                    tmp.DefaultValue = SetPin.EditValue.Value.ToString();
+                return tmp;
+            }
+            set
+            {
+                if (SetPin.EditValue != null)
+                {
+                    SetPin.EditValue.Value = Support.TConvert.ToObject(VarType, value.DefaultValue);
+                    OnValueChanged(SetPin.EditValue);
+                }
+            }
+        }
+
         public PinIn BeforeExec { get; set; } = new PinIn();
         public PinOut AfterExec { get; set; } = new PinOut();
         public ClassPropertyVar()
@@ -467,9 +590,61 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             return ClassProperty.FieldType;
         }
+
+        public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            if (IsGet)
+                return;
+
+            var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+            proDesc.Name = Name;
+            proDesc.DisplayName = Name;
+            proDesc.PropertyType = VarType;
+            //proDesc.CustomValueEditor = SetPin.EditValue;
+            collection.Add(proDesc);
+        }
+
+        public object GetPropertyValue(string propertyName)
+        {
+            if (IsGet)
+                return null;
+            return SetPin.EditValue.Value;
+        }
+
+        public void SetPropertyValue(string propertyName, object value)
+        {
+            if (IsGet)
+                return;
+            SetPin.EditValue.Value = value;
+            OnValueChanged(SetPin.EditValue);
+        }
+
+        public void LightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = true;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.LightDebuggerLine();
+            }
+        }
+
+        public void UnLightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = false;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.UnLightDebuggerLine();
+            }
+        }
     }
 
-    public partial class ClassFieldVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode
+    public partial class ClassFieldVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, IPropertyCustomization
     {   
         public static ClassFieldVar NewClassMemberVar(Rtti.UClassMeta.FieldMeta meta, bool isGet)
         {
@@ -530,6 +705,32 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
+
+        public class TSaveData : IO.BaseSerializer
+        {
+            [Rtti.Meta]
+            public string DefaultValue { get; set; } = null;
+        }
+        [Rtti.Meta(Order = 2)]
+        public TSaveData SaveData
+        {
+            get
+            {
+                var tmp = new TSaveData();
+                if (SetPin.EditValue != null)
+                    tmp.DefaultValue = SetPin.EditValue.Value.ToString();
+                return tmp;
+            }
+            set
+            {
+                if (SetPin.EditValue != null)
+                {
+                    SetPin.EditValue.Value = Support.TConvert.ToObject(VarType, value.DefaultValue);
+                    OnValueChanged(SetPin.EditValue);
+                }
+            }
+        }
+
         public PinIn BeforeExec { get; set; } = new PinIn();
         public PinOut AfterExec { get; set; } = new PinOut();
         public ClassFieldVar()
@@ -739,6 +940,58 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             return Rtti.UTypeDesc.TypeOf(ClassField.Field.FieldType);
         }
+
+        public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            if (IsGet)
+                return;
+
+            var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+            proDesc.Name = Name;
+            proDesc.DisplayName = Name;
+            proDesc.PropertyType = VarType;
+            //proDesc.CustomValueEditor = SetPin.EditValue;
+            collection.Add(proDesc);
+        }
+
+        public object GetPropertyValue(string propertyName)
+        {
+            if (IsGet)
+                return null;
+            return SetPin.EditValue.Value;
+        }
+
+        public void SetPropertyValue(string propertyName, object value)
+        {
+            if (IsGet)
+                return;
+            SetPin.EditValue.Value = value;
+            OnValueChanged(SetPin.EditValue);
+        }
+
+        public void LightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = true;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.LightDebuggerLine();
+            }
+        }
+
+        public void UnLightDebuggerLine()
+        {
+            var linker = ParentGraph.GetFirstLinker(BeforeExec);
+            if (linker != null)
+            {
+                linker.InDebuggerLine = false;
+                var node = ParentGraph.GetOppositePinNode(BeforeExec) as IBeforeExecNode;
+                if (node != null)
+                    node.UnLightDebuggerLine();
+            }
+        }
     }
     
     public partial class LocalVar : VarNode
@@ -874,6 +1127,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (bool)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
         }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
+        }
     }
     [ContextMenu("SByte", "Data\\POD\\SByte@_serial@", UMacross.MacrossEditorKeyword)]
     public partial class SByteLVar : LocalVar, UEditableValue.IValueEditNotify
@@ -914,6 +1171,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             mValue = (SByte)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
+        }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
     [ContextMenu("Int16", "Data\\POD\\Int16@_serial@", UMacross.MacrossEditorKeyword)]
@@ -956,6 +1217,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (Int16)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
         }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
+        }
     }
     [ContextMenu("Int32", "Data\\POD\\Int32@_serial@", UMacross.MacrossEditorKeyword)]
     public partial class Int32LVar : LocalVar, UEditableValue.IValueEditNotify
@@ -996,6 +1261,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             mValue = (Int32)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
+        }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
     [ContextMenu("Int64", "Data\\POD\\Int64@_serial@", UMacross.MacrossEditorKeyword)]
@@ -1038,6 +1307,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (Int64)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
         }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
+        }
     }
     [ContextMenu("Byte", "Data\\POD\\Byte@_serial@", UMacross.MacrossEditorKeyword)]
     public partial class ByteLVar : LocalVar, UEditableValue.IValueEditNotify
@@ -1078,6 +1351,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             mValue = (Byte)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
+        }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
     [ContextMenu("UInt16", "Data\\POD\\UInt16@_serial@", UMacross.MacrossEditorKeyword)]
@@ -1120,6 +1397,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (UInt16)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
         }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
+        }
     }
     [ContextMenu("UInt32", "Data\\POD\\UInt32@_serial@", UMacross.MacrossEditorKeyword)]
     public partial class UInt32LVar : LocalVar, UEditableValue.IValueEditNotify
@@ -1160,6 +1441,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             mValue = (UInt32)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
+        }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
     [ContextMenu("UInt64", "Data\\POD\\UInt64@_serial@", UMacross.MacrossEditorKeyword)]
@@ -1202,6 +1487,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (UInt64)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
         }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
+        }
     }
     [ContextMenu("float", "Data\\POD\\Float@_serial@", UMacross.MacrossEditorKeyword)]
     public partial class FloatLVar : LocalVar, UEditableValue.IValueEditNotify
@@ -1242,6 +1531,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             mValue = (float)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
+        }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
     [ContextMenu("double", "Data\\POD\\Double@_serial@", UMacross.MacrossEditorKeyword)]
@@ -1284,6 +1577,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (double)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
         }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
+        }
     }
     [ContextMenu("string", "Data\\POD\\String@_serial@", UMacross.MacrossEditorKeyword)]
     public partial class StringLVar : LocalVar, UEditableValue.IValueEditNotify
@@ -1324,6 +1621,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             mValue = (string)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
+        }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            if(Value == null)
+                EGui.Controls.CtrlUtility.DrawHelper("null");
+            else
+                EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
     [ContextMenu("Vector2", "Data\\POD\\BaseData\\Vector2@_serial@", UMacross.MacrossEditorKeyword)]
@@ -1366,6 +1670,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (Vector2)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
         }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
+        }
     }
     [ContextMenu("Vector3", "Data\\POD\\BaseData\\Vector3@_serial@", UMacross.MacrossEditorKeyword)]
     public partial class Vector3LVar : LocalVar, UEditableValue.IValueEditNotify
@@ -1407,6 +1715,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (Vector3)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
         }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
+        }
     }
     [ContextMenu("Vector4", "Data\\POD\\BaseData\\Vector4@_serial@", UMacross.MacrossEditorKeyword)]
     public partial class Vector4LVar : LocalVar, UEditableValue.IValueEditNotify
@@ -1447,6 +1759,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             mValue = (Vector4)SetPin.EditValue.Value;
             return new UPrimitiveExpression(Value);
+        }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
 

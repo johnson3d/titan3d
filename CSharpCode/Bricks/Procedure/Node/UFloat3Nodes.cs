@@ -1,10 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
-
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
+    [Bricks.CodeBuilder.ContextMenu("Float3Value", "Float3\\Float3Value", UPgcGraph.PgcEditorKeyword)]
+    public class UFloat3ValueNode : UPgcNodeBase
+    {
+        [Browsable(false)]
+        public PinOut ResultPin { get; set; } = new PinOut();
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UFloat3ValueNode()
+        {
+            Icon.Size = new Vector2(25, 25);
+            Icon.Color = 0xFF00FF00;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
+
+            AddOutput(ResultPin, "Result", OutputDesc);
+        }
+        [Rtti.Meta]
+        public Vector3 Value { get; set; } = Vector3.One;
+        public unsafe override bool OnProcedure(UPgcGraph graph)
+        {
+            var result = graph.BufferCache.FindBuffer(ResultPin);
+
+            for (int i = 0; i < result.Depth; i++)
+            {
+                for (int j = 0; j < result.Height; j++)
+                {
+                    for (int k = 0; k < result.Width; k++)
+                    {
+                        result.SetFloat3(k, j, i, Value);
+                    }
+                }
+            }
+            return true;
+        }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            return OutputDesc;
+        }
+    }
     [Bricks.CodeBuilder.ContextMenu("Float3Unpack", "Float3\\Unpack", UPgcGraph.PgcEditorKeyword)]
     public class UFloat3UnpackNodes : UPgcNodeBase
     {
@@ -17,8 +55,8 @@ namespace EngineNS.Bricks.Procedure.Node
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut ZPin { get; set; } = new PinOut();
 
-        public UBufferCreator InputFloat3Desc = UBufferCreator.CreateInstance< USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator OutputFloatDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator InputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator OutputFloatDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UFloat3UnpackNodes()
         {
             Icon.Size = new Vector2(25, 25);
@@ -39,12 +77,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 var buffer = graph.BufferCache.FindBuffer(InXYZ);
                 if (buffer != null)
                 {
-                    var result = buffer.BufferCreator.Clone();
-                    result.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
-                    return result;
+                    OutputFloatDesc.SetSize(buffer.BufferCreator);
+                    return OutputFloatDesc;
                 }
             }
-            return base.GetOutBufferCreator(pin);
+            return null;
         }
         public override unsafe bool InitProcedure(UPgcGraph graph)
         {
@@ -87,8 +124,8 @@ namespace EngineNS.Bricks.Procedure.Node
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut OutXYZ { get; set; } = new PinOut();
 
-        public UBufferCreator InputFloatDesc = UBufferCreator.CreateInstance< USuperBuffer <float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat3Desc = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator InputFloatDesc { get; } = UBufferCreator.CreateInstance< USuperBuffer <float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
 
         public UFloat3PackNodes()
         {
@@ -110,12 +147,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 var buffer = graph.BufferCache.FindBuffer(XPin);
                 if (buffer != null)
                 {
-                    var result = buffer.BufferCreator.Clone();
-                    result.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
-                    return result;
+                    OutputFloat3Desc.SetSize(buffer.BufferCreator);
+                    return OutputFloat3Desc;
                 }
             }
-            return base.GetOutBufferCreator(pin);
+            return null;
         }
         public override bool OnProcedure(UPgcGraph graph)
         {
@@ -148,6 +184,44 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("UVW", "Float3\\UVW", UPgcGraph.PgcEditorKeyword)]
+    public class UUVWNode : UPgcNodeBase
+    {
+        [Browsable(false)]
+        public PinOut ResultPin { get; set; } = new PinOut();
+        public UBufferCreator OutputDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UUVWNode()
+        {
+            Icon.Size = new Vector2(25, 25);
+            Icon.Color = 0xFF00FF00;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
+
+            AddOutput(ResultPin, "Result", OutputDesc);
+        }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            return OutputDesc;
+        }
+        public unsafe override bool OnProcedure(UPgcGraph graph)
+        {
+            var result = graph.BufferCache.FindBuffer(ResultPin);
+
+            for (int i = 0; i < result.Depth; i++)
+            {
+                for (int j = 0; j < result.Height; j++)
+                {
+                    for (int k = 0; k < result.Width; k++)
+                    {
+                        var uvw = result.GetUVW(k, j, i);
+
+                        result.SetPixel(k, j, i, uvw);
+                    }
+                }
+            }
+            return true;
+        }
+    }
 
     /*
      0 1 2
@@ -162,8 +236,8 @@ namespace EngineNS.Bricks.Procedure.Node
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut Normal { get; set; } = new PinOut();
 
-        public UBufferCreator InputFloatDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat3Desc = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator InputFloatDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
 
         public UFloat3HeightToNormal()
         {
@@ -183,12 +257,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 var buffer = graph.BufferCache.FindBuffer(HFieldPin);
                 if (buffer != null)
                 {
-                    var result = buffer.BufferCreator.Clone();
-                    result.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
-                    return result;
+                    OutputFloat3Desc.SetSize(buffer.BufferCreator);
+                    return OutputFloat3Desc;
                 }
             }
-            return base.GetOutBufferCreator(pin);
+            return null;
         }
         [Rtti.Meta]
         public float GridSize { get; set; } = 1.0f;
@@ -246,8 +319,8 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinIn InXYZ { get; set; } = new PinIn();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut OutXYZ { get; set; } = new PinOut();
-        public UBufferCreator InputFloat3Desc = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
-        public UBufferCreator OutputFloat3Desc = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator InputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
+        public UBufferCreator OutputFloat3Desc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
         public UFloat3Normalize()
         {
             Icon.Size = new Vector2(25, 25);
@@ -266,10 +339,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 var buffer = graph.BufferCache.FindBuffer(InXYZ);
                 if (buffer != null)
                 {
-                    return buffer.BufferCreator;
+                    OutputFloat3Desc.SetSize(buffer.BufferCreator);
+                    return OutputFloat3Desc;
                 }
             }
-            return base.GetOutBufferCreator(pin);
+            return null;
         }
         public override bool OnProcedure(UPgcGraph graph)
         {
@@ -294,6 +368,59 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 
+    [Bricks.CodeBuilder.ContextMenu("Dot", "Float3\\Dot", UPgcGraph.PgcEditorKeyword)]
+    public class UFloat3Dot : UBinocularWithMask
+    {
+        public UFloat3Dot()
+        {
+            InputLeftDesc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
+            InputRightDesc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
+            OutputDesc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
+        }
+        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        {
+            if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
+                return false;
+            var input = iPin.Tag as UBufferCreator;
+            var output = oPin.Tag as UBufferCreator;
+
+            if (IsMatchLinkedPin(input, output) == false)
+            {
+                return false;
+            }
+            return true;
+        }
+        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        {
+            if (iPin.LinkDesc.CanLinks.Contains("Value"))
+            {
+                ParentGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
+            }
+        }
+        public unsafe override void OnPerPixel(UPgcGraph graph, UPgcNodeBase node, UBufferConponent result, int x, int y, int z, object tag)
+        {
+            var arg = tag as ULeftRightBuffer;
+            var left = arg.Left;
+            var right = arg.Right;
+            var resultType = arg.ResultType;
+            var leftType = arg.LeftType;
+            var rightType = arg.RightType;
+
+            if (right == null || this.IsMask(x, y, z, arg.Mask) == false)
+            {
+                result.PixelOperator.Copy(resultType, result.GetSuperPixelAddress(x, y, z),
+                    leftType, left.GetSuperPixelAddress(x, y, z));
+                return;
+            }
+
+            var uvw = result.GetUVW(x, y, z);
+            ref var lv = ref left.GetPixel<Vector3>(x, y, z);
+            ref var rv = ref right.GetPixel<Vector3>(in uvw);
+            var v = Vector3.Dot(in lv, in rv);
+            result.SetPixel<float>(x, y, z, in v);
+        }
+    }
+
     [Bricks.CodeBuilder.ContextMenu("Float3Gaussion", "Float3\\Gaussion", UPgcGraph.PgcEditorKeyword)]
     public class UFloat3Gaussion : UMonocular
     {
@@ -305,8 +432,8 @@ namespace EngineNS.Bricks.Procedure.Node
         };
         public UFloat3Gaussion()
         {
-            DefaultInputDesc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
-            DefaultBufferCreator.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
+            SourceDesc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
+            ResultDesc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
         }
         [Rtti.Meta]
         public bool ClampBorder { get; set; } = true;
@@ -483,7 +610,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
     [Bricks.CodeBuilder.ContextMenu("MeshMorph", "Float3\\Morph", UPgcGraph.PgcEditorKeyword)]
-    public class UFloat3Morph : UOpNode
+    public class UFloat3Morph : UPgcNodeBase
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinIn InXYZ { get; set; } = new PinIn();
@@ -514,9 +641,9 @@ namespace EngineNS.Bricks.Procedure.Node
             BackColor = 0x80808080;
 
             AddInput(InXYZ, "XYZ", XYZBufferCreator);
-            AddInput(XBezierPin, "XBezier", DefaultInputDesc, "Bezier");
-            AddInput(YBezierPin, "YBezier", DefaultInputDesc, "Bezier");
-            AddInput(ZBezierPin, "ZBezier", DefaultInputDesc, "Bezier");
+            AddInput(XBezierPin, "XBezier", null, "Bezier");
+            AddInput(YBezierPin, "YBezier", null, "Bezier");
+            AddInput(ZBezierPin, "ZBezier", null, "Bezier");
             AddOutput(OutXYZ, "XYZ", XYZBufferCreator);
         }
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
@@ -527,10 +654,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 var buffer = graph.BufferCache.FindBuffer(InXYZ);
                 if (buffer != null)
                 {
-                    return buffer.BufferCreator;
+                    XYZBufferCreator.SetSize(buffer.BufferCreator);
+                    return XYZBufferCreator;
                 }
             }
-            return base.GetOutBufferCreator(pin);
+            return null;
         }
         public override bool OnProcedure(UPgcGraph graph)
         {
@@ -635,7 +763,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Transform", "Float3\\Transform", UPgcGraph.PgcEditorKeyword)]
-    public class UFloat3Transform : UOpNode
+    public class UFloat3Transform : UPgcNodeBase
     {
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinIn InXYZ { get; set; } = new PinIn();        
@@ -667,10 +795,11 @@ namespace EngineNS.Bricks.Procedure.Node
                 var buffer = graph.BufferCache.FindBuffer(InXYZ);
                 if (buffer != null)
                 {
-                    return buffer.BufferCreator;
+                    XYZBufferCreator.SetSize(buffer.BufferCreator);
+                    return XYZBufferCreator;
                 }
             }
-            return base.GetOutBufferCreator(pin);
+            return null;
         }
         public override bool OnProcedure(UPgcGraph graph)
         {

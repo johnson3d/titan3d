@@ -21,7 +21,7 @@ namespace EngineNS.Bricks.Procedure
             return result;
         }
     }
-    public class UPgcEditor : Editor.IAssetEditor, IO.ISerializer, Graphics.Pipeline.IRootForm
+    public class UPgcEditor : Editor.IAssetEditor, IO.ISerializer, Graphics.Pipeline.IRootForm, ITickable
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -35,9 +35,15 @@ namespace EngineNS.Bricks.Procedure
         public float LeftWidth = 0;
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
+        public Editor.UPreviewViewport PreviewViewport;
+        [RName.PGRName(FilterExts = UPgcAsset.AssetExt)]
+        public RName PreviewPGC { get; set; }
+        public NxRHI.UGpuSystem GpuSystem { get; private set; }
+        public NxRHI.UGpuDevice GpuDevice { get; private set; }
         public UPgcEditor()
         {
-
+            PreviewViewport = new Editor.UPreviewViewport();
+            PreviewPGC = RName.GetRName("template/emptyterrain.pgc", RName.ERNameType.Engine);
         }
         ~UPgcEditor()
         {
@@ -45,6 +51,8 @@ namespace EngineNS.Bricks.Procedure
         }
         public void Cleanup()
         {
+            PreviewViewport?.Cleanup();
+            PreviewViewport = null;
             NodePropGrid.Target = null;
         }
         public Graphics.Pipeline.IRootForm GetRootForm()
@@ -54,8 +62,36 @@ namespace EngineNS.Bricks.Procedure
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
             await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+
+            var gpuDesc = new NxRHI.FGpuSystemDesc();
+            unsafe
+            {
+                gpuDesc.CreateDebugLayer = 0;
+                gpuDesc.WindowHandle = IntPtr.Zero.ToPointer();
+            }
+            GpuSystem = NxRHI.UGpuSystem.CreateGpuSystem(NxRHI.ERhiType.RHI_D3D11, in gpuDesc);
+            NxRHI.FGpuDeviceDesc desc = new NxRHI.FGpuDeviceDesc();
+            GpuDevice = GpuSystem.CreateGpuDevice(in desc);
+            
             return true;
         }
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        {
+            viewport.RenderPolicy = policy;
+
+            await viewport.World.InitWorld();
+
+            (viewport as Editor.UPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
+
+            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
+            gridNode.ViewportSlate = this.PreviewViewport;
+
+            PreviewRoot = await viewport.World.Root.NewNode(viewport.World, typeof(GamePlay.Scene.USubTreeRootNode), 
+                new GamePlay.Scene.UNodeData() { Name = "PreviewRoot" }, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+            PreviewRoot.SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+            PreviewRoot.Parent = viewport.World.Root;
+        }
+        public GamePlay.Scene.USceneActorNode PreviewRoot { get; private set; }
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
@@ -64,6 +100,20 @@ namespace EngineNS.Bricks.Procedure
         public void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml)
         {
 
+        }
+        #endregion
+        #region Tickable
+        public void TickLogic(int ellapse)
+        {
+            PreviewViewport.TickLogic(ellapse);
+        }
+        public void TickRender(int ellapse)
+        {
+            PreviewViewport.TickRender(ellapse);
+        }
+        public void TickSync(int ellapse)
+        {
+            PreviewViewport.TickSync(ellapse);
         }
         #endregion
         #region IAssetEditor
@@ -89,10 +139,17 @@ namespace EngineNS.Bricks.Procedure
 
             GraphRenderer.SetGraph(this.EditAsset.AssetGraph);
 
+            PreviewViewport.PreviewAsset = AssetName;
+            PreviewViewport.Title = $"MaterialPreview:{AssetName}";
+            PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+
+            UEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
         public void OnCloseEditor()
         {
+            UEngine.Instance.TickableManager.RemoveTickable(this);
             Cleanup();
         }
         public void OnEvent(ref SDL2.SDL.SDL_Event e)
@@ -119,7 +176,7 @@ namespace EngineNS.Bricks.Procedure
                 }
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -154,7 +211,10 @@ namespace EngineNS.Bricks.Procedure
             {
                 if (PreviewDockId != 0)
                 {
-
+                    PreviewViewport.DockId = PreviewDockId;
+                    PreviewViewport.DockCond = ImGuiCond_.ImGuiCond_Always;
+                    PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.Window;
+                    PreviewViewport.OnDraw();
                 }
             }
         }
@@ -178,13 +238,11 @@ namespace EngineNS.Bricks.Procedure
         }
         private async System.Threading.Tasks.Task Compile()
         {
-            EditAsset.Compile();
-
-            var buffer = EditAsset.AssetGraph.Root.GetResultBuffer(0);
-            if (buffer != null)
+            await UEngine.Instance.EventPoster.Post(() =>
             {
-
-            }
+                EditAsset.Compile(EditAsset.AssetGraph.Root);
+                return true;
+            }, Thread.Async.EAsyncTarget.Logic);
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
         {
@@ -196,6 +254,38 @@ namespace EngineNS.Bricks.Procedure
             {
                 if (ImGuiAPI.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
+                    if (ImGuiAPI.CollapsingHeader("Camera", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                    {
+                        float v = PreviewViewport.CameraMoveSpeed;
+                        ImGuiAPI.SliderFloat("KeyMove", ref v, 1.0f, 150.0f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                        PreviewViewport.CameraMoveSpeed = v;
+
+                        v = PreviewViewport.CameraMouseWheelSpeed;
+                        ImGuiAPI.InputFloat("WheelMove", ref v, 0.1f, 1.0f, "%.3f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                        PreviewViewport.CameraMouseWheelSpeed = v;
+
+                        var zN = PreviewViewport.CameraController.Camera.mCoreObject.mZNear;
+                        var zF = PreviewViewport.CameraController.Camera.mCoreObject.mZFar;
+                        ImGuiAPI.SliderFloat("ZNear", ref zN, 0.1f, 100.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                        ImGuiAPI.SliderFloat("ZFar", ref zF, 10.0f, 10000.0f, "%.1f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                        if (zN != PreviewViewport.CameraController.Camera.mCoreObject.mZNear ||
+                            zF != PreviewViewport.CameraController.Camera.mCoreObject.mZFar)
+                        {
+                            PreviewViewport.CameraController.Camera.SetZRange(zN, zF);
+                        }
+
+                        var camPos = PreviewViewport.CameraController.Camera.mCoreObject.GetPosition();
+                        var saved = camPos;
+                        ImGuiAPI.InputDouble($"X", ref camPos.X, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                        ImGuiAPI.InputDouble($"Y", ref camPos.Y, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                        ImGuiAPI.InputDouble($"Z", ref camPos.Z, 0.1, 10.0, "%.2f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                        if (saved != camPos)
+                        {
+                            var lookAt = PreviewViewport.CameraController.Camera.mCoreObject.GetLookAt();
+                            var up = PreviewViewport.CameraController.Camera.mCoreObject.GetUp();
+                            PreviewViewport.CameraController.Camera.mCoreObject.LookAtLH(in camPos, lookAt - saved + camPos, up);
+                        }
+                    }
                     ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
                     var winClass = new ImGuiWindowClass();
                     winClass.UnsafeCallConstructor();
@@ -203,7 +293,13 @@ namespace EngineNS.Bricks.Procedure
                     sz.Y = sz.X;
                     ImGuiAPI.DockSpace(PreviewDockId, in sz, dockspace_flags, in winClass);
                     winClass.UnsafeCallDestructor();
-                }   
+
+                    this.PreviewViewport.Visible = true;
+                }
+                else
+                {
+                    this.PreviewViewport.Visible = false;
+                }
                 if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
                     NodePropGrid.OnDraw(true, false, false);
@@ -218,7 +314,7 @@ namespace EngineNS.Bricks.Procedure
         protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
         {
             var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (ImGuiAPI.BeginChild("RightWindow", in Vector2.MinusOne, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 GraphRenderer.OnDraw();
             }

@@ -8,7 +8,7 @@ namespace EngineNS.Editor.Forms
     {
         public UCpuProfiler()
         {
-            Editor.UMainEditorApplication.RegRootForm(this);
+            UEngine.RootFormManager.RegRootForm(this);
         }
 
         public async System.Threading.Tasks.Task<bool> Initialize()
@@ -29,9 +29,12 @@ namespace EngineNS.Editor.Forms
         {
             if (mRpcProfilerThreads == null || mRpcProfilerThreads.IsCompleted)
             {
-                if (mRpcProfilerThreads != null)
-                    ProfilerThreadNames = mRpcProfilerThreads.Result.ThreadNames;
-                mRpcProfilerThreads = Profiler.URpcProfiler.GetProfilerThreads(0);
+                if (UEngine.Instance.RpcModule.RpcManager != null)
+                {
+                    if (mRpcProfilerThreads != null)
+                        ProfilerThreadNames = mRpcProfilerThreads.Result.ThreadNames;
+                    mRpcProfilerThreads = Profiler.URpcProfiler.GetProfilerThreads(0);
+                }
             }
                 
             if (Visible == false)

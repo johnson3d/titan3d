@@ -10,7 +10,7 @@ namespace EngineNS.GamePlay
         public UGameViewportSlate(bool regRoot)
         {
             if (regRoot)
-                Editor.UMainEditorApplication.RegRootForm(this);
+                UEngine.RootFormManager.RegRootForm(this);
             CameraController = new Editor.Controller.EditorCameraController();
         }
         CNativeString mNstrTitle = new CNativeString();

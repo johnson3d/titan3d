@@ -332,7 +332,7 @@ namespace EngineNS.UTest
                 {
                     return;
                 }
-                var ret5 = await UTest_Rpc.TestRpc5(Vector3.UnitXYZ, 0, pConnect);
+                var ret5 = await UTest_Rpc.TestRpc5(Vector3.One, 0, pConnect);
                 var ret6 = await UTest_Rpc.TestRpc6(new TestRPCArgument() { AA = 8 }, 0, pConnect);
                 var ret7 = await UTest_Rpc.TestRpc7(new TestUnmanagedStruct() { A = 8 }, 0, pConnect);
 

@@ -127,6 +127,7 @@ namespace EngineNS.Thread
                 var time1 = Support.Time.GetTickCount();
                 try
                 {
+                    FContextTickableManager.GetInstance().ThreadTick();
                     Tick();
                 }
                 catch(Exception ex)
@@ -192,6 +193,11 @@ namespace EngineNS.Thread
         {
             get;
         } = new Queue<Async.PostEvent>();
+        [Browsable(false)]
+        public List<Async.PostEvent> RunUntilFinishEvents
+        {
+            get;
+        } = new List<Async.PostEvent>();
         public long LimitTime
         {
             get;
@@ -279,6 +285,25 @@ namespace EngineNS.Thread
                     }
                     TimeOut = true;
                     return;
+                }
+            }
+            lock(RunUntilFinishEvents)
+            {
+                for (int i = RunUntilFinishEvents.Count - 1; i >= 0; i--)
+                {
+                    var e = RunUntilFinishEvents[i];
+                    if(e.PostActionCondition != null)
+                    {
+                        bool bFinish;
+                        var ret = e.PostActionCondition(out bFinish);
+                        var caw = e.Awaiter as Async.TaskAwaiter;
+                        if (caw != null)
+                            caw.SetResult(ret);
+                        if (bFinish)
+                        {
+                            RunUntilFinishEvents.RemoveAt(i);
+                        }
+                    }
                 }
             }
             TimeOut = false;

@@ -242,7 +242,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             float pi;
             pi = 3.1415926f;
             float alpha;
-            float a, b, x, y, x1, y1, r1, r2;
+            float a, b, x, y, x1, y1, r1;//, r2;
             x = uv.X;
             y = 1 - uv.Y;
             a = y - 0.5f;
@@ -304,7 +304,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         public string TextureVarName { get; set; }
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = RHI.CShaderResourceView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
         public RName AssetName
         {
             get
@@ -327,10 +327,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 exec();
             }
         }
-        ISamplerStateDesc mSampler;
+        NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta]
-        public ISamplerStateDesc Sampler { get => mSampler; set => mSampler = value; }
-        private RHI.CShaderResourceView TextureSRV;
+        public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
+        private NxRHI.USrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null)
@@ -475,7 +475,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         public string TextureVarName { get; set; }
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = RHI.CShaderResourceView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
         public RName AssetName
         {
             get
@@ -498,10 +498,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 exec();
             }
         }
-        ISamplerStateDesc mSampler;
+        NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta]
-        public ISamplerStateDesc Sampler { get => mSampler; set => mSampler = value; }
-        private RHI.CShaderResourceView TextureSRV;
+        public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
+        private NxRHI.USrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null)
@@ -645,7 +645,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         public string TextureVarName { get; set; }
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = RHI.CShaderResourceView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
         public RName AssetName
         {
             get
@@ -668,10 +668,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 exec();
             }
         }
-        ISamplerStateDesc mSampler;
+        NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta]
-        public ISamplerStateDesc Sampler { get => mSampler; set => mSampler = value; }
-        private RHI.CShaderResourceView TextureSRV;
+        public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
+        private NxRHI.USrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null)
@@ -815,7 +815,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         public string TextureVarName { get; set; }
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = RHI.CShaderResourceView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
         public RName AssetName
         {
             get
@@ -838,10 +838,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 exec();
             }
         }
-        ISamplerStateDesc mSampler;
+        NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta]
-        public ISamplerStateDesc Sampler { get => mSampler; set => mSampler = value; }
-        private RHI.CShaderResourceView TextureSRV;
+        public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
+        private NxRHI.USrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null)

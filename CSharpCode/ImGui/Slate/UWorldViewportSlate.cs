@@ -7,13 +7,13 @@ namespace EngineNS.EGui.Slate
 {
     public class UWorldViewportSlate : Graphics.Pipeline.UViewportSlate
     {
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
-        public RHI.CViewPort Viewport { get; } = new RHI.CViewPort();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
-        public RHI.CScissorRect ScissorRect { get; } = new RHI.CScissorRect();
+        NxRHI.FViewPort mViewport = new NxRHI.FViewPort();
+        public NxRHI.FViewPort Viewport { get => mViewport; }
+        NxRHI.FScissorRect mScissorRect = new NxRHI.FScissorRect();
+        public NxRHI.FScissorRect ScissorRect { get=> mScissorRect; }
 
         public Graphics.Pipeline.UDrawBuffers Copy2SwapChainPass = new Graphics.Pipeline.UDrawBuffers();
-        public RHI.CRenderPass SwapChainPassDesc;
+        public NxRHI.URenderPass SwapChainPassDesc;
 
         GamePlay.UAxis mAxis;
 
@@ -69,7 +69,7 @@ namespace EngineNS.EGui.Slate
 
             await this.World.InitWorld();
             SetCameraOffset(in DVector3.Zero);
-            SetCameraOffset(new DVector3(-300, 0, 0));
+            //SetCameraOffset(new DVector3(-300, 0, 0));
 
             mAxis = new GamePlay.UAxis();
             await mAxis.Initialize(this.World, CameraController);
@@ -80,17 +80,16 @@ namespace EngineNS.EGui.Slate
                 return;
 
             var vpSize = this.ClientSize;
-            Viewport.mCoreObject.TopLeftX = WindowPos.X + ClientMin.X;
-            Viewport.mCoreObject.TopLeftY = WindowPos.Y + ClientMin.Y;
-            Viewport.mCoreObject.Width = vpSize.X;
-            Viewport.mCoreObject.Height = vpSize.Y;
+            
+            mViewport.TopLeftX = WindowPos.X + ClientMin.X;
+            mViewport.TopLeftY = WindowPos.Y + ClientMin.Y;
+            mViewport.Width = vpSize.X;
+            mViewport.Height = vpSize.Y;
 
-            ScissorRect.mCoreObject.SetRectNumber(1);
-            ScissorRect.mCoreObject.SetSCRect(0, 
-                (int)Viewport.mCoreObject.TopLeftX, 
-                (int)Viewport.mCoreObject.TopLeftY,
-                (int)(Viewport.mCoreObject.TopLeftX + vpSize.X),
-                (int)(Viewport.mCoreObject.TopLeftY + vpSize.Y));
+            mScissorRect.MinX = (int)mViewport.TopLeftX;
+            mScissorRect.MinY = (int)mViewport.TopLeftY;
+            mScissorRect.MaxX = (int)(mViewport.TopLeftX + mViewport.Width);
+            mScissorRect.MinX = (int)(mViewport.TopLeftY + mViewport.Height); 
 
             if (bSizeChanged)
             {
@@ -206,33 +205,32 @@ namespace EngineNS.EGui.Slate
         }
         public unsafe void TickLogic(int ellapse)
         {
+            RenderPolicy?.BeginTickLogic(World);
+
             World.TickLogic(this.RenderPolicy, ellapse);
 
-            if (IsDrawing == false)
-                return;
-            if (this.IsFocused)
+            if (IsDrawing)
             {
-                TickOnFocus();
+                if (this.IsFocused)
+                {
+                    TickOnFocus();
+                }
+
+                mVisParameter.World = World;
+                mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
+                mVisParameter.VisibleNodes = RenderPolicy.VisibleNodes;
+                mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
+                World.GatherVisibleMeshes(mVisParameter);
+
+                if (mWorldBoundShapes != null)
+                {
+                    RenderPolicy.VisibleMeshes.AddRange(mWorldBoundShapes);
+                }
+
+                RenderPolicy?.TickLogic(World);
             }
 
-            mVisParameter.World = World;
-            mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
-            mVisParameter.VisibleNodes = RenderPolicy.VisibleNodes;
-            mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
-            World.GatherVisibleMeshes(mVisParameter);
-
-            if (mWorldBoundShapes != null)
-            {
-                RenderPolicy.VisibleMeshes.AddRange(mWorldBoundShapes);
-            }
-
-            RenderPolicy?.TickLogic(World);
-        }
-        public unsafe void TickRender(int ellapse)
-        {
-            if (IsDrawing == false)
-                return;
-            RenderPolicy?.TickRender();
+            RenderPolicy?.EndTickLogic(World);
         }
         public void TickSync(int ellapse)
         {

@@ -22,6 +22,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
+            UEngine.Instance.EditorInstance.PhyMaterialIcon?.OnDraw(cmdlist, in start, in end, 0);
             cmdlist.AddText(in start, 0xFFFFFFFF, "PhyMtl", null);
         }
     }

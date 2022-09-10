@@ -6,7 +6,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 {
     public interface IShaderCodeProvider
     {
-        IO.CMemStreamWriter DefineCode { get; }
-        IO.CMemStreamWriter SourceCode { get; }
+        unsafe NxRHI.UShaderCode DefineCode { get; }
+        unsafe NxRHI.UShaderCode SourceCode { get; }
     }
 }

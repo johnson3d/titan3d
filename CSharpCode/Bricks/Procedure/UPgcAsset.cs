@@ -17,8 +17,7 @@ namespace EngineNS.Bricks.Procedure
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
-            //纹理不会引用别的资产
-            return false;
+            return true;
         }
         public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
         {
@@ -78,9 +77,12 @@ namespace EngineNS.Bricks.Procedure
             ameta.RefAssetRNames.Clear();
 
             ameta.AddReferenceAsset(AssetGraph.ProgramName);
-            foreach (UPgcNodeBase i in AssetGraph.Nodes)
+            foreach (var i in AssetGraph.Nodes)
             {
-                i.UpdateAMetaReferences(ameta);
+                var node = i as UPgcNodeBase;
+                if (node == null)
+                    continue;
+                node.UpdateAMetaReferences(ameta);
             }
             ameta.RefAssetRNames.Sort();
         }
@@ -95,11 +97,13 @@ namespace EngineNS.Bricks.Procedure
             //IO.FileManager.WriteAllText(name.Address, xmlText);
 
             var ameta = this.GetAMeta();
-            if (ameta != null)
+            if (ameta == null)
             {
-                UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                var asset = UEngine.Instance.AssetMetaManager.NewAsset<UPgcAsset>(name);
+                ameta = asset.GetAMeta();
             }
+            UpdateAMetaReferences(ameta);
+            ameta.SaveAMeta();
 
             AssetGraph.Version++;
             IO.FileManager.SaveObjectToXml(name.Address, AssetGraph);
@@ -130,59 +134,15 @@ namespace EngineNS.Bricks.Procedure
             {
                 result.AssetGraph.Root = new Node.UEndingNode();
                 result.AssetGraph.Root.Name = "RootNode";
-                result.AssetGraph.Root.PinNumber = 4;
                 result.AssetGraph.AddNode(result.AssetGraph.Root);
             }
 
             return result;
         }
 
-        public void Compile()
+        public void Compile(UPgcNodeBase root)
         {
-            //AssetGraph.IsTryCacheBuffer = true;
-            AssetGraph.BufferCache.ResetCache();
-            var nodes = AssetGraph.Compile();
-            int NumOfLayer = 0;
-            foreach (var i in nodes)
-            {
-                if (i.RootDistance >= NumOfLayer)
-                    NumOfLayer = i.RootDistance;
-            }
-            NumOfLayer += 1;
-            List<UPgcNodeBase>[] Layers = new List<UPgcNodeBase>[NumOfLayer];
-            for (int i = 0; i < NumOfLayer; i++)
-            {
-                Layers[i] = new List<UPgcNodeBase>();
-            }
-            
-            foreach (var i in nodes)
-            {
-                i.InitProcedure(AssetGraph);
-                
-                Layers[i.RootDistance].Add(i);
-            }
-            foreach (var i in nodes)
-            {
-                AssetGraph.McProgram?.Get().OnNodeInitialized(AssetGraph, i);
-            }
-
-            for (int i = Layers.Length - 1; i >= 0; i--)
-            {
-                foreach (var j in Layers[i])
-                {
-                    //AssetGraph.BufferCache .... clear
-                    //AssetGraph.BufferCache .... SaveBuffferToTempFile
-                    var t1 = Support.Time.HighPrecision_GetTickCount();
-                    j.DoProcedure(AssetGraph);
-                    AssetGraph.McProgram?.Get().OnNodeProcedureFinished(AssetGraph, j);
-                    var t2 = Support.Time.HighPrecision_GetTickCount();
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Procedure", $"Node:{j.Name} = {(t2 - t1) / 1000000.0f}");
-                }
-            }
-            //foreach (var i in nodes)
-            //{
-            //    i.DoProcedure(AssetGraph);
-            //}
+            AssetGraph.Compile(root);
         }
     }
 }

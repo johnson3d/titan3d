@@ -7,7 +7,7 @@ namespace EngineNS.Graphics.Pipeline
     public class UAttachmentDesc
     {
         public FHashText AttachmentName;
-        public EGpuBufferViewType BufferViewTypes = EGpuBufferViewType.GBVT_Rtv | EGpuBufferViewType.GBVT_Srv;
+        public NxRHI.EBufferType BufferViewTypes = NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV;
         public EPixelFormat Format;
         public uint Width;
         public uint Height;
@@ -31,12 +31,12 @@ namespace EngineNS.Graphics.Pipeline
             Transient,
         }
         public ELifeMode LifeMode = ELifeMode.Imported;
-        public RHI.CGpuBuffer Buffer;
-        public RHI.CRenderTargetView Rtv;
-        public RHI.CDepthStencilView Dsv;
-        public RHI.CUnorderedAccessView Uav;
-        public RHI.CShaderResourceView Srv;
-        public RHI.CConstantBuffer CBuffer;
+        public NxRHI.UGpuResource Buffer;
+        public NxRHI.URenderTargetView Rtv;
+        public NxRHI.UDepthStencilView Dsv;
+        public NxRHI.UUaView Uav;
+        public NxRHI.USrView Srv;
+        public NxRHI.UCbView CBuffer;
         public void Cleanup()
         {
             if (LifeMode == ELifeMode.Imported)
@@ -61,157 +61,130 @@ namespace EngineNS.Graphics.Pipeline
                 Buffer = null;
             }
         }
-        public bool CreateBufferViews(EGpuBufferViewType types, UAttachmentDesc AttachmentDesc, bool isCpuRead = false)
+        public bool CreateBufferViews(NxRHI.EBufferType types, UAttachmentDesc AttachmentDesc, bool isCpuRead = false)
         {
             LifeMode = ELifeMode.Transient;
             var rc = UEngine.Instance.GfxDevice.RenderContext;
-            if (AttachmentDesc.Format != EPixelFormat.PXF_UNKNOWN || (types & (EGpuBufferViewType.GBVT_Rtv | EGpuBufferViewType.GBVT_Dsv)) != 0)
+            if (AttachmentDesc.Format != EPixelFormat.PXF_UNKNOWN || (types & (NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_DSV)) != 0)
             {
-                ITexture2DDesc desc = new ITexture2DDesc();
+                var desc = new NxRHI.FTextureDesc();
                 desc.SetDefault();
                 if (isCpuRead)
                 {
-                    desc.CPUAccess = (UInt32)(ECpuAccess.CAS_WRITE | ECpuAccess.CAS_READ);
+                    desc.CpuAccess = (NxRHI.ECpuAccess.CAS_WRITE | NxRHI.ECpuAccess.CAS_READ);
                 }
                 desc.m_Width = AttachmentDesc.Width;
                 desc.m_Height = AttachmentDesc.Height;
                 desc.m_Format = AttachmentDesc.Format;
 
-                if ((types & EGpuBufferViewType.GBVT_Dsv) != 0)
+                if ((types & NxRHI.EBufferType.BFT_DSV) != 0)
                 {
-                    switch (desc.m_Format)
-                    {
-                        case EPixelFormat.PXF_D24_UNORM_S8_UINT:
-                            desc.m_Format = EPixelFormat.PXF_R24G8_TYPELESS;
-                            break;
-                        case EPixelFormat.PXF_D32_FLOAT:
-                            desc.m_Format = EPixelFormat.PXF_R32_TYPELESS;
-                            break;
-                        case EPixelFormat.PXF_D16_UNORM:
-                            desc.m_Format = EPixelFormat.PXF_R16_TYPELESS;
-                            break;
-                        case EPixelFormat.PXF_UNKNOWN:
-                            desc.m_Format = EPixelFormat.PXF_R16_TYPELESS;
-                            break;
-                        default:
-                            break;
-                    }
-                    desc.m_BindFlags = (uint)EBindFlags.BF_DEPTH_STENCIL;
+                    desc.m_BindFlags |= NxRHI.EBufferType.BFT_DSV;
                 }
-                if ((types & EGpuBufferViewType.GBVT_Rtv) != 0)
+                if ((types & NxRHI.EBufferType.BFT_RTV) != 0)
                 {
-                    desc.m_BindFlags = (uint)EBindFlags.BF_RENDER_TARGET;
+                    desc.m_BindFlags |= NxRHI.EBufferType.BFT_RTV;
                 }
-                if ((types & EGpuBufferViewType.GBVT_Srv) != 0)
+                if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
-                    desc.m_BindFlags |= (uint)EBindFlags.BF_SHADER_RES;
+                    desc.m_BindFlags |= NxRHI.EBufferType.BFT_SRV;
                 }
-                if ((types & EGpuBufferViewType.GBVT_Uav) != 0)
+                if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
-                    desc.m_BindFlags |= (uint)EBindFlags.BF_UNORDERED_ACCESS;
+                    desc.m_BindFlags |= NxRHI.EBufferType.BFT_UAV;
                 }
-                Buffer = rc.CreateTexture2D(in desc);
+                Buffer = rc.CreateTexture(in desc);
+                System.Diagnostics.Debug.Assert(Buffer != null);
 
-                if ((types & EGpuBufferViewType.GBVT_Rtv) != 0)
+                if ((types & NxRHI.EBufferType.BFT_RTV) != 0)
                 {
-                    var viewDesc = new IRenderTargetViewDesc();
+                    var viewDesc = new NxRHI.FRtvDesc();
                     viewDesc.SetTexture2D();
                     viewDesc.Format = AttachmentDesc.Format;
-                    viewDesc.mGpuBuffer = Buffer.mCoreObject;
                     viewDesc.Width = AttachmentDesc.Width;
                     viewDesc.Height = AttachmentDesc.Height;
                     viewDesc.Texture2D.MipSlice = 0;
-                    Rtv = rc.CreateRenderTargetView(in viewDesc);
+                    Rtv = rc.CreateRTV(Buffer as NxRHI.UTexture, in viewDesc);
                 }
-                if ((types & EGpuBufferViewType.GBVT_Dsv) != 0)
+                if ((types & NxRHI.EBufferType.BFT_DSV) != 0)
                 {
-                    var viewDesc = new IDepthStencilViewDesc();
+                    var viewDesc = new NxRHI.FDsvDesc();
                     viewDesc.SetDefault();
                     viewDesc.Format = AttachmentDesc.Format;
-                    viewDesc.Texture2D = Buffer.mCoreObject;
                     viewDesc.Width = AttachmentDesc.Width;
                     viewDesc.Height = AttachmentDesc.Height;
                     viewDesc.MipLevel = 0;
-                    Dsv = rc.CreateDepthRenderTargetView(in viewDesc);
+                    Dsv = rc.CreateDSV(Buffer as NxRHI.UTexture, in viewDesc);
                 }
-                if ((types & EGpuBufferViewType.GBVT_Srv) != 0)
+                if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
-                    var viewDesc = new IShaderResourceViewDesc();
+                    var viewDesc = new NxRHI.FSrvDesc();
                     viewDesc.SetTexture2D();
-                    viewDesc.Type = ESrvType.ST_Texture2D;
+                    viewDesc.Type = NxRHI.ESrvType.ST_Texture2D;
                     viewDesc.Format = AttachmentDesc.Format;
-                    viewDesc.mGpuBuffer = Buffer.mCoreObject;
                     viewDesc.Texture2D.MipLevels = 1;
-                    Srv = rc.CreateShaderResourceView(in viewDesc);
+                    Srv = rc.CreateSRV(Buffer as NxRHI.UTexture, in viewDesc);
                 }
-                if ((types & EGpuBufferViewType.GBVT_Uav) != 0)
+                if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
-                    var viewDesc = new IUnorderedAccessViewDesc();
+                    var viewDesc = new NxRHI.FUavDesc();
                     viewDesc.SetTexture2D();
                     viewDesc.Format = AttachmentDesc.Format;
                     viewDesc.Texture2D.MipSlice = 0;
-                    Uav = rc.CreateUnorderedAccessView(Buffer, in viewDesc);
+                    Uav = rc.CreateUAV(Buffer as NxRHI.UTexture, in viewDesc);
                 }
             }
             else
             {
-                IGpuBufferDesc desc = new IGpuBufferDesc();
+                var desc = new NxRHI.FBufferDesc();
                 desc.SetDefault();
-                if (isCpuRead)
+                desc.Size = AttachmentDesc.Width * AttachmentDesc.Height;
+                desc.StructureStride = AttachmentDesc.Width;
+                if ((types & NxRHI.EBufferType.BFT_Vertex) != 0)
                 {
-                    desc.SetStaging();
+                    desc.Type |= NxRHI.EBufferType.BFT_Vertex;
                 }
-                else
+                if ((types & NxRHI.EBufferType.BFT_Index) != 0)
                 {
-                    desc.SetMode(false, true);
+                    desc.Type |= NxRHI.EBufferType.BFT_Index;
                 }
-                desc.m_ByteWidth = AttachmentDesc.Width * AttachmentDesc.Height;
-                desc.m_StructureByteStride = AttachmentDesc.Width;
-                Buffer = rc.CreateGpuBuffer(in desc, IntPtr.Zero);
-
-                if ((types & EGpuBufferViewType.GBVT_VertexBuffer) != 0)
+                if ((types & NxRHI.EBufferType.BFT_IndirectArgs) != 0)
                 {
-                    var viewDesc = new IVertexBufferDesc();
-                    viewDesc.SetDefault();
-                    viewDesc.ByteWidth = AttachmentDesc.Width * AttachmentDesc.Height;
-                    viewDesc.Stride = AttachmentDesc.Width;
-                    rc.CreateVertexBuffer(in viewDesc);
+                    desc.Type |= NxRHI.EBufferType.BFT_IndirectArgs;
                 }
-                if ((types & EGpuBufferViewType.GBVT_IndexBuffer) != 0)
+                if ((types & NxRHI.EBufferType.BFT_CBuffer) != 0)
                 {
-                    var viewDesc = new IIndexBufferDesc();
-                    viewDesc.SetDefault();
-                    viewDesc.ByteWidth = AttachmentDesc.Width * AttachmentDesc.Height;
-                    viewDesc.Type = EIndexBufferType.IBT_Int32;//???
-                    rc.CreateIndexBuffer(in viewDesc);
+                    desc.Type |= NxRHI.EBufferType.BFT_CBuffer;
                 }
-                if ((types & EGpuBufferViewType.GBVT_IndirectBuffer) != 0)
+                if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
-
+                    desc.Type |= NxRHI.EBufferType.BFT_SRV;
                 }
-                if ((types & EGpuBufferViewType.GBVT_CBuffer) != 0)
+                if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
-                    //rc.CreateConstantBuffer()
+                    desc.Type |= NxRHI.EBufferType.BFT_UAV;
                 }
-                if ((types & EGpuBufferViewType.GBVT_Srv) != 0)
+                Buffer = rc.CreateBuffer(in desc);
+                if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
-                    var viewDesc = new IShaderResourceViewDesc();
-                    viewDesc.SetBuffer();
-                    viewDesc.Type = ESrvType.ST_BufferSRV;
+                    var viewDesc = new NxRHI.FSrvDesc();
+                    viewDesc.SetBuffer(0);
+                    viewDesc.Type = NxRHI.ESrvType.ST_BufferSRV;
                     viewDesc.Format = AttachmentDesc.Format;
-                    viewDesc.mGpuBuffer = Buffer.mCoreObject;
                     //viewDesc.Buffer.FirstElement = 1;
                     viewDesc.Buffer.NumElements = AttachmentDesc.Height;
-                    Srv = rc.CreateShaderResourceView(in viewDesc);
+                    viewDesc.Buffer.StructureByteStride = desc.StructureStride;
+                    Srv = rc.CreateSRV(Buffer as NxRHI.UBuffer, in viewDesc);
                 }
-                if ((types & EGpuBufferViewType.GBVT_Uav) != 0)
+                if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
-                    var viewDesc = new IUnorderedAccessViewDesc();
-                    viewDesc.SetBuffer();
+                    var viewDesc = new NxRHI.FUavDesc();
+                    viewDesc.SetBuffer(0);
                     viewDesc.Format = AttachmentDesc.Format;
                     viewDesc.Buffer.FirstElement = 0;
                     viewDesc.Buffer.NumElements = AttachmentDesc.Height;
-                    Uav = rc.CreateUnorderedAccessView(Buffer, in viewDesc);
+                    viewDesc.Buffer.StructureByteStride = desc.StructureStride;
+                    Uav = rc.CreateUAV(Buffer as NxRHI.UBuffer, in viewDesc);
                 }
             }
 
@@ -243,21 +216,20 @@ namespace EngineNS.Graphics.Pipeline
             public int TargetViewId;
         }
         public UTargetViewIdentifier TargetViewIdentifier;
-        public RHI.CViewPort ViewPort = new RHI.CViewPort();
-        public RHI.CFrameBuffers FrameBuffers;
-        public RHI.CSwapChain SwapChain;
+        public NxRHI.FViewPort Viewport = new NxRHI.FViewPort();
+        public NxRHI.UFrameBuffers FrameBuffers { get; set; }
         public Common.URenderGraphPin[] RenderTargets;
         public Common.URenderGraphPin DepthStencil;
-        RHI.CConstantBuffer mPerViewportCBuffer;
-        public RHI.CConstantBuffer PerViewportCBuffer
+        NxRHI.UCbView mPerViewportCBuffer;
+        public NxRHI.UCbView PerViewportCBuffer
         {
             get
             {
                 if (mPerViewportCBuffer == null)
                 {
-                    var effect = UEngine.Instance.GfxDevice.EffectManager.DummyEffect;
-                    mPerViewportCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(effect.ShaderProgram, effect.ShaderIndexer.cbPerViewport);
-                    PerViewportCBuffer.mCoreObject.NativeSuper.SetDebugName($"Viewport");
+                    var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+                    mPerViewportCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerViewport.Binder.mCoreObject);
+                    PerViewportCBuffer.SetDebugName($"Viewport");
                     UpdateViewportCBuffer();
                 }
                 return mPerViewportCBuffer;
@@ -274,7 +246,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 var attachment = policy.AttachmentCache.GetAttachement(RenderTargets[i].Attachement.AttachmentName, RenderTargets[i].Attachement);
                 //RenderTargets[i].AttachBuffer = attachment;
-                FrameBuffers.mCoreObject.BindRenderTargetView((uint)i, attachment.Rtv.mCoreObject);
+                FrameBuffers.BindRenderTargetView((uint)i, attachment.Rtv);
             }
             if (DepthStencil != null)
             {
@@ -282,47 +254,53 @@ namespace EngineNS.Graphics.Pipeline
                 //DepthStencil.AttachBuffer = attachment;
                 if (FrameBuffers != null && attachment.Dsv != null)
                 {
-                    FrameBuffers.mCoreObject.BindDepthStencilView(attachment.Dsv.mCoreObject);
+                    FrameBuffers.BindDepthStencilView(attachment.Dsv);
                 }
             }
+            FrameBuffers.FlushModify();
             //UpdateFrameBuffers(, y);
         }
-        public unsafe void Initialize(URenderPolicy policy, RHI.CRenderPass renderPass)
+        public unsafe void Initialize(URenderPolicy policy, NxRHI.URenderPass renderPass)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             
-            var fbDesc = new IFrameBuffersDesc();
-            fbDesc.RenderPass = renderPass.mCoreObject;
-            FrameBuffers = rc.CreateFrameBuffers(in fbDesc);
+            FrameBuffers = rc.CreateFrameBuffers(renderPass);
 
-            var rpsDesc = renderPass.mCoreObject.mDesc;
-            RenderTargets = new Common.URenderGraphPin[renderPass.mCoreObject.mDesc.m_NumOfMRT];
-            
+            var rpsDesc = renderPass.mCoreObject.Desc;
+            RenderTargets = new Common.URenderGraphPin[renderPass.mCoreObject.Desc.m_NumOfMRT];
+
+            Viewport.m_TopLeftX = 0;
+            Viewport.m_TopLeftY = 0;
+            Viewport.m_MinDepth = 0;
+            Viewport.m_MaxDepth = 1.0f;
             //UpdateFrameBuffers();
-            UpdateViewportCBuffer();
         }
-        public bool UpdateFrameBuffers(float width, float height)
+        public void SetRenderTarget(uint index, NxRHI.URenderTargetView rtv)
         {
-            return FrameBuffers.mCoreObject.UpdateFrameBuffers(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, width, height);
-        }        
-        public int SwapChainIndex
-        {
-            get
+            if (RenderTargets[index] == null)
             {
-                if (FrameBuffers == null)
-                    return -1;
-                return FrameBuffers.mCoreObject.mSwapChainIndex;
+                RenderTargets[index] = new Common.URenderGraphPin();
             }
+            RenderTargets[index].LifeMode = UAttachBuffer.ELifeMode.Imported;
+            RenderTargets[index].ImportedBuffer = new UAttachBuffer();
+            RenderTargets[index].ImportedBuffer.Rtv = rtv;
+            FrameBuffers.BindRenderTargetView(index, rtv);
         }
-        public bool BindSwapChain(int index, RHI.CSwapChain swapchain)
+        public void SetDepthStencil(NxRHI.UDepthStencilView dsv)
         {
-            FrameBuffers.mCoreObject.BindSwapChain((uint)index, swapchain.mCoreObject);
-            return true;
+            if (DepthStencil == null)
+            {
+                DepthStencil = new Common.URenderGraphPin();
+            }
+            DepthStencil.LifeMode = UAttachBuffer.ELifeMode.Imported;
+            DepthStencil.ImportedBuffer = new UAttachBuffer();
+            DepthStencil.ImportedBuffer.Dsv = dsv;
+            FrameBuffers.BindDepthStencilView(dsv);
         }
         public bool SetRenderTarget(Common.URenderGraph policy, int index, Common.URenderGraphPin pin)
         {
             if (pin.PinType == Common.URenderGraphPin.EPinType.Input ||
-                (pin.Attachement.BufferViewTypes & EGpuBufferViewType.GBVT_Rtv) != EGpuBufferViewType.GBVT_Rtv)
+                (pin.Attachement.BufferViewTypes & NxRHI.EBufferType.BFT_RTV) != NxRHI.EBufferType.BFT_RTV)
             {
                 System.Diagnostics.Debug.Assert(false);
                 return false;
@@ -333,7 +311,7 @@ namespace EngineNS.Graphics.Pipeline
         public bool SetDepthStencil(Common.URenderGraph policy, Common.URenderGraphPin pin)
         {
             if (pin.PinType == Common.URenderGraphPin.EPinType.Input ||
-                (pin.Attachement.BufferViewTypes & EGpuBufferViewType.GBVT_Dsv) != EGpuBufferViewType.GBVT_Dsv)
+                (pin.Attachement.BufferViewTypes & NxRHI.EBufferType.BFT_DSV) != NxRHI.EBufferType.BFT_DSV)
             {
                 System.Diagnostics.Debug.Assert(false);
                 return false;
@@ -351,8 +329,8 @@ namespace EngineNS.Graphics.Pipeline
             if (rc == null)
                 return;
 
-            ViewPort.mCoreObject.Width = (float)x;
-            ViewPort.mCoreObject.Height = (float)y;
+            Viewport.Width = (float)x;
+            Viewport.Height = (float)y;
 
             //UpdateFrameBuffers(x, y);
             UpdateViewportCBuffer();
@@ -363,35 +341,30 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (PerViewportCBuffer != null)
                 {
-                    var indexer = PerViewportCBuffer.PerViewportIndexer;
+                    var indexer = UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerViewport;
 
-                    Vector4 gViewportSizeAndRcp = new Vector4(ViewPort.mCoreObject.Width, ViewPort.mCoreObject.Height, 1 / ViewPort.mCoreObject.Width, 1 / ViewPort.mCoreObject.Height);
+                    Vector4 gViewportSizeAndRcp = new Vector4(Viewport.Width, Viewport.Height, 1 / Viewport.Width, 1 / Viewport.Height);
                     PerViewportCBuffer.SetValue(indexer.gViewportSizeAndRcp, in gViewportSizeAndRcp);
                 }
             }
         }
     }
-
-    public class UComputeBuffers
-    {
-
-    }
 }
 
 
-namespace EngineNS.RHI
+namespace EngineNS.NxRHI
 {
-    public partial class CDrawCall
+    public partial class UGraphicDraw
     {
         public void BindGBuffer(Graphics.Pipeline.CCamera camera, Graphics.Pipeline.UGraphicsBuffers GBuffers)
         {
-            unsafe
-            {
-                if (GBuffers.PerViewportCBuffer != null)
-                    mCoreObject.BindShaderCBuffer(Effect.ShaderIndexer.cbPerViewport, GBuffers.PerViewportCBuffer.mCoreObject);
-                if (camera.PerCameraCBuffer != null)
-                    mCoreObject.BindShaderCBuffer(Effect.ShaderIndexer.cbPerCamera, camera.PerCameraCBuffer.mCoreObject);
-            }
+            //UEngine.Instance.GfxDevice.CoreShaderBinder.ShaderResource.cbPerViewport
+            //UEngine.Instance.GfxDevice.CoreShaderBinder.ShaderResource.cbPerCamera
+
+            if (GBuffers.PerViewportCBuffer != null && Effect.BindIndexer.cbPerViewport != null)
+                mCoreObject.BindResource(Effect.BindIndexer.cbPerViewport.mCoreObject, GBuffers.PerViewportCBuffer.mCoreObject.NativeSuper);
+            if (camera.PerCameraCBuffer != null && Effect.BindIndexer.cbPerCamera != null)
+                mCoreObject.BindResource(Effect.BindIndexer.cbPerCamera.mCoreObject, camera.PerCameraCBuffer.mCoreObject.NativeSuper);
         }
     }
 }

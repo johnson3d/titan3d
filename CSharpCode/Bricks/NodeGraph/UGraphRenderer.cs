@@ -33,6 +33,9 @@ namespace EngineNS.Bricks.NodeGraph
                 UEngine.Instance.UIManager[styles.PinDisconnectedExecImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinDisconnectedExecImg, RName.ERNameType.Engine));
             if (UEngine.Instance.UIManager[styles.PinHoverCueImg] == null)
                 UEngine.Instance.UIManager[styles.PinHoverCueImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.PinHoverCueImg, RName.ERNameType.Engine));
+            
+            if (UEngine.Instance.UIManager[styles.BreakpointNodeImg] == null)
+                UEngine.Instance.UIManager[styles.BreakpointNodeImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.BreakpointNodeImg, RName.ERNameType.Engine));
         }
 
         UNodeGraph mGraph = null;
@@ -40,6 +43,8 @@ namespace EngineNS.Bricks.NodeGraph
         Vector2 DrawOffset;
         public void SetGraph(UNodeGraph graph)
         {
+            if(mGraph != null)
+                mGraph.ResetButtonPress();
             mGraph = graph;
             // Update inherit
             mGraphInherit.Clear();
@@ -67,8 +72,7 @@ namespace EngineNS.Bricks.NodeGraph
                     if (presentWindow != null)
                     {
                         var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(mGraph.AssetName);
-                        var cmdlst = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList();
-                        Editor.USnapshot.Save(mGraph.AssetName, ameta, presentWindow.SwapChain.mCoreObject.GetBackBuffer(0), cmdlst, 
+                        Editor.USnapshot.Save(mGraph.AssetName, ameta, presentWindow.SwapChain.mCoreObject.GetBackBuffer(0), 
                             (uint)DrawOffset.X, (uint)DrawOffset.Y, (uint)GraphSize.X, (uint)GraphSize.Y);
                     }
                 }
@@ -105,14 +109,17 @@ namespace EngineNS.Bricks.NodeGraph
                 var winPos = ImGuiAPI.GetWindowPos();
                 DrawOffset.SetValue(winPos.X + vpMin.X, winPos.Y + vpMin.Y);
                 var pt = ImGuiAPI.GetMousePos();
-                var screenPt = mGraph.ToScreenPos(pt.X - DrawOffset.X, pt.Y - DrawOffset.Y);
-                ProcessMouse(in screenPt);
+                var delta = pt - DrawOffset;
+                var screenPt = mGraph.ToScreenPos(delta.X, delta.Y);
+                if(delta.X >= 0 && delta.X <= sz.X && delta.Y >= 0 && delta.Y <= sz.Y)
+                    ProcessMouse(in screenPt);
 
                 var cmd = ImGuiAPI.GetWindowDrawList();
                 if (mGraph.PhysicalSizeVP.X != sz.X || mGraph.PhysicalSizeVP.Y != sz.Y)
                 {
                     mGraph.SetPhysicalSizeVP(sz.X, sz.Y);
                 }
+
 
                 // draw grid
                 var styles = UNodeGraphStyles.DefaultStyles;
@@ -162,6 +169,20 @@ namespace EngineNS.Bricks.NodeGraph
                     var mPos = ImGuiAPI.GetMousePos();
                 }
 
+                // draw mouse drag rect
+                if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) &&
+                    (delta.X >= 0 && delta.X <= sz.X && delta.Y >= 0 && delta.Y <= sz.Y) && 
+                    !mGraph.IsMovingSelNodes && mGraph.PopMenuPressObject == null)
+                {
+                    var min = mGraph.CanvasToViewport(Vector2.Minimize(mGraph.PressPosition, mGraph.DragPosition)) + DrawOffset;
+                    var max = mGraph.CanvasToViewport(Vector2.Maximize(mGraph.PressPosition, mGraph.DragPosition)) + DrawOffset;
+                    var size = max - min;
+                    if (size.X > MathHelper.Epsilon || size.Y > MathHelper.Epsilon)
+                    {
+                        cmd.AddRect(min, max, 0xFF00FF00, 0.0f, ImDrawFlags_.ImDrawFlags_None, 2);
+                    }
+                }
+
                 mGraph.OnDrawAfter(this, styles, cmd);
                 DrawPopMenu();
             }
@@ -170,7 +191,7 @@ namespace EngineNS.Bricks.NodeGraph
 
         void ProcessMouse(in Vector2 screenPt)
         {
-            if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows) == false)
+            if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_RootWindow) == false)
                 return;
             if (ImGuiAPI.IsWindowHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_ChildWindows))
             {
@@ -237,12 +258,14 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public void DrawImage(ImDrawList cmdlist, EGui.UUvAnim icon, in Vector2 rcMin, in Vector2 rcMax)
         {
-            icon.OnDraw(ref cmdlist, rcMin, rcMax, 0);
+            icon.OnDraw(cmdlist, rcMin, rcMax, 0);
         }
         public Vector2 CanvasToDraw(in Vector2 pos)
         {
             return mGraph.CanvasToViewport(in pos) + DrawOffset;
         }
+
+        public string BreakerName = "";
         public void DrawNode(ImDrawList cmdlist, UNodeBase node)
         {
             if(node.LayoutDirty)
@@ -254,7 +277,9 @@ namespace EngineNS.Bricks.NodeGraph
             var nodeStart = CanvasToDraw(node.Position);
             var nodeEnd = CanvasToDraw(node.Position + node.Size);
 
-            ImGuiAPI.SetWindowFontScale(1.0f / node.ParentGraph.ScaleVP);
+            if (node.ParentGraph != null)
+                ImGuiAPI.SetWindowFontScale(1.0f / node.ParentGraph.ScaleVP);
+
 
             var shadowExt = new Vector2(12, 12);
             //cmdlist.AddRectFilled(in nodeStart, in nodeEnd, node.BackColor, 0, 0);
@@ -276,7 +301,8 @@ namespace EngineNS.Bricks.NodeGraph
 
             var endTitle = mGraph.CanvasToViewport(node.Position + new Vector2(node.Size.X, node.TitleHeight)) + DrawOffset;
             //cmdlist.AddRectFilled(in nodeStart, in endTitle, node.TitleColor, 0, 0);
-
+            uint col = 0xFFFFFFFF;
+            uint errorCol = 0xFF0000FF;
             {//DrawTitle
                 var titleImg = UEngine.Instance.UIManager[styles.NodeTitleImg] as EGui.UIProxy.ImageProxy;
                 if(titleImg != null)
@@ -301,14 +327,17 @@ namespace EngineNS.Bricks.NodeGraph
                 //Draw Node Name
                 {
                     var drawStart = CanvasToDraw(node.Position + styles.TitlePadding);
-                    cmdlist.AddText(in drawStart, 0xFFFFFFFF, node.Name, null);
+                    if (node.HasError)
+                        cmdlist.AddText(in drawStart, errorCol, node.Name, null);
+                    else
+                        cmdlist.AddText(in drawStart, col, node.Name, null);
                 }
             }
 
             {//Draw Preview
-                Vector2 prevStart;
-                prevStart.X = node.Position.X + (node.Size.X - node.PrevSize.X) * 0.5f;
-                prevStart.Y = node.Position.Y + node.TitleHeight;
+                Vector2 prevStart = node.PrevPos;
+                //prevStart.X = node.Position.X + (node.Size.X - node.PrevSize.X) * 0.5f;
+                //prevStart.Y = node.Position.Y + node.TitleHeight;
                 var start1 = CanvasToDraw(in prevStart);
                 var end1 = CanvasToDraw(prevStart + node.PrevSize);
                 node.OnPreviewDraw(in start1, in end1, cmdlist);
@@ -366,7 +395,10 @@ namespace EngineNS.Bricks.NodeGraph
                 if(!string.IsNullOrEmpty(inPin.Name) && inPin.ShowName)
                 {
                     start = CanvasToDraw(inPin.NamePosition);
-                    cmdlist.AddText(start, 0xFFFFFFFF, inPin.Name, null);
+                    if(node.CodeExcept != null && node.CodeExcept.ErrorPin == inPin)
+                        cmdlist.AddText(start, errorCol, inPin.Name, null);
+                    else
+                        cmdlist.AddText(start, col, inPin.Name, null);
                 }
 				if (inPin.EditValue != null)
                 {
@@ -401,13 +433,74 @@ namespace EngineNS.Bricks.NodeGraph
                 if (!string.IsNullOrEmpty(i.Name) && i.ShowName)
                 {
                     start = CanvasToDraw(i.NamePosition);
-                    cmdlist.AddText(start, 0xFFFFFFFF, i.Name, null);
+                    if(node.CodeExcept != null && node.CodeExcept.ErrorPin == i)
+                        cmdlist.AddText(start, errorCol, i.Name, null);
+                    else
+                        cmdlist.AddText(start, col, i.Name, null);
                 }
             }
 
             if (mGraph.LinkingOp.StartPin != null)
             {
                 DrawLinkingOp(cmdlist);
+            }
+
+            // breaker point
+            if(node is IBreakableNode)
+            {
+                var breakableNode = node as IBreakableNode;
+                int circleSegments = 36;
+                uint circleBG = 0xFF0000FF;
+                uint circleBorder = 0xFF000000;
+                float borderThickness = 2 / mGraph.ScaleVP;
+                float circleRadius = 12 / mGraph.ScaleVP;
+                switch(breakableNode.BreakerState)
+                {
+                    case EBreakerState.Enable:
+                        cmdlist.AddCircleFilled(in nodeStart, circleRadius, circleBG, circleSegments);
+                        cmdlist.AddCircle(in nodeStart, circleRadius, circleBorder, circleSegments, borderThickness);
+                        break;
+                    case EBreakerState.Disable:
+                        cmdlist.AddCircle(in nodeStart, circleRadius - 2, circleBG, circleSegments, borderThickness + 1);
+                        cmdlist.AddCircle(in nodeStart, circleRadius - 4, circleBorder, circleSegments, 1);
+                        cmdlist.AddCircle(in nodeStart, circleRadius, circleBorder, circleSegments, 1);
+                        break;
+                    case EBreakerState.Hidden:
+                        break;
+                }
+
+                if(BreakerName == breakableNode.BreakerName)
+                {
+                    var breakpointImg = UEngine.Instance.UIManager[styles.BreakpointNodeImg] as EGui.UIProxy.ImageProxy;
+                    if (breakpointImg != null)
+                    {
+                        var imgSize = new Vector2(50.0f, 50.0f) / mGraph.ScaleVP;
+                        var posStart = nodeStart + new Vector2((nodeEnd.X - nodeStart.X - imgSize.X) * 0.5f, -imgSize.Y);
+                        var posEnd = posStart + imgSize;
+                        breakpointImg.OnDraw(cmdlist, posStart, posEnd, 0xFFFFFFFF);
+                    }
+
+                    var execNode = node as IBeforeExecNode;
+                    if(execNode != null)
+                    {
+                        execNode.LightDebuggerLine();
+                    }
+                }
+
+                Vector2 circleStart = nodeStart - new Vector2(circleRadius, circleRadius);
+                Vector2 circleEnd = nodeStart + new Vector2(circleRadius, circleRadius);
+                if(ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false) && ImGuiAPI.IsMouseHoveringRect(circleStart, circleEnd, true))
+                {
+                    switch(breakableNode.BreakerState)
+                    {
+                        case EBreakerState.Enable:
+                            breakableNode.BreakerState = EBreakerState.Disable;
+                            break;
+                        case EBreakerState.Disable:
+                            breakableNode.BreakerState = EBreakerState.Enable;
+                            break;
+                    }
+                }
             }
 
             node.OnAfterDraw(styles, cmdlist);
@@ -430,7 +523,9 @@ namespace EngineNS.Bricks.NodeGraph
             int num_segs = (int)(delta.Length() / styles.BezierPixelPerSegement + 1);
 
             var lineColor = styles.LinkerColor;
-            if (linker.OutPin.LinkDesc != null)
+            if (linker.InDebuggerLine)
+                lineColor = 0xFF0000FF;
+            else if (linker.OutPin.LinkDesc != null)
                 lineColor = linker.OutPin.LinkDesc.LineColor;
             else if (linker.InPin.LinkDesc != null)
                 lineColor = linker.InPin.LinkDesc.LineColor;
@@ -480,8 +575,8 @@ namespace EngineNS.Bricks.NodeGraph
                 var min = LinkingOp.HoverPin.Position;
                 Vector2 max;
                 max = min + LinkingOp.HoverPin.Size;
-                min += DrawOffset;
-                max += DrawOffset;
+                min = mGraph.CanvasToViewport(min) + DrawOffset;
+                max = mGraph.CanvasToViewport(max) + DrawOffset;
                 cmdlist.AddRect(in min, in max, styles.HighLightColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2);
             }
 
@@ -527,6 +622,11 @@ namespace EngineNS.Bricks.NodeGraph
                         if (mGraph.NodeMenuDirty)
                         {
                             mGraph.UpdateNodeMenus();
+                            var node = mGraph.PopMenuPressObject as IBreakableNode;
+                            if(node != null)
+                            {
+                                node.AddMenuItems(mGraph.NodeMenus);
+                            }
                             mGraph.NodeMenuDirty = false;
                         }
                         for (var childIdx = 0; childIdx < mGraph.NodeMenus.SubMenuItems.Count; childIdx++)

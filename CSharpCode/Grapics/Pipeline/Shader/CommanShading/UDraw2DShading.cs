@@ -10,14 +10,14 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         {
             CodeName = RName.GetRName("shaders/slate/slategui.cginc", RName.ERNameType.Engine);
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
-                EVertexStreamType.VST_UV,};
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
+        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
-            //var gpuProgram = drawcall.Effect.ShaderProgram;
+            //var gpuProgram = drawcall.Effect.ShaderEffect;
             //var cbIndex = drawcall.mCoreObject.FindCBufferIndex("cbPerShadingEnv");
             //if (cbIndex != 0xFFFFFFFF)
             //{
@@ -38,41 +38,41 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         {
             CodeName = RName.GetRName("shaders/shadingenv/sys/copy2d.shadingenv", RName.ERNameType.Engine);
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
-                EVertexStreamType.VST_UV,};
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
+        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
-            var gpuProgram = drawcall.Effect.ShaderProgram;
-            var cbIndex = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerShadingEnv");
-            if (!CoreSDK.IsNullPointer(cbIndex))
+            var gpuProgram = drawcall.mCoreObject.GetShaderEffect();
+            var cbIndex = gpuProgram.FindBinder("cbPerShadingEnv");
+            if (cbIndex.IsValidPointer)
             {
                 if (PerShadingCBuffer == null)
                 {
-                    PerShadingCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(gpuProgram, "cbPerShadingEnv");
-                    PerShadingCBuffer.SetMatrix(0, in Matrix.Identity);
+                    PerShadingCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(cbIndex.GetShaderBinder(NxRHI.EShaderType.SDT_Unknown));
+                    PerShadingCBuffer.SetValue(cbIndex.FindField("RenderMatrix"), in Matrix.Identity);
                     var RenderColor = new Color4(1, 1, 1, 1);
-                    PerShadingCBuffer.SetValue(1, in RenderColor);
+                    PerShadingCBuffer.SetValue(cbIndex.FindField("RenderColor"), in RenderColor);
                 }
-                drawcall.mCoreObject.BindShaderCBuffer(cbIndex, PerShadingCBuffer.mCoreObject);
+                drawcall.BindCBuffer(cbIndex, PerShadingCBuffer);
             }
         }
-        public unsafe void OnDrawCall(RHI.CDrawCall drawcall, UCopy2DPolicy policy, Mesh.UMesh mesh)
+        public unsafe void OnDrawCall(NxRHI.UGraphicDraw drawcall, UCopy2DPolicy policy, Mesh.UMesh mesh)
         {
-            var index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Srv, "SourceTexture");
-            if (!CoreSDK.IsNullPointer(index))
+            var index = drawcall.ShaderEffect.FindBinder("SourceTexture");
+            if (index.IsValidPointer)
             {
-                drawcall.mCoreObject.BindShaderSrv(index, policy.ViewPolicy.GetFinalShowRSV().mCoreObject);
+                drawcall.BindSRV(index, policy.ViewPolicy.GetFinalShowRSV());
             }
 
-            index = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_Sampler, "Samp_SourceTexture");
-            if (!CoreSDK.IsNullPointer(index))
+            index = drawcall.ShaderEffect.FindBinder("Samp_SourceTexture");
+            if (index.IsValidPointer)
             {
-                drawcall.mCoreObject.BindShaderSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);
+                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
             }
-            //var rsv = mesh.Tag as RHI.CShaderResourceView;
+            //var rsv = mesh.Tag as NxRHI.USrView;
             //if (rsv != null)
             //{
             //    drawcall.mCoreObject.BindSRVAll(index, rsv.mCoreObject.Ptr); 
@@ -85,25 +85,25 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         {
             CodeName = RName.GetRName("shaders/shadingenv/sys/rect2d.shadingenv", RName.ERNameType.Engine);
         }
-        public override EVertexStreamType[] GetNeedStreams()
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new EVertexStreamType[] { EVertexStreamType.VST_Position,
-                EVertexStreamType.VST_UV,};
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, RHI.CDrawCall drawcall)
+        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
-            var gpuProgram = drawcall.Effect.ShaderProgram;
-            var cbIndex = drawcall.mCoreObject.GetReflector().GetShaderBinder(EShaderBindType.SBT_CBuffer, "cbPerShadingEnv");
-            if (CoreSDK.IsNullPointer(cbIndex) != false)
+            var gpuProgram = drawcall.ShaderEffect;
+            var cbIndex = gpuProgram.FindBinder("cbPerShadingEnv");
+            if (cbIndex.IsValidPointer)
             {
                 if (PerShadingCBuffer == null)
                 {
-                    PerShadingCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(gpuProgram, "cbPerShadingEnv");
-                    PerShadingCBuffer.SetMatrix(0, in Matrix.Identity);
+                    PerShadingCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(cbIndex.GetShaderBinder(NxRHI.EShaderType.SDT_Unknown));
+                    PerShadingCBuffer.SetValue(cbIndex.FindField("RenderMatrix"), in Matrix.Identity);
                     var RenderColor = new Color4(1, 1, 1, 1);
-                    PerShadingCBuffer.SetValue(1, in RenderColor);
+                    PerShadingCBuffer.SetValue(cbIndex.FindField("RenderColor"), in RenderColor);
                 }
-                drawcall.mCoreObject.BindShaderCBuffer(cbIndex, PerShadingCBuffer.mCoreObject);
+                drawcall.BindCBuffer(cbIndex, PerShadingCBuffer);
             }
         }
     }

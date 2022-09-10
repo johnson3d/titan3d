@@ -48,7 +48,26 @@ namespace EngineNS
                 else
                 {
                     var v = (Vector3)info.Value;
-                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 3, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    float speed = 0.1f;
+                    var format = "%.6f";
+                    if (info.HostProperty != null)
+                    {
+                        var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueRange>();
+                        if (vR != null)
+                        {
+                            minValue = (float)vR.Min;
+                            maxValue = (float)vR.Max;
+                        }
+                        var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueChangeStep>();
+                        if (vStep != null)
+                        {
+                            speed = vStep.Step;
+                        }
+                        var vFormat = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueFormat>();
+                        if (vFormat != null)
+                            format = vFormat.Format;
+                    }
+                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 3, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     //ImGuiAPI.InputFloat3(TName.FromString2("##", info.Name).ToString(), (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
                     //ImGuiAPI.PopStyleVar(1);
                     if (changed && !info.Readonly)//(v != saved)
@@ -189,33 +208,12 @@ namespace EngineNS
         {
             return !float.IsNaN(val.X) && !float.IsNaN(val.Y) && !float.IsNaN(val.Z);
         }
-        /// <summary>
-        /// (1,1,1)向量
-        /// </summary>
-        [Rtti.Meta]
-        public readonly static Vector3 UnitXYZ = new Vector3(1, 1, 1);
-        /// <summary>
-        /// 零向量
-        /// </summary>
-        [Rtti.Meta]
         public readonly static Vector3 Zero = new Vector3(0, 0, 0);
-        /// <summary>
-        /// X轴的单位向量
-        /// </summary>
-        [Rtti.Meta]
         public readonly static Vector3 UnitX = new Vector3(1, 0, 0);
-        /// <summary>
-        /// Y轴的单位向量
-        /// </summary>
-        [Rtti.Meta]
-        public readonly static Vector3 UnitY = new Vector3(0, 1, 0);
-        /// <summary>
-        /// Z轴的单位向量
-        /// </summary>
-        [Rtti.Meta]
-        public readonly static Vector3 UnitZ = new Vector3(0, 0, 1);
-        
+        public readonly static Vector3 UnitY = new Vector3(0, 1, 0);        
+        public readonly static Vector3 UnitZ = new Vector3(0, 0, 1);        
         public readonly static Vector3 One = new Vector3(1f, 1f, 1f);
+        public readonly static Vector3 MinusOne = new Vector3(-1f, -1f, -1f);
         public readonly static Vector3 Up = new Vector3(0f, 1f, 0f);
         public readonly static Vector3 Down = new Vector3(0f, -1f, 0f);
         public readonly static Vector3 Right = new Vector3(1f, 0f, 0f);

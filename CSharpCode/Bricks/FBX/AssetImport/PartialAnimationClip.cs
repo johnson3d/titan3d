@@ -56,7 +56,7 @@ namespace EngineNS.Animation.Asset
                     bool nameChanged = ImGuiAPI.InputText("##in_rname", ref mName);
                     if (nameChanged)
                     {
-                        if (IO.FileManager.FileExists(mDir.Address + mName + RHI.CShaderResourceView.AssetExt))
+                        if (IO.FileManager.FileExists(mDir.Address + mName + UAnimationClip.AssetExt))
                             eErrorType = enErrorType.IsExisting;
                     }
 

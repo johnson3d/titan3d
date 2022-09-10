@@ -11,13 +11,19 @@ namespace EngineNS.Thread
         public ThreadLogic()
         {
             this.Interval = 0;
-            LogicEndEvents[0] = mLogicEnd;
-            LogicEndEvents[1] = mMacrossDebug;
+            LogicEndEvents[(int)EEndEvent.Normal] = LogicEnd;
+            LogicEndEvents[(int)EEndEvent.MacrossDebug] = MacrossDebug;
         }
-        public System.Threading.AutoResetEvent mLogicBegin = new System.Threading.AutoResetEvent(false);
-        public System.Threading.AutoResetEvent mLogicEnd = new System.Threading.AutoResetEvent(false);
-        public System.Threading.EventWaitHandle mMacrossDebug = new System.Threading.EventWaitHandle(false, System.Threading.EventResetMode.ManualReset);
-        public System.Threading.EventWaitHandle[] LogicEndEvents = new System.Threading.EventWaitHandle[2];
+        internal enum EEndEvent : int
+        {
+            Normal = 0,
+            MacrossDebug,
+            Number,
+        }
+        public System.Threading.AutoResetEvent LogicBegin { get; } = new System.Threading.AutoResetEvent(false);
+        public System.Threading.AutoResetEvent LogicEnd { get; } = new System.Threading.AutoResetEvent(false);
+        public System.Threading.EventWaitHandle MacrossDebug { get; } = new System.Threading.EventWaitHandle(false, System.Threading.EventResetMode.ManualReset);
+        public System.Threading.EventWaitHandle[] LogicEndEvents { get; } = new System.Threading.EventWaitHandle[(int)EEndEvent.Number];
         public bool IsTicking
         {
             get;
@@ -25,8 +31,8 @@ namespace EngineNS.Thread
         }= false;
         public override void Tick()
         {
-            mLogicBegin.WaitOne();
-            mLogicBegin.Reset();
+            LogicBegin.WaitOne();
+            LogicBegin.Reset();
             IsTicking = true;
 
             using (new Profiler.TimeScopeHelper(ScopeTick))
@@ -36,7 +42,7 @@ namespace EngineNS.Thread
             }
 
             IsTicking = false;
-            mLogicEnd.Set();
+            LogicEnd.Set();
         }
         protected override void OnThreadStart()
         {
@@ -48,8 +54,8 @@ namespace EngineNS.Thread
         }
         public override bool StartThread(string name, FOnThreadTick action)
         {
-            mLogicBegin.Reset();
-            mLogicEnd.Reset();
+            LogicBegin.Reset();
+            LogicEnd.Reset();
             return base.StartThread(name, action);
         }
         public override void StopThread(Action waitAction)

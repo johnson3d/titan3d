@@ -222,10 +222,12 @@ namespace EngineNS.IO
             uint versionHash;
             this.Read(out versionHash);
 
-            var savePos = this.GetPosition();
-            uint ObjDataSize = 0;
-            this.Read(out ObjDataSize);
-            savePos += ObjDataSize;
+            //var savePos = this.GetPosition();
+            //uint ObjDataSize = 0;
+            //this.Read(out ObjDataSize);
+            //savePos += ObjDataSize;
+
+            var savePos = IO.SerializerHelper.GetSkipOffset(this);
 
             var meta = Rtti.UClassMetaManager.Instance.GetMeta(typeHash);
             if (meta == null)
@@ -238,7 +240,9 @@ namespace EngineNS.IO
             {
                 Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost in direct:{meta.ClassMetaName}");
                 Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"MetaVersion lost:{versionHash}");
-                throw new Exception($"MetaVersion lost:{versionHash}");
+                this.Seek(savePos);
+                return false;
+                //throw new Exception($"MetaVersion lost:{versionHash}");
             }
             if (!meta.ClassType.IsEqual(v.GetType()))
                 return false;

@@ -7,21 +7,21 @@ namespace EngineNS.Bricks.Particle
     public class UNebulaShader
     {
         public static readonly UInt32_3 Dispatch_SetupDimArray1 = new UInt32_3(32, 1, 1);
-        public Graphics.Pipeline.Shader.UShader Particle_Update;
+        public NxRHI.UComputeEffect Particle_Update;
 
-        public Graphics.Pipeline.Shader.UShader Particle_SetupParameters;
+        public NxRHI.UComputeEffect Particle_SetupParameters;
 
         public IParticleEmitter Emitter;
         public RName NebulaName;
-        public IO.CMemStreamWriter ParticleVar;
-        public IO.CMemStreamWriter SystemData;
-        public IO.CMemStreamWriter CBufferVar;
-        public IO.CMemStreamWriter HLSLDefine;
-        public IO.CMemStreamWriter HLSLCode;
+        public NxRHI.UShaderCode ParticleVar;
+        public NxRHI.UShaderCode SystemData;
+        public NxRHI.UShaderCode CBufferVar;
+        public NxRHI.UShaderCode HLSLDefine;
+        public NxRHI.UShaderCode HLSLCode;
         public class UNebulaInclude : EngineNS.Editor.ShaderCompiler.UHLSLInclude
         {
             public UNebulaShader Host;
-            public override unsafe MemStreamWriter* GetHLSLCode(string includeName, out bool bIncluded)
+            public override unsafe NxRHI.FShaderCode* GetHLSLCode(string includeName, out bool bIncluded)
             {
                 if (includeName.EndsWith("/ParticleVar"))
                 {
@@ -51,38 +51,38 @@ namespace EngineNS.Bricks.Particle
                 else
                 {
                     bIncluded = false;
-                    return (MemStreamWriter*)0;
+                    return (NxRHI.FShaderCode*)0;
                 }
             }
         }
 
         public void Init(RName nebula, IParticleEmitter emitter, string particleVar, string sysData, string cbVar, string define, string code)
         {
-            var defines = new RHI.CShaderDefinitions();
+            var defines = new NxRHI.UShaderDefinitions();
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray1.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray1.Z}");
             defines.mCoreObject.AddDefine("BufferHeadSize", $"{UGpuParticleResources.BufferHeadSize*4}");
 
-            ParticleVar = new IO.CMemStreamWriter();
-            ParticleVar.SetText(particleVar);
-            SystemData = new IO.CMemStreamWriter();
-            SystemData.SetText(sysData);
-            HLSLDefine = new IO.CMemStreamWriter();
-            HLSLDefine.SetText(define);
-            HLSLCode = new IO.CMemStreamWriter();
-            HLSLCode.SetText(code);
-            CBufferVar = new IO.CMemStreamWriter();
-            CBufferVar.SetText(cbVar);
+            ParticleVar = new NxRHI.UShaderCode();
+            ParticleVar.TextCode = particleVar;
+            SystemData = new NxRHI.UShaderCode();
+            SystemData.TextCode = sysData;
+            HLSLDefine = new NxRHI.UShaderCode();
+            HLSLDefine.TextCode = define;
+            HLSLCode = new NxRHI.UShaderCode();
+            HLSLCode.TextCode = code;
+            CBufferVar = new NxRHI.UShaderCode();
+            CBufferVar.TextCode = cbVar;
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var incProvider = new UNebulaInclude();
             incProvider.Host = this;
-            Particle_Update = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine),
-                "CS_Particle_Update", EShaderType.EST_ComputeShader, defines, incProvider);
+            Particle_Update = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine).Address,
+                "CS_Particle_Update", NxRHI.EShaderType.SDT_ComputeShader, null, null, null, defines, incProvider);
 
-            Particle_SetupParameters = UEngine.Instance.GfxDevice.EffectManager.GetShader(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine),
-                "CS_Particle_SetupParameters", EShaderType.EST_ComputeShader, defines, incProvider);
+            Particle_SetupParameters = UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine).Address,
+                "CS_Particle_SetupParameters", NxRHI.EShaderType.SDT_ComputeShader, null, null, null, defines, incProvider);
         }
     }
     public class UNebulaShaderManager
@@ -92,10 +92,10 @@ namespace EngineNS.Bricks.Particle
     public class UNebulaTemplateManager : UModule<UEngine>
     {
         public uint ShaderRandomPoolSize = 65535;
-        public RHI.CGpuBuffer RandomPoolBuffer;
+        public NxRHI.UBuffer RandomPoolBuffer;
         public Random mRandom = new Random((int)Support.Time.GetTickCount());
 
-        public RHI.CShaderResourceView RandomPoolSrv;
+        public NxRHI.USrView RandomPoolSrv;
         public UNebulaShaderManager NebulaShaderManager { get; } = new UNebulaShaderManager();
         public Dictionary<RName, UNebulaParticle> Particles { get; } = new Dictionary<RName, UNebulaParticle>();
         public float RandomSignedUnit()//[-1,1]
@@ -109,12 +109,13 @@ namespace EngineNS.Bricks.Particle
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             unsafe
             {
-                var bfDesc = new IGpuBufferDesc();
+                var bfDesc = new NxRHI.FBufferDesc();
 
-                bfDesc.SetMode(false, true);
+                bfDesc.SetDefault();
+                bfDesc.Type = NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV;
                 //bfDesc.MiscFlags = (UInt32)(EResourceMiscFlag.BUFFER_ALLOW_RAW_VIEWS);
-                bfDesc.ByteWidth = (uint)sizeof(Vector4) * ShaderRandomPoolSize;
-                bfDesc.StructureByteStride = (uint)sizeof(Vector4);
+                bfDesc.Size = (uint)sizeof(Vector4) * ShaderRandomPoolSize;
+                bfDesc.StructureStride = (uint)sizeof(Vector4);
                 var initData = new Vector4[ShaderRandomPoolSize];
                 for (int i = 0; i < ShaderRandomPoolSize; i++)
                 {
@@ -122,17 +123,20 @@ namespace EngineNS.Bricks.Particle
                 }
                 fixed (Vector4* pAddr = &initData[0])
                 {
-                    RandomPoolBuffer = rc.CreateGpuBuffer(in bfDesc, (IntPtr)pAddr);
+                    bfDesc.InitData = pAddr;
+                    RandomPoolBuffer = rc.CreateBuffer(in bfDesc);
                 }
 
-                var srvDesc = new IShaderResourceViewDesc();
-                srvDesc.SetBuffer();
-                //srvDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
+                var srvDesc = new NxRHI.FSrvDesc();
+                srvDesc.SetBuffer(0);
                 srvDesc.Buffer.FirstElement = 0;
-                //srvDesc.Buffer.ElementWidth = (uint)sizeof(Vector4);
-                srvDesc.Buffer.NumElements = ShaderRandomPoolSize;
-                srvDesc.mGpuBuffer = RandomPoolBuffer.mCoreObject;
-                RandomPoolSrv = rc.CreateShaderResourceView(in srvDesc);
+                srvDesc.Buffer.NumElements = ShaderRandomPoolSize;// (uint)sizeof(Vector4);
+                srvDesc.Buffer.StructureByteStride = (uint)sizeof(Vector4);
+                //srvDesc.Type = NxRHI.ESrvType.ST_BufferEx;
+                //srvDesc.Format = EPixelFormat.PXF_R32_TYPELESS;
+                //srvDesc.BufferEx.Flags = 1;
+                //srvDesc.BufferEx.NumElements = ShaderRandomPoolSize;
+                RandomPoolSrv = rc.CreateSRV(RandomPoolBuffer, in srvDesc);
             }
             return true;
         }

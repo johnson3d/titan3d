@@ -1,5 +1,7 @@
-﻿using System;
+﻿using EngineNS.Bricks.NodeGraph;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 using System.Text;
 
@@ -38,8 +40,15 @@ namespace EngineNS.Bricks.CodeBuilder
         Ref,
     }
 
-    public class UCodeObject
+    public class UCodeObject : IO.ISerializer
     {
+        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public virtual void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
     }
 
     public class UExpressionBase : UCodeObject { }
@@ -145,22 +154,75 @@ namespace EngineNS.Bricks.CodeBuilder
             return TypeFullName;
         }
 
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
-
         public bool IsEqual(Type type)
         {
             if (mTypeDesc != null)
                 return mTypeDesc.IsEqual(type);
             return TypeFullName == type.FullName;
         }
+        public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
+        {
+        }
+
+        public virtual void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        {
+        }
     }
-    public class UVariableDeclaration : UStatementBase, IO.ISerializer
+
+    public class UDebuggerSetWatchVariable : UStatementBase
+    {
+        [Rtti.Meta]
+        public UTypeReference VariableType { get; set; }
+        [Rtti.Meta]
+        public string VariableName { get; set; }
+        [Rtti.Meta]
+        public UExpressionBase VariableValue { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            var w = obj as UDebuggerSetWatchVariable;
+            if (w == null)
+                return false;
+            return (VariableName == w.VariableName) &&
+                   (VariableValue == w.VariableValue) &&
+                   (VariableType == w.VariableType);
+        }
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+        public override string ToString()
+        {
+            return "debugger:" + VariableType.TypeFullName + " " + VariableName + " " + VariableValue.ToString();
+        }
+    }
+    public class UDebuggerTryBreak : UStatementBase
+    {
+        [Rtti.Meta]
+        public string BreakName { get; set; }
+
+        public UDebuggerTryBreak(string name)
+        {
+            BreakName = name;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var b = obj as UDebuggerTryBreak;
+            if (b == null)
+                return false;
+            return (BreakName == b.BreakName);
+        }
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+        public override string ToString()
+        {
+            return "debugger:breaker_" + BreakName;
+        }
+    }
+    public class UVariableDeclaration : UStatementBase, IO.ISerializer, EGui.Controls.PropertyGrid.IPropertyCustomization, NodeGraph.UEditableValue.IValueEditNotify
     {
         [Rtti.Meta]
         public UTypeReference VariableType { get; set; }
@@ -174,14 +236,6 @@ namespace EngineNS.Bricks.CodeBuilder
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
 
         public UVariableDeclaration()
-        {
-        }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
         {
         }
 
@@ -199,6 +253,128 @@ namespace EngineNS.Bricks.CodeBuilder
         public override string ToString()
         {
             return (VariableType.TypeFullName + " " + VariableName);
+        }
+
+        public void GetProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            var pros = TypeDescriptor.GetProperties(this);
+            var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            foreach(PropertyDescriptor prop in pros)
+            {
+                var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                proDesc.InitValue(this, thisType, prop, parentIsValueType);
+                switch(proDesc.Name)
+                {
+                    case "VariableType":
+                        {
+                            List<Rtti.UTypeDesc> types = new List<Rtti.UTypeDesc>(200);
+                            proDesc.PropertyType = Rtti.UTypeDesc.TypeOf(typeof(System.Type));
+                            foreach(var service in Rtti.UTypeDescManager.Instance.Services.Values)
+                            {
+                                foreach(var type in service.Types.Values)
+                                {
+                                    types.Add(type);
+                                }
+                            }
+                            proDesc.CustomValueEditor = new EGui.Controls.PropertyGrid.PGTypeEditorAttribute(types.ToArray());
+                        }
+                        break;
+                    case "InitValue":
+                        {
+                            if(VariableType.TypeDesc == null)
+                            {
+                                proDesc.ReleaseObject();
+                                continue;
+                            }
+                            var editor = NodeGraph.UEditableValue.CreateEditableValue(this, VariableType.TypeDesc, proDesc);
+                            if(editor == null)
+                            {
+                                proDesc.ReleaseObject();
+                                continue;
+                            }
+                            proDesc.PropertyType = VariableType.TypeDesc;
+                            proDesc.CustomValueEditor = editor;
+                        }
+                        break;
+                    case "Comment":
+                        {
+                            proDesc.PropertyType = Rtti.UTypeDesc.TypeOf(typeof(System.String));
+                        }
+                        break;
+                }
+                collection.Add(proDesc);
+            }
+        }
+
+        public object GetPropertyValue(string propertyName)
+        {
+            switch(propertyName)
+            {
+                case "VariableType":
+                    return VariableType.TypeDesc;
+                case "InitValue":
+                    {
+                        var pe = InitValue as UPrimitiveExpression;
+                        if(pe != null)
+                            return pe.GetValue();
+                    }
+                    break;
+                case "Comment":
+                    return Comment?.CommentString;
+                default:
+                    {
+                        var proInfo = GetType().GetProperty(propertyName);
+                        if (proInfo != null)
+                            return proInfo.GetValue(this);
+                    }
+                    break;
+            }
+            return null;
+        }
+
+        public void SetPropertyValue(string propertyName, object value)
+        {
+            switch(propertyName)
+            {
+                case "VariableType":
+                    {
+                        var tagType = value as Rtti.UTypeDesc;
+                        if(tagType != VariableType.TypeDesc)
+                        {
+                            InitValue = new UPrimitiveExpression(tagType, tagType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(tagType) : null);
+                            VariableType.TypeDesc = tagType;
+                        }
+                    }
+                    break;
+                case "InitValue":
+                    {
+                        var pe = InitValue as UPrimitiveExpression;
+                        if(pe != null)
+                            pe.ValueStr = UPrimitiveExpression.CalculateValueString(pe.Type, value);
+                    }
+                    break;
+                case "Comment":
+                    {
+                        Comment.CommentString = (string)value;
+                    }
+                    break;
+                default:
+                    {
+                        var proInfo = GetType().GetProperty(propertyName);
+                        if(proInfo != null)
+                            proInfo.SetValue(this, value);
+                    }
+                    break;
+            }
+        }
+
+        public void OnValueChanged(UEditableValue ev)
+        {
+            var pe = InitValue as UPrimitiveExpression;
+            if(pe != null)
+            {
+                pe.ValueStr = UPrimitiveExpression.CalculateValueString(pe.Type, ev.Value);
+            }
         }
     }
 
@@ -281,14 +457,6 @@ namespace EngineNS.Bricks.CodeBuilder
             retVal.IsParamArray = GetIsParamArray(info);
             retVal.Meta = info.Meta;
             return retVal;
-        }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
         }
 
         public override bool Equals(object obj)
@@ -464,14 +632,6 @@ namespace EngineNS.Bricks.CodeBuilder
             return retVal;
         }
 
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
-
         public bool HasLocalVariable(string variableName)
         {
             for(int i=0; i<LocalVariables.Count; i++)
@@ -540,14 +700,6 @@ namespace EngineNS.Bricks.CodeBuilder
             return Namespace.GetHashCode();
         }
 
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
-
         public static bool operator !=(UNamespaceDeclaration lh, UNamespaceDeclaration rh)
         {
             return !(lh == rh);
@@ -583,6 +735,9 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public UCommentStatement Comment { get; set; }
 
+        public List<UVariableDeclaration> PreDefineVariables = new List<UVariableDeclaration>();
+
+
         public string GetFullName()
         {
             return ((Namespace != null) ? (Namespace.Namespace + ".") : "") + ClassName;
@@ -601,6 +756,11 @@ namespace EngineNS.Bricks.CodeBuilder
             Methods = new List<UMethodDeclaration>();
             Namespace = null;
             Comment = null;
+            PreDefineVariables.Clear();
+        }
+        public void ResetRuntimeData()
+        {
+            PreDefineVariables.Clear();
         }
         public void ClearMethods()
         {
@@ -630,14 +790,6 @@ namespace EngineNS.Bricks.CodeBuilder
                     return Properties[i];
             }
             return null;
-        }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
         }
 
         public override bool Equals(object obj)
@@ -675,14 +827,6 @@ namespace EngineNS.Bricks.CodeBuilder
         public override int GetHashCode()
         {
             return Class.GetHashCode();
-        }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
         }
 
         public override string ToString()
@@ -724,14 +868,6 @@ namespace EngineNS.Bricks.CodeBuilder
         public override int GetHashCode()
         {
             return ToString().GetHashCode();
-        }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
         }
 
         public override string ToString()
@@ -776,14 +912,6 @@ namespace EngineNS.Bricks.CodeBuilder
         public override int GetHashCode()
         {
             return Expression.GetHashCode();
-        }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
         }
 
         public override string ToString()
@@ -847,14 +975,6 @@ namespace EngineNS.Bricks.CodeBuilder
             return ToString().GetHashCode();
         }
 
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
-
         public override string ToString()
         {
             string retStr = "";
@@ -881,13 +1001,6 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public bool IsAsync { get; set; } = false;
 
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
     }
 
     public class UAssignOperatorStatement : UStatementBase, IO.ISerializer
@@ -908,14 +1021,6 @@ namespace EngineNS.Bricks.CodeBuilder
         public override int GetHashCode()
         {
             return ToString().GetHashCode();
-        }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
         }
 
         public override string ToString()
@@ -973,13 +1078,6 @@ namespace EngineNS.Bricks.CodeBuilder
             return Left.ToString() + " " + Operation.ToString() + " " + Right.ToString();
         }
 
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
     }
 
     public class UUnaryOperatorExpression : UExpressionBase, IO.ISerializer
@@ -1012,13 +1110,6 @@ namespace EngineNS.Bricks.CodeBuilder
             return Operation.ToString() + "(" + Value.ToString() + ")";
         }
 
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
     }
 
     public class UIndexerOperatorExpression : UExpressionBase, IO.ISerializer
@@ -1047,14 +1138,6 @@ namespace EngineNS.Bricks.CodeBuilder
             return ToString().GetHashCode();
         }
 
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
-
         public override string ToString()
         {
             var retVal = Target.ToString();
@@ -1070,7 +1153,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public Rtti.UTypeDesc Type { get; set; }
         string mValueStr;
         [Rtti.Meta]
-        protected string ValueStr 
+        public string ValueStr 
         {
             get => mValueStr;
             set => mValueStr = value;
@@ -1174,30 +1257,87 @@ namespace EngineNS.Bricks.CodeBuilder
         public UPrimitiveExpression(Rtti.UTypeDesc type, object value)
         {
             Type = type;
+            ValueStr = CalculateValueString(type, value);
+        }
+        public static string CalculateValueString(Rtti.UTypeDesc type, object value)
+        {
+            string retValue;
             if (value == null)
             {
-                ValueStr = "null";
+                retValue = "null";
             }
             else if (type == Rtti.UTypeDescGetter<bool>.TypeDesc)
             {
                 var v = (bool)value;
-                ValueStr = v ? "true" : "false";
+                retValue = v ? "true" : "false";
             }
             else if (type == Rtti.UTypeDescGetter<RName>.TypeDesc)
             {
                 var v = (RName)value;
-
-                ValueStr = $"EngineNS.RName.GetRName(\"{v.Name}\", EngineNS.RName.ERNameType.{v.RNameType})";
+                retValue = $"EngineNS.RName.GetRName(\"{v.Name}\", EngineNS.RName.ERNameType.{v.RNameType})";
             }
             else if(type == Rtti.UTypeDescGetter<System.Type>.TypeDesc)
             {
                 var typeDesc = (Rtti.UTypeDesc)value;
-                ValueStr = $"typeof({typeDesc.FullName})";
+                retValue = $"typeof({typeDesc.FullName})";
             }
             else
             {
-                ValueStr = value.ToString();
+                retValue = value.ToString();
             }
+            return retValue;
+        }
+        public object GetValue()
+        {
+            if (Type.IsEqual(typeof(Byte)))
+                return System.Convert.ToByte(ValueStr);
+            else if (Type.IsEqual(typeof(UInt16)))
+                return System.Convert.ToUInt16(ValueStr);
+            else if (Type.IsEqual(typeof(UInt32)))
+                return System.Convert.ToUInt32(ValueStr);
+            else if (Type.IsEqual(typeof(UInt64)))
+                return System.Convert.ToUInt64(ValueStr);
+            else if (Type.IsEqual(typeof(SByte)))
+                return System.Convert.ToSByte(ValueStr);
+            else if (Type.IsEqual(typeof(Int16)))
+                return System.Convert.ToInt16(ValueStr);
+            else if (Type.IsEqual(typeof(Int32)))
+                return System.Convert.ToInt32(ValueStr);
+            else if (Type.IsEqual(typeof(Int64)))
+                return System.Convert.ToInt64(ValueStr);
+            else if (Type.IsEqual(typeof(float)))
+                return System.Convert.ToSingle(ValueStr);
+            else if (Type.IsEqual(typeof(double)))
+                return System.Convert.ToDouble(ValueStr);
+            else if (Type.IsEqual(typeof(string)))
+                return ValueStr;
+            else if(Type.IsEqual(typeof(bool)))
+                return System.Convert.ToBoolean(ValueStr);
+            else if(Type.IsEqual(typeof(Vector2)))
+                return Vector2.FromString(ValueStr);
+            else if (Type.IsEqual(typeof(Vector3)))
+                return Vector2.FromString(ValueStr);
+            else if (Type.IsEqual(typeof(Vector4)))
+                return Vector2.FromString(ValueStr);
+            else if(Type.IsEqual(typeof(RName)))
+            {
+                var idxStart = ValueStr.IndexOf('(');
+                var idxEnd = ValueStr.IndexOf(')');
+                if (idxStart >= 0 && idxEnd >= 0)
+                {
+                    var subStrs = ValueStr.Substring(idxStart, idxEnd - idxStart).Split(',');
+                    var name = subStrs[0].TrimStart('"', ' ').TrimEnd('"', ' ');
+                    var rnameType = subStrs[1].TrimStart(' ').TrimEnd(' ');
+                    return RName.GetRName(name, (EngineNS.RName.ERNameType)System.Enum.Parse(typeof(EngineNS.RName.ERNameType), rnameType));
+                }
+            }
+            else if(Type.IsEqual(typeof(System.Type)))
+            {
+                var idxStart = ValueStr.IndexOf('(');
+                var idxEnd = ValueStr.IndexOf(')');
+                return Rtti.UTypeDesc.TypeOfFullName(ValueStr.Substring(idxStart, idxEnd - idxStart));
+            }
+            return null;
         }
         public void SetValue<T>(T value) where T : unmanaged
         {
@@ -1208,18 +1348,6 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             Type = Rtti.UTypeDesc.TypeOf(typeof(string));
             ValueStr = value;
-        }
-        public string GetValueString()
-        {
-            return ValueStr;
-        }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
         }
     }
 
@@ -1245,14 +1373,6 @@ namespace EngineNS.Bricks.CodeBuilder
             return ToString().GetHashCode();
         }
 
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
-
         public override string ToString()
         {
             return "(" + TargetType.ToString() + ")" + Expression.ToString();
@@ -1265,6 +1385,12 @@ namespace EngineNS.Bricks.CodeBuilder
         public string TypeName { get; set; }
         [Rtti.Meta]
         public List<UExpressionBase> Parameters { get; set; } = new List<UExpressionBase>();
+
+        public UCreateObjectExpression(string typeName, params UExpressionBase[] exps)
+        {
+            TypeName = typeName;
+            Parameters.AddRange(exps);
+        }
 
         public override bool Equals(object obj)
         {
@@ -1285,14 +1411,6 @@ namespace EngineNS.Bricks.CodeBuilder
         public override int GetHashCode()
         {
             return ToString().GetHashCode();
-        }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
         }
 
         public override string ToString()
@@ -1333,14 +1451,6 @@ namespace EngineNS.Bricks.CodeBuilder
         public override int GetHashCode()
         {
             return Type.GetHashCode();
-        }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
         }
 
         public override string ToString()
@@ -1391,15 +1501,6 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
-
         public override string ToString()
         {
             var retStr = "";
@@ -1460,15 +1561,6 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
-
         public override string ToString()
         {
             var retVal = "if(" + Condition.ToString() + ")";
@@ -1515,14 +1607,6 @@ namespace EngineNS.Bricks.CodeBuilder
             return ToString().GetHashCode();
         }
 
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
-
         public override string ToString()
         {
             return "for(" + LoopIndexName + "=" + BeginExpression.ToString() +
@@ -1549,14 +1633,6 @@ namespace EngineNS.Bricks.CodeBuilder
         public override int GetHashCode()
         {
             return ToString().GetHashCode();
-        }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
         }
 
         public override string ToString()
@@ -1606,15 +1682,6 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             CommentString = comment;
         }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
-
         public override bool Equals(object obj)
         {
             var val = obj as UCommentStatement;
@@ -1660,15 +1727,6 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ToString().GetHashCode();
         }
-
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-        }
-
         public override string ToString()
         {
             return Expression.ToString() + ((NextStatement != null) ? NextStatement.ToString() : "");

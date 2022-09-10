@@ -16,25 +16,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             UpdatePinMenus();
         }
         public UShaderEditor ShaderEditor;
-        uint CurSerialId = 0;
-        public uint GenSerialId()
-        {
-            return CurSerialId++;
-        }
-        static void GetNodeNameAndMenuStr(in string menuString, UMaterialGraph graph, ref string nodeName, ref string menuName)
-        {
-            menuName = menuString;
-            nodeName = menuName;
-            var idx = menuString.IndexOf('@');
-            if (idx >= 0)
-            {
-                var idxEnd = menuString.IndexOf('@', idx + 1);
-                var subStr = menuString.Substring(idx + 1, idxEnd - idx - 1);
-                subStr = subStr.Replace("serial", graph.GenSerialId().ToString());
-                menuName = menuString.Remove(idx, idxEnd - idx + 1);
-                nodeName = menuName.Insert(idx, subStr);
-            }
-        }
+
         public override void UpdateCanvasMenus()
         {
             CanvasMenus.SubMenuItems.Clear();
@@ -53,16 +35,16 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                         for(var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
                         {
                             var menuStr = att.MenuPaths[menuIdx];
-                            string nodeName = null;
-                            GetNodeNameAndMenuStr(menuStr, this, ref nodeName, ref menuStr);
+                            var menuName = GetMenuName(menuStr);
                             if (menuIdx < att.MenuPaths.Length - 1)
-                                parentMenu = parentMenu.AddMenuItem(menuStr, null, null);
+                                parentMenu = parentMenu.AddMenuItem(menuName, null, null);
                             else
                             {
-                                parentMenu.AddMenuItem(menuStr, att.FilterStrings, null,
+                                parentMenu.AddMenuItem(menuName, att.FilterStrings, null,
                                     (UMenuItem item, object sender) =>
                                     {
                                         var node = Rtti.UTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
+                                        var nodeName = GetSerialFinalString(menuStr, GenSerialId());
                                         if (nodeName != null)
                                             node.Name = nodeName;
                                         node.UserData = this;
@@ -109,13 +91,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     for(var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
                     {
                         var menuStr = att.MenuPaths[menuIdx];
-                        string nodeName = null;
-                        GetNodeNameAndMenuStr(menuStr, this, ref nodeName, ref menuStr);
+                        var menuName = GetMenuName(menuStr);
                         if (menuIdx < att.MenuPaths.Length - 1)
-                            parentMenu = parentMenu.AddMenuItem(menuStr, null, null);
+                            parentMenu = parentMenu.AddMenuItem(menuName, null, null);
                         else
                         {
-                            parentMenu.AddMenuItem(menuStr, att.FilterStrings, null, action);
+                            parentMenu.AddMenuItem(menuName, att.FilterStrings, null, action);
                         }
                     }
                 }
@@ -126,17 +107,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
             var uniformVarMenus = CanvasMenus.AddMenuItem("UniformVars", null, null);
             var perFrameMenus = uniformVarMenus.AddMenuItem("PerFrame", null, null);
-            var members = RHI.CConstantBuffer.PerFrameType.GetFields();
+            var members = UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerFrame.GetType().GetFields();
             foreach(var i in members)
             {
-                var attrs = i.GetCustomAttributes(typeof(RHI.CConstantBuffer.UShaderTypeAttribute), false);
+                var attrs = i.GetCustomAttributes(typeof(NxRHI.UShader.UShaderVarAttribute), false);
                 if (attrs.Length == 0)
                     continue;
                 perFrameMenus.AddMenuItem(i.Name, null,
                     (UMenuItem item, object sender) =>
                     {
                         var node = new UUniformVar();
-                        node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as RHI.CConstantBuffer.UShaderTypeAttribute).ShaderType);
+                        node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as NxRHI.UShader.UShaderVarAttribute).VarType);
                         node.Name = i.Name;
                         node.UserData = this;
                         node.Position = PopMenuPosition;
@@ -223,16 +204,16 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         //    {
         //        if (ImGuiAPI.BeginMenu("PerFrame", true))
         //        {
-        //            System.Reflection.FieldInfo[] members = RHI.CConstantBuffer.PerFrameType.GetFields();
+        //            System.Reflection.FieldInfo[] members = NxRHI.UBuffer.PerFrameType.GetFields();
         //            foreach (var i in members)
         //            {
-        //                var attrs = i.GetCustomAttributes(typeof(RHI.CConstantBuffer.UShaderTypeAttribute), false);
+        //                var attrs = i.GetCustomAttributes(typeof(NxRHI.UBuffer.UShaderTypeAttribute), false);
         //                if (attrs.Length == 0)
         //                    continue;
         //                if (ImGuiAPI.MenuItem(i.Name, null, false, true))
         //                {
         //                    var node = new UUniformVar();
-        //                    node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as RHI.CConstantBuffer.UShaderTypeAttribute).ShaderType);
+        //                    node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as NxRHI.UBuffer.UShaderTypeAttribute).ShaderType);
         //                    node.Name = i.Name;
         //                    node.UserData = this;
         //                    node.Position = PopMenuPosition;

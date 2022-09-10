@@ -5,6 +5,8 @@ using System.Text;
 
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
+    [Bricks.CodeBuilder.ContextMenu("TerrainNode", "TerrainNode", GamePlay.Scene.UNode.EditorKeyword)]
+    [GamePlay.Scene.UNode(NodeDataType = typeof(UTerrainData), DefaultNamePrefix = "Terrain")]
     public class UTerrainNode : GamePlay.Scene.USceneActorNode
     {
         public class UTerrainData : GamePlay.Scene.UNodeData
@@ -28,11 +30,15 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             [Rtti.Meta]
             public float PatchSize { get; set; } = 64.0f;
             [Rtti.Meta]
-            public int ActiveLevel = 1;
-            public List<float> LODRangeFloat = new List<float>();
+            public int ActiveLevel { get; set; } = 1;
+            [Rtti.Meta]
+            public List<float> LODRangeFloat { get; set; } = new List<float>();
             [Rtti.Meta]
             [RName.PGRName(FilterExts = Procedure.UPgcAsset.AssetExt)]
             public RName PgcName { get; set; }
+            
+            public int LevelSideX = 1024;
+            public int LevelSideZ = 1024;
         }
         
         public UTerrainSystem Terrain { get; } = new UTerrainSystem();
@@ -95,72 +101,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             get
             {
-                if (mTerrainGen == null)
-                {
-#pragma warning disable CS0162
-                    if (true)
-                    {
-                        
-                    }
-                    else
-                    {
-                        mTerrainGen = new Procedure.UPgcAsset();
-                        var root = new Bricks.Procedure.Node.UEndingNode();
-                        root.Name = "RootNode";
-                        root.PinNumber = 4;
-                        mTerrainGen.AssetGraph.AddNode(root);
-                        mTerrainGen.AssetGraph.Root = root;
-
-                        var perlinnode1 = new Procedure.Node.UNoisePerlin();
-                        perlinnode1.Name = "NoisePerlin1";
-                        mTerrainGen.AssetGraph.AddNode(perlinnode1);
-
-                        var perlinnode2 = new Procedure.Node.UNoisePerlin();
-                        perlinnode2.Name = "NoisePerlin2";
-                        mTerrainGen.AssetGraph.AddNode(perlinnode2);
-
-                        var addOp = new Bricks.Procedure.Node.UPixelAdd();
-                        addOp.Name = "Add";
-                        mTerrainGen.AssetGraph.AddNode(addOp);
-
-                        var smooth1 = new Bricks.Procedure.Node.USmoothGaussion();
-                        smooth1.Name = "Smooth1";
-                        mTerrainGen.AssetGraph.AddNode(smooth1);
-
-                        mTerrainGen.AssetGraph.AddLink(perlinnode1.ResultPin, addOp.LeftPin, true);
-                        mTerrainGen.AssetGraph.AddLink(perlinnode2.ResultPin, addOp.RightPin, true);
-
-                        mTerrainGen.AssetGraph.AddLink(addOp.ResultPin, smooth1.SrcPin, true);
-
-                        var calcNorm = new Bricks.Procedure.Node.UCalcNormal();
-                        calcNorm.Name = "CalcNorm";
-                        mTerrainGen.AssetGraph.AddNode(calcNorm);
-
-                        mTerrainGen.AssetGraph.AddLink(smooth1.ResultPin, calcNorm.HFieldPin, true);
-
-                        mTerrainGen.AssetGraph.AddLink(smooth1.ResultPin, root.Inputs[0], true);
-                        mTerrainGen.AssetGraph.AddLink(calcNorm.XPin, root.Inputs[1], true);
-                        mTerrainGen.AssetGraph.AddLink(calcNorm.YPin, root.Inputs[2], true);
-                        mTerrainGen.AssetGraph.AddLink(calcNorm.ZPin, root.Inputs[3], true);
-
-                        //TerrainGen.SmoothNum = 3;
-                        calcNorm.GridSize = 1.0f;
-                        perlinnode1.Amptitude = 130.0f;
-                        perlinnode1.Freq = 0.002f;
-                        perlinnode2.Amptitude = 1.5f;
-                        perlinnode2.Freq = 0.8f;
-                        //TerrainGen.GridStep = 1.0f;
-                        //TerrainGen.InitPerlin();
-                    }
-#pragma warning restore CS0162
-                }
                 return mTerrainGen;
             }
         }
 
         public ULevelStreaming LevelStreaming = new ULevelStreaming();
 
-        public RHI.CConstantBuffer TerrainCBuffer;
+        public NxRHI.UCbView TerrainCBuffer;
 
         public VirtualTexture.UVirtualTextureArray RVTextureArray;
         public UTerrainMaterialIdManager TerrainMaterialIdManager { get; set; }
@@ -224,10 +171,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             IsAcceptShadow = true;
 
-            RVTextureArray = new EngineNS.Bricks.VirtualTexture.UVirtualTextureArray();
-            RVTextureArray.CreateRVT(64, 64, 1, EPixelFormat.PXF_R8G8B8A8_UNORM, 256);
-            var cmd = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList();
-            RVTextureArray.PushTexture2D(cmd, RName.GetRName("utest/texture/xsl.srv"));
+            //RVTextureArray = new EngineNS.Bricks.VirtualTexture.UVirtualTextureArray();
+            //RVTextureArray.CreateRVT(64, 64, 1, EPixelFormat.PXF_R8G8B8A8_UNORM, 256);
+            //var cmd = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList();
+            //RVTextureArray.PushTexture2D(cmd, RName.GetRName("utest/texture/xsl.srv"));
+
+            if(trData.PgcName==null)
+                trData.PgcName = RName.GetRName("UTest/terraingen.pgc");
 
             mTerrainGen = Procedure.UPgcAsset.LoadAsset(trData.PgcName);// RName.GetRName("UTest/terraingen.pgc"));            
             {
@@ -244,9 +194,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if (hmNode != null)
             {
                 TerrainMaterialIdManager = hmNode.MaterialIdManager;
-                TerrainMaterialIdManager.BuildSRV(UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                TerrainMaterialIdManager.BuildSRV();
                 await hmNode.SureMaterialResources();
             }
+
+            float bvSX = 0;
+            float bvSZ = 0;
+            float bvEX = PatchSize * PatchSide * NumOfLevelX;
+            float bvEZ = PatchSize * PatchSide * NumOfLevelZ;
+            this.BoundVolume.mLocalAABB.Minimum.SetValue(bvSX, -0.5f, bvSZ);
+            this.BoundVolume.mLocalAABB.Maximum.SetValue(bvEX, 0.5f, bvEZ);
 
             return true;
         }
@@ -267,22 +224,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             if (TerrainCBuffer == null)
                 return;
-            var varIndex = TerrainCBuffer.mCoreObject.FindVar("GridSize");
-            TerrainCBuffer.SetValue(varIndex, GridSize);
+            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+            TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.GridSize, GridSize);
 
-            varIndex = TerrainCBuffer.mCoreObject.FindVar("PatchSize");
-            TerrainCBuffer.SetValue(varIndex, PatchSize);
+            TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.PatchSize, PatchSize);
 
-            varIndex = TerrainCBuffer.mCoreObject.FindVar("TexUVScale");
-            TerrainCBuffer.SetValue(varIndex, TexUVScale);
+            TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.TexUVScale, TexUVScale);
 
-            varIndex = TerrainCBuffer.mCoreObject.FindVar("MaterialIdUVStep");
-            TerrainCBuffer.SetValue(varIndex, MaterialIdUVStep);
+            TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.MaterialIdUVStep, MaterialIdUVStep);
 
-            varIndex = TerrainCBuffer.mCoreObject.FindVar("DiffuseUVStep");
-            TerrainCBuffer.SetValue(varIndex, DiffuseUVStep);
+            TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.DiffuseUVStep, DiffuseUVStep);
 
-            varIndex = TerrainCBuffer.mCoreObject.FindVar("MorphLODs");
             for (int i = 0; i < MorphRange.Length; i++)
             {
                 LODLayer tmp = new LODLayer();
@@ -295,7 +247,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 tmp.HalfDim = 0.5f * (float)tmp.Dimension;
                 tmp.TwoRcpDim = 2.0f / (float)tmp.Dimension;
 
-                TerrainCBuffer.SetValue(varIndex, in tmp, (uint)i);
+                TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.MorphLODs, i, in tmp);
             }
         }
         protected override void OnParentSceneChanged(GamePlay.Scene.UScene prev, GamePlay.Scene.UScene cur)
@@ -327,13 +279,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 sphere.Radius = radius[i];
                 this.MorphRange[i].Y = (float)sphere.Radius;
-                this.MorphRange[i].X = (float)CoreDefine.DoubleLerp(morphStart, sphere.Radius, 0.8f);
+                this.MorphRange[i].X = (float)CoreDefine.Lerp(morphStart, sphere.Radius, 0.8f);
 
                 morphStart = SphereCover(in sphere, i, radius.Count - 1);
                 morphStart = Math.Sqrt(morphStart);
             }
             this.MorphRange[radius.Count - 1].Y = radius[radius.Count - 1];
-            this.MorphRange[radius.Count - 1].X = (float)CoreDefine.DoubleLerp(morphStart, radius[radius.Count - 1], 0.8f);
+            this.MorphRange[radius.Count - 1].X = (float)CoreDefine.Lerp(morphStart, radius[radius.Count - 1], 0.8f);
 
             for (int i = 0; i < radius.Count; i++)
             {
@@ -390,13 +342,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 sphere.Radius = radius[i];
                 this.MorphRange[i].Y = (float)sphere.Radius;
-                this.MorphRange[i].X = (float)CoreDefine.DoubleLerp(morphStart, sphere.Radius, 0.8f);
+                this.MorphRange[i].X = (float)CoreDefine.Lerp(morphStart, sphere.Radius, 0.8f);
 
                 morphStart = SphereCover(in sphere, i, radius.Count - 1, patches);
                 morphStart = Math.Sqrt(morphStart);
             }
             this.MorphRange[radius.Count - 1].Y = radius[radius.Count - 1];
-            this.MorphRange[radius.Count - 1].X = (float)CoreDefine.DoubleLerp(morphStart, radius[radius.Count - 1], 0.8f);
+            this.MorphRange[radius.Count - 1].X = (float)CoreDefine.Lerp(morphStart, radius[radius.Count - 1], 0.8f);
 
             for (int i = 0; i < radius.Count; i++)
             {

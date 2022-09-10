@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             return GpuSceneNode;
         }
-        public override RHI.CShaderResourceView GetFinalShowRSV()
+        public override NxRHI.USrView GetFinalShowRSV()
         {
             return this.AttachmentCache.FindAttachement(FinalCopyNode.GBuffers.RenderTargets[0].Attachement.AttachmentName).Srv;
         }
@@ -235,7 +235,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             return null;
         }
         //渲染DrawCall的时候调用，如果产生了对应的ShadingType的Drawcall，则会callback到这里设置一些这个shading的特殊参数
-        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, RHI.CDrawCall drawcall, Mesh.UMesh mesh, int atom)
+        public override void OnDrawCall(Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Mesh.UMesh mesh, int atom)
         {
             mesh.MdfQueue.OnDrawCall(shadingType, drawcall, this, mesh);
             //drawcall.Effect.ShadingEnv
@@ -280,33 +280,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             PickHollowNode?.TickLogic(world, this, true);
 
             FinalCopyNode?.TickLogic(world, this, true);
-        }
-        public unsafe override void TickRender()
-        {
-            if (this.DisableShadow == false)
-                mShadowMapNode?.TickRender(this);
-
-            GpuSceneNode?.TickRender(this);
-
-            BasePassNode?.TickRender(this);
-
-            ScreenTilingNode?.TickRender(this);
-
-            HzbNode?.TickRender(this);
-
-            VoxelsNode?.TickRender(this);
-
-            TranslucentNode?.TickRender(this);
-
-            HitproxyNode?.TickRender(this);
-
-            PickedNode?.TickRender(this);
-            
-            PickBlurNode?.TickRender(this);
-
-            PickHollowNode?.TickRender(this);
-
-            FinalCopyNode?.TickRender(this);
         }
         public unsafe override void TickSync()
         {

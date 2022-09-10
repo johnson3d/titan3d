@@ -57,9 +57,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     {
         public UTerrainLevel Level;
         public UPatch[,] TiledPatch;
-        public RHI.CShaderResourceView HeightMapSRV;
-        public RHI.CShaderResourceView NormalMapSRV;
-        public RHI.CShaderResourceView MaterialIdMapSRV;
+        public NxRHI.USrView HeightMapSRV;
+        public NxRHI.USrView WaterHMapSRV;
+        public NxRHI.USrView NormalMapSRV;
+        public NxRHI.USrView MaterialIdMapSRV;
         public float HeightMapMinHeight;
         public float HeightMapMaxHeight;
         
@@ -106,13 +107,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             
             if (bForce)
             {
-                BuildLevelDataFromPGC(Level.Node.GetNodeData<UTerrainNode.UTerrainData>().PgcName);
+                BuildLevelDataFromPGC(Level.Node.GetNodeData<UTerrainNode.UTerrainData>());
             }
             else
             {
                 await UEngine.Instance.EventPoster.Post(() =>
                 {
-                    BuildLevelDataFromPGC(Level.Node.GetNodeData<UTerrainNode.UTerrainData>().PgcName);
+                    BuildLevelDataFromPGC(Level.Node.GetNodeData<UTerrainNode.UTerrainData>());
                     return true;
                 }, Thread.Async.EAsyncTarget.AsyncIO);
             }
@@ -131,9 +132,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             var hMap = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
             var norMap = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>>(1, 1, 1));
+            var waterMap = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
             var idMap = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(1, 1, 1));
             var transform = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<FTransform, Procedure.FTransformOperator>>(1, 1, 1));
             var plants = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Int32_2, Procedure.FInt2Operator>>(1, 1, 1));
+            var grasses = Procedure.UBufferConponent.CreateInstance(Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<FGrassTransformData, FGrassTransformDataOperator>>(1, 1, 1));
 
             using (var xnd = IO.CXndHolder.LoadXnd(file))
             {
@@ -161,6 +164,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     return false;
                 norMap.LoadXnd(node, Hash160.Emtpy);
 
+                node = xnd.RootNode.TryGetChildNode("WaterMap");
+                if (node.IsValidPointer == false)
+                {
+                    waterMap.LoadXnd(node, Hash160.Emtpy);
+                }
+                else
+                {
+                    waterMap = null;
+                }
+
                 node = xnd.RootNode.TryGetChildNode("MatIdMap");
                 if (node.IsValidPointer == false)
                     return false;
@@ -175,25 +188,45 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 if (node.IsValidPointer == false)
                     return false;
                 plants.LoadXnd(node, Hash160.Emtpy);
+
+                node = xnd.RootNode.TryGetChildNode("GrassInfo");
+                if (node.IsValidPointer)
+                {
+                    grasses.LoadXnd(node, Hash160.Emtpy);
+                }
             }
 
-            CreateFromBuffer(hMap, norMap, idMap, transform, plants);
+            CreateFromBuffer(hMap, norMap, waterMap, idMap, transform, plants, grasses);
             return true;
         }
 
-        private void CreateFromBuffer(Procedure.UBufferConponent hMap, Procedure.UBufferConponent norMap, 
-            Procedure.UBufferConponent idMap, Procedure.UBufferConponent transform, Procedure.UBufferConponent plants)
+        private void CreateFromBuffer(Procedure.UBufferConponent hMap, Procedure.UBufferConponent norMap, Procedure.UBufferConponent waterMap,
+            Procedure.UBufferConponent idMap, Procedure.UBufferConponent transform, Procedure.UBufferConponent plants, 
+            Procedure.UBufferConponent grass)
+        {
+            UpdateHeightMap(hMap);
+
+            UpdateNormalMap(norMap);
+
+            UpdateWaterMap(waterMap);
+
+            UpdateMaterialIdMap(idMap);
+
+            UpdatePlants(transform, plants);
+
+            UpdateGrass(grass);
+        }
+
+        public void UpdateHeightMap(Procedure.UBufferConponent hMap)
         {
             var patchSide = Level.PatchSide;
-            var terrainGen = Level.Node.TerrainGen;
-            var IdMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.UMaterialIdMapNode;
-
             TiledPatch = new UPatch[patchSide, patchSide];
             for (int i = 0; i < patchSide; i++)
             {
                 for (int j = 0; j < patchSide; j++)
                 {
-                    TiledPatch[i, j] = new UPatch();
+                    if (TiledPatch[i, j] == null)
+                        TiledPatch[i, j] = new UPatch();
                     TiledPatch[i, j].Initialize(this, j, i, hMap);
                 }
             }
@@ -219,10 +252,28 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             InitPhysics(Level);
 
             HeightMapSRV = hMap.CreateAsHeightMapTexture2D(HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
+        }
+
+        public void UpdateWaterMap(Procedure.UBufferConponent waterMap)
+        {
+            if (waterMap == null)
+                return;
+            WaterHMapSRV = waterMap.CreateAsHeightMapTexture2D(HeightMapMinHeight, HeightMapMaxHeight, EPixelFormat.PXF_R16_FLOAT);
+        }
+        
+        public void UpdateNormalMap(Procedure.UBufferConponent norMap)
+        {
             var norImage = new Bricks.Procedure.UImage2D();
             norImage.Initialize(norMap.Width, norMap.Height,
                 norMap as Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>,
                 null, 0);
+
+            NormalMapSRV = norImage.CreateRGBA8Texture2DAsNormal(); //terrainGen.mResultNormalImage.CreateRGBA8Texture2DAsNormal();
+        }
+        public void UpdateMaterialIdMap(Procedure.UBufferConponent idMap)
+        {
+            if (idMap == null)
+                return;
 
             var idMapImage = new Bricks.Procedure.UImage2D();
             idMapImage.Initialize(idMap.Width, idMap.Height,
@@ -231,9 +282,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 null,
                 null);
 
-            NormalMapSRV = norImage.CreateRGBA8Texture2DAsNormal(); //terrainGen.mResultNormalImage.CreateRGBA8Texture2DAsNormal();
             MaterialIdMapSRV = idMapImage.CreateRGBA8Texture2D(false);
-
+        }
+        public void UpdatePlants(Procedure.UBufferConponent transform, Procedure.UBufferConponent plants)
+        {
+            var terrainGen = Level.Node.TerrainGen;
+            var IdMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.UMaterialIdMapNode;
             if (transform != null && plants != null)
             {
                 for (int i = 0; i < plants.Width; i++)
@@ -247,14 +301,105 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
             }
         }
+        //////////////////////////////////////////////////
+        //static bool GAdded = false;
+        //////////////////////////////////////////////////
+        public unsafe void UpdateGrass(Procedure.UBufferConponent grass)
+        {
+            if (grass == null || grass.Width <= 0)
+                return;
+
+            var terrainGen = Level.Node.TerrainGen;
+            var idMapNode = terrainGen.AssetGraph.FindFirstNode("MatIdMapping") as Procedure.Node.UMaterialIdMapNode;
+            var grassAdr = grass.GetSuperPixelAddress(0, 0, 0);
+            float minScale = float.MaxValue;
+            float maxScale = float.MinValue;
+            //////////////////////////////////////////////////
+            //DVector3 maxPos = new DVector3(double.MinValue, double.MinValue, double.MinValue);
+            //DVector3 minPos = new DVector3(double.MaxValue, double.MaxValue, double.MaxValue);
+            //////////////////////////////////////////////////
+            for (int i=0; i<grass.Width; i++)
+            {
+                FGrassTransformData* tData = (FGrassTransformData*)(grassAdr + i * sizeof(FGrassTransformData));
+                var scale = tData->Transform.Scale.Y;
+                if(scale < minScale)
+                    minScale = scale;
+                if(scale > maxScale)
+                    maxScale = scale;
+                //////////////////////////////////////////////////
+                //if (maxPos.X < tData->Transform.Position.X)
+                //    maxPos.X = tData->Transform.Position.X;
+                //if(maxPos.Y < tData->Transform.Position.Y)
+                //    maxPos.Y = tData->Transform.Position.Y;
+                //if(maxPos.Z < tData->Transform.Position.Z)
+                //    maxPos.Z = tData->Transform.Position.Z;
+                //if(minPos.X > tData->Transform.Position.X)
+                //    minPos.X = tData->Transform.Position.X;
+                //if(minPos.Y > tData->Transform.Position.Y)
+                //    minPos.Y = tData->Transform.Position.Y;
+                //if(minPos.Z > tData->Transform.Position.Z)
+                //    minPos.Z = tData->Transform.Position.Z;
+                //////////////////////////////////////////////////
+            }
+            for(int i=0; i<grass.Width; i++)
+            {
+                //////////////////////////////////////////////////
+                //if (i > 1 || GAdded)
+                //{
+                //    GAdded = true;
+                //    break;
+                //}
+                //////////////////////////////////////////////////
+                ref var p = ref grass.GetPixel<FGrassTransformData>(i, 0, 0);
+                var levelSize = Level.PatchSide * Level.Node.PatchSize;
+                if((p.Transform.Position.X < Level.StartPosition.X) || (p.Transform.Position.X > Level.StartPosition.X + levelSize) ||
+                   (p.Transform.Position.Z < Level.StartPosition.Z) || (p.Transform.Position.Z > Level.StartPosition.Z + levelSize))
+                        continue;
+
+                var material = idMapNode.MaterialIdManager.MaterialIdArray[(int)p.MaterialIdx];
+                var grs = material.Grasses[(int)p.GrassIdx];
+                grs.MinScale = minScale;
+                grs.MaxScale = maxScale;
+                // to patch
+                var patchIdxX = (int)((p.Transform.Position.X - Level.StartPosition.X) / GetTerrainNode().PatchSize);
+                var patchIdxY = (int)((p.Transform.Position.Z - Level.StartPosition.Z) / GetTerrainNode().PatchSize);
+
+                //////////////////////////////////////////////////
+                //if (patchIdxX != 0 || patchIdxY != 1)
+                //    continue;
+                //patchIdxX = 1;
+                //patchIdxY = 1;
+                //p.Transform.Position = new DVector3(patchIdxX * Level.Node.PatchSize, 0, patchIdxY * Level.Node.PatchSize) + Level.StartPosition;
+                //p.Transform.Scale = new Vector3(minScale);
+                //p.Transform.Quat = Quaternion.Identity;
+                //if (i == 1)
+                //{
+                //    p.Transform.Position += new DVector3(40, 0, 0);
+                //    p.Transform.Scale = new Vector3(maxScale);
+                //    p.Transform.Quat = Quaternion.RotationAxis(Vector3.Up, (float)(System.Math.PI * 0.25));
+                //}
+                //////////////////////////////////////////////////
+
+                if (Level.PatchSide <= patchIdxX || Level.PatchSide <= patchIdxY)
+                    continue;
+                var patch = TiledPatch[patchIdxY, patchIdxX];
+                var patchOffset = new DVector3(
+                    patchIdxX * GetTerrainNode().PatchSize + Level.StartPosition.X,
+                    Level.StartPosition.Y,
+                    patchIdxY * GetTerrainNode().PatchSize + Level.StartPosition.Z);
+                patch.GrassManager.AddGrass(patch, patchOffset, grs, p.Transform, grass.Width);
+            }
+        }
         protected unsafe void SaveLevelToCache(string file, in Hash160 hash)
         {
             var terrainGen = Level.Node.TerrainGen;
-            var hMap = terrainGen.AssetGraph.Root.GetResultBuffer(0);
-            var norMap = terrainGen.AssetGraph.Root.GetResultBuffer(1);
-            var idMap = terrainGen.AssetGraph.Root.GetResultBuffer(2);
-            var transform = terrainGen.AssetGraph.Root.GetResultBuffer(3);
-            var plants = terrainGen.AssetGraph.Root.GetResultBuffer(4);
+            var hMap = terrainGen.AssetGraph.Root.GetResultBuffer("Height");
+            var norMap = terrainGen.AssetGraph.Root.GetResultBuffer("Normal");
+            var idMap = terrainGen.AssetGraph.Root.GetResultBuffer("MatId");
+            var waterMap = terrainGen.AssetGraph.Root.GetResultBuffer("Water");
+            var transform = terrainGen.AssetGraph.Root.GetResultBuffer("Transform");
+            var plants = terrainGen.AssetGraph.Root.GetResultBuffer("Plants");
+            var grasses = terrainGen.AssetGraph.Root.GetResultBuffer("Grass");
 
             using (var xnd = new IO.CXndHolder("TrLevel", 0, 0))
             {
@@ -266,41 +411,89 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     attr.ReleaseWriter(ref ar);
                 }
 
-                using (var node = xnd.NewNode("HeightMap", 0, 0))
+                if (hMap != null)
                 {
-                    xnd.RootNode.AddNode(node);
-                    hMap.SaveXnd(xnd, node, in Hash160.Emtpy);
+                    using (var node = xnd.NewNode("HeightMap", 0, 0))
+                    {
+                        xnd.RootNode.AddNode(node);
+                        hMap.SaveXnd(xnd, node, in Hash160.Emtpy);
+                    }
                 }
 
-                using (var node = xnd.NewNode("NormalMap", 0, 0))
+                if (hMap != null)
                 {
-                    xnd.RootNode.AddNode(node);
-                    norMap.SaveXnd(xnd, node, in Hash160.Emtpy);
+                    using (var node = xnd.NewNode("HeightMap", 0, 0))
+                    {
+                        xnd.RootNode.AddNode(node);
+                        hMap.SaveXnd(xnd, node, in Hash160.Emtpy);
+                    }
                 }
 
-                using (var node = xnd.NewNode("MatIdMap", 0, 0))
+                if (norMap != null)
                 {
-                    xnd.RootNode.AddNode(node);
-                    idMap.SaveXnd(xnd, node, in Hash160.Emtpy);
+                    using (var node = xnd.NewNode("NormalMap", 0, 0))
+                    {
+                        xnd.RootNode.AddNode(node);
+                        norMap.SaveXnd(xnd, node, in Hash160.Emtpy);
+                    }
                 }
 
-                using (var node = xnd.NewNode("PlantTransform", 0, 0))
+                if (idMap != null)
                 {
-                    xnd.RootNode.AddNode(node);
-                    transform.SaveXnd(xnd, node, in Hash160.Emtpy);
+                    using (var node = xnd.NewNode("MatIdMap", 0, 0))
+                    {
+                        xnd.RootNode.AddNode(node);
+                        idMap.SaveXnd(xnd, node, in Hash160.Emtpy);
+                    }
                 }
 
-                using (var node = xnd.NewNode("PlantInfo", 0, 0))
+                if (waterMap != null)
                 {
-                    xnd.RootNode.AddNode(node);
-                    plants.SaveXnd(xnd, node, in Hash160.Emtpy);
+                    using (var node = xnd.NewNode("WaterMap", 0, 0))
+                    {
+                        xnd.RootNode.AddNode(node);
+                        waterMap.SaveXnd(xnd, node, in Hash160.Emtpy);
+                    }
+                }
+
+                if (transform != null)
+                {
+                    using (var node = xnd.NewNode("PlantTransform", 0, 0))
+                    {
+                        xnd.RootNode.AddNode(node);
+                        transform.SaveXnd(xnd, node, in Hash160.Emtpy);
+                    }
+                }
+
+                if (plants != null)
+                {
+                    using (var node = xnd.NewNode("PlantInfo", 0, 0))
+                    {
+                        xnd.RootNode.AddNode(node);
+                        plants.SaveXnd(xnd, node, in Hash160.Emtpy);
+                    }
+                }
+
+                if(grasses != null)
+                {
+                    using (var node = xnd.NewNode("GrassInfo", 0, 0))
+                    {
+                        xnd.RootNode.AddNode(node);
+                        grasses.SaveXnd(xnd, node, in Hash160.Emtpy);
+                    }
                 }
 
                 xnd.SaveXnd(file);
             }   
         }
-        protected void BuildLevelDataFromPGC(RName terrainName)
+        protected void BuildLevelDataFromPGC(UTerrainNode.UTerrainData nodeData)
         {
+            RName terrainName = nodeData.PgcName;
+            if (terrainName == null)
+            {
+                BuildEmptyLevelData(nodeData.LevelSideX, nodeData.LevelSideZ);
+                return;
+            }
             var patchSide = Level.PatchSide;
             var terrainGen = Level.Node.TerrainGen;
 
@@ -321,16 +514,19 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //    await IdMapNode.SureMaterialResources();
 
             var noise1 = terrainGen.AssetGraph.FindFirstNode("NoisePerlin1") as Procedure.Node.UNoisePerlin;
-            var noise2 = terrainGen.AssetGraph.FindFirstNode("NoisePerlin2") as Procedure.Node.UNoisePerlin;
-            noise1.StartPosition = Level.StartPosition;
-            noise2.StartPosition = Level.StartPosition;
-
-            //make border guard 2 + 1024 + 3
-            noise1.StartPosition.X -= noise1.Border;
-            noise1.StartPosition.Z -= noise1.Border;
-
-            noise2.StartPosition.X -= noise1.Border;
-            noise2.StartPosition.Z -= noise1.Border;
+            if(noise1!=null)
+            {
+                noise1.StartPosition = Level.StartPosition;
+                noise1.StartPosition.X -= noise1.Border;
+                noise1.StartPosition.Z -= noise1.Border;
+            }
+            //var noise2 = terrainGen.AssetGraph.FindFirstNode("NoisePerlin2") as Procedure.Node.UNoisePerlin;
+            //if (noise2 != null)
+            //{
+            //    noise2.StartPosition = Level.StartPosition;
+            //    noise2.StartPosition.X -= noise1.Border;
+            //    noise2.StartPosition.Z -= noise1.Border;
+            //}
 
             var trans = terrainGen.AssetGraph.FindFirstNode("Plants") as Procedure.Node.UTransformBuilder;
             if (trans != null)
@@ -340,16 +536,31 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 trans.Offset = Level.StartPosition;
             }
 
-            terrainGen.Compile();
-            var hMap = terrainGen.AssetGraph.Root.GetResultBuffer(0);
-            var norMap = terrainGen.AssetGraph.Root.GetResultBuffer(1) as Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>;
-            var idMap = terrainGen.AssetGraph.Root.GetResultBuffer(2) as Procedure.USuperBuffer<float, Procedure.FFloatOperator>;
-            var transform = terrainGen.AssetGraph.Root.GetResultBuffer(3) as Procedure.USuperBuffer<FTransform, Procedure.FTransformOperator>;
-            var plants = terrainGen.AssetGraph.Root.GetResultBuffer(4) as Procedure.USuperBuffer<Int32_2, Procedure.FInt2Operator>;
-            CreateFromBuffer(hMap, norMap, idMap, transform, plants);
+            var root = terrainGen.AssetGraph.Root;
+            terrainGen.Compile(root);
+            var hMap = root.GetResultBuffer("Height");
+            var norMap = root.GetResultBuffer("Normal") as Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>;
+            var idMap = root.GetResultBuffer("MatId") as Procedure.USuperBuffer<float, Procedure.FFloatOperator>;
+            var waterMap = root.GetResultBuffer("Water") as Procedure.USuperBuffer<float, Procedure.FFloatOperator>;
+            var transform = root.GetResultBuffer("Transform") as Procedure.USuperBuffer<FTransform, Procedure.FTransformOperator>;
+            var plants = root.GetResultBuffer("Plants") as Procedure.USuperBuffer<Int32_2, Procedure.FInt2Operator>;
+            var grasses = root.GetResultBuffer("Grass") as Procedure.USuperBuffer<FGrassTransformData, FGrassTransformDataOperator>;
+            CreateFromBuffer(hMap, norMap, waterMap, idMap, transform, plants, grasses);
             
             SaveLevelToCache(lvlFile, Level.Node.TerrainGenHash);
             terrainGen.AssetGraph.BufferCache.ResetCache();
+        }
+        protected void BuildEmptyLevelData(int xSize, int ySize)
+        {
+            var creator = Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(xSize, ySize, 1);
+            var hMap = Procedure.UBufferConponent.CreateInstance(creator);
+            var waterMap = Procedure.UBufferConponent.CreateInstance(creator);
+            creator = Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<Vector3, Procedure.FFloat3Operator>>(xSize, ySize, 1);
+            var norMap = Procedure.UBufferConponent.CreateInstance(creator);
+            creator = Procedure.UBufferCreator.CreateInstance<Procedure.USuperBuffer<float, Procedure.FFloatOperator>>(xSize, ySize, 1);
+            var idMap = Procedure.UBufferConponent.CreateInstance(creator);
+
+            CreateFromBuffer(hMap, norMap, waterMap, idMap, null, null, null);
         }
         #region Px & Collide
         public unsafe void InitPhysics(UTerrainLevel level)
@@ -362,7 +573,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 var materials = new Bricks.PhysicsCore.UPhyMaterial[1];
                 materials[0] = UEngine.Instance.PhyModue.PhyContext.PhyMaterialManager.DefaultMaterial;
                 var terrainShape = pc.CreateShapeHeightfield(materials,
-                    PhyHeightfield, PxHeightfieldScale, in Vector3.UnitXYZ);
+                    PhyHeightfield, PxHeightfieldScale, in Vector3.One);
 
                 PhyActor = pc.CreateActor(EPhyActorType.PAT_Static, in Level.Node.Placement.AbsTransform.mPosition, in Quaternion.Identity);
                 Vector3 shapeCenter;
@@ -391,9 +602,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var h1 = (float)(PxHeightfieldSamples[(zGrid + 1) * HeightfieldWidth + xGrid].height) * PxHeightfieldScale;
             var h2 = (float)(PxHeightfieldSamples[(zGrid + 1) * HeightfieldWidth + xGrid + 1].height) * PxHeightfieldScale;
             var h3 = (float)(PxHeightfieldSamples[zGrid * HeightfieldWidth + xGrid + 1].height) * PxHeightfieldScale;
-            var zT1 = CoreDefine.FloatLerp(h0, h1, zLerp);
-            var zT2 = CoreDefine.FloatLerp(h3, h2, zLerp);
-            return CoreDefine.FloatLerp(zT1, zT2, xLerp) + (HeightMapMinHeight + HeightMapMaxHeight) * 0.5f;
+            var zT1 = CoreDefine.Lerp(h0, h1, zLerp);
+            var zT2 = CoreDefine.Lerp(h3, h2, zLerp);
+            return CoreDefine.Lerp(zT1, zT2, xLerp) + (HeightMapMinHeight + HeightMapMaxHeight) * 0.5f;
         }
         #endregion
         public void SetAcceptShadow(bool value)

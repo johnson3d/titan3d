@@ -53,7 +53,7 @@ namespace EngineNS.Bricks.PhysicsCore
             matrials[0] = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/SysDft_Color.material", RName.ERNameType.Engine));
             matrials[0].RenderLayer = Graphics.Pipeline.ERenderLayer.RL_Translucent;
             var rast = matrials[0].Rasterizer;
-            rast.FillMode = EFillMode.FMD_WIREFRAME;
+            rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
             matrials[0].Rasterizer = rast;
             ShowMesh.Initialize(meshPrimitve, matrials);
 
@@ -88,7 +88,7 @@ namespace EngineNS.Bricks.PhysicsCore
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"PxTriMesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMesh;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.MainWindow, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
             UEngine.Instance.TickableManager.AddTickable(this);
 
             TriMeshPropGrid.Target = TriMesh;
@@ -118,7 +118,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 }
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }

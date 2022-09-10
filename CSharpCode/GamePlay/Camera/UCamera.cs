@@ -108,11 +108,11 @@ namespace EngineNS.GamePlay.Camera
 
         #endregion
 
-        public override bool OnTickLogic(UWorld world, URenderPolicy policy)
-        {
-            var dir = Placement.AbsTransform.Quat * Vector3.Forward;
-            LookAtLH(Location, Location + dir * 10, Vector3.Up);
-            return base.OnTickLogic(world, policy);
-        }
+        //public override bool OnTickLogic(UWorld world, URenderPolicy policy)
+        //{
+        //    var dir = Placement.AbsTransform.Quat * Vector3.Forward;
+        //    LookAtLH(Location, Location + dir * 10, Vector3.Up);
+        //    return base.OnTickLogic(world, policy);
+        //}
     }
 }

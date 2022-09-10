@@ -48,6 +48,7 @@ namespace EngineNS.Thread
                     }
                     else
                     {
+                        UEngine.Instance.ContextThreadManager.mTPoolTrigger.Reset();
                         break;
                     }
                 }
@@ -65,8 +66,12 @@ namespace EngineNS.Thread
                     UEngine.Instance.EventPoster.mRunOnPEAllocator.ReleaseObject(e);
                 }
             }
-            UEngine.Instance.ContextThreadManager.mTPoolTrigger.Reset();
 
+            //lock (events)
+            //{
+            //    if (events.Count == 0)
+            //        UEngine.Instance.ContextThreadManager.mTPoolTrigger.Reset();
+            //}
             TickAwaitEvent();
         }
         protected override void OnThreadStart()

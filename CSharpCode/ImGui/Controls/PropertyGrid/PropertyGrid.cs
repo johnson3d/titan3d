@@ -60,6 +60,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             public bool Readonly;
             public bool Expand;
             public ImGuiTreeNodeFlags_ Flags;
+            public CustomPropertyDescriptor HostProperty;
         }
         //public virtual void OnDraw(System.Reflection.PropertyInfo prop, object target, object value, Controls.PropertyGrid.PropertyGrid pg, List<KeyValuePair<object, System.Reflection.PropertyInfo>> callstack)
         public virtual bool OnDraw(in EditorInfo info, out object newValue)
@@ -96,9 +97,17 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public UTypeSelector.EFilterMode FilterMode = UTypeSelector.EFilterMode.IncludeObjectType | UTypeSelector.EFilterMode.IncludeValueType;
 
         public Rtti.UTypeDesc BaseType;
+        public PGTypeEditorAttribute()
+        {
+
+        }
         public PGTypeEditorAttribute(System.Type baseType)
         {
             BaseType = Rtti.UTypeDesc.TypeOf(baseType);
+        }
+        public PGTypeEditorAttribute(Rtti.UTypeDesc[] types)
+        {
+            TypeSlt.TypeList = types;
         }
         protected static EGui.Controls.UTypeSelector TypeSlt = new EGui.Controls.UTypeSelector();
         public override bool OnDraw(in EditorInfo info, out object newValue)
@@ -145,6 +154,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     public interface IPropertyCustomization
     {
         void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType);
+        object? GetPropertyValue(string propertyName);
+        void SetPropertyValue(string propertyName, object? value);
     }
 
     public class PGProvider

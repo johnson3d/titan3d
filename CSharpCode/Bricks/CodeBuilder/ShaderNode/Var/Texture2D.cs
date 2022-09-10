@@ -11,7 +11,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut OutTex { get; set; } = new PinOut();
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = RHI.CShaderResourceView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
         [System.ComponentModel.Browsable(false)]
         public RName AssetName
         {
@@ -30,7 +30,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 exec();
             }
         }
-        private RHI.CShaderResourceView TextureSRV;
+        private NxRHI.USrView TextureSRV;
         public Texture2D()
         {
             VarType = Rtti.UTypeDescGetter<Texture2D>.TypeDesc;

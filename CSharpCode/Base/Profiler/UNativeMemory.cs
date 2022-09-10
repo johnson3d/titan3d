@@ -32,7 +32,7 @@ namespace EngineNS.Profiler
         //在做ClrProfiler的时候，不要MarshalString，否则会干扰ObjectAllocate统计!!!!!
         private unsafe void OnNativeMemAllocImpl(IntPtr size, sbyte* file, IntPtr line, IntPtr id)
         {
-            //if ((uint)id == 9584)
+            //if ((uint)id == 2085)
             //{
             //    return;
             //}

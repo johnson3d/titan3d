@@ -7,8 +7,8 @@ namespace EngineNS
     [TypeConverter]
     public struct FTransform
     {
-        public static FTransform IdentityForRef = FTransform.CreateTransform(in DVector3.Zero, in Vector3.UnitXYZ, in Quaternion.Identity);
-        public readonly static FTransform Identity = FTransform.CreateTransform(in DVector3.Zero, in Vector3.UnitXYZ, in Quaternion.Identity);
+        public static FTransform IdentityForRef = FTransform.CreateTransform(in DVector3.Zero, in Vector3.One, in Quaternion.Identity);
+        public readonly static FTransform Identity = FTransform.CreateTransform(in DVector3.Zero, in Vector3.One, in Quaternion.Identity);
         public FTransform(in FTransform trans)
         {
             mPosition = trans.mPosition;

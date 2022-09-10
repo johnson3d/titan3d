@@ -17,7 +17,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainMdfQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainPlant.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Grass\UGrassModifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Grass\UMdfGrassStaticMesh.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UQTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CDLOD\UTerrainGrass.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UTerrainModule.cs" />
   </ItemGroup>
   <ItemGroup>

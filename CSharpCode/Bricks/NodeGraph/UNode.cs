@@ -1,10 +1,11 @@
-﻿using System;
+﻿using EngineNS.EGui.Controls.PropertyGrid;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.Bricks.NodeGraph
 {
-    public class GraphException : Exception
+    public class GraphException : Exception, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public UNodeBase ErrorNode;
         public NodePin ErrorPin;
@@ -26,6 +27,40 @@ namespace EngineNS.Bricks.NodeGraph
             ErrorNode = node;
             ErrorPin = pin;
             ErrorInfo = $"{sourceFilePath}:{sourceLineNumber}->{memberName}->{info}";
+        }
+
+        public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            if(ErrorPin != null)
+            {
+                var pinNameProDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                pinNameProDesc.Name = "ErrorPinName";
+                pinNameProDesc.PropertyType = Rtti.UTypeDesc.TypeOf(typeof(string));
+                pinNameProDesc.IsReadonly = true;
+                collection.Add(pinNameProDesc);
+            }
+
+            var infoProDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+            infoProDesc.Name = "ErrorInfo";
+            infoProDesc.PropertyType = Rtti.UTypeDesc.TypeOf(typeof(string));
+            infoProDesc.IsReadonly = true;
+            collection.Add(infoProDesc);
+        }
+
+        public object GetPropertyValue(string propertyName)
+        {
+            switch(propertyName)
+            {
+                case "ErrorPinName":
+                    return ErrorPinName;
+                case "ErrorInfo":
+                    return ErrorInfo;
+            }
+            return null;
+        }
+
+        public void SetPropertyValue(string propertyName, object value)
+        {
         }
     }
 
@@ -101,10 +136,25 @@ namespace EngineNS.Bricks.NodeGraph
     public interface IBeforeExecNode
     {
         public PinIn BeforeExec { get; set; }
+        public void LightDebuggerLine();
+        public void UnLightDebuggerLine();
     }
     public interface IAfterExecNode
     {
         public PinOut AfterExec { get; set; }
+    }
+
+    public enum EBreakerState
+    {
+        Hidden,
+        Enable,
+        Disable,
+    }
+    public interface IBreakableNode
+    {
+        public string BreakerName { get; }
+        public EBreakerState BreakerState { get; set; }
+        public void AddMenuItems(UMenuItem parentItem);
     }
 
     public class UNodeBase : IO.ISerializer
@@ -129,9 +179,16 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
         [Rtti.Meta]
-        public virtual string Name { get; set; }
+        public virtual string Name { get; set; } = "NoName";
         [Rtti.Meta]
         public Guid NodeId { get; set; }
+        public string NodeType
+        {
+            get
+            {
+                return this.GetType().Name;
+            }
+        }
         public bool Selected { get; set; }
         internal Vector2 mPosition;
         [Rtti.Meta]
@@ -145,6 +202,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
         public Vector2 Size { get; set; }
+        public Vector2 PrevPos;
         public Vector2 PrevSize { get; set; }
         public EGui.UUvAnim Icon { get; set; } = new EGui.UUvAnim();
         public float TitleHeight { get; set; }
@@ -260,7 +318,8 @@ namespace EngineNS.Bricks.NodeGraph
             TitleHeight = lineHeight;
             fNodeH += TitleHeight;
             fNodeH += styles.TitlePadding.Y;
-
+            PrevPos.Y = Position.Y + fNodeH;
+            float maxInputSizeX = 0;
             var lines = Math.Max(Inputs.Count, Outputs.Count);
             for (int i = 0; i < lines; i++)
             {
@@ -320,6 +379,7 @@ namespace EngineNS.Bricks.NodeGraph
 
                     Inputs[i].EditValuePosition = Inputs[i].NamePosition + new Vector2(styles.PinSpacing + nameSize.X, 0);
                 }
+                SetIfBigger(ref maxInputSizeX, lineWidth);
                 if (i < Outputs.Count)
                 {
                     var inIcon = styles.PinOutStyle.Image;
@@ -355,10 +415,12 @@ namespace EngineNS.Bricks.NodeGraph
                 SetIfBigger(ref fNodeW, lineWidth);
                 fNodeH += (lineHeight + styles.PinPadding + extPadding);
             }
-            Size = new Vector2(fNodeW + PrevSize.X + styles.MinSpaceInOut, fNodeH);
-            if (fNodeH - TitleHeight < PrevSize.Y)
+            PrevPos.X = Position.X + maxInputSizeX + styles.PinSpacing;
+            var doubleSpacing = styles.PinSpacing * 2;
+            Size = new Vector2(fNodeW + PrevSize.X + styles.MinSpaceInOut + doubleSpacing, fNodeH);
+            if ((fNodeH - TitleHeight) < (PrevSize.Y + doubleSpacing))
             {
-                Size = new Vector2(Size.X, TitleHeight + PrevSize.Y);
+                Size = new Vector2(Size.X, TitleHeight + PrevSize.Y + doubleSpacing);
             }
             for (int i = 0; i < Outputs.Count; i++)
             {
@@ -668,6 +730,32 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
             return true;
+        }
+
+        public static void AddDebugBreakerStatement(string breakName, ref BuildCodeStatementsData data)
+        {
+            var breakType = Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Macross.UMacrossBreak));
+            var breakDef = new CodeBuilder.UVariableDeclaration()
+            {
+                VariableType = new CodeBuilder.UTypeReference(breakType),
+                VariableName = breakName,
+                InitValue = new CodeBuilder.UCreateObjectExpression(data.CodeGen.GetTypeString(breakType), new CodeBuilder.UPrimitiveExpression(breakName))
+            };
+            if (!data.ClassDec.PreDefineVariables.Contains(breakDef))
+                data.ClassDec.PreDefineVariables.Add(breakDef);
+            data.CurrentStatements.Add(new CodeBuilder.UDebuggerTryBreak(breakName));
+        }
+        public static string GetRuntimeValueString(string name)
+        {
+            if (Macross.UMacrossDebugger.Instance.CurrrentBreak != null && Macross.UMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame != null)
+            {
+                if (Macross.UMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame.HasWatchVariable(name))
+                {
+                    var obj = Macross.UMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame.GetWatchVariable(name);
+                    return (obj == null) ? "null" : obj.ToString() + " ";
+                }
+            }
+            return "";
         }
     }
 }

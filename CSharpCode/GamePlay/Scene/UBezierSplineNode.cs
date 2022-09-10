@@ -5,6 +5,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
+    [Bricks.CodeBuilder.ContextMenu("Bezier", "BezierSpline", UNode.EditorKeyword)]
     [UNode(NodeDataType = typeof(UBezierSplineNode.UBezierSplineNodeData), DefaultNamePrefix = "BzSpline")]
     public class UBezierSplineNode : USceneActorNode
     {
@@ -21,13 +22,13 @@ namespace EngineNS.GamePlay.Scene
                 //test code
                 Spline = new UBezier3DSpline();
                 
-                Spline.AppendPoint(in Vector3.Zero, in Vector3.UnitXYZ);
+                Spline.AppendPoint(in Vector3.Zero, in Vector3.One);
                 
                 var end = new Vector3(1, 1, 0);
-                Spline.AppendPoint(in end, end - Vector3.UnitXYZ);
+                Spline.AppendPoint(in end, end - Vector3.One);
 
                 end = new Vector3(10, 5, 3);
-                Spline.AppendPoint(in end, end + Vector3.UnitXYZ);
+                Spline.AppendPoint(in end, end + Vector3.One);
             }
         }
 
@@ -126,7 +127,7 @@ namespace EngineNS.GamePlay.Scene
         public void UpdateSplineMesh()
         {
             {
-                var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeBezier3DSpline(Spline, 0xFFFFFFFF).ToMesh();
+                var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeBezier3DSpline(Spline, 0xFFFFFFFF).ToMesh();
                 if (cookedMesh == null)
                     return;
                 var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
@@ -157,7 +158,7 @@ namespace EngineNS.GamePlay.Scene
                     pointSmooth = splineData.PointSmooth;
                 }
                 
-                var cookedMesh = Graphics.Mesh.CMeshDataProvider.MakeSphere(radius, pointSmooth, pointSmooth, 0xffffffff).ToMesh();
+                var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeSphere(radius, pointSmooth, pointSmooth, 0xffffffff).ToMesh();
                 if (cookedMesh == null)
                     return;
                 var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
@@ -195,7 +196,7 @@ namespace EngineNS.GamePlay.Scene
                         UEngine.Instance.GfxDevice.HitproxyManager.MapProxy(sPoint);
                         SplinePoints.Add(sPoint);
                         //instantMesh.InstanceModifier.PushInstance(in i.End, in Vector3.UnitXYZ, in Quaternion.Identity, in UInt32_4.Zero, this.HitProxy.ProxyId);
-                        instantMesh.InstanceModifier.PushInstance(in Spline.Curves[i].mEnd, in Vector3.UnitXYZ, in Quaternion.Identity, in UInt32_4.Zero, sPoint.HitProxy.ProxyId);
+                        instantMesh.InstanceModifier.PushInstance(in Spline.Curves[i].mEnd, in Vector3.One, in Quaternion.Identity, in UInt32_4.Zero, sPoint.HitProxy.ProxyId);
 
                         //var cache = i.GetPointCache(Spline.Segments);
                         //for (int j = 0; j < cache.CachedPoints.Length; j++)

@@ -54,12 +54,27 @@ namespace EngineNS
                 else
                 {
                     var v = (Quaternion)info.Value;
+                    float speed = 0.1f;
+                    if (info.HostProperty != null)
+                    {
+                        var vR = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueRange>();
+                        if (vR != null)
+                        {
+                            minValue = (float)vR.Min;
+                            maxValue = (float)vR.Max;
+                        }
+                        var vStep = info.HostProperty.GetAttribute<EGui.Controls.PropertyGrid.PGValueChangeStep>();
+                        if (vStep != null)
+                        {
+                            speed = vStep.Step;
+                        }
+                    }
                     var el = v.ToEuler();
                     Vector3 angle;
                     angle.X = CoreDefine.Radian_To_Angle(el.X).X;
                     angle.Y = CoreDefine.Radian_To_Angle(el.Y).X;
                     angle.Z = CoreDefine.Radian_To_Angle(el.Z).X;
-                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&angle, 3, 0.1f, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&angle, 3, speed, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     //ImGuiAPI.InputFloat3(TName.FromString2("##", info.Name).ToString(), (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
                     //ImGuiAPI.PopStyleVar(1);
                     if (changed && !info.Readonly)//(v != saved)
@@ -432,7 +447,7 @@ namespace EngineNS
         /// <param name="right">四元数对象</param>
         /// <returns>返回计算后的四元数</returns>
         [Rtti.Meta]
-        public static Quaternion Add(Quaternion left, Quaternion right)
+        public static Quaternion Add(in Quaternion left, in Quaternion right)
         {
             Quaternion result;
             result.X = left.X + right.X;
@@ -468,14 +483,19 @@ namespace EngineNS
         /// <param name="g">重力值</param>
         /// <returns>返回计算后的四元数</returns>
         [Rtti.Meta]
-        public static Quaternion Barycentric(Quaternion q1, Quaternion q2, Quaternion q3, float f, float g)
+        public static Quaternion Barycentric(in Quaternion q1, in Quaternion q2, in Quaternion q3, float f, float g)
         {
             Quaternion result;
 
             unsafe
             {
-                IDllImportApi.v3dxQuaternionBaryCentric((Quaternion*)&result, (Quaternion*)&q1,
-                (Quaternion*)&q2, (Quaternion*)&q3, f, g);
+                fixed (Quaternion* q1Ptr = &q1)
+                fixed (Quaternion* q2Ptr = &q2)
+                fixed (Quaternion* q3Ptr = &q3)
+                {
+                    IDllImportApi.v3dxQuaternionBaryCentric((Quaternion*)&result, q1Ptr,
+                    q2Ptr, q3Ptr, f, g);
+                }
             }
 
             return result;
@@ -544,7 +564,7 @@ namespace EngineNS
         /// <param name="right">四元数对象</param>
         /// <returns>返回计算后的四元数</returns>
         [Rtti.Meta]
-        public static Quaternion Divide(Quaternion left, Quaternion right)
+        public static Quaternion Divide(in Quaternion left, in Quaternion right)
         {
             Quaternion result;
             result.X = left.X / right.X;
@@ -659,7 +679,7 @@ namespace EngineNS
         /// <param name="amount">插值</param>
         /// <returns>返回计算后的四元数</returns>
         [Rtti.Meta]
-        public static Quaternion Lerp(Quaternion left, Quaternion right, float amount)
+        public static Quaternion Lerp(in Quaternion left, in Quaternion right, float amount)
         {
             Quaternion result;
             float inverse = 1.0f - amount;
@@ -765,7 +785,7 @@ namespace EngineNS
         /// <param name="right">四元数对象</param>
         /// <returns>返回计算后的四元数</returns>
         [Rtti.Meta]
-        public static Quaternion Multiply(Quaternion left, Quaternion right)
+        public static Quaternion Multiply(in Quaternion left, in Quaternion right)
         {
             Quaternion quaternion;
             float lx = left.X;
@@ -1326,7 +1346,7 @@ namespace EngineNS
         /// <param name="right">旋转四元数</param>
         /// <returns>返回计算后的旋转四元数</returns>
         [Rtti.Meta]
-        public static Quaternion Subtract(Quaternion left, Quaternion right)
+        public static Quaternion Subtract(in Quaternion left, in Quaternion right)
         {
             Quaternion result;
             result.X = left.X - right.X;

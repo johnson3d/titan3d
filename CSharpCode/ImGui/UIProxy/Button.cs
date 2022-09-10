@@ -38,7 +38,7 @@ namespace EngineNS.EGui.UIProxy
         public UInt32 ImageActiveColor = 0xFFFFFFFF;
         public bool ShowBG = false;
 
-        //System.Threading.Tasks.Task<RHI.CShaderResourceView> mTask;
+        //System.Threading.Tasks.Task<NxRHI.USrView> mTask;
         //IntPtr mImagePtr;
 
         ImageProxy mImage = new ImageProxy();

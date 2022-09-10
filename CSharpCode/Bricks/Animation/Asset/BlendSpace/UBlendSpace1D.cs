@@ -89,10 +89,6 @@ namespace EngineNS.Animation.Asset.BlendSpace
             //必须是TextureAsset
             return true;
         }
-        public override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
-        {
-            base.OnDraw(in cmdlist, in sz, ContentBrowser);
-        }
     }
 
     public class UBlendSpace1D : UBlendSpace
