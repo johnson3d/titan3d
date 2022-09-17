@@ -656,4 +656,133 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
     }
+
+    [Bricks.CodeBuilder.ContextMenu("Grass", "Terrain\\Grass", UPgcGraph.PgcEditorKeyword)]
+    public partial class UGrassNode : UPgcNodeBase
+    {
+        public class UGrassNodeDefine
+        {
+            internal UGrassNode HostNode;
+            public class UValueEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+            {
+                public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
+                {
+                    newValue = info.Value;
+                    var nodeDef = newValue as UGrassNodeDefine;
+                    var NumOfPin = nodeDef.HostNode.GrassDefines.Count;
+                    if (ImGuiAPI.InputInt("NumOfPin", (int*)&NumOfPin, 0, 0, ImGuiInputTextFlags_.ImGuiInputTextFlags_None))
+                    {
+                        if (NumOfPin <= 0)
+                            NumOfPin = 1;
+                        var oldInputs = nodeDef.HostNode.GrassDefines;
+                        nodeDef.HostNode.GrassDefines = new List<UGrassPinDefine>();
+                        for (int i = 0; i < NumOfPin; i++)
+                        {
+                            if (i < oldInputs.Count)
+                            {
+                                nodeDef.HostNode.GrassDefines.Add(oldInputs[i]);
+                            }
+                            else
+                            {
+                                nodeDef.HostNode.GrassDefines.Add(new UGrassPinDefine());
+                            }
+                        }
+                    }
+                    if (ImGuiAPI.Button("UpdatePins"))
+                    {
+                        nodeDef.HostNode.UpdateInputs();
+                    }
+                    return false;
+                }
+            }
+        }
+        [UGrassNodeDefine.UValueEditor]
+        public UGrassNodeDefine NodeDefine
+        {
+            get;
+        } = new UGrassNodeDefine();
+
+        [System.ComponentModel.Browsable(false)]
+        public PinOut Grass { get; set; } = new PinOut();
+
+        public class UGrassPinDefine : IO.BaseSerializer
+        {
+            [Rtti.Meta]
+            public string Name { get; set; } = "UserPin";
+            [Rtti.Meta]
+            public string TypeValue { get; set; } = "Value";
+            [Rtti.Meta]
+            public Terrain.CDLOD.UTerrainGrass GrassData { get; set; } = new Terrain.CDLOD.UTerrainGrass();
+        }
+
+        List<UGrassPinDefine> mGrassDefines = new List<UGrassPinDefine>();
+        UBufferCreator mInBufferCreator = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>();
+        [Rtti.Meta]
+        public List<UGrassPinDefine> GrassDefines
+        {
+            get => mGrassDefines;
+            set
+            {
+                mGrassDefines = value;
+                UpdateInputs();
+            }
+        }
+
+        public UGrassNode()
+        {
+            Icon.Size = new Vector2(25, 25);
+            Icon.Color = 0xFF00FF00;
+            TitleColor = 0xFF204020;
+            BackColor = 0x80808080;
+
+            AddOutput(Grass, "Grass", null, "Grass");
+
+            NodeDefine.HostNode = this;
+            UpdateInputs();
+        }
+
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            return null;
+        }
+
+        public void UpdateInputs()
+        {
+            //for(int i=0; i<Inputs.Count; i++)
+            //{
+            //    ParentGraph.RemoveLinkedIn(Inputs[i]);
+            //}
+            //Inputs.Clear();
+            
+            for(int i=0; i<GrassDefines.Count; i++)
+            {
+                if(i >= Inputs.Count)
+                {
+                    var pin = new PinIn();
+                    AddInput(pin, GrassDefines[i].Name, mInBufferCreator, GrassDefines[i].TypeValue);
+                }
+                else
+                {
+                    if(!Inputs[i].LinkDesc.CanLinks.Contains(GrassDefines[i].TypeValue))
+                    {
+                        ParentGraph.RemoveLinkedIn(Inputs[i]);
+                        Inputs[i].LinkDesc.CanLinks.Clear();
+                        Inputs[i].LinkDesc.CanLinks.Add(GrassDefines[i].TypeValue);
+                    }
+                    if(Inputs[i].Name != GrassDefines[i].Name)
+                    {
+                        Inputs[i].Name = GrassDefines[i].Name;
+                    }
+                }
+            }
+            OnPositionChanged();
+        }
+        public override UBufferConponent GetResultBuffer(int index)
+        {
+            if (index < 0 || index >= Inputs.Count)
+                return null;
+            var graph = ParentGraph as UPgcGraph;
+            return graph.BufferCache.FindBuffer(Inputs[index]);
+        }
+    }
 }

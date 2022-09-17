@@ -10,6 +10,10 @@ namespace EngineNS.Support
         {
             mCoreObject = vfxRandom.CreateInstance();
         }
+        public byte GetNextByte()
+        {
+            return (byte)mCoreObject.NextValue16Bit();
+        }
         public ushort GetNextUInt16()
         {
             return (ushort)mCoreObject.NextValue16Bit();

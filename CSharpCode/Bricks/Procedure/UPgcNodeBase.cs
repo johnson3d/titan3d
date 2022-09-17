@@ -278,7 +278,7 @@ namespace EngineNS.Bricks.Procedure
         public abstract UBufferCreator GetOutBufferCreator(PinOut pin);
 
         #region procedure
-        public UBufferConponent GetResultBuffer(int index)
+        public virtual UBufferConponent GetResultBuffer(int index)
         {
             if (index < 0 || index >= Outputs.Count)
                 return null;

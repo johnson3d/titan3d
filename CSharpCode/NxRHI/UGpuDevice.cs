@@ -384,7 +384,12 @@ namespace EngineNS.NxRHI
         {
             return mCoreObject.SignalFence(fence.mCoreObject, value);
         }
-		public ICommandList GetIdleCmdlist(EQueueCmdlist type)
+        public ulong IncreaseSignal(UFence fence)
+        {
+            return mCoreObject.IncreaseSignal(fence.mCoreObject);
+        }
+
+        public ICommandList GetIdleCmdlist(EQueueCmdlist type)
         {
             return mCoreObject.GetIdleCmdlist(type);
         }

@@ -19,10 +19,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 result += i.ToString();
             }
-            foreach(var i in Grasses)
-            {
-                result += i.ToString();
-            }
+            //foreach(var i in Grasses)
+            //{
+            //    result += i.ToString();
+            //}
             return result;
         }
 
@@ -86,58 +86,58 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 UpdateTotalPlantDensity();
             }
         }
-        List<UTerrainGrass> mGrasses = new List<UTerrainGrass>();
-        [Rtti.Meta]
-        public List<UTerrainGrass> Grasses
-        {
-            get => mGrasses;
-            set
-            {
-                mGrasses = value;
-                UpdateTotalGrassDensity();
-            }
-        }
-        int mTotalGrassDensity;
-        public int TotalGrassDensity
-        {
-            get => mTotalGrassDensity;
-            set
-            {
-                mTotalGrassDensity = value;
-                UpdateTotalGrassDensity();
-            }
-        }
-        public void UpdateTotalGrassDensity()
-        {
-            lock(Grasses)
-            {
-                mTotalGrassDensity = 0;
-                if(Grasses.Count > 0)
-                {
-                    mTotalGrassDensity = NullGrassDensity;
-                    foreach(var i in Grasses)
-                    {
-                        mTotalGrassDensity += i.Density;
-                    }
+        //List<UTerrainGrass> mGrasses = new List<UTerrainGrass>();
+        //[Rtti.Meta]
+        //public List<UTerrainGrass> Grasses
+        //{
+        //    get => mGrasses;
+        //    set
+        //    {
+        //        mGrasses = value;
+        //        UpdateTotalGrassDensity();
+        //    }
+        //}
+        //int mTotalGrassDensity;
+        //public int TotalGrassDensity
+        //{
+        //    get => mTotalGrassDensity;
+        //    set
+        //    {
+        //        mTotalGrassDensity = value;
+        //        UpdateTotalGrassDensity();
+        //    }
+        //}
+        //public void UpdateTotalGrassDensity()
+        //{
+        //    lock(Grasses)
+        //    {
+        //        mTotalGrassDensity = 0;
+        //        if(Grasses.Count > 0)
+        //        {
+        //            mTotalGrassDensity = NullGrassDensity;
+        //            foreach(var i in Grasses)
+        //            {
+        //                mTotalGrassDensity += i.Density;
+        //            }
 
-                    Grasses.Sort((x, y) =>
-                    {
-                        return x.Density.CompareTo(y.Density);
-                    });
-                }
-            }
-        }
-        int mNullGrassDensity = 10;
-        [Rtti.Meta]
-        public int NullGrassDensity
-        {
-            get => mNullGrassDensity;
-            set
-            {
-                mNullGrassDensity = value;
-                UpdateTotalGrassDensity();
-            }
-        }
+        //            Grasses.Sort((x, y) =>
+        //            {
+        //                return x.Density.CompareTo(y.Density);
+        //            });
+        //        }
+        //    }
+        //}
+        //int mNullGrassDensity = 10;
+        //[Rtti.Meta]
+        //public int NullGrassDensity
+        //{
+        //    get => mNullGrassDensity;
+        //    set
+        //    {
+        //        mNullGrassDensity = value;
+        //        UpdateTotalGrassDensity();
+        //    }
+        //}
         [Rtti.Meta]
         public int GetRandomPlant(int rdValue)
         {
@@ -154,20 +154,20 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return -1;
         }
 
-        public int GetRandomGrass(int rdValue)
-        {
-            rdValue = rdValue % TotalGrassDensity;
-            if (rdValue < NullGrassDensity)
-                return -1;
-            int curTotal = NullGrassDensity;
-            for(int i=0; i < Grasses.Count; i++)
-            {
-                curTotal += Grasses[i].Density;
-                if (rdValue < curTotal)
-                    return i;
-            }
-            return -1;
-        }
+        //public int GetRandomGrass(int rdValue)
+        //{
+        //    rdValue = rdValue % TotalGrassDensity;
+        //    if (rdValue < NullGrassDensity)
+        //        return -1;
+        //    int curTotal = NullGrassDensity;
+        //    for(int i=0; i < Grasses.Count; i++)
+        //    {
+        //        curTotal += Grasses[i].Density;
+        //        if (rdValue < curTotal)
+        //            return i;
+        //    }
+        //    return -1;
+        //}
     }
     public class UTerrainMaterialIdManager : IO.BaseSerializer
     {

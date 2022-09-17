@@ -263,12 +263,13 @@ namespace EngineNS.Graphics.Mesh.Modifier
             {
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-                uint growSize = 1;
-                if (mdf.mMaxNumber > 10)
-                {
-                    growSize += mdf.mMaxNumber;
-                }
-                SureBuffers(mdf, mdf.mCurNumber + growSize);
+                //uint growSize = 1;
+                //if (mdf.mMaxNumber > 10)
+                //{
+                //    growSize += mdf.mMaxNumber;
+                //}
+                //SureBuffers(mdf, mdf.mCurNumber + growSize);
+                System.Diagnostics.Debug.Assert(mdf.CurNumber < mdf.mMaxNumber);
 
                 InstData[mdf.mCurNumber].Position = pos;
                 InstData[mdf.mCurNumber].Quat = quat;

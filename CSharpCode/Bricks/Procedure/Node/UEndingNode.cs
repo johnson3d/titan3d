@@ -118,14 +118,16 @@ namespace EngineNS.Bricks.Procedure.Node
             base.OnLoadLinker(linker);
 
             var input = linker.OutPin.Tag as UBufferCreator;
-            (linker.InPin.Tag as UBufferCreator).BufferType = input.BufferType;
+            if(input != null)
+                (linker.InPin.Tag as UBufferCreator).BufferType = input.BufferType;
         }
         public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin);
 
-            var input = oPin.Tag as UBufferCreator;
-            (iPin.Tag as UBufferCreator).BufferType = input.BufferType;
+            var oPT = oPin.Tag as UBufferCreator;
+            if(oPT != null)
+                (iPin.Tag as UBufferCreator).BufferType = oPT.BufferType;
         }
         public UBufferConponent GetResultBuffer(string pinName)
         {

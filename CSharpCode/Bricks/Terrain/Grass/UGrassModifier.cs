@@ -22,6 +22,10 @@ namespace EngineNS.Bricks.Terrain.Grass
         public CDLOD.UTerrainGrassManager.UGrassType GrassType;
         uint mCurNumber = 0;
         public uint CurNumber => mCurNumber;
+        public void ResetCurNumber()
+        {
+            mCurNumber = 0;
+        }
         uint mMaxNumber = 0;
         public uint MaxNumber => mMaxNumber;
         public class UInstantVBs

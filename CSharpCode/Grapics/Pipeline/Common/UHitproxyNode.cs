@@ -319,46 +319,47 @@ namespace EngineNS.Graphics.Pipeline.Common
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(HitproxyPass.PostCmds.DrawCmdList);
 
             var fence = mCopyFence;
-            var targetValue = fence.AspectValue + 1;
             UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((im_cmd, name) =>
             {
-                rc.CmdQueue.SignalFence(fence, targetValue);
+                rc.CmdQueue.IncreaseSignal(fence);
+                var targetValue = fence.AspectValue;
+                var postTime = Support.Time.GetTickCount();
+                UEngine.Instance.EventPoster.PostTickSyncEvent(() =>
+                {
+                    var testTime = Support.Time.GetTickCount();
+                    if (readTexture != mReadableHitproxyTexture || testTime - postTime > 1000)
+                    {
+                        IsHitproxyBuilding = false;
+                        return true;
+                    }
+                    if (fence.CompletedValue >= targetValue)
+                    {
+                        var im_cmd = UEngine.Instance.GfxDevice.RenderContext.CmdQueue.GetIdleCmdlist(NxRHI.EQueueCmdlist.QCL_Read);
+                        var gpuDataBlob = new Support.CBlobObject();
+                        readTexture.GetGpuBufferDataPointer().FetchGpuData(im_cmd, 0, gpuDataBlob.mCoreObject);
+                        //var ptr = (uint*)gpuDataBlob.mCoreObject.GetData();
+                        //var num = gpuDataBlob.mCoreObject.GetSize() / 4;
+                        //for (int i = 2; i < num; i++)
+                        //{
+                        //    if (ptr[i] != 0)
+                        //    {
+                        //        int xxx = 0;
+                        //    }
+                        //}
+                        UEngine.Instance.GfxDevice.RenderContext.CmdQueue.ReleaseIdleCmdlist(im_cmd, NxRHI.EQueueCmdlist.QCL_Read);
+                        NxRHI.ITexture.BuildImage2DBlob(mHitProxyData.mCoreObject, gpuDataBlob.mCoreObject, in CopyTexDesc);
+                        IsHitproxyBuilding = false;
+
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                });
             }, "Signal Ready");
 
-            var postTime = Support.Time.GetTickCount();
-            UEngine.Instance.EventPoster.PostTickSyncEvent(() =>
-            {
-                var testTime = Support.Time.GetTickCount();
-                if (readTexture != mReadableHitproxyTexture || testTime - postTime > 1000)
-                {
-                    IsHitproxyBuilding = false;
-                    return true;
-                }
-                if (fence.CompletedValue >= targetValue)
-                {
-                    var im_cmd = UEngine.Instance.GfxDevice.RenderContext.CmdQueue.GetIdleCmdlist(NxRHI.EQueueCmdlist.QCL_Read);
-                    var gpuDataBlob = new Support.CBlobObject();
-                    readTexture.GetGpuBufferDataPointer().FetchGpuData(im_cmd, 0, gpuDataBlob.mCoreObject);
-                    //var ptr = (uint*)gpuDataBlob.mCoreObject.GetData();
-                    //var num = gpuDataBlob.mCoreObject.GetSize() / 4;
-                    //for (int i = 2; i < num; i++)
-                    //{
-                    //    if (ptr[i] != 0)
-                    //    {
-                    //        int xxx = 0;
-                    //    }
-                    //}
-                    UEngine.Instance.GfxDevice.RenderContext.CmdQueue.ReleaseIdleCmdlist(im_cmd, NxRHI.EQueueCmdlist.QCL_Read);
-                    NxRHI.ITexture.BuildImage2DBlob(mHitProxyData.mCoreObject, gpuDataBlob.mCoreObject, in CopyTexDesc);
-                    IsHitproxyBuilding = false;
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            });
+            
 
             //UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((im_cmd, name) =>
             //{

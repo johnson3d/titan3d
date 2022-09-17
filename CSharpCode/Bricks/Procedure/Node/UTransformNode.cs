@@ -197,15 +197,15 @@ namespace EngineNS.Bricks.Procedure.Node
         public PinOut OutTransform { get; set; } = new PinOut();
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
         public PinOut OutPlant { get; set; } = new PinOut();
-        [EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
-        public PinOut OutGrass { get; set; } = new PinOut();
+        //[EGui.Controls.PropertyGrid.PGCustomValueEditor(HideInPG = true)]
+        //public PinOut OutGrass { get; set; } = new PinOut();
         public UBufferCreator InputHeightDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UBufferCreator InputNormDesc = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
         public UBufferCreator InputMatIdDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UBufferCreator InputHMappinDesc = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, -1, -1);
         public UBufferCreator OutputTransDesc = UBufferCreator.CreateInstance<USuperBuffer<FTransform, FTransformOperator>>(0, 0, 0);
         public UBufferCreator OutputPlantDesc = UBufferCreator.CreateInstance<USuperBuffer<Int32_2, FInt2Operator>>(0, 0, 0);
-        public UBufferCreator OutputGrassDesc = UBufferCreator.CreateInstance<USuperBuffer<FGrassTransformData, FGrassTransformDataOperator>>(0, 0, 0);
+        //public UBufferCreator OutputGrassDesc = UBufferCreator.CreateInstance<USuperBuffer<FGrassTransformData, FGrassTransformDataOperator>>(0, 0, 0);
         public UTransformBuilder()
         {
             Icon.Size = new Vector2(25, 25);
@@ -219,7 +219,7 @@ namespace EngineNS.Bricks.Procedure.Node
             AddInput(IdMapPin, "IdMap", InputHMappinDesc, "IdMap");
             AddOutput(OutTransform, "Trans", OutputTransDesc);
             AddOutput(OutPlant, "Plant", OutputPlantDesc);
-            AddOutput(OutGrass, "Grass", OutputGrassDesc);
+            //AddOutput(OutGrass, "Grass", OutputGrassDesc);
         }
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
@@ -232,10 +232,10 @@ namespace EngineNS.Bricks.Procedure.Node
             {
                 return OutputPlantDesc;
             }
-            else if(pin == OutGrass)
-            {
-                return OutputGrassDesc;
-            }
+            //else if(pin == OutGrass)
+            //{
+            //    return OutputGrassDesc;
+            //}
             return null;
         }
         public override unsafe bool InitProcedure(UPgcGraph graph)
@@ -253,7 +253,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             var trans = graph.BufferCache.FindBuffer(OutTransform);
             var plants = graph.BufferCache.FindBuffer(OutPlant);
-            var grasses = graph.BufferCache.FindBuffer(OutGrass);
+            //var grasses = graph.BufferCache.FindBuffer(OutGrass);
 
             var heightResult = graph.BufferCache.FindBuffer(HeightPin);
             var normResult = graph.BufferCache.FindBuffer(NormPin);
@@ -262,7 +262,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
             trans.ResizePixels(0, 1, 1);
             plants.ResizePixels(0, 1, 1);
-            grasses.ResizePixels(0, 1, 1);
+            //grasses.ResizePixels(0, 1, 1);
             var randObj = new Support.URandom();
             randObj.mCoreObject.SetSeed(FinalRandomSeed);
             for (int i = 0; i < heightResult.Depth; i++)
@@ -303,24 +303,24 @@ namespace EngineNS.Bricks.Procedure.Node
                             }
                         }
 
-                        // grass
-                        if(trMtlDesc.Grasses.Count > 0)
-                        {
-                            var iGrass = trMtlDesc.GetRandomGrass(randObj.GetNextInt32());
-                            if(iGrass >= 0)
-                            {
-                                var grassDesc = trMtlDesc.Grasses[iGrass];
+                        //// grass
+                        //if(trMtlDesc.Grasses.Count > 0)
+                        //{
+                        //    var iGrass = trMtlDesc.GetRandomGrass(randObj.GetNextInt32());
+                        //    if(iGrass >= 0)
+                        //    {
+                        //        var grassDesc = trMtlDesc.Grasses[iGrass];
 
-                                var tmp = Terrain.CDLOD.FGrassTransformData.Create();
-                                tmp.Transform.Position = new DVector3(x, y, z);
-                                var scale = CoreDefine.Lerp(grassDesc.MinScale, grassDesc.MaxScale, randObj.GetUnit());
-                                tmp.Transform.Scale = new Vector3(scale);
-                                tmp.Transform.Quat = Quaternion.RotationAxis(in Vector3.Up, CoreDefine.TWO_PI * randObj.GetUnit());
-                                tmp.MaterialIdx = id;
-                                tmp.GrassIdx = iGrass;
-                                grasses.AddPixel(in tmp);
-                            }
-                        }
+                        //        var tmp = Terrain.CDLOD.FGrassTransformData.Create();
+                        //        tmp.Transform.Position = new DVector3(x, y, z);
+                        //        var scale = CoreDefine.Lerp(grassDesc.MinScale, grassDesc.MaxScale, randObj.GetUnit());
+                        //        tmp.Transform.Scale = new Vector3(scale);
+                        //        tmp.Transform.Quat = Quaternion.RotationAxis(in Vector3.Up, CoreDefine.TWO_PI * randObj.GetUnit());
+                        //        tmp.MaterialIdx = id;
+                        //        tmp.GrassIdx = iGrass;
+                        //        grasses.AddPixel(in tmp);
+                        //    }
+                        //}
                     }
                 }
             }

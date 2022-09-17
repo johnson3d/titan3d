@@ -64,6 +64,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             set;
         } = 64;
         public float GridSize = 1.0f;
+        public float GridTileSize = 1.0f * 1024.0f / 1023.0f;
         public float TexUVScale = 64.0f / 1024.0f;
         public float MaterialIdUVStep = 1.0f / 1024.0f;//TerrainMaterialIdManager
         public float DiffuseUVStep = 1.0f / 1024.0f;// (1.0f / 1024.0f) * 16.0f;//TerrainMaterialIdManager

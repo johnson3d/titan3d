@@ -39,9 +39,9 @@ namespace EngineNS.Support
             }
             public bool MoveNext()
             {
+                Index++;
                 if (Index >= Count)
                     return false;
-                Index++;
                 return true;
             }
             public void Reset()

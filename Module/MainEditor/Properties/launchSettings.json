@@ -2,7 +2,7 @@
   "profiles": {
     "MainEditor": {
       "commandName": "Project",
-      "commandLineArgs": "config=$(SolutionDir)content\\EngineConfig.cfg",
+      "commandLineArgs": "config=$(SolutionDir)content\\EngineConfigForVK.cfg",
       "workingDirectory": "..\\..\\binaries\\",
       "environmentVariables": {
         "CORECLR_PROFILER_PATH_64": "$(SolutionDir)binaries\\Core.Window.dll",

@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         //public Graphics.Pipeline.Shader.UMaterialInstance WaterMaterial;
         public NxRHI.UCbView PatchCBuffer;
 
-        public UTerrainGrassManager GrassManager = new UTerrainGrassManager();
+        public UTerrainGrassManager GrassManager;
 
         public Vector3 StartPosition = new Vector3(0);
         public Vector2 TexUVOffset;        
@@ -46,6 +46,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             Level = level;
 
+            if (x == 16 || z == 16)
+            {
+                return;
+            }
             XInLevel = x;
             ZInLevel = z;
             var terrain = level.GetTerrainNode().Terrain;
@@ -136,6 +140,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             OnAbsTransformChanged(terrainNode, terrainNode.GetWorld());
             UpdateCameraOffset(terrainNode.GetWorld());
             SetAcceptShadow(level.GetTerrainNode().IsAcceptShadow);
+
+            GrassManager = new UTerrainGrassManager(this);
         }
         public void SetAcceptShadow(bool value)
         {

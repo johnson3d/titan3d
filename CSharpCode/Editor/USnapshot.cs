@@ -46,7 +46,7 @@ namespace EngineNS.Editor
                 {
                     im_cmd.CopyTextureToBuffer(dstBf.mCoreObject, in CopyBufferFootPrint, tex, 0);
                 }
-                UEngine.Instance.GfxDevice.RenderContext.CmdQueue.SignalFence(fence, 1);
+                UEngine.Instance.GfxDevice.RenderContext.CmdQueue.IncreaseSignal(fence);
             }, "Copy Snap Texture");
 
             UEngine.Instance.EventPoster.RunOn(() =>
@@ -105,7 +105,7 @@ namespace EngineNS.Editor
                 {
                     im_cmd.CopyTextureToBuffer(dstBf.mCoreObject, in CopyBufferFootPrint, srv.mCoreObject.GetBufferAsTexture(), 0);
                 }
-                UEngine.Instance.GfxDevice.RenderContext.CmdQueue.SignalFence(fence, 1);
+                UEngine.Instance.GfxDevice.RenderContext.CmdQueue.IncreaseSignal(fence);
             }, "Copy Snap SRV");
 
             UEngine.Instance.EventPoster.RunOn(() =>

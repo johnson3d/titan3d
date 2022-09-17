@@ -51,6 +51,13 @@ namespace EngineNS.Profiler
                 case ELevelTraceType.ELTT_Warning:
                     tag = ELogTag.Warning;
                     break;
+                case ELevelTraceType.ELTT_Graphics:
+                    if (logContent.StartsWith("Vk[Error]"))
+                    {
+                        tag = ELogTag.Error;
+                        break;
+                    }
+                    break;
             }
 
             OnReportLog?.Invoke(tag, level.ToString(), null, logFile, line, logContent);

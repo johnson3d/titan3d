@@ -172,7 +172,7 @@ namespace EngineNS.Bricks.NodeGraph
                 // draw mouse drag rect
                 if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) &&
                     (delta.X >= 0 && delta.X <= sz.X && delta.Y >= 0 && delta.Y <= sz.Y) && 
-                    !mGraph.IsMovingSelNodes && mGraph.PopMenuPressObject == null)
+                    !mGraph.IsMovingSelNodes && mGraph.LinkingOp.StartPin == null)
                 {
                     var min = mGraph.CanvasToViewport(Vector2.Minimize(mGraph.PressPosition, mGraph.DragPosition)) + DrawOffset;
                     var max = mGraph.CanvasToViewport(Vector2.Maximize(mGraph.PressPosition, mGraph.DragPosition)) + DrawOffset;
@@ -341,6 +341,16 @@ namespace EngineNS.Bricks.NodeGraph
                 var start1 = CanvasToDraw(in prevStart);
                 var end1 = CanvasToDraw(prevStart + node.PrevSize);
                 node.OnPreviewDraw(in start1, in end1, cmdlist);
+            }
+
+            if (mGraph.LinkingOp.HoverPin != null)
+            {
+                var min = mGraph.LinkingOp.HoverPin.Position;
+                Vector2 max;
+                max = min + mGraph.LinkingOp.HoverPin.Size;
+                min = mGraph.CanvasToViewport(min) + DrawOffset;
+                max = mGraph.CanvasToViewport(max) + DrawOffset;
+                cmdlist.AddRect(in min, in max, styles.HighLightColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2);
             }
 
             string lastGroup = null;
@@ -570,16 +580,6 @@ namespace EngineNS.Bricks.NodeGraph
             var p2 = new Vector2(p1.X - ControlLength, p1.Y);
             var p3 = new Vector2(p4.X + ControlLength, p4.Y);
 
-            if (LinkingOp.HoverPin != null)
-            {
-                var min = LinkingOp.HoverPin.Position;
-                Vector2 max;
-                max = min + LinkingOp.HoverPin.Size;
-                min = mGraph.CanvasToViewport(min) + DrawOffset;
-                max = mGraph.CanvasToViewport(max) + DrawOffset;
-                cmdlist.AddRect(in min, in max, styles.HighLightColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2);
-            }
-
             p1 = mGraph.CanvasToViewport(in p1);
             p2 = mGraph.CanvasToViewport(in p2);
             p3 = mGraph.CanvasToViewport(in p3);
@@ -630,7 +630,7 @@ namespace EngineNS.Bricks.NodeGraph
                             mGraph.NodeMenuDirty = false;
                         }
                         for (var childIdx = 0; childIdx < mGraph.NodeMenus.SubMenuItems.Count; childIdx++)
-                            DrawMenu(mGraph.NodeMenus.SubMenuItems[childIdx], mCanvasMenuFilterStr.ToLower());
+                            DrawMenu(mGraph.NodeMenus.SubMenuItems[childIdx], "".ToLower());
                         break;
                     case UNodeGraph.EGraphMenu.Pin:
                         {
@@ -640,7 +640,7 @@ namespace EngineNS.Bricks.NodeGraph
                                 mGraph.PinMenuDirty = false;
                             }
                             for (var childIdx = 0; childIdx < mGraph.PinMenus.SubMenuItems.Count; childIdx++)
-                                DrawMenu(mGraph.PinMenus.SubMenuItems[childIdx], mCanvasMenuFilterStr.ToLower());
+                                DrawMenu(mGraph.PinMenus.SubMenuItems[childIdx], "".ToLower());
                             var pressPin = mGraph.PopMenuPressObject as NodePin;
                             if (pressPin != null)
                             {

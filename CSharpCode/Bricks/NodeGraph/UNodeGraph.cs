@@ -675,8 +675,7 @@ namespace EngineNS.Bricks.NodeGraph
                         }
                     }
                 }
-                else
-                if (Rtti.UTypeDesc.CanCast(pKls, typeof(NodePin)))
+                else if (Rtti.UTypeDesc.CanCast(pKls, typeof(NodePin)))
                 {
                     var pin = hit as NodePin;
                     LinkingOp.StartPin = pin;
@@ -700,6 +699,15 @@ namespace EngineNS.Bricks.NodeGraph
                             i.MoveOffset = PressPosition - i.Node.Position;
                         }
                     }
+                }
+                else if (Rtti.UTypeDesc.CanCast(pKls, typeof(NodePin)))
+                {
+                    var pin = hit as NodePin;
+                    LinkingOp.StartPin = pin;
+                    LinkingOp.HoverPin = pin;
+                    LinkingOp.BlockingEnd = PressPosition;
+                    PopMenuPressObject = pin.HostNode.GetPinType(pin);
+                    PinLinkMenuDirty = true;
                 }
             }
         }
@@ -904,6 +912,7 @@ namespace EngineNS.Bricks.NodeGraph
         public void PressDrag(in Vector2 screenPos)
         {
             DragPosition = ViewportRateToCanvas(in screenPos);
+            LinkingOp.HoverPin = null;
             var hit = HitObject(DragPosition.X, DragPosition.Y);
             if (hit != null)
             {

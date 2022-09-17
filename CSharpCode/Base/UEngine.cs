@@ -263,6 +263,8 @@ namespace EngineNS
         }
         public void FinalCleanup()
         {
+            GfxDevice.RenderCmdQueue.Reset();
+
             StopSystemThreads();
 
             base.CleanupModules();

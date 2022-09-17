@@ -89,15 +89,16 @@ namespace EngineNS.Graphics.Pipeline
 
             if (SwapChain == null)
                 return;
-
-            UEngine.Instance.EventPoster.PostTickSyncEvent(() =>
-            {
-                if (SwapChain == null)
-                    return true;
-                UEngine.Instance.GfxDevice.RenderCmdQueue.Reset();
-                SwapChain.OnResize(x, y);
-                return true;
-            });
+            UEngine.Instance.GfxDevice.RenderCmdQueue.Reset();
+            SwapChain.OnResize(x, y);
+            //UEngine.Instance.EventPoster.PostTickSyncEvent(() =>
+            //{
+            //    if (SwapChain == null)
+            //        return true;
+            //    UEngine.Instance.GfxDevice.RenderCmdQueue.Reset();
+            //    SwapChain.OnResize(x, y);
+            //    return true;
+            //});
         }
         public virtual void TickLogic(int ellapse)
         {

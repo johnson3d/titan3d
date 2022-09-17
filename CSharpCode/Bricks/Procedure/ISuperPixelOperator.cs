@@ -1421,7 +1421,152 @@ namespace EngineNS.Bricks.Procedure
             t.Z = CoreDefine.Abs(l.Z);
         }
     }
+    public struct FByteOperator : ISuperPixelOperator<byte>
+    {
+        public Rtti.UTypeDesc ElementType
+        {
+            get
+            {
+                return Rtti.UTypeDescGetter<byte>.TypeDesc;
+            }
+        }
+        public Rtti.UTypeDesc BufferType
+        {
+            get
+            {
+                return Rtti.UTypeDescGetter<USuperBuffer<byte, FByteOperator>>.TypeDesc;
+            }
+        }
+        public byte MaxValue { get => byte.MaxValue; }
+        public byte MinValue { get => byte.MinValue; }
+        public unsafe int Compare(void* left, void* right)
+        {
+            ref var l = ref *(byte*)left;
+            ref var r = ref *(byte*)right;
+            return l.CompareTo(r);
+        }
+        public int Compare(in byte left, in byte right)
+        {
+            return left.CompareTo(right);
+        }
+        public unsafe void SetIfGreateThan(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
+        {
+            if (*(byte*)src > *(byte*)tar)
+            {
+                *(byte*)tar = *(byte*)src;
+            }
+        }
+        public unsafe void SetIfLessThan(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
+        {
+            if (*(byte*)src < *(byte*)tar)
+            {
+                *(byte*)tar = *(byte*)src;
+            }
+        }
+        public byte Add(in byte left, in byte right)
+        {
+            return (byte)(left + right);
+        }
+        public unsafe void SetAsMaxValue(void* tar)
+        {
+            (*(byte*)tar) = byte.MaxValue;
+        }
+        public unsafe void SetAsMinValue(void* tar)
+        {
+            (*(byte*)tar) = byte.MinValue;
+        }
+        public unsafe void Copy(Rtti.UTypeDesc tarTyp, void* tar, Rtti.UTypeDesc srcType, void* src)
+        {
+            (*(byte*)tar) = (*(byte*)src);
+        }
+        public unsafe void Add(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
+        {
+            if (resultType != Rtti.UTypeDescGetter<byte>.TypeDesc && resultType != leftType && resultType != rightType)
+            {
+                return;
+            }
+            byte rValue = 0;
+            if (right != (void*)0)
+            {
+                rValue = *(byte*)right;
+            }
+            (*(byte*)result) = (byte)((*(byte*)left) + rValue);
+        }
+        public unsafe void Sub(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
+        {
+            if (resultType != Rtti.UTypeDescGetter<byte>.TypeDesc && resultType != leftType && resultType != rightType)
+            {
+                return;
+            }
+            byte rValue = 0;
+            if (right != (void*)0)
+            {
+                rValue = *(byte*)right;
+            }
+            (*(byte*)result) = (byte)((*(byte*)left) - rValue);
+        }
+        public unsafe void Mul(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
+        {
+            if (resultType != Rtti.UTypeDescGetter<byte>.TypeDesc && resultType != leftType && resultType != rightType)
+            {
+                return;
+            }
+            byte rValue = 1;
+            if (right != (void*)0)
+            {
+                rValue = *(byte*)right;
+            }
+            (*(byte*)result) = (byte)((*(byte*)left) * rValue);
+        }
+        public unsafe void Div(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right)
+        {
+            if (resultType != Rtti.UTypeDescGetter<byte>.TypeDesc && resultType != leftType && resultType != rightType)
+            {
+                return;
+            }
+            byte rValue = 1;
+            if (right != (void*)0)
+            {
+                rValue = *(byte*)right;
+            }
+            (*(byte*)result) = (byte)((*(byte*)left) / rValue);
+        }
+        public unsafe void Lerp(Rtti.UTypeDesc resultType, void* result, Rtti.UTypeDesc leftType, void* left, Rtti.UTypeDesc rightType, void* right, float factor)
+        {
+            if (resultType != Rtti.UTypeDescGetter<byte>.TypeDesc && resultType != leftType && resultType != rightType)
+            {
+                return;
+            }
+            byte rValue = 1;
+            if (right != (void*)0)
+            {
+                rValue = *(byte*)right;
+            }
+            *(byte*)result = (byte)CoreDefine.Lerp((float)*(byte*)left, (float)rValue, factor);
+        }
+        public unsafe void Max(void* result, void* left, void* right)
+        {
+            ref var l = ref *(byte*)left;
+            ref var r = ref *(byte*)right;
+            ref var t = ref *(byte*)result;
 
+            t = (byte)CoreDefine.Max((int)l, (int)r);
+        }
+        public unsafe void Min(void* result, void* left, void* right)
+        {
+            ref var l = ref *(byte*)left;
+            ref var r = ref *(byte*)right;
+            ref var t = ref *(byte*)result;
+
+            t = (byte)CoreDefine.Min((int)l, (int)r);
+        }
+        public unsafe void Abs(void* result, void* left)
+        {
+            ref var l = ref *(byte*)left;
+            ref var t = ref *(byte*)result;
+            t = (byte)CoreDefine.Abs((int)l);
+        }
+    }
     public struct FSByteOperator : ISuperPixelOperator<sbyte>
     {
         public Rtti.UTypeDesc ElementType
