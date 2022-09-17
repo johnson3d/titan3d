@@ -1,5 +1,7 @@
 #include "VKShader.h"
 #include "VKGpuDevice.h"
+#include "VKBuffer.h"
+#include "VKGpuState.h"
 #include "../NxRHIDefine.h"
 #include "../../Bricks/CrossShaderCompiler/IShaderConductor.h"
 #include <spirv_cross/spirv_cross_c.h>
@@ -114,6 +116,8 @@ namespace NxRHI
 	void VKDescriptorSetCreator::OnFree(MemAlloc::FPagedObject<VkDescriptorSet>* obj)
 	{
 		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
 		for (auto& i : Shader->mLayoutBindings)
 		{
 			VkWriteDescriptorSet descriptorWrite = {};
@@ -130,7 +134,8 @@ namespace NxRHI
 			{
 				case VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
 				{
-					tmpStructureBuffer.buffer = nullptr;
+					tmpStructureBuffer.buffer = device->mNullUBO->mBuffer;
+					tmpStructureBuffer.range = VK_WHOLE_SIZE;
 					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 					descriptorWrite.pBufferInfo = &tmpStructureBuffer;
 					vkUpdateDescriptorSets(device->mDevice, 1, &descriptorWrite, 0, nullptr);
@@ -138,7 +143,8 @@ namespace NxRHI
 				}
 				case VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
 				{
-					tmpStructureBuffer.buffer = nullptr;
+					tmpStructureBuffer.buffer = device->mNullSSBO->mBuffer;
+					tmpStructureBuffer.range = VK_WHOLE_SIZE;
 					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 					descriptorWrite.pBufferInfo = &tmpStructureBuffer;
 					vkUpdateDescriptorSets(device->mDevice, 1, &descriptorWrite, 0, nullptr);
@@ -146,8 +152,8 @@ namespace NxRHI
 				}
 				case VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
 				{
-					tmp.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-					tmp.imageView = nullptr;
+					tmp.imageLayout = ((VKTexture*)device->mNullSampledImage->GetBuffer())->GetImageLayout();
+					tmp.imageView = (VkImageView)device->mNullSampledImage->GetHWBuffer();
 					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 					descriptorWrite.pImageInfo = &tmp;
 					vkUpdateDescriptorSets(device->mDevice, 1, &descriptorWrite, 0, nullptr);
@@ -156,7 +162,7 @@ namespace NxRHI
 				case VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:
 				{
 					tmp.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-					tmp.imageView = nullptr;
+					tmp.imageView = (VkImageView)device->mNullSampledImage->GetHWBuffer();
 					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
 					descriptorWrite.pImageInfo = &tmp;
 					vkUpdateDescriptorSets(device->mDevice, 1, &descriptorWrite, 0, nullptr);
@@ -164,8 +170,7 @@ namespace NxRHI
 				}
 				case VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER:
 				{
-					tmp.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-					tmp.sampler = nullptr;
+					tmp.sampler = (VkSampler)device->mNullSampler->GetHWBuffer();
 					descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 					descriptorWrite.pImageInfo = &tmp;
 					vkUpdateDescriptorSets(device->mDevice, 1, &descriptorWrite, 0, nullptr);
@@ -179,6 +184,8 @@ namespace NxRHI
 	void VKDescriptorSetCreator::FinalCleanup(MemAlloc::FPage<VkDescriptorSet>* page)
 	{
 		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
 		auto pPage = (VKDescriptorSetPage*)page;
 		vkDestroyDescriptorPool(device->mDevice, pPage->mDescriptorPool, device->GetVkAllocCallBacks());
 		pPage->mDescriptorPool = nullptr;
@@ -209,6 +216,9 @@ namespace NxRHI
 	}
 	VKShader::~VKShader()
 	{
+		mDescriptorSetAllocator.FinalCleanup();
+		mDescriptorSetAllocator.Creator.Shader = nullptr;
+
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
@@ -221,8 +231,6 @@ namespace NxRHI
 			device->DelayDestroy(mLayout);
 			mLayout = nullptr;
 		}
-		mDescriptorSetAllocator.FinalCleanup();
-		mDescriptorSetAllocator.Creator.Shader = nullptr;
 	}
 	bool VKShader::Init(VKGpuDevice* device, FShaderDesc* desc)
 	{

@@ -6,6 +6,7 @@
 #include "DX11Event.h"
 #include "DX11InputAssembly.h"
 #include "DX11FrameBuffers.h"
+#include "DX11Drawcall.h"
 #include "../NxEffect.h"
 
 #define new VNEW
@@ -76,6 +77,8 @@ namespace NxRHI
 			mCmdQueue->mHardwareContext = MakeWeakRef(new DX11CommandList());
 			mCmdQueue->mHardwareContext->Init(this, pImmContext);
 			QueryDevice();
+
+			mCmdQueue->Init(this);
 			return true;
 		}
 
@@ -120,15 +123,15 @@ namespace NxRHI
 		pImmContext->Release();
 
 		QueryDevice();
+		mCmdQueue->Init(this);
 
 		FFenceDesc fcDesc{};
 		
-		mCaps.IsSupoortBufferToTexture = false;
-		mCaps.IsSupportSSBO_VS = true;
-
-		mCmdQueue->mQueueFence = MakeWeakRef(this->CreateFence(&fcDesc, "CmdQueue Fence"));
 		mFrameFence = MakeWeakRef(this->CreateFence(&fcDesc, "Dx11 Frame Fence"));
 
+		mCaps.IsSupoortBufferToTexture = false;
+		mCaps.IsSupportSSBO_VS = true;
+		
 		mGpuResourceAlignment.CBufferAlignment = 256;
 		mGpuResourceAlignment.TexturePitchAlignment = 256;
 		mGpuResourceAlignment.TextureAlignment = 512;
@@ -347,6 +350,11 @@ namespace NxRHI
 		}
 		return result;
 	}
+	IGraphicDraw* DX11GpuDevice::CreateGraphicDraw()
+	{
+		auto result = new DX11GraphicDraw();
+		return result;
+	}
 
 	DX11CmdQueue::DX11CmdQueue()
 	{
@@ -368,6 +376,31 @@ namespace NxRHI
 			mIdleCmdlist.pop();
 		}
 	}
+	void DX11CmdQueue::Init(DX11GpuDevice* device)
+	{
+		FFenceDesc fcDesc{};
+		mQueueExecuteFence = MakeWeakRef(device->CreateFence(&fcDesc, "QueueExecute"));
+		mQueueFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdQueue Fence"));
+	}
+	void DX11CmdQueue::ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists)
+	{
+		auto dx11Cmd = (DX11CommandList*)Cmdlist;
+		VAutoVSLLock locker(mImmCmdListLocker);
+		if (NumOfWait == UINT_MAX)
+		{
+			this->WaitFence(mQueueExecuteFence, mQueueExecuteFence->GetAspectValue());
+		}
+		else
+		{
+			for (UINT i = 0; i < NumOfWait; i++)
+			{
+				this->WaitFence(ppWaitCmdlists[i]->mCommitFence, ppWaitCmdlists[i]->mCommitFence->GetAspectValue());
+			}
+		}
+		dx11Cmd->Commit(mHardwareContext->mContext);
+		this->IncreaseSignal(dx11Cmd->mCommitFence);
+		this->IncreaseSignal(mQueueExecuteFence);
+	}
 	void DX11CmdQueue::ExecuteCommandList(UINT num, ICommandList** ppCmdlist)
 	{
 		VAutoVSLLock locker(mImmCmdListLocker);
@@ -376,7 +409,9 @@ namespace NxRHI
 			auto dx11Cmd = (DX11CommandList*)ppCmdlist[i];
 			if (dx11Cmd == mHardwareContext)
 				continue;
-			dx11Cmd->Commit(mHardwareContext->mContext);
+			//dx11Cmd->Commit(mHardwareContext->mContext);
+
+			ExecuteCommandList(dx11Cmd, UINT_MAX, nullptr);
 		}
 	}
 	UINT64 DX11CmdQueue::SignalFence(IFence* fence, UINT64 value)
@@ -384,38 +419,44 @@ namespace NxRHI
 		fence->Signal(this, value);
 		return fence->GetCompletedValue();
 	}
+	void DX11CmdQueue::WaitFence(IFence* fence, UINT64 value)
+	{
+		auto dxFence = ((DX11Fence*)fence);
+		dxFence->mFence->SetEventOnCompletion(value, dxFence->mEvent->mHandle);
+		mHardwareContext->mContext4->Wait(dxFence->mFence, value);
+	}
 	ICommandList* DX11CmdQueue::GetIdleCmdlist(EQueueCmdlist type)
 	{
 		switch (type)
 		{
-		case QCL_Read:
-			{
-				mImmCmdListLocker.Lock();
-				return mHardwareContext;
-			}
-		case QCL_Transient:
-			{
-				VAutoVSLLock locker(mImmCmdListLocker);
-				if (mIdleCmdlist.empty())
+			case QCL_Read:
 				{
-					mIdleCmdlist.push(mDevice->CreateCommandList());
+					mImmCmdListLocker.Lock();
+					return mHardwareContext;
 				}
-				auto result = mIdleCmdlist.front();
-				mIdleCmdlist.pop();
-				return result;
-			}
-		case QCL_FramePost:
-			{
-				mImmCmdListLocker.Lock();
-				if (mFramePost == nullptr)
+			case QCL_Transient:
 				{
-					mFramePost = MakeWeakRef((DX11CommandList*)mDevice->CreateCommandList());
+					VAutoVSLLock locker(mImmCmdListLocker);
+					if (mIdleCmdlist.empty())
+					{
+						mIdleCmdlist.push(mDevice->CreateCommandList());
+					}
+					auto result = mIdleCmdlist.front();
+					mIdleCmdlist.pop();
+					return result;
 				}
-				return mFramePost;
-			}
-			break;
-		default:
-			return nullptr;
+			case QCL_FramePost:
+				{
+					mImmCmdListLocker.Lock();
+					if (mFramePost == nullptr)
+					{
+						mFramePost = MakeWeakRef((DX11CommandList*)mDevice->CreateCommandList());
+					}
+					return mFramePost;
+				}
+				break;
+			default:
+				return nullptr;
 		}
 	}
 	void DX11CmdQueue::ReleaseIdleCmdlist(ICommandList* cmd, EQueueCmdlist type)

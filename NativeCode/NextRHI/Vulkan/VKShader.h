@@ -32,7 +32,11 @@ namespace NxRHI
 		void OnFree(MemAlloc::FPagedObject<VkDescriptorSet>* obj);
 		void FinalCleanup(MemAlloc::FPage<VkDescriptorSet>* page);
 	};
-	
+	class FDescriptorSetAllocator : public MemAlloc::FPagedObjectAllocator<VkDescriptorSet, VKDescriptorSetCreator, 128>
+	{
+
+	};
+
 	class VKShader : public IShader
 	{
 	public:
@@ -48,7 +52,6 @@ namespace NxRHI
 		VNameString			mFunctionName;
 		std::vector<VkDescriptorSetLayoutBinding>	mLayoutBindings;
 		VkDescriptorSetLayout				mLayout = nullptr;
-		using FDescriptorSetAllocator = MemAlloc::FPagedObjectAllocator<VkDescriptorSet, VKDescriptorSetCreator, 128>;
 		FDescriptorSetAllocator				mDescriptorSetAllocator;
 	};
 }

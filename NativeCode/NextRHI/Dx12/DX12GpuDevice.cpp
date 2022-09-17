@@ -134,8 +134,7 @@ namespace NxRHI
 		mDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&cmdQueue));
 		mCmdQueue->mCmdQueue = cmdQueue;
 
-		FFenceDesc fcDesc{};
-		mCmdQueue->mQueueFence = MakeWeakRef(this->CreateFence(&fcDesc, "CmdQueue Fence"));
+		mCmdQueue->Init(this);
 		
 		auto tRtv = new DX12AllocHeapManager(mDevice, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 0, 256);
 		mRtvHeapManager = MakeWeakRef(tRtv);
@@ -157,6 +156,7 @@ namespace NxRHI
 		
 		QueryDevice();
 
+		FFenceDesc fcDesc{};
 		mFrameFence = MakeWeakRef(this->CreateFence(&fcDesc, "Dx12 Frame Fence"));
 
 		if (CmdSigForIndirectDrawIndex == nullptr)
@@ -475,12 +475,37 @@ namespace NxRHI
 			mIdleCmdlist.pop();
 		}
 	}
+	void DX12CmdQueue::Init(DX12GpuDevice* device)
+	{
+		FFenceDesc fcDesc{};
+		mQueueFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdQueue Fence"));;
+		mQueueExecuteFence = MakeWeakRef(device->CreateFence(&fcDesc, "QueueExecute"));
+	}
 	void DX12CmdQueue::ClearIdleCmdlists()
 	{
 		if (mIdleCmdlist.empty() == false)
 		{
 			mIdleCmdlist.pop();
 		}
+	}
+	void DX12CmdQueue::ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists)
+	{
+		auto dx11Cmd = (DX12CommandList*)Cmdlist;
+		VAutoVSLLock locker(mImmCmdListLocker);
+		if (NumOfWait == UINT_MAX)
+		{
+			this->WaitFence(mQueueExecuteFence, mQueueExecuteFence->GetAspectValue());
+		}
+		else
+		{
+			for (UINT i = 0; i < NumOfWait; i++)
+			{
+				this->WaitFence(ppWaitCmdlists[i]->mCommitFence, ppWaitCmdlists[i]->mCommitFence->GetAspectValue());
+			}
+		}
+		dx11Cmd->Commit(this);
+		this->IncreaseSignal(dx11Cmd->mCommitFence);
+		this->IncreaseSignal(mQueueExecuteFence);
 	}
 	void DX12CmdQueue::ExecuteCommandList(UINT num, ICommandList** ppCmdlist)
 	{
@@ -495,6 +520,12 @@ namespace NxRHI
 	{
 		fence->Signal(this, value);
 		return fence->GetCompletedValue();
+	}
+	void DX12CmdQueue::WaitFence(IFence* fence, UINT64 value)
+	{
+		auto dxFence = (DX12Fence*)fence;
+		dxFence->mFence->SetEventOnCompletion(value, dxFence->mEvent->mHandle);
+		mCmdQueue->Wait(dxFence->mFence, value);
 	}
 	void DX12CmdQueue::TryRecycle()
 	{

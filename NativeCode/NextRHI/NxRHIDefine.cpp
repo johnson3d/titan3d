@@ -103,6 +103,13 @@ namespace NxRHI
 		FreePoint = memory;
 		memory->AddRef();
 	}
+	FLinearGpuHeapPool::~FLinearGpuHeapPool()
+	{
+		for (auto i : FreeRanges)
+		{
+			//i.H
+		}
+	}
 	/// ===================================================================================================================
 	void FLinearGpuMemory::FreeMemory()
 	{
@@ -200,13 +207,17 @@ namespace NxRHI
 			FreeRanges.push_back(memory->AddressRange);
 		}
 	}
+	IGpuLinearMemAllocator::~IGpuLinearMemAllocator()
+	{
+		Pools.clear();
+	}
 	AutoRef<FGpuMemory> IGpuLinearMemAllocator::Alloc(IGpuDevice* device, UINT64 size)
 	{
 		VAutoVSLLock lk(mLocker);
 
 		for (auto& i : Pools)
 		{
-			auto result = i->Alloc(device, size);
+			auto result = MakeWeakRef(i->Alloc(device, size));
 			if (result!=nullptr)
 			{
 				return result;
@@ -220,7 +231,7 @@ namespace NxRHI
 		range.End = PoolSize;
 		pool->FreeRanges.push_back(range);
 		Pools.push_back(pool);
-		return pool->Alloc(device, size);
+		return MakeWeakRef(pool->Alloc(device, size));
 	}
 	void IGpuLinearMemAllocator::Free(FGpuMemory* memory)
 	{

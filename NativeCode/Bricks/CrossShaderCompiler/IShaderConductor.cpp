@@ -365,7 +365,9 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, FShaderDesc
 				auto pDx12Reflection = (ID3D12ShaderReflection*)finalResult.reflection.GetD3D12ShaderReflection();
 				if (pDx12Reflection != nullptr)
 				{
+#if defined(HasModule_Dx12)
 					DX12Shader::Reflect(desc, pDx12Reflection);
+#endif
 				}
 			}
 			else if(dest[i].language == ShaderConductor::ShadingLanguage::Essl)
@@ -385,8 +387,9 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, FShaderDesc
 				size_t sz = finalResult.target.Size();
 				desc->SpirV.resize(sz);
 				memcpy(&desc->SpirV[0], (char*)finalResult.target.Data(), finalResult.target.Size());
-
+#if defined(HasModule_Vulcan)
 				VKShader::Reflect(desc);
+#endif
 			}
 		}
 	}

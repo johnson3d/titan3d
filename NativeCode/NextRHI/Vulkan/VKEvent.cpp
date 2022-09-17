@@ -16,6 +16,15 @@ namespace NxRHI
 			vkDestroySemaphore(device->mDevice, obj, device->GetVkAllocCallBacks());
 		}
 	};
+	template<>
+	struct AuxGpuResourceDestroyer<VkFence>
+	{
+		static void Destroy(VkFence obj, IGpuDevice* device1)
+		{
+			auto device = (VKGpuDevice*)device1;
+			vkDestroyFence(device->mDevice, obj, device->GetVkAllocCallBacks());
+		}
+	};
 	bool VKEvent::Init(VKGpuDevice* pDevice, const FEventDesc& desc, const char* name)
 	{
 		Name = name;
@@ -77,25 +86,7 @@ namespace NxRHI
 		auto hr = vkGetSemaphoreCounterValue(device->mDevice, mSemaphore, &count);
 		if (count == UINT64_MAX)
 		{
-			device->DelayDestroy(mSemaphore);
-			mSemaphore = nullptr;
-
-			VkSemaphoreCreateInfo info{};
-			info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-			//info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-			VkSemaphoreTypeCreateInfo timelineCreateInfo{};
-			timelineCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
-			timelineCreateInfo.semaphoreType = VkSemaphoreType::VK_SEMAPHORE_TYPE_TIMELINE;
-			timelineCreateInfo.initialValue = 0;
-
-			info.pNext = &timelineCreateInfo;
-
-			if (vkCreateSemaphore(device->mDevice, &info, device->GetVkAllocCallBacks(), &mSemaphore) != VK_SUCCESS)
-			{
-				ASSERT(false);
-			}
-			return device->GetCmdQueue()->SignalFence(this, AspectValue + 1);
+			ASSERT(false);
 		}
 		ASSERT(hr == VK_SUCCESS);
 		return count;
@@ -119,34 +110,12 @@ namespace NxRHI
 	}
 	void VKFence::Signal(ICmdQueue* queue, UINT64 value)
 	{
-		ASSERT(value < UINT64_MAX / 2);
-		if (AspectValue >= value)
-		{
-			ASSERT(false);
-			return;
-		}
-		AspectValue = value;
-		
-		VkTimelineSemaphoreSubmitInfo timelineInfo;
-		timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
-		timelineInfo.pNext = NULL;
-		timelineInfo.waitSemaphoreValueCount = 0;
-		timelineInfo.signalSemaphoreValueCount = 1;
-		timelineInfo.pSignalSemaphoreValues = &value;
-
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.pNext = &timelineInfo;
-		submitInfo.commandBufferCount = 0;
-		submitInfo.waitSemaphoreCount = 0;
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &mSemaphore;
-		VAutoVSLLock lk(((VKCmdQueue*)queue)->mGraphicsQueueLocker);
-		vkQueueSubmit(((VKCmdQueue*)queue)->mGraphicsQueue, 1, &submitInfo, nullptr);
+		queue->SignalFence(this, value);
 	}
 	bool VKFence::Wait(UINT64 value, UINT timeOut)
 	{
-		if (GetCompletedValue() < value)
+		auto completed = GetCompletedValue();
+		if (completed < value)
 		{
 			auto device = mDeviceRef.GetPtr();
 			VkSemaphoreWaitInfo info{};
@@ -155,7 +124,8 @@ namespace NxRHI
 			info.semaphoreCount = 1;
 			info.pSemaphores = &mSemaphore;
 			info.pValues = &value;
-			vkWaitSemaphores(device->mDevice, &info, UINT64_MAX);
+			//vkWaitSemaphores(device->mDevice, &info, UINT64_MAX);
+			completed = GetCompletedValue();
 		}
 
 		return true;
@@ -164,6 +134,72 @@ namespace NxRHI
 	{
 		auto device = mDeviceRef.GetPtr();
 		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT, mSemaphore, name);
+	}
+	/// ====================================
+	VKBinaryFence::VKBinaryFence(VKGpuDevice* device)
+	{
+		mDeviceRef.FromObject(device);
+
+		VkSemaphoreCreateInfo info{};
+		info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+		if (vkCreateSemaphore(device->mDevice, &info, device->GetVkAllocCallBacks(), &mSemaphore) != VK_SUCCESS)
+		{
+			ASSERT(false);
+		}
+	}
+	VKBinaryFence::~VKBinaryFence()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
+
+		device->DelayDestroy(mSemaphore);
+		mSemaphore = nullptr;
+	}
+	/// ====================================
+	VKGpuToHostFence::VKGpuToHostFence(VKGpuDevice* device, bool signal)
+	{
+		mDeviceRef.FromObject(device);
+
+		VkFenceCreateInfo info{};
+		info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		if (signal)
+			info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+		if (vkCreateFence(device->mDevice, &info, device->GetVkAllocCallBacks(), &mFence) != VK_SUCCESS)
+		{
+			ASSERT(false);
+		}
+	}
+	VKGpuToHostFence::~VKGpuToHostFence()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
+
+		device->DelayDestroy(mFence);
+		mFence = nullptr;
+	}
+	void VKGpuToHostFence::Reset()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
+		vkResetFences(device->mDevice, 1, &mFence);
+	}
+	bool VKGpuToHostFence::IsSignaled()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return false;
+		auto hr = vkGetFenceStatus(device->mDevice, mFence);
+		return hr == VK_SUCCESS;
+	}
+	void VKGpuToHostFence::Wait()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
+		vkWaitForFences(device->mDevice, 1, &mFence, VK_TRUE, UINT64_MAX);
 	}
 }
 

@@ -456,15 +456,30 @@ namespace NxRHI
 	{
 		if (sl == EShaderLanguage::SL_DXBC)
 		{
+#if defined(HasModule_Dx11)
 			return DX11Shader::CompileShader(this, desc, shader, entry, type, sm, defines, sl, bDebugShader);
+#else
+			ASSERT(false);
+			return false;
+#endif
 		}
 		if (sl == EShaderLanguage::SL_DXIL)
 		{
+#if defined(HasModule_Dx12)
 			return DX12Shader::CompileShader(this, desc, shader, entry, type, sm, defines, sl, bDebugShader);
+#else
+			ASSERT(false);
+			return false;
+#endif
 		}
 		if (sl == EShaderLanguage::SL_SPIRV)
 		{
+#if defined(HasModule_Vulkan)
 			return VKShader::CompileShader(this, desc, shader, entry, type, sm, defines, sl, bDebugShader);
+#else
+			ASSERT(false);
+			return false;
+#endif
 		}
 		return false;
 	}

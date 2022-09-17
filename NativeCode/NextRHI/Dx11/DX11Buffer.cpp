@@ -120,7 +120,7 @@ namespace NxRHI
 		//refCmdList->mContext->UpdateSubresource(mBuffer, mipIndex, (D3D11_BOX*)box, pData, rowPitch, depthPitch);
 		auto pContext = refCmdList->mContext;
 		//UINT subRes = D3D11CalcSubresource(mipIndex, arrayIndex, 1);
-		if (rowPitch < Desc.Size && (Desc.CpuAccess & ECpuAccess::CAS_WRITE))
+		if (Desc.Usage == USAGE_DYNAMIC)//rowPitch < Desc.Size && (Desc.CpuAccess & ECpuAccess::CAS_WRITE))
 		{
 			D3D11_MAPPED_SUBRESOURCE mapData;
 			if (S_OK == pContext->Map(mBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapData))
@@ -137,7 +137,7 @@ namespace NxRHI
 
 	void DX11Buffer::UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size)
 	{
-		if (offset == 0 && Desc.Usage == USAGE_DEFAULT)// && size == Desc.Size)
+		if (/*offset == 0 && */Desc.Usage == USAGE_DEFAULT)// && size == Desc.Size)
 		{
 			auto refCmdList = (DX11CommandList*)cmd;
 			refCmdList->mContext->UpdateSubresource(mBuffer, 0, nullptr, pData, size, size);

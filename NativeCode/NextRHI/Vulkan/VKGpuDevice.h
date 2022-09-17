@@ -9,10 +9,13 @@ NS_BEGIN
 namespace NxRHI
 {
 	class VKBuffer;
+	class VKSrView;
+	class VKSampler;
 	class VKGpuDevice;
 	class VKCommandList;
 	class VKCmdQueue;
 	class VKCmdBufferManager;
+	class VKBinaryFence;
 	class VKGpuSystem : public IGpuSystem
 	{
 	public:
@@ -54,6 +57,7 @@ namespace NxRHI
 		static PFN_vkDebugMarkerSetObjectNameEXT fn_vkDebugMarkerSetObjectNameEXT;
 		static PFN_vkCmdDebugMarkerBeginEXT fn_vkCmdDebugMarkerBeginEXT;
 		static PFN_vkCmdDebugMarkerEndEXT fn_vkCmdDebugMarkerEndEXT;
+		static PFN_vkQueueSubmit2 fn_vkQueueSubmit2;
 		static void SetVkObjectDebugName(VkDevice device, VkDebugReportObjectTypeEXT type, void* pObj, const char* name)
 		{
 			VkDebugMarkerObjectNameInfoEXT dbgNameInfo{};
@@ -149,17 +153,23 @@ namespace NxRHI
 		
 		AutoRef<VKGpuDefaultMemAllocator>	mDefaultBufferAllocator;
 
+		AutoRef<VKBuffer>					mNullUBO;
+		AutoRef<VKBuffer>					mNullSSBO;
 		AutoRef<VKBuffer>					mNullVB;
-
+		AutoRef<VKSrView>					mNullSampledImage;
+		AutoRef<VKSampler>					mNullSampler;
 	private:
 		bool GetAllocatorInfo(VkBufferUsageFlags flags, VkMemoryPropertyFlags prop, UINT& typeIndex, UINT& alignment);
+		void CreateNullObjects();
 	};
 
 	class VKCmdQueue : public ICmdQueue
 	{
 	public:
+		virtual void ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists) override;
 		virtual void ExecuteCommandList(UINT num, ICommandList** ppCmdlist) override;
 		virtual UINT64 SignalFence(IFence* fence, UINT64 value) override;
+		virtual void WaitFence(IFence* fence, UINT64 value) override;
 		virtual ICommandList* GetIdleCmdlist(EQueueCmdlist type) override;
 		virtual void ReleaseIdleCmdlist(ICommandList* cmd, EQueueCmdlist type) override;
 		virtual void Flush() override;
@@ -167,27 +177,25 @@ namespace NxRHI
 		bool GraphicsEqualPresentQueue() const {
 			return mGraphicsQueueIndex == mPresentQueueIndex;
 		}
+		UINT64 QueueSignal(IFence* fence, UINT64 value, VkFence g2hFence);
+	private:
+		void QueueExecuteCommandList(ICommandList* Cmdlist);
 	public:
 		VKCmdQueue();
 		~VKCmdQueue();
+		void Init(VKGpuDevice* device);
 		void ClearIdleCmdlists();
-		void TryRecycle();
 		VKGpuDevice*					mDevice = nullptr;
-		VSLLock							mGraphicsQueueLocker;
 		VCritical						mImmCmdListLocker;
 		AutoRef<VKCommandList>			mFramePost;
 		std::queue<AutoRef<ICommandList>>	mIdleCmdlist;
-		struct FWaitRecycle 
-		{
-			UINT64						WaitFenceValue = 0;
-			AutoRef<ICommandList>		CmdList;
-		};
-		std::vector<FWaitRecycle>		mWaitRecycleCmdlists;
-
+		AutoRef<VKCommandList>			mDummyCmdList;
+		
 		UINT							mGraphicsQueueIndex = -1;
 		UINT							mPresentQueueIndex = -1;
 		VkQueue							mGraphicsQueue = nullptr;
 		VkQueue							mPresentQueue = nullptr;
+		AutoRef<IFence>					mFlushFence;
 	};
 }
 

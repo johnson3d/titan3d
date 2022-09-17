@@ -25,6 +25,7 @@ namespace MemAlloc
 	{
 		virtual AutoRef<FPagedObject<_Type>> Alloc() = 0;
 		virtual void Free(FPagedObject<_Type>* ptr) = 0;
+		virtual void OnFree(FPagedObject<_Type>* ptr) = 0;
 	};
 
 	template<typename _Type>
@@ -63,6 +64,10 @@ namespace MemAlloc
 			{
 				FreeImpl(ptr);
 			}
+		}
+		virtual void OnFree(FPagedObject<_Type>* ptr) override
+		{
+			Creator.OnFree(ptr);
 		}
 		void FinalCleanup()
 		{
@@ -142,6 +147,7 @@ namespace MemAlloc
 		auto allocator = page->Allocator.GetPtr();
 		if (allocator == nullptr)
 			return;
+		allocator->OnFree(this);
 		allocator->Free(this);
 	}
 }

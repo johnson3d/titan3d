@@ -33,6 +33,9 @@ namespace NxRHI
 		if (FAILED(hr))
 			return false;
 		mContext->QueryInterface(IID_ID3D11DeviceContext4, (void**)&mContext4);		
+
+		FFenceDesc fcDesc{};
+		mCommitFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdList Commit Fence"));
 		return true;
 	}
 	bool DX11CommandList::Init(DX11GpuDevice* device, ID3D11DeviceContext* context)

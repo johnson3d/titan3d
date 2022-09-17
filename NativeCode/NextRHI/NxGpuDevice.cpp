@@ -53,33 +53,52 @@ namespace NxRHI
 		{
 			case EngineNS::NxRHI::RHI_D3D11:
 			{
+#if defined(HasModule_Dx11)
 				auto result = new DX11GpuSystem();
 				result->Type = type;
 				result->InitGpuSystem(type, desc);
 				return result;
+#else
+				return nullptr;
+#endif
 			}
 			case EngineNS::NxRHI::RHI_D3D12:
 			{
+#if defined(HasModule_Dx12)
 				auto result = new DX12GpuSystem();
 				result->Type = type;
 				result->InitGpuSystem(type, desc);
 				return result;
+#else
+				ASSERT(false);
+				return nullptr;
+#endif
 			}
 			case EngineNS::NxRHI::RHI_VK:
 			{
+#if defined(HasModule_Vulkan)
 				auto result = new VKGpuSystem();
 				result->Type = type;
 				result->InitGpuSystem(type, desc);
 				return result;
+#else
+				ASSERT(false);
+				return nullptr;
+#endif
 			}
 			case EngineNS::NxRHI::RHI_GL:
 				break;
 			case EngineNS::NxRHI::RHI_VirtualDevice:
 			{
+#if defined(HasModule_NullDevice)
 				auto result = new NullGpuSystem();
 				result->Type = type;
 				result->InitGpuSystem(type, desc);
 				return result;
+#else
+				ASSERT(false);
+				return nullptr;
+#endif
 			}
 			default:
 				break;
@@ -129,15 +148,17 @@ namespace NxRHI
 				}
 			}
 			ASSERT(completed <= mFrameFence->GetAspectValue());
-			if (completed < mFrameFence->GetAspectValue())
-			{
-				mFrameFence->Wait(mFrameFence->GetAspectValue());
-				GetCmdQueue()->IncreaseSignal(mFrameFence);
-			}
-			else
-			{
-				GetCmdQueue()->IncreaseSignal(mFrameFence);
-			}
+			GetCmdQueue()->IncreaseSignal(mFrameFence);
+			
+			//if (completed < mFrameFence->GetAspectValue())
+			//{
+			//	//mFrameFence->Wait(mFrameFence->GetAspectValue());
+			//	GetCmdQueue()->IncreaseSignal(mFrameFence);
+			//}
+			//else
+			//{
+			//	GetCmdQueue()->IncreaseSignal(mFrameFence);
+			//}
 		}
 	}
 }

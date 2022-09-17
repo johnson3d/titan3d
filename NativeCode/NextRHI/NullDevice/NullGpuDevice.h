@@ -53,8 +53,10 @@ namespace NxRHI
 	class NullCmdQueue : public ICmdQueue
 	{
 	public:
+		virtual void ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists) override;
 		virtual void ExecuteCommandList(UINT num, ICommandList** ppCmdlist) override;
 		virtual UINT64 SignalFence(IFence* fence, UINT64 value) override;
+		virtual void WaitFence(IFence* fence, UINT64 value) override;
 		virtual ICommandList* GetIdleCmdlist(EQueueCmdlist type) override;
 		virtual void ReleaseIdleCmdlist(ICommandList* cmd, EQueueCmdlist type) override;
 		virtual void Flush() override;

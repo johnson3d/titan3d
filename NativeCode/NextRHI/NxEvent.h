@@ -55,6 +55,9 @@ namespace NxRHI
 		inline UINT64 GetAspectValue() const {
 			return AspectValue;
 		}
+		inline bool WaitToAspect(UINT timeOut = INFINITE) {
+			return Wait(AspectValue, timeOut);
+		}
 	public:
 		std::string		Name;
 		FFenceDesc		Desc{};

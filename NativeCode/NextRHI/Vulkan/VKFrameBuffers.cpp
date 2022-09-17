@@ -69,32 +69,32 @@ namespace NxRHI
 	{
 		switch (action)
 		{
-		case EFrameBufferLoadAction::LoadActionDontCare:
-			return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		case EFrameBufferLoadAction::LoadActionLoad:
-			return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_LOAD;
-		case EFrameBufferLoadAction::LoadActionClear:
-			return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
-		default:
-			return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			case EFrameBufferLoadAction::LoadActionDontCare:
+				return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			case EFrameBufferLoadAction::LoadActionLoad:
+				return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_LOAD;
+			case EFrameBufferLoadAction::LoadActionClear:
+				return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
+			default:
+				return VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		}
 	}
 	inline VkAttachmentStoreOp FrameBufferStoreAction2VK(EFrameBufferStoreAction action)
 	{
 		switch (action)
 		{
-		case EFrameBufferStoreAction::StoreActionDontCare:
-			return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		case EFrameBufferStoreAction::StoreActionStore:
-			return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
-		case EFrameBufferStoreAction::StoreActionMultisampleResolve:
-			return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
-		case EFrameBufferStoreAction::StoreActionStoreAndMultisampleResolve:
-			return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
-		case EFrameBufferStoreAction::StoreActionUnknown:
-			return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
-		default:
-			return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
+			case EFrameBufferStoreAction::StoreActionDontCare:
+				return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			case EFrameBufferStoreAction::StoreActionStore:
+				return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
+			case EFrameBufferStoreAction::StoreActionMultisampleResolve:
+				return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
+			case EFrameBufferStoreAction::StoreActionStoreAndMultisampleResolve:
+				return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
+			case EFrameBufferStoreAction::StoreActionUnknown:
+				return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
+			default:
+				return VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_MAX_ENUM;
 		}
 	}
 	VKRenderPass::VKRenderPass()
@@ -177,16 +177,24 @@ namespace NxRHI
 		//subpass.inputAttachmentCount TBDR GPU optimizer
 		//subpass.pInputAttachments
 		//https://zhuanlan.zhihu.com/p/131392827
+		//https://stackoverflow.com/questions/66461389/vksubpassdependency-required-for-depth-attachment-but-not-for-color-attachment
 
-		VkSubpassDependency dependency{};
-		dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependency.dstSubpass = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; //VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-
-		dependency.srcAccessMask = 0;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;		
-		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		VkSubpassDependency dependency[2]{};
+		dependency[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+		dependency[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+		dependency[0].dstSubpass = 0;
+		dependency[0].srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; //VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		dependency[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		dependency[0].srcAccessMask = 0;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;		
+		dependency[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;//VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		
+		dependency[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+		dependency[1].srcSubpass = VK_SUBPASS_EXTERNAL;
+		dependency[1].dstSubpass = 0;
+		dependency[1].srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; //VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		dependency[1].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;// VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		dependency[1].srcAccessMask = 0;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;		
+		dependency[1].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;// VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;//VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
 		VkRenderPassCreateInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -194,8 +202,25 @@ namespace NxRHI
 		renderPassInfo.pAttachments = &attachments[0];
 		renderPassInfo.subpassCount = 1;
 		renderPassInfo.pSubpasses = &subpass;
-		renderPassInfo.dependencyCount = 1;
-		renderPassInfo.pDependencies = &dependency;
+		if (desc.AttachmentDepthStencil.Format != PXF_UNKNOWN)
+		{
+			if (desc.NumOfMRT == 0)
+			{
+				renderPassInfo.dependencyCount = 1;
+				renderPassInfo.pDependencies = &dependency[1];
+			}
+			else
+			{
+				renderPassInfo.dependencyCount = 2;
+				renderPassInfo.pDependencies = dependency;
+			}
+		}
+		else
+		{
+			renderPassInfo.dependencyCount = 1;
+			renderPassInfo.pDependencies = dependency;
+		}
+		
 
 		if (vkCreateRenderPass(device->mDevice, &renderPassInfo, device->GetVkAllocCallBacks(), &mRenderPass) != VK_SUCCESS)
 			return false;
@@ -285,10 +310,15 @@ namespace NxRHI
 	}
 	void VKSwapChain::FBackBuffer::Cleanup(VKGpuDevice* device)
 	{
-		if (PresentSemaphore != nullptr)
+		if (AcquireSemaphore != nullptr)
 		{
-			device->DelayDestroy(PresentSemaphore);
-			PresentSemaphore = nullptr;
+			device->DelayDestroy(AcquireSemaphore);
+			AcquireSemaphore = nullptr;
+		}
+		if (RenderFinishSemaphore != nullptr)
+		{
+			device->DelayDestroy(RenderFinishSemaphore);
+			RenderFinishSemaphore = nullptr;
 		}
 	}
 
@@ -315,8 +345,8 @@ namespace NxRHI
 		device->DelayDestroy(mSurface);
 		mSurface = nullptr;
 
-		device->DelayDestroy(AcquireImageFence);
-		AcquireImageFence = nullptr;
+		//device->DelayDestroy(AcquireImageFence);
+		//AcquireImageFence = nullptr;
 	}
 
 	bool VKSwapChain::Init(VKGpuDevice* device, const FSwapChainDesc& desc)
@@ -337,9 +367,9 @@ namespace NxRHI
 #endif
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device->mPhysicalDevice, mSurface, &mCapabilities);
 		
-		VkFenceCreateInfo vkfcInfo{};
+		/*VkFenceCreateInfo vkfcInfo{};
 		vkfcInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-		vkCreateFence(device->mDevice, &vkfcInfo, device->GetVkAllocCallBacks(), &AcquireImageFence);
+		vkCreateFence(device->mDevice, &vkfcInfo, device->GetVkAllocCallBacks(), &AcquireImageFence);*/
 
 		FFenceDesc fcdesc{};
 		fcdesc.InitValue = 0;
@@ -523,20 +553,10 @@ namespace NxRHI
 		cmd->BeginCommand();
 		for (UINT i = 0; i < Desc.BufferCount; i++)
 		{
-			if (BackBuffers[i]->Texture == nullptr)
-			{
-				BackBuffers[i]->Texture = MakeWeakRef(new VKTexture());
-			}
-			if (BackBuffers[i]->PresentSemaphore == nullptr)
-			{
-				//FFenceDesc fcDesc{};
-				//BackBuffers[i].PresentFence = MakeWeakRef((VKFence*)device->CreateFence(&fcDesc, "Swapchain present fence"));
-				VkSemaphoreCreateInfo info{};
-				info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-				info.flags = 0;
+			ASSERT(BackBuffers[i]->Texture);
+			ASSERT(BackBuffers[i]->AcquireSemaphore);
+			ASSERT(BackBuffers[i]->RenderFinishSemaphore);
 
-				vkCreateSemaphore(device->mDevice, &info, device->GetVkAllocCallBacks(), &BackBuffers[i]->PresentSemaphore);
-			}
 			auto pDx12Texture = (VKTexture*)GetBackBuffer(i);
 			pDx12Texture->mDeviceRef.FromObject(device);
 			if (pDx12Texture != nullptr)
@@ -559,7 +579,6 @@ namespace NxRHI
 
 		//CurrentBackBuffer = 0;
 
-		vkAcquireNextImageKHR(((VKGpuDevice*)device)->mDevice, mSwapChain, UINT64_MAX, VK_NULL_HANDLE, AcquireImageFence, &CurrentBackBuffer);
 		return true;
 	}
 	bool VKSwapChain::Create(IGpuDevice* device1, UINT w, UINT h)
@@ -586,7 +605,7 @@ namespace NxRHI
 		if (false == CheckSwapSurfaceFormat(surfaceFormat, scs.formats))
 			return false;
 
-		VkPresentModeKHR presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+		VkPresentModeKHR presentMode = VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR;
 
 		VkExtent2D extent;
 		extent.width = Desc.Width;
@@ -646,7 +665,7 @@ namespace NxRHI
 			{
 				BackBuffers[i]->Texture = MakeWeakRef(new VKTexture());
 			}
-			if (BackBuffers[i]->PresentSemaphore == nullptr)
+			if (BackBuffers[i]->RenderFinishSemaphore == nullptr)
 			{
 				/*FFenceDesc fcDesc{};
 				BackBuffers[i].PresentFence = MakeWeakRef((VKFence*)device->CreateFence(&fcDesc, "Swapchain present fence"));*/
@@ -655,7 +674,9 @@ namespace NxRHI
 				info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 				info.flags = 0;
 
-				vkCreateSemaphore(device->mDevice, &info, device->GetVkAllocCallBacks(), &BackBuffers[i]->PresentSemaphore);
+				BackBuffers[i]->AcquireSemaphore = MakeWeakRef(new VKBinaryFence(device));
+				BackBuffers[i]->RenderFinishSemaphore = MakeWeakRef(new VKBinaryFence(device));
+				BackBuffers[i]->RenderFinishFence = MakeWeakRef(new VKGpuToHostFence(device, true));
 			}
 			auto pDx12Texture = (VKTexture*)GetBackBuffer(i);
 			pDx12Texture->mDeviceRef.FromObject(device);
@@ -680,7 +701,6 @@ namespace NxRHI
 
 		//CurrentBackBuffer = 0;
 
-		vkAcquireNextImageKHR(((VKGpuDevice*)device)->mDevice, mSwapChain, UINT64_MAX, VK_NULL_HANDLE, AcquireImageFence, &CurrentBackBuffer);
 		return true;
 	}
 	ITexture* VKSwapChain::GetBackBuffer(UINT index)
@@ -693,7 +713,7 @@ namespace NxRHI
 	}
 	UINT VKSwapChain::GetCurrentBackBuffer()
 	{
-		CurrentBackBuffer = CurrentBackBuffer % BackBuffers.size();
+		//CurrentBackBuffer = CurrentBackBuffer % BackBuffers.size();
 		return CurrentBackBuffer;
 	}
 	void VKSwapChain::BeginFrame()
@@ -701,51 +721,53 @@ namespace NxRHI
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
-		vkWaitForFences(device->mDevice, 1, &AcquireImageFence, VK_TRUE, UINT64_MAX);
-		vkResetFences(device->mDevice, 1, &AcquireImageFence);
+		auto semaphore = BackBuffers[CurrentFrame]->AcquireSemaphore;
+		auto result = vkAcquireNextImageKHR(device->mDevice, mSwapChain, UINT64_MAX, semaphore->mSemaphore, VK_NULL_HANDLE, &CurrentBackBuffer);
+		ASSERT(result == VK_SUCCESS);
+		BackBuffers[CurrentBackBuffer]->RenderFinishFence->Wait();
+
+		auto cmdQueue = (VKCmdQueue*)device->GetCmdQueue();
+		cmdQueue->WaitFence(semaphore, 0);// semaphore->GetAspectValue());
 	}
 	void VKSwapChain::Present(IGpuDevice* device, UINT SyncInterval, UINT Flags)
 	{
+		auto cmdQueue = (VKCmdQueue*)device->GetCmdQueue();
+
+		auto rfinishSemaphore = BackBuffers[CurrentFrame]->RenderFinishSemaphore;
+		auto rfinishFence = BackBuffers[CurrentBackBuffer]->RenderFinishFence;
+		
+		//cmdQueue->SignalFence(semaphore, 0);// semaphore->GetAspectValue());
+		
+		rfinishFence->Reset();
+		auto aspect1 = cmdQueue->mQueueExecuteFence->GetAspectValue();
+
+		cmdQueue->QueueSignal(rfinishSemaphore, 0, rfinishFence->mFence);
+
+		//bool t1 = rfinishFence->IsSignaled();
+		//auto aspect2 = cmdQueue->mQueueExecuteFence->GetAspectValue();
+		//cmdQueue->mQueueExecuteFence->WaitToAspect();
+		////rfinishFence->Wait();
+		//auto aspect3 = cmdQueue->mQueueExecuteFence->GetAspectValue();
+		//ASSERT(aspect2 - 1 == aspect1);
+		//ASSERT(rfinishFence->IsSignaled());
+
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
-		auto& curBackBuffer = BackBuffers[CurrentBackBuffer];
-		auto smp = curBackBuffer->PresentSemaphore;
-
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.waitSemaphoreCount = 0;//1
-		//submitInfo.pWaitSemaphores = waitSemaphores;
-		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.commandBufferCount = 0;
-		submitInfo.pCommandBuffers = nullptr;
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &smp;
-		{
-			auto cmdQueue = (VKCmdQueue*)device->GetCmdQueue();
-			VAutoVSLLock lk(cmdQueue->mGraphicsQueueLocker);
-			vkQueueSubmit(cmdQueue->mGraphicsQueue, 1, &submitInfo, nullptr);
-
-			VkSemaphore waitSemaphores[] = { smp };
-			presentInfo.waitSemaphoreCount = 1;
-			presentInfo.pWaitSemaphores = waitSemaphores;
-
-			VkSwapchainKHR swapChains[] = { mSwapChain };
-			presentInfo.swapchainCount = 1;
-			presentInfo.pSwapchains = swapChains;
-			presentInfo.pImageIndices = &CurrentBackBuffer;
-			auto result = vkQueuePresentKHR(cmdQueue->mPresentQueue, &presentInfo);
-			//ASSERT(result == VK_SUCCESS);
-		}
+		//auto& curBackBuffer = BackBuffers[CurrentFrame];
 		
-		//CurrentBackBuffer = (CurrentBackBuffer + 1) % (UINT)BackBuffers.size();
+		VkSwapchainKHR swapChains[] = { mSwapChain };
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChains;
+		presentInfo.pImageIndices = &CurrentBackBuffer;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = &rfinishSemaphore->mSemaphore;
+		auto result = vkQueuePresentKHR(cmdQueue->mPresentQueue, &presentInfo);
+		ASSERT(result == VK_SUCCESS);
+		
+		CurrentFrame = (CurrentFrame + 1) % (UINT)BackBuffers.size();
 
-		{
-			auto result = vkAcquireNextImageKHR(((VKGpuDevice*)device)->mDevice, mSwapChain, UINT64_MAX, VK_NULL_HANDLE, AcquireImageFence, &CurrentBackBuffer);
-			//ASSERT(result == VK_SUCCESS);
-		}
-
+		//device->mFrameFence->WaitToAspect();
 		device->GetCmdQueue()->IncreaseSignal(PresentFence);
 	}
 	void VKSwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device)

@@ -246,6 +246,10 @@ namespace NxRHI
 	{
 		
 	}
+	void NullCmdQueue::ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists)
+	{
+
+	}
 	void NullCmdQueue::ExecuteCommandList(UINT num, ICommandList** ppCmdlist)
 	{
 		
@@ -253,6 +257,10 @@ namespace NxRHI
 	UINT64 NullCmdQueue::SignalFence(IFence* fence, UINT64 value)
 	{
 		return value;
+	}
+	void NullCmdQueue::WaitFence(IFence* fence, UINT64 value)
+	{
+
 	}
 	ICommandList* NullCmdQueue::GetIdleCmdlist(EQueueCmdlist type)
 	{

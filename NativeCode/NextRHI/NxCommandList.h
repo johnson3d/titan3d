@@ -99,6 +99,8 @@ namespace NxRHI
 		
 		AutoRef<IGpuPipeline>				mPipelineDesc;
 		AutoRef<IFrameBuffers>				mCurrentFrameBuffers;
+
+		AutoRef<IFence>						mCommitFence;
 	};
 }
 

@@ -5,6 +5,7 @@
 #include "VKGpuState.h"
 #include "VKCommandList.h"
 #include "VKFrameBuffers.h"
+#include "VKShader.h"
 
 #define new VNEW
 
@@ -19,6 +20,8 @@ namespace NxRHI
 		{
 			//auto device = (VKGpuDevice*)device1;
 			//vkDestroyBuffer(device->mDevice, obj, device->GetVkAllocCallBacks());
+			// auto pAllocator = (FDescriptorSetAllocator*)obj->HostPage.GetPtr()->Allocator.GetPtr();
+			//pAllocator->Creator.OnFree(obj);
 			obj->Free();
 		}
 	};

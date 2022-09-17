@@ -26,6 +26,10 @@
 #define HasModule_Particle
 #define HasModule_MathLib
 #define HasModule_NextRHI
+#define HasModule_Dx11
+#define HasModule_Dx12
+#define HasModule_Vulkan
+#define HasModule_NullDevice
 
 #include <WinSock2.h>
 #include <mswsock.h>

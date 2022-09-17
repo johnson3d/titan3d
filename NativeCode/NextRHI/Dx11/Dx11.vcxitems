@@ -16,6 +16,7 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)DX11Buffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DX11CommandList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DX11Drawcall.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DX11FrameBuffers.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DX11GpuDevice.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DX11Event.cpp" />
@@ -27,6 +28,7 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)DX11Buffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DX11CommandList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DX11Drawcall.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DX11FrameBuffers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DX11GpuDevice.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)DX11Event.h" />

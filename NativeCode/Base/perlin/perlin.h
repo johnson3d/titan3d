@@ -36,7 +36,10 @@ public:
 		return rand_lcg(mCurState);
 	}
 	int NextValue16Bit() {
-		return (((UINT)rand_lcg(mCurState))>>16) & 0x7fff;
+		return (((UINT)rand_lcg(mCurState))>>16) & 0xffff;
+	}
+	int NextValue8Bit() {
+		return (((UINT)rand_lcg(mCurState)) >> 24) & 0xff;
 	}
 };
 //#define SAMPLE_SIZE 1024

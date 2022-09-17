@@ -54,10 +54,38 @@ namespace NxRHI
 		virtual void Signal(ICmdQueue* queue, UINT64 value) override;
 		virtual bool Wait(UINT64 value, UINT timeOut = INFINITE) override;
 		virtual void SetDebugName(const char* name) override;
+
+		virtual bool IsBinary() const{
+			return false;
+		}
 	public:
 		TObjectHandle<VKGpuDevice>	mDeviceRef;
 		AutoRef<VKEvent>	mEvent;
 		VkSemaphore			mSemaphore = nullptr;
+	};
+	class VKBinaryFence : public VKFence
+	{
+	public:
+		VKBinaryFence(VKGpuDevice* pDevice);
+		~VKBinaryFence();
+		virtual bool IsBinary() const override{
+			return true;
+		}
+		virtual UINT64 GetCompletedValue() override {
+			return 0;
+		}
+	};
+	class VKGpuToHostFence : public VIUnknownBase
+	{
+	public:
+		VKGpuToHostFence(VKGpuDevice* pDevice, bool signal);
+		~VKGpuToHostFence();
+		void Wait();
+		void Reset();
+		bool IsSignaled();
+	public:
+		TObjectHandle<VKGpuDevice>	mDeviceRef;
+		VkFence				mFence;
 	};
 }
 

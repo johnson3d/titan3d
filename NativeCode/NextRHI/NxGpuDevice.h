@@ -241,19 +241,26 @@ namespace NxRHI
 		{
 			ExecuteCommandList(1, &pCmdlist);
 		}
-		virtual void ExecuteCommandList(UINT num, ICommandList * *ppCmdlist) = 0;
+		//NumOfWait = 0: No wait
+		//NumOfWait = 0xFFFFFFFF: Prev Queued Cmdlist
+		virtual void ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists) = 0;
+		virtual void ExecuteCommandList(UINT num, ICommandList** ppCmdlist) = 0;
 		virtual UINT64 SignalFence(IFence * fence, UINT64 value) = 0;
+		virtual void WaitFence(IFence* fence, UINT64 value) = 0;
 		virtual ICommandList* GetIdleCmdlist(EQueueCmdlist type) = 0;
 		virtual void ReleaseIdleCmdlist(ICommandList* cmd, EQueueCmdlist type) = 0;
 		virtual void Flush() = 0;
 		
 		inline UINT64 IncreaseSignal(IFence* fence)
 		{
+			VAutoVSLLock lk(mGraphicsQueueLocker);
 			UINT64 target = fence->GetAspectValue() + 1;
 			return SignalFence(fence, target);
 		}
 	public:
+		VCritical						mGraphicsQueueLocker;
 		AutoRef<IFence>					mQueueFence;
+		AutoRef<IFence>					mQueueExecuteFence;
 	};
 }
 

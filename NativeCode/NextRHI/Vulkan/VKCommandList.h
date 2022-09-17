@@ -13,9 +13,18 @@ namespace NxRHI
 	class VKRenderTargetView;
 	class VKDepthStencilView;
 
+	enum EPagedCmdBufferState
+	{
+		PCBS_Free,
+		PCBS_Recording,
+		PCBS_Commiting,
+		PCBS_WaitFree,
+	};
+
 	struct VKCommandBufferPagedObject : public MemAlloc::FPagedObject<VkCommandBuffer>
 	{
-
+		EPagedCmdBufferState		mState = EPagedCmdBufferState::PCBS_Free;
+		UINT64						mTargetValue = 0;
 	};
 	struct VKCommandBufferPage : public MemAlloc::FPage<VkCommandBuffer>
 	{
@@ -36,14 +45,14 @@ namespace NxRHI
 	{
 		struct FCmdBufferHolder
 		{
-			UINT64										TargetValue;
-			AutoRef<MemAlloc::FPagedObject<VkCommandBuffer>>	CmdBuffer;
-			AutoRef<IFence>								Fence;
+			AutoRef<VKCommandBufferPagedObject>	CmdBuffer;
+			AutoRef<IFence>						Fence;
 		};
 		VSLLock									mLocker;
 		std::vector<FCmdBufferHolder>			mWaitFrees;
-		void TickForRecycle();
-		void PushRecycle(const AutoRef<IFence>& fence, UINT64 targetValue, const AutoRef<MemAlloc::FPagedObject<VkCommandBuffer>>& buffer);
+		~VKCommandbufferAllocator();
+		void TickForRecycle(VKGpuDevice* device);
+		void PushRecycle(const AutoRef<IFence>& fence, AutoRef<VKCommandBufferPagedObject>& buffer);
 	};
 
 	class VKCmdBufferManager : public VThreadDispatcher<VKCommandbufferAllocator>
@@ -62,6 +71,8 @@ namespace NxRHI
 		bool Init(VKGpuDevice* device);
 		virtual bool BeginCommand() override;
 		virtual void EndCommand() override;
+		bool BeginCommand(VkCommandBufferUsageFlagBits flags);
+		void EndCommand(bool bRecycle);
 		virtual void SetShader(IShader* shader) override;
 		virtual void SetCBV(EShaderType type, const FShaderBinder* binder, ICbView* buffer) override;
 		virtual void SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view) override;
@@ -96,15 +107,13 @@ namespace NxRHI
 		virtual void BeginEvent(const char* info) override;
 		virtual void EndEvent() override;
 	public:
-		void Commit(VKCmdQueue* cmdQueue);
 		void UseCurrentViewports();
 		void UseCurrentScissors();
 		inline VKGpuDevice* GetVKDevice()
 		{
 			return (VKGpuDevice*)mDevice.GetPtr();
 		}
-		AutoRef<MemAlloc::FPagedObject<VkCommandBuffer>>	mCommandBuffer;
-		AutoRef<IFence>				mCommitFence;
+		AutoRef<VKCommandBufferPagedObject>			mCommandBuffer;
 		
 		bool						mIsRecording = false;
 

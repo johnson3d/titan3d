@@ -36,28 +36,48 @@ namespace NxRHI
 			vkDestroyCommandPool(device->mDevice, obj, device->GetVkAllocCallBacks());
 		}
 	};
-	void VKCommandbufferAllocator::TickForRecycle()
+	VKCommandbufferAllocator::~VKCommandbufferAllocator()
+	{
+		for (size_t i = 0; i < mWaitFrees.size(); i++)
+		{
+			auto& holder = mWaitFrees[i];
+			holder.CmdBuffer->Release();
+			holder.CmdBuffer = nullptr;
+			holder.Fence = nullptr;
+		}
+		mWaitFrees.clear();
+	}
+	void VKCommandbufferAllocator::TickForRecycle(VKGpuDevice* device)
 	{
 		VAutoVSLLock lk(mLocker);
 		for (size_t i = 0; i < mWaitFrees.size(); i++)
 		{
 			auto& holder = mWaitFrees[i];
-			if (holder.Fence->GetCompletedValue() >= holder.TargetValue)
+			auto pAllocator = (VKCommandbufferAllocator*)holder.CmdBuffer->HostPage.GetPtr()->Allocator.GetPtr();
+			ASSERT(pAllocator == device->mCmdAllocatorManager->GetThreadContext());
+			auto completed = holder.Fence->GetCompletedValue();
+			if (completed >= holder.CmdBuffer->mTargetValue)
 			{
+				MemAlloc::FPagedObject<VkCommandBuffer>* pTmp = holder.CmdBuffer;
 				vkResetCommandBuffer(holder.CmdBuffer->RealObject, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+				auto checkValue = ((VKCommandBufferPagedObject*)pTmp)->mState;
+				ASSERT(checkValue == EPagedCmdBufferState::PCBS_Commiting);
+				((VKCommandBufferPagedObject*)pTmp)->mState = EPagedCmdBufferState::PCBS_WaitFree;
 				holder.CmdBuffer->Free();
+				((VKCommandBufferPagedObject*)pTmp)->mState = EPagedCmdBufferState::PCBS_Free;
+				
 				mWaitFrees.erase(mWaitFrees.begin() + i);
 				i--;
 			}
 		}
 	}
-	void VKCommandbufferAllocator::PushRecycle(const AutoRef<IFence>& fence, UINT64 targetValue, const AutoRef<MemAlloc::FPagedObject<VkCommandBuffer>>& buffer)
+	void VKCommandbufferAllocator::PushRecycle(const AutoRef<IFence>& fence, AutoRef<VKCommandBufferPagedObject>& buffer)
 	{
 		ASSERT(buffer != nullptr);
 		FCmdBufferHolder tmp;
 		tmp.CmdBuffer = buffer;
 		tmp.Fence = fence;
-		tmp.TargetValue = targetValue;
+		buffer->mTargetValue = UINT64_MAX;
 		
 		VAutoVSLLock lk(mLocker);
 		mWaitFrees.push_back(tmp);
@@ -133,7 +153,14 @@ namespace NxRHI
 	VKCommandList::~VKCommandList()
 	{
 		if (GetVKDevice() == nullptr)
+		{
+			if (mCommandBuffer != nullptr)
+			{
+				mCommandBuffer->Release();
+				mCommandBuffer = nullptr;
+			}
 			return;
+		}
 
 		if (mCommandBuffer != nullptr)
 		{
@@ -156,66 +183,54 @@ namespace NxRHI
 	}
 	bool VKCommandList::BeginCommand()
 	{
+		return BeginCommand(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+	}
+	bool VKCommandList::BeginCommand(VkCommandBufferUsageFlagBits flags)
+	{
 		if (mIsRecording)
 		{
 			ASSERT(false);
 			return true;
 		}
 
-		if (mCommandBuffer != nullptr)
+		ASSERT(mCommandBuffer == nullptr);
+		/*if (mCommandBuffer != nullptr)
 		{
 			ASSERT(false);
 			auto targetValue = mCommitFence->GetAspectValue() + 1;
 			GetVKDevice()->mCmdAllocatorManager->GetThreadContext()->PushRecycle(mCommitFence, targetValue, mCommandBuffer);
 			mCommandBuffer = nullptr;
-		}
-		mCommandBuffer = GetVKDevice()->mCmdAllocatorManager->GetThreadContext()->Alloc();
+		}*/
+		auto vkCmdBuffer = GetVKDevice()->mCmdAllocatorManager->GetThreadContext()->Alloc();;
+		mCommandBuffer = (VKCommandBufferPagedObject*)vkCmdBuffer.GetPtr();
+		MemAlloc::FPagedObject<VkCommandBuffer>* pTmp = mCommandBuffer;
+		ASSERT(((VKCommandBufferPagedObject*)pTmp)->mState == EPagedCmdBufferState::PCBS_Free);
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 		vkBeginCommandBuffer(mCommandBuffer->RealObject, &beginInfo);
+		((VKCommandBufferPagedObject*)pTmp)->mState = EPagedCmdBufferState::PCBS_Recording;
 
 		mIsRecording = true;
 		return true;
 	}
 	void VKCommandList::EndCommand()
 	{
+		EndCommand(true);
+	}
+	void VKCommandList::EndCommand(bool bRecycle)
+	{
 		if (mIsRecording)
 		{
 			vkEndCommandBuffer(mCommandBuffer->RealObject);
 
-			auto targetValue = mCommitFence->GetAspectValue() + 1;
-			GetVKDevice()->mCmdAllocatorManager->GetThreadContext()->PushRecycle(mCommitFence, targetValue, mCommandBuffer);
+			if (bRecycle)
+				GetVKDevice()->mCmdAllocatorManager->GetThreadContext()->PushRecycle(mCommitFence, mCommandBuffer);
 		}
 		mIsRecording = false;
 	}
 		
-	void VKCommandList::Commit(VKCmdQueue* cmdQueue)
-	{
-		//ASSERT(mIsRecording == false);
-		if (mCommandBuffer == nullptr)
-			return;
-
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.waitSemaphoreCount = 0;//1
-		//submitInfo.pWaitSemaphores = waitSemaphores;
-		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &mCommandBuffer->RealObject;
-		submitInfo.signalSemaphoreCount = 0;
-		//submitInfo.pSignalSemaphores = &mCommitFence->mSemaphore;
-
-		{
-			VAutoVSLLock lk(cmdQueue->mGraphicsQueueLocker);
-			vkQueueSubmit(cmdQueue->mGraphicsQueue, 1, &submitInfo, nullptr);
-		}
-
-		cmdQueue->IncreaseSignal(mCommitFence);
-		
-		mCommandBuffer = nullptr;
-	}
+	
 	bool VKCommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
 		ASSERT(mIsRecording);

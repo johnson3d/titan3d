@@ -58,7 +58,6 @@ namespace NxRHI
 		}
 		AutoRef<ID3D12CommandAllocator>		mAllocator;
 		AutoRef<ID3D12GraphicsCommandList>	mContext;
-		AutoRef<IFence>				mCommitFence;
 		AutoRef<DX12TableHeap>		mCurrentSrvTable;
 		AutoRef<DX12TableHeap>		mCurrentSamplerTable;
 

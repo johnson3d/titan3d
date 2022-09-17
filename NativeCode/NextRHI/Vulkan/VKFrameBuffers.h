@@ -11,6 +11,8 @@ namespace NxRHI
 	class VKRenderTargetView;
 	class VKSrView;
 	class VKFence;
+	class VKBinaryFence;
+	class VKGpuToHostFence;
 	class VKRenderPass : public IRenderPass
 	{
 	public:
@@ -64,14 +66,16 @@ namespace NxRHI
 		{
 			FBackBuffer();
 			void Cleanup(VKGpuDevice* device);
-			VkSemaphore			PresentSemaphore = nullptr;
-			AutoRef<ITexture>	Texture;
+			AutoRef<VKBinaryFence>		AcquireSemaphore;
+			AutoRef<VKBinaryFence>		RenderFinishSemaphore;
+			AutoRef<VKGpuToHostFence>	RenderFinishFence;
+			AutoRef<ITexture>			Texture;
 			AutoRef<IRenderTargetView>	Rtv;
 			void CreateRtvAndSrv(IGpuDevice* device);
 		};
 		std::vector<AutoRef<FBackBuffer>>		BackBuffers;
-		VkFence							AcquireImageFence = nullptr;
 		UINT							CurrentBackBuffer = 0;
+		UINT							CurrentFrame = 0;
 		AutoRef<IFence>					PresentFence;
 	};
 }

@@ -194,6 +194,7 @@ namespace NxRHI
 	};
 	struct FLinearGpuHeapPool : public VIUnknown
 	{
+		~FLinearGpuHeapPool();
 		TObjectHandle<IGpuLinearMemAllocator> HostAllocator;
 		std::vector<FAddressRange>	FreeRanges;
 		AutoRef<IGpuHeap>			GpuHeap;
@@ -207,6 +208,7 @@ namespace NxRHI
 		std::vector<AutoRef<FLinearGpuHeapPool>>		Pools;
 		UINT64				PoolSize = 1024 * 1204 * 8;//8 mbytes per block;
 	public:
+		~IGpuLinearMemAllocator();
 		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size) override;
 		virtual void Free(FGpuMemory* memory) override;
 

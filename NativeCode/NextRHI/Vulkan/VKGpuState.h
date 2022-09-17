@@ -13,6 +13,9 @@ namespace NxRHI
 		VKSampler();
 		~VKSampler();
 		bool Init(VKGpuDevice* device, const FSamplerDesc& desc);
+		virtual void* GetHWBuffer() override {
+			return mView;
+		}
 	public:
 		TObjectHandle<VKGpuDevice>	mDeviceRef;
 		VkSampler		mView = nullptr;
