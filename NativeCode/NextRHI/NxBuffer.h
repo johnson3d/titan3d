@@ -262,6 +262,12 @@ namespace NxRHI
 			MiscFlags = (EResourceMiscFlag)0;
 			InitData = nullptr;
 		}
+		void SetShared() {
+			MiscFlags = (EResourceMiscFlag)(MiscFlags | EResourceMiscFlag::RM_SHARED);
+		}
+		bool IsShared() const {
+			return (MiscFlags & EResourceMiscFlag::RM_SHARED) != 0;
+		}
 		UINT Width = 1;
 		UINT Height = 1;
 		UINT Depth = 0;
@@ -307,6 +313,7 @@ namespace NxRHI
 		{
 			return mipIndex + arrayIndex * Desc.MipLevels;
 		}
+		virtual void* GetSharedHandle() { return nullptr; }
 		virtual bool Map(ICommandList* cmd, UINT index, FMappedSubResource* res, bool forRead) = 0;
 		virtual void Unmap(ICommandList* cmd, UINT index) = 0;
 		static void BuildImage2DBlob(IBlobObject * blob, void* pData, UINT RowPitch, const FTextureDesc* desc);

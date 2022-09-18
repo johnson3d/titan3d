@@ -154,6 +154,7 @@ namespace NxRHI
 		virtual bool InitDevice(IGpuSystem * pGpuSystem, const FGpuDeviceDesc * desc) = 0;
 		virtual IBuffer* CreateBuffer(const FBufferDesc * desc) = 0;
 		virtual ITexture* CreateTexture(const FTextureDesc * desc) = 0;
+		virtual ITexture* CreateTexture(void* pSharedObject) { return nullptr; }
 		virtual ICbView* CreateCBV(IBuffer* pBuffer, const FCbvDesc * desc) = 0;
 		virtual IVbView* CreateVBV(IBuffer* pBuffer, const FVbvDesc * desc) = 0;
 		virtual IIbView* CreateIBV(IBuffer* pBuffer, const FIbvDesc * desc) = 0;

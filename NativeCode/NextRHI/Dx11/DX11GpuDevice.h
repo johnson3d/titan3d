@@ -22,6 +22,7 @@ namespace NxRHI
 		virtual bool InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc) override;
 		virtual IBuffer* CreateBuffer(const FBufferDesc* desc) override;
 		virtual ITexture* CreateTexture(const FTextureDesc* desc) override;
+		virtual ITexture* CreateTexture(void* pSharedObject) override;
 		virtual ICbView* CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc) override;
 		virtual IVbView* CreateVBV(IBuffer* pBuffer, const FVbvDesc* desc) override;
 		virtual IIbView* CreateIBV(IBuffer* pBuffer, const FIbvDesc* desc) override;

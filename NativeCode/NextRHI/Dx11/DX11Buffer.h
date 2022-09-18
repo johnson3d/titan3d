@@ -33,9 +33,11 @@ namespace NxRHI
 		DX11Texture();
 		~DX11Texture();
 		bool Init(DX11GpuDevice* device, const FTextureDesc& desc);
+		bool Init(DX11GpuDevice* device, void* pSharedObject);
 		virtual void* GetHWBuffer() override {
 			return mTexture1D;
 		}
+		virtual void* GetSharedHandle() override;
 		virtual bool Map(ICommandList* cmd, UINT subRes, FMappedSubResource* res, bool forRead) override;
 		virtual void Unmap(ICommandList* cmd, UINT subRes) override;
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch) override;

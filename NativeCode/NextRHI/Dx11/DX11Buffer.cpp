@@ -229,7 +229,98 @@ namespace NxRHI
 		}
 		return flags;
 	}
+	void* DX11Texture::GetSharedHandle()
+	{
+		//device->mDevice->OpenSharedResource(,IID_IDXGIResource, )
+		IDXGIResource* dxgiRes;
+		auto hr = mTexture1D->QueryInterface(IID_IDXGIResource, (void**) & dxgiRes);
+		if (FAILED(hr))
+			return nullptr;
+		void* result;
+		hr = dxgiRes->GetSharedHandle(&result);
+		dxgiRes->Release();
+		if (FAILED(hr))
+		{	
+			return nullptr;
+		}
+		return result;
+	}
+	bool DX11Texture::Init(DX11GpuDevice* device, void* pSharedObject)
+	{
+		IDXGIResource* dxgiRes;
+		auto hr = device->mDevice->OpenSharedResource(pSharedObject, IID_IDXGIResource, (void**)&dxgiRes);
+		if (FAILED(hr))
+			return false;
 
+		
+		hr = dxgiRes->QueryInterface(__uuidof(ID3D11Texture1D), (void**)(&mTexture1D));
+		if (FAILED(hr))
+		{
+			hr = dxgiRes->QueryInterface(__uuidof(ID3D11Texture2D), (void**)(&mTexture2D));
+			if (FAILED(hr))
+			{
+				hr = dxgiRes->QueryInterface(__uuidof(ID3D11Texture3D), (void**)(&mTexture3D));
+				dxgiRes->Release();
+				if (FAILED(hr))
+				{
+					return false;
+				}
+				else
+				{
+					D3D11_TEXTURE3D_DESC td;
+					mTexture3D->GetDesc(&td);
+					dxgiRes->Release();
+
+					Desc.Width = td.Width;
+					Desc.Height = td.Height;
+					Desc.Depth = td.Depth;
+					Desc.Format = DXFormatToFormat(td.Format);
+					Desc.ArraySize = 1;
+					//Desc.BindFlags = BufferTypeToDXBindFlags(desc.BindFlags);
+					Desc.CpuAccess = (ECpuAccess)td.CPUAccessFlags;
+					Desc.MipLevels = td.MipLevels;
+					Desc.Usage = (EGpuUsage)td.Usage;
+					Desc.MiscFlags = (EResourceMiscFlag)td.MiscFlags;
+				}
+			}
+			else
+			{
+				D3D11_TEXTURE2D_DESC td;
+				mTexture2D->GetDesc(&td);
+				dxgiRes->Release();
+
+				Desc.Width = td.Width;
+				Desc.Height = td.Height;
+				Desc.Depth = 0;
+				Desc.Format = DXFormatToFormat(td.Format);
+				Desc.ArraySize = 1;
+				//Desc.BindFlags = BufferTypeToDXBindFlags(desc.BindFlags);
+				Desc.CpuAccess = (ECpuAccess)td.CPUAccessFlags;
+				Desc.MipLevels = td.MipLevels;
+				Desc.Usage = (EGpuUsage)td.Usage;
+				Desc.MiscFlags = (EResourceMiscFlag)td.MiscFlags;
+			}
+		}
+		else
+		{
+			D3D11_TEXTURE1D_DESC td;
+			mTexture1D->GetDesc(&td);
+			dxgiRes->Release();
+
+			Desc.Width = td.Width;
+			Desc.Height = 0;
+			Desc.Depth = 0;
+			Desc.Format = DXFormatToFormat(td.Format);
+			Desc.ArraySize = 1;
+			//Desc.BindFlags = BufferTypeToDXBindFlags(desc.BindFlags);
+			Desc.CpuAccess = (ECpuAccess)td.CPUAccessFlags;
+			Desc.MipLevels = td.MipLevels;
+			Desc.Usage = (EGpuUsage)td.Usage;
+			Desc.MiscFlags = (EResourceMiscFlag)td.MiscFlags;
+		}
+		
+		return true;
+	}
 	bool DX11Texture::Init(DX11GpuDevice* device, const FTextureDesc& desc)
 	{
 		Desc = desc;

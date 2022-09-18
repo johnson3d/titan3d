@@ -176,6 +176,16 @@ namespace NxRHI
 		}
 		return result;
 	}
+	ITexture* DX11GpuDevice::CreateTexture(void* pSharedObject)
+	{
+		auto result = new DX11Texture();
+		if (result->Init(this, pSharedObject) == false)
+		{
+			result->Release();
+			return nullptr;
+		}
+		return result;
+	}
 	ICbView* DX11GpuDevice::CreateCBV(IBuffer* pBuffer, const FCbvDesc* desc)
 	{
 		auto result = new DX11CbView();
