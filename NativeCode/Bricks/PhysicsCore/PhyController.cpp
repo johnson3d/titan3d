@@ -1,11 +1,14 @@
 #include "PhyController.h"
 #include "PhyScene.h"
 #include "PhyActor.h"
+#include "PhyMaterial.h"
 
 #define new VNEW
 
 NS_BEGIN
 
+ENGINE_RTTI_IMPL(EngineNS::PhyBoxControllerDesc);
+ENGINE_RTTI_IMPL(EngineNS::PhyCapsuleControllerDesc);
 ENGINE_RTTI_IMPL(EngineNS::PhyController);
 
 struct vPhysXCharacterControllerCallBack_ControllerFilter : public physx::PxControllerFilterCallback
@@ -26,12 +29,13 @@ struct vPhysXCharacterControllerCallBack_ControllerFilter : public physx::PxCont
 		else
 			return false;
 	}
-} ControllerFilter;
+} ControllerFilterCallback;
 
 struct vPhysXCharacterControllerCallBack_QueryFilter : public physx::PxQueryFilterCallback
 {
 	virtual physx::PxQueryHitType::Enum preFilter(const physx::PxFilterData& filterData, const physx::PxShape* shape, const physx::PxRigidActor* actor, physx::PxSceneQueryFlags& queryFlags)
 	{
+		return physx::PxQueryHitType::eBLOCK;
 		if (shape->getFlags()&physx::PxShapeFlag::eTRIGGER_SHAPE)
 			return physx::PxQueryHitType::eTOUCH;
 		auto shapeData = shape->getQueryFilterData();
@@ -44,7 +48,7 @@ struct vPhysXCharacterControllerCallBack_QueryFilter : public physx::PxQueryFilt
 	{
 		return physx::PxQueryHitType::eBLOCK;
 	}
-} QueryFilter;
+} QueryFilterCallback;
 
 struct vPhysXCharacterControllerCallBack_HitReport : public physx::PxUserControllerHitReport
 {
@@ -67,20 +71,26 @@ struct vPhysXCharacterControllerCallBack_Behavior : public physx::PxControllerBe
 {
 	virtual physx::PxControllerBehaviorFlags getBehaviorFlags(const physx::PxShape& shape, const physx::PxActor& actor)
 	{
-		return physx::PxControllerBehaviorFlag::eCCT_CAN_RIDE_ON_OBJECT;
+		return physx::PxControllerBehaviorFlags(0);
 	}
 
 	virtual physx::PxControllerBehaviorFlags getBehaviorFlags(const physx::PxController& controller)
 	{
-		return physx::PxControllerBehaviorFlag::eCCT_CAN_RIDE_ON_OBJECT;
+		return physx::PxControllerBehaviorFlags(0);
 	}
 
 	virtual physx::PxControllerBehaviorFlags getBehaviorFlags(const physx::PxObstacle& obstacle)
 	{
-		return physx::PxControllerBehaviorFlag::eCCT_CAN_RIDE_ON_OBJECT;
+		return physx::PxControllerBehaviorFlags(0);
 	}
 }Behavior;
 
+PhyCapsuleControllerDesc::PhyCapsuleControllerDesc()
+{
+	mDesc = &mCapsuleDesc;
+	mDesc->behaviorCallback = &Behavior;
+	mDesc->reportCallback = &HitReport;
+}
 
 PhyController::PhyController(PhyScene* scene, physx::PxController* ctr)
 {
@@ -137,8 +147,8 @@ EPhyControllerCollisionFlag PhyController::Move(const v3dxVector3* disp, float m
 		return (EPhyControllerCollisionFlag)physx::PxControllerCollisionFlag::Enum::eCOLLISION_SIDES;
 
 	physx::PxControllerFilters cFilter;
-	cFilter.mCCTFilterCallback = &ControllerFilter;
-	cFilter.mFilterCallback = &QueryFilter;
+	cFilter.mCCTFilterCallback = &ControllerFilterCallback;
+	cFilter.mFilterCallback = &QueryFilterCallback;
 	cFilter.mFilterData = (const physx::PxFilterData*)filterData;
 	cFilter.mFilterFlags = (physx::PxQueryFlag::Enum)filterFlags;
 
@@ -212,7 +222,7 @@ void PhyController::SetSlopeLimit(float slopeLimit)
 	physx::PxSceneWriteLock Lock(*pScene->mScene);
 	mController->setSlopeLimit(slopeLimit);
 }
-void PhyController::SetQueryFilterData(physx::PxFilterData* filterData)
+void PhyController::SetQueryFilterData(const PhyFilterData* filterData)
 {
 	auto pScene = mScene.GetPtr();
 	physx::PxSceneWriteLock Lock(*pScene->mScene);
@@ -230,7 +240,32 @@ void PhyController::SetQueryFilterData(physx::PxFilterData* filterData)
 	mController->getActor()->getShapes(shapeList, sizeof(physx::PxShape) * shapeCount);
 	for (UINT i = 0; i < shapeCount; ++i)
 	{
-		shapeList[i]->setQueryFilterData(*filterData);
+		shapeList[i]->setQueryFilterData(*(physx::PxFilterData*)filterData);
+	}
+	if (shapeCount > 32)
+	{
+		delete[] shapeList;
+	}
+}
+void PhyController::SetSimulationFilterData(const PhyFilterData* filterData)
+{
+	auto pScene = mScene.GetPtr();
+	physx::PxSceneWriteLock Lock(*pScene->mScene);
+	auto shapeCount = mController->getActor()->getNbShapes();
+	physx::PxShape* shapeList_array[32];
+	physx::PxShape** shapeList = nullptr;
+	if (shapeCount > 32)
+	{
+		shapeList = new physx::PxShape * [shapeCount];
+	}
+	else
+	{
+		shapeList = shapeList_array;
+	}
+	mController->getActor()->getShapes(shapeList, sizeof(physx::PxShape) * shapeCount);
+	for (UINT i = 0; i < shapeCount; ++i)
+	{
+		shapeList[i]->setSimulationFilterData(*(physx::PxFilterData*)filterData);
 	}
 	if (shapeCount > 32)
 	{
@@ -238,3 +273,5 @@ void PhyController::SetQueryFilterData(physx::PxFilterData* filterData)
 	}
 }
 NS_END
+
+

@@ -58,28 +58,10 @@ namespace NxRHI
 		}
 		AutoRef<ID3D12CommandAllocator>		mAllocator;
 		AutoRef<ID3D12GraphicsCommandList>	mContext;
-		AutoRef<DX12TableHeap>		mCurrentSrvTable;
-		AutoRef<DX12TableHeap>		mCurrentSamplerTable;
-
-		AutoRef<DX12TableHeap>		mCurrentComputeSrvTable;
-		AutoRef<DX12TableHeap>		mCurrentComputeSamplerTable;
-
+		
 		//AutoRef<ID3D12CommandSignature>	mCurrentIndirectDrawIndexSig;
 		//AutoRef<ID3D12CommandSignature>	mCurrentIndirectDispatchSig;
 
-		struct FTableRecycle : public VIUnknownBase
-		{
-			FTableRecycle(size_t cap)
-			{
-				mAllocTableHeaps.reserve(cap);
-			}
-			void Recycle();
-			std::vector<AutoRef<DX12TableHeap>>		mAllocTableHeaps;
-			UINT64					mWaitValue = 0;
-		};
-		AutoRef<FTableRecycle>		mCurrentTableRecycle;
-		std::vector<AutoRef<FTableRecycle>>	mQueueTables;
-		std::queue<AutoRef<FTableRecycle>>	mFreeTables;
 		bool						mIsRecording = false;
 
 		std::vector<AutoRef<DX12RenderTargetView>>	mCurRtvs;

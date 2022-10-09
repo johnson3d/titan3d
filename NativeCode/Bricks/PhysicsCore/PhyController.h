@@ -1,7 +1,12 @@
 #pragma once
 #include "PhyEntity.h"
 
+
 NS_BEGIN
+
+class PhyScene;
+class PhyActor;
+class PhyMaterial;
 
 enum TR_ENUM()
 EPhyControllerCollisionFlag
@@ -11,8 +16,81 @@ EPhyControllerCollisionFlag
 	eCOLLISION_DOWN = (1 << 2)	//!< Character has collision below.
 };
 
-class PhyScene;
-class PhyActor;
+
+class TR_CLASS()
+	PhyControllerDesc : public VIUnknown
+{
+public:
+	PhyControllerDesc()
+	{
+
+	}
+	physx::PxControllerDesc* mDesc;
+	PhyFilterData mFilterData;
+	void SetMaterial(PhyMaterial * mtl);
+	void SetQueryFilterData(physx::PxFilterData * data);
+	void SetHitReportCallback()
+	{
+
+	}
+	void SetBehaviorCallback()
+	{
+
+	}
+};
+
+class TR_CLASS()
+	PhyBoxControllerDesc : public PhyControllerDesc
+{
+public:
+	ENGINE_RTTI(PhyBoxControllerDesc);
+	PhyBoxControllerDesc()
+	{
+		mDesc = &mBoxDesc;
+	}
+	physx::PxBoxControllerDesc		mBoxDesc;
+	v3dxVector3 GetExtent() {
+		v3dxVector3 v;
+		v.x = mBoxDesc.halfSideExtent;
+		v.y = mBoxDesc.halfHeight;
+		v.z = mBoxDesc.halfForwardExtent;
+		return v;
+	}
+	void SetExtent(const v3dxVector3 * v) {
+		mBoxDesc.halfSideExtent = v->x;
+		mBoxDesc.halfHeight = v->y;
+		mBoxDesc.halfForwardExtent = v->z;
+	}
+};
+
+class TR_CLASS()
+	PhyCapsuleControllerDesc : public PhyControllerDesc
+{
+public:
+	ENGINE_RTTI(PhyCapsuleControllerDesc);
+	PhyCapsuleControllerDesc();
+	physx::PxCapsuleControllerDesc	mCapsuleDesc;
+
+	float GetCapsuleRadius() {
+		return mCapsuleDesc.radius;
+	}
+	void SetCapsuleRadius(float v) {
+		mCapsuleDesc.radius = v;
+	}
+	float GetCapsuleHeight() {
+		return mCapsuleDesc.height;
+	}
+	void SetCapsuleHeight(float v) {
+		mCapsuleDesc.height = v;
+	}
+	physx::PxCapsuleClimbingMode::Enum GetCapsuleClimbingMode() {
+		return mCapsuleDesc.climbingMode;
+	}
+	void SetCapsuleClimbingMode(physx::PxCapsuleClimbingMode::Enum v) {
+		mCapsuleDesc.climbingMode = v;
+	}
+};
+
 class TR_CLASS() 
 	PhyController : public PhyEntity
 {
@@ -37,7 +115,8 @@ public:
 	void SetContactOffset(float offset);
 	float GetSlopeLimit();
 	void SetSlopeLimit(float slopeLimit);
-	void SetQueryFilterData(physx::PxFilterData* filterData);
+	void SetQueryFilterData(const PhyFilterData * filterData);
+	void SetSimulationFilterData(const PhyFilterData * filterData);
 };
 
 NS_END

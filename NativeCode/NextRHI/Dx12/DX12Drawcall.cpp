@@ -3,6 +3,7 @@
 #include "DX12Buffer.h"
 #include "DX12GpuState.h"
 #include "DX12FrameBuffers.h"
+#include "DX12GpuDevice.h"
 #include "../NxGeomMesh.h"
 #include "../NxEffect.h"
 
@@ -12,11 +13,128 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	
+	DX12GraphicDraw::DX12GraphicDraw()
+	{
+
+	}
+	DX12GraphicDraw::~DX12GraphicDraw()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (mSrvTable != nullptr)
+		{
+			device->DelayDestroy(mSrvTable);
+			mSrvTable = nullptr;
+		}
+		if (mSamplerTable != nullptr)
+		{
+			device->DelayDestroy(mSamplerTable);
+			mSamplerTable = nullptr;
+		}
+	}
+	void DX12GraphicDraw::OnGpuDrawStateUpdated()
+	{
+		IsDirty = true;
+
+	}
+	void DX12GraphicDraw::OnBindResource(const FEffectBinder* binder, IGpuResource* resource)
+	{
+		IsDirty = true;
+	}
+	void DX12GraphicDraw::BindResourceToDescriptSets(DX12GpuDevice* device, const FEffectBinder* binder, IGpuResource* resource)
+	{
+		auto handle = (DX12DescriptorSetPagedObject*)resource->GetHWBuffer();
+		if (binder->BindType == EShaderBindType::SBT_Sampler)
+		{
+			ASSERT(mSamplerTable != nullptr);
+			if (binder->VSBinder != nullptr)
+				device->mDevice->CopyDescriptorsSimple(1, mSamplerTable->GetHandle(binder->VSBinder->DescriptorIndex), handle->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+			if (binder->PSBinder != nullptr)
+				device->mDevice->CopyDescriptorsSimple(1, mSamplerTable->GetHandle(binder->PSBinder->DescriptorIndex), handle->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+		}
+		else
+		{
+			ASSERT(mSrvTable != nullptr);
+			if (binder->VSBinder != nullptr)
+				device->mDevice->CopyDescriptorsSimple(1, mSrvTable->GetHandle(binder->VSBinder->DescriptorIndex), handle->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			if (binder->PSBinder != nullptr)
+				device->mDevice->CopyDescriptorsSimple(1, mSrvTable->GetHandle(binder->PSBinder->DescriptorIndex), handle->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		}
+	}
+	void DX12GraphicDraw::BindDescriptors(DX12GpuDevice* device, DX12CommandList* dx12Cmd, DX12ShaderEffect* effect)
+	{
+		ID3D12DescriptorHeap* descriptorHeaps[4] = {};
+		int NumOfHeaps = 0;
+		if (mSrvTable != nullptr)
+			descriptorHeaps[NumOfHeaps++] = mSrvTable->RealObject;
+		if (mSamplerTable != nullptr)
+			descriptorHeaps[NumOfHeaps++] = mSamplerTable->RealObject;
+
+		dx12Cmd->mContext->SetGraphicsRootSignature(effect->mSignature);
+		dx12Cmd->mContext->SetDescriptorHeaps(NumOfHeaps, descriptorHeaps);
+
+		if (effect->mSrvTableSize > 0)
+		{
+			dx12Cmd->mContext->SetGraphicsRootDescriptorTable(effect->mSrvTableSizeIndex, mSrvTable->RealObject->GetGPUDescriptorHandleForHeapStart());
+		}
+		if (effect->mSamplerTableSize > 0)
+		{
+			dx12Cmd->mContext->SetGraphicsRootDescriptorTable(effect->mSamplerTableSizeIndex, mSamplerTable->RealObject->GetGPUDescriptorHandleForHeapStart());
+		}
+	}
+	void DX12GraphicDraw::RebuildDescriptorSets(DX12GpuDevice* device, DX12CommandList* dx12Cmd)
+	{
+		auto effect = this->ShaderEffect.UnsafeConvertTo<DX12ShaderEffect>();
+		if (IsDirty == false)
+		{
+			UINT finger = 0;
+			for (auto& i : BindResources)
+			{
+				finger += i.second->GetFingerPrint();
+			}
+			if (finger == FingerPrient)
+			{
+				BindDescriptors(device, dx12Cmd, effect);
+
+				/*for (auto& i : BindResources)
+				{
+					BindResourceToDescriptSets(device, i.first, i.second);
+				}*/
+
+				return;
+			}
+
+			FingerPrient = finger;
+		}
+
+		IsDirty = false;
+
+		if (effect->mSrvTableSize > 0)
+		{
+			if (mSrvTable != nullptr)
+				device->DelayDestroy(mSrvTable);
+			mSrvTable = effect->mDescriptorAllocatorCSU->Alloc<DX12DescriptorSetPagedObject>();
+		}
+		if (effect->mSamplerTableSize > 0)
+		{
+			if (mSamplerTable != nullptr)
+				device->DelayDestroy(mSamplerTable);
+			mSamplerTable = effect->mDescriptorAllocatorSampler->Alloc<DX12DescriptorSetPagedObject>();
+		}
+
+		BindDescriptors(device, dx12Cmd, effect);
+
+		for (auto& i : BindResources)
+		{
+			BindResourceToDescriptSets(device, i.first, i.second);
+		}
+	}
 	void DX12GraphicDraw::Commit(ICommandList* cmdlist)
 	{
 		if (Mesh == nullptr || ShaderEffect == nullptr)
 			return;
 
+		auto dx12Cmd = (DX12CommandList*)cmdlist;
 		//Mesh->Commit(cmdlist);
 		D3D12_VERTEX_BUFFER_VIEW dxVBs[VST_Number]{};
 		for (int i = 0; i < VST_Number; i++)
@@ -26,17 +144,20 @@ namespace NxRHI
 			{
 				auto vb = vbv->Buffer.UnsafeConvertTo<DX12Buffer>();
 				dxVBs[i].BufferLocation = vb->GetGPUVirtualAddress();
+				dxVBs[i].StrideInBytes = vb->Desc.StructureStride;
 				dxVBs[i].SizeInBytes = vb->Desc.Size;
 			}
 		}
-		((DX12CommandList*)cmdlist)->SetIndexBuffer(Mesh->IndexBuffer, Mesh->IsIndex32);
+		dx12Cmd->mContext->IASetVertexBuffers(0, VST_Number, dxVBs);
+		dx12Cmd->SetIndexBuffer(Mesh->IndexBuffer, Mesh->IsIndex32);
 
 		if (AttachVB != nullptr)
 		{
 			AttachVB->Commit(cmdlist);
 		}
 
-		UpdateGpuDrawState(cmdlist->GetGpuDevice(), cmdlist, cmdlist->mCurrentFrameBuffers->mRenderPass);
+		auto device = (DX12GpuDevice*)cmdlist->GetGpuDevice();
+		UpdateGpuDrawState(device, cmdlist, cmdlist->mCurrentFrameBuffers->mRenderPass);
 		/*if (GpuDrawState == nullptr)
 		{
 			UpdateGpuDrawState(cmdlist->mDevice, cmdlist, );
@@ -44,11 +165,14 @@ namespace NxRHI
 				return;
 		}*/
 		cmdlist->SetGraphicsPipeline(GpuDrawState);
-
-		auto effect = GetShaderEffect();
-
-		effect->Commit(cmdlist, this);
-
+		
+		auto effect = (DX12ShaderEffect*)GetShaderEffect();
+		
+		//effect->Commit(cmdlist, this);
+		{
+			RebuildDescriptorSets(device, dx12Cmd);
+		}
+		
 		for (auto& i : BindResources)
 		{
 			switch (i.first->BindType)

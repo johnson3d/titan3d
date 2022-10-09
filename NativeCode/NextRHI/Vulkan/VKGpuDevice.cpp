@@ -272,6 +272,10 @@ namespace NxRHI
 		{
 			Mode = "Info";
 		}
+		if (strstr(pMessage, "VK_PIPELINE_STAGE_ALL_COMMANDS_BIT") != nullptr)
+		{
+			return FALSE;
+		}
 		VFX_LTRACE(ELTT_Graphics, "Vk[%s]: %s\r\n", Mode, pMessage);
 		return FALSE;
 	}
@@ -896,8 +900,7 @@ namespace NxRHI
 		FFenceDesc fcDesc{};
 		//mQueueFence = MakeWeakRef(device->CreateFence(&fcDesc, "CmdQueue Fence"));
 		mQueueExecuteFence = MakeWeakRef(device->CreateFence(&fcDesc, "QueueExecute"));
-		mFlushFence = MakeWeakRef(device->CreateFence(&fcDesc, "QueueFlush"));
-
+		
 		mDummyCmdList = MakeWeakRef((VKCommandList*)device->CreateCommandList());
 		mDummyCmdList->BeginCommand(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
 		/*mDummyCmdList->BeginEvent("dummy");
@@ -1174,6 +1177,7 @@ namespace NxRHI
 	}
 	void VKCmdQueue::ExecuteCommandList(UINT num, ICommandList** ppCmdlist)
 	{
+		this->Flush();//temp code
 		VAutoVSLLock locker(mImmCmdListLocker);
 		for (UINT i = 0; i < num; i++)
 		{
@@ -1184,6 +1188,7 @@ namespace NxRHI
 	}
 	UINT64 VKCmdQueue::SignalFence(IFence* fence, UINT64 value)
 	{
+		fence->WaitToAspect();//temp code
 		return QueueSignal(fence, value, nullptr);
 	}
 	UINT64 VKCmdQueue::QueueSignal(IFence* fence, UINT64 value, VkFence g2hFence)
@@ -1195,12 +1200,7 @@ namespace NxRHI
 		VAutoVSLLock lk(mGraphicsQueueLocker);
 
 		auto completedValue = dxFence->GetCompletedValue();
-		auto aspectValue = dxFence->GetAspectValue();
-		if (aspectValue - completedValue > 50)
-		{
-			dxFence->WaitToAspect();
-		}
-
+		
 		if (signalFence->IsBinary() == false)
 		{
 			if (signalFence->AspectValue >= value)
@@ -1308,8 +1308,7 @@ namespace NxRHI
 	}
 	void VKCmdQueue::Flush()
 	{
-		this->IncreaseSignal(mFlushFence);
-		mFlushFence->WaitToAspect();
+		mQueueExecuteFence->WaitToAspect();
 	}
 }
 

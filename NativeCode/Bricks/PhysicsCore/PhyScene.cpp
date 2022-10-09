@@ -4,6 +4,8 @@
 #include "PhyMaterial.h"
 #include "PhyShape.h"
 #include "PhyObstacle.h"
+#include "PhyController.h"
+#include "PxSceneDesc.h"
 
 #define new VNEW
 
@@ -11,13 +13,12 @@ using namespace physx;
 
 NS_BEGIN
 
-ENGINE_RTTI_IMPL(EngineNS::PhyBoxControllerDesc);
-ENGINE_RTTI_IMPL(EngineNS::PhyCapsuleControllerDesc);
+
 
 ENGINE_RTTI_IMPL(EngineNS::PhySceneDesc);
 ENGINE_RTTI_IMPL(EngineNS::PhyScene);
 
-PhySceneDesc::ContactReportCallback::FPxSimulationFilterShader PhySceneDesc::ContactReportCallback::_PxSimulationFilterShader = nullptr;
+FSimulationFilterShader PhySimulationFilterShader::_CustomSimulationFilterShader = nullptr;
 
 PhySceneDesc::PhySceneDesc()
 {
@@ -31,7 +32,9 @@ PhySceneDesc::~PhySceneDesc()
 
 void PhySceneDesc::Init()
 {
-	mDesc->simulationEventCallback = &ContactCB;
+	mDesc->simulationEventCallback = &SimulationEventCallback;
+	mDesc->filterShader = PhySimulationFilterShader::DefaultSimulationFilterShader;
+	mDesc->flags |= PxSceneFlag::eREQUIRE_RW_LOCK;
 	if (!mDesc->cpuDispatcher)
 	{
 		physx::PxDefaultCpuDispatcher* dispatcher = physx::PxDefaultCpuDispatcherCreate(1);
@@ -40,12 +43,6 @@ void PhySceneDesc::Init()
 			VFX_LTRACE(ELevelTraceType::ELTT_Error, vT("PxDefaultCpuDispatcherCreate(Ver = %d) failed!\r\n"), PX_PHYSICS_VERSION);
 		}
 		mDesc->cpuDispatcher = dispatcher;
-	}
-
-	static physx::PxSimulationFilterShader defaultFilterShader = physx::PxDefaultSimulationFilterShader;
-	if (!mDesc->filterShader)
-	{
-		mDesc->filterShader = defaultFilterShader;
 	}
 
 	if (!mDesc->cpuDispatcher)
@@ -63,23 +60,22 @@ void PhySceneDesc::Init()
 #endif
 }
 
-void PhySceneDesc::SetContactCallBack(void* handle, FonContact onContact,
+void PhySceneDesc::SetSimulationEventCallback(void* handle, FonContact onContact,
 	FonTrigger onTrigger,
-	ContactReportCallback::FonConstraintBreak onConstraintBreak,
-	ContactReportCallback::FonWake onWake,
-	ContactReportCallback::FonSleep onSleep,
-	ContactReportCallback::FonAdvance onAdvance,
-	ContactReportCallback::FPxSimulationFilterShader pxSimulationFilterShader)
+	FonConstraintBreak onConstraintBreak,
+	FonWake onWake,
+	FonSleep onSleep,
+	FonAdvance onAdvance)
 {
-	ContactCB.Handle = handle;
-	ContactCB._onContact = onContact;
-	ContactCB._onTrigger = onTrigger;
-	ContactCB._onConstraintBreak = onConstraintBreak;
-	ContactCB._onWake = onWake;
-	ContactCB._onSleep = onSleep;
-	ContactCB._onAdvance = onAdvance;
-	ContactCB._PxSimulationFilterShader = pxSimulationFilterShader;
-	mDesc->filterShader = &ContactReportCallback::CorePxSimulationFilterShader;
+	SimulationEventCallback.Handle = handle;
+	SimulationEventCallback._onContact = onContact;
+	SimulationEventCallback._onTrigger = onTrigger;
+	SimulationEventCallback._onConstraintBreak = onConstraintBreak;
+	SimulationEventCallback._onWake = onWake;
+	SimulationEventCallback._onSleep = onSleep;
+	SimulationEventCallback._onAdvance = onAdvance;
+	
+	//mDesc->filterShader = &ContactReportCallback::CorePxSimulationFilterShader;
 	/*mDesc->filterShader = (physx::PxSimulationFilterShader)pxSimulationFilterShader;
 	{
 		physx::PxFilterObjectAttributes attributes0 = 0;
@@ -355,3 +351,5 @@ PhyObstacleContext* PhyScene::CreateObstacleContext()
 }
 
 NS_END
+
+

@@ -70,6 +70,7 @@ public:
 	static void SetMemAllocCallBack(FOnNativeMemAlloc cb);
 	static void SetMemFreeCallBack(FOnNativeMemFree cb);
 	static void SetMemLeakCallBack(FOnNativeMemLeak cb);
+	static void SetMemDebugInfo(void* memory, const char* info);
 
 	static FCreateManagedObject CreateManagedObject;
 	static void SetCreateManagedObjectFunction(FCreateManagedObject fn) {

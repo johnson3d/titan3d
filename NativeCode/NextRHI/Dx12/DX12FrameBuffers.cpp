@@ -2,6 +2,7 @@
 #include "DX12Buffer.h"
 #include "DX12GpuDevice.h"
 #include "DX12Event.h"
+#include "DX12Effect.h"
 
 #define new VNEW
 
@@ -31,8 +32,8 @@ namespace NxRHI
 				break;
 			}
 			ASSERT(refRTV->GetHWBuffer() != nullptr);
-			auto dxRtv = (FDX12GpuMemory*)refRTV->GetHWBuffer();
-			mDX11RTVArray[RTVIdx] = dxRtv->Handle;
+			auto dxRtv = (DX12DescriptorSetPagedObject*)refRTV->GetHWBuffer();
+			mDX11RTVArray[RTVIdx] = dxRtv->GetHandle(0);
 		}
 	}
 
@@ -190,7 +191,8 @@ namespace NxRHI
 	{
 		if (PresentFence != nullptr)
 		{
-			PresentFence->Wait(CurrentFenceTargetValue);
+			//PresentFence->Wait(CurrentFenceTargetValue);
+			PresentFence->WaitToAspect();
 		}
 	}
 	void DX12SwapChain::Present(IGpuDevice* device, UINT SyncInterval, UINT Flags)
@@ -212,8 +214,8 @@ namespace NxRHI
 		else
 			CurrentBackBuffer = (CurrentBackBuffer + 1) % (UINT)BackBuffers.size();
 		
-		CurrentFenceTargetValue = PresentFence->GetAspectValue() + 1;
-		device->GetCmdQueue()->SignalFence(PresentFence, CurrentFenceTargetValue);
+		//CurrentFenceTargetValue = PresentFence->GetAspectValue() + 1;
+		device->GetCmdQueue()->IncreaseSignal(PresentFence);
 	}
 	void DX12SwapChain::FBackBuffer::CreateRtvAndSrv(IGpuDevice* device)
 	{

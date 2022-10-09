@@ -60,16 +60,21 @@ namespace NxRHI
 	}
 	DX12Sampler::~DX12Sampler()
 	{
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
+
 		if (mView != nullptr)
 		{
-			mView->FreeMemory();
+			device->DelayDestroy(mView);
 			mView = nullptr;
 		}
 	}
 	bool DX12Sampler::Init(DX12GpuDevice* device, const FSamplerDesc& desc)
 	{
 		Desc = desc;
-		mView = device->mSamplerAllocHeapManager->Alloc(device->mDevice);
+		mView = device->mSamplerAllocHeapManager->Alloc<DX12DescriptorSetPagedObject>();
+		mDeviceRef.FromObject(device);
 
 		D3D12_SAMPLER_DESC				mDxDesc;
 		mDxDesc.Filter = FilterToDX(desc.Filter);
@@ -83,7 +88,7 @@ namespace NxRHI
 		mDxDesc.MaxAnisotropy = desc.MaxAnisotropy;
 		mDxDesc.MipLODBias = desc.MipLODBias;
 
-		device->mDevice->CreateSampler(&mDxDesc, mView->Handle);
+		device->mDevice->CreateSampler(&mDxDesc, mView->GetHandle(0));
 		return true;
 	}
 

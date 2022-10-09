@@ -96,6 +96,7 @@ public:
 		q->w = tm.q.w;
 	}
 	void SetQueryFilterData(const PhyFilterData* filterData);
+	void SetSimulationFilterData(const PhyFilterData* filterData);
 	void SetFlag(EPhysShapeFlag flag, bool value);
 	bool HaveFlag(EPhysShapeFlag flag);
 

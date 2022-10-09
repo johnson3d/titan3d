@@ -8,6 +8,9 @@ namespace NxRHI
 {
 	class DX12CommandList;
 	class DX12CmdQueue;
+	struct DX12DescriptorSetPagedObject;
+	struct DX12DescriptorSetAllocator;
+	
 	class DX12GpuSystem : public IGpuSystem
 	{
 	public:
@@ -45,6 +48,7 @@ namespace NxRHI
 		virtual IEvent* CreateGpuEvent(const FEventDesc* desc, const char* name) override;
 		virtual ICmdQueue* GetCmdQueue() override;
 
+		virtual IGraphicDraw* CreateGraphicDraw() override;
 		virtual void TickPostEvents() override;
 	private: 
 		void QueryDevice();
@@ -56,13 +60,10 @@ namespace NxRHI
 		AutoRef<ID3D12Debug>			mDebugLayer;
 		AutoRef<ID3D12InfoQueue>		mDebugInfoQueue;
 		AutoRef<DX12CmdQueue>			mCmdQueue;
-		AutoRef<DX12AllocHeapManager>	mRtvHeapManager;
-		AutoRef<DX12AllocHeapManager>	mDsvHeapManager;
-		AutoRef<DX12AllocHeapManager>	mSamplerAllocHeapManager;
-		AutoRef<DX12AllocHeapManager>	mSrvAllocHeapManager;
-
-		AutoRef<DX12TableHeapManager>		mSrvTableHeapManager;
-		AutoRef<DX12TableHeapManager>		mSamplerTableHeapManager;
+		AutoRef<DX12DescriptorSetAllocator>	mRtvHeapManager;
+		AutoRef<DX12DescriptorSetAllocator>	mDsvHeapManager;
+		AutoRef<DX12DescriptorSetAllocator>	mSamplerAllocHeapManager;
+		AutoRef<DX12DescriptorSetAllocator>	mSrvAllocHeapManager;
 
 		AutoRef<DX12CommandAllocatorManager>	mCmdAllocatorManager;
 		AutoRef<DX12GpuPooledMemAllocator>		mCBufferMemAllocator;
@@ -72,6 +73,11 @@ namespace NxRHI
 
 		AutoRef<ID3D12CommandSignature>		CmdSigForIndirectDrawIndex;
 		AutoRef<ID3D12CommandSignature>		CmdSigForIndirectDispatch;
+
+		AutoRef<DX12DescriptorSetPagedObject>	mNullCBV;
+		AutoRef<DX12DescriptorSetPagedObject>	mNullSRV;
+		AutoRef<DX12DescriptorSetPagedObject>	mNullUAV;
+		AutoRef<DX12DescriptorSetPagedObject>	mNullSampler;
 	};
 
 	class DX12CmdQueue : public ICmdQueue

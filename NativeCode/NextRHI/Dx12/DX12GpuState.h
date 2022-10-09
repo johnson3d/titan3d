@@ -7,14 +7,20 @@ NS_BEGIN
 namespace NxRHI
 {
 	class DX12GpuDevice;
+	struct DX12DescriptorSetPagedObject;
+
 	class DX12Sampler : public ISampler
 	{
 	public:
 		DX12Sampler();
 		~DX12Sampler();
+		virtual void* GetHWBuffer() override {
+			return mView;
+		}
 		bool Init(DX12GpuDevice* device, const FSamplerDesc& desc);
 	public:
-		AutoRef<FDX12GpuMemory> mView;
+		TObjectHandle<DX12GpuDevice>			mDeviceRef;
+		AutoRef<DX12DescriptorSetPagedObject>	mView;
 	};
 
 	class DX12GpuPipeline : public IGpuPipeline

@@ -95,7 +95,9 @@ namespace MainEditor
             while (true)
             {
                 if (EngineNS.UEngine.Instance.Tick() == false)
+                {
                     break;
+                }
                 //System.GC.Collect();
                 if (IsProfiling == 1)
                 {

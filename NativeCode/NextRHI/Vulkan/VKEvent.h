@@ -74,6 +74,7 @@ namespace NxRHI
 		virtual UINT64 GetCompletedValue() override {
 			return 0;
 		}
+		virtual bool Wait(UINT64 value, UINT timeOut = INFINITE) override;
 	};
 	class VKGpuToHostFence : public VIUnknownBase
 	{
@@ -85,7 +86,7 @@ namespace NxRHI
 		bool IsSignaled();
 	public:
 		TObjectHandle<VKGpuDevice>	mDeviceRef;
-		VkFence				mFence;
+		VkFence				mFence = nullptr;
 	};
 }
 

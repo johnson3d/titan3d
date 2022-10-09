@@ -9,6 +9,8 @@ namespace MemAlloc
 {
 	template<typename _Type>
 	struct FPage;
+	template<typename _Type>
+	struct FAllocatorBase;
 
 	template<typename _Type>
 	struct FPagedObject : public VIUnknownBase
@@ -17,15 +19,29 @@ namespace MemAlloc
 		FPagedObject<_Type>*	Next = nullptr;
 		TObjectHandle<FPage<_Type>>		HostPage;
 
+		FAllocatorBase<_Type>* GetAllocator() {
+			auto page = HostPage.GetPtr();
+			if (page == nullptr)
+				return nullptr;
+			return page->Allocator.GetPtr();
+		}
 		void Free();
 	};
 
 	template<typename _Type>
 	struct FAllocatorBase : public VIUnknown
 	{
-		virtual AutoRef<FPagedObject<_Type>> Alloc() = 0;
-		virtual void Free(FPagedObject<_Type>* ptr) = 0;
-		virtual void OnFree(FPagedObject<_Type>* ptr) = 0;
+		typedef FPagedObject<_Type>		FPagedObjectType;
+
+		template<typename _FPagedObjectType = FPagedObjectType>
+		AutoRef<_FPagedObjectType> Alloc() {
+			auto ptr = dynamic_cast<_FPagedObjectType*>(AllocObject());
+			return MakeWeakRef(ptr);
+		}
+
+		virtual FPagedObjectType* AllocObject() = 0;
+		virtual void Free(FPagedObjectType* ptr) = 0;
+		virtual void OnFree(FPagedObjectType* ptr) = 0;
 	};
 
 	template<typename _Type>
@@ -37,11 +53,15 @@ namespace MemAlloc
 	template<typename _Type, typename _CreatorType, UINT PageSize = 128, bool MultThread = true>
 	struct FPagedObjectAllocator : public FAllocatorBase<_Type>
 	{
+		typedef FPagedObject<_Type>		FPagedObjectType;
+		typedef FPage<_Type>			FPageType;
+		
 		VSLLock							Locker;
 		_CreatorType					Creator{};
-		FPagedObject<_Type>*			FreePoint = nullptr;
-		std::vector<AutoRef<FPage<_Type>>>		Pages;
-		virtual AutoRef<FPagedObject<_Type>> Alloc() override
+		FPagedObjectType*				FreePoint = nullptr;
+		std::vector<AutoRef<FPageType>>	Pages;
+		
+		virtual FPagedObjectType* AllocObject() override
 		{
 			if constexpr (MultThread)
 			{
@@ -53,7 +73,7 @@ namespace MemAlloc
 				return AllocImpl();
 			}
 		}
-		virtual void Free(FPagedObject<_Type>* ptr) override
+		virtual void Free(FPagedObjectType* ptr) override
 		{
 			if constexpr (MultThread)
 			{
@@ -65,7 +85,7 @@ namespace MemAlloc
 				FreeImpl(ptr);
 			}
 		}
-		virtual void OnFree(FPagedObject<_Type>* ptr) override
+		virtual void OnFree(FPagedObjectType* ptr) override
 		{
 			Creator.OnFree(ptr);
 		}
@@ -81,8 +101,12 @@ namespace MemAlloc
 				FinalCleanupImpl();
 			}
 		}
+		~FPagedObjectAllocator()
+		{
+			FinalCleanup();
+		}
 	protected:
-		AutoRef<FPagedObject<_Type>> AllocImpl()
+		FPagedObjectType* AllocImpl()
 		{
 			if (FreePoint == nullptr)
 			{
@@ -117,8 +141,9 @@ namespace MemAlloc
 			result->Next = nullptr;
 			return result;
 		}
-		void FreeImpl(FPagedObject<_Type>* ptr)
+		void FreeImpl(FPagedObjectType* ptr)
 		{
+			ptr->AddRef();
 			ptr->Next = FreePoint;
 			FreePoint = ptr;
 		}
@@ -135,6 +160,7 @@ namespace MemAlloc
 			{
 				Creator.FinalCleanup(i);
 			}
+			Pages.clear();
 		}
 	};
 	

@@ -127,6 +127,12 @@ void CoreSDK::SetMemLeakCallBack(FOnNativeMemLeak cb)
 	SDK_vfxMemory_SetMemLeakCallBack(cb);
 }
 
+extern "C" VFX_API void vfxMemory_SetDebugInfo(void* memory, LPCSTR info);
+void CoreSDK::SetMemDebugInfo(void* memory, const char* info)
+{
+	vfxMemory_SetDebugInfo(memory, info);
+}
+
 void CoreSDK::UpdateEngineTick(INT64 tick)
 {
 	VIUnknown::EngineTime = tick;

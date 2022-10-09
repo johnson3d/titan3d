@@ -18,13 +18,13 @@ namespace NxRHI
 		virtual void Commit(ICommandList* cmdlist) override;
 
 		void RebuildDescriptorSets();
-		static void BindResourceToDescriptSets(VKGpuDevice* device, AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>>& dsSetVS,
-			AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>>& dsSetPS,
+		static void BindResourceToDescriptSets(VKGpuDevice* device, AutoRef<VKDescriptorSetPagedObject>& dsSetVS,
+			AutoRef<VKDescriptorSetPagedObject>& dsSetPS,
 			const FEffectBinder* binder, IGpuResource* resource);
 	public:
 		TObjectHandle<VKGpuDevice>				mDeviceRef;
-		AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>>		mDescriptorSetVS;
-		AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>>		mDescriptorSetPS;
+		AutoRef<VKDescriptorSetPagedObject>		mDescriptorSetVS;
+		AutoRef<VKDescriptorSetPagedObject>		mDescriptorSetPS;
 		bool									IsDirty = false;
 		UINT									FingerPrient = 0;
 	};

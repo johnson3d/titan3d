@@ -195,7 +195,6 @@ namespace NxRHI
 		UINT							mPresentQueueIndex = -1;
 		VkQueue							mGraphicsQueue = nullptr;
 		VkQueue							mPresentQueue = nullptr;
-		AutoRef<IFence>					mFlushFence;
 	};
 }
 

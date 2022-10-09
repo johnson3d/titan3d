@@ -124,8 +124,8 @@ namespace NxRHI
 			info.semaphoreCount = 1;
 			info.pSemaphores = &mSemaphore;
 			info.pValues = &value;
-			//vkWaitSemaphores(device->mDevice, &info, UINT64_MAX);
-			completed = GetCompletedValue();
+			vkWaitSemaphores(device->mDevice, &info, UINT64_MAX);
+			//completed = GetCompletedValue();
 		}
 
 		return true;
@@ -156,6 +156,11 @@ namespace NxRHI
 		device->DelayDestroy(mSemaphore);
 		mSemaphore = nullptr;
 	}
+	bool VKBinaryFence::Wait(UINT64 value, UINT timeOut)
+	{
+		ASSERT(false);
+		return false;
+	}
 	/// ====================================
 	VKGpuToHostFence::VKGpuToHostFence(VKGpuDevice* device, bool signal)
 	{
@@ -184,7 +189,11 @@ namespace NxRHI
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
-		vkResetFences(device->mDevice, 1, &mFence);
+		auto hr = vkResetFences(device->mDevice, 1, &mFence);
+		if (hr != VK_SUCCESS)
+		{
+			ASSERT(false);
+		}
 	}
 	bool VKGpuToHostFence::IsSignaled()
 	{
@@ -199,7 +208,11 @@ namespace NxRHI
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
-		vkWaitForFences(device->mDevice, 1, &mFence, VK_TRUE, UINT64_MAX);
+		auto hr = vkWaitForFences(device->mDevice, 1, &mFence, VK_TRUE, UINT64_MAX);
+		if (hr != VK_SUCCESS)
+		{
+			ASSERT(false);
+		}
 	}
 }
 

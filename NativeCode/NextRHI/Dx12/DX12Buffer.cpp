@@ -2,6 +2,7 @@
 #include "DX12CommandList.h"
 #include "DX12GpuDevice.h"
 #include "DX12Event.h"
+#include "DX12Effect.h"
 
 #define new VNEW
 
@@ -26,14 +27,6 @@ namespace NxRHI
 		}
 	};
 	template<>
-	struct AuxGpuResourceDestroyer<AutoRef<FDX12GpuMemory>>
-	{
-		static void Destroy(AutoRef<FDX12GpuMemory> obj, IGpuDevice* device1)
-		{
-			obj->FreeMemory();
-		}
-	}; 
-	template<>
 	struct AuxGpuResourceDestroyer<std::vector<AutoRef<ID3D12Resource>>>
 	{
 		static void Destroy(std::vector<AutoRef<ID3D12Resource>> obj, IGpuDevice* device1)
@@ -49,7 +42,7 @@ namespace NxRHI
 		case EngineNS::NxRHI::GRS_Undefine:
 			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
 		case EngineNS::NxRHI::GRS_SrvPS:
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ; //return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		case EngineNS::NxRHI::GRS_GenericRead:
 			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
 		case EngineNS::NxRHI::GRS_Uav:
@@ -708,7 +701,7 @@ namespace NxRHI
 		mDeviceRef.FromObject(device);
 		
 		D3D12_RESOURCE_STATES resState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
-		GpuState = EGpuResourceState::GRS_GenericRead;
+		GpuState = EGpuResourceState::GRS_Undefine;
 		D3D12_HEAP_PROPERTIES properties{};
 		properties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		D3D12_RESOURCE_DESC resDesc{};
@@ -868,20 +861,29 @@ namespace NxRHI
 
 			auto cmd = (DX12CommandList*)device->GetCmdQueue()->GetIdleCmdlist(EQueueCmdlist::QCL_Transient);
 			cmd->BeginCommand();
-			auto saved = this->GpuState;
+			//auto saved = this->GpuState;
 			this->TransitionTo(cmd, EGpuResourceState::GRS_CopyDst);
 			for (UINT j = 0; j < desc.MipLevels; j++)
 			{
 				dstLocation.SubresourceIndex = j;
 				cmd->mContext->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocations[j], NULL);
 			}
-			this->TransitionTo(cmd, saved);
+			this->TransitionTo(cmd, EGpuResourceState::GRS_Undefine);
 			cmd->EndCommand();
 
 			device->GetCmdQueue()->ExecuteCommandList(cmd);
 			device->GetCmdQueue()->ReleaseIdleCmdlist(cmd, EQueueCmdlist::QCL_Transient);
 
 			device->DelayDestroy(mipBuffers);
+		}
+		else
+		{
+			auto cmd = (DX12CommandList*)device->GetCmdQueue()->GetIdleCmdlist(EQueueCmdlist::QCL_Transient);
+			cmd->BeginCommand();
+			this->TransitionTo(cmd, EGpuResourceState::GRS_GenericRead);
+			cmd->EndCommand();
+			device->GetCmdQueue()->ExecuteCommandList(cmd);
+			device->GetCmdQueue()->ReleaseIdleCmdlist(cmd, EQueueCmdlist::QCL_Transient);
 		}
 			
 		return true;
@@ -1091,6 +1093,12 @@ namespace NxRHI
 		tmp.Transition.pResource = mGpuResource;
 		tmp.Transition.StateBefore = GpuStateToDX12(GpuState);
 		tmp.Transition.StateAfter = GpuStateToDX12(state);
+		if (tmp.Transition.StateBefore == tmp.Transition.StateAfter)
+			return;
+		/*if (tmp.Transition.StateBefore == D3D12_RESOURCE_STATE_GENERIC_READ && tmp.Transition.StateAfter == D3D12_RESOURCE_STATE_PRESENT)
+		{
+			int xx = 0;
+		}*/
 		tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		((DX12CommandList*)cmd)->mContext->ResourceBarrier(1, &tmp);
 		GpuState = state;
@@ -1119,7 +1127,9 @@ namespace NxRHI
 		mDeviceRef.FromObject(device);
 		ShaderBinder = desc.ShaderBinder;
 
-		UINT alignedSize = ShaderBinder->Size;
+		UINT alignedSize = 1;
+		if(ShaderBinder!=nullptr)
+			alignedSize = ShaderBinder->Size;
 		auto pAlignment = device->GetGpuResourceAlignment();
 		if (alignedSize % pAlignment->CBufferAlignment)
 		{
@@ -1146,13 +1156,13 @@ namespace NxRHI
 			Buffer = pBuffer;
 		}
 		
-		mView = device->mSrvAllocHeapManager->Alloc(device->mDevice);
+		mView = device->mSrvAllocHeapManager->Alloc<DX12DescriptorSetPagedObject>();
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC d3dDesc{};
 		d3dDesc.BufferLocation = Buffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
 		d3dDesc.SizeInBytes = alignedSize;// Buffer->Desc.Size;
 
-		device->mDevice->CreateConstantBufferView(&d3dDesc, mView->Handle);
+		device->mDevice->CreateConstantBufferView(&d3dDesc, mView->GetHandle(0));
 
 		return true;
 	}
@@ -1338,7 +1348,7 @@ namespace NxRHI
 		mDeviceRef.FromObject(device);
 		Desc = desc;
 		Buffer = pBuffer;
-		mView = device->mSrvAllocHeapManager->Alloc(device->mDevice);
+		mView = device->mSrvAllocHeapManager->Alloc<DX12DescriptorSetPagedObject>();
 		//
 		D3D12_SHADER_RESOURCE_VIEW_DESC d3dDesc{};
 		SrvDesc2DX(&d3dDesc, &desc);
@@ -1355,13 +1365,14 @@ namespace NxRHI
 			d3dDesc.Buffer.StructureByteStride = 0;
 		}
 		auto pD3DRes = (ID3D12Resource*)pBuffer->GetHWBuffer();
-		device->mDevice->CreateShaderResourceView(pD3DRes, &d3dDesc, mView->Handle);
+		device->mDevice->CreateShaderResourceView(pD3DRes, &d3dDesc, mView->GetHandle(0));
 		
 		return true;
 	}
 	bool DX12SrView::UpdateBuffer(IGpuDevice* device, IGpuBufferData* pBuffer)
 	{
 		Buffer = pBuffer;
+		mFingerPrint++;
 		D3D12_SHADER_RESOURCE_VIEW_DESC d3dDesc{};
 		d3dDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		if (Desc.Type == ESrvType::ST_Texture1D ||
@@ -1373,7 +1384,7 @@ namespace NxRHI
 		SrvDesc2DX(&d3dDesc, &Desc);
 
 		auto pD3DRes = (ID3D12Resource*)pBuffer->GetHWBuffer();
-		((DX12GpuDevice*)device)->mDevice->CreateShaderResourceView(pD3DRes, &d3dDesc, mView->Handle);
+		((DX12GpuDevice*)device)->mDevice->CreateShaderResourceView(pD3DRes, &d3dDesc, mView->GetHandle(0));
 		return true;
 	}
 
@@ -1457,7 +1468,7 @@ namespace NxRHI
 		mDeviceRef.FromObject(device);
 		Desc = desc;
 		Buffer = pBuffer;
-		mView = device->mSrvAllocHeapManager->Alloc(device->mDevice);
+		mView = device->mSrvAllocHeapManager->Alloc<DX12DescriptorSetPagedObject>();
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC tmp{};
 		UavDesc2DX(pBuffer, &tmp, &desc);
@@ -1470,7 +1481,7 @@ namespace NxRHI
 			tmp.Format = DXGI_FORMAT::DXGI_FORMAT_R32_TYPELESS;
 			tmp.Buffer.StructureByteStride = 0;
 		}
-		device->mDevice->CreateUnorderedAccessView((ID3D12Resource*)pBuffer->GetHWBuffer(), nullptr, &tmp, mView->Handle);
+		device->mDevice->CreateUnorderedAccessView((ID3D12Resource*)pBuffer->GetHWBuffer(), nullptr, &tmp, mView->GetHandle(0));
 
 		return true;
 	}
@@ -1567,18 +1578,18 @@ namespace NxRHI
 		if (desc != nullptr)
 			Desc = *desc;
 		GpuResource = pBuffer;
-		mView = device->mRtvHeapManager->Alloc(device->mDevice);
+		mView = device->mRtvHeapManager->Alloc<DX12DescriptorSetPagedObject>();
 
 		if (desc == nullptr)
 		{
-			device->mDevice->CreateRenderTargetView((ID3D12Resource*)pBuffer->GetHWBuffer(), nullptr, mView->Handle);
+			device->mDevice->CreateRenderTargetView((ID3D12Resource*)pBuffer->GetHWBuffer(), nullptr, mView->GetHandle(0));
 		}
 		else
 		{
 			D3D12_RENDER_TARGET_VIEW_DESC	mDesc;
 			RtvDesc2DX(&mDesc, desc);
 
-			device->mDevice->CreateRenderTargetView((ID3D12Resource*)pBuffer->GetHWBuffer(), &mDesc, mView->Handle);
+			device->mDevice->CreateRenderTargetView((ID3D12Resource*)pBuffer->GetHWBuffer(), &mDesc, mView->GetHandle(0));
 		}
 
 		return true;
@@ -1602,7 +1613,7 @@ namespace NxRHI
 		Desc = desc;
 		auto dxPixelFormat = FormatToDX12Format(desc.Format);
 		GpuResource = pBuffer;
-		mView = device->mDsvHeapManager->Alloc(device->mDevice);
+		mView = device->mDsvHeapManager->Alloc<DX12DescriptorSetPagedObject>();
 		
 		D3D12_DEPTH_STENCIL_VIEW_DESC	DSVDesc;
 		memset(&DSVDesc, 0, sizeof(DSVDesc));
@@ -1619,7 +1630,7 @@ namespace NxRHI
 		}
 		DSVDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 		
-		device->mDevice->CreateDepthStencilView((ID3D12Resource*)pBuffer->GetHWBuffer(), &DSVDesc, mView->Handle);
+		device->mDevice->CreateDepthStencilView((ID3D12Resource*)pBuffer->GetHWBuffer(), &DSVDesc, mView->GetHandle(0));
 
 		return true;
 	}

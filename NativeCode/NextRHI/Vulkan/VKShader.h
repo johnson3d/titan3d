@@ -13,6 +13,18 @@ namespace NxRHI
 	{
 
 	};
+	template<>
+	struct AuxGpuResourceDestroyer<AutoRef<VKDescriptorSetPagedObject>>
+	{
+		static void Destroy(AutoRef<VKDescriptorSetPagedObject> obj, IGpuDevice* device1)
+		{
+			//auto device = (VKGpuDevice*)device1;
+			//vkDestroyBuffer(device->mDevice, obj, device->GetVkAllocCallBacks());
+			// auto pAllocator = (FDescriptorSetAllocator*)obj->HostPage.GetPtr()->Allocator.GetPtr();
+			//pAllocator->Creator.OnFree(obj);
+			obj->Free();
+		}
+	};
 	struct VKDescriptorSetPage : public MemAlloc::FPage<VkDescriptorSet>
 	{
 		VkDescriptorPool				mDescriptorPool = nullptr;

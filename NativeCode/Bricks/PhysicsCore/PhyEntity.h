@@ -65,7 +65,7 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 
 	void SetDefault()
 	{
-		word0 = word1 = word2 = word3 = 0;
+		word0 = word1 = word2 = word3 = 1;
 	}
 
 	UINT word0;

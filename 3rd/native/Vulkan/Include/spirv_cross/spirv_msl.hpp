@@ -665,6 +665,7 @@ protected:
 		SPVFuncImplQuantizeToF16,
 		SPVFuncImplCubemapTo2DArrayFace,
 		SPVFuncImplUnsafeArray, // Allow Metal to use the array<T> template to make arrays a value type
+		SPVFuncImplStorageMatrix, // Allow threadgroup construction of matrices
 		SPVFuncImplInverse4x4,
 		SPVFuncImplInverse3x3,
 		SPVFuncImplInverse2x2,
@@ -736,6 +737,7 @@ protected:
 	void emit_struct_member(const SPIRType &type, uint32_t member_type_id, uint32_t index,
 	                        const std::string &qualifier = "", uint32_t base_offset = 0) override;
 	void emit_struct_padding_target(const SPIRType &type) override;
+	std::string type_to_glsl(const SPIRType &type, uint32_t id, bool member);
 	std::string type_to_glsl(const SPIRType &type, uint32_t id = 0) override;
 	void emit_block_hints(const SPIRBlock &block) override;
 
@@ -796,6 +798,7 @@ protected:
 	void extract_global_variables_from_functions();
 	void mark_packable_structs();
 	void mark_as_packable(SPIRType &type);
+	void mark_as_workgroup_struct(SPIRType &type);
 
 	std::unordered_map<uint32_t, std::set<uint32_t>> function_global_vars;
 	void extract_global_variables_from_function(uint32_t func_id, std::set<uint32_t> &added_arg_ids,
@@ -986,6 +989,8 @@ protected:
 	void prepare_access_chain_for_scalar_access(std::string &expr, const SPIRType &type, spv::StorageClass storage,
 	                                            bool &is_packed) override;
 	void fix_up_interpolant_access_chain(const uint32_t *ops, uint32_t length);
+	void check_physical_type_cast(std::string &expr, const SPIRType *type, uint32_t physical_type) override;
+
 	bool emit_tessellation_access_chain(const uint32_t *ops, uint32_t length);
 	bool emit_tessellation_io_load(uint32_t result_type, uint32_t id, uint32_t ptr);
 	bool is_out_of_bounds_tessellation_level(uint32_t id_lhs);

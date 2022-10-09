@@ -17968,6 +17968,44 @@ namespace VULKAN_HPP_NAMESPACE
 #  endif /*VULKAN_HPP_DISABLE_ENHANCED_MODE*/
 #endif   /*VK_ENABLE_BETA_EXTENSIONS*/
 
+#if defined( VK_USE_PLATFORM_METAL_EXT )
+  //=== VK_EXT_metal_objects ===
+
+  template <typename Dispatch>
+  VULKAN_HPP_INLINE void Device::exportMetalObjectsEXT( VULKAN_HPP_NAMESPACE::ExportMetalObjectsInfoEXT * pMetalObjectsInfo,
+                                                        Dispatch const &                                  d ) const VULKAN_HPP_NOEXCEPT
+  {
+    VULKAN_HPP_ASSERT( d.getVkHeaderVersion() == VK_HEADER_VERSION );
+    d.vkExportMetalObjectsEXT( m_device, reinterpret_cast<VkExportMetalObjectsInfoEXT *>( pMetalObjectsInfo ) );
+  }
+
+#  ifndef VULKAN_HPP_DISABLE_ENHANCED_MODE
+  template <typename Dispatch>
+  VULKAN_HPP_NODISCARD VULKAN_HPP_INLINE VULKAN_HPP_NAMESPACE::ExportMetalObjectsInfoEXT
+                                         Device::exportMetalObjectsEXT( Dispatch const & d ) const VULKAN_HPP_NOEXCEPT
+  {
+    VULKAN_HPP_ASSERT( d.getVkHeaderVersion() == VK_HEADER_VERSION );
+
+    VULKAN_HPP_NAMESPACE::ExportMetalObjectsInfoEXT metalObjectsInfo;
+    d.vkExportMetalObjectsEXT( m_device, reinterpret_cast<VkExportMetalObjectsInfoEXT *>( &metalObjectsInfo ) );
+
+    return metalObjectsInfo;
+  }
+
+  template <typename X, typename Y, typename... Z, typename Dispatch>
+  VULKAN_HPP_NODISCARD VULKAN_HPP_INLINE StructureChain<X, Y, Z...> Device::exportMetalObjectsEXT( Dispatch const & d ) const VULKAN_HPP_NOEXCEPT
+  {
+    VULKAN_HPP_ASSERT( d.getVkHeaderVersion() == VK_HEADER_VERSION );
+
+    StructureChain<X, Y, Z...>                        structureChain;
+    VULKAN_HPP_NAMESPACE::ExportMetalObjectsInfoEXT & metalObjectsInfo = structureChain.template get<VULKAN_HPP_NAMESPACE::ExportMetalObjectsInfoEXT>();
+    d.vkExportMetalObjectsEXT( m_device, reinterpret_cast<VkExportMetalObjectsInfoEXT *>( &metalObjectsInfo ) );
+
+    return structureChain;
+  }
+#  endif /*VULKAN_HPP_DISABLE_ENHANCED_MODE*/
+#endif   /*VK_USE_PLATFORM_METAL_EXT*/
+
   //=== VK_KHR_synchronization2 ===
 
   template <typename Dispatch>
@@ -19346,21 +19384,6 @@ namespace VULKAN_HPP_NAMESPACE
 
     return createResultValueType( static_cast<VULKAN_HPP_NAMESPACE::Result>( result ), pipelineProperties );
   }
-
-  template <typename X, typename Y, typename... Z, typename Dispatch>
-  VULKAN_HPP_NODISCARD VULKAN_HPP_INLINE typename ResultValueType<StructureChain<X, Y, Z...>>::type
-                       Device::getPipelinePropertiesEXT( const VULKAN_HPP_NAMESPACE::PipelineInfoEXT & pipelineInfo, Dispatch const & d ) const
-  {
-    VULKAN_HPP_ASSERT( d.getVkHeaderVersion() == VK_HEADER_VERSION );
-
-    StructureChain<X, Y, Z...>               structureChain;
-    VULKAN_HPP_NAMESPACE::BaseOutStructure & pipelineProperties = structureChain.template get<VULKAN_HPP_NAMESPACE::BaseOutStructure>();
-    VkResult                                 result             = d.vkGetPipelinePropertiesEXT(
-      m_device, reinterpret_cast<const VkPipelineInfoEXT *>( &pipelineInfo ), reinterpret_cast<VkBaseOutStructure *>( &pipelineProperties ) );
-    resultCheck( static_cast<VULKAN_HPP_NAMESPACE::Result>( result ), VULKAN_HPP_NAMESPACE_STRING "::Device::getPipelinePropertiesEXT" );
-
-    return createResultValueType( static_cast<VULKAN_HPP_NAMESPACE::Result>( result ), structureChain );
-  }
 #endif /*VULKAN_HPP_DISABLE_ENHANCED_MODE*/
 
   //=== VK_EXT_extended_dynamic_state2 ===
@@ -19788,6 +19811,158 @@ namespace VULKAN_HPP_NAMESPACE
     d.vkGetDescriptorSetHostMappingVALVE( m_device, static_cast<VkDescriptorSet>( descriptorSet ), &pData );
 
     return pData;
+  }
+#endif /*VULKAN_HPP_DISABLE_ENHANCED_MODE*/
+
+  //=== VK_EXT_shader_module_identifier ===
+
+  template <typename Dispatch>
+  VULKAN_HPP_INLINE void Device::getShaderModuleIdentifierEXT( VULKAN_HPP_NAMESPACE::ShaderModule                shaderModule,
+                                                               VULKAN_HPP_NAMESPACE::ShaderModuleIdentifierEXT * pIdentifier,
+                                                               Dispatch const &                                  d ) const VULKAN_HPP_NOEXCEPT
+  {
+    VULKAN_HPP_ASSERT( d.getVkHeaderVersion() == VK_HEADER_VERSION );
+    d.vkGetShaderModuleIdentifierEXT( m_device, static_cast<VkShaderModule>( shaderModule ), reinterpret_cast<VkShaderModuleIdentifierEXT *>( pIdentifier ) );
+  }
+
+#ifndef VULKAN_HPP_DISABLE_ENHANCED_MODE
+  template <typename Dispatch>
+  VULKAN_HPP_NODISCARD VULKAN_HPP_INLINE VULKAN_HPP_NAMESPACE::ShaderModuleIdentifierEXT
+    Device::getShaderModuleIdentifierEXT( VULKAN_HPP_NAMESPACE::ShaderModule shaderModule, Dispatch const & d ) const VULKAN_HPP_NOEXCEPT
+  {
+    VULKAN_HPP_ASSERT( d.getVkHeaderVersion() == VK_HEADER_VERSION );
+
+    VULKAN_HPP_NAMESPACE::ShaderModuleIdentifierEXT identifier;
+    d.vkGetShaderModuleIdentifierEXT( m_device, static_cast<VkShaderModule>( shaderModule ), reinterpret_cast<VkShaderModuleIdentifierEXT *>( &identifier ) );
+
+    return identifier;
+  }
+#endif /*VULKAN_HPP_DISABLE_ENHANCED_MODE*/
+
+  template <typename Dispatch>
+  VULKAN_HPP_INLINE void Device::getShaderModuleCreateInfoIdentifierEXT( const VULKAN_HPP_NAMESPACE::ShaderModuleCreateInfo * pCreateInfo,
+                                                                         VULKAN_HPP_NAMESPACE::ShaderModuleIdentifierEXT *    pIdentifier,
+                                                                         Dispatch const &                                     d ) const VULKAN_HPP_NOEXCEPT
+  {
+    VULKAN_HPP_ASSERT( d.getVkHeaderVersion() == VK_HEADER_VERSION );
+    d.vkGetShaderModuleCreateInfoIdentifierEXT(
+      m_device, reinterpret_cast<const VkShaderModuleCreateInfo *>( pCreateInfo ), reinterpret_cast<VkShaderModuleIdentifierEXT *>( pIdentifier ) );
+  }
+
+#ifndef VULKAN_HPP_DISABLE_ENHANCED_MODE
+  template <typename Dispatch>
+  VULKAN_HPP_NODISCARD VULKAN_HPP_INLINE VULKAN_HPP_NAMESPACE::ShaderModuleIdentifierEXT
+                                         Device::getShaderModuleCreateInfoIdentifierEXT( const VULKAN_HPP_NAMESPACE::ShaderModuleCreateInfo & createInfo,
+                                                    Dispatch const &                                     d ) const VULKAN_HPP_NOEXCEPT
+  {
+    VULKAN_HPP_ASSERT( d.getVkHeaderVersion() == VK_HEADER_VERSION );
+
+    VULKAN_HPP_NAMESPACE::ShaderModuleIdentifierEXT identifier;
+    d.vkGetShaderModuleCreateInfoIdentifierEXT(
+      m_device, reinterpret_cast<const VkShaderModuleCreateInfo *>( &createInfo ), reinterpret_cast<VkShaderModuleIdentifierEXT *>( &identifier ) );
+
+    return identifier;
+  }
+#endif /*VULKAN_HPP_DISABLE_ENHANCED_MODE*/
+
+  //=== VK_QCOM_tile_properties ===
+
+  template <typename Dispatch>
+  VULKAN_HPP_NODISCARD VULKAN_HPP_INLINE Result Device::getFramebufferTilePropertiesQCOM( VULKAN_HPP_NAMESPACE::Framebuffer          framebuffer,
+                                                                                          uint32_t *                                 pPropertiesCount,
+                                                                                          VULKAN_HPP_NAMESPACE::TilePropertiesQCOM * pProperties,
+                                                                                          Dispatch const & d ) const VULKAN_HPP_NOEXCEPT
+  {
+    VULKAN_HPP_ASSERT( d.getVkHeaderVersion() == VK_HEADER_VERSION );
+    return static_cast<Result>( d.vkGetFramebufferTilePropertiesQCOM(
+      m_device, static_cast<VkFramebuffer>( framebuffer ), pPropertiesCount, reinterpret_cast<VkTilePropertiesQCOM *>( pProperties ) ) );
+  }
+
+#ifndef VULKAN_HPP_DISABLE_ENHANCED_MODE
+  template <typename TilePropertiesQCOMAllocator, typename Dispatch>
+  VULKAN_HPP_NODISCARD VULKAN_HPP_INLINE typename ResultValueType<std::vector<VULKAN_HPP_NAMESPACE::TilePropertiesQCOM, TilePropertiesQCOMAllocator>>::type
+                       Device::getFramebufferTilePropertiesQCOM( VULKAN_HPP_NAMESPACE::Framebuffer framebuffer, Dispatch const & d ) const
+  {
+    VULKAN_HPP_ASSERT( d.getVkHeaderVersion() == VK_HEADER_VERSION );
+
+    std::vector<VULKAN_HPP_NAMESPACE::TilePropertiesQCOM, TilePropertiesQCOMAllocator> properties;
+    uint32_t                                                                           propertiesCount;
+    VkResult                                                                           result;
+    do
+    {
+      result = d.vkGetFramebufferTilePropertiesQCOM( m_device, static_cast<VkFramebuffer>( framebuffer ), &propertiesCount, nullptr );
+      if ( ( result == VK_SUCCESS ) && propertiesCount )
+      {
+        properties.resize( propertiesCount );
+        result = d.vkGetFramebufferTilePropertiesQCOM(
+          m_device, static_cast<VkFramebuffer>( framebuffer ), &propertiesCount, reinterpret_cast<VkTilePropertiesQCOM *>( properties.data() ) );
+      }
+    } while ( result == VK_INCOMPLETE );
+
+    VULKAN_HPP_ASSERT( propertiesCount <= properties.size() );
+    if ( propertiesCount < properties.size() )
+    {
+      properties.resize( propertiesCount );
+    }
+    return properties;
+  }
+
+  template <typename TilePropertiesQCOMAllocator,
+            typename Dispatch,
+            typename B1,
+            typename std::enable_if<std::is_same<typename B1::value_type, TilePropertiesQCOM>::value, int>::type>
+  VULKAN_HPP_NODISCARD VULKAN_HPP_INLINE typename ResultValueType<std::vector<VULKAN_HPP_NAMESPACE::TilePropertiesQCOM, TilePropertiesQCOMAllocator>>::type
+                       Device::getFramebufferTilePropertiesQCOM( VULKAN_HPP_NAMESPACE::Framebuffer framebuffer,
+                                              TilePropertiesQCOMAllocator &     tilePropertiesQCOMAllocator,
+                                              Dispatch const &                  d ) const
+  {
+    VULKAN_HPP_ASSERT( d.getVkHeaderVersion() == VK_HEADER_VERSION );
+
+    std::vector<VULKAN_HPP_NAMESPACE::TilePropertiesQCOM, TilePropertiesQCOMAllocator> properties( tilePropertiesQCOMAllocator );
+    uint32_t                                                                           propertiesCount;
+    VkResult                                                                           result;
+    do
+    {
+      result = d.vkGetFramebufferTilePropertiesQCOM( m_device, static_cast<VkFramebuffer>( framebuffer ), &propertiesCount, nullptr );
+      if ( ( result == VK_SUCCESS ) && propertiesCount )
+      {
+        properties.resize( propertiesCount );
+        result = d.vkGetFramebufferTilePropertiesQCOM(
+          m_device, static_cast<VkFramebuffer>( framebuffer ), &propertiesCount, reinterpret_cast<VkTilePropertiesQCOM *>( properties.data() ) );
+      }
+    } while ( result == VK_INCOMPLETE );
+
+    VULKAN_HPP_ASSERT( propertiesCount <= properties.size() );
+    if ( propertiesCount < properties.size() )
+    {
+      properties.resize( propertiesCount );
+    }
+    return properties;
+  }
+#endif /*VULKAN_HPP_DISABLE_ENHANCED_MODE*/
+
+  template <typename Dispatch>
+  VULKAN_HPP_INLINE Result Device::getDynamicRenderingTilePropertiesQCOM( const VULKAN_HPP_NAMESPACE::RenderingInfo * pRenderingInfo,
+                                                                          VULKAN_HPP_NAMESPACE::TilePropertiesQCOM *  pProperties,
+                                                                          Dispatch const &                            d ) const VULKAN_HPP_NOEXCEPT
+  {
+    VULKAN_HPP_ASSERT( d.getVkHeaderVersion() == VK_HEADER_VERSION );
+    return static_cast<Result>( d.vkGetDynamicRenderingTilePropertiesQCOM(
+      m_device, reinterpret_cast<const VkRenderingInfo *>( pRenderingInfo ), reinterpret_cast<VkTilePropertiesQCOM *>( pProperties ) ) );
+  }
+
+#ifndef VULKAN_HPP_DISABLE_ENHANCED_MODE
+  template <typename Dispatch>
+  VULKAN_HPP_NODISCARD VULKAN_HPP_INLINE VULKAN_HPP_NAMESPACE::TilePropertiesQCOM
+    Device::getDynamicRenderingTilePropertiesQCOM( const VULKAN_HPP_NAMESPACE::RenderingInfo & renderingInfo, Dispatch const & d ) const VULKAN_HPP_NOEXCEPT
+  {
+    VULKAN_HPP_ASSERT( d.getVkHeaderVersion() == VK_HEADER_VERSION );
+
+    VULKAN_HPP_NAMESPACE::TilePropertiesQCOM properties;
+    d.vkGetDynamicRenderingTilePropertiesQCOM(
+      m_device, reinterpret_cast<const VkRenderingInfo *>( &renderingInfo ), reinterpret_cast<VkTilePropertiesQCOM *>( &properties ) );
+
+    return properties;
   }
 #endif /*VULKAN_HPP_DISABLE_ENHANCED_MODE*/
 

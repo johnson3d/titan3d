@@ -25,41 +25,6 @@ namespace NxRHI
 	{
 		if (GetDX12Device() == nullptr)
 			return;
-
-		if (mCommitFence != nullptr)
-		{
-			auto fenceValue = mCommitFence->GetCompletedValue();
-			for (size_t i = 0; i < mQueueTables.size(); i++)
-			{
-				auto cur = mQueueTables[i];
-
-				if (fenceValue < cur->mWaitValue)
-				{
-					auto fence = mCommitFence;
-					//VFX_LTRACE(ELTT_Warning, "DX12CommandList destroy: recycle TableHeaps but fence dosen't signal");
-					//std::function<Test_ConstantVarDesc::MemberCall> a;
-					//a = std::bind(&Test_ConstantVarDesc::AAAA, new Test_ConstantVarDesc(), std::placeholders::_1);
-
-					GetDX12Device()->PushPostEvent([fence, cur](IGpuDevice* device, UINT64 frameCount)->bool
-						{
-							if (fence->GetCompletedValue() >= cur->mWaitValue)
-							{
-								cur->Recycle();
-								return true;
-							}
-							else
-							{
-								return false;
-							}
-						});
-				}
-				else
-				{
-					cur->Recycle();
-				}
-			}
-			mQueueTables.clear();
-		}
 	}
 	bool DX12CommandList::Init(DX12GpuDevice* device)
 	{
@@ -86,15 +51,6 @@ namespace NxRHI
 			ASSERT(false);
 			mContext->Close();
 		}
-		if (mFreeTables.size() == 0)
-		{
-			mCurrentTableRecycle = MakeWeakRef(new FTableRecycle(64));
-		}
-		else
-		{
-			mCurrentTableRecycle = mFreeTables.front();
-			mFreeTables.pop();
-		}
 
 		//ASSERT(mAllocator == nullptr);
 		mAllocator = GetDX12Device()->mCmdAllocatorManager->Alloc(GetDX12Device()->mDevice);
@@ -114,19 +70,6 @@ namespace NxRHI
 		}
 		//mContext->Close();
 		mIsRecording = false;
-
-		auto fenceValue = mCommitFence->GetCompletedValue();
-		for (size_t i = 0; i < mQueueTables.size(); i++)
-		{
-			auto cur = mQueueTables[i];
-			if (fenceValue >= cur->mWaitValue)
-			{
-				cur->Recycle();
-				mQueueTables.erase(mQueueTables.begin() + i);
-				i--;
-				mFreeTables.push(cur);
-			}
-		}
 	}
 	bool DX12CommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
@@ -167,7 +110,8 @@ namespace NxRHI
 				//	//auto rtv = dxFB->mRenderTargets[i].UnsafeConvertTo<DX12RenderTargetView>()->mView->Handle;
 				//	mContext->OMSetRenderTargets(1, &rtv, true, &dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>()->mView->Handle);
 				//}
-				mContext->OMSetRenderTargets((UINT)dxFB->mDX11RTVArray.size(), &dxFB->mDX11RTVArray[0], false, &dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>()->mView->Handle);
+				auto handle = dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>()->mView->GetHandle(0);
+				mContext->OMSetRenderTargets((UINT)dxFB->mDX11RTVArray.size(), &dxFB->mDX11RTVArray[0], false, &handle);
 			}	
 			else
 			{
@@ -184,7 +128,8 @@ namespace NxRHI
 		{
 			if (dxFB->mDepthStencilView != nullptr)
 			{
-				mContext->OMSetRenderTargets(0, nullptr, true, &dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>()->mView->Handle);
+				auto handle = dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>()->mView->GetHandle(0);
+				mContext->OMSetRenderTargets(0, nullptr, true, &handle);
 			}
 			else
 			{
@@ -227,7 +172,8 @@ namespace NxRHI
 
 			if (flag != 0)
 			{
-				mContext->ClearDepthStencilView(dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>()->mView->Handle, flag, passClears->DepthClearValue, passClears->StencilClearValue, 0, nullptr);
+				auto handle = dxFB->mDepthStencilView.UnsafeConvertTo<DX12DepthStencilView>()->mView->GetHandle(0);
+				mContext->ClearDepthStencilView(handle, flag, passClears->DepthClearValue, passClears->StencilClearValue, 0, nullptr);
 			}
 		}
 
@@ -282,12 +228,15 @@ namespace NxRHI
 				break;
 		}*/
 	}
+#define DESCRIPTOR_IN_DRAWCALL
+
 	void DX12CommandList::SetCBV(EShaderType type, const FShaderBinder* binder, ICbView* buffer)
 	{
 		ASSERT(mIsRecording);
 		buffer->FlushDirty(this);
 		//mContext->SetGraphicsRootConstantBufferView(binder->DescriptorIndex, ((DX12Buffer*)buffer)->mGpuResource->GetGPUVirtualAddress());
 
+#ifndef DESCRIPTOR_IN_DRAWCALL
 		buffer->Buffer->TransitionTo(this, EGpuResourceState::GRS_GenericRead);
 		auto handle = ((DX12CbView*)buffer)->mView;
 		auto device = GetDX12Device()->mDevice;
@@ -299,6 +248,7 @@ namespace NxRHI
 		{
 			device->CopyDescriptorsSimple(1, mCurrentSrvTable->GetHandle(binder->DescriptorIndex), handle->Handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		}
+#endif
 	}
 	void DX12CommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
@@ -310,6 +260,7 @@ namespace NxRHI
 			view->Buffer->TransitionTo(this, (EGpuResourceState)(EGpuResourceState::GRS_SrvPS));
 		else
 			view->Buffer->TransitionTo(this, (EGpuResourceState)(EGpuResourceState::GRS_GenericRead));
+#ifndef DESCRIPTOR_IN_DRAWCALL
 		auto handle = ((DX12SrView*)view)->mView;
 		auto device = GetDX12Device()->mDevice;
 		if (type == EShaderType::SDT_ComputeShader)
@@ -320,6 +271,7 @@ namespace NxRHI
 		{
 			device->CopyDescriptorsSimple(1, mCurrentSrvTable->GetHandle(binder->DescriptorIndex), handle->Handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		}
+#endif
 	}
 	void DX12CommandList::SetUav(EShaderType type, const FShaderBinder* binder, IUaView* view)
 	{
@@ -327,6 +279,7 @@ namespace NxRHI
 		/*auto pAddr = ((ID3D12Resource*)view->Buffer->GetHWBuffer())->GetGPUVirtualAddress();
 		mContext->SetGraphicsRootUnorderedAccessView(binder->DescriptorIndex, pAddr);*/
 		view->Buffer->TransitionTo(this, EGpuResourceState::GRS_Uav);
+#ifndef DESCRIPTOR_IN_DRAWCALL
 		auto handle = ((DX12UaView*)view)->mView;
 		auto device = GetDX12Device()->mDevice;
 		if (type == EShaderType::SDT_ComputeShader)
@@ -337,10 +290,12 @@ namespace NxRHI
 		{
 			device->CopyDescriptorsSimple(1, mCurrentSrvTable->GetHandle(binder->DescriptorIndex), handle->Handle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		}
+#endif
 	}
 	void DX12CommandList::SetSampler(EShaderType type, const FShaderBinder* binder, ISampler* sampler)
 	{
 		ASSERT(mIsRecording);
+#ifndef DESCRIPTOR_IN_DRAWCALL
 		auto handle = ((DX12Sampler*)sampler)->mView;
 		auto device = GetDX12Device()->mDevice;
 		if (type == EShaderType::SDT_ComputeShader) 
@@ -351,6 +306,7 @@ namespace NxRHI
 		{
 			device->CopyDescriptorsSimple(1, mCurrentSamplerTable->GetHandle(binder->DescriptorIndex), handle->Handle, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 		}
+#endif
 	}
 	void DX12CommandList::SetVertexBuffer(UINT slot, IVbView* buffer, UINT32 Offset, UINT Stride)
 	{
@@ -607,28 +563,16 @@ namespace NxRHI
 	void DX12CommandList::Commit(DX12CmdQueue* cmdQueue)
 	{
 		//ASSERT(mIsRecording == false);
-		if (mCurrentTableRecycle == nullptr || mAllocator == nullptr)
+		if (mAllocator == nullptr)
 			return;
 		//BeginEvent(mDebugName.c_str());
 		cmdQueue->mCmdQueue->ExecuteCommandLists(1, (ID3D12CommandList**)&mContext);
 		auto targetValue = mCommitFence->GetAspectValue() + 1;
-		mCurrentTableRecycle->mWaitValue = targetValue;
 		cmdQueue->SignalFence(mCommitFence, targetValue);
 		//EndEvent();
-		mQueueTables.push_back(mCurrentTableRecycle);
-		mCurrentTableRecycle = nullptr;
 		
 		GetDX12Device()->mCmdAllocatorManager->Free(mAllocator, targetValue, mCommitFence);
 		mAllocator = nullptr;
-	}
-	void DX12CommandList::FTableRecycle::Recycle()
-	{
-		for (auto& i : mAllocTableHeaps)
-		{
-			i->FreeTableHeap();
-		}
-		mWaitValue = 0;
-		mAllocTableHeaps.clear();
 	}
 }
 

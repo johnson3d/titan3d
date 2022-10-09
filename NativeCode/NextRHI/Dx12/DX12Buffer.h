@@ -7,6 +7,7 @@ NS_BEGIN
 namespace NxRHI
 {
 	class DX12GpuDevice;
+	struct DX12DescriptorSetPagedObject;
 	class DX12Buffer : public IBuffer
 	{
 	public:
@@ -65,7 +66,7 @@ namespace NxRHI
 		bool Init(DX12GpuDevice* device, IBuffer* pBuffer, const FCbvDesc& desc);
 	public:
 		TObjectHandle<DX12GpuDevice> mDeviceRef;
-		AutoRef<FDX12GpuMemory> mView;
+		AutoRef<DX12DescriptorSetPagedObject> mView;
 	};
 
 	class DX12VbView : public IVbView
@@ -90,9 +91,13 @@ namespace NxRHI
 		}
 		bool Init(DX12GpuDevice* device, IGpuBufferData* pBffer, const FSrvDesc& desc);
 		virtual bool UpdateBuffer(IGpuDevice* device, IGpuBufferData* buffer) override;
+		virtual UINT GetFingerPrint() const override {
+			return mFingerPrint;
+		}
 	public:
 		TObjectHandle<DX12GpuDevice> mDeviceRef;
-		AutoRef<FDX12GpuMemory> mView;
+		AutoRef<DX12DescriptorSetPagedObject> mView;
+		UINT						mFingerPrint = 0;
 	};
 
 	class DX12UaView : public IUaView
@@ -106,7 +111,7 @@ namespace NxRHI
 		bool Init(DX12GpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc);
 	public:
 		TObjectHandle<DX12GpuDevice> mDeviceRef;
-		AutoRef<FDX12GpuMemory> mView;
+		AutoRef<DX12DescriptorSetPagedObject> mView;
 	};
 
 	class DX12RenderTargetView : public IRenderTargetView
@@ -120,7 +125,7 @@ namespace NxRHI
 		bool Init(DX12GpuDevice* device, ITexture* pBuffer, const FRtvDesc* desc);
 	public:
 		TObjectHandle<DX12GpuDevice> mDeviceRef;
-		AutoRef<FDX12GpuMemory> mView;
+		AutoRef<DX12DescriptorSetPagedObject> mView;
 	};
 
 	class DX12DepthStencilView : public IDepthStencilView
@@ -134,7 +139,7 @@ namespace NxRHI
 		bool Init(DX12GpuDevice* device, ITexture* pBuffer, const FDsvDesc& desc);
 	public:
 		TObjectHandle<DX12GpuDevice> mDeviceRef;
-		AutoRef<FDX12GpuMemory> mView;
+		AutoRef<DX12DescriptorSetPagedObject> mView;
 	};
 }
 

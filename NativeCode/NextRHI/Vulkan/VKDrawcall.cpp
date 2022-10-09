@@ -13,18 +13,6 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	template<>
-	struct AuxGpuResourceDestroyer<AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>>>
-	{
-		static void Destroy(AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>> obj, IGpuDevice* device1)
-		{
-			//auto device = (VKGpuDevice*)device1;
-			//vkDestroyBuffer(device->mDevice, obj, device->GetVkAllocCallBacks());
-			// auto pAllocator = (FDescriptorSetAllocator*)obj->HostPage.GetPtr()->Allocator.GetPtr();
-			//pAllocator->Creator.OnFree(obj);
-			obj->Free();
-		}
-	};
 	VKGraphicDraw::~VKGraphicDraw()
 	{
 		auto device = mDeviceRef.GetPtr();
@@ -57,8 +45,8 @@ namespace NxRHI
 	{
 		IsDirty = true;
 	}
-	void VKGraphicDraw::BindResourceToDescriptSets(VKGpuDevice* device, AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>>& dsSetVS,
-						AutoRef<MemAlloc::FPagedObject<VkDescriptorSet>>& dsSetPS, 
+	void VKGraphicDraw::BindResourceToDescriptSets(VKGpuDevice* device, AutoRef<VKDescriptorSetPagedObject>& dsSetVS,
+						AutoRef<VKDescriptorSetPagedObject>& dsSetPS,
 						const FEffectBinder* binder, IGpuResource* resource)
 	{
 		VkDescriptorImageInfo tmpVS{};
@@ -243,13 +231,6 @@ namespace NxRHI
 			
 		IsDirty = false;
 		auto device = mDeviceRef.GetPtr();
-		auto vs = ShaderEffect->mVertexShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.Alloc();
-		auto ps = ShaderEffect->mPixelShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.Alloc();
-
-		for (auto& i : BindResources)
-		{
-			BindResourceToDescriptSets(device, vs, ps, i.first, i.second);
-		}
 		if (mDescriptorSetVS != nullptr)
 		{
 			device->DelayDestroy(mDescriptorSetVS);
@@ -260,8 +241,14 @@ namespace NxRHI
 			device->DelayDestroy(mDescriptorSetPS);
 			mDescriptorSetPS = nullptr;
 		}
-		mDescriptorSetVS = vs;
-		mDescriptorSetPS = ps;
+
+		mDescriptorSetVS = ShaderEffect->mVertexShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.Alloc<VKDescriptorSetPagedObject>();
+		mDescriptorSetPS = ShaderEffect->mPixelShader.UnsafeConvertTo<VKShader>()->mDescriptorSetAllocator.Alloc<VKDescriptorSetPagedObject>();
+
+		for (auto& i : BindResources)
+		{
+			BindResourceToDescriptSets(device, mDescriptorSetVS, mDescriptorSetPS, i.first, i.second);
+		}
 	}
 	void VKGraphicDraw::Commit(ICommandList* cmdlist)
 	{

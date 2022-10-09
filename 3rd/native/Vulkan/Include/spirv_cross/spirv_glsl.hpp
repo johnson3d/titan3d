@@ -364,7 +364,7 @@ protected:
 	virtual void emit_function_prototype(SPIRFunction &func, const Bitset &return_flags);
 
 	SPIRBlock *current_emitting_block = nullptr;
-	SPIRBlock *current_emitting_switch = nullptr;
+	SmallVector<SPIRBlock *> current_emitting_switch_stack;
 	bool current_emitting_switch_fallthrough = false;
 
 	virtual void emit_instruction(const Instruction &instr);
@@ -711,6 +711,7 @@ protected:
 	spv::StorageClass get_expression_effective_storage_class(uint32_t ptr);
 	virtual bool access_chain_needs_stage_io_builtin_translation(uint32_t base);
 
+	virtual void check_physical_type_cast(std::string &expr, const SPIRType *type, uint32_t physical_type);
 	virtual void prepare_access_chain_for_scalar_access(std::string &expr, const SPIRType &type,
 	                                                    spv::StorageClass storage, bool &is_packed);
 

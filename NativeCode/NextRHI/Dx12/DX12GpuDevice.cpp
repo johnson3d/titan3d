@@ -7,6 +7,7 @@
 #include "DX12InputAssembly.h"
 #include "DX12FrameBuffers.h"
 #include "DX12Effect.h"
+#include "DX12Drawcall.h"
 #include "../NxEffect.h"
 #include <dxgi1_3.h>
 
@@ -118,6 +119,12 @@ namespace NxRHI
 			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_CREATEUNORDEREDACCESSVIEW_INVALIDDIMENSIONS, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_DEPTH_STENCIL_FORMAT_MISMATCH_PIPELINE_STATE, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_CREATESHADERRESOURCEVIEW_INVALIDFORMAT, TRUE);
+			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_SET_DESCRIPTOR_HEAP_INVALID, TRUE);
+			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_SET_DESCRIPTOR_TABLE_INVALID, TRUE);
+			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_INVALID_DESCRIPTOR_HANDLE, TRUE);
+			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_RESOURCE_BARRIER_BEFORE_AFTER_MISMATCH, TRUE);
+			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_DEVICE_REMOVAL_PROCESS_AT_FAULT, TRUE);
+
 			D3D12_INFO_QUEUE_FILTER filter{};
 			D3D12_MESSAGE_ID denyIds[]{
 				D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,
@@ -130,27 +137,55 @@ namespace NxRHI
 
 		D3D12_COMMAND_QUEUE_DESC queueDesc{};
 		queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-		ID3D12CommandQueue* cmdQueue;
-		mDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&cmdQueue));
-		mCmdQueue->mCmdQueue = cmdQueue;
+		//queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_DISABLE_GPU_TIMEOUT;
+		mDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(mCmdQueue->mCmdQueue.GetAddressOf()));
 
 		mCmdQueue->Init(this);
 		
-		auto tRtv = new DX12AllocHeapManager(mDevice, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 0, 256);
+		auto tRtv = new DX12DescriptorSetAllocator();
 		mRtvHeapManager = MakeWeakRef(tRtv);
-		auto tDsv = new DX12AllocHeapManager(mDevice, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 0, 64);
+		{
+			mRtvHeapManager->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+			mRtvHeapManager->Creator.mDesc.NumDescriptors = 1;
+			mRtvHeapManager->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+			mRtvHeapManager->Creator.mShaderEffect = nullptr;
+			mRtvHeapManager->Creator.IsSampler = false;
+			mRtvHeapManager->Creator.mDeviceRef.FromObject(this);
+			mRtvHeapManager->mDescriptorStride = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		}
+		auto tDsv = new DX12DescriptorSetAllocator();
 		mDsvHeapManager = MakeWeakRef(tDsv);
-		auto tSampler = new DX12AllocHeapManager(mDevice, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 0, 256);
+		{
+			mDsvHeapManager->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+			mDsvHeapManager->Creator.mDesc.NumDescriptors = 1;
+			mDsvHeapManager->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+			mDsvHeapManager->Creator.mShaderEffect = nullptr;
+			mDsvHeapManager->Creator.IsSampler = false;
+			mDsvHeapManager->Creator.mDeviceRef.FromObject(this);
+			mDsvHeapManager->mDescriptorStride = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+		}
+		auto tSampler = new DX12DescriptorSetAllocator();
 		mSamplerAllocHeapManager = MakeWeakRef(tSampler);
-		auto tSrv = new DX12AllocHeapManager(mDevice, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 0, 4096);
+		{
+			mSamplerAllocHeapManager->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+			mSamplerAllocHeapManager->Creator.mDesc.NumDescriptors = 1;
+			mSamplerAllocHeapManager->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;// D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+			mSamplerAllocHeapManager->Creator.mShaderEffect = nullptr;
+			mSamplerAllocHeapManager->Creator.IsSampler = true;
+			mSamplerAllocHeapManager->Creator.mDeviceRef.FromObject(this);
+			mSamplerAllocHeapManager->mDescriptorStride = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+		}
+		auto tSrv = new DX12DescriptorSetAllocator();
 		mSrvAllocHeapManager = MakeWeakRef(tSrv);
-		
-		mSrvTableHeapManager = MakeWeakRef(new DX12TableHeapManager());
-		mSrvTableHeapManager->mDescriptorStride = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		mSrvTableHeapManager->mHeapType = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		mSamplerTableHeapManager = MakeWeakRef(new DX12TableHeapManager());
-		mSamplerTableHeapManager->mDescriptorStride = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-		mSamplerTableHeapManager->mHeapType = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+		{
+			mSrvAllocHeapManager->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+			mSrvAllocHeapManager->Creator.mDesc.NumDescriptors = 1;
+			mSrvAllocHeapManager->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;//D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+			mSrvAllocHeapManager->Creator.mShaderEffect = nullptr;
+			mSrvAllocHeapManager->Creator.IsSampler = false;
+			mSrvAllocHeapManager->Creator.mDeviceRef.FromObject(this);
+			mSrvAllocHeapManager->mDescriptorStride = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		}
 
 		mCmdAllocatorManager = MakeWeakRef(new DX12CommandAllocatorManager());
 		
@@ -258,6 +293,11 @@ namespace NxRHI
 		mCBufferMemAllocator->mResDesc.Layout = D3D12_TEXTURE_LAYOUT::D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		mCBufferMemAllocator->mResDesc.Flags = D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE;
 		mCBufferMemAllocator->mResState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+
+		{
+			mNullCBV = mSrvAllocHeapManager->Alloc<DX12DescriptorSetPagedObject>();
+			mNullSampler = mSamplerAllocHeapManager->Alloc<DX12DescriptorSetPagedObject>();
+		}
 		return true;
 	}
 	void DX12GpuDevice::QueryDevice()
@@ -456,6 +496,12 @@ namespace NxRHI
 			result->Release();
 			return nullptr;
 		}
+		return result;
+	}
+	IGraphicDraw* DX12GpuDevice::CreateGraphicDraw()
+	{
+		auto result = new DX12GraphicDraw();
+		result->mDeviceRef.FromObject(this);
 		return result;
 	}
 	void DX12GpuDevice::TickPostEvents()

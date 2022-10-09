@@ -387,7 +387,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, FShaderDesc
 				size_t sz = finalResult.target.Size();
 				desc->SpirV.resize(sz);
 				memcpy(&desc->SpirV[0], (char*)finalResult.target.Data(), finalResult.target.Size());
-#if defined(HasModule_Vulcan)
+#if defined(HasModule_Vulkan)
 				VKShader::Reflect(desc);
 #endif
 			}

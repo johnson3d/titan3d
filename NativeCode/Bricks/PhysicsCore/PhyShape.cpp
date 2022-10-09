@@ -131,7 +131,20 @@ void PhyShape::SetQueryFilterData(const PhyFilterData* filterData)
 	{
 		mShape->setQueryFilterData(*(physx::PxFilterData*)filterData);
 	}
+
+}void PhyShape::SetSimulationFilterData(const PhyFilterData* filterData)
+{
+	if (mActor.IsValid() && mActor.GetPtr() && mActor.GetPtr()->mScene.GetPtr() != nullptr)
+	{
+		physx::PxSceneWriteLock Lock(*mActor.GetPtr()->mScene.GetPtr()->mScene);
+		mShape->setSimulationFilterData(*(physx::PxFilterData*)filterData);
+	}
+	else
+	{
+		mShape->setSimulationFilterData(*(physx::PxFilterData*)filterData);
+	}
 }
+
 
 void PhyShape::SetFlag(EPhysShapeFlag flag, bool value)
 {
@@ -662,3 +675,4 @@ int PhyShape::GetTrianglesRemap(int index)
 	return mTrianglesRemap[index];
 }
 NS_END
+

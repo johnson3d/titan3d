@@ -724,8 +724,11 @@ namespace NxRHI
 		auto semaphore = BackBuffers[CurrentFrame]->AcquireSemaphore;
 		auto result = vkAcquireNextImageKHR(device->mDevice, mSwapChain, UINT64_MAX, semaphore->mSemaphore, VK_NULL_HANDLE, &CurrentBackBuffer);
 		ASSERT(result == VK_SUCCESS);
-		BackBuffers[CurrentBackBuffer]->RenderFinishFence->Wait();
-
+		auto rfinishFence = BackBuffers[CurrentBackBuffer]->RenderFinishFence;
+		
+		rfinishFence->Wait();
+		rfinishFence->Reset();
+		
 		auto cmdQueue = (VKCmdQueue*)device->GetCmdQueue();
 		cmdQueue->WaitFence(semaphore, 0);// semaphore->GetAspectValue());
 	}
@@ -738,19 +741,13 @@ namespace NxRHI
 		
 		//cmdQueue->SignalFence(semaphore, 0);// semaphore->GetAspectValue());
 		
-		rfinishFence->Reset();
+		//rfinishFence->Reset();
 		auto aspect1 = cmdQueue->mQueueExecuteFence->GetAspectValue();
 
 		cmdQueue->QueueSignal(rfinishSemaphore, 0, rfinishFence->mFence);
-
-		//bool t1 = rfinishFence->IsSignaled();
-		//auto aspect2 = cmdQueue->mQueueExecuteFence->GetAspectValue();
-		//cmdQueue->mQueueExecuteFence->WaitToAspect();
-		////rfinishFence->Wait();
-		//auto aspect3 = cmdQueue->mQueueExecuteFence->GetAspectValue();
-		//ASSERT(aspect2 - 1 == aspect1);
-		//ASSERT(rfinishFence->IsSignaled());
-
+		
+		cmdQueue->Flush();//temp code
+		
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
