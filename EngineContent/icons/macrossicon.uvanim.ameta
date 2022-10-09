@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.EGui.UVAnimAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="3aac2cb9-ac8f-4a20-a8c9-12f2722ba571" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.EGui.UUvAnim&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Value="Engine,uestyle/graph/execpin_disconnected.srv,0eb980db-3f07-4233-8d4d-a0de09377323" />
+  </RefAssetRNames>
+  <SnapUVEnd Type="EngineNS.Vector2@EngineCore" Value="1,1" />
+  <SnapUVStart Type="EngineNS.Vector2@EngineCore" Value="0,0" />
+  <TextureName Type="EngineNS.RName@EngineCore" Value="Engine,uestyle/graph/execpin_disconnected.srv,0eb980db-3f07-4233-8d4d-a0de09377323" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.EGui.UUvAnim@EngineCore" />
+</Root>

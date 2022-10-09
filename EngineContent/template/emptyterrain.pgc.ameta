@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.Procedure.UPgcAssetAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="5d465e03-5de6-45aa-8243-65b9d40c0bde" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Procedure.UPgcAsset&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="6">
+    <e_0 Value="Game,utest/texture/ground_04_n.srv,58caafa4-d323-47ad-a36d-3c0eac7d0397" />
+    <e_1 Value="Game,utest/texture/ground6_nmp.srv,d005108e-4752-4aad-bb02-dcf0d8a8eb14" />
+    <e_2 Value="Game,utest/texture/ground6.srv,e4a4a66c-b97a-4113-b16a-c45e9d72fcfd" />
+    <e_3 Value="Game,utest/texture/ground8_nmp.srv,a70b5d9b-9473-463b-b82e-f1b3e9660bc9" />
+    <e_4 Value="Game,utest/texture/ground8.srv,2ea1a338-2ae4-4c7a-a4d2-672fe6909556" />
+    <e_5 Value="Game,utest/texture/groundsnow.srv,270f28e0-0d68-4b59-b129-b5a15ba7daf7" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.UPgcAsset@EngineCore" />
+</Root>

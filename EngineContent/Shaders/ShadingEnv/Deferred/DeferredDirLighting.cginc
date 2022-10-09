@@ -157,11 +157,11 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 		mSFD.mViewer2ShadowDepth = (half)ShadowMapUV.z;
 
-#if USE_ESM
+//#if USE_ESM
 	ShadowValue = GetESMValue(ShadowMapUV.xy, mSFD, 10);//GetESMValue(float2 SMUV, float CurrentDepth, ShadowFilterData SFD, float ESM_C)
-#else
-	ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
-#endif
+//#else
+//	ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
+//#endif
 
 		if (ShadowValue < 1.0f)
 			output.RT0.a = 0.0h;

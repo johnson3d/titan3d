@@ -96,11 +96,11 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		{
 			mSFD.mViewer2ShadowDepth = (half)ShadowMapUV.z;
 			
-			#if USE_ESM
-			ShadowValue = GetESMValue(ShadowMapUV.xy, mSFD, 10);
-			#else
-			ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
-			#endif
+			//#if USE_ESM
+			ShadowValue = GetESMValue(ShadowMapUV.xy, mSFD, 10.0);
+			//#else
+			//ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
+			//#endif
 			//ShadowValue = NoFiltering(ShadowMapUV.xy, mSFD);
 			
 			half FadeValue = (half)saturate(PerPixelViewerDistance * gFadeParam.x + gFadeParam.y);
@@ -117,11 +117,11 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 
 			mSFD.mViewer2ShadowDepth = (half)ShadowMapUV.z;
 
-			#if USE_ESM
-			ShadowValue = GetESMValue(ShadowMapUV.xy, mSFD, 10);
-			#else
-			ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
-			#endif
+//			#if USE_ESM
+			ShadowValue = GetESMValue(ShadowMapUV.xy, mSFD, 10.0);
+//			#else
+//			ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
+//			#endif
 
 			half FadeValue = (half)saturate(PerPixelViewerDistance * gFadeParam.x + gFadeParam.y);
 			ShadowValue = lerp(ShadowValue, 1.0h, FadeValue);
