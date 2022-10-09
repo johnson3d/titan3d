@@ -102,6 +102,31 @@ namespace EngineNS.Thread
             }
             mThread = null;
         }
+        public virtual void ExecuteToEmpty()
+        {
+            while (TotalEvents > 0)
+            {
+                FContextTickableManager.GetInstance().ThreadTick();
+                TickAwaitEvent();
+            }
+            //Async.PostEvent cur;
+            //while (DoOnePriorityEvent(out cur))
+            //{
+            //    UEngine.Instance.EventPoster.mRunOnPEAllocator.ReleaseObject(cur);
+            //}
+            //while (DoOneAsyncEvent(out cur))
+            //{
+
+            //}
+            //while (DoOneContnueEvent(out cur))
+            //{
+
+            //}            
+            //lock (RunUntilFinishEvents)
+            //{
+
+            //}
+        }
         protected int mThreadId = 0;
         public int ThreadId
         {
@@ -122,7 +147,7 @@ namespace EngineNS.Thread
             CurrentContext = this;
             mThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
             OnThreadStart();
-            while (mIsRun)
+            while (mIsRun || TotalEvents > 0)
             {
                 var time1 = Support.Time.GetTickCount();
                 try
@@ -142,6 +167,7 @@ namespace EngineNS.Thread
                 if (time2 - time1 < Interval)
                     System.Threading.Thread.Sleep(Interval - (int)(time2 - time1));
             }
+            //ExecuteToEmpty();
             mIsFinished = true;
             OnThreadExited();
             CurrentContext = null;
@@ -178,21 +204,52 @@ namespace EngineNS.Thread
         {
             get { return ContinueEvents.Count; }
         }
+        public int TotalEvents
+        {
+            get
+            {
+                return PriorityNum + AsyncNum + ContinueNum;
+            }
+        }
         [Browsable(false)]
-        public Queue<Async.PostEvent> PriorityEvents
+        protected Queue<Async.PostEvent> PriorityEvents
         {
             get;
         } = new Queue<Async.PostEvent>();
+        public void EnqueuePriority(Async.PostEvent evt)
+        {
+            System.Diagnostics.Debug.Assert(IsFinished == false);
+            lock (PriorityEvents)
+            {
+                PriorityEvents.Enqueue(evt);
+            }
+        }
         [Browsable(false)]
-        public Queue<Async.PostEvent> AsyncEvents
+        protected Queue<Async.PostEvent> AsyncEvents
         {
             get;
         } = new Queue<Async.PostEvent>();
+        public void EnqueueAsync(Async.PostEvent evt)
+        {
+            System.Diagnostics.Debug.Assert(IsFinished == false);
+            lock (AsyncEvents)
+            {
+                AsyncEvents.Enqueue(evt);
+            }
+        }
         [Browsable(false)]
-        public Queue<Async.PostEvent> ContinueEvents
+        protected Queue<Async.PostEvent> ContinueEvents
         {
             get;
         } = new Queue<Async.PostEvent>();
+        public void EnqueueContinue(Async.PostEvent evt)
+        {
+            System.Diagnostics.Debug.Assert(IsFinished == false);
+            lock (ContinueEvents)
+            {
+                ContinueEvents.Enqueue(evt);
+            }
+        }
         [Browsable(false)]
         public List<Async.PostEvent> RunUntilFinishEvents
         {

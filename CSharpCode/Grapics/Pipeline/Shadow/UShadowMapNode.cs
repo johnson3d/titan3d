@@ -51,7 +51,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         //private Vector3 mDirLightCameraLookAtPos = new Vector3(0.0f, 0.0f, 0.0f);
         public Vector3 mDirLightDirection = new Vector3(0.0f, -1.5f, 1.0f);
 
-        public float mShadowDistance = 40.0f;
+        public float mShadowDistance = 400.0f;
         private float mShadowCameraOffset = 100.0f;
 
         public float mFadeStrength = 0.2f;
@@ -174,7 +174,10 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         {
             mDirLightDirection = world.DirectionLight.Direction;
 
-            var ViewerCamera = policy.DefaultCamera;
+            var ViewerCamera =  policy.DefaultCamera;
+
+            ViewerCamera.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
+
             //calculate viewer camera frustum bounding sphere and shadow camera data;
             float HalfFoV = ViewerCamera.mCoreObject.mFov * 0.5f;
             float zNear = ViewerCamera.mCoreObject.mZNear;
@@ -295,8 +298,10 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                 var passClear = new NxRHI.FRenderPassClears();
                 //passClear.SetDefault();
-                passClear.m_DepthClearValue = 1.0f;
-                passClear.m_StencilClearValue = 0;
+                //passClear.m_DepthClearValue = 1.0f;
+                //passClear.m_StencilClearValue = 0;
+                passClear.SetDefault();
+                passClear.SetClearColor(0, new Color4(1, 0, 0, 0));
                 GBuffers.BuildFrameBuffers(policy);
                 cmdlist.BeginPass(GBuffers.FrameBuffers, in passClear, "ShadowDepth");
                 //if (bClear)

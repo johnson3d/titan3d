@@ -117,7 +117,7 @@ namespace EngineNS.Bricks.PhysicsCore
                     RName rn = (RName)newValue;
                     if (rn != old)
                     {
-                        materials[i] = UEngine.Instance.PhyModue.PhyContext.PhyMaterialManager.GetMaterialSync(rn);
+                        materials[i] = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(rn);
                         var hostShape = info.ObjectInstance as UPhyShape;
                         //if (hostShape != null)
                         hostShape.FlushMaterials();
@@ -179,7 +179,7 @@ namespace EngineNS.Bricks.PhysicsCore
                         case EPhysShapeType.PST_TriangleMesh:
                             {
                                 var shape = this as UPhyTriMeshShape;
-                                var triMesh = UEngine.Instance.PhyModue.PhyContext.PhyMeshManager.GetMeshSync(shape.TriMeshSource);
+                                var triMesh = UEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMeshSync(shape.TriMeshSource);
                                 if(triMesh!=null)
                                 {
                                     meshPrimitive = triMesh.ToMeshProvider().ToMesh();

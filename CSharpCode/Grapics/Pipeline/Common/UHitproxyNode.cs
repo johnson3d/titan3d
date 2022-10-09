@@ -196,7 +196,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public unsafe override void Cleanup()
         {
-            //mReadableHitproxyTexture = null;
+            mReadableHitproxyTexture?.Dispose();
+            mReadableHitproxyTexture = null;
             
             GHitproxyBuffers?.Cleanup();
             GHitproxyBuffers = null;
@@ -245,6 +246,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             //mReadableHitproxyTexture = UEngine.Instance.GfxDevice.RenderContext.CreateTextureToCpuBuffer(in CopyTexDesc, in CopyBufferFootPrint);
             //mReadableHitproxyTexture.SetDebugName("Readback Hitproxy Buffer");
 
+            mReadableHitproxyTexture?.Dispose();
             mReadableHitproxyTexture = null;
         }
         NxRHI.FTextureDesc CopyTexDesc = new NxRHI.FTextureDesc();
@@ -324,10 +326,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                 rc.CmdQueue.IncreaseSignal(fence);
                 var targetValue = fence.AspectValue;
                 var postTime = Support.Time.GetTickCount();
-                UEngine.Instance.EventPoster.PostTickSyncEvent(() =>
+                UEngine.Instance.EventPoster.PostTickSyncEvent((tickCount) =>
                 {
-                    var testTime = Support.Time.GetTickCount();
-                    if (readTexture != mReadableHitproxyTexture || testTime - postTime > 1000)
+                    if (readTexture != mReadableHitproxyTexture || tickCount - postTime > 1000)
                     {
                         IsHitproxyBuilding = false;
                         return true;

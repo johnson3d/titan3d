@@ -18,7 +18,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.PhyModue.PhyContext.PhyMeshManager.GetMesh(GetAssetName());
+            return await UEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMesh(GetAssetName());
         }
         public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
@@ -63,7 +63,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
             protected override bool DoImportAsset()
             {
-                mAsset = UEngine.Instance.PhyModue.PhyContext.CookTriMesh(mMesh.MeshDataProvider, null, null, null);
+                mAsset = UEngine.Instance.PhyModule.PhyContext.CookTriMesh(mMesh.MeshDataProvider, null, null, null);
                 mAsset.AssetName = GetAssetRName();
 
                 return base.DoImportAsset();
@@ -184,7 +184,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 ar.Read(out size);
                 blob.mCoreObject.ReSize(size);
                 ar.ReadPtr(blob.mCoreObject.GetData(), (int)size);
-                mesh.mCoreObject.CreateFromCookedData(UEngine.Instance.PhyModue.PhyContext.mCoreObject, blob.mCoreObject.GetData(), size);
+                mesh.mCoreObject.CreateFromCookedData(UEngine.Instance.PhyModule.PhyContext.mCoreObject, blob.mCoreObject.GetData(), size);
                 return null;
             }
         }

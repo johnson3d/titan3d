@@ -629,7 +629,7 @@ namespace EngineNS
         /// <param name="amount">插值因子</param>
         /// <returns>返回计算后的向量</returns>
         [Rtti.Meta]
-        public static Vector2 SmoothStep( Vector2 start, Vector2 end, float amount )
+        public static Vector2 SmoothStep(in Vector2 start, in Vector2 end, float amount )
 	    {
             Vector2 vector;
 
@@ -667,7 +667,7 @@ namespace EngineNS
         /// <param name="value2">坐标点</param>
         /// <returns>返回两点间的距离</returns>
         [Rtti.Meta]
-        public static float Distance( Vector2 value1, Vector2 value2 )
+        public static float Distance(in Vector2 value1, in Vector2 value2 )
 	    {
 		    float x = value1.X - value2.X;
 		    float y = value1.Y - value2.Y;
@@ -681,7 +681,7 @@ namespace EngineNS
         /// <param name="value2">坐标点</param>
         /// <returns>返回两点间的距离的平方</returns>
         [Rtti.Meta]
-        public static float DistanceSquared( Vector2 value1, Vector2 value2 )
+        public static float DistanceSquared(in Vector2 value1, in Vector2 value2 )
 	    {
 		    float x = value1.X - value2.X;
 		    float y = value1.Y - value2.Y;
@@ -695,7 +695,7 @@ namespace EngineNS
         /// <param name="right">二维向量</param>
         /// <returns>返回点积值</returns>
         [Rtti.Meta]
-        public static float Dot( Vector2 left, Vector2 right )
+        public static float Dot(in Vector2 left, in Vector2 right )
 	    {
 		    return (left.X * right.X + left.Y * right.Y);
 	    }
@@ -705,7 +705,7 @@ namespace EngineNS
         /// <param name="vector">二维向量</param>
         /// <returns>返回单位化后的向量</returns>
         [Rtti.Meta]
-        public static Vector2 Normalize( Vector2 vector )
+        public static Vector2 Normalize(in Vector2 vector )
 	    {
 		    vector.Normalize();
 		    return vector;

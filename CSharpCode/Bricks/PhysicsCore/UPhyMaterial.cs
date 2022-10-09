@@ -18,7 +18,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.PhyModue.PhyContext.PhyMaterialManager.GetMaterial(GetAssetName());
+            return await UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterial(GetAssetName());
         }
         public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
@@ -44,7 +44,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 TypeSlt.SelectedType = type;
 
                 PGAssetInitTask = PGAsset.Initialize();
-                mAsset = UEngine.Instance.PhyModue.PhyContext.CreateMaterial(0, 0, 0);
+                mAsset = UEngine.Instance.PhyModule.PhyContext.CreateMaterial(0, 0, 0);
                 PGAsset.Target = mAsset;
             }
             protected override bool CheckAsset()
@@ -93,7 +93,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public static UPhyMaterial LoadXnd(UPhyMaterialManager manager, IO.CXndNode node)
         {
-            UPhyMaterial result = UEngine.Instance.PhyModue.PhyContext.CreateMaterial(0, 0, 0);
+            UPhyMaterial result = UEngine.Instance.PhyModule.PhyContext.CreateMaterial(0, 0, 0);
             if (ReloadXnd(result, manager, node) == false)
                 return null;
             return result;
@@ -161,7 +161,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 if (mDefaultMaterial == null)
                 {
-                    mDefaultMaterial = UEngine.Instance.PhyModue.PhyContext.CreateMaterial(1, 1, 0.6f);
+                    mDefaultMaterial = UEngine.Instance.PhyModule.PhyContext.CreateMaterial(1, 1, 0.6f);
                 }
                 return mDefaultMaterial;
             }

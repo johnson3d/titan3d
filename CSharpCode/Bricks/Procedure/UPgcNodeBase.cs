@@ -158,12 +158,12 @@ namespace EngineNS.Bricks.Procedure
         }
         public override void OnLButtonClicked(NodePin clickedPin)
         {
-            var graph = this.ParentGraph as UPgcGraph;
+            //var graph = this.ParentGraph as UPgcGraph;
 
-            if (graph != null && graph.GraphEditor != null)
-            {
-                graph.GraphEditor.NodePropGrid.Target = this;
-            }
+            //if (graph != null && graph.GraphEditor != null)
+            //{
+            //    graph.GraphEditor.NodePropGrid.Target = this;
+            //}
         }
         #endregion
 

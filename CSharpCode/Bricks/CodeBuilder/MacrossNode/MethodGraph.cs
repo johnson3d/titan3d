@@ -998,24 +998,41 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         private void NodeOnLButtonClicked(UNodeBase node, NodePin clickedPin)
         {
-            var editor = node.UserData as UMacrossEditor;
-            if (node.HasError)
-            {
-                if (editor != null)
-                {
-                    editor.PGMember.Target = node.CodeExcept;
-                }
-                return;
-            }
-            if (node.GetPropertyEditObject() == null)
-            {
-                if (editor != null)
-                    editor.PGMember.Target = null;
-                return;
-            }
+            //var editor = node.UserData as UMacrossEditor;
+            //if (node.HasError)
+            //{
+            //    if (editor != null)
+            //    {
+            //        editor.PGMember.Target = node.CodeExcept;
+            //    }
+            //    return;
+            //}
+            //if (node.GetPropertyEditObject() == null)
+            //{
+            //    if (editor != null)
+            //        editor.PGMember.Target = null;
+            //    return;
+            //}
 
-            if (editor != null)
-                editor.PGMember.Target = node.GetPropertyEditObject();
+            //if (editor != null)
+            //    editor.PGMember.Target = node.GetPropertyEditObject();
+        }
+        public void UpdateSelectPG()
+        {
+            if (SelectedNodesDirty == false)
+                return;
+            if (MacrossEditor == null)
+                return;
+            var list = new List<object>(SelectedNodes.Count);
+            for(int i=0; i<SelectedNodes.Count; i++)
+            {
+                var node = SelectedNodes[i].Node;
+                if (node.HasError)
+                    list.Add(node.CodeExcept);
+                var obj = node.GetPropertyEditObject();
+                list.Add(obj);
+            }
+            MacrossEditor.PGMember.Target = list;
         }
         private void NodeOnPreRead(UNodeBase node, object tagObject, object hostObject, bool fromXml)
         {

@@ -186,6 +186,6 @@ namespace EngineNS
 {
     partial class UEngine
     {
-        public Bricks.PhysicsCore.UPhyModule PhyModue { get; set; } = new Bricks.PhysicsCore.UPhyModule();
+        public Bricks.PhysicsCore.UPhyModule PhyModule { get; set; } = new Bricks.PhysicsCore.UPhyModule();
     }
 }

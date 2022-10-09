@@ -11,6 +11,8 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Actor\UActor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Actor\UCharacter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneNode\UPhyCollisionNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneNode\UPhyControllerNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UPhyActor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UPhyContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UPhyController.cs" />

@@ -345,9 +345,9 @@ namespace EngineNS.Thread.Async
                         int nMinTask = int.MaxValue;
                         foreach (var i in ContextPools)
                         {
-                            if (i.AsyncEvents.Count < nMinTask)
+                            if (i.AsyncNum < nMinTask)
                             {
-                                nMinTask = i.AsyncEvents.Count;
+                                nMinTask = i.AsyncNum;
                                 thread = i;
                             }
                         }
@@ -376,10 +376,7 @@ namespace EngineNS.Thread.Async
             eh.AsyncType = EAsyncType.ParallelTasks;
             if (ctx != null)
             {
-                lock (ctx.PriorityEvents)
-                {
-                    ctx.PriorityEvents.Enqueue(eh);
-                }
+                ctx.EnqueuePriority(eh);
             }
             else
             {
@@ -410,10 +407,7 @@ namespace EngineNS.Thread.Async
                 ContextThread ctx = GetContext(target);
                 if (ctx != null)
                 {
-                    lock (ctx.PriorityEvents)
-                    {
-                        ctx.PriorityEvents.Enqueue(eh);
-                    }
+                    ctx.EnqueuePriority(eh);
                 }
             }
         }
@@ -532,7 +526,7 @@ namespace EngineNS.Thread.Async
             smp = null;
         }
 
-        public delegate bool FPostTickSync();
+        public delegate bool FPostTickSync(long tickCount);
         protected List<FPostTickSync> mPostTickSyncEvents = new List<FPostTickSync>();
         public void PostTickSyncEvent(FPostTickSync evt)
         {
@@ -541,13 +535,13 @@ namespace EngineNS.Thread.Async
                 mPostTickSyncEvents.Add(evt);
             }
         }
-        public void TickPostTickSyncEvents()
+        public void TickPostTickSyncEvents(long tickCount)
         {
             lock (mPostTickSyncEvents)
             {
                 for (int i = 0; i < mPostTickSyncEvents.Count; i++)
                 {
-                    if (mPostTickSyncEvents[i]())
+                    if (mPostTickSyncEvents[i](tickCount))
                     {
                         mPostTickSyncEvents.RemoveAt(i);
                         i--;
@@ -637,10 +631,7 @@ namespace EngineNS.Thread.Async
             {
                 case EAsyncType.Normal:
                     {
-                        lock (PEvent.AsyncTarget.AsyncEvents)
-                        {
-                            PEvent.AsyncTarget.AsyncEvents.Enqueue(PEvent);
-                        }
+                        PEvent.AsyncTarget.EnqueueAsync(PEvent);
                     }
                     break;
                 case EAsyncType.AsyncIOEmpty:
@@ -690,10 +681,7 @@ namespace EngineNS.Thread.Async
                         System.Threading.ThreadPool.QueueUserWorkItem((data) =>
                         {
                             PEvent.PostAction();
-                            lock (PEvent.ContinueThread.ContinueEvents)
-                            {
-                                PEvent.ContinueThread.ContinueEvents.Enqueue(PEvent);
-                            }
+                            PEvent.ContinueThread.EnqueueContinue(PEvent);
                         });
                     }
                     break;

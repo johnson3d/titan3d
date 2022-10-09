@@ -363,6 +363,19 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     
                 if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
+                    if(GraphRenderer.Graph != null && GraphRenderer.Graph.SelectedNodesDirty)
+                    {
+                        List<object> tagList = new List<object>(GraphRenderer.Graph.SelectedNodes.Count);
+                        for(int i=0; i<GraphRenderer.Graph.SelectedNodes.Count; i++)
+                        {
+                            var node = GraphRenderer.Graph.SelectedNodes[i].Node;
+                            if (node.GetPropertyEditObject() == null)
+                                continue;
+                            tagList.Add(node.GetPropertyEditObject());
+                        }
+                        NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<UNodeBase>.TypeDesc;
+                        NodePropGrid.Target = tagList;
+                    }
                     NodePropGrid.OnDraw(true, false, false);
                 }
                 if (ImGuiAPI.CollapsingHeader("MaterialProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))

@@ -576,12 +576,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                         //ImGuiAPI.PopStyleVar(1);
                                         ImGuiAPI.TableSetColumnIndex(1);
                                         //ImGuiAPI.GotoColumns(1);
+                                        PushPGEditorStyleValues();
                                         try
                                         {
                                             object newValue;
-                                            PushPGEditorStyleValues();
                                             var changed = editorOnDraw.OnDraw(in itemEditorInfo, out newValue);
-                                            PopPGEditorStyleValues();
                                             if (changed)
                                             {
                                                 propDesc.SetValue(ref target, newValue);
@@ -596,6 +595,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                         {
                                             Console.WriteLine(ex.ToString());
                                         }
+                                        PopPGEditorStyleValues();
 
                                         if (treeNodeRet)
                                             ImGuiAPI.TreePop();

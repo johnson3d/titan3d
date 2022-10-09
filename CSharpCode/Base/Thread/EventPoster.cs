@@ -57,16 +57,13 @@ namespace EngineNS.Thread
         {
             if (PostEvent == null)
                 return;
-            lock (PostEvent.ContinueThread.ContinueEvents)
+            if (ContinueEnqueued)
+                return;
+            if (PostEvent != null)
             {
-                if (ContinueEnqueued)
-                    return;
-                if (PostEvent != null)
-                {
-                    PostEvent.ContinueThread.ContinueEvents.Enqueue(PostEvent);
-                    ContinueEnqueued = true;
-                }
-            }   
+                PostEvent.ContinueThread.EnqueueContinue(PostEvent);
+                ContinueEnqueued = true;
+            }
         }
         public int GetCount()
         {

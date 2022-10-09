@@ -180,12 +180,13 @@ namespace EngineNS.Bricks.Terrain.Grass
             {
                 var rc = UEngine.Instance.GfxDevice.RenderContext;
 
-                uint growSize = 1;
-                if(mdf.mMaxNumber > 10)
-                {
-                    growSize += mdf.mMaxNumber;
-                }
-                SureBuffers(mdf, mdf.mCurNumber + growSize);
+                //uint growSize = 1;
+                //if(mdf.mMaxNumber > 10)
+                //{
+                //    growSize += mdf.mMaxNumber;
+                //}
+                //SureBuffers(mdf, mdf.mCurNumber + growSize);
+                System.Diagnostics.Debug.Assert(mdf.CurNumber < mdf.mMaxNumber);
 
                 InstData[mdf.mCurNumber].Data = data;
                 InstData[mdf.mCurNumber].TerrainHeight = height;

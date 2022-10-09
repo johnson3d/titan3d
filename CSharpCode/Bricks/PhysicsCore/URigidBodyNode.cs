@@ -88,7 +88,7 @@ namespace EngineNS.Bricks.PhysicsCore
                     {
                         RName mtlName;
                         ar.Read(out mtlName);
-                        pxMaterials[j] = UEngine.Instance.PhyModue.PhyContext.PhyMaterialManager.GetMaterialSync(mtlName);
+                        pxMaterials[j] = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(mtlName);
                     }
                     switch (type)
                     {
@@ -98,7 +98,7 @@ namespace EngineNS.Bricks.PhysicsCore
                             {
                                 Vector3 extent = new Vector3();
                                 ar.Read(out extent);
-                                var shape = UEngine.Instance.PhyModue.PhyContext.CreateShapeBox(pxMaterials[0], in extent);
+                                var shape = UEngine.Instance.PhyModule.PhyContext.CreateShapeBox(pxMaterials[0], in extent);
                                 PxShapes.Add(shape);
                             }
                             break;
@@ -106,7 +106,7 @@ namespace EngineNS.Bricks.PhysicsCore
                             {
                                 float fRadius = 0;
                                 ar.Read(out fRadius);
-                                var shape = UEngine.Instance.PhyModue.PhyContext.CreateShapeSphere(pxMaterials[0], fRadius);
+                                var shape = UEngine.Instance.PhyModule.PhyContext.CreateShapeSphere(pxMaterials[0], fRadius);
                                 PxShapes.Add(shape);
                             }
                             break;
@@ -116,7 +116,7 @@ namespace EngineNS.Bricks.PhysicsCore
                                 float fHalfHeight = 0;
                                 ar.Read(out fRadius);
                                 ar.Read(out fHalfHeight);
-                                var shape = UEngine.Instance.PhyModue.PhyContext.CreateShapeCapsule(pxMaterials[0], fRadius, fHalfHeight);
+                                var shape = UEngine.Instance.PhyModule.PhyContext.CreateShapeCapsule(pxMaterials[0], fRadius, fHalfHeight);
                                 PxShapes.Add(shape);
                             }
                             break;
@@ -126,10 +126,10 @@ namespace EngineNS.Bricks.PhysicsCore
                             {
                                 RName triMeshSource;
                                 ar.Read(out triMeshSource);
-                                var triMesh = UEngine.Instance.PhyModue.PhyContext.PhyMeshManager.GetMeshSync(triMeshSource);
+                                var triMesh = UEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMeshSync(triMeshSource);
                                 Vector3 scale = new Vector3();
                                 Quaternion quat = new Quaternion();
-                                var shape = UEngine.Instance.PhyModue.PhyContext.CreateShapeTriMesh(pxMaterials, triMesh, in scale, in quat);
+                                var shape = UEngine.Instance.PhyModule.PhyContext.CreateShapeTriMesh(pxMaterials, triMesh, in scale, in quat);
                                 PxShapes.Add(shape);
                             }
                             break;
@@ -158,7 +158,7 @@ namespace EngineNS.Bricks.PhysicsCore
         private void InitPhysics(URigidBodyNodeData rbNodeData)
         {
             ref FTransform transform = ref this.Placement.AbsTransform;
-            PxActor = UEngine.Instance.PhyModue.PhyContext.CreateActor(rbNodeData.PxActorType, in transform.mPosition, in transform.mQuat);
+            PxActor = UEngine.Instance.PhyModule.PhyContext.CreateActor(rbNodeData.PxActorType, in transform.mPosition, in transform.mQuat);
             PxActor.mCoreObject.SetActorFlag(EPhyActorFlag.PAF_eVISUALIZATION, true);
 
             UpdatePxShape(rbNodeData.PxShapes);
@@ -257,8 +257,8 @@ namespace EngineNS.Bricks.PhysicsCore
                     var node = info.ObjectInstance as URigidBodyNode;
                     if (node != null)
                     {
-                        var mtl = UEngine.Instance.PhyModue.PhyContext.PhyMaterialManager.DefaultMaterial;
-                        var box = UEngine.Instance.PhyModue.PhyContext.CreateShapeBox(mtl, in HalfExtent);
+                        var mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
+                        var box = UEngine.Instance.PhyModule.PhyContext.CreateShapeBox(mtl, in HalfExtent);
                         node.Shapes.Add(box);
                         node.UpdateShapeAABB();
                     }

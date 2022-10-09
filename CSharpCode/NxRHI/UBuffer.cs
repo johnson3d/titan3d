@@ -89,6 +89,15 @@ namespace EngineNS.NxRHI
     }
     public class UBuffer : AuxPtrType<NxRHI.IBuffer>, UGpuResource
     {
+        public UBuffer()
+        {
+
+        }
+        public UBuffer(IBuffer ptr)
+        {
+            mCoreObject = ptr;
+            mCoreObject.NativeSuper.NativeSuper.AddRef();
+        }
         public IGpuBufferData GetGpuBufferDataPointer()
         {
             return mCoreObject.NativeSuper;
@@ -186,12 +195,13 @@ namespace EngineNS.NxRHI
             if (device.RhiType == ERhiType.RHI_D3D11)
             {
                 var result = new UTexture(new ITexture(ptr.CppPointer));
+                ptr.Release();
                 return result;
             }
             else
             {
-                var result = new UBuffer();
-                result.mCoreObject = new IBuffer(ptr.CppPointer);
+                var result = new UBuffer(new IBuffer(ptr.CppPointer));
+                ptr.Release();
                 return result;
             }
         }
@@ -250,6 +260,8 @@ namespace EngineNS.NxRHI
             if (ShaderBinder.IsValidPointer == false)
                 return false;
             var binder = ShaderBinder.FindField(name);
+            if (binder.IsValidPointer == false)
+                return false;
             SetValue<T>(binder, v);
             return true;
         }

@@ -42,5 +42,9 @@ namespace EngineNS
                 CoreSDK.IUnknown_Release(mCoreObject.NativePointer.ToPointer());
             }
         }
+        public unsafe void Core_SetMemDebugInfo(string info)
+        {
+            CoreSDK.SetMemDebugInfo(mCoreObject.NativePointer.ToPointer(), info);
+        }
     }
 }

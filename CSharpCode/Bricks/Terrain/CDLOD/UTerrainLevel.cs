@@ -643,16 +643,18 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         #region Px & Collide
         public unsafe void InitPhysics(UTerrainLevel level)
         {
-            var pc = UEngine.Instance.PhyModue.PhyContext;
+            var pc = UEngine.Instance.PhyModule.PhyContext;
             int texSize = level.Node.TexSizePerPatch * level.Node.PatchSide;
             fixed (PhyHeightFieldSample* pPixelData = &PxHeightfieldSamples[0])
             {
                 PhyHeightfield = pc.CookHeightfield(texSize, texSize, pPixelData, 0, false);
                 var materials = new Bricks.PhysicsCore.UPhyMaterial[1];
-                materials[0] = UEngine.Instance.PhyModue.PhyContext.PhyMaterialManager.DefaultMaterial;
+                materials[0] = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
                 var terrainShape = pc.CreateShapeHeightfield(materials,
                     PhyHeightfield, PxHeightfieldScale, in Vector3.One);
-
+                PhyFilterData SimulationFilterData = new PhyFilterData();
+                terrainShape.mCoreObject.SetQueryFilterData(SimulationFilterData);
+                terrainShape.mCoreObject.SetSimulationFilterData(SimulationFilterData);
                 PhyActor = pc.CreateActor(EPhyActorType.PAT_Static, in Level.Node.Placement.AbsTransform.mPosition, in Quaternion.Identity);
                 Vector3 shapeCenter;
                 shapeCenter.X = (float)Level.LevelX * Level.Node.LevelSize;

@@ -18,7 +18,7 @@ namespace EngineNS.GamePlay.Controller
 {
     public class UCharacterController : UNode, IController
     {
-        public UCharacter ControlledCharacter { get; set; }
+        public Scene.Actor.UActor ControlledCharacter { get; set; }
         public Camera.ICameraControlNode CameraControlNode { get; set; }
         public UMovement MovementNode { get; set; }
 
@@ -78,7 +78,7 @@ namespace EngineNS.GamePlay.Controller
             YawDelta = 0;
 
             float speed = 3;
-            DVector3 control = DVector3.Forward * VInput + DVector3.Left * HInput;
+            Vector3 control = Vector3.Forward * VInput + Vector3.Left * HInput;
             MovementNode.LinearVelocity = ControlledCharacter.Placement.Quat * control * speed;
         }
 

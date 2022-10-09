@@ -761,6 +761,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             if (ImGuiAPI.BeginChild("Function", in size, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
             {
+                func.UpdateSelectPG();
                 func.GraphRenderer.OnDraw();                
                 //func.OnDraw(null, false);
             }

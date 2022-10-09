@@ -35,7 +35,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public async System.Threading.Tasks.Task<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            Material = await UEngine.Instance.PhyModue.PhyContext.PhyMaterialManager.CreateMaterial(name);
+            Material = await UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.CreateMaterial(name);
             if (Material == null)
                 return false;
 
@@ -101,12 +101,12 @@ namespace EngineNS.Bricks.PhysicsCore
             if (ImGuiAPI.Button("Save", in btSize))
             {
                 Material.SaveAssetTo(Material.AssetName);
-                var unused = UEngine.Instance.PhyModue.PhyContext.PhyMaterialManager.ReloadMaterial(Material.AssetName);
+                var unused = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.ReloadMaterial(Material.AssetName);
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.Button("Reload", in btSize))
             {
-                var unused = UEngine.Instance.PhyModue.PhyContext.PhyMaterialManager.ReloadMaterial(Material.AssetName);
+                var unused = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.ReloadMaterial(Material.AssetName);
             }
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)

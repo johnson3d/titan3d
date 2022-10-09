@@ -306,20 +306,20 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             //    }
             //    return;
             //}
-            var graph = node.UserData as UMaterialGraph;
-            graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = null;
+            //var graph = node.UserData as UMaterialGraph;
+            //graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = null;
 
-            if (node.GetPropertyEditObject() == null)
-            {
-                if (graph != null)
-                {
-                    graph.ShaderEditor.NodePropGrid.Target = null;
-                }
-                return;
-            }
+            //if (node.GetPropertyEditObject() == null)
+            //{
+            //    if (graph != null)
+            //    {
+            //        graph.ShaderEditor.NodePropGrid.Target = null;
+            //    }
+            //    return;
+            //}
 
-            graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<UNodeBase>.TypeDesc;
-            graph.ShaderEditor.NodePropGrid.Target = node.GetPropertyEditObject();
+            //graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<UNodeBase>.TypeDesc;
+            //graph.ShaderEditor.NodePropGrid.Target = node.GetPropertyEditObject();
         }
         private void NodeOnLinkedFrom(UNodeBase node, PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {

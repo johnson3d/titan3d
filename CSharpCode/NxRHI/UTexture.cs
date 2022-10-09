@@ -620,7 +620,8 @@ namespace EngineNS.NxRHI
                         break;
                 }
 
-                return rc.CreateTexture(in texDesc);
+                var result = rc.CreateTexture(in texDesc);
+                return result;
             }
             finally
             {

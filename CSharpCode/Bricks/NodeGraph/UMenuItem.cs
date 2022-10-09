@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows.Forms;
 
 namespace EngineNS.Bricks.NodeGraph
 {
@@ -15,6 +16,18 @@ namespace EngineNS.Bricks.NodeGraph
         public FOnMenuDraw OnMenuDraw;
         public List<UMenuItem> SubMenuItems { get; } = new List<UMenuItem>();
         public UMenuItem Parent = null;
+        public bool IsExpanded = false;
+        public void SetIsExpanded(bool value, bool withChildren)
+        {
+            IsExpanded = value;
+            if(withChildren)
+            {
+                for(int i=0; i<SubMenuItems.Count; i++)
+                {
+                    SubMenuItems[i].SetIsExpanded(value, withChildren);
+                }
+            }
+        }
 
         public UMenuItem FindMenuItem(string path)
         {

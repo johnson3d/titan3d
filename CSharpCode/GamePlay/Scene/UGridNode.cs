@@ -31,17 +31,21 @@ namespace EngineNS.GamePlay.Scene
             var material = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));
             var materialInstance = Graphics.Pipeline.Shader.UMaterialInstance.CreateMaterialInstance(material);
             materialInstance.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_Translucent;
-            var samp = materialInstance.UsedSamplerStates[0].Value;
-            samp.MaxAnisotropy = 15;
-            samp.Filter = NxRHI.ESamplerFilter.SPF_ANISOTROPIC;
-            var blend0 = materialInstance.Blend;
-            
             unsafe
             {
+                var blend0 = materialInstance.Blend;
                 blend0.RenderTarget[0].BlendEnable = 1;
                 materialInstance.Blend = blend0;
             }
-            materialInstance.UsedSamplerStates[0].Value = samp;
+            if (materialInstance.UsedSamplerStates.Count > 0)
+            {
+                var samp = materialInstance.UsedSamplerStates[0].Value;
+                samp.MaxAnisotropy = 15;
+                samp.Filter = NxRHI.ESamplerFilter.SPF_ANISOTROPIC;
+                samp.m_MaxLOD = 0;
+                
+                materialInstance.UsedSamplerStates[0].Value = samp;
+            }
             var gridColor = materialInstance.FindVar("GridColor");
             if (gridColor != null)
             {

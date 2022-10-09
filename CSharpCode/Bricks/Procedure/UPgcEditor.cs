@@ -302,6 +302,11 @@ namespace EngineNS.Bricks.Procedure
                 }
                 if (ImGuiAPI.CollapsingHeader("NodeProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
+                    if(GraphRenderer.Graph != null && GraphRenderer.Graph.SelectedNodesDirty)
+                    {
+                        NodePropGrid.Target = GraphRenderer.Graph.SelectedNodes;
+                        GraphRenderer.Graph.SelectedNodesDirty = false;
+                    }
                     NodePropGrid.OnDraw(true, false, false);
                 }
                 if (ImGuiAPI.CollapsingHeader("EditorProperty", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))

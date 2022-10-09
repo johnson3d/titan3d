@@ -84,7 +84,8 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void TickSync()
         {
-            UEngine.Instance.EventPoster.TickPostTickSyncEvents();
+            var testTime = Support.Time.GetTickCount();
+            UEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
             UEngine.Instance.GfxDevice.RenderContext.TickPostEvents();
         }
         public override void EndFrame(UEngine engine)
@@ -93,6 +94,8 @@ namespace EngineNS.Graphics.Pipeline
         }
         public override void Cleanup(UEngine engine)
         {
+            UEngine.Instance.EventPoster.TickPostTickSyncEvents(long.MaxValue);
+
             engine.TickableManager.RemoveTickable(RenderCmdQueue);
 
             TextureManager?.Cleanup();

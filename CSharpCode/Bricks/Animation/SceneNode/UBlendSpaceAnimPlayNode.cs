@@ -94,7 +94,7 @@ namespace EngineNS.Animation.SceneNode
             {
                 Movement = Parent.Parent.FindFirstChild("Movement") as GamePlay.Movemnet.UMovement;
             }
-            Player.Input = new Vector3((float)Movement.LinearVelocity.Length(), 0, 0);
+            Player.Input = new Vector3(Movement.CurrentLinearVelocity.Length(), 0, 0);
             Player.Update(world.DeltaTimeSecond);
             Player.Evaluate();
         }

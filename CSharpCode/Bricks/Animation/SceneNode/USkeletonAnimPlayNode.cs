@@ -52,6 +52,7 @@ namespace EngineNS.Animation.SceneNode
             System.Diagnostics.Debug.Assert(parent is UMeshNode);
             var node = new Animation.SceneNode.USkeletonAnimPlayNode();
             await node.InitializeNode(world, data, bvType, placementType);
+            node.BindingTo(parent as UMeshNode);
             node.Parent = parent;
 
             return node;

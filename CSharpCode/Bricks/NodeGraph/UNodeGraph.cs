@@ -1,6 +1,9 @@
-﻿using System;
+﻿using EngineNS.EGui.Controls.PropertyGrid;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
+using System.Threading;
 
 namespace EngineNS.Bricks.NodeGraph
 {
@@ -45,11 +48,40 @@ namespace EngineNS.Bricks.NodeGraph
         public List<UPinLinker> Linkers { get; } = new List<UPinLinker>();
         
         public ULinkingLine LinkingOp { get; } = new ULinkingLine();
-        public class FSelNodeState
+        public class FSelNodeState : EGui.Controls.PropertyGrid.IPropertyCustomization
         {
             public UNodeBase Node;
             public Vector2 MoveOffset;
+
+            public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+            {
+                if (Node == null)
+                    return;
+                var pros = TypeDescriptor.GetProperties(Node);
+                collection.InitValue(Node, Rtti.UTypeDesc.TypeOf(Node.GetType()), pros, parentIsValueType);
+            }
+
+            public object GetPropertyValue(string propertyName)
+            {
+                if (Node == null)
+                    return null;
+                var pro = Node.GetType().GetProperty(propertyName);
+                if (pro == null)
+                    return null;
+                return pro.GetValue(Node);
+            }
+
+            public void SetPropertyValue(string propertyName, object value)
+            {
+                if (Node == null)
+                    return;
+                var pro = Node.GetType().GetProperty(propertyName);
+                if (pro == null)
+                    return;
+                pro.SetValue(Node, value);
+            }
         }
+        public bool SelectedNodesDirty = false;
         public List<FSelNodeState> SelectedNodes { get; } = new List<FSelNodeState>();
 
         public Dictionary<UNodeBase, UNodeGraph> SubGraphs;
@@ -434,6 +466,7 @@ namespace EngineNS.Bricks.NodeGraph
             FSelNodeState state = new FSelNodeState();
             state.Node = node;
             SelectedNodes.Add(state);
+            SelectedNodesDirty = true;
         }
         public void RemoveSelected(UNodeBase node)
         {
@@ -443,6 +476,7 @@ namespace EngineNS.Bricks.NodeGraph
                 if (SelectedNodes[i].Node == node)
                 {
                     SelectedNodes.RemoveAt(i);
+                    SelectedNodesDirty = true;
                     i--;
                 }
             }
@@ -454,6 +488,7 @@ namespace EngineNS.Bricks.NodeGraph
                 i.Node.Selected = false;
             }
             SelectedNodes.Clear();
+            SelectedNodesDirty = true;
         }
         #endregion
 
@@ -496,7 +531,18 @@ namespace EngineNS.Bricks.NodeGraph
             Object,
         };
 
-        public EGraphMenu CurMenuType;
+        EGraphMenu mCurMenuType;
+        public bool FirstSetCurMenuType = false;
+        public EGraphMenu CurMenuType
+        {
+            get => mCurMenuType;
+            set
+            {
+                if(mCurMenuType != value)
+                    FirstSetCurMenuType = true;
+                mCurMenuType = value;
+            }
+        }
         public object PopMenuPressObject;
         public Vector2 PopMenuPosition;
         public UMenuItem CanvasMenus = new UMenuItem();
@@ -649,66 +695,52 @@ namespace EngineNS.Bricks.NodeGraph
                 ButtonPress[i] = false;
             }
         }
+        public bool MultiSelectionMode = false;
         public void LeftPress(in Vector2 screenPos)
         {
             ButtonPress[(int)EMouseButton.Left] = true;
             PressPosition = ViewportRateToCanvas(in screenPos);
+
             var hit = HitObject(PressPosition.X, PressPosition.Y);
+            MultiSelectionMode = false;
             if (hit == null)
             {
+                MultiSelectionMode = true;
                 return;
             }
 
-            if (SelectedNodes.Count == 0)
+            var pKls = hit.GetType();
+            if (Rtti.UTypeDesc.CanCast(pKls, typeof(UNodeBase)))
             {
-                var pKls = hit.GetType();
-                if (Rtti.UTypeDesc.CanCast(pKls, typeof(UNodeBase)))
+                var node = hit as UNodeBase;
+                if (node.Selected)
                 {
-                    var node = hit as UNodeBase;
-                    if (node.IsHitTitle(PressPosition.X, PressPosition.Y))
-                    {
-                        AddSelected(node);
-                        mIsMovingSelNodes = true;
-                        foreach (var i in SelectedNodes)
-                        {
-                            i.MoveOffset = PressPosition - i.Node.Position;
-                        }
-                    }
+                    if(this.IsKeydown(EKey.Ctl))
+                        RemoveSelected(node);
                 }
-                else if (Rtti.UTypeDesc.CanCast(pKls, typeof(NodePin)))
+                else
                 {
-                    var pin = hit as NodePin;
-                    LinkingOp.StartPin = pin;
-                    LinkingOp.HoverPin = pin;
-                    LinkingOp.BlockingEnd = PressPosition;
-                    PopMenuPressObject = pin.HostNode.GetPinType(pin);
-                    PinLinkMenuDirty = true;
+                    if (!IsKeydown(EKey.Ctl) && !IsKeydown(EKey.Shift))
+                        ClearSelected();
+                    AddSelected(node);
+                }
+                if(node.IsHitTitle(PressPosition.X, PressPosition.Y))
+                {
+                    mIsMovingSelNodes = true;
+                    foreach (var i in SelectedNodes)
+                    {
+                        i.MoveOffset = PressPosition - i.Node.Position;
+                    }
                 }
             }
-            else
+            else if (Rtti.UTypeDesc.CanCast(pKls, typeof(NodePin)))
             {
-                var pKls = hit.GetType();
-                if (Rtti.UTypeDesc.CanCast(pKls, typeof(UNodeBase)))
-                {
-                    var node = hit as UNodeBase;
-                    if (node.Selected && node.IsHitTitle(PressPosition.X, PressPosition.Y))
-                    {
-                        mIsMovingSelNodes = true;
-                        foreach (var i in SelectedNodes)
-                        {
-                            i.MoveOffset = PressPosition - i.Node.Position;
-                        }
-                    }
-                }
-                else if (Rtti.UTypeDesc.CanCast(pKls, typeof(NodePin)))
-                {
-                    var pin = hit as NodePin;
-                    LinkingOp.StartPin = pin;
-                    LinkingOp.HoverPin = pin;
-                    LinkingOp.BlockingEnd = PressPosition;
-                    PopMenuPressObject = pin.HostNode.GetPinType(pin);
-                    PinLinkMenuDirty = true;
-                }
+                var pin = hit as NodePin;
+                LinkingOp.StartPin = pin;
+                LinkingOp.HoverPin = pin;
+                LinkingOp.BlockingEnd = PressPosition;
+                PopMenuPressObject = pin.HostNode.GetPinType(pin);
+                PinLinkMenuDirty = true;
             }
         }
 
@@ -719,95 +751,73 @@ namespace EngineNS.Bricks.NodeGraph
             UNodeBase pressNode = null;
             if (CurMenuType == EGraphMenu.None)
             {
-                if (this.IsKeydown(EKey.Ctl))
+                if (!mIsMovingSelNodes)
                 {
-                    var start = Vector2.Minimize(PressPosition, DragPosition);
-                    var end = Vector2.Maximize(PressPosition, DragPosition);
-                    List<UNodeBase> sels = new List<UNodeBase>();
-                    GetSelectNodes(PressPosition, DragPosition, sels);
-                    foreach (var i in sels)
+                    if (LinkingOp.StartPin != null)
                     {
-                        if (i.Selected)
-                            RemoveSelected(i);
-                        else
-                            AddSelected(i);
-                    }
-                }
-                else if (this.IsKeydown(EKey.Shift))
-                {
-                    var start = Vector2.Minimize(PressPosition, DragPosition);
-                    var end = Vector2.Maximize(PressPosition, DragPosition);
-                    List<UNodeBase> sels = new List<UNodeBase>();
-                    GetSelectNodes(start, end, sels);
-                    foreach (var i in sels)
-                    {
-                        AddSelected(i);
-                    }
-                }
-                else
-                {
-                    if (!mIsMovingSelNodes)
-                    {
-                        if (LinkingOp.StartPin != null)
+                        var hit = HitObject(DragPosition.X, DragPosition.Y);
+                        if (hit != null)
                         {
-                            var hit = HitObject(DragPosition.X, DragPosition.Y);
-                            if (hit != null)
+                            var pKls = hit.GetType();
+                            if (Rtti.UTypeDesc.CanCast(pKls,typeof(PinIn)) &&
+                                Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(),typeof(PinOut)))
                             {
-                                var pKls = hit.GetType();
-                                if (Rtti.UTypeDesc.CanCast(pKls,typeof(PinIn)) &&
-                                    Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(),typeof(PinOut)))
-                                {
-                                    var outPin = LinkingOp.StartPin as PinOut;
-                                    var inPin = hit as PinIn;
-                                    AddLink(outPin, inPin, true);
-                                    pressNode = inPin.HostNode;
-                                }
-                                else if (
-                                    Rtti.UTypeDesc.CanCast(pKls,typeof(PinOut)) &&
-                                    Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(),typeof(PinIn)))
-                                {
-                                    var outPin = hit as PinOut;
-                                    var inPin = LinkingOp.StartPin as PinIn;
-                                    AddLink(outPin, inPin, true);
-                                    pressNode = outPin.HostNode;
-                                }
-                                else
-                                {
-                                    pressNode = hit as UNodeBase;
-                                }
+                                var outPin = LinkingOp.StartPin as PinOut;
+                                var inPin = hit as PinIn;
+                                AddLink(outPin, inPin, true);
+                                pressNode = inPin.HostNode;
+                            }
+                            else if (
+                                Rtti.UTypeDesc.CanCast(pKls,typeof(PinOut)) &&
+                                Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(),typeof(PinIn)))
+                            {
+                                var outPin = hit as PinOut;
+                                var inPin = LinkingOp.StartPin as PinIn;
+                                AddLink(outPin, inPin, true);
+                                pressNode = outPin.HostNode;
                             }
                             else
                             {
-                                // 打开该pin关联的菜单
-                                PopMenuPosition = ViewportRateToCanvas(in screenPos);
-                                if(PopMenuPressObject != null && PopMenuPressObject != this)
-                                {
-                                    CurMenuType = EGraphMenu.Object;
-                                }
+                                pressNode = hit as UNodeBase;
                             }
                         }
                         else
                         {
-                            var hit = HitObject(DragPosition.X, DragPosition.Y);
-                            var hitPin = hit as NodePin;
-                            if (hitPin != null)
+                            // 打开该pin关联的菜单
+                            PopMenuPosition = ViewportRateToCanvas(in screenPos);
+                            if(PopMenuPressObject != null && PopMenuPressObject != this)
                             {
-                                hitPin.HostNode.OnLButtonClicked(hitPin);
-                                pressNode = hitPin.HostNode;
+                                CurMenuType = EGraphMenu.Object;
+                                ObjectMenus.SetIsExpanded(false, true);
+                                CanvasMenuFilterStr = "";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var hit = HitObject(DragPosition.X, DragPosition.Y);
+                        var hitPin = hit as NodePin;
+                        if (hitPin != null)
+                        {
+                            hitPin.HostNode.OnLButtonClicked(hitPin);
+                            pressNode = hitPin.HostNode;
+                        }
+                        else
+                        {
+                            var hitNode = hit as UNodeBase;
+                            if (hitNode != null)
+                            {
+                                hitNode.OnLButtonClicked(null);
+                                pressNode = hitNode;
                             }
                             else
-                            {
-                                var hitNode = hit as UNodeBase;
-                                if (hitNode != null)
-                                {
-                                    hitNode.OnLButtonClicked(null);
-                                    pressNode = hitNode;
-                                }
-                                else
-                                    OnLButtonClicked();
-                            }
+                                OnLButtonClicked();
+                        }
 
-                            ClearSelected();
+                        if(MultiSelectionMode)
+                        {
+                            if(!this.IsKeydown(EKey.Shift) && !this.IsKeydown(EKey.Ctl))
+                                ClearSelected();
                             var start = PressPosition;
                             var end = DragPosition;
                             if (start.X > end.X)
@@ -824,40 +834,57 @@ namespace EngineNS.Bricks.NodeGraph
                             }
                             List<UNodeBase> sels = new List<UNodeBase>();
                             GetSelectNodes(start, end, sels);
-                            foreach (var i in sels)
+                            if(this.IsKeydown(EKey.Ctl))
                             {
-                                AddSelected(i);
+                                foreach (var i in sels)
+                                {
+                                    if (i.Selected)
+                                        RemoveSelected(i);
+                                    else
+                                        AddSelected(i);
+                                }
+                            }
+                            else
+                            {
+                                foreach (var i in sels)
+                                {
+                                    AddSelected(i);
+                                }
                             }
                         }
+
+                    }
+                }
+                else
+                {
+                    var hit = HitObject(DragPosition.X, DragPosition.Y);
+                    var hitPin = hit as NodePin;
+                    if (hitPin != null)
+                    {
+                        hitPin.HostNode.OnLButtonClicked(hitPin);
                     }
                     else
                     {
-                        var hit = HitObject(DragPosition.X, DragPosition.Y);
-                        var hitPin = hit as NodePin;
-                        if (hitPin != null)
+                        var hitNode = hit as UNodeBase;
+                        if (hitNode != null)
                         {
-                            hitPin.HostNode.OnLButtonClicked(hitPin);
+                            hitNode.OnLButtonClicked(null);
                         }
                         else
-                        {
-                            var hitNode = hit as UNodeBase;
-                            if (hitNode != null)
-                            {
-                                hitNode.OnLButtonClicked(null);
-                            }
-                            else
-                                OnLButtonClicked();
-                        }
+                            OnLButtonClicked();
                     }
                 }
             }
             ButtonPress[(int)EMouseButton.Left] = false;
             mIsMovingSelNodes = false;
+            mLastDragDirection = Vector2.Zero;
+            mShakeTime = 0;
             if (OnLinkingUp(LinkingOp, pressNode))
             {
                 LinkingOp.StartPin = null;
             }
             //LinkingOp.StartPin = null;
+            MultiSelectionMode = false;
         }
 
         public void RightPress(in Vector2 screenPos)
@@ -868,6 +895,7 @@ namespace EngineNS.Bricks.NodeGraph
             if (hit == null)
                 return;
         }
+        public string CanvasMenuFilterStr = "";
         public void RightRelease(in Vector2 screenPos)
         {
             PopMenuPosition = ViewportRateToCanvas(in screenPos);
@@ -889,6 +917,8 @@ namespace EngineNS.Bricks.NodeGraph
             else
             {
                 CurMenuType = EGraphMenu.Canvas;
+                CanvasMenus.SetIsExpanded(false, true);
+                CanvasMenuFilterStr = "";
                 PopMenuPressObject = this;
             }
             ButtonPress[(int)EMouseButton.Right] = false;
@@ -909,8 +939,45 @@ namespace EngineNS.Bricks.NodeGraph
 
             ButtonPress[(int)EMouseButton.Middle] = false;
         }
+        Vector2 mLastDragPosition;
+        Vector2 mLastDragDirection;
+        int mShakeTime = 0;
+        float mShakeElapsedSecond = 0;
+        public bool CheckMouseShake()
+        {
+            var dir = DragPosition - mLastDragPosition;
+            dir.Normalize();
+            if (mLastDragDirection == Vector2.Zero)
+            {
+                mShakeElapsedSecond = 0.0f;
+                mLastDragDirection = dir;
+                return false;
+            }
+
+            mShakeElapsedSecond += EngineNS.UEngine.Instance.ElapsedSecond;
+            var dotVal = Vector2.Dot(dir, mLastDragDirection);
+            if(dotVal < 0)
+            {
+                mLastDragDirection = dir;
+                if (mShakeElapsedSecond < 0.3f)
+                {
+                    mShakeElapsedSecond = 0.0f;
+                    mShakeTime++;
+                    if(mShakeTime >= 6)
+                    {
+                        mShakeTime = 0;
+                        return true;
+                    }
+                }
+                else
+                    mShakeTime = 0;
+            }
+
+            return false;
+        }
         public void PressDrag(in Vector2 screenPos)
         {
+            mLastDragPosition = DragPosition;
             DragPosition = ViewportRateToCanvas(in screenPos);
             LinkingOp.HoverPin = null;
             var hit = HitObject(DragPosition.X, DragPosition.Y);
@@ -947,6 +1014,21 @@ namespace EngineNS.Bricks.NodeGraph
                     foreach (var i in SelectedNodes)
                     {
                         i.Node.Position = DragPosition - i.MoveOffset;
+                    }
+
+                    if(CheckMouseShake())
+                    {
+                        foreach(var node in SelectedNodes)
+                        {
+                            foreach (var iPin in node.Node.Inputs)
+                            {
+                                RemoveLinkedIn(iPin);
+                            }
+                            foreach (var oPin in node.Node.Outputs)
+                            {
+                                RemoveLinkedOut(oPin);
+                            }
+                        }
                     }
                 }
                 else

@@ -108,7 +108,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 return false;
             HostScene = scene;
 
-            var pc = UEngine.Instance.PhyModue.PhyContext;
+            var pc = UEngine.Instance.PhyModule.PhyContext;
             if (pc == null)
                 return false;
             

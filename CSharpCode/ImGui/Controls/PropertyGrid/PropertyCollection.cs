@@ -97,6 +97,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         }
         public T GetAttribute<T>() where T : Attribute
         {
+            if (Attributes == null)
+                return null;
             foreach(var attr in Attributes)
             {
                 if (attr is T)

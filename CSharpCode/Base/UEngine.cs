@@ -264,12 +264,10 @@ namespace EngineNS
         public void FinalCleanup()
         {
             GfxDevice.RenderCmdQueue.Reset();
-
+            base.CleanupModules();
+            TickableManager.Cleanup();
             StopSystemThreads();
 
-            base.CleanupModules();
-
-            TickableManager.Cleanup();
             Profiler.TimeScopeManager.FinalCleanup();
             AssetMetaManager.Cleanup();
             EngineNS.Profiler.Log.FinalLogger();

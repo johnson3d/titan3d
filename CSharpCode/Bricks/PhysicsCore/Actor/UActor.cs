@@ -17,15 +17,15 @@ namespace EngineNS.GamePlay.Scene.Actor
         }
         partial void CreatePxCapsuleActor(ref bool result, Scene.UScene scene, float radius, float height)
         {
-            var pc = UEngine.Instance.PhyModue.PhyContext;
+            var pc = UEngine.Instance.PhyModule.PhyContext;
             ref var transform = ref Placement.TransformRef;
             PhyActor = pc.CreateActor(EPhyActorType.PAT_Dynamic, in transform.mPosition, in transform.mQuat);
             Bricks.PhysicsCore.UPhyMaterial mtl;
             
             if (this.ActorData.PxMaterial != null)
-                mtl = UEngine.Instance.PhyModue.PhyContext.PhyMaterialManager.GetMaterialSync(this.ActorData.PxMaterial);
+                mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(this.ActorData.PxMaterial);
             else
-                mtl = UEngine.Instance.PhyModue.PhyContext.PhyMaterialManager.DefaultMaterial;
+                mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
 
             //var shape = pc.CreateShapeCapsule(mtl, radius, height / 2.0f);
             var shape = pc.CreateShapeSphere(mtl, radius);

@@ -250,12 +250,14 @@ namespace EngineNS.GamePlay.Scene
                 {
                     mParent.Children.Remove(this);
                 }
+                var oldParent = mParent;
                 mParent = value;
                 if (mParent != null)
                 {
                     if (mParent.Children.Contains(this) == false)
                         mParent.Children.Add(this);
                 }
+                ParentChanged(oldParent, mParent);
 
                 var newScene = GetNearestParentScene();
                 if (oldScene != newScene)
@@ -328,6 +330,14 @@ namespace EngineNS.GamePlay.Scene
         #endregion
 
         #region Virtual Interface
+        private void ParentChanged(UNode prev, UNode cur)
+        {
+            OnParentChanged(prev, cur);
+        }
+        protected virtual void OnParentChanged(UNode prev, UNode cur)
+        {
+
+        }
         private void ParentSceneChanged(UScene prev, UScene cur)
         {
             OnParentSceneChanged(prev, cur);

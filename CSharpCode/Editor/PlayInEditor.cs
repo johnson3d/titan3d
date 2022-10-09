@@ -55,6 +55,12 @@ namespace EngineNS
                                     EndPlayInEditor();
                                 };
 
+            var outOfMouse = IControl.Create<UKey>(new UKey.UKeyData() { Keycode = Bricks.Input.Keycode.KEY_F1 });
+            outOfMouse.TriggerPress += (ITriggerControl sender) =>
+            {
+                UEngine.Instance.InputSystem.Mouse.ShowCursor = true;
+            };
+
             return ret;
         }
 

@@ -78,7 +78,7 @@ namespace EngineNS.Thread.Async
                 }
                 if (PostEvent != null)
                 {
-                    PostEvent.ContinueThread.ContinueEvents.Enqueue(PostEvent);
+                    PostEvent.ContinueThread.EnqueueContinue(PostEvent);
                 }
             }
         }

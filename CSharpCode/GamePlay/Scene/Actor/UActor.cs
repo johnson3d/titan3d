@@ -36,7 +36,7 @@ namespace EngineNS.GamePlay.Scene.Actor
             if (cur != null)
             {
                 bool ok = true;
-                CreatePxCapsuleActor(ref ok, cur, ActorData.Radius, ActorData.Height);
+                //CreatePxCapsuleActor(ref ok, cur, ActorData.Radius, ActorData.Height);
             }
         }
     }
