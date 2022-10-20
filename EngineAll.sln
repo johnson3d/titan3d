@@ -715,12 +715,15 @@ Global
 		3rd\native\iconv\iconv.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\Image.Shared\Image.Shared.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\MeshOptimizer\MeshOptimizer.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		3rd\native\spirv-cross\spirv-cross.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		codegen\Cs2Cpp\cpp\Cs2Cpp.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		codegen\NativeBinder\CodeGen.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Base\Base.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\Animation\Animation.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		NativeCode\Bricks\Canvas\Canvas.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\CrossShaderCompiler\CrossShaderCompiler.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\FBX\FBX.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		NativeCode\Bricks\GpuDump\GpuDump.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\MathLib\MathLib.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\MeshSimplify\MeshSimplify.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\Particle\Particle.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
@@ -730,6 +733,8 @@ Global
 		NativeCode\Bricks\TcpServer\TcpServer.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\Terrain\Terrain.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Bricks\TextConverter\TextConverter.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		NativeCode\Bricks\TextFont\TextFont.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		NativeCode\Bricks\TextureCompress\TextureCompress.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Graphics\Mesh\Mesh.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\Graphics\Pipeline\Pipeline.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		NativeCode\ImGui\ImGui.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
