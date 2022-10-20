@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{1346e989-1c5f-4c28-9217-f60f40bfde83}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)GLSL.std.450.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cfg.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_common.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cpp.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cross.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cross_c.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cross_containers.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cross_error_handling.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cross_parsed_ir.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_cross_util.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_glsl.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_hlsl.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_msl.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_parser.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)spirv_reflect.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_cfg.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_cpp.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_cross.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_cross_c.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_cross_parsed_ir.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_cross_util.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_glsl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_hlsl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_msl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_parser.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)spirv_reflect.cpp" />
+  </ItemGroup>
+</Project>
