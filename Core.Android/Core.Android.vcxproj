@@ -112,32 +112,48 @@
     <Import Project="..\NativeCode\Bricks\Particle\Particle.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\PhysicsCore\PhysicsCore.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Terrain\Terrain.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\Canvas\Canvas.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\MathLib\MathLib.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\MeshSimplify\MeshSimplify.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\NextRHI\NextRHI.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\TextFont\TextFont.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\NextRHI\Vulkan\Vulkan.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\iconv\iconv.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\spirv-cross\spirv-cross.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>../binaries\$(Configuration)\</OutDir>
+    <UseMultiToolTask>true</UseMultiToolTask>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>../binaries\$(Configuration)\</OutDir>
+    <UseMultiToolTask>true</UseMultiToolTask>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <OutDir>../binaries\$(Configuration)\</OutDir>
+    <UseMultiToolTask>true</UseMultiToolTask>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <OutDir>../binaries\$(Configuration)\</OutDir>
+    <UseMultiToolTask>true</UseMultiToolTask>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <OutDir>../binaries\$(Configuration)\</OutDir>
+    <UseMultiToolTask>true</UseMultiToolTask>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <OutDir>../binaries\$(Configuration)\</OutDir>
+    <UseMultiToolTask>true</UseMultiToolTask>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <OutDir>../binaries\$(Configuration)\</OutDir>
+    <UseMultiToolTask>true</UseMultiToolTask>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <OutDir>../binaries\$(Configuration)\</OutDir>
+    <UseMultiToolTask>true</UseMultiToolTask>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -147,7 +163,7 @@
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -161,7 +177,7 @@
       <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -176,7 +192,7 @@
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -190,7 +206,7 @@
       <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -205,11 +221,11 @@
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;vulkan;%(LibraryDependencies)</LibraryDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
@@ -219,11 +235,11 @@
       <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;PTR_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>c;m;atomic;log;gcc;android;EGL;GLESv2;vulkan;%(LibraryDependencies)</LibraryDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -234,7 +250,7 @@
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <EnableNeonCodegen>true</EnableNeonCodegen>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -248,7 +264,7 @@
       <PreprocessorDefinitions>VFX_EXPORTS;GLEW_STATIC;GLEW_NO_GLU;AS_DLLMODULE;PLATFORM_DROID;COREWINDOW_EXPORTS;FT2_BUILD_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CppLanguageStandard>c++1z</CppLanguageStandard>
       <ExceptionHandling>Enabled</ExceptionHandling>
-      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\FreeType\include;..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\eigen-3.4.0;..\3rd\native\Vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-frtti %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>

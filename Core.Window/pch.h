@@ -21,4 +21,6 @@
 
 #include "../NativeCode/NextRHI/NxRHI.h"
 
+using namespace EngineNS;
+
 #endif //PCH_H

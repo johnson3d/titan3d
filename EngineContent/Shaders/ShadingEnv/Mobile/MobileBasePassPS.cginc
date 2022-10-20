@@ -326,7 +326,8 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 			float2 tileIdxF = (uv.xy * gViewportSizeAndRcp.xy) / TileSize;
 			uint2 tileIdx = (uint2)tileIdxF;
 			uint indexOfTile = GetTileIndex(tileIdx.x, tileIdx.y);
-			for (int i = 0; i < TilingBuffer[indexOfTile].NumPointLight; i++)
+			uint NumOfLights = min(TilingBuffer[indexOfTile].NumPointLight, 32);
+			for (int i = 0; i < NumOfLights; i++)
 			{
 				uint lightIndex = TilingBuffer[indexOfTile].PointLights[i];
 				FPointLight light = GpuScene_PointLights[lightIndex];
