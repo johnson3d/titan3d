@@ -39,11 +39,17 @@ namespace EngineNS.Bricks.NodeGraph
         public Vector2 IconOffset { get; set; } = new Vector2(2, 2);
         public float MinSpaceInOut { get; set; } = 20.0f;
         public UInt32 TitleTextColor { get; set; } = 0xFFFFFFFF;
+        public UInt32 TitleTextDarkColor { get; set; } = 0xFF8c8c8c;
+        public UInt32 TitleTextErrorColor { get; set; } = 0xFF0000FF;
+        public float TitleTextOffset { get; set; } = 5;
         public Vector2 TitlePadding = new Vector2(8, 6);
         public UInt32 PinTextColor { get; set; } = 0xFFFFFFFF;
         public UInt32 SelectedColor { get; set; } = 0xFFFF00FF;
         public UInt32 LinkerColor { get; set; } = 0xFF00FFFF;
+        public UInt32 PreOrderLinkerColor { get; set; } = 0xFF00AAAA;
         public float LinkerThinkness { get; set; } = 3;
+        public float LinkerMinDelta { get; set; } = 50;
+        public float LinkerMaxDelta { get; set; } = 700;
         public UInt32 HighLightColor { get; set; } = 0xFF0000FF;
         public float BezierPixelPerSegement { get; set; } = 10.0f;
 

@@ -327,6 +327,22 @@ namespace EngineNS.Rtti
         }
         public static UTypeDescManager Instance { get; } = new UTypeDescManager();
         public Dictionary<string, ServiceManager> Services { get; } = new Dictionary<string, ServiceManager>();
+        public bool GetInheritTypes(UTypeDesc baseType, ref List<UTypeDesc> types)
+        {
+            bool finded = false;
+            foreach(var service in Services.Values)
+            {
+                foreach(var type in service.Types.Values)
+                {
+                    if(type.IsSubclassOf(baseType))
+                    {
+                        types.Add(type);
+                        finded = true;
+                    }
+                }
+            }
+            return finded;
+        }
         public void InitTypes()
         {
             var ass = AppDomain.CurrentDomain.GetAssemblies();

@@ -102,6 +102,9 @@ namespace EngineNS.Bricks.NodeGraph
         {
             Nodes.Clear();
             Linkers.Clear();
+            PreOrderLinker = null;
+            PreOrderPinIn = null;
+            PreOrderPinOut = null;
         }
         [Rtti.Meta]
         public UNodeBase FindFirstNode(string name)
@@ -137,6 +140,13 @@ namespace EngineNS.Bricks.NodeGraph
             }
             AddLink(oPin, iPin, bCallLinked);
         }
+        public bool CanLink(PinOut oPin, PinIn iPin)
+        {
+            if (oPin == null || iPin == null)
+                return false;
+            return (oPin.HostNode.CanLinkTo(oPin, iPin.HostNode, iPin) &&
+                    iPin.HostNode.CanLinkFrom(iPin, oPin.HostNode, oPin));
+        }
         public void AddLink(PinOut oPin, PinIn iPin, bool bCallLinked)
         {
             foreach (var i in Linkers)
@@ -144,8 +154,7 @@ namespace EngineNS.Bricks.NodeGraph
                 if (i.InPin == iPin && i.OutPin == oPin)
                     return;
             }
-            if (oPin.HostNode.CanLinkTo(oPin, iPin.HostNode, iPin) &&
-                    iPin.HostNode.CanLinkFrom(iPin, oPin.HostNode, oPin))
+            if (CanLink(oPin, iPin))
             {
                 if(!iPin.MultiLinks)
                     RemoveLink(iPin);
@@ -755,7 +764,7 @@ namespace EngineNS.Bricks.NodeGraph
                 {
                     if (LinkingOp.StartPin != null)
                     {
-                        var hit = HitObject(DragPosition.X, DragPosition.Y);
+                        var hit = LinkingOp.HoverPin; //HitObject(DragPosition.X, DragPosition.Y);
                         if (hit != null)
                         {
                             var pKls = hit.GetType();
@@ -776,10 +785,10 @@ namespace EngineNS.Bricks.NodeGraph
                                 AddLink(outPin, inPin, true);
                                 pressNode = outPin.HostNode;
                             }
-                            else
-                            {
-                                pressNode = hit as UNodeBase;
-                            }
+                            //else
+                            //{
+                            //    pressNode = hit as UNodeBase;
+                            //}
                         }
                         else
                         {
@@ -788,8 +797,6 @@ namespace EngineNS.Bricks.NodeGraph
                             if(PopMenuPressObject != null && PopMenuPressObject != this)
                             {
                                 CurMenuType = EGraphMenu.Object;
-                                ObjectMenus.SetIsExpanded(false, true);
-                                CanvasMenuFilterStr = "";
                             }
                         }
                     }
@@ -857,21 +864,26 @@ namespace EngineNS.Bricks.NodeGraph
                 }
                 else
                 {
-                    var hit = HitObject(DragPosition.X, DragPosition.Y);
-                    var hitPin = hit as NodePin;
-                    if (hitPin != null)
+                    if(PreOrderLinker != null)
                     {
-                        hitPin.HostNode.OnLButtonClicked(hitPin);
+                        AddLink(PreOrderLinker.OutPin, PreOrderPinIn, true);
+                        AddLink(PreOrderPinOut, PreOrderLinker.InPin, true);
+                        // todo: rearrange
                     }
                     else
                     {
-                        var hitNode = hit as UNodeBase;
-                        if (hitNode != null)
-                        {
-                            hitNode.OnLButtonClicked(null);
-                        }
+                        var hit = HitObject(DragPosition.X, DragPosition.Y);
+                        var hitPin = hit as NodePin;
+                        if (hitPin != null)
+                            hitPin.HostNode.OnLButtonClicked(hitPin);
                         else
-                            OnLButtonClicked();
+                        {
+                            var hitNode = hit as UNodeBase;
+                            if (hitNode != null)
+                                hitNode.OnLButtonClicked(null);
+                            else
+                                OnLButtonClicked();
+                        }
                     }
                 }
             }
@@ -885,6 +897,10 @@ namespace EngineNS.Bricks.NodeGraph
             }
             //LinkingOp.StartPin = null;
             MultiSelectionMode = false;
+            PreOrderLinker = null;
+            PreOrderPinIn = null;
+            PreOrderPinOut = null;
+            mCheckCopyDrag = true;
         }
 
         public void RightPress(in Vector2 screenPos)
@@ -895,7 +911,6 @@ namespace EngineNS.Bricks.NodeGraph
             if (hit == null)
                 return;
         }
-        public string CanvasMenuFilterStr = "";
         public void RightRelease(in Vector2 screenPos)
         {
             PopMenuPosition = ViewportRateToCanvas(in screenPos);
@@ -917,8 +932,6 @@ namespace EngineNS.Bricks.NodeGraph
             else
             {
                 CurMenuType = EGraphMenu.Canvas;
-                CanvasMenus.SetIsExpanded(false, true);
-                CanvasMenuFilterStr = "";
                 PopMenuPressObject = this;
             }
             ButtonPress[(int)EMouseButton.Right] = false;
@@ -943,6 +956,7 @@ namespace EngineNS.Bricks.NodeGraph
         Vector2 mLastDragDirection;
         int mShakeTime = 0;
         float mShakeElapsedSecond = 0;
+        bool mCheckCopyDrag = true;
         public bool CheckMouseShake()
         {
             var dir = DragPosition - mLastDragPosition;
@@ -980,7 +994,48 @@ namespace EngineNS.Bricks.NodeGraph
             mLastDragPosition = DragPosition;
             DragPosition = ViewportRateToCanvas(in screenPos);
             LinkingOp.HoverPin = null;
-            var hit = HitObject(DragPosition.X, DragPosition.Y);
+            object hit = null;
+            if(LinkingOp.StartPin != null)
+            {
+                float minLen = 50;
+                for (int i = 0; i < Nodes.Count; i++)
+                {
+                    if (Nodes[i] == LinkingOp.StartPin.HostNode)
+                        continue;
+
+                    if (Vector2.Intersects(Nodes[i].Position, Nodes[i].Position + Nodes[i].Size, DragPosition, 50))
+                    {
+                        if (LinkingOp.StartPin is PinIn)
+                        {
+                            for (int pinId = 0; pinId < Nodes[i].Outputs.Count; pinId++)
+                            {
+                                var pin = Nodes[i].Outputs[pinId];
+                                var len = (DragPosition - (pin.HotPosition + pin.HotSize * 0.5f)).Length();
+                                if (len < minLen && CanLink(pin, LinkingOp.StartPin as PinIn))
+                                {
+                                    hit = pin;
+                                    minLen = len;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int pinId = 0; pinId < Nodes[i].Inputs.Count; pinId++)
+                            {
+                                var pin = Nodes[i].Inputs[pinId];
+                                var len = (DragPosition - (pin.HotPosition + pin.HotSize * 0.5f)).Length();
+                                if (len < minLen && CanLink(LinkingOp.StartPin as PinOut, pin))
+                                {
+                                    hit = pin;
+                                    minLen = len;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+                hit = HitObject(DragPosition.X, DragPosition.Y);
             if (hit != null)
             {
                 if(Rtti.UTypeDesc.CanCast(hit.GetType(), typeof(NodePin)))
@@ -1001,32 +1056,119 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
 
-            if (ButtonPress[(int)EMouseButton.Left] == false &&
-                ButtonPress[(int)EMouseButton.Right] == false &&
-                ButtonPress[(int)EMouseButton.Middle] == false)
-            {
-                return;
-            }
-            else if (ButtonPress[(int)EMouseButton.Left])
+            if (ButtonPress[(int)EMouseButton.Left])
             {
                 if (mIsMovingSelNodes)
                 {
-                    foreach (var i in SelectedNodes)
+                    if (ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Left, -1))
                     {
-                        i.Node.Position = DragPosition - i.MoveOffset;
+                        if(IsKeydown(EKey.Shift) && mCheckCopyDrag)
+                        {
+                            mCheckCopyDrag = false;
+                            // copy selected nodes
+                            List<FSelNodeState> copyedNodes = new List<FSelNodeState>(SelectedNodes.Count);
+                            foreach (var i in SelectedNodes)
+                            {
+                                var type = Rtti.UTypeDesc.TypeOf(i.Node.GetType());
+                                var node = Rtti.UTypeDescManager.CreateInstance(type) as UNodeBase;
+                                i.Node.CopyTo(node);
+                                node.Name = i.Node.Name + "_copy";
+                                node.UserData = i.Node.UserData;
+                                node.Position = i.Node.Position;
+                                SetDefaultActionForNode(node);
+                                this.AddNode(node);
+                                i.Node.Selected = false;
+                                node.Selected = true;
+                                copyedNodes.Add(new FSelNodeState()
+                                {
+                                    Node = node,
+                                    MoveOffset = i.MoveOffset,
+                                });
+                            }
+                            SelectedNodes.Clear();
+                            SelectedNodes.AddRange(copyedNodes.ToArray());
+                            SelectedNodesDirty = true;
+                        }
+                        foreach (var i in SelectedNodes)
+                        {
+                            i.Node.Position = DragPosition - i.MoveOffset;
+                        }
                     }
-
+                    CheckNodeIntersectLink(DragPosition);
                     if(CheckMouseShake())
                     {
-                        foreach(var node in SelectedNodes)
+                        if(SelectedNodes.Count == 1)
                         {
-                            foreach (var iPin in node.Node.Inputs)
+                            var node = SelectedNodes[0].Node;
+                            var inLinkers = new List<UPinLinker>(node.Inputs.Count);
+                            for (int pI = 0; pI < node.Inputs.Count; pI++)
                             {
-                                RemoveLinkedIn(iPin);
+                                var inPin = node.Inputs[pI];
+                                for (int i = 0; i < Linkers.Count; i++)
+                                {
+                                    if (Linkers[i].InPin == inPin)
+                                    {
+                                        inLinkers.Add(Linkers[i]);
+                                    }
+                                }
                             }
-                            foreach (var oPin in node.Node.Outputs)
+                            var outLinkers = new List<UPinLinker>(node.Outputs.Count);
+                            for(int pI = 0; pI < node.Outputs.Count; pI++)
                             {
-                                RemoveLinkedOut(oPin);
+                                var outPin = node.Outputs[pI];
+                                for(int i=0; i<Linkers.Count; i++)
+                                {
+                                    if(Linkers[i].OutPin == outPin)
+                                    {
+                                        outLinkers.Add(Linkers[i]);
+                                    }
+                                }
+                            }
+                            unsafe
+                            {
+                                var used = stackalloc bool[outLinkers.Count];
+                                for (int i = 0; i < inLinkers.Count; i++)
+                                {
+                                    for (int j = 0; j < outLinkers.Count; j++)
+                                    {
+                                        if (used[j])
+                                            continue;
+
+                                        if (CanLink(inLinkers[i].OutPin, outLinkers[j].InPin))
+                                        {
+                                            used[j] = true;
+                                            AddLink(inLinkers[i].OutPin, outLinkers[j].InPin, true);
+                                            break;
+                                        }
+                                    }
+                                    inLinkers[i].InPin?.HostNode.OnRemoveLinker(inLinkers[i]);
+                                    inLinkers[i].OutPin?.HostNode.OnRemoveLinker(inLinkers[i]);
+                                    inLinkers[i].InPin = null;
+                                    inLinkers[i].OutPin = null;
+                                    Linkers.Remove(inLinkers[i]);
+                                }
+                                for(int i=0; i<outLinkers.Count; i++)
+                                {
+                                    outLinkers[i].InPin?.HostNode.OnRemoveLinker(outLinkers[i]);
+                                    outLinkers[i].OutPin?.HostNode.OnRemoveLinker(outLinkers[i]);
+                                    outLinkers[i].InPin = null;
+                                    outLinkers[i].OutPin = null;
+                                    Linkers.Remove(outLinkers[i]);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach(var node in SelectedNodes)
+                            {
+                                foreach (var iPin in node.Node.Inputs)
+                                {
+                                    RemoveLinkedIn(iPin);
+                                }
+                                foreach (var oPin in node.Node.Outputs)
+                                {
+                                    RemoveLinkedOut(oPin);
+                                }
                             }
                         }
                     }
@@ -1046,6 +1188,56 @@ namespace EngineNS.Bricks.NodeGraph
                 t.Y = screenPos.Y * SizeVP.Y;
                 var NewPositionVP = PressPosition - t;
                 PositionVP = NewPositionVP;
+            }
+        }
+
+        public UPinLinker PreOrderLinker;
+        public PinIn PreOrderPinIn;
+        public PinOut PreOrderPinOut;
+        void CheckNodeIntersectLink(in Vector2 dragPosition)
+        {
+            PreOrderLinker = null;
+            PreOrderPinIn = null;
+            PreOrderPinOut = null;
+            if (SelectedNodes.Count != 1)
+                return;
+            var selNode = SelectedNodes[0].Node;
+            float minDis = 20.0f;
+            for (int i = 0; i < Linkers.Count; i++)
+            {
+                var linker = Linkers[i];
+                var pointA = linker.InPin.HotPosition + linker.InPin.HotSize * 0.5f;
+                var pointB = linker.OutPin.HotPosition + linker.OutPin.HotSize * 0.5f;
+                var dis = PointF.DistanceToLine(dragPosition.X, dragPosition.Y, pointA.X, pointA.Y, pointB.X, pointB.Y);
+                if(dis < minDis)
+                {
+                    for(int pinIdx = 0; pinIdx < selNode.Inputs.Count; pinIdx++)
+                    {
+                        var pin = selNode.Inputs[pinIdx];
+                        if (linker.InPin == pin)
+                            continue;
+                        if(CanLink(linker.OutPin, pin))
+                        {
+                            PreOrderLinker = linker;
+                            PreOrderPinIn = pin;
+                            minDis = dis;
+                            break;
+                        }
+                    }
+                    for(int pinIdx = 0; pinIdx < selNode.Outputs.Count; pinIdx++)
+                    {
+                        var pin = selNode.Outputs[pinIdx];
+                        if (linker.OutPin == pin)
+                            continue;
+                        if(CanLink(pin, linker.InPin))
+                        {
+                            PreOrderLinker = linker;
+                            PreOrderPinOut = pin;
+                            minDis = dis;
+                            break;
+                        }
+                    }
+                }
             }
         }
         public float WheelSpeed { get; set; } = 0.1f;

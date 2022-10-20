@@ -21,6 +21,9 @@ namespace EngineNS.Bricks.Input.Device.Mouse
             }
         }
 
+        public int MouseX;
+        public int MouseY;
+
         public void Tick()
         {
             if(!ShowCursor)

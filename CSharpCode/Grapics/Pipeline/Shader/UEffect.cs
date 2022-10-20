@@ -331,7 +331,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         private static async System.Threading.Tasks.Task<bool> LinkShaders(UEffect result)
         {
-            //result.ShaderEffect.mCoreObject.LinkShaders();
+            //result.GraphicsEffect.mCoreObject.LinkShaders();
             return true;
         }
 

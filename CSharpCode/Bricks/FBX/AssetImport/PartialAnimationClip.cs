@@ -113,7 +113,7 @@ namespace EngineNS.Animation.Asset
                         {
                             animName = animDesc->Name.c_str();
                         }
-                        var rn = RName.GetRName(mDir.Name + animName + UAnimationClip.AssetExt);
+                        var rn = RName.GetRName(mDir.Name + animName + UAnimationClip.AssetExt, mDir.RNameType);
                         animImporter.Process();
                         List<AssetImportAndExport.FBX.FBXAnimElement> animElements = new List<AssetImportAndExport.FBX.FBXAnimElement>();
                         for (int animIndex = 0; animIndex < animImporter.GetAnimElementsNum(); ++animIndex)

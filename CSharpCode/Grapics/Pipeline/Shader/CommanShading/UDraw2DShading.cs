@@ -17,7 +17,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         }
         public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
-            //var gpuProgram = drawcall.Effect.ShaderEffect;
+            //var gpuProgram = drawcall.Effect.GraphicsEffect;
             //var cbIndex = drawcall.mCoreObject.FindCBufferIndex("cbPerShadingEnv");
             //if (cbIndex != 0xFFFFFFFF)
             //{
@@ -45,7 +45,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         }
         public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
-            var gpuProgram = drawcall.mCoreObject.GetShaderEffect();
+            var gpuProgram = drawcall.mCoreObject.GetGraphicsEffect();
             var cbIndex = gpuProgram.FindBinder("cbPerShadingEnv");
             if (cbIndex.IsValidPointer)
             {
@@ -61,13 +61,13 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         }
         public unsafe void OnDrawCall(NxRHI.UGraphicDraw drawcall, UCopy2DPolicy policy, Mesh.UMesh mesh)
         {
-            var index = drawcall.ShaderEffect.FindBinder("SourceTexture");
+            var index = drawcall.GraphicsEffect.FindBinder("SourceTexture");
             if (index.IsValidPointer)
             {
                 drawcall.BindSRV(index, policy.ViewPolicy.GetFinalShowRSV());
             }
 
-            index = drawcall.ShaderEffect.FindBinder("Samp_SourceTexture");
+            index = drawcall.GraphicsEffect.FindBinder("Samp_SourceTexture");
             if (index.IsValidPointer)
             {
                 drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
@@ -92,7 +92,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
         }
         public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
-            var gpuProgram = drawcall.ShaderEffect;
+            var gpuProgram = drawcall.GraphicsEffect;
             var cbIndex = gpuProgram.FindBinder("cbPerShadingEnv");
             if (cbIndex.IsValidPointer)
             {

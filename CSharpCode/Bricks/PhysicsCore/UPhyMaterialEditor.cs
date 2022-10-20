@@ -97,14 +97,14 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         protected unsafe void DrawToolBar()
         {
-            var btSize = new Vector2(64, 64);
-            if (ImGuiAPI.Button("Save", in btSize))
+            var btSize = Vector2.Zero;
+            if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 Material.SaveAssetTo(Material.AssetName);
                 var unused = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.ReloadMaterial(Material.AssetName);
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Reload", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Reload", in btSize))
             {
                 var unused = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.ReloadMaterial(Material.AssetName);
             }

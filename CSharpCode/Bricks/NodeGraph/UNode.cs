@@ -178,8 +178,22 @@ namespace EngineNS.Bricks.NodeGraph
             OnPreReadAction?.Invoke(this, tagObject, hostObject, fromXml);
         }
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
+        string mName = "NoName";
         [Rtti.Meta]
-        public virtual string Name { get; set; } = "NoName";
+        public virtual string Name 
+        {
+            get => mName;
+            set
+            {
+                if (mName == "NoName")
+                    Label = value;
+                mName = value;
+                LayoutDirty = true;
+            }
+        }
+        [Rtti.Meta]
+        [System.ComponentModel.Browsable(false)]
+        public virtual string Label { get; set; } = "NoName";
         [Rtti.Meta]
         public Guid NodeId { get; set; }
         public string NodeType
@@ -311,10 +325,16 @@ namespace EngineNS.Bricks.NodeGraph
             lineWidth += styles.IconOffset.X;
             lineWidth += Icon.Size.X;
             var nameSize = CalcTextSize(Name);
+            if(Name != Label && !string.IsNullOrEmpty(Label))
+            {
+                var tempSize = CalcTextSize(Label);
+                nameSize.Y += tempSize.Y + styles.TitleTextOffset;
+                nameSize.X = System.Math.Max(tempSize.X, nameSize.X);
+            }
             lineWidth += nameSize.X;
+            lineHeight = nameSize.Y + styles.TitlePadding.Y * 2;
             SetIfBigger(ref fNodeW, lineWidth);
             SetIfBigger(ref lineHeight, styles.IconOffset.Y * 2 + Icon.Size.Y);
-            SetIfBigger(ref lineHeight, nameSize.Y);
             TitleHeight = lineHeight;
             fNodeH += TitleHeight;
             fNodeH += styles.TitlePadding.Y;
@@ -756,6 +776,16 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
             return "";
+        }
+        public virtual bool CopyTo(UNodeBase target)
+        {
+            if (target.GetType() != this.GetType())
+                return false;
+
+            var type = Rtti.UTypeDesc.TypeOf(this.GetType());
+            var meta = Rtti.UClassMetaManager.Instance.GetMeta(type);
+            meta.CopyObjectMetaField(target, this);
+            return true;
         }
     }
 }

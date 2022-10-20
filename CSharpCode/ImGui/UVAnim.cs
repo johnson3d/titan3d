@@ -18,6 +18,10 @@ namespace EngineNS.EGui
         {
             return UUvAnim.AssetExt;
         }
+        public override string GetAssetTypeName()
+        {
+            return "UVAnim";
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             await Thread.AsyncDummyClass.DummyFunc();
@@ -70,7 +74,7 @@ namespace EngineNS.EGui
                 }
             }
 
-            cmdlist.AddText(in start, 0xFFFFFFFF, "UVAnim", null);
+            //cmdlist.AddText(in start, 0xFFFFFFFF, "UVAnim", null);
         }
         System.Threading.Tasks.Task<NxRHI.USrView> SnapTask;
     }

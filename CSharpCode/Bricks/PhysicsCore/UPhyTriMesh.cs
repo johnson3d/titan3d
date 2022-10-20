@@ -20,10 +20,14 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             return await UEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMesh(GetAssetName());
         }
-        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        //{
+        //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+        //    cmdlist.AddText(in start, 0xFFFFFFFF, "PhyMesh", null);
+        //}
+        public override string GetAssetTypeName()
         {
-            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
-            cmdlist.AddText(in start, 0xFFFFFFFF, "PhyMesh", null);
+            return "Physic Mesh";
         }
     }
     [UPhyTriMesh.UPhyMeshImport]

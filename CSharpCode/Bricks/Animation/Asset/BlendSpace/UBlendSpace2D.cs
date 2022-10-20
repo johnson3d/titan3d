@@ -18,6 +18,10 @@ namespace EngineNS.Animation.Asset.BlendSpace
             //必须是TextureAsset
             return true;
         }
+        public override string GetAssetTypeName()
+        {
+            return "Blend Space";
+        }
     }
 
 

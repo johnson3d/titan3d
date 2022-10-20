@@ -11,6 +11,10 @@ namespace EngineNS.GamePlay.Scene
         {
             return UScene.AssetExt;
         }
+        public override string GetAssetTypeName()
+        {
+            return "Scene";
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
@@ -20,11 +24,11 @@ namespace EngineNS.GamePlay.Scene
             //必须是TextureAsset
             return true;
         }
-        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
-        {
-            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
-            cmdlist.AddText(in start, 0xFFFFFFFF, "scene", null);
-        }
+        //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        //{
+        //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+        //    cmdlist.AddText(in start, 0xFFFFFFFF, "scene", null);
+        //}
     }
     public class USceneData : UNodeData
     {

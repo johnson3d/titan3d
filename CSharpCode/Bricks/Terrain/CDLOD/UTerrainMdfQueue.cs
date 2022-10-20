@@ -57,9 +57,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             
             var pat = Patch;
             
-            SureCBuffer(drawcall.mCoreObject.GetShaderEffect());
+            SureCBuffer(drawcall.mCoreObject.GetGraphicsEffect());
 
-            var shaderProg = drawcall.mCoreObject.GetShaderEffect();
+            var shaderProg = drawcall.mCoreObject.GetGraphicsEffect();
             var index = shaderProg.FindBinder("HeightMapTexture");
             if (index.IsValidPointer)
             {
@@ -146,7 +146,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 drawcall.BindCBuffer(cbIndex, pat.Level.Level.Node.TerrainCBuffer);
             }
         }
-        private void SureCBuffer(NxRHI.IShaderEffect shaderProg)
+        private void SureCBuffer(NxRHI.IGraphicsEffect shaderProg)
         {
             var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
             var pat = Patch;

@@ -45,7 +45,7 @@ namespace EngineNS.EGui.Controls
                 }
                 bool check = (TagFilters & Profiler.ELogTag.Info) != 0;
                 ImGuiAPI.SameLine(0, -1);
-                ImGuiAPI.Checkbox("Info", ref check);
+                EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox("Info", ref check);
                 if (check)
                 {
                     TagFilters |= Profiler.ELogTag.Info;
@@ -56,7 +56,7 @@ namespace EngineNS.EGui.Controls
                 }
                 check = (TagFilters & Profiler.ELogTag.Warning) != 0;
                 ImGuiAPI.SameLine(0, -1);
-                ImGuiAPI.Checkbox("Warning", ref check);
+                EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox("Warning", ref check);
                 if (check)
                 {
                     TagFilters |= Profiler.ELogTag.Warning;
@@ -67,7 +67,7 @@ namespace EngineNS.EGui.Controls
                 }
                 check = (TagFilters & Profiler.ELogTag.Error) != 0;
                 ImGuiAPI.SameLine(0, -1);
-                ImGuiAPI.Checkbox("Error", ref check);
+                EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox("Error", ref check);
                 if (check)
                 {
                     TagFilters |= Profiler.ELogTag.Error;
@@ -78,7 +78,7 @@ namespace EngineNS.EGui.Controls
                 }
                 check = (TagFilters & Profiler.ELogTag.Fatal) != 0;
                 ImGuiAPI.SameLine(0, -1);
-                ImGuiAPI.Checkbox("Fatal", ref check);
+                EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox("Fatal", ref check);
                 if (check)
                 {
                     TagFilters |= Profiler.ELogTag.Fatal;

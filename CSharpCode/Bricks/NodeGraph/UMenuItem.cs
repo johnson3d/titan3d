@@ -130,6 +130,8 @@ namespace EngineNS.Bricks.NodeGraph
             if (mFilterStore == filter)
                 return mLastCheckResult;
 
+            var finalFilter = filter.Replace(" ", "");
+
             bool checkResult;
             if (SubMenuItems.Count > 0)
             {
@@ -141,9 +143,9 @@ namespace EngineNS.Bricks.NodeGraph
                 checkResult = result;
             }
             else
-                checkResult = TextForFilter.Contains(filter);
+                checkResult = TextForFilter.Contains(finalFilter);
 
-            mFilterStore = filter;
+            mFilterStore = finalFilter;
             mLastCheckResult = checkResult;
             return checkResult;
         }

@@ -19,6 +19,10 @@ namespace EngineNS.Animation.Asset
             //必须是TextureAsset
             return true;
         }
+        public override string GetAssetTypeName()
+        {
+            return "Animation Clip";
+        }
     }
 
     [Rtti.Meta]
@@ -162,10 +166,6 @@ namespace EngineNS.Animation.Asset
         #region ImprotAttribute
         public partial class ImportAttribute : IO.CommonCreateAttribute
         {
-            ~ImportAttribute()
-            {
-                mFileDialog.Dispose();
-            }
             string mSourceFile;
             ImGui.ImGuiFileDialog mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             //EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();

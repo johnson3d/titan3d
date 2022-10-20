@@ -50,14 +50,6 @@ namespace EngineNS.NxRHI
                 return mCoreObject.GetAspectValue();
             }
         }
-        public void SetEvent()
-        {
-            mCoreObject.SetEvent();
-        }
-		public void ResetEvent()
-        {
-            mCoreObject.SetEvent();
-        }
         public void Wait(ulong value, uint time = uint.MaxValue)
         {
             mCoreObject.Wait(value, time);

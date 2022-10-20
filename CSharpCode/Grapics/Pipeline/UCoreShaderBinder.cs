@@ -8,7 +8,7 @@ namespace EngineNS.Graphics.Pipeline
     {
         public unsafe void UpdateIndex(NxRHI.UShaderEffect effect)
         {
-            //effect.ShaderEffect.
+            //effect.GraphicsEffect.
             CBufferCreator.UpdateBindResouce(effect);
             var binder = effect.FindBinder("cbPerFrame");
             if (binder != null)

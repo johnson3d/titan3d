@@ -63,12 +63,18 @@ namespace EngineNS.EGui.UIProxy
         }
 
         public static Vector2 RectMax;
-        public static void BeginToolbar(in ImDrawList drawList)
+        public static unsafe void BeginToolbar(in ImDrawList drawList, bool drawSplitline = true)
         {
+            var style = ImGuiAPI.GetStyle();
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
-            var windowWidth = ImGuiAPI.GetWindowWidth();
+            var windowWidth = ImGuiAPI.GetWindowContentRegionWidth();
             RectMax = cursorPos + new Vector2(windowWidth, EGui.UIProxy.StyleConfig.Instance.ToolbarHeight);
             drawList.AddRectFilled(in cursorPos, in RectMax, EGui.UIProxy.StyleConfig.Instance.ToolbarBG, 0.0f, ImDrawFlags_.ImDrawFlags_None);
+            if (drawSplitline)
+            {
+                var thickness = 1;
+                drawList.AddLine(new Vector2(cursorPos.X, RectMax.Y - thickness), new Vector2(RectMax.X, RectMax.Y - thickness), EGui.UIProxy.StyleConfig.Instance.WindowBackground, thickness);
+            }
             ImGuiAPI.BeginGroup();
         }
         public static void EndToolbar()
@@ -87,8 +93,9 @@ namespace EngineNS.EGui.UIProxy
         public float NextItemOffset => 0;
         public float NextItemSpacing => -1;
 
-        bool isMouseDown = false;
-        bool isMouseHover = false;
+        public bool IsMouseDown = false;
+        public bool IsMouseHover = false;
+        public bool IsDisable = false;
 
         public void Cleanup()
         {
@@ -103,7 +110,7 @@ namespace EngineNS.EGui.UIProxy
 
         public bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
         {
-            if(DrawButton(drawList, drawData, ref isMouseDown, ref isMouseHover, Icon, Name, NextItemOffset, NextItemSpacing))
+            if(DrawButton(drawList, ref IsMouseDown, ref IsMouseHover, Icon, Name, IsDisable, NextItemOffset, NextItemSpacing))
             {
                 Action?.Invoke();
                 return true;
@@ -111,13 +118,14 @@ namespace EngineNS.EGui.UIProxy
             return false;
         }
         public static bool DrawButton(in ImDrawList drawList, 
-                                  in Support.UAnyPointer drawData, 
                                   ref bool isMouseDown, 
                                   ref bool isMouseHover,
                                   ImageProxy icon,
                                   string name,
+                                  bool disable = false,
                                   float itemOffset = 0,
-                                  float itemSpacing = -1)
+                                  float itemSpacing = -1
+            )
         {
             ImGuiAPI.SameLine(itemOffset, itemSpacing);
 
@@ -145,34 +153,30 @@ namespace EngineNS.EGui.UIProxy
                 hitRectMax.Y = tempScrPos.Y + icon.ImageSize.Y;
             }
 
-            var textSize = ImGuiAPI.CalcTextSize(name, false, -1);
-            tempScrPos.Y = cursorScrPos.Y + (StyleConfig.Instance.ToolbarHeight - textSize.Y) * 0.5f + clickDelta;
+            if(!string.IsNullOrEmpty(name))
+            {
+                var textSize = ImGuiAPI.CalcTextSize(name, false, -1);
+                tempScrPos.Y = cursorScrPos.Y + (StyleConfig.Instance.ToolbarHeight - textSize.Y) * 0.5f + clickDelta;
+                hitRectMin.X = System.Math.Min(hitRectMin.X, tempScrPos.X);
+                hitRectMin.Y = System.Math.Min(hitRectMin.Y, tempScrPos.Y);
+                hitRectMax.X = System.Math.Max(hitRectMax.X, tempScrPos.X + textSize.X);
+                hitRectMax.Y = System.Math.Max(hitRectMax.Y, tempScrPos.Y + textSize.Y);
+            }
             ImGuiAPI.SetCursorScreenPos(in tempScrPos);
-            hitRectMin.X = System.Math.Min(hitRectMin.X, tempScrPos.X);
-            hitRectMin.Y = System.Math.Min(hitRectMin.Y, tempScrPos.Y);
-            hitRectMax.X = System.Math.Max(hitRectMax.X, tempScrPos.X + textSize.X);
-            hitRectMax.Y = System.Math.Max(hitRectMax.Y, tempScrPos.Y + textSize.Y);
-            if(isMouseDown)
-            {
-                var pressColor = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor_Press);
-                ImGuiAPI.TextColored(in pressColor, name);
-                if(icon != null)
-                    icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in pressColor);
-            }
+
+            Vector4 color = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor);
+            if(disable)
+                color = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor_Disable);
+            else if (isMouseDown)
+                color = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor_Press);
             else if(isMouseHover)
-            {
-                var hoverColor = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor_Hover);
-                ImGuiAPI.TextColored(in hoverColor, name);
-                if(icon != null)
-                    icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in hoverColor);
-            }
-            else
-            {
-                var textColor = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor);
-                ImGuiAPI.TextColored(in textColor, name);
-                if (icon != null)
-                    icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in textColor);
-            }
+                color = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor_Hover);
+
+            if (!string.IsNullOrEmpty(name))
+                ImGuiAPI.TextColored(in color, name);
+            if (icon != null)
+                icon.Color = ImGuiAPI.ColorConvertFloat4ToU32(in color);
+
             ImGuiAPI.EndGroup();
             if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false) && isMouseHover)
             {
@@ -181,7 +185,7 @@ namespace EngineNS.EGui.UIProxy
             isMouseHover = ImGuiAPI.IsMouseHoveringRect(in hitRectMin, in hitRectMax, true);
             isMouseDown = ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) && isMouseHover;
 
-            return retValue;
+            return retValue && !disable;
         }
     }
 

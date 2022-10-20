@@ -263,27 +263,39 @@ namespace EngineNS.Editor
                     ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
                 {
                     wsz = ImGuiAPI.GetWindowSize();
-                    DrawMainMenu();
                     DrawToolBar();
+                    DrawMainMenu();
 
-                    ImGuiAPI.Separator();
-                    ImGuiAPI.Columns(2, null, true);
-                    if (LeftWidth == 0)
+                    //ImGuiAPI.Separator();
+                    //ImGuiAPI.Columns(2, null, true);
+                    //if (LeftWidth == 0)
+                    //{
+                    //    ImGuiAPI.SetColumnWidth(0, wsz.X * 0.15f);
+                    //}
+                    //var min = ImGuiAPI.GetWindowContentRegionMin();
+                    //var max = ImGuiAPI.GetWindowContentRegionMin();
+
+                    //DrawLeft(ref min, ref max);
+                    //LeftWidth = ImGuiAPI.GetColumnWidth(0);
+                    //ImGuiAPI.NextColumn();
+
+                    //DrawCenter(ref min, ref max);
+                    //CenterWidth = ImGuiAPI.GetColumnWidth(1);
+                    //ImGuiAPI.NextColumn();
+
+                    //ImGuiAPI.Columns(1, null, true);
+                    if (ImGuiAPI.BeginChild("CenterWindow", in Vector2.MinusOne, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                     {
-                        ImGuiAPI.SetColumnWidth(0, wsz.X * 0.15f);
+                        ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+                        var sz = new Vector2(0.0f, 0.0f);
+                        //var winClass = new ImGuiWindowClass();
+                        //winClass.UnsafeCallConstructor();
+                        //ImGuiAPI.DockSpace(CenterDockId, ref sz, dockspace_flags, ref winClass);
+                        //winClass.UnsafeCallDestructor();
+
+                        ImGuiAPI.DockSpace(CenterDockId, &sz, dockspace_flags, (ImGuiWindowClass*)0);
                     }
-                    var min = ImGuiAPI.GetWindowContentRegionMin();
-                    var max = ImGuiAPI.GetWindowContentRegionMin();
-
-                    DrawLeft(ref min, ref max);
-                    LeftWidth = ImGuiAPI.GetColumnWidth(0);
-                    ImGuiAPI.NextColumn();
-
-                    DrawCenter(ref min, ref max);
-                    CenterWidth = ImGuiAPI.GetColumnWidth(1);
-                    ImGuiAPI.NextColumn();
-
-                    ImGuiAPI.Columns(1, null, true);
+                    ImGuiAPI.EndChild();
                 }
                 ImGuiAPI.End();
 
@@ -392,10 +404,13 @@ namespace EngineNS.Editor
             //    ImGuiAPI.EndMenuBar();
             //}
         }
+        bool[] mToolBtn_IsMouseDown = new bool[4];
+        bool[] mToolBtn_IsMouseHover = new bool[4];
         private unsafe void DrawToolBar()
         {
-            var btSize = Vector2.Zero;
-            if (ImGuiAPI.Button("CompileMacross", in btSize))
+            var drawList = ImGuiAPI.GetWindowDrawList();
+            EGui.UIProxy.Toolbar.BeginToolbar(drawList);
+            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[0], ref mToolBtn_IsMouseHover[0], null, "CompileMacross"))
             {
                 var csFiles = new List<string>(IO.FileManager.GetFiles(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game), "*.cs"));
                 var projectPath = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProjectPath;
@@ -428,24 +443,21 @@ namespace EngineNS.Editor
 
                 //UEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
             }
-            ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Play", in btSize))
+            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[1], ref mToolBtn_IsMouseHover[1], null, "Play"))
             {
                 var task = OnPlayGame(UEngine.Instance.Config.PlayGameName);
             }
-            ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Stop", in btSize))
+            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[2], ref mToolBtn_IsMouseHover[2], null, "Stop"))
             {
 
             }
-
-            ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Cap", in btSize))
+            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[3], ref mToolBtn_IsMouseHover[3], null, "Cap"))
             {
                 IRenderDocTool.GetInstance().SetGpuDevice(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
                 IRenderDocTool.GetInstance().SetActiveWindow(this.NativeWindow.HWindow.ToPointer());
                 UEngine.Instance.CaptureRenderDocFrame = 1;
             }
+            EGui.UIProxy.Toolbar.EndToolbar();
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
         {

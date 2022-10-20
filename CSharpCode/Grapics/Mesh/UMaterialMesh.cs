@@ -13,6 +13,10 @@ namespace EngineNS.Graphics.Mesh
         {
             return UMaterialMesh.AssetExt;
         }
+        public override string GetAssetTypeName()
+        {
+            return "UMS";
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(GetAssetName());
@@ -22,11 +26,11 @@ namespace EngineNS.Graphics.Mesh
             //必须是TextureAsset
             return true;
         }
-        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
-        {
-            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
-            cmdlist.AddText(in start, 0xFFFFFFFF, "ums", null);
-        }
+        //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        //{
+        //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+        //    cmdlist.AddText(in start, 0xFFFFFFFF, "ums", null);
+        //}
         protected override Color GetBorderColor()
         {
             return Color.OrangeRed;

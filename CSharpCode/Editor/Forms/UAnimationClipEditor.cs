@@ -97,8 +97,8 @@ namespace EngineNS.Editor.Forms
         }
         protected unsafe void DrawToolBar()
         {
-            var btSize = new Vector2(64, 64);
-            if (ImGuiAPI.Button("Save", in btSize))
+            var btSize = Vector2.Zero;
+            if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 AnimationClip.SaveAssetTo(AnimationClip.AssetName);
                 var unused = UEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(AnimationClip.AssetName);
@@ -106,17 +106,17 @@ namespace EngineNS.Editor.Forms
                 //USnapshot.Save(AnimationClip.AssetName, AnimationClip.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Reload", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Reload", in btSize))
             {
 
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Undo", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
             {
 
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Redo", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
             {
 
             }

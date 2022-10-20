@@ -11,6 +11,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return UMaterial.AssetExt;
         }
+        public override string GetAssetTypeName()
+        {
+            return "Material";
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(GetAssetName());
@@ -30,11 +34,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return Color.Gold;
         }
-        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
-        {
-            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
-            cmdlist.AddText(in start, 0xFFFFFFFF, "Mtl", null);
-        }
+        //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        //{
+        //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+        //    cmdlist.AddText(in start, 0xFFFFFFFF, "Mtl", null);
+        //}
     }
     [Rtti.Meta]
     [UMaterial.MaterialImport]

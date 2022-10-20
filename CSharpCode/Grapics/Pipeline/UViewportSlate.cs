@@ -172,7 +172,7 @@ namespace EngineNS.Graphics.Pipeline
 
                 IsMouseIn = ImGuiAPI.IsMouseHoveringRect(in min, in max, true);
 
-                if(ImGuiAPI.BeginChild("ViewportClient", in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                if(ImGuiAPI.BeginChild("ViewportClient", in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove| ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground))
                 {
                     IsViewportSlateFocused = ImGuiAPI.IsHoverCurrentWindow() && ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows);
                     OnDrawViewportUI(in curPos);                    
@@ -220,7 +220,11 @@ namespace EngineNS.Graphics.Pipeline
             var DrawOffset = new Vector2();
             DrawOffset.SetValue(winPos.X + vpMin.X, winPos.Y + vpMin.Y);
 
-            var viewMtx = camera.mCoreObject.GetViewProjection();
+            //var viewMtx = camera.mCoreObject.GetViewProjection();
+            var xCamera = camera.mCoreObject.GetRight();
+            var yCamera = camera.mCoreObject.GetUp();
+            var zCamera = camera.mCoreObject.GetDirection();
+            var viewMtx = Matrix.MakeMatrixAxis(in xCamera, in yCamera, in zCamera, in Vector3.Zero);
             var xVec = Vector3.TransformNormal(in Vector3.Right, in viewMtx);
             var yVec = Vector3.TransformNormal(in Vector3.Up, in viewMtx);
             var zVec = Vector3.TransformNormal(in Vector3.Forward, in viewMtx);

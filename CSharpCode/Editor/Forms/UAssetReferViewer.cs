@@ -266,7 +266,7 @@ namespace EngineNS.Editor.Forms
         protected void DrawToolBar()
         {
             var btSize = Vector2.Zero;
-            if (ImGuiAPI.Button("ExportRefs", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("ExportRefs", in btSize))
             {
                 
             }

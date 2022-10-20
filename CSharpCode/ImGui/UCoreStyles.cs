@@ -8,7 +8,7 @@ namespace EngineNS.EGui
     {
         public static UCoreStyles Instance { get; } = new UCoreStyles();
         public Color SnapBorderColor { get; set; } = Color.Green;
-        public int SnapRounding { get; set; } = 10;
+        public int SnapRounding { get; set; } = 3;
         public int SnapThinkness { get; set; } = 1;
         public Color LogInfoColor { get; set; } = Color.Green;
         public Color LogWarningColor { get; set; } = Color.DarkRed;

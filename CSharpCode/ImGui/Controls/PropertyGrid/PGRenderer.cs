@@ -166,7 +166,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 return;
             //mCallstack.Clear();
             //mCallstack.Add(new KeyValuePair<object, System.Reflection.PropertyInfo>(null, null));
-
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, EGui.UIProxy.StyleConfig.Instance.PGWindowPadding);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_WindowBg, EGui.UIProxy.StyleConfig.Instance.PanelBackground);
             if (bNewForm)
             {
                 if (ImGuiAPI.Begin($"{PGName}", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
@@ -185,12 +186,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 var winPos = ImGuiAPI.GetWindowPos();
                 var winSize = ImGuiAPI.GetWindowSize();
                 var sz = new Vector2(-1);
-                if(ImGuiAPI.BeginChild($"{PGName}", in sz, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                if(ImGuiAPI.BeginChild($"{PGName}", in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     OnDrawContent(bShowReadOnly, in winPos, in winSize, bKeepColums);
                 }
                 ImGuiAPI.EndChild();
             }
+            ImGuiAPI.PopStyleVar(1);
+            ImGuiAPI.PopStyleColor(1);
         }
 
         private unsafe void OnDrawHeadBar(ref ImDrawList drawList)
@@ -233,7 +236,6 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var posMin = drawPos;//ImGuiAPI.GetCursorPos(); //ImGuiAPI.GetWindowPos();
             var posMax = posMin + drawSize;// ImGuiAPI.GetWindowSize();
             drawList.AddRectFilled(in posMin, in posMax, EGui.UIProxy.StyleConfig.Instance.PanelBackground, 0.0f, ImDrawFlags_.ImDrawFlags_None);
-
             if (ImGuiAPI.IsWindowDocked())
             {
                 DockId = ImGuiAPI.GetWindowDockID();

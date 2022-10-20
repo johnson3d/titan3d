@@ -19,33 +19,37 @@ namespace EngineNS.Bricks.Procedure
         {
             return true;
         }
-        public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
+        public override string GetAssetTypeName()
         {
-            var start = ImGuiAPI.GetItemRectMin();
-            var end = start + sz;
-
-            var name = IO.FileManager.GetPureName(GetAssetName().Name);
-            var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
-            Vector2 tpos;
-            tpos.Y = start.Y + sz.Y - tsz.Y;
-            tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
-            //ImGuiAPI.PushClipRect(in start, in end, true);
-
-            end.Y -= tsz.Y;
-            OnDrawSnapshot(in cmdlist, ref start, ref end);
-            cmdlist.AddRect(in start, in end, (uint)EGui.UCoreStyles.Instance.SnapBorderColor.ToArgb(),
-                EGui.UCoreStyles.Instance.SnapRounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll, EGui.UCoreStyles.Instance.SnapThinkness);
-
-            cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
-            //ImGuiAPI.PopClipRect();
-
-            DrawPopMenu(ContentBrowser);
+            return "PGC";
         }
-        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
-        {
-            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
-            cmdlist.AddText(in start, 0xFFFFFFFF, "PGC", null);
-        }
+        //public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
+        //{
+        //    var start = ImGuiAPI.GetItemRectMin();
+        //    var end = start + sz;
+
+        //    var name = IO.FileManager.GetPureName(GetAssetName().Name);
+        //    var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
+        //    Vector2 tpos;
+        //    tpos.Y = start.Y + sz.Y - tsz.Y;
+        //    tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
+        //    //ImGuiAPI.PushClipRect(in start, in end, true);
+
+        //    end.Y -= tsz.Y;
+        //    OnDrawSnapshot(in cmdlist, ref start, ref end);
+        //    cmdlist.AddRect(in start, in end, (uint)EGui.UCoreStyles.Instance.SnapBorderColor.ToArgb(),
+        //        EGui.UCoreStyles.Instance.SnapRounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll, EGui.UCoreStyles.Instance.SnapThinkness);
+
+        //    cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
+        //    //ImGuiAPI.PopClipRect();
+
+        //    DrawPopMenu(ContentBrowser);
+        //}
+        //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        //{
+        //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+        //    cmdlist.AddText(in start, 0xFFFFFFFF, "PGC", null);
+        //}
         public override void OnShowIconTimout(int time)
         {
             base.OnShowIconTimout(time);

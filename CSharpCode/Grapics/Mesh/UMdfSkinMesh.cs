@@ -73,7 +73,7 @@ namespace EngineNS.Graphics.Mesh
                 var shaderBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
                 if (PerSkinMeshCBuffer == null)
                 {
-                    if (shaderBinder.CBPerSkinMesh.UpdateFieldVar(drawcall.ShaderEffect, "cbSkinMesh"))
+                    if (shaderBinder.CBPerSkinMesh.UpdateFieldVar(drawcall.GraphicsEffect, "cbSkinMesh"))
                     {
                         PerSkinMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(shaderBinder.CBPerSkinMesh.Binder.mCoreObject);
                     }

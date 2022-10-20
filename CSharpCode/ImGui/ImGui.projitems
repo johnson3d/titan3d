@@ -39,12 +39,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Base.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Button.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\CheckBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIProxy\CollapsingHeader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\ComboBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Dialog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Image.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Input.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Menu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\MessageBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Panel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\SearchBar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\StyleConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Toolbar.cs" />

@@ -97,17 +97,17 @@ namespace EngineNS.EGui
         protected void DrawToolBar()
         {
             var btSize = Vector2.Zero;
-            if (ImGuiAPI.Button("Save", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 UvAnim.SaveAssetTo(UvAnim.AssetName);
                 var unused = UEngine.Instance.GfxDevice.UvAnimManager.ReloadUVAnim(UvAnim.AssetName);
             }
             ImGuiAPI.SameLine(0, 100);
-            if (ImGuiAPI.Checkbox("ShowFrames", ref mIsShowFrames))
+            if (EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox("ShowFrames", ref mIsShowFrames))
             {
 
             }
-            if (ImGuiAPI.Checkbox("WriteFrame", ref mIsWriteFrame))
+            if (EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox("WriteFrame", ref mIsWriteFrame))
             {
 
             }

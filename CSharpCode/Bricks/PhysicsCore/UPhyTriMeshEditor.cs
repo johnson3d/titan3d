@@ -149,8 +149,8 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         protected unsafe void DrawToolBar()
         {
-            var btSize = new Vector2(64, 64);
-            if (ImGuiAPI.Button("SaveSnap", in btSize))
+            var btSize = Vector2.Zero;
+            if (EGui.UIProxy.CustomButton.ToolButton("SaveSnap", in btSize))
             {
                 //Editor.USnapshot.Save(TriMesh.AssetName, TriMesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }

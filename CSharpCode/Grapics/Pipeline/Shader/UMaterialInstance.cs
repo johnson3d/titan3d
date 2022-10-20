@@ -11,6 +11,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return UMaterialInstance.AssetExt;
         }
+        public override string GetAssetTypeName()
+        {
+            return "MInst";
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(GetAssetName());
@@ -22,11 +26,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return true;
             return false;
         }
-        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
-        {
-            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
-            cmdlist.AddText(in start, 0xFFFFFFFF, "MInst", null);
-        }
+        //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        //{
+        //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+        //    cmdlist.AddText(in start, 0xFFFFFFFF, "MInst", null);
+        //}
         public override void ResetSnapshot()
         {
             HasSnapshot = true;

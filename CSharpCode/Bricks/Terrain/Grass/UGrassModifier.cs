@@ -280,7 +280,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             else if (InstantVBs != null)
                 InstantVBs.Flush2VB(cmd, this);
         }
-        private void SureCBuffer(NxRHI.IShaderEffect shaderProg)
+        private void SureCBuffer(NxRHI.IGraphicsEffect shaderProg)
         {
             var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
             if(GrassType.GrassCBuffer == null)
@@ -296,7 +296,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             if ((pat.Level.Level.Node.TerrainCBuffer == null) || (pat.PatchCBuffer == null))
                 return;
 
-            SureCBuffer(drawcall.mCoreObject.GetShaderEffect());
+            SureCBuffer(drawcall.mCoreObject.GetGraphicsEffect());
 
             drawcall.mCoreObject.DrawInstance = (ushort)this.CurNumber;
 

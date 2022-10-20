@@ -22,11 +22,11 @@ namespace EngineNS.NxRHI
             set { mCoreObject.MeshLOD = value; }
         }
 
-        public IShaderEffect ShaderEffect
+        public IGraphicsEffect GraphicsEffect
         {
             get
             {
-                return mCoreObject.GetShaderEffect();
+                return mCoreObject.GetGraphicsEffect();
             }
         }
         public void Commit(ICommandList cmdlist)

@@ -106,13 +106,13 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         protected void DrawToolBar()
         {
-            var btSize = new Vector2(64, 64);
-            if (ImGuiAPI.Button("Save", in btSize))
+            var btSize = Vector2.Zero;
+            if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 //EngineNS.Editor.USnapshot.Save(NebulaParticle.AssetName, NebulaParticle.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Compile", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
             {
                 
             }

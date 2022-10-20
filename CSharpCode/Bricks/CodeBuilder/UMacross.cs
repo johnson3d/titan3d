@@ -52,6 +52,10 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return UMacross.AssetExt;
         }
+        public override string GetAssetTypeName()
+        {
+            return "Macross";
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             await EngineNS.Thread.AsyncDummyClass.DummyFunc();
@@ -68,11 +72,11 @@ namespace EngineNS.Bricks.CodeBuilder
             // macross可以引用所有类型的资源
             return true;
         }
-        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
-        {
-            UEngine.Instance.EditorInstance.MacrossIcon?.OnDraw(cmdlist, in start, in end, 0);
-            cmdlist.AddText(in start, 0xFFFFFFFF, "Macross", null);
-        }
+        //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        //{
+        //    UEngine.Instance.EditorInstance.MacrossIcon?.OnDraw(cmdlist, in start, in end, 0);
+        //    cmdlist.AddText(in start, 0xFFFFFFFF, "Macross", null);
+        //}
     }
 
     [Rtti.Meta]

@@ -25,7 +25,7 @@ public struct CppBool
             var v = (CppBool)info.Value;
             bool v2 = v;
             var saved = v;
-            ImGuiAPI.Checkbox($"##{info.Name}", &v2);
+            EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox($"##{info.Name}", ref v2);
             if (v != saved)
             {
                 newValue = v;
@@ -100,10 +100,10 @@ public struct vBOOL
         {
             newValue = info.Value;
             ImGuiAPI.SetNextItemWidth(-1);
-            var v = ((vBOOL)info.Value);
-            var saved = v;
-            ImGuiAPI.Checkbox($"##{info.Name}", (bool*)&v);
-            if (v.Value != saved.Value)
+            var v = (bool)((vBOOL)info.Value);
+            var saved = (bool)v;
+            EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox($"##{info.Name}", ref v);
+            if (v != saved)
             {
                 newValue = vBOOL.FromBoolean(v);
                 return true;

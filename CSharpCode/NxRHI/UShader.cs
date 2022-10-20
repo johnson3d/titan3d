@@ -40,7 +40,7 @@ namespace EngineNS.NxRHI
             }
             public uint BufferSize;
             
-            public bool UpdateFieldVar(IShaderEffect effect, string name)
+            public bool UpdateFieldVar(IGraphicsEffect effect, string name)
             {
                 if (mBinder != null)
                     return true;

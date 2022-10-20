@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.NxRHI
 {
-    public class UShaderEffect : AuxPtrType<NxRHI.IShaderEffect>
+    public class UShaderEffect : AuxPtrType<NxRHI.IGraphicsEffect>
     {
         public FEffectBinder FindBinder(VNameString name)
         {

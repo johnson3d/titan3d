@@ -888,9 +888,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             }
                         }
 
-                        LinkingOp.StartPin = null;
-                        LinkingOp.HoverPin = null;
-                        LinkingOp.IsBlocking = false;
+                        LinkingOp.Reset();
                         PopKlassSelector = false;
                     }
                     else if (KlassSelector.mSltMember != null)
@@ -907,9 +905,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             this.AddLink(oPin.HostNode, oPin.Name, node, node.Self.Name);
                         }
 
-                        LinkingOp.StartPin = null;
-                        LinkingOp.HoverPin = null;
-                        LinkingOp.IsBlocking = false;
+                        LinkingOp.Reset();
                         PopKlassSelector = false;
                     }
                     else if (KlassSelector.mSltField != null)
@@ -926,9 +922,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             this.AddLink(oPin.HostNode, oPin.Name, node, node.Self.Name);
                         }
 
-                        LinkingOp.StartPin = null;
-                        LinkingOp.HoverPin = null;
-                        LinkingOp.IsBlocking = false;
+                        LinkingOp.Reset();
                         PopKlassSelector = false;
                     }
                     else if (KlassSelector.mSltMethod != null)
@@ -948,9 +942,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             }
                         }
                         
-                        LinkingOp.StartPin = null;
-                        LinkingOp.HoverPin = null;
-                        LinkingOp.IsBlocking = false;
+                        LinkingOp.Reset();
                         PopKlassSelector = false;
                     }
                     ImGuiAPI.EndPopup();

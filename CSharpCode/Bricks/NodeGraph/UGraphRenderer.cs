@@ -114,7 +114,7 @@ namespace EngineNS.Bricks.NodeGraph
                 var screenPt = mGraph.ToScreenPos(delta.X, delta.Y);
                 if (delta.X >= 0 && delta.X <= sz.X && delta.Y >= 0 && delta.Y <= sz.Y)
                 {
-                    ProcessKeyboard();
+                    ProcessKeyboard(in screenPt);
                     ProcessMouse(in screenPt, in sz);
                 }
 
@@ -191,12 +191,13 @@ namespace EngineNS.Bricks.NodeGraph
             ImGuiAPI.EndChild();
         }
 
-        void ProcessKeyboard()
+        static List<UNodeBase> mCopyedNodes = new List<UNodeBase>();
+        void ProcessKeyboard(in Vector2 screenPt)
         {
             if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_RootWindow) == false)
                 return;
 
-            if(UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_DELETE))
+            if(ImGuiAPI.IsKeyPressed(ImGuiAPI.GetKeyIndex(ImGuiKey_.ImGuiKey_Delete), false))
             {
                 foreach(var node in mGraph.SelectedNodes)
                 {
@@ -204,11 +205,58 @@ namespace EngineNS.Bricks.NodeGraph
                 }
                 mGraph.ClearSelected();
             }
-            if(UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_TAB))
+            if(ImGuiAPI.IsKeyPressed(ImGuiAPI.GetKeyIndex(ImGuiKey_.ImGuiKey_Tab), false))
             {
+                mGraph.PopMenuPosition = mGraph.ViewportRateToCanvas(screenPt);
                 mGraph.CurMenuType = UNodeGraph.EGraphMenu.Canvas;
-                mGraph.CanvasMenus.SetIsExpanded(false, true);
-                mGraph.CanvasMenuFilterStr = "";
+            }
+            if(mGraph.IsKeydown(UNodeGraph.EKey.Ctl))
+            {
+                if (ImGuiAPI.IsKeyPressed(ImGuiAPI.GetKeyIndex(ImGuiKey_.ImGuiKey_C), false))
+                {
+                    mCopyedNodes.Clear();
+                    for(int i=0; i<mGraph.SelectedNodes.Count; i++)
+                    {
+                        mCopyedNodes.Add(mGraph.SelectedNodes[i].Node);
+                    }
+                }
+                if(ImGuiAPI.IsKeyPressed(ImGuiAPI.GetKeyIndex(ImGuiKey_.ImGuiKey_V), false) && mCopyedNodes.Count > 0)
+                //if(UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_v) && mCopyedNodes.Count > 0)
+                {
+                    mGraph.ClearSelected();
+                    var min = mCopyedNodes[0].Position;
+                    var max = mCopyedNodes[0].Size + min;
+                    for(int i=0; i<mCopyedNodes.Count; i++)
+                    {
+                        var nodeMin = mCopyedNodes[i].Position;
+                        var nodeMax = nodeMin + mCopyedNodes[i].Size;
+                        if (min.X > nodeMin.X)
+                            min.X = nodeMin.X;
+                        if (min.Y > nodeMin.Y)
+                            min.Y = nodeMin.Y;
+                        if (max.X < nodeMax.X)
+                            max.X = nodeMax.X;
+                        if (max.Y < nodeMax.Y)
+                            max.Y = nodeMax.Y;
+
+                        var copyedNode = Rtti.UTypeDescManager.CreateInstance(mCopyedNodes[i].GetType()) as UNodeBase;
+                        var id = copyedNode.NodeId;
+                        mCopyedNodes[i].CopyTo(copyedNode);
+                        copyedNode.NodeId = id;
+                        copyedNode.UserData = mGraph;
+                        mGraph.SetDefaultActionForNode(copyedNode);
+                        mGraph.AddNode(copyedNode);
+                        mGraph.AddSelected(copyedNode);
+                    }
+
+                    var center = (min + max) * 0.5f;
+                    var newCenter = mGraph.ViewportRateToCanvas(screenPt);
+                    for(int i=0; i<mGraph.SelectedNodes.Count; i++)
+                    {
+                        var node = mGraph.SelectedNodes[i].Node;
+                        node.Position += newCenter - center;
+                    }
+                }
             }
         }
 
@@ -337,8 +385,6 @@ namespace EngineNS.Bricks.NodeGraph
 
             var endTitle = mGraph.CanvasToViewport(node.Position + new Vector2(node.Size.X, node.TitleHeight)) + DrawOffset;
             //cmdlist.AddRectFilled(in nodeStart, in endTitle, node.TitleColor, 0, 0);
-            uint col = 0xFFFFFFFF;
-            uint errorCol = 0xFF0000FF;
             {//DrawTitle
                 var titleImg = UEngine.Instance.UIManager[styles.NodeTitleImg] as EGui.UIProxy.ImageProxy;
                 if(titleImg != null)
@@ -352,22 +398,26 @@ namespace EngineNS.Bricks.NodeGraph
                 //var curStart = node.Position;
                 //{//Draw Node Icon
 
-                    //    curStart.X += styles.IconOffset.X;
-                    //    var drawStart = CanvasToDraw(curStart);
-                    //    var drawEnd = CanvasToDraw(curStart + node.Icon.Size);
-                    //    DrawImage(cmdlist, node.Icon, in drawStart, in drawEnd);
+                //    curStart.X += styles.IconOffset.X;
+                //    var drawStart = CanvasToDraw(curStart);
+                //    var drawEnd = CanvasToDraw(curStart + node.Icon.Size);
+                //    DrawImage(cmdlist, node.Icon, in drawStart, in drawEnd);
 
-                    //    curStart.X += node.Icon.Size.X;
-                    //}
+                //    curStart.X += node.Icon.Size.X;
+                //}
 
                 //Draw Node Name
+                var drawStart = CanvasToDraw(node.Position + styles.TitlePadding);
+                if (node.Name != node.Label && !string.IsNullOrEmpty(node.Label))
                 {
-                    var drawStart = CanvasToDraw(node.Position + styles.TitlePadding);
-                    if (node.HasError)
-                        cmdlist.AddText(in drawStart, errorCol, node.Name, null);
-                    else
-                        cmdlist.AddText(in drawStart, col, node.Name, null);
+                    cmdlist.AddText(in drawStart, styles.TitleTextDarkColor, node.Label, null);
+                    var textSize = ImGuiAPI.CalcTextSize(node.Label, false, 0.0f);
+                    drawStart.Y += textSize.Y + styles.TitleTextOffset;
                 }
+                if (node.HasError)
+                    cmdlist.AddText(in drawStart, styles.TitleTextErrorColor, node.Name, null);
+                else
+                    cmdlist.AddText(in drawStart, styles.TitleTextColor, node.Name, null);
             }
 
             {//Draw Preview
@@ -442,9 +492,9 @@ namespace EngineNS.Bricks.NodeGraph
                 {
                     start = CanvasToDraw(inPin.NamePosition);
                     if(node.CodeExcept != null && node.CodeExcept.ErrorPin == inPin)
-                        cmdlist.AddText(start, errorCol, inPin.Name, null);
+                        cmdlist.AddText(start, styles.TitleTextErrorColor, inPin.Name, null);
                     else
-                        cmdlist.AddText(start, col, inPin.Name, null);
+                        cmdlist.AddText(start, styles.TitleTextColor, inPin.Name, null);
                 }
 				if (inPin.EditValue != null)
                 {
@@ -480,9 +530,9 @@ namespace EngineNS.Bricks.NodeGraph
                 {
                     start = CanvasToDraw(i.NamePosition);
                     if(node.CodeExcept != null && node.CodeExcept.ErrorPin == i)
-                        cmdlist.AddText(start, errorCol, i.Name, null);
+                        cmdlist.AddText(start, styles.TitleTextErrorColor, i.Name, null);
                     else
-                        cmdlist.AddText(start, col, i.Name, null);
+                        cmdlist.AddText(start, styles.TitleTextColor, i.Name, null);
                 }
             }
 
@@ -490,9 +540,10 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 DrawLinkingOp(cmdlist);
             }
+            DrawPreorderLink(cmdlist);
 
             // breaker point
-            if(node is IBreakableNode)
+            if (node is IBreakableNode)
             {
                 var breakableNode = node as IBreakableNode;
                 int circleSegments = 36;
@@ -554,18 +605,18 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public void DrawLinker(ImDrawList cmdlist, UPinLinker linker)
         {
+            var styles = UNodeGraphStyles.DefaultStyles;
             var p1_v = linker.OutPin.HotPosition + linker.OutPin.HotSize * 0.5f;
             var p4_v = linker.InPin.HotPosition + linker.InPin.HotSize * 0.5f;
             var p1 = new Vector2(p1_v.X, p1_v.Y);
             var p4 = new Vector2(p4_v.X, p4_v.Y);
             var delta = p4_v - p1_v;
             //auto delta = ImVec2(delta_v.GetX(), delta_v.GetY());
-            delta.X = Math.Abs(delta.X);
+            var ctDelta = Math.Min(styles.LinkerMaxDelta, Math.Max(styles.LinkerMinDelta, Math.Max(Math.Abs(delta.X), Math.Abs(delta.Y)) * 0.5f));
 
-            var p2 = new Vector2(p1.X + delta.X * 0.5f, p1.Y);
-            var p3 = new Vector2(p4.X - delta.X * 0.5f, p4.Y);
+            var p2 = new Vector2(p1.X + ctDelta, p1.Y);
+            var p3 = new Vector2(p4.X - ctDelta, p4.Y);
 
-            var styles = UNodeGraphStyles.DefaultStyles;
             int num_segs = (int)(delta.Length() / styles.BezierPixelPerSegement + 1);
 
             var lineColor = styles.LinkerColor;
@@ -597,6 +648,10 @@ namespace EngineNS.Bricks.NodeGraph
             var styles = UNodeGraphStyles.DefaultStyles;
             var LinkingOp = mGraph.LinkingOp;
             var p4 = mGraph.LinkingOp.BlockingEnd;
+            if(mGraph.LinkingOp.HoverPin != null)
+            {
+                p4 = mGraph.LinkingOp.HoverPin.HotPosition + mGraph.LinkingOp.HoverPin.HotSize * 0.5f;
+            }
             Vector2 p1;
             float ControlLength = 0;
             if (LinkingOp.StartPin.GetType() == typeof(PinIn))
@@ -626,9 +681,33 @@ namespace EngineNS.Bricks.NodeGraph
             p4 += DrawOffset;
             cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, styles.LinkerColor, 3, 30);
         }
+        void DrawPreorderLink(ImDrawList cmdlist)
+        {
+            if (mGraph.PreOrderLinker == null)
+                return;
+
+            var styles = UNodeGraphStyles.DefaultStyles;
+            if(mGraph.PreOrderPinIn != null)
+            {
+                var ptA = mGraph.PreOrderPinIn.HotPosition + mGraph.PreOrderPinIn.HotSize * 0.5f;
+                var ptB = mGraph.PreOrderLinker.OutPin.HotPosition + mGraph.PreOrderLinker.OutPin.HotSize * 0.5f;
+                ptA = mGraph.CanvasToViewport(ptA) + DrawOffset;
+                ptB = mGraph.CanvasToViewport(ptB) + DrawOffset;
+                cmdlist.AddLine(ptA, ptB, styles.PreOrderLinkerColor, 1);
+            }
+            if(mGraph.PreOrderPinOut != null)
+            {
+                var ptA = mGraph.PreOrderLinker.InPin.HotPosition + mGraph.PreOrderLinker.InPin.HotSize * 0.5f;
+                var ptB = mGraph.PreOrderPinOut.HotPosition + mGraph.PreOrderPinOut.HotSize * 0.5f;
+                ptA = mGraph.CanvasToViewport(ptA) + DrawOffset;
+                ptB = mGraph.CanvasToViewport(ptB) + DrawOffset;
+                cmdlist.AddLine(ptA, ptB, styles.PreOrderLinkerColor, 1);
+            }
+        }
         bool mCanvasMenuFilterFocused = false;
         List<Rect> mMouseInvalidAreas = new List<Rect>();
-        Vector2 mMenuWinSize = Vector2.Zero;
+        public string CanvasMenuFilterStr = "";
+
         public void DrawPopMenu()
         {
             if (mGraph.CurMenuType == UNodeGraph.EGraphMenu.None)
@@ -685,9 +764,13 @@ namespace EngineNS.Bricks.NodeGraph
                                 var width = ImGuiAPI.GetWindowContentRegionWidth();//ImGuiAPI.GetWindowWidth();
                                 var drawList = ImGuiAPI.GetWindowDrawList();
                                 if(mGraph.FirstSetCurMenuType)
+                                {
                                     ImGuiAPI.SetKeyboardFocusHere(0);
+                                    mGraph.CanvasMenus.SetIsExpanded(false, true);
+                                    CanvasMenuFilterStr = "";
+                                }
 
-                                EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref mGraph.CanvasMenuFilterStr, width);
+                                EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref CanvasMenuFilterStr, width);
                                 Vector2 wsize = new Vector2(200, 400);
                                 var id = ImGuiAPI.GetID("GraphContextMenu");
                                 if(ImGuiAPI.BeginChild(id, wsize, false, 
@@ -701,7 +784,7 @@ namespace EngineNS.Bricks.NodeGraph
                                     }
                                     mCurrentQuickMenuIdx = 0;
                                     for(var childIdx = 0; childIdx < mGraph.CanvasMenus.SubMenuItems.Count; childIdx++)
-                                        DrawMenu(mGraph.CanvasMenus.SubMenuItems[childIdx], mGraph.CanvasMenuFilterStr.ToLower(), ref mMenuWinSize);
+                                        DrawMenu(mGraph.CanvasMenus.SubMenuItems[childIdx], CanvasMenuFilterStr.ToLower());
                                 }
                                 ImGuiAPI.EndChild();
                             }
@@ -729,7 +812,7 @@ namespace EngineNS.Bricks.NodeGraph
                                 mGraph.NodeMenuDirty = false;
                             }
                             for (var childIdx = 0; childIdx < mGraph.NodeMenus.SubMenuItems.Count; childIdx++)
-                                DrawMenu(mGraph.NodeMenus.SubMenuItems[childIdx], "".ToLower(), ref mMenuWinSize);
+                                DrawMenu(mGraph.NodeMenus.SubMenuItems[childIdx], "".ToLower());
                         }
                         break;
                     case UNodeGraph.EGraphMenu.Pin:
@@ -750,7 +833,7 @@ namespace EngineNS.Bricks.NodeGraph
                                     mGraph.PinMenuDirty = false;
                                 }
                                 for (var childIdx = 0; childIdx < mGraph.PinMenus.SubMenuItems.Count; childIdx++)
-                                    DrawMenu(mGraph.PinMenus.SubMenuItems[childIdx], "".ToLower(), ref mMenuWinSize);
+                                    DrawMenu(mGraph.PinMenus.SubMenuItems[childIdx], "".ToLower());
                                 var pressPin = mGraph.PopMenuPressObject as NodePin;
                                 if (pressPin != null)
                                 {
@@ -780,11 +863,15 @@ namespace EngineNS.Bricks.NodeGraph
                                 var width = ImGuiAPI.GetColumnWidth(0);
                                 var drawList = ImGuiAPI.GetWindowDrawList();
                                 if (mGraph.FirstSetCurMenuType)
+                                {
                                     ImGuiAPI.SetKeyboardFocusHere(0);
+                                    CanvasMenuFilterStr = "";
+                                    mGraph.ObjectMenus.SetIsExpanded(false, true);
+                                }
 
-                                EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref mGraph.CanvasMenuFilterStr, width);
+                                EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref CanvasMenuFilterStr, width);
                                 for (var childIdx = 0; childIdx < mGraph.ObjectMenus.SubMenuItems.Count; childIdx++)
-                                    DrawMenu(mGraph.ObjectMenus.SubMenuItems[childIdx], mGraph.CanvasMenuFilterStr.ToLower(), ref mMenuWinSize);
+                                    DrawMenu(mGraph.ObjectMenus.SubMenuItems[childIdx], CanvasMenuFilterStr.ToLower());
                             }
                         }
                         break;
@@ -816,7 +903,7 @@ namespace EngineNS.Bricks.NodeGraph
         }
         int mSelectQuickMenuIdx = 0;
         int mCurrentQuickMenuIdx = 0;
-        public void DrawMenu(UMenuItem item, string filter, ref Vector2 maxSize)
+        public void DrawMenu(UMenuItem item, string filter)
         {
             if (!item.FilterCheck(filter))
                 return;
@@ -837,16 +924,16 @@ namespace EngineNS.Bricks.NodeGraph
                         flag |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
                         if(ImGuiAPI.IsKeyPressed((int)ImGuiKey_.ImGuiKey_Enter, false))
                         {
-                            item.Action(item, mGraph.PopMenuPressObject);
-                            ImGuiAPI.CloseCurrentPopup();
-                            mGraph.CurMenuType = UNodeGraph.EGraphMenu.None;
-                            mGraph.LinkingOp.StartPin = null;
+                            if(item.Action != null)
+                            {
+                                item.Action(item, mGraph.PopMenuPressObject);
+                                ImGuiAPI.CloseCurrentPopup();
+                                mGraph.CurMenuType = UNodeGraph.EGraphMenu.None;
+                                mGraph.LinkingOp.Reset();
+                            }
                         }
                     }
                     ImGuiAPI.TreeNodeEx(item.Text, flag);
-                    var size = ImGuiAPI.GetItemRectSize();
-                    maxSize.X = Math.Max(size.X, maxSize.X);
-                    maxSize.Y += size.Y;
                     if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
                         if (item.Action != null)
@@ -854,7 +941,7 @@ namespace EngineNS.Bricks.NodeGraph
                             item.Action(item, mGraph.PopMenuPressObject);
                             ImGuiAPI.CloseCurrentPopup();
                             mGraph.CurMenuType = UNodeGraph.EGraphMenu.None;
-                            mGraph.LinkingOp.StartPin = null;
+                            mGraph.LinkingOp.Reset();
                         }
                     }
                     mCurrentQuickMenuIdx++;
@@ -867,13 +954,10 @@ namespace EngineNS.Bricks.NodeGraph
                 ImGuiAPI.SetNextItemOpen(item.IsExpanded, ImGuiCond_.ImGuiCond_None);
                 if (ImGuiAPI.TreeNode(item.Text))
                 {
-                    var size = ImGuiAPI.GetItemRectSize();
-                    maxSize.X = Math.Max(size.X, maxSize.X);
-                    maxSize.Y += size.Y;
                     item.IsExpanded = true;
                     for (int menuIdx = 0; menuIdx < item.SubMenuItems.Count; menuIdx++)
                     {
-                        DrawMenu(item.SubMenuItems[menuIdx], filter, ref maxSize);
+                        DrawMenu(item.SubMenuItems[menuIdx], filter);
                     }
                     ImGuiAPI.TreePop();
                 }

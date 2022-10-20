@@ -39,6 +39,8 @@ namespace EngineNS.EGui.UIProxy
             }
             else
             {
+                if (mTask.Result == null)
+                    return IntPtr.Zero;
                 if(ImageSize == Vector2.Zero)
                     ImageSize = new Vector2(mTask.Result.PicDesc.Width, mTask.Result.PicDesc.Height);
                 return mTask.Result.GetTextureHandle();

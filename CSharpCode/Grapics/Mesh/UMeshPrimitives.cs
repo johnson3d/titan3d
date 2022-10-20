@@ -11,6 +11,10 @@ namespace EngineNS.Graphics.Mesh
         {
             return UMeshPrimitives.AssetExt;
         }
+        public override string GetAssetTypeName()
+        {
+            return "VMS";
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
@@ -19,11 +23,11 @@ namespace EngineNS.Graphics.Mesh
         {
             return false;
         }
-        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
-        {
-            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
-            cmdlist.AddText(in start, 0xFFFFFFFF, "vms", null);
-        }
+        //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        //{
+        //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+        //    cmdlist.AddText(in start, 0xFFFFFFFF, "vms", null);
+        //}
         protected override Color GetBorderColor()
         {
             return Color.LightYellow;

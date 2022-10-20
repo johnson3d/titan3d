@@ -200,7 +200,7 @@ namespace EngineNS.Bricks.NodeGraph
                 ImGuiAPI.PushItemWidth(ControlWidth * fScale);
                 var v = System.Convert.ToBoolean(Value);
                 var saved = v;
-                ImGuiAPI.Checkbox($"##{LabelName}", ref v);
+                EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox($"##{LabelName}", ref v);
                 if (saved != v)
                 {
                     Value = v;
@@ -446,7 +446,7 @@ namespace EngineNS.Bricks.NodeGraph
 
             UEngine.Instance.EditorInstance.RNamePopupContentBrowser.ExtNames = FilterExts;
             UEngine.Instance.EditorInstance.RNamePopupContentBrowser.MacrossBase = MacrossType;
-            UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset = null;
+            UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets.Clear();
             if (ImGuiAPI.Button("+"))
             {
                 UEngine.Instance.EditorInstance.RNamePopupContentBrowser.Visible = true;
@@ -462,10 +462,10 @@ namespace EngineNS.Bricks.NodeGraph
                     ImGuiAPI.EndPopup();
                 }
             }
-            if (UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset != null &&
-                    UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset.GetAssetName() != AssetName)
+            if (UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets.Count > 0 &&
+                    UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets[0].GetAssetName() != AssetName)
             {
-                this.Value = UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset.GetAssetName();
+                this.Value = UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets[0].GetAssetName();
             }
         }
     }

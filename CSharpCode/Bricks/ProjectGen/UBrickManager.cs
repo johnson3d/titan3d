@@ -96,7 +96,7 @@ namespace EngineNS.Bricks.ProjectGen
                 for (int i = 0; i < AllBricks.Count; i++)
                 {
                     bool bCheck = AllBricks[i].Checked;
-                    ImGuiAPI.Checkbox(AllBricks[i].FullName, ref bCheck);
+                    EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox(AllBricks[i].FullName, ref bCheck);
                     if (bCheck != AllBricks[i].Checked)
                     {
                         SetBrickChecked(AllBricks[i], bCheck);

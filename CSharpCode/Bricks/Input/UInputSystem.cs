@@ -30,8 +30,16 @@ namespace EngineNS.Bricks.Input
         Dictionary<EventType, UEventTrigger> EventTriggerDic = new Dictionary<EventType, UEventTrigger>();
 
 
-        
+
+        public bool[] OldKeyboards = new bool[(int)Scancode.NUM_SCANCODES];
         public bool[] Keyboards = new bool[(int)Scancode.NUM_SCANCODES];
+        public List<string> DropFiles = new List<string>();
+        public bool IsDropFiles = false;
+        public void ClearFilesDrop()
+        {
+            IsDropFiles = false;
+            DropFiles.Clear();
+        }
 
         public Device.Mouse.UMouse Mouse;
 
@@ -73,10 +81,28 @@ namespace EngineNS.Bricks.Input
                     EGui.UDockWindowSDL.ImGui_ImplSDL2_ProcessEvent(in sdlEvt);
                 }
                 MappedEvent(in sdlEvt, out var evt);
-                if (evt.Type == EventType.QUIT)
+                switch(evt.Type)
                 {
-                    return -1;
+                    case EventType.QUIT:
+                        return - 1;
+                    case EventType.DROPFILE:
+                        {
+                            var str = Marshal.PtrToStringUTF8(evt.Drop.File);
+                            DropFiles.Add(str);
+                        }
+                        break;
+                    case EventType.DROPBEGIN:
+                        {
+                            DropFiles.Clear();
+                        }
+                        break;
+                    case EventType.DROPCOMPLETE:
+                        {
+                            IsDropFiles = true;
+                        }
+                        break;
                 }
+
                 engine.EventProcessorManager.TickSDLEvent(sdlEvt);
                 UpdateKeyboardState(evt);
                 if (EventTriggerDic.ContainsKey(evt.Type))
@@ -109,15 +135,26 @@ namespace EngineNS.Bricks.Input
             }
         }
 
+        bool mKeyboardStateDirty = false;
         public void UpdateKeyboardState(Event evt)
         {
+            var key = (int)evt.Keyboard.Keysym.Scancode;
+            if(mKeyboardStateDirty)
+            {
+                Keyboards.CopyTo(OldKeyboards, 0);
+                mKeyboardStateDirty = false;
+            }
             if (evt.Type == EventType.KEYDOWN)
             {
-                Keyboards[(int)evt.Keyboard.Keysym.Scancode] = true;
+                OldKeyboards[key] = Keyboards[key];
+                Keyboards[key] = true;
+                mKeyboardStateDirty = true;
             }
             else if (evt.Type == EventType.KEYUP)
             {
-                Keyboards[(int)evt.Keyboard.Keysym.Scancode] = false;
+                OldKeyboards[key] = Keyboards[key];
+                Keyboards[key] = false;
+                mKeyboardStateDirty = true;
             }
         }
         public bool IsKeyDown(Keycode key)
@@ -127,6 +164,11 @@ namespace EngineNS.Bricks.Input
         public bool IsKeyDown(Scancode key)
         {
             return Keyboards[(int)key];
+        }
+        public bool IsKeyPressed(Keycode key)
+        {
+            var keycode = (int)GetScancodeFromKey(key);
+            return (OldKeyboards[keycode] && !Keyboards[keycode]);
         }
 
         public bool RegEvent(EventType eventType, IEvent evt)

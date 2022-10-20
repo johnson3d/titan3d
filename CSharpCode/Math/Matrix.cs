@@ -2748,12 +2748,21 @@ namespace EngineNS
             //return !Matrix.Equals(left, right);
         }
 
-        public static Matrix MakeMatrix(Vector3 InX, Vector3 InY, Vector3 InZ, Vector3 InW)
+        public static Matrix MakeMatrix(in Vector3 InX, in Vector3 InY, in Vector3 InZ, in Vector3 InW)
         {
             Matrix result;
             result.M11 = InX.X; result.M12 = InX.Y; result.M13 = InX.Z; result.M14 = 0.0f;
             result.M21 = InY.X; result.M22 = InY.Y; result.M23 = InY.Z; result.M24 = 0.0f;
             result.M31 = InZ.X; result.M32 = InZ.Y; result.M33 = InZ.Z; result.M34 = 0.0f;
+            result.M41 = InW.X; result.M42 = InW.Y; result.M43 = InW.Z; result.M44 = 1.0f;
+            return result;
+        }
+        public static Matrix MakeMatrixAxis(in Vector3 InX, in Vector3 InY, in Vector3 InZ, in Vector3 InW)
+        {
+            Matrix result;
+            result.M11 = InX.X; result.M12 = InY.X; result.M13 = InZ.X; result.M14 = 0.0f;
+            result.M21 = InX.Y; result.M22 = InY.Y; result.M23 = InZ.Y; result.M24 = 0.0f;
+            result.M31 = InX.Z; result.M32 = InY.Z; result.M33 = InZ.Z; result.M34 = 0.0f;
             result.M41 = InW.X; result.M42 = InW.Y; result.M43 = InW.Z; result.M44 = 1.0f;
             return result;
         }
@@ -2769,7 +2778,7 @@ namespace EngineNS
             NewX.Normalize();
             var NewY = Vector3.Cross(NewZ, NewX);
 
-            return Matrix.MakeMatrix(NewX, NewY, NewZ, Vector3.Zero);
+            return Matrix.MakeMatrix(in NewX, in NewY, in NewZ, in Vector3.Zero);
         }
         public static Matrix MakeFromY(Vector3 NewY)
         {
@@ -2782,7 +2791,7 @@ namespace EngineNS
             NewX.Normalize();
             var NewZ = Vector3.Cross(NewX, NewY);
 
-            return Matrix.MakeMatrix(NewX, NewY, NewZ, Vector3.Zero);
+            return Matrix.MakeMatrix(in NewX, in NewY, in NewZ, in Vector3.Zero);
         }
         public static Matrix MakeFromX(Vector3 NewX)
         {
@@ -2795,7 +2804,7 @@ namespace EngineNS
             NewX.Normalize();
             var NewY = Vector3.Cross(NewZ, NewX);
 
-            return Matrix.MakeMatrix(NewX, NewY, NewZ, Vector3.Zero);
+            return Matrix.MakeMatrix(in NewX, in NewY, in NewZ, in Vector3.Zero);
         }
     }
 }

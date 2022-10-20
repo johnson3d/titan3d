@@ -301,7 +301,7 @@ namespace EngineNS.Graphics.Mesh
                         System.Diagnostics.Debug.Assert(!string.IsNullOrEmpty(meshName));
                         if (hasSkin)
                         {
-                            var rn = RName.GetRName(mDir.Name + meshName + Animation.Asset.USkeletonAsset.AssetExt);
+                            var rn = RName.GetRName(mDir.Name + meshName + Animation.Asset.USkeletonAsset.AssetExt, mDir.RNameType);
                             var fbxSkeletonDesc = meshImporter.GetSkeletonDesc();
                             await CreateOrMergeSkeleton(rn, fbxSkeletonDesc);
                         }

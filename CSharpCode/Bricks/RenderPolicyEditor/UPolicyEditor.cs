@@ -139,18 +139,18 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         protected void DrawToolBar()
         {
-            var btSize = new Vector2(64, 64);
-            if (ImGuiAPI.Button("Save", in btSize))
+            var btSize = Vector2.Zero;
+            if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 var noused = Save();
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Compile", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
             {
                 var noused = Compile();
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Set", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Set", in btSize))
             {
                 var noused = SetCurrentPolicy();
             }

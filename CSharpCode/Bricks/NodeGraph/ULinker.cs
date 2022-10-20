@@ -99,5 +99,12 @@ namespace EngineNS.Bricks.NodeGraph
 
         public bool IsBlocking;
         public Vector2 BlockingEnd;
+
+        public void Reset()
+        {
+            StartPin = null;
+            HoverPin = null;
+            IsBlocking = false;
+        }
     }
 }

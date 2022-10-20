@@ -147,5 +147,14 @@ namespace EngineNS.GamePlay.Scene
         {
             ameta.AddReferenceAsset(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));
         }
+
+        public override void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
+        {
+            //base.GetHitProxyDrawMesh(meshes);
+        }
+        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        {
+            //base.OnGatherVisibleMeshes(rp);
+        }
     }
 }

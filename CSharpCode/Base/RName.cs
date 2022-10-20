@@ -82,12 +82,12 @@ namespace EngineNS
                 ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Always);
                 UEngine.Instance.EditorInstance.RNamePopupContentBrowser.ExtNames = FilterExts;
                 UEngine.Instance.EditorInstance.RNamePopupContentBrowser.MacrossBase = Rtti.UTypeDesc.TypeOf(MacrossType);
-                UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset = null;
+                UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets.Clear();
                 mComboBox.OnDraw(in drawList, in anyPt);
-                if(UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset != null &&
-                    UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset.GetAssetName() != name)
+                if(UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets.Count > 0 &&
+                    UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets[0].GetAssetName() != name)
                 {
-                    mDrawData.NewValue = UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAsset.GetAssetName();
+                    mDrawData.NewValue = UEngine.Instance.EditorInstance.RNamePopupContentBrowser.SelectedAssets[0].GetAssetName();
                 }
                 var pos = ImGuiAPI.GetCursorScreenPos();
                 pos.X += snapSize.X + 8;

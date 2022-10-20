@@ -52,6 +52,14 @@ namespace EngineNS.EGui.UIProxy
             mDic.Clear();
         }
     }
+
+    public class UIPanelProxy
+    {
+        public static bool BeginPanel(string str_id, in Vector2 size, bool border, ImGuiWindowFlags_ flags)
+        {
+            return ImGuiAPI.BeginChild(str_id, size, border, flags);
+        }
+    }
 }
 
 namespace EngineNS

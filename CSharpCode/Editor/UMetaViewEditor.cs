@@ -102,12 +102,12 @@ namespace EngineNS.Editor
         protected void DrawToolBar()
         {
             var btSize = Vector2.Zero;
-            if (ImGuiAPI.Button("Mipmap", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Mipmap", in btSize))
             {
 
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("SavePng", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("SavePng", in btSize))
             {
 
             }

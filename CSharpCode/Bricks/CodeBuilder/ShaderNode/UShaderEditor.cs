@@ -293,7 +293,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
         protected void DrawToolBar()
         {
-            var btSize = new Vector2(48, 16);
+            var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 var noused = Save();

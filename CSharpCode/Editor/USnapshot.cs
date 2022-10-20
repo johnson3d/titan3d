@@ -39,8 +39,15 @@ namespace EngineNS.Editor
                 var dstBf = texture as NxRHI.UBuffer;
                 if (dstTex != null)
                 {
-                    var box = new NxRHI.FSubresourceBox();
-                    im_cmd.CopyTextureRegion(dstTex.mCoreObject, 0, 0,0,0, tex, 0, in box);
+                    //var box = new NxRHI.FSubresourceBox();
+                    //box.Left = x;
+                    //box.Right = x + cpuDesc.Width;
+                    //box.Top = y;
+                    //box.Bottom = y + cpuDesc.Height;
+                    //box.Front = 0;
+                    //box.Back = 1;
+                    //im_cmd.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, tex, 0, in box);// (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
+                    im_cmd.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, tex, 0, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
                 }
                 else if (dstBf != null)
                 {
@@ -98,8 +105,7 @@ namespace EngineNS.Editor
                 var dstBf = texture as NxRHI.UBuffer;
                 if (dstTex != null)
                 {
-                    var box = new NxRHI.FSubresourceBox();
-                    im_cmd.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, srv.mCoreObject.GetBufferAsTexture(), 0, in box);
+                    im_cmd.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, srv.mCoreObject.GetBufferAsTexture(), 0, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
                 }
                 else if (dstBf != null)
                 {

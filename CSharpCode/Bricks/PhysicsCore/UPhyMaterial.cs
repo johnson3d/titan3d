@@ -20,10 +20,14 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             return await UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterial(GetAssetName());
         }
-        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        //{
+        //    UEngine.Instance.EditorInstance.PhyMaterialIcon?.OnDraw(cmdlist, in start, in end, 0);
+        //    cmdlist.AddText(in start, 0xFFFFFFFF, "PhyMtl", null);
+        //}
+        public override string GetAssetTypeName()
         {
-            UEngine.Instance.EditorInstance.PhyMaterialIcon?.OnDraw(cmdlist, in start, in end, 0);
-            cmdlist.AddText(in start, 0xFFFFFFFF, "PhyMtl", null);
+            return "PhyMtl";
         }
     }
     [Rtti.Meta]

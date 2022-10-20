@@ -96,7 +96,7 @@ namespace EngineNS.Editor.Forms
         protected void DrawToolBar()
         {
             var btSize = Vector2.Zero;
-            if (ImGuiAPI.Button("Mipmap", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Mipmap", in btSize))
             {
                 StbImageSharp.ImageResult image;
 
@@ -124,7 +124,7 @@ namespace EngineNS.Editor.Forms
                 }
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("SavePng", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("SavePng", in btSize))
             {
                 StbImageSharp.ImageResult image;
 

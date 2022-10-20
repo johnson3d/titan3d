@@ -113,7 +113,7 @@ namespace EngineNS.Rtti
                 var srcProp = srcType.GetProperty(i.PropertyName);
                 if (srcProp == null)
                     continue;
-                if (tarProp.PropertyType == srcProp.PropertyType)
+                if (tarProp.PropertyType == srcProp.PropertyType && tarProp.CanWrite)
                 {
                     var v = srcProp.GetValue(src);
                     tarProp.SetValue(tar, v);
@@ -755,30 +755,34 @@ namespace EngineNS.Rtti
         {
             return ".metadata";
         }
+        public override string GetAssetTypeName()
+        {
+            return "Metadata";
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return null;
         }
-        public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
-        {
-            var start = ImGuiAPI.GetItemRectMin();
-            var end = start + sz;
+        //public unsafe override void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
+        //{
+        //    var start = ImGuiAPI.GetItemRectMin();
+        //    var end = start + sz;
 
-            var name = IO.FileManager.GetPureName(GetAssetName().Name);
-            var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
-            Vector2 tpos;
-            tpos.Y = start.Y + sz.Y - tsz.Y;
-            tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
-            ImGuiAPI.PushClipRect(in start, in end, true);
+        //    var name = IO.FileManager.GetPureName(GetAssetName().Name);
+        //    var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
+        //    Vector2 tpos;
+        //    tpos.Y = start.Y + sz.Y - tsz.Y;
+        //    tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
+        //    ImGuiAPI.PushClipRect(in start, in end, true);
 
-            end.Y -= tsz.Y;
-            OnDrawSnapshot(in cmdlist, ref start, ref end);
-            cmdlist.AddRect(in start, in end, (uint)EGui.UCoreStyles.Instance.SnapBorderColor.ToArgb(),
-                EGui.UCoreStyles.Instance.SnapRounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll, EGui.UCoreStyles.Instance.SnapThinkness);
+        //    end.Y -= tsz.Y;
+        //    OnDrawSnapshot(in cmdlist, ref start, ref end);
+        //    cmdlist.AddRect(in start, in end, (uint)EGui.UCoreStyles.Instance.SnapBorderColor.ToArgb(),
+        //        EGui.UCoreStyles.Instance.SnapRounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll, EGui.UCoreStyles.Instance.SnapThinkness);
 
-            cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
-            ImGuiAPI.PopClipRect();
-        }
+        //    cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
+        //    ImGuiAPI.PopClipRect();
+        //}
     }
     [Editor.UAssetEditor(EditorType = typeof(Editor.UMetaVersionViewer))]
     public class UMetaVersion

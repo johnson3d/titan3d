@@ -21,6 +21,10 @@ namespace EngineNS.Animation.Asset
         {
             return true;
         }
+        public override string GetAssetTypeName()
+        {
+            return "Skeleton";
+        }
     }
     [Rtti.Meta]
     //[UFullSkeleton.Import]

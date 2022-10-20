@@ -78,7 +78,6 @@ namespace EngineNS.EGui.UIProxy
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextHoveredColor);
             if (IsTopMenuItem)
             {
-                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, StyleConfig.Instance.MenuHeaderColor);
                 ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in StyleConfig.Instance.TopMenuFramePadding);
             }
             else
@@ -96,14 +95,16 @@ namespace EngineNS.EGui.UIProxy
                 ImGuiAPI.SetCursorPosX(posX);
 
             }
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, StyleConfig.Instance.MenuHeaderColor);
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, UIProxy.StyleConfig.Instance.MenuHeaderColor);
             if (this.SubMenus != null && this.SubMenus.Count > 0)
                 State.Opened = ImGuiAPI.BeginMenu(MenuName, State.Enable);
             else
                 State.Opened = ImGuiAPI.MenuItem(MenuName, Shortcut, Selected, State.Enable);
+            ImGuiAPI.PopStyleColor(2);
             //ImGuiAPI.EndGroup();
             if(IsTopMenuItem)
             {
-                ImGuiAPI.PopStyleColor(1);
                 ImGuiAPI.PopStyleVar(1);
             }
             else
@@ -183,8 +184,9 @@ namespace EngineNS.EGui.UIProxy
                 ImGuiAPI.SetCursorPosX(posX);
             }
 
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, UIProxy.StyleConfig.Instance.TVHeaderActive);
             state.Opened = ImGuiAPI.MenuItem(menuName, shortcut, selected, state.Enable);
-
+            ImGuiAPI.PopStyleColor(1);
             ImGuiAPI.PopStyleVar(2);
             if(state.HasIndent)
                 ImGuiAPI.Unindent(StyleConfig.Instance.MenuItemIndent);
@@ -265,7 +267,9 @@ namespace EngineNS.EGui.UIProxy
                 posX += icon.ImageSize.X + StyleConfig.Instance.ItemSpacing.X;
                 ImGuiAPI.SetCursorPosX(posX);
             }
+            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, UIProxy.StyleConfig.Instance.TVHeaderActive);
             state.Opened = ImGuiAPI.BeginMenu(menuName, state.Enable);
+            ImGuiAPI.PopStyleColor(1);
             if(isTopMenuItem)
             {
                 ImGuiAPI.PopStyleColor(1);

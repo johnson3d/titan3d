@@ -192,6 +192,8 @@ namespace EngineNS.Bricks.Procedure
         {
             if (input == output)
                 return true;
+            if (input == null || output == null)
+                return false;
             if (input.ElementType != output.ElementType)
             {
                 return false;

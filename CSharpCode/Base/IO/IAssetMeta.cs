@@ -17,6 +17,14 @@ namespace EngineNS.IO
         {
 
         }
+        public virtual bool IsAssetSource(string fileExt)
+        {
+            return false;
+        }
+        public virtual void ImportSource(string sourceFile, RName dir)
+        {
+            throw new NotImplementedException("Need override this method!");
+        }
     }
     public class CommonCreateAttribute : IO.IAssetCreateAttribute
     {
@@ -187,10 +195,17 @@ namespace EngineNS.IO
         public static readonly string MetaExt = ".ameta";
         protected RName mAssetName;
         public bool HasSnapshot { get; set; } = true;
+        public bool IsSelected = false;
         public IAssetMeta()
         {
             mDeleteMenuState.Reset();
             mDeleteMenuState.HasIndent = false;
+            mRefGraphMenuState.Reset();
+            mRefGraphMenuState.HasIndent = false;
+        }
+        public virtual string GetAssetTypeName()
+        {
+            throw new NotImplementedException("Need override this method!");
         }
         public virtual string GetAssetExtType()
         {
@@ -245,36 +260,70 @@ namespace EngineNS.IO
         {
             return true;
         }
+        EGui.UIProxy.MenuItemProxy.MenuState mRefGraphMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         EGui.UIProxy.MenuItemProxy.MenuState mDeleteMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
         protected virtual Color GetBorderColor()
         {
             return EGui.UCoreStyles.Instance.SnapBorderColor;
         }
+        static Vector2 tempDelta0 = new Vector2(8, 8);
+        static Vector2 tempDelta = new Vector2(12, 15);
         public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
         {
+            var snapSize = sz.X * 0.9f;
             var start = ImGuiAPI.GetItemRectMin();
             var end = start + sz;
 
-            var name = IO.FileManager.GetPureName(GetAssetName().Name, 9);
-            var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
+            var shadowImg = UEngine.Instance.UIManager[UAssetMetaManager.ItemShadowImgName] as EGui.UIProxy.ImageProxy;
+            if (shadowImg != null)
+                shadowImg.OnDraw(cmdlist, start - tempDelta0, end + tempDelta);
+            var color = 0xff383838;
+            var typeFontColor = 0xff757575;
+            var nameColor = EGui.UIProxy.StyleConfig.Instance.TextColor;
+            if (IsSelected)
+            {
+                color = EGui.UIProxy.StyleConfig.Instance.TVHeaderActive;
+                typeFontColor = EGui.UIProxy.StyleConfig.Instance.TextColor;
+                nameColor = 0xFFFFFFFF;
+            }
+            else if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_RectOnly) && 
+                ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_DockHierarchy))
+                color = EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered;
+            cmdlist.AddRectFilled(start, end, color, EGui.UCoreStyles.Instance.SnapRounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
+
+            var delta = (sz.X - snapSize) * 0.5f;
+            var typeName = GetAssetTypeName();
+            //var tsz = ImGuiAPI.CalcTextSize(typeName, false, -1);
             Vector2 tpos;
-            tpos.Y = start.Y + sz.Y - tsz.Y;
-            tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
+            tpos.X = start.X + delta;
+            tpos.Y = start.Y + delta;
+            UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_13px);
+            cmdlist.AddText(in tpos, typeFontColor, typeName, null);
+            UEngine.Instance.GfxDevice.SlateRenderer.PopFont();
+
             //ImGuiAPI.PushClipRect(in start, in end, true);
 
-            end.Y -= tsz.Y;
-            OnDrawSnapshot(in cmdlist, ref start, ref end);
+            var snapStart = new Vector2(start.X + delta, tpos.Y + 18);
+            var snapEnd = snapStart + new Vector2(snapSize, snapSize);
+            OnDrawSnapshot(in cmdlist, ref snapStart, ref snapEnd);
 
             //var titleImg = UEngine.Instance.UIManager.GetUIProxy("uestyle/graph/regularnode_shadow_selected.srv", new Thickness(18.0f / 64.0f)) as EGui.UIProxy.ImageProxy;
             //if (titleImg != null)
             //    titleImg.OnDraw(cmdlist, in start, in end);
 
-            cmdlist.AddRect(in start, in end, (uint)GetBorderColor().ToAbgr(), 
-                EGui.UCoreStyles.Instance.SnapRounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll, EGui.UCoreStyles.Instance.SnapThinkness);
+            cmdlist.AddRect(in snapStart, in snapEnd, (uint)GetBorderColor().ToAbgr(), 
+                0.0f, ImDrawFlags_.ImDrawFlags_None, EGui.UCoreStyles.Instance.SnapThinkness);
 
-            cmdlist.AddText(in tpos, 0xFFFF00FF, name, null);
+            var name = IO.FileManager.GetPureName(GetAssetName().Name, 11);
+            var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
+            tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
+            tpos.Y = snapEnd.Y + 8;
+            UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_15px);
+            cmdlist.AddText(in tpos, nameColor, name, null);
+            UEngine.Instance.GfxDevice.SlateRenderer.PopFont();
             //ImGuiAPI.PopClipRect();
+
 
             DrawPopMenu(ContentBrowser);
         }
@@ -287,7 +336,7 @@ namespace EngineNS.IO
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 Support.UAnyPointer menuData = new Support.UAnyPointer();
 
-                if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, ref drawList, ref menuData, ref mDeleteMenuState))
+                if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, ref drawList, ref menuData, ref mRefGraphMenuState))
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     var rn = RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType);
@@ -420,6 +469,7 @@ namespace EngineNS.IO
                 return result;
             return null;
         }
+        public static string ItemShadowImgName = "uestyle/content/uniformshadow.srv";
         public void LoadMetas()
         {
             var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine);
@@ -460,6 +510,9 @@ namespace EngineNS.IO
                 Assets.Add(m.AssetId, m);
                 RNameAssets[m.GetAssetName()] = m;
             }
+
+            if (UEngine.Instance.UIManager[ItemShadowImgName] == null)
+                UEngine.Instance.UIManager[ItemShadowImgName] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(ItemShadowImgName, RName.ERNameType.Engine), new Thickness(16.0f / 64.0f, 16.0f / 64.0f, 16.0f / 64.0f, 16.0f / 64.0f));
         }
         public T NewAsset<T>(RName name) where T : class, IAsset, new()
         {

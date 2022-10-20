@@ -288,17 +288,17 @@ namespace EngineNS.Editor.Forms
         protected void DrawToolBar()
         {
             var btSize = Vector2.Zero;
-            if (ImGuiAPI.Button("Save", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 Scene.SaveAssetTo(AssetName);
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Snapshot", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Snapshot", in btSize))
             {
                 USnapshot.Save(AssetName, Scene.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV());
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Reload", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Reload", in btSize))
             {
                 if (Scene != null)
                     Scene.Parent = null;
@@ -314,17 +314,17 @@ namespace EngineNS.Editor.Forms
                 action();
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Undo", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
             {
 
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Redo", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Redo", in btSize))
             {
 
             }
             ImGuiAPI.SameLine(0, -1);
-            if (ImGuiAPI.Button("Test", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Test", in btSize))
             {
                 Scene.ClearChildren();
                 var task = EngineNS.Editor.UMainEditorApplication.TestCreateScene(PreviewViewport, PreviewViewport.World, Scene);
@@ -341,7 +341,7 @@ namespace EngineNS.Editor.Forms
                 {
                     name = GamePlay.UWorld.UVisParameter.FilterTypeCountAs;
                 }
-                if (ImGuiAPI.Checkbox(name, ref checkValue))
+                if (EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox(name, ref checkValue))
                 {
                     if (checkValue)
                     {

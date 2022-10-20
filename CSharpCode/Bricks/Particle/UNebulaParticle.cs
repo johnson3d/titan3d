@@ -11,6 +11,11 @@ namespace EngineNS.Bricks.Particle
         {
             return UNebulaParticle.AssetExt;
         }
+
+        public override string GetAssetTypeName()
+        {
+            return "Nebula";
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             //return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
@@ -20,11 +25,11 @@ namespace EngineNS.Bricks.Particle
         {
             return false;
         }
-        public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
-        {
-            base.OnDrawSnapshot(in cmdlist, ref start, ref end);
-            cmdlist.AddText(in start, 0xFFFFFFFF, "nebula", null);
-        }
+        //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        //{
+        //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
+        //    cmdlist.AddText(in start, 0xFFFFFFFF, "nebula", null);
+        //}
     }
     [UNebulaParticle.UNebulaParticleImport]
     [IO.AssetCreateMenu(MenuName = "NubulaParticle")]
