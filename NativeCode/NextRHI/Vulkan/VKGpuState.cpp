@@ -447,7 +447,7 @@ namespace NxRHI
 	bool VKGpuDrawState::BuildState(IGpuDevice* device1)
 	{
 		auto device = (VKGpuDevice*)device1;
-		auto effect = ShaderEffect.UnsafeConvertTo<VKShaderEffect>();
+		auto effect = ShaderEffect.UnsafeConvertTo<VKGraphicsEffect>();
 
 		VkPipelineShaderStageCreateInfo shaderStages[2]{};
 		shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;

@@ -1276,6 +1276,59 @@ public:
 	{
 		return ImGui::IsWindowDocked();
 	}
+	static void          DockBuilderDockWindow(const char* window_name, ImGuiID node_id)
+	{
+		ImGui::DockBuilderDockWindow(window_name, node_id);
+	}
+	static ImGuiDockNode* DockBuilderGetNode(ImGuiID node_id)
+	{
+		return ImGui::DockBuilderGetNode(node_id);
+	}
+	static ImGuiID       DockBuilderAddNode(ImGuiID node_id = 0, ImGuiDockNodeFlags flags = 0)
+	{
+		return ImGui::DockBuilderAddNode(node_id, flags);
+	}
+	static void          DockBuilderRemoveNode(ImGuiID node_id)
+	{
+		ImGui::DockBuilderRemoveNode(node_id);
+	}
+	static void          DockBuilderRemoveNodeDockedWindows(ImGuiID node_id, bool clear_settings_refs = true)
+	{
+		ImGui::DockBuilderRemoveNodeDockedWindows(node_id, clear_settings_refs);
+	}
+	static void          DockBuilderRemoveNodeChildNodes(ImGuiID node_id)
+	{
+		ImGui::DockBuilderRemoveNodeChildNodes(node_id);
+	}
+	static void          DockBuilderSetNodePos(ImGuiID node_id, ImVec2 pos)
+	{
+		ImGui::DockBuilderSetNodePos(node_id, pos);
+	}
+	static void          DockBuilderSetNodeSize(ImGuiID node_id, ImVec2 size)
+	{
+		ImGui::DockBuilderSetNodeSize(node_id, size);
+	}
+	static ImGuiID		 DockBuilderSplitNode(ImGuiID node_id, ImGuiDir split_dir, float size_ratio_for_node_at_dir, ImGuiID* out_id_at_dir, ImGuiID* out_id_at_opposite_dir)
+	{
+		return ImGui::DockBuilderSplitNode(node_id, split_dir, size_ratio_for_node_at_dir, out_id_at_dir, out_id_at_opposite_dir);
+	}
+	static void          DockBuilderCopyDockSpace(ImGuiID src_dockspace_id, ImGuiID dst_dockspace_id, ImVector<const char*>* in_window_remap_pairs)
+	{
+		ImGui::DockBuilderCopyDockSpace(src_dockspace_id, dst_dockspace_id, in_window_remap_pairs);
+	}
+	static void          DockBuilderCopyNode(ImGuiID src_node_id, ImGuiID dst_node_id, ImVector<ImGuiID>* out_node_remap_pairs)
+	{
+		ImGui::DockBuilderCopyNode(src_node_id, dst_node_id, out_node_remap_pairs);
+	}
+	static void          DockBuilderCopyWindowSettings(const char* src_name, const char* dst_name)
+	{
+		ImGui::DockBuilderCopyWindowSettings(src_name, dst_name);
+	}
+	static void          DockBuilderFinish(ImGuiID node_id)
+	{
+		ImGui::DockBuilderFinish(node_id);
+	}
+
 	// Logging/Capture
 	static void          LogToTTY(int auto_open_depth = -1)
 	{

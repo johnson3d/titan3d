@@ -83,21 +83,13 @@ namespace NxRHI
 			ASSERT(false);
 			return 0;
 		}
-		auto hr = vkGetSemaphoreCounterValue(device->mDevice, mSemaphore, &count);
+		auto hr = VKGpuSystem::vkGetSemaphoreCounterValue(device->mDevice, mSemaphore, &count);
 		if (count == UINT64_MAX)
 		{
 			ASSERT(false);
 		}
 		ASSERT(hr == VK_SUCCESS);
 		return count;
-	}
-	void VKFence::SetEvent()
-	{
-		mEvent->SetEvent();
-	}
-	void VKFence::ResetEvent()
-	{
-		mEvent->ResetEvent();
 	}
 	void VKFence::CpuSignal(UINT64 value)
 	{
@@ -106,7 +98,7 @@ namespace NxRHI
 		info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO;
 		info.semaphore = mSemaphore;
 		info.value = value;
-		vkSignalSemaphore(device->mDevice, &info);
+		VKGpuSystem::vkSignalSemaphore(device->mDevice, &info);
 	}
 	void VKFence::Signal(ICmdQueue* queue, UINT64 value)
 	{
@@ -114,19 +106,30 @@ namespace NxRHI
 	}
 	bool VKFence::Wait(UINT64 value, UINT timeOut)
 	{
-		auto completed = GetCompletedValue();
-		if (completed < value)
-		{
-			auto device = mDeviceRef.GetPtr();
-			VkSemaphoreWaitInfo info{};
-			info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
-			info.flags = 0;// VK_SEMAPHORE_WAIT_ANY_BIT;
-			info.semaphoreCount = 1;
-			info.pSemaphores = &mSemaphore;
-			info.pValues = &value;
-			vkWaitSemaphores(device->mDevice, &info, UINT64_MAX);
-			//completed = GetCompletedValue();
-		}
+		//temp code
+		auto device = mDeviceRef.GetPtr();
+		VkSemaphoreWaitInfo info{};
+		info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+		info.flags = 0;// VK_SEMAPHORE_WAIT_ANY_BIT;
+		info.semaphoreCount = 1;
+		info.pSemaphores = &mSemaphore;
+		info.pValues = &value;
+		auto hr = VKGpuSystem::vkWaitSemaphores(device->mDevice, &info, UINT64_MAX);
+		ASSERT(hr == VK_SUCCESS);
+
+		//auto completed = GetCompletedValue();
+		//if (completed < value)
+		//{
+		//	auto device = mDeviceRef.GetPtr();
+		//	VkSemaphoreWaitInfo info{};
+		//	info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+		//	info.flags = 0;// VK_SEMAPHORE_WAIT_ANY_BIT;
+		//	info.semaphoreCount = 1;
+		//	info.pSemaphores = &mSemaphore;
+		//	info.pValues = &value;
+		//	VKGpuSystem::vkWaitSemaphores(device->mDevice, &info, UINT64_MAX);
+		//	//completed = GetCompletedValue();
+		//}
 
 		return true;
 	}

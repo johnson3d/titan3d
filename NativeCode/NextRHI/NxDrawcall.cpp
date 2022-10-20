@@ -41,7 +41,7 @@ namespace NxRHI
 			OnGpuDrawStateUpdated();
 		}
 	}
-	void IGraphicDraw::BindShaderEffect(IGpuDevice* device, IShaderEffect* effect)
+	void IGraphicDraw::BindShaderEffect(IGpuDevice* device, IGraphicsEffect* effect)
 	{
 		ShaderEffect = effect;
 	}
@@ -53,7 +53,7 @@ namespace NxRHI
 	{
 		Pipeline = pipe;
 	}
-	IShaderEffect* IGraphicDraw::GetShaderEffect() 
+	IGraphicsEffect* IGraphicDraw::GetGraphicsEffect() 
 	{
 		return ShaderEffect;
 	}
@@ -67,7 +67,7 @@ namespace NxRHI
 	}
 	IGpuResource* IGraphicDraw::FindGpuResource(VNameString name)
 	{
-		auto binder = GetShaderEffect()->FindBinder(name);
+		auto binder = GetGraphicsEffect()->FindBinder(name);
 		if (binder == nullptr)
 			return nullptr;
 
@@ -80,7 +80,7 @@ namespace NxRHI
 	}
 	bool IGraphicDraw::BindResource(VNameString name, IGpuResource* resource)
 	{
-		auto binder = GetShaderEffect()->FindBinder(name);
+		auto binder = GetGraphicsEffect()->FindBinder(name);
 		if (binder == nullptr)
 			return false;
 
@@ -137,7 +137,7 @@ namespace NxRHI
 		}*/
 		cmdlist->SetGraphicsPipeline(GpuDrawState);
 		
-		auto effect = GetShaderEffect();
+		auto effect = GetGraphicsEffect();
 
 		effect->Commit(cmdlist, this);
 		
@@ -148,7 +148,7 @@ namespace NxRHI
 				case SBT_CBuffer:
 				{
 					IGpuResource* t = i.second;
-					effect->BindCBuffer(cmdlist, i.first, (ICbView*)t);
+					effect->BindCBV(cmdlist, i.first, (ICbView*)t);
 				}
 				break;
 				case SBT_SRV:

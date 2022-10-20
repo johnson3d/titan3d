@@ -24,7 +24,7 @@ namespace NxRHI
 	struct FSamplerDesc;
 	class ISampler;
 	struct FGpuPipelineDesc;
-	class IShaderEffect;
+	class IGraphicsEffect;
 	class IGpuPipeline;
 	class IGpuDrawState;
 	struct FInputLayoutDesc;
@@ -172,7 +172,7 @@ namespace NxRHI
 		virtual IInputLayout* CreateInputLayout(FInputLayoutDesc* desc) = 0;
 		virtual ICommandList* CreateCommandList() = 0;
 		virtual IShader* CreateShader(FShaderDesc* desc) = 0;
-		virtual IShaderEffect* CreateShaderEffect() = 0;
+		virtual IGraphicsEffect* CreateShaderEffect() = 0;
 		virtual IComputeEffect* CreateComputeEffect() = 0;
 		virtual IFence* CreateFence(const FFenceDesc* desc, const char* name) = 0;
 		virtual IEvent* CreateGpuEvent(const FEventDesc * desc, const char* name) = 0;

@@ -37,7 +37,7 @@ void ICamera::Cleanup()
 	
 }
 
-void ICamera::UpdateConstBufferData(NxRHI::ICbView* buffer)
+void ICamera::UpdateConstBufferData(EngineNS::NxRHI::ICbView* buffer)
 {
 	auto pBinder = buffer->GetShaderBinder();
 	v3dxMatrix4 tempM;	

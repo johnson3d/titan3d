@@ -39,14 +39,6 @@ namespace NxRHI
 	{
 		return mFence->GetCompletedValue();
 	}
-	void DX12Fence::SetEvent()
-	{
-		mEvent->SetEvent();
-	}
-	void DX12Fence::ResetEvent()
-	{
-		mEvent->ResetEvent();
-	}
 	void DX12Fence::CpuSignal(UINT64 value)
 	{
 		mFence->Signal(value);

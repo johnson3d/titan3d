@@ -23,13 +23,12 @@ namespace NxRHI
 
 	struct VKCommandBufferPagedObject : public MemAlloc::FPagedObject<VkCommandBuffer>
 	{
-		EPagedCmdBufferState		mState = EPagedCmdBufferState::PCBS_Free;
-		UINT64						mTargetValue = 0;
+		
 	};
 	struct VKCommandBufferPage : public MemAlloc::FPage<VkCommandBuffer>
 	{
 		~VKCommandBufferPage();
-		VkCommandPool					mCommandPool = nullptr;
+		VkCommandPool					mCommandPool = (VkCommandPool)nullptr;
 	};
 	struct VKCommandBufferCreator
 	{
@@ -43,20 +42,12 @@ namespace NxRHI
 
 	struct VKCommandbufferAllocator : public MemAlloc::FPagedObjectAllocator<VkCommandBuffer, VKCommandBufferCreator>
 	{
-		struct FCmdBufferHolder
-		{
-			AutoRef<VKCommandBufferPagedObject>	CmdBuffer;
-			AutoRef<IFence>						Fence;
-		};
-		VSLLock									mLocker;
-		std::vector<FCmdBufferHolder>			mWaitFrees;
 		~VKCommandbufferAllocator();
-		void TickForRecycle(VKGpuDevice* device);
-		void PushRecycle(const AutoRef<IFence>& fence, AutoRef<VKCommandBufferPagedObject>& buffer);
 	};
 
 	class VKCmdBufferManager : public VThreadDispatcher<VKCommandbufferAllocator>
 	{
+	public:
 		VKGpuDevice*				mDevice = nullptr;
 	public:
 		void Initialize(VKGpuDevice* device);
@@ -73,6 +64,7 @@ namespace NxRHI
 		virtual void EndCommand() override;
 		bool BeginCommand(VkCommandBufferUsageFlagBits flags);
 		void EndCommand(bool bRecycle);
+		void Commit(VKCmdQueue* queue);
 		virtual void SetShader(IShader* shader) override;
 		virtual void SetCBV(EShaderType type, const FShaderBinder* binder, ICbView* buffer) override;
 		virtual void SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view) override;
@@ -94,6 +86,9 @@ namespace NxRHI
 		virtual void IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset = 0) override;
 		virtual void Dispatch(UINT x, UINT y, UINT z) override;
 		virtual void IndirectDispatch(IBuffer* indirectArg, UINT indirectArgOffset = 0) override;
+		virtual void SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess) override;
+		virtual void SetBufferBarrier(IBuffer* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) override;
+		virtual void SetTextureBarrier(ITexture* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) override;
 
 		/*virtual UINT64 SignalFence(IFence* fence, UINT64 value, IEvent* evt = nullptr) override;
 		virtual void WaitGpuFence(IFence* fence, UINT64 value) override;*/

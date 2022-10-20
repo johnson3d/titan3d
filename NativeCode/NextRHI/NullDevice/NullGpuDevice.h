@@ -39,7 +39,7 @@ namespace NxRHI
 		virtual IInputLayout* CreateInputLayout(FInputLayoutDesc* desc) override;
 		virtual ICommandList* CreateCommandList() override;
 		virtual IShader* CreateShader(FShaderDesc* desc) override;
-		virtual IShaderEffect* CreateShaderEffect() override;
+		virtual IGraphicsEffect* CreateShaderEffect() override;
 		virtual IComputeEffect* CreateComputeEffect() override;
 		virtual IFence* CreateFence(const FFenceDesc* desc, const char* name) override;
 		virtual IEvent* CreateGpuEvent(const FEventDesc* desc, const char* name) override;

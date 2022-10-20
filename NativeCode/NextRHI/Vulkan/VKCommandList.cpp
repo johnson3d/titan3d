@@ -9,8 +9,6 @@
 #include "VKEffect.h"
 #include "../NxDrawcall.h"
 
-#include <pix3.h>
-
 #define new VNEW
 
 NS_BEGIN
@@ -18,12 +16,12 @@ NS_BEGIN
 namespace NxRHI
 {
 	template<>
-	struct AuxGpuResourceDestroyer<AutoRef<MemAlloc::FPagedObject<VkCommandBuffer>>>
+	struct AuxGpuResourceDestroyer<AutoRef<VKCommandBufferPagedObject>>
 	{
-		static void Destroy(AutoRef<MemAlloc::FPagedObject<VkCommandBuffer>> obj, IGpuDevice* device1)
+		static void Destroy(AutoRef<VKCommandBufferPagedObject> obj, IGpuDevice* device1)
 		{
-			ASSERT(false);
-			vkResetCommandBuffer(obj->RealObject, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+			//ASSERT(false);
+			//vkResetCommandBuffer(obj->RealObject, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 			obj->Free();
 		}
 	};
@@ -38,49 +36,7 @@ namespace NxRHI
 	};
 	VKCommandbufferAllocator::~VKCommandbufferAllocator()
 	{
-		for (size_t i = 0; i < mWaitFrees.size(); i++)
-		{
-			auto& holder = mWaitFrees[i];
-			holder.CmdBuffer->Release();
-			holder.CmdBuffer = nullptr;
-			holder.Fence = nullptr;
-		}
-		mWaitFrees.clear();
-	}
-	void VKCommandbufferAllocator::TickForRecycle(VKGpuDevice* device)
-	{
-		VAutoVSLLock lk(mLocker);
-		for (size_t i = 0; i < mWaitFrees.size(); i++)
-		{
-			auto& holder = mWaitFrees[i];
-			auto pAllocator = (VKCommandbufferAllocator*)holder.CmdBuffer->HostPage.GetPtr()->Allocator.GetPtr();
-			ASSERT(pAllocator == device->mCmdAllocatorManager->GetThreadContext());
-			auto completed = holder.Fence->GetCompletedValue();
-			if (completed >= holder.CmdBuffer->mTargetValue)
-			{
-				MemAlloc::FPagedObject<VkCommandBuffer>* pTmp = holder.CmdBuffer;
-				vkResetCommandBuffer(holder.CmdBuffer->RealObject, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
-				auto checkValue = ((VKCommandBufferPagedObject*)pTmp)->mState;
-				ASSERT(checkValue == EPagedCmdBufferState::PCBS_Commiting);
-				((VKCommandBufferPagedObject*)pTmp)->mState = EPagedCmdBufferState::PCBS_WaitFree;
-				holder.CmdBuffer->Free();
-				((VKCommandBufferPagedObject*)pTmp)->mState = EPagedCmdBufferState::PCBS_Free;
-				
-				mWaitFrees.erase(mWaitFrees.begin() + i);
-				i--;
-			}
-		}
-	}
-	void VKCommandbufferAllocator::PushRecycle(const AutoRef<IFence>& fence, AutoRef<VKCommandBufferPagedObject>& buffer)
-	{
-		ASSERT(buffer != nullptr);
-		FCmdBufferHolder tmp;
-		tmp.CmdBuffer = buffer;
-		tmp.Fence = fence;
-		buffer->mTargetValue = UINT64_MAX;
 		
-		VAutoVSLLock lk(mLocker);
-		mWaitFrees.push_back(tmp);
 	}
 	void VKCmdBufferManager::Initialize(VKGpuDevice* device)
 	{
@@ -136,7 +92,7 @@ namespace NxRHI
 	}
 	void VKCommandBufferCreator::OnFree(MemAlloc::FPagedObject<VkCommandBuffer>* obj)
 	{
-		vkResetCommandBuffer(obj->RealObject, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+		//vkResetCommandBuffer(obj->RealObject, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 	}
 	void VKCommandBufferCreator::FinalCleanup(MemAlloc::FPage<VkCommandBuffer>* page)
 	{
@@ -152,13 +108,9 @@ namespace NxRHI
 	}
 	VKCommandList::~VKCommandList()
 	{
-		if (GetVKDevice() == nullptr)
+		auto device = GetVKDevice();
+		if (device == nullptr)
 		{
-			if (mCommandBuffer != nullptr)
-			{
-				mCommandBuffer->Release();
-				mCommandBuffer = nullptr;
-			}
 			return;
 		}
 
@@ -204,13 +156,12 @@ namespace NxRHI
 		auto vkCmdBuffer = GetVKDevice()->mCmdAllocatorManager->GetThreadContext()->Alloc();;
 		mCommandBuffer = (VKCommandBufferPagedObject*)vkCmdBuffer.GetPtr();
 		MemAlloc::FPagedObject<VkCommandBuffer>* pTmp = mCommandBuffer;
-		ASSERT(((VKCommandBufferPagedObject*)pTmp)->mState == EPagedCmdBufferState::PCBS_Free);
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+		vkResetCommandBuffer(mCommandBuffer->RealObject, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 		vkBeginCommandBuffer(mCommandBuffer->RealObject, &beginInfo);
-		((VKCommandBufferPagedObject*)pTmp)->mState = EPagedCmdBufferState::PCBS_Recording;
-
+		
 		mIsRecording = true;
 		return true;
 	}
@@ -222,15 +173,22 @@ namespace NxRHI
 	{
 		if (mIsRecording)
 		{
+			SetMemoryBarrier(EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, EBarrierAccess::BAS_MemoryWrite, (EBarrierAccess)(EBarrierAccess::BAS_MemoryRead | EBarrierAccess::BAS_MemoryWrite));
 			vkEndCommandBuffer(mCommandBuffer->RealObject);
-
-			if (bRecycle)
-				GetVKDevice()->mCmdAllocatorManager->GetThreadContext()->PushRecycle(mCommitFence, mCommandBuffer);
 		}
 		mIsRecording = false;
 	}
 		
-	
+	void VKCommandList::Commit(VKCmdQueue* queue)
+	{
+		auto device = GetVKDevice();
+		if (mCommandBuffer != nullptr)
+		{
+			device->DelayDestroy(mCommandBuffer);
+			mCommandBuffer = nullptr;
+		}
+	}
+
 	bool VKCommandList::BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name)
 	{
 		ASSERT(mIsRecording);
@@ -259,7 +217,7 @@ namespace NxRHI
 			}
 		}
 		mCurrentFrameBuffers = fb;
-		auto dxFB = ((VKFrameBuffers*)fb);
+		[[maybe_unused]] auto dxFB = ((VKFrameBuffers*)fb);
 
 		auto pVKFrameBuffers = ((VKFrameBuffers*)fb);
 		VkRenderPassBeginInfo renderPassInfo{};
@@ -410,13 +368,13 @@ namespace NxRHI
 		VkDebugMarkerMarkerInfoEXT markerInfo{};
 		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
 		markerInfo.pMarkerName = info;
-		VKGpuSystem::fn_vkCmdDebugMarkerBeginEXT(mCommandBuffer->RealObject, &markerInfo);
+		VKGpuSystem::vkCmdDebugMarkerBeginEXT(mCommandBuffer->RealObject, &markerInfo);
 	}
 	void VKCommandList::EndEvent()
 	{
 		ASSERT(mIsRecording);
 		
-		VKGpuSystem::fn_vkCmdDebugMarkerEndEXT(mCommandBuffer->RealObject);
+		VKGpuSystem::vkCmdDebugMarkerEndEXT(mCommandBuffer->RealObject);
 	}
 	void VKCommandList::SetShader(IShader* shader)
 	{
@@ -492,7 +450,7 @@ namespace NxRHI
 	void VKCommandList::SetSampler(EShaderType type, const FShaderBinder* binder, ISampler* sampler)
 	{
 		ASSERT(mIsRecording);
-		auto handle = ((VKSampler*)sampler)->mView;
+		[[maybe_unused]] auto handle = ((VKSampler*)sampler)->mView;
 		/*auto device = GetDX12Device()->mDevice;
 		if (type == EShaderType::SDT_ComputeShader) 
 		{
@@ -608,6 +566,240 @@ namespace NxRHI
 		ASSERT(mIsRecording);
 		
 		vkCmdDispatchIndirect(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset);
+	}
+	VkAccessFlags BarrierAccessToVK(EBarrierAccess flags)
+	{
+		VkAccessFlags result = VkAccessFlagBits::VK_ACCESS_NONE;
+		if (flags & EBarrierAccess::BAS_IndirectRead)
+			result |= VkAccessFlagBits::VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
+		if (flags & EBarrierAccess::BAS_IndexRead)
+			result |= VkAccessFlagBits::VK_ACCESS_INDEX_READ_BIT;
+		if (flags & EBarrierAccess::BAS_VertexRead)
+			result |= VkAccessFlagBits::VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
+		if (flags & EBarrierAccess::BAS_CBufferRead)
+			result |= VkAccessFlagBits::VK_ACCESS_UNIFORM_READ_BIT;
+		if (flags & EBarrierAccess::BAS_InputStreamRead)
+			result |= VkAccessFlagBits::VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
+		if (flags & EBarrierAccess::BAS_ShaderRead)
+			result |= VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT;
+		if (flags & EBarrierAccess::BAS_ShaderWrite)
+			result |= VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT;
+		if (flags & EBarrierAccess::BAS_RenderTargetRead)
+			result |= VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+		if (flags & EBarrierAccess::BAS_RenderTargetWrite)
+			result |= VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		if (flags & EBarrierAccess::BAS_DepthStencilRead)
+			result |= VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+		if (flags & EBarrierAccess::BAS_DepthStencilWrite)
+			result |= VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		if (flags & EBarrierAccess::BAS_CopyRead)
+			result |= VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
+		if (flags & EBarrierAccess::BAS_CopyWrite)
+			result |= VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
+		if (flags & EBarrierAccess::BAS_CpuRead)
+			result |= VkAccessFlagBits::VK_ACCESS_HOST_READ_BIT;
+		if (flags & EBarrierAccess::BAS_CpuWrite)
+			result |= VkAccessFlagBits::VK_ACCESS_HOST_WRITE_BIT;
+		if (flags & EBarrierAccess::BAS_MemoryRead)
+			result |= VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
+		if (flags & EBarrierAccess::BAS_MemoryWrite)
+			result |= VkAccessFlagBits::VK_ACCESS_MEMORY_WRITE_BIT;
+		return result;
+	}
+	VkPipelineStageFlags PipelineStateToVK(EPipelineStage stage)
+	{
+		VkPipelineStageFlags result = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_NONE;
+		if (stage & EPipelineStage::PPLS_TOP_OF_PIPE)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		if (stage & EPipelineStage::PPLS_DRAW_INDIRECT)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
+		if (stage & EPipelineStage::PPLS_VERTEX_INPUT)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
+		if (stage & EPipelineStage::PPLS_VERTEX_SHADER)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+		if (stage & EPipelineStage::PPLS_TESSELLATION_CONTROL_SHADER)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT;
+		if (stage & EPipelineStage::PPLS_TESSELLATION_EVALUATION_SHADER)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT;
+		if (stage & EPipelineStage::PPLS_GEOMETRY_SHADER)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT;
+		if (stage & EPipelineStage::PPLS_FRAGMENT_SHADER)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		if (stage & EPipelineStage::PPLS_EARLY_FRAGMENT_TESTS)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		if (stage & EPipelineStage::PPLS_LATE_FRAGMENT_TESTS)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+		if (stage & EPipelineStage::PPLS_COLOR_ATTACHMENT_OUTPUT)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		if (stage & EPipelineStage::PPLS_COMPUTE_SHADER)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+		if (stage & EPipelineStage::PPLS_TRANSFER)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT;
+		if (stage & EPipelineStage::PPLS_BOTTOM_OF_PIPE)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		if (stage & EPipelineStage::PPLS_HOST)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_HOST_BIT;
+		if (stage & EPipelineStage::PPLS_ALL_GRAPHICS)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
+		if (stage & EPipelineStage::PPLS_ALL_COMMANDS)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+		if (stage & EPipelineStage::PPLS_TRANSFORM_FEEDBACK)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT;
+		if (stage & EPipelineStage::PPLS_CONDITIONAL_RENDERING)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_CONDITIONAL_RENDERING_BIT_EXT;
+		if (stage & EPipelineStage::PPLS_ACCELERATION_STRUCTURE_BUILD)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR;
+		if (stage & EPipelineStage::PPLS_RAY_TRACING_SHADER)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR;
+		if (stage & EPipelineStage::PPLS_TASK_SHADER)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TASK_SHADER_BIT_NV;
+		if (stage & EPipelineStage::PPLS_MESH_SHADER)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_MESH_SHADER_BIT_NV;
+		if (stage & EPipelineStage::PPLS_FRAGMENT_DENSITY_PROCESS)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_DENSITY_PROCESS_BIT_EXT;
+		if (stage & EPipelineStage::PPLS_FRAGMENT_SHADING_RATE_ATTACHMENT)
+			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR;
+		return result;
+	}
+	void GpuResourceStateToVKAccessAndPipeline(EGpuResourceState state, VkAccessFlags& outAccessFlags, VkPipelineStageFlagBits& outPipelineStages)
+	{//https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkAccessFlagBits.html
+		outPipelineStages = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		switch (state)
+		{
+		case EngineNS::NxRHI::GRS_Undefine:
+			outAccessFlags = VkAccessFlagBits::VK_ACCESS_NONE;
+			outPipelineStages = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			return;
+		case EngineNS::NxRHI::GRS_Present:
+		case EngineNS::NxRHI::GRS_SrvPS:
+			outAccessFlags = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT;
+			outPipelineStages = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+			return;
+		case EngineNS::NxRHI::GRS_GenericRead:
+			outAccessFlags = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT;
+			outPipelineStages = (VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+			return;
+		case EngineNS::NxRHI::GRS_Uav:
+			outAccessFlags = (VkAccessFlagBits)(VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT);
+			outPipelineStages = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+			return;
+		case EngineNS::NxRHI::GRS_UavIndirect:
+			outAccessFlags = (VkAccessFlagBits)(VkAccessFlagBits::VK_ACCESS_INDIRECT_COMMAND_READ_BIT);
+			outPipelineStages = VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
+			return;
+		case EngineNS::NxRHI::GRS_RenderTarget:
+			outAccessFlags = VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			outPipelineStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			return;
+		case EngineNS::NxRHI::GRS_DepthStencil:
+			outAccessFlags = VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			outPipelineStages = (VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
+			return;
+		case EngineNS::NxRHI::GRS_DepthRead:
+		case EngineNS::NxRHI::GRS_StencilRead:
+		case EngineNS::NxRHI::GRS_DepthStencilRead:
+			outAccessFlags = VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+			outPipelineStages = (VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
+			return;
+		case EngineNS::NxRHI::GRS_CopySrc:
+			outAccessFlags = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
+			outPipelineStages = (VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_TRANSFER_BIT | VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
+			return;
+		case EngineNS::NxRHI::GRS_CopyDst:
+			outAccessFlags = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
+			outPipelineStages = (VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_TRANSFER_BIT | VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
+			return;
+		default:
+			outAccessFlags = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT;
+			outPipelineStages = (VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+			return;
+		}
+	}
+	void VKCommandList::SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess)
+	{
+		VkMemoryBarrier mb{};
+		mb.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+		//mb.pNext = NULL;
+		mb.srcAccessMask = BarrierAccessToVK(srcAccess);
+		mb.dstAccessMask = BarrierAccessToVK(dstAccess);
+
+		auto _srcStages = PipelineStateToVK(srcStage);
+		auto _dstStages = PipelineStateToVK(dstStage);
+		vkCmdPipelineBarrier(
+			mCommandBuffer->RealObject,
+			_srcStages, 
+			_dstStages,
+			0,
+			1,
+			&mb,
+			0,
+			nullptr,
+			0,
+			nullptr
+		);
+	}
+	void VKCommandList::SetBufferBarrier(IBuffer* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
+	{
+		VkBufferMemoryBarrier barrier{};
+		barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.buffer = (VkBuffer)pResource->GetHWBuffer();
+		barrier.offset = 0;
+		barrier.size = pResource->Desc.Size;
+
+		VkPipelineStageFlagBits srcStages, dstStages;
+		GpuResourceStateToVKAccessAndPipeline(srcAccess, barrier.srcAccessMask, srcStages);
+		GpuResourceStateToVKAccessAndPipeline(dstAccess, barrier.dstAccessMask, dstStages);
+
+		vkCmdPipelineBarrier(
+			mCommandBuffer->RealObject,
+			srcStages,
+			dstStages,//VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,//VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+			0,
+			0, nullptr,
+			1, &barrier,
+			0, nullptr
+		);
+	}
+	void VKCommandList::SetTextureBarrier(ITexture* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
+	{
+		VkImageMemoryBarrier barrier{};
+		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.oldLayout = GpuStateToVKImageLayout(srcAccess);
+		barrier.newLayout = GpuStateToVKImageLayout(dstAccess);
+		//barrier.srcAccessMask
+
+		if (barrier.oldLayout != barrier.newLayout)
+		{
+			barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.image = (VkImage)pResource->GetHWBuffer();
+
+			if (pResource->Desc.BindFlags & EBufferType::BFT_SRV)
+				barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, false);
+			else
+				barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(pResource->Desc.Format, true, true);
+			barrier.subresourceRange.baseArrayLayer = 0;
+			barrier.subresourceRange.layerCount = pResource->Desc.ArraySize;
+			barrier.subresourceRange.baseMipLevel = 0;//All
+			barrier.subresourceRange.levelCount = pResource->Desc.MipLevels;
+
+			VkPipelineStageFlagBits srcStages, dstStages;
+			GpuResourceStateToVKAccessAndPipeline(srcAccess, barrier.srcAccessMask, srcStages);
+			GpuResourceStateToVKAccessAndPipeline(dstAccess, barrier.dstAccessMask, dstStages);
+
+			vkCmdPipelineBarrier(
+				mCommandBuffer->RealObject,
+				srcStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+				dstStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,//VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+				0,
+				0, nullptr,
+				0, nullptr,
+				1, &barrier
+			);
+		}
 	}
 	//UINT64 VKCommandList::SignalFence(IFence* fence, UINT64 value, IEvent* evt)
 	//{

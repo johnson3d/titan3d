@@ -23,6 +23,7 @@
 class v3dxVector2 : public v3dVector2_t
 {
 public:
+	static v3dxVector2 Zero;
 	v3dxVector2();
 	v3dxVector2(float ix,float iy);
 	v3dxVector2(const v3dxVector2& v){

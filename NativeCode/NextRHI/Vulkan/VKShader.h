@@ -27,7 +27,7 @@ namespace NxRHI
 	};
 	struct VKDescriptorSetPage : public MemAlloc::FPage<VkDescriptorSet>
 	{
-		VkDescriptorPool				mDescriptorPool = nullptr;
+		VkDescriptorPool				mDescriptorPool = (VkDescriptorPool)nullptr;
 	};
 	struct VKDescriptorSetCreator
 	{
@@ -63,7 +63,7 @@ namespace NxRHI
 		VkShaderModule		mShader{};
 		VNameString			mFunctionName;
 		std::vector<VkDescriptorSetLayoutBinding>	mLayoutBindings;
-		VkDescriptorSetLayout				mLayout = nullptr;
+		VkDescriptorSetLayout				mLayout = (VkDescriptorSetLayout)nullptr;
 		FDescriptorSetAllocator				mDescriptorSetAllocator;
 	};
 }

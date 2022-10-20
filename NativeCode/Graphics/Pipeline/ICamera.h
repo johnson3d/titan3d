@@ -115,7 +115,7 @@ public:
 	v3dxMatrix4 GetViewPortOffsetMatrix() const {
 		return mLogicData->mViewPortOffsetMatrix;
 	}
-	void UpdateConstBufferData(NxRHI::ICbView* buffer);
+	void UpdateConstBufferData(EngineNS::NxRHI::ICbView* buffer);
 protected:
 	void UpdateFrustum();
 	void UpdateFrustumOrtho();

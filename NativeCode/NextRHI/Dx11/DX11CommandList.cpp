@@ -382,6 +382,18 @@ namespace NxRHI
 	{
 		mContext->DispatchIndirect(((DX11Buffer*)indirectArg)->mBuffer, indirectArgOffset);
 	}
+	void DX11CommandList::SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess)
+	{
+
+	}
+	void DX11CommandList::SetBufferBarrier(IBuffer* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
+	{
+
+	}
+	void DX11CommandList::SetTextureBarrier(ITexture* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
+	{
+
+	}
 	/*UINT64 DX11CommandList::SignalFence(IFence* fence, UINT64 value, IEvent* evt)
 	{
 		ASSERT(mContext4);

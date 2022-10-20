@@ -47,6 +47,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)io\vfxfile_IOS.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IUnknown.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)kmeans\kmeans.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)mix_defs\dds_defs.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)perlin\perlin.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)r2m\F2MManager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)r2m\file_2_memory.h" />

@@ -5,7 +5,7 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	class IShaderEffect;
+	class IGraphicsEffect;
 	enum TR_ENUM(SV_EnumNoFlags = true)
 		ESamplerFilter
 	{
@@ -315,7 +315,7 @@ namespace NxRHI
 	public:
 		EPrimitiveType			TopologyType = EPrimitiveType::EPT_TriangleList;
 		AutoRef<IGpuPipeline>	Pipeline;
-		AutoRef<IShaderEffect>	ShaderEffect;
+		AutoRef<IGraphicsEffect>	ShaderEffect;
 		AutoRef<IRenderPass>	RenderPass;
 		virtual bool BuildState(IGpuDevice* device) {
 			return true;
@@ -326,7 +326,7 @@ namespace NxRHI
 		FGpuPipelineManager : public VIUnknown
 	{
 	public:
-		const IGpuDrawState* GetOrCreate(IGpuDevice* device, IRenderPass * rpass, IShaderEffect* effect, IGpuPipeline* pipeline, EPrimitiveType topology);
+		const IGpuDrawState* GetOrCreate(IGpuDevice* device, IRenderPass * rpass, IGraphicsEffect* effect, IGpuPipeline* pipeline, EPrimitiveType topology);
 	public:
 		std::map<UINT64, AutoRef<IGpuDrawState>>		GpuPipelineCache;
 	};

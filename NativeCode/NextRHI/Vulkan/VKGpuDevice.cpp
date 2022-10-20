@@ -9,7 +9,10 @@
 #include "VKEffect.h"
 #include "VKDrawcall.h"
 #include "../NxEffect.h"
-#include <dxgi1_3.h>
+
+#if defined(HasModule_GpuDump)
+#include "../../Bricks/GpuDump/NvAftermath.h"
+#endif
 
 #define new VNEW
 
@@ -17,12 +20,17 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	PFN_vkCmdBeginDebugUtilsLabelEXT VKGpuSystem::fn_vkCmdBeginDebugUtilsLabelEXT = VK_NULL_HANDLE;
-	PFN_vkCmdEndDebugUtilsLabelEXT VKGpuSystem::fn_vkCmdEndDebugUtilsLabelEXT = VK_NULL_HANDLE;
-	PFN_vkDebugMarkerSetObjectNameEXT VKGpuSystem::fn_vkDebugMarkerSetObjectNameEXT = VK_NULL_HANDLE;
-	PFN_vkCmdDebugMarkerBeginEXT VKGpuSystem::fn_vkCmdDebugMarkerBeginEXT = VK_NULL_HANDLE;
-	PFN_vkCmdDebugMarkerEndEXT VKGpuSystem::fn_vkCmdDebugMarkerEndEXT = VK_NULL_HANDLE;
-	PFN_vkQueueSubmit2 VKGpuSystem::fn_vkQueueSubmit2 = VK_NULL_HANDLE;
+#define ImplVKFunctionPtr(name) PFN_##name VKGpuSystem::name = VK_NULL_HANDLE;
+	
+	ImplVKFunctionPtr(vkCmdBeginDebugUtilsLabelEXT);
+	ImplVKFunctionPtr(vkCmdEndDebugUtilsLabelEXT);
+	ImplVKFunctionPtr(vkDebugMarkerSetObjectNameEXT);
+	ImplVKFunctionPtr(vkCmdDebugMarkerBeginEXT);
+	ImplVKFunctionPtr(vkCmdDebugMarkerEndEXT);
+	ImplVKFunctionPtr(vkQueueSubmit2);
+	ImplVKFunctionPtr(vkGetSemaphoreCounterValue);
+	ImplVKFunctionPtr(vkSignalSemaphore);
+	ImplVKFunctionPtr(vkWaitSemaphores);
 
 	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) 
 	{
@@ -149,13 +157,19 @@ namespace NxRHI
 		mHwDevices.resize(mDeviceNumber);
 		vkEnumeratePhysicalDevices(mVKInstance, &mDeviceNumber, mHwDevices.data());
 
+#define GetVKFunctionPtr(name) name = (PFN_##name)vkGetInstanceProcAddr(mVKInstance, #name);
+
 		//vkCmdBeginDebugUtilsLabelEXT
-		fn_vkCmdBeginDebugUtilsLabelEXT = (PFN_vkCmdBeginDebugUtilsLabelEXT)vkGetInstanceProcAddr(mVKInstance, "vkCmdBeginDebugUtilsLabelEXT");
-		fn_vkCmdEndDebugUtilsLabelEXT = (PFN_vkCmdEndDebugUtilsLabelEXT)vkGetInstanceProcAddr(mVKInstance, "vkCmdEndDebugUtilsLabelEXT");
-		fn_vkDebugMarkerSetObjectNameEXT = (PFN_vkDebugMarkerSetObjectNameEXT)vkGetInstanceProcAddr(mVKInstance, "vkDebugMarkerSetObjectNameEXT");
-		fn_vkCmdDebugMarkerBeginEXT = (PFN_vkCmdDebugMarkerBeginEXT)vkGetInstanceProcAddr(mVKInstance, "vkCmdDebugMarkerBeginEXT");
-		fn_vkCmdDebugMarkerEndEXT = (PFN_vkCmdDebugMarkerEndEXT)vkGetInstanceProcAddr(mVKInstance, "vkCmdDebugMarkerEndEXT");
-		fn_vkQueueSubmit2 = (PFN_vkQueueSubmit2)vkGetInstanceProcAddr(mVKInstance, "vkQueueSubmit2");
+		GetVKFunctionPtr(vkCmdBeginDebugUtilsLabelEXT);
+		GetVKFunctionPtr(vkCmdEndDebugUtilsLabelEXT);
+		GetVKFunctionPtr(vkDebugMarkerSetObjectNameEXT);
+		GetVKFunctionPtr(vkDebugMarkerSetObjectNameEXT);
+		GetVKFunctionPtr(vkCmdDebugMarkerBeginEXT);
+		GetVKFunctionPtr(vkCmdDebugMarkerEndEXT);
+		GetVKFunctionPtr(vkQueueSubmit2);
+		GetVKFunctionPtr(vkGetSemaphoreCounterValue);
+		GetVKFunctionPtr(vkSignalSemaphore);
+		GetVKFunctionPtr(vkWaitSemaphores);
 		
 #ifdef PLATFORM_WIN
 		{
@@ -163,7 +177,7 @@ namespace NxRHI
 			createInfo_surf.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 			createInfo_surf.pNext = nullptr;
 			createInfo_surf.hinstance = nullptr;
-			createInfo_surf.hwnd = (HWND)desc->WindowHandle;
+			createInfo_surf.hwnd = (HWND)desc->WindowHandle; 
 			vkCreateWin32SurfaceKHR(mVKInstance, &createInfo_surf, nullptr, &mSurface);
 		}
 #endif
@@ -352,6 +366,11 @@ namespace NxRHI
 			extensions.push_back(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME);
 			extensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
 			extensions.push_back(VK_EXT_TOOLING_INFO_EXTENSION_NAME);
+			if (HasExtension(VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME))
+				extensions.push_back(VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME);
+			if (HasExtension(VK_NV_DEVICE_DIAGNOSTICS_CONFIG_EXTENSION_NAME))
+				extensions.push_back(VK_NV_DEVICE_DIAGNOSTICS_CONFIG_EXTENSION_NAME);
+			
 			//extensions.push_back(VK_GOOGLE_HLSL_FUNCTIONALITY1_EXTENSION_NAME);
 			/*extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 			extensions.push_back(VK_KHR_16BIT_STORAGE_EXTENSION_NAME);
@@ -468,6 +487,15 @@ namespace NxRHI
 			createInfo.enabledLayerCount = 0;
 		}
 
+#if defined(HasModule_GpuDump)
+		GpuDump::NvAftermath::InitDump(NxRHI::RHI_VK);
+		VkDeviceDiagnosticsConfigCreateInfoNV nvDiagnosticsInfo{};
+		devfeatures12.pNext = &nvDiagnosticsInfo;
+		nvDiagnosticsInfo.sType = VK_STRUCTURE_TYPE_DEVICE_DIAGNOSTICS_CONFIG_CREATE_INFO_NV;
+		nvDiagnosticsInfo.flags = VkDeviceDiagnosticsConfigFlagBitsNV::VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_RESOURCE_TRACKING_BIT_NV |
+			VkDeviceDiagnosticsConfigFlagBitsNV::VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_AUTOMATIC_CHECKPOINTS_BIT_NV |
+			VkDeviceDiagnosticsConfigFlagBitsNV::VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_SHADER_DEBUG_INFO_BIT_NV;
+#endif
 		if (vkCreateDevice(mPhysicalDevice, &createInfo, GetVkAllocCallBacks(), &mDevice) != VK_SUCCESS)
 		{
 			ASSERT(false);
@@ -497,15 +525,15 @@ namespace NxRHI
 			cmdAllocator->Initialize(this);
 			mCmdAllocatorManager = MakeWeakRef(cmdAllocator);
 
-			/*TObjectHandle<VKCmdBufferManager> manager;
-			manager.FromObject(mCmdAllocatorManager);*/
-			VKCmdBufferManager* manager = mCmdAllocatorManager;
-			FContextTickableManager::GetInstance()->PushTickable([this, manager]()->bool
+			/*auto manager = mCmdAllocatorManager;
+			FContextTickableManager::GetInstance()->PushTickable([manager]()->bool
 				{
 					auto context = manager->GetThreadContext();
-					context->TickForRecycle(this);
+					if (context == nullptr)
+						return true;
+					context->TickForRecycle(manager->mDevice);
 					return false;
-				});
+				});*/
 		}
 
 		mCmdQueue->Init(this);
@@ -824,9 +852,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IShaderEffect* VKGpuDevice::CreateShaderEffect()
+	IGraphicsEffect* VKGpuDevice::CreateShaderEffect()
 	{
-		return new VKShaderEffect();
+		return new VKGraphicsEffect();
 	}
 	IComputeEffect* VKGpuDevice::CreateComputeEffect()
 	{
@@ -923,9 +951,9 @@ namespace NxRHI
 			submitInfo.pCommandBuffers = &dx11Cmd->mCommandBuffer->RealObject;
 			submitInfo.waitSemaphoreCount = 1;
 			submitInfo.pWaitSemaphores = &dxFence->mSemaphore;
-			VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
+			VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;/*VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
 				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT |
-				VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+				VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;*/
 			submitInfo.pWaitDstStageMask = &waitStage;
 			submitInfo.signalSemaphoreCount = 2;
 			VkSemaphore signalSemas[2]{};
@@ -947,186 +975,174 @@ namespace NxRHI
 			timelineInfo.signalSemaphoreValueCount = 2;
 			timelineInfo.pSignalSemaphoreValues = signalValues;
 
-			{
-				auto pTmp = dx11Cmd->mCommandBuffer;
-				pTmp->mState = EPagedCmdBufferState::PCBS_Commiting;
-				pTmp->mTargetValue = cmdFence->AspectValue;
-			}
-
-			vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, nullptr);
-			dx11Cmd->mCommandBuffer = nullptr;
+			auto hr = vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, nullptr);
+			ASSERT(hr == VK_SUCCESS);
+			//dx11Cmd->mCommandBuffer = nullptr;
+			dx11Cmd->Commit(this);
 		}
 	}
 	void VKCmdQueue::ExecuteCommandList(ICommandList* Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists)
 	{
 		//((VKCommandList*)Cmdlist)->Commit(this);
-		auto dx11Cmd = (VKCommandList*)Cmdlist;
-		if (dx11Cmd->mCommandBuffer == nullptr)
-			return;
+		//auto dx11Cmd = (VKCommandList*)Cmdlist;
+		//if (dx11Cmd->mCommandBuffer == nullptr)
+		//	return;
 
-		if (VKGpuSystem::fn_vkQueueSubmit2 != nullptr)
-		{
-			VAutoVSLLock locker(mImmCmdListLocker);
+		//if (VKGpuSystem::vkQueueSubmit2 != nullptr)
+		//{
+		//	VAutoVSLLock locker(mImmCmdListLocker);
 
-			VkCommandBufferSubmitInfo cmdbufferInfo{};
-			cmdbufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
-			cmdbufferInfo.commandBuffer = ((VKCommandList*)Cmdlist)->mCommandBuffer->RealObject;
+		//	VkCommandBufferSubmitInfo cmdbufferInfo{};
+		//	cmdbufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
+		//	cmdbufferInfo.commandBuffer = ((VKCommandList*)Cmdlist)->mCommandBuffer->RealObject;
 
-			VkSubmitInfo2 submitInfo{};
-			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
-			submitInfo.commandBufferInfoCount = 1;
-			submitInfo.pCommandBufferInfos = &cmdbufferInfo;
+		//	VkSubmitInfo2 submitInfo{};
+		//	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
+		//	submitInfo.commandBufferInfoCount = 1;
+		//	submitInfo.pCommandBufferInfos = &cmdbufferInfo;
 
-			std::vector<VkSemaphoreSubmitInfo> waitSmp{};
-			VkSemaphoreSubmitInfo signalSmp[2]{};
-			{
-				auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
-				signalSmp[0].sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-				signalSmp[0].semaphore = dxFence->mSemaphore;
-				signalSmp[0].value = dxFence->GetAspectValue() + 1;
-				signalSmp[0].stageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+		//	std::vector<VkSemaphoreSubmitInfo> waitSmp{};
+		//	VkSemaphoreSubmitInfo signalSmp[2]{};
+		//	{
+		//		auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
+		//		signalSmp[0].sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+		//		signalSmp[0].semaphore = dxFence->mSemaphore;
+		//		signalSmp[0].value = dxFence->GetAspectValue() + 1;
+		//		signalSmp[0].stageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
-				dxFence = Cmdlist->mCommitFence.UnsafeConvertTo<VKFence>();
-				signalSmp[1].sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-				signalSmp[1].semaphore = dxFence->mSemaphore;
-				signalSmp[1].value = dxFence->GetAspectValue() + 1;
-				signalSmp[1].stageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-			}
-			submitInfo.signalSemaphoreInfoCount = (UINT)2;
-			submitInfo.pSignalSemaphoreInfos = signalSmp;
+		//		dxFence = Cmdlist->mCommitFence.UnsafeConvertTo<VKFence>();
+		//		signalSmp[1].sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+		//		signalSmp[1].semaphore = dxFence->mSemaphore;
+		//		signalSmp[1].value = dxFence->GetAspectValue() + 1;
+		//		signalSmp[1].stageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+		//	}
+		//	submitInfo.signalSemaphoreInfoCount = (UINT)2;
+		//	submitInfo.pSignalSemaphoreInfos = signalSmp;
 
-			if (NumOfWait == UINT_MAX)
-			{
-				auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
-				VkSemaphoreSubmitInfo tmp{};
-				tmp.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-				tmp.semaphore = dxFence->mSemaphore;
-				tmp.value = dxFence->GetAspectValue();
-				tmp.stageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+		//	if (NumOfWait == UINT_MAX)
+		//	{
+		//		auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
+		//		VkSemaphoreSubmitInfo tmp{};
+		//		tmp.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+		//		tmp.semaphore = dxFence->mSemaphore;
+		//		tmp.value = dxFence->GetAspectValue();
+		//		tmp.stageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
-				submitInfo.waitSemaphoreInfoCount = 1;
-				submitInfo.pWaitSemaphoreInfos = &tmp;
+		//		submitInfo.waitSemaphoreInfoCount = 1;
+		//		submitInfo.pWaitSemaphoreInfos = &tmp;
 
-				VKGpuSystem::fn_vkQueueSubmit2(mGraphicsQueue, 1, &submitInfo, nullptr);
-			}
-			else
-			{
-				for (UINT i = 0; i < NumOfWait; i++)
-				{
-					auto dxFence = ppWaitCmdlists[i]->mCommitFence.UnsafeConvertTo<VKFence>();
-					VkSemaphoreSubmitInfo tmp{};
-					tmp.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-					tmp.semaphore = dxFence->mSemaphore;
-					tmp.value = dxFence->GetAspectValue();
-					tmp.stageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-					waitSmp.push_back(tmp);
-				}
-				if (waitSmp.size() > 0)
-				{
-					submitInfo.waitSemaphoreInfoCount = (UINT)waitSmp.size();
-					submitInfo.pWaitSemaphoreInfos = &waitSmp[0];
-				}
+		//		VKGpuSystem::vkQueueSubmit2(mGraphicsQueue, 1, &submitInfo, nullptr);
+		//	}
+		//	else
+		//	{
+		//		for (UINT i = 0; i < NumOfWait; i++)
+		//		{
+		//			auto dxFence = ppWaitCmdlists[i]->mCommitFence.UnsafeConvertTo<VKFence>();
+		//			VkSemaphoreSubmitInfo tmp{};
+		//			tmp.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+		//			tmp.semaphore = dxFence->mSemaphore;
+		//			tmp.value = dxFence->GetAspectValue();
+		//			tmp.stageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+		//			waitSmp.push_back(tmp);
+		//		}
+		//		if (waitSmp.size() > 0)
+		//		{
+		//			submitInfo.waitSemaphoreInfoCount = (UINT)waitSmp.size();
+		//			submitInfo.pWaitSemaphoreInfos = &waitSmp[0];
+		//		}
 
-				VKGpuSystem::fn_vkQueueSubmit2(mGraphicsQueue, 1, &submitInfo, nullptr);
-			}
-		}
-		else
-		{
-			VAutoVSLLock locker(mImmCmdListLocker);
+		//		VKGpuSystem::vkQueueSubmit2(mGraphicsQueue, 1, &submitInfo, nullptr);
+		//	}
+		//}
+		//else
+		//{
+		//	VAutoVSLLock locker(mImmCmdListLocker);
 
-			VkSubmitInfo submitInfo{};
-			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-			submitInfo.commandBufferCount = 1;
-			submitInfo.pCommandBuffers = &dx11Cmd->mCommandBuffer->RealObject;
+		//	VkSubmitInfo submitInfo{};
+		//	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		//	submitInfo.commandBufferCount = 1;
+		//	submitInfo.pCommandBuffers = &dx11Cmd->mCommandBuffer->RealObject;
 
-			VkSemaphore signalSmp[2]{};
-			UINT64 signalSmpValue[2]{};
+		//	VkSemaphore signalSmp[2]{};
+		//	UINT64 signalSmpValue[2]{};
 
-			UINT64 singleValue = mQueueExecuteFence->GetAspectValue();
-			VkPipelineStageFlags singleWaitStages = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-			std::vector<VkSemaphore> waitSmps;
-			std::vector<UINT64> waitSmpValues;
-			std::vector<VkPipelineStageFlags> waitSmpStages;
-			
-			VkTimelineSemaphoreSubmitInfo timelineInfo{};
-			timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
-			timelineInfo.signalSemaphoreValueCount = (UINT)2;
-			timelineInfo.pSignalSemaphoreValues = signalSmpValue;
-			
-			submitInfo.pNext = &timelineInfo;
-			submitInfo.signalSemaphoreCount = (UINT)2;
-			submitInfo.pSignalSemaphores = signalSmp;
+		//	UINT64 singleValue = mQueueExecuteFence->GetAspectValue();
+		//	VkPipelineStageFlags singleWaitStages = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+		//	std::vector<VkSemaphore> waitSmps;
+		//	std::vector<UINT64> waitSmpValues;
+		//	std::vector<VkPipelineStageFlags> waitSmpStages;
+		//	
+		//	VkTimelineSemaphoreSubmitInfo timelineInfo{};
+		//	timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+		//	timelineInfo.signalSemaphoreValueCount = (UINT)2;
+		//	timelineInfo.pSignalSemaphoreValues = signalSmpValue;
+		//	
+		//	submitInfo.pNext = &timelineInfo;
+		//	submitInfo.signalSemaphoreCount = (UINT)2;
+		//	submitInfo.pSignalSemaphores = signalSmp;
 
-			if (NumOfWait == UINT_MAX)
-			{
-				auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
-				
-				timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
-				timelineInfo.waitSemaphoreValueCount = 1;
-				timelineInfo.pWaitSemaphoreValues = &singleValue;
+		//	if (NumOfWait == UINT_MAX)
+		//	{
+		//		auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
+		//		
+		//		timelineInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+		//		timelineInfo.waitSemaphoreValueCount = 1;
+		//		timelineInfo.pWaitSemaphoreValues = &singleValue;
 
-				submitInfo.waitSemaphoreCount = 1;
-				submitInfo.pWaitSemaphores = &dxFence->mSemaphore;
-				submitInfo.pWaitDstStageMask = &singleWaitStages;
-			}
-			else
-			{
-				for (UINT i = 0; i < NumOfWait; i++)
-				{
-					auto dxFence = ppWaitCmdlists[i]->mCommitFence.UnsafeConvertTo<VKFence>();
-					waitSmps.push_back(dxFence->mSemaphore);
-					waitSmpValues.push_back(dxFence->GetAspectValue());
-					waitSmpStages.push_back(VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
-				}
-				
+		//		submitInfo.waitSemaphoreCount = 1;
+		//		submitInfo.pWaitSemaphores = &dxFence->mSemaphore;
+		//		submitInfo.pWaitDstStageMask = &singleWaitStages;
+		//	}
+		//	else
+		//	{
+		//		for (UINT i = 0; i < NumOfWait; i++)
+		//		{
+		//			auto dxFence = ppWaitCmdlists[i]->mCommitFence.UnsafeConvertTo<VKFence>();
+		//			waitSmps.push_back(dxFence->mSemaphore);
+		//			waitSmpValues.push_back(dxFence->GetAspectValue());
+		//			waitSmpStages.push_back(VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+		//		}
+		//		
 
-				if (waitSmps.size() > 0)
-				{
-					submitInfo.waitSemaphoreCount = (UINT)waitSmps.size();
-					submitInfo.pWaitSemaphores = &waitSmps[0];
-					submitInfo.pWaitDstStageMask = &waitSmpStages[0];
-					
-					timelineInfo.waitSemaphoreValueCount = (UINT)waitSmps.size();
-					timelineInfo.pWaitSemaphoreValues = &waitSmpValues[0];
-				}
-			}
+		//		if (waitSmps.size() > 0)
+		//		{
+		//			submitInfo.waitSemaphoreCount = (UINT)waitSmps.size();
+		//			submitInfo.pWaitSemaphores = &waitSmps[0];
+		//			submitInfo.pWaitDstStageMask = &waitSmpStages[0];
+		//			
+		//			timelineInfo.waitSemaphoreValueCount = (UINT)waitSmps.size();
+		//			timelineInfo.pWaitSemaphoreValues = &waitSmpValues[0];
+		//		}
+		//	}
 
-			{
-				auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
-				signalSmp[0] = dxFence->mSemaphore;
-				signalSmpValue[0] = ++dxFence->AspectValue;
+		//	{
+		//		auto dxFence = mQueueExecuteFence.UnsafeConvertTo<VKFence>();
+		//		signalSmp[0] = dxFence->mSemaphore;
+		//		signalSmpValue[0] = ++dxFence->AspectValue;
 
-				dxFence = Cmdlist->mCommitFence.UnsafeConvertTo<VKFence>();
-				signalSmp[1] = dxFence->mSemaphore;
-				signalSmpValue[1] = ++dxFence->AspectValue;
-			
-				if (dx11Cmd->mCommandBuffer != nullptr)
-				{
-					MemAlloc::FPagedObject<VkCommandBuffer>* pTmp = dx11Cmd->mCommandBuffer;
-					((VKCommandBufferPagedObject*)pTmp)->mState = EPagedCmdBufferState::PCBS_Commiting;
-					((VKCommandBufferPagedObject*)pTmp)->mTargetValue = signalSmpValue[1];
-					dx11Cmd->mCommandBuffer = nullptr;
-				}
+		//		dxFence = Cmdlist->mCommitFence.UnsafeConvertTo<VKFence>();
+		//		signalSmp[1] = dxFence->mSemaphore;
+		//		signalSmpValue[1] = ++dxFence->AspectValue;
 
-				vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, nullptr);
-			}
+		//		vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, nullptr);
+		//	}
 
-			/*VAutoVSLLock locker(mImmCmdListLocker);
-			if (NumOfWait == UINT_MAX)
-			{
-				this->WaitFence(mQueueExecuteFence, mQueueExecuteFence->GetAspectValue());
-			}
-			else
-			{
-				for (UINT i = 0; i < NumOfWait; i++)
-				{
-					this->WaitFence(ppWaitCmdlists[i]->mCommitFence, ppWaitCmdlists[i]->mCommitFence->GetAspectValue());
-				}
-			}
-			dx11Cmd->Commit(this);
-			this->IncreaseSignal(Cmdlist->mCommitFence);
-			this->IncreaseSignal(mQueueExecuteFence);*/
-		}
+		//	/*VAutoVSLLock locker(mImmCmdListLocker);
+		//	if (NumOfWait == UINT_MAX)
+		//	{
+		//		this->WaitFence(mQueueExecuteFence, mQueueExecuteFence->GetAspectValue());
+		//	}
+		//	else
+		//	{
+		//		for (UINT i = 0; i < NumOfWait; i++)
+		//		{
+		//			this->WaitFence(ppWaitCmdlists[i]->mCommitFence, ppWaitCmdlists[i]->mCommitFence->GetAspectValue());
+		//		}
+		//	}
+		//	dx11Cmd->Commit(this);
+		//	this->IncreaseSignal(Cmdlist->mCommitFence);
+		//	this->IncreaseSignal(mQueueExecuteFence);*/
+		//}
 	}
 	void VKCmdQueue::WaitFence(IFence* fence, UINT64 value)
 	{
@@ -1140,9 +1156,9 @@ namespace NxRHI
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &mDummyCmdList->mCommandBuffer->RealObject;
 		
-		VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
+		VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;/*VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT |
 			VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT |
-			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;*/
 		VkSemaphore waitSmp[2]{};
 		waitSmp[0] = dxFence->mSemaphore;
 		waitSmp[1] = waitFence->mSemaphore;
@@ -1173,7 +1189,8 @@ namespace NxRHI
 		timelineInfo.signalSemaphoreValueCount = 1;
 		timelineInfo.pSignalSemaphoreValues = signalValue;
 
-		vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, nullptr);
+		auto hr = vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, nullptr);
+		ASSERT(hr == VK_SUCCESS);
 	}
 	void VKCmdQueue::ExecuteCommandList(UINT num, ICommandList** ppCmdlist)
 	{
@@ -1242,7 +1259,8 @@ namespace NxRHI
 		timelineInfo.signalSemaphoreValueCount = 2;
 		timelineInfo.pSignalSemaphoreValues = signalValue;
 
-		vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, g2hFence);
+		auto hr = vkQueueSubmit(mGraphicsQueue, 1, &submitInfo, g2hFence);
+		ASSERT(hr == VK_SUCCESS);
 
 		return completedValue;
 	}

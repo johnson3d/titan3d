@@ -13,3 +13,5 @@
 #include "v3dxVector2.h"
 
 #define new VNEW
+
+v3dxVector2 v3dxVector2::Zero(0,0);

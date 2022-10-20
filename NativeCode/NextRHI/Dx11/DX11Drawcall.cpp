@@ -50,7 +50,7 @@ namespace NxRHI
 		}*/
 		cmdlist->SetGraphicsPipeline(GpuDrawState);
 
-		auto effect = GetShaderEffect();
+		auto effect = GetGraphicsEffect();
 
 		effect->Commit(cmdlist, this);
 
@@ -61,7 +61,7 @@ namespace NxRHI
 				case SBT_CBuffer:
 				{
 					IGpuResource* t = i.second;
-					effect->BindCBuffer(cmdlist, i.first, (ICbView*)t);
+					effect->BindCBV(cmdlist, i.first, (ICbView*)t);
 				}
 				break;
 				case SBT_SRV:

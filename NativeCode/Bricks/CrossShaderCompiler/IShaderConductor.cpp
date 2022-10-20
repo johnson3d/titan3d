@@ -14,9 +14,10 @@
 
 #define  new VNEW
 
-#if defined(PLATFORM_WIN)
 using namespace EngineNS;
 using namespace EngineNS::NxRHI;
+
+#if defined(PLATFORM_WIN)
 
 struct UEngineInclude : public ID3DInclude
 {
@@ -110,10 +111,10 @@ IShaderConductor* IShaderConductor::GetInstance()
 //	}
 //}
 
-bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm,
-			const NxRHI::IShaderDefinitions* defines, bool bDebugShader, NxRHI::EShaderLanguage sl)
+bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FShaderDesc* desc, const char* shader, const char* entry, NxRHI::EShaderType type, const char* sm,
+			const NxRHI::IShaderDefinitions* defines, bool bDebugShader, NxRHI::EShaderLanguage sl, bool debugShader)
 {
-	if (sl == EShaderLanguage::SL_DXBC)
+	if (sl == NxRHI::EShaderLanguage::SL_DXBC)
 	{
 #if defined(PLATFORM_WIN)
 		auto ar = compiler->GetShaderCodeStream(shader);
@@ -184,23 +185,23 @@ bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FS
 #endif
 	}
 
-	if (sl == EShaderLanguage::SL_DXIL || 
-		sl == EShaderLanguage::SL_SPIRV || 
-		sl == EShaderLanguage::SL_GLSL ||
-		sl == EShaderLanguage::SL_METAL)
+	if (sl == NxRHI::EShaderLanguage::SL_DXIL ||
+		sl == NxRHI::EShaderLanguage::SL_SPIRV ||
+		sl == NxRHI::EShaderLanguage::SL_GLSL ||
+		sl == NxRHI::EShaderLanguage::SL_METAL)
 	{
-		CompileHLSL(compiler, desc, shader, entry, type, sm, defines, sl);
+		CompileHLSL(compiler, desc, shader, entry, type, sm, defines, sl, debugShader);
 	}
 
-	if (sl == EShaderLanguage::SL_SPIRV)
+	if (sl == NxRHI::EShaderLanguage::SL_SPIRV)
 	{
 		
 	}
 	return true;
 }
 
-bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, FShaderDesc* desc, const char* hlsl, const char* entry, EShaderType type, std::string sm,
-	const IShaderDefinitions* defines, NxRHI::EShaderLanguage sl)
+bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FShaderDesc* desc, const char* hlsl, const char* entry, NxRHI::EShaderType type, std::string sm,
+	const NxRHI::IShaderDefinitions* defines, NxRHI::EShaderLanguage sl, bool debugShader)
 {
 #if defined(PLATFORM_WIN)
 	auto ar = compiler->GetShaderCodeStream(hlsl);
@@ -209,13 +210,13 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, FShaderDesc
 	ShaderConductor::ShaderStage stage = ShaderConductor::ShaderStage::VertexShader;
 	switch (type)
 	{
-	case EShaderType::SDT_VertexShader:
+	case NxRHI::EShaderType::SDT_VertexShader:
 		stage = ShaderConductor::ShaderStage::VertexShader;
 		break;
-	case EShaderType::SDT_PixelShader:
+	case NxRHI::EShaderType::SDT_PixelShader:
 		stage = ShaderConductor::ShaderStage::PixelShader;
 		break;
-	case EShaderType::SDT_ComputeShader:
+	case NxRHI::EShaderType::SDT_ComputeShader:
 		stage = ShaderConductor::ShaderStage::ComputeShader;
 		break;
 	default:
@@ -277,6 +278,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, FShaderDesc
 	}
 
 	ShaderConductor::Compiler::Options opt;
+	opt.enableDebugInfo = debugShader;
 	opt.packMatricesInRowMajor = false;
 	opt.enable16bitTypes = true;
 	opt.shaderModel = { 6,2 };

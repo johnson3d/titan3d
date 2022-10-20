@@ -13,7 +13,7 @@ namespace NxRHI
 	class FVertexArray;
 	class FGeomMesh;
 	class IGpuPipeline;
-	class IShaderEffect;
+	class IGraphicsEffect;
 	class FEffectBinder;
 	class IGpuResource;
 	class ICommandList;
@@ -36,9 +36,9 @@ namespace NxRHI
 		void BindResource(const FEffectBinder* binder, IGpuResource * resource);
 		IGpuResource* FindGpuResource(VNameString name);
 		virtual void Commit(ICommandList * cmdlist) override;
-		void BindShaderEffect(IGpuDevice* device, IShaderEffect * effect);
+		void BindShaderEffect(IGpuDevice* device, IGraphicsEffect * effect);
 		void BindPipeline(IGpuDevice * device, IGpuPipeline * pipe);
-		IShaderEffect* GetShaderEffect();
+		IGraphicsEffect* GetGraphicsEffect();
 		IGpuPipeline* GetPipeline();
 		FGeomMesh* GetGeomMesh() {
 			return Mesh;
@@ -57,7 +57,7 @@ namespace NxRHI
 		void BindIndirectDrawArgsBuffer(IBuffer* buffer, UINT offset);
 	public:
 		std::map<const FEffectBinder*, AutoRef<IGpuResource>>	BindResources;
-		AutoRef<IShaderEffect>		ShaderEffect;
+		AutoRef<IGraphicsEffect>		ShaderEffect;
 		AutoRef<IGpuPipeline>		Pipeline;
 		AutoRef<FGeomMesh>			Mesh;
 		AutoRef<FVertexArray>		AttachVB;

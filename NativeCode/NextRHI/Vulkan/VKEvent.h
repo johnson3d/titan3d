@@ -48,8 +48,6 @@ namespace NxRHI
 
 		bool Init(VKGpuDevice * pDevice, const FFenceDesc & desc, const char* name);
 		virtual UINT64 GetCompletedValue() override;
-		virtual void SetEvent() override;
-		virtual void ResetEvent() override;
 		virtual void CpuSignal(UINT64 value) override;
 		virtual void Signal(ICmdQueue* queue, UINT64 value) override;
 		virtual bool Wait(UINT64 value, UINT timeOut = INFINITE) override;
@@ -61,7 +59,7 @@ namespace NxRHI
 	public:
 		TObjectHandle<VKGpuDevice>	mDeviceRef;
 		AutoRef<VKEvent>	mEvent;
-		VkSemaphore			mSemaphore = nullptr;
+		VkSemaphore			mSemaphore = (VkSemaphore)nullptr;
 	};
 	class VKBinaryFence : public VKFence
 	{
@@ -86,7 +84,7 @@ namespace NxRHI
 		bool IsSignaled();
 	public:
 		TObjectHandle<VKGpuDevice>	mDeviceRef;
-		VkFence				mFence = nullptr;
+		VkFence				mFence = (VkFence)nullptr;
 	};
 }
 

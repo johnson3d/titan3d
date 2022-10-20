@@ -34,26 +34,26 @@ namespace NxRHI
 		}
 		return 0;
 	}
-	IShaderEffect::IShaderEffect()
+	IGraphicsEffect::IGraphicsEffect()
 	{
 
 	}
-	IShaderEffect::~IShaderEffect()
+	IGraphicsEffect::~IGraphicsEffect()
 	{
 
 	}
-	void IShaderEffect::BindInputLayout(IInputLayout* va)
+	void IGraphicsEffect::BindInputLayout(IInputLayout* va)
 	{
 		mInputLayout = va;
 	}
-	void IShaderEffect::LinkShaders()
+	void IGraphicsEffect::LinkShaders()
 	{
 		mBinders.clear();
 
 		PushBinder(EShaderType::SDT_VertexShader, mVertexShader->Reflector);
 		PushBinder(EShaderType::SDT_PixelShader, mPixelShader->Reflector);
 	}
-	void IShaderEffect::PushBinder(EShaderType shaderType, IShaderReflector* pReflector)
+	void IGraphicsEffect::PushBinder(EShaderType shaderType, IShaderReflector* pReflector)
 	{
 		if (pReflector == nullptr)
 			return;
@@ -74,7 +74,7 @@ namespace NxRHI
 			PushBinder(shaderType, i->Name, i);
 		}
 	}
-	void IShaderEffect::PushBinder(EShaderType shaderType, VNameString name, AutoRef<FShaderBinder>& binder)
+	void IGraphicsEffect::PushBinder(EShaderType shaderType, VNameString name, AutoRef<FShaderBinder>& binder)
 	{
 		AutoRef<FEffectBinder> eb;
 		auto iter = mBinders.find(name);
@@ -105,7 +105,7 @@ namespace NxRHI
 				break;
 		}
 	}
-	void IShaderEffect::BindCBuffer(ICommandList* cmdlist, const FEffectBinder* binder, ICbView* buffer)
+	void IGraphicsEffect::BindCBV(ICommandList* cmdlist, const FEffectBinder* binder, ICbView* buffer)
 	{
 		if (binder->VSBinder != nullptr)
 		{
@@ -116,7 +116,7 @@ namespace NxRHI
 			cmdlist->SetCBV(EShaderType::SDT_PixelShader, binder->PSBinder, buffer);
 		}
 	}
-	void IShaderEffect::BindSrv(ICommandList* cmdlist, const FEffectBinder* binder, ISrView* srv)
+	void IGraphicsEffect::BindSrv(ICommandList* cmdlist, const FEffectBinder* binder, ISrView* srv)
 	{
 		if (binder->VSBinder != nullptr)
 		{
@@ -127,7 +127,7 @@ namespace NxRHI
 			cmdlist->SetSrv(EShaderType::SDT_PixelShader, binder->PSBinder, srv);
 		}
 	}
-	void IShaderEffect::BindUav(ICommandList* cmdlist, const FEffectBinder* binder, IUaView* uav)
+	void IGraphicsEffect::BindUav(ICommandList* cmdlist, const FEffectBinder* binder, IUaView* uav)
 	{
 		if (binder->VSBinder != nullptr)
 		{
@@ -138,7 +138,7 @@ namespace NxRHI
 			cmdlist->SetUav(EShaderType::SDT_PixelShader, binder->PSBinder, uav);
 		}
 	}
-	void IShaderEffect::BindSampler(ICommandList* cmdlist, const FEffectBinder* binder, ISampler* sampler)
+	void IGraphicsEffect::BindSampler(ICommandList* cmdlist, const FEffectBinder* binder, ISampler* sampler)
 	{
 		if (binder->VSBinder != nullptr)
 		{
@@ -176,7 +176,7 @@ namespace NxRHI
 		auto pReflector = mComputeShader->GetReflector();
 		return pReflector->FindBinder(type, name);
 	}
-	void IComputeEffect::BindCBuffer(ICommandList* cmdlist, const FShaderBinder* binder, ICbView* buffer)
+	void IComputeEffect::BindCBV(ICommandList* cmdlist, const FShaderBinder* binder, ICbView* buffer)
 	{
 		cmdlist->SetCBV(EShaderType::SDT_ComputeShader, binder, buffer);
 	}

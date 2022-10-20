@@ -8,7 +8,7 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	enum TR_ENUM()
+	enum TR_ENUM(SV_EnumNoFlags)
 		EGpuUsage
 	{
 		USAGE_DEFAULT = 0,
@@ -22,6 +22,28 @@ namespace NxRHI
 		CAS_DEFAULT = 0,
 			CAS_WRITE = 0x10000,
 			CAS_READ = 0x20000,
+	};
+	enum TR_ENUM()
+		EBarrierAccess
+	{
+		BAS_Default = 0,
+			BAS_IndirectRead = 0x00000001,
+			BAS_IndexRead = 0x00000002,
+			BAS_VertexRead = 0x00000004,
+			BAS_CBufferRead = 0x00000008,
+			BAS_InputStreamRead = 0x00000010,
+			BAS_ShaderRead = 0x00000020,
+			BAS_ShaderWrite = 0x00000040,
+			BAS_RenderTargetRead = 0x00000080,
+			BAS_RenderTargetWrite = 0x00000100,
+			BAS_DepthStencilRead = 0x00000200,
+			BAS_DepthStencilWrite = 0x00000400,
+			BAS_CopyRead = 0x00000800,
+			BAS_CopyWrite = 0x00001000,
+			BAS_CpuRead = 0x00002000,
+			BAS_CpuWrite = 0x00004000,
+			BAS_MemoryRead = 0x00008000,
+			BAS_MemoryWrite = 0x00010000,
 	};
 	enum TR_ENUM()
 		EResourceMiscFlag
@@ -155,6 +177,9 @@ namespace NxRHI
 		virtual void UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubresourceBox* box, UINT rowPitch, UINT depthPitch) {
 
 		}
+		virtual void UpdateGpuData(ICommandList* cmd, UINT offset, void* pData, UINT size) {
+
+		}
 		virtual bool Map(ICommandList* cmd, UINT index, FMappedSubResource* res, bool forRead) = 0;
 		virtual void Unmap(ICommandList* cmd, UINT index) = 0;
 	public:
@@ -165,12 +190,12 @@ namespace NxRHI
 	{
 	public:
 		ENGINE_RTTI(IBuffer);
-		virtual bool Map(ICommandList * cmd, UINT index, FMappedSubResource * res, bool forRead) = 0;
-		virtual void Unmap(ICommandList * cmd, UINT index) = 0;
+		virtual bool Map(ICommandList * cmd, UINT index, FMappedSubResource * res, bool forRead) override = 0;
+		virtual void Unmap(ICommandList * cmd, UINT index) override = 0;
 		virtual void Flush2Device(ICommandList* cmd, void* pBuffer, UINT Size) = 0;
 		virtual bool FetchGpuData(ICommandList * cmd, UINT subRes, IBlobObject * blob) override;
-		virtual void UpdateGpuData(ICommandList * cmd, UINT offset, void* pData, UINT size) = 0;
-		virtual void SetDebugName(const char* name) {}
+		virtual void UpdateGpuData(ICommandList * cmd, UINT offset, void* pData, UINT size) override = 0;
+		virtual void SetDebugName(const char* name) override {}
 		template<class _T>
 		void SetValue(const FShaderVarDesc& binder, const _T& v)
 		{
@@ -314,12 +339,12 @@ namespace NxRHI
 			return mipIndex + arrayIndex * Desc.MipLevels;
 		}
 		virtual void* GetSharedHandle() { return nullptr; }
-		virtual bool Map(ICommandList* cmd, UINT index, FMappedSubResource* res, bool forRead) = 0;
-		virtual void Unmap(ICommandList* cmd, UINT index) = 0;
+		virtual bool Map(ICommandList* cmd, UINT index, FMappedSubResource* res, bool forRead) override = 0;
+		virtual void Unmap(ICommandList* cmd, UINT index) override = 0;
 		static void BuildImage2DBlob(IBlobObject * blob, void* pData, UINT RowPitch, const FTextureDesc* desc);
 		static void BuildImage2DBlob(IBlobObject* blob, IBlobObject* gpuData, const FTextureDesc* desc);
 		virtual bool FetchGpuData(ICommandList * cmd, UINT subRes, IBlobObject * blob) override;
-		virtual void SetDebugName(const char* name) {}
+		virtual void SetDebugName(const char* name) override{}
 		virtual FResourceState* GetResourceState() override {
 			return &mResourceState;
 		}

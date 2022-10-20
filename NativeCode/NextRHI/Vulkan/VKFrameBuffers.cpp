@@ -308,7 +308,7 @@ namespace NxRHI
 	{
 
 	}
-	void VKSwapChain::FBackBuffer::Cleanup(VKGpuDevice* device)
+	void VKSwapChain::FBackBuffer::CleanupVK(VKGpuDevice* device)
 	{
 		if (AcquireSemaphore != nullptr)
 		{
@@ -335,7 +335,7 @@ namespace NxRHI
 		
 		for (auto i : BackBuffers)
 		{
-			i->Cleanup(device);
+			i->CleanupVK(device);
 		}
 		BackBuffers.clear();
 

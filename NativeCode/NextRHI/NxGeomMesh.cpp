@@ -951,7 +951,16 @@ namespace NxRHI
 
 		return &mAtoms[index][lod];
 	}
-
+	void FMeshDataProvider::PushAtom(const FMeshAtomDesc* pDescLODs, UINT count, const AutoRef<VIUnknownBase>& ext)
+	{
+		std::vector<FMeshAtomDesc> tmp;
+		for (UINT i = 0; i < count; i++)
+		{
+			tmp.push_back(pDescLODs[i]);
+		}
+		mAtoms.push_back(tmp);
+		mAtomExtDatas.push_back(ext);
+	}
 	bool FMeshDataProvider::SetAtom(UINT index, UINT lod, const FMeshAtomDesc& desc)
 	{
 		if (index >= (UINT)mAtoms.size())

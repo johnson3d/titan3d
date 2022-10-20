@@ -165,7 +165,7 @@ namespace NxRHI
 	{
 		desc->FunctionName = entry;
 		//return DX12Shader_CompileShader2(compiler, desc, shader, entry, type, "5_0", defines, sl, bDebugShader);
-		return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl);
+		return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader);
 	}
 	
 	DX12Shader::DX12Shader()

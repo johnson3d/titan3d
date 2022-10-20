@@ -1,7 +1,16 @@
 #include "NxShader.h"
+
+#if defined(HasModule_Dx11)
 #include "Dx11/DX11Shader.h"
+#endif
+
+#if defined(HasModule_Dx12)
 #include "Dx12/DX12Shader.h"
+#endif
+
+#if defined(HasModule_Vulkan)
 #include "Vulkan/VKShader.h"
+#endif
 
 #define new VNEW
 

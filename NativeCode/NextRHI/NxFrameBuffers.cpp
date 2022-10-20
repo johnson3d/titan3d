@@ -1,5 +1,5 @@
 #include "NxFrameBuffers.h"
-#include "NXBuffer.h"
+#include "NxBuffer.h"
 
 #define new VNEW
 

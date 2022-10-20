@@ -6,11 +6,11 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	class VKShaderEffect : public IShaderEffect
+	class VKGraphicsEffect : public IGraphicsEffect
 	{
 	public:
-		VKShaderEffect();
-		~VKShaderEffect();
+		VKGraphicsEffect();
+		~VKGraphicsEffect();
 		virtual void BuildState(IGpuDevice* device) override;
 		virtual void Commit(ICommandList* cmdlist, IGraphicDraw* drawcall) override;
 	public:

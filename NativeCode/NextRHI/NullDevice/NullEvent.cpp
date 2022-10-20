@@ -30,14 +30,6 @@ namespace NxRHI
 	{
 		return 0;
 	}
-	void NullFence::SetEvent()
-	{
-		
-	}
-	void NullFence::ResetEvent()
-	{
-		
-	}
 	void NullFence::CpuSignal(UINT64 value)
 	{
 

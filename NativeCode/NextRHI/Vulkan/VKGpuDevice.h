@@ -46,18 +46,23 @@ namespace NxRHI
 		}
 	public:
 		VkInstance					mVKInstance = nullptr;
-		VkSurfaceKHR				mSurface = nullptr;
+		VkSurfaceKHR				mSurface = (VkSurfaceKHR)nullptr;
 		std::vector<VkPhysicalDevice>	mHwDevices;
 
 		std::vector<VkExtensionProperties>	mDeviceExtensions;
 		std::vector<VkLayerProperties>	mLayerProperties;
 
-		static PFN_vkCmdBeginDebugUtilsLabelEXT fn_vkCmdBeginDebugUtilsLabelEXT;
-		static PFN_vkCmdEndDebugUtilsLabelEXT fn_vkCmdEndDebugUtilsLabelEXT;
-		static PFN_vkDebugMarkerSetObjectNameEXT fn_vkDebugMarkerSetObjectNameEXT;
-		static PFN_vkCmdDebugMarkerBeginEXT fn_vkCmdDebugMarkerBeginEXT;
-		static PFN_vkCmdDebugMarkerEndEXT fn_vkCmdDebugMarkerEndEXT;
-		static PFN_vkQueueSubmit2 fn_vkQueueSubmit2;
+		#define DefineVKFunctionPtr(name) static PFN_##name name;
+		DefineVKFunctionPtr(vkCmdBeginDebugUtilsLabelEXT);
+		DefineVKFunctionPtr(vkCmdEndDebugUtilsLabelEXT);
+		DefineVKFunctionPtr(vkDebugMarkerSetObjectNameEXT);
+		DefineVKFunctionPtr(vkCmdDebugMarkerBeginEXT);
+		DefineVKFunctionPtr(vkCmdDebugMarkerEndEXT);
+		DefineVKFunctionPtr(vkQueueSubmit2);
+		DefineVKFunctionPtr(vkGetSemaphoreCounterValue);
+		DefineVKFunctionPtr(vkSignalSemaphore);
+		DefineVKFunctionPtr(vkWaitSemaphores);
+
 		static void SetVkObjectDebugName(VkDevice device, VkDebugReportObjectTypeEXT type, void* pObj, const char* name)
 		{
 			VkDebugMarkerObjectNameInfoEXT dbgNameInfo{};
@@ -65,7 +70,7 @@ namespace NxRHI
 			dbgNameInfo.pObjectName = name;
 			dbgNameInfo.objectType = type;
 			dbgNameInfo.object = (uint64_t)pObj;
-			VKGpuSystem::fn_vkDebugMarkerSetObjectNameEXT(device, &dbgNameInfo);
+			VKGpuSystem::vkDebugMarkerSetObjectNameEXT(device, &dbgNameInfo);
 		}
 	public:
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
@@ -97,7 +102,7 @@ namespace NxRHI
 		virtual IInputLayout* CreateInputLayout(FInputLayoutDesc* desc) override;
 		virtual ICommandList* CreateCommandList() override;
 		virtual IShader* CreateShader(FShaderDesc* desc) override;
-		virtual IShaderEffect* CreateShaderEffect() override;
+		virtual IGraphicsEffect* CreateShaderEffect() override;
 		virtual IComputeEffect* CreateComputeEffect() override;
 		virtual IFence* CreateFence(const FFenceDesc* desc, const char* name) override;
 		virtual IEvent* CreateGpuEvent(const FEventDesc* desc, const char* name) override;
@@ -129,16 +134,24 @@ namespace NxRHI
 			}
 			return 0xFFFFFFFF;
 		}
+		bool HasExtension(const char* name) const{
+			for (auto& i : mDeviceExtensions)
+			{
+				if (strcmp(i.extensionName, name) == 0)
+					return true;
+			}
+			return false;
+		}
 	public:
 		TObjectHandle<VKGpuSystem>		mGpuSystem;
 		VkPhysicalDeviceProperties		mDeviceProperties{};
 		VkPhysicalDeviceFeatures		mDeviceFeatures{};
 		VkPhysicalDeviceMemoryProperties mMemProperties{};
 		VkPhysicalDevice				mPhysicalDevice = nullptr;
-		VkSurfaceKHR					mSurface = nullptr;
+		VkSurfaceKHR					mSurface = (VkSurfaceKHR)nullptr;
 		VkDevice						mDevice = nullptr;
-		VkCommandPool					mCommandPool = nullptr;
-		VkDebugReportCallbackEXT		mDebugReportCallback = nullptr;
+		VkCommandPool					mCommandPool = (VkCommandPool)nullptr;
+		VkDebugReportCallbackEXT		mDebugReportCallback = (VkDebugReportCallbackEXT)nullptr;
 		std::vector<VkExtensionProperties>	mDeviceExtensions;
 
 		AutoRef<VKCmdQueue>				mCmdQueue;

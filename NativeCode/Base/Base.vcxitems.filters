@@ -218,6 +218,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)thread\vfxThreadDispatcher.h">
       <Filter>thread</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)mix_defs\dds_defs.h">
+      <Filter>mix_defs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="io">
@@ -264,6 +267,9 @@
     </Filter>
     <Filter Include="allocator">
       <UniqueIdentifier>{183ee525-19f0-4ecc-bfc3-245c5b9f8fc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mix_defs">
+      <UniqueIdentifier>{df71e943-4b24-4db9-9400-469b0e711ac4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -118,6 +118,18 @@ namespace NxRHI
 	{
 		
 	}
+	void NullCommandList::SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess)
+	{
+
+	}
+	void NullCommandList::SetBufferBarrier(IBuffer* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
+	{
+
+	}
+	void NullCommandList::SetTextureBarrier(ITexture* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
+	{
+
+	}
 	/*UINT64 NullCommandList::SignalFence(IFence* fence, UINT64 value, IEvent* evt)
 	{
 		return value;

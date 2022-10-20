@@ -422,6 +422,133 @@ namespace NxRHI
 		mContext->ExecuteIndirect(device->CmdSigForIndirectDispatch, 1, (ID3D12Resource*)dx12Buffer->GetHWBuffer(), offset, nullptr, 0);
 		dx12Buffer->TransitionTo(this, saved);
 	}
+	void DX12CommandList::SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess)
+	{
+		//D3D12_RESOURCE_BARRIER
+		//mContext->ResourceBarrier()
+	}
+	D3D12_RESOURCE_STATES GpuStateToDX12(EGpuResourceState state)
+	{
+		switch (state)
+		{
+		case EngineNS::NxRHI::GRS_Undefine:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+		case EngineNS::NxRHI::GRS_SrvPS:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ; //return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		case EngineNS::NxRHI::GRS_GenericRead:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+		case EngineNS::NxRHI::GRS_Uav:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		case EngineNS::NxRHI::GRS_UavIndirect:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
+		case EngineNS::NxRHI::GRS_RenderTarget:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_RENDER_TARGET;
+		case EngineNS::NxRHI::GRS_DepthStencil:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
+		case EngineNS::NxRHI::GRS_DepthRead:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
+		case EngineNS::NxRHI::GRS_StencilRead:
+			ASSERT(false);
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
+		case EngineNS::NxRHI::GRS_DepthStencilRead:
+			ASSERT(false);
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
+		case EngineNS::NxRHI::GRS_CopySrc:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_SOURCE;
+		case EngineNS::NxRHI::GRS_CopyDst:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
+		case EngineNS::NxRHI::GRS_Present:
+			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_PRESENT;
+		default:
+			break;
+		}
+		return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+	}
+	EGpuResourceState DX12ToGpuState(D3D12_RESOURCE_STATES state)
+	{
+		switch (state)
+		{
+		case D3D12_RESOURCE_STATE_COMMON:
+			break;
+		case D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER:
+			break;
+		case D3D12_RESOURCE_STATE_INDEX_BUFFER:
+			break;
+		case D3D12_RESOURCE_STATE_RENDER_TARGET:
+			break;
+		case D3D12_RESOURCE_STATE_UNORDERED_ACCESS:
+			break;
+		case D3D12_RESOURCE_STATE_DEPTH_WRITE:
+			break;
+		case D3D12_RESOURCE_STATE_DEPTH_READ:
+			break;
+		case D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE:
+			break;
+		case D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE:
+			break;
+		case D3D12_RESOURCE_STATE_STREAM_OUT:
+			break;
+		case D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT:
+			break;
+		case D3D12_RESOURCE_STATE_COPY_DEST:
+			break;
+		case D3D12_RESOURCE_STATE_COPY_SOURCE:
+			break;
+		case D3D12_RESOURCE_STATE_RESOLVE_DEST:
+			break;
+		case D3D12_RESOURCE_STATE_RESOLVE_SOURCE:
+			break;
+		case D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE:
+			break;
+		case D3D12_RESOURCE_STATE_SHADING_RATE_SOURCE:
+			break;
+		case D3D12_RESOURCE_STATE_GENERIC_READ:
+			break;
+		case D3D12_RESOURCE_STATE_VIDEO_DECODE_READ:
+			break;
+		case D3D12_RESOURCE_STATE_VIDEO_DECODE_WRITE:
+			break;
+		case D3D12_RESOURCE_STATE_VIDEO_PROCESS_READ:
+			break;
+		case D3D12_RESOURCE_STATE_VIDEO_PROCESS_WRITE:
+			break;
+		case D3D12_RESOURCE_STATE_VIDEO_ENCODE_READ:
+			break;
+		case D3D12_RESOURCE_STATE_VIDEO_ENCODE_WRITE:
+			break;
+		default:
+			break;
+		}
+		return EGpuResourceState::GRS_Undefine;
+	}
+	void DX12CommandList::SetBufferBarrier(IBuffer* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
+	{
+		D3D12_RESOURCE_BARRIER tmp{};
+		tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		auto pTarGpuResource = (ID3D12Resource*)pResource->GetHWBuffer();
+		tmp.Transition.pResource = pTarGpuResource;
+		tmp.Transition.StateBefore = GpuStateToDX12(srcAccess);
+		tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
+		if (tmp.Transition.StateBefore == tmp.Transition.StateAfter)
+			return;
+		tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		mContext->ResourceBarrier(1, &tmp);
+	}
+	void DX12CommandList::SetTextureBarrier(ITexture* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess)
+	{
+		D3D12_RESOURCE_BARRIER tmp{};
+		tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		auto pTarGpuResource = (ID3D12Resource*)pResource->GetHWBuffer();
+		tmp.Transition.pResource = pTarGpuResource;
+		tmp.Transition.StateBefore = GpuStateToDX12(srcAccess);
+		tmp.Transition.StateAfter = GpuStateToDX12(dstAccess);
+		if (tmp.Transition.StateBefore == tmp.Transition.StateAfter)
+			return;
+		tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		mContext->ResourceBarrier(1, &tmp);
+	}
 	//UINT64 DX12CommandList::SignalFence(IFence* fence, UINT64 value, IEvent* evt)
 	//{
 	//	ASSERT(mIsRecording);

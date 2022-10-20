@@ -223,12 +223,12 @@ void CoreSDK::Free(void* ptr)
 }
 
 void CoreSDK::Print2Console(TR_META(SV_NoStringConverter = true) char* txt, bool newLine) {
-	printf(txt);
+	printf("%s", txt);
 	if (newLine)
 		printf("\n");
 }
 void CoreSDK::Print2Console2(const char* txt, bool newLine) {
-	printf(txt);
+	printf("%s", txt);
 	if (newLine)
 		printf("\n");
 }

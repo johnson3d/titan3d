@@ -79,18 +79,46 @@ namespace NxRHI
 		auto pDescriptorObj = (DX12DescriptorSetPagedObject*)obj;
 		if (IsSampler)
 		{
-			ASSERT(mShaderEffect->mSamplerTableSize == mDesc.NumDescriptors);
-			for (int i = 0; i < mShaderEffect->mSamplerTableSize; i++)
+			switch (Type)
 			{
-				device->mDevice->CopyDescriptorsSimple(1, pDescriptorObj->GetHandle(i), device->mNullSampler->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+				case EngineNS::NxRHI::DX12DescriptorSetCreator::Graphics:
+					ASSERT(mShaderEffect->mSamplerTableSize == mDesc.NumDescriptors);
+					for (int i = 0; i < mShaderEffect->mSamplerTableSize; i++)
+					{
+						device->mDevice->CopyDescriptorsSimple(1, pDescriptorObj->GetHandle(i), device->mNullSampler->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+					}
+					break;
+				case EngineNS::NxRHI::DX12DescriptorSetCreator::Compute:
+					ASSERT(mComputeEffect->mSamplerTableSize == mDesc.NumDescriptors);
+					for (int i = 0; i < mComputeEffect->mSamplerTableSize; i++)
+					{
+						device->mDevice->CopyDescriptorsSimple(1, pDescriptorObj->GetHandle(i), device->mNullSampler->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+					}
+					break;
+				default:
+					break;
 			}
 		}
 		else
 		{
-			ASSERT(mShaderEffect->mSrvTableSize == mDesc.NumDescriptors);
-			for (int i = 0; i < mShaderEffect->mSrvTableSize; i++)
+			switch (Type)
 			{
-				device->mDevice->CopyDescriptorsSimple(1, pDescriptorObj->GetHandle(i), device->mNullCBV->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				case EngineNS::NxRHI::DX12DescriptorSetCreator::Graphics:
+					ASSERT(mShaderEffect->mSrvTableSize == mDesc.NumDescriptors);
+					for (int i = 0; i < mShaderEffect->mSrvTableSize; i++)
+					{
+						device->mDevice->CopyDescriptorsSimple(1, pDescriptorObj->GetHandle(i), device->mNullCBV->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					}
+					break;
+				case EngineNS::NxRHI::DX12DescriptorSetCreator::Compute:
+					ASSERT(mComputeEffect->mSrvTableSize == mDesc.NumDescriptors);
+					for (int i = 0; i < mComputeEffect->mSrvTableSize; i++)
+					{
+						device->mDevice->CopyDescriptorsSimple(1, pDescriptorObj->GetHandle(i), device->mNullCBV->GetHandle(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					}
+					break;
+				default:
+					break;
 			}
 		}
 	}
@@ -172,7 +200,7 @@ namespace NxRHI
 		pBinder->DescriptorIndex = (UINT)pOutRanges->size();
 		pOutRanges->push_back(rangeVS);
 	}
-	void DX12ShaderEffect::BuildState(IGpuDevice* device1)
+	void DX12GraphicsEffect::BuildState(IGpuDevice* device1)
 	{
 		auto device = ((DX12GpuDevice*)device1);
 		std::vector<D3D12_ROOT_PARAMETER>	mRootParameters;
@@ -283,6 +311,7 @@ namespace NxRHI
 		if (mSrvTableSize > 0)
 		{
 			mDescriptorAllocatorCSU = MakeWeakRef(new DX12DescriptorSetAllocator());
+			mDescriptorAllocatorCSU->Creator.Type = DX12DescriptorSetCreator::EDescriptorType::Graphics;
 			mDescriptorAllocatorCSU->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 			mDescriptorAllocatorCSU->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 			mDescriptorAllocatorCSU->Creator.mDesc.NumDescriptors = mSrvTableSize;
@@ -296,6 +325,7 @@ namespace NxRHI
 		if (mSamplerTableSize > 0)
 		{
 			mDescriptorAllocatorSampler = MakeWeakRef(new DX12DescriptorSetAllocator());
+			mDescriptorAllocatorSampler->Creator.Type = DX12DescriptorSetCreator::EDescriptorType::Graphics;
 			mDescriptorAllocatorSampler->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
 			mDescriptorAllocatorSampler->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 			mDescriptorAllocatorSampler->Creator.mDesc.NumDescriptors = mSamplerTableSize;
@@ -306,7 +336,7 @@ namespace NxRHI
 			mDescriptorAllocatorSampler->mDescriptorStride = device->mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 		}
 	}
-	AutoRef<ID3D12CommandSignature> DX12ShaderEffect::GetIndirectDrawIndexCmdSig(ICommandList* cmdlist)
+	AutoRef<ID3D12CommandSignature> DX12GraphicsEffect::GetIndirectDrawIndexCmdSig(ICommandList* cmdlist)
 	{
 		return nullptr;
 		/*if (CmdSigForIndirectDrawIndex == nullptr)
@@ -322,7 +352,7 @@ namespace NxRHI
 		}
 		return CmdSigForIndirectDrawIndex;*/
 	}
-	void DX12ShaderEffect::Commit(ICommandList* cmdlist, IGraphicDraw* drawcall)
+	void DX12GraphicsEffect::Commit(ICommandList* cmdlist, IGraphicDraw* drawcall)
 	{
 		/*auto dx12Cmd = (DX12CommandList*)cmdlist;
 		ASSERT(dx12Cmd->mCurrentTableRecycle != nullptr);
@@ -378,6 +408,7 @@ namespace NxRHI
 
 	void DX12ComputeEffect::BuildState(IGpuDevice* device)
 	{
+		auto dxDevice = (DX12GpuDevice*)device;
 		std::vector<D3D12_ROOT_PARAMETER>	mRootParameters;
 		std::vector<D3D12_DESCRIPTOR_RANGE>	usb;
 		std::vector<D3D12_DESCRIPTOR_RANGE>	sampler;
@@ -451,7 +482,7 @@ namespace NxRHI
 
 		auto bfSize = serializedRootSig->GetBufferSize();
 		ID3D12RootSignature* pRootSig = nullptr;
-		((DX12GpuDevice*)device)->mDevice->CreateRootSignature(0,
+		dxDevice->mDevice->CreateRootSignature(0,
 			serializedRootSig->GetBufferPointer(),
 			bfSize,
 			IID_PPV_ARGS(&pRootSig));
@@ -465,7 +496,35 @@ namespace NxRHI
 			mComputeShader->Desc->DxIL.size()
 		};
 		pipeDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-		((DX12GpuDevice*)device)->mDevice->CreateComputePipelineState(&pipeDesc, IID_PPV_ARGS(mPipelineState.GetAddressOf()));
+		dxDevice->mDevice->CreateComputePipelineState(&pipeDesc, IID_PPV_ARGS(mPipelineState.GetAddressOf()));
+
+		if (mSrvTableSize > 0)
+		{
+			mDescriptorAllocatorCSU = MakeWeakRef(new DX12DescriptorSetAllocator());
+			mDescriptorAllocatorCSU->Creator.Type = DX12DescriptorSetCreator::EDescriptorType::Compute;
+			mDescriptorAllocatorCSU->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+			mDescriptorAllocatorCSU->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+			mDescriptorAllocatorCSU->Creator.mDesc.NumDescriptors = mSrvTableSize;
+			mDescriptorAllocatorCSU->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+			mDescriptorAllocatorCSU->Creator.mComputeEffect = this;
+			mDescriptorAllocatorCSU->Creator.IsSampler = false;
+			mDescriptorAllocatorCSU->Creator.mDeviceRef.FromObject(device);
+			mDescriptorAllocatorCSU->mDescriptorStride = dxDevice->mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		}
+
+		if (mSamplerTableSize > 0)
+		{
+			mDescriptorAllocatorSampler = MakeWeakRef(new DX12DescriptorSetAllocator());
+			mDescriptorAllocatorSampler->Creator.Type = DX12DescriptorSetCreator::EDescriptorType::Compute;
+			mDescriptorAllocatorSampler->Creator.mDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+			mDescriptorAllocatorSampler->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+			mDescriptorAllocatorSampler->Creator.mDesc.NumDescriptors = mSamplerTableSize;
+			mDescriptorAllocatorSampler->Creator.mDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+			mDescriptorAllocatorSampler->Creator.mComputeEffect = this;
+			mDescriptorAllocatorSampler->Creator.IsSampler = true;
+			mDescriptorAllocatorSampler->Creator.mDeviceRef.FromObject(device);
+			mDescriptorAllocatorSampler->mDescriptorStride = dxDevice->mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+		}
 	}
 	
 	void DX12ComputeEffect::Commit(ICommandList* cmdlist)

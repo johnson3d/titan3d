@@ -11,7 +11,7 @@ IMesh::IMesh()
 
 }
 
-void IMesh::Initialize(NxRHI::FMeshPrimitives* mesh, IMdfQueue* mdf)
+void IMesh::Initialize(EngineNS::NxRHI::FMeshPrimitives* mesh, IMdfQueue* mdf)
 {
 	mGeoms = mesh;
 	mMdfQueue = mdf;

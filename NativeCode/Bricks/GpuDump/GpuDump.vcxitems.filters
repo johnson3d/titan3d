@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="NsightDumpVK">
+      <UniqueIdentifier>{d2147cdf-f16a-4340-a5a2-4b8784260021}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)NvAftermath.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)NsightDumpVK\NsightAftermathGpuCrashTracker.cpp">
+      <Filter>NsightDumpVK</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)NsightDumpVK\NsightAftermathShaderDatabase.cpp">
+      <Filter>NsightDumpVK</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)NvAftermath.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)NsightDumpVK\NsightAftermathGpuCrashTracker.h">
+      <Filter>NsightDumpVK</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)NsightDumpVK\NsightAftermathHelpers.h">
+      <Filter>NsightDumpVK</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)NsightDumpVK\NsightAftermathShaderDatabase.h">
+      <Filter>NsightDumpVK</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

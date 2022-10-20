@@ -30,6 +30,10 @@
 #define HasModule_Dx12
 #define HasModule_Vulkan
 #define HasModule_NullDevice
+#define HasModule_Canvas
+#define HasModule_TextFont
+#define HasModule_TextureCompress
+#define HasModule_GpuDump
 
 #include <WinSock2.h>
 #include <mswsock.h>
@@ -65,6 +69,9 @@
 #define HasModule_Particle
 #define HasModule_MathLib
 #define HasModule_NextRHI
+#define HasModule_Vulkan
+#define HasModule_Canvas
+#define HasModule_TextFont
 
 #include <jni.h>
 #include <errno.h>

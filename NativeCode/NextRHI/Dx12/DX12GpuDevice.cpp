@@ -470,9 +470,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IShaderEffect* DX12GpuDevice::CreateShaderEffect()
+	IGraphicsEffect* DX12GpuDevice::CreateShaderEffect()
 	{
-		return new DX12ShaderEffect();
+		return new DX12GraphicsEffect();
 	}
 	IComputeEffect* DX12GpuDevice::CreateComputeEffect()
 	{
@@ -501,6 +501,12 @@ namespace NxRHI
 	IGraphicDraw* DX12GpuDevice::CreateGraphicDraw()
 	{
 		auto result = new DX12GraphicDraw();
+		result->mDeviceRef.FromObject(this);
+		return result;
+	}
+	IComputeDraw* DX12GpuDevice::CreateComputeDraw()
+	{
+		auto result = new DX12ComputeDraw();
 		result->mDeviceRef.FromObject(this);
 		return result;
 	}

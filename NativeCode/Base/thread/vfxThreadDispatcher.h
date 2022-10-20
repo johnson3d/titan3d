@@ -10,9 +10,11 @@ class VThreadDispatcher : public VIUnknown
 	thread_local static VThreadContext*		Context;
 	std::vector<VThreadContext**>			mThreadContexts;
 	VSLLock									mLocker;
+	bool									mDisposed = false;
 public:
 	void FinalCleanup()
 	{
+		mDisposed = true;
 		VAutoVSLLock lk(mLocker);
 		for (auto i : mThreadContexts)
 		{
@@ -25,6 +27,8 @@ public:
 	}
 	VThreadContext* GetThreadContext()
 	{
+		if (mDisposed)
+			return nullptr;
 		if (Context == nullptr)
 		{
 			Context = new VThreadContext();

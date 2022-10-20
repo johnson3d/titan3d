@@ -205,9 +205,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IShaderEffect* NullGpuDevice::CreateShaderEffect()
+	IGraphicsEffect* NullGpuDevice::CreateShaderEffect()
 	{
-		return new IShaderEffect();
+		return new IGraphicsEffect();
 	}
 	IComputeEffect* NullGpuDevice::CreateComputeEffect()
 	{

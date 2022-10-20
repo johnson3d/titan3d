@@ -68,7 +68,7 @@
 
 typedef uint8_t uint8;
 typedef uint32_t uint32;
-typedef uint64_t uint64;
+typedef unsigned long long uint64;
 typedef std::pair<uint64, uint64> uint128;
 
 inline uint64 Uint128Low64(const uint128& x) { return x.first; }

@@ -29,7 +29,7 @@ TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention
 typedef void* (*FGetManagedObjectFromGCHandle)(void* handle);
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
-typedef void (*FOnShaderTranslated)(NxRHI::FShaderDesc* shaderDesc);
+typedef void (*FOnShaderTranslated)(EngineNS::NxRHI::FShaderDesc* shaderDesc);
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void (* FAssertEvent)(const void* str, const void* file, int line);

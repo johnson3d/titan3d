@@ -13,8 +13,8 @@ protected:
 	AutoRef<NxRHI::FVertexArray>				mVertexArray;
 public:
 	IMesh();
-	void Initialize(NxRHI::FMeshPrimitives* mesh, IMdfQueue* mdf);
-	void SetInputStreams(NxRHI::FVertexArray* draw);
+	void Initialize(EngineNS::NxRHI::FMeshPrimitives* mesh, IMdfQueue* mdf);
+	void SetInputStreams(EngineNS::NxRHI::FVertexArray* draw);
 
 	IMdfQueue* GetMdfQuque() {
 		return mMdfQueue;
@@ -22,7 +22,7 @@ public:
 
 	IMesh* CloneMesh();
 
-	static NxRHI::FInputLayoutDesc* CreateInputLayoutDesc(UINT streams);
+	static EngineNS::NxRHI::FInputLayoutDesc* CreateInputLayoutDesc(UINT streams);
 };
 
 NS_END

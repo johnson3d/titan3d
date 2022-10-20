@@ -1474,7 +1474,6 @@ struct AuxRttiBuilder<CombineFullName(ns, Type)> : public AuxRttiBuilderBase\
 		pRtti->Init();\
 	}\
 };\
-FRttiStruct AuxRttiStruct<Type>::Instance;\
 AuxRttiBuilder<Type> AuxRttiBuilder<Type>::Instance;
 
 template<typename T>

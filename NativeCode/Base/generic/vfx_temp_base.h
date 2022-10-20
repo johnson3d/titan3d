@@ -76,11 +76,6 @@ template<> struct __vfxDefaultCompare<UINT64>
 			return (t1 < t2) ? -1 : ((t2 < t1) ? 1 : 0);
 	}
 };
-template<> struct __vfxDefaultCompare<ULONG>
-{
-	inline INT_PTR operator () (const ULONG & t1, const ULONG & t2)
-	{	return (INT_PTR)(t1 - t2);}
-};
 
 template <class TYPE,class KEY>
 struct __vfxDefaultCompareWithKey

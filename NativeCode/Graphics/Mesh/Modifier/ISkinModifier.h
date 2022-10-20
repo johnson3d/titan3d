@@ -9,7 +9,7 @@ class TR_CLASS()
 {
 public:
 	ISkinModifier();
-	virtual void SetInputStreams(NxRHI::FMeshPrimitives * mesh, NxRHI::FVertexArray * vao);
+	virtual void SetInputStreams(EngineNS::NxRHI::FMeshPrimitives * mesh, EngineNS::NxRHI::FVertexArray * vao);
 	virtual void GetInputStreams(UINT * pOutStreams);
 	virtual void GetProvideStreams(UINT * pOutStreams);
 };

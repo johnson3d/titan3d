@@ -92,7 +92,7 @@ namespace NxRHI
 			{
 				for (UINT j = 0; j < desc->Width; j++)
 				{
-					auto color = *(DWORD*)(&row[j * 4]);
+					//auto color = *(DWORD*)(&row[j * 4]);
 					dst[j * 4 + 3] = row[j * 4];
 					dst[j * 4 + 2] = row[j * 4 + 1];
 					dst[j * 4 + 1] = row[j * 4 + 2];

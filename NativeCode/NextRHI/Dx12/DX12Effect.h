@@ -9,7 +9,8 @@ namespace NxRHI
 {
 	class DX12GpuDevice;
 	class DX12Shader;
-	class DX12ShaderEffect;
+	class DX12GraphicsEffect;
+	class DX12ComputeEffect;
 	struct DX12DescriptorSetPagedObject : public MemAlloc::FPagedObject<AutoRef<ID3D12DescriptorHeap>>
 	{
 		//DX12ShaderEffect*		ShaderEffect = nullptr;
@@ -30,8 +31,24 @@ namespace NxRHI
 	};
 	struct DX12DescriptorSetCreator
 	{
+		DX12DescriptorSetCreator()
+		{
+			mShaderEffect = nullptr;
+		}
 		TObjectHandle<DX12GpuDevice>		mDeviceRef;
-		DX12ShaderEffect*					mShaderEffect = nullptr;
+		
+		enum EDescriptorType
+		{
+			Graphics,
+			Compute,
+		};
+		EDescriptorType Type = EDescriptorType::Graphics;
+		union
+		{
+			DX12GraphicsEffect* mShaderEffect;
+			DX12ComputeEffect* mComputeEffect;
+		};
+		
 		D3D12_DESCRIPTOR_HEAP_DESC			mDesc{};
 		bool								IsSampler = false;
 		MemAlloc::FPage<AutoRef<ID3D12DescriptorHeap>>* CreatePage(UINT pageSize);
@@ -43,7 +60,7 @@ namespace NxRHI
 	{
 		UINT			mDescriptorStride = 0;
 	};
-	class DX12ShaderEffect : public IShaderEffect
+	class DX12GraphicsEffect : public IGraphicsEffect
 	{
 	public:
 		virtual void BuildState(IGpuDevice* device) override;
@@ -74,6 +91,9 @@ namespace NxRHI
 		int								mSamplerTableSize;
 		AutoRef<ID3D12RootSignature>	mSignature;
 		AutoRef<ID3D12PipelineState>	mPipelineState;
+
+		AutoRef<DX12DescriptorSetAllocator>	mDescriptorAllocatorCSU;
+		AutoRef<DX12DescriptorSetAllocator>	mDescriptorAllocatorSampler;
 	};
 }
 

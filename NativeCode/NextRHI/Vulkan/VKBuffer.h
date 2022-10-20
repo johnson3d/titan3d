@@ -15,7 +15,7 @@ namespace NxRHI
 		bool Init(VKGpuDevice* device, const FBufferDesc& desc);
 
 		virtual void* GetHWBuffer() override{
-			return mBuffer;
+			return (void*)mBuffer;
 		}
 		virtual void Flush2Device(ICommandList* cmd, void* pBuffer, UINT Size) override;
 		virtual bool Map(ICommandList* cmd, UINT index, FMappedSubResource* res, bool forRead) override;
@@ -31,7 +31,7 @@ namespace NxRHI
 		}
 	public:
 		TObjectHandle<VKGpuDevice>		mDeviceRef;
-		VkBuffer						mBuffer = nullptr;
+		VkBuffer						mBuffer = (VkBuffer)nullptr;
 		AutoRef<FGpuMemory>				mGpuMemory;
 	};
 
@@ -55,7 +55,7 @@ namespace NxRHI
 		VkImageAspectFlagBits GetImageAspect();
 	public:
 		TObjectHandle<VKGpuDevice>	mDeviceRef;
-		VkImage						mImage = nullptr;
+		VkImage						mImage = (VkImage)nullptr;
 		//VkImageLayout				mLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
 		AutoRef<FGpuMemory>			mGpuMemory;
 		EShaderType					mShaderStages = EShaderType::SDT_AllStages;
@@ -115,7 +115,7 @@ namespace NxRHI
 			}
 			else
 			{
-				return mImageView;
+				return (void*)mImageView;
 			}
 		}
 		bool Init(VKGpuDevice* device, IGpuBufferData* pBffer, const FSrvDesc& desc);
@@ -128,7 +128,7 @@ namespace NxRHI
 	public:
 		TObjectHandle<VKGpuDevice>	mDeviceRef;
 		
-		VkImageView					mImageView = nullptr;
+		VkImageView					mImageView = (VkImageView)nullptr;
 		UINT						mFingerPrint = 0;
 	};
 
@@ -138,7 +138,7 @@ namespace NxRHI
 		VKUaView();
 		~VKUaView();
 		virtual void* GetHWBuffer() override {
-			if (Desc.ViewDimension == ESrvType::ST_BufferSRV)
+			if (Desc.ViewDimension == EDimensionUAV::UAV_DIMENSION_BUFFER)
 			{
 				if (Desc.Format == EPixelFormat::PXF_UNKNOWN)
 				{
@@ -149,14 +149,14 @@ namespace NxRHI
 			}
 			else
 			{
-				return mImageView;
+				return (void*)mImageView;
 			}
 		}
 		bool Init(VKGpuDevice* device, IGpuBufferData* pBuffer, const FUavDesc& desc);
 		virtual void SetDebugName(const char* name) override;
 	public:
 		TObjectHandle<VKGpuDevice>	mDeviceRef;
-		VkImageView					mImageView = nullptr;
+		VkImageView					mImageView = (VkImageView)nullptr;
 	};
 
 	class VKRenderTargetView : public IRenderTargetView
@@ -165,13 +165,13 @@ namespace NxRHI
 		VKRenderTargetView();
 		~VKRenderTargetView();
 		virtual void* GetHWBuffer() override {
-			return mView;
+			return (void*)mView;
 		}
 		bool Init(VKGpuDevice* device, ITexture* pBuffer, const FRtvDesc* desc);
 		virtual void SetDebugName(const char* name) override;
 	public:
 		TObjectHandle<VKGpuDevice>	mDeviceRef;
-		VkImageView					mView = nullptr;
+		VkImageView					mView = (VkImageView)nullptr;
 	};
 
 	class VKDepthStencilView : public IDepthStencilView
@@ -180,13 +180,13 @@ namespace NxRHI
 		VKDepthStencilView();
 		~VKDepthStencilView();
 		virtual void* GetHWBuffer() override {
-			return mView;
+			return (void*)mView;
 		}
 		bool Init(VKGpuDevice* device, ITexture* pBuffer, const FDsvDesc& desc);
 		virtual void SetDebugName(const char* name) override;
 	public:
 		TObjectHandle<VKGpuDevice>	mDeviceRef;
-		VkImageView					mView = nullptr;
+		VkImageView					mView = (VkImageView)nullptr;
 	};
 }
 

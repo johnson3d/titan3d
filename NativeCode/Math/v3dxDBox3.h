@@ -214,4 +214,6 @@ public:
 private:
 };
 
+#pragma pack(pop)
+
 #include "v3dxDBox3.inl.h"

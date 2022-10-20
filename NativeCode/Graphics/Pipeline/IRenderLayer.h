@@ -12,7 +12,7 @@ public:
 	{
 
 	}
-	void PushDrawCall(NxRHI::IGpuDraw* primitive) {
+	void PushDrawCall(EngineNS::NxRHI::IGpuDraw* primitive) {
 		primitive->AddRef();
 		mPrimitive.push_back(primitive);
 	}

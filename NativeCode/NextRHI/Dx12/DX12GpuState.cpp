@@ -161,7 +161,7 @@ namespace NxRHI
 	bool DX12GpuDrawState::BuildState(IGpuDevice* device)
 	{
 		auto pDx12 = this->Pipeline.UnsafeConvertTo<DX12GpuPipeline>();
-		auto pEffect = ShaderEffect.UnsafeConvertTo<DX12ShaderEffect>();
+		auto pEffect = ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
 		auto pInputLayout = pEffect->mInputLayout.UnsafeConvertTo<DX12InputLayout>();
 		std::vector<D3D12_INPUT_ELEMENT_DESC> mDx12Elements;
 		pInputLayout->GetDX12Elements(mDx12Elements);

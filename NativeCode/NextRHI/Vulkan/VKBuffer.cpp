@@ -23,7 +23,7 @@ namespace NxRHI
 	{
 		static void Destroy(AutoRef<VKBuffer> obj, IGpuDevice* device1)
 		{
-			auto device = (VKGpuDevice*)device1;
+			[[maybe_unused]] auto device = (VKGpuDevice*)device1;
 		}
 	}; 
 	template<>
@@ -227,7 +227,7 @@ namespace NxRHI
 		VkMemoryRequirements memRequirements;
 		vkGetBufferMemoryRequirements(device->mDevice, mBuffer, &memRequirements);
 		auto memSize = memRequirements.size;//((memRequirements.size + memRequirements.alignment - 1) / memRequirements.alignment) * memRequirements.alignment;
-		auto memoryTypeIndex = device->FindMemoryType(memRequirements.memoryTypeBits, memFlags);
+		[[maybe_unused]] auto memoryTypeIndex = device->FindMemoryType(memRequirements.memoryTypeBits, memFlags);
 		//ASSERT(device->mCBufferAllocator->mMemTypeIndex == memoryTypeIndex);
 		mGpuMemory = allocator->Alloc(device, memSize);
 
@@ -275,89 +275,37 @@ namespace NxRHI
 			result |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 		return result;
 	}
-	void GpuResourceStateToVKAccessAndPipeline(EGpuResourceState state, VkAccessFlags& outAccessFlags, VkPipelineStageFlagBits& outPipelineStages)
-	{//https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkAccessFlagBits.html
-		outPipelineStages = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-		switch (state)
-		{
-		case EngineNS::NxRHI::GRS_Undefine:
-			outAccessFlags = VkAccessFlagBits::VK_ACCESS_NONE;
-			outPipelineStages = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-			return;
-		case EngineNS::NxRHI::GRS_Present:
-		case EngineNS::NxRHI::GRS_SrvPS:
-			outAccessFlags = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT;
-			outPipelineStages = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-			return;
-		case EngineNS::NxRHI::GRS_GenericRead:
-			outAccessFlags = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT;
-			outPipelineStages = (VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-			return;
-		case EngineNS::NxRHI::GRS_Uav:
-			outAccessFlags = (VkAccessFlagBits)(VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT);
-			outPipelineStages = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-			return;
-		case EngineNS::NxRHI::GRS_UavIndirect:
-			outAccessFlags = (VkAccessFlagBits)(VkAccessFlagBits::VK_ACCESS_INDIRECT_COMMAND_READ_BIT);
-			outPipelineStages = VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
-			return;
-		case EngineNS::NxRHI::GRS_RenderTarget:
-			outAccessFlags = VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-			outPipelineStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-			return;
-		case EngineNS::NxRHI::GRS_DepthStencil:
-			outAccessFlags = VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-			outPipelineStages = (VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-			return;
-		case EngineNS::NxRHI::GRS_DepthRead:
-		case EngineNS::NxRHI::GRS_StencilRead:
-		case EngineNS::NxRHI::GRS_DepthStencilRead:
-			outAccessFlags = VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-			outPipelineStages = (VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-			return;
-		case EngineNS::NxRHI::GRS_CopySrc:
-			outAccessFlags = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
-			outPipelineStages = (VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_TRANSFER_BIT | VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
-			return;
-		case EngineNS::NxRHI::GRS_CopyDst:
-			outAccessFlags = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
-			outPipelineStages = (VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_TRANSFER_BIT | VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
-			return;
-		default:
-			outAccessFlags = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT;
-			outPipelineStages = (VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-			return;
-		}
-	}
+	
 	void VKBuffer::TransitionTo(ICommandList* cmd, EGpuResourceState state)
 	{
 		//ASSERT(state != EGpuResourceState::GRS_Undefine);
 		if (state == GpuState)
 			return;
 		
-		VkBufferMemoryBarrier barrier{};
-		barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.buffer = mBuffer;
-		barrier.offset = 0;
-		barrier.size = Desc.Size;
+		cmd->SetBufferBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
+		//VkBufferMemoryBarrier barrier{};
+		//barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+		//barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		//barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		//barrier.buffer = mBuffer;
+		//barrier.offset = 0;
+		//barrier.size = Desc.Size;
 
-		VkPipelineStageFlagBits srcStages,dstStages;
-		GpuResourceStateToVKAccessAndPipeline(GpuState, barrier.srcAccessMask, srcStages);
-		GpuResourceStateToVKAccessAndPipeline(state, barrier.dstAccessMask, dstStages);
+		//VkPipelineStageFlagBits srcStages,dstStages;
+		//GpuResourceStateToVKAccessAndPipeline(GpuState, barrier.srcAccessMask, srcStages);
+		//GpuResourceStateToVKAccessAndPipeline(state, barrier.dstAccessMask, dstStages);
 
-		auto vkCmd = (VKCommandList*)cmd;
+		//auto vkCmd = (VKCommandList*)cmd;
 
-		vkCmdPipelineBarrier(
-			vkCmd->mCommandBuffer->RealObject,
-			srcStages,
-			dstStages,//VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,//VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			0,
-			0, nullptr,
-			1, &barrier,
-			0, nullptr
-		);
+		//vkCmdPipelineBarrier(
+		//	vkCmd->mCommandBuffer->RealObject,
+		//	srcStages,
+		//	dstStages,//VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,//VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+		//	0,
+		//	0, nullptr,
+		//	1, &barrier,
+		//	0, nullptr
+		//);
 		GpuState = state;
 	}
 
@@ -379,7 +327,7 @@ namespace NxRHI
 	{
 		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
-			auto copyDesc = this->Desc;
+			[[maybe_unused]] auto copyDesc = this->Desc;
 		}
 		else
 		{
@@ -454,39 +402,9 @@ namespace NxRHI
 	void VKBuffer::SetDebugName(const char* name)
 	{
 		auto device = mDeviceRef.GetPtr();
-		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT, mBuffer, name);
+		VKGpuSystem::SetVkObjectDebugName(device->mDevice, VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT, (void*)mBuffer, name);
 	}
 	
-	VkImageAspectFlags FormatToVKImageAspectFlags(EPixelFormat format, bool sampledDepth, bool sampledStencil)
-	{
-		VkImageAspectFlags result = (VkImageAspectFlags)0;
-		switch (format)
-		{
-			case EPixelFormat::PXF_D16_UNORM:
-			case EPixelFormat::PXF_D32_FLOAT:
-			case EPixelFormat::PXF_D32_FLOAT_S8X24_UINT:
-			{
-				result |= VK_IMAGE_ASPECT_DEPTH_BIT;
-			}
-			break;
-			case EPixelFormat::PXF_R24G8_TYPELESS:
-			case EPixelFormat::PXF_D24_UNORM_S8_UINT:
-			{
-				if (sampledDepth)
-					result |= VK_IMAGE_ASPECT_DEPTH_BIT;
-				/*if (sampledStencil)
-					result |= VK_IMAGE_ASPECT_STENCIL_BIT;*/
-			}
-			break;
-			default:
-			{
-				result = VK_IMAGE_ASPECT_COLOR_BIT;
-			}
-			break;
-		}
-		return result;
-	}
-
 	VKTexture::VKTexture()
 	{
 	}
@@ -500,7 +418,7 @@ namespace NxRHI
 			return;
 		
 		device->DelayDestroy(mImage);
-		mImage = nullptr;
+		mImage = (VkImage)nullptr;
 
 		device->DelayDestroy(mGpuMemory);
 		mGpuMemory = nullptr;
@@ -568,92 +486,7 @@ namespace NxRHI
 		}
 		return result;
 	}
-	EGpuResourceState VKImageLayoutToGpuState(VkImageLayout layout)
-	{
-		switch (layout)
-		{
-		case VK_IMAGE_LAYOUT_UNDEFINED:
-			return EGpuResourceState::GRS_Undefine;
-		case VK_IMAGE_LAYOUT_GENERAL:
-			return EGpuResourceState::GRS_GenericRead;
-		case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
-			return EGpuResourceState::GRS_RenderTarget;
-		case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
-			return EGpuResourceState::GRS_DepthStencil;
-		case VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL:
-			return EGpuResourceState::GRS_DepthStencilRead;
-		case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-			return EGpuResourceState::GRS_GenericRead;
-		case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
-			return EGpuResourceState::GRS_CopySrc;
-		case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
-			return EGpuResourceState::GRS_CopyDst;
-		case VK_IMAGE_LAYOUT_PREINITIALIZED:
-			return EGpuResourceState::GRS_Undefine;
-		case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL:
-			return EGpuResourceState::GRS_Undefine;
-		case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL:
-			return EGpuResourceState::GRS_DepthStencil;
-		case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
-			return EGpuResourceState::GRS_DepthStencil;
-		case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL:
-			return EGpuResourceState::GRS_DepthRead;
-		case VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL:
-			return EGpuResourceState::GRS_DepthStencil;
-		case VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL:
-			return EGpuResourceState::GRS_StencilRead;
-		case VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL:
-			return EGpuResourceState::GRS_GenericRead;
-		case VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL:
-			return EGpuResourceState::GRS_Uav;
-		case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
-			return EGpuResourceState::GRS_Present;
-		case VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR:
-			return EGpuResourceState::GRS_Present;
-		case VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT:
-			break;
-		case VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR:
-			break;
-		case VK_IMAGE_LAYOUT_MAX_ENUM:
-			break;
-		default:
-			break;
-		}
-		return EGpuResourceState::GRS_Undefine;
-	}
-	VkImageLayout GpuStateToVKImageLayout(EGpuResourceState state)
-	{
-		switch (state)
-		{
-		case EngineNS::NxRHI::GRS_Undefine:
-			return VK_IMAGE_LAYOUT_UNDEFINED;
-		case EngineNS::NxRHI::GRS_SrvPS:
-			return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		case EngineNS::NxRHI::GRS_GenericRead:
-			return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		case EngineNS::NxRHI::GRS_Uav:
-			return VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-		case EngineNS::NxRHI::GRS_RenderTarget:
-			return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		case EngineNS::NxRHI::GRS_DepthStencil:
-			return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-		case EngineNS::NxRHI::GRS_DepthRead:
-			return VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
-		case EngineNS::NxRHI::GRS_StencilRead:
-			return VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
-		case EngineNS::NxRHI::GRS_DepthStencilRead:
-			return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-		case EngineNS::NxRHI::GRS_CopySrc:
-			return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-		case EngineNS::NxRHI::GRS_CopyDst:
-			return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-		case EngineNS::NxRHI::GRS_Present:
-			return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		default:
-			break;
-		}
-		return VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
-	}
+	
 	VkImageLayout VKTexture::GetImageLayout()
 	{
 		return GpuStateToVKImageLayout(GpuState);
@@ -1008,44 +841,45 @@ namespace NxRHI
 		if (state == GpuState)
 			return;
 
-		VkImageMemoryBarrier barrier{};
-		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		barrier.oldLayout = GpuStateToVKImageLayout(GpuState);
-		barrier.newLayout = GpuStateToVKImageLayout(state);
-		//barrier.srcAccessMask
-		
-		if (barrier.oldLayout != barrier.newLayout)
-		{
-			barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			barrier.image = mImage;
+		cmd->SetTextureBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
+		//VkImageMemoryBarrier barrier{};
+		//barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		//barrier.oldLayout = GpuStateToVKImageLayout(GpuState);
+		//barrier.newLayout = GpuStateToVKImageLayout(state);
+		////barrier.srcAccessMask
+		//
+		//if (barrier.oldLayout != barrier.newLayout)
+		//{
+		//	barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		//	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		//	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		//	barrier.image = mImage;
 
-			if (Desc.BindFlags & EBufferType::BFT_SRV)
-				barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(Desc.Format, true, false);
-			else
-				barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(Desc.Format, true, true);
-			barrier.subresourceRange.baseArrayLayer = 0;
-			barrier.subresourceRange.layerCount = Desc.ArraySize;
-			barrier.subresourceRange.baseMipLevel = 0;//All
-			barrier.subresourceRange.levelCount = Desc.MipLevels;
+		//	if (Desc.BindFlags & EBufferType::BFT_SRV)
+		//		barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(Desc.Format, true, false);
+		//	else
+		//		barrier.subresourceRange.aspectMask = FormatToVKImageAspectFlags(Desc.Format, true, true);
+		//	barrier.subresourceRange.baseArrayLayer = 0;
+		//	barrier.subresourceRange.layerCount = Desc.ArraySize;
+		//	barrier.subresourceRange.baseMipLevel = 0;//All
+		//	barrier.subresourceRange.levelCount = Desc.MipLevels;
 
-			auto vkCmd = (VKCommandList*)cmd;
+		//	auto vkCmd = (VKCommandList*)cmd;
 
-			VkPipelineStageFlagBits srcStages, dstStages;
-			GpuResourceStateToVKAccessAndPipeline(GpuState, barrier.srcAccessMask, srcStages);
-			GpuResourceStateToVKAccessAndPipeline(state, barrier.dstAccessMask, dstStages);
+		//	VkPipelineStageFlagBits srcStages, dstStages;
+		//	GpuResourceStateToVKAccessAndPipeline(GpuState, barrier.srcAccessMask, srcStages);
+		//	GpuResourceStateToVKAccessAndPipeline(state, barrier.dstAccessMask, dstStages);
 
-			vkCmdPipelineBarrier(
-				vkCmd->mCommandBuffer->RealObject,
-				srcStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-				dstStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,//VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-				0,
-				0, nullptr,
-				0, nullptr,
-				1, &barrier
-			);
-		}
+		//	vkCmdPipelineBarrier(
+		//		vkCmd->mCommandBuffer->RealObject,
+		//		srcStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		//		dstStages, //VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,//VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+		//		0,
+		//		0, nullptr,
+		//		0, nullptr,
+		//		1, &barrier
+		//	);
+		//}
 
 		GpuState = state;
 	}
@@ -1350,7 +1184,7 @@ namespace NxRHI
 		if (Desc.Type == ESrvType::ST_BufferSRV)
 		{
 			UINT alignedSize = ((VKBuffer*)pBuffer)->Desc.Size;
-			auto bf = Buffer.UnsafeConvertTo<VKBuffer>();
+			[[maybe_unused]] auto bf = Buffer.UnsafeConvertTo<VKBuffer>();
 			VkBufferViewCreateInfo createInfo = {};
 			createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
 			createInfo.buffer = (VkBuffer)Buffer->GetHWBuffer();
@@ -1456,7 +1290,7 @@ namespace NxRHI
 		if (Desc.ViewDimension == EDimensionUAV::UAV_DIMENSION_BUFFER)
 		{
 			UINT alignedSize = ((VKBuffer*)pBuffer)->Desc.Size;
-			auto bf = Buffer.UnsafeConvertTo<VKBuffer>();
+			[[maybe_unused]] auto bf = Buffer.UnsafeConvertTo<VKBuffer>();
 			VkBufferViewCreateInfo createInfo = {};
 			createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
 			createInfo.buffer = (VkBuffer)Buffer->GetHWBuffer();

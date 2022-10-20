@@ -35,100 +35,6 @@ namespace NxRHI
 		}
 	}; 
 	
-	D3D12_RESOURCE_STATES GpuStateToDX12(EGpuResourceState state)
-	{
-		switch (state)
-		{
-		case EngineNS::NxRHI::GRS_Undefine:
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
-		case EngineNS::NxRHI::GRS_SrvPS:
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ; //return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-		case EngineNS::NxRHI::GRS_GenericRead:
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
-		case EngineNS::NxRHI::GRS_Uav:
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		case EngineNS::NxRHI::GRS_UavIndirect:
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
-		case EngineNS::NxRHI::GRS_RenderTarget:
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_RENDER_TARGET;
-		case EngineNS::NxRHI::GRS_DepthStencil:
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
-		case EngineNS::NxRHI::GRS_DepthRead:
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
-		case EngineNS::NxRHI::GRS_StencilRead:
-			ASSERT(false);
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
-		case EngineNS::NxRHI::GRS_DepthStencilRead:
-			ASSERT(false);
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
-		case EngineNS::NxRHI::GRS_CopySrc:
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_SOURCE;
-		case EngineNS::NxRHI::GRS_CopyDst:
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
-		case EngineNS::NxRHI::GRS_Present:
-			return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_PRESENT;
-		default:
-			break;
-		}
-		return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
-	}
-	EGpuResourceState DX12ToGpuState(D3D12_RESOURCE_STATES state)
-	{
-		switch (state)
-		{
-		case D3D12_RESOURCE_STATE_COMMON:
-			break;
-		case D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER:
-			break;
-		case D3D12_RESOURCE_STATE_INDEX_BUFFER:
-			break;
-		case D3D12_RESOURCE_STATE_RENDER_TARGET:
-			break;
-		case D3D12_RESOURCE_STATE_UNORDERED_ACCESS:
-			break;
-		case D3D12_RESOURCE_STATE_DEPTH_WRITE:
-			break;
-		case D3D12_RESOURCE_STATE_DEPTH_READ:
-			break;
-		case D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE:
-			break;
-		case D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE:
-			break;
-		case D3D12_RESOURCE_STATE_STREAM_OUT:
-			break;
-		case D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT:
-			break;
-		case D3D12_RESOURCE_STATE_COPY_DEST:
-			break;
-		case D3D12_RESOURCE_STATE_COPY_SOURCE:
-			break;
-		case D3D12_RESOURCE_STATE_RESOLVE_DEST:
-			break;
-		case D3D12_RESOURCE_STATE_RESOLVE_SOURCE:
-			break;
-		case D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE:
-			break;
-		case D3D12_RESOURCE_STATE_SHADING_RATE_SOURCE:
-			break;
-		case D3D12_RESOURCE_STATE_GENERIC_READ:
-			break;
-		case D3D12_RESOURCE_STATE_VIDEO_DECODE_READ:
-			break;
-		case D3D12_RESOURCE_STATE_VIDEO_DECODE_WRITE:
-			break;
-		case D3D12_RESOURCE_STATE_VIDEO_PROCESS_READ:
-			break;
-		case D3D12_RESOURCE_STATE_VIDEO_PROCESS_WRITE:
-			break;
-		case D3D12_RESOURCE_STATE_VIDEO_ENCODE_READ:
-			break;
-		case D3D12_RESOURCE_STATE_VIDEO_ENCODE_WRITE:
-			break;
-		default:
-			break;
-		}
-		return EGpuResourceState::GRS_Undefine;
-	}
 	DX12Buffer::DX12Buffer()
 	{
 		
@@ -382,7 +288,9 @@ namespace NxRHI
 				return;
 		}
 
-		D3D12_RESOURCE_BARRIER tmp{};
+		cmd->SetBufferBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
+
+		/*D3D12_RESOURCE_BARRIER tmp{};
 		tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		auto pTarGpuResource = ((DX12GpuHeap*)mGpuMemory->GpuHeap)->mGpuResource;
@@ -390,7 +298,7 @@ namespace NxRHI
 		tmp.Transition.StateBefore = GpuStateToDX12(GpuState);
 		tmp.Transition.StateAfter = GpuStateToDX12(state);
 		tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		((DX12CommandList*)cmd)->mContext->ResourceBarrier(1, &tmp);
+		((DX12CommandList*)cmd)->mContext->ResourceBarrier(1, &tmp);*/
 		GpuState = state;
 	}
 
@@ -1087,7 +995,9 @@ namespace NxRHI
 			if (state == GpuState)
 				return;
 		}
-		D3D12_RESOURCE_BARRIER tmp{};
+		cmd->SetTextureBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
+
+		/*D3D12_RESOURCE_BARRIER tmp{};
 		tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		tmp.Transition.pResource = mGpuResource;
@@ -1095,12 +1005,9 @@ namespace NxRHI
 		tmp.Transition.StateAfter = GpuStateToDX12(state);
 		if (tmp.Transition.StateBefore == tmp.Transition.StateAfter)
 			return;
-		/*if (tmp.Transition.StateBefore == D3D12_RESOURCE_STATE_GENERIC_READ && tmp.Transition.StateAfter == D3D12_RESOURCE_STATE_PRESENT)
-		{
-			int xx = 0;
-		}*/
 		tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		((DX12CommandList*)cmd)->mContext->ResourceBarrier(1, &tmp);
+		((DX12CommandList*)cmd)->mContext->ResourceBarrier(1, &tmp);*/
+
 		GpuState = state;
 	}
 

@@ -2,11 +2,23 @@
 #include "NxGpuState.h"
 #include "NxGeomMesh.h"
 #include "NxDrawcall.h"
-#include "Dx11/DX11GpuDevice.h"
-#include "Dx12/DX12GpuDevice.h"
-#include "Vulkan/VKGpuDevice.h"
 #include "NullDevice/NullGpuDevice.h"
+
+#if defined(HasModule_RenderDoc)
 #include "../Bricks/RenderDoc/IRenderDocTool.h"
+#endif
+
+#if defined(HasModule_Dx11)
+#include "Dx11/DX11GpuDevice.h"
+#endif
+
+#if defined(HasModule_Dx12)
+#include "Dx12/DX12GpuDevice.h"
+#endif
+
+#if defined(HasModule_Vulkan)
+#include "Vulkan/VKGpuDevice.h"
+#endif
 
 #define new VNEW
 
@@ -47,7 +59,9 @@ namespace NxRHI
 	{
 		if (desc->UseRenderDoc)
 		{
+#if defined(HasModule_RenderDoc)
 			IRenderDocTool::GetInstance()->InitRenderDoc();
+#endif
 		}
 		switch (type)
 		{

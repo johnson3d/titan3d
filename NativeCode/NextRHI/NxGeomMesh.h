@@ -56,11 +56,11 @@ namespace NxRHI
 			NumPrimitives = 0;
 			NumInstances = 1;
 		}
-		EPrimitiveType PrimitiveType;
-		UINT BaseVertexIndex;
-		UINT StartIndex;
-		UINT NumPrimitives;
-		UINT NumInstances;
+		EPrimitiveType PrimitiveType = EPT_TriangleList;
+		UINT BaseVertexIndex = 0;
+		UINT StartIndex = 0;
+		UINT NumPrimitives = 0;
+		UINT NumInstances = 1;
 		bool IsIndexDraw() const {
 			return StartIndex != 0xFFFFFFFF;
 		}
@@ -205,6 +205,7 @@ namespace NxRHI
 	{
 	public:
 		std::vector<std::vector<FMeshAtomDesc>>	mAtoms;
+		std::vector<AutoRef<VIUnknownBase>>		mAtomExtDatas;
 		v3dxBox3				mAABB;
 		AutoRef<IBlobObject>	mVertexBuffers[VST_Number];
 		AutoRef<IBlobObject>	IndexBuffer;
@@ -241,7 +242,10 @@ namespace NxRHI
 		IBlobObject* GetIndices();
 
 		FMeshAtomDesc* GetAtom(UINT index, UINT lod);
-		
+		VIUnknownBase* GetAtomExtData(UINT index) const{
+			return mAtomExtDatas[index];
+		}
+		void PushAtom(const FMeshAtomDesc* pDescLODs, UINT count, const AutoRef<VIUnknownBase>& ext);
 		bool SetAtom(UINT index, UINT lod, const FMeshAtomDesc& desc);
 		void PushAtomLOD(UINT index, const FMeshAtomDesc& desc);
 		UINT GetAtomLOD(UINT index);

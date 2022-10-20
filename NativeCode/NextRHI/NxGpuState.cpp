@@ -9,7 +9,7 @@ NS_BEGIN
 
 namespace NxRHI
 {
-	const IGpuDrawState* FGpuPipelineManager::GetOrCreate(IGpuDevice* device, IRenderPass* rpass, IShaderEffect* effect, IGpuPipeline* pipeline, EPrimitiveType topology)
+	const IGpuDrawState* FGpuPipelineManager::GetOrCreate(IGpuDevice* device, IRenderPass* rpass, IGraphicsEffect* effect, IGpuPipeline* pipeline, EPrimitiveType topology)
 	{
 		void* tmp[4] = { rpass, effect, pipeline , (void*)topology };
 		UINT64 hash = CityHash64((const char*)tmp, sizeof(tmp));

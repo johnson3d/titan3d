@@ -288,7 +288,7 @@ namespace NxRHI
 			AttachVB->Commit(cmdlist);
 		}
 
-		auto effect = (VKShaderEffect*)GetShaderEffect();
+		auto effect = (VKGraphicsEffect*)GetGraphicsEffect();
 
 		effect->Commit(cmdlist, this);
 
@@ -299,7 +299,7 @@ namespace NxRHI
 				case SBT_CBuffer:
 				{
 					IGpuResource* t = i.second;
-					effect->BindCBuffer(cmdlist, i.first, (ICbView*)t);
+					effect->BindCBV(cmdlist, i.first, (ICbView*)t);
 				}
 				break;
 				case SBT_SRV:

@@ -49,7 +49,7 @@ typedef char					INT8;
 typedef short					INT16;
 typedef int						INT32;
 
-typedef long long				INT64;
+typedef int64_t 				INT64;
 
 typedef unsigned short			USHORT;
 typedef unsigned int			UINT;
@@ -57,7 +57,7 @@ typedef unsigned long			ULONG;
 typedef unsigned char			UINT8;
 typedef unsigned short			UINT16;
 typedef unsigned int			UINT32;
-typedef unsigned long long		UINT64;
+typedef uint64_t 				UINT64;
 
 typedef UINT8					BYTE;
 typedef UINT16					WORD;
@@ -70,11 +70,11 @@ typedef unsigned short			ushort;
 typedef struct {
 	INT64 a;
 	UINT64 b;
-	}							int128;
+	}							vfx_int128;
 typedef struct {
-	INT64 a;
+	UINT64 a;
 	UINT64 b;
-}								uint128;
+}								vfx_uint128;
 
 typedef float					FLOAT;
 typedef double					DOUBLE;
@@ -152,7 +152,6 @@ const INT vTRUE				= 1;
 typedef signed char			int8;
 typedef signed short		int16;
 typedef signed int			int32;
-typedef signed long long	INT64;
 typedef unsigned char		uint8;
 typedef unsigned short		uint16;
 typedef unsigned int		uint32;

@@ -44,12 +44,18 @@ namespace NxRHI
 			return nullptr;
 		}
 	};
+
 	class TR_CLASS()
-		IShaderEffect : public VIUnknownBase
+		IGpuEffect : public VIUnknownBase
+	{
+
+	};
+	class TR_CLASS()
+		IGraphicsEffect : public IGpuEffect
 	{
 	public:
-		IShaderEffect();
-		~IShaderEffect();
+		IGraphicsEffect();
+		~IGraphicsEffect();
 		virtual void BuildState(IGpuDevice * device) {
 
 		}
@@ -81,7 +87,7 @@ namespace NxRHI
 			}
 			return iter->second;
 		}
-		void BindCBuffer(ICommandList* cmdlist, const FEffectBinder* binder, ICbView* buffer);
+		void BindCBV(ICommandList* cmdlist, const FEffectBinder* binder, ICbView* buffer);
 		void BindSrv(ICommandList* cmdlist, const FEffectBinder* binder, ISrView* srv);
 		void BindUav(ICommandList* cmdlist, const FEffectBinder* binder, IUaView* uav);
 		void BindSampler(ICommandList* cmdlist, const FEffectBinder* binder, ISampler* sampler);
@@ -97,14 +103,14 @@ namespace NxRHI
 	};
 
 	class TR_CLASS()
-		IComputeEffect : public VIUnknownBase
+		IComputeEffect : public IGpuEffect
 	{
 	public:
 		void BindCS(IShader * shader);
 		IShader* GetCS() {
 			return mComputeShader;
 		}
-		void BindCBuffer(ICommandList * cmdlist, const FShaderBinder* binder, ICbView * buffer);
+		void BindCBV(ICommandList * cmdlist, const FShaderBinder* binder, ICbView * buffer);
 		void BindSrv(ICommandList * cmdlist, const FShaderBinder* binder, ISrView * srv);
 		void BindUav(ICommandList * cmdlist, const FShaderBinder* binder, IUaView * uav);
 		void BindSampler(ICommandList * cmdlist, const FShaderBinder* binder, ISampler * sampler);

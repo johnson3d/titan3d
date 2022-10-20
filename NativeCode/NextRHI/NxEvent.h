@@ -43,8 +43,6 @@ namespace NxRHI
 	public:
 		ENGINE_RTTI(IFence);
 		virtual UINT64 GetCompletedValue() = 0;
-		virtual void SetEvent() = 0;
-		virtual void ResetEvent() = 0;
 		virtual void CpuSignal(UINT64 value) = 0;
 		virtual void Signal(ICmdQueue * queue, UINT64 value) = 0;
 		virtual bool Wait(UINT64 value, UINT timeOut = INFINITE) = 0;

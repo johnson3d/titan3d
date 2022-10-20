@@ -1363,7 +1363,28 @@ ImGuiDockNodeFlags_
     ImGuiDockNodeFlags_PassthruCentralNode          = 1 << 3,   // Shared       // Enable passthru dockspace: 1) DockSpace() will render a ImGuiCol_WindowBg background covering everything excepted the Central Node when empty. Meaning the host window should probably use SetNextWindowBgAlpha(0.0f) prior to Begin() when using this. 2) When Central Node is empty: let inputs pass-through + won't display a DockingEmptyBg background. See demo for details.
     ImGuiDockNodeFlags_NoSplit                      = 1 << 4,   // Shared/Local // Disable splitting the node into smaller nodes. Useful e.g. when embedding dockspaces into a main root one (the root one may have splitting disabled to reduce confusion). Note: when turned off, existing splits will be preserved.
     ImGuiDockNodeFlags_NoResize                     = 1 << 5,   // Shared/Local // Disable resizing node using the splitter/separators. Useful with programmatically setup dockspaces.
-    ImGuiDockNodeFlags_AutoHideTabBar               = 1 << 6    // Shared/Local // Tab bar will automatically hide when there is a single window in the dock node.
+    ImGuiDockNodeFlags_AutoHideTabBar               = 1 << 6,   // Shared/Local // Tab bar will automatically hide when there is a single window in the dock node.
+
+	// [Internal]
+	ImGuiDockNodeFlagsPrivate_DockSpace                    = 1 << 10,  // Local, Saved  // A dockspace is a node that occupy space within an existing user window. Otherwise the node is floating and create its own window.
+	ImGuiDockNodeFlagsPrivate_CentralNode                  = 1 << 11,  // Local, Saved  // The central node has 2 main properties: stay visible when empty, only use "remaining" spaces from its neighbor.
+	ImGuiDockNodeFlagsPrivate_NoTabBar                     = 1 << 12,  // Local, Saved  // Tab bar is completely unavailable. No triangle in the corner to enable it back.
+	ImGuiDockNodeFlagsPrivate_HiddenTabBar                 = 1 << 13,  // Local, Saved  // Tab bar is hidden, with a triangle in the corner to show it again (NB: actual tab-bar instance may be destroyed as this is only used for single-window tab bar)
+	ImGuiDockNodeFlagsPrivate_NoWindowMenuButton           = 1 << 14,  // Local, Saved  // Disable window/docking menu (that one that appears instead of the collapse button)
+	ImGuiDockNodeFlagsPrivate_NoCloseButton                = 1 << 15,  // Local, Saved  //
+	ImGuiDockNodeFlagsPrivate_NoDocking                    = 1 << 16,  // Local, Saved  // Disable any form of docking in this dockspace or individual node. (On a whole dockspace, this pretty much defeat the purpose of using a dockspace at all). Note: when turned on, existing docked nodes will be preserved.
+	ImGuiDockNodeFlagsPrivate_NoDockingSplitMe             = 1 << 17,  // [EXPERIMENTAL] Prevent another window/node from splitting this node.
+	ImGuiDockNodeFlagsPrivate_NoDockingSplitOther          = 1 << 18,  // [EXPERIMENTAL] Prevent this node from splitting another window/node.
+	ImGuiDockNodeFlagsPrivate_NoDockingOverMe              = 1 << 19,  // [EXPERIMENTAL] Prevent another window/node to be docked over this node.
+	ImGuiDockNodeFlagsPrivate_NoDockingOverOther           = 1 << 20,  // [EXPERIMENTAL] Prevent this node to be docked over another window or non-empty node.
+	ImGuiDockNodeFlagsPrivate_NoDockingOverEmpty           = 1 << 21,  // [EXPERIMENTAL] Prevent this node to be docked over an empty node (e.g. DockSpace with no other windows)
+	ImGuiDockNodeFlagsPrivate_NoResizeX                    = 1 << 22,  // [EXPERIMENTAL]
+	ImGuiDockNodeFlagsPrivate_NoResizeY                    = 1 << 23,  // [EXPERIMENTAL]
+	ImGuiDockNodeFlagsPrivate_SharedFlagsInheritMask_      = ~0,
+	ImGuiDockNodeFlagsPrivate_NoResizeFlagsMask_           = ImGuiDockNodeFlags_NoResize | ImGuiDockNodeFlagsPrivate_NoResizeX | ImGuiDockNodeFlagsPrivate_NoResizeY,
+	ImGuiDockNodeFlagsPrivate_LocalFlagsMask_              = ImGuiDockNodeFlags_NoSplit | ImGuiDockNodeFlagsPrivate_NoResizeFlagsMask_ | ImGuiDockNodeFlags_AutoHideTabBar | ImGuiDockNodeFlagsPrivate_DockSpace | ImGuiDockNodeFlagsPrivate_CentralNode | ImGuiDockNodeFlagsPrivate_NoTabBar | ImGuiDockNodeFlagsPrivate_HiddenTabBar | ImGuiDockNodeFlagsPrivate_NoWindowMenuButton | ImGuiDockNodeFlagsPrivate_NoCloseButton | ImGuiDockNodeFlagsPrivate_NoDocking,
+	ImGuiDockNodeFlagsPrivate_LocalFlagsTransferMask_      = ImGuiDockNodeFlagsPrivate_LocalFlagsMask_ & ~ImGuiDockNodeFlagsPrivate_DockSpace,  // When splitting those flags are moved to the inheriting child, never duplicated
+	ImGuiDockNodeFlagsPrivate_SavedFlagsMask_              = ImGuiDockNodeFlagsPrivate_NoResizeFlagsMask_ | ImGuiDockNodeFlagsPrivate_DockSpace | ImGuiDockNodeFlagsPrivate_CentralNode | ImGuiDockNodeFlagsPrivate_NoTabBar | ImGuiDockNodeFlagsPrivate_HiddenTabBar | ImGuiDockNodeFlagsPrivate_NoWindowMenuButton | ImGuiDockNodeFlagsPrivate_NoCloseButton | ImGuiDockNodeFlagsPrivate_NoDocking
 };
 
 // Flags for ImGui::BeginDragDropSource(), ImGui::AcceptDragDropPayload()

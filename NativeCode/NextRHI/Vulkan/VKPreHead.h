@@ -2,20 +2,16 @@
 
 #include "../NxGpuDevice.h"
 #include "../NxRHIDefine.h"
-
-#ifdef PLATFORM_WIN
-#define VK_USE_PLATFORM_WIN32_KHR
-#endif
+#include "../NxBuffer.h"
 
 #include <vulkan/vulkan.h>
 
-#pragma warning(push)
-#pragma warning(disable:4005)
-#include <d3d12.h>
-#include <d3d12Shader.h>
-#include <d3dcompiler.h>
-#include <dxgi1_4.h>
-#pragma warning(pop)
+#ifdef PLATFORM_WIN
+    #define VK_USE_PLATFORM_WIN32_KHR
+    #include <vulkan/vulkan_win32.h>
+#elif defined(PLATFORM_DROID)
+    #include <vulkan/vulkan_android.h>
+#endif
 
 NS_BEGIN
 
@@ -630,7 +626,7 @@ namespace NxRHI
             break;
         case VK_FORMAT_ASTC_12x12_SFLOAT_BLOCK_EXT:
             break;
-        case VK_FORMAT_G8_B8R8_2PLANE_444_UNORM_EXT:
+        /*case VK_FORMAT_G8_B8R8_2PLANE_444_UNORM_EXT:
             break;
         case VK_FORMAT_G10X6_B10X6R10X6_2PLANE_444_UNORM_3PACK16_EXT:
             break;
@@ -641,7 +637,7 @@ namespace NxRHI
         case VK_FORMAT_A4R4G4B4_UNORM_PACK16_EXT:
             break;
         case VK_FORMAT_A4B4G4R4_UNORM_PACK16_EXT:
-            break;
+            break;*/
         case VK_FORMAT_MAX_ENUM:
             break;
         default:
@@ -714,7 +710,7 @@ namespace NxRHI
         }
         return 0xFFFFFFFF;
     }
-    static EVertexStreamType GetStreamTypeByVKBinding(UINT inputSlot)
+    inline EVertexStreamType GetStreamTypeByVKBinding(UINT inputSlot)
     {
         switch (inputSlot)
         {
@@ -757,6 +753,124 @@ namespace NxRHI
         return VST_Number;
     }
 	
+    inline VkImageAspectFlags FormatToVKImageAspectFlags(EPixelFormat format, bool sampledDepth, bool sampledStencil)
+    {
+        VkImageAspectFlags result = (VkImageAspectFlags)0;
+        switch (format)
+        {
+        case EPixelFormat::PXF_D16_UNORM:
+        case EPixelFormat::PXF_D32_FLOAT:
+        case EPixelFormat::PXF_D32_FLOAT_S8X24_UINT:
+        {
+            result |= VK_IMAGE_ASPECT_DEPTH_BIT;
+        }
+        break;
+        case EPixelFormat::PXF_R24G8_TYPELESS:
+        case EPixelFormat::PXF_D24_UNORM_S8_UINT:
+        {
+            if (sampledDepth)
+                result |= VK_IMAGE_ASPECT_DEPTH_BIT;
+            /*if (sampledStencil)
+                result |= VK_IMAGE_ASPECT_STENCIL_BIT;*/
+        }
+        break;
+        default:
+        {
+            result = VK_IMAGE_ASPECT_COLOR_BIT;
+        }
+        break;
+        }
+        return result;
+    }
+
+	inline VkImageLayout GpuStateToVKImageLayout(EGpuResourceState state)
+	{
+		switch (state)
+		{
+		case EngineNS::NxRHI::GRS_Undefine:
+			return VK_IMAGE_LAYOUT_UNDEFINED;
+		case EngineNS::NxRHI::GRS_SrvPS:
+			return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		case EngineNS::NxRHI::GRS_GenericRead:
+			return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		case EngineNS::NxRHI::GRS_Uav:
+			return VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+		case EngineNS::NxRHI::GRS_RenderTarget:
+			return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		case EngineNS::NxRHI::GRS_DepthStencil:
+			return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		case EngineNS::NxRHI::GRS_DepthRead:
+			return VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+		case EngineNS::NxRHI::GRS_StencilRead:
+			return VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
+		case EngineNS::NxRHI::GRS_DepthStencilRead:
+			return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+		case EngineNS::NxRHI::GRS_CopySrc:
+			return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		case EngineNS::NxRHI::GRS_CopyDst:
+			return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		case EngineNS::NxRHI::GRS_Present:
+			return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		default:
+			break;
+		}
+		return VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
+	}
+
+	inline EGpuResourceState VKImageLayoutToGpuState(VkImageLayout layout)
+	{
+		switch (layout)
+		{
+		case VK_IMAGE_LAYOUT_UNDEFINED:
+			return EGpuResourceState::GRS_Undefine;
+		case VK_IMAGE_LAYOUT_GENERAL:
+			return EGpuResourceState::GRS_GenericRead;
+		case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+			return EGpuResourceState::GRS_RenderTarget;
+		case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+			return EGpuResourceState::GRS_DepthStencil;
+		case VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL:
+			return EGpuResourceState::GRS_DepthStencilRead;
+		case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+			return EGpuResourceState::GRS_GenericRead;
+		case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+			return EGpuResourceState::GRS_CopySrc;
+		case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+			return EGpuResourceState::GRS_CopyDst;
+		case VK_IMAGE_LAYOUT_PREINITIALIZED:
+			return EGpuResourceState::GRS_Undefine;
+		case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL:
+			return EGpuResourceState::GRS_Undefine;
+		case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL:
+			return EGpuResourceState::GRS_DepthStencil;
+		case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+			return EGpuResourceState::GRS_DepthStencil;
+		case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL:
+			return EGpuResourceState::GRS_DepthRead;
+		case VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL:
+			return EGpuResourceState::GRS_DepthStencil;
+		case VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL:
+			return EGpuResourceState::GRS_StencilRead;
+		case VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL:
+			return EGpuResourceState::GRS_GenericRead;
+		case VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL:
+			return EGpuResourceState::GRS_Uav;
+		case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
+			return EGpuResourceState::GRS_Present;
+		case VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR:
+			return EGpuResourceState::GRS_Present;
+		case VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT:
+			break;
+		case VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR:
+			break;
+		case VK_IMAGE_LAYOUT_MAX_ENUM:
+			break;
+		default:
+			break;
+		}
+		return EGpuResourceState::GRS_Undefine;
+	}
+
 	struct VKGpuHeap : public IGpuHeap
 	{
 		VkDeviceMemory              Memory;
@@ -765,7 +879,7 @@ namespace NxRHI
 			return 0;
 		}
 		virtual void* GetHWBuffer() override{
-			return Memory;
+			return (void*)Memory;
 		}
 	};
 	struct FVKDefaultGpuMemory : public FGpuMemory
@@ -791,7 +905,7 @@ namespace NxRHI
 	public:
 		UINT64							mBatchPoolSize = 64 * 1024 * 1024;
 		UINT							mMemTypeIndex = -1;
-		virtual UINT GetBatchCount(UINT64 size) {
+		virtual UINT GetBatchCount(UINT64 size) override {
 			return (UINT)(mBatchPoolSize / size);
 		}
 		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size, UINT count) override;

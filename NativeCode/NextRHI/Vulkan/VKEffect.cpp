@@ -74,11 +74,11 @@ namespace NxRHI
 		}
 	}*/
 	
-	VKShaderEffect::VKShaderEffect()
+	VKGraphicsEffect::VKGraphicsEffect()
 	{
 		
 	}
-	VKShaderEffect::~VKShaderEffect()
+	VKGraphicsEffect::~VKGraphicsEffect()
 	{
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
@@ -90,7 +90,7 @@ namespace NxRHI
 			mPipelineLayout = nullptr;
 		}
 	}
-	void VKShaderEffect::BuildState(IGpuDevice* device1)
+	void VKGraphicsEffect::BuildState(IGpuDevice* device1)
 	{
 		auto device = (VKGpuDevice*)device1;
 		mDeviceRef.FromObject(device);
@@ -136,7 +136,7 @@ namespace NxRHI
 		}
 	}
 
-	void VKShaderEffect::Commit(ICommandList* cmdlist, IGraphicDraw* drawcall)
+	void VKGraphicsEffect::Commit(ICommandList* cmdlist, IGraphicDraw* drawcall)
 	{
 		//vkCmdBindDescriptorSets(vkCmd->mCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 0, (UINT)IVKDrawCall::ESetStage::STS_NUM, mCurVkSetState->mDescriptorSet, 0, nullptr);
 

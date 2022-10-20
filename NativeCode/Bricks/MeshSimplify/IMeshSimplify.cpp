@@ -1,4 +1,4 @@
-#include "IMeshSImplify.h"
+#include "IMeshSimplify.h"
 #include "Simplify.h"
 
 #define new VNEW

@@ -332,9 +332,9 @@ namespace NxRHI
 		}
 		return result;
 	}
-	IShaderEffect* DX11GpuDevice::CreateShaderEffect()
+	IGraphicsEffect* DX11GpuDevice::CreateShaderEffect()
 	{
-		return new IShaderEffect();
+		return new IGraphicsEffect();
 	}
 	IComputeEffect* DX11GpuDevice::CreateComputeEffect()
 	{

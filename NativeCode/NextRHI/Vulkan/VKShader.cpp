@@ -4,7 +4,12 @@
 #include "VKGpuState.h"
 #include "../NxRHIDefine.h"
 #include "../../Bricks/CrossShaderCompiler/IShaderConductor.h"
-#include <spirv_cross/spirv_cross_c.h>
+#include "../../../3rd/native/spirv-cross/spirv_cross_c.h"
+//#include <spirv_cross/spirv_cross_c.h>
+
+#if defined(HasModule_GpuDump)
+#include "../../Bricks/GpuDump/NvAftermath.h"
+#endif
 
 #define new VNEW
 
@@ -207,7 +212,7 @@ namespace NxRHI
 	bool VKShader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader)
 	{
 		desc->FunctionName = entry;
-		return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl);
+		return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader);
 	}
 
 	VKShader::VKShader()
@@ -250,6 +255,10 @@ namespace NxRHI
 		{
 			return false;
 		}
+
+#if defined(HasModule_GpuDump)
+		GpuDump::NvAftermath::RegSpirv(&desc->SpirV[0], (UINT)createInfo.codeSize);
+#endif
 
 		VkShaderStageFlagBits shaderStage = (VkShaderStageFlagBits)0;
 		switch (Desc->Type)
@@ -377,30 +386,6 @@ namespace NxRHI
 		testAllocator.Free(obj);*/
 
 		return true;
-	}
-	static EShaderVarType DxShaderVarType2VarType(D3D_SHADER_VARIABLE_TYPE type)
-	{
-		switch (type)
-		{
-			case D3D_SVT_INT:
-			{
-				return EShaderVarType::SVT_Int;
-			}
-			case D3D_SVT_FLOAT:
-			{
-				return EShaderVarType::SVT_Float;
-			}
-			case D3D_SVT_TEXTURE:
-			{
-				return EShaderVarType::SVT_Texture;
-			}
-			case D3D_SVT_SAMPLER:
-			{
-				return EShaderVarType::SVT_Sampler;
-			}
-			default:
-				return EShaderVarType::SVT_Unknown;
-		}
 	}
 	
 	bool VKShader::Reflect(FShaderDesc* desc)

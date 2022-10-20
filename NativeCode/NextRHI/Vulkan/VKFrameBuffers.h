@@ -65,7 +65,7 @@ namespace NxRHI
 		struct FBackBuffer : public VIUnknown
 		{
 			FBackBuffer();
-			void Cleanup(VKGpuDevice* device);
+			void CleanupVK(VKGpuDevice* device);
 			AutoRef<VKBinaryFence>		AcquireSemaphore;
 			AutoRef<VKBinaryFence>		RenderFinishSemaphore;
 			AutoRef<VKGpuToHostFence>	RenderFinishFence;
