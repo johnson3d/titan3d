@@ -467,6 +467,7 @@ namespace NxRHI
 		}
 		BeginEvent(mDebugName.c_str());
 		imContex->ExecuteCommandList(mCmdList, 0);
+		Safe_Release(mCmdList);
 		EndEvent();
 	}
 }
