@@ -32,13 +32,12 @@ namespace EngineNS
             return new TName(GetNameIndex2(name1, name2));
         }
         #region Manger
-        static UInt32 mCurIndex = 0;
         static List<string> NameTable = new List<string>();
         private static UInt32 GetNameIndex(string name)
         {
             lock (NameTable)
             {
-                for (int i = 0; i < mCurIndex; i++)
+                for (int i = 0; i < NameTable.Count; i++)
                 {
                     if (NameTable[i] == name)
                     {
@@ -53,7 +52,7 @@ namespace EngineNS
         {
             lock (NameTable)
             {
-                for (int i = 0; i < mCurIndex; i++)
+                for (int i = 0; i < NameTable.Count; i++)
                 {
                     var name = NameTable[i];
                     if (name.Length == name1.Length + name2.Length)
