@@ -12,7 +12,7 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Game,utest/ttt.material,4099c4b0-f565-4347-820a-7644edc4a0d5" />
-    <e_1 Value="Game,utest/taxi.srv,d6b2c4d5-f2de-4225-bf01-a82fb9e2144d" />
+    <e_1 Value="Game,utest/taxi.srv,b31e5467-f924-4646-ae70-929082eccccf" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" />
 </Root>

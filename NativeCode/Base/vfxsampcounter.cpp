@@ -95,7 +95,7 @@ SampResult* v3dSampMgr::FindSamp(const char* name)
 	if (i == m_Samps.end())
 	{
 		SampResult* sr = new SampResult();
-		sr->mEnable = FALSE;
+		sr->mEnable = TRUE;
 		sr->mName = name;
 		m_Samps.insert(std::make_pair(name, sr));
 		return sr;

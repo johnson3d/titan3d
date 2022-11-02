@@ -133,6 +133,70 @@ namespace NxRHI
 			return VK_FORMAT_A2R10G10B10_UINT_PACK32;
 		case EngineNS::PXF_R10G10B10A2_TYPELESS:
 			return VK_FORMAT_A2R10G10B10_UINT_PACK32;
+        case PXF_BC1_TYPELESS:
+            return VK_FORMAT_BC1_RGB_UNORM_BLOCK;
+		case PXF_BC1_UNORM:
+            return VK_FORMAT_BC1_RGB_UNORM_BLOCK;
+		case PXF_BC1_UNORM_SRGB:
+            return VK_FORMAT_BC1_RGB_SRGB_BLOCK;
+		case PXF_BC2_TYPELESS:
+            return VK_FORMAT_BC2_UNORM_BLOCK;
+		case PXF_BC2_UNORM:
+            return VK_FORMAT_BC2_UNORM_BLOCK;
+		case PXF_BC2_UNORM_SRGB:
+            return VK_FORMAT_BC2_SRGB_BLOCK;
+		case PXF_BC3_TYPELESS:
+            return VK_FORMAT_BC3_UNORM_BLOCK;
+		case PXF_BC3_UNORM:
+            return VK_FORMAT_BC3_UNORM_BLOCK;
+		case PXF_BC3_UNORM_SRGB:
+            return VK_FORMAT_BC3_SRGB_BLOCK;
+		case PXF_BC4_TYPELESS:
+            return VK_FORMAT_BC4_UNORM_BLOCK;
+		case PXF_BC4_UNORM:
+            return VK_FORMAT_BC4_UNORM_BLOCK;
+		case PXF_BC4_SNORM:
+            return VK_FORMAT_BC4_SNORM_BLOCK;
+		case PXF_BC5_TYPELESS:
+            return VK_FORMAT_BC5_UNORM_BLOCK;
+		case PXF_BC5_UNORM:
+            return VK_FORMAT_BC5_UNORM_BLOCK;
+		case PXF_BC5_SNORM:
+            return VK_FORMAT_BC5_SNORM_BLOCK;
+		case PXF_BC6H_TYPELESS:
+            return VK_FORMAT_BC6H_UFLOAT_BLOCK;
+		case PXF_BC6H_UF16:
+            return VK_FORMAT_BC6H_UFLOAT_BLOCK;
+		case PXF_BC6H_SF16:
+            return VK_FORMAT_BC6H_SFLOAT_BLOCK;
+		case PXF_BC7_TYPELESS:
+            return VK_FORMAT_BC7_UNORM_BLOCK;
+		case PXF_BC7_UNORM:
+            return VK_FORMAT_BC7_UNORM_BLOCK;
+		case PXF_BC7_UNORM_SRGB:
+            return VK_FORMAT_BC7_SRGB_BLOCK;
+		case PXF_ETC1:
+            return VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK;
+		case PXF_ETC2_RGB8:
+            return VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK;
+		case PXF_ETC2_SRGB8:
+            return VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK;
+		case PXF_ETC2_RGBA8:
+            return VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK;
+		case PXF_ETC2_SRGBA8:
+            return VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK;
+		case PXF_ETC2_R11:
+            return VK_FORMAT_EAC_R11_UNORM_BLOCK;
+		case PXF_ETC2_SIGNED_R11:
+            return VK_FORMAT_EAC_R11_SNORM_BLOCK;
+		case PXF_ETC2_RG11:
+            return VK_FORMAT_EAC_R11G11_UNORM_BLOCK;
+		case PXF_ETC2_SIGNED_RG11:
+            return VK_FORMAT_EAC_R11G11_SNORM_BLOCK;
+		case PXF_ETC2_RGB8A1:
+            return VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK;
+		case PXF_ETC2_SRGB8A1:
+            return VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK;
 		default:
 			ASSERT(false);
 			break;
@@ -407,37 +471,37 @@ namespace NxRHI
         case VK_FORMAT_D32_SFLOAT_S8_UINT:
             break;
         case VK_FORMAT_BC1_RGB_UNORM_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC1_UNORM;
         case VK_FORMAT_BC1_RGB_SRGB_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC1_UNORM_SRGB;
         case VK_FORMAT_BC1_RGBA_UNORM_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC1_UNORM;
         case VK_FORMAT_BC1_RGBA_SRGB_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC1_UNORM_SRGB;
         case VK_FORMAT_BC2_UNORM_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC2_UNORM;
         case VK_FORMAT_BC2_SRGB_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC2_UNORM_SRGB;
         case VK_FORMAT_BC3_UNORM_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC3_UNORM;
         case VK_FORMAT_BC3_SRGB_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC2_UNORM_SRGB;
         case VK_FORMAT_BC4_UNORM_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC4_UNORM;
         case VK_FORMAT_BC4_SNORM_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC4_SNORM;
         case VK_FORMAT_BC5_UNORM_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC5_UNORM;
         case VK_FORMAT_BC5_SNORM_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC5_SNORM;
         case VK_FORMAT_BC6H_UFLOAT_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC6H_UF16;
         case VK_FORMAT_BC6H_SFLOAT_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC6H_SF16;
         case VK_FORMAT_BC7_UNORM_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC7_UNORM;
         case VK_FORMAT_BC7_SRGB_BLOCK:
-            break;
+            return EPixelFormat::PXF_BC7_UNORM_SRGB;
         case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
             break;
         case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:

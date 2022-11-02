@@ -11,8 +11,8 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
     <e_0 Value="Game,utest/plant/plantbranch.material,44007e03-adeb-44b7-a985-4d0cc23d1633" />
-    <e_1 Value="Game,utest/plant/fir_01_plant/t_fir_alba_bark_01_bc.srv,008d4fd2-d08d-4469-b41a-5c3dd0e595bd" />
-    <e_2 Value="Game,utest/plant/fir_01_plant/t_fir_bark_01_n.srv,c00a3d30-0755-4719-9c67-6ce8eb0dfded" />
+    <e_1 Value="Game,utest/plant/fir_01_plant/t_fir_alba_bark_01_bc.srv,598c63d3-30b7-4354-a068-03e8807fc0dd" />
+    <e_2 Value="Game,utest/plant/fir_01_plant/t_fir_bark_01_n.srv,d6ad543f-2115-47b3-ab6b-1dad9f93e463" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" />
 </Root>

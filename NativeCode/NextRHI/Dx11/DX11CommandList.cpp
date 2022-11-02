@@ -7,6 +7,7 @@
 #include "DX11InputAssembly.h"
 #include "DX11FrameBuffers.h"
 #include "../NxDrawcall.h"
+#include "../../Base/vfxsampcounter.h"
 
 #define new VNEW
 
@@ -49,6 +50,7 @@ namespace NxRHI
 	bool DX11CommandList::BeginCommand()
 	{
 		IsRecording = true;
+		Safe_Release(mCmdList);
 		return true;
 	}
 	void DX11CommandList::EndCommand()

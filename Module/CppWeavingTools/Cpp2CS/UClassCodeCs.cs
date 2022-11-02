@@ -157,7 +157,7 @@ namespace CppWeaving.Cpp2CS
                     string retStr = "return ";
                     if (retTypeStr == "void")
                         retStr = "";
-                    
+
                     AddLine($"private delegate {retTypeStr} CSImpl_{i.Name}(IntPtr self, {i.GetParameterDefineCs()});");
                     UTypeManager.WritePInvokeAttribute(this, i);
                     AddLine($"private extern static void TSDK_Set_CSImpl_{i.Name}_{i.FunctionHash}(CSImpl_{i.Name} fn);");
@@ -185,11 +185,11 @@ namespace CppWeaving.Cpp2CS
             AddLine($"public struct CppStructLayout");
             PushBrackets();
             {
-                foreach(var i in mClass.Properties)
+                foreach (var i in mClass.Properties)
                 {
                     var field = i as UField;
                     AddLine($"[System.Runtime.InteropServices.FieldOffset({field.Offset / 8})]");
-                    if(i.IsDelegate)
+                    if (i.IsDelegate)
                         AddLine($"public IntPtr {i.Name};");
                     else
                     {
@@ -201,7 +201,7 @@ namespace CppWeaving.Cpp2CS
                                 retType = dypeDef;
                         }
                         AddLine($"public {retType} {i.Name};");
-                    }   
+                    }
                 }
             }
             PopBrackets();
@@ -289,6 +289,7 @@ namespace CppWeaving.Cpp2CS
             {
                 if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
                     continue;
+                var retType = i.GetCsTypeName();
                 bool pointerTypeWrapper = false;
                 if (i.NumOfTypePointer == 1 && i.PropertyType.ClassType == UTypeBase.EClassType.PointerType)
                 {
@@ -311,7 +312,6 @@ namespace CppWeaving.Cpp2CS
                         AddLine($"{GetAccessDefine(i.Access)} {i.PropertyType.ToCsName()} {i.Name}");
                     else
                     {
-                         var retType = i.GetCsTypeName();
                         if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
                         {
                             if (retType == "sbyte*")
@@ -347,7 +347,12 @@ namespace CppWeaving.Cpp2CS
                                 AddLine($"return {marshalReturn}((IntPtr){pinvoke});");
                             }
                             else
-                                AddLine($"return {pinvoke};");
+                            {
+                                if (retType == "bool")
+                                    AddLine($"return {pinvoke} == 0 ? false : true;");
+                                else
+                                    AddLine($"return {pinvoke};");
+                            }
                         }
                         EndInvoke(i);
                     }
@@ -371,7 +376,7 @@ namespace CppWeaving.Cpp2CS
                             EndInvoke(i);
                         }
                         PopBrackets();
-                    }   
+                    }
                 }
                 PopBrackets();
             }
@@ -385,7 +390,7 @@ namespace CppWeaving.Cpp2CS
                 if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
                     continue;
 
-                var retType = i.GetCsTypeName();                
+                var retType = i.GetCsTypeName();
                 if (i.IsTypeDef)
                 {
                     var dypeDef = USysClassManager.Instance.FindTypeDef(i.CxxName);
@@ -394,7 +399,14 @@ namespace CppWeaving.Cpp2CS
                 }
 
                 UTypeManager.WritePInvokeAttribute(this, i);
-                AddLine($"extern static {retType} TSDK_{mClass.VisitorPInvoke}_FieldGet__{i.Name}(void* self);");
+                if (retType == "bool")
+                {
+                    AddLine($"extern static sbyte TSDK_{mClass.VisitorPInvoke}_FieldGet__{i.Name}(void* self);");
+                }
+                else
+                {
+                    AddLine($"extern static {retType} TSDK_{mClass.VisitorPInvoke}_FieldGet__{i.Name}(void* self);");
+                }
 
                 if (!i.HasMeta(UProjectSettings.SV_ReadOnly))
                 {
@@ -488,7 +500,16 @@ namespace CppWeaving.Cpp2CS
                     else
                     {
                         if (marshalReturn == null)
-                            AddLine($"{retStr}{invoke}({callArg});");
+                        {
+                            if (retTypeStr == "bool")
+                            {
+                                AddLine($"return {invoke}({callArg}) == 0 ? false : true;");
+                            }
+                            else
+                            {
+                                AddLine($"{retStr}{invoke}({callArg});");
+                            }
+                        }
                         else
                             AddLine($"{retStr}{marshalReturn}((IntPtr){invoke}({callArg}));");
                     }
@@ -545,7 +566,14 @@ namespace CppWeaving.Cpp2CS
                 //        retTypeStr = "string";
                 //    }
                 //}
-                AddLine($"extern static {retTypeStr} TSDK_{mClass.VisitorPInvoke}_{i.Name}_{i.FunctionHash}({callStr});");
+                if(retTypeStr=="bool")
+                {
+                    AddLine($"extern static sbyte TSDK_{mClass.VisitorPInvoke}_{i.Name}_{i.FunctionHash}({callStr});");
+                }
+                else
+                {
+                    AddLine($"extern static {retTypeStr} TSDK_{mClass.VisitorPInvoke}_{i.Name}_{i.FunctionHash}({callStr});");
+                }   
             }
         }
         protected virtual void GenCast()

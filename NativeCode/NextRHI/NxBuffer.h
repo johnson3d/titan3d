@@ -350,8 +350,8 @@ namespace NxRHI
 		}
 		virtual IGpuBufferData* CreateBufferData(IGpuDevice* device, UINT mipIndex, ECpuAccess cpuAccess, FSubResourceFootPrint* outFootPrint) = 0;
 	public:
-		FTextureDesc		Desc;
-		FResourceState		mResourceState;
+		FTextureDesc		Desc{};
+		FResourceState		mResourceState{};
 	};
 
 	struct TR_CLASS(SV_LayoutStruct = 8)

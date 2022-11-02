@@ -15,8 +15,8 @@ NS_BEGIN
 
 class v3dSampMgr;
 
-struct TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-SampResult : public VIUnknown
+struct TR_CLASS()
+	SampResult : public VIUnknown
 {
 	friend v3dSampMgr;
 
@@ -37,11 +37,9 @@ SampResult : public VIUnknown
 		mMaxTimeInLife = 0;
 	}
 
-	TR_FUNCTION()
 	const char* GetName() const {
 		return mName.c_str();
 	}
-	TR_MEMBER()
 	bool			mEnable;
 
 	VStringA		mName;
@@ -64,7 +62,7 @@ SampResult : public VIUnknown
 	void PushParent(SampResult* p)
 	{
 		auto it = m_Parents.find(p);
-		if(it!=m_Parents.end())
+		if (it != m_Parents.end())
 		{
 			it->second.HitCount++;
 		}
@@ -82,41 +80,28 @@ SampResult : public VIUnknown
 		}
 	}
 
-	TR_FUNCTION()
 	INT64 Begin(v3dSampMgr* mgr, bool bPushParent = true);
-	TR_FUNCTION()
 	void End(v3dSampMgr* mgr, INT64 begin);
 
-	TR_MEMBER()
 	INT64			mAvgTime;
-	TR_MEMBER()
 	int				mAvgHit;
 
-	TR_MEMBER()
 	INT64			mAvgTimePerHit;
 
-	TR_MEMBER()
 	int				mAvgCounter;
-	TR_MEMBER()
 	int				mCurFrame;
-	TR_MEMBER()
 	int				mHitInCurFrame;
-	TR_MEMBER()
 	int				mHitInCounter;
-	TR_MEMBER()
 	int				mMaxHitInCounter;
-	TR_MEMBER()
 	INT64			mTimeInCurFrame;
-	TR_MEMBER()
 	INT64			mTimeInCounter;
-	TR_MEMBER()
 	INT64			mMaxTimeInCounter;
 
 	INT64			mMaxTimeInLife;
 };
 
-class TR_CLASS(SV_NameSpace = EngineNS, SV_UsingNS = EngineNS)
-v3dSampMgr : public VIUnknown
+class TR_CLASS()
+	v3dSampMgr : public VIUnknown
 {
 	int UpdateCount;
 public:
@@ -230,19 +215,29 @@ public:
 
 	TR_FUNCTION(SV_NoBind)
 	void Update();
-	TR_FUNCTION()
 	static void UpdateAllThreadInstance();
 
-	TR_FUNCTION()
 	void ClearSamps()
 	{
 		Cleanup();
 	}		
 
-	TR_FUNCTION()
 	SampResult* FindSamp( const char* name );
-	TR_FUNCTION()
 	SampResult* PureFindSamp(const char* name);
+	UINT GetSampNum() const{
+		return (UINT)m_Samps.size();
+	}
+	void GetAllSamps(SampResult** ppSamps, UINT count) const
+	{
+		UINT index = 0;
+		for (auto& i : m_Samps)
+		{
+			ppSamps[index] = i.second;
+			++index;
+			if (index >= count)
+				return;
+		}
+	}
 };
 
 class v3dAutoSampEx
@@ -267,7 +262,7 @@ public:
 	//#define SAMP_BEGIN(name) v3dSampMgr::GetInstance()->Begin(name);
 	//#define SAMP_END(begin,name) v3dSampMgr::GetInstance()->End(begin,name,v3dSampMgr::GetInstance()->m_AvgCounter);
 
-	#define AUTO_SAMP_INNER(name,line) static EngineNS::SampResult* SR_##line = EngineNS::v3dSampMgr::GetThreadInstance()->FindSamp(name);\
+	#define AUTO_SAMP_INNER(name,line) static thread_local EngineNS::SampResult* SR_##line = EngineNS::v3dSampMgr::GetThreadInstance()->FindSamp(name);\
 				EngineNS::v3dAutoSampEx AS##line(SR_##line);
 
 	#define AUTO_SAMP(name) AUTO_SAMP_INNER(name,__LINE__)

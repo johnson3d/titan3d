@@ -5,7 +5,11 @@
 #include "../../Base/IO/MemStream.h"
 #include <xutility>
 
+#if defined(_DEBUG)
 #pragma comment(lib, "crnlibD_x64_VC9.lib")
+#else 
+#pragma comment(lib, "crnlib_x64_VC9.lib")//crnlib_DLL_x64_VC9.lib
+#endif
 
 #define new VNEW
 
@@ -26,33 +30,17 @@ NS_BEGIN
 
 namespace TextureCompress
 {
-	crn_format ToCrunchFomat(ETextureFormat fmt)
+	crn_format ToCrunchFomat(NxRHI::ETextureCompressFormat fmt)
 	{
 		switch (fmt)
 		{
-		case EngineNS::TextureCompress::DXT1:
-		case EngineNS::TextureCompress::DXT1a:
+		case NxRHI::ETextureCompressFormat::TCF_Dxt1:
+		case NxRHI::ETextureCompressFormat::TCF_Dxt1a:
 			return crn_format::cCRNFmtDXT1;
-		case EngineNS::TextureCompress::DXT3:
+		case NxRHI::ETextureCompressFormat::TCF_Dxt3:
 			return crn_format::cCRNFmtDXT3;
-		case EngineNS::TextureCompress::DXT5:
+		case NxRHI::ETextureCompressFormat::TCF_Dxt5:
 			return crn_format::cCRNFmtDXT5;
-		case EngineNS::TextureCompress::DXT5_CCxY:
-			return crn_format::cCRNFmtDXT5_CCxY;
-		case EngineNS::TextureCompress::DXT5_xGxR:
-			return crn_format::cCRNFmtDXT5_xGxR;
-		case EngineNS::TextureCompress::DXT5_xGBR:
-			return crn_format::cCRNFmtDXT5_xGBR;
-		case EngineNS::TextureCompress::DXT5_AGBR:
-			return crn_format::cCRNFmtDXT5_AGBR;
-		case EngineNS::TextureCompress::DXN_XY:
-			return crn_format::cCRNFmtDXN_XY;
-		case EngineNS::TextureCompress::DXN_YX:
-			return crn_format::cCRNFmtDXN_YX;
-		case EngineNS::TextureCompress::DXT5A:
-			return crn_format::cCRNFmtDXT5A;
-		case EngineNS::TextureCompress::ETC1:
-			return crn_format::cCRNFmtETC1;
 		default:
 			return crn_format::cCRNFmtInvalid;
 		}
@@ -63,7 +51,32 @@ namespace TextureCompress
 		//printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bProcessing: %u%%", std::min(100, std::max(0, percentage_complete)));
 		return true;
 	}
-	bool CrunchWrap::CompressPixels(UINT numOfThreads, IBlobObject* result, UINT width, UINT height, const FCubeImage* pSrcImage, ETextureFormat fmt, bool genMips, bool srgb, float bitrate, int quality_level)
+	EPixelFormat ExtFormatToPixelFormat(NxRHI::ETextureCompressFormat fmt, bool srgb)
+	{
+		switch (fmt)
+		{
+		case NxRHI::ETextureCompressFormat::TCF_Dxt1:
+		case NxRHI::ETextureCompressFormat::TCF_Dxt1a:
+			if(srgb)
+				return PXF_BC1_UNORM_SRGB;
+			else
+				return PXF_BC1_UNORM;
+		case NxRHI::ETextureCompressFormat::TCF_Dxt3:
+			if (srgb)
+				return PXF_BC2_UNORM_SRGB;
+			else
+				return PXF_BC2_UNORM;
+		case NxRHI::ETextureCompressFormat::TCF_Dxt5:
+			if (srgb)
+				return PXF_BC3_UNORM_SRGB;
+			else
+				return PXF_BC3_UNORM;
+		default:
+			break;
+		}
+		return PXF_UNKNOWN;
+	}
+	bool CrunchWrap::CompressPixels(UINT numOfThreads, IBlobObject* result, UINT width, UINT height, const FCubeImage* pSrcImage, NxRHI::ETextureCompressFormat fmt, bool genMips, bool srgb, float bitrate, int quality_level)
 	{
 		bool use_adaptive_block_sizes = true;
 		crn_comp_params comp_params{};
@@ -81,7 +94,7 @@ namespace TextureCompress
 		comp_params.m_pImages[5][0] = pSrcImage->Image5;
 
 		comp_params.m_format = ToCrunchFomat(fmt);
-		if (fmt == DXT1a)
+		if (fmt == NxRHI::ETextureCompressFormat::TCF_Dxt1a)
 		{
 			comp_params.set_flag(cCRNCompFlagDXT1AForTransparency, true);
 		}
@@ -97,6 +110,7 @@ namespace TextureCompress
 
 		crn_mipmap_params mip_params;
 		mip_params.m_gamma_filtering = srgb;
+		mip_params.m_min_mip_size = 8;
 		mip_params.m_mode = genMips ? cCRNMipModeGenerateMips : cCRNMipModeNoMips;
 
 		UINT actual_quality_level;
@@ -136,27 +150,136 @@ namespace TextureCompress
 				
 			}
 		}
-		for (int i = 0; i < face; i++)
+		
+		NxRHI::FPictureDesc picDesc{};
+		picDesc.Width = dds_desc.dwWidth;
+		picDesc.Height = dds_desc.dwHeight;
+		picDesc.MipLevel = dds_desc.dwMipMapCount;
+		picDesc.Format = ExtFormatToPixelFormat(fmt, srgb);
+		picDesc.CompressFormat = fmt;
+		picDesc.CubeFaces = face;		
+		picDesc.sRGB = srgb;
+
 		{
-			for (int j = 0; j < dds_desc.dwMipMapCount; j++)
+			for (int j = 0; j < (int)dds_desc.dwMipMapCount; j++)
 			{
-				const crn_uint32 width = std::max(1U, dds_desc.dwWidth >> j);
-				const crn_uint32 height = std::max(1U, dds_desc.dwHeight >> j);
-				const crn_uint32 blocks_x = std::max(1U, (width + 3) >> 2);
-				const crn_uint32 blocks_y = std::max(1U, (height + 3) >> 2);
-				const crn_uint32 row_pitch = blocks_x * crnd::crnd_get_bytes_per_dxt_block(comp_params.m_format);
-				const crn_uint32 total_face_size = row_pitch * blocks_y;
+				const UINT width = std::max(1U, dds_desc.dwWidth >> j);
+				const UINT height = std::max(1U, dds_desc.dwHeight >> j);
+				if (width < 4 || height < 4)
+				{
+					dds_desc.dwMipMapCount = j;
+					picDesc.MipLevel = j;
+					break;
+				}
+				if (width % 4 != 0 || height % 4 != 0)
+				{
+					dds_desc.dwMipMapCount = j;
+					picDesc.MipLevel = j;
+					break;
+				}
 			}
 		}
 
-		result->PushData(&actual_quality_level, sizeof(UINT));
-		result->PushData(&actual_bitrate, sizeof(float));
-		result->PushData(&output_file_size, sizeof(UINT));
-		result->PushData(pOutput_file_data, output_file_size);
+		result->PushData(&picDesc, sizeof(picDesc));
+		
+		for (int i = 0; i < face; i++)
+		{
+			for (int j = 0; j < (int)dds_desc.dwMipMapCount; j++)
+			{
+				const UINT width = std::max(1U, dds_desc.dwWidth >> j);
+				const UINT height = std::max(1U, dds_desc.dwHeight >> j);
+				const UINT blocks_x = std::max(1U, (width + 3) >> 2);
+				const UINT blocks_y = std::max(1U, (height + 3) >> 2);
+				const UINT row_pitch = blocks_x * crnd::crnd_get_bytes_per_dxt_block(comp_params.m_format);
+				const UINT total_face_size = row_pitch * blocks_y;
+				ASSERT(width >= 4 && height >= 4);
+				result->PushData(&width, sizeof(UINT));
+				result->PushData(&height, sizeof(UINT));
+				result->PushData(&row_pitch, sizeof(UINT));
+
+				auto pPixels = new BYTE[total_face_size];
+				ar.Read(pPixels, total_face_size);
+				result->PushData(&total_face_size, sizeof(UINT));
+				result->PushData(pPixels, total_face_size);
+				delete[] pPixels;
+			}
+		}
 		
 		crn_free_block(pOutput_file_data);
 
 		return true;
+	}
+	EPixelFormat CrnPixelFormatTo(crnlib::pixel_format fmt)
+	{
+		switch (fmt)
+		{
+		case crnlib::PIXEL_FMT_INVALID:
+			break;
+		case crnlib::PIXEL_FMT_DXT1:
+			return EPixelFormat::PXF_BC1_UNORM;
+		case crnlib::PIXEL_FMT_DXT2:
+			return EPixelFormat::PXF_BC2_UNORM;
+		case crnlib::PIXEL_FMT_DXT3:
+			return EPixelFormat::PXF_BC2_UNORM;
+		case crnlib::PIXEL_FMT_DXT4:
+			return EPixelFormat::PXF_BC3_UNORM;
+		case crnlib::PIXEL_FMT_DXT5:
+			return EPixelFormat::PXF_BC3_UNORM;
+		case crnlib::PIXEL_FMT_3DC:
+			break;
+		case crnlib::PIXEL_FMT_DXN:
+			break;
+		case crnlib::PIXEL_FMT_DXT5A:
+			return EPixelFormat::PXF_BC3_UNORM;
+		case crnlib::PIXEL_FMT_DXT5_CCxY:
+			break;
+		case crnlib::PIXEL_FMT_DXT5_xGxR:
+			break;
+		case crnlib::PIXEL_FMT_DXT5_xGBR:
+			break;
+		case crnlib::PIXEL_FMT_DXT5_AGBR:
+			break;
+		case crnlib::PIXEL_FMT_DXT1A:
+			return EPixelFormat::PXF_BC1_UNORM;
+		case crnlib::PIXEL_FMT_ETC1:
+			break;
+		case crnlib::PIXEL_FMT_R8G8B8:
+			break;
+		case crnlib::PIXEL_FMT_L8:
+			break;
+		case crnlib::PIXEL_FMT_A8:
+			break;
+		case crnlib::PIXEL_FMT_A8L8:
+			break;
+		case crnlib::PIXEL_FMT_A8R8G8B8:
+			break;
+		default:
+			break;
+		}return EPixelFormat::PXF_R8G8B8A8_UNORM;
+	}
+	void* CrunchWrap::DecompressDxt(const void* pDDS_file_data, UINT dds_file_size, UINT** ppImages, NxRHI::FPictureDesc* tex_desc)
+	{
+		crn_texture_desc ddsDesc{};
+
+		auto conjtext = crn_decompress_dds_to_images_withcontext(pDDS_file_data, dds_file_size, ppImages, ddsDesc);
+		if (conjtext == nullptr)
+		{
+			return nullptr;
+		}
+
+		tex_desc->SetDefault();
+		tex_desc->MipLevel = ddsDesc.m_levels;
+		tex_desc->CubeFaces = ddsDesc.m_faces;
+		tex_desc->Width = ddsDesc.m_width;
+		tex_desc->Height = ddsDesc.m_height;
+
+		tex_desc->Format = CrnPixelFormatTo((crnlib::pixel_format)ddsDesc.m_fmt_fourcc);
+
+		return conjtext;
+	}
+	void CrunchWrap::FreeDecpressDxtContext(void* p)
+	{
+		free_crn_decompress_context(p);
 	}
 }
 

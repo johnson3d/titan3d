@@ -25,6 +25,7 @@ namespace NxRHI
 	public:
 		ENGINE_RTTI(IGpuDraw);
 		virtual void Commit(ICommandList * cmdlist) = 0;
+		virtual UINT GetPrimitiveNum() = 0;
 	};
 	class TR_CLASS()
 		IGraphicDraw : public IGpuDraw
@@ -55,6 +56,13 @@ namespace NxRHI
 			return IndirectDrawArgsBuffer;
 		}
 		void BindIndirectDrawArgsBuffer(IBuffer* buffer, UINT offset);
+		const FMeshAtomDesc* GetMeshAtomDesc() {
+			return Mesh->GetAtomDesc(MeshAtom, MeshLOD);
+		}
+		virtual UINT GetPrimitiveNum(){
+			auto desc = GetMeshAtomDesc();
+			return desc->NumPrimitives * desc->NumInstances;
+		}
 	public:
 		std::map<const FEffectBinder*, AutoRef<IGpuResource>>	BindResources;
 		AutoRef<IGraphicsEffect>		ShaderEffect;
@@ -98,6 +106,10 @@ namespace NxRHI
 		bool BindResource(EShaderBindType type, VNameString name, IGpuResource* resource);
 		void BindResource(const FShaderBinder* binder, IGpuResource* resource);
 		IGpuResource* FindGpuResource(EShaderBindType type, VNameString name);
+
+		virtual UINT GetPrimitiveNum() {
+			return mDispatchX * mDispatchY * mDispatchZ;
+		}
 	public:
 		UINT					mDispatchX = 0;
 		UINT					mDispatchY = 0;
@@ -116,6 +128,9 @@ namespace NxRHI
 		virtual void Commit(ICommandList * cmdlist) override;
 		void BindSrc(IGpuBufferData * res);
 		void BindDest(IGpuBufferData * res);
+		virtual UINT GetPrimitiveNum() {
+			return 1;
+		}
 	public:
 		AutoRef<IGpuBufferData>	mSrc;
 		AutoRef<IGpuBufferData>	mDest;

@@ -1,5 +1,6 @@
 #include "NxCommandList.h"
 #include "NxDrawcall.h"
+#include "../../Base/vfxsampcounter.h"
 
 #define new VNEW
 
@@ -10,6 +11,7 @@ namespace NxRHI
 	void ICommandList::PushGpuDraw(IGpuDraw* draw) 
 	{
 		mDrawcallArray.push_back(draw);
+		mPrimitiveNum += draw->GetPrimitiveNum();
 	}
 	void ICommandList::FlushDraws()
 	{
@@ -21,6 +23,7 @@ namespace NxRHI
 	void ICommandList::ResetGpuDraws() 
 	{
 		mDrawcallArray.clear();
+		mPrimitiveNum = 0;
 	}
 }
 

@@ -149,7 +149,7 @@ namespace AssetImportAndExport::FBX
 	{
 		if (CheckValided && mFBXFileImportDesc->MeshNum > index)
 		{
-			return mFBXFileImportDesc->Meshes[index];
+			return &mFBXFileImportDesc->Meshes[index];
 		}
 		return nullptr;
 	}
@@ -163,7 +163,7 @@ namespace AssetImportAndExport::FBX
 	{
 		if (CheckValided && mFBXFileImportDesc->AnimNum> index)
 		{
-			return mFBXFileImportDesc->Anims[index];
+			return &mFBXFileImportDesc->Anims[index];
 		}
 		return nullptr;
 	}
@@ -178,9 +178,6 @@ namespace AssetImportAndExport::FBX
 		mFBXFileImportDesc = new FBXFileImportDesc();
 		auto info = importer->GetFileHeaderInfo();
 		auto time = info->mCreationTimeStamp;
-		/*char* charName = new char[strlen(info->mCreator.Buffer()) + 1];
-		strcpy_s(charName, strlen(info->mCreator.Buffer()) + 1, info->mCreator.Buffer());
-		mFBXFileImportDesc->Creater = VNameString(charName);*/
 		mFBXFileImportDesc->Creater = VNameString(info->mCreator.Buffer());
 		FbxSystemUnit SceneSystemUnit = scene->GetGlobalSettings().GetSystemUnit();
 		mFBXFileImportDesc->FileSystemUnit = GetSystemUnitType(SceneSystemUnit);
@@ -189,9 +186,6 @@ namespace AssetImportAndExport::FBX
 		auto indexStart = mFilename.find_last_of('\\');
 		auto indexEnd = mFilename.find_last_of('.');
 		auto pureFileName = mFilename.substr(indexStart + 1, indexEnd - indexStart - 1);
-		/*charName = new char[pureFileName.size() + 1];
-		strcpy_s(charName, pureFileName.size() + 1, pureFileName.c_str());
-		mFBXFileImportDesc->FileName = VNameString(charName);*/
 		mFBXFileImportDesc->FileName = VNameString(pureFileName.c_str());
 	}
 
@@ -200,25 +194,17 @@ namespace AssetImportAndExport::FBX
 		auto root = scene->GetRootNode();
 
 		//mesh
-		std::vector<FBXMeshImportDesc*> meshDescs;
+		//std::vector<FBXMeshImportDesc> meshDescs;
 		for (int i = 0; i < root->GetChildCount(); ++i)
 		{
-			ExtractFBXMeshesDescRecursive(root->GetChild(i), meshDescs);
+			ExtractFBXMeshesDescRecursive(root->GetChild(i), mFBXFileImportDesc->Meshes);
 		}
-		if (meshDescs.size() > 0)
-		{
-			mFBXFileImportDesc->MeshNum = (UINT)meshDescs.size();
-			mFBXFileImportDesc->Meshes = new FBXMeshImportDesc * [mFBXFileImportDesc->MeshNum];
-			for (int i = 0; i < meshDescs.size(); ++i)
-			{
-				mFBXFileImportDesc->Meshes[i] = meshDescs[i];
-			}
-			meshDescs.clear();
-		}
+		mFBXFileImportDesc->MeshNum = (UINT)mFBXFileImportDesc->Meshes.size();
+
 		//animation
 		FbxArray<FbxString*> animStackNameArray;
 		scene->FillAnimStackNameArray(animStackNameArray);
-		std::vector<FBXAnimImportDesc*> animDescs;
+		//std::vector<FBXAnimImportDesc*> animDescs;
 		for (int i = 0; i < animStackNameArray.GetCount(); ++i)
 		{
 			// select the base layer from the animation stack
@@ -229,26 +215,12 @@ namespace AssetImportAndExport::FBX
 				break;
 			}
 			FbxAnimLayer* lanimationLayer = lAnimationStack->GetMember<FbxAnimLayer>();
-			ExtractFBXAnimsDescRecursive(scene->GetRootNode(), lAnimationStack, lanimationLayer, animDescs);
+			ExtractFBXAnimsDescRecursive(scene->GetRootNode(), lAnimationStack, lanimationLayer, mFBXFileImportDesc->Anims);
 		}
-		if (animDescs.size() > 0)
-		{
-			mFBXFileImportDesc->AnimNum = (UINT)animDescs.size();
-			mFBXFileImportDesc->Anims = new FBXAnimImportDesc * [mFBXFileImportDesc->AnimNum];
-			for (int i = 0; i < animDescs.size(); ++i)
-			{
-				mFBXFileImportDesc->Anims[i] = animDescs[i];
-			}
-			for (auto& i : animDescs)
-			{
-				delete i;
-			}
-			animDescs.clear();
-		}
-
+		mFBXFileImportDesc->AnimNum = (UINT)mFBXFileImportDesc->Anims.size();
 	}
 
-	void FBXImporter::ExtractFBXMeshesDescRecursive(fbxsdk::FbxNode* node, std::vector<FBXMeshImportDesc*>& outFBXMeshImportDesces)
+	void FBXImporter::ExtractFBXMeshesDescRecursive(fbxsdk::FbxNode* node, std::vector<FBXMeshImportDesc>& outFBXMeshImportDesces)
 	{
 		auto att = node->GetNodeAttribute();
 		if (att != nullptr)
@@ -257,23 +229,20 @@ namespace AssetImportAndExport::FBX
 			if (attType == FOT_Mesh)
 			{
 				auto mesh = (FbxMesh*)att;
-				FBXMeshImportDesc* meshDesc = new FBXMeshImportDesc();
+				FBXMeshImportDesc meshDesc;;
 				auto strName = FBXDataConverter::ConvertToStdString(node->GetName());
-				/*auto charName = new char[strName.size() + 1];
-				strcpy_s(charName, strName.size() + 1, strName.c_str());
-				meshDesc->Name = charName;*/
-				meshDesc->Name = strName.c_str();
+				meshDesc.Name = strName.c_str();
 				//meshDesc->Hash = HashHelper::APHash(meshDesc->Name);
-				meshDesc->Type = (EFBXObjectType)attType;
-				meshDesc->FBXNode = node;
+				meshDesc.Type = (EFBXObjectType)attType;
+				meshDesc.FBXNode = node;
 				if (mesh->GetDeformerCount() > 0)
 				{
-					meshDesc->HaveSkin = TRUE;
+					meshDesc.HaveSkin = TRUE;
 				}
 				if (node->GetMaterialCount() > 0)
-					meshDesc->RenderAtom = node->GetMaterialCount();
+					meshDesc.RenderAtom = node->GetMaterialCount();
 				else
-					meshDesc->RenderAtom = 1;
+					meshDesc.RenderAtom = 1;
 				outFBXMeshImportDesces.push_back(meshDesc);
 			}
 		}
@@ -283,7 +252,7 @@ namespace AssetImportAndExport::FBX
 		}
 	}
 
-	void FBXImporter::ExtractFBXAnimsDescRecursive(fbxsdk::FbxNode* node, FbxAnimStack* animStack, FbxAnimLayer* animLayer, std::vector<FBXAnimImportDesc*>& outFBXAnimImportDesces)
+	void FBXImporter::ExtractFBXAnimsDescRecursive(fbxsdk::FbxNode* node, FbxAnimStack* animStack, FbxAnimLayer* animLayer, std::vector<FBXAnimImportDesc>& outFBXAnimImportDesces)
 	{
 		FbxScene* scene = node->GetScene();
 		std::string animName = FBXDataConverter::ConvertToStdString(animStack->GetName());
@@ -312,19 +281,19 @@ namespace AssetImportAndExport::FBX
 			}
 			if (createOption)
 			{
-				FBXAnimImportDesc* animDesc = new FBXAnimImportDesc();
-				animDesc->Name = VNameString(animName.c_str());
-				animDesc->FBXNode = node;
-				animDesc->AnimLayer = animLayer;
-				animDesc->AnimStack = animStack;
-				animDesc->AnimationType = animType;
+				FBXAnimImportDesc animDesc;
+				animDesc.Name = VNameString(animName.c_str());
+				animDesc.FBXNode = node;
+				animDesc.AnimLayer = animLayer;
+				animDesc.AnimStack = animStack;
+				animDesc.AnimationType = animType;
 				auto span = animStack->GetLocalTimeSpan();
 				auto start = span.GetStart().GetSecondDouble();
 				auto duration = span.GetDuration().GetSecondDouble();
 				auto end = span.GetStop().GetSecondDouble();
 				auto rate = FbxTime::GetFrameRate(node->GetScene()->GetGlobalSettings().GetTimeMode());
-				animDesc->Duration = (float)duration;
-				animDesc->SampleRate = (float)rate;
+				animDesc.Duration = (float)duration;
+				animDesc.SampleRate = (float)rate;
 				outFBXAnimImportDesces.push_back(animDesc);
 			}
 

@@ -7,6 +7,8 @@
 
 #define new VNEW
 
+#if defined(UseModule_ClrProfiler)
+
 class __declspec(uuid("805A308B-061C-47F3-9B30-F785C3186E81")) CoreProfiler;
 
 extern "C" HRESULT __stdcall DllGetClassObject(REFCLSID rclsid, REFIID riid, void** ppv) 
@@ -603,3 +605,10 @@ const char* CoreProfiler::GetMethodName(FunctionID function) const
 
 	return GetTypeName(type, module);// + "::" + OS::UnicodeToAnsi(name);
 }
+
+#else
+extern "C" HRESULT __stdcall DllGetClassObject(REFCLSID rclsid, REFIID riid, void** ppv)
+{
+	return CLASS_E_CLASSNOTAVAILABLE;
+}
+#endif

@@ -97,12 +97,14 @@ namespace NxRHI
 			DeviceHandle = nullptr;
 			DeviceContextHandle = nullptr;
 			CreateDebugLayer = true;
+			GpuDump = true;
 		}
 		ERhiType	RhiType = ERhiType::RHI_D3D11;
 		int		AdapterId = 0;
 		void*	DeviceHandle = nullptr;
 		void*	DeviceContextHandle = nullptr;
 		bool	CreateDebugLayer = true;
+		bool	GpuDump = true;
 	};
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FGpuDeviceCaps

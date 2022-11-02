@@ -12,9 +12,9 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
     <e_0 Value="Game,utest/puppet/pbr_role.material,13e877a1-aba6-4b7b-83a9-a852d111baff" />
-    <e_1 Value="Game,utest/elf/elf_majestic_armor_06_dn.srv,fa8c41a3-03ec-434e-8746-461cccda98ee" />
-    <e_2 Value="Game,utest/elf/elf_majestic_armor_04_no.srv,a310ef01-2a4b-4ef0-9302-ae7e5e45386d" />
-    <e_3 Value="Game,utest/puppet/texture/puppet_ao.srv,7cfa7d37-bcf3-4903-9948-50a114dfd015" />
+    <e_1 Value="Game,utest/elf/elf_majestic_armor_06_dn.srv,b7d2b6b2-a4eb-42e8-aa5f-f9913e1cc452" />
+    <e_2 Value="Game,utest/elf/elf_majestic_armor_04_no.srv,945ca0b7-5a39-4827-aabc-7ab45662ef77" />
+    <e_3 Value="Game,utest/puppet/texture/puppet_ao.srv,2c7867fa-102a-4c8f-bb61-ddc45b08b8e8" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" />
 </Root>

@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.USrViewAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="4bd7f782-54c0-4fb1-b796-b947b048e6ee" />
-  <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrVieww&#xA;" />
+  <AssetId Type="System.Guid@Unknown" Value="09f00879-7ae5-4c4e-a4ac-95cf8729dce6" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
       <e_0 Value="0,0,1,1" />
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
-    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
-    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.USrView@EngineCore" />

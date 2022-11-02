@@ -5,6 +5,7 @@
 #include "DX11FrameBuffers.h"
 #include "../NxGeomMesh.h"
 #include "../NxEffect.h"
+#include "../../Base/vfxsampcounter.h"
 
 #define new VNEW
 
@@ -14,34 +15,40 @@ namespace NxRHI
 {
 	void DX11GraphicDraw::Commit(ICommandList* cmdlist)
 	{
+		AUTO_SAMP("NxRHI.GraphicDraw.Commit");
 		if (Mesh == nullptr || ShaderEffect == nullptr)
 			return;
 
 		//Mesh->Commit(cmdlist);
-		ID3D11Buffer* dxVBs[VST_Number];
-		UINT strides[VST_Number]{};
-		UINT offset[VST_Number]{};
-		for (int i = 0; i < VST_Number; i++)
 		{
-			auto vbv = Mesh->VertexArray->VertexBuffers[i];
-			if (vbv != nullptr)
+			AUTO_SAMP("NxRHI.GraphicDraw.Commit.Geom");
+			ID3D11Buffer* dxVBs[VST_Number];
+			UINT strides[VST_Number]{};
+			UINT offset[VST_Number]{};
+			for (int i = 0; i < VST_Number; i++)
 			{
-				auto vb = vbv->Buffer.UnsafeConvertTo<DX11Buffer>();
-				dxVBs[i] = vb->mBuffer;
-				strides[i] = vb->Desc.StructureStride;
+				auto vbv = Mesh->VertexArray->VertexBuffers[i];
+				if (vbv != nullptr)
+				{
+					auto vb = vbv->Buffer.UnsafeConvertTo<DX11Buffer>();
+					dxVBs[i] = vb->mBuffer;
+					strides[i] = vb->Desc.StructureStride;
+				}
+				else
+					dxVBs[i] = nullptr;
 			}
-			else
-				dxVBs[i] = nullptr;
+			((DX11CommandList*)cmdlist)->mContext->IASetVertexBuffers(0, VST_Number, dxVBs, strides, offset);
+			cmdlist->SetIndexBuffer(Mesh->IndexBuffer, Mesh->IsIndex32);
 		}
-		((DX11CommandList*)cmdlist)->mContext->IASetVertexBuffers(0, VST_Number, dxVBs, strides, offset);
-		cmdlist->SetIndexBuffer(Mesh->IndexBuffer, Mesh->IsIndex32);
-
 		if (AttachVB != nullptr)
 		{
 			AttachVB->Commit(cmdlist);
 		}
-
-		UpdateGpuDrawState(cmdlist->GetGpuDevice(), cmdlist, cmdlist->mCurrentFrameBuffers->mRenderPass);
+		
+		{
+			AUTO_SAMP("NxRHI.GraphicDraw.Commit.UpdateDrawState");
+			UpdateGpuDrawState(cmdlist->GetGpuDevice(), cmdlist, cmdlist->mCurrentFrameBuffers->mRenderPass);
+		}
 		/*if (GpuDrawState == nullptr)
 		{
 			UpdateGpuDrawState(cmdlist->mDevice, cmdlist, );
@@ -52,12 +59,16 @@ namespace NxRHI
 
 		auto effect = GetGraphicsEffect();
 
-		effect->Commit(cmdlist, this);
-
-		for (auto& i : BindResources)
 		{
-			switch (i.first->BindType)
+			effect->Commit(cmdlist, this);
+		}
+		
+		{
+			AUTO_SAMP("NxRHI.GraphicDraw.Commit.BindResouces");
+			for (auto& i : BindResources)
 			{
+				switch (i.first->BindType)
+				{
 				case SBT_CBuffer:
 				{
 					IGpuResource* t = i.second;
@@ -84,24 +95,28 @@ namespace NxRHI
 				break;
 				default:
 					break;
+				}
 			}
 		}
 
-		auto pDrawDesc = Mesh->GetAtomDesc(MeshAtom, MeshLOD);
-		ASSERT(pDrawDesc);
-		if (IndirectDrawArgsBuffer)
 		{
-			cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsBuffer, IndirectDrawOffsetForArgs);
-		}
-		else
-		{
-			if (pDrawDesc->IsIndexDraw())
+			AUTO_SAMP("NxRHI.GraphicDraw.Commit.Draw");
+			auto pDrawDesc = Mesh->GetAtomDesc(MeshAtom, MeshLOD);
+			ASSERT(pDrawDesc);
+			if (IndirectDrawArgsBuffer)
 			{
-				cmdlist->DrawIndexed(pDrawDesc->PrimitiveType, pDrawDesc->BaseVertexIndex, pDrawDesc->StartIndex, pDrawDesc->NumPrimitives, DrawInstance);
+				cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsBuffer, IndirectDrawOffsetForArgs);
 			}
 			else
 			{
-				cmdlist->Draw(pDrawDesc->PrimitiveType, pDrawDesc->BaseVertexIndex, pDrawDesc->NumPrimitives, DrawInstance);
+				if (pDrawDesc->IsIndexDraw())
+				{
+					cmdlist->DrawIndexed(pDrawDesc->PrimitiveType, pDrawDesc->BaseVertexIndex, pDrawDesc->StartIndex, pDrawDesc->NumPrimitives, DrawInstance);
+				}
+				else
+				{
+					cmdlist->Draw(pDrawDesc->PrimitiveType, pDrawDesc->BaseVertexIndex, pDrawDesc->NumPrimitives, DrawInstance);
+				}
 			}
 		}
 	}

@@ -334,6 +334,12 @@ inline unsigned char VReturnValueMarshal<bool, unsigned char>(const bool& v)
 	return (unsigned char)(v? 1 : 0);
 }
 
+template<>
+inline char VReturnValueMarshal<bool, char>(const bool& v)
+{
+	return (char)(v ? 1 : 0);
+}
+
 template<typename SType, typename TType>
 inline TType VParameterMarshal(SType v)
 {

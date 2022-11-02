@@ -14,8 +14,8 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
-    <e_0 Value="Game,utest/brdf_test/t_chair_m.srv,94a769bf-4898-4416-a21b-e1a824151287" />
-    <e_1 Value="Game,utest/brdf_test/t_chair_n.srv,43a12165-0ee9-45fe-81ec-224bf595ef45" />
+    <e_0 Value="Game,utest/brdf_test/t_chair_m.srv,146d069a-f44d-47b7-b53d-7b083e94fc12" />
+    <e_1 Value="Game,utest/brdf_test/t_chair_n.srv,01b7272d-00ce-43be-8fde-cab5389a141e" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" />
 </Root>

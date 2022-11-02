@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Animation.Asset.UAnimationClipAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="23bbf478-824c-4618-9dda-b62902bcd6ce" />
+  <AssetId Type="System.Guid@Unknown" Value="1758cc9c-92d9-4006-b518-1e13fd487df0" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Animation.Asset.UAnimationClip&#xA;" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
@@ -8,8 +8,6 @@
       <e_0 Value="0,0,1,1" />
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
-    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
-    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Animation.Asset.UAnimationClip@EngineCore" />

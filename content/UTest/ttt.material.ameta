@@ -14,7 +14,7 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Game,utest/texture/puppet_logo_b.srv,acc0aad0-2ddb-41ad-b4b5-e38f34f07bc8" />
+    <e_0 Value="Game,utest/texture/puppet_logo_b.srv,0a0f1c42-4276-444f-831d-7918224738a1" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" />
 </Root>

@@ -12,7 +12,7 @@ namespace NxRHI
 	public:
 		DX11Event(const char* name)
 		{
-			mHandle = CreateEventEx(nullptr, name, 0, EVENT_ALL_ACCESS);
+			mHandle = CreateEventExA(nullptr, name, 0, EVENT_ALL_ACCESS);
 		}
 		~DX11Event()
 		{

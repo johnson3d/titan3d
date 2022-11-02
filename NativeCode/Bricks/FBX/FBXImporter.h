@@ -97,22 +97,11 @@ namespace AssetImportAndExport
 				ConvertSceneUnit = false;
 				ScaleFactor = 1.f;
 				MeshNum = 0;
-				Meshes = nullptr;
 				AnimNum = 0;
-				Anims = nullptr;
 			};
 			~FBXFileImportDesc()
 			{
-				for (UINT i = 0; i < MeshNum; ++i)
-				{
-					Safe_Delete<FBXMeshImportDesc>(Meshes[i]);
-				}
-				Safe_DeleteArray<FBXMeshImportDesc*>(Meshes);
-				for (UINT i = 0; i < MeshNum; ++i)
-				{
-					Safe_Delete<FBXAnimImportDesc>(Anims[i]);
-				}
-				Safe_DeleteArray<FBXAnimImportDesc*>(Anims);
+
 			}
 		public:
 			VNameString FileName;
@@ -124,8 +113,10 @@ namespace AssetImportAndExport
 			UINT AnimNum = 0;
 		protected:
 			//FBXObjectImportDesc** Objects;
-			FBXMeshImportDesc** Meshes;
-			FBXAnimImportDesc** Anims;
+			std::vector<FBXMeshImportDesc> Meshes;
+			std::vector<FBXAnimImportDesc> Anims;
+			//FBXMeshImportDesc** Meshes;
+			//FBXAnimImportDesc** Anims;
 		};
 
 		class TR_CLASS(SV_Dispose = delete self)
@@ -146,8 +137,8 @@ namespace AssetImportAndExport
 			void ExtractFBXFileDesc(fbxsdk::FbxScene* scene, fbxsdk::FbxImporter * importer);
 			void ExtractFBXOBjectDescs(fbxsdk::FbxScene * scene);
 			//void ExtractFBXObjectsDescRecursive(fbxsdk::FbxNode * node, const EFBXObjectType objectType, std::vector<FBXObjectImportDesc*>&outFileImportDescs);
-			void ExtractFBXMeshesDescRecursive(fbxsdk::FbxNode * node, std::vector<FBXMeshImportDesc*>&outFBXMeshImportDesces);
-			void ExtractFBXAnimsDescRecursive(fbxsdk::FbxNode * node, FbxAnimStack * animStack, FbxAnimLayer * animLayer, std::vector<FBXAnimImportDesc*>&outFBXAnimImportDesces);
+			void ExtractFBXMeshesDescRecursive(fbxsdk::FbxNode * node, std::vector<FBXMeshImportDesc>&outFBXMeshImportDesces);
+			void ExtractFBXAnimsDescRecursive(fbxsdk::FbxNode * node, FbxAnimStack * animStack, FbxAnimLayer * animLayer, std::vector<FBXAnimImportDesc>&outFBXAnimImportDesces);
 		protected:
 			std::string mFilename;
 			FBXFileImportDesc* mFBXFileImportDesc = nullptr;

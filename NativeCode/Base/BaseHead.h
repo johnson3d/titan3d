@@ -33,6 +33,7 @@
 #define HasModule_Canvas
 #define HasModule_TextFont
 #define HasModule_TextureCompress
+#define HasModule_EtcLib
 #define HasModule_GpuDump
 
 #include <WinSock2.h>

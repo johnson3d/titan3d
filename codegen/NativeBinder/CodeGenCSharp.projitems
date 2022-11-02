@@ -212,10 +212,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EColorSpace_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EComparisionMode_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ECpuAccess_910209287.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ECubeFace_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ECullMode_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EDepthWriteMask_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EDimensionUAV_910209287.cpp2cs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EEtcFormat_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EFenceType_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EFillMode_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EFrameBufferLoadAction_910209287.cpp2cs.cs" />
@@ -236,6 +236,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EShaderVarType_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ESrvType_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EStencilOp_910209287.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ETextureCompressFormat_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EVertexShaderOutType_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EVertexStreamType_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FAttachmentDesc_910209287.cpp2cs.cs" />
@@ -349,7 +350,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TextureCompress/DDPIXELFORMAT_4143738103.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TextureCompress/DDSCAPS2_4143738103.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TextureCompress/DDSURFACEDESC2_4143738103.cpp2cs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TextureCompress/ETextureFormat_4143738103.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TextureCompress/FCubeImage_4143738103.cpp2cs.cs" />
   </ItemGroup>
 </Project>

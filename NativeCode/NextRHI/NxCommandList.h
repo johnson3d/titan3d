@@ -108,6 +108,7 @@ namespace NxRHI
 		virtual void BeginEvent(const char* info) = 0;
 		virtual void EndEvent() = 0;
 
+		//TR_FUNCTION(SV_SuppressGC = true)
 		void PushGpuDraw(IGpuDraw * draw);
 		void FlushDraws();
 		void ResetGpuDraws();
@@ -124,6 +125,9 @@ namespace NxRHI
 		UINT GetDrawcallNumber() const{
 			return (UINT)mDrawcallArray.size();
 		}
+		UINT GetPrimitiveNumber() const {
+			return mPrimitiveNum;
+		}
 		IGpuDevice* GetGpuDevice() {
 			return mDevice.GetPtr();
 		}
@@ -131,6 +135,7 @@ namespace NxRHI
 		TObjectHandle<IGpuDevice>			mDevice;
 		std::vector<AutoRef<IGpuDraw>>		mDrawcallArray;
 		std::string							mDebugName;
+		UINT								mPrimitiveNum = 0;
 		
 		AutoRef<IGpuPipeline>				mPipelineDesc;
 		AutoRef<IFrameBuffers>				mCurrentFrameBuffers;

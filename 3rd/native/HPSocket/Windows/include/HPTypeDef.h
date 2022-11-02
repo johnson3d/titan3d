@@ -26,8 +26,8 @@
 /* HP-Socket 版本号 */
 #define HP_VERSION_MAJOR		5	// 主版本号
 #define HP_VERSION_MINOR		8	// 子版本号
-#define HP_VERSION_REVISE		3	// 修正版本号
-#define HP_VERSION_BUILD		2	// 构建编号
+#define HP_VERSION_REVISE		8	// 修正版本号
+#define HP_VERSION_BUILD		1	// 构建编号
 
 //#define _UDP_DISABLED				// 禁用 UDP
 //#define _SSL_DISABLED				// 禁用 SSL
@@ -89,13 +89,14 @@
 /**************************************************************** Base Type Definitions **************************************************************/
 /*****************************************************************************************************************************************************/
 
-typedef const BYTE*	LPCBYTE, PCBYTE;
+typedef const BYTE*		LPCBYTE, PCBYTE;
+typedef ULONG_PTR		TID, THR_ID, NTHR_ID, PID, PRO_ID;
 
 /************************************************************************
 名称：连接 ID 数据类型
 描述：应用程序可以把 CONNID 定义为自身需要的类型（如：ULONG / ULONGLONG）
 ************************************************************************/
-typedef ULONG_PTR	CONNID, HP_CONNID;
+typedef ULONG_PTR		CONNID, HP_CONNID;
 
 /************************************************************************
 名称：通信组件服务状态
@@ -240,8 +241,8 @@ typedef enum EnIPAddrType
 ************************************************************************/
 typedef struct TIPAddr
 {
-	EnIPAddrType type;
-	LPCTSTR		 address;
+	En_HP_IPAddrType type;
+	LPCTSTR			 address;
 } *LPTIPAddr, HP_TIPAddr, *HP_LPTIPAddr;
 
 /************************************************************************
@@ -283,7 +284,7 @@ struct TSocketTask;
 参数：pTask -- Socket 任务结构体指针
 返回值：（无）
 ************************************************************************/
-typedef VOID (__HP_CALL *Fn_SocketTaskProc)(TSocketTask* pTask);
+typedef VOID (__HP_CALL *Fn_SocketTaskProc)(struct TSocketTask* pTask);
 typedef Fn_SocketTaskProc	HP_Fn_SocketTaskProc;
 
 /************************************************************************
@@ -292,14 +293,14 @@ typedef Fn_SocketTaskProc	HP_Fn_SocketTaskProc;
 ************************************************************************/
 typedef struct TSocketTask
 {
-	Fn_SocketTaskProc	fn;			// 任务处理函数
-	PVOID				sender;		// 发起对象
-	CONNID				connID;		// 连接 ID
-	LPCBYTE				buf;		// 数据缓冲区
-	INT					bufLen;		// 数据缓冲区长度
-	EnTaskBufferType	bufType;	// 缓冲区类型
-	WPARAM				wparam;		// 自定义参数
-	LPARAM				lparam;		// 自定义参数
+	HP_Fn_SocketTaskProc	fn;			// 任务处理函数
+	PVOID					sender;		// 发起对象
+	CONNID					connID;		// 连接 ID
+	LPCBYTE					buf;		// 数据缓冲区
+	INT						bufLen;		// 数据缓冲区长度
+	En_HP_TaskBufferType	bufType;	// 缓冲区类型
+	WPARAM					wparam;		// 自定义参数
+	LPARAM					lparam;		// 自定义参数
 } *LPTSocketTask, HP_TSocketTask, *HP_LPTSocketTask;
 
 /************************************************************************
@@ -530,3 +531,23 @@ THeader, HP_THeader, *LPHEADER, *HP_LPHEADER,
 TCookie, HP_TCookie, *LPCOOKIE, *HP_LPCOOKIE;
 
 #endif
+
+/************************************************************************
+名称：数据回调函数
+描述：回调处理过程中产生的数据输出
+参数：	
+	pData		-- 数据缓冲区
+	iLength		-- 数据长度
+	pContext	-- 回调上下文
+
+返回值：
+		TRUE	-- 成功
+		FALSE	-- 失败
+
+************************************************************************/
+typedef BOOL (__HP_CALL *Fn_DataCallback)(const BYTE* pData, int iLength, PVOID pContext);
+typedef Fn_DataCallback	Fn_CompressDataCallback;
+typedef Fn_DataCallback	Fn_DecompressDataCallback;
+typedef Fn_DataCallback	HP_Fn_DataCallback;
+typedef Fn_DataCallback	HP_Fn_CompressDataCallback;
+typedef Fn_DataCallback	HP_Fn_DecompressDataCallback;

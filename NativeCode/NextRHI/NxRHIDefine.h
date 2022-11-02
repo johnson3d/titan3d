@@ -42,46 +42,74 @@ namespace NxRHI
 			CMP_GREATER_EQUAL = 7,
 			CMP_ALWAYS = 8
 	};
-
 	enum TR_ENUM(SV_EnumNoFlags = true)
-		EEtcFormat
+		ETextureCompressFormat
 	{
-		UNKNOWN,
-			//
-			ETC1,
-			//
-			// ETC2 formats
-			RGB8,
-			SRGB8,
-			RGBA8,
-			SRGBA8,
-			R11,
-			SIGNED_R11,
-			RG11,
-			SIGNED_RG11,
-			RGB8A1,
-			SRGB8A1,
-			//
-			FORMATS,
-			//
-			DEFAULT = SRGB8
+		TCF_None = 0,//no compress
+			TCF_Dxt1,//rgb:5-6-5 a:0
+			TCF_Dxt1a,//rgb:5-6-5 a:1
+			TCF_Dxt3,//rgb:5-6-5 a:8
+			TCF_Dxt5,//rg:8-8
+			TCF_Etc1,
+			TCF_Etc2_RGB8,
+			TCF_Etc2_RGBA8,
+			TCF_Etc2_R11,
+			TCF_Etc2_SIGNED_R11,
+			TCF_Etc2_RG11,
+			TCF_Etc2_SIGNED_RG11,
+			TCF_Etc2_RGBA1,
+			TCF_Astc,
+	};
+	enum TR_ENUM()
+		ECubeFace
+	{
+		CBFC_Left = 1,
+			CBFC_Right = (1 << 1),
+			CBFC_Top = (1 << 2),
+			CBFC_Bottom = (1 << 3),
+			CBFC_Front = (1 << 4),
+			CBFC_Bac = (1 << 5),
 	};
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FPictureDesc
 	{
 		void SetDefault()
 		{
-			sRGB = 1;
-			EtcFormat = EEtcFormat::RGBA8;//rgba8
+			dwStructureSize = sizeof(FPictureDesc);
+			CompressFormat = ETextureCompressFormat::TCF_None;
 			MipLevel = 0;
 			Width = 0;
 			Height = 0;
+			CubeFaces = 0;
+			DontCompress = FALSE;
+			Format = EPixelFormat::PXF_UNKNOWN;
+			sRGB = FALSE;
+			StripOriginSource = FALSE;
+
+			BitNumRed = 8;
+			BitNumGreen = 8;
+			BitNumBlue = 8;
+			BitNumAlpha = 8;
+			Unused = 0;
 		}
-		int				sRGB = 1;
-		EEtcFormat		EtcFormat = EEtcFormat::RGBA8;
+		UINT			dwStructureSize = sizeof(FPictureDesc);
+		ETextureCompressFormat	CompressFormat = ETextureCompressFormat::TCF_None;
 		int				MipLevel = 0;
 		int				Width = 0;
 		int				Height = 0;
+		UINT			CubeFaces = 0;
+
+		vBOOL			DontCompress = FALSE;
+		EPixelFormat	Format = EPixelFormat::PXF_UNKNOWN;
+
+		vBOOL			sRGB = FALSE;
+		vBOOL			StripOriginSource = FALSE;
+
+		BYTE			BitNumRed = 8;
+		BYTE			BitNumGreen = 8;
+		BYTE			BitNumBlue = 8;
+		BYTE			BitNumAlpha = 8;
+		UINT			Unused = 0;
 	};
 	enum TR_ENUM(SV_EnumNoFlags = true)
 		EVertexStreamType : UINT32

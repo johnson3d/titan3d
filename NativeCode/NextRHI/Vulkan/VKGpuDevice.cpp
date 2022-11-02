@@ -293,6 +293,11 @@ namespace NxRHI
 		VFX_LTRACE(ELTT_Graphics, "Vk[%s]: %s\r\n", Mode, pMessage);
 		return FALSE;
 	}
+	struct VkStructureHead
+	{
+		VkStructureType                     sType;
+		const void* pNext;
+	};
 	bool VKGpuDevice::InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc)
 	{
 		auto pVkGpuSys = (VKGpuSystem*)pGpuSystem;
@@ -425,6 +430,8 @@ namespace NxRHI
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		createInfo.pNext = &devfeatures12;
 
+		[[maybe_unused]]VkStructureHead* curDeviceCreateChainTail = nullptr;
+		curDeviceCreateChainTail = (VkStructureHead*)&devfeatures12;
 		float queuePriority = 1.0f;
 		VkDeviceQueueCreateInfo queueCreateInfos[2]{};
 		{
@@ -488,13 +495,16 @@ namespace NxRHI
 		}
 
 #if defined(HasModule_GpuDump)
-		GpuDump::NvAftermath::InitDump(NxRHI::RHI_VK);
-		VkDeviceDiagnosticsConfigCreateInfoNV nvDiagnosticsInfo{};
-		devfeatures12.pNext = &nvDiagnosticsInfo;
-		nvDiagnosticsInfo.sType = VK_STRUCTURE_TYPE_DEVICE_DIAGNOSTICS_CONFIG_CREATE_INFO_NV;
-		nvDiagnosticsInfo.flags = VkDeviceDiagnosticsConfigFlagBitsNV::VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_RESOURCE_TRACKING_BIT_NV |
-			VkDeviceDiagnosticsConfigFlagBitsNV::VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_AUTOMATIC_CHECKPOINTS_BIT_NV |
-			VkDeviceDiagnosticsConfigFlagBitsNV::VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_SHADER_DEBUG_INFO_BIT_NV;
+		if (desc->GpuDump)
+		{
+			GpuDump::NvAftermath::InitDump(NxRHI::RHI_VK);
+			VkDeviceDiagnosticsConfigCreateInfoNV nvDiagnosticsInfo{};
+			curDeviceCreateChainTail->pNext = &nvDiagnosticsInfo;
+			nvDiagnosticsInfo.sType = VK_STRUCTURE_TYPE_DEVICE_DIAGNOSTICS_CONFIG_CREATE_INFO_NV;
+			nvDiagnosticsInfo.flags = VkDeviceDiagnosticsConfigFlagBitsNV::VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_RESOURCE_TRACKING_BIT_NV |
+				VkDeviceDiagnosticsConfigFlagBitsNV::VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_AUTOMATIC_CHECKPOINTS_BIT_NV |
+				VkDeviceDiagnosticsConfigFlagBitsNV::VK_DEVICE_DIAGNOSTICS_CONFIG_ENABLE_SHADER_DEBUG_INFO_BIT_NV;
+		}
 #endif
 		if (vkCreateDevice(mPhysicalDevice, &createInfo, GetVkAllocCallBacks(), &mDevice) != VK_SUCCESS)
 		{

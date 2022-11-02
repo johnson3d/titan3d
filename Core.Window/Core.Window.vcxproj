@@ -23,7 +23,7 @@
     <ProjectGuid>{AD0E23E3-ECA5-4E52-B69D-BB6E669C48C6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>CoreWindow</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -43,14 +43,16 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -72,7 +74,6 @@
     <Import Project="..\NativeCode\Bricks\Animation\Animation.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\TcpClient\TcpClient.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\TcpServer\TcpServer.vcxitems" Label="Shared" />
-    <Import Project="..\NativeCode\Platform\Windows\Windows.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\FreeType\FreeType.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\MeshOptimizer\MeshOptimizer.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\MeshSimplify\MeshSimplify.vcxitems" Label="Shared" />
@@ -88,8 +89,10 @@
     <Import Project="..\NativeCode\Bricks\TextFont\TextFont.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Canvas\Canvas.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\spirv-cross\spirv-cross.vcxitems" Label="Shared" />
-    <Import Project="..\NativeCode\Bricks\TextureCompress\TextureCompress.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\GpuDump\GpuDump.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\EtcLib\EtcLib.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Platform\Windows\Windows.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\TextureCompress\TextureCompress.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -147,7 +150,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>PTR_64;_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;_DEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PTR_64;_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY;_DEBUG</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -200,12 +203,12 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>PTR_64;_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;NDEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PTR_64;_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY;NDEBUG</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;c:\aaa;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -215,7 +218,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/crunch/lib/x64/debug;../3rd/native/NVAftermath/lib/x64;../3rd/native/eigen;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;../3rd/native/eigen-3.4.0;..\3rd\native\PhysX-4.1\physx\Lib\windows\release;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/crunch/lib/x64/release;../3rd/native/NVAftermath/lib/x64;../3rd/native/eigen;..\3rd\native\FBXSDK\2019.2\lib\x64\release;../3rd/native/HPSocket/Windows/lib;../3rd/native/Vulkan/Lib;../3rd/native/renderdoc/Lib;../3rd/native/eigen-3.4.0;..\3rd\native\PhysX-4.1\physx\Lib\windows\release;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>

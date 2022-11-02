@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.USrViewAMeta@EngineCore">
-  <AssetId Type="System.Guid@mscorlib" Value="d6b2c4d5-f2de-4225-bf01-a82fb9e2144d" />
-  <Description Type="System.String@mscorlib" Value="This is a EngineNS.NxRHI.USrView&#xA;" />
+  <AssetId Type="System.Guid@Unknown" Value="b31e5467-f924-4646-ae70-929082eccccf" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
-    <Color Type="System.UInt32@mscorlib" Value="4294967295" />
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
-    <UVCoord Type="EngineNS.Vector2@EngineCore" Value="0,0" />
-    <UVSize Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@mscorlib" Count="0" />
-  <TypeStr Type="System.String@mscorlib" Value="EngineNS.NxRHI.USrView@EngineCore" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.USrView@EngineCore" />
 </Root>

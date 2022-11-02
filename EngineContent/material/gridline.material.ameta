@@ -11,7 +11,7 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Engine,texture/levelgrid1dstripes.srv,18de751b-e984-47f6-9f3d-ba74a0d697ff" />
+    <e_0 Value="Engine,texture/levelgrid1dstripes.srv,77dd449b-d3e8-46b9-b30c-1d50a98eeed5" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" />
 </Root>

@@ -120,6 +120,7 @@ namespace NxRHI
 				pDx11Texture->Desc.Format = Desc.Format;
 				pDx11Texture->Desc.Width = Desc.Width;
 				pDx11Texture->Desc.Height = Desc.Height;
+				pDx11Texture->Desc.BindFlags = (EBufferType)(EBufferType::BFT_SRV | EBufferType::BFT_RTV);
 				Safe_Release(pDx11Texture->mTexture2D);
 				pDx11Texture->mTexture2D = pBackBuffer;
 				pDx11Texture->GpuState = EGpuResourceState::GRS_Present;

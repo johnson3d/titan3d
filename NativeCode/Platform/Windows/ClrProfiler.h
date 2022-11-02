@@ -4,8 +4,12 @@
 #include <corprof.h>
 #include <atomic>
 #include <string>
-#include "atlsafe.h"
-#include "atlcom.h"
+
+#define UseModule_ClrProfiler
+#if defined(UseModule_ClrProfiler)
+
+#include <atlsafe.h>
+#include <atlcom.h>
 
 class CoreProfilerFactory : public IClassFactory {
 public:
@@ -126,3 +130,5 @@ private:
 	const char* GetMethodName(FunctionID function) const;
 	CComPtr<ICorProfilerInfo8> _info;
 };
+
+#endif

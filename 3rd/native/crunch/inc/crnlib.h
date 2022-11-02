@@ -554,6 +554,8 @@ struct crn_texture_desc
    crn_uint32 m_fmt_fourcc; // Same as crnlib::pixel_format
 };
 bool crn_decompress_dds_to_images(const void *pDDS_file_data, crn_uint32 dds_file_size, crn_uint32 **ppImages, crn_texture_desc &tex_desc);
+void* crn_decompress_dds_to_images_withcontext(const void* pDDS_file_data, crn_uint32 dds_file_size, crn_uint32** ppImages, crn_texture_desc& tex_desc);
+void free_crn_decompress_context(void* ptex);
 
 // Frees all images allocated by crn_decompress_dds_to_images().
 void crn_free_all_images(crn_uint32 **ppImages, const crn_texture_desc &desc);
