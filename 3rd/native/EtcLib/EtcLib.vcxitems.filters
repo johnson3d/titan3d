@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Src">
+      <UniqueIdentifier>{994ec696-3345-4bff-9169-1b7094f8436d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc">
+      <UniqueIdentifier>{aaa894c0-a058-45ec-9d73-e91067fe9362}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\Etc">
+      <UniqueIdentifier>{61c0acb1-57ab-4a01-b97c-542c224db528}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\EtcCodec">
+      <UniqueIdentifier>{abef55f0-5dff-4ee9-a716-6b4266c631e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Etc">
+      <UniqueIdentifier>{681b7f77-2ed5-4f5d-a577-7b2d02ac1d5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\EtcCodec">
+      <UniqueIdentifier>{0937bc82-392b-4abe-b102-50a4aa0934e5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Etc.h">
+      <Filter>Inc\Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcColor.h">
+      <Filter>Inc\Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcColorFloatRGBA.h">
+      <Filter>Inc\Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcConfig.h">
+      <Filter>Inc\Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcFilter.h">
+      <Filter>Inc\Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcImage.h">
+      <Filter>Inc\Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcMath.h">
+      <Filter>Inc\Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcBlock4x4.h">
+      <Filter>Inc\EtcCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding.h">
+      <Filter>Inc\EtcCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding_ETC1.h">
+      <Filter>Inc\EtcCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding_R11.h">
+      <Filter>Inc\EtcCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding_RG11.h">
+      <Filter>Inc\EtcCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding_RGB8.h">
+      <Filter>Inc\EtcCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding_RGB8A1.h">
+      <Filter>Inc\EtcCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding_RGBA8.h">
+      <Filter>Inc\EtcCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcBlock4x4EncodingBits.h">
+      <Filter>Inc\EtcCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcDifferentialTrys.h">
+      <Filter>Inc\EtcCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcErrorMetric.h">
+      <Filter>Inc\EtcCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcIndividualTrys.h">
+      <Filter>Inc\EtcCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)EtcSortedBlockList.h">
+      <Filter>Inc\EtcCodec</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Etc.cpp">
+      <Filter>Src\Etc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcFilter.cpp">
+      <Filter>Src\Etc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcMath.cpp">
+      <Filter>Src\Etc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcImage.cpp">
+      <Filter>Src\Etc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcBlock4x4.cpp">
+      <Filter>Src\EtcCodec</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding.cpp">
+      <Filter>Src\EtcCodec</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding_ETC1.cpp">
+      <Filter>Src\EtcCodec</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding_R11.cpp">
+      <Filter>Src\EtcCodec</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding_RG11.cpp">
+      <Filter>Src\EtcCodec</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding_RGB8.cpp">
+      <Filter>Src\EtcCodec</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding_RGB8A1.cpp">
+      <Filter>Src\EtcCodec</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcBlock4x4Encoding_RGBA8.cpp">
+      <Filter>Src\EtcCodec</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcDifferentialTrys.cpp">
+      <Filter>Src\EtcCodec</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcIndividualTrys.cpp">
+      <Filter>Src\EtcCodec</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)EtcSortedBlockList.cpp">
+      <Filter>Src\EtcCodec</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
