@@ -215,6 +215,12 @@ namespace EngineNS.Rtti
         {
             return SystemType.GetInterface(name);
         }
+#nullable enable
+        public System.Reflection.MethodInfo? GetMethod(string name)
+        {
+            return SystemType.GetMethod(name);
+        }
+#nullable disable
     }
     public struct UTypeDescGetter<T>
     {

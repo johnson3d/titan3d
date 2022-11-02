@@ -260,5 +260,25 @@ namespace EngineNS.IO
         {
             mCoreObject = MemStreamReader.CreateInstance();
         }
+        public unsafe uint Read<T>(out T v) where T : unmanaged
+        {
+            fixed(T* p = &v)
+            {
+                return mCoreObject.Read(p, (uint)sizeof(T));
+            }
+        }
+        public unsafe uint Read(void* pSrc, uint t)
+        {
+            return mCoreObject.Read(pSrc, t);
+        }
+        public unsafe byte[] ReadByteArray(uint size)
+        {
+            var result = new byte[size];
+            fixed (byte* p = &result[0])
+            {
+                mCoreObject.Read(p, size);
+            }
+            return result;
+        }
     }
 }

@@ -15,8 +15,8 @@ namespace EngineNS.Editor
         RName AssetName { get; set; }
         bool Visible { get; set; }
         void OnDraw();
-        void OnEvent(ref SDL2.SDL.SDL_Event e);
-        Graphics.Pipeline.IRootForm GetRootForm();
+        void OnEvent(in Bricks.Input.Event e);
+        IRootForm GetRootForm();
         System.Threading.Tasks.Task<bool> Initialize();
     }
     public class UAssetEditorManager

@@ -1,8 +1,10 @@
 ﻿using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static EngineNS.GamePlay.UWorld;
 
 namespace EngineNS.GamePlay.Scene
 {
@@ -10,6 +12,12 @@ namespace EngineNS.GamePlay.Scene
     [UNode(NodeDataType = typeof(USceneCapture.USceneCaptureData), DefaultNamePrefix = "Capture")]
     public partial class USceneCapture : USceneActorNode, ITickable, IRootForm
     {
+        public enum ECaptureMode
+        {
+            Normal,
+            OnlyShowNodes,
+            ExcludeNodes,
+        }
         public class USceneCaptureData : UNodeData
         {
             [Rtti.Meta]
@@ -17,6 +25,12 @@ namespace EngineNS.GamePlay.Scene
             public RName RPolicyName { get; set; }
             [Rtti.Meta]
             public Vector2 TargetSize { get; set; } = new Vector2(256, 256);
+            [Rtti.Meta]
+            public ECaptureMode CaptureMode { get; set; } = ECaptureMode.Normal;
+            [Rtti.Meta]
+            public List<Guid> ShowActors { get; set; }
+            [Rtti.Meta]
+            public List<Guid> ExcludeActors { get; set; }
         }
         public Graphics.Pipeline.URenderPolicy RenderPolicy { get; set; }
         public Editor.Controller.EditorCameraController CameraController = new Editor.Controller.EditorCameraController();
@@ -47,8 +61,59 @@ namespace EngineNS.GamePlay.Scene
             UpdateCamera();
 
             UEngine.Instance.TickableManager.AddTickable(this);
+
+            mVisParameter.OnVisitNode = this.OnVisitNode;
             return true;
         }
+        bool OnVisitNode(Scene.UNode node, UVisParameter arg)
+        {
+            switch (CaptureMode)
+            {
+                case ECaptureMode.Normal:
+                    {
+                        return true;
+                    }
+                case ECaptureMode.OnlyShowNodes:
+                    {
+                        var actor = node as USceneActorNode;
+                        if (actor == null)
+                            return false;
+                        var data = GetNodeData<USceneCaptureData>();
+                        return data.ShowActors.Contains(actor.ActorId);
+                    }
+                case ECaptureMode.ExcludeNodes:
+                    {
+                        var actor = node as USceneActorNode;
+                        if (actor == null)
+                            return false;
+                        var data = GetNodeData<USceneCaptureData>();
+                        return !data.ExcludeActors.Contains(actor.ActorId);
+                    }
+                default:
+                    break;
+            }
+            
+            return true;
+        }
+        public ECaptureMode CaptureMode
+        {
+            get => GetNodeData<USceneCaptureData>().CaptureMode;
+            set
+            {
+                GetNodeData<USceneCaptureData>().CaptureMode = value;
+            }
+        }
+
+        public Vector2 TargetSize
+        {
+            get => GetNodeData<USceneCaptureData>().TargetSize;
+            set
+            {
+                GetNodeData<USceneCaptureData>().TargetSize = value;
+                RenderPolicy.OnResize(value.X, value.Y);
+            }
+        }
+
         void UpdateCamera()
         {
             if (RenderPolicy == null)

@@ -1,4 +1,5 @@
-﻿using EngineNS.Graphics.Pipeline;
+﻿using EngineNS.GamePlay.Camera;
+using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,23 +8,57 @@ namespace EngineNS.GamePlay.Movemnet
 {
     public class UMovement : Scene.ULightWeightNodeBase
     {
-        public Vector3 LinearVelocity { protected get; set; }
-        public Vector3 AngularVelocity { protected get; set; }
+        public Vector3 LinearVelocity { get; private set; }
+
+        private Vector3 SettedLinearVelocity = Vector3.Zero;
+        public void SetLinearVelocity(Vector3 linearVelocity)
+        {
+            SettedLinearVelocity = linearVelocity;
+        }
+        public Vector3 AngularVelocity { get; private set; }
+
+        private Vector3 SettedAngularVelocity = Vector3.Zero;
+        public void SetAngularVelocity(Vector3 angularVelocity)
+        {
+            SettedAngularVelocity = angularVelocity;
+        }
         public bool EnableGravity { get; set; } = false;
         public Vector3 GravityAcceleration { get; set; } = Vector3.Down * 9.8f;
         protected Vector3 GravityVelocity = Vector3.Zero;
         public float MaxGravitySpeed = 10;
 
-        public Vector3 CurrentLinearVelocity { get; protected set; }
-        public Vector3 CurrentAngularVelocity { get; protected set; }
-
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UMovement), nameof(TickLogic));
         public override void TickLogic(UWorld world, URenderPolicy policy)
         {
-            UpdatePlacement(world,policy);
-            base.TickLogic(world, policy);
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                DVector3 posBeforeMove = Parent.Placement.AbsTransform.Position;
+                UpdatePlacement(world, policy);
+                DVector3 posAfterMove = Parent.Placement.AbsTransform.Position;
+                LinearVelocity = (posAfterMove - posBeforeMove).ToSingleVector3() / world.DeltaTimeSecond;
+                base.TickLogic(world, policy);
+            }   
         }
-        protected void UpdatePlacement(UWorld world, URenderPolicy policy)
+
+        protected Vector3 ConsumeSettedLinearVelocity()
         {
+            var temp = SettedLinearVelocity;
+            SettedLinearVelocity = Vector3.Zero;
+            return temp;
+        }
+        protected Vector3 ConsumeSettedAngularVelocity()
+        {
+            var temp = SettedAngularVelocity;
+            SettedAngularVelocity = Vector3.Zero;
+            return temp;
+        }
+        protected virtual void UpdatePlacement(UWorld world, URenderPolicy policy)
+        {
+            var settedLinearVelocity = ConsumeSettedLinearVelocity();
+            var settedAngularVelocity = ConsumeSettedAngularVelocity();
+            var currentLinearVelocity = Vector3.Zero;
+            var currentAngularVelocity = Vector3.Zero;
             if (EnableGravity)
             {
                 GravityVelocity += GravityAcceleration * world.DeltaTimeSecond;
@@ -31,17 +66,15 @@ namespace EngineNS.GamePlay.Movemnet
                 {
                     GravityVelocity = GravityAcceleration.NormalizeValue * MaxGravitySpeed;
                 }
-                CurrentLinearVelocity = LinearVelocity + GravityVelocity;
+                currentLinearVelocity = settedLinearVelocity + GravityVelocity;
             }
             else
             {
-                CurrentLinearVelocity = LinearVelocity;
+                currentLinearVelocity = settedLinearVelocity;
             }
-            CurrentAngularVelocity = AngularVelocity;
-            Parent.Placement.Position += CurrentLinearVelocity * world.DeltaTimeSecond;
-            Parent.Placement.Quat = Parent.Placement.Quat * Quaternion.FromEuler(CurrentLinearVelocity * world.DeltaTimeSecond);
-            LinearVelocity = Vector3.Zero;
-            AngularVelocity = Vector3.Zero;
+            currentAngularVelocity = settedAngularVelocity;
+            Parent.Placement.Position += currentLinearVelocity * world.DeltaTimeSecond;
+            Parent.Placement.Quat = Parent.Placement.Quat * Quaternion.FromEuler(currentAngularVelocity * world.DeltaTimeSecond);
         }
     }
 }

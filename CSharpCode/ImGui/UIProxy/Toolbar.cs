@@ -123,11 +123,15 @@ namespace EngineNS.EGui.UIProxy
                                   ImageProxy icon,
                                   string name,
                                   bool disable = false,
+                                  float parentHeight = -1,
                                   float itemOffset = 0,
                                   float itemSpacing = -1
             )
         {
             ImGuiAPI.SameLine(itemOffset, itemSpacing);
+
+            if (parentHeight < 0)
+                parentHeight = StyleConfig.Instance.ToolbarHeight;
 
             bool retValue = false;
             var cursorScrPos = ImGuiAPI.GetCursorScreenPos();
@@ -140,10 +144,10 @@ namespace EngineNS.EGui.UIProxy
             }
 
             Vector2 hitRectMin = new Vector2(float.MaxValue, float.MaxValue);
-            Vector2 hitRectMax = new Vector2(float.MinValue, float.MinValue); ;
+            Vector2 hitRectMax = new Vector2(float.MinValue, float.MinValue);
             if(icon != null)
             {
-                tempScrPos.Y = cursorScrPos.Y + (StyleConfig.Instance.ToolbarHeight - icon.ImageSize.Y) * 0.5f + clickDelta;
+                tempScrPos.Y = cursorScrPos.Y + (parentHeight - icon.ImageSize.Y) * 0.5f + clickDelta;
                 hitRectMin.X = cursorScrPos.X;
                 hitRectMin.Y = tempScrPos.Y;
                 icon.OnDraw(in drawList, in tempScrPos);
@@ -156,7 +160,7 @@ namespace EngineNS.EGui.UIProxy
             if(!string.IsNullOrEmpty(name))
             {
                 var textSize = ImGuiAPI.CalcTextSize(name, false, -1);
-                tempScrPos.Y = cursorScrPos.Y + (StyleConfig.Instance.ToolbarHeight - textSize.Y) * 0.5f + clickDelta;
+                tempScrPos.Y = cursorScrPos.Y + (parentHeight - textSize.Y) * 0.5f + clickDelta;
                 hitRectMin.X = System.Math.Min(hitRectMin.X, tempScrPos.X);
                 hitRectMin.Y = System.Math.Min(hitRectMin.Y, tempScrPos.Y);
                 hitRectMax.X = System.Math.Max(hitRectMax.X, tempScrPos.X + textSize.X);

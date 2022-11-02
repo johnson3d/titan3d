@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public class UGameApplication : Graphics.Pipeline.USlateApplication, ITickable
+    public class UGameApplication : USlateApplication, ITickable
     {
         public UGameInstance GameInstance;
         //public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()

@@ -28,7 +28,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
     }
 
-    public partial class UShaderEditor : Editor.IAssetEditor, IO.ISerializer, ITickable, Graphics.Pipeline.IRootForm
+    public partial class UShaderEditor : Editor.IAssetEditor, IO.ISerializer, ITickable, IRootForm
     {
         public UShaderEditor()
         {
@@ -53,7 +53,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public bool Visible { get => mVisible; set => mVisible = value; }
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-        public Graphics.Pipeline.IRootForm GetRootForm()
+        public IRootForm GetRootForm()
         {
             return this;
         }
@@ -83,7 +83,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         #endregion
         #region IAssetEditor
         bool IsStarting = false;
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -192,7 +192,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             UEngine.Instance.TickableManager.RemoveTickable(this);
             Cleanup();
         }
-        public void OnEvent(ref SDL2.SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
             //PreviewViewport.OnEvent(ref e);
         }

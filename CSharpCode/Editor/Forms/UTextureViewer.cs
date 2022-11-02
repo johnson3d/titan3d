@@ -1,11 +1,11 @@
-﻿using SDL2;
+﻿using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UTextureViewer : Editor.IAssetEditor, Graphics.Pipeline.IRootForm
+    public class UTextureViewer : Editor.IAssetEditor, IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -32,14 +32,14 @@ namespace EngineNS.Editor.Forms
         {
             return await TexturePropGrid.Initialize();
         }
-        public Graphics.Pipeline.IRootForm GetRootForm()
+        public IRootForm GetRootForm()
         {
             return this;
         }
         public async System.Threading.Tasks.Task<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(name);
+            TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetOrNewTexture(name);
             if (TextureSRV == null)
                 return false;
 
@@ -96,60 +96,19 @@ namespace EngineNS.Editor.Forms
         protected void DrawToolBar()
         {
             var btSize = Vector2.Zero;
-            if (EGui.UIProxy.CustomButton.ToolButton("Mipmap", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
-                StbImageSharp.ImageResult image;
-
-                using (var xnd = IO.CXndHolder.LoadXnd(AssetName.Address))
+                StbImageSharp.ImageResult image = NxRHI.USrView.LoadOriginImage(AssetName);
+                using (var xnd = new IO.CXndHolder("USrView", 0, 0))
                 {
-                    var pngAttr = xnd.RootNode.TryGetAttribute("Png");
-
-                    var ar = pngAttr.GetReader(null);
-                    byte[] data;
-                    ar.ReadNoSize(out data, (int)pngAttr.GetReaderLength());
-                    pngAttr.ReleaseReader(ref ar);
-
-                    using (var memStream = new System.IO.MemoryStream(data, false))
-                    {
-                        image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                        if (image == null)
-                            return;
-                    }
-                }
-
-                using (var xnd = new IO.CXndHolder("CShaderResourceView", 0, 0))
-                {
-                    NxRHI.USrView.SaveTexture(xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);
+                    NxRHI.USrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);
                     xnd.SaveXnd(AssetName.Address);
                 }
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("SavePng", in btSize))
             {
-                StbImageSharp.ImageResult image;
-
-                using (var xnd = IO.CXndHolder.LoadXnd(AssetName.Address))
-                {
-                    var pngAttr = xnd.RootNode.TryGetAttribute("Png");
-
-                    var ar = pngAttr.GetReader(null);
-                    byte[] data;
-                    ar.ReadNoSize(out data, (int)pngAttr.GetReaderLength());
-                    pngAttr.ReleaseReader(ref ar);
-
-                    using (var memStream = new System.IO.MemoryStream(data, false))
-                    {
-                        image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                        if (image == null)
-                            return;
-                    }
-
-                    using (var memStream = new System.IO.FileStream(AssetName.Address + ".png", System.IO.FileMode.OpenOrCreate))
-                    {
-                        var writer = new StbImageWriteSharp.ImageWriter();
-                        writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
-                    }
-                }
+                USrView.SaveOriginPng(AssetName);
             }
         }
         protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
@@ -191,7 +150,7 @@ namespace EngineNS.Editor.Forms
             }
             ImGuiAPI.EndChild();
         }
-        public void OnEvent(ref SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
             
         }

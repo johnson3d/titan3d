@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Windows
 {
-    public class UClrProfiler : EngineNS.Graphics.Pipeline.IRootForm
+    public class UClrProfiler : IRootForm
     {
         public UClrProfiler()
         {

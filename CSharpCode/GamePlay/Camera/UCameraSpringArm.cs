@@ -1,4 +1,5 @@
-﻿using EngineNS.GamePlay.Scene;
+﻿using EngineNS.Animation.SceneNode;
+using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
@@ -63,19 +64,27 @@ namespace EngineNS.GamePlay.Camera
         }
 
         private Quaternion Rotation = Quaternion.Identity;
-
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UCameraSpringArm), nameof(TickLogic));
         public override bool OnTickLogic(UWorld world, URenderPolicy policy)
         {
-            var position = Placement.AbsTransform.Position + Placement.Quat * DVector3.Backward * ArmLength;
-            var lookAt = Placement.AbsTransform.Position + TargetOffset;
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                var position = Placement.AbsTransform.Position + Placement.Quat * DVector3.Backward * ArmLength;
+                var lookAt = Placement.AbsTransform.Position + TargetOffset;
 
-            Camera.LookAtLH(position, lookAt, Vector3.Up);
-            return base.OnTickLogic(world, policy);
+                Camera.LookAtLH(position, lookAt, Vector3.Up);
+                return base.OnTickLogic(world, policy);
+            }   
         }
         #region ICameraControlNode
         public void AddDelta(Vector3 delta)
         {
-            Placement.Quat = Placement.Quat * Quaternion.FromEuler(new Vector3(delta.X * 0.01f, delta.Y * 0.01f, 0)) ;
+
+            Placement.Quat = Quaternion.FromEuler(Placement.Quat.ToEuler() + delta);
+            //Placement.Quat = Quaternion.RotationAxis(Vector3.Left, delta.X) * Quaternion.RotationAxis(Vector3.Up, delta.Y) * Placement.Quat;
+
+
         }
         public void AddYaw(float delta)
         {

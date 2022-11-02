@@ -252,6 +252,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         NxRHI.FTextureDesc CopyTexDesc = new NxRHI.FTextureDesc();
         NxRHI.FSubResourceFootPrint CopyBufferFootPrint = new NxRHI.FSubResourceFootPrint();
         bool IsHitproxyBuilding = false;
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UHitproxyNode), nameof(TickLogic));
         public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
             if (IsHitproxyBuilding)
@@ -259,37 +261,40 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             IsHitproxyBuilding = true;
 
-            HitproxyPass.ClearMeshDrawPassArray();
-            foreach (var i in policy.VisibleMeshes)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                if (i.Atoms == null)
-                    continue;
-
-                if (i.IsDrawHitproxy)
+                HitproxyPass.ClearMeshDrawPassArray();
+                foreach (var i in policy.VisibleMeshes)
                 {
-                    for (int j = 0; j < i.Atoms.Length; j++)
-                    {
-                        var hpDrawcall = i.GetDrawCall(GHitproxyBuffers, j, policy, URenderPolicy.EShadingType.HitproxyPass, this);
-                        if (hpDrawcall != null)
-                        {
-                            hpDrawcall.BindGBuffer(policy.DefaultCamera, GHitproxyBuffers);
+                    if (i.Atoms == null)
+                        continue;
 
-                            var layer = i.Atoms[j].Material.RenderLayer;
-                            HitproxyPass.PushDrawCall(layer, hpDrawcall);
+                    if (i.IsDrawHitproxy)
+                    {
+                        for (int j = 0; j < i.Atoms.Length; j++)
+                        {
+                            var hpDrawcall = i.GetDrawCall(GHitproxyBuffers, j, policy, URenderPolicy.EShadingType.HitproxyPass, this);
+                            if (hpDrawcall != null)
+                            {
+                                hpDrawcall.BindGBuffer(policy.DefaultCamera, GHitproxyBuffers);
+
+                                var layer = i.Atoms[j].Material.RenderLayer;
+                                HitproxyPass.PushDrawCall(layer, hpDrawcall);
+                            }
                         }
                     }
-                }   
-            }
+                }
 
-            {
-                //draw mesh first
-                var passClears = new NxRHI.FRenderPassClears();
-                passClears.SetDefault();
-                passClears.SetClearColor(0, new Color4(0, 0, 0, 0));
-                GHitproxyBuffers.BuildFrameBuffers(policy);
-                GGizmosBuffers.BuildFrameBuffers(policy);
-                HitproxyPass.BuildRenderPass(policy, in GHitproxyBuffers.Viewport, in passClears, GHitproxyBuffers, GGizmosBuffers, "Hitproxy:");
-            }
+                {
+                    //draw mesh first
+                    var passClears = new NxRHI.FRenderPassClears();
+                    passClears.SetDefault();
+                    passClears.SetClearColor(0, new Color4(0, 0, 0, 0));
+                    GHitproxyBuffers.BuildFrameBuffers(policy);
+                    GGizmosBuffers.BuildFrameBuffers(policy);
+                    HitproxyPass.BuildRenderPass(policy, in GHitproxyBuffers.Viewport, in passClears, GHitproxyBuffers, GGizmosBuffers, "Hitproxy:");
+                }
+            }   
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             //copy to sys memory after draw all meshesr

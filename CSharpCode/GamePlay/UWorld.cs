@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.EGui.Slate;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -105,17 +106,30 @@ namespace EngineNS.GamePlay
             public Graphics.Pipeline.CCamera CullCamera;
             public List<Graphics.Mesh.UMesh> VisibleMeshes = null;// new List<Graphics.Mesh.UMesh>();
             public List<GamePlay.Scene.UNode> VisibleNodes = null;
+            public delegate bool FOnVisitNode(Scene.UNode node, UVisParameter arg);
+            public FOnVisitNode OnVisitNode = null;
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeGatherVisibleMeshes = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(GatherVisibleMeshes));
         public virtual void GatherVisibleMeshes(UVisParameter rp)
         {
-            rp.VisibleMeshes.Clear();
-            rp.VisibleNodes?.Clear();
+            using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes))
+            {
+                rp.VisibleMeshes.Clear();
+                rp.VisibleNodes?.Clear();
 
-            OnVisitNode_GatherVisibleMeshes(Root, rp);
+                OnVisitNode_GatherVisibleMeshes(Root, rp);
+            }   
         }
         private unsafe bool OnVisitNode_GatherVisibleMeshes(Scene.UNode node, object arg)
         {
             var rp = arg as UVisParameter;
+
+            if (rp.OnVisitNode != null)
+            {
+                if (rp.OnVisitNode(node, rp) == false)
+                    return false;
+            }
             
             CONTAIN_TYPE type;
             if (node.HasStyle(Scene.UNode.ENodeStyles.VisibleFollowParent))
@@ -239,16 +253,20 @@ namespace EngineNS.GamePlay
             mRealtimeMillisecondSinceStartup = 0;
             mDeltaTimeMillisecond = 0;
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(TickLogic));
         public virtual void TickLogic(Graphics.Pipeline.URenderPolicy policy, int ellapse)
         {
-            TickTime(ellapse);
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                TickTime(ellapse);
 
-            if (Pause)
-                return;
+                if (Pause)
+                    return;
+                Root.TickLogic(this, policy);
 
-            Root.TickLogic(this, policy);
-
-            mMemberTickables.TickLogic(this, UEngine.Instance.ElapseTickCount);
+                mMemberTickables.TickLogic(this, UEngine.Instance.ElapseTickCount);
+            }
         }
         #endregion
     }

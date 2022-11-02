@@ -7,7 +7,7 @@ namespace EngineNS.Thread
     public class ThreadRHI : ContextThread
     {
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadRHI), nameof(Tick), "RHITick");
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadRHI), nameof(Tick));
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTickAwaitEvent = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadRHI), nameof(TickAwaitEvent));
         public override void Tick()

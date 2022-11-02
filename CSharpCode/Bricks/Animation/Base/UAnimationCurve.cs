@@ -12,23 +12,37 @@ namespace EngineNS.Animation
 {
     namespace Curve
     {
+        public struct NullableVector3
+        {
+            public Nullable<float> X;
+            public Nullable<float> Y;
+            public Nullable<float> Z;
+            public static readonly NullableVector3 Empty = new NullableVector3();
+            public static readonly NullableVector3 One = new NullableVector3() { X = 1.0f, Y = 1.0f, Z = 1.0f };
+            public static NullableVector3 FromVector3(Vector3 value)
+            {
+                NullableVector3 nullableVector3;
+                nullableVector3.X = value.X; nullableVector3.Y = value.Y; nullableVector3.Z = value.Z;
+                return nullableVector3;
+            }
+        }
         [StructLayout(LayoutKind.Explicit, Size = 3)]
         public struct CurveValue
         {
             [FieldOffset(0)]
-            public float FloatValue;
+            public Nullable<float> FloatValue;
             [FieldOffset(0)]
-            public Vector3 Vector3Value;
+            public NullableVector3 Vector3Value;
 
-            public CurveValue(float floatValue)
+            public CurveValue(Nullable<float> floatValue)
             {
-                Vector3Value = Vector3.Zero;
+                Vector3Value = NullableVector3.Empty;
                 FloatValue = floatValue;
             }
-            public CurveValue(Vector3 vector3Value)
+            public CurveValue(NullableVector3 nullableVector3Value)
             {
                 FloatValue = 0;
-                Vector3Value = vector3Value;
+                Vector3Value = nullableVector3Value;
             }
         }
         // curve can be a asset 
@@ -69,7 +83,7 @@ namespace EngineNS.Animation
 
             public CurveValue Evaluate(float time)
             {
-                Vector3 temp = Vector3.Zero;
+                NullableVector3 temp = NullableVector3.Empty;
                 if (XCurve != null)
                     temp.X = XCurve.Evaluate(time, ref mXCache);
                 if (YCurve != null)
@@ -96,7 +110,7 @@ namespace EngineNS.Animation
             //}
             public CurveValue Evaluate(float time)
             {
-                float temp = 0;
+                Nullable<float> temp = null;
                 if (Curve != null)
                     temp = Curve.Evaluate(time, ref mCache);
                 CurveValue value = new CurveValue(temp);

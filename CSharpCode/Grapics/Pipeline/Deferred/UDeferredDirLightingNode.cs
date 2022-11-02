@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Graphics.Pipeline.Common;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -280,12 +281,17 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             cBuffer.SetValue(coreBinder.CBPerViewport.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
             cBuffer.SetValue(coreBinder.CBPerViewport.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UDeferredDirLightingNode), nameof(TickLogic));
         public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            var cBuffer = GBuffers.PerViewportCBuffer;
-            if (cBuffer != null)
-                SetCBuffer(world, cBuffer, policy);
-            base.TickLogic(world, policy, bClear);
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                var cBuffer = GBuffers.PerViewportCBuffer;
+                if (cBuffer != null)
+                    SetCBuffer(world, cBuffer, policy);
+                base.TickLogic(world, policy, bClear);
+            }   
         }
     }
 }

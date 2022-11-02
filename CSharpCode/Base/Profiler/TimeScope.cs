@@ -6,6 +6,7 @@ using System.ComponentModel;
 using EngineNS.IO;
 using EngineNS.Rtti;
 using EngineNS.Bricks.Network.RPC;
+using static EngineNS.EGui.UIProxy.SingleInputDialog;
 
 namespace EngineNS.Profiler
 {
@@ -156,8 +157,27 @@ namespace EngineNS.Profiler
     {
         #region ThreadInstance
         public static List<TimeScopeManager> AllThreadInstance { get; } = new List<TimeScopeManager>();
-        public static void UpdateAllInstance()
+        public unsafe static void UpdateAllInstance()
         {
+            foreach (var i in AllThreadInstance)
+            {
+                var num = i.mCoreObject.GetSampNum();
+                if (num != i.Scopes.Count)
+                {
+                    EngineNS.SampResult** pOuts = (EngineNS.SampResult**)CoreSDK.Alloc((uint)sizeof(EngineNS.SampResult*) * num, null, 0);
+                    i.mCoreObject.GetAllSamps(pOuts, num);
+                    for (int j = 0; j < (uint)num; j++)
+                    {
+                        var pCur = new EngineNS.SampResult(pOuts[j]);
+                        var name = pCur.GetName();
+                        if (i.Scopes.ContainsKey(name))
+                            continue;
+                        var result = new TimeScope(pCur, TimeScope.EProfileFlag.FlagsAll);
+                        i.Scopes.Add(name, result);
+                    }
+                    CoreSDK.Free(pOuts);
+                }
+            }
             EngineNS.v3dSampMgr.UpdateAllThreadInstance();
         }
         public static void FinalCleanup()

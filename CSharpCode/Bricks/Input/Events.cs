@@ -219,6 +219,15 @@ namespace EngineNS.Bricks.Input
         public int xRel;
         public int yRel;
     }
+    public enum EMouseButton : uint
+    {
+        BUTTON_LEFT = 1u,
+        BUTTON_MIDDLE = 2u,
+        BUTTON_RIGHT = 3u,
+        BUTTON_X1 = 4u,
+        BUTTON_X2 = 5u,
+    }
+
     public struct MouseButtonEvent
     {
         public EventType Type;

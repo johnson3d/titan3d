@@ -7,7 +7,7 @@ namespace EngineNS.Thread
     public class ThreadLogic : ContextThread
     {
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadLogic), nameof(Tick), "LogicTick");
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(ThreadLogic), nameof(Tick));
         public ThreadLogic()
         {
             this.Interval = 0;

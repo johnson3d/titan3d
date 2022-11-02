@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EngineNS.Bricks.VXGI;
+using EngineNS.Graphics.Pipeline.Shadow;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -101,46 +103,56 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 GBuffers.OnResize(x, y);
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UDeferredBasePassNode), nameof(TickLogic));
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopePushGpuDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UDeferredBasePassNode), "PushGpuDraw");
         public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            BasePass.DrawCmdList.ResetGpuDraws();
-            //BasePass.DrawCmdList.SetViewport(GBuffers.ViewPort.mCoreObject);
-            foreach (var i in policy.VisibleMeshes)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                if (i.Atoms == null)
-                    continue;
-
-                for (int j = 0; j < i.Atoms.Length; j++)
+                using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                 {
-                    if (i.Atoms[j].Material == null)
-                        continue;
-                    var layer = i.Atoms[j].Material.RenderLayer;
-                    if (layer != ERenderLayer.RL_Opaque)
-                        continue;
-
-                    var drawcall = i.GetDrawCall(GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
-                    if (drawcall != null)
+                    BasePass.DrawCmdList.ResetGpuDraws();
+                    //BasePass.DrawCmdList.SetViewport(GBuffers.ViewPort.mCoreObject);
+                    foreach (var i in policy.VisibleMeshes)
                     {
-                        drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
-                        
-                        BasePass.DrawCmdList.PushGpuDraw(drawcall.mCoreObject);
+                        if (i.Atoms == null)
+                            continue;
+
+                        for (int j = 0; j < i.Atoms.Length; j++)
+                        {
+                            if (i.Atoms[j].Material == null)
+                                continue;
+                            var layer = i.Atoms[j].Material.RenderLayer;
+                            if (layer != ERenderLayer.RL_Opaque)
+                                continue;
+
+                            var drawcall = i.GetDrawCall(GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
+                            if (drawcall != null)
+                            {
+                                drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+
+                                BasePass.DrawCmdList.PushGpuDraw(drawcall.mCoreObject);
+                            }
+                        }
                     }
-                }
-            }
+                }   
 
-            var cmdlist = BasePass.DrawCmdList;
-            var passClears = new NxRHI.FRenderPassClears();
-            passClears.SetDefault();
-            passClears.SetClearColor(0, new Color4(1, 0, 0, 0));
-            cmdlist.BeginCommand();
-            cmdlist.SetViewport(in GBuffers.Viewport);
-            GBuffers.BuildFrameBuffers(policy);
-            cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
-            cmdlist.FlushDraws();
-            cmdlist.EndPass();
-            cmdlist.EndCommand();
+                var cmdlist = BasePass.DrawCmdList;
+                var passClears = new NxRHI.FRenderPassClears();
+                passClears.SetDefault();
+                passClears.SetClearColor(0, new Color4(1, 0, 0, 0));
+                cmdlist.BeginCommand();
+                cmdlist.SetViewport(in GBuffers.Viewport);
+                GBuffers.BuildFrameBuffers(policy);
+                cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
+                cmdlist.FlushDraws();
+                cmdlist.EndPass();
+                cmdlist.EndCommand();
 
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+            }   
         }
         public override void TickSync(URenderPolicy policy)
         {

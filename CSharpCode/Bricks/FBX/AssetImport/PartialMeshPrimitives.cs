@@ -23,12 +23,13 @@ namespace EngineNS.Graphics.Mesh
             UMeshDataProvider.UMakeTorusParameter TorusParameter = new UMeshDataProvider.UMakeTorusParameter();
             UMeshDataProvider.MakeCapsuleParameter CapsuleParameter = new UMeshDataProvider.MakeCapsuleParameter(); 
 
-            public unsafe partial void FBXCreateCreateDraw(UContentBrowser ContentBrowser)
+            public unsafe partial bool FBXCreateCreateDraw(UContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import MeshPrimitives", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                 var mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
                 var visible = true;
+                var retValue = false;
                 if (ImGuiAPI.BeginPopupModal($"Import MeshPrimitives", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     if (ImGuiAPI.BeginCombo("MeshType", MeshType, ImGuiComboFlags_.ImGuiComboFlags_None))
@@ -145,7 +146,7 @@ namespace EngineNS.Graphics.Mesh
                                     {
                                         var task = FBXImportMesh();
                                         ImGuiAPI.CloseCurrentPopup();
-                                        ContentBrowser.mAssetImporter = null;
+                                        retValue = true;
                                     }
                                     break;
                                 case "Box":
@@ -164,7 +165,7 @@ namespace EngineNS.Graphics.Mesh
 
                                         mesh.ToMesh().SaveAssetTo(name);
                                         ImGuiAPI.CloseCurrentPopup();
-                                        ContentBrowser.mAssetImporter = null;
+                                        retValue = true;
                                     }
                                     break;
                                 case "Rect2D":
@@ -183,7 +184,7 @@ namespace EngineNS.Graphics.Mesh
 
                                         mesh.ToMesh().SaveAssetTo(name);
                                         ImGuiAPI.CloseCurrentPopup();
-                                        ContentBrowser.mAssetImporter = null;
+                                        retValue = true;
                                     }
                                     break;
                                 case "Sphere":
@@ -202,7 +203,7 @@ namespace EngineNS.Graphics.Mesh
 
                                         mesh.ToMesh().SaveAssetTo(name);
                                         ImGuiAPI.CloseCurrentPopup();
-                                        ContentBrowser.mAssetImporter = null;
+                                        retValue = true;
                                     }
                                     break;
                                 case "Cylinder":
@@ -221,7 +222,7 @@ namespace EngineNS.Graphics.Mesh
 
                                         mesh.ToMesh().SaveAssetTo(name);
                                         ImGuiAPI.CloseCurrentPopup();
-                                        ContentBrowser.mAssetImporter = null;
+                                        retValue = true;
                                     }
                                     break;
                                 case "Torus":
@@ -240,7 +241,7 @@ namespace EngineNS.Graphics.Mesh
 
                                         mesh.ToMesh().SaveAssetTo(name);
                                         ImGuiAPI.CloseCurrentPopup();
-                                        ContentBrowser.mAssetImporter = null;
+                                        retValue = true;
                                     }
                                     break;
                                 case "Capsule":
@@ -259,7 +260,7 @@ namespace EngineNS.Graphics.Mesh
 
                                         mesh.ToMesh().SaveAssetTo(name);
                                         ImGuiAPI.CloseCurrentPopup();
-                                        ContentBrowser.mAssetImporter = null;
+                                        retValue = true;
                                     }
                                     break;
                             }
@@ -269,7 +270,7 @@ namespace EngineNS.Graphics.Mesh
                     if (ImGuiAPI.Button("Cancel", in Vector2.Zero))
                     {
                         ImGuiAPI.CloseCurrentPopup();
-                        ContentBrowser.mAssetImporter = null;
+                        retValue = true;
                     }
 
                     ImGuiAPI.Separator();
@@ -280,6 +281,8 @@ namespace EngineNS.Graphics.Mesh
                     
                     ImGuiAPI.EndPopup();
                 }
+
+                return retValue;
             }
 
             private async System.Threading.Tasks.Task<bool> FBXImportMesh()

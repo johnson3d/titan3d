@@ -154,8 +154,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     public interface IPropertyCustomization
     {
         void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType);
+#nullable enable
         object? GetPropertyValue(string propertyName);
         void SetPropertyValue(string propertyName, object? value);
+#nullable disable
     }
 
     public class PGProvider

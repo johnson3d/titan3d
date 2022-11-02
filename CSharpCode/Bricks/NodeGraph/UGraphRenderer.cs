@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.NodeGraph
 {
-    public class UGraphRenderer : Graphics.Pipeline.IGuiModule
+    public class UGraphRenderer : IGuiModule
     {
         public UGraphRenderer()
         {
@@ -192,12 +192,14 @@ namespace EngineNS.Bricks.NodeGraph
         }
 
         static List<UNodeBase> mCopyedNodes = new List<UNodeBase>();
+        static Dictionary<NodePin, NodePin> mCopyedPins = new Dictionary<NodePin, NodePin>();
+        static Dictionary<NodePin, NodePin> mCopyedLinkers = new Dictionary<NodePin, NodePin>();
         void ProcessKeyboard(in Vector2 screenPt)
         {
             if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_RootWindow) == false)
                 return;
 
-            if(ImGuiAPI.IsKeyPressed(ImGuiAPI.GetKeyIndex(ImGuiKey_.ImGuiKey_Delete), false))
+            if (UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_DELETE))
             {
                 foreach(var node in mGraph.SelectedNodes)
                 {
@@ -205,31 +207,41 @@ namespace EngineNS.Bricks.NodeGraph
                 }
                 mGraph.ClearSelected();
             }
-            if(ImGuiAPI.IsKeyPressed(ImGuiAPI.GetKeyIndex(ImGuiKey_.ImGuiKey_Tab), false))
+            if (UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_TAB))
             {
                 mGraph.PopMenuPosition = mGraph.ViewportRateToCanvas(screenPt);
                 mGraph.CurMenuType = UNodeGraph.EGraphMenu.Canvas;
             }
             if(mGraph.IsKeydown(UNodeGraph.EKey.Ctl))
             {
-                if (ImGuiAPI.IsKeyPressed(ImGuiAPI.GetKeyIndex(ImGuiKey_.ImGuiKey_C), false))
+                if (UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_c))
                 {
                     mCopyedNodes.Clear();
-                    for(int i=0; i<mGraph.SelectedNodes.Count; i++)
+                    mCopyedLinkers.Clear();
+                    for (int i=0; i<mGraph.SelectedNodes.Count; i++)
                     {
                         mCopyedNodes.Add(mGraph.SelectedNodes[i].Node);
                     }
+                    for(int i=0; i<mGraph.Linkers.Count; i++)
+                    {
+                        if(mCopyedNodes.Contains(mGraph.Linkers[i].InNode) &&
+                           mCopyedNodes.Contains(mGraph.Linkers[i].OutNode))
+                        {
+                            mCopyedLinkers[mGraph.Linkers[i].OutPin] = mGraph.Linkers[i].InPin;
+                        }
+                    }
                 }
-                if(ImGuiAPI.IsKeyPressed(ImGuiAPI.GetKeyIndex(ImGuiKey_.ImGuiKey_V), false) && mCopyedNodes.Count > 0)
-                //if(UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_v) && mCopyedNodes.Count > 0)
+                if(UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_v) && mCopyedNodes.Count > 0)
                 {
                     mGraph.ClearSelected();
+                    mCopyedPins.Clear();
                     var min = mCopyedNodes[0].Position;
                     var max = mCopyedNodes[0].Size + min;
                     for(int i=0; i<mCopyedNodes.Count; i++)
                     {
-                        var nodeMin = mCopyedNodes[i].Position;
-                        var nodeMax = nodeMin + mCopyedNodes[i].Size;
+                        var node = mCopyedNodes[i];
+                        var nodeMin = node.Position;
+                        var nodeMax = nodeMin + node.Size;
                         if (min.X > nodeMin.X)
                             min.X = nodeMin.X;
                         if (min.Y > nodeMin.Y)
@@ -239,14 +251,27 @@ namespace EngineNS.Bricks.NodeGraph
                         if (max.Y < nodeMax.Y)
                             max.Y = nodeMax.Y;
 
-                        var copyedNode = Rtti.UTypeDescManager.CreateInstance(mCopyedNodes[i].GetType()) as UNodeBase;
+                        var copyedNode = Rtti.UTypeDescManager.CreateInstance(node.GetType()) as UNodeBase;
                         var id = copyedNode.NodeId;
-                        mCopyedNodes[i].CopyTo(copyedNode);
+                        node.CopyTo(copyedNode);
                         copyedNode.NodeId = id;
                         copyedNode.UserData = mGraph;
                         mGraph.SetDefaultActionForNode(copyedNode);
                         mGraph.AddNode(copyedNode);
                         mGraph.AddSelected(copyedNode);
+
+                        for(int pinIdx=0; pinIdx<node.Inputs.Count; pinIdx++)
+                        {
+                            var srcPin = node.Inputs[pinIdx];
+                            var tagPin = copyedNode.Inputs[pinIdx];
+                            mCopyedPins[srcPin] = tagPin;
+                        }
+                        for(int pinIdx = 0; pinIdx < node.Outputs.Count; pinIdx++)
+                        {
+                            var srcPin = node.Outputs[pinIdx];
+                            var tagPin = copyedNode.Outputs[pinIdx];
+                            mCopyedPins[srcPin] = tagPin;
+                        }
                     }
 
                     var center = (min + max) * 0.5f;
@@ -255,6 +280,13 @@ namespace EngineNS.Bricks.NodeGraph
                     {
                         var node = mGraph.SelectedNodes[i].Node;
                         node.Position += newCenter - center;
+                    }
+
+                    foreach(var linker in mCopyedLinkers)
+                    {
+                        var outPin = mCopyedPins[linker.Key] as PinOut;
+                        var inPin = mCopyedPins[linker.Value] as PinIn;
+                        mGraph.AddLink(outPin, inPin, true);
                     }
                 }
             }

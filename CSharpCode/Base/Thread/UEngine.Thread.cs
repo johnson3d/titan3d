@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.IO;
+using System;
 using System.Collections.Generic;
 
 namespace EngineNS
@@ -254,8 +256,11 @@ namespace EngineNS
 
             try
             {
-                DrawSlateWindow();
-                UEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
+                using (new Profiler.TimeScopeHelper(ScopeDrawSlateWindow))
+                {
+                    DrawSlateWindow();
+                    UEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
+                }
                 if (this.PlayMode != EPlayMode.Game)
                 {
                     UEngine.Instance.AssetMetaManager.EditorCheckShowIconTimeout();
@@ -267,6 +272,8 @@ namespace EngineNS
             }
             GfxDevice?.TickSync();
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeDrawSlateWindow = Profiler.TimeScopeManager.GetTimeScope(typeof(UEngine), nameof(DrawSlateWindow));
         partial void DrawSlateWindow();
     }
 }

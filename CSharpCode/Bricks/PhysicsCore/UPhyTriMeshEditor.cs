@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
-    public class UPhyTriMeshEditor : Editor.IAssetEditor, ITickable, Graphics.Pipeline.IRootForm
+    public class UPhyTriMeshEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -33,11 +33,11 @@ namespace EngineNS.Bricks.PhysicsCore
             await TriMeshPropGrid.Initialize();
             return true;
         }
-        public Graphics.Pipeline.IRootForm GetRootForm()
+        public IRootForm GetRootForm()
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -173,7 +173,7 @@ namespace EngineNS.Bricks.PhysicsCore
             PreviewViewport.OnDraw();
         }
 
-        public void OnEvent(ref SDL2.SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
             //throw new NotImplementedException();
         }

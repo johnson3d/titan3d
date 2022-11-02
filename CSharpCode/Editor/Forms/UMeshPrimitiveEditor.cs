@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using SDL2;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UMeshPrimitiveEditor : Editor.IAssetEditor, ITickable, Graphics.Pipeline.IRootForm
+    public class UMeshPrimitiveEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -32,11 +31,11 @@ namespace EngineNS.Editor.Forms
             await MeshPropGrid.Initialize();
             return true;
         }
-        public Graphics.Pipeline.IRootForm GetRootForm()
+        public IRootForm GetRootForm()
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -190,7 +189,7 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.OnDraw();
         }
 
-        public void OnEvent(ref SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
             //throw new NotImplementedException();
         }

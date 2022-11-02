@@ -26,7 +26,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Slate\UBaseRenderer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Slate\UWorldViewportSlate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UCoreStyles.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UDockWindowSDL.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIEditor\EditableFormData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\Columns.cs" />
@@ -36,6 +35,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Elements\Text.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIEditor\Form.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIEditor\FormStructureEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UImDrawDataRHI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Base.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\Button.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UIProxy\CheckBox.cs" />

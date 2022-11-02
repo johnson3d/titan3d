@@ -143,7 +143,7 @@ namespace EngineNS.Editor
         }
     }
 
-    public class UIWindowsTest : EngineNS.Graphics.Pipeline.IRootForm
+    public class UIWindowsTest : EngineNS.IRootForm
     {
         public void Cleanup()
         {
@@ -186,7 +186,7 @@ namespace EngineNS.Editor
                                 var tagDir = RName.GetRName("icons", RName.ERNameType.Engine);
                                 foreach(var file in files)
                                 {
-                                    NxRHI.USrView.ImportAttribute.ImportImage(file, tagDir);
+                                    NxRHI.USrView.ImportAttribute.ImportImage(file, tagDir, new NxRHI.USrView.UPicDesc());
                                 }
                             },
                         },
@@ -352,7 +352,7 @@ namespace EngineNS.Editor
                 DockCond = ImGuiCond_.ImGuiCond_FirstUseEver,
             };
             await meshEditor.Initialize();
-            mForms = new List<Graphics.Pipeline.IRootForm>()
+            mForms = new List<IRootForm>()
             {
                 meshEditor,
             };
@@ -361,7 +361,7 @@ namespace EngineNS.Editor
         }
 
         List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
-        List<Graphics.Pipeline.IRootForm> mForms = new List<Graphics.Pipeline.IRootForm>();
+        List<IRootForm> mForms = new List<IRootForm>();
         //bool fileMenuOpen = false;
         //bool colorPushed = false;
         //bool hover = false;
@@ -442,7 +442,7 @@ namespace EngineNS.Editor
         }
     }
 
-    public class MeshEditor : Graphics.Pipeline.IRootForm
+    public class MeshEditor : IRootForm
     {
         bool mVisible = true;
         public bool Visible

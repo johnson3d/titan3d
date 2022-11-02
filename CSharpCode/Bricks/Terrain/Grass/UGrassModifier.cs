@@ -178,14 +178,12 @@ namespace EngineNS.Bricks.Terrain.Grass
             }
             public uint PushInstance(UGrassModifier mdf, uint data, float height)
             {
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
-
                 //uint growSize = 1;
                 //if(mdf.mMaxNumber > 10)
                 //{
                 //    growSize += mdf.mMaxNumber;
                 //}
-                //SureBuffers(mdf, mdf.mCurNumber + growSize);
+                SureBuffers(mdf, mdf.mCurNumber + 1);
                 System.Diagnostics.Debug.Assert(mdf.CurNumber < mdf.mMaxNumber);
 
                 InstData[mdf.mCurNumber].Data = data;
@@ -290,6 +288,25 @@ namespace EngineNS.Bricks.Terrain.Grass
                     GrassType.GrassCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerGrassType.Binder.mCoreObject);
             }
         }
+        public class UMdfShaderBinder : Graphics.Pipeline.UCoreShaderBinder.UShaderResourceIndexer
+        {
+            public void Init(NxRHI.UShaderEffect effect)
+            {
+                UpdateBindResouce(effect);
+                HeightMapTexture = effect.FindBinder("HeightMapTexture");
+                Samp_HeightMapTexture = effect.FindBinder("Samp_HeightMapTexture");
+                cbPerPatch = effect.FindBinder("cbPerPatch");
+                cbPerTerrain = effect.FindBinder("cbPerTerrain");
+                cbPerGrassType = effect.FindBinder("cbPerGrassType");
+                VSGrassDataArray = effect.FindBinder("VSGrassDataArray");
+            }
+            public NxRHI.UEffectBinder HeightMapTexture;
+            public NxRHI.UEffectBinder Samp_HeightMapTexture;
+            public NxRHI.UEffectBinder cbPerPatch;
+            public NxRHI.UEffectBinder cbPerTerrain;
+            public NxRHI.UEffectBinder cbPerGrassType;
+            public NxRHI.UEffectBinder VSGrassDataArray;
+        }
         public unsafe void OnDrawCall(Graphics.Pipeline.URenderPolicy.EShadingType shadingType, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.UMesh mesh)
         {
             var pat = GrassType.Patch;
@@ -300,18 +317,26 @@ namespace EngineNS.Bricks.Terrain.Grass
 
             drawcall.mCoreObject.DrawInstance = (ushort)this.CurNumber;
 
-            var index = drawcall.FindBinder("HeightMapTexture");
-            if (index.IsValidPointer)
-                drawcall.BindSRV(index, pat.Level.HeightMapSRV);
-            index = drawcall.FindBinder("Samp_HeightMapTexture");
-            if (index.IsValidPointer)
-                drawcall.BindSampler(index, policy.ClampState);
+            var effectBinder = drawcall.Effect.mBindIndexer as UMdfShaderBinder;
+            if (effectBinder == null)
+            {
+                effectBinder = new UMdfShaderBinder();
+                effectBinder.Init(drawcall.Effect.ShaderEffect);
+                drawcall.Effect.mBindIndexer = effectBinder;
+            }
 
-            index = drawcall.FindBinder("cbPerTerrain");
-            if(index.IsValidPointer)
-                drawcall.BindCBuffer(index, pat.Level.Level.Node.TerrainCBuffer);
-            var cbIndex = drawcall.FindBinder("cbPerPatch");
-            if(cbIndex.IsValidPointer)
+            //var index = drawcall.FindBinder("HeightMapTexture");
+            if (effectBinder.HeightMapTexture != null)
+                drawcall.BindSRV(effectBinder.HeightMapTexture.mCoreObject, pat.Level.HeightMapSRV);
+            //index = drawcall.FindBinder("Samp_HeightMapTexture");
+            if (effectBinder.Samp_HeightMapTexture != null)
+                drawcall.BindSampler(effectBinder.Samp_HeightMapTexture.mCoreObject, policy.ClampState);
+
+            //index = drawcall.FindBinder("cbPerTerrain");
+            if (effectBinder.cbPerTerrain != null)
+                drawcall.BindCBuffer(effectBinder.cbPerTerrain.mCoreObject, pat.Level.Level.Node.TerrainCBuffer);
+            //var cbIndex = drawcall.FindBinder("cbPerPatch");
+            if (effectBinder.cbPerPatch != null)
             {
                 var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
                 pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.StartPosition, in pat.StartPosition);
@@ -326,11 +351,11 @@ namespace EngineNS.Bricks.Terrain.Grass
 
                 pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.TexUVOffset, in pat.TexUVOffset);
 
-                drawcall.BindCBuffer(cbIndex, pat.PatchCBuffer);
+                drawcall.BindCBuffer(effectBinder.cbPerPatch.mCoreObject, pat.PatchCBuffer);
             }
 
-            index = drawcall.FindBinder("cbPerGrassType");
-            if(index.IsValidPointer)
+            //index = drawcall.FindBinder("cbPerGrassType");
+            if (effectBinder.cbPerGrassType != null)
             {
                 var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.MinScale, GrassType.GrassDesc.MinScale);
@@ -338,18 +363,19 @@ namespace EngineNS.Bricks.Terrain.Grass
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.HeightMapMinHeight, in pat.Level.HeightMapMinHeight);
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.PatchIdxX, pat.IndexX);
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.PatchIdxZ, pat.IndexZ);
-                drawcall.BindCBuffer(index, GrassType.GrassCBuffer);
+                drawcall.BindCBuffer(effectBinder.cbPerGrassType.mCoreObject, GrassType.GrassCBuffer);
             }
 
             if(InstantSSBO != null)
             {
-                var binder = drawcall.FindBinder("VSGrassDataArray");
-                if (binder.IsValidPointer == false)
-                    return;
-                var cmd = UEngine.Instance.GfxDevice.RenderContext.CmdQueue.GetIdleCmdlist(NxRHI.EQueueCmdlist.QCL_FramePost);
-                this.Flush2VB(cmd);
-                UEngine.Instance.GfxDevice.RenderContext.CmdQueue.ReleaseIdleCmdlist(cmd, NxRHI.EQueueCmdlist.QCL_FramePost);
-                drawcall.BindSRV(binder, InstantSSBO.InstantSRV);
+                //var binder = drawcall.FindBinder("VSGrassDataArray");
+                if (effectBinder.VSGrassDataArray != null)
+                {
+                    var cmd = UEngine.Instance.GfxDevice.RenderContext.CmdQueue.GetIdleCmdlist(NxRHI.EQueueCmdlist.QCL_FramePost);
+                    this.Flush2VB(cmd);
+                    UEngine.Instance.GfxDevice.RenderContext.CmdQueue.ReleaseIdleCmdlist(cmd, NxRHI.EQueueCmdlist.QCL_FramePost);
+                    drawcall.BindSRV(effectBinder.VSGrassDataArray.mCoreObject, InstantSSBO.InstantSRV);
+                }
             }
             else if(InstantVBs != null)
             {

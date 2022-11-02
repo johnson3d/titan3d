@@ -57,13 +57,13 @@ namespace EngineNS.Graphics.Mesh
                 //mDesc.Desc.SetDefault();
                 //PGAsset.SingleTarget = mDesc;
             }
-            public override unsafe void OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
+            public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
             {
                 //we also can import from other types
-                FBXCreateCreateDraw(ContentBrowser);
+                return FBXCreateCreateDraw(ContentBrowser);
             }
 
-            public unsafe partial void FBXCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
+            public unsafe partial bool FBXCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
         }
         public UMeshPrimitives()
         {

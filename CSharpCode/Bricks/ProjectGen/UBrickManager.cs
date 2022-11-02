@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace EngineNS.Bricks.ProjectGen
 {
-    public class UBrickManager : Graphics.Pipeline.IRootForm
+    public class UBrickManager : IRootForm
     {
         public UBrickManager()
         {

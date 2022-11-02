@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Bricks.VXGI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -170,155 +171,166 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         {
             return X < Min ? Min : X < Max ? X : Max;
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UShadowMapNode), nameof(TickLogic));
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopePushGpuDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UShadowMapNode), "PushGpuDraw");
         public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            mDirLightDirection = world.DirectionLight.Direction;
-
-            var ViewerCamera =  policy.DefaultCamera;
-
-            ViewerCamera.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
-
-            //calculate viewer camera frustum bounding sphere and shadow camera data;
-            float HalfFoV = ViewerCamera.mCoreObject.mFov * 0.5f;
-            float zNear = ViewerCamera.mCoreObject.mZNear;
-            float NearUpLength = zNear * (float)Math.Tan(HalfFoV);
-            float NearRightLength = NearUpLength * ViewerCamera.mCoreObject.mAspect;
-            Vector3 NearUpOffset = NearUpLength * ViewerCamera.mCoreObject.GetUp();
-            Vector3 NearRightOffset = NearRightLength * ViewerCamera.mCoreObject.GetRight();
-
-            float FarUpLength = mShadowDistance * (float)Math.Tan(HalfFoV);
-            float FarRightLength = FarUpLength * ViewerCamera.mCoreObject.mAspect;
-            Vector3 FarUpOffset = FarUpLength * ViewerCamera.mCoreObject.GetUp();
-            Vector3 FarRightOffset = FarRightLength * ViewerCamera.mCoreObject.GetRight();
-
-            var position = ViewerCamera.mCoreObject.GetLocalPosition();
-            var direction = ViewerCamera.mCoreObject.GetDirection();
-            mSSM_FrustumVtx[0] = position + direction * zNear + NearRightOffset + NearUpOffset;//nrt;
-            mSSM_FrustumVtx[1] = position + direction * zNear + NearRightOffset - NearUpOffset;//nrb;
-            mSSM_FrustumVtx[2] = position + direction * zNear - NearRightOffset + NearUpOffset;//nlt;
-            mSSM_FrustumVtx[3] = position + direction * zNear - NearRightOffset - NearUpOffset;//nlb;
-            mSSM_FrustumVtx[4] = position + direction * mShadowDistance + FarRightOffset + FarUpOffset;//frt;
-            mSSM_FrustumVtx[5] = position + direction * mShadowDistance + FarRightOffset - FarUpOffset;//frb;
-            mSSM_FrustumVtx[6] = position + direction * mShadowDistance - FarRightOffset + FarUpOffset;//flt;
-            mSSM_FrustumVtx[7] = position + direction * mShadowDistance - FarRightOffset - FarUpOffset;//flb;
-
-            float TanHalfFoVHeight = (float)Math.Tan(HalfFoV);
-            float TanHalfFoVWidth = TanHalfFoVHeight * ViewerCamera.mCoreObject.mAspect;
-            float FrustumLength = mShadowDistance - zNear;
-
-            float NearHalfWidth = zNear * TanHalfFoVWidth;
-            float NearHalfHeight = zNear * TanHalfFoVHeight;
-            float NearHalfDiagonalSqr = NearHalfWidth * NearHalfWidth + NearHalfHeight * NearHalfHeight;
-            float FarHalfWidth = mShadowDistance * TanHalfFoVWidth;
-            float FarHalfHeight = mShadowDistance * TanHalfFoVHeight;
-            float FarHalfDiagonalSqr = FarHalfWidth * FarHalfWidth + FarHalfHeight * FarHalfHeight;
-
-            float OptimalOffset = FrustumLength * 0.5f + (NearHalfDiagonalSqr - FarHalfDiagonalSqr) / (2.0f * FrustumLength);
-            float ViewerPosOffset = Clamp(mShadowDistance - OptimalOffset, zNear, mShadowDistance);
-            var FrustumSphereCenter = position + direction * ViewerPosOffset;
-            double FrustumSphereRadius = 1.0;
-            for (UInt32 idx = 0; idx < 8; idx++)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                FrustumSphereRadius = Math.Max(FrustumSphereRadius, Vector3.DistanceSquared(FrustumSphereCenter, mSSM_FrustumVtx[idx]));
-            }
-            FrustumSphereRadius = (float)Math.Ceiling((float)Math.Sqrt(FrustumSphereRadius));
-            //FrustumSphereRadius = Math.Min((float)Math.Sqrt(FrustumSphereRadius), MaxFrustumDiagonal * 0.5f);
+                mDirLightDirection = world.DirectionLight.Direction;
 
-            var ShadowCameraPos = FrustumSphereCenter - mDirLightDirection * ((float)FrustumSphereRadius + mShadowCameraOffset);
+                var ViewerCamera = policy.DefaultCamera;
 
-            var shadowCamera = ShadowCamera.mCoreObject;
-            shadowCamera.LookAtLH(ShadowCameraPos.AsDVector(), FrustumSphereCenter.AsDVector(), in Vector3.UnitY);
-            float FrustumSphereDiameter = (float)FrustumSphereRadius * 2.0f;
-            float ShadowCameraZFar = mShadowCameraOffset + FrustumSphereDiameter;
-            float ShadowCameraZNear = 0.0f;
-            shadowCamera.MakeOrtho(FrustumSphereDiameter, FrustumSphereDiameter, ShadowCameraZNear, ShadowCameraZFar);
-            Vector4 WorldCenterNDC = Vector4.Transform(new Vector4(0.0f, 0.0f, 0.0f, 1.0f), shadowCamera.GetViewProjection());
-            float TexelPosX = (WorldCenterNDC.X * 0.5f + 0.5f) * mResolutionY;
-            float TexelPosAdjustedNdcX = ((float)Math.Floor(TexelPosX) / mResolutionY - 0.5f) / 0.5f;
-            float TexelOffsetNdcX = TexelPosAdjustedNdcX - WorldCenterNDC.X;
-            float TexelPosY = (WorldCenterNDC.Y * (-0.5f) + 0.5f) * mResolutionY;
-            float TexelPosAdjustedNdcY = ((float)Math.Floor(TexelPosY) / mResolutionY - 0.5f) / (-0.5f);
-            float TexelOffsetNdcY = TexelPosAdjustedNdcY - WorldCenterNDC.Y;
-            shadowCamera.DoOrthoProjectionForShadow(FrustumSphereDiameter, FrustumSphereDiameter, ShadowCameraZNear, ShadowCameraZFar, TexelOffsetNdcX, TexelOffsetNdcY);
+                //calculate viewer camera frustum bounding sphere and shadow camera data;
+                float HalfFoV = ViewerCamera.mCoreObject.mFov * 0.5f;
+                float zNear = ViewerCamera.mCoreObject.mZNear;
+                float NearUpLength = zNear * (float)Math.Tan(HalfFoV);
+                float NearRightLength = NearUpLength * ViewerCamera.mCoreObject.mAspect;
+                Vector3 NearUpOffset = NearUpLength * ViewerCamera.mCoreObject.GetUp();
+                Vector3 NearRightOffset = NearRightLength * ViewerCamera.mCoreObject.GetRight();
 
-            Matrix vp = shadowCamera.GetViewProjection();
-            Matrix result;
-            Matrix.Transpose(in vp, out result);
+                float FarUpLength = mShadowDistance * (float)Math.Tan(HalfFoV);
+                float FarRightLength = FarUpLength * ViewerCamera.mCoreObject.mAspect;
+                Vector3 FarUpOffset = FarUpLength * ViewerCamera.mCoreObject.GetUp();
+                Vector3 FarRightOffset = FarRightLength * ViewerCamera.mCoreObject.GetRight();
 
-            mViewer2ShadowMtx = mOrtho2UVMtx * result;
+                var position = ViewerCamera.mCoreObject.GetLocalPosition();
+                var direction = ViewerCamera.mCoreObject.GetDirection();
+                mSSM_FrustumVtx[0] = position + direction * zNear + NearRightOffset + NearUpOffset;//nrt;
+                mSSM_FrustumVtx[1] = position + direction * zNear + NearRightOffset - NearUpOffset;//nrb;
+                mSSM_FrustumVtx[2] = position + direction * zNear - NearRightOffset + NearUpOffset;//nlt;
+                mSSM_FrustumVtx[3] = position + direction * zNear - NearRightOffset - NearUpOffset;//nlb;
+                mSSM_FrustumVtx[4] = position + direction * mShadowDistance + FarRightOffset + FarUpOffset;//frt;
+                mSSM_FrustumVtx[5] = position + direction * mShadowDistance + FarRightOffset - FarUpOffset;//frb;
+                mSSM_FrustumVtx[6] = position + direction * mShadowDistance - FarRightOffset + FarUpOffset;//flt;
+                mSSM_FrustumVtx[7] = position + direction * mShadowDistance - FarRightOffset - FarUpOffset;//flb;
 
-            float PerObjCustomDepthBias = 1.0f;
-            float DepthBiasClipSpace = UniformDepthBias / (ShadowCameraZFar - ShadowCameraZNear) * (FrustumSphereDiameter / mResolutionY) * PerObjCustomDepthBias;
-            //float DepthBiasClipSpace = UniformDepthBias / (ShadowCameraZFar - ShadowCameraZNear);
+                float TanHalfFoVHeight = (float)Math.Tan(HalfFoV);
+                float TanHalfFoVWidth = TanHalfFoVHeight * ViewerCamera.mCoreObject.mAspect;
+                float FrustumLength = mShadowDistance - zNear;
 
-            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
-            var cBuffer = GBuffers.PerViewportCBuffer;
-            if (cBuffer != null)
-            {
-                var tmp = new Vector2(0.0f, 1.0f / ShadowCameraZFar);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gDepthBiasAndZFarRcp, in tmp);
-            }
+                float NearHalfWidth = zNear * TanHalfFoVWidth;
+                float NearHalfHeight = zNear * TanHalfFoVHeight;
+                float NearHalfDiagonalSqr = NearHalfWidth * NearHalfWidth + NearHalfHeight * NearHalfHeight;
+                float FarHalfWidth = mShadowDistance * TanHalfFoVWidth;
+                float FarHalfHeight = mShadowDistance * TanHalfFoVHeight;
+                float FarHalfDiagonalSqr = FarHalfWidth * FarHalfWidth + FarHalfHeight * FarHalfHeight;
 
-            mShadowTransitionScale = 1.0f / (DepthBiasClipSpace + 0.00001f);
-
-            float FadeStartDistance = mShadowDistance - mShadowDistance * mFadeStrength;
-            mFadeParam.X = 1.0f / (mShadowDistance - FadeStartDistance + 0.0001f);
-            mFadeParam.Y = -FadeStartDistance * mFadeParam.X;
-
-            //render Shadow Caster
-            mVisParameter.CullType = GamePlay.UWorld.UVisParameter.EVisCull.Shadow;
-            mVisParameter.World = world;
-            mVisParameter.CullCamera = ShadowCamera;
-            world.GatherVisibleMeshes(mVisParameter);
-
-            var cmdlist = BasePass.DrawCmdList;
-            cmdlist.ResetGpuDraws();
-            foreach (var i in mVisParameter.VisibleMeshes)
-            {
-                if (i.IsCastShadow == false)
-                    continue;
-                if (i.Atoms == null)
-                    continue;
-
-                for (int j = 0; j < i.Atoms.Length; j++)
+                float OptimalOffset = FrustumLength * 0.5f + (NearHalfDiagonalSqr - FarHalfDiagonalSqr) / (2.0f * FrustumLength);
+                float ViewerPosOffset = Clamp(mShadowDistance - OptimalOffset, zNear, mShadowDistance);
+                var FrustumSphereCenter = position + direction * ViewerPosOffset;
+                double FrustumSphereRadius = 1.0;
+                for (UInt32 idx = 0; idx < 8; idx++)
                 {
-                    var drawcall = i.GetDrawCall(GBuffers, j, policy, URenderPolicy.EShadingType.DepthPass, this);
-                    if (drawcall != null)
-                    {
-                        drawcall.BindGBuffer(ShadowCamera, GBuffers);
+                    FrustumSphereRadius = Math.Max(FrustumSphereRadius, Vector3.DistanceSquared(FrustumSphereCenter, mSSM_FrustumVtx[idx]));
+                }
+                FrustumSphereRadius = (float)Math.Ceiling((float)Math.Sqrt(FrustumSphereRadius));
+                //FrustumSphereRadius = Math.Min((float)Math.Sqrt(FrustumSphereRadius), MaxFrustumDiagonal * 0.5f);
 
-                        cmdlist.PushGpuDraw(drawcall);
+                var ShadowCameraPos = FrustumSphereCenter - mDirLightDirection * ((float)FrustumSphereRadius + mShadowCameraOffset);
+
+                var shadowCamera = ShadowCamera.mCoreObject;
+                shadowCamera.LookAtLH(ShadowCameraPos.AsDVector(), FrustumSphereCenter.AsDVector(), in Vector3.UnitY);
+                float FrustumSphereDiameter = (float)FrustumSphereRadius * 2.0f;
+                float ShadowCameraZFar = mShadowCameraOffset + FrustumSphereDiameter;
+                float ShadowCameraZNear = 0.0f;
+                shadowCamera.MakeOrtho(FrustumSphereDiameter, FrustumSphereDiameter, ShadowCameraZNear, ShadowCameraZFar);
+                Vector4 WorldCenterNDC = Vector4.Transform(new Vector4(0.0f, 0.0f, 0.0f, 1.0f), shadowCamera.GetViewProjection());
+                float TexelPosX = (WorldCenterNDC.X * 0.5f + 0.5f) * mResolutionY;
+                float TexelPosAdjustedNdcX = ((float)Math.Floor(TexelPosX) / mResolutionY - 0.5f) / 0.5f;
+                float TexelOffsetNdcX = TexelPosAdjustedNdcX - WorldCenterNDC.X;
+                float TexelPosY = (WorldCenterNDC.Y * (-0.5f) + 0.5f) * mResolutionY;
+                float TexelPosAdjustedNdcY = ((float)Math.Floor(TexelPosY) / mResolutionY - 0.5f) / (-0.5f);
+                float TexelOffsetNdcY = TexelPosAdjustedNdcY - WorldCenterNDC.Y;
+                shadowCamera.DoOrthoProjectionForShadow(FrustumSphereDiameter, FrustumSphereDiameter, ShadowCameraZNear, ShadowCameraZFar, TexelOffsetNdcX, TexelOffsetNdcY);
+
+                Matrix vp = shadowCamera.GetViewProjection();
+                Matrix result;
+                Matrix.Transpose(in vp, out result);
+
+                mViewer2ShadowMtx = mOrtho2UVMtx * result;
+
+                float PerObjCustomDepthBias = 1.0f;
+                float DepthBiasClipSpace = UniformDepthBias / (ShadowCameraZFar - ShadowCameraZNear) * (FrustumSphereDiameter / mResolutionY) * PerObjCustomDepthBias;
+                //float DepthBiasClipSpace = UniformDepthBias / (ShadowCameraZFar - ShadowCameraZNear);
+
+                var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+                var cBuffer = GBuffers.PerViewportCBuffer;
+                if (cBuffer != null)
+                {
+                    var tmp = new Vector2(0.0f, 1.0f / ShadowCameraZFar);
+                    cBuffer.SetValue(coreBinder.CBPerViewport.gDepthBiasAndZFarRcp, in tmp);
+                }
+
+                mShadowTransitionScale = 1.0f / (DepthBiasClipSpace + 0.00001f);
+
+                float FadeStartDistance = mShadowDistance - mShadowDistance * mFadeStrength;
+                mFadeParam.X = 1.0f / (mShadowDistance - FadeStartDistance + 0.0001f);
+                mFadeParam.Y = -FadeStartDistance * mFadeParam.X;
+
+                //render Shadow Caster
+                mVisParameter.CullType = GamePlay.UWorld.UVisParameter.EVisCull.Shadow;
+                mVisParameter.World = world;
+                mVisParameter.CullCamera = ShadowCamera;
+                ShadowCamera.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
+                BasePass.SwapBuffer();
+                world.GatherVisibleMeshes(mVisParameter);
+
+                var cmdlist = BasePass.DrawCmdList;
+                using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
+                {
+                    cmdlist.ResetGpuDraws();
+
+                    foreach (var i in mVisParameter.VisibleMeshes)
+                    {
+                        if (i.IsCastShadow == false)
+                            continue;
+                        if (i.Atoms == null)
+                            continue;
+
+                        for (int j = 0; j < i.Atoms.Length; j++)
+                        {
+                            var drawcall = i.GetDrawCall(GBuffers, j, policy, URenderPolicy.EShadingType.DepthPass, this);
+                            if (drawcall != null)
+                            {
+                                drawcall.BindGBuffer(ShadowCamera, GBuffers);
+
+                                cmdlist.PushGpuDraw(drawcall);
+                            }
+                        }
                     }
                 }
-            }
 
-            if(cmdlist.BeginCommand())
-            {
-                cmdlist.SetViewport(in GBuffers.Viewport);
+                if (cmdlist.BeginCommand())
+                {
+                    cmdlist.SetViewport(in GBuffers.Viewport);
 
-                var passClear = new NxRHI.FRenderPassClears();
-                //passClear.SetDefault();
-                //passClear.m_DepthClearValue = 1.0f;
-                //passClear.m_StencilClearValue = 0;
-                passClear.SetDefault();
-                passClear.SetClearColor(0, new Color4(1, 0, 0, 0));
-                GBuffers.BuildFrameBuffers(policy);
-                cmdlist.BeginPass(GBuffers.FrameBuffers, in passClear, "ShadowDepth");
-                //if (bClear)
-                //    cmdlist.BeginRenderPass(policy, GBuffers, in passClear, "ShadowDepth");
-                //else
-                //    cmdlist.BeginRenderPass(policy, GBuffers, "ShadowDepth");
-                cmdlist.FlushDraws();
-                cmdlist.EndPass();
-                cmdlist.EndCommand();
-            }
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+                    var passClear = new NxRHI.FRenderPassClears();
+                    //passClear.SetDefault();
+                    //passClear.m_DepthClearValue = 1.0f;
+                    //passClear.m_StencilClearValue = 0;
+                    passClear.SetDefault();
+                    passClear.SetClearColor(0, new Color4(1, 0, 0, 0));
+                    GBuffers.BuildFrameBuffers(policy);
+                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClear, "ShadowDepth");
+                    //if (bClear)
+                    //    cmdlist.BeginRenderPass(policy, GBuffers, in passClear, "ShadowDepth");
+                    //else
+                    //    cmdlist.BeginRenderPass(policy, GBuffers, "ShadowDepth");
+                    cmdlist.FlushDraws();
+                    cmdlist.EndPass();
+                    cmdlist.EndCommand();
+                }
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+            }   
         }
 
         public override void TickSync(URenderPolicy policy)
         {
-            BasePass.SwapBuffer();
-            ShadowCamera.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
+            //BasePass.SwapBuffer();
+            //ShadowCamera.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
         }
     }
 }

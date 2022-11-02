@@ -163,5 +163,14 @@ namespace EngineNS.Bricks.Particle.Simple
 
             return true;
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(USimpleNebulaNode), nameof(TickLogic));
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        {
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                return base.OnTickLogic(world, policy);
+            }
+        }
     }
 }

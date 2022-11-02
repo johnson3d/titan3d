@@ -76,17 +76,22 @@ namespace EngineNS.GamePlay.GamePlayMacross
                 }
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UGamePlayMacrossNode), nameof(TickLogic));
         public override void TickLogic(UWorld world, URenderPolicy policy)
         {
-            var macrossNodeData = GetNodeData<UGamePlayMacrossNodeData>();
-            var gameplay = macrossNodeData?.McGamePlay?.Get();
-            if (gameplay == null)
-                return;
-            gameplay.TickLogic(world.DeltaTimeSecond);
-            gameplay.TickAnimation(world.DeltaTimeSecond);
-            gameplay.EvaluateAnimation(world.DeltaTimeSecond);
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                var macrossNodeData = GetNodeData<UGamePlayMacrossNodeData>();
+                var gameplay = macrossNodeData?.McGamePlay?.Get();
+                if (gameplay == null)
+                    return;
+                gameplay.TickLogic(world.DeltaTimeSecond);
+                gameplay.TickAnimation(world.DeltaTimeSecond);
+                gameplay.EvaluateAnimation(world.DeltaTimeSecond);
 
-            base.TickLogic(world, policy);
+                base.TickLogic(world, policy);
+            }   
         }
         public override void OnNodeLoaded(UNode parent)
         {

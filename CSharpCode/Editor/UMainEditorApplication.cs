@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using SDL2;
+//using SDL2;
 
 namespace EngineNS.Editor
 {
-    public partial class UMainEditorApplication : Graphics.Pipeline.USlateApplication, ITickable
+    public partial class UMainEditorApplication : USlateApplication, ITickable
     {
         public UAssetEditorManager AssetEditorManager { get; } = new UAssetEditorManager();
         
@@ -23,7 +23,8 @@ namespace EngineNS.Editor
             //mWorldOutliner = new Editor.Forms.UWorldOutliner(WorldViewportSlate);
 
             mBrickManager = new Bricks.ProjectGen.UBrickManager();
-            mEditorSettings = new Forms.UEditorSettings();            
+            mEditorSettings = new Forms.UEditorSettings();
+            mPIEController = new UPIEController();
         }
         private bool IsVisible = true;
         //public Editor.Forms.UWorldOutliner mWorldOutliner;
@@ -32,6 +33,7 @@ namespace EngineNS.Editor
         public Editor.Forms.UInspector mMainInspector;
         public Bricks.ProjectGen.UBrickManager mBrickManager = null;
         public Editor.Forms.UEditorSettings mEditorSettings;
+        public UPIEController mPIEController;
 
         //public UEditorWorldViewportSlate WorldViewportSlate = null;
         //public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
@@ -128,6 +130,64 @@ namespace EngineNS.Editor
                 },
                 new EGui.UIProxy.MenuItemProxy()
                 {
+                    MenuName = "Tools",
+                    IsTopMenuItem = true,
+                    SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
+                    {
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "CompileMacross",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                var csFiles = new List<string>(IO.FileManager.GetFiles(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game), "*.cs"));
+                                var projectPath = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProjectPath;
+                                csFiles.AddRange(IO.FileManager.GetFiles(projectPath, "*.cs"));
+                                List<string> arguments = new List<string>();
+                                for (int i = 0; i < csFiles.Count; ++i)
+                                    arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFiles[i]));
+
+                                var projectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject;
+                                var projDef = XDocument.Load(projectFile);
+                                var references = projDef.Element("Project").Elements("ItemGroup").Elements("Reference").Select(refElem => refElem.Value);
+                                foreach (var reference in references)
+                                {
+                                    arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile, projectPath + reference));
+                                }
+                                //var references = projDef.Element(projDef.n) 
+
+                                var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameAssembly;
+                                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OutputFile, assemblyFile));
+                                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.PdbFile, assemblyFile.Replace(".dll", ".tpdb")));
+                                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.Outputkind, Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary.ToString()));
+                                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OptimizationLevel, Microsoft.CodeAnalysis.OptimizationLevel.Debug.ToString()));
+                                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.AllowUnsafe, "true"));
+
+                                if (CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray()))
+                                {
+                                    UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
+                                }
+                                //var gameAssembly = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameAssembly;
+
+                                //UEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "Cap",
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                unsafe
+                                {
+                                    IRenderDocTool.GetInstance().SetGpuDevice(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
+                                    IRenderDocTool.GetInstance().SetActiveWindow(this.NativeWindow.HWindow.ToPointer());
+                                    UEngine.Instance.CaptureRenderDocFrame = 1;
+                                }
+                            },
+                        },
+                    },
+                },
+                new EGui.UIProxy.MenuItemProxy()
+                {
                     MenuName = "Windows",
                     IsTopMenuItem = true,
                     SubMenus = new List<EGui.UIProxy.IUIProxyBase>()
@@ -178,6 +238,18 @@ namespace EngineNS.Editor
                                 }
                             },
                         },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "PIE Controller",
+                            Selected = false,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            {
+                                mPIEController.Visible = !mPIEController.Visible;
+                                item.Selected = mPIEController.Visible;
+                                if(mPIEController.Visible)
+                                    _ = mPIEController.Initialize();
+                            },
+                        },
                     },
                 },
             };
@@ -206,8 +278,7 @@ namespace EngineNS.Editor
                 {
                     var pViewport = ImGuiAPI.PlatformIO_Viewports_Get(ImGuiAPI.GetPlatformIO(), i);
                     var nativeWindow = pViewport->PlatformHandle;
-                    var flags = SDL.SDL_GetWindowFlags((IntPtr)nativeWindow);
-                    if ((flags & (uint)SDL.SDL_WindowFlags.SDL_WINDOW_INPUT_FOCUS) != 0)
+                    if (UNativeWindow.IsInputFocus((IntPtr)nativeWindow))
                     {
                         ActiveViewportId = pViewport->ID;
                     }
@@ -230,7 +301,9 @@ namespace EngineNS.Editor
                 CenterDockId = ImGuiAPI.GetID("CenterDocker");
 
                 mCpuProfiler.DockId = CenterDockId;
+#if PWindow
                 mClrProfiler.DockId = CenterDockId;
+#endif
                 //WorldViewportSlate.DockId = CenterDockId;
                 //mWorldOutliner.DockId = LeftDockId;
                 ContentBrowser.DockId = CenterDockId;
@@ -263,7 +336,7 @@ namespace EngineNS.Editor
                     ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
                 {
                     wsz = ImGuiAPI.GetWindowSize();
-                    DrawToolBar();
+                    //DrawToolBar();
                     DrawMainMenu();
 
                     //ImGuiAPI.Separator();
@@ -404,112 +477,75 @@ namespace EngineNS.Editor
             //    ImGuiAPI.EndMenuBar();
             //}
         }
-        bool[] mToolBtn_IsMouseDown = new bool[4];
-        bool[] mToolBtn_IsMouseHover = new bool[4];
-        private unsafe void DrawToolBar()
-        {
-            var drawList = ImGuiAPI.GetWindowDrawList();
-            EGui.UIProxy.Toolbar.BeginToolbar(drawList);
-            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[0], ref mToolBtn_IsMouseHover[0], null, "CompileMacross"))
-            {
-                var csFiles = new List<string>(IO.FileManager.GetFiles(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game), "*.cs"));
-                var projectPath = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProjectPath;
-                csFiles.AddRange(IO.FileManager.GetFiles(projectPath, "*.cs"));
-                List<string> arguments = new List<string>();
-                for (int i = 0; i < csFiles.Count; ++i)
-                    arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFiles[i]));
+        //bool[] mToolBtn_IsMouseDown = new bool[4];
+        //bool[] mToolBtn_IsMouseHover = new bool[4];
+        //private unsafe void DrawToolBar()
+        //{
+        //    var drawList = ImGuiAPI.GetWindowDrawList();
+        //    EGui.UIProxy.Toolbar.BeginToolbar(drawList);
 
-                var projectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject;
-                var projDef = XDocument.Load(projectFile);
-                var references = projDef.Element("Project").Elements("ItemGroup").Elements("Reference").Select(refElem => refElem.Value);
-                foreach (var reference in references)
-                {
-                    arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile, projectPath + reference));
-                }
-                //var references = projDef.Element(projDef.n) 
+        //    if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[1], ref mToolBtn_IsMouseHover[1], null, "Play"))
+        //    {
+        //        var task = OnPlayGame(UEngine.Instance.Config.PlayGameName);
+        //    }
+        //    if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[2], ref mToolBtn_IsMouseHover[2], null, "Stop"))
+        //    {
 
-                var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameAssembly;
-                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OutputFile, assemblyFile));
-                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.PdbFile, assemblyFile.Replace(".dll", ".tpdb")));
-                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.Outputkind, Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary.ToString()));
-                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OptimizationLevel, Microsoft.CodeAnalysis.OptimizationLevel.Debug.ToString()));
-                arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.AllowUnsafe, "true"));
+        //    }
 
-                if (CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray()))
-                {
-                    UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
-                }
-                //var gameAssembly = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameAssembly;
+        //    EGui.UIProxy.Toolbar.EndToolbar();
+        //}
+        //protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
+        //{
+        //    var size = new Vector2(-1, -1);
+        //    if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+        //    {
+        //        ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+        //        var winClass = new ImGuiWindowClass();
+        //        winClass.UnsafeCallConstructor();
+        //        var sz = new Vector2(0.0f, 0.0f);
+        //        ImGuiAPI.DockSpace(LeftDockId, in sz, dockspace_flags, in winClass);
+        //        winClass.UnsafeCallDestructor();
+        //    }
+        //    ImGuiAPI.EndChild();
+        //}
+        //protected unsafe void DrawCenter(ref Vector2 min, ref Vector2 max)
+        //{
+        //    var size = new Vector2(-1, -1);
+        //    if (ImGuiAPI.BeginChild("CenterWindow", in size, false, 
+        //        ImGuiWindowFlags_.ImGuiWindowFlags_None))
+        //    {
+        //        ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+        //        var sz = new Vector2(0.0f, 0.0f);
+        //        //var winClass = new ImGuiWindowClass();
+        //        //winClass.UnsafeCallConstructor();
+        //        //ImGuiAPI.DockSpace(CenterDockId, ref sz, dockspace_flags, ref winClass);
+        //        //winClass.UnsafeCallDestructor();
 
-                //UEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
-            }
-            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[1], ref mToolBtn_IsMouseHover[1], null, "Play"))
-            {
-                var task = OnPlayGame(UEngine.Instance.Config.PlayGameName);
-            }
-            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[2], ref mToolBtn_IsMouseHover[2], null, "Stop"))
-            {
-
-            }
-            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[3], ref mToolBtn_IsMouseHover[3], null, "Cap"))
-            {
-                IRenderDocTool.GetInstance().SetGpuDevice(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
-                IRenderDocTool.GetInstance().SetActiveWindow(this.NativeWindow.HWindow.ToPointer());
-                UEngine.Instance.CaptureRenderDocFrame = 1;
-            }
-            EGui.UIProxy.Toolbar.EndToolbar();
-        }
-        protected unsafe void DrawLeft(ref Vector2 min, ref Vector2 max)
-        {
-            var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("LeftWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-                var winClass = new ImGuiWindowClass();
-                winClass.UnsafeCallConstructor();
-                var sz = new Vector2(0.0f, 0.0f);
-                ImGuiAPI.DockSpace(LeftDockId, in sz, dockspace_flags, in winClass);
-                winClass.UnsafeCallDestructor();
-            }
-            ImGuiAPI.EndChild();
-        }
-        protected unsafe void DrawCenter(ref Vector2 min, ref Vector2 max)
-        {
-            var size = new Vector2(-1, -1);
-            if (ImGuiAPI.BeginChild("CenterWindow", in size, false, 
-                ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-                var sz = new Vector2(0.0f, 0.0f);
-                //var winClass = new ImGuiWindowClass();
-                //winClass.UnsafeCallConstructor();
-                //ImGuiAPI.DockSpace(CenterDockId, ref sz, dockspace_flags, ref winClass);
-                //winClass.UnsafeCallDestructor();
-
-                ImGuiAPI.DockSpace(CenterDockId, &sz, dockspace_flags, (ImGuiWindowClass*)0);
-            }
-            ImGuiAPI.EndChild();
-        }
-        protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
-        {
-            //var size = new Vector2(-1, -1);
-            //if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            //{
-            //    ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
-            //    var winClass = new ImGuiWindowClass();
-            //    winClass.UnsafeCallConstructor();
-            //    var sz = new Vector2(0.0f, 0.0f);
-            //    ImGuiAPI.DockSpace(RightDockId, in sz, dockspace_flags, in winClass);
-            //    winClass.UnsafeCallDestructor();
-            //}
-            //ImGuiAPI.EndChild();
-        }
+        //        ImGuiAPI.DockSpace(CenterDockId, &sz, dockspace_flags, (ImGuiWindowClass*)0);
+        //    }
+        //    ImGuiAPI.EndChild();
+        //}
+        //protected unsafe void DrawRight(ref Vector2 min, ref Vector2 max)
+        //{
+        //    //var size = new Vector2(-1, -1);
+        //    //if (ImGuiAPI.BeginChild("RightWindow", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+        //    //{
+        //    //    ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
+        //    //    var winClass = new ImGuiWindowClass();
+        //    //    winClass.UnsafeCallConstructor();
+        //    //    var sz = new Vector2(0.0f, 0.0f);
+        //    //    ImGuiAPI.DockSpace(RightDockId, in sz, dockspace_flags, in winClass);
+        //    //    winClass.UnsafeCallDestructor();
+        //    //}
+        //    //ImGuiAPI.EndChild();
+        //}
         #endregion
 
-        async System.Threading.Tasks.Task OnPlayGame(RName assetName)
-        {
-            await UEngine.Instance.StartPlayInEditor(UEngine.Instance.GfxDevice.SlateApplication, assetName);
-        }
+        //async System.Threading.Tasks.Task OnPlayGame(RName assetName)
+        //{
+        //    await UEngine.Instance.StartPlayInEditor(UEngine.Instance.GfxDevice.SlateApplication, assetName);
+        //}
         #region TestCode
         public static async System.Threading.Tasks.Task TestCreateScene(Graphics.Pipeline.UViewportSlate vpSlate,GamePlay.UWorld world, GamePlay.Scene.UNode root, bool hideTerrain = false)
         {

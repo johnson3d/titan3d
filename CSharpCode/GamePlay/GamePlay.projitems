@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controller\UNPCController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controller\UCharacterController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\UGameplayMacross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Movemnet\UCharacterMovement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Movemnet\UMovement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\Actor\UActor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\UPlayer.cs" />

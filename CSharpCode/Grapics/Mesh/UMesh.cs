@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Graphics.Pipeline.Deferred;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -241,6 +242,8 @@ namespace EngineNS.Graphics.Mesh
                 }
                 return drawCalls;
             }
+            [ThreadStatic]
+            private static Profiler.TimeScope ScopeOnDrawCall = Profiler.TimeScopeManager.GetTimeScope(typeof(UAtom), "OnDrawCall");
             public unsafe virtual NxRHI.UGraphicDraw GetDrawCall(Pipeline.UGraphicsBuffers targetView, UMesh mesh, int atom, Pipeline.URenderPolicy policy,
                 Pipeline.URenderPolicy.EShadingType shadingType, Pipeline.Common.URenderGraphNode node)
             {
@@ -321,8 +324,11 @@ namespace EngineNS.Graphics.Mesh
                 //        result.mCoreObject.BindCBufferAll(result.Effect.CBPerMeshIndex, mesh.PerMeshCBuffer.mCoreObject);
                 //    }
                 //}
-                
-                policy.OnDrawCall(shadingType, result, mesh, atom);
+
+                using (new Profiler.TimeScopeHelper(ScopeOnDrawCall))
+                {
+                    policy.OnDrawCall(shadingType, result, mesh, atom);
+                }
                 return result;
             }
         }

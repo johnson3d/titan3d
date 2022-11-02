@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using SDL2;
 
 namespace EngineNS.Editor
 {
@@ -21,7 +20,7 @@ namespace EngineNS.Editor
             RenderPolicy?.Cleanup();
             RenderPolicy = null;
         }
-        protected async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
@@ -52,7 +51,7 @@ namespace EngineNS.Editor
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
         }
         bool Initialized = false;
-        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, float zMin, float zMax)
+        public override async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
             Graphics.Pipeline.URenderPolicy policy = null;
             var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName);
@@ -109,7 +108,7 @@ namespace EngineNS.Editor
         Vector2 mPreMousePt;
         public float CameraMoveSpeed { get; set; } = 1.0f;
         public float CameraMouseWheelSpeed { get; set; } = 1.0f;
-        public unsafe override bool OnEvent(ref SDL.SDL_Event e)
+        public unsafe override bool OnEvent(in Bricks.Input.Event e)
         {
             if (this.IsFocused == false)
             {
@@ -117,46 +116,46 @@ namespace EngineNS.Editor
             }
 
             var keyboards = UEngine.Instance.InputSystem;
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
+            if (e.Type == Bricks.Input.EventType.MOUSEMOTION)
             {
-                if (e.button.button == SDL.SDL_BUTTON_LEFT)
+                if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
                 {
                     if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.motion.x - mPreMousePt.X) * 0.01f);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.motion.y - mPreMousePt.Y) * 0.01f);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * 0.01f);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * 0.01f);
                     }
                 }
-                else if (e.button.button == SDL.SDL_BUTTON_MIDDLE)
+                else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_MIDDLE)
                 {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.motion.x - mPreMousePt.X) * 0.01f);
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.motion.y - mPreMousePt.Y) * 0.01f);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.X - mPreMousePt.X) * 0.01f);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.Y - mPreMousePt.Y) * 0.01f);
                 }
-                else if (e.button.button == SDL.SDL_BUTTON_X1)
+                else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_X1)
                 {
                     if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
-                        CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, (e.motion.y - mPreMousePt.Y) * 0.03f);
+                        CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, (e.MouseMotion.Y - mPreMousePt.Y) * 0.03f);
                     }
                     else
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.motion.x - mPreMousePt.X) * 0.01f, true);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.motion.y - mPreMousePt.Y) * 0.01f, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * 0.01f, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * 0.01f, true);
                     }
                 }
 
-                mPreMousePt.X = e.motion.x;
-                mPreMousePt.Y = e.motion.y;
+                mPreMousePt.X = e.MouseMotion.X;
+                mPreMousePt.Y = e.MouseMotion.Y;
             }
-            else if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL)
+            else if (e.Type == Bricks.Input.EventType.MOUSEWHEEL)
             {
                 if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                 {
-                    CameraMoveSpeed += (float)(e.wheel.y * 0.01f);
+                    CameraMoveSpeed += (float)(e.MouseWheel.Y * 0.01f);
                 }
                 else
                 {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, e.wheel.y * CameraMouseWheelSpeed);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, e.MouseWheel.Y * CameraMouseWheelSpeed);
                 }
             }
             return true;

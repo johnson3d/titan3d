@@ -1,5 +1,4 @@
-﻿using EngineNS.Editor;
-using EngineNS.GamePlay.Action;
+﻿using EngineNS.GamePlay.Action;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -184,7 +183,7 @@ namespace EngineNS.GamePlay
                 return await base.InitializeNode(world, data, bvType, placementType);
             }
 
-            public override bool DrawNode(UTreeNodeDrawer tree, int index, int NumOfChild)
+            public override bool DrawNode(EngineNS.Editor.UTreeNodeDrawer tree, int index, int NumOfChild)
             {
                 return false;
             }
@@ -1127,31 +1126,31 @@ namespace EngineNS.GamePlay
         bool mCtrlKeyIsDown = false;
         bool mShiftKeyIsDown = false;
         bool mAltKeyIsDown = false;
-        public void OnEvent(Graphics.Pipeline.UViewportSlate viewport, in SDL2.SDL.SDL_Event e)
+        public void OnEvent(Graphics.Pipeline.UViewportSlate viewport, in Bricks.Input.Event e)
         {
             if (mAxisMeshDatas == null)
                 return;
 
             UpdateAxisShow(viewport);            
-            switch (e.type)
+            switch (e.Type)
             {
-                case SDL2.SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                case Bricks.Input.EventType.MOUSEBUTTONDOWN:
                     {
                         mFirstTransAxis = true;
-                        if(e.button.button == SDL2.SDL.SDL_BUTTON_LEFT && mCurrentAxisType != enAxisType.Null)
+                        if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT && mCurrentAxisType != enAxisType.Null)
                         {
-                            StartTransAxis(viewport, e);
+                            StartTransAxis(viewport, in e);
                         }
                     }
                     break;
-                case SDL2.SDL.SDL_EventType.SDL_MOUSEMOTION:
+                case Bricks.Input.EventType.MOUSEMOTION:
                     {
                         if(!mIsTransAxisOperation)
                         {
                             var edtorPolicy = viewport.RenderPolicy as Graphics.Pipeline.URenderPolicy;
                             if (edtorPolicy != null)
                             {
-                                var pos = viewport.Window2Viewport(new Vector2((float)e.motion.x, (float)e.motion.y));
+                                var pos = viewport.Window2Viewport(new Vector2((float)e.MouseMotion.X, (float)e.MouseMotion.Y));
                                 var hitObj = edtorPolicy.GetHitproxy((uint)pos.X, (uint)pos.Y);
                                 if (hitObj != null)
                                 {
@@ -1270,35 +1269,35 @@ namespace EngineNS.GamePlay
                             }
                         }
 
-                        if (e.button.button == SDL2.SDL.SDL_BUTTON_LEFT)
+                        if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
                         {
-                            var noUse = TransAxis(new Vector2(e.motion.x, e.motion.y), viewport);
+                            var noUse = TransAxis(new Vector2(e.MouseMotion.X, e.MouseMotion.Y), viewport);
                         }
                     }
                     break;
-                case SDL2.SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
+                case Bricks.Input.EventType.MOUSEBUTTONUP:
                     {
-                        if (e.button.button == SDL2.SDL.SDL_BUTTON_LEFT)
+                        if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
                             EndTransAxis();
                     }
                     break;
-                case SDL2.SDL.SDL_EventType.SDL_KEYDOWN:
+                case Bricks.Input.EventType.KEYDOWN:
                     {
-                        if (e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_LCTRL || e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_RCTRL)
+                        if (e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_LCTRL || e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_RCTRL)
                             mCtrlKeyIsDown = true;
-                        if (e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_LSHIFT || e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_RSHIFT)
+                        if (e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_LSHIFT || e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_RSHIFT)
                             mShiftKeyIsDown = true;
-                        if (e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_LALT || e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_RALT)
+                        if (e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_LALT || e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_RALT)
                             mAltKeyIsDown = true;
                     }
                     break;
-                case SDL2.SDL.SDL_EventType.SDL_KEYUP:
+                case Bricks.Input.EventType.KEYUP:
                     {
-                        if (e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_LCTRL || e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_RCTRL)
+                        if (e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_LCTRL || e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_RCTRL)
                             mCtrlKeyIsDown = false;
-                        if (e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_LSHIFT || e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_RSHIFT)
+                        if (e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_LSHIFT || e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_RSHIFT)
                             mShiftKeyIsDown = false;
-                        if (e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_LALT || e.key.keysym.sym == SDL2.SDL.SDL_Keycode.SDLK_RALT)
+                        if (e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_LALT || e.Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_RALT)
                             mAltKeyIsDown = false;
                     }
                     break;
@@ -1632,7 +1631,7 @@ namespace EngineNS.GamePlay
         Vector3 mMouseStartScreenLocation;
         bool mIsTransAxisOperation = false;
         FTransform mPosNodeStartTransform;
-        void StartTransAxis(Graphics.Pipeline.UViewportSlate viewport, in SDL2.SDL.SDL_Event e)
+        void StartTransAxis(Graphics.Pipeline.UViewportSlate viewport, in Bricks.Input.Event e)
         {
             if (!mInitialized)
                 return;
@@ -1725,7 +1724,7 @@ namespace EngineNS.GamePlay
                         tempNormal.Normalize();
                         planeAxis = Vector3.Cross(transAxis, tempNormal);
                         planeAxis.Normalize();
-                        PickPlanePos(viewport, e.motion.x, e.motion.y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
+                        PickPlanePos(viewport, e.MouseMotion.X, e.MouseMotion.Y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
                     }
                     break;
                 case enAxisType.Rot_X:
@@ -1750,7 +1749,7 @@ namespace EngineNS.GamePlay
                             var camera = mCameraController.Camera.mCoreObject;
 
                             EngineNS.Vector3 pickRay = -EngineNS.Vector3.UnitY;
-                            var pos = viewport.Window2Viewport(new Vector2(e.motion.x, e.motion.y));
+                            var pos = viewport.Window2Viewport(new Vector2(e.MouseMotion.X, e.MouseMotion.Y));
                             var pickResult = camera.GetPickRay(ref pickRay, pos.X, pos.Y, viewport.ClientSize.X, viewport.ClientSize.Y);
                             pickRay.Normalize();
                             var camPos = camera.GetPosition();
@@ -1764,7 +1763,7 @@ namespace EngineNS.GamePlay
                         else
                         {
                             EngineNS.Vector3.TransformNormal(in axisDir, in startWorldMat, out planeAxis);
-                            PickPlanePos(viewport, e.motion.x, e.motion.y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
+                            PickPlanePos(viewport, e.MouseMotion.X, e.MouseMotion.Y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
                         }
                     }
                     break;
@@ -1774,7 +1773,7 @@ namespace EngineNS.GamePlay
                 case enAxisType.Scale_Plane_XY:
                     {
                         EngineNS.Vector3.TransformNormal(in EngineNS.Vector3.UnitZ, in startWorldMat, out planeAxis);
-                        PickPlanePos(viewport, e.motion.x, e.motion.y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
+                        PickPlanePos(viewport, e.MouseMotion.X, e.MouseMotion.Y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
                     }
                     break;
                 case enAxisType.Move_Y:
@@ -1786,7 +1785,7 @@ namespace EngineNS.GamePlay
                         tempNormal.Normalize();
                         planeAxis = EngineNS.Vector3.Cross(transAxis, tempNormal);
                         planeAxis.Normalize();
-                        PickPlanePos(viewport, e.motion.x, e.motion.y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
+                        PickPlanePos(viewport, e.MouseMotion.X, e.MouseMotion.Y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
                     }
                     break;
                 case enAxisType.Move_Line_XZ:
@@ -1795,7 +1794,7 @@ namespace EngineNS.GamePlay
                 case enAxisType.Scale_Plane_XZ:
                     {
                         EngineNS.Vector3.TransformNormal(in EngineNS.Vector3.UnitY, in startWorldMat, out planeAxis);
-                        PickPlanePos(viewport, e.motion.x, e.motion.y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
+                        PickPlanePos(viewport, e.MouseMotion.X, e.MouseMotion.Y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
                     }
                     break;
                 case enAxisType.Move_Z:
@@ -1807,7 +1806,7 @@ namespace EngineNS.GamePlay
                         tempNormal.Normalize();
                         planeAxis = EngineNS.Vector3.Cross(transAxis, tempNormal);
                         planeAxis.Normalize();
-                        PickPlanePos(viewport, e.motion.x, e.motion.y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
+                        PickPlanePos(viewport, e.MouseMotion.X, e.MouseMotion.Y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
                     }
                     break;
                 case enAxisType.Move_Line_YZ:
@@ -1816,13 +1815,13 @@ namespace EngineNS.GamePlay
                 case enAxisType.Scale_Plane_YZ:
                     {
                         EngineNS.Vector3.TransformNormal(in EngineNS.Vector3.UnitX, in startWorldMat, out planeAxis);
-                        PickPlanePos(viewport, e.motion.x, e.motion.y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
+                        PickPlanePos(viewport, e.MouseMotion.X, e.MouseMotion.Y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
                     }
                     break;
                 case enAxisType.Scale_XYZ:
                     {
                         planeAxis = -cameraDirection;
-                        PickPlanePos(viewport, e.motion.x, e.motion.y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
+                        PickPlanePos(viewport, e.MouseMotion.X, e.MouseMotion.Y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
                     }
                     break;
                 case enAxisType.Edge_X_Min:
@@ -1836,7 +1835,7 @@ namespace EngineNS.GamePlay
                         tempNormal.Normalize();
                         planeAxis = EngineNS.Vector3.Cross(transAxis, tempNormal);
                         planeAxis.Normalize();
-                        PickPlanePos(viewport, e.motion.x, e.motion.y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
+                        PickPlanePos(viewport, e.MouseMotion.X, e.MouseMotion.Y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
                     }
                     break;
                 case enAxisType.Edge_Y_Min:
@@ -1850,7 +1849,7 @@ namespace EngineNS.GamePlay
                         tempNormal.Normalize();
                         planeAxis = EngineNS.Vector3.Cross(transAxis, tempNormal);
                         planeAxis.Normalize();
-                        PickPlanePos(viewport, e.motion.x, e.motion.y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
+                        PickPlanePos(viewport, e.MouseMotion.X, e.MouseMotion.Y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
                     }
                     break;
                 case enAxisType.Edge_Z_Min:
@@ -1864,12 +1863,12 @@ namespace EngineNS.GamePlay
                         tempNormal.Normalize();
                         planeAxis = EngineNS.Vector3.Cross(transAxis, tempNormal);
                         planeAxis.Normalize();
-                        PickPlanePos(viewport, e.motion.x, e.motion.y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
+                        PickPlanePos(viewport, e.MouseMotion.X, e.MouseMotion.Y, in mCurrentAxisStartTransform.mPosition, in planeAxis, out mMouseStartLocation);
                     }
                     break;
             }
 
-            mMouseStartScreenLocation = new Vector3(e.motion.x, e.motion.y, 0.0f);
+            mMouseStartScreenLocation = new Vector3(e.MouseMotion.X, e.MouseMotion.Y, 0.0f);
             #region Debug
             //if (mPlaneNode != null)
             //{

@@ -12,6 +12,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)FileManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UClrProfiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UExcelOperator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UInputSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UPlatformWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Windows.brick" />

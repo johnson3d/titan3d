@@ -140,19 +140,19 @@ namespace EngineNS.GamePlay
             meshNode1.IsAcceptShadow = false;
             meshNode1.IsCastShadow = true;
 
-            var sapnd = new EngineNS.Animation.SceneNode.USkeletonAnimPlayNode.USkeletonAnimPlayNodeData();
-            sapnd.Name = "PlayAnim";
-            sapnd.AnimatinName = RName.GetRName("utest/puppet/animation/w2_walk_aim_f_loop_ip.animclip");
-            await EngineNS.Animation.SceneNode.USkeletonAnimPlayNode.AddSkeletonAnimPlayNode(scene.World, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
-            //var sapnd = new EngineNS.Animation.SceneNode.UBlendSpaceAnimPlayNode.UBlendSpaceAnimPlayNodeData();
+            //var sapnd = new EngineNS.Animation.SceneNode.USkeletonAnimPlayNode.USkeletonAnimPlayNodeData();
             //sapnd.Name = "PlayAnim";
             //sapnd.AnimatinName = RName.GetRName("utest/puppet/animation/w2_walk_aim_f_loop_ip.animclip");
-            //sapnd.OverrideAsset = true;
-            //sapnd.Axises.Add(new EngineNS.Animation.Asset.BlendSpace.UBlendSpace_Axis("Speed", -3, 3));
-            //sapnd.Axises.Add(new EngineNS.Animation.Asset.BlendSpace.UBlendSpace_Axis("V"));
-            //sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"), Vector3.Zero));
-            //sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_walk_aim_f_loop_ip.animclip"), new Vector3(3, 0, 0)));
-            //await EngineNS.Animation.SceneNode.UBlendSpaceAnimPlayNode.AddBlendSpace2DAnimPlayNode(scene.World, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
+            //await EngineNS.Animation.SceneNode.USkeletonAnimPlayNode.AddSkeletonAnimPlayNode(scene.World, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
+            var sapnd = new EngineNS.Animation.SceneNode.UBlendSpaceAnimPlayNode.UBlendSpaceAnimPlayNodeData();
+            sapnd.Name = "PlayAnim";
+            sapnd.AnimatinName = RName.GetRName("utest/puppet/animation/w2_walk_aim_f_loop_ip.animclip");
+            sapnd.OverrideAsset = true;
+            sapnd.Axises.Add(new EngineNS.Animation.Asset.BlendSpace.UBlendSpace_Axis("Speed", -3, 3));
+            sapnd.Axises.Add(new EngineNS.Animation.Asset.BlendSpace.UBlendSpace_Axis("V"));
+            sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"), Vector3.Zero));
+            sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_run_f_loop_ip.animclip"), new Vector3(3, 0, 0)));
+            await EngineNS.Animation.SceneNode.UBlendSpaceAnimPlayNode.AddBlendSpace2DAnimPlayNode(scene.World, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
 
             var characterController = new EngineNS.GamePlay.Controller.UCharacterController();
             await characterController.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.UNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
@@ -174,19 +174,19 @@ namespace EngineNS.GamePlay
             camera.Parent = springArm;
             camera.Camera = WorldViewportSlate.RenderPolicy.DefaultCamera;
 
-            var movement = new EngineNS.GamePlay.Movemnet.UMovement();
-            movement.EnableGravity = true;
-            await movement.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.UNodeData() { Name = "Movement" }, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
-            movement.Parent = ChiefPlayer;
-
-            characterController.MovementNode = movement;
-
             var phyControl = new UCapsulePhyControllerNode();
             var phyNodeData = new UCapsulePhyControllerNode.UCapsulePhyControllerNodeData();
             phyNodeData.Height = 1.5f;
             phyNodeData.Radius = 0.5f;
             await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             phyControl.Parent = ChiefPlayer;
+
+            var movement = new EngineNS.GamePlay.Movemnet.UCharacterMovement();
+            movement.EnableGravity = true;
+            await movement.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.UNodeData() { Name = "Movement" }, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            movement.Parent = ChiefPlayer;
+
+            characterController.MovementNode = movement;
         }
 
         public async System.Threading.Tasks.Task CreateSpereActor(Scene.UScene scene)

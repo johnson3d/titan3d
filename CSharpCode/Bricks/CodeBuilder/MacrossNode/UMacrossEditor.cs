@@ -10,7 +10,7 @@ using System.Xml.Linq;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class UMacrossEditor : IO.ISerializer, Editor.IAssetEditor, Graphics.Pipeline.IRootForm
+    public partial class UMacrossEditor : IO.ISerializer, Editor.IAssetEditor, IRootForm
     {
         public UMacrossEditor()
         {
@@ -90,7 +90,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public Graphics.Pipeline.IRootForm GetRootForm()
+        public IRootForm GetRootForm()
         {
             return this;
         }
@@ -781,7 +781,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         }
 
-        public void OnEvent(ref SDL2.SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
 
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using static EngineNS.NxRHI.URenderCmdQueue;
 
 namespace EngineNS.NxRHI
 {
@@ -118,10 +119,14 @@ namespace EngineNS.NxRHI
                 return mCoreObject.GetDrawcallNumber();
             }
         }
-
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UCommandList), nameof(FlushDraws));
         public void FlushDraws()
         {
-            mCoreObject.FlushDraws();
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                mCoreObject.FlushDraws();
+            }   
         }
         public void ResetGpuDraws()
         {
@@ -143,6 +148,8 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.PushGpuDraw(draw.NativeSuper);
         }
+        //[ThreadStatic]
+        //private static Profiler.TimeScope ScopePushGpuDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UCommandList), nameof(PushGpuDraw));
         public void PushGpuDraw(UGraphicDraw draw)
         {
             PushGpuDraw(draw.mCoreObject);
@@ -166,12 +173,31 @@ namespace EngineNS.NxRHI
             public FRenderCmd Cmd;
             public string Name;
         }
-
+        public class UQueueStat
+        {
+            public uint NumOfCmdlist;
+            public uint NumOfDrawcall;
+            public uint NumOfPrimitive;
+            public void Reset()
+            {
+                NumOfCmdlist = 0;
+                NumOfDrawcall = 0;
+                NumOfPrimitive = 0;
+            }
+        }
+        public UQueueStat GetStat()
+        {
+            return QueueStats[1];
+        }
+        public UQueueStat[] QueueStats = new UQueueStat[2];
         public readonly Queue<FRCmdInfo>[] RenderCmds = new Queue<FRCmdInfo>[2];
         public readonly Queue<FRCmdInfo>[] RenderPreCmds = new Queue<FRCmdInfo>[2];
         public readonly Queue<FRCmdInfo>[] RenderPostCmds = new Queue<FRCmdInfo>[2];
         public URenderCmdQueue()
         {
+            QueueStats[0] = new UQueueStat();
+            QueueStats[1] = new UQueueStat();
+
             RenderCmds[0] = new Queue<FRCmdInfo>();
             RenderCmds[1] = new Queue<FRCmdInfo>();
 
@@ -247,25 +273,33 @@ namespace EngineNS.NxRHI
                     UEngine.Instance.GfxDevice.RenderContext.CmdQueue.ExecuteCommandList(cmd);
                 };
                 RenderCmds[0].Enqueue(info);
+                QueueStats[0].NumOfDrawcall += cmd.mCoreObject.GetDrawcallNumber();
+                QueueStats[0].NumOfCmdlist++;
+                QueueStats[0].NumOfPrimitive += cmd.mCoreObject.GetPrimitiveNumber();
             }
         }
         public void TickLogic(int ellapse)
         {
 
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeRenderTick = Profiler.TimeScopeManager.GetTimeScope(typeof(URenderCmdQueue), nameof(TickRender));
         public void TickRender(int ellapse)
         {
             var cmdQueue = UEngine.Instance.GfxDevice.RenderContext.CmdQueue;
-
+            
+            using (new Profiler.TimeScopeHelper(ScopeRenderTick))
             {
                 var im_cmd = cmdQueue.GetIdleCmdlist(EQueueCmdlist.QCL_Read);
                 TickAways(im_cmd);
                 cmdQueue.ReleaseIdleCmdlist(im_cmd, EQueueCmdlist.QCL_Read);
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeSyncTick = Profiler.TimeScopeManager.GetTimeScope(typeof(URenderCmdQueue), nameof(TickRender));
         public void TickSync(int ellapse)
         {
-            //if( false )
+            using (new Profiler.TimeScopeHelper(ScopeRenderTick))
             {
                 var cmdQueue = UEngine.Instance.GfxDevice.RenderContext.CmdQueue;
                 var im_cmd = cmdQueue.GetIdleCmdlist(EQueueCmdlist.QCL_FramePost);
@@ -276,23 +310,34 @@ namespace EngineNS.NxRHI
 
                 //UEngine.Instance.EventPoster.TickPostTickSyncEvents();
                 //UEngine.Instance.GfxDevice.RenderContext.TickPostEvents();
-            }
 
-            {
-                var save = RenderCmds[0];
-                RenderCmds[0] = RenderCmds[1];
-                RenderCmds[1] = save;
+                Swap(ref RenderCmds[0], ref RenderCmds[1]);
+                Swap(ref RenderPreCmds[0], ref RenderPreCmds[1]);
+                Swap(ref RenderPostCmds[0], ref RenderPostCmds[1]);
+                Swap(ref QueueStats[0], ref QueueStats[1]);
+                QueueStats[0].Reset();
+                //{
+                //    var save = RenderCmds[0];
+                //    RenderCmds[0] = RenderCmds[1];
+                //    RenderCmds[1] = save;
+                //}
+                //{
+                //    var save = RenderPreCmds[0];
+                //    RenderPreCmds[0] = RenderPreCmds[1];
+                //    RenderPreCmds[1] = save;
+                //}
+                //{
+                //    var save = RenderPostCmds[0];
+                //    RenderPostCmds[0] = RenderPostCmds[1];
+                //    RenderPostCmds[1] = save;
+                //}
             }
-            {
-                var save = RenderPreCmds[0];
-                RenderPreCmds[0] = RenderPreCmds[1];
-                RenderPreCmds[1] = save;
-            }
-            {
-                var save = RenderPostCmds[0];
-                RenderPostCmds[0] = RenderPostCmds[1];
-                RenderPostCmds[1] = save;
-            }
+        }
+        public void Swap<T>(ref T l, ref T r)
+        {
+            var save = l;
+            l = r;
+            r = save;
         }
         public void TickAways(ICommandList ImCmdlist)
         {

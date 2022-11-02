@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using SDL2;
 
 namespace EngineNS.Editor
 {
-    public class UEditorWorldViewportSlate : EGui.Slate.UWorldViewportSlate, Graphics.Pipeline.IRootForm
+    public class UEditorWorldViewportSlate : EGui.Slate.UWorldViewportSlate, IRootForm
     {
         public UEditorWorldViewportSlate(bool regRoot)
         {
@@ -34,10 +33,10 @@ namespace EngineNS.Editor
                 app.mMainInspector.PropertyGrid.Target = proxy;
             }
         }
-        protected override void OnMouseUp(ref SDL.SDL_Event e)
+        protected override void OnMouseUp(in Bricks.Input.Event e)
         {
             //test
-            if (e.button.button == SDL.SDL_BUTTON_LEFT)
+            if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
             {
                 var root = World.Root.FindFirstChild("DrawMeshNode");
                 if (root == null)
@@ -45,7 +44,7 @@ namespace EngineNS.Editor
                 Vector3 ray = new Vector3();
                 float sw = Viewport.Width;
                 float sh = Viewport.Height;
-                var mouse = Window2Viewport(new Vector2((float)e.button.x, (float)e.button.y));
+                var mouse = Window2Viewport(new Vector2((float)e.MouseButton.X, (float)e.MouseButton.Y));
                 if (0 != CameraController.Camera.mCoreObject.GetPickRay(ref ray, mouse.X, mouse.Y, sw, sh))
                 {
                     var pos = CameraController.Camera.mCoreObject.GetPosition();

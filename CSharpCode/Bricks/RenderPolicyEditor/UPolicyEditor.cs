@@ -4,7 +4,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.RenderPolicyEditor
 {
-    public class UPolicyEditor : Editor.IAssetEditor, IO.ISerializer, Graphics.Pipeline.IRootForm
+    public class UPolicyEditor : Editor.IAssetEditor, IO.ISerializer, IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -29,7 +29,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         {
             NodePropGrid.Target = null;
         }
-        public Graphics.Pipeline.IRootForm GetRootForm()
+        public IRootForm GetRootForm()
         {
             return this;
         }
@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         {
             Cleanup();
         }
-        public void OnEvent(ref SDL2.SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
         }
         #endregion

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UEditorSettings : Graphics.Pipeline.IRootForm
+    public class UEditorSettings : IRootForm
     {
         public UEditorSettings()
         {

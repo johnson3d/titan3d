@@ -1,5 +1,7 @@
 ﻿using EngineNS.Animation.Base;
+using EngineNS.Animation.Curve;
 using EngineNS.IO;
+using EngineNS.Rtti;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,7 +23,7 @@ namespace EngineNS.Animation.Asset
         }
         public override string GetAssetTypeName()
         {
-            return "Animation Clip";
+            return "AnimationClip";
         }
     }
 
@@ -155,7 +157,23 @@ namespace EngineNS.Animation.Asset
 
         public static void ConstructAnimHierarchy(UAnimHierarchy root, UAnimHierarchy parent, List<UAnimHierarchy> children)
         {
-            foreach(var child in children)
+            if (root == null)
+            {
+                foreach (var property in root.Node.Properties)
+                {
+                    if (property.ClassType == UTypeDesc.TypeOf<Vector3>())
+                        property.TypeStr = UTypeDesc.TypeOf<NullableVector3>().TypeString;
+                }
+            }
+            if (parent != null)
+            {
+                foreach (var property in parent.Node.Properties)
+                {
+                    if (property.ClassType == UTypeDesc.TypeOf<Vector3>())
+                        property.TypeStr = UTypeDesc.TypeOf<NullableVector3>().TypeString;
+                }
+            }
+            foreach (var child in children)
             {
                 child.Root = root;
                 child.Parent = parent;
@@ -166,6 +184,10 @@ namespace EngineNS.Animation.Asset
         #region ImprotAttribute
         public partial class ImportAttribute : IO.CommonCreateAttribute
         {
+            ~ImportAttribute()
+            {
+                //mFileDialog.Dispose();
+            }
             string mSourceFile;
             ImGui.ImGuiFileDialog mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             //EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
@@ -176,9 +198,9 @@ namespace EngineNS.Animation.Asset
                 //mDesc.Desc.SetDefault();
                 //PGAsset.SingleTarget = mDesc;
             }
-            public override unsafe void OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
+            public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
             {
-                FBXCreateCreateDraw(ContentBrowser);
+                return FBXCreateCreateDraw(ContentBrowser);
             }
 
             //for just create a clip as a property animation not from fbx 
@@ -191,7 +213,7 @@ namespace EngineNS.Animation.Asset
                 return false;
             }
 
-            public unsafe partial void FBXCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
+            public unsafe partial bool FBXCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
         }
         #endregion
 

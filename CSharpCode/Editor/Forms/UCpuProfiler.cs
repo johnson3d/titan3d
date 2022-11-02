@@ -1,10 +1,11 @@
-﻿using System;
+﻿using EngineNS.EGui;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UCpuProfiler : Graphics.Pipeline.IRootForm
+    public class UCpuProfiler : IRootForm
     {
         public UCpuProfiler()
         {
@@ -25,7 +26,105 @@ namespace EngineNS.Editor.Forms
         Task<Profiler.URpcProfiler.RpcProfilerThreads> mRpcProfilerThreads;
         List<string> ProfilerThreadNames = new List<string>();
         List<Profiler.URpcProfiler.RpcProfilerData.ScopeInfo> Scopes = new List<Profiler.URpcProfiler.RpcProfilerData.ScopeInfo>();
-        public unsafe void OnDraw()
+        void SetCopes(List<Profiler.URpcProfiler.RpcProfilerData.ScopeInfo> src)
+        {
+            if (mSortMode != ESortMode.None)
+            {
+                for (int j = 0; j < Scopes.Count; j++)
+                {
+                    bool find = false;
+                    foreach (var i in src)
+                    {
+                        if (Scopes[j].ShowName == i.ShowName)
+                        {
+                            find = true;
+                            break;
+                        }
+                    }
+                    if (find == false)
+                    {
+                        Scopes.RemoveAt(j);
+                        j--;
+                    }
+                }
+                foreach (var i in src)
+                {
+                    bool find = false;
+                    for (int j = 0; j < Scopes.Count; j++)
+                    {
+                        if (Scopes[j].ShowName == i.ShowName)
+                        {
+                            Scopes[j] = i;
+                            find = true;
+                            break;
+                        }
+                    }
+                    if (find == false)
+                    {
+                        Scopes.Add(i);
+                    }
+                }
+            }
+            else
+            {
+                Scopes = src;
+            }
+            //SortScopes();
+        }
+        private int FindScope(string name)
+        {
+            for (int i = 0; i < Scopes.Count; i++)
+            {
+                if (Scopes[i].ShowName == name)
+                    return i;
+            }
+            return -1;
+        }
+        enum ESortMode
+        {
+            None = 0,
+            ByName,
+            ByTime,
+        }
+        ESortMode mSortMode = ESortMode.None;
+        void SortScopes()
+        {
+            switch (mSortMode)
+            {
+                case ESortMode.ByName:
+                    {
+                        Scopes.Sort((x, y) =>
+                        {
+                            return x.ShowName.CompareTo(y.ShowName);
+                        });
+                    }
+                    break;
+                case ESortMode.ByTime:
+                    {
+                        Scopes.Sort((x, y) =>
+                        {
+                            return y.AvgTime.CompareTo(x.AvgTime);
+                        });
+                    }
+                    break;
+            }
+
+            
+        }
+        string mFilter;
+        bool mFilterFocusd;
+        string CurrentThreadName = null;
+        string CurrentName = null;
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeOnDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UCpuProfiler), nameof(OnDraw));
+        public void OnDraw()
+        {
+            using (new Profiler.TimeScopeHelper(ScopeOnDraw))
+            {
+                OnDrawImpl();
+            }
+        }
+        private unsafe void OnDrawImpl()
         {
             if (mRpcProfilerThreads == null || mRpcProfilerThreads.IsCompleted)
             {
@@ -45,6 +144,10 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
             if (ImGuiAPI.Begin("CpuProfiler", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
+                var cmdlst = ImGuiAPI.GetWindowDrawList();
+                var stats = UEngine.Instance.GfxDevice.RenderCmdQueue.GetStat();
+                ImGuiAPI.Text($"CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive};");
+                EGui.UIProxy.SearchBarProxy.OnDraw(ref mFilterFocusd, cmdlst, "filter", ref mFilter, ImGuiAPI.GetWindowContentRegionWidth());
                 DockId = ImGuiAPI.GetWindowDockID();
                 if (ImGuiAPI.BeginTabBar("CPU", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
                 {
@@ -52,83 +155,149 @@ namespace EngineNS.Editor.Forms
                     {
                         if (ImGuiAPI.BeginTabItem(i, null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
                         {
+                            if (i != CurrentThreadName)
+                            {
+                                CurrentThreadName = i;
+                                CurrentName = null;
+                                Scopes.Clear();
+                            }
+                            
                             if (mRpcProfilerData == null || mRpcProfilerData.IsCompleted)
                             {
                                 if (mRpcProfilerData != null)
-                                    Scopes = mRpcProfilerData.Result.Scopes;
+                                    SetCopes(mRpcProfilerData.Result.Scopes);
                                 mRpcProfilerData = Profiler.URpcProfiler.GetProfilerData(i);
                             }
-
-                            if (ImGuiAPI.BeginTable("TimeScope", 5, ImGuiTableFlags_.ImGuiTableFlags_Resizable, in Vector2.Zero, 0.0f))
+                            if (ImGuiAPI.BeginChild("TimeScope", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                             {
-                                ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
-                                ImGuiAPI.TableSetColumnIndex(0);
-                                ImGuiAPI.Text("Name");
-                                ImGuiAPI.TableSetColumnIndex(1);
-                                ImGuiAPI.Text("AvgTime");
-                                ImGuiAPI.TableSetColumnIndex(2);
-                                ImGuiAPI.Text("AvgHit");
-                                ImGuiAPI.TableSetColumnIndex(3);
-                                ImGuiAPI.Text("MaxTime");
-                                ImGuiAPI.TableSetColumnIndex(4);
-                                ImGuiAPI.Text("Parent");
-
-                                foreach (var j in Scopes)
+                                if (ImGuiAPI.BeginTable("TimeScope", 5, ImGuiTableFlags_.ImGuiTableFlags_Resizable | ImGuiTableFlags_.ImGuiTableFlags_ScrollY, in Vector2.Zero, 0.0f))
                                 {
-                                    ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
-                                    
+                                    var startY = ImGuiAPI.GetItemRectMax().Y;
+                                    ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
                                     ImGuiAPI.TableSetColumnIndex(0);
-                                    if (j.ShowName != null)
+                                    ImGuiAPI.Text("Name");
+                                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                                     {
-                                        ImGuiAPI.Text(j.ShowName);
-                                        //if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
-                                        //    EGui.Controls.CtrlUtility.DrawHelper(j.Value.mCoreObject.GetName());
-                                    }
-                                    else
-                                    {
-                                        ImGuiAPI.Text(j.ShowName);
+                                        mSortMode = ESortMode.ByName;
+                                        SortScopes();
+                                        CurrentName = null;
                                     }
                                     ImGuiAPI.TableSetColumnIndex(1);
-                                    ImGuiAPI.Text(j.AvgTime.ToString());
-                                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                                    ImGuiAPI.Text("AvgTime");
+                                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                                     {
-                                        PopItemMenu(i, j, "AvgTime");
+                                        mSortMode = ESortMode.ByTime;
+                                        SortScopes();
+                                        CurrentName = null;
                                     }
                                     ImGuiAPI.TableSetColumnIndex(2);
-                                    ImGuiAPI.Text(j.AvgHit.ToString());
-                                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
-                                    {
-                                        PopItemMenu(i, j, "AvgHit");
-                                    }
+                                    ImGuiAPI.Text("AvgHit");
                                     ImGuiAPI.TableSetColumnIndex(3);
-                                    ImGuiAPI.Text(j.MaxTime.ToString());
-                                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
-                                    {
-                                        PopItemMenu(i, j, "MaxTime");
-                                    }
+                                    ImGuiAPI.Text("MaxTime");
                                     ImGuiAPI.TableSetColumnIndex(4);
-                                    Vector4 clr = new Vector4(1, 0, 1, 1);
-                                    if (j.Parent != "null")
+                                    ImGuiAPI.Text("Parent");
+
+                                    //ImGuiAPI.TableSetupColumn("Name", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoHide, 0.0f, 0);
+                                    //if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                                    //{
+                                    //    mSortMode = ESortMode.ByName;
+                                    //    SortScopes();
+                                    //    CurrentName = null;
+                                    //}
+                                    //ImGuiAPI.TableSetupColumn("AvgTime", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoHide, 0.0f, 1);
+                                    //if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                                    //{
+                                    //    mSortMode = ESortMode.ByTime;
+                                    //    SortScopes();
+                                    //    CurrentName = null;
+                                    //}
+                                    //ImGuiAPI.TableSetupColumn("AvgHit", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoHide, 0.0f, 2);
+                                    //ImGuiAPI.TableSetupColumn("MaxTime", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoHide, 0.0f, 3);
+                                    //ImGuiAPI.TableSetupColumn("Parent", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoHide, 0.0f, 4);
+                                    //ImGuiAPI.TableSetupScrollFreeze(1, 1);
+                                    //ImGuiAPI.TableHeadersRow();
+
+                                    //ImGuiTableSortSpecs* sorts_specs = ImGuiAPI.TableGetSortSpecs();
+                                    //if (sorts_specs != IntPtr.Zero.ToPointer() && sorts_specs->SpecsDirty)
+                                    //{
+
+                                    //}
+                                    //bool sorts_specs_using_name = (ImGuiAPI.TableGetColumnFlags(0) & (int)ImGuiTableColumnFlags_.ImGuiTableColumnFlags_IsSorted) != 0;
+                                    //if (sorts_specs_using_name)
+                                    //{
+                                    //    mSortMode = ESortMode.ByName;
+                                    //    SortScopes();
+                                    //    CurrentName = null;
+                                    //}
+
+                                    foreach (var j in Scopes)
                                     {
-                                        ImGuiAPI.TextColored(in clr, j.Parent);
-                                        var min = ImGuiAPI.GetItemRectMin();
-                                        var max = ImGuiAPI.GetItemRectMax();
-                                        min.Y = max.Y;
-                                        var cmdlist = ImGuiAPI.GetWindowDrawList();
-                                        cmdlist.AddLine(in min, in max, 0xFFFF00FF, 1);
+                                        if (string.IsNullOrEmpty(mFilter) == false && j.ShowName.Contains(mFilter) == false)
+                                            continue;
+
+                                        ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
+
+                                        ImGuiAPI.TableSetColumnIndex(0);
+                                        ImGuiAPI.Text(j.ShowName);
                                         if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                                         {
-                                            Console.WriteLine("Jump to parent");
+                                            CurrentName = j.ShowName;
+                                        }
+                                        if (j.ShowName == CurrentName)
+                                        {
+                                            var start = ImGuiAPI.GetItemRectMin();
+                                            if (startY <= start.Y)
+                                            {
+                                                var textSize = ImGuiAPI.CalcTextSize(j.ShowName, false, 0);
+                                                var end = new Vector2(start.X + ImGuiAPI.GetWindowContentRegionWidth(), start.Y + textSize.Y);
+                                                cmdlst.AddRectFilled(in start, in end, 0x80808080, 1, ImDrawFlags_.ImDrawFlags_None);
+                                            }
+                                        }
+
+                                        ImGuiAPI.TableSetColumnIndex(1);
+                                        ImGuiAPI.Text(j.AvgTime.ToString());
+                                        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                                        {
+                                            PopItemMenu(i, j, "AvgTime");
+                                        }
+                                        ImGuiAPI.TableSetColumnIndex(2);
+                                        ImGuiAPI.Text(j.AvgHit.ToString());
+                                        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                                        {
+                                            PopItemMenu(i, j, "AvgHit");
+                                        }
+                                        ImGuiAPI.TableSetColumnIndex(3);
+                                        ImGuiAPI.Text(j.MaxTime.ToString());
+                                        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                                        {
+                                            PopItemMenu(i, j, "MaxTime");
+                                        }
+                                        ImGuiAPI.TableSetColumnIndex(4);
+                                        Vector4 clr = new Vector4(1, 0, 1, 1);
+                                        if (j.Parent != "null")
+                                        {
+                                            ImGuiAPI.TextColored(in clr, j.Parent);
+                                            var min = ImGuiAPI.GetItemRectMin();
+                                            var max = ImGuiAPI.GetItemRectMax();
+                                            min.Y = max.Y;
+                                            var cmdlist = ImGuiAPI.GetWindowDrawList();
+                                            cmdlist.AddLine(in min, in max, 0xFFFF00FF, 1);
+                                            if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                                            {
+                                                CurrentName = j.Parent;
+                                            }
+                                        }
+                                        else
+                                            ImGuiAPI.TextColored(in clr, "null");
+                                        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                                        {
+                                            PopItemMenu(i, j, "Parent");
                                         }
                                     }
-                                    else
-                                        ImGuiAPI.TextColored(in clr, "null");
-                                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
-                                    {
-                                        PopItemMenu(i, j, "Parent");
-                                    }
+                                    ImGuiAPI.EndTable();
                                 }
-                                ImGuiAPI.EndTable();
+                                
+                                ImGuiAPI.EndChild();
                             }
                             ImGuiAPI.EndTabItem();
                         }

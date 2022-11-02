@@ -356,6 +356,19 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
                 descPose.Transforms[i] = transform;
             }
         }
+        public static void AddPoses(ref ULocalSpaceRuntimePose outPose, ULocalSpaceRuntimePose lPose, ULocalSpaceRuntimePose rPose)
+        {
+            System.Diagnostics.Debug.Assert(lPose.Transforms.Count == rPose.Transforms.Count);
+            System.Diagnostics.Debug.Assert(lPose.Transforms.Count == outPose.Transforms.Count);
+            for (int i = 0; i < outPose.Transforms.Count; ++i)
+            {
+                FTransform lTransform = lPose.Transforms[i];
+                FTransform rTransform = rPose.Transforms[i];
+                FTransform outTransform = FTransform.Identity;
+                FTransform.Multiply(out outTransform, lTransform, rTransform);
+                outPose.Transforms[i] = outTransform;
+            }
+        }
         public static void AddPoses(ref ULPosMRotRuntimePose outPose, ULPosMRotRuntimePose basePose, ULPosMRotRuntimePose additivePose, float alpha)
         {
             System.Diagnostics.Debug.Assert(basePose.Transforms.Count == additivePose.Transforms.Count);

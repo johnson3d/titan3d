@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+
+#if PWindow
 using SDL2;
+#endif
 
 namespace EngineNS.Graphics.Pipeline
 {
@@ -19,15 +22,17 @@ namespace EngineNS.Graphics.Pipeline
                 return true;
             }
 
+#if PWindow
             if (SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING) == -1)
                 return false;
+#endif
 
             var wtType = Rtti.UTypeDesc.TypeOf(engine.Config.MainWindowType).SystemType;
             if (wtType == null)
             {
                 wtType = typeof(EngineNS.Editor.UMainEditorApplication);
             }
-            SlateApplication = Rtti.UTypeDescManager.CreateInstance(wtType) as Graphics.Pipeline.USlateApplication;
+            SlateApplication = Rtti.UTypeDescManager.CreateInstance(wtType) as USlateApplication;
             var winRect = engine.Config.MainWindow;
 
             if(engine.Config.SupportMultWindows)
@@ -122,7 +127,9 @@ namespace EngineNS.Graphics.Pipeline
             SlateApplication = null;
 
             Editor.ShaderCompiler.UShaderCodeManager.Instance.Cleanup();
+#if PWindow
             SDL.SDL_Quit();
+#endif
         }
         public USlateApplication SlateApplication { get; set; }
         public NxRHI.UGpuSystem RenderSystem { get; private set; }
@@ -153,7 +160,7 @@ namespace EngineNS.Graphics.Pipeline
                     return false;
                 var rcDesc = new NxRHI.FGpuDeviceDesc();
                 rcDesc.SetDefault();
-                var caps = new NxRHI.FGpuDeviceCaps();
+                //var caps = new NxRHI.FGpuDeviceCaps();
                 //RenderSystem.GetContextDesc(Adapter, ref rcDesc);
 
                 rcDesc.CreateDebugLayer = bDebugLayer;

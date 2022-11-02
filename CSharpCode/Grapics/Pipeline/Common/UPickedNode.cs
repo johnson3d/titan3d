@@ -99,49 +99,54 @@ namespace EngineNS.Graphics.Pipeline.Common
             base.Cleanup();
         }
         List<Mesh.UMesh> mPickedMeshes = new List<Mesh.UMesh>();
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UPickedNode), nameof(TickLogic));
         public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            var cmdlist = BasePass.DrawCmdList;
-            cmdlist.ResetGpuDraws();
-            
-            mPickedMeshes.Clear();
-            foreach (var i in PickedManager.PickedProxies)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                i.GetHitProxyDrawMesh(mPickedMeshes);
-            }
-            foreach (var mesh in mPickedMeshes)
-            {
-                if (mesh == null || mesh.Atoms == null)
-                    continue;
+                var cmdlist = BasePass.DrawCmdList;
+                cmdlist.ResetGpuDraws();
 
-                for (int j = 0; j < mesh.Atoms.Length; j++)
+                mPickedMeshes.Clear();
+                foreach (var i in PickedManager.PickedProxies)
                 {
-                    var drawcall = mesh.GetDrawCall(PickedBuffer, j, policy, Graphics.Pipeline.URenderPolicy.EShadingType.Picked, this);
-                    if (drawcall != null)
-                    {
-                        if (PickedBuffer.PerViewportCBuffer != null)
-                            drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, PickedBuffer.PerViewportCBuffer);
-                        if (policy.DefaultCamera.PerCameraCBuffer != null)
-                            drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+                    i.GetHitProxyDrawMesh(mPickedMeshes);
+                }
+                foreach (var mesh in mPickedMeshes)
+                {
+                    if (mesh == null || mesh.Atoms == null)
+                        continue;
 
-                        cmdlist.PushGpuDraw(drawcall.mCoreObject);
+                    for (int j = 0; j < mesh.Atoms.Length; j++)
+                    {
+                        var drawcall = mesh.GetDrawCall(PickedBuffer, j, policy, Graphics.Pipeline.URenderPolicy.EShadingType.Picked, this);
+                        if (drawcall != null)
+                        {
+                            if (PickedBuffer.PerViewportCBuffer != null)
+                                drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, PickedBuffer.PerViewportCBuffer);
+                            if (policy.DefaultCamera.PerCameraCBuffer != null)
+                                drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+
+                            cmdlist.PushGpuDraw(drawcall.mCoreObject);
+                        }
                     }
                 }
-            }
 
-            if(cmdlist.BeginCommand())
-            {
-                cmdlist.SetViewport(in PickedBuffer.Viewport);
-                var passClears = new NxRHI.FRenderPassClears();
-                passClears.SetDefault();
-                passClears.SetClearColor(0, new Color4(1, 0, 1, 0));
-                PickedBuffer.BuildFrameBuffers(policy);
-                cmdlist.BeginPass(PickedBuffer.FrameBuffers, in passClears, "Picked");
-                cmdlist.FlushDraws();
-                cmdlist.EndPass();
-                cmdlist.EndCommand();
-            }
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+                if (cmdlist.BeginCommand())
+                {
+                    cmdlist.SetViewport(in PickedBuffer.Viewport);
+                    var passClears = new NxRHI.FRenderPassClears();
+                    passClears.SetDefault();
+                    passClears.SetClearColor(0, new Color4(1, 0, 1, 0));
+                    PickedBuffer.BuildFrameBuffers(policy);
+                    cmdlist.BeginPass(PickedBuffer.FrameBuffers, in passClears, "Picked");
+                    cmdlist.FlushDraws();
+                    cmdlist.EndPass();
+                    cmdlist.EndCommand();
+                }
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+            }   
         }
         public unsafe override void TickSync(URenderPolicy policy)
         {

@@ -1,4 +1,5 @@
-﻿using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
+﻿using EngineNS.Animation.Curve;
+using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -33,15 +34,43 @@ namespace EngineNS.Animation.SkeletonAnimation.AnimatablePose
         {
             get
             {
-                return FTransform.CreateTransform(Position.AsDVector(), Scale, Quaternion.FromEuler(Rotation));
+                return FTransform.CreateTransform(GetPositionVector3().AsDVector(), GetScaleVector3(), Quaternion.FromEuler(GetRotationVector3()));
             }
         }
+        private Vector3 GetPositionVector3()
+        {
+            var descInitTranslation = Desc.InitMatrix.Translation;
+            Vector3 result = Vector3.Zero;
+            result.X = Position.X.HasValue ? Position.X.Value : descInitTranslation.X;
+            result.Y = Position.Y.HasValue ? Position.Y.Value : descInitTranslation.Y;
+            result.Z = Position.Z.HasValue ? Position.Z.Value : descInitTranslation.Z;
+            return result;
+        }
+        private Vector3 GetRotationVector3()
+        {
+            var descInitRotation = Desc.InitMatrix.Rotation.ToEuler();
+            Vector3 result = Vector3.Zero;
+            result.X = Rotation.X.HasValue ? Rotation.X.Value : descInitRotation.X;
+            result.Y = Rotation.Y.HasValue ? Rotation.Y.Value : descInitRotation.Y;
+            result.Z = Rotation.Z.HasValue ? Rotation.Z.Value : descInitRotation.Z;
+            return result;
+        }
+        private Vector3 GetScaleVector3()
+        {
+            var descInitScale = Desc.InitMatrix.Scale;
+            Vector3 result = Vector3.Zero;
+            result.X = Scale.X.HasValue ? Scale.X.Value : descInitScale.X;
+            result.Y = Scale.Y.HasValue ? Scale.Y.Value : descInitScale.Y;
+            result.Z = Scale.Z.HasValue ? Scale.Z.Value : descInitScale.Z;
+            return result;
+        }
         [EngineNS.Animation.Animatable.AnimatableProperty]
-        public Vector3 Position { get; set; } = Vector3.Zero;
+        public NullableVector3 Position { get; set; } = NullableVector3.Empty;
+        
         [EngineNS.Animation.Animatable.AnimatableProperty]
-        public Vector3 Rotation { get; set; } = Vector3.Zero;
+        public NullableVector3 Rotation { get; set; } = NullableVector3.Empty;
         [EngineNS.Animation.Animatable.AnimatableProperty]
-        public Vector3 Scale { get; set; } = Vector3.One;
+        public NullableVector3 Scale { get; set; } = NullableVector3.One;
 
         public IAnimatableLimbPose Clone()
         {
@@ -68,15 +97,42 @@ namespace EngineNS.Animation.SkeletonAnimation.AnimatablePose
         {
             get
             {
-                return FTransform.CreateTransform(Position.AsDVector(), Scale, Quaternion.FromEuler(Rotation));
+                return FTransform.CreateTransform(GetPositionVector3().AsDVector(), GetScaleVector3(), Quaternion.FromEuler(GetRotationVector3()));
             }
         }
+        private Vector3 GetPositionVector3()
+        {
+            var descInitTranslation = Desc.InitMatrix.Translation;
+            Vector3 result = Vector3.Zero;
+            result.X = Position.X.HasValue ? Position.X.Value : descInitTranslation.X;
+            result.Y = Position.Y.HasValue ? Position.Y.Value : descInitTranslation.Y;
+            result.Z = Position.Z.HasValue ? Position.Z.Value : descInitTranslation.Z;
+            return result;
+        }
+        private Vector3 GetRotationVector3()
+        {
+            var descInitRotation = Desc.InitMatrix.Rotation.ToEuler();
+            Vector3 result = Vector3.Zero;
+            result.X = Rotation.X.HasValue ? Rotation.X.Value : descInitRotation.X;
+            result.Y = Rotation.Y.HasValue ? Rotation.Y.Value : descInitRotation.Y;
+            result.Z = Rotation.Z.HasValue ? Rotation.Z.Value : descInitRotation.Z;
+            return result;
+        }
+        private Vector3 GetScaleVector3()
+        {
+            var descInitScale = Desc.InitMatrix.Scale;
+            Vector3 result = Vector3.Zero;
+            result.X = Scale.X.HasValue ? Scale.X.Value : descInitScale.X;
+            result.Y = Scale.Y.HasValue ? Scale.Y.Value : descInitScale.Y;
+            result.Z = Scale.Z.HasValue ? Scale.Z.Value : descInitScale.Z;
+            return result;
+        }
         [EngineNS.Animation.Animatable.AnimatableProperty]
-        public Vector3 Position { get; set; } = Vector3.Zero;
+        public NullableVector3 Position { get; set; } = NullableVector3.Empty;
         [EngineNS.Animation.Animatable.AnimatableProperty]
-        public Vector3 Rotation { get; set; } = Vector3.Zero;
+        public NullableVector3 Rotation { get; set; } = NullableVector3.Empty;
         [EngineNS.Animation.Animatable.AnimatableProperty]
-        public Vector3 Scale { get; set; } = Vector3.One;
+        public NullableVector3 Scale { get; set; } = NullableVector3.One;
 
         public IAnimatableLimbPose Clone()
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EngineNS.IO
 {
@@ -13,9 +14,9 @@ namespace EngineNS.IO
 
         }
         //导入的窗口渲染接口
-        public virtual void OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
+        public virtual bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
         {
-
+            return true;
         }
         public virtual bool IsAssetSource(string fileExt)
         {
@@ -61,11 +62,12 @@ namespace EngineNS.IO
             mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IAsset;
             PGAsset.Target = mAsset;
         }
-        public override unsafe void OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
+        public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
         {
             if (bPopOpen == false)
                 ImGuiAPI.OpenPopup($"New {TypeSlt.BaseType.Name}", ImGuiPopupFlags_.ImGuiPopupFlags_None);
 
+            bool retValue = false;
             var visible = true;
             ImGuiAPI.SetNextWindowSize(new Vector2(200, 500), ImGuiCond_.ImGuiCond_FirstUseEver);
             if (ImGuiAPI.BeginPopupModal($"New {TypeSlt.BaseType.Name}", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
@@ -126,7 +128,7 @@ namespace EngineNS.IO
                             if (DoImportAsset())
                             {
                                 ImGuiAPI.CloseCurrentPopup();
-                                ContentBrowser.mAssetImporter = null;
+                                retValue = true;
                             }
                         }
                     }
@@ -135,7 +137,7 @@ namespace EngineNS.IO
                 if (ImGuiAPI.Button("Cancel", &sz))
                 {
                     ImGuiAPI.CloseCurrentPopup();
-                    ContentBrowser.mAssetImporter = null;
+                    retValue = true;
                 }
 
                 if (PGAssetInitTask != null && !PGAssetInitTask.IsCompleted)
@@ -149,6 +151,7 @@ namespace EngineNS.IO
                 
                 ImGuiAPI.EndPopup();
             }
+            return retValue;
         }
         protected virtual bool CheckAsset()
         {
@@ -216,7 +219,8 @@ namespace EngineNS.IO
         {
             if (Task != null)
             {
-                Task.Result.mTextureRSV = null;
+                if (Task.Result != null)
+                    Task.Result.mTextureRSV = null;
                 Task = null;
             }
         }

@@ -70,7 +70,7 @@ namespace EngineNS.Bricks.VirtualTexture
             if (index == -1)
                 return null;
             NxRHI.USrView.UPicDesc txDesc = null;
-            StbImageSharp.ImageResult[] mipDatas = NxRHI.USrView.LoadPngImageLevels(name, ArrayDesc.MipLevels, ref txDesc);
+            StbImageSharp.ImageResult[] mipDatas = NxRHI.USrView.LoadImageLevels(name, ArrayDesc.MipLevels, ref txDesc);
             if (mipDatas == null || mipDatas.Length == 0)
                 return null;
             if (mipDatas[0].Width != ArrayDesc.Width || mipDatas[0].Height != ArrayDesc.Height ||

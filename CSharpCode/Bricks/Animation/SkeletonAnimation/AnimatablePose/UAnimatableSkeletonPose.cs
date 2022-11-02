@@ -1,4 +1,5 @@
-﻿using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
+﻿using EngineNS.Animation.Curve;
+using EngineNS.Animation.SkeletonAnimation.Skeleton.Limb;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -65,9 +66,9 @@ namespace EngineNS.Animation.SkeletonAnimation.AnimatablePose
                     }
                 }
                 var bonePose = limbPose as UAnimatableBonePose;
-                bonePose.Position = mat.Translation;
-                bonePose.Rotation = mat.Rotation.ToEuler();
-                bonePose.Scale = mat.Scale;
+                bonePose.Position = NullableVector3.FromVector3(mat.Translation);
+                bonePose.Rotation = NullableVector3.FromVector3(mat.Rotation.ToEuler());
+                bonePose.Scale = NullableVector3.FromVector3(mat.Scale);
             }
         }
         public IAnimatableLimbPose FindLimbPose(uint nameHash)
@@ -89,6 +90,6 @@ namespace EngineNS.Animation.SkeletonAnimation.AnimatablePose
             }
             pose.ConstructHierarchy();
             return pose;
-        }
+        } 
     }
 }

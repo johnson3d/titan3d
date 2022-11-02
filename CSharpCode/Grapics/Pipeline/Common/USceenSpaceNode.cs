@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Bricks.VXGI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -99,35 +100,40 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.EndCommand();
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(USceenSpaceNode), nameof(TickLogic));
         public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            var cmdlist = BasePass.DrawCmdList;
-            if (ScreenMesh != null)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                cmdlist.ResetGpuDraws();
-                for (int j = 0; j < ScreenMesh.Atoms.Length; j++)
+                var cmdlist = BasePass.DrawCmdList;
+                if (ScreenMesh != null)
                 {
-                    var drawcall = ScreenMesh.GetDrawCall(GBuffers, j, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
-                    if (drawcall == null)
-                        continue;
-                    drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
-                    drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
-                    cmdlist.PushGpuDraw(drawcall.mCoreObject);
+                    cmdlist.ResetGpuDraws();
+                    for (int j = 0; j < ScreenMesh.Atoms.Length; j++)
+                    {
+                        var drawcall = ScreenMesh.GetDrawCall(GBuffers, j, ScreenDrawPolicy, Graphics.Pipeline.URenderPolicy.EShadingType.BasePass, this);
+                        if (drawcall == null)
+                            continue;
+                        drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
+                        drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+                        cmdlist.PushGpuDraw(drawcall.mCoreObject);
+                    }
                 }
-            }
-            if(cmdlist.BeginCommand())
-            {
-                cmdlist.SetViewport(in GBuffers.Viewport);
-                var passClears = new NxRHI.FRenderPassClears();
-                passClears.SetDefault();
-                passClears.SetClearColor(0, new Color4(0, 0, 0, 0));
-                GBuffers.BuildFrameBuffers(policy);
-                cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
-                cmdlist.FlushDraws();
-                cmdlist.EndPass();
-                cmdlist.EndCommand();
-            }
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+                if (cmdlist.BeginCommand())
+                {
+                    cmdlist.SetViewport(in GBuffers.Viewport);
+                    var passClears = new NxRHI.FRenderPassClears();
+                    passClears.SetDefault();
+                    passClears.SetClearColor(0, new Color4(0, 0, 0, 0));
+                    GBuffers.BuildFrameBuffers(policy);
+                    cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, DebugName);
+                    cmdlist.FlushDraws();
+                    cmdlist.EndPass();
+                    cmdlist.EndCommand();
+                }
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+            }   
         }
         public override unsafe void TickSync(URenderPolicy policy)
         {

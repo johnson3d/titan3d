@@ -66,6 +66,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)TCoreSDK.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TName.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)USlateApplication.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UTest\UnitTester.cs" />
   </ItemGroup>
   <ItemGroup>

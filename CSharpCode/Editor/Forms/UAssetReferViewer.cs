@@ -134,7 +134,7 @@ namespace EngineNS.Editor.Forms
     {
     }
 
-    class UAssetReferViewer : Editor.IAssetEditor, Graphics.Pipeline.IRootForm
+    class UAssetReferViewer : Editor.IAssetEditor, IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -149,7 +149,7 @@ namespace EngineNS.Editor.Forms
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
 
-        public Graphics.Pipeline.IRootForm GetRootForm()
+        public IRootForm GetRootForm()
         {
             return this;
         }
@@ -200,7 +200,7 @@ namespace EngineNS.Editor.Forms
         {
             Cleanup();
         }
-        public void OnEvent(ref SDL2.SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
         }
         #endregion

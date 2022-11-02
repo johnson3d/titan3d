@@ -56,33 +56,38 @@ namespace EngineNS.Graphics.Pipeline.Common
                 attachement.Uav = ResultBuffer.Uav;
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UCopyNode), nameof(TickLogic));
         public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            if (mCopyDrawcall == null)
-                return;
-            var cmdlist = BasePass.DrawCmdList;            
-            if (cmdlist.BeginCommand())
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                var srcPin = GetAttachBuffer(SrcPinIn);
-                var tarPin = GetAttachBuffer(DestPinOut);
+                if (mCopyDrawcall == null)
+                    return;
+                var cmdlist = BasePass.DrawCmdList;
+                if (cmdlist.BeginCommand())
+                {
+                    var srcPin = GetAttachBuffer(SrcPinIn);
+                    var tarPin = GetAttachBuffer(DestPinOut);
 
-                mCopyDrawcall.BindSrc(srcPin.Buffer);
-                mCopyDrawcall.BindSrc(tarPin.Buffer);
+                    mCopyDrawcall.BindSrc(srcPin.Buffer);
+                    mCopyDrawcall.BindSrc(tarPin.Buffer);
 
-                //if (SrcPinIn.Attachement.Format == EPixelFormat.PXF_UNKNOWN)
-                //{
-                //    //SetCopyBuffer(srcPin.Buffer.mCoreObject, 0, tarPin.Buffer.mCoreObject, 0, SrcPinIn.Attachement.Width * SrcPinIn.Attachement.Height);
-                //}
-                //else
-                //{   
-                //    mCopyDrawcall.SetCopyTexture2D(srcPin.Buffer.mCoreObject, 0, 0, 0, tarPin.Buffer.mCoreObject, 0, 0, 0, SrcPinIn.Attachement.Width, SrcPinIn.Attachement.Height);
-                //}
+                    //if (SrcPinIn.Attachement.Format == EPixelFormat.PXF_UNKNOWN)
+                    //{
+                    //    //SetCopyBuffer(srcPin.Buffer.mCoreObject, 0, tarPin.Buffer.mCoreObject, 0, SrcPinIn.Attachement.Width * SrcPinIn.Attachement.Height);
+                    //}
+                    //else
+                    //{   
+                    //    mCopyDrawcall.SetCopyTexture2D(srcPin.Buffer.mCoreObject, 0, 0, 0, tarPin.Buffer.mCoreObject, 0, 0, 0, SrcPinIn.Attachement.Width, SrcPinIn.Attachement.Height);
+                    //}
 
-                mCopyDrawcall.Commit(cmdlist);
+                    mCopyDrawcall.Commit(cmdlist);
 
-                cmdlist.EndCommand();
-            }
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+                    cmdlist.EndCommand();
+                }
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmdlist);
+            }   
         }
         
         public override unsafe void TickSync(URenderPolicy policy)

@@ -150,11 +150,11 @@ namespace EngineNS.GamePlay.Scene
 
         public override void GetHitProxyDrawMesh(List<Graphics.Mesh.UMesh> meshes)
         {
-            //base.GetHitProxyDrawMesh(meshes);
+            base.GetHitProxyDrawMesh(meshes);
         }
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {
-            //base.OnGatherVisibleMeshes(rp);
+            base.OnGatherVisibleMeshes(rp);
         }
     }
 }

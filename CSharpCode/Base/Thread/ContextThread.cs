@@ -173,7 +173,7 @@ namespace EngineNS.Thread
             CurrentContext = null;
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(ContextThread), nameof(Tick), "TickAction");
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(ContextThread), nameof(Tick));
         public virtual void Tick()
         {
             if(TickAction!=null)

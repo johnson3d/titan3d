@@ -2,9 +2,9 @@
 using EngineNS.GamePlay.Scene;
 using EngineNS.GamePlay.Scene.Actor;
 using EngineNS.Graphics.Pipeline;
-using SDL2;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace EngineNS.GamePlay.Player
@@ -48,7 +48,7 @@ namespace EngineNS.GamePlay.Player
             PlayerData.CharacterController?.TickLogic(world, policy);
         }
 
-        public bool OnEvent(ref SDL.SDL_Event e)
+        public unsafe bool OnEvent(in Bricks.Input.Event e)
         {
 
             return true;

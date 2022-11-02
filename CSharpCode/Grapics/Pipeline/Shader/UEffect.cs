@@ -47,8 +47,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public NxRHI.UShaderDesc DescVS { get; private set; }
         public NxRHI.UShaderDesc DescPS { get; private set; }
         public UShadingEnv ShadingEnv { get; internal set; }
-        
-        //public UShaderIndexer ShaderIndexer { get; } = new UShaderIndexer();
+
         public unsafe void SaveTo(Hash160 hash)
         {
             var path = UEngine.Instance.FileManager.GetPath(IO.FileManager.ERootDir.Cache, IO.FileManager.ESystemDir.Effect);
@@ -335,7 +334,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return true;
         }
 
-        UCoreShaderBinder.UShaderResourceIndexer mBindIndexer;
+        public UCoreShaderBinder.UShaderResourceIndexer mBindIndexer;
         public UCoreShaderBinder.UShaderResourceIndexer BindIndexer
         {
             get

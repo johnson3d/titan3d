@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Bricks.VXGI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -193,33 +194,38 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             ResetComputeDrawcall(policy);
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UHzbNode), nameof(TickLogic));
         public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
         {
-            if (Setup == null)
-                return;
-            var cmd = BasePass.DrawCmdList;
-
-            var srvIdx = SetupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");
-            if (srvIdx.IsValidPointer)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                var depth = this.GetAttachBuffer(this.DepthPinIn).Srv;
-                SetupDrawcall.BindSrv(srvIdx, depth);
-            }
-            SetupDrawcall.Commit(cmd);
+                if (Setup == null)
+                    return;
+                var cmd = BasePass.DrawCmdList;
 
-            if (MipsDrawcalls != null)
-            {
-                for (int i = 0; i < MipsDrawcalls.Length; i++)
+                var srvIdx = SetupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");
+                if (srvIdx.IsValidPointer)
                 {
-                    MipsDrawcalls[i].Commit(cmd);
+                    var depth = this.GetAttachBuffer(this.DepthPinIn).Srv;
+                    SetupDrawcall.BindSrv(srvIdx, depth);
                 }
-            }
+                SetupDrawcall.Commit(cmd);
 
-            if (cmd.BeginCommand())
-            {
-                cmd.EndCommand();
-            }
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+                if (MipsDrawcalls != null)
+                {
+                    for (int i = 0; i < MipsDrawcalls.Length; i++)
+                    {
+                        MipsDrawcalls[i].Commit(cmd);
+                    }
+                }
+
+                if (cmd.BeginCommand())
+                {
+                    cmd.EndCommand();
+                }
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+            }   
         }
         public unsafe override void TickSync(Graphics.Pipeline.URenderPolicy policy)
         {

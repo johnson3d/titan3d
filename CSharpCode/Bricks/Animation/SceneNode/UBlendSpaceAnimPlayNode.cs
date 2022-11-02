@@ -1,4 +1,6 @@
 ﻿using EngineNS.Animation.Asset.BlendSpace;
+using EngineNS.GamePlay.Controller;
+using EngineNS.GamePlay.Movemnet;
 using EngineNS.GamePlay.Scene;
 using System;
 using System.Collections.Generic;
@@ -88,15 +90,20 @@ namespace EngineNS.Animation.SceneNode
 
         }
         GamePlay.Movemnet.UMovement Movement = null;
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UBlendSpaceAnimPlayNode), nameof(TickLogic));
         public override void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
-            if (Movement == null)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                Movement = Parent.Parent.FindFirstChild("Movement") as GamePlay.Movemnet.UMovement;
-            }
-            Player.Input = new Vector3(Movement.CurrentLinearVelocity.Length(), 0, 0);
-            Player.Update(world.DeltaTimeSecond);
-            Player.Evaluate();
+                if (Movement == null)
+                {
+                    Movement = Parent.Parent.FindFirstChild<UMovement>() as GamePlay.Movemnet.UMovement;
+                }
+                Player.Input = new Vector3(Movement.LinearVelocity.Length(), 0, 0);
+                Player.Update(world.DeltaTimeSecond);
+                Player.Evaluate();
+            }   
         }
 
         public static async System.Threading.Tasks.Task<UBlendSpaceAnimPlayNode> AddBlendSpace2DAnimPlayNode(GamePlay.UWorld world, UNode parent, UNodeData data, EBoundVolumeType bvType, Type placementType)

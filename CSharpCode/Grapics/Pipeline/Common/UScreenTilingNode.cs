@@ -175,63 +175,68 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             ResetComputeDrawcall(policy);
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UScreenTilingNode), nameof(TickLogic));
         public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
         {
-            if (TileX == 0 || TileY == 0)
-                return;
-            var gpuScene = policy.GetGpuSceneNode();// .FindNode("GpuSceneNode") as Common.UGpuSceneNode;
-
-            var cmd = BasePass.DrawCmdList;
-            cmd.BeginCommand();
-
-            var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCBuffer;
-            if (ConfigCBuffer != null)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                var idx = ConfigCBuffer.ShaderBinder.FindField("LightNum");                
-                if (gpuScene != null)
-                {
-                    var LightNum = gpuScene.PointLights.DataArray.Count;
-                    ConfigCBuffer.SetValue(idx, in LightNum);
-                }
-                UInt32_2 tile;
-                tile.X = TileX;
-                tile.Y = TileY;
-                idx = ConfigCBuffer.ShaderBinder.FindField("TileNum");
-                ConfigCBuffer.SetValue(idx, in tile);
+                if (TileX == 0 || TileY == 0)
+                    return;
+                var gpuScene = policy.GetGpuSceneNode();// .FindNode("GpuSceneNode") as Common.UGpuSceneNode;
 
-                ConfigCBuffer.FlushDirty(cmd, false);
-            }
-            
-            #region Setup
-            {
-                var srvIdx = SetupTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");
-                if (srvIdx.IsValidPointer)
-                {
-                    var depth = this.GetAttachBuffer(DepthPinIn);
-                    SetupTileDataDrawcall.BindSrv(srvIdx, depth.Srv);
-                }
-                SetupTileDataDrawcall.Commit(cmd);
-            }
-            #endregion
+                var cmd = BasePass.DrawCmdList;
+                cmd.BeginCommand();
 
-            #region PushLights
-            {
-                var srvIdx = PushLightToTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GpuScene_PointLights");
-                if (srvIdx.IsValidPointer)
+                var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCBuffer;
+                if (ConfigCBuffer != null)
                 {
-                    var attachBuffer = this.GetAttachBuffer(PointLightsPinIn);
-                    if (attachBuffer.Srv != null)
+                    var idx = ConfigCBuffer.ShaderBinder.FindField("LightNum");
+                    if (gpuScene != null)
                     {
-                        PushLightToTileDataDrawcall.BindSrv(srvIdx, attachBuffer.Srv);
-                        PushLightToTileDataDrawcall.Commit(cmd);
+                        var LightNum = gpuScene.PointLights.DataArray.Count;
+                        ConfigCBuffer.SetValue(idx, in LightNum);
                     }
-                }
-                
-            }
-            #endregion
+                    UInt32_2 tile;
+                    tile.X = TileX;
+                    tile.Y = TileY;
+                    idx = ConfigCBuffer.ShaderBinder.FindField("TileNum");
+                    ConfigCBuffer.SetValue(idx, in tile);
 
-            cmd.EndCommand();
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+                    ConfigCBuffer.FlushDirty(cmd, false);
+                }
+
+                #region Setup
+                {
+                    var srvIdx = SetupTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");
+                    if (srvIdx.IsValidPointer)
+                    {
+                        var depth = this.GetAttachBuffer(DepthPinIn);
+                        SetupTileDataDrawcall.BindSrv(srvIdx, depth.Srv);
+                    }
+                    SetupTileDataDrawcall.Commit(cmd);
+                }
+                #endregion
+
+                #region PushLights
+                {
+                    var srvIdx = PushLightToTileDataDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "GpuScene_PointLights");
+                    if (srvIdx.IsValidPointer)
+                    {
+                        var attachBuffer = this.GetAttachBuffer(PointLightsPinIn);
+                        if (attachBuffer.Srv != null)
+                        {
+                            PushLightToTileDataDrawcall.BindSrv(srvIdx, attachBuffer.Srv);
+                            PushLightToTileDataDrawcall.Commit(cmd);
+                        }
+                    }
+
+                }
+                #endregion
+
+                cmd.EndCommand();
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+            }   
         }
         public unsafe override void TickSync(Graphics.Pipeline.URenderPolicy policy)
         {

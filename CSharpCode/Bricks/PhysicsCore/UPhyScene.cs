@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Bricks.Terrain.CDLOD;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -125,9 +126,14 @@ namespace EngineNS.Bricks.PhysicsCore
             mPxScene?.Dispose();
             mPxScene = null;
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UPhySceneMember), nameof(TickLogic));
         public void TickLogic(object host, int ellapse)
         {
-            PxScene?.Tick(((float)ellapse) * 0.001f);
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                PxScene?.Tick(((float)ellapse) * 0.001f);
+            }   
         }
         public void TickRender(object host, int ellapse)
         {

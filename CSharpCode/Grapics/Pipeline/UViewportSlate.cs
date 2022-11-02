@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using SDL2;
 
 namespace EngineNS.Graphics.Pipeline
 {
@@ -271,23 +270,23 @@ namespace EngineNS.Graphics.Pipeline
                 OnHitproxySelected(hitObj);
             }
         }
-        public unsafe virtual bool OnEvent(ref SDL.SDL_Event e)
+        public unsafe virtual bool OnEvent(in Bricks.Input.Event e)
         {
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP)
+            if (e.Type == Bricks.Input.EventType.MOUSEBUTTONUP)
             {
-                OnMouseUp(ref e);
+                OnMouseUp(in e);
             }
-            else if(e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN)
+            else if(e.Type == Bricks.Input.EventType.MOUSEBUTTONDOWN)
             {
-                OnMouseDown(ref e);
+                OnMouseDown(in e);
             }
             return true;
         }
-        protected virtual void OnMouseUp(ref SDL.SDL_Event e)
+        protected virtual void OnMouseUp(in Bricks.Input.Event e)
         {
 
         }
-        protected virtual void OnMouseDown(ref SDL.SDL_Event e)
+        protected virtual void OnMouseDown(in Bricks.Input.Event e)
         {
 
         }
@@ -311,10 +310,10 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
-        public delegate System.Threading.Tasks.Task FOnInitialize(UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax);
+        public delegate System.Threading.Tasks.Task FOnInitialize(UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax);
         public FOnInitialize OnInitialize = null;
         [Rtti.Meta]
-        public virtual async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, float zMin, float zMax)
+        public virtual async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
             var policy = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy();
             if (OnInitialize != null)

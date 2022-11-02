@@ -13,16 +13,17 @@ namespace EngineNS.Animation.Command
         public float Time;
         UAnimatableSkeletonPose ExtractedPose = null;
         Asset.UAnimationClip AnimationClip = null;
+        ULocalSpaceRuntimePose BindedLocalSpaceRuntimePose = null;
 
         public UExtractPoseFromClipCommand(in Asset.UAnimationClip skeletonAnimClip)
         {
             AnimationClip = skeletonAnimClip;
         }
 
-        public UExtractPoseFromClipCommand(ref UAnimatableSkeletonPose extractedPose, in Asset.UAnimationClip skeletonAnimClip)
+        public UExtractPoseFromClipCommand(ref UAnimatableSkeletonPose bindeddPose, in Asset.UAnimationClip skeletonAnimClip)
         {
             AnimationClip = skeletonAnimClip;
-            SetExtractedPose(ref extractedPose);
+            SetExtractedPose(ref bindeddPose);
         }
 
         public UExtractPoseFromClipCommand()
@@ -33,6 +34,7 @@ namespace EngineNS.Animation.Command
         {
             ExtractedPose = extractedPose;
             AnimationPropertiesSetter = UAnimationPropertiesSetter.Binding(AnimationClip, ExtractedPose);
+            BindedLocalSpaceRuntimePose = URuntimePoseUtility.CreateLocalSpaceRuntimePose(extractedPose);
             mOutPose = URuntimePoseUtility.CreateLocalSpaceRuntimePose(extractedPose);
         }
 
@@ -42,6 +44,8 @@ namespace EngineNS.Animation.Command
             if (AnimationPropertiesSetter == null && ExtractedPose != null)
                 return;
             AnimationPropertiesSetter.Evaluate(Time);
+            //var extractedPose = URuntimePoseUtility.CreateLocalSpaceRuntimePose(ExtractedPose);
+            //URuntimePoseUtility.AddPoses(ref mOutPose, extractedPose, BindedLocalSpaceRuntimePose);
             URuntimePoseUtility.ConvetToLocalSpaceRuntimePose(ref mOutPose, ExtractedPose);
         }
     }

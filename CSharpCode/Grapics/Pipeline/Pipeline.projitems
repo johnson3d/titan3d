@@ -53,7 +53,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)UGraphicsBuffers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UHitproxyManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UPresentWindow.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)USlateApplication.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UStateManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UViewportSlate.cs" />
   </ItemGroup>

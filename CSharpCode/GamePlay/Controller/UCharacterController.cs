@@ -3,14 +3,15 @@ using EngineNS.Bricks.Input.Device.Keyboard;
 using EngineNS.Bricks.Input.Device.Mouse;
 using EngineNS.Bricks.Input.InputMapping.Action;
 using EngineNS.Bricks.Input.InputMapping.Binding;
+using EngineNS.Bricks.PhysicsCore;
 using EngineNS.GamePlay.Character;
 using EngineNS.GamePlay.Movemnet;
 using EngineNS.GamePlay.Scene;
 using EngineNS.GamePlay.Scene.Actor;
 using EngineNS.Graphics.Pipeline;
-using SDL2;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -43,7 +44,7 @@ namespace EngineNS.GamePlay.Controller
 
         private void Axis2D_OnValueUpdate(UAxis2DAction sender, Vector2 value)
         {
-            VInput = value.X;
+            VInput = -value.X;
             HInput = value.Y;
         }
 
@@ -62,26 +63,31 @@ namespace EngineNS.GamePlay.Controller
 
         float HInput = 0;
         float VInput = 0;
-
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UCharacterController), nameof(TickLogic));
         public override void TickLogic(UWorld world, URenderPolicy policy)
         {
-            base.TickLogic(world, policy);
-
-            CameraControlNode.AddDelta(new Vector3(PitchDelta * 0.1f, YawDelta * 0.1f, 0));
-
-            //MovementNode.AngularVelocity = new DVector3(0, YawDelta * 0.1f, 0);
-            if (OrientCameraRoation)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                ControlledCharacter.Placement.Quat = Quaternion.GetQuaternion(Vector3.Forward, -new DVector3(CameraControlNode.Camera.Direction.X, 0, CameraControlNode.Camera.Direction.Z).ToSingleVector3());
-            }
-            PitchDelta = 0;
-            YawDelta = 0;
+                base.TickLogic(world, policy);
 
-            float speed = 3;
-            Vector3 control = Vector3.Forward * VInput + Vector3.Left * HInput;
-            MovementNode.LinearVelocity = ControlledCharacter.Placement.Quat * control * speed;
+                float PitchSpeed = 15, YawSpeed = 15;
+                float yawDelta = Math.Min(YawDelta, 100) * 0.01f;
+                float pitchDelta = Math.Min(PitchDelta, 100) * 0.01f;
+                CameraControlNode.AddDelta(new Vector3(-pitchDelta * PitchSpeed * world.DeltaTimeSecond, yawDelta * YawSpeed * world.DeltaTimeSecond, 0));
+
+                //MovementNode.AngularVelocity = new DVector3(0, YawDelta * 0.1f, 0);
+                if (OrientCameraRoation)
+                {
+                    ControlledCharacter.Placement.Quat = Quaternion.GetQuaternion(Vector3.Forward, -new DVector3(CameraControlNode.Camera.Direction.X, 0, CameraControlNode.Camera.Direction.Z).ToSingleVector3());
+                }
+                PitchDelta = 0;
+                YawDelta = 0;
+
+                float speed = 3;
+                Vector3 control = Vector3.Forward * VInput + Vector3.Left * HInput;
+                MovementNode.SetLinearVelocity(ControlledCharacter.Placement.Quat * control * speed);
+            }   
         }
-
-
     }
 }

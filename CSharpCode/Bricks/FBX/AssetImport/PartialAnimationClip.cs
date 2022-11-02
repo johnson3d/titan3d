@@ -10,11 +10,12 @@ namespace EngineNS.Animation.Asset
         public partial class ImportAttribute
         {
             AssetImportAndExport.FBX.FBXImporter mFBXImporter; //for now we only have one file to import
-            public unsafe partial void FBXCreateCreateDraw(UContentBrowser ContentBrowser)
+            public unsafe partial bool FBXCreateCreateDraw(UContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import Animation", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                 var visible = true;
+                var retValue = false;
                 if (ImGuiAPI.BeginPopupModal($"Import Animation", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var sz = new Vector2(-1, 0);
@@ -75,7 +76,7 @@ namespace EngineNS.Animation.Asset
                             if (FBXImport())
                             {
                                 ImGuiAPI.CloseCurrentPopup();
-                                ContentBrowser.mAssetImporter = null;
+                                retValue = true;
                             }
                         }
                         ImGuiAPI.SameLine(0, 20);
@@ -83,10 +84,12 @@ namespace EngineNS.Animation.Asset
                     if (ImGuiAPI.Button("Cancel", in sz))
                     {
                         ImGuiAPI.CloseCurrentPopup();
-                        ContentBrowser.mAssetImporter = null;
+                        retValue = true;
                     }
                     ImGuiAPI.EndPopup();
                 }
+
+                return retValue;
             }
             private unsafe bool FBXImport()
             {
@@ -113,7 +116,7 @@ namespace EngineNS.Animation.Asset
                         {
                             animName = animDesc->Name.c_str();
                         }
-                        var rn = RName.GetRName(mDir.Name + animName + UAnimationClip.AssetExt, mDir.RNameType);
+                        var rn = RName.GetRName(mDir.Name + animName + UAnimationClip.AssetExt);
                         animImporter.Process();
                         List<AssetImportAndExport.FBX.FBXAnimElement> animElements = new List<AssetImportAndExport.FBX.FBXAnimElement>();
                         for (int animIndex = 0; animIndex < animImporter.GetAnimElementsNum(); ++animIndex)
@@ -187,7 +190,7 @@ namespace AssetImportAndExport.FBX
                         animChunk.AnimCurvesList.Add(curve.Id, curve);
 
                         AnimatableObjectPropertyDesc posDesc = new AnimatableObjectPropertyDesc();
-                        posDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<Vector3>();
+                        posDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<NullableVector3>();
                         posDesc.Name = "Position";
                         posDesc.CurveId = curve.Id;
                         objectClassDesc.Properties.Add(posDesc);
@@ -212,7 +215,7 @@ namespace AssetImportAndExport.FBX
                         animChunk.AnimCurvesList.Add(curve.Id, curve);
 
                         AnimatableObjectPropertyDesc rotDesc = new AnimatableObjectPropertyDesc();
-                        rotDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<Vector3>();
+                        rotDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<NullableVector3>();
                         rotDesc.Name = "Rotation";
                         rotDesc.CurveId = curve.Id;
                         objectClassDesc.Properties.Add(rotDesc);
@@ -236,7 +239,7 @@ namespace AssetImportAndExport.FBX
                         animChunk.AnimCurvesList.Add(curve.Id, curve);
 
                         AnimatableObjectPropertyDesc scaleDesc = new AnimatableObjectPropertyDesc();
-                        scaleDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<Vector3>();
+                        scaleDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<NullableVector3>();
                         scaleDesc.Name = "Scale";
                         scaleDesc.CurveId = curve.Id;
                         objectClassDesc.Properties.Add(scaleDesc);

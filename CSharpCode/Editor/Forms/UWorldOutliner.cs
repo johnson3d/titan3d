@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UWorldOutliner : UTreeNodeDrawer, Graphics.Pipeline.IRootForm
+    public class UWorldOutliner : UTreeNodeDrawer, IRootForm
     {
         public GamePlay.UWorld World
         {
@@ -98,7 +98,7 @@ namespace EngineNS.Editor.Forms
             if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None) && ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left))
             {
                 //这里考虑一下单选多选的问题
-                if (ImGuiAPI.IsKeyDown((int)SDL2.SDL.SDL_Scancode.SDL_SCANCODE_LCTRL))
+                if (ImGuiAPI.IsKeyDown((int)Bricks.Input.Scancode.SCANCODE_LCTRL))
                 {
                     provider.Selected = !provider.Selected;
                     if (provider.Selected == false)
@@ -196,7 +196,7 @@ namespace EngineNS.Editor.Forms
                             parentMenu.AddMenuItem(menuStr, att.FilterStrings, null,
                                 (item, sender) =>
                                 {
-                                    NewNode(i);
+                                    var nu = NewNode(i);
                                 });
                         }
                     }

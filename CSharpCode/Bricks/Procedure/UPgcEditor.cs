@@ -27,7 +27,7 @@ namespace EngineNS.Bricks.Procedure
             return result;
         }
     }
-    public class UPgcEditor : Editor.IAssetEditor, IO.ISerializer, Graphics.Pipeline.IRootForm, ITickable
+    public class UPgcEditor : Editor.IAssetEditor, IO.ISerializer, IRootForm, ITickable
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.Procedure
             PreviewViewport = null;
             NodePropGrid.Target = null;
         }
-        public Graphics.Pipeline.IRootForm GetRootForm()
+        public IRootForm GetRootForm()
         {
             return this;
         }
@@ -81,7 +81,7 @@ namespace EngineNS.Bricks.Procedure
             
             return true;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -170,7 +170,7 @@ namespace EngineNS.Bricks.Procedure
             UEngine.Instance.TickableManager.RemoveTickable(this);
             Cleanup();
         }
-        public void OnEvent(ref SDL2.SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
         }
         #endregion
@@ -223,7 +223,7 @@ namespace EngineNS.Bricks.Procedure
             if (Visible == false)
                 return;
 
-            bool drawing = true;
+            //bool drawing = true;
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             //ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
@@ -269,7 +269,7 @@ namespace EngineNS.Bricks.Procedure
             }
             else
             {
-                drawing = false;
+                //drawing = false;
             }
             //var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
             ResetDockspace();
@@ -302,7 +302,7 @@ namespace EngineNS.Bricks.Procedure
                 var noused = Compile();
             }
         }
-        uint PreviewDockId = 0;
+        //uint PreviewDockId = 0;
         private async System.Threading.Tasks.Task Save()
         {
             EditAsset.SaveAssetTo(AssetName);

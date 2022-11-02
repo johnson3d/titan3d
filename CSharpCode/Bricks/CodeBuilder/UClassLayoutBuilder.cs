@@ -11,7 +11,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public int Columns { get; set; }
         public uint Offset { get; set; }
     }
-    public class UClassLayoutBuilder : Graphics.Pipeline.IGuiModule
+    public class UClassLayoutBuilder : IGuiModule
     {
         bool mIsStruct = true;
         public bool IsStruct { get => mIsStruct; set => mIsStruct = value; }

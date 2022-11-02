@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using EngineNS.Graphics.Pipeline;
 using SDL2;
 
 namespace EngineNS.EGui
@@ -241,7 +242,18 @@ namespace EngineNS.EGui
                 GeomMesh = null;
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeRenderImDrawData = Profiler.TimeScopeManager.GetTimeScope(typeof(UDockWindowSDL), nameof(RenderImDrawData));
         public unsafe static void RenderImDrawData(ref ImDrawData draw_data, Graphics.Pipeline.UPresentWindow presentWindow, UImDrawDataRHI rhiData)
+        {
+            using (new Profiler.TimeScopeHelper(ScopeRenderImDrawData))
+            {
+                RenderImDrawDataImpl(ref draw_data, presentWindow, rhiData);
+            }
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeDrawPass = Profiler.TimeScopeManager.GetTimeScope(typeof(UDockWindowSDL), "RenderImDrawData.DrawPass");
+        private unsafe static void RenderImDrawDataImpl(ref ImDrawData draw_data, Graphics.Pipeline.UPresentWindow presentWindow, UImDrawDataRHI rhiData)
         {
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             uint vertexOffsetInVertices = 0;
@@ -251,7 +263,7 @@ namespace EngineNS.EGui
             {
                 return;
             }
-
+            
             uint totalVBSize = (uint)(draw_data.TotalVtxCount * sizeof(ImDrawVert));
             if (rhiData.VertexBuffer == null || totalVBSize > rhiData.VertexBuffer.mCoreObject.Desc.Size)
             {
@@ -292,28 +304,31 @@ namespace EngineNS.EGui
                 rhiData.IndexBuffer = rc.CreateIBV(null, in ibDesc);
                 rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
             }
-
-            rhiData.DataVB.Clear(false);
-            rhiData.DataIB.Clear(false);
-            for (int i = 0; i < draw_data.CmdListsCount; i++)
+            
+            using (new Profiler.TimeScopeHelper(ScopeDrawPass))
             {
-                var cmd_list = new ImDrawList(draw_data.CmdLists[i]);
+                rhiData.DataVB.Clear(false);
+                rhiData.DataIB.Clear(false);
+                for (int i = 0; i < draw_data.CmdListsCount; i++)
+                {
+                    var cmd_list = new ImDrawList(draw_data.CmdLists[i]);
 
-                rhiData.DataVB.Append(cmd_list.VtxBufferData, cmd_list.VtxBufferSize);
-                rhiData.DataIB.Append(cmd_list.IdxBufferData, cmd_list.IdxBufferSize);
+                    rhiData.DataVB.Append(cmd_list.VtxBufferData, cmd_list.VtxBufferSize);
+                    rhiData.DataIB.Append(cmd_list.IdxBufferData, cmd_list.IdxBufferSize);
 
-                vertexOffsetInVertices += (uint)cmd_list.VtxBufferSize;
-                indexOffsetInElements += (uint)cmd_list.IdxBufferSize;
+                    vertexOffsetInVertices += (uint)cmd_list.VtxBufferSize;
+                    indexOffsetInElements += (uint)cmd_list.IdxBufferSize;
+                }
+
+                rhiData.VertexBuffer.UpdateGpuData(rhiData.CmdList, 0,
+                    rhiData.DataVB.UnsafeAddressAt(0).ToPointer(), (uint)(vertexOffsetInVertices * sizeof(ImDrawVert)));
+
+                rhiData.IndexBuffer.UpdateGpuData(rhiData.CmdList, 0,
+                    rhiData.DataIB.UnsafeAddressAt(0).ToPointer(), (uint)(indexOffsetInElements * sizeof(ushort)));
+                
+                rhiData.GeomMesh.mCoreObject.GetVertexArray().BindVB(NxRHI.EVertexStreamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
+                rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
             }
-
-            rhiData.VertexBuffer.UpdateGpuData(rhiData.CmdList, 0,
-                rhiData.DataVB.UnsafeAddressAt(0).ToPointer(), (uint)(vertexOffsetInVertices * sizeof(ImDrawVert)));
-
-            rhiData.IndexBuffer.UpdateGpuData(rhiData.CmdList, 0,
-                rhiData.DataIB.UnsafeAddressAt(0).ToPointer(), (uint)(indexOffsetInElements * sizeof(ushort)));
-
-            rhiData.GeomMesh.mCoreObject.GetVertexArray().BindVB(NxRHI.EVertexStreamType.VST_Position, rhiData.VertexBuffer.mCoreObject);
-            rhiData.GeomMesh.mCoreObject.BindIndexBuffer(rhiData.IndexBuffer.mCoreObject);
 
             // Setup orthographic projection matrix into our constant buffer
             var io = ImGuiAPI.GetIO();
@@ -327,7 +342,7 @@ namespace EngineNS.EGui
                 T,
                 -1.0f,
                 1.0f);
-
+            
             rhiData.FontCBuffer.SetValue("ProjectionMatrix", in mvp);
 
             var fb_scale = io.DisplayFramebufferScale;

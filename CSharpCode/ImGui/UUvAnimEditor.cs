@@ -1,11 +1,10 @@
-﻿using SDL2;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.EGui
 {
-    public class UUvAnimEditor : Editor.IAssetEditor, Graphics.Pipeline.IRootForm
+    public class UUvAnimEditor : Editor.IAssetEditor, IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -28,7 +27,7 @@ namespace EngineNS.EGui
         {
             return await UvAnimPropGrid.Initialize();
         }
-        public Graphics.Pipeline.IRootForm GetRootForm()
+        public IRootForm GetRootForm()
         {
             return this;
         }
@@ -256,7 +255,7 @@ namespace EngineNS.EGui
             }
             ImGuiAPI.EndChild();
         }
-        public void OnEvent(ref SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
             
         }

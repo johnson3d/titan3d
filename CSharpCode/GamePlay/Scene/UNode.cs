@@ -119,6 +119,7 @@ namespace EngineNS.GamePlay.Scene
             ChildrenInvisible = (1 << 10),
             SceneManaged = (1 << 11),
             Transient = (1 << 12),
+            NoTick = (1 << 13),
             Invisible = SelfInvisible | ChildrenInvisible,
         }
         public ENodeStyles NodeStyles
@@ -149,6 +150,24 @@ namespace EngineNS.GamePlay.Scene
         public void UnsetStyle(ENodeStyles style)
         {
             NodeStyles &= ~style;
+        }
+        public bool IsNoTick
+        {
+            get
+            {
+                return HasStyle(ENodeStyles.NoTick);
+            }
+            set
+            {
+                if (value)
+                {
+                    SetStyle(ENodeStyles.NoTick);
+                }
+                else
+                {
+                    UnsetStyle(ENodeStyles.NoTick);
+                }
+            }
         }
         public virtual bool IsCastShadow
         {
@@ -379,6 +398,16 @@ namespace EngineNS.GamePlay.Scene
             foreach (var i in Children)
             {
                 if (i.NodeName == name)
+                    return i;
+            }
+            return null;
+        }
+
+        public UNode FindFirstChild<T>()
+        {
+            foreach (var i in Children)
+            {
+                if (i.GetType() == typeof(T) || i.GetType().IsSubclassOf(typeof(T)))
                     return i;
             }
             return null;
@@ -684,6 +713,8 @@ namespace EngineNS.GamePlay.Scene
         #region GamePlay
         public virtual void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
+            if (this.IsNoTick)
+                return;
             if (OnTickLogic(world, policy) == false)
                 return;
 
@@ -737,6 +768,10 @@ namespace EngineNS.GamePlay.Scene
         public override bool IsSceneManagedType()
         {
             return true;
+        }
+        public virtual Guid ActorId
+        {
+            get { return Guid.Empty; }
         }
     }
     [Bricks.CodeBuilder.ContextMenu("SubTree", "SubTree", UNode.EditorKeyword)]

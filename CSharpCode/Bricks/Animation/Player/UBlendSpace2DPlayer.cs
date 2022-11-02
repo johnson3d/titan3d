@@ -105,9 +105,10 @@ namespace EngineNS.Animation.Player
                 var clip = mRuntimeBlendSamples[i].Animation as UAnimationClip;
                 System.Diagnostics.Debug.Assert(clip != null);
                 UExtractPoseFromClipCommand animEvaluateCmd = new UExtractPoseFromClipCommand(ref clipPose,clip);
+                animEvaluateCmd.Time = PlayPercent * clip.Duration;
+
                 mEvaluateCmd.AnimCmds.Add(animEvaluateCmd);
                 mEvaluateCmd.AnimPoses.Add(clipPose);
-                animEvaluateCmd.Time = PlayPercent * clip.Duration;
                 mEvaluateCmd.Desc.Weights.Add(mRuntimeBlendSamples[i].TotalWeight);
                 mEvaluateCmd.Desc.Times.Add(PlayPercent * clip.Duration);
             }

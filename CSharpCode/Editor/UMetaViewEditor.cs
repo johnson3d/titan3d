@@ -1,11 +1,10 @@
 ﻿using EngineNS.GamePlay.Character;
 using System;
 using System.Collections.Generic;
-using SDL2;
 
 namespace EngineNS.Editor
 {
-    public class UMetaVersionViewer : Editor.IAssetEditor, Graphics.Pipeline.IRootForm
+    public class UMetaVersionViewer : Editor.IAssetEditor, IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -22,7 +21,7 @@ namespace EngineNS.Editor
         {
             return await VersionPropGrid.Initialize();
         }
-        public Graphics.Pipeline.IRootForm GetRootForm()
+        public IRootForm GetRootForm()
         {
             return this;
         }
@@ -102,12 +101,12 @@ namespace EngineNS.Editor
         protected void DrawToolBar()
         {
             var btSize = Vector2.Zero;
-            if (EGui.UIProxy.CustomButton.ToolButton("Mipmap", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
 
             }
             ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("SavePng", in btSize))
+            if (EGui.UIProxy.CustomButton.ToolButton("Load", in btSize))
             {
 
             }
@@ -129,7 +128,7 @@ namespace EngineNS.Editor
             }
             ImGuiAPI.EndChild();
         }
-        public void OnEvent(ref SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
 
         }

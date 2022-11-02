@@ -28,25 +28,17 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
         public Bricks.PhysicsCore.UPhyController PhyController { get; set; } = null;
 
-        FTransform mLastFrameTransform;
-        public override bool OnTickLogic(UWorld world, URenderPolicy policy)
+        public bool TryMove(DVector3 dist, float deltaTimeSecond, out DVector3 newPosition)
         {
             if (PhyController == null)
-                return false;
-            var data = NodeData as UCapsulePhyControllerNodeData;
-            var currentTransform = Parent.Placement.AbsTransform;
-            var dist = currentTransform.Position - mLastFrameTransform.Position;
-            var phyResult = PhyController.mCoreObject.Move(dist.ToSingleVector3(), 0.001f, world.DeltaTimeSecond, data.QueryFilterData, data.PhyQueryFlags);
-            
-            if(phyResult != 0)
             {
-                bool collision = true;
+                newPosition = DVector3.Zero;
+                return false;
             }
-            var position = PhyController.mCoreObject.GetFootPosition();
-            Parent.Placement.Position = position.AsDVector();
-            mLastFrameTransform = Parent.Placement.AbsTransform;
-
-            return base.OnTickLogic(world, policy);
+            var data = NodeData as UCapsulePhyControllerNodeData;
+            var phyResult = PhyController.mCoreObject.Move(dist.ToSingleVector3(), 0.001f, deltaTimeSecond, data.QueryFilterData, data.PhyQueryFlags);
+            newPosition = PhyController.mCoreObject.GetFootPosition().AsDVector();
+            return true;
         }
     }
     public class UCapsulePhyControllerNode : UPhyControllerNodeBase
@@ -88,6 +80,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             {
                 System.Diagnostics.Debug.Assert(false);
             }
+            PhyController.mCoreObject.SetFootPosition(cur.Placement.AbsTransform.Position.ToSingleVector3());
             PhyController.mCoreObject.SetQueryFilterData(CapsulePhyControllerNodeData.QueryFilterData);
             PhyController.mCoreObject.SetSimulationFilterData(CapsulePhyControllerNodeData.SimulationFilterData);
             base.OnParentChanged(prev, cur);
@@ -128,6 +121,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             {
                 System.Diagnostics.Debug.Assert(false);
             }
+            PhyController.mCoreObject.SetFootPosition(cur.Placement.AbsTransform.Position.ToSingleVector3());
+            PhyController.mCoreObject.SetQueryFilterData(BoxPhyControllerNodeData.QueryFilterData);
+            PhyController.mCoreObject.SetSimulationFilterData(BoxPhyControllerNodeData.SimulationFilterData);
             base.OnParentChanged(prev, cur);
         }
     }

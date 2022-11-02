@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
-    public class UPhyMaterialEditor : Editor.IAssetEditor, Graphics.Pipeline.IRootForm
+    public class UPhyMaterialEditor : Editor.IAssetEditor, IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -28,7 +28,7 @@ namespace EngineNS.Bricks.PhysicsCore
             await MaterialPropGrid.Initialize();
             return true;
         }
-        public Graphics.Pipeline.IRootForm GetRootForm()
+        public IRootForm GetRootForm()
         {
             return this;
         }
@@ -126,7 +126,7 @@ namespace EngineNS.Bricks.PhysicsCore
             
         }
 
-        public void OnEvent(ref SDL2.SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
             //throw new NotImplementedException();
         }

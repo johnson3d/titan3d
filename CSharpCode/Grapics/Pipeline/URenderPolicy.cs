@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Thread;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -56,14 +57,18 @@ namespace EngineNS.Graphics.Pipeline
                 return null;
             return hitproxyNode.GetHitproxy(MouseX, MouseY);
         }
-
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTickSync = Profiler.TimeScopeManager.GetTimeScope(typeof(URenderPolicy), nameof(TickSync));
         public override void TickSync()
         {
-            base.TickSync();
-            foreach(var i in CameraAttachments)
+            using (new Profiler.TimeScopeHelper(ScopeTickSync))
             {
-                i.Value.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
-            }
+                base.TickSync();
+                foreach (var i in CameraAttachments)
+                {
+                    i.Value.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
+                }
+            }   
         }
         #region Turn On/Off
         protected bool mDisableShadow;

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.EGui.Controls
 {
-    public class UItemDragging : Graphics.Pipeline.IRootForm
+    public class UItemDragging : IRootForm
     {
         public UItemDragging()
         {

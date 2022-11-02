@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UInspector : Graphics.Pipeline.IRootForm, EGui.IPanel
+    public class UInspector : IRootForm, EGui.IPanel
     {
         public UInspector()
         {

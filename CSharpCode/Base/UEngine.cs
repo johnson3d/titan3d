@@ -72,6 +72,12 @@ namespace EngineNS
         [Rtti.Meta]
         public bool CookMETAL { get; set; } = false;
         [Rtti.Meta]
+        public bool CompressDxt { get; set; } = true;
+        [Rtti.Meta]
+        public bool CompressEtc { get; set; } = false;
+        [Rtti.Meta]
+        public bool CompressAstc { get; set; } = false;
+        [Rtti.Meta]
         public RName DefaultMaterial { get; set; }// = RName.GetRName("UTest/ttt.material");
         [Rtti.Meta]
         public RName DefaultMaterialInstance { get; set; }// = RName.GetRName("UTest/box_wite.uminst");
@@ -196,6 +202,8 @@ namespace EngineNS
 
             var tEnd = Support.Time.HighPrecision_GetTickCount();
             Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Engine PreInit Time:{(tEnd - t1) / 1000} ms");
+
+            this.PluginModuleManager.InitPlugins(this);
             return true;
         }
         [ThreadStatic]
@@ -257,9 +265,7 @@ namespace EngineNS
         }
         public void PostQuitMessage()
         {
-            var closeEvent = new SDL2.SDL.SDL_Event();
-            closeEvent.type = SDL2.SDL.SDL_EventType.SDL_QUIT;
-            SDL2.SDL.SDL_PushEvent(ref closeEvent);
+            Bricks.Input.UInputSystem.PostQuitMessage();
         }
         public void FinalCleanup()
         {

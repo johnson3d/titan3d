@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Bricks.VXGI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -173,42 +174,47 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 }
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UForwordNode), nameof(TickLogic));
         public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            if (mOpaqueShading == null)
-                return;
-            BasePass.ClearMeshDrawPassArray();
-            
-            foreach (var i in policy.VisibleMeshes)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                if (i.Atoms == null)
-                    continue;
+                if (mOpaqueShading == null)
+                    return;
+                BasePass.ClearMeshDrawPassArray();
 
-                for (int j = 0; j < i.Atoms.Length; j++)
+                foreach (var i in policy.VisibleMeshes)
                 {
-                    if (i.Atoms[j].Material == null)
-                        continue;
-                    var layer = i.Atoms[j].Material.RenderLayer;
-                    if (layer == ERenderLayer.RL_Opaque)
+                    if (i.Atoms == null)
                         continue;
 
-                    var drawcall = i.GetDrawCall(GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
-                    if (drawcall != null)
+                    for (int j = 0; j < i.Atoms.Length; j++)
                     {
-                        drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
-                        //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+                        if (i.Atoms[j].Material == null)
+                            continue;
+                        var layer = i.Atoms[j].Material.RenderLayer;
+                        if (layer == ERenderLayer.RL_Opaque)
+                            continue;
 
-                        BasePass.PushDrawCall(layer, drawcall);
+                        var drawcall = i.GetDrawCall(GBuffers, j, policy, URenderPolicy.EShadingType.BasePass, this);
+                        if (drawcall != null)
+                        {
+                            drawcall.BindGBuffer(policy.DefaultCamera, GBuffers);
+                            //GGizmosBuffers.PerViewportCBuffer = GBuffers.PerViewportCBuffer;
+
+                            BasePass.PushDrawCall(layer, drawcall);
+                        }
                     }
                 }
-            }
 
-            var passClear = new NxRHI.FRenderPassClears();
-            passClear.SetDefault();
-            passClear.SetClearColor(0, new Color4(1, 0, 0, 0));
-            GBuffers.BuildFrameBuffers(policy);
-            GGizmosBuffers.BuildFrameBuffers(policy);
-            BasePass.BuildRenderPass(policy, in GBuffers.Viewport, in passClear, GBuffers, GGizmosBuffers, "Forword:");
+                var passClear = new NxRHI.FRenderPassClears();
+                passClear.SetDefault();
+                passClear.SetClearColor(0, new Color4(1, 0, 0, 0));
+                GBuffers.BuildFrameBuffers(policy);
+                GGizmosBuffers.BuildFrameBuffers(policy);
+                BasePass.BuildRenderPass(policy, in GBuffers.Viewport, in passClear, GBuffers, GGizmosBuffers, "Forword:");
+            }   
         }
         public override void TickSync(URenderPolicy policy)
         {

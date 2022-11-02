@@ -317,36 +317,41 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
 
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UGpuSceneNode), nameof(TickLogic));
         public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
         {
-            if (policy.VisibleNodes == null)
-                return;
-            var cmd = BasePass.DrawCmdList;
-            cmd.BeginCommand();
-            PointLights.Clear();
-            if (policy.DisablePointLight == false)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                foreach (var i in policy.VisibleNodes)
+                if (policy.VisibleNodes == null)
+                    return;
+                var cmd = BasePass.DrawCmdList;
+                cmd.BeginCommand();
+                PointLights.Clear();
+                if (policy.DisablePointLight == false)
                 {
-                    var pointLight = i as GamePlay.Scene.UPointLightNode;
-                    if (pointLight == null)
-                        continue;
+                    foreach (var i in policy.VisibleNodes)
+                    {
+                        var pointLight = i as GamePlay.Scene.UPointLightNode;
+                        if (pointLight == null)
+                            continue;
 
-                    var lightData = pointLight.NodeData as GamePlay.Scene.UPointLightNode.ULightNodeData;
+                        var lightData = pointLight.NodeData as GamePlay.Scene.UPointLightNode.ULightNodeData;
 
-                    FPointLight light;
-                    var pos = pointLight.Placement.Position;
-                    light.PositionAndRadius = new Vector4(pos.ToSingleVector3(), lightData.Radius);
-                    light.ColorAndIntensity = new Vector4(lightData.Color.X, lightData.Color.Y, lightData.Color.Z, lightData.Intensity);
-                    pointLight.IndexInGpuScene = PointLights.PushData(light);
-                }                
-                PointLights.Flush2GPU(cmd.mCoreObject);
-            }
-            //if PerFrameCBuffer dirty :flush
-            UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject.FlushDirty(cmd.mCoreObject, false);
-            cmd.EndCommand();
+                        FPointLight light;
+                        var pos = pointLight.Placement.Position;
+                        light.PositionAndRadius = new Vector4(pos.ToSingleVector3(), lightData.Radius);
+                        light.ColorAndIntensity = new Vector4(lightData.Color.X, lightData.Color.Y, lightData.Color.Z, lightData.Intensity);
+                        pointLight.IndexInGpuScene = PointLights.PushData(light);
+                    }
+                    PointLights.Flush2GPU(cmd.mCoreObject);
+                }
+                //if PerFrameCBuffer dirty :flush
+                UEngine.Instance.GfxDevice.PerFrameCBuffer.mCoreObject.FlushDirty(cmd.mCoreObject, false);
+                cmd.EndCommand();
 
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+            }   
         }
         public unsafe override void TickSync(Graphics.Pipeline.URenderPolicy policy)
         {

@@ -387,29 +387,33 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return maxDist;
         }
         //bool DebugPrintLOD = false;
-        
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UTerrainNode), nameof(TickLogic));
         public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
-            EyeCenter = policy.DefaultCamera.mCoreObject.GetPosition();
-            EyeLocalCenter = policy.DefaultCamera.mCoreObject.GetLocalPosition();
-            
-            if (SetActiveCenter(in EyeCenter))
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                world.CameraOffset = EyeCenter;
-                policy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in EyeCenter);
-            }
+                EyeCenter = policy.DefaultCamera.mCoreObject.GetPosition();
+                EyeLocalCenter = policy.DefaultCamera.mCoreObject.GetLocalPosition();
 
-            //UpdateRangeLOD((NodeData as UTerrainData).LODRangeFloat, EyeCenter - this.Location);
+                if (SetActiveCenter(in EyeCenter))
+                {
+                    world.CameraOffset = EyeCenter;
+                    policy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in EyeCenter);
+                }
 
-            foreach (var i in ActiveLevels)
-            {
-                if (i == null)
-                    continue;
-                i.LevelData?.Tick(world, policy);
-            }
+                //UpdateRangeLOD((NodeData as UTerrainData).LODRangeFloat, EyeCenter - this.Location);
 
-            LevelStreaming.Tick(UEngine.Instance.ElapsedSecond);
-            return base.OnTickLogic(world, policy);
+                foreach (var i in ActiveLevels)
+                {
+                    if (i == null)
+                        continue;
+                    i.LevelData?.Tick(world, policy);
+                }
+
+                LevelStreaming.Tick(UEngine.Instance.ElapsedSecond);
+                return base.OnTickLogic(world, policy);
+            }   
         }
         protected override void OnAbsTransformChanged()
         {

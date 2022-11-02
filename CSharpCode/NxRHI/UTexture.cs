@@ -1,7 +1,12 @@
-﻿using NPOI.OpenXmlFormats.Vml;
+﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using NPOI.OpenXmlFormats.Vml;
 using NPOI.SS.Formula.Functions;
+using NPOI.Util;
+using Org.BouncyCastle.Crypto.IO;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Text;
 
 namespace EngineNS.NxRHI
@@ -79,7 +84,8 @@ namespace EngineNS.NxRHI
                 var uv0 = new Vector2(0, 0);
                 var uv1 = new Vector2(1, 1);
 
-                cmdlist.AddImage(SnapTask.Result.GetTextureHandle().ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                if (SnapTask.Result != null)
+                    cmdlist.AddImage(SnapTask.Result.GetTextureHandle().ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
             }
             //cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
         }
@@ -91,13 +97,43 @@ namespace EngineNS.NxRHI
     {
         public class UPicDesc
         {
+            public UPicDesc()
+            {
+                Desc.SetDefault();
+            }
             public FPictureDesc Desc;
-            public int sRGB { get => Desc.sRGB; set => Desc.sRGB = value; }
-            public EEtcFormat EtcFormat { get => Desc.EtcFormat; set => Desc.EtcFormat = value; }
+            //public uint dwStructureSize { get => Desc.dwStructureSize; set => Desc.dwStructureSize = value; }
+            [ReadOnly(true)]
+            public ETextureCompressFormat CompressFormat { get => Desc.CompressFormat; set => Desc.CompressFormat = value; }
+            [ReadOnly(true)]
+            public EPixelFormat Format { get => Desc.Format; set => Desc.Format = value; }
+            [ReadOnly(true)]
+            public uint CubeFaces { get => Desc.CubeFaces; set => Desc.CubeFaces = value; }
             public int MipLevel { get => Desc.MipLevel; set => Desc.MipLevel = value; }
+            [ReadOnly(true)]
             public int Width { get => Desc.Width; set => Desc.Width = value; }
+            [ReadOnly(true)]
             public int Height { get => Desc.Height; set => Desc.Height = value; }
-            public List<Int32_2> MipSizes = new List<Int32_2>();
+            public byte BitNumRed { get => Desc.BitNumRed; set => Desc.BitNumRed = value; }
+            public byte BitNumGreen { get => Desc.BitNumGreen; set => Desc.BitNumGreen = value; }
+            public byte BitNumBlue { get => Desc.BitNumBlue; set => Desc.BitNumBlue = value; }
+            public byte BitNumAlpha { get => Desc.BitNumAlpha; set => Desc.BitNumAlpha = value; }
+            public bool DontCompress 
+            {
+                get => Desc.DontCompress != 0 ? true : false;
+                set => Desc.DontCompress = value ? 1 : 0;
+            }
+            public bool sRGB
+            {
+                get => Desc.sRGB != 0 ? true : false;
+                set => Desc.sRGB = value ? 1 : 0;
+            }
+            public bool StripOriginSource
+            {
+                get => Desc.StripOriginSource != 0 ? true : false;
+                set => Desc.StripOriginSource = value ? 1 : 0;
+            }
+            public List<Int32_3> MipSizes { get; } = new List<Int32_3>();
         }
         public EPixelFormat SrvFormat
         {
@@ -128,53 +164,62 @@ namespace EngineNS.NxRHI
                 var noused = PGAsset.Initialize();
                 PGAsset.Target = mDesc;
             }
-            public override unsafe void OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
+            public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import SRV", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                bool retValue = false;
                 var visible = true;
                 ImGuiAPI.SetNextWindowSize(new Vector2(200, 500), ImGuiCond_.ImGuiCond_FirstUseEver);
                 if (ImGuiAPI.BeginPopupModal($"Import SRV", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
-                    var sz = new Vector2(-1, 0);
-                    if (ImGuiAPI.Button("Select Image", in sz))
+                    if(string.IsNullOrEmpty(ContentBrowser.CurrentImporterFile))
                     {
-                        mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".png,.PNG,.jpg,.JPG,.bmp,.BMP,.tga,.TGA", ".");
-                    }
-                    // display
-                    if (mFileDialog.DisplayDialog("ChooseFileDlgKey"))
-                    {
-                        // action if OK
-                        if (mFileDialog.IsOk() == true)
+                        var sz = new Vector2(-1, 0);
+                        if (ImGuiAPI.Button("Select Image", in sz))
                         {
-                            mSourceFile = mFileDialog.GetFilePathName();
-                            string filePath = mFileDialog.GetCurrentPath();
-                            using (var stream = System.IO.File.OpenRead(mSourceFile))
-                            {
-                                var image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                                if (image != null)
-                                {
-                                    mDesc.Width = image.Width;
-                                    mDesc.Height = image.Height;
-
-                                    int height = image.Height;
-                                    int width = image.Width;
-                                    int mipLevel = 0;
-                                    do
-                                    {
-                                        height = height / 2;
-                                        width = width / 2;
-                                        mipLevel++;
-                                    }
-                                    while (height > 0 && width > 0);
-
-                                    mDesc.MipLevel = mipLevel;
-                                }
-                                mName = IO.FileManager.GetPureName(mSourceFile);
-                            }
+                            mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".png,.PNG,.jpg,.JPG,.bmp,.BMP,.tga,.TGA", ".");
                         }
-                        // close
-                        mFileDialog.CloseDialog();
+                        // display
+                        if (mFileDialog.DisplayDialog("ChooseFileDlgKey"))
+                        {
+                            // action if OK
+                            if (mFileDialog.IsOk() == true)
+                            {
+                                mSourceFile = mFileDialog.GetFilePathName();
+                                string filePath = mFileDialog.GetCurrentPath();
+                                using (var stream = System.IO.File.OpenRead(mSourceFile))
+                                {
+                                    var image = StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                                    if (image != null)
+                                    {
+                                        mDesc.Width = image.Width;
+                                        mDesc.Height = image.Height;
+
+                                        int height = image.Height;
+                                        int width = image.Width;
+                                        int mipLevel = 0;
+                                        do
+                                        {
+                                            height = height / 2;
+                                            width = width / 2;
+                                            mipLevel++;
+                                        }
+                                        while (height > 0 && width > 0);
+
+                                        mDesc.MipLevel = mipLevel;
+                                    }
+                                    mName = IO.FileManager.GetPureName(mSourceFile);
+                                }
+                            }
+                            // close
+                            mFileDialog.CloseDialog();
+                        }
+                    }
+                    else if(string.IsNullOrEmpty(mSourceFile))
+                    {
+                        mSourceFile = ContentBrowser.CurrentImporterFile;
+                        mName = IO.FileManager.GetPureName(mSourceFile);
                     }
                     if (bFileExisting)
                     {
@@ -200,23 +245,23 @@ namespace EngineNS.NxRHI
                         }
                     }
 
-                    sz = Vector2.Zero;
+                    var btSz = Vector2.Zero;
                     if (bFileExisting == false)
                     {
-                        if (ImGuiAPI.Button("Create Asset", in sz))
+                        if (ImGuiAPI.Button("Create Asset", in btSz))
                         {
                             if (ImportImage())
                             {
                                 ImGuiAPI.CloseCurrentPopup();
-                                ContentBrowser.mAssetImporter = null;
+                                retValue = true;
                             }
                         }
                         ImGuiAPI.SameLine(0, 20);
                     }
-                    if (ImGuiAPI.Button("Cancel", in sz))
+                    if (ImGuiAPI.Button("Cancel", in btSz))
                     {
                         ImGuiAPI.CloseCurrentPopup();
-                        ContentBrowser.mAssetImporter = null;
+                        retValue = true;
                     }
 
                     ImGuiAPI.Separator();
@@ -225,6 +270,9 @@ namespace EngineNS.NxRHI
 
                     ImGuiAPI.EndPopup();
                 }
+                if (!visible)
+                    retValue = true;
+                return retValue;
             }
             private bool ImportImage()
             {
@@ -242,7 +290,7 @@ namespace EngineNS.NxRHI
                     var rn = RName.GetRName(mDir.Name + mName + USrView.AssetExt, mDir.RNameType);
 
                     var xnd = new IO.CXndHolder("USrView", 0, 0);
-                    USrView.SaveTexture(xnd.RootNode.mCoreObject, image, mDesc);
+                    USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, mDesc);
                     xnd.SaveXnd(rn.Address);
 
                     var ameta = new USrViewAMeta();
@@ -257,7 +305,7 @@ namespace EngineNS.NxRHI
                 return true;
             }
 
-            public static bool ImportImage(string sourceFile, RName dir)
+            public static bool ImportImage(string sourceFile, RName dir, UPicDesc desc)
             {
                 using (var stream = System.IO.File.OpenRead(sourceFile))
                 {
@@ -267,27 +315,31 @@ namespace EngineNS.NxRHI
                     if (image == null)
                         return false;
 
-                    var desc = new UPicDesc();
-
-                    desc.Width = image.Width;
-                    desc.Height = image.Height;
                     var name = IO.FileManager.GetPureName(sourceFile);
-
                     var rn = RName.GetRName(dir.Name.TrimEnd('\\').TrimEnd('/') + "/" + name + USrView.AssetExt, dir.RNameType);
 
-                    var xnd = new IO.CXndHolder("CShaderResourceView", 0, 0);
-                    USrView.SaveTexture(xnd.RootNode.mCoreObject, image, desc);
-                    xnd.SaveXnd(rn.Address);
-
-                    var ameta = new USrViewAMeta();
-                    ameta.SetAssetName(rn);
-                    ameta.AssetId = Guid.NewGuid();
-                    ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(USrView));
-                    ameta.Description = $"This is a {typeof(USrView).FullName}\n";
-                    ameta.SaveAMeta();
-
-                    UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                    return SaveSrv(image, rn, desc);
                 }
+            }
+
+            public static bool SaveSrv(StbImageSharp.ImageResult image, RName rn, UPicDesc desc)
+            {
+                desc.Width = image.Width;
+                desc.Height = image.Height;
+
+                var xnd = new IO.CXndHolder("USrView", 0, 0);
+                USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, desc);
+                xnd.SaveXnd(rn.Address);
+
+                var ameta = new USrViewAMeta();
+                ameta.SetAssetName(rn);
+                ameta.AssetId = Guid.NewGuid();
+                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(USrView));
+                ameta.Description = $"This is a {typeof(USrView).FullName}\n";
+                ameta.SaveAMeta();
+
+                UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+
                 return true;
             }
 
@@ -308,7 +360,7 @@ namespace EngineNS.NxRHI
             }
             public override void ImportSource(string sourceFile, RName dir)
             {
-                ImportImage(sourceFile, dir);
+                ImportImage(sourceFile, dir, new UPicDesc());
             }
         }
 
@@ -329,9 +381,20 @@ namespace EngineNS.NxRHI
         }
         public void SaveAssetTo(RName name)
         {
-            //这里需要存盘的情况很少，正常来说srb是Image导入的时候生成的，不是保存出来的
-            //mCoreObject.Save2Xnd()
-            IO.FileManager.CopyFile(AssetName.Address, name.Address);
+            var image = LoadOriginImage(this.AssetName);
+            if (image == null)
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Assets", $"SaveAssetTo failed: LoadOriginImage({AssetName}) = null");
+                return;
+            }
+            ImportAttribute.SaveSrv(image, name, this.PicDesc);
+
+            var ameta = this.GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta();
+            }
         }
         [Rtti.Meta]
         public RName AssetName
@@ -399,10 +462,7 @@ namespace EngineNS.NxRHI
                 if (xnd == null)
                     return null;
 
-                var tex = LoadPngTexture2DMipLevel(xnd.RootNode.mCoreObject, PicDesc, level);
-                if (tex == null)
-                    return null;
-                return tex;
+                return LoadTexture2DMipLevel(xnd.RootNode, this.PicDesc, level);
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
@@ -422,6 +482,55 @@ namespace EngineNS.NxRHI
         }
         #endregion
 
+        public static StbImageSharp.ImageResult LoadOriginImage(RName name)
+        {
+            using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
+            {
+                if (xnd == null)
+                {
+                    var sourceFile = name.Address + ".png";
+                    using (var stream = System.IO.File.OpenRead(sourceFile))
+                    {
+                        if (stream == null)
+                            return null;
+                        return StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                    }
+                }
+                var attr = xnd.RootNode.TryGetAttribute("OriginSource");
+                if (attr.IsValidPointer == false)
+                {
+                    attr = xnd.RootNode.TryGetAttribute("Png");
+                }
+                if (attr.IsValidPointer)
+                {
+                    var ar = attr.GetReader(null);
+                    byte[] pngData;
+                    ar.ReadNoSize(out pngData, (int)attr.GetReaderLength());
+                    attr.ReleaseReader(ref ar);
+
+                    using (var memStream = new System.IO.MemoryStream(pngData))
+                    {
+                        var image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                        return image;
+                    }
+                }
+                else
+                {
+                    var sourceFile = name.Address + ".png";
+                    if (System.IO.File.Exists(sourceFile) == false)
+                    {
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Assets", $"LoadOriginImage({name}) failed");
+                        return null;
+                    }
+                    using (var stream = System.IO.File.OpenRead(sourceFile))
+                    {
+                        if (stream == null)
+                            return null;
+                        return StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                    }
+                }
+            }
+        }
         #region static function
         public static int CalcMipLevel(int width, int height, bool isAnyZero)
         {
@@ -459,29 +568,124 @@ namespace EngineNS.NxRHI
             while (true);
             return mipLevel;
         }
-        public static unsafe void SaveTexture(XndNode node, StbImageSharp.ImageResult image, UPicDesc desc)
+        public static unsafe void SaveTexture(RName assetName, XndNode node, StbImageSharp.ImageResult image, UPicDesc desc)
         {
-            using (var memStream = new System.IO.MemoryStream(image.Data.Length))
+            desc.Height = image.Height;
+            desc.Width = image.Width;
+            if (desc.StripOriginSource && assetName != null)
             {
-                var writer = new StbImageWriteSharp.ImageWriter();
-                writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
-                var pngData = memStream.ToArray();
-                var attr = node.GetOrAddAttribute("Png", 0, 0);
-                var ar = attr.GetWriter((ulong)memStream.Position);
-                ar.WriteNoSize(pngData, (int)memStream.Position);
-                attr.ReleaseWriter(ref ar);
+                using (var memStream = new System.IO.FileStream(assetName.Address + ".png", System.IO.FileMode.OpenOrCreate))
+                {
+                    var writer = new StbImageWriteSharp.ImageWriter();
+                    writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+                }
+            }
+            else
+            {
+                using (var memStream = new System.IO.MemoryStream(image.Data.Length))
+                {
+                    var writer = new StbImageWriteSharp.ImageWriter();
+                    writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+                    var pngData = memStream.ToArray();
+                    var attr = node.GetOrAddAttribute("Png", 0, 0);
+                    var ar = attr.GetWriter((ulong)memStream.Position);
+                    ar.WriteNoSize(pngData, (int)memStream.Position);
+                    attr.ReleaseWriter(ref ar);
+                }
             }
 
+            if (image.Width % 4 != 0 || image.Height % 4 != 0)
+            {
+                desc.DontCompress = true;
+            }
             int mipLevel = 0;
             var curImage = image;
             desc.MipSizes.Clear();
+            if (desc.DontCompress == false)
             {
-                var pngMipsNode = node.GetOrAddNode("PngMips", 0, 0);
-                mipLevel = SavePngMips(pngMipsNode, curImage, desc);
+                if (UEngine.Instance.Config.CompressDxt)
+                {
+                    if (desc.BitNumAlpha == 8 || desc.BitNumAlpha == 4)
+                    {
+                        desc.CompressFormat = ETextureCompressFormat.TCF_Dxt3;
+                    }
+                    else if (desc.BitNumAlpha == 1)
+                    {
+                        desc.CompressFormat = ETextureCompressFormat.TCF_Dxt1a;
+                    }
+                    else
+                    {
+                        desc.CompressFormat = ETextureCompressFormat.TCF_Dxt1;
+                    }
+                }
+                else if (UEngine.Instance.Config.CompressEtc)
+                {
+                    if (desc.BitNumAlpha == 8 || desc.BitNumAlpha == 4)
+                    {
+                        desc.CompressFormat = ETextureCompressFormat.TCF_Etc2_RGBA8;
+                    }
+                    else if (desc.BitNumAlpha == 1)
+                    {
+                        desc.CompressFormat = ETextureCompressFormat.TCF_Etc2_RGBA1;
+                    }
+                    else
+                    {
+                        desc.CompressFormat = ETextureCompressFormat.TCF_Etc2_RGB8;
+                    }
+                }
+                else if (UEngine.Instance.Config.CompressAstc)
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                    desc.CompressFormat = ETextureCompressFormat.TCF_Etc2_RGBA8;
+                }
+                else
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                    desc.CompressFormat = ETextureCompressFormat.TCF_None;
+                }
+            }
+            else
+            {
+                desc.CompressFormat = ETextureCompressFormat.TCF_None;
+            }
+            switch (desc.CompressFormat)
+            {
+                case ETextureCompressFormat.TCF_None:
+                    {
+                        var pngMipsNode = node.GetOrAddNode("PngMips", 0, 0);
+                        mipLevel = SavePngMips(pngMipsNode, curImage, desc);
+                        switch (curImage.Comp)
+                        {
+                            case StbImageSharp.ColorComponents.RedGreenBlueAlpha:
+                            case StbImageSharp.ColorComponents.RedGreenBlue:
+                                desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                                break;
+                            case StbImageSharp.ColorComponents.Grey:
+                                desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                                break;
+                            case StbImageSharp.ColorComponents.GreyAlpha:
+                                desc.Format = EPixelFormat.PXF_R8G8_UNORM;
+                                break;
+                            default:
+                                desc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
+                                break;
+                        }
+                    }
+                    break;
+                case ETextureCompressFormat.TCF_Dxt1://rgb:5-6-5 a:0
+                case ETextureCompressFormat.TCF_Dxt1a://rgb:5-6-5 a:1
+                case ETextureCompressFormat.TCF_Dxt3://rgb:5-6-5 a:8
+                case ETextureCompressFormat.TCF_Dxt5://rg:8-8
+                    {
+                        var pngMipsNode = node.GetOrAddNode("DxtMips", 0, 0);
+                        mipLevel = SaveDxtMips(pngMipsNode, curImage, desc);
+                    }
+                    break;
             }
 
             {
                 desc.Desc.MipLevel = mipLevel;
+                desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
                 var attr = node.GetOrAddAttribute("Desc", 0, 0);
                 var ar = attr.GetWriter((ulong)sizeof(FPictureDesc));
                 ar.Write(desc.Desc);
@@ -511,7 +715,7 @@ namespace EngineNS.NxRHI
                     ar.WriteNoSize(pngData, (int)memStream.Position);
                     attr.ReleaseWriter(ref ar);
                 }
-                desc.MipSizes.Add(new Int32_2() { X = width, Y = height });
+                desc.MipSizes.Add(new Int32_3() { X = width, Y = height, Z = width * 4 });
                 height = height / 2;
                 width = width / 2;
                 if ((height == 0 && width == 0))
@@ -531,6 +735,86 @@ namespace EngineNS.NxRHI
 
             return mipLevel;
         }
+        public unsafe static int SaveDxtMips(XndNode mipsNode, StbImageSharp.ImageResult curImage, UPicDesc desc)
+        {
+            System.Diagnostics.Debug.Assert(desc.DontCompress == false);
+            var srcImage = new TextureCompress.FCubeImage();
+            fixed (byte* pImageData = &curImage.Data[0])
+            {
+                srcImage.m_Image0 = (uint*)pImageData;
+                var blobResult = new Support.CBlobObject();
+                if (TextureCompress.CrunchWrap.CompressPixels(16, blobResult.mCoreObject, (uint)curImage.Width, (uint)curImage.Height, in srcImage, desc.CompressFormat, true, desc.sRGB, 0, 255))
+                {
+                    var ar = blobResult.CreateReader();
+                    var loadDesc = new FPictureDesc();
+                    ar.Read(out loadDesc);
+
+                    System.Diagnostics.Debug.Assert(desc.Width == loadDesc.Width);
+                    System.Diagnostics.Debug.Assert(desc.Height == loadDesc.Height);
+                    desc.MipLevel = loadDesc.MipLevel;
+                    desc.CubeFaces = loadDesc.CubeFaces;
+                    desc.Format = loadDesc.Format;
+                    
+                    desc.MipSizes.Clear();
+                    for (uint i = 0; i < desc.Desc.CubeFaces; i++)
+                    {
+                        var faceNode = mipsNode.GetOrAddNode($"Face{i}",0 , 0);
+                        for (uint j = 0; j < desc.Desc.MipLevel; j++)
+                        {
+                            var mipSize = new Int32_3();
+                            ar.Read(out mipSize);
+                            desc.MipSizes.Add(mipSize);
+                            uint total_face_size = 0;
+                            ar.Read(out total_face_size);
+                            var pixels = ar.ReadByteArray(total_face_size);
+
+                            var attr = faceNode.GetOrAddAttribute($"DxtMip{j}", 0, 0);
+                            {
+                                var ar2 = attr.GetWriter((ulong)total_face_size);
+                                ar2.WriteNoSize(pixels, (int)total_face_size);
+                                attr.ReleaseWriter(ref ar2);
+                            }
+                        }
+                    }
+                }
+            }
+            return desc.MipLevel;
+            //int mipLevel = 0;
+            //int height = curImage.Height;
+            //int width = curImage.Width;
+            //do
+            //{
+            //    using (var memStream = new System.IO.MemoryStream(curImage.Data.Length))
+            //    {
+            //        var writer = new StbImageWriteSharp.ImageWriter();
+            //        writer.WritePng(curImage.Data, curImage.Width, curImage.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+            //        //writer.WriteJpg(curImage.Data, curImage.Width, curImage.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream, 100);
+            //        var pngData = memStream.ToArray();
+            //        var attr = pngMipsNode.GetOrAddAttribute($"PngMip{mipLevel}", 0, 0);
+            //        var ar = attr.GetWriter((ulong)memStream.Position);
+            //        ar.WriteNoSize(pngData, (int)memStream.Position);
+            //        attr.ReleaseWriter(ref ar);
+            //    }
+            //    desc.MipSizes.Add(new Int32_2() { X = width, Y = height });
+            //    height = height / 2;
+            //    width = width / 2;
+            //    if ((height == 0 && width == 0))
+            //    {
+            //        break;
+            //    }
+            //    mipLevel++;
+            //    if (height == 0)
+            //        height = 1;
+            //    if (width == 0)
+            //        width = 1;
+            //    curImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(curImage, width, height);
+            //    if (desc.MipLevel > 0 && mipLevel == desc.MipLevel)
+            //        break;
+            //}
+            //while (true);
+
+            //return mipLevel;
+        }
         public static uint GetPixelByteWidth(EPixelFormat format)
         {
             switch (format)
@@ -547,20 +831,7 @@ namespace EngineNS.NxRHI
                     return 0;
             }
         }
-        public static unsafe UPicDesc LoadPicDesc(RName name)
-        {
-            using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
-            {
-                var desc = new UPicDesc();
-                var attr = xnd.RootNode.TryGetAttribute("Desc");
-                var ar = attr.GetReader(null);
-
-                ar.Read(out desc.Desc);
-                attr.ReleaseReader(ref ar);
-                return desc;
-            }
-        }
-        public static unsafe StbImageSharp.ImageResult[] LoadPngImageLevels(RName name, uint mipLevel, ref UPicDesc desc)
+        public static unsafe StbImageSharp.ImageResult[] LoadImageLevels(RName name, uint mipLevel, ref UPicDesc desc)
         {
             using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
             {
@@ -575,34 +846,191 @@ namespace EngineNS.NxRHI
                     }
                 }
                 var pngNode = xnd.RootNode.TryGetChildNode("PngMips");
-                if (pngNode.NativePointer == IntPtr.Zero)
-                    return null;
-
-                if (mipLevel == 0)
+                if (pngNode.IsValidPointer)
                 {
-                    mipLevel = pngNode.GetNumOfAttribute();
-                }
-                var result = new StbImageSharp.ImageResult[mipLevel];
-                for (uint i = 0; i < mipLevel; i++)
-                {
-                    var mipAttr = pngNode.TryGetAttribute($"PngMip{i}");
-                    if (mipAttr.NativePointer == IntPtr.Zero)
-                        return null;
-
-                    var ar = mipAttr.GetReader(null);
-                    byte[] data;
-                    ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
-                    mipAttr.ReleaseReader(ref ar);
-
-                    using (var memStream = new System.IO.MemoryStream(data, false))
+                    if (mipLevel == 0)
                     {
-                        result[i] = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                        mipLevel = pngNode.GetNumOfAttribute();
                     }
+                    var result = new StbImageSharp.ImageResult[mipLevel];
+                    for (uint i = 0; i < mipLevel; i++)
+                    {
+                        var mipAttr = pngNode.TryGetAttribute($"PngMip{i}");
+                        if (mipAttr.NativePointer == IntPtr.Zero)
+                            return null;
+
+                        var ar = mipAttr.GetReader(null);
+                        byte[] data;
+                        ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
+                        mipAttr.ReleaseReader(ref ar);
+
+                        using (var memStream = new System.IO.MemoryStream(data, false))
+                        {
+                            result[i] = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                        }
+                    }
+                    return result;
                 }
-                return result;
+                else
+                {
+                    //todo
+                    pngNode = xnd.RootNode.TryGetChildNode("DxtMips");
+                }
+                return null;
             }
         }
-        public static unsafe UTexture LoadPngTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel)
+        public static unsafe Support.CBlobObject[] LoadPixelMipLevels(RName name, uint mipLevel, UPicDesc desc)
+        {
+            using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
+            {
+                if (desc != null)
+                {
+                    LoadPictureDesc(xnd.RootNode, desc);
+                }
+
+                var pngNode = xnd.RootNode.TryGetChildNode("PngMips");
+                if (pngNode.IsValidPointer)
+                {
+                    if (mipLevel == 0)
+                    {
+                        mipLevel = pngNode.GetNumOfAttribute();
+                    }
+                    var result = new StbImageSharp.ImageResult[mipLevel];
+                    var blobs = new Support.CBlobObject[mipLevel];
+                    for (uint i = 0; i < mipLevel; i++)
+                    {
+                        var mipAttr = pngNode.TryGetAttribute($"PngMip{i}");
+                        if (mipAttr.NativePointer == IntPtr.Zero)
+                            return null;
+
+                        var ar = mipAttr.GetReader(null);
+                        byte[] data;
+                        ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
+                        mipAttr.ReleaseReader(ref ar);
+
+                        using (var memStream = new System.IO.MemoryStream(data, false))
+                        {
+                            result[i] = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                            blobs[i] = new Support.CBlobObject();
+                            fixed (byte* p = &result[i].Data[0])
+                            {
+                                blobs[i].PushData(p, (uint)result[i].Data.Length);
+                            }
+                        }
+                    }
+                    return blobs;
+                }
+                else
+                {
+                    //todo
+                    var dxtNode = xnd.RootNode.TryGetChildNode("DxtMips");
+                    if (dxtNode.IsValidPointer)
+                    {
+                        for (uint j = 0; j < desc.Desc.CubeFaces; j++)
+                        {
+                            var faceNode = dxtNode.TryGetChildNode($"Face{j}");
+                            if (faceNode.IsValidPointer == false)
+                            {
+                                continue;
+                            }
+                            if (mipLevel == 0)
+                            {
+                                mipLevel = faceNode.GetNumOfAttribute();
+                            }
+                            var blobs = new Support.CBlobObject[mipLevel];
+                            for (uint i = 0; i < mipLevel; i++)
+                            {
+                                var realLevel = desc.MipLevel - mipLevel + i;
+                                var ptr = faceNode.TryGetAttribute($"DxtMip{realLevel}");
+                                if (ptr.NativePointer == IntPtr.Zero)
+                                    return null;
+                                var mipAttr = ptr;
+                                var ar = mipAttr.GetReader(null);
+                                byte[] data;
+                                ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
+                                mipAttr.ReleaseReader(ref ar);
+
+                                blobs[i] = new Support.CBlobObject();
+                                fixed (byte* p = &data[0])
+                                {
+                                    blobs[i].PushData(p, (uint)data.Length);
+                                }
+                            }
+                            return blobs;
+                        }
+                    }
+                }
+                return null;
+            }
+        }
+        public static unsafe UPicDesc LoadPictureDesc(RName name)
+        {
+            using (var xnd = IO.CXndHolder.LoadXnd(name.Address))
+            {
+                return LoadPictureDesc(xnd.RootNode);
+            }
+        }
+        public static unsafe void LoadPictureDesc(IO.CXndNode node, UPicDesc desc)
+        {
+            var attr = node.TryGetAttribute("Desc");
+            var ar = attr.GetReader(null);
+            //ar.Read(out desc.Desc);
+            uint headSize = 0;
+            ar.Read(out headSize);
+            System.Diagnostics.Debug.Assert(headSize <= sizeof(FPictureDesc));
+            fixed (FPictureDesc* pDesc = &desc.Desc)
+            {
+                var pDescData = (byte*)pDesc + sizeof(uint);
+                ar.ReadPtr(pDescData, (int)headSize - sizeof(uint));
+            }
+
+            int len;
+            ar.Read(out len);
+            desc.MipSizes.Clear();
+            for (int i = 0; i < len; i++)
+            {
+                Int32_3 tmp = new Int32_3();
+                if (headSize == 20)
+                {
+                    ar.Read(out tmp.X);
+                    ar.Read(out tmp.Y);
+                    tmp.Z = tmp.X * 4;
+                }
+                else
+                {
+                    ar.Read(out tmp);
+                }
+                desc.MipSizes.Add(tmp);
+            }
+            attr.ReleaseReader(ref ar);
+        }
+        public static unsafe UPicDesc LoadPictureDesc(IO.CXndNode node)
+        {
+            UPicDesc desc = new UPicDesc();
+            LoadPictureDesc(node, desc);
+            return desc;
+        }
+        public static unsafe UTexture LoadTexture2DMipLevel(IO.CXndNode node, UPicDesc desc, int level)
+        {
+            switch (desc.CompressFormat)
+            {
+                case ETextureCompressFormat.TCF_None:
+                    {
+                        return LoadPngTexture2DMipLevel(node.mCoreObject, desc, level);
+                    }
+                case ETextureCompressFormat.TCF_Dxt1:
+                case ETextureCompressFormat.TCF_Dxt1a:
+                case ETextureCompressFormat.TCF_Dxt3:
+                case ETextureCompressFormat.TCF_Dxt5:
+                    {
+                        return LoadDxtTexture2DMipLevel(node.mCoreObject, desc, level);
+                    }
+                default:
+                    return null;
+            }
+        }
+        #region Load Mips
+        private static unsafe UTexture LoadPngTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -635,22 +1063,6 @@ namespace EngineNS.NxRHI
                     {
                         image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                     }
-                    if (realLevel == 0)
-                    {
-                        var srcImage = new TextureCompress.FCubeImage();
-                        unsafe
-                        {
-                            fixed (byte* pImageData = &image.Data[0])
-                            {
-                                srcImage.m_Image0 = (uint*)pImageData;
-                                //var blobResult = new Support.CBlobObject();
-                                //if (TextureCompress.CrunchWrap.CompressPixels(4, blobResult.mCoreObject, (uint)image.Width, (uint)image.Height, in srcImage, TextureCompress.ETextureFormat.DXT5, true, true, 0, 1))
-                                //{
-
-                                //}
-                            }
-                        }
-                    }
                     handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(image.Data, System.Runtime.InteropServices.GCHandleType.Pinned);
                     //pInitData[i].SetDefault();
                     pInitData[i].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0).ToPointer();
@@ -674,6 +1086,8 @@ namespace EngineNS.NxRHI
                 }
 
                 var result = rc.CreateTexture(in texDesc);
+                if (result == null)
+                    return null;
                 return result;
             }
             finally
@@ -685,42 +1099,123 @@ namespace EngineNS.NxRHI
                 }
             }
         }
+        private static unsafe UTexture LoadDxtTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel)
+        {
+            if (mipLevel == 0)
+                return null;
+            var rc = UEngine.Instance.GfxDevice.RenderContext;
+
+            var pngNode = node.TryGetChildNode("DxtMips");
+            if (pngNode.NativePointer == IntPtr.Zero)
+                return null;
+
+            var handles = stackalloc System.Runtime.InteropServices.GCHandle[mipLevel];
+            try
+            {
+                var pInitData = stackalloc FMappedSubResource[mipLevel];
+
+                for (uint j = 0; j < desc.Desc.CubeFaces; j++)
+                {
+                    var faceNode = pngNode.TryGetChildNode($"Face{j}");
+                    if (faceNode.IsValidPointer == false)
+                    {
+                        continue;
+                    }
+                    for (uint i = 0; i < mipLevel; i++)
+                    {
+                        var realLevel = desc.MipLevel - mipLevel + i;
+                        var ptr = faceNode.TryGetAttribute($"DxtMip{realLevel}");
+                        if (ptr.NativePointer == IntPtr.Zero)
+                            return null;
+                        var mipAttr = ptr;
+                        var ar = mipAttr.GetReader(null);
+                        byte[] data;
+                        ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
+                        mipAttr.ReleaseReader(ref ar);
+
+                        handles[i] = System.Runtime.InteropServices.GCHandle.Alloc(data, System.Runtime.InteropServices.GCHandleType.Pinned);
+                        //pInitData[i].SetDefault();
+                        pInitData[i].m_pData = System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(data, 0).ToPointer();
+                        pInitData[i].m_RowPitch = (uint)desc.MipSizes[(int)realLevel].Z;
+                        pInitData[i].m_DepthPitch = pInitData[i].m_RowPitch * (uint)desc.MipSizes[(int)realLevel].Y;
+                    }
+                }
+                var texDesc = new FTextureDesc();
+                texDesc.SetDefault();
+                texDesc.Width = (uint)desc.MipSizes[desc.MipLevel - mipLevel].X;
+                texDesc.Height = (uint)desc.MipSizes[desc.MipLevel - mipLevel].Y;
+                texDesc.MipLevels = (uint)mipLevel;
+                texDesc.InitData = pInitData;
+                texDesc.Format = desc.Desc.Format;
+
+                var result = rc.CreateTexture(in texDesc);
+                return result;
+            }
+            finally
+            {
+                for (uint i = 0; i < mipLevel; i++)
+                {
+                    if (handles[i].IsAllocated)
+                        handles[i].Free();
+                }
+            }
+        }
+        #endregion
+        public static void SaveOriginPng(RName rn)
+        {
+            if (System.IO.File.Exists(rn.Address) == false)
+                return;
+
+            using (var xnd = IO.CXndHolder.LoadXnd(rn.Address))
+            {
+                var pngAttr = xnd.RootNode.TryGetAttribute("Png");
+                if (pngAttr.IsValidPointer)
+                {
+                    var ar = pngAttr.GetReader(null);
+                    byte[] data;
+                    ar.ReadNoSize(out data, (int)pngAttr.GetReaderLength());
+                    pngAttr.ReleaseReader(ref ar);
+
+                    StbImageSharp.ImageResult image;
+                    using (var memStream = new System.IO.MemoryStream(data, false))
+                    {
+                        image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                        if (image == null)
+                        {
+                            return;
+                        }
+                    }
+                    using (var memStream = new System.IO.FileStream(rn.Address + ".png", System.IO.FileMode.OpenOrCreate))
+                    {
+                        var writer = new StbImageWriteSharp.ImageWriter();
+                        writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
+                    }
+                }
+            }
+        }
         public static async System.Threading.Tasks.Task<USrView> LoadSrvMipmap(RName rn, int mipLevel)
         {
-            UPicDesc desc = new UPicDesc();
+            UPicDesc desc = null;
             var tex2d = await UEngine.Instance.EventPoster.Post(() =>
             {
                 var xnd = IO.CXndHolder.LoadXnd(rn.Address);
                 if (xnd == null)
                     return null;
 
-                {
-                    var attr = xnd.RootNode.TryGetAttribute("Desc");
-                    var ar = attr.GetReader(null);
-                    ar.Read(out desc.Desc);
-                    int len;
-                    ar.Read(out len);
-                    for (int i = 0; i < len; i++)
-                    {
-                        Int32_2 tmp;
-                        ar.Read(out tmp);
-                        desc.MipSizes.Add(tmp);
-                    }
-                    attr.ReleaseReader(ref ar);
-                }
+                desc = LoadPictureDesc(xnd.RootNode);
 
                 if (mipLevel == -1 || mipLevel > desc.MipLevel)
                     mipLevel = desc.MipLevel;
 
-                var tex = LoadPngTexture2DMipLevel(xnd.RootNode.mCoreObject, desc, mipLevel);
-                if (tex == null)
-                    return null;
-
-                return tex;
+                return LoadTexture2DMipLevel(xnd.RootNode, desc, mipLevel);
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
             if (tex2d == null)
+            {
+                if (UEngine.Instance.PlayMode == EPlayMode.Editor)
+                    SaveOriginPng(rn);
                 return null;
+            }
 
             var rc = UEngine.Instance.GfxDevice.RenderContext;
             var srvDesc = new FSrvDesc();
@@ -840,6 +1335,14 @@ namespace EngineNS.NxRHI
                 }
             }
         }
+        public async System.Threading.Tasks.Task<USrView> GetOrNewTexture(RName rn, int mipLevel = 1)
+        {
+            var result = await GetTexture(rn, mipLevel);
+            if (result != null)
+                return result;
+
+            return await USrView.LoadSrvMipmap(rn, mipLevel);
+        }
         public async System.Threading.Tasks.Task<USrView> GetTexture(RName rn, int mipLevel = 1)
         {
             if (rn == null)
@@ -886,8 +1389,7 @@ namespace EngineNS.NxRHI
             }
             finally
             {
-                if (srv != null)
-                    mCreatingSession.FinishSession(rn, session, srv);
+                mCreatingSession.FinishSession(rn, session, srv);
             }
         }
         public USrView TryGetTexture(RName rn)
@@ -927,19 +1429,24 @@ namespace EngineNS.NxRHI
         }
         int TickInterval = 150;
         int EllapsedRemainTime = 150;
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UTextureManager), nameof(TickLogic));
         public void TickLogic(int ellapse)
         {
-            EllapsedRemainTime -= ellapse;
-            if (EllapsedRemainTime <= 0)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                UpdateStreamingState();
-                EllapsedRemainTime = TickInterval;
-            }
-            foreach (var i in mWaitRemoves)
-            {
-                StreamingAssets.Remove(i);
-            }
-            mWaitRemoves.Clear();
+                EllapsedRemainTime -= ellapse;
+                if (EllapsedRemainTime <= 0)
+                {
+                    UpdateStreamingState();
+                    EllapsedRemainTime = TickInterval;
+                }
+                foreach (var i in mWaitRemoves)
+                {
+                    StreamingAssets.Remove(i);
+                }
+                mWaitRemoves.Clear();
+            }   
         }
         public void TickRender(int ellapse)
         {

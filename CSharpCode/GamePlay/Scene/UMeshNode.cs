@@ -326,10 +326,10 @@ namespace EngineNS.GamePlay.Scene
         static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
         public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
         {
-            using (var guard = new Macross.UMacrossStackGuard(mLogicTickFrame))
-            {
-                mTestBreak.TryBreak();
-            }
+            //using (var guard = new Macross.UMacrossStackGuard(mLogicTickFrame))
+            //{
+            //    mTestBreak.TryBreak();
+            //}
                 
             return true;
         }

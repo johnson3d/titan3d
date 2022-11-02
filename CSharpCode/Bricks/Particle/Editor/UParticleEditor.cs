@@ -5,7 +5,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
-    public partial class UParticleEditor : EngineNS.Editor.IAssetEditor, IO.ISerializer, ITickable, Graphics.Pipeline.IRootForm
+    public partial class UParticleEditor : EngineNS.Editor.IAssetEditor, IO.ISerializer, ITickable, IRootForm
     {
         public static LinkDesc NewInOutPinDesc(string linkType = "Value")
         {
@@ -40,7 +40,7 @@ namespace EngineNS.Bricks.Particle.Editor
         public uint DockId { get; set; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public UNebulaParticle NebulaParticle;
-        public Graphics.Pipeline.IRootForm GetRootForm()
+        public IRootForm GetRootForm()
         {
             return this;
         }
@@ -199,7 +199,7 @@ namespace EngineNS.Bricks.Particle.Editor
         public UGraphRenderer GraphRenderer { get; } = new UGraphRenderer();
         public CodeBuilder.UClassLayoutBuilder ParticleStructBuilder { get; } = new CodeBuilder.UClassLayoutBuilder();
         bool IsStarting = false;
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             ParticleGraph.NebulaEditor = this;
             viewport.RenderPolicy = policy;
@@ -288,7 +288,7 @@ namespace EngineNS.Bricks.Particle.Editor
             UEngine.Instance.TickableManager.RemoveTickable(this);
             Cleanup();
         }
-        public void OnEvent(ref SDL2.SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
             //PreviewViewport.OnEvent(ref e);
         }

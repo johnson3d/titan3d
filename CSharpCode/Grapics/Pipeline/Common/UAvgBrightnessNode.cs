@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Bricks.VXGI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -86,50 +87,55 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             ResetComputeDrawcall(policy);
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UAvgBrightnessNode), nameof(TickLogic));
         public unsafe override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
         {
-            var gpuScene = policy.GetGpuSceneNode();
-            
-            var cmd = BasePass.DrawCmdList;
-            #region Setup
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                var srvIdx = SetupAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
-                if (srvIdx.IsValidPointer)
-                {
-                    var attachment = this.GetAttachBuffer(GpuScenePinInOut);
-                    SetupAvgBrightnessDrawcall.BindUav(srvIdx, attachment.Uav);
-                }
-                SetupAvgBrightnessDrawcall.Commit(cmd);
-            }
-            #endregion
+                var gpuScene = policy.GetGpuSceneNode();
 
-            #region Count
-            {
-                if (CountAvgBrightnessDrawcall != null)
+                var cmd = BasePass.DrawCmdList;
+                #region Setup
                 {
-                    var attachment = this.GetAttachBuffer(ColorPinIn);
-                    var lightSRV = attachment.Srv;
-                    uint targetWidth = (uint)lightSRV.PicDesc.Width;
-                    uint targetHeight = (uint)lightSRV.PicDesc.Height;
-                    var srvIdx = CountAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "TargetBuffer");
+                    var srvIdx = SetupAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
                     if (srvIdx.IsValidPointer)
                     {
-                        CountAvgBrightnessDrawcall.BindSrv(srvIdx, lightSRV);
+                        var attachment = this.GetAttachBuffer(GpuScenePinInOut);
+                        SetupAvgBrightnessDrawcall.BindUav(srvIdx, attachment.Uav);
                     }
-                    CountAvgBrightnessDrawcall.SetDispatch(
-                        CoreDefine.Roundup(targetWidth, Dispatch_SetupDimArray2.X), 
-                        CoreDefine.Roundup(targetHeight, Dispatch_SetupDimArray2.Y), 
-                        1);
-                    CountAvgBrightnessDrawcall.Commit(cmd);
+                    SetupAvgBrightnessDrawcall.Commit(cmd);
                 }
-            }
-            #endregion
+                #endregion
 
-            if (cmd.BeginCommand())
-            {
-                cmd.EndCommand();
-            }
-            UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+                #region Count
+                {
+                    if (CountAvgBrightnessDrawcall != null)
+                    {
+                        var attachment = this.GetAttachBuffer(ColorPinIn);
+                        var lightSRV = attachment.Srv;
+                        uint targetWidth = (uint)lightSRV.PicDesc.Width;
+                        uint targetHeight = (uint)lightSRV.PicDesc.Height;
+                        var srvIdx = CountAvgBrightnessDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "TargetBuffer");
+                        if (srvIdx.IsValidPointer)
+                        {
+                            CountAvgBrightnessDrawcall.BindSrv(srvIdx, lightSRV);
+                        }
+                        CountAvgBrightnessDrawcall.SetDispatch(
+                            CoreDefine.Roundup(targetWidth, Dispatch_SetupDimArray2.X),
+                            CoreDefine.Roundup(targetHeight, Dispatch_SetupDimArray2.Y),
+                            1);
+                        CountAvgBrightnessDrawcall.Commit(cmd);
+                    }
+                }
+                #endregion
+
+                if (cmd.BeginCommand())
+                {
+                    cmd.EndCommand();
+                }
+                UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmdlist(cmd);
+            }   
         }
         
         public override void TickSync(URenderPolicy policy)

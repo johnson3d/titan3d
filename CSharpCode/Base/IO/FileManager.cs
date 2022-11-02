@@ -27,6 +27,8 @@ namespace EngineNS.IO
             Engine,
             Editor,
             Cache,
+            Plugin,
+            Execute,
             EngineSource,
             GameSource,
             Count,

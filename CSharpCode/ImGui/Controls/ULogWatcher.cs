@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.EGui.Controls
 {
-    public class ULogWatcher : Graphics.Pipeline.IRootForm
+    public class ULogWatcher : IRootForm
     {
         public ULogWatcher()
         {

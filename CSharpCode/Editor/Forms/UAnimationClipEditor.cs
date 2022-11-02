@@ -1,5 +1,4 @@
 ﻿using EngineNS.Graphics.Pipeline;
-using SDL2;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UAnimationClipEditor : Editor.IAssetEditor, ITickable, Graphics.Pipeline.IRootForm
+    public class UAnimationClipEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public Animation.Asset.UAnimationClip AnimationClip;
         public Editor.UPreviewViewport PreviewViewport = new Editor.UPreviewViewport();
@@ -138,7 +137,7 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.VieportType = Graphics.Pipeline.UViewportSlate.EVieportType.ChildWindow;
             PreviewViewport.OnDraw();
         }
-        public void OnEvent(ref SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
             //throw new NotImplementedException();
         }

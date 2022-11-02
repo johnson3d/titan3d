@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Animation.Curve;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -281,7 +282,7 @@ namespace EngineNS
 {
     namespace Animation.SkeletonAnimation
     {
-        [Animatable.PropertyTypeAssign(typeof(Vector3))]
+        [Animatable.PropertyTypeAssign(typeof(NullableVector3))]
         [Animatable.PropertyNameAssign("Position")]
         public class UBonePosePositionSetter : Animatable.IPropertySetter
         {
@@ -299,7 +300,7 @@ namespace EngineNS
             }
         }
 
-        [Animatable.PropertyTypeAssign(typeof(Vector3))]
+        [Animatable.PropertyTypeAssign(typeof(NullableVector3))]
         [Animatable.PropertyNameAssign("Rotation")]
         public class UBonePoseRotationSetter : Animatable.IPropertySetter
         {

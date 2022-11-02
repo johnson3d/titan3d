@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using SDL2;
 
 namespace EngineNS.Graphics.Pipeline
 {
@@ -49,10 +48,9 @@ namespace EngineNS.Graphics.Pipeline
                 System.Diagnostics.Debug.Assert(false);
             }
             //scDesc.BufferCount = 1;
-            int w, h;
-            SDL.SDL_GetWindowSize(Window, out w, out h);
-            scDesc.Width = (uint)w;
-            scDesc.Height = (uint)h;
+            var size = GetWindowSize();
+            scDesc.Width = (uint)size.X;
+            scDesc.Height = (uint)size.Y;
             scDesc.OutputWindow = HWindow.ToPointer();
             SwapChain = UEngine.Instance.GfxDevice.RenderContext.CreateSwapChain(in scDesc);
         }

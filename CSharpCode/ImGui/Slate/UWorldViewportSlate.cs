@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using EngineNS.Editor.Forms;
 using EngineNS.Graphics.Pipeline;
-using SDL2;
 
 namespace EngineNS.EGui.Slate
 {
@@ -39,13 +39,13 @@ namespace EngineNS.EGui.Slate
             await EngineNS.Thread.AsyncDummyClass.DummyFunc();
             return true;
         }
-        public async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        public async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
             CameraController.ControlCamera(RenderPolicy.DefaultCamera);
         }
-        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, float zMin, float zMax)
+        public override async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
             URenderPolicy policy = null;
             var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName);
@@ -55,7 +55,7 @@ namespace EngineNS.EGui.Slate
             }
             await InitializeImpl(application, policy, zMin, zMax);
         }
-        private async System.Threading.Tasks.Task InitializeImpl(Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        private async System.Threading.Tasks.Task InitializeImpl(USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             await Initialize();
             
@@ -108,72 +108,72 @@ namespace EngineNS.EGui.Slate
         Vector2 mStartMousePt;
         public float CameraMoveSpeed { get; set; } = 1.0f;
         public float CameraMouseWheelSpeed { get; set; } = 1.0f;
-        public unsafe override bool OnEvent(ref SDL.SDL_Event e)
+        public unsafe override bool OnEvent(in Bricks.Input.Event e)
         {
             mAxis?.OnEvent(this, in e);
             var keyboards = UEngine.Instance.InputSystem;
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN)
+            if (e.Type == Bricks.Input.EventType.MOUSEBUTTONDOWN)
             {
-                mStartMousePt = new Vector2(e.motion.x, e.motion.y);
+                mStartMousePt = new Vector2(e.MouseMotion.X, e.MouseMotion.Y);
             }
-            else if (e.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
+            else if (e.Type == Bricks.Input.EventType.MOUSEMOTION)
             {
-                if (e.button.button == SDL.SDL_BUTTON_LEFT)
+                if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
                 {
                     if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.motion.x - mPreMousePt.X) * 0.01f);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.motion.y - mPreMousePt.Y) * 0.01f);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * 0.01f);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * 0.01f);
                     }                    
                 }
-                else if (e.button.button == SDL.SDL_BUTTON_MIDDLE)
+                else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_MIDDLE)
                 {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.motion.x - mPreMousePt.X) * 0.01f, true);
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.motion.y - mPreMousePt.Y) * -0.01f, true);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.X - mPreMousePt.X) * 0.01f, true);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.Y - mPreMousePt.Y) * -0.01f, true);
                 }
-                else if (e.button.button == SDL.SDL_BUTTON_X1)
+                else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_X1)
                 {
                     if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
-                        CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, (e.motion.y - mPreMousePt.Y) * 0.03f, true);
+                        CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, (e.MouseMotion.Y - mPreMousePt.Y) * 0.03f, true);
                     }
                     else
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.motion.x - mPreMousePt.X) * 0.01f, true);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.motion.y - mPreMousePt.Y) * 0.01f, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * 0.01f, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * 0.01f, true);
                     }
                 }
 
-                mPreMousePt.X = e.motion.x;
-                mPreMousePt.Y = e.motion.y;
+                mPreMousePt.X = e.MouseMotion.X;
+                mPreMousePt.Y = e.MouseMotion.Y;
             }
-            else if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL)
+            else if (e.Type == Bricks.Input.EventType.MOUSEWHEEL)
             {
                 if (IsViewportSlateFocused)
                 {
                     if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
-                        CameraMoveSpeed += (float)(e.wheel.y * 0.01f);
+                        CameraMoveSpeed += (float)(e.MouseWheel.Y * 0.01f);
                     }
                     else
                     {
-                        CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, e.wheel.y * CameraMouseWheelSpeed, true);
+                        CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, e.MouseWheel.Y * CameraMouseWheelSpeed, true);
                     }
                 }
             }
-            else if(e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP)
+            else if(e.Type == Bricks.Input.EventType.MOUSEBUTTONUP)
             {
-                if (e.button.button == SDL.SDL_BUTTON_LEFT && mAxis != null &&
+                if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT && mAxis != null &&
                     mAxis.CurrentAxisType == GamePlay.UAxis.enAxisType.Null &&
-                    (new Vector2(e.motion.x, e.motion.y) - mStartMousePt).Length() < 1.0f &&
+                    (new Vector2(e.MouseMotion.X, e.MouseMotion.Y) - mStartMousePt).Length() < 1.0f &&
                     !mAxisOperated &&
                     IsMouseIn)
                 {
-                    ProcessHitproxySelected(e.motion.x, e.motion.y);
+                    ProcessHitproxySelected(e.MouseMotion.X, e.MouseMotion.Y);
                 }
             }
 
-            return base.OnEvent(ref e);
+            return base.OnEvent(in e);
         }
         #endregion
         GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
@@ -203,34 +203,49 @@ namespace EngineNS.EGui.Slate
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, -step, true);
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorldViewportSlate), nameof(TickLogic));
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeRPolicyTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorldViewportSlate), "TickRPolicy");
         public unsafe void TickLogic(int ellapse)
         {
-            RenderPolicy?.BeginTickLogic(World);
-
-            World.TickLogic(this.RenderPolicy, ellapse);
-
-            if (IsDrawing)
+            using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                if (this.IsFocused)
+                using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))
                 {
-                    TickOnFocus();
-                }
+                    RenderPolicy?.BeginTickLogic(World);
+                }   
 
-                mVisParameter.World = World;
-                mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
-                mVisParameter.VisibleNodes = RenderPolicy.VisibleNodes;
-                mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
-                World.GatherVisibleMeshes(mVisParameter);
+                World.TickLogic(this.RenderPolicy, ellapse);
 
-                if (mWorldBoundShapes != null)
+                if (IsDrawing)
                 {
-                    RenderPolicy.VisibleMeshes.AddRange(mWorldBoundShapes);
+                    if (this.IsFocused)
+                    {
+                        TickOnFocus();
+                    }
+
+                    mVisParameter.World = World;
+                    mVisParameter.VisibleMeshes = RenderPolicy.VisibleMeshes;
+                    mVisParameter.VisibleNodes = RenderPolicy.VisibleNodes;
+                    mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
+                    World.GatherVisibleMeshes(mVisParameter);
+
+                    if (mWorldBoundShapes != null)
+                    {
+                        RenderPolicy.VisibleMeshes.AddRange(mWorldBoundShapes);
+                    }
+
+                    using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))
+                    {
+                        RenderPolicy?.TickLogic(World);
+                    }   
                 }
-
-                RenderPolicy?.TickLogic(World);
-            }
-
-            RenderPolicy?.EndTickLogic(World);
+                using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))
+                {
+                    RenderPolicy?.EndTickLogic(World);
+                }
+            }   
         }
         public void TickSync(int ellapse)
         {

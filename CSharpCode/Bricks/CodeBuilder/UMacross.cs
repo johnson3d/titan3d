@@ -97,7 +97,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 mSelectedType = null;
             }
 
-            public override unsafe void OnDraw(UContentBrowser contentBrowser)
+            public override unsafe bool OnDraw(UContentBrowser contentBrowser)
             {
                 //base.OnDraw(contentBrowser);
                 
@@ -105,6 +105,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     ImGuiAPI.OpenPopup($"New Macross", ImGuiPopupFlags_.ImGuiPopupFlags_None);
 
                 var visible = true;
+                var retValue = false;
                 if (ImGuiAPI.BeginPopupModal($"New Macross", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var drawList = ImGuiAPI.GetWindowDrawList();
@@ -197,7 +198,7 @@ namespace EngineNS.Bricks.CodeBuilder
                             if (DoImportAsset())
                             {
                                 ImGuiAPI.CloseCurrentPopup();
-                                contentBrowser.mAssetImporter = null;
+                                retValue = true;
                             }
                         }
                     }
@@ -205,11 +206,13 @@ namespace EngineNS.Bricks.CodeBuilder
                     if(ImGuiAPI.Button("Cancel", in Vector2.Zero))
                     {
                         ImGuiAPI.CloseCurrentPopup();
-                        contentBrowser.mAssetImporter = null;
+                        retValue = true;
                     }
 
                     ImGuiAPI.EndPopup();
                 }// */
+
+                return retValue;
             }
         }
 

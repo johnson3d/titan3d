@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using SDL2;
+using EngineNS.Thread;
 
 namespace EngineNS.Editor.Forms
 {
-    public class USceneEditor : Editor.IAssetEditor, ITickable, Graphics.Pipeline.IRootForm
+    public class USceneEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public class USceneEditorViewport : EGui.Slate.UWorldViewportSlate
         {
             public EGui.Controls.PropertyGrid.PropertyGrid NodeInspector = new EGui.Controls.PropertyGrid.PropertyGrid();
-            public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.USlateApplication application, RName policyName, float zMin, float zMax)
+            public override async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
             {
                 await base.Initialize(application, policyName, zMin, zMax);
                 await NodeInspector.Initialize();
@@ -187,11 +187,11 @@ namespace EngineNS.Editor.Forms
             InitMainMenu();
             return true;
         }
-        public Graphics.Pipeline.IRootForm GetRootForm()
+        public IRootForm GetRootForm()
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.UViewportSlate viewport, Graphics.Pipeline.USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.UViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -420,14 +420,19 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.OnDraw();
         }
 
-        public void OnEvent(ref SDL.SDL_Event e)
+        public void OnEvent(in Bricks.Input.Event e)
         {
             //throw new NotImplementedException();
         }
         #region Tickable
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(USceneEditor), nameof(TickLogic));
         public void TickLogic(int ellapse)
         {
-            PreviewViewport.TickLogic(ellapse);
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                PreviewViewport.TickLogic(ellapse);
+            }
         }
         public void TickRender(int ellapse)
         {
