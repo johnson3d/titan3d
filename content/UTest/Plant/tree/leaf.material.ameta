@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.UMaterialAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="daae3334-50cb-4504-8286-5b4b7a0d1a4e" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,utest/plant/tree/t_leafs_diffuse.srv,01c690a9-3147-45da-9a74-6695252d4203" />
+    <e_1 Value="Game,utest/plant/tree/t_leafs_normal.srv,32f237bb-9449-4851-9b36-6035cbe700c8" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" />
+</Root>

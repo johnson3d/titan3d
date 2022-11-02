@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.UMeshPrimitivesAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="c272ea77-81ce-4940-9fe3-e908c37310d9" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />
+  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMeshPrimitives@EngineCore" />
+</Root>
