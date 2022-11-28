@@ -826,7 +826,6 @@ public:
 	}
 	static bool          InputTextNoName(const char* label, void* buf, UINT buf_size, ImGuiInputTextFlags_ flags = (ImGuiInputTextFlags_)0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL)
 	{
-		//提供一个版本直接c++操作不要显示名字，这主要减少c#的字符串+操作导致的垃圾产生的。
 		std::string labelName = "##";
 		labelName += label;
 		return ImGui::InputText(labelName.c_str(), (char*)buf, (UINT)buf_size, flags, callback, user_data);
