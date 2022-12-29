@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <BaseOutputPath>$(SolutionDir)\binaries\Plugins</BaseOutputPath>
+  </PropertyGroup>
+
+  <Import Project="..\GameTasks\GameTasks.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Module\Engine.Android\Engine.Android.csproj" />
+    <ProjectReference Include="..\..\GameItems\GameItems.Android\GameItems.Android.csproj" />
+  </ItemGroup>
+
+</Project>

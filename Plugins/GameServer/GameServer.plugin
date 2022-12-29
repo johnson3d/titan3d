@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.AssemblyLoader.UPluginDescriptor@EngineCore">
+  <LoadOnInit Type="System.Boolean@Unknown" Value="True" />
+  <Platforms Type="System.Collections.Generic.List&lt;EngineNS.EPlatformType@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Value="PLTF_Windows" />
+  </Platforms>
+  <Dependencies Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
+    <e_0 Value="RpcCaller" />
+  </Dependencies>
+</Root>

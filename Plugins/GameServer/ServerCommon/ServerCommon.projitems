@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>e57c9402-d948-41e2-b824-01217f1b10b7</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>EngineNS.Plugins</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)GameClient\UGameClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GateServer\UGateClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GateServer\UGateServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LevelServer\ULevelClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LevelServer\ULevelServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LoginServer\UAccountManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LoginServer\ULoginServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RootServer\URootServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UGameServerPlugin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UServerBase.cs" />
+  </ItemGroup>
+</Project>
