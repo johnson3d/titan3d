@@ -102,7 +102,7 @@ namespace NxRHI
 		mSwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
 		mSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-		auto hr = device->mDXGIFactory->CreateSwapChain(device->mDevice, &mSwapChainDesc, &mView);
+		auto hr = device-> mDXGIFactory->CreateSwapChain(device->mDevice, &mSwapChainDesc, &mView);
 		if (FAILED(hr))
 			return false;
 

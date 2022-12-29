@@ -15,11 +15,6 @@
 #pragma once
 #include "../string/vfxstring.h"
 
-namespace EngineNS
-{
-	class XNDNode;
-}
-
 class VTime
 {
 public:

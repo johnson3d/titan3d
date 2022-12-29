@@ -213,6 +213,9 @@ namespace NxRHI
 		bool					IsIndex32 = false;
 		UINT					VertexNumber = 0;
 		UINT					PrimitiveNumber = 0;
+
+		DWORD					StreamTypes = 0;
+		int						AtomSize = 0;
 	public:
 		ENGINE_RTTI(FMeshDataProvider);
 
@@ -220,12 +223,11 @@ namespace NxRHI
 		~FMeshDataProvider();
 		virtual void Cleanup() override;
 
-		void Reset() {
-			Cleanup();
-		}
+		void Reset();
 
 		bool InitFromMesh(IGpuDevice* device, FMeshPrimitives* mesh);
 		bool Init(DWORD streams, bool isIndex32, int atom);
+		bool Init();
 
 		bool LoadFromMeshPrimitive(XndNode * pNode, EVertexStreamType streams);
 
@@ -255,6 +257,7 @@ namespace NxRHI
 		void* GetVertexPtr(EVertexStreamType stream, UINT index);
 
 		UINT AddVertex(const v3dxVector3 * pos, const v3dxVector3 * nor, const v3dxVector2 * uv, DWORD color);
+		void ResizeVertexBuffers(UINT size);
 
 		//alternative interface for same mesh
 		vBOOL AddTriangle(UINT a, UINT b, UINT c);

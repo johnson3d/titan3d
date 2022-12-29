@@ -26,7 +26,7 @@ class TR_CLASS()
 private:
 	ObjectHandle* Handle;
 public:
-	static INT64	EngineTime;
+	static UINT64	EngineCurrentFrame;
 public:	
 	VIUnknown();
 	virtual ~VIUnknown();
@@ -187,14 +187,15 @@ enum TR_ENUM()
 struct TR_CLASS(SV_LayoutStruct = 8)
 	FResourceState
 {
-	EResourceState		mStreamState;
-	INT64				mAccessTime;
-	unsigned int		mResourceSize;
+	EResourceState		mStreamState = SS_Invalid;
+	UINT				mResourceSize = 0;
+	UINT64				mAccessFrame = 0;
+	
 
 	FResourceState()
 	{
 		mStreamState = SS_Invalid;
-		mAccessTime = 0;
+		mAccessFrame = 0;
 		mResourceSize = 0;
 	}
 	inline EResourceState GetStreamState()
@@ -211,11 +212,11 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 	void SetResourceSize(unsigned int size) {
 		mResourceSize = size;
 	}
-	INT64 GetAccessTime() const {
-		return mAccessTime;
+	UINT64 GetAccessFrame() const {
+		return mAccessFrame;
 	}
-	void SetAccessTime(INT64 t) {
-		mAccessTime = t;
+	void SetAccessFrame(UINT64 t) {
+		mAccessFrame = t;
 	}
 };
 

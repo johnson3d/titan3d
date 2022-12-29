@@ -13,7 +13,7 @@ void VIUnknownBase::DeleteThis()
 	delete this;
 }
 
-INT64 VIUnknown::EngineTime = 0;
+UINT64 VIUnknown::EngineCurrentFrame = 0;
 
 FOnManagedObjectHolderDestroy IManagedObjectHolder::OnManagedObjectHolderDestroy = nullptr;
 

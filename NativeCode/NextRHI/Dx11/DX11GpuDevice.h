@@ -11,7 +11,14 @@ namespace NxRHI
 	class DX11GpuSystem : public IGpuSystem
 	{
 	public:
+		~DX11GpuSystem();
+		virtual bool InitGpuSystem(ERhiType type, const FGpuSystemDesc* desc) override;
 		virtual IGpuDevice* CreateDevice(const FGpuDeviceDesc* desc) override;
+		virtual int GetNumOfGpuDevice() const override;
+		virtual void GetDeviceDesc(int index, FGpuDeviceDesc* desc) const override;
+	public:
+		AutoRef<IDXGIFactory>					mDXGIFactory;
+		std::vector<AutoRef<IDXGIAdapter>>		mGIAdapters;
 	};
 
 	class DX11GpuDevice : public IGpuDevice
@@ -50,7 +57,7 @@ namespace NxRHI
 	private:
 		void QueryDevice();
 	public:
-		IDXGIFactory*					mDXGIFactory = nullptr;
+		AutoRef<IDXGIFactory>			mDXGIFactory;
 		ID3D11Device*					mDevice;
 		ID3D11Device5*					mDevice5;
 		D3D_FEATURE_LEVEL               mFeatureLevel;

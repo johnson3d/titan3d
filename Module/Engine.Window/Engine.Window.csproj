@@ -9,7 +9,7 @@
     <OutputPath>..\..\binaries\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DefineConstants>TRACE;PWindow</DefineConstants>
+    <DefineConstants>TRACE;PWindow;TitanEngine_AutoGen</DefineConstants>
     <SkipPostSharp>True</SkipPostSharp>
     <NoWarn>1701;1702;1998</NoWarn>
     <DebugType>portable</DebugType>
@@ -20,7 +20,7 @@
     <OutputPath>..\..\binaries\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DefineConstants>TRACE;PWindow</DefineConstants>
+    <DefineConstants>TRACE;PWindow;TitanEngine_AutoGen</DefineConstants>
     <NoWarn>1701;1702;1998</NoWarn>
     <DebugType>portable</DebugType>
   </PropertyGroup>
@@ -30,10 +30,6 @@
   <Import Project="..\..\CSharpCode\Bricks\CodeBuilder\CodeBuilder.projitems" Label="Shared" />
 
   <Import Project="..\..\codegen\NativeBinder\CodeGenCSharp.projitems" Label="Shared" />
-
-  <Import Project="..\..\codegen\Rpc\Engine\EngineRPC.projitems" Label="Shared" />
-
-  <Import Project="..\..\codegen\Property\Engine\EngineProperty.projitems" Label="Shared" />
 
   <Import Project="..\..\codegen\Cs2Cpp\cs\Cs2Cpp.projitems" Label="Shared" />
 
@@ -91,12 +87,16 @@
   <Import Project="..\..\3rd\csharp\NvTriStrip\NvTriStrip.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\NxRHI\NxRHI.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\WindowSDL\WindowSDL.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\BehaviorTree\BehaviorTree.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\DesignMacross\DesignMacross.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Recast\Recast.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\UI\UI.projitems" Label="Shared" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.0.0-3.final" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.0.0-3.final" />
     <PackageReference Include="Mono.Cecil" Version="0.11.4" />
-    <PackageReference Include="NPOI" Version="2.5.2" />
+    <PackageReference Include="NPOI" Version="2.6.0" />
     <PackageReference Include="ppy.SDL2-CS" Version="1.0.82" />
     <PackageReference Include="RIPEMD160" Version="1.0.1" />
     <PackageReference Include="SkiaSharp" Version="2.88.0-preview.61" />
@@ -105,7 +105,7 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(SolutionDir)CS_Rpc_Engine.bat" />
+    <Exec Command="$(SolutionDir)CS_Rpc_Cs2Cpp.bat" />
   </Target>
 
 </Project>

@@ -9,8 +9,11 @@
     <Import_RootNamespace>CodeGenCSharp</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Network.RPC.URpcManager.rpc.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Profiler.URpcProfiler.rpc.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UTest.UTest_Rpc.rpc.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Plugins.GateServer.UGateServer_2260260923.rpc.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Plugins.LevelServer.ULevelClient_3179894993.rpc.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Plugins.LevelServer.ULevelServer_4018893084.rpc.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Plugins.LoginServer.ULoginServer_354303984.rpc.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Plugins.RootServer.URootServer_524221687.rpc.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RobotClient.URobot_2486640464.rpc.cs" />
   </ItemGroup>
 </Project>

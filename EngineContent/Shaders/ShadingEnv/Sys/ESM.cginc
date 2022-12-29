@@ -59,26 +59,26 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     coefficientSum += increamentalGaussian.x;
     increamentalGaussian.xy *= increamentalGaussian.yz;
     
-    for(int i = 1; i <= blurnum; i ++ )
-    {
-        for(int j = 1; j <= blurnum; j ++ )
-        {
-            avgValue +=GShadowMap.Sample(Samp_GShadowMap, uv + float2(i * stepx, j * stepy)) * increamentalGaussian.x;
-            avgValue +=GShadowMap.Sample(Samp_GShadowMap, uv + float2(i * -stepx, j * stepy)) * increamentalGaussian.x;
-            avgValue +=GShadowMap.Sample(Samp_GShadowMap, uv + float2(i * -stepx, j * -stepy)) * increamentalGaussian.x;
-            avgValue +=GShadowMap.Sample(Samp_GShadowMap, uv + float2(i * stepx, j * -stepy)) * increamentalGaussian.x;
+    // for(int i = 1; i <= blurnum; i ++ )
+    // {
+    //     for(int j = 1; j <= blurnum; j ++ )
+    //     {
+    //         avgValue +=GShadowMap.Sample(Samp_GShadowMap, uv + float2(i * stepx, j * stepy)) * increamentalGaussian.x;
+    //         avgValue +=GShadowMap.Sample(Samp_GShadowMap, uv + float2(i * -stepx, j * stepy)) * increamentalGaussian.x;
+    //         avgValue +=GShadowMap.Sample(Samp_GShadowMap, uv + float2(i * -stepx, j * -stepy)) * increamentalGaussian.x;
+    //         avgValue +=GShadowMap.Sample(Samp_GShadowMap, uv + float2(i * stepx, j * -stepy)) * increamentalGaussian.x;
 
-            coefficientSum+= 4.0*increamentalGaussian.x;
-            increamentalGaussian.xy *= increamentalGaussian.yz;
-        }
+    //         coefficientSum+= 4.0*increamentalGaussian.x;
+    //         increamentalGaussian.xy *= increamentalGaussian.yz;
+    //     }
 
-    }
+    // }
 	
-    float4 texcolor = avgValue/coefficientSum;
+    //float4 texcolor = avgValue/coefficientSum;
     
     //texcolor.g =GShadowMap.Sample(Samp_GShadowMap, uv).r;
     //return texcolor;
-
+    float4 texcolor = GShadowMap.Sample(Samp_GShadowMap, uv);
 	output.RT0 = texcolor;
 
 	return output;

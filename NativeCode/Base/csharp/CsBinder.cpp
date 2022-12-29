@@ -75,7 +75,7 @@ void UCs2CppBase::UnitTest()
 	mCs2CppBuilder.CreateManagedObject();
 	if (mCs2CppBuilder.mCSharpHandle != nullptr)
 	{
-		[[maybe_unused]] auto pObject = mCs2CppBuilder.GetManagedObject();
+		//[[maybe_unused]] auto pObject = mCs2CppBuilder.GetManagedObject();
 		int b = 2;
 		[[maybe_unused]] auto r = mCs2CppBuilder.Func0(1.0, &b);
 		[[maybe_unused]] auto r2 = mCs2CppBuilder.Func1(5);

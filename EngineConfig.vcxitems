@@ -20,6 +20,7 @@
     <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForCook.cfg" />
     <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForDX12.cfg" />
     <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForGL.cfg" />
+    <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForRootServer.cfg" />
     <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForVK.cfg" />
     <None Include="$(MSBuildThisFileDirectory)content\SlateApp.cfg" />
   </ItemGroup>

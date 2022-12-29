@@ -17,16 +17,7 @@ namespace NxRHI
 			SBT_Vertex,
 			SBT_Index,
 	};
-	enum TR_ENUM(SV_EnumNoFlags)
-		EShaderVarType
-	{
-		SVT_Float,
-			SVT_Int,
-			SVT_Texture,
-			SVT_Sampler,
-			SVT_Struct,
-			SVT_Unknown,
-	};
+	
 	struct TR_CLASS()
 		FShaderVarDesc : public VIUnknownBase
 	{

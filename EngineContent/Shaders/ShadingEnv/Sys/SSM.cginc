@@ -51,7 +51,7 @@ PS_INPUT VS_Main(VS_INPUT input)
 
 struct PS_OUTPUT
 {
-	//float4 RT0 : SV_Target0;
+	float4 RT0 : SV_Target0;
 };
 
 PS_OUTPUT PS_Main(PS_INPUT input)
@@ -73,7 +73,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	clip(mtl.mAlpha - mtl.mAlphaTest);
 #endif 
 
-	//output.RT0 = half4(0.0f, 0.0f, 0.0f, 1.0f);
+	output.RT0.rgb = mtl.mAlbedo;
+	output.RT0.a = mtl.mAlpha;
 	
 	return output;
 }

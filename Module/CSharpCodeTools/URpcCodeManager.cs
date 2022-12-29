@@ -26,6 +26,78 @@ namespace CSharpCodeTools
             result.FullName = fullname;
             return result;
         }
+        public void GatherRpcClass(string dir)
+        {
+            const string Start_String = "#if TitanEngine_AutoGen";
+            const string End_String = "#endif//TitanEngine_AutoGen";
+            foreach (var i in SourceCodes)
+            {
+                string beforeStr = null;
+                string afterStr = null;
+                var code = System.IO.File.ReadAllText(i);
+                var saved_code = code;
+                var istart = code.IndexOf(Start_String);
+                if (istart >= 0)
+                {
+                    beforeStr = code.Substring(0, istart);
+                    var iend = code.IndexOf(End_String, istart);
+                    if (iend >= 0)
+                    {
+                        afterStr = code.Substring(iend + End_String.Length);
+                    }
+                }
+                if (beforeStr != null)
+                {
+                    code = beforeStr + afterStr;
+                }
+                SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
+
+                CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
+
+                ClassDefines.Clear();
+
+                foreach (var j in root.Members)
+                {
+                    IterateClass(root, j);
+                }
+
+                foreach (var j in ClassDefines)
+                {
+                    var klsDefine = j.Value;
+                    klsDefine.Build();
+                }
+
+                string genCode = "";
+                foreach (var j in ClassDefines)
+                {
+                    //j.Value.Usings.Clear();
+                    //j.Value.GenCode(null);
+                    (j.Value as URpcClassDefine).GenCode(dir, i);
+                    if (j.Value.ClassCode.Length > 0)
+                    {
+                        genCode += j.Value.ClassCode;
+                        //genCode += "\r\n";
+                    }
+                }
+
+                if (genCode.Length > 0)
+                {
+                    code += Start_String;
+                    code += "\r\n";
+
+                    code += "#region TitanEngine_AutoGen\r\n";
+
+                    code += genCode;
+
+                    code += "#endregion//TitanEngine_AutoGen\r\n";
+
+                    code += End_String;
+
+                    if (saved_code != code)
+                        System.IO.File.WriteAllText(i, code);
+                }
+            }
+        }
         protected override void OnVisitMethod(UClassCodeBase kls, MethodDeclarationSyntax method)
         {
 
@@ -46,11 +118,13 @@ namespace CSharpCodeTools
                             }
                         }
                         string target, executer;
-                        if (GetRpcClassAttribute(kls, out target, out executer))
+                        bool callerInClass = false;
+                        if (GetRpcClassAttribute(kls, out target, out executer, out callerInClass))
                         {
                             var klsDeffine = FindOrCreate(fullname) as URpcClassDefine;
                             klsDeffine.RunTarget = target;
                             klsDeffine.Executer = executer;
+                            klsDeffine.CallerInClass = callerInClass;
                         }
                         foreach (var i in kls.Members)
                         {
@@ -104,9 +178,13 @@ namespace CSharpCodeTools
                                                 }
                                             }
 
-                                            var a = method.ParameterList.Parameters[0];
-                                            rpcMethod.ArgType = a.Type.ToString();
-                                            rpcMethod.ArgName = a.Identifier.ValueText;
+                                            rpcMethod.ArgTypes.Clear();
+                                            for (int n = 0; n < method.ParameterList.Parameters.Count - 1; n++)
+                                            {
+                                                var a = method.ParameterList.Parameters[n];
+                                                var ta = new KeyValuePair<string, string>(a.Type.ToString(), a.Identifier.ValueText);
+                                                rpcMethod.ArgTypes.Add(ta);
+                                            }
                                             
                                             if (method.ReturnType.ToString() == "System.Void" || method.ReturnType.ToString() == "void")
                                             {
@@ -152,10 +230,11 @@ namespace CSharpCodeTools
             }
         }
         
-        private bool GetRpcClassAttribute(ClassDeclarationSyntax decl, out string target, out string executer)
+        private bool GetRpcClassAttribute(ClassDeclarationSyntax decl, out string target, out string executer, out bool callerInClass)
         {
             target = null;
             executer = null;
+            callerInClass = false;
             foreach (var i in decl.AttributeLists)
             {
                 foreach (var j in i.Attributes)
@@ -178,6 +257,11 @@ namespace CSharpCodeTools
                                 else if (name == "Executer")
                                 {
                                     executer = m.Expression.NormalizeWhitespace().ToFullString();
+                                }
+                                else if (name == "CallerInClass")
+                                {
+                                    if (m.Expression.NormalizeWhitespace().ToFullString() == "true")
+                                        callerInClass = true;
                                 }
                             }
                         }

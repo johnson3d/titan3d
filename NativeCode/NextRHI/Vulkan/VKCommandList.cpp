@@ -155,7 +155,7 @@ namespace NxRHI
 		}*/
 		auto vkCmdBuffer = GetVKDevice()->mCmdAllocatorManager->GetThreadContext()->Alloc();;
 		mCommandBuffer = (VKCommandBufferPagedObject*)vkCmdBuffer.GetPtr();
-		MemAlloc::FPagedObject<VkCommandBuffer>* pTmp = mCommandBuffer;
+		//MemAlloc::FPagedObject<VkCommandBuffer>* pTmp = mCommandBuffer;
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
@@ -412,7 +412,7 @@ namespace NxRHI
 	void VKCommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
 		ASSERT(mIsRecording);
-		view->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
+		view->GetResourceState()->SetAccessFrame(VIUnknown::EngineCurrentFrame);
 		/*if (type == EShaderType::SDT_PixelShader)
 			view->Buffer->TransitionTo(this, EGpuResourceState::GRS_SrvPS);
 		else

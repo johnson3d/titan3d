@@ -153,15 +153,40 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	}
 	else
 	{
-		ShadowMapUV = mul(float4(WorldPos, 1.0f), gViewer2ShadowMtx[0]);
+		for (int CsmIdx = 0; CsmIdx < gCsmNum; CsmIdx++)
+	{
+		if (PerPixelViewerDistance < (half)gCsmDistanceArray[CsmIdx])
+		{
+			ShadowMapUV = mul(float4(WorldPos, 1.0f), gViewer2ShadowMtxArrayEditor[CsmIdx]);
+			mSFD.mShadowTransitionScale = (half)gShadowTransitionScaleArrayEditor[CsmIdx];
+			break;
+		}
+	}
 
-		mSFD.mViewer2ShadowDepth = (half)ShadowMapUV.z;
+		if (ShadowMapUV.z > 0.0f)
+		{
+			mSFD.mViewer2ShadowDepth = (half)ShadowMapUV.z;
+			
+			//#if USE_ESM
+			//ShadowValue = GetESMValue(ShadowMapUV.xy, mSFD, 10.0);
+			//#else
+			ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
+			//#endif
+			//ShadowValue = NoFiltering(ShadowMapUV.xy, mSFD);
+			
+			half FadeValue = (half)saturate(PerPixelViewerDistance * gFadeParam.x + gFadeParam.y);
+			ShadowValue = lerp(ShadowValue, 1.0h, FadeValue);
+		}
 
-//#if USE_ESM
-	ShadowValue = GetESMValue(ShadowMapUV.xy, mSFD, 10);//GetESMValue(float2 SMUV, float CurrentDepth, ShadowFilterData SFD, float ESM_C)
-//#else
-//	ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
-//#endif
+// 		ShadowMapUV = mul(float4(WorldPos, 1.0f), gViewer2ShadowMtx[0]);
+
+// 		mSFD.mViewer2ShadowDepth = (half)ShadowMapUV.z;
+
+// //#if USE_ESM
+// 	ShadowValue = GetESMValue(ShadowMapUV.xy, mSFD, 10);//GetESMValue(float2 SMUV, float CurrentDepth, ShadowFilterData SFD, float ESM_C)
+// //#else
+// //	ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
+// //#endif
 
 		if (ShadowValue < 1.0f)
 			output.RT0.a = 0.0h;

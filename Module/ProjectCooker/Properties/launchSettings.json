@@ -2,7 +2,7 @@
   "profiles": {
     "ProjectCooker": {
       "commandName": "Project",
-      "commandLineArgs": "ExeCmd=SaveAsLastest AssetType=Scene+Mesh+Material+MaterialInst CookCfg=$(SolutionDir)content\\EngineConfigForCook.cfg ",
+      "commandLineArgs": "ExtraCmd=1 CookCfg=$(SolutionDir)content\\EngineConfigForRootServer.cfg ",
       "workingDirectory": "..\\..\\binaries\\",
       "nativeDebugging": true
     }

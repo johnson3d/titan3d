@@ -1,13 +1,39 @@
-﻿using System;
+﻿using EngineNS;
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace ProjectCooker
 {
     class Program
     {
+#if PWindow
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+#endif
+
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello!Titan Cooker!");
+            var handle = GetConsoleWindow();
+            ShowWindow(handle, 1);
 
+            Console.WriteLine("Hello Titan");
+            var extCmd = UCookCommand.FindArgument(args, "ExtraCmd=");
+            if (extCmd != null)
+            {
+                List<string> argList = new List<string>(args);
+                Console.WriteLine($"Please input extra command: {extCmd}");
+                var cmdNum = System.Convert.ToInt32(extCmd);
+                for (int i = 0; i < cmdNum; i++)
+                {
+                    var tmpCmd = Console.ReadLine();
+                    argList.Add(tmpCmd);
+                }
+                args = argList.ToArray();
+            }
+            
             var cfgFile = UCookCommand.FindArgument(args, "CookCfg=");
             //var cfgFile = @"F:\titan3d\content\EngineConfigForCook.cfg";
             //EngineNS.UEngine.UGfxDeviceType = typeof(EngineNS.Graphics.Pipeline.UGfxDeviceConsole);
@@ -46,6 +72,51 @@ namespace ProjectCooker
                         {
                             var exe = new Command.UStartDS();
                             await exe.ExecuteCommand(args);
+                        }
+                        return;
+                    case "StartRobot":
+                        {
+                            var serverPlugin = UEngine.Instance.PluginModuleManager.GetPluginModule("ClientRobot");
+                            if (serverPlugin != null)
+                            {
+                                serverPlugin.SureLoad();
+                            }
+                        }
+                        return;
+                    case "StartRootServer":
+                        {
+                            var serverPlugin = UEngine.Instance.PluginModuleManager.GetPluginModule("RootServer");
+                            if (serverPlugin != null)
+                            {
+                                serverPlugin.SureLoad();
+                            }
+                        }
+                        return;
+                    case "StartLoginServer":
+                        {
+                            var serverPlugin = UEngine.Instance.PluginModuleManager.GetPluginModule("LoginServer");
+                            if (serverPlugin != null)
+                            {
+                                serverPlugin.SureLoad();
+                            }
+                        }
+                        return;
+                    case "StartLevelServer":
+                        {
+                            var serverPlugin = UEngine.Instance.PluginModuleManager.GetPluginModule("LevelServer");
+                            if (serverPlugin != null)
+                            {
+                                serverPlugin.SureLoad();
+                            }
+                        }
+                        return;
+                    case "StartGateServer":
+                        {
+                            var serverPlugin = UEngine.Instance.PluginModuleManager.GetPluginModule("GateServer");
+                            if (serverPlugin != null)
+                            {
+                                serverPlugin.SureLoad();
+                            }
                         }
                         return;
                     case "BuildSerializer":

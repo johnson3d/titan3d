@@ -10,7 +10,7 @@ NS_BEGIN
 
 namespace Canvas
 {
-	struct FRect;
+	struct FClipRect;
 	class TR_CLASS()
 		FUtility
 	{
@@ -19,7 +19,7 @@ namespace Canvas
 		static bool LineLineIntersection(const v3dxVector2 & ps1, const v3dxVector2 & pe1, const v3dxVector2 & ps2, const v3dxVector2 & pe2, v3dxVector2 * pPoint);
 
 		//sure s in rect
-		static bool LineRectIntersection(const v3dxVector2 & s, const v3dxVector2 & e, const FRect & rect, v3dxVector2 * pPoint);
+		static bool LineRectIntersection(const v3dxVector2 & s, const v3dxVector2 & e, const FClipRect & rect, v3dxVector2 * pPoint);
 	};
 
 	struct FColorAndFlags
@@ -80,17 +80,17 @@ namespace Canvas
 		RCN_X1_Y1,
 	};
 
-	struct FRect
+	struct FClipRect
 	{
 		float X = 0;
 		float Y = 0;
 		float Width = 1.0f;
 		float Height = 1.0f;
-		FRect()
+		FClipRect()
 		{
 
 		}
-		FRect(float x, float y, float w, float h)
+		FClipRect(float x, float y, float w, float h)
 		{
 			X = x; Y = y; Width = w; Height = h;
 		}
@@ -113,8 +113,8 @@ namespace Canvas
 			return v3dxVector2(X, Y + Height);
 		}
 
-		static FRect And(const FRect& r1, const FRect& r2) {
-			FRect result;
+		static FClipRect And(const FClipRect& r1, const FClipRect& r2) {
+			FClipRect result;
 			result.X = std::max(r1.X, r2.X);
 			result.Y = std::max(r1.Y, r2.Y);
 			result.Width = std::min(r1.GetRight(), r2.GetRight()) - result.X;
@@ -131,7 +131,7 @@ namespace Canvas
 		bool ClipLine(const v3dxVector2& s, const v3dxVector2& e, v3dxVector2* os, v3dxVector2* oe) const
 		{
 			bool bs = IsContain(s);
-			bool be = IsContain(s);
+			bool be = IsContain(e);
 			if (bs && be)
 			{
 				*os = s;
@@ -213,7 +213,7 @@ namespace Canvas
 	class IImageRect : public VIUnknownBase
 	{
 	public:
-		FRect				Rect{};//[0-1]
+		FClipRect				Rect{};//[0-1]
 		AutoRef<IImage>		Image;
 	};
 	class IFont : public VIUnknown
@@ -304,14 +304,14 @@ namespace Canvas
 		void NewDrawCmd() {
 			mStopCmdIndex = (UINT)mDrawCmds.size();
 		}
-		void PushClip(const FRect& rect);
+		void PushClip(const FClipRect& rect);
 		void PopClip();
 
 		void AddText(IFont* font, const WCHAR* text, float x, float y, const Rgba& color);
 		void AddLine(const v3dxVector2& start, const v3dxVector2& end, float width, const Rgba& color, IImageRect* imgRect = nullptr);
 		void AddLineStrips(const v3dxVector2* pPoints, UINT num, float width, const Rgba& color);
 		void AddImage(IImageRect* image, float x, float y, float w, float h, const Rgba& color);
-		const FRect& GetCurrentClipRect() const {
+		const FClipRect& GetCurrentClipRect() const {
 			ASSERT(mClipRects.size() > 0);
 			return mClipRects[mClipRects.size() - 1];
 		}
@@ -322,7 +322,7 @@ namespace Canvas
 	public:
 		FDrawBatch* Batch = nullptr;
 	protected:
-		std::vector<FRect>				mClipRects;
+		std::vector<FClipRect>				mClipRects;
 		std::vector<AutoRef<FDrawCmd>>	mDrawCmds;
 		size_t							mStopCmdIndex = 0;
 	};
@@ -358,7 +358,7 @@ namespace Canvas
 		void Begin(float w, float h);
 		void End();
 	protected:
-		FRect						ClientRect{};
+		FClipRect						ClientRect{};
 		AutoRef<FDrawCmdList>		Backgroud;
 		AutoRef<FDrawCmdList>		Middleground;
 		AutoRef<FDrawCmdList>		Foregroud;
@@ -368,18 +368,30 @@ namespace Canvas
 		FCanvas : public VIUnknown
 	{
 	public:
+		ENGINE_RTTI(FCanvas);
+		FCanvas();
+		~FCanvas();
 		void PushBatch(AutoRef<FDrawBatch>&batch) {
 			mBatches.push_back(batch);
 		}
+		TR_FUNCTION()
 		void Begin(float w, float h);
+		
+		TR_FUNCTION()
 		void End();
+
+		TR_FUNCTION()
 		void BuildMesh(NxRHI::FMeshDataProvider* mesh);
+
+		TR_FUNCTION()
+		void DemoDraw(NxRHI::FMeshDataProvider* MeshProvider);
+
 	protected:
 		void PushCmdList(FDrawCmdList* cmdlist, NxRHI::FMeshDataProvider* mesh);
 
 		void DemoDraw();
 	protected:
-		FRect								ClientRect{};
+		FClipRect							ClientRect{};
 		AutoRef<FDrawCmdList>				Backgroud;
 		std::vector<AutoRef<FDrawBatch>>	mBatches;
 		AutoRef<FDrawCmdList>				Foregroud;

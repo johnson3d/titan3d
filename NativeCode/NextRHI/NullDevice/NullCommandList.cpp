@@ -68,7 +68,7 @@ namespace NxRHI
 	}
 	void NullCommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
-		view->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
+		view->GetResourceState()->SetAccessFrame(VIUnknown::EngineCurrentFrame);
 	}
 	void NullCommandList::SetUav(EShaderType type, const FShaderBinder* binder, IUaView* view)
 	{

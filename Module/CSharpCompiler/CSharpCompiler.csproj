@@ -87,4 +87,5 @@
   <Import Project="..\..\CSharpCode\Bricks\SourceControl\SourceControl.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\VXGI\VXGI.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\PhysicsCore\PhysicsCore.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\NodeGraph\NodeGraph.projitems" Label="Shared" />
 </Project>

@@ -59,7 +59,7 @@ namespace NxRHI
 		const FMeshAtomDesc* GetMeshAtomDesc() {
 			return Mesh->GetAtomDesc(MeshAtom, MeshLOD);
 		}
-		virtual UINT GetPrimitiveNum(){
+		virtual UINT GetPrimitiveNum() override{
 			auto desc = GetMeshAtomDesc();
 			return desc->NumPrimitives * desc->NumInstances;
 		}
@@ -107,7 +107,7 @@ namespace NxRHI
 		void BindResource(const FShaderBinder* binder, IGpuResource* resource);
 		IGpuResource* FindGpuResource(EShaderBindType type, VNameString name);
 
-		virtual UINT GetPrimitiveNum() {
+		virtual UINT GetPrimitiveNum() override{
 			return mDispatchX * mDispatchY * mDispatchZ;
 		}
 	public:
@@ -128,7 +128,7 @@ namespace NxRHI
 		virtual void Commit(ICommandList * cmdlist) override;
 		void BindSrc(IGpuBufferData * res);
 		void BindDest(IGpuBufferData * res);
-		virtual UINT GetPrimitiveNum() {
+		virtual UINT GetPrimitiveNum() override{
 			return 1;
 		}
 	public:

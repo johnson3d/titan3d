@@ -11,6 +11,6 @@
     <ProjectReference Include="..\..\..\Module\Engine.Window\Engine.Window.csproj" />
   </ItemGroup>
 
-  <Import Project="..\GameItem\GameItem.projitems" Label="Shared" />
+  <Import Project="..\GameItems\GameItem.projitems" Label="Shared" />
 
 </Project>

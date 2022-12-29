@@ -84,6 +84,9 @@ namespace NxRHI
 		virtual int GetNumOfGpuDevice() const{
 			return 1;
 		}
+		virtual void GetDeviceDesc(int index, FGpuDeviceDesc* desc) const {
+
+		}
 	public:
 		ERhiType		Type = ERhiType::RHI_D3D11;
 	};
@@ -93,6 +96,7 @@ namespace NxRHI
 		void SetDefault()
 		{
 			RhiType = ERhiType::RHI_D3D11;
+			memset(Name, 0, sizeof(Name));
 			AdapterId = 0;
 			DeviceHandle = nullptr;
 			DeviceContextHandle = nullptr;
@@ -100,11 +104,17 @@ namespace NxRHI
 			GpuDump = true;
 		}
 		ERhiType	RhiType = ERhiType::RHI_D3D11;
+		char	Name[256]{};
 		int		AdapterId = 0;
+		UINT64	DedicatedVideoMemory = 0;
 		void*	DeviceHandle = nullptr;
 		void*	DeviceContextHandle = nullptr;
 		bool	CreateDebugLayer = true;
 		bool	GpuDump = true;
+
+		const char* GetName() const {
+			return Name;
+		}
 	};
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FGpuDeviceCaps

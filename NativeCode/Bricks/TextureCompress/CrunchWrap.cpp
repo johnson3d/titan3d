@@ -13,18 +13,18 @@
 
 #define new VNEW
 
-extern "C" const void* __stdcall __std_find_trivial_2(const void* _First, const void* _Last, uint16_t _Val) noexcept
-{
-	const uint16_t* pCur = (const uint16_t*)_First;
-	const uint16_t* pEnd = (const uint16_t*)_Last;
-	while (pCur < pEnd)
-	{
-		if (*pCur == _Val)
-			return pCur;
-		pCur++;
-	}
-	return nullptr;
-}
+//extern "C" const void* __stdcall __std_find_trivial_2(const void* _First, const void* _Last, uint16_t _Val) noexcept
+//{
+//	const uint16_t* pCur = (const uint16_t*)_First;
+//	const uint16_t* pEnd = (const uint16_t*)_Last;
+//	while (pCur < pEnd)
+//	{
+//		if (*pCur == _Val)
+//			return pCur;
+//		pCur++;
+//	}
+//	return nullptr;
+//}
 
 NS_BEGIN
 

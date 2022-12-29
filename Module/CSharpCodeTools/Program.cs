@@ -98,12 +98,14 @@ namespace CSharpCodeTools
             {
                 string target = dir + "/" + text;
                 Console.WriteLine($"Target={target}");
-
-                Console.WriteLine("Rpc:GatherClass");
                 URpcCodeManager.Instance.GatherCodeFiles(includes, excludes);
-                URpcCodeManager.Instance.GatherClass();
-                Console.WriteLine("Rpc:WriteCode");
-                URpcCodeManager.Instance.WriteCode(target);
+                URpcCodeManager.Instance.GatherRpcClass(target);
+
+                //Console.WriteLine("Rpc:GatherClass");
+                //URpcCodeManager.Instance.GatherCodeFiles(includes, excludes);
+                //URpcCodeManager.Instance.GatherClass();
+                //Console.WriteLine("Rpc:WriteCode");
+                //URpcCodeManager.Instance.WriteCode(target);
                 URpcCodeManager.Instance.MakeSharedProjectCSharp(target + "/", "EngineRPC.projitems");
                 Console.WriteLine("Rpc:Finished");
             }

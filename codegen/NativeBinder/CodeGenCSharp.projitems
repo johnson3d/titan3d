@@ -114,6 +114,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiTableRowData_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ImGuiViewportDataSDL2_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IModifier_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/InputGeom_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IParticleSystemAttribute_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IRenderDocTool_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IRenderLayer_2581692454.cpp2cs.cs" />
@@ -157,6 +158,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/QNodeBase_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/QNode_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/QTree_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RcNavCrowd_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RcNavMesh_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RcNavQuery_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RecastBuilder_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RttiEnumManager_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RttiEnum_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/RttiStructManager_2581692454.cpp2cs.cs" />
@@ -167,6 +172,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TcpConnect_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TcpServerManager_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TcpServer_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/TileMeshBuilder_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/UCs2CppBase_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/v3dSampMgr_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/vfxRandom_2581692454.cpp2cs.cs" />

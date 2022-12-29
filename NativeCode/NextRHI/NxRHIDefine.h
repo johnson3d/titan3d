@@ -1,7 +1,9 @@
 #pragma once
 #include "../Base/IUnknown.h"
 #include "../Base/thread/vfxcritical.h"
-
+#include "../Math/v3dxVector2.h"
+#include "../Math/v3dxVector3.h"
+#include "../Math/v3dxQuaternion.h"
 NS_BEGIN
 
 namespace NxRHI
@@ -133,6 +135,156 @@ namespace NxRHI
 			VST_Number,
 			VST_FullMask = 0xffffffff,
 	};
+	enum TR_ENUM(SV_EnumNoFlags)
+		EShaderVarType
+	{
+		SVT_Float,
+			SVT_Int,
+			SVT_Texture,
+			SVT_Sampler,
+			SVT_Struct,
+			SVT_Unknown,
+	};
+	inline void GetVertexStreamInfo(EVertexStreamType type, UINT* stride = nullptr, UINT* element = nullptr, EShaderVarType* varType = nullptr)
+	{
+		switch (type)
+		{
+		case EngineNS::NxRHI::VST_Position:
+			if (stride != nullptr)
+				*stride = sizeof(v3dxVector3);
+			if (element != nullptr)
+				*element = 3;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Float;
+			break;
+		case EngineNS::NxRHI::VST_Normal:
+			if (stride != nullptr)
+				*stride = sizeof(v3dxVector3);
+			if (element != nullptr)
+				*element = 3;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Float;
+			break;
+		case EngineNS::NxRHI::VST_Tangent:
+			if (stride != nullptr)
+				*stride = sizeof(v3dxQuaternion);
+			if (element != nullptr)
+				*element = 4;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Float;
+			break;
+		case EngineNS::NxRHI::VST_Color:
+			if (stride != nullptr)
+				*stride = sizeof(DWORD);
+			if (element != nullptr)
+				*element = 1;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Int;
+			break;
+		case EngineNS::NxRHI::VST_UV:
+			if (stride != nullptr)
+				*stride = sizeof(v3dxVector2);
+			if (element != nullptr)
+				*element = 2;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Float;
+			break;
+		case EngineNS::NxRHI::VST_LightMap:
+			if (stride != nullptr)
+				*stride = sizeof(v3dxVector2);
+			if (element != nullptr)
+				*element = 2;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Float;
+			break;
+		case EngineNS::NxRHI::VST_SkinIndex:
+			if (stride != nullptr)
+				*stride = sizeof(DWORD);
+			if (element != nullptr)
+				*element = 1;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Int;
+			break;
+		case EngineNS::NxRHI::VST_SkinWeight:
+			if (stride != nullptr)
+				*stride = sizeof(DWORD);
+			if (element != nullptr)
+				*element = 1;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Int;
+			break;
+		case EngineNS::NxRHI::VST_TerrainIndex:
+			if (stride != nullptr)
+				*stride = sizeof(DWORD);
+			if (element != nullptr)
+				*element = 1;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Int;
+			break;
+		case EngineNS::NxRHI::VST_TerrainGradient:
+			if (stride != nullptr)
+				*stride = sizeof(DWORD);
+			if (element != nullptr)
+				*element = 1;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Int;
+			break;
+		case EngineNS::NxRHI::VST_InstPos:
+			if (stride != nullptr)
+				*stride = sizeof(v3dxVector3);
+			if (element != nullptr)
+				*element = 3;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Float;
+			break;
+		case EngineNS::NxRHI::VST_InstQuat:
+			if (stride != nullptr)
+				*stride = sizeof(v3dxQuaternion);
+			if (element != nullptr)
+				*element = 4;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Float;
+			break;
+		case EngineNS::NxRHI::VST_InstScale:
+			if (stride != nullptr)
+				*stride = sizeof(v3dxVector3);
+			if (element != nullptr)
+				*element = 3;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Float;
+			break;
+		case EngineNS::NxRHI::VST_F4_1:
+			if (stride != nullptr)
+				*stride = sizeof(v3dxQuaternion);
+			if (element != nullptr)
+				*element = 4;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Int;
+			break;
+		case EngineNS::NxRHI::VST_F4_2:
+			if (stride != nullptr)
+				*stride = sizeof(v3dxQuaternion);
+			if (element != nullptr)
+				*element = 4;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Float;
+			break;
+		case EngineNS::NxRHI::VST_F4_3:
+			if (stride != nullptr)
+				*stride = sizeof(v3dxQuaternion);
+			if (element != nullptr)
+				*element = 4;
+			if (varType != nullptr)
+				*varType = EShaderVarType::SVT_Float;
+			break;
+		case EngineNS::NxRHI::VST_Number:
+			break;
+		case EngineNS::NxRHI::VST_FullMask:
+			break;
+		default:
+			break;
+		}
+	}
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FSubresourceBox
 	{

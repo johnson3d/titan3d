@@ -206,7 +206,7 @@ namespace NxRHI
 	}
 	void DX11CommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
-		view->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
+		view->GetResourceState()->SetAccessFrame(VIUnknown::EngineCurrentFrame);
 		switch (type)
 		{
 			case EShaderType::SDT_ComputeShader:

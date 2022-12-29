@@ -6,7 +6,7 @@ namespace EngineNS.Rtti
 {
     public class AssemblyEntry
     {
-        public class GameAssemblyDesc : AssemblyDesc
+        public class GameAssemblyDesc : UAssemblyDesc
         {
             public GameAssemblyDesc()
             {
@@ -23,11 +23,11 @@ namespace EngineNS.Rtti
 
             public override object CreateInstance(RName name)
             {
-                if (name.Name == "demo0.mcrs")
+                #region MacrossGenerated Start                if (name == RName.GetRName("utest/mactest.macross", EngineNS.RName.ERNameType.Game))
                 {
-                    return new GameProject.GAloneGame();
+                    return new NS_utest.mactest();
                 }
-                #region MacrossGenerated Start                if (name == RName.GetRName("utest/puppet/testgameplay.macross", EngineNS.RName.ERNameType.Game))
+                if (name == RName.GetRName("utest/puppet/testgameplay.macross", EngineNS.RName.ERNameType.Game))
                 {
                     return new NS_utest.puppet.testgameplay();
                 }
@@ -52,7 +52,7 @@ namespace EngineNS.Rtti
             }
         }
         static GameAssemblyDesc AssmblyDesc = new GameAssemblyDesc();
-        public static AssemblyDesc GetAssemblyDesc()
+        public static UAssemblyDesc GetAssemblyDesc()
         {
             return AssmblyDesc;
         }

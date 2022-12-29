@@ -44,7 +44,7 @@ namespace Canvas
 		pPoint->y = (A1 * C2 - A2 * C1) * invdelta;
 		return true;
 	}
-	bool FUtility::LineRectIntersection(const v3dxVector2& s, const v3dxVector2& e, const FRect& rect, v3dxVector2* pPoint)
+	bool FUtility::LineRectIntersection(const v3dxVector2& s, const v3dxVector2& e, const FClipRect& rect, v3dxVector2* pPoint)
 	{
 		v3dxVector2 intersection;
 		v3dxVector2 r00 = rect.Get_X0_Y0();
@@ -77,15 +77,22 @@ namespace Canvas
 		mDrawCmds.push_back(tmp);
 		return tmp;
 	}
-	void FDrawCmdList::PushClip(const FRect& rect)
+	void FDrawCmdList::PushClip(const FClipRect& rect)
 	{
-		const auto& rc = GetCurrentClipRect();
-		auto clip = FRect::And(rc, rect);
-		mClipRects.push_back(clip);
+		if (mClipRects.size() > 0)
+		{
+			const auto& rc = GetCurrentClipRect();
+			auto clip = FClipRect::And(rc, rect);
+			mClipRects.push_back(clip);
+		}
+		else
+		{
+			mClipRects.push_back(rect);
+		}
 	}
 	void FDrawCmdList::PopClip()
 	{
-		mClipRects.erase(mClipRects.begin() + mClipRects.size());
+		//mClipRects.erase(mClipRects.begin() + mClipRects.size()); //TODO
 	}
 
 	void FDrawCmdList::AddText(IFont* font, const WCHAR* text, float x, float y, const Rgba& color)
@@ -245,6 +252,19 @@ namespace Canvas
 
 	}
 
+	FCanvas::FCanvas()
+	{
+		Backgroud = MakeWeakRef(new FDrawCmdList());
+		Backgroud->Batch = nullptr;
+
+		Foregroud = MakeWeakRef(new FDrawCmdList());
+		Foregroud->Batch = nullptr;
+	}
+
+	FCanvas::~FCanvas()
+	{
+	}
+
 	void FCanvas::BuildMesh(NxRHI::FMeshDataProvider* mesh)
 	{
 		mesh->Reset();
@@ -265,11 +285,11 @@ namespace Canvas
 		ClientRect.Width = w;
 		ClientRect.Height = h;
 
-		Backgroud->Reset();
-		Backgroud->PushClip(ClientRect);
+		//Backgroud->Reset(); //TODO
+		//Backgroud->PushClip(ClientRect);
 
-		Foregroud->Reset();
-		Foregroud->PushClip(ClientRect);
+		//Foregroud->Reset(); //TODO
+		//Foregroud->PushClip(ClientRect);
 	}
 
 	void FCanvas::End()
@@ -277,7 +297,7 @@ namespace Canvas
 
 	}
 
-	void FCanvas::DemoDraw()
+	void FCanvas::DemoDraw(NxRHI::FMeshDataProvider* MeshProvider)
 	{
 		Begin(800, 600);
 		{
@@ -287,13 +307,15 @@ namespace Canvas
 			{
 				auto cmdlist = win1->GetBackgroud();
 				{
-					cmdlist->AddLine(v3dxVector2(0, 0), v3dxVector2(100, 100), 5.0f, Rgba(255, 255, 255));
+					auto ImageRect = MakeWeakRef(new IImageRect());
+					cmdlist->AddLine(v3dxVector2(0, 0), v3dxVector2(100, 100), 5.0f, Rgba(255, 255, 255), ImageRect);
 					//cmdlist->AddText();
 				}
 				cmdlist = win1->GetMiddleground();
 				{
-					cmdlist->PushClip(FRect(20, 20, 60, 60));
-					cmdlist->AddLine(v3dxVector2(100, 0), v3dxVector2(0, 100), 5.0f, Rgba(255, 255, 255));
+					cmdlist->PushClip(FClipRect(20, 20, 60, 60));
+					auto ImageRect = MakeWeakRef(new IImageRect());
+					cmdlist->AddLine(v3dxVector2(100, 0), v3dxVector2(0, 100), 5.0f, Rgba(255, 255, 255), ImageRect);
 					cmdlist->PopClip();
 				}
 			}
@@ -302,10 +324,8 @@ namespace Canvas
 		}
 		End();
 
-		auto mesh = MakeWeakRef(new NxRHI::FMeshDataProvider());
+		auto mesh = MakeWeakRef(MeshProvider);
 		this->BuildMesh(mesh);
-
-		//mesh->Render
 	}
 }
 

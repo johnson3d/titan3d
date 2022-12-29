@@ -66,6 +66,10 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.TextureManager.GetTexture(rn);
+                //if (asset.PicDesc.DontCompress == false)
+                //    asset.PicDesc.CompressFormat = EngineNS.UEngine.Instance.Config.CompressFormat;
+                //else
+                //    asset.PicDesc.CompressFormat = EngineNS.NxRHI.ETextureCompressFormat.TCF_None;
                 asset.SaveAssetTo(rn);
             }
 
@@ -76,6 +80,10 @@ namespace ProjectCooker.Command
                 var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.TextureManager.GetTexture(rn);
+                //if (asset.PicDesc.DontCompress == false)
+                //    asset.PicDesc.CompressFormat = EngineNS.UEngine.Instance.Config.CompressFormat;
+                //else
+                //    asset.PicDesc.CompressFormat = EngineNS.NxRHI.ETextureCompressFormat.TCF_None;
                 asset.SaveAssetTo(rn);
             }
         }

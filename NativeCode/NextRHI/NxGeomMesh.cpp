@@ -778,25 +778,36 @@ namespace NxRHI
 		return true;
 	}
 
+	void FMeshDataProvider::Reset()
+	{
+		Init();
+	}
 	bool FMeshDataProvider::Init(DWORD streams, bool isIndex32, int atom)
 	{
+		StreamTypes = streams;
+		IsIndex32 = isIndex32;
+		AtomSize = atom;
+		
+		return Init();
+	}
+	bool FMeshDataProvider::Init()
+	{
 		Cleanup();
+
+		mAtoms.resize(AtomSize);
 		for (int i = 0; i < VST_Number; i++)
 		{
-			if (streams & (1 << i))
+			if (StreamTypes & (1 << i))
 			{
 				mVertexBuffers[i] = MakeWeakRef(new IBlobObject());
 			}
 		}
 
 		IndexBuffer = MakeWeakRef(new IBlobObject());
-		IsIndex32 = isIndex32;
+
 
 		PrimitiveNumber = 0;
 		VertexNumber = 0;
-
-		mAtoms.resize(atom);
-
 		return true;
 	}
 
@@ -1163,6 +1174,19 @@ namespace NxRHI
 			return nullptr;
 		auto pData = (BYTE*)vb->GetData();
 		return pData + index * stride;
+	}
+
+	void FMeshDataProvider::ResizeVertexBuffers(UINT size)
+	{
+		for (int i = 0; i < VST_Number; i++)
+		{
+			if (mVertexBuffers[i] != nullptr)
+			{
+				UINT stride = 0;
+				NxRHI::GetVertexStreamInfo((EVertexStreamType)i, &stride);
+				mVertexBuffers[i]->ReSize(size * stride);
+			}
+		}
 	}
 
 	UINT FMeshDataProvider::AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector2* uv, DWORD color)

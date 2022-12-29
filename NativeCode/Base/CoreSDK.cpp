@@ -133,9 +133,9 @@ void CoreSDK::SetMemDebugInfo(void* memory, const char* info)
 	vfxMemory_SetDebugInfo(memory, info);
 }
 
-void CoreSDK::UpdateEngineTick(INT64 tick)
+void CoreSDK::UpdateEngineFrame(UINT64 frame)
 {
-	VIUnknown::EngineTime = tick;
+	VIUnknown::EngineCurrentFrame = frame;
 }
 
 void CoreSDK::IUnknown_Release(void* unk)

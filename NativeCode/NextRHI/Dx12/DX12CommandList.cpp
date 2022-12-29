@@ -253,7 +253,7 @@ namespace NxRHI
 	void DX12CommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
 		ASSERT(mIsRecording);
-		view->GetResourceState()->SetAccessTime(VIUnknown::EngineTime);
+		view->GetResourceState()->SetAccessFrame(VIUnknown::EngineCurrentFrame);
 		ASSERT(view->Buffer->GetGpuResourceState() != EGpuResourceState::GRS_RenderTarget);
 
 		if (type == EShaderType::SDT_PixelShader)

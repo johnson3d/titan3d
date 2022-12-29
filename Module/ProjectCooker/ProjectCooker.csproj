@@ -7,10 +7,12 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\binaries\</OutputPath>
+    <DefineConstants>$(DefineConstants)TRACE;PWindow</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>..\..\binaries\</OutputPath>
+    <DefineConstants>$(DefineConstants)TRACE;PWindow</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

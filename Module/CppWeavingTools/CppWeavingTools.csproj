@@ -15,7 +15,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClangSharp" Version="11.0.0-beta3" />
+    <PackageReference Include="ClangSharp" Version="15.0.2" />
+    <PackageReference Include="libclang" Version="15.0.0" />
+    <PackageReference Include="libClangSharp" Version="15.0.0" />
   </ItemGroup>
 
 </Project>

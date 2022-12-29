@@ -235,9 +235,27 @@ namespace CSharpCodeTools
         }
         public void GatherClass()
         {
+            const string Start_String = "#if TitanEngine_AutoGen";
+            const string End_String = "#endif//TitanEngine_AutoGen";
             foreach (var i in SourceCodes)
             {
+                string beforeStr = null;
+                string afterStr = null;
                 var code = System.IO.File.ReadAllText(i);
+                var istart = code.IndexOf(Start_String);
+                if (istart >= 0)
+                {
+                    beforeStr = code.Substring(0, istart);
+                    var iend = code.IndexOf(End_String);
+                    if (iend >= 0)
+                    {
+                        afterStr = code.Substring(iend + End_String.Length);
+                    }
+                }
+                if (beforeStr != null)
+                {
+                    code = beforeStr + afterStr;
+                }
                 SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
 
                 CompilationUnitSyntax root = tree.GetCompilationUnitRoot();

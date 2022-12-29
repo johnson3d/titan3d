@@ -1,4 +1,4 @@
-Include=CSharpCode
+Include=CSharpCode,Plugins
 Exclude=CSharpCode/ImGui,Math
 Target=codegen/Rpc/Engine
 Property_Target=codegen/Property/Engine

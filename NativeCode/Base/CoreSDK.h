@@ -48,7 +48,7 @@ public:
 
 	static void InitF2MManager();
 	static void FinalF2MManager();
-	static void UpdateEngineTick(INT64 tick);
+	static void UpdateEngineFrame(UINT64 frame);
 	static void IUnknown_Release(void* unk);
 	static int IUnknown_AddRef(void* unk);
 	static void SetWriteLogStringCallback(FWriteLogString wls);

@@ -23,33 +23,33 @@
     <ProjectGuid>{AD0E23E3-ECA5-4E52-B69D-BB6E669C48C6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>CoreWindow</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
@@ -93,6 +93,13 @@
     <Import Project="..\3rd\native\EtcLib\EtcLib.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Platform\Windows\Windows.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\TextureCompress\TextureCompress.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\DebugUtils\DebugUtils.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\Detour\Detour.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\DetourCrowd\DetourCrowd.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\DetourTileCache\DetourTileCache.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\Recast\Recast\Recast.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\RecastBuilder\RecastBuilder.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\RecastRuntime\RecastRuntime.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -155,7 +162,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -208,7 +215,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>

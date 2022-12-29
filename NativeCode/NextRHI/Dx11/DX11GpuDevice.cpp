@@ -15,6 +15,65 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	static void SafeCreateDXGIFactory(IDXGIFactory** ppDXGIFactory)
+	{
+		HMODULE  hmDXGI_DLL = LoadLibraryA("dxgi.dll");
+
+		typedef HRESULT(WINAPI* FnpCreateDXGIFactory)(REFIID ridd, void** ppFactory);
+
+		FnpCreateDXGIFactory fnpCreateDXGIFactory = (FnpCreateDXGIFactory)GetProcAddress(hmDXGI_DLL, "CreateDXGIFactory1");
+
+		if (fnpCreateDXGIFactory == NULL)
+		{
+			fnpCreateDXGIFactory = (FnpCreateDXGIFactory)GetProcAddress(hmDXGI_DLL, "CreateDXGIFactory");
+			if (fnpCreateDXGIFactory == NULL)
+			{
+				fnpCreateDXGIFactory = CreateDXGIFactory1;
+			}
+		}
+
+		fnpCreateDXGIFactory(__uuidof(IDXGIFactory), (void**)ppDXGIFactory);
+	}
+	DX11GpuSystem::~DX11GpuSystem()
+	{
+	}
+
+	bool DX11GpuSystem::InitGpuSystem(ERhiType type, const FGpuSystemDesc* desc)
+	{
+		SafeCreateDXGIFactory(mDXGIFactory.GetAddressOf());
+		if (mDXGIFactory == nullptr)
+			return false;
+
+		mGIAdapters.clear();
+		UINT index = 0;
+		while (true)
+		{
+			AutoRef<IDXGIAdapter> adapter;
+			auto hr = mDXGIFactory->EnumAdapters(index, adapter.GetAddressOf());
+			if (hr != S_OK)
+				break;
+			mGIAdapters.push_back(adapter);
+			index++;
+		}
+
+		return true;
+	}
+	int DX11GpuSystem::GetNumOfGpuDevice() const
+	{
+		return (int)mGIAdapters.size();
+	}
+	void DX11GpuSystem::GetDeviceDesc(int index, FGpuDeviceDesc* desc) const
+	{
+		if (index < 0 || index >= (int)mGIAdapters.size())
+			return;
+		DXGI_ADAPTER_DESC dxdesc{};
+		mGIAdapters[index]->GetDesc(&dxdesc);
+		desc->RhiType = ERhiType::RHI_D3D11;
+		desc->AdapterId = index;
+		desc->DedicatedVideoMemory = dxdesc.DedicatedVideoMemory;
+		auto text = StringHelper::wstrtostr(dxdesc.Description);
+		strcpy(desc->Name, text.c_str());
+	}
 	IGpuDevice* DX11GpuSystem::CreateDevice(const FGpuDeviceDesc* desc)
 	{
 		auto result = new DX11GpuDevice();
@@ -35,37 +94,17 @@ namespace NxRHI
 		Safe_Release(mDefinedAnnotation);
 		Safe_Release(mDevice5);
 		Safe_Release(mDevice);
-		Safe_Release(mDXGIFactory);
 	}
 	ICmdQueue* DX11GpuDevice::GetCmdQueue()
 	{
 		return mCmdQueue;
 	}
-	static void SafeCreateDXGIFactory(IDXGIFactory** ppDXGIFactory)
-	{
-		HMODULE  hmDXGI_DLL = LoadLibraryA("dxgi.dll");
-
-		typedef HRESULT(WINAPI* FnpCreateDXGIFactory)(REFIID ridd, void** ppFactory);
-
-		FnpCreateDXGIFactory fnpCreateDXGIFactory = (FnpCreateDXGIFactory)GetProcAddress(hmDXGI_DLL, "CreateDXGIFactory1");
-
-		if (fnpCreateDXGIFactory == NULL)
-		{
-			fnpCreateDXGIFactory = (FnpCreateDXGIFactory)GetProcAddress(hmDXGI_DLL, "CreateDXGIFactory");
-			if (fnpCreateDXGIFactory == NULL)
-			{
-				fnpCreateDXGIFactory = CreateDXGIFactory1;
-			}
-		}
-
-		fnpCreateDXGIFactory(__uuidof(IDXGIFactory), (void**)ppDXGIFactory);
-	}
+	
 	bool DX11GpuDevice::InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc)
 	{
 		Desc = *desc;
 
-		SafeCreateDXGIFactory(&mDXGIFactory);
-
+		mDXGIFactory = ((DX11GpuSystem*)pGpuSystem)->mDXGIFactory;
 		mCmdQueue = MakeWeakRef(new DX11CmdQueue());
 		mCmdQueue->mDevice = this;
 		ID3D11DeviceContext* pImmContext;

@@ -8,7 +8,7 @@ namespace CSharpCodeTools
 {
     class UClassCodeBase
     {
-        public List<string> Usings = new List<string>();
+        public List<string> Usings { get; } = new List<string>();
         public void AddUsing(string code)
         {
             if (Usings.Contains(code))
@@ -42,6 +42,11 @@ namespace CSharpCodeTools
         }
 
         #region code writer
+        public void ResetWriter()
+        {
+            ClassCode = "";
+            NumOfTab = 0;
+        }
         protected int NumOfTab = 0;
         public int GetTabNum()
         {
@@ -102,7 +107,7 @@ namespace CSharpCodeTools
             {
                 result += '\t';
             }
-            result += code + '\n';
+            result += code + "\r\n";
 
             classCode += result;
             return result;
@@ -113,7 +118,7 @@ namespace CSharpCodeTools
         }
         public static void NewLine(ref string classCode, in int numOfTab)
         {
-            AddLine("\n", ref classCode, in numOfTab);
+            AddLine("\r\n", ref classCode, in numOfTab);
         }
         public string AppendCode(string code, bool bTab, bool bNewLine)
         {
@@ -128,7 +133,7 @@ namespace CSharpCodeTools
             result += code;
             if (bNewLine)
             {
-                result += "\n";
+                result += "\r\n";
             }
 
             ClassCode += result;

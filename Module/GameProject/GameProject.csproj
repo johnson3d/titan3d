@@ -13,12 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Engine.Window\Engine.Window.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="Engine.Window">
-      <HintPath>..\..\binaries\net5.0\Engine.Window.dll</HintPath>
+      <HintPath>..\..\binaries\net6.0\Engine.Window.dll</HintPath>
     </Reference>
   </ItemGroup>
 

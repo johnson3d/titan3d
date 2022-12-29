@@ -265,7 +265,7 @@ namespace NxRHI
 		if (GVKGpuDeviceValid == false)
 			return FALSE;
 		const char* Mode = "Default";
-		auto device = (VKGpuDevice*)pUserData;
+		//auto device = (VKGpuDevice*)pUserData;
 		if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT)
 		{
 			Mode = "Warning";
