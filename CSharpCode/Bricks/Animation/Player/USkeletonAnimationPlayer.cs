@@ -42,12 +42,23 @@ namespace EngineNS.Animation.Player
         public void Update(float elapse)
         {
             System.Diagnostics.Debug.Assert(SkeletonAnimClip.Duration != 0.0f);
-
+            float beforeTime = Time;
             Time += elapse;
             Time %= SkeletonAnimClip.Duration;
 
             //make command
             mAnimEvaluateCommand.Time = Time;
+
+            foreach(var notify in SkeletonAnimClip.Notifies)
+            {
+                var before = (Int64)(beforeTime * 1000);
+                var after = (Int64)(Time * 1000);
+                //ms
+                if (notify.CanTrigger(before, after))
+                {
+                    notify.Trigger(before, after);
+                }
+            }
         }
 
         public void Evaluate()

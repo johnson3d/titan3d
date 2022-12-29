@@ -14,6 +14,7 @@ namespace EngineNS.Bricks.NodeGraph
         public CodeBuilder.UMethodDeclaration MethodDec;
         public CodeBuilder.UCodeGeneratorBase CodeGen;
         public UNodeGraph NodeGraph;
+        public UNodeBase GraphHostNode;
         public List<CodeBuilder.UStatementBase> CurrentStatements;
         public object UserData;
         
@@ -23,6 +24,7 @@ namespace EngineNS.Bricks.NodeGraph
             data.ClassDec = ClassDec;
             data.MethodDec = MethodDec;
             data.NodeGraph = NodeGraph;
+            data.GraphHostNode = GraphHostNode;
             data.CodeGen = CodeGen;
         }
     }
@@ -33,25 +35,35 @@ namespace EngineNS.Bricks.NodeGraph
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
         public virtual void Initialize()
         {
-            UpdateCanvasMenus();
-            UpdateNodeMenus();
-            UpdatePinMenus();
+            //UpdateCanvasMenus();
+            //UpdateNodeMenus();
+            //UpdatePinMenus();
         }
         public virtual void SetDefaultActionForNode(UNodeBase node) { }
+        public virtual UGraphRenderer GetGraphRenderer() 
+        {
+            throw new MissingMethodException("Need override this method");
+        }
         [Rtti.Meta]
+        [Browsable(false)]
         public RName AssetName { get; set; }
         [Rtti.Meta]
         public string GraphName { get; set; } = "NodeGraph";
         [Rtti.Meta]
+        [Browsable(false)]
         public List<UNodeBase> Nodes { get; } = new List<UNodeBase>();
         [Rtti.Meta(Order = 1)]
+        [Browsable(false)]
         public List<UPinLinker> Linkers { get; } = new List<UPinLinker>();
         
+        [Browsable(false)]
         public ULinkingLine LinkingOp { get; } = new ULinkingLine();
         public class FSelNodeState : EGui.Controls.PropertyGrid.IPropertyCustomization
         {
             public UNodeBase Node;
             public Vector2 MoveOffset;
+            [Browsable(false)]
+            public bool IsPropertyVisibleDirty { get; set; } = false;
 
             public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
             {
@@ -82,9 +94,11 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
         public bool SelectedNodesDirty = false;
+        [Browsable(false)]
         public List<FSelNodeState> SelectedNodes { get; } = new List<FSelNodeState>();
 
         public Dictionary<UNodeBase, UNodeGraph> SubGraphs;
+        [Browsable(false)]
         public UNodeGraph ParentGraph { get; set; }
 
         public delegate void FOnChangeGraph(UNodeGraph graph);
@@ -529,6 +543,7 @@ namespace EngineNS.Bricks.NodeGraph
         protected bool IsZooming;
         protected Vector2 ZoomCenter;
         protected bool mIsMovingSelNodes;
+        [Browsable(false)]
         public bool IsMovingSelNodes => mIsMovingSelNodes;
 
         public enum EGraphMenu
@@ -542,6 +557,7 @@ namespace EngineNS.Bricks.NodeGraph
 
         EGraphMenu mCurMenuType;
         public bool FirstSetCurMenuType = false;
+        [Browsable(false)]
         public EGraphMenu CurMenuType
         {
             get => mCurMenuType;
@@ -565,11 +581,102 @@ namespace EngineNS.Bricks.NodeGraph
             CanvasMenus.SubMenuItems.Clear();
             CanvasMenus.Text = "Canvas";
         }
+
+        static List<UNodeBase> mCopyedNodes = new List<UNodeBase>();
+        static Dictionary<NodePin, NodePin> mCopyedPins = new Dictionary<NodePin, NodePin>();
+        static Dictionary<NodePin, NodePin> mCopyedLinkers = new Dictionary<NodePin, NodePin>();
+        public void Copy()
+        {
+            mCopyedNodes.Clear();
+            mCopyedLinkers.Clear();
+            for (int i = 0; i < SelectedNodes.Count; i++)
+            {
+                mCopyedNodes.Add(SelectedNodes[i].Node);
+            }
+            for (int i = 0; i < Linkers.Count; i++)
+            {
+                if (mCopyedNodes.Contains(Linkers[i].InNode) &&
+                   mCopyedNodes.Contains(Linkers[i].OutNode))
+                {
+                    mCopyedLinkers[Linkers[i].OutPin] = Linkers[i].InPin;
+                }
+            }
+        }
+        public void Paste(in Vector2 screenPt)
+        {
+            if (mCopyedNodes.Count <= 0)
+                return;
+
+            ClearSelected();
+            mCopyedPins.Clear();
+            var min = mCopyedNodes[0].Position;
+            var max = mCopyedNodes[0].Size + min;
+            for (int i = 0; i < mCopyedNodes.Count; i++)
+            {
+                var node = mCopyedNodes[i];
+                var nodeMin = node.Position;
+                var nodeMax = nodeMin + node.Size;
+                if (min.X > nodeMin.X)
+                    min.X = nodeMin.X;
+                if (min.Y > nodeMin.Y)
+                    min.Y = nodeMin.Y;
+                if (max.X < nodeMax.X)
+                    max.X = nodeMax.X;
+                if (max.Y < nodeMax.Y)
+                    max.Y = nodeMax.Y;
+
+                var copyedNode = Rtti.UTypeDescManager.CreateInstance(node.GetType()) as UNodeBase;
+                node.CopyTo(copyedNode);
+                copyedNode.UserData = this;
+                SetDefaultActionForNode(copyedNode);
+                AddNode(copyedNode);
+                AddSelected(copyedNode);
+
+                for (int pinIdx = 0; pinIdx < node.Inputs.Count; pinIdx++)
+                {
+                    var srcPin = node.Inputs[pinIdx];
+                    var tagPin = copyedNode.Inputs[pinIdx];
+                    mCopyedPins[srcPin] = tagPin;
+                }
+                for (int pinIdx = 0; pinIdx < node.Outputs.Count; pinIdx++)
+                {
+                    var srcPin = node.Outputs[pinIdx];
+                    var tagPin = copyedNode.Outputs[pinIdx];
+                    mCopyedPins[srcPin] = tagPin;
+                }
+            }
+
+            var center = (min + max) * 0.5f;
+            var newCenter = ViewportRateToCanvas(screenPt);
+            for (int i = 0; i < SelectedNodes.Count; i++)
+            {
+                var node = SelectedNodes[i].Node;
+                node.Position += newCenter - center;
+            }
+
+            foreach (var linker in mCopyedLinkers)
+            {
+                var outPin = mCopyedPins[linker.Key] as PinOut;
+                var inPin = mCopyedPins[linker.Value] as PinIn;
+                AddLink(outPin, inPin, true);
+            }
+        }
+
+        public void DeleteSelectedNodes()
+        {
+            foreach (var i in SelectedNodes)
+            {
+                RemoveNode(i.Node);
+            }
+            ClearSelected();
+        }
+
         public bool NodeMenuDirty = false;
         public virtual void UpdateNodeMenus()
         {
             NodeMenus.SubMenuItems.Clear();
             NodeMenus.Text = "Node";
+            NodeMenus.AddMenuSeparator("GENERAL");
             NodeMenus.AddMenuItem(
                 "Delete Node", null,
                 (UMenuItem item, object sender) =>
@@ -584,12 +691,78 @@ namespace EngineNS.Bricks.NodeGraph
                 "Delete Selected", null,
                 (UMenuItem item, object sender) =>
                 {
-                    foreach (var i in SelectedNodes)
-                    {
-                        this.RemoveNode(i.Node);
-                    }
-                    this.ClearSelected();
+                    DeleteSelectedNodes();
+                },
+                (UMenuItem item, object sender) =>
+                {
+                    if (SelectedNodes.Count == 0)
+                        item.MenuState.Enable = false;
+                    else
+                        item.MenuState.Enable = true;
+                    return true;
                 });
+            NodeMenus.AddMenuItem(
+                "Copy", null,
+                (UMenuItem item, object sender) =>
+                {
+                    Copy();
+                });
+            NodeMenus.AddMenuSeparator("ORGANIZATION");
+            NodeMenus.AddMenuItem(
+                "Collapse Nodes", null,
+                (UMenuItem item, object sender) =>
+                {
+                    var nodeList = new List<UNodeBase>(SelectedNodes.Count);
+                    for (int i = 0; i < SelectedNodes.Count; i++)
+                    {
+                        nodeList.Add(SelectedNodes[i].Node);
+                    }
+                    CollapseNodes(nodeList);
+                },
+                (UMenuItem item, object sender) =>
+                {
+                    if(SelectedNodes.Count == 0)
+                        item.MenuState.Enable = false;
+                    else
+                        item.MenuState.Enable = true;
+                    return true;
+                });
+            NodeMenus.AddMenuItem(
+                "Expand Nodes", null,
+                (UMenuItem item, object sender) =>
+                {
+                    var nodeList = new List<UNodeBase>(SelectedNodes.Count);
+                    for (int i = 0; i < SelectedNodes.Count; i++)
+                    {
+                        nodeList.Add(SelectedNodes[i].Node);
+                    }
+                    ExpandNodes(nodeList);
+                },
+                (UMenuItem item, object sender) =>
+                {
+                    for (int i = 0; i < SelectedNodes.Count; i++)
+                    {
+                        if (SelectedNodes[i].Node.GetType().GetInterface("IUnionNode") != null)
+                            return true;
+                    }
+
+                    return false;
+                });
+        }
+        public virtual void CollapseNodes(List<UNodeBase> nodeList)
+        {
+            throw new InvalidOperationException("Need override this method");
+        }
+        public virtual void ExpandNodes(List<UNodeBase> nodeList)
+        {
+            for(int i=0; i<nodeList.Count; i++)
+            {
+                var node = nodeList[i] as IUnionNode;
+                if (node == null)
+                    continue;
+
+                IUnionNode.ExpandUnionNode(this, node);
+            }
         }
         public bool PinMenuDirty = false;
         public virtual void UpdatePinMenus()
@@ -1211,11 +1384,11 @@ namespace EngineNS.Bricks.NodeGraph
                 var dis = PointF.DistanceToLine(dragPosition.X, dragPosition.Y, pointA.X, pointA.Y, pointB.X, pointB.Y);
                 if(dis < minDis)
                 {
+                    if (selNode.Inputs.Contains(linker.InPin))
+                        continue;
                     for(int pinIdx = 0; pinIdx < selNode.Inputs.Count; pinIdx++)
                     {
                         var pin = selNode.Inputs[pinIdx];
-                        if (linker.InPin == pin)
-                            continue;
                         if(CanLink(linker.OutPin, pin))
                         {
                             PreOrderLinker = linker;
@@ -1224,11 +1397,11 @@ namespace EngineNS.Bricks.NodeGraph
                             break;
                         }
                     }
+                    if (selNode.Outputs.Contains(linker.OutPin))
+                        continue;
                     for(int pinIdx = 0; pinIdx < selNode.Outputs.Count; pinIdx++)
                     {
                         var pin = selNode.Outputs[pinIdx];
-                        if (linker.OutPin == pin)
-                            continue;
                         if(CanLink(pin, linker.InPin))
                         {
                             PreOrderLinker = linker;
@@ -1240,6 +1413,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
         }
+        [Browsable(false)]
         public float WheelSpeed { get; set; } = 0.1f;
         public void Zoom(in Vector2 screenPos, float delta)
         {

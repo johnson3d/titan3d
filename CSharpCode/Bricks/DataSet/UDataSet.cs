@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.HSSF.UserModel;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,13 +12,20 @@ namespace EngineNS.Bricks.DataSet
         public UTable MainTable;
         public bool LoadDataSet(RName name, Type objType)
         {
-            System.IO.FileStream fs = System.IO.File.OpenRead(name.Address);
-            if (fs == null)
-                return false;
-
-            var workbook = new NPOI.HSSF.UserModel.HSSFWorkbook(fs);
-            return LoadDataSetFromExcel(workbook, objType);
+            bool isOk = false;
+            LoadDataSet_Exel(ref isOk, name, objType);
+            if (isOk)
+            {
+                return true;
+            }
+            //todo: load xnd
+            return false;
         }
+        public bool LoadFromDatabase(Type objType)
+        {
+            return false;
+        }
+        partial void LoadDataSet_Exel(ref bool isOk, RName name, Type objType);
         public UTable GetTable(string name)
         {
             UTable result;
@@ -84,10 +92,11 @@ namespace EngineNS.UTest
         public void UnitTestEntrance()
         {
             var dataSet = new Bricks.DataSet.UDataSet();
-            dataSet.LoadDataSet(RName.GetRName("UTest/dataset/testdatatype.xls"), typeof(TestDataType));
-
-            var obj = dataSet.MainTable.GetData(0) as TestDataType;
-            UTest.UnitTestManager.TAssert(obj.A == 1, "");
+            if(dataSet.LoadDataSet(RName.GetRName("UTest/dataset/testdatatype.xls"), typeof(TestDataType)))
+            {
+                var obj = dataSet.MainTable.GetData(0) as TestDataType;
+                UTest.UnitTestManager.TAssert(obj.A == 1, "");
+            }
 
             //dataSet.SaveDataSetToExcel(RName.GetRName("UTest/dataset/testdatatype_1.xls").Address);
         }

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>e60c1147-2371-496a-9d1a-86d835ec84d5</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>BehaviorTree</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Behavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BehaviorTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Blackboard.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Composite\CompositeBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Composite\ParallelBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Composite\RandomSelectBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Composite\SelectBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Composite\SequenceBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Decorator\ConditionDecorator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Decorator\ConditionFuncDecorator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Decorator\DecoratorBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Event\ConditionEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Leaf\Action\ActionBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Leaf\Action\DelayBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Leaf\Action\FinishWithResultBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Leaf\Action\MoveToBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Leaf\Condition\ConditionBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Leaf\LeafBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\UBehaviorTreeMacross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\UBehaviorTreeMacrossEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Service\CustomFunctionService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Service\ServiceBehavior.cs" />
+  </ItemGroup>
+</Project>

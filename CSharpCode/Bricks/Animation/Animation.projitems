@@ -25,7 +25,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_MakeAdditivePose.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_SelectPoseByInt.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\UBlendTree_ZeroPose.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Macross\UAnimationMacross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\UAnimMacross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\UAnimMacrossEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Notify\SoundAnimNotify.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Notify\EffectAnimNotify.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Notify\DurativeAnimNotify.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Notify\TransientAnimNotify.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Notify\IAnimNotify.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\UBlendSpace2DPlayer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneNode\UBlendSpaceAnimPlayNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SkeletonAnimation\RuntimePose\Control\Blend\UBlendPose.cs" />

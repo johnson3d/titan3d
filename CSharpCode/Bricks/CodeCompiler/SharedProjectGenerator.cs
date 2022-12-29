@@ -24,7 +24,7 @@ namespace EngineNS.CodeCompiler
         {
             get
             {
-                return IO.FileManager.GetBaseDirectory(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject) + ProjectFile;
+                return IO.FileManager.GetBaseDirectory(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject) + ProjectFile;
             }
         }
         [Rtti.Meta]

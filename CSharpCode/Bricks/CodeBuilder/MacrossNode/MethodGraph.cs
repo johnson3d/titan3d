@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading.Tasks;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.EGui.Controls.PropertyGrid;
+using Mono.CompilerServices.SymbolWriter;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
@@ -73,6 +78,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public UMacrossMethodGraph MethodGraph;
         public List<PinOut> Arguments = new List<PinOut>();
+        List<PinOut> mTemplateArguments = new List<PinOut>();
         public void UpdateMethodDefine(UMethodDeclaration methodDec)
         {
             mMethodDecKeyword = methodDec.GetKeyword();
@@ -86,11 +92,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             Name = methodDec.MethodName;
 
-            var newArgs = new List<PinOut>();
+            var ignoreOut = !methodDec.IsOverride;
+            mTemplateArguments.Clear();
             foreach (var i in methodDec.Arguments)
             {
+                if (ignoreOut && i.OperationType == EMethodArgumentAttribute.Out)
+                    continue;
                 PinOut argPin = null;
-                foreach (var j in Arguments)
+                foreach(var j in Arguments)
                 {
                     var defType = j.Tag as UTypeReference;
                     if (j.Name == i.VariableName && defType == i.VariableType)
@@ -108,7 +117,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     argPin.Tag = i.VariableType;
                     argPin.Name = i.VariableName;
                 }
-                newArgs.Add(argPin);
+                mTemplateArguments.Add(argPin);
             }
 
             foreach (var i in Arguments)
@@ -118,7 +127,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             Arguments.Clear();
 
-            foreach (var i in newArgs)
+            foreach (var i in mTemplateArguments)
             {
                 Arguments.Add(i);
                 AddPinOut(i);
@@ -151,7 +160,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             OnPositionChanged();
         }
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             for(int i=0; i<data.MethodDec.Arguments.Count; i++)
             {
@@ -169,7 +178,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             foreach (var i in links)
             {
                 var nextNode = i.InNode;
-                nextNode.BuildStatements(ref data);
+                var nextPin = i.InPin;
+                nextNode.BuildStatements(nextPin, ref data);
                 //funGraph.Function.Body.PushExpr(nextNode.GetExpr(funGraph, cGen, false));
             }
         }
@@ -215,6 +225,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     EGui.Controls.CtrlUtility.DrawHelper($"{valueString}({typeFullName})");
                 }
             }
+        }
+
+        public override object GetPropertyEditObject()
+        {
+            return MethodGraph;
         }
     }
     public class MethodData : IO.ISerializer
@@ -289,8 +304,434 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
         }
     }
-    public partial class UMacrossMethodGraph : UNodeGraph
+    public partial class UMacrossMethodGraph : UNodeGraph, IPropertyCustomization
     {
+        bool mInputsDirty = true;
+        List<UMethodArgumentDeclaration> mInputs = new List<UMethodArgumentDeclaration>();
+        [InputsOperationCallback, Category("Params")]
+        public List<UMethodArgumentDeclaration> Inputs
+        {
+            get
+            {
+                if(mInputsDirty)
+                {
+                    mInputs.Clear();
+                    for (int i = 0; i < MethodDatas[0].MethodDec.Arguments.Count; i++)
+                    {
+                        var arg = MethodDatas[0].MethodDec.Arguments[i];
+                        switch(arg.OperationType)
+                        {
+                            case EMethodArgumentAttribute.Default:
+                            case EMethodArgumentAttribute.In:
+                            case EMethodArgumentAttribute.Ref:
+                                mInputs.Add(arg);
+                                break;
+                        }
+                        arg.GetErrorStringAction = GetVariableErrorString;
+                    }
+                    mInputsDirty = false;
+                }
+
+                return mInputs;
+            }
+            set
+            {
+                mInputs = value;
+                MethodDatas[0].StartNode.UpdateMethodDefine(MethodDatas[0].MethodDec);
+            }
+        }
+        class InputsOperationCallbackAttribute : PGListOperationCallbackAttribute
+        {
+            void PreInsertOperation(int index, object value, UMacrossMethodGraph graph)
+            {
+                var name = "InValue" + index;
+                var methodDec = graph.MethodDatas[0].MethodDec;
+                var sameName = false;
+                do
+                {
+                    sameName = false;
+                    for(int i=0; i < methodDec.Arguments.Count; i++)
+                    {
+                        if (methodDec.Arguments[i].VariableName == name)
+                        {
+                            name += "1";
+                            sameName = true;
+                            break;
+                        }
+                    }
+                }
+                while (sameName);
+                var arg = value as UMethodArgumentDeclaration;
+                arg.VariableName = name;
+                arg.OperationVisible = false;
+                arg.OperationType = EMethodArgumentAttribute.Default;
+            }
+            public override void OnPreInsert(int index, object value, object objInstance)
+            {
+                var enumrableInterface = objInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if(enumrableInterface != null)
+                {
+                    foreach(var ins in (IEnumerable)objInstance)
+                    {
+                        var graph = ins as UMacrossMethodGraph;
+                        PreInsertOperation(index, value, graph);
+                    }
+                }
+                else
+                {
+                    var graph = objInstance as UMacrossMethodGraph;
+                    PreInsertOperation(index, value, graph);
+                }
+            }
+            void AfterInsertOperation(int index, object value, UMacrossMethodGraph graph)
+            {
+                var arg = value as UMethodArgumentDeclaration;
+                var methodDec = graph.MethodDatas[0].MethodDec;
+                if (index >= methodDec.Arguments.Count)
+                    methodDec.Arguments.Add(arg);
+                else
+                    methodDec.Arguments.Insert(index, arg);
+            }
+            public override void OnAfterInsert(int index, object value, object objInstance)
+            {
+                var enumrableInterface = objInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if(enumrableInterface != null)
+                {
+                    foreach(var ins in (IEnumerable)objInstance)
+                    {
+                        if (ins == null)
+                            continue;
+
+                        var graph = ins as UMacrossMethodGraph;
+                        AfterInsertOperation(index, value, graph);
+                    }
+                }
+                else
+                {
+                    var graph = objInstance as UMacrossMethodGraph;
+                    AfterInsertOperation(index, value, graph);
+                }
+            }
+            void AfterRemoveOperation(int index, UMacrossMethodGraph graph)
+            {
+                var methodDec = graph.MethodDatas[0].MethodDec;
+                methodDec.Arguments.RemoveAt(index);
+            }
+            public override void OnAfterRemoveAt(int index, object objInstance)
+            {
+                var enumrableInterface = objInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if(enumrableInterface != null)
+                {
+                    foreach(var ins in (IEnumerable)objInstance)
+                    {
+                        if (ins == null)
+                            continue;
+
+                        var graph = ins as UMacrossMethodGraph;
+                        AfterRemoveOperation(index, graph);
+                    }
+                }
+                else
+                {
+                    var graph = objInstance as UMacrossMethodGraph;
+                    AfterRemoveOperation(index, graph);
+                }
+            }
+
+            UMethodArgumentDeclaration mOldDec = new UMethodArgumentDeclaration();
+            void PreValueChanged(int index, UMacrossMethodGraph graph, UMethodArgumentDeclaration value)
+            {
+                mOldDec.VariableName = value.VariableName;
+            }
+            public override void OnPreValueChanged(int index, object value, object objInstance)
+            {
+                var enumrableInterface = objInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if (enumrableInterface != null)
+                {
+                    foreach (var ins in (IEnumerable)objInstance)
+                    {
+                        if (ins == null)
+                            continue;
+
+                        var graph = ins as UMacrossMethodGraph;
+                        PreValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                    }
+                }
+                else
+                {
+                    var graph = objInstance as UMacrossMethodGraph;
+                    PreValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                }
+            }
+            void AfterValueChanged(int index, UMacrossMethodGraph graph, UMethodArgumentDeclaration value)
+            {
+                if(value.VariableName != mOldDec.VariableName)
+                {
+                    for(int i=0; i<graph.MethodDatas[0].StartNode.Arguments.Count; i++)
+                    {
+                        var pin = graph.MethodDatas[0].StartNode.Arguments[i];
+                        if (pin.Name == mOldDec.VariableName)
+                        {
+                            pin.Name = value.VariableName;
+                            break;
+                        }
+                    }
+                }
+            }
+            public override void OnAfterValueChanged(int index, object value, object objInstance)
+            {
+                var enumrableInterface = objInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if (enumrableInterface != null)
+                {
+                    foreach (var ins in (IEnumerable)objInstance)
+                    {
+                        if (ins == null)
+                            continue;
+
+                        var graph = ins as UMacrossMethodGraph;
+                        AfterValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                    }
+                }
+                else
+                {
+                    var graph = objInstance as UMacrossMethodGraph;
+                    AfterValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                }
+            }
+        }
+
+        bool mOutputsDirty = true;
+        List<UMethodArgumentDeclaration> mOutputs = new List<UMethodArgumentDeclaration>();
+        [OutputsOperationCallback, Category("Params")]
+        public List<UMethodArgumentDeclaration> Outputs
+        {
+            get
+            {
+                if(mOutputsDirty)
+                {
+                    mOutputs.Clear();
+                    for (int i = 0; i < MethodDatas[0].MethodDec.Arguments.Count; i++)
+                    {
+                        var arg = MethodDatas[0].MethodDec.Arguments[i];
+                        switch (arg.OperationType)
+                        {
+                            case EMethodArgumentAttribute.Ref:
+                            case EMethodArgumentAttribute.Out:
+                                mOutputs.Add(arg);
+                                break;
+                        }
+                        arg.GetErrorStringAction = GetVariableErrorString;
+                    }
+                    mOutputsDirty = false;
+                }
+                return mOutputs;
+            }
+            set
+            {
+                mOutputs = value;
+                bool hasReturnNode = false;
+                for (int i = 0; i < Nodes.Count; i++)
+                {
+                    if (Nodes[i] is ReturnNode)
+                    {
+                        var retNode = Nodes[i] as ReturnNode;
+                        retNode.UpdateMethodDefine(MethodDatas[0].MethodDec);
+                        hasReturnNode = true;
+                    }
+                }
+                if(!hasReturnNode)
+                {
+                    var node = new ReturnNode();
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                    node.UpdateMethodDefine(MethodDatas[0].MethodDec);
+                    node.Position = MethodDatas[0].StartNode.Position + new Vector2(300, 0);
+
+                }
+            }
+        }
+        class OutputsOperationCallbackAttribute : PGListOperationCallbackAttribute
+        {
+            void PreInsertOperation(int index, object value, UMacrossMethodGraph graph)
+            {
+                var name = "OutValue" + index;
+                var methodDec = graph.MethodDatas[0].MethodDec;
+                var sameName = false;
+                do
+                {
+                    sameName = false;
+                    for (int i = 0; i < methodDec.Arguments.Count; i++)
+                    {
+                        if (methodDec.Arguments[i].VariableName == name)
+                        {
+                            name += "1";
+                            sameName = true;
+                            break;
+                        }
+                    }
+                }
+                while (sameName);
+                var arg = value as UMethodArgumentDeclaration;
+                arg.VariableName = name;
+                arg.OperationVisible = false;
+                arg.OperationType = EMethodArgumentAttribute.Out;
+            }
+            public override void OnPreInsert(int index, object value, object objInstance)
+            {
+                var enumrableInterface = objInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if (enumrableInterface != null)
+                {
+                    foreach (var ins in (IEnumerable)objInstance)
+                    {
+                        var graph = ins as UMacrossMethodGraph;
+                        PreInsertOperation(index, value, graph);
+                    }
+                }
+                else
+                {
+                    var graph = objInstance as UMacrossMethodGraph;
+                    PreInsertOperation(index, value, graph);
+                }
+            }
+            void AfterInsertOperation(int index, object value, UMacrossMethodGraph graph)
+            {
+                var arg = value as UMethodArgumentDeclaration;
+                var methodDec = graph.MethodDatas[0].MethodDec;
+                var realIdx = graph.Inputs.Count + index;
+                if (realIdx >= methodDec.Arguments.Count)
+                    methodDec.Arguments.Add(arg);
+                else
+                    methodDec.Arguments.Insert(realIdx, arg);
+            }
+            public override void OnAfterInsert(int index, object value, object objInstance)
+            {
+                var enumrableInterface = objInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if (enumrableInterface != null)
+                {
+                    foreach (var ins in (IEnumerable)objInstance)
+                    {
+                        if (ins == null)
+                            continue;
+
+                        var graph = ins as UMacrossMethodGraph;
+                        AfterInsertOperation(index, value, graph);
+                    }
+                }
+                else
+                {
+                    var graph = objInstance as UMacrossMethodGraph;
+                    AfterInsertOperation(index, value, graph);
+                }
+            }
+            void AfterRemoveOperation(int index, UMacrossMethodGraph graph)
+            {
+                var methodDec = graph.MethodDatas[0].MethodDec;
+                methodDec.Arguments.RemoveAt(index + graph.Inputs.Count);
+            }
+            public override void OnAfterRemoveAt(int index, object objInstance)
+            {
+                var enumrableInterface = objInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if (enumrableInterface != null)
+                {
+                    foreach (var ins in (IEnumerable)objInstance)
+                    {
+                        if (ins == null)
+                            continue;
+
+                        var graph = ins as UMacrossMethodGraph;
+                        AfterRemoveOperation(index, graph);
+                    }
+                }
+                else
+                {
+                    var graph = objInstance as UMacrossMethodGraph;
+                    AfterRemoveOperation(index, graph);
+                }
+            }
+            UMethodArgumentDeclaration mOldDec = new UMethodArgumentDeclaration();
+            void PreValueChanged(int index, UMacrossMethodGraph graph, UMethodArgumentDeclaration value)
+            {
+                mOldDec.VariableName = value.VariableName;
+            }
+            public override void OnPreValueChanged(int index, object value, object objInstance)
+            {
+                var enumrableInterface = objInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if (enumrableInterface != null)
+                {
+                    foreach (var ins in (IEnumerable)objInstance)
+                    {
+                        if (ins == null)
+                            continue;
+
+                        var graph = ins as UMacrossMethodGraph;
+                        PreValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                    }
+                }
+                else
+                {
+                    var graph = objInstance as UMacrossMethodGraph;
+                    PreValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                }
+            }
+            void AfterValueChanged(int index, UMacrossMethodGraph graph, UMethodArgumentDeclaration value)
+            {
+                if (value.VariableName != mOldDec.VariableName)
+                {
+                    for (int i = 0; i < graph.Nodes.Count; i++)
+                    {
+                        if (graph.Nodes[i] is ReturnNode)
+                        {
+                            var retNode = graph.Nodes[i] as ReturnNode;
+                            for (int argIdx = 0; argIdx < retNode.Arguments.Count; argIdx++)
+                            {
+                                var pin = retNode.Arguments[argIdx];
+                                if (pin.Name == mOldDec.VariableName)
+                                {
+                                    pin.Name = value.VariableName;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            public override void OnAfterValueChanged(int index, object value, object objInstance)
+            {
+                var enumrableInterface = objInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if (enumrableInterface != null)
+                {
+                    foreach (var ins in (IEnumerable)objInstance)
+                    {
+                        if (ins == null)
+                            continue;
+
+                        var graph = ins as UMacrossMethodGraph;
+                        AfterValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                    }
+                }
+                else
+                {
+                    var graph = objInstance as UMacrossMethodGraph;
+                    AfterValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                }
+            }
+        }
+
+        string GetVariableErrorString(in PGCustomValueEditorAttribute.EditorInfo info, UMethodArgumentDeclaration dec, object newValue)
+        {
+            var newName = (string)newValue;
+            for(int i=0; i<Inputs.Count; i++)
+            {
+                if ((Inputs[i].VariableName == newName) && (Inputs[i] != dec))
+                    return "Same name with input " + i;
+            }
+            for(int i=0; i<Outputs.Count; i++)
+            {
+                if ((Outputs[i].VariableName == newName) && (Outputs[i] != dec))
+                    return "Same name with output " + i;
+            }
+            return null;
+        }
         public static UMacrossMethodGraph NewGraph(UMacrossEditor kls, UMethodDeclaration method = null)
         {
             var result = new UMacrossMethodGraph();
@@ -304,6 +745,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var methodData = MethodData.CreateFromMethod(result, method);
                 result.MethodDatas.Add(methodData);
                 result.AddNode(methodData.StartNode);
+                result.GraphName = method.MethodName;
             }
             return result;
         }
@@ -352,7 +794,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     NodeGraph = this,
                     CurrentStatements = MethodDatas[i].MethodDec.MethodBody.Sequence,
                 };
-                MethodDatas[i].StartNode.BuildStatements(ref data);
+                MethodDatas[i].StartNode.BuildStatements(null, ref data);
             }
         }
         //[Rtti.Meta]
@@ -375,15 +817,76 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    }
         //}
         //private UMethodStartNode StartNode;
+        [Browsable(false)]
         public UMacrossEditor MacrossEditor
         {
             get;
             private set;
         }
+        [GraphName]
         public string Name
         {
             get => ToString();
+            set
+            {
+                if(MethodDatas.Count == 1)
+                {
+                    var methodDec = MethodDatas[0].MethodDec;
+                    if (!methodDec.IsOverride)
+                        methodDec.MethodName = value;
+                }
+                GraphName = value;
+            }
         }
+
+        class GraphNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        {
+            protected override async Task<bool> Initialize_Override()
+            {
+                return await base.Initialize_Override();
+            }
+            protected override void Cleanup_Override()
+            {
+                base.Cleanup_Override();
+            }
+            public override bool OnDraw(in EditorInfo info, out object newValue)
+            {
+                bool isReadonly = true;
+                var enumrableInterface = info.ObjectInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if(enumrableInterface != null)
+                {
+                    foreach(var objIns in (IEnumerable)info.ObjectInstance)
+                    {
+                        if (objIns == null)
+                            continue;
+
+                        var graph = objIns as UMacrossMethodGraph;
+                        if (graph != null && graph.MethodDatas.Count == 1)
+                        {
+                            if (!graph.MethodDatas[0].MethodDec.IsOverride)
+                            {
+                                isReadonly = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    var graph = info.ObjectInstance as UMacrossMethodGraph;
+                    if (graph != null && graph.MethodDatas.Count == 1)
+                    {
+                        if (!graph.MethodDatas[0].MethodDec.IsOverride)
+                            isReadonly = false;
+                    }
+                }
+                EditorInfo tempInfo = new EditorInfo();
+                info.CopyTo(ref tempInfo);
+                tempInfo.Readonly = isReadonly;
+                return StringEditor.OnDraw(this, in info, out newValue);
+            }
+        }
+
         public override string ToString()
         {
             if (MethodDatas.Count == 1)
@@ -394,6 +897,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //[Rtti.Meta]
         //public DefineFunction Function { get; set; }
         [Rtti.Meta]
+        [Browsable(false)]
         public List<MethodData> MethodDatas
         {
             get;
@@ -514,6 +1018,54 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //            });
             //    }
             //}
+        }
+
+        public override void UpdateNodeMenus()
+        {
+            base.UpdateNodeMenus();
+            int start = -1;
+            int i = 0;
+            for(i=0; i<NodeMenus.SubMenuItems.Count; i++)
+            {
+                var menu = NodeMenus.SubMenuItems[i];
+                if (start >= 0)
+                {
+                    if (menu.IsSeparator)
+                    {
+                        start = i;
+                        break;
+                    }
+                }
+                if(menu.Text == "ORGANIZATION" && menu.IsSeparator)
+                {
+                    start = i;
+                }
+            }
+            //var collapseToMethodAction = new Action<UMenuItem, object>((item, sender) =>
+            //{
+            //    var nodeList = new List<UNodeBase>(SelectedNodes.Count);
+            //    for (int i = 0; i < SelectedNodes.Count; i++)
+            //    {
+            //        nodeList.Add(SelectedNodes[i].Node);
+            //    }
+            //    CollapseNodes(nodeList);
+            //});
+            //if(start < 0 || i > NodeMenus.SubMenuItems.Count)
+            //{
+            //    NodeMenus.InsertMenuItem(start, "Collapse to Method", null, collapseToMethodAction)
+            //}
+        }
+
+        public override void CollapseNodes(List<UNodeBase> nodeList)
+        {
+            var node = IUnionNode.CreateUnionNode<UnionNode, UnionPinDefine, EndPointNode>(this, nodeList);
+            node.Name = "Collapse Node";
+            ((UMacrossMethodGraph)(node.ContentGraph)).MacrossEditor = MacrossEditor;
+            DeleteSelectedNodes();
+        }
+        public override UGraphRenderer GetGraphRenderer()
+        {
+            return GraphRenderer;
         }
 
         private void UpdateMenuWithClassMeta(Rtti.UClassMeta classMeta, UMenuItem menu)
@@ -1015,6 +1567,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return;
             if (MacrossEditor == null)
                 return;
+            SelectedNodesDirty = false;
             var list = new List<object>(SelectedNodes.Count);
             for(int i=0; i<SelectedNodes.Count; i++)
             {
@@ -1033,6 +1586,47 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return;
 
             node.UserData = klsGraph;
+        }
+
+        [Browsable(false)]
+        public bool IsPropertyVisibleDirty { get; set; } = false;
+        public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            var pros = TypeDescriptor.GetProperties(this);
+            var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            foreach (PropertyDescriptor prop in pros)
+            {
+                var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                proDesc.InitValue(this, thisType, prop, parentIsValueType);
+                if (!proDesc.IsBrowsable)
+                    continue;
+                switch (proDesc.Name)
+                {
+                    case "GraphName":
+                        break;
+                    case "Inputs":
+                    case "Outputs":
+                        {
+                            if (!MethodDatas[0].MethodDec.IsOverride)
+                                collection.Add(proDesc);
+                        }
+                        break;
+                    default:
+                        collection.Add(proDesc);
+                        break;
+                }
+            }
+            IsPropertyVisibleDirty = false;
+        }
+
+        public object GetPropertyValue(string propertyName)
+        {
+            return PropertyCustomizationHelper<UMacrossMethodGraph>.GetPropertyValue(this, propertyName);
+        }
+
+        public void SetPropertyValue(string propertyName, object value)
+        {
+            PropertyCustomizationHelper<UMacrossMethodGraph>.SetPropertyValue(this, propertyName, value);
         }
     }
 }

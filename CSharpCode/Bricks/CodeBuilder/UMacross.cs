@@ -1,4 +1,5 @@
-﻿using EngineNS.EGui.Controls;
+﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.EGui.Controls;
 using EngineNS.IO;
 using EngineNS.Rtti;
 using System;
@@ -66,6 +67,16 @@ namespace EngineNS.Bricks.CodeBuilder
             var address = RName.GetAddress(type, name);
             IO.FileManager.DeleteDirectory(address);
             IO.FileManager.DeleteFile(address + IAssetMeta.MetaExt);
+
+            if(UMacrossEditor.RemoveAssemblyDescCreateInstanceCode(name, type))
+            {
+                EngineNS.UEngine.Instance.MacrossManager.GenerateProjects();
+                var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameAssembly;
+                if (UEngine.Instance.MacrossModule.CompileCode(assemblyFile))
+                {
+                    UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
+                }
+            }
         }
         public override bool CanRefAssetType(IAssetMeta ameta)
         {

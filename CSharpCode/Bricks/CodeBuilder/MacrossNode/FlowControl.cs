@@ -95,16 +95,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var firstLinker = data.NodeGraph.GetFirstLinker(FirstPin);
             if (firstLinker != null)
-                firstLinker.InPin.HostNode.BuildStatements(ref data);
+                firstLinker.InPin.HostNode.BuildStatements(firstLinker.InPin, ref data);
             for(int i=0; i<Sequences.Count; i++)
             {
                 var linker = data.NodeGraph.GetFirstLinker(Sequences[i]);
                 if (linker != null)
-                    linker.InPin.HostNode.BuildStatements(ref data);
+                    linker.InPin.HostNode.BuildStatements(linker.InPin, ref data);
             }
         }
 
@@ -134,6 +134,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public void AddMenuItems(UMenuItem parentItem)
         {
+            parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
                 (UMenuItem item, object sender) =>
                 {
@@ -165,6 +166,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public void AddMenuItems(UMenuItem parentItem)
         {
+            parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
                 (UMenuItem item, object sender) =>
                 {
@@ -297,9 +299,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if(stayPin == ConditionResultPairs[i].Key)
                 {
-                    EGui.Controls.CtrlUtility.DrawHelper(GetRuntimeValueString(stayPin.Name + "_" + (uint)NodeId.GetHashCode()));
+                    EGui.Controls.CtrlUtility.DrawHelper("bool " + GetRuntimeValueString(stayPin.Name + "_" + (uint)NodeId.GetHashCode()));
                 }
             }
+        }
+
+        public override Rtti.UTypeDesc GetInPinType(PinIn pin)
+        {
+            for(int i=0; i< ConditionResultPairs.Count; i++)
+            {
+                if (pin == ConditionResultPairs[i].Key)
+                    return Rtti.UTypeDesc.TypeOf(typeof(bool));
+            }
+            return null;
         }
 
         //public override IExpression GetExpr(UMacrossMethodGraph funGraph, ICodeGen cGen, bool bTakeResult)
@@ -371,7 +383,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    ifOp.NextExpr = this.GetNextExpr(funGraph, cGen);
         //    return ifOp;
         //}
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var nodeId = (uint)NodeId.GetHashCode();
             var ifStatement = new UIfStatement();
@@ -382,6 +394,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     condition = data.NodeGraph.GetOppositePinExpression(ConditionResultPairs[i].Key, ref data);
                 else
                     condition = new UPrimitiveExpression(true);
+                var opPin = data.NodeGraph.GetOppositePin(ConditionResultPairs[i].Value);
                 var node = data.NodeGraph.GetOppositePinNode(ConditionResultPairs[i].Value);
                 var trueStatement = new UExecuteSequenceStatement();
                 if(node != null)
@@ -389,7 +402,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     var trueData = new BuildCodeStatementsData();
                     data.CopyTo(ref trueData);
                     trueData.CurrentStatements = trueStatement.Sequence;
-                    node.BuildStatements(ref trueData);
+                    node.BuildStatements(opPin, ref trueData);
                 }
                 if(i == 0)
                 {
@@ -419,18 +432,20 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             data.CurrentStatements.Add(ifStatement);
             var falseStatement = new UExecuteSequenceStatement();
             ifStatement.FalseStatement = falseStatement;
+            var falseOpPin = data.NodeGraph.GetOppositePin(FalsePin);
             var falseNode = data.NodeGraph.GetOppositePinNode(FalsePin);
             if(falseNode != null)
             {
                 var falseData = new BuildCodeStatementsData();
                 data.CopyTo(ref falseData);
                 falseData.CurrentStatements = falseStatement.Sequence;
-                falseNode.BuildStatements(ref falseData);
+                falseNode.BuildStatements(falseOpPin, ref falseData);
             }
 
+            var nextOpPin = data.NodeGraph.GetOppositePin(AfterExec);
             var nextNode = data.NodeGraph.GetOppositePinNode(AfterExec);
             if (nextNode != null)
-                nextNode.BuildStatements(ref data);
+                nextNode.BuildStatements(nextOpPin, ref data);
         }
 
         public void LightDebuggerLine()
@@ -475,6 +490,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public void AddMenuItems(UMenuItem parentItem)
         {
+            parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
                 (UMenuItem item, object sender) =>
                 {
@@ -509,30 +525,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             if (methodGraph.MethodDatas.Count != 1)
                 return;
-
             // 图中只有一个函数时才能有返回值
             var data = methodGraph.MethodDatas[0];
-            if(data.MethodDec.ReturnValue != null)
-            {
-                var retPin = AddPinIn(new PinIn()
-                {
-                    Name = data.MethodDec.ReturnValue.VariableName,
-                    Tag = data.MethodDec.ReturnValue.VariableType,
-                });
-            }
-            for(int i=0; i<data.MethodDec.Arguments.Count; i++)
-            {
-                var argDec = data.MethodDec.Arguments[i];
-                if(argDec.OperationType == EMethodArgumentAttribute.Ref ||
-                   argDec.OperationType == EMethodArgumentAttribute.Out)
-                {
-                    var pin = AddPinIn(new PinIn()
-                    {
-                        Name = argDec.VariableName,
-                        Tag = argDec.VariableType,
-                    });
-                }
-            }
+            UpdateMethodDefine(data.MethodDec);
             //ReturnType = methodGraph.Function.ReturnType;
             //var retType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(methodGraph.Function.ReturnType);
             //if (retType != null)
@@ -552,6 +547,85 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //ReturnValuePin.Link.CanLinks.Add("Value");
 
             //AddPinIn(ReturnValuePin);
+        }
+        public List<PinIn> Arguments = new List<PinIn>();
+        List<PinIn> mTemplateArguments = new List<PinIn>();
+        public void UpdateMethodDefine(UMethodDeclaration methodDec)
+        {
+            mTemplateArguments.Clear();
+            if (methodDec.ReturnValue != null)
+            {
+                PinIn retPin = null;
+                if(Arguments.Count > 0)
+                {
+                    var defType = Arguments[0].Tag as UTypeReference;
+                    if(Inputs[0].Name == methodDec.ReturnValue.VariableName &&
+                       defType == methodDec.ReturnValue.VariableType)
+                    {
+                        retPin = Arguments[0];
+                        Arguments.Remove(retPin);
+                        Inputs.Remove(retPin);
+                    }
+                }
+                if(retPin == null)
+                {
+                    retPin = new PinIn()
+                    {
+                        Name = methodDec.ReturnValue.VariableName,
+                        Tag = methodDec.ReturnValue.VariableType,
+                    };
+                }
+                mTemplateArguments.Add(retPin);
+            }
+
+            for (int i = 0; i < methodDec.Arguments.Count; i++)
+            {
+                var argDec = methodDec.Arguments[i];
+                if (argDec.OperationType == EMethodArgumentAttribute.Ref ||
+                   argDec.OperationType == EMethodArgumentAttribute.Out)
+                {
+                    PinIn argPin = null;
+                    for(int argIdx= Arguments.Count - 1; argIdx >= 0; argIdx--)
+                    {
+                        var defType = Arguments[argIdx].Tag as UTypeReference;
+                        if(Arguments[argIdx].Name == argDec.VariableName && defType == argDec.VariableType)
+                        {
+                            argPin = Arguments[argIdx];
+                            Arguments.RemoveAt(argIdx);
+                            Inputs.Remove(argPin);
+                            break;
+                        }
+                    }
+                    if(argPin == null)
+                    {
+                        argPin = new PinIn()
+                        {
+                            Name = argDec.VariableName,
+                            Tag = argDec.VariableType,
+                        };
+                    }
+                    mTemplateArguments.Add(argPin);
+                }
+            }
+
+            var methodGraph = ParentGraph as UMacrossMethodGraph;
+            if(methodGraph != null)
+            {
+                foreach (var i in Arguments)
+                {
+                    methodGraph.RemoveLinkedIn(i);
+                    RemovePinIn(i);
+                }
+                Arguments.Clear();
+            }
+
+            for(int i=0; i<mTemplateArguments.Count; i++)
+            {
+                Arguments.Add(mTemplateArguments[i]);
+                AddPinIn(mTemplateArguments[i]);
+            }
+
+            OnPositionChanged();
         }
         public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
@@ -616,7 +690,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //return false;
             return true;
         }
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             for(int i=0; i<Inputs.Count; i++)
             {
@@ -624,6 +698,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     continue;
 
                 var exp = data.NodeGraph.GetOppositePinExpression(Inputs[i], ref data);
+                if(exp == null)
+                {
+                    var typeRef = Inputs[i].Tag as UTypeReference;
+                    if(typeRef != null)
+                        exp = new UDefaultValueExpression(typeRef);
+                }
                 var st = new UAssignOperatorStatement()
                 {
                     From = exp,
@@ -702,6 +782,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     node.UnLightDebuggerLine();
             }
         }
+        public override object GetPropertyEditObject()
+        {
+            return ParentGraph;
+        }
     }
     [ContextMenu("forloop", "FlowControl\\For", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class ForLoopNode : UNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
@@ -744,6 +828,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public void AddMenuItems(UMenuItem parentItem)
         {
+            parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
                 (UMenuItem item, object sender) =>
                 {
@@ -798,7 +883,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 EGui.Controls.CtrlUtility.DrawHelper(GetRuntimeValueString(mLoopIdxName + "_" + nodeId));
         }
 
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var nodeId = (uint)NodeId.GetHashCode();
             var forStatement = new UForLoopStatement()
@@ -843,6 +928,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             AddDebugBreakerStatement(BreakerName, ref data);
             data.CurrentStatements.Add(forStatement);
+            var bodyNodePin = data.NodeGraph.GetOppositePin(LoopBodyPin);
             var bodyNode = data.NodeGraph.GetOppositePinNode(LoopBodyPin);
             if(bodyNode != null)
             {
@@ -857,12 +943,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var loopData = new BuildCodeStatementsData();
                 data.CopyTo(ref loopData);
                 loopData.CurrentStatements = bodyStatements.Sequence;
-                bodyNode.BuildStatements(ref loopData);
+                bodyNode.BuildStatements(bodyNodePin, ref loopData);
             }
 
+            var nextNodePin = data.NodeGraph.GetOppositePin(AfterExec);
             var nextNode = data.NodeGraph.GetOppositePinNode(AfterExec);
             if (nextNode != null)
-                nextNode.BuildStatements(ref data);
+                nextNode.BuildStatements(nextNodePin, ref data);
         }
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
@@ -917,6 +1004,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public void AddMenuItems(UMenuItem parentItem)
         {
+            parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
                 (UMenuItem item, object sender) =>
                 {
@@ -948,7 +1036,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             LoopBodyPin.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
         }
 
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var whileStatement = new UWhileLoopStatement();
             if (data.NodeGraph.PinHasLinker(ConditionPin))
@@ -964,6 +1052,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             });
             AddDebugBreakerStatement(BreakerName, ref data);
             data.CurrentStatements.Add(whileStatement);
+            var bodyNodePin = data.NodeGraph.GetOppositePin(LoopBodyPin);
             var bodyNode = data.NodeGraph.GetOppositePinNode(LoopBodyPin);
             if(bodyNode != null)
             {
@@ -972,12 +1061,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var loopData = new BuildCodeStatementsData();
                 data.CopyTo(ref loopData);
                 loopData.CurrentStatements = bodyStatement.Sequence;
-                bodyNode.BuildStatements(ref loopData);
+                bodyNode.BuildStatements(bodyNodePin, ref loopData);
             }
 
+            var nextNodePin = data.NodeGraph.GetOppositePin(AfterExec);
             var nextNode = data.NodeGraph.GetOppositePinNode(AfterExec);
             if (nextNode != null)
-                nextNode.BuildStatements(ref data);
+                nextNode.BuildStatements(nextNodePin, ref data);
         }
 
         public override void OnMouseStayPin(NodePin stayPin)
@@ -1030,6 +1120,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public void AddMenuItems(UMenuItem parentItem)
         {
+            parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
                 (UMenuItem item, object sender) =>
                 {
@@ -1048,7 +1139,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
         }
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             AddDebugBreakerStatement(BreakerName, ref data);
             data.CurrentStatements.Add(new UContinueStatement());
@@ -1101,6 +1192,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public void AddMenuItems(UMenuItem parentItem)
         {
+            parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
                 (UMenuItem item, object sender) =>
                 {
@@ -1119,7 +1211,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
         }
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             data.CurrentStatements.Add(new UBreakStatement());
         }

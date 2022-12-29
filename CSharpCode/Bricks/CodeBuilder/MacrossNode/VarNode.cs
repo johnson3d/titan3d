@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.EGui.Controls.PropertyGrid;
@@ -235,7 +236,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set => mIsGet = value;
         }
 
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (IsGet)
                 return;
@@ -263,9 +264,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             };
             data.CurrentStatements.Add(assignSt);
 
+            var oppoNodePin = data.NodeGraph.GetOppositePin(AfterExec);
             var oppoNode = data.NodeGraph.GetOppositePinNode(AfterExec);
             if (oppoNode != null)
-                oppoNode.BuildStatements(ref data);
+                oppoNode.BuildStatements(oppoNodePin, ref data);
         }
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
@@ -297,6 +299,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
+        [Browsable(false)]
+        public bool IsPropertyVisibleDirty { get; set; } = false;
         public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             if (IsGet)
@@ -527,7 +531,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return hostExp;
         }
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (IsGet)
                 return;
@@ -560,9 +564,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             };
             data.CurrentStatements.Add(assignSt);
 
+            var oppoNodePin = data.NodeGraph.GetOppositePin(AfterExec);
             var oppoNode = data.NodeGraph.GetOppositePinNode(AfterExec);
             if (oppoNode != null)
-                oppoNode.BuildStatements(ref data);
+                oppoNode.BuildStatements(oppoNodePin, ref data);
         }
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
@@ -591,6 +596,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return ClassProperty.FieldType;
         }
 
+        [Browsable(false)]
+        public bool IsPropertyVisibleDirty { get; set; } = false;
         public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             if (IsGet)
@@ -877,7 +884,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return hostExp;
         }
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (IsGet)
                 return;
@@ -910,9 +917,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             };
             data.CurrentStatements.Add(assignSt);
 
+            var oppoNodePin = data.NodeGraph.GetOppositePin(AfterExec);
             var oppoNode = data.NodeGraph.GetOppositePinNode(AfterExec);
             if (oppoNode != null)
-                oppoNode.BuildStatements(ref data);
+                oppoNode.BuildStatements(oppoNodePin, ref data);
         }
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
@@ -941,6 +949,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return Rtti.UTypeDesc.TypeOf(ClassField.Field.FieldType);
         }
 
+        [Browsable(false)]
+        public bool IsPropertyVisibleDirty { get; set; } = false;
         public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             if (IsGet)

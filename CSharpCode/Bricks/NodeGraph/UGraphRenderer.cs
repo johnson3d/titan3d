@@ -191,9 +191,6 @@ namespace EngineNS.Bricks.NodeGraph
             ImGuiAPI.EndChild();
         }
 
-        static List<UNodeBase> mCopyedNodes = new List<UNodeBase>();
-        static Dictionary<NodePin, NodePin> mCopyedPins = new Dictionary<NodePin, NodePin>();
-        static Dictionary<NodePin, NodePin> mCopyedLinkers = new Dictionary<NodePin, NodePin>();
         void ProcessKeyboard(in Vector2 screenPt)
         {
             if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_RootWindow) == false)
@@ -216,78 +213,11 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 if (UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_c))
                 {
-                    mCopyedNodes.Clear();
-                    mCopyedLinkers.Clear();
-                    for (int i=0; i<mGraph.SelectedNodes.Count; i++)
-                    {
-                        mCopyedNodes.Add(mGraph.SelectedNodes[i].Node);
-                    }
-                    for(int i=0; i<mGraph.Linkers.Count; i++)
-                    {
-                        if(mCopyedNodes.Contains(mGraph.Linkers[i].InNode) &&
-                           mCopyedNodes.Contains(mGraph.Linkers[i].OutNode))
-                        {
-                            mCopyedLinkers[mGraph.Linkers[i].OutPin] = mGraph.Linkers[i].InPin;
-                        }
-                    }
+                    mGraph.Copy();
                 }
-                if(UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_v) && mCopyedNodes.Count > 0)
+                if(UEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_v))
                 {
-                    mGraph.ClearSelected();
-                    mCopyedPins.Clear();
-                    var min = mCopyedNodes[0].Position;
-                    var max = mCopyedNodes[0].Size + min;
-                    for(int i=0; i<mCopyedNodes.Count; i++)
-                    {
-                        var node = mCopyedNodes[i];
-                        var nodeMin = node.Position;
-                        var nodeMax = nodeMin + node.Size;
-                        if (min.X > nodeMin.X)
-                            min.X = nodeMin.X;
-                        if (min.Y > nodeMin.Y)
-                            min.Y = nodeMin.Y;
-                        if (max.X < nodeMax.X)
-                            max.X = nodeMax.X;
-                        if (max.Y < nodeMax.Y)
-                            max.Y = nodeMax.Y;
-
-                        var copyedNode = Rtti.UTypeDescManager.CreateInstance(node.GetType()) as UNodeBase;
-                        var id = copyedNode.NodeId;
-                        node.CopyTo(copyedNode);
-                        copyedNode.NodeId = id;
-                        copyedNode.UserData = mGraph;
-                        mGraph.SetDefaultActionForNode(copyedNode);
-                        mGraph.AddNode(copyedNode);
-                        mGraph.AddSelected(copyedNode);
-
-                        for(int pinIdx=0; pinIdx<node.Inputs.Count; pinIdx++)
-                        {
-                            var srcPin = node.Inputs[pinIdx];
-                            var tagPin = copyedNode.Inputs[pinIdx];
-                            mCopyedPins[srcPin] = tagPin;
-                        }
-                        for(int pinIdx = 0; pinIdx < node.Outputs.Count; pinIdx++)
-                        {
-                            var srcPin = node.Outputs[pinIdx];
-                            var tagPin = copyedNode.Outputs[pinIdx];
-                            mCopyedPins[srcPin] = tagPin;
-                        }
-                    }
-
-                    var center = (min + max) * 0.5f;
-                    var newCenter = mGraph.ViewportRateToCanvas(screenPt);
-                    for(int i=0; i<mGraph.SelectedNodes.Count; i++)
-                    {
-                        var node = mGraph.SelectedNodes[i].Node;
-                        node.Position += newCenter - center;
-                    }
-
-                    foreach(var linker in mCopyedLinkers)
-                    {
-                        var outPin = mCopyedPins[linker.Key] as PinOut;
-                        var inPin = mCopyedPins[linker.Value] as PinIn;
-                        mGraph.AddLink(outPin, inPin, true);
-                    }
+                    mGraph.Paste(screenPt);
                 }
             }
         }
@@ -814,9 +744,10 @@ namespace EngineNS.Bricks.NodeGraph
                                         mGraph.UpdateCanvasMenus();
                                         mGraph.CanvasMenuDirty = false;
                                     }
+                                    var cmdList = ImGuiAPI.GetWindowDrawList();
                                     mCurrentQuickMenuIdx = 0;
                                     for(var childIdx = 0; childIdx < mGraph.CanvasMenus.SubMenuItems.Count; childIdx++)
-                                        DrawMenu(mGraph.CanvasMenus.SubMenuItems[childIdx], CanvasMenuFilterStr.ToLower());
+                                        DrawMenu(mGraph.CanvasMenus.SubMenuItems[childIdx], CanvasMenuFilterStr.ToLower(), cmdList);
                                 }
                                 ImGuiAPI.EndChild();
                             }
@@ -843,8 +774,9 @@ namespace EngineNS.Bricks.NodeGraph
                                 }
                                 mGraph.NodeMenuDirty = false;
                             }
+                            var cmdList = ImGuiAPI.GetWindowDrawList();
                             for (var childIdx = 0; childIdx < mGraph.NodeMenus.SubMenuItems.Count; childIdx++)
-                                DrawMenu(mGraph.NodeMenus.SubMenuItems[childIdx], "".ToLower());
+                                DrawMenu(mGraph.NodeMenus.SubMenuItems[childIdx], "".ToLower(), cmdList, eMenuStyle.Menu);
                         }
                         break;
                     case UNodeGraph.EGraphMenu.Pin:
@@ -859,13 +791,14 @@ namespace EngineNS.Bricks.NodeGraph
                                 var size = ImGuiAPI.GetWindowSize();
                                 mMouseInvalidAreas[0] = new Rect(pos.X, pos.Y, size.X, size.Y);
 
-                               if (mGraph.PinMenuDirty)
+                                if (mGraph.PinMenuDirty)
                                 {
                                     mGraph.UpdatePinMenus();
                                     mGraph.PinMenuDirty = false;
                                 }
+                                var cmdList = ImGuiAPI.GetWindowDrawList();
                                 for (var childIdx = 0; childIdx < mGraph.PinMenus.SubMenuItems.Count; childIdx++)
-                                    DrawMenu(mGraph.PinMenus.SubMenuItems[childIdx], "".ToLower());
+                                    DrawMenu(mGraph.PinMenus.SubMenuItems[childIdx], "".ToLower(), cmdList, eMenuStyle.Menu);
                                 var pressPin = mGraph.PopMenuPressObject as NodePin;
                                 if (pressPin != null)
                                 {
@@ -901,9 +834,10 @@ namespace EngineNS.Bricks.NodeGraph
                                     mGraph.ObjectMenus.SetIsExpanded(false, true);
                                 }
 
+                                var cmdList = ImGuiAPI.GetWindowDrawList();
                                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref CanvasMenuFilterStr, width);
                                 for (var childIdx = 0; childIdx < mGraph.ObjectMenus.SubMenuItems.Count; childIdx++)
-                                    DrawMenu(mGraph.ObjectMenus.SubMenuItems[childIdx], CanvasMenuFilterStr.ToLower());
+                                    DrawMenu(mGraph.ObjectMenus.SubMenuItems[childIdx], CanvasMenuFilterStr.ToLower(), cmdList);
                             }
                         }
                         break;
@@ -935,7 +869,12 @@ namespace EngineNS.Bricks.NodeGraph
         }
         int mSelectQuickMenuIdx = 0;
         int mCurrentQuickMenuIdx = 0;
-        public void DrawMenu(UMenuItem item, string filter)
+        enum eMenuStyle
+        {
+            TreeList,
+            Menu,
+        }
+        void DrawMenu(UMenuItem item, string filter, ImDrawList cmdList, eMenuStyle style = eMenuStyle.TreeList)
         {
             if (!item.FilterCheck(filter))
                 return;
@@ -945,10 +884,18 @@ namespace EngineNS.Bricks.NodeGraph
                 item.OnMenuDraw(item, this);
                 return;
             }
-            
+            if(item.BeforeMenuDraw != null)
+            {
+                if (item.BeforeMenuDraw(item, this) == false)
+                    return;
+            }
             if (item.SubMenuItems.Count == 0)
             {
-                if(!string.IsNullOrEmpty(item.Text))
+                if (item.IsSeparator)
+                {
+                    EGui.UIProxy.NamedMenuSeparator.OnDraw(item.Text, cmdList, EGui.UIProxy.StyleConfig.Instance.NamedMenuSeparatorThickness);
+                }
+                else if (!string.IsNullOrEmpty(item.Text))
                 {
                     var flag = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen;
                     if (mSelectQuickMenuIdx == mCurrentQuickMenuIdx && !string.IsNullOrEmpty(filter))
@@ -965,8 +912,18 @@ namespace EngineNS.Bricks.NodeGraph
                             }
                         }
                     }
-                    ImGuiAPI.TreeNodeEx(item.Text, flag);
-                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    bool clicked = false;
+                    switch(style)
+                    {
+                        case eMenuStyle.TreeList:
+                            ImGuiAPI.TreeNodeEx(item.Text, flag);
+                            clicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+                            break;
+                        case eMenuStyle.Menu:
+                            clicked = EGui.UIProxy.MenuItemProxy.MenuItem(item.Text, "", false, null, cmdList, Support.UAnyPointer.Default, ref item.MenuState);
+                            break;
+                    }
+                    if (clicked)
                     {
                         if (item.Action != null)
                         {
@@ -982,19 +939,35 @@ namespace EngineNS.Bricks.NodeGraph
             else
             {
                 if (!string.IsNullOrEmpty(filter))
-                    item.IsExpanded = true;
-                ImGuiAPI.SetNextItemOpen(item.IsExpanded, ImGuiCond_.ImGuiCond_None);
-                if (ImGuiAPI.TreeNode(item.Text))
+                    item.MenuState.Opened = true;
+                switch(style)
                 {
-                    item.IsExpanded = true;
-                    for (int menuIdx = 0; menuIdx < item.SubMenuItems.Count; menuIdx++)
-                    {
-                        DrawMenu(item.SubMenuItems[menuIdx], filter);
-                    }
-                    ImGuiAPI.TreePop();
+                    case eMenuStyle.TreeList:
+                        ImGuiAPI.SetNextItemOpen(item.MenuState.Opened, ImGuiCond_.ImGuiCond_None);
+                        if (ImGuiAPI.TreeNode(item.Text))
+                        {
+                            item.MenuState.Opened = true;
+                            for (int menuIdx = 0; menuIdx < item.SubMenuItems.Count; menuIdx++)
+                            {
+                                DrawMenu(item.SubMenuItems[menuIdx], filter, cmdList, style);
+                            }
+                            ImGuiAPI.TreePop();
+                        }
+                        else
+                            item.MenuState.Opened = false;
+                        break;
+                    case eMenuStyle.Menu:
+                        if(EGui.UIProxy.MenuItemProxy.BeginMenuItem(item.Text, "", null, cmdList, Support.UAnyPointer.Default, ref item.MenuState))
+                        {
+                            for (int menuIdx = 0; menuIdx < item.SubMenuItems.Count; menuIdx++)
+                            {
+                                DrawMenu(item.SubMenuItems[menuIdx], filter, cmdList, style);
+                            }
+                            EGui.UIProxy.MenuItemProxy.EndMenuItem();
+                        }
+                        break;
                 }
-                else
-                    item.IsExpanded = false;
+
             }
         }
     }

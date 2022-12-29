@@ -494,6 +494,8 @@ namespace EngineNS.Bricks.Procedure
         #endregion
 
         #region PG
+        [Browsable(false)]
+        public bool IsPropertyVisibleDirty { get; set; } = false;
         public void GetProperties(ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());

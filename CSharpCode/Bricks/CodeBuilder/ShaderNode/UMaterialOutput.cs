@@ -207,7 +207,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public UMethodDeclaration PSFunction { get; } = new UMethodDeclaration();
         public UMethodDeclaration VSFunction { get; } = new UMethodDeclaration();
         public List<UVariableDeclaration> UniformVars { get; } = new List<UVariableDeclaration>();
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var graph = data.NodeGraph as UMaterialGraph;
             PSFunction.MethodName = "DO_PS_MATERIAL_IMPL";
@@ -234,8 +234,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             if (Albedo.HasLinker())
             {
                 var linker = graph.FindInLinkerSingle(Albedo);
+                var opPin = graph.GetOppositePin(Albedo);
                 var pinNode = graph.GetOppositePinNode(Albedo);
-                pinNode.BuildStatements(ref data);
+                pinNode.BuildStatements(opPin, ref data);
                 var exp = graph.GetOppositePinExpression(Albedo, ref data);
                 var assign = new UAssignOperatorStatement()
                 {
@@ -247,8 +248,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             if(Emissive.HasLinker())
             {
                 var linker = graph.FindInLinkerSingle(Emissive);
+                var opPin = graph.GetOppositePin(Emissive);
                 var pinNode = graph.GetOppositePinNode(Emissive);
-                pinNode.BuildStatements(ref data);
+                pinNode.BuildStatements(opPin, ref data);
                 var exp = graph.GetOppositePinExpression(Emissive, ref data);
                 var assign = new UAssignOperatorStatement()
                 {
@@ -261,7 +263,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var linker = graph.FindInLinkerSingle(Normal);
                 var pinNode = graph.GetOppositePinNode(Normal);
-                pinNode.BuildStatements(ref data);
+                var opPin = graph.GetOppositePin(Normal);
+                pinNode.BuildStatements(opPin, ref data);
                 var exp = graph.GetOppositePinExpression(Normal, ref data);
                 var assign = new UAssignOperatorStatement()
                 {
@@ -274,7 +277,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var linker = graph.FindInLinkerSingle(Metallic);
                 var pinNode = graph.GetOppositePinNode(Metallic);
-                pinNode.BuildStatements(ref data);
+                var opPin = graph.GetOppositePin(Metallic);
+                pinNode.BuildStatements(opPin, ref data);
                 var exp = graph.GetOppositePinExpression(Metallic, ref data);
                 var assign = new UAssignOperatorStatement()
                 {
@@ -287,7 +291,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var linker = graph.FindInLinkerSingle(Rough);
                 var pinNode = graph.GetOppositePinNode(Rough);
-                pinNode.BuildStatements(ref data);
+                var opPin = graph.GetOppositePin(Rough);
+                pinNode.BuildStatements(opPin, ref data);
                 var exp = graph.GetOppositePinExpression(Rough, ref data);
                 var assign = new UAssignOperatorStatement()
                 {
@@ -300,7 +305,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var linker = graph.FindInLinkerSingle(Alpha);
                 var pinNode = graph.GetOppositePinNode(Alpha);
-                pinNode.BuildStatements(ref data);
+                var opPin = graph.GetOppositePin(Alpha);
+                pinNode.BuildStatements(opPin, ref data);
                 var exp = graph.GetOppositePinExpression(Alpha, ref data);
                 var assign = new UAssignOperatorStatement()
                 {
@@ -313,7 +319,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 var linker = graph.FindInLinkerSingle(AlphaTest);
                 var pinNode = graph.GetOppositePinNode(AlphaTest);
-                pinNode.BuildStatements(ref data);
+                var opPin = graph.GetOppositePin(AlphaTest);
+                pinNode.BuildStatements(opPin, ref data);
                 var exp = graph.GetOppositePinExpression(AlphaTest, ref data);
                 var assign = new UAssignOperatorStatement()
                 {
@@ -345,8 +352,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             data.MethodDec = VSFunction;
             if (VertexOffset.HasLinker())
             {
+                var opPin = graph.GetOppositePin(VertexOffset);
                 var pinNode = graph.GetOppositePinNode(VertexOffset);
-                pinNode.BuildStatements(ref data);
+                pinNode.BuildStatements(opPin, ref data);
                 var exp = graph.GetOppositePinExpression(VertexOffset, ref data);
                 var assign = new UAssignOperatorStatement()
                 {

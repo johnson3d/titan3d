@@ -4,7 +4,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
-    public class UNodePinDefine : IO.BaseSerializer
+    public class UNodePinDefine : NodeGraph.UNodePinDefineBase
     {
         [Rtti.Meta]
         public string Name { get; set; } = "UserPin";
@@ -12,6 +12,14 @@ namespace EngineNS.Bricks.Procedure.Node
         public string TypeValue { get; set; } = "Value";
         [Rtti.Meta]
         public UBufferCreator BufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<float, FFloatOperator>>(-1, - 1, -1);
+
+        protected override void InitFromPin<T>(T pin)
+        {
+            Name = pin.Name;
+            UBufferCreator.CopyTo(pin.Tag as UBufferCreator, BufferCreator);
+            if (pin.LinkDesc.CanLinks.Count > 0)
+                TypeValue = pin.LinkDesc.CanLinks[0];
+        }
     }
     [Macross.UMacross]
     public partial class UProgram

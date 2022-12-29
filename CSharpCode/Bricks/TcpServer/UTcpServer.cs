@@ -100,9 +100,13 @@ namespace EngineNS.Bricks.TcpServer
                 mTcpConnects.Clear();
             }
         }
+        public delegate void FOnConnectAction(string action, UTcpConnect conn);
+        public FOnConnectAction OnConnectAction = null;
         protected virtual UTcpConnect CreateTcpConnect(EngineNS.TcpConnect conn)
         {
-            var result = new UTcpConnect(conn);            
+            var result = new UTcpConnect(conn);
+            if (OnConnectAction != null)
+                OnConnectAction("OnCreate", result);
             return result;
         }
         protected virtual void OnConnectAccept(UTcpConnect connect)
@@ -110,6 +114,8 @@ namespace EngineNS.Bricks.TcpServer
             lock (mTcpConnects)
             {
                 mTcpConnects[connect.mCoreObject.mConnId] = connect;
+                if (OnConnectAction != null)
+                    OnConnectAction("OnAccept", connect);
             }
         }
         protected virtual void OnConnectClosed(UTcpConnect connect)
@@ -117,6 +123,8 @@ namespace EngineNS.Bricks.TcpServer
             lock (mTcpConnects)
             {
                 mTcpConnects.Remove(connect.mCoreObject.mConnId);
+                if (OnConnectAction != null)
+                    OnConnectAction("OnClosed", connect);
             }
         }
         public void Tick()

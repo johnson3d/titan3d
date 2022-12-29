@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)RPC\UNetworkPackage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RPC\URpcAwaiter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RPC\URpcClass.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UNetPackageManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UTcpClient.cs" />
   </ItemGroup>
   <ItemGroup>

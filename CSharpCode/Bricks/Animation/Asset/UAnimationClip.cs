@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using EngineNS.Animation.Notify;
 
 namespace EngineNS.Animation.Asset
 {
@@ -44,6 +45,8 @@ namespace EngineNS.Animation.Asset
         public float SampleRate { get; set; } = 1.0f;
         [Rtti.Meta]
         public float Duration { get; set; } = 0.0f;
+        [Rtti.Meta]
+        public List<IAnimNotify> Notifies { get; set; } = new List<IAnimNotify>();
         public IAssetMeta CreateAMeta()
         {
             var result = new UAnimationClipAMeta();

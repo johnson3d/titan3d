@@ -17,5 +17,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)UNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UNodeGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UNodeGraphStyles.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UUnionNode.cs" />
   </ItemGroup>
 </Project>

@@ -26,6 +26,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\MacrossStyles.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\MethodNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\Monocular.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\UnionNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossNode\VarNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Control\CallNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Control\HLSLMethod.cs" />

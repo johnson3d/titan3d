@@ -1,4 +1,5 @@
-﻿using EngineNS.Graphics.Pipeline.Shader;
+﻿using EngineNS.Bricks.NodeGraph;
+using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -402,7 +403,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             return base.GetNoneLinkedParameterExp(pin, argIdx, ref data);
         }
-        public override void BuildStatements(ref NodeGraph.BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref NodeGraph.BuildCodeStatementsData data)
         {
             var material = data.UserData as UMaterial;
             var texturePinIn = FindPinIn("texture");
@@ -428,7 +429,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     material.UsedSamplerStates.Add(tmp);
                 }
             }
-            base.BuildStatements(ref data);
+            base.BuildStatements(pin, ref data);
         }
     }
 
@@ -572,7 +573,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             return base.GetNoneLinkedParameterExp(pin, argIdx, ref data);
         }
-        public override void BuildStatements(ref NodeGraph.BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref NodeGraph.BuildCodeStatementsData data)
         {
             var material = data.UserData as UMaterial;
             var texturePinIn = FindPinIn("texture");
@@ -598,7 +599,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     material.UsedSamplerStates.Add(tmp);
                 }
             }
-            base.BuildStatements(ref data);
+            base.BuildStatements(pin, ref data);
         }
     }
 
@@ -742,7 +743,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             return base.GetNoneLinkedParameterExp(pin, argIdx, ref data);
         }
-        public override void BuildStatements(ref NodeGraph.BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref NodeGraph.BuildCodeStatementsData data)
         {
             var material = data.UserData as UMaterial;
             var texturePinIn = FindPinIn("texture");
@@ -768,7 +769,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     material.UsedSamplerStates.Add(tmp);
                 }
             }
-            base.BuildStatements(ref data);
+            base.BuildStatements(pin, ref data);
         }
     }
 
@@ -912,7 +913,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             return base.GetNoneLinkedParameterExp(pin, argIdx, ref data);
         }
-        public override void BuildStatements(ref NodeGraph.BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref NodeGraph.BuildCodeStatementsData data)
         {
             var material = data.UserData as UMaterial;
             var texturePinIn = FindPinIn("texture");
@@ -938,7 +939,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     material.UsedSamplerStates.Add(tmp);
                 }
             }
-            base.BuildStatements(ref data);
+            base.BuildStatements(pin, ref data);
         }
     }
 }

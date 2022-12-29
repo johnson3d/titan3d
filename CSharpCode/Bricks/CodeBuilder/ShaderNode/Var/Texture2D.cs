@@ -85,7 +85,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         //    return Var;
         //}
 
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var material = data.UserData as UMaterial;
             if(material.FindSRV(this.Name) == null)

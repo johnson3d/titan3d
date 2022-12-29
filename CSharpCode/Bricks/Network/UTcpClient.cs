@@ -15,13 +15,21 @@ namespace EngineNS.Bricks.Network
         {
             mRcvBuffer.Dispose();
         }
+        public RPC.EAuthority Authority { get; set; } = RPC.EAuthority.Client;
         public bool Connected { get; set; }
+        public object Tag { get; set; } = null;
         public UInt16 ConnectId { get; private set; }
         public UInt16 GetConnectId()
         {
             return ConnectId;
         }
-        public void Send(ref IO.AuxWriter<RPC.UMemWriter> pkg)
+        public unsafe void Send(void* ptr, uint size)
+        {
+            if (Connected == false)
+                return;
+            mCoreObject.Send((sbyte*)ptr, size);
+        }
+        public void Send(in IO.AuxWriter<RPC.UMemWriter> pkg)
         {
             if (Connected == false)
                 return;
@@ -39,9 +47,12 @@ namespace EngineNS.Bricks.Network
         }
         private System.Threading.Thread mRcvThread;
         public Support.UNativeArray<byte> mRcvBuffer;
-        public async System.Threading.Tasks.Task<bool> Connect(string ip, UInt16 port, UInt16 connId, int timeOut = 2000)
+        public async System.Threading.Tasks.Task<bool> Connect(string ip, UInt16 port, UNetPackageManager pkgManager = null, UInt16 connId = UInt16.MinValue, int timeOut = 2000)
         {
-            mPkgBuilder.NetPackageManager = UEngine.Instance.RpcModule.NetPackageManager;
+            if (pkgManager != null)
+                mPkgBuilder.NetPackageManager = pkgManager;
+            else
+                mPkgBuilder.NetPackageManager = UEngine.Instance.RpcModule.NetPackageManager;
             ConnectId = connId;
             var ok = await UEngine.Instance.EventPoster.Post(() =>
             {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EngineNS.Bricks.Network.RPC
@@ -11,10 +12,17 @@ namespace EngineNS.Bricks.Network.RPC
     //3.字符串类型，不能走Read<T>，所以也需要一个特殊流程走Read(out string)
     public class URpcAwaiter
     {
+        [ThreadStatic]
+        public static bool IsTimeout = false;
         static TaskCompletionSource<object> source = new TaskCompletionSource<object>();
         public static async Task<T> AwaitReturn<T>(UReturnAwaiter waiter) where T : unmanaged
         {
             T rt = await source.Task.RPCWaitReturn<T>(waiter);
+            return rt;
+        }
+        public static async Task<T> AwaitReturn<T>(UReturnAwaiter waiter, int noused = 0) where T : class, IO.ISerializer
+        {
+            T rt = await source.Task.RPCWaitReturn_ISerializer<T>(waiter);
             return rt;
         }
         public static async Task<T> AwaitReturn_ISerializer<T>(UReturnAwaiter waiter) where T : IO.ISerializer
@@ -48,6 +56,7 @@ namespace EngineNS.Bricks.Network.RPC
                 if (isTimeOut)
                 {
                     //throw Timeout exception : UReturnAwaiter & coneinuation;
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"{continuation.ToString()} timeout");
                 }
                 else
                 {
@@ -55,6 +64,7 @@ namespace EngineNS.Bricks.Network.RPC
                 }
                 try
                 {
+                    URpcAwaiter.IsTimeout = isTimeOut;
                     continuation();
                 }
                 catch (Exception ex)
@@ -100,14 +110,16 @@ namespace EngineNS.Bricks.Network.RPC
                 if (isTimeOut)
                 {
                     tmp = null;//应该给一个错误的对象用来判断超时间
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"{continuation.ToString()} timeout");
                 }
                 else
                 {
-                    pkg.Read(out tmp, null);
+                    pkg.Read(out tmp);
                 }
                 try
                 {
                     Result = (T)tmp;
+                    URpcAwaiter.IsTimeout = isTimeOut;
                     continuation();
                 }
                 catch (Exception ex)

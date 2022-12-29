@@ -1,5 +1,7 @@
 ﻿using EngineNS.Bricks.NodeGraph;
+using EngineNS.EGui.Controls.PropertyGrid;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
@@ -235,6 +237,9 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
 
+        [Browsable(false)]
+        public bool IsPropertyVisibleDirty { get; set; } = false;
+
         public UVariableDeclaration()
         {
         }
@@ -378,16 +383,70 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    public class UMethodArgumentDeclaration : UCodeObject, IO.ISerializer
+    public class UMethodArgumentDeclaration : UCodeObject, IO.ISerializer, EGui.Controls.PropertyGrid.IPropertyCustomization, NodeGraph.UEditableValue.IValueEditNotify
     {
+        [Browsable(false)]
+        public bool IsPropertyVisibleDirty { get; set; } = false;
+
+        bool mOperationVisible = true;
+        [Browsable(false)]
+        [Rtti.Meta]
+        public bool OperationVisible 
+        {
+            get => mOperationVisible;
+            set
+            {
+                mOperationVisible = value;
+                IsPropertyVisibleDirty = true;
+            }
+        }
+        bool mInitValueVisible = true;
+        [Browsable(false)]
+        [Rtti.Meta]
+        public bool InitValueVisible 
+        {
+            get => mInitValueVisible;
+            set
+            {
+                mInitValueVisible = value;
+                IsPropertyVisibleDirty = true;
+            }
+        }
+
         public Rtti.MetaParameterAttribute Meta;
 
         [Rtti.Meta]
-        public UTypeReference VariableType { get; set; }
+        public UTypeReference VariableType { get; set; } = new UTypeReference(Rtti.UTypeDesc.TypeOf<int>());
+        public Action<string, string> OnVariableNameChanged = null;
+        string mVariableName = "NewValue";
         [Rtti.Meta]
-        public string VariableName { get; set; }
+        [VariableName]
+        public string VariableName 
+        {
+            get => mVariableName;
+            set
+            {
+                var oldName = mVariableName;
+                mVariableName = value;
+                OnVariableNameChanged?.Invoke(oldName, value);
+            }
+        }
+        public delegate string Delegate_GetErrorString(in PGCustomValueEditorAttribute.EditorInfo info, UMethodArgumentDeclaration dec, object newValue);
+        public Delegate_GetErrorString GetErrorStringAction;
+        class VariableNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+        {
+            public VariableNameAttribute()
+            {
+                UserDraw = false;
+            }
+            public override string GetErrorString<T>(in EditorInfo info, T newValue)
+            {
+                var maDec = info.ObjectInstance as UMethodArgumentDeclaration;
+                return maDec?.GetErrorStringAction?.Invoke(in info, maDec, newValue);
+            }
+        }
         [Rtti.Meta]
-        public UExpressionBase InitValue { get; set; }
+        public UExpressionBase InitValue { get; set; } = new UPrimitiveExpression(Rtti.UTypeDesc.TypeOf<int>(), 0);
         [Rtti.Meta]
         public EMethodArgumentAttribute OperationType { get; set; } = EMethodArgumentAttribute.Default;
         [Rtti.Meta]
@@ -466,7 +525,8 @@ namespace EngineNS.Bricks.CodeBuilder
                 return false;
             return (VariableType.Equals(arg.VariableType) &&
                     VariableName == arg.VariableName &&
-                    IsParamArray == IsParamArray);
+                    IsParamArray == arg.IsParamArray &&
+                    InitValue == arg.InitValue);
         }
         public override int GetHashCode()
         {
@@ -475,6 +535,129 @@ namespace EngineNS.Bricks.CodeBuilder
         public override string ToString()
         {
             return OperationType.ToString() + " " + IsParamArray.ToString() + " " + VariableType.TypeFullName + " " + VariableName;
+        }
+
+        public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            var pros = TypeDescriptor.GetProperties(this);
+            var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            foreach(PropertyDescriptor prop in pros)
+            {
+                var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                proDesc.InitValue(this, thisType, prop, parentIsValueType);
+                if (!proDesc.IsBrowsable)
+                    continue;
+                switch(proDesc.Name)
+                {
+                    case "VariableType":
+                        {
+                            var types = new List<Rtti.UTypeDesc>(200);
+                            proDesc.PropertyType = Rtti.UTypeDesc.TypeOf(typeof(System.Type));
+                            foreach(var service in Rtti.UTypeDescManager.Instance.Services.Values)
+                            {
+                                foreach(var type in service.Types.Values)
+                                {
+                                    types.Add(type);
+                                }
+                            }
+                            proDesc.CustomValueEditor = new EGui.Controls.PropertyGrid.PGTypeEditorAttribute(types.ToArray());
+                            collection.Add(proDesc);
+                        }
+                        break;
+                    case "InitValue":
+                        if(InitValueVisible)
+                        {
+                            if (VariableType.TypeDesc == null)
+                            {
+                                proDesc.ReleaseObject();
+                                continue;
+                            }
+                            var editor = NodeGraph.UEditableValue.CreateEditableValue(this, VariableType.TypeDesc, proDesc);
+                            if (editor == null)
+                            {
+                                proDesc.ReleaseObject();
+                                continue;
+                            }
+                            proDesc.PropertyType = VariableType.TypeDesc;
+                            proDesc.CustomValueEditor = editor;
+                            collection.Add(proDesc);
+                        }
+                        break;
+                    case "OperationType":
+                        if(OperationVisible)
+                        {
+                            collection.Add(proDesc);
+                        }
+                        break;
+                    default:
+                        collection.Add(proDesc);
+                        break;
+                }
+            }
+            IsPropertyVisibleDirty = false;
+        }
+
+        public object GetPropertyValue(string propertyName)
+        {
+            switch(propertyName)
+            {
+                case "VariableType":
+                    return VariableType.TypeDesc;
+                case "InitValue":
+                    {
+                        var pe = InitValue as UPrimitiveExpression;
+                        if (pe != null)
+                            return pe.GetValue();
+                    }
+                    break;
+                default:
+                    {
+                        var proInfo = GetType().GetProperty(propertyName);
+                        if (proInfo != null)
+                            return proInfo.GetValue(this);
+                    }
+                    break;
+            }
+            return null;
+        }
+
+        public void SetPropertyValue(string propertyName, object value)
+        {
+            switch(propertyName)
+            {
+                case "VariableType":
+                    {
+                        var tagType = value as Rtti.UTypeDesc;
+                        if(tagType != VariableType.TypeDesc)
+                        {
+                            InitValue = new UPrimitiveExpression(tagType, tagType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(tagType) : null);
+                            VariableType.TypeDesc = tagType;
+                        }
+                    }
+                    break;
+                case "InitValue":
+                    {
+                        var pe = InitValue as UPrimitiveExpression;
+                        if (pe != null)
+                            pe.ValueStr = UPrimitiveExpression.CalculateValueString(pe.Type, value);
+                    }
+                    break;
+                default:
+                    {
+                        var proInfo = GetType().GetProperty(propertyName);
+                        if (proInfo != null)
+                            proInfo.SetValue(this, value);
+                    }
+                    break;
+            }
+        }
+        public void OnValueChanged(UEditableValue ev)
+        {
+            var pe = InitValue as UPrimitiveExpression;
+            if (pe != null)
+            {
+                pe.ValueStr = UPrimitiveExpression.CalculateValueString(pe.Type, ev.Value);
+            }
         }
     }
 

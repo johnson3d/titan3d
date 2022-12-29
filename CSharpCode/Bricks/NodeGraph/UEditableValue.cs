@@ -324,6 +324,8 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
 
+        [Browsable(false)]
+        public bool IsPropertyVisibleDirty { get; set; } = false;
         public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             var pros = TypeDescriptor.GetProperties(this);

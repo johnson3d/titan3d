@@ -13,12 +13,20 @@ namespace EngineNS.Bricks.NodeGraph
         public FMenuAction Action;
         public delegate void FOnMenuDraw(UMenuItem item, object sender);
         public FOnMenuDraw OnMenuDraw;
+        public Func<UMenuItem, object, bool> BeforeMenuDraw;
         public List<UMenuItem> SubMenuItems { get; } = new List<UMenuItem>();
         public UMenuItem Parent = null;
-        public bool IsExpanded = false;
+        public bool IsSeparator = false;
+
+        public EGui.UIProxy.MenuItemProxy.MenuState MenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
+
+        public UMenuItem()
+        {
+            MenuState.Reset();
+        }
         public void SetIsExpanded(bool value, bool withChildren)
         {
-            IsExpanded = value;
+            MenuState.Opened = value;
             if(withChildren)
             {
                 for(int i=0; i<SubMenuItems.Count; i++)
@@ -47,11 +55,52 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return null;
         }
-        public UMenuItem AddMenuItem(string text, object userData, FMenuAction action)
+        public UMenuItem AddMenuSeparator(string text)
         {
-            return AddMenuItem(text, null, userData, action);
+            var tmp = new UMenuItem();
+            tmp.Text = text;
+            tmp.IsSeparator = true;
+            SubMenuItems.Add(tmp);
+            return tmp;
         }
-        public UMenuItem AddMenuItem(string text, string filter, object userData, FMenuAction action)
+        public UMenuItem InsertMenuItem(int index, string text, object userData, FMenuAction action, Func<UMenuItem, object, bool> beforeAction = null)
+        {
+            return InsertMenuItem(index, text, null, userData, action, beforeAction);
+        }
+        public UMenuItem InsertMenuItem(int index, string text, string filter, object userData, FMenuAction action, Func<UMenuItem, object, bool> beforeAction = null)
+        {
+            if (index < 0)
+                return null;
+            if(index >= SubMenuItems.Count)
+                return AddMenuItem(text, filter, userData, action, beforeAction);
+            else
+            {
+                foreach (var i in SubMenuItems)
+                {
+                    if (i.Text == text)
+                    {
+                        i.UserData = userData;
+                        i.Action = action;
+                        i.BeforeMenuDraw = beforeAction;
+                        return i;
+                    }
+                }
+                var tmp = new UMenuItem();
+                tmp.Text = text;
+                tmp.TextForFilter = string.IsNullOrEmpty(filter) ? text.ToLower() : filter.ToLower();
+                tmp.UserData = userData;
+                tmp.Action = action;
+                tmp.BeforeMenuDraw = beforeAction;
+                tmp.Parent = this;
+                SubMenuItems.Insert(index, tmp);
+                return tmp;
+            }
+        }
+        public UMenuItem AddMenuItem(string text, object userData, FMenuAction action, Func<UMenuItem, object, bool> beforeAction = null)
+        {
+            return AddMenuItem(text, null, userData, action, beforeAction);
+        }
+        public UMenuItem AddMenuItem(string text, string filter, object userData, FMenuAction action, Func<UMenuItem, object, bool> beforeAction = null)
         {
             foreach (var i in SubMenuItems)
             {
@@ -59,6 +108,7 @@ namespace EngineNS.Bricks.NodeGraph
                 {
                     i.UserData = userData;
                     i.Action = action;
+                    i.BeforeMenuDraw = beforeAction;
                     return i;
                 }
             }
@@ -67,6 +117,7 @@ namespace EngineNS.Bricks.NodeGraph
             tmp.TextForFilter = string.IsNullOrEmpty(filter) ? text.ToLower() : filter.ToLower();
             tmp.UserData = userData;
             tmp.Action = action;
+            tmp.BeforeMenuDraw = beforeAction;
             tmp.Parent = this;
             SubMenuItems.Add(tmp);
             return tmp;
@@ -147,6 +198,16 @@ namespace EngineNS.Bricks.NodeGraph
             mFilterStore = finalFilter;
             mLastCheckResult = checkResult;
             return checkResult;
+        }
+
+        public enum eMenuStyle
+        {
+            TreeList,
+            Menu,
+        }
+        public static void Draw(UMenuItem item, string filter, ImDrawList cmdList, eMenuStyle style = eMenuStyle.TreeList)
+        {
+
         }
     }
 }

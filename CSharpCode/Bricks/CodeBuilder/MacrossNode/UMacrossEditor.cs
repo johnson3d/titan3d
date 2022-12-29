@@ -116,7 +116,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public MemberVar DraggingMember;
         public bool IsDraggingMember = false;
         public float LeftWidth = 300;
-        bool bFirstDraw = true;
+        //bool bFirstDraw = true;
         UCSharpCodeGenerator mCSCodeGen = new UCSharpCodeGenerator();
         public UCSharpCodeGenerator CSCodeGen => mCSCodeGen;
 
@@ -166,6 +166,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             {
                 var xml = IO.FileManager.LoadXml($"{rn.Address}/class_graph.dat");
+                if (xml == null)
+                    return;
                 object pThis = this;
                 IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
 
@@ -270,7 +272,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         void GenerateAssemblyDescCreateInstanceCode()
         {
-            var projFolder = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + IO.FileManager.GetParentPathName(UEngine.Instance.EditorInstance.Config.GameProject);
+            var projFolder = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + IO.FileManager.GetParentPathName(UEngine.Instance.EditorInstance.Config.GameProject);
             var assemblyFileName = projFolder + "/Assembly.cs";
             string assemblyDescCodes = "";
             using(var sr = new System.IO.StreamReader(assemblyFileName, Encoding.UTF8, true))
@@ -304,10 +306,52 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 sw.Write(assemblyDescCodes);
             }
         }
+        public static bool RemoveAssemblyDescCreateInstanceCode(string name, RName.ERNameType type)
+        {
+            try
+            {
+                var projFolder = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + IO.FileManager.GetParentPathName(UEngine.Instance.EditorInstance.Config.GameProject);
+                var assemblyFileName = projFolder + "/Assembly.cs";
+                string assemblyDescCodes = "";
+                using (var sr = new System.IO.StreamReader(assemblyFileName, Encoding.UTF8, true))
+                {
+                    assemblyDescCodes = sr.ReadToEnd();
+                }
+                if(string.IsNullOrEmpty(assemblyDescCodes))
+                {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Macross", "Remove macross create instance code failed, Assembly file is empty!");
+                    return false;
+                }
+                var startKeyword = "#region MacrossGenerated Start";
+                var idx = assemblyDescCodes.IndexOf(startKeyword);
+                var startIdx = idx + startKeyword.Length + 1;
+                var keyStr = $"if (name == RName.GetRName(\"{name}\", {type.GetType().FullName.Replace("+", ".")}.{type.ToString()}))";
+                var keyIdx = assemblyDescCodes.IndexOf(keyStr, idx);
+                var tab = "                ";
+                if (keyIdx >= 0)
+                {
+                    keyIdx -= tab.Length;
+                    var endIdx = assemblyDescCodes.IndexOf("}\r\n", keyIdx) + "}\r\n".Length;
+                    assemblyDescCodes = assemblyDescCodes.Remove(keyIdx, endIdx - keyIdx);
+                    using (var sw = new System.IO.StreamWriter(assemblyFileName, false, Encoding.UTF8))
+                    {
+                        sw.Write(assemblyDescCodes);
+                    }
+                    return true;
+                }
+            }
+            catch(System.Exception ex)
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Macross", ex.ToString());
+                return false;
+            }
+            return false;
+        }
 
         public void CompileCode()
         {
-            var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameAssembly;
+            UEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
+            var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameAssembly;
             if (UEngine.Instance.MacrossModule.CompileCode(assemblyFile))
             {
                 UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
@@ -382,77 +426,115 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 ImGuiAPI.EndMenuBar();
             }
         }
+
+        bool mDockInitialized = false;
+        ImGuiWindowClass mDockKeyClass;
+        unsafe void ResetDockspace(bool force = false)
+        {
+            var pos = ImGuiAPI.GetCursorPos();
+            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
+            mDockKeyClass.ClassId = id;
+            ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
+            if (mDockInitialized && !force)
+                return;
+            ImGuiAPI.DockBuilderRemoveNode(id);
+            ImGuiAPI.DockBuilderAddNode(id, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None);
+            ImGuiAPI.DockBuilderSetNodePos(id, pos);
+            ImGuiAPI.DockBuilderSetNodeSize(id, Vector2.One);
+            mDockInitialized = true;
+
+            var graphId = id;
+            uint leftId = 0;
+            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref graphId);
+            uint propertyId = 0;
+            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Right, 0.2f, ref propertyId, ref graphId);
+
+            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("GraphWindow"), graphId);
+            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("NodeProperty"), propertyId);
+            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("ClassView"), leftId);
+            ImGuiAPI.DockBuilderFinish(id);
+        }
+
+        string GetDockWindowName(string name)
+        {
+            return name + "##" + mDockKeyClass.m_ClassId;
+        }
+
         struct STToolButtonData
         {
             public bool IsMouseDown;
             public bool IsMouseHover;
         }
         STToolButtonData[] mToolBtnDatas = new STToolButtonData[7];
+        void DrawToolbar()
+        {
+            var drawList = ImGuiAPI.GetWindowDrawList();
+
+            int toolBarItemIdx = 0;
+            var spacing = EGui.UIProxy.StyleConfig.Instance.ToolbarSeparatorThickness + EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X * 2;
+            EGui.UIProxy.Toolbar.BeginToolbar(in drawList);
+            if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, 
+                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Save"))
+            {
+                SaveClassGraph(AssetName);
+                GenerateCode();
+                CompileCode();
+            }
+            toolBarItemIdx++;
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
+                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "GenCode", false, -1, 0, spacing))
+            {
+                GenerateCode();
+                CompileCode();
+            }
+            toolBarItemIdx++;
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
+                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "ClassSettings", false, -1, 0, spacing))
+            {
+                PGMember.Target = DefClass;
+            }
+            toolBarItemIdx++;
+            // test ////////////////
+            //if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, in Support.UAnyPointer.Default,
+            //    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "DebugTest"))
+            //{
+            //    var result = UEngine.Instance.EventPoster.Post(() =>
+            //    {
+            //        var tt = UEngine.Instance.MacrossModule.NewInnerObject<Macross.UMacrossTestClass>(AssetName);
+            //        var methodInfo = tt.GetType().GetMethod("Method_0");
+            //        //tt.VirtualFunc3(5);
+            //        methodInfo?.Invoke(tt, null);
+
+            //        return true;
+            //    }, Thread.Async.EAsyncTarget.Logic);
+            //}
+            ////////////////////////
+            toolBarItemIdx++;
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            if(Macross.UMacrossDebugger.Instance.CurrrentBreak != null)
+            {
+                if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
+                    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Run", false, -1, 0, spacing))
+                {
+                    Macross.UMacrossDebugger.Instance.Run();
+                }
+            }
+                
+            EGui.UIProxy.Toolbar.EndToolbar();
+        }
         public unsafe void OnDraw()
         {
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin($"Macross:{IO.FileManager.GetPureName(AssetName!=null? AssetName.Name :"NoName")}", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None| ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
+            //ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
+            if (EGui.UIProxy.DockProxy.BeginMainForm($"Macross:{IO.FileManager.GetPureName(AssetName!=null? AssetName.Name :"NoName")}", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_None| ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar))
             {
-                var drawList = ImGuiAPI.GetWindowDrawList();
+                DrawToolbar();
 
-                int toolBarItemIdx = 0;
-                var spacing = EGui.UIProxy.StyleConfig.Instance.ToolbarSeparatorThickness + EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X * 2;
-                EGui.UIProxy.Toolbar.BeginToolbar(in drawList);
-                if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, 
-                    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Save"))
-                {
-                    SaveClassGraph(AssetName);
-                    GenerateCode();
-                    CompileCode();
-                }
-                toolBarItemIdx++;
-                EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
-                if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
-                    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "GenCode", false, 0, spacing))
-                {
-                    GenerateCode();
-                    CompileCode();
-                }
-                toolBarItemIdx++;
-                EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
-                if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
-                    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "ClassSettings", false, 0, spacing))
-                {
-                    PGMember.Target = DefClass;
-                }
-                toolBarItemIdx++;
-                // test ////////////////
-                //if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, in Support.UAnyPointer.Default,
-                //    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "DebugTest"))
+                //if (ImGuiAPI.IsWindowDocked())
                 //{
-                //    var result = UEngine.Instance.EventPoster.Post(() =>
-                //    {
-                //        var tt = UEngine.Instance.MacrossModule.NewInnerObject<Macross.UMacrossTestClass>(AssetName);
-                //        var methodInfo = tt.GetType().GetMethod("Method_0");
-                //        //tt.VirtualFunc3(5);
-                //        methodInfo?.Invoke(tt, null);
-
-                //        return true;
-                //    }, Thread.Async.EAsyncTarget.Logic);
+                //    DockId = ImGuiAPI.GetWindowDockID();
                 //}
-                ////////////////////////
-                toolBarItemIdx++;
-                EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
-                if(Macross.UMacrossDebugger.Instance.CurrrentBreak != null)
-                {
-                    if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
-                        ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Run", false, 0, spacing))
-                    {
-                        Macross.UMacrossDebugger.Instance.Run();
-                    }
-                }
-                
-                EGui.UIProxy.Toolbar.EndToolbar();
-
-                if (ImGuiAPI.IsWindowDocked())
-                {
-                    DockId = ImGuiAPI.GetWindowDockID();
-                }
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
@@ -462,34 +544,39 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 OnDrawMainMenu();
 
-                ImGuiAPI.Columns(2, null, true);
-                if (bFirstDraw)
-                {
-                    ImGuiAPI.SetColumnWidth(0, LeftWidth);
-                    bFirstDraw = false;
-                }
-                var curPos = ImGuiAPI.GetCursorScreenPos();
-                LeftWidth = ImGuiAPI.GetColumnWidth(0);
-                var szLeft = new Vector2(LeftWidth, 0);
-                if (ImGuiAPI.BeginChild("LeftWin", in szLeft, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
-                {
-                    OnLeftWindow();
-                }
-                ImGuiAPI.EndChild();
-                ImGuiAPI.NextColumn();
+                //ImGuiAPI.Columns(2, null, true);
+                //if (bFirstDraw)
+                //{
+                //    ImGuiAPI.SetColumnWidth(0, LeftWidth);
+                //    bFirstDraw = false;
+                //}
+                //var curPos = ImGuiAPI.GetCursorScreenPos();
+                //LeftWidth = ImGuiAPI.GetColumnWidth(0);
+                //var szLeft = new Vector2(LeftWidth, 0);
+                //if (ImGuiAPI.BeginChild("LeftWin", in szLeft, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                //{
+                //    OnLeftWindow();
+                //}
+                //ImGuiAPI.EndChild();
+                //ImGuiAPI.NextColumn();
 
-                var colWidth = ImGuiAPI.GetColumnWidth(1);
-                var szRight = new Vector2(colWidth, 0);
-                if (ImGuiAPI.BeginChild("RightWin", in szRight, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
-                {
-                    OnRightWindow();
-                }
-                ImGuiAPI.EndChild();
+                //var colWidth = ImGuiAPI.GetColumnWidth(1);
+                //var szRight = new Vector2(colWidth, 0);
+                //if (ImGuiAPI.BeginChild("RightWin", in szRight, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                //{
+                //    OnDrawGraph();
+                //}
+                //ImGuiAPI.EndChild();
 
-                ImGuiAPI.Columns(1, null, true);
-                ImGuiAPI.NextColumn();
+                //ImGuiAPI.Columns(1, null, true);
+                //ImGuiAPI.NextColumn();
             }
-            ImGuiAPI.End();
+            ResetDockspace();
+            EGui.UIProxy.DockProxy.EndMainForm();
+
+            DrawClassView();
+            DrawGraph();
+            DrawPropertyGrid();
 
             if (IsDraggingMember == true && ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) == false)
             {
@@ -522,12 +609,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         }
 
+        bool mClassViewShow = true;
         EGui.UIProxy.MenuItemProxy.MenuState mNewMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         EGui.UIProxy.MenuItemProxy.MenuState mOverrideMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
-        protected unsafe void OnLeftWindow()
+        protected unsafe void DrawClassView()
         {
-            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;// | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
-            if (ImGuiAPI.CollapsingHeader("ClassView", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;// | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("ClassView"), ref mClassViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 Vector2 buttonSize = new Vector2(16, 16);
                 float buttonOffset = 16;
@@ -612,7 +700,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     var drawList = ImGuiAPI.GetWindowDrawList();
                     var menuData = new Support.UAnyPointer();
-                    if(EGui.UIProxy.MenuItemProxy.MenuItem("New Method", null, false, null, ref drawList, ref menuData, ref mNewMethodMenuState))
+                    if(EGui.UIProxy.MenuItemProxy.MenuItem("New Method", null, false, null, in drawList, in menuData, ref mNewMethodMenuState))
                     {
                         var num = 0;
                         while(true)
@@ -644,7 +732,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             OpenFunctions[i].CanvasMenuDirty = true;
                         }
                     }
-                    if (EGui.UIProxy.MenuItemProxy.BeginMenuItem("Override Method", null, null, ref drawList, ref menuData, ref mOverrideMenuState))
+                    if (EGui.UIProxy.MenuItemProxy.BeginMenuItem("Override Method", null, null, in drawList, in menuData, ref mOverrideMenuState))
                     {
                         for(int i=0; i < mOverrideMethodMenuItems.Count; i++)
                         {
@@ -684,10 +772,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         {
                             if (methodTreeNodeDoubleClicked)
                             {
-                                if (OpenFunctions.Contains(method) == false)
+                                mSettingCurrentFuncIndex = OpenFunctions.IndexOf(method);
+                                if (mSettingCurrentFuncIndex < 0)
                                 {
                                     method.VisibleInClassGraphTables = true;
                                     method.GraphRenderer.SetGraph(method);
+                                    mSettingCurrentFuncIndex = OpenFunctions.Count;
                                     OpenFunctions.Add(method);
                                 }
                             }
@@ -702,66 +792,84 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     ImGuiAPI.TreePop();
                 }
             }
-            if (ImGuiAPI.CollapsingHeader("Property", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+            EGui.UIProxy.DockProxy.EndPanel();
+        }
+        bool mNodePropertyShow = true;
+        void DrawPropertyGrid()
+        {
+            if(EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("NodeProperty"), ref mNodePropertyShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 PGMember.OnDraw(true, false, false);
             }
+            EGui.UIProxy.DockProxy.EndPanel();
         }
         Macross.UMacrossBreak mBreakerStore = null;
-        protected unsafe void OnRightWindow()
+        bool mGraphWindowShow = true;
+        int mSettingCurrentFuncIndex = -1;
+        protected unsafe void DrawGraph()
         {
-            var vMin = ImGuiAPI.GetWindowContentRegionMin();
-            var vMax = ImGuiAPI.GetWindowContentRegionMin();
-            if (ImGuiAPI.BeginTabBar("OpenFuncTab", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
+            if(EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("GraphWindow"), ref mGraphWindowShow, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
-                var itMax = ImGuiAPI.GetItemRectSize();
-                vMin.Y += itMax.Y;
-                var sz = vMax - vMin;
-                bool breakerChanged = false;
-                if (mBreakerStore != Macross.UMacrossDebugger.Instance.CurrrentBreak)
+                var vMin = ImGuiAPI.GetWindowContentRegionMin();
+                var vMax = ImGuiAPI.GetWindowContentRegionMax();
+                if (ImGuiAPI.BeginTabBar("OpenFuncTab", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
                 {
-                    mBreakerStore = Macross.UMacrossDebugger.Instance.CurrrentBreak;
-                    breakerChanged = true;
-                }
-                for (int i = 0; i < OpenFunctions.Count; i++)
-                {
-                    var func = OpenFunctions[i];
-                    if(breakerChanged)
+                    var itMax = ImGuiAPI.GetItemRectSize();
+                    vMin.Y += itMax.Y;
+                    var sz = vMax - vMin;
+                    bool breakerChanged = false;
+                    if (mBreakerStore != Macross.UMacrossDebugger.Instance.CurrrentBreak)
                     {
-                        for(int linkerIdx=0; linkerIdx < func.Linkers.Count; linkerIdx++)
+                        mBreakerStore = Macross.UMacrossDebugger.Instance.CurrrentBreak;
+                        breakerChanged = true;
+                    }
+                    for (int i = 0; i < OpenFunctions.Count; i++)
+                    {
+                        var func = OpenFunctions[i];
+                        if(breakerChanged)
                         {
-                            func.Linkers[linkerIdx].InDebuggerLine = false;
+                            for(int linkerIdx=0; linkerIdx < func.Linkers.Count; linkerIdx++)
+                            {
+                                func.Linkers[linkerIdx].InDebuggerLine = false;
+                            }
+                            if (mBreakerStore != null)
+                                func.GraphRenderer.BreakerName = mBreakerStore.BreakName;
+                            else
+                                func.GraphRenderer.BreakerName = "";
                         }
-                        if (mBreakerStore != null)
-                            func.GraphRenderer.BreakerName = mBreakerStore.BreakName;
-                        else
-                            func.GraphRenderer.BreakerName = "";
-                    }
 
-                    if (ImGuiAPI.BeginTabItem(func.Name, ref func.VisibleInClassGraphTables, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
-                    {
-                        DrawFunctionGraph(func, sz);
+                        var flag = ImGuiTabItemFlags_.ImGuiTabItemFlags_None;
+                        if(mSettingCurrentFuncIndex == i)
+                        {
+                            flag |= ImGuiTabItemFlags_.ImGuiTabItemFlags_SetSelected;
+                            mSettingCurrentFuncIndex = -1;
+                        }
+                        if (ImGuiAPI.BeginTabItem(func.Name, ref func.VisibleInClassGraphTables, flag))
+                        {
+                            DrawFunctionGraph(func, sz);
 
-                        ImGuiAPI.EndTabItem();
+                            ImGuiAPI.EndTabItem();
+                        }
                     }
-                }
-                for (int i = 0; i < OpenFunctions.Count; i++)
-                {
-                    if (OpenFunctions[i].VisibleInClassGraphTables == false)
+                    for (int i = 0; i < OpenFunctions.Count; i++)
                     {
-                        OpenFunctions.RemoveAt(i);
-                        i--;
+                        if (OpenFunctions[i].VisibleInClassGraphTables == false)
+                        {
+                            OpenFunctions.RemoveAt(i);
+                            i--;
+                        }
                     }
+                    ImGuiAPI.EndTabBar();
                 }
-                ImGuiAPI.EndTabBar();
             }
+            EGui.UIProxy.DockProxy.EndPanel();
         }
 
         public void DrawFunctionGraph(UMacrossMethodGraph func, Vector2 size)
         {
             if (ImGuiAPI.BeginChild("Function", in size, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
             {
-                func.UpdateSelectPG();
+                ((UMacrossMethodGraph)(func.GraphRenderer.Graph)).UpdateSelectPG();
                 func.GraphRenderer.OnDraw();                
                 //func.OnDraw(null, false);
             }
@@ -819,13 +927,13 @@ namespace EngineNS.Macross
         partial void TryCompileCode(string assemblyFile, ref bool success)
         {
             var csFiles = new List<string>(IO.FileManager.GetFiles(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game), "*.cs"));
-            var projectPath = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProjectPath;
+            var projectPath = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProjectPath;
             csFiles.AddRange(IO.FileManager.GetFiles(projectPath, "*.cs"));
             var arguments = new List<string>();
             for (int i = 0; i < csFiles.Count; ++i)
                 arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFiles[i]));
 
-            var projectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject;
+            var projectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject;
             var projDef = XDocument.Load(projectFile);
             var references = projDef.Element("Project").Elements("ItemGroup").Elements("Reference").Select(refElem => refElem.Value);
             foreach (var reference in references)

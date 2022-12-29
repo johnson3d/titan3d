@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.TcpServer
         {
             mPkgBuilder.ParsePackage(ptr, (uint)size, this);
         }
-
+        public Bricks.Network.RPC.EAuthority Authority { get; set; } = Bricks.Network.RPC.EAuthority.Client;
         public bool Connected 
         {
             get
@@ -51,11 +51,18 @@ namespace EngineNS.Bricks.TcpServer
 
             }
         }
+        public object Tag { get; set; } = null;
         public UInt16 GetConnectId()
         {
             return (UInt16)mCoreObject.mConnId;
         }
-        public void Send(ref IO.AuxWriter<Bricks.Network.RPC.UMemWriter> pkg)
+        public unsafe void Send(void* ptr, uint size)
+        {
+            if (Connected == false)
+                return;
+            mCoreObject.Send((byte*)ptr, (int)size);
+        }
+        public void Send(in IO.AuxWriter<Bricks.Network.RPC.UMemWriter> pkg)
         {
             unsafe 
             {

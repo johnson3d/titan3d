@@ -52,7 +52,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         //        Material.UsedUniformVars.Add(tmp);
         //    }
         //}
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var material = data.UserData as UMaterial;
             var varNode = this;
@@ -244,14 +244,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         //    }
         //    return null;
         //}
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
-            base.BuildStatements(ref data);
+            base.BuildStatements(pin, ref data);
             if(data.NodeGraph.PinHasLinker(InX))
             {
                 var pinNode = data.NodeGraph.GetOppositePinNode(InX);
                 var opPin = data.NodeGraph.GetOppositePin(InX);
-                pinNode.BuildStatements(ref data);
+                pinNode.BuildStatements(opPin, ref data);
 
                 var assignStatement = new UAssignOperatorStatement()
                 {

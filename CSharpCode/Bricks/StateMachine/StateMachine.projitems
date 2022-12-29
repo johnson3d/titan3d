@@ -9,15 +9,24 @@
     <Import_RootNamespace>EngineNS.Bricks.StateMachine</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)IAttachmentRule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IAttachment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IStateMachine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ITransition.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StackBasedSM\UStackBasedStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StackBasedSM\UStackBasedState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StackBasedSM\UStackBasedStateTransition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedSM\UTimedStateAttachment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\UTimedStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimedSM\UTimedState.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TimedSM\UTimedTransition.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UStateMachine.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UState.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UTransition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedSM\UTimedStateTransition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SampleSM\UStateAttachment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SampleSM\UStateMachine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SampleSM\UState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SampleSM\UStateTransition.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)SampleSM\" />
   </ItemGroup>
 </Project>

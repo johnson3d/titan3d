@@ -10,8 +10,20 @@ namespace EngineNS.Bricks.StateMachine
         void Initialize();
         void Enter();
         void Exit();
+        /// <summary>
+        /// Tick this state node every frame
+        /// </summary>
+        /// <param name="elapseSecond"></param>
         void Tick(float elapseSecond);
-        bool AddTransition(UTransition transition);
-        bool RemoveTransition(UTransition transition);
+        /// <summary>
+        /// update game logic ,can be paused
+        /// </summary>
+        /// <param name="elapseSecond"></param>
+        void Update(float elapseSecond);
+        bool ShouldUpdate();
+        bool AddTransition(ITransition transition);
+        bool RemoveTransition(ITransition transition);
+        bool AddAttachment(IAttachmentRule attachment);
+        bool RemoveAttachment(IAttachmentRule attachment);
     }
 }

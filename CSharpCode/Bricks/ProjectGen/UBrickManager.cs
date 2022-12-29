@@ -91,7 +91,7 @@ namespace EngineNS.Bricks.ProjectGen
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
 
             Vector2 size = new Vector2(0, 0);
-            if (ImGuiAPI.Begin("BrickManager", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginMainForm("BrickManager", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 for (int i = 0; i < AllBricks.Count; i++)
                 {
@@ -108,7 +108,7 @@ namespace EngineNS.Bricks.ProjectGen
                     SaveProject("CustomEngine");
                 }
             }
-            ImGuiAPI.End();
+            EGui.UIProxy.DockProxy.EndMainForm();
         }
         public void SetBrickChecked(UBrickDesc brick, bool bCheck)
         {

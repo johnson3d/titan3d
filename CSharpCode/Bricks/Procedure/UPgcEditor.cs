@@ -177,8 +177,6 @@ namespace EngineNS.Bricks.Procedure
 
         #region DrawUI
         bool mDockInitialized = false;
-        Vector2 mOldWinSize;
-        Vector2 mWinSize;
         ImGuiWindowClass mDockKeyClass;
         unsafe void ResetDockspace(bool force = false)
         {
@@ -186,8 +184,6 @@ namespace EngineNS.Bricks.Procedure
             //    return;
             //mDockInitialized = true;
 
-            mOldWinSize = mWinSize;
-            mWinSize = ImGuiAPI.GetWindowSize();
             var pos = ImGuiAPI.GetCursorPos();
 
             var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
@@ -211,12 +207,16 @@ namespace EngineNS.Bricks.Procedure
             uint previewId = 0;
             ImGuiAPI.DockBuilderSplitNode(leftId, ImGuiDir_.ImGuiDir_Up, 0.3f, ref previewId, ref leftId);
 
-            ImGuiAPI.DockBuilderDockWindow("GraphWindow", graphId);
-            ImGuiAPI.DockBuilderDockWindow("PreviewWindow", previewId);
-            ImGuiAPI.DockBuilderDockWindow("NodeProperty", propertyId);
-            ImGuiAPI.DockBuilderDockWindow("EditorProperty", propertyId);
-            ImGuiAPI.DockBuilderDockWindow("Hierarchy", leftId);
+            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("GraphWindow"), graphId);
+            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("PreviewWindow"), previewId);
+            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("NodeProperty"), propertyId);
+            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("EditorProperty"), propertyId);
+            ImGuiAPI.DockBuilderDockWindow(GetDockWindowName("Hierarchy"), leftId);
             ImGuiAPI.DockBuilderFinish(id);
+        }
+        string GetDockWindowName(string name)
+        {
+            return name + "##" + mDockKeyClass.m_ClassId;
         }
         public unsafe void OnDraw()
         {
@@ -227,7 +227,7 @@ namespace EngineNS.Bricks.Procedure
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             //ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            if (ImGuiAPI.Begin(AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
+            if (EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
@@ -273,7 +273,7 @@ namespace EngineNS.Bricks.Procedure
             }
             //var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
             ResetDockspace();
-            ImGuiAPI.End();
+            EGui.UIProxy.DockProxy.EndMainForm();
 
             DrawPreview();
             DrawGraph();
@@ -319,7 +319,7 @@ namespace EngineNS.Bricks.Procedure
         {
             var size = new Vector2(-1, -1);
             bool bOpen = true;
-            if (EGui.UIProxy.DockPanelProxy.Begin(mDockKeyClass, "PreviewWindow", ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("PreviewWindow"), ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (EGui.UIProxy.CollapsingHeaderProxy.CollapsingHeader("Preview", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                 {
@@ -383,24 +383,30 @@ namespace EngineNS.Bricks.Procedure
                 //    GraphPropGrid.OnDraw(true, false, false);
                 //}
             }
-            EGui.UIProxy.DockPanelProxy.End();
+            EGui.UIProxy.DockProxy.EndPanel();
         }
 
         protected unsafe void DrawGraph()
         {
             var size = new Vector2(-1, -1);
             bool bOpen = true;
-            if (EGui.UIProxy.DockPanelProxy.Begin(mDockKeyClass, "GraphWindow", ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("GraphWindow"), ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 GraphRenderer.OnDraw();
             }
-            EGui.UIProxy.DockPanelProxy.End();
+            EGui.UIProxy.DockProxy.EndPanel();
         }
         void DrawPropertyGrid()
         {
             var size = new Vector2(-1, -1);
+            bool editorOpen = true;
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("EditorProperty"), ref editorOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                GraphPropGrid.OnDraw(true, false, false);
+            }
+            EGui.UIProxy.DockProxy.EndPanel();
             bool bOpen = true;
-            if (EGui.UIProxy.DockPanelProxy.Begin(mDockKeyClass, "NodeProperty", ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetDockWindowName("NodeProperty"), ref bOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (GraphRenderer.Graph != null && GraphRenderer.Graph.SelectedNodesDirty)
                 {
@@ -409,13 +415,7 @@ namespace EngineNS.Bricks.Procedure
                 }
                 NodePropGrid.OnDraw(true, false, false);
             }
-            EGui.UIProxy.DockPanelProxy.End();
-            bool editorOpen = true;
-            if (EGui.UIProxy.DockPanelProxy.Begin(mDockKeyClass, "EditorProperty", ref editorOpen, ImGuiWindowFlags_.ImGuiWindowFlags_None))
-            {
-                GraphPropGrid.OnDraw(true, false, false);
-            }
-            EGui.UIProxy.DockPanelProxy.End();
+            EGui.UIProxy.DockProxy.EndPanel();
         }
         #endregion
     }

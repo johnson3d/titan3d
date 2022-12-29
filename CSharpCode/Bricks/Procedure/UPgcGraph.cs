@@ -38,6 +38,10 @@ namespace EngineNS.Bricks.Procedure
 
             //Root = new Buffer2D.UEndingNode();
         }
+        public override UGraphRenderer GetGraphRenderer()
+        {
+            return GraphEditor?.GraphRenderer;
+        }
         public override void UpdateCanvasMenus()
         {
             CanvasMenus.SubMenuItems.Clear();
@@ -260,5 +264,12 @@ namespace EngineNS.Bricks.Procedure
             return this.FindFirstNode(name) as UPgcNodeBase;
         }
         #endregion
+
+        public override void CollapseNodes(List<UNodeBase> nodeList)
+        {
+            var node = IUnionNode.CreateUnionNode<Node.UUnionNode, Node.UNodePinDefine, Node.UEndPointNode>(this, nodeList);
+            node.Name = "Collapse Node";
+            DeleteSelectedNodes();
+        }
     }
 }

@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{259a5db5-f6a1-40a1-82b6-6d15da35f99f}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\DetourCrowd.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\DetourLocalBoundary.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\DetourObstacleAvoidance.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\DetourPathCorridor.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\DetourPathQueue.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\DetourProximityGrid.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\DetourCrowd.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\DetourLocalBoundary.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\DetourObstacleAvoidance.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\DetourPathCorridor.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\DetourPathQueue.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\DetourProximityGrid.cpp" />
+  </ItemGroup>
+</Project>

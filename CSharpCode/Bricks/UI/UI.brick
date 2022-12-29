@@ -1,0 +1,10 @@
+{
+  "Name": "UI",
+  "Path": "CSharpCode/Bricks/UI",
+  "FullName": "CSharpCode/Bricks/UI/UI.brick",
+  "SharedProjects": [
+    "CSharpCode/GamePlay/GamePlay.brick"
+  ],
+  "Nugets": [],
+  "DllModules": []
+}

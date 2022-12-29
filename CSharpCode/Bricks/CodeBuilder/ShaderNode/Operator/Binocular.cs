@@ -95,12 +95,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 
         //    return binOp;
         //}
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (data.NodeGraph.PinHasLinker(Left))
-                data.NodeGraph.GetOppositePinNode(Left).BuildStatements(ref data);
+            {
+                var opPin = data.NodeGraph.GetOppositePin(Left);
+                data.NodeGraph.GetOppositePinNode(Left).BuildStatements(opPin, ref data);
+            }
             if(data.NodeGraph.PinHasLinker(Right))
-                data.NodeGraph.GetOppositePinNode(Right).BuildStatements(ref data);
+            {
+                var opPin = data.NodeGraph.GetOppositePin(Right);
+                data.NodeGraph.GetOppositePinNode(Right).BuildStatements(opPin, ref data);
+            }
         }
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {

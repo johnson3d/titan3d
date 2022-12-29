@@ -75,17 +75,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             };
             return binOp;
         }
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             if(Left.HasLinker())
             {
+                var opPin = data.NodeGraph.GetOppositePin(Left);
                 var pinNode = data.NodeGraph.GetOppositePinNode(Left);
-                pinNode.BuildStatements(ref data);
+                pinNode.BuildStatements(opPin, ref data);
             }
             if(Right.HasLinker())
             {
+                var opPin = data.NodeGraph.GetOppositePin(Right);
                 var pinNode = data.NodeGraph.GetOppositePinNode(Right);
-                pinNode.BuildStatements(ref data);
+                pinNode.BuildStatements(opPin, ref data);
             }
         }
         //public override IExpression GetExpr(UMacrossMethodGraph funGraph, ICodeGen cGen, bool bTakeResult)

@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
-using static Org.BouncyCastle.Math.EC.ECCurve;
-using System.Reflection.Metadata.Ecma335;
+using EngineNS.Macross;
+using EngineNS.Rtti;
 
 namespace EngineNS.Bricks.AssemblyLoader
 {
@@ -37,7 +37,7 @@ namespace EngineNS.Bricks.AssemblyLoader
             foreach (var assembly in ass)
             {
                 if (assembly.GetName().Name == name.Name)
-                    return null;
+                    return assembly;
             }
             if (IncludeAssemblies != null)
             {
@@ -166,9 +166,13 @@ namespace EngineNS.Bricks.AssemblyLoader
     {
         public string FilePath;
         [Rtti.Meta]
+        public bool Enable { get; set; } = true;
+        [Rtti.Meta]
         public bool LoadOnInit { get; set; } = true;
         [Rtti.Meta]
         public List<EPlatformType> Platforms { get; set; } = new List<EPlatformType>() { EPlatformType.PLTF_Windows };
+        [Rtti.Meta]
+        public List<string> Dependencies { get; set; } = new List<string>();
         public void SaveDescriptor()
         {
             IO.FileManager.SaveObjectToXml(FilePath, this);
@@ -182,75 +186,144 @@ namespace EngineNS.Bricks.AssemblyLoader
         public EPluginModuleState ModuleSate { get; set; } = EPluginModuleState.Unloaded;
         public string AssemblyPath { get; set; }
         WeakReference mLoader = null;
-        public void SureLoad()
+        public WeakReference<Assembly> ModuleAssembly { get; private set; }
+        public Assembly UnsafeGetAssembly()
         {
+            if (ModuleAssembly == null)
+                return null;
+            Assembly result;
+            if (ModuleAssembly.TryGetTarget(out result))
+                return result;
+            return null;
+        }
+        public bool SureLoad()
+        {
+            if (PluginDescriptor.Enable == false)
+            {
+                if (ModuleSate != EPluginModuleState.Unloaded)
+                {
+                    UnloadPlugin(true);
+                    ModuleSate = EPluginModuleState.Unloaded;
+                }
+                return false;
+            }
             switch (ModuleSate)
             {
                 case EPluginModuleState.Unloaded:
                     {
                         try
                         {
-                            LoadPlugin();
+                            if (LoadPlugin() == false)
+                                return false;
                             ModuleSate = EPluginModuleState.Loaded;
+                            return true;
                         }
                         catch(Exception ex)
                         {
                             Profiler.Log.WriteException(ex);
                             ModuleSate = EPluginModuleState.Unloaded;
+                            return false;
                         }
                     }
-                    break;
                 case EPluginModuleState.Loaded:
                     {
-                        return;
+                        return true;
                     }
                 case EPluginModuleState.ReloadReady:
                     {
                         Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}): will be reloaded");
-                        UnloadPlugin();
+                        if (UnloadPlugin(false) == false)
+                        {
+                            ModuleSate = EPluginModuleState.Loaded;
+                            return true;
+                        }
 
                         try
                         {
-                            LoadPlugin();
+                            if (LoadPlugin() == false)
+                                return false;
                             ModuleSate = EPluginModuleState.Loaded;
+                            return true;
                         }
                         catch (Exception ex)
                         {
                             Profiler.Log.WriteException(ex);
                             ModuleSate = EPluginModuleState.Unloaded;
+                            return false;
                         }
                     }
-                    break;
+                default:
+                    return false;
             }
         }
-        private void LoadPlugin()
+        private bool LoadPlugin()
         {
+            foreach (var i in PluginDescriptor.Dependencies)
+            {
+                var dModule = Manager.GetPluginModule(i);
+                if (dModule == null)
+                {
+                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}): load failed because the {i} is not found");
+                    return false;
+                }
+                dModule.PluginDescriptor.Enable = true;
+                if (false == dModule.SureLoad())
+                    return false;
+            }
+
             var context = new ULoadContext(AssemblyPath);// Manager.CoreBinDirectory);
             //var assembly = context.LoadFromAssemblyPath(AssemblyPath);
             var assembly = context.LoadOnMemory(AssemblyPath);
+            Rtti.UAssemblyDesc.UpdateRtti(this.Name, assembly, UnsafeGetAssembly());
+            ModuleAssembly = new WeakReference<Assembly>(assembly);
+            if (GetPluginObjectImpl() == false)
+                return false;
 
-            var type = assembly.GetType("EngineNS.Plugin.UPluginLoader");
+            mLoader = new WeakReference(context, true);
+            return true;
+        }
+        private bool GetPluginObjectImpl()
+        {
+            Assembly assembly;
+            if (ModuleAssembly.TryGetTarget(out assembly) == false)
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}): ModuleAssembly is not alive");
+                return false;
+            }
+            var type = assembly.GetType($"EngineNS.Plugins.{this.Name}.UPluginLoader");
             if (type == null)
             {
-                return;
+                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}): EngineNS.Plugin.UPluginLoader is not found");
+                return false;
             }
             var method = type.GetMethod("GetPluginObject", BindingFlags.Static | BindingFlags.Public);
             if (method == null)
             {
-                return;
+                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}): EngineNS.Plugin.UPluginLoader.GetPluginObject is not found");
+                return false;
             }
             var obj = method.Invoke(null, null);
             PluginObject = obj as UPlugin;
             if (PluginObject == null)
-                return;
+            {
+                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}): EngineNS.Plugin.UPluginLoader.GetPluginObject return null");
+                return false;
+            }
             PluginObject.OnLoadedPlugin();
-            mLoader = new WeakReference(context, true);
+            return true;
         }
-        private void UnloadImpl()
+        private void UnloadImpl(bool bUnregAssembly)
         {
+            if (bUnregAssembly)
+            {
+                Rtti.UTypeDescManager.Instance.UnregAssembly(this.UnsafeGetAssembly());
+            }
+
             try
             {
                 PluginObject?.OnUnloadPlugin();
+
+                //Rtti.UTypeDescManager.Instance.UnregAssembly();
             }
             catch(Exception ex)
             {
@@ -264,28 +337,35 @@ namespace EngineNS.Bricks.AssemblyLoader
                 context.Unload();
             }
         }
-        public void UnloadPlugin()
+        public bool UnloadPlugin(bool bUnregAssembly)
         {
-            UnloadImpl();
+            if (ModuleSate == EPluginModuleState.Unloaded)
+                return true;
+
+            UnloadImpl(bUnregAssembly);
 
             for (int i = 0; mLoader.IsAlive; i++)
             {
                 if (i > 10)
                 {
+                    GetPluginObjectImpl();
                     Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}) is alive still after unload");
-                    break;
+                    return false;
                 }
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
             }
 
             mLoader = null;
+            ModuleAssembly = null;
             ModuleSate = EPluginModuleState.Unloaded;
+            return true;
         }
         private UPlugin PluginObject;//do not store this object any where
         public T GetPluginObject<T>() where T : UPlugin
         {
-            SureLoad();
+            if (SureLoad() == false)
+                return null;
             return PluginObject as T;
         }
     }
@@ -309,7 +389,7 @@ namespace EngineNS.Bricks.AssemblyLoader
                 path += ".plugin";
                 var name = IO.FileManager.GetPureName(path);
                 var module = GetPluginModule(name);
-                if (module != null)
+                if (module != null && module.PluginDescriptor.Enable)
                 {
                     if (module.ModuleSate == EPluginModuleState.Loaded)
                         module.ModuleSate = EPluginModuleState.ReloadReady;
@@ -333,9 +413,8 @@ namespace EngineNS.Bricks.AssemblyLoader
             //mWatcher.Renamed += (sender, e) => { OnPluginChanged(e.FullPath); OnPluginChanged(e.OldFullPath); };
             mWatcher.EnableRaisingEvents = true;
 
-            
+            var files = IO.FileManager.GetFiles(path, "*.plugin", false);
 #if PWindow
-            var files = System.IO.Directory.GetFiles(path, "*.plugin");
             if (false)
             {
                 var template = new UPluginDescriptor();
@@ -374,15 +453,21 @@ namespace EngineNS.Bricks.AssemblyLoader
                 var dir = IO.FileManager.GetBaseDirectory(i);
                 module.AssemblyPath = dir + name + PlatformSuffix;
                 PluginModules.Add(name, module);
-                if (module.PluginDescriptor.LoadOnInit)
-                    module.SureLoad();
             }
 
-            //foreach (var i in PluginModules)
-            //{
-            //    i.Value.SureLoad();
-            //    i.Value.UnloadPlugin();
-            //}
+            foreach (var i in PluginModules)
+            {
+                if (i.Value.PluginDescriptor.LoadOnInit == false)
+                    continue;
+                i.Value.SureLoad();
+            }
+
+            var taskModule = this.GetPluginModule("GameTasks");
+            if (taskModule != null)
+            {
+                //test code
+                //taskModule.UnloadPlugin(true);
+            }
         }
     }
 }

@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{bccbb13c-8f09-42ab-b3c9-da9a40c43e0b}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\Recast.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\RecastAlloc.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Include\RecastAssert.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\Recast.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\RecastAlloc.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\RecastArea.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\RecastAssert.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\RecastContour.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\RecastFilter.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\RecastLayers.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\RecastMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\RecastMeshDetail.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\RecastRasterization.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Source\RecastRegion.cpp" />
+  </ItemGroup>
+</Project>

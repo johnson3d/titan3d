@@ -415,7 +415,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 UserData = Material,
                 CodeGen = mHLSLCodeGen,
             };
-            MaterialOutput.BuildStatements(ref data);
+            MaterialOutput.BuildStatements(null, ref data);
 
             string code = "";
             UCodeGeneratorData genData = new UCodeGeneratorData()

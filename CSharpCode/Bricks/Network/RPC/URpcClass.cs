@@ -8,10 +8,17 @@ namespace EngineNS.Bricks.Network.RPC
     {
         public ERunTarget RunTarget;
         public EExecuter Executer;
-        FCallMethod[] Methods = new FCallMethod[UInt16.MaxValue];
+        public struct FRpcInfo
+        {
+            public string Name;
+            public FCallMethod Method;
+            public URpcMethodAttribute Attribute;
+        }
+
+        FRpcInfo[] Methods = new FRpcInfo[UInt16.MaxValue];
         public URpcClass(Type type)
         {
-            var attrs = type.GetCustomAttributes(typeof(URpcClassAttribute), false);
+            var attrs = type.GetCustomAttributes(typeof(URpcClassAttribute), true);
             if (attrs.Length == 0)
                 throw new UException("");
 
@@ -22,7 +29,7 @@ namespace EngineNS.Bricks.Network.RPC
             var methods = type.GetMethods();
             foreach (var i in methods)
             {
-                attrs = i.GetCustomAttributes(typeof(URpcMethodAttribute), false);
+                attrs = i.GetCustomAttributes(typeof(URpcMethodAttribute), true);
                 if (attrs.Length == 0)
                     continue;
 
@@ -40,9 +47,11 @@ namespace EngineNS.Bricks.Network.RPC
                     throw new UException("");
 
                 var mtd = attrs[0] as URpcMethodAttribute;
-                if (Methods[mtd.Index] != null)
+                if (Methods[mtd.Index].Method != null)
                     throw new UException("");
-                Methods[mtd.Index] = fun;
+                Methods[mtd.Index].Name = i.Name;
+                Methods[mtd.Index].Method = fun;
+                Methods[mtd.Index].Attribute = mtd;
             }
         }
         static System.Reflection.FieldInfo GetFieldInherit(System.Type type, string name, System.Reflection.BindingFlags flags)
@@ -70,18 +79,22 @@ namespace EngineNS.Bricks.Network.RPC
                 realRetType.GetInterface("ISerializer") == null)
                 return false;
             var parms = mtd.GetParameters();
-            if (parms.Length != 2)
-                return false;
-            if (parms[0].ParameterType != typeof(string) && 
-                parms[0].ParameterType.IsValueType == false &&
-                parms[0].ParameterType.Name != "ISerializer" &&
-                parms[0].ParameterType.GetInterface("ISerializer") == null)
-                return false;
-            if (parms[1].ParameterType != typeof(UCallContext))
+            //if (parms.Length != 2)
+            //    return false;
+            
+            for (int i = 0; i < parms.Length - 1; i++)
+            {
+                if (parms[i].ParameterType != typeof(string) &&
+                    parms[i].ParameterType.IsValueType == false &&
+                    parms[i].ParameterType.Name != "ISerializer" &&
+                    parms[i].ParameterType.GetInterface("ISerializer") == null)
+                    return false;
+            }
+            if (parms[parms.Length - 1].ParameterType != typeof(UCallContext))
                 return false;
             return true;
         }
-        public FCallMethod GetCallee(UInt16 index)
+        public FRpcInfo GetCallee(UInt16 index)
         {
             return Methods[index];
         }

@@ -37,11 +37,15 @@ namespace EngineNS.Bricks.Procedure
         public UBufferCreator Clone()
         {
             var result = new UBufferCreator();
-            result.BufferType = BufferType;
-            result.XSize = XSize;
-            result.YSize = YSize;
-            result.ZSize = ZSize;
+            CopyTo(this, result);
             return result;
+        }
+        public static void CopyTo(UBufferCreator src, UBufferCreator tag)
+        {
+            tag.BufferType = src.BufferType;
+            tag.XSize = src.XSize;
+            tag.YSize = src.YSize;
+            tag.ZSize = src.ZSize;
         }
         public void SetSize(UBufferCreator creator)
         {

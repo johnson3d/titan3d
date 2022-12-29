@@ -1,6 +1,7 @@
 ﻿using EngineNS.EGui.Controls.PropertyGrid;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Bricks.NodeGraph
@@ -29,6 +30,8 @@ namespace EngineNS.Bricks.NodeGraph
             ErrorInfo = $"{sourceFilePath}:{sourceLineNumber}->{memberName}->{info}";
         }
 
+        [Browsable(false)]
+        public bool IsPropertyVisibleDirty { get; set; } = false;
         public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             if(ErrorPin != null)
@@ -123,11 +126,37 @@ namespace EngineNS.Bricks.NodeGraph
             //return true;
             return HostNode.ParentGraph.PinHasLinker(this);
         }
+        public virtual void CopyTo(NodePin pin)
+        {
+            CopyTo(this, pin);
+        }
+        public static void CopyTo(NodePin src, NodePin tag)
+        {
+            tag.Name = src.Name;
+            tag.LinkDesc = src.LinkDesc;
+            tag.Position = src.Position;
+            tag.Size = src.Size;
+            tag.MultiLinks = src.MultiLinks;
+            tag.Tag = src.Tag;
+            tag.GroupName = src.GroupName;
+            tag.ShowIcon = src.ShowIcon;
+            tag.ShowName = src.ShowName;
+        }
     }
     public class PinIn : NodePin
     {
         [Rtti.Meta]
         public UEditableValue EditValue { get; set; } = null;
+
+        public override void CopyTo(NodePin pin)
+        {
+            var pinIn = pin as PinIn;
+            if (pinIn == null)
+                return;
+
+            base.CopyTo(pinIn);
+            pinIn.EditValue = EditValue;
+        }
     }
     public class PinOut : NodePin
     {
@@ -159,7 +188,7 @@ namespace EngineNS.Bricks.NodeGraph
 
     public class UNodeBase : IO.ISerializer
     {
-        public bool LayoutDirty { get; set; } = true;
+        public bool LayoutDirty = true;
 
         public bool HasError = false;
         public GraphException CodeExcept;
@@ -195,6 +224,7 @@ namespace EngineNS.Bricks.NodeGraph
         [System.ComponentModel.Browsable(false)]
         public virtual string Label { get; set; } = "NoName";
         [Rtti.Meta]
+        [System.ComponentModel.Browsable(false)]
         public Guid NodeId { get; set; }
         public string NodeType
         {
@@ -206,6 +236,7 @@ namespace EngineNS.Bricks.NodeGraph
         public bool Selected { get; set; }
         internal Vector2 mPosition;
         [Rtti.Meta]
+        [System.ComponentModel.Browsable(false)]
         public Vector2 Position 
         { 
             get => mPosition;
@@ -215,15 +246,24 @@ namespace EngineNS.Bricks.NodeGraph
                 OnPositionChanged();
             }
         }
+        [System.ComponentModel.Browsable(false)]
         public Vector2 Size { get; set; }
         public Vector2 PrevPos;
+        [System.ComponentModel.Browsable(false)]
         public Vector2 PrevSize { get; set; }
+        [System.ComponentModel.Browsable(false)]
         public EGui.UUvAnim Icon { get; set; } = new EGui.UUvAnim();
+        [System.ComponentModel.Browsable(false)]
         public float TitleHeight { get; set; }
+        [System.ComponentModel.Browsable(false)]
         public UNodeGraph ParentGraph { get; set; }
+        [System.ComponentModel.Browsable(false)]
         public uint BackColor { get; set; }
+        [System.ComponentModel.Browsable(false)]
         public uint TitleColor { get; set; }
+        [System.ComponentModel.Browsable(false)]
         public List<PinIn> Inputs { get; } = new List<PinIn>();
+        [System.ComponentModel.Browsable(false)]
         public List<PinOut> Outputs { get; } = new List<PinOut>();
 
         public object UserData;
@@ -275,6 +315,7 @@ namespace EngineNS.Bricks.NodeGraph
 
         public UNodeBase()
         {
+            Icon.Size = new Vector2(25, 25);
             Selected = false;
             ParentGraph = null;
             TitleHeight = 0;
@@ -560,7 +601,7 @@ namespace EngineNS.Bricks.NodeGraph
                 return true;
             }
         }
-        public PinIn AddPinIn(PinIn pin)
+        public virtual PinIn AddPinIn(PinIn pin)
         {
             pin.HostNode = this;
             foreach (var i in Inputs)
@@ -571,7 +612,7 @@ namespace EngineNS.Bricks.NodeGraph
             Inputs.Add(pin);
             return pin;
         }
-        public PinIn InsertPinIn(int idx, PinIn pin)
+        public virtual PinIn InsertPinIn(int idx, PinIn pin)
         {
             if(idx < 0 || idx >= Inputs.Count)
                 return AddPinIn(pin);
@@ -585,7 +626,7 @@ namespace EngineNS.Bricks.NodeGraph
             Inputs.Insert(idx, pin);
             return pin;
         }
-        public void RemovePinIn(PinIn pin)
+        public virtual void RemovePinIn(PinIn pin)
         {
             pin.HostNode = null;
             for (int i = 0; i < Inputs.Count; i++)
@@ -597,7 +638,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
         }
-        public PinOut AddPinOut(PinOut pin)
+        public virtual PinOut AddPinOut(PinOut pin)
         {
             pin.HostNode = this;
             foreach (var i in Outputs)
@@ -608,7 +649,7 @@ namespace EngineNS.Bricks.NodeGraph
             Outputs.Add(pin);
             return pin;
         }
-        public void RemovePinOut(PinOut pin)
+        public virtual void RemovePinOut(PinOut pin)
         {
             pin.HostNode = null;
             for (int i = 0; i < Outputs.Count; i++)
@@ -705,7 +746,7 @@ namespace EngineNS.Bricks.NodeGraph
             else
                 return GetOutPinType(pin as PinOut);
         }
-        public virtual void BuildStatements(ref BuildCodeStatementsData data) 
+        public virtual void BuildStatements(NodePin pin, ref BuildCodeStatementsData data) 
         {
             throw new InvalidOperationException("Invalid build statements");
         }
@@ -777,14 +818,17 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return "";
         }
-        public virtual bool CopyTo(UNodeBase target)
+        public virtual bool CopyTo(UNodeBase target, bool withId = false)
         {
             if (target.GetType() != this.GetType())
                 return false;
 
+            var id = target.NodeId;
             var type = Rtti.UTypeDesc.TypeOf(this.GetType());
             var meta = Rtti.UClassMetaManager.Instance.GetMeta(type);
             meta.CopyObjectMetaField(target, this);
+            if(!withId)
+                target.NodeId = id;
             return true;
         }
     }

@@ -480,8 +480,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                         var inPin = pinData.PinIn;
                         if(data.NodeGraph.PinHasLinker(inPin))
                         {
+                            var opPin = data.NodeGraph.GetOppositePin(inPin);
                             var opNode = data.NodeGraph.GetOppositePinNode(inPin);
-                            opNode.BuildStatements(ref data);
+                            opNode.BuildStatements(opPin, ref data);
                             exp = data.NodeGraph.GetOppositePinExpression(inPin, ref data);
                         }
                         else
@@ -496,8 +497,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                         var inPin = pinData.PinIn;
                         if (data.NodeGraph.PinHasLinker(inPin))
                         {
+                            var opPin = data.NodeGraph.GetOppositePin(inPin);
                             var opNode = data.NodeGraph.GetOppositePinNode(inPin);
-                            opNode.BuildStatements(ref data);
+                            opNode.BuildStatements(opPin, ref data);
                             exp = data.NodeGraph.GetOppositePinExpression(inPin, ref data);
                         }
                         else
@@ -507,7 +509,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
         }
 
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var method = Method;
 

@@ -197,14 +197,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         //    }
         //    return null;
         //}
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
-            base.BuildStatements(ref data);
+            base.BuildStatements(pin, ref data);
             if(data.NodeGraph.PinHasLinker(InXYZW))
             {
                 var pinNode = data.NodeGraph.GetOppositePinNode(InXYZW);
                 var opPin = data.NodeGraph.GetOppositePin(InXYZW);
-                pinNode.BuildStatements(ref data);
+                pinNode.BuildStatements(opPin, ref data);
 
                 var assignStatment = new UAssignOperatorStatement()
                 {
@@ -218,7 +218,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             {
                 var pinNode = data.NodeGraph.GetOppositePinNode(InX);
                 var opPin = data.NodeGraph.GetOppositePin(InX);
-                pinNode.BuildStatements(ref data);
+                pinNode.BuildStatements(opPin, ref data);
 
                 var assignStatment = new UAssignOperatorStatement()
                 {
@@ -232,7 +232,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             {
                 var pinNode = data.NodeGraph.GetOppositePinNode(InY);
                 var opPin = data.NodeGraph.GetOppositePin(InY);
-                pinNode.BuildStatements(ref data);
+                pinNode.BuildStatements(opPin, ref data);
 
                 var assignStatment = new UAssignOperatorStatement()
                 {
@@ -246,7 +246,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             {
                 var pinNode = data.NodeGraph.GetOppositePinNode(InZ);
                 var opPin = data.NodeGraph.GetOppositePin(InZ);
-                pinNode.BuildStatements(ref data);
+                pinNode.BuildStatements(opPin, ref data);
 
                 var assignStatment = new UAssignOperatorStatement()
                 {
@@ -260,7 +260,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             {
                 var pinNode = data.NodeGraph.GetOppositePinNode(InW);
                 var opPin = data.NodeGraph.GetOppositePin(InW);
-                pinNode.BuildStatements(ref data);
+                pinNode.BuildStatements(opPin, ref data);
 
                 data.CurrentStatements.Add(new UAssignOperatorStatement()
                 {

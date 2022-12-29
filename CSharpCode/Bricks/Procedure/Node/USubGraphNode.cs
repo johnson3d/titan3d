@@ -5,6 +5,176 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure.Node
 {
+    public class UEndPointNode : UPgcNodeBase, IEndPointNode
+    {
+        [Rtti.Meta]
+        public bool IsStart { get; set; }
+
+        List<UNodePinDefineBase> mUserInputs = new List<UNodePinDefineBase>();
+        [Rtti.Meta]
+        public List<UNodePinDefineBase> UserInputs
+        {
+            get => mUserInputs;
+            set
+            {
+                mUserInputs = value;
+                UpdateInputs();
+            }
+        }
+        List<UNodePinDefineBase> mUserOutputs = new List<UNodePinDefineBase>();
+        [Rtti.Meta]
+        public List<UNodePinDefineBase> UserOutputs
+        {
+            get => mUserOutputs;
+            set
+            {
+                mUserOutputs = value;
+                UpdateOutputs();
+            }
+        }
+        public UEndPointNode()
+        {
+            Icon.Size = new Vector2(25, 25);
+        }
+        public override void OnMouseStayPin(NodePin stayPin)
+        {
+            var creator = stayPin.Tag as UBufferCreator;
+            if (creator != null)
+            {
+                EGui.Controls.CtrlUtility.DrawHelper($"{creator.ElementType.Name}");
+            }
+        }
+
+        public void UpdateInputs()
+        {
+            for (int i = 0; i < Inputs.Count; i++)
+            {
+                ParentGraph.RemoveLinkedIn(Inputs[i]);
+            }
+            Inputs.Clear();
+            for (int i = 0; i < UserInputs.Count; i++)
+            {
+                var input = UserInputs[i] as UNodePinDefine;
+                var pin = new PinIn();
+                AddInput(pin, input.Name, input.BufferCreator, input.TypeValue);
+            }
+        }
+        public void UpdateOutputs()
+        {
+            for (int i = 0; i < Outputs.Count; i++)
+            {
+                ParentGraph.RemoveLinkedOut(Outputs[i]);
+            }
+            Outputs.Clear();
+            for (int i = 0; i < UserOutputs.Count; i++)
+            {
+                var output = UserOutputs[i] as UNodePinDefine;
+                var pin = new PinOut();
+                AddOutput(pin, output.Name, output.BufferCreator, output.TypeValue);
+            }
+        }
+        public void UpdatePinWithDefine(NodePin pin, UNodePinDefineBase pinDef)
+        {
+        }
+
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class UUnionNode : UPgcNodeBase, IUnionNode
+    {
+        [Rtti.Meta]
+        public UNodeGraph ContentGraph { get; set; }
+        [Rtti.Meta]
+        public Guid InputNodeId { get; set; }
+        [Rtti.Meta]
+        public Guid OutputNodeId { get; set; }
+
+        List<UNodePinDefineBase> mUserInputs = new List<UNodePinDefineBase>();
+        [Rtti.Meta]
+        public List<UNodePinDefineBase> UserInputs
+        {
+            get => mUserInputs;
+            set
+            {
+                mUserInputs = value;
+                UpdateInputs();
+            }
+        }
+        List<UNodePinDefineBase> mUserOutputs = new List<UNodePinDefineBase>();
+        [Rtti.Meta]
+        public List<UNodePinDefineBase> UserOutputs
+        {
+            get => mUserOutputs;
+            set
+            {
+                mUserOutputs = value;
+                UpdateOutputs();
+            }
+        }
+
+        public UUnionNode()
+        {
+            Icon.Size = new Vector2(25, 25);
+        }
+        public override void OnDoubleClick()
+        {
+            var render = ParentGraph.GetGraphRenderer();
+            if (render != null)
+            {
+                ContentGraph.GraphName = Name;
+                ContentGraph.ParentGraph = ParentGraph;
+                render.SetGraph(ContentGraph);
+            }
+        }
+        public override bool InitProcedure(UPgcGraph graph)
+        {
+            var cGraph = ContentGraph as UPgcGraph;
+            cGraph.GraphEditor = graph.GraphEditor;
+            cGraph.BufferCache.ResetCache();
+
+            //SureSubGraphInputOutputs();
+
+            return true;
+        }
+        public void UpdateInputs()
+        {
+            for(int i = 0; i < Inputs.Count; i++)
+            {
+                ParentGraph.RemoveLinkedIn(Inputs[i]);
+            }
+            Inputs.Clear();
+            for(int i=0; i< UserInputs.Count; i++)
+            {
+                var input = UserInputs[i] as UNodePinDefine;
+                var pin = new PinIn();
+                AddInput(pin, input.Name, input.BufferCreator, input.TypeValue);
+            }
+        }
+        public void UpdateOutputs()
+        {
+            for(int i=0; i<Outputs.Count; i++)
+            {
+                ParentGraph.RemoveLinkedOut(Outputs[i]);
+            }
+            Outputs.Clear();
+            for(int i=0; i<UserOutputs.Count; i++)
+            {
+                var output = UserOutputs[i] as UNodePinDefine;
+                var pin = new PinOut();
+                AddOutput(pin, output.Name, output.BufferCreator, output.TypeValue);
+            }
+        }
+        public void UpdatePinWithDefine(NodePin pin, UNodePinDefineBase pinDef)
+        {
+        }
+        public override UBufferCreator GetOutBufferCreator(PinOut pin)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 
     [Bricks.CodeBuilder.ContextMenu("SubGraph", "SubGraph", UPgcGraph.PgcEditorKeyword)]
     public partial class USubGraphNode : UPgcNodeBase
@@ -224,6 +394,17 @@ namespace EngineNS.Bricks.Procedure.Node
                 }
             }
             return null;
+        }
+        public override void OnDoubleClick()
+        {
+            if (GraphAsset != null)
+            {
+                var graph = this.ParentGraph as UPgcGraph;
+                GraphAsset.AssetGraph.ParentGraph = this.ParentGraph;
+                GraphAsset.AssetGraph.GraphName = this.Name;
+                this.SureSubGraphInputOutputs();
+                graph.GraphEditor.GraphRenderer.SetGraph(GraphAsset.AssetGraph);
+            }
         }
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {

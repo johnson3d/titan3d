@@ -83,7 +83,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         //    return null;
         //}
 
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
         }
 

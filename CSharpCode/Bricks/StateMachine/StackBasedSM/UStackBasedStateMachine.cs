@@ -4,10 +4,10 @@ using System.Text;
 
 namespace EngineNS.Bricks.StateMachine.StackBasedSM
 {
-    public class UStackBasedStateMachine : UStateMachine
+    public class UStackBasedStateMachine : IStateMachine
     {
         protected Stack<StackBasedState> StatesStack = new Stack<StackBasedState>();
-        public UStackBasedStateMachine(string name) : base(name)
+        public UStackBasedStateMachine(string name)
         {
 
         }

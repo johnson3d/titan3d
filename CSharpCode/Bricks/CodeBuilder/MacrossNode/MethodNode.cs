@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
@@ -316,6 +317,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public void AddMenuItems(UMenuItem parentItem)
         {
+            parentItem.AddMenuSeparator("BREAKPOINTS");
             parentItem.AddMenuItem("Add Breakpoint", null,
                 (UMenuItem item, object sender) =>
                 {
@@ -754,6 +756,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             return base.GetPropertyEditObject();
         }
+        [Browsable(false)]
+        public bool IsPropertyVisibleDirty { get; set; } = false;
         public void GetProperties(ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             for(int i=0; i<Arguments.Count; i++)
@@ -990,7 +994,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 if(pinData.PinIn == pin)
                 {
-                    if (EGui.UIProxy.MenuItemProxy.MenuItem("AddPin", null, false, null, ref drawList, ref menuData, ref pinData.AddPinMenuState))
+                    if (EGui.UIProxy.MenuItemProxy.MenuItem("AddPin", null, false, null, in drawList, in menuData, ref pinData.AddPinMenuState))
                         addPinAction();
                     processed = true;
                 }
@@ -999,11 +1003,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     var subPin = pinData.SubPins[subIdx];
                     if(subPin.PinIn == pin)
                     {
-                        if (EGui.UIProxy.MenuItemProxy.MenuItem("AddPin", null, false, null, ref drawList, ref menuData, ref subPin.AddPinMenuState))
+                        if (EGui.UIProxy.MenuItemProxy.MenuItem("AddPin", null, false, null, in drawList, in menuData, ref subPin.AddPinMenuState))
                             addPinAction();
                         if (subPin.IsCustomPin)
                         {
-                            if (EGui.UIProxy.MenuItemProxy.MenuItem("DeletePin", null, false, null, ref drawList, ref menuData, ref subPin.DeletePinMenuState))
+                            if (EGui.UIProxy.MenuItemProxy.MenuItem("DeletePin", null, false, null, in drawList, in menuData, ref subPin.DeletePinMenuState))
                             {
                                 RemovePinIn(subPin.PinIn);
                                 pinData.SubPins.RemoveAt(subIdx);
@@ -1211,13 +1215,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     else
                                     {
                                         exp = fexp;
-                                        var varName = ((UVariableReferenceExpression)texp).VariableName;
-                                        beforeStatements?.Add(new UDebuggerSetWatchVariable()
+                                        if (beforeStatements != null)
                                         {
-                                            VariableType = new UTypeReference(pinType),
-                                            VariableName = varName,
-                                            VariableValue = exp,
-                                        });
+                                            var varName = ((UVariableReferenceExpression)texp).VariableName;
+                                            beforeStatements?.Add(new UDebuggerSetWatchVariable()
+                                            {
+                                                VariableType = new UTypeReference(pinType),
+                                                VariableName = varName,
+                                                VariableValue = exp,
+                                            });
+                                        }
                                     }
                                 }
                                 else
@@ -1245,20 +1252,23 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             else
                             {
                                 exp = new UVariableReferenceExpression(paramName);
-                                var typeRef = new UTypeReference(pinType);
-                                var varDec = new UVariableDeclaration()
+                                if (beforeStatements != null)
                                 {
-                                    VariableType = typeRef,
-                                    VariableName = paramName,
-                                    InitValue = GetNoneLinkedParameterExp(inPin, argIdx, ref data),
-                                };
-                                beforeStatements.Add(varDec);
-                                beforeStatements.Add(new UDebuggerSetWatchVariable()
-                                {
-                                    VariableType = typeRef,
-                                    VariableName = paramName,
-                                    VariableValue = exp,
-                                });
+                                    var typeRef = new UTypeReference(pinType);
+                                    var varDec = new UVariableDeclaration()
+                                    {
+                                        VariableType = typeRef,
+                                        VariableName = paramName,
+                                        InitValue = GetNoneLinkedParameterExp(inPin, argIdx, ref data),
+                                    };
+                                    beforeStatements.Add(varDec);
+                                    beforeStatements.Add(new UDebuggerSetWatchVariable()
+                                    {
+                                        VariableType = typeRef,
+                                        VariableName = paramName,
+                                        VariableValue = exp,
+                                    });
+                                }
                             }
                         }
                         break;
@@ -1283,12 +1293,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             else
                                 exp = GetNoneLinkedParameterExp(inPin, argIdx, ref data);
 
-                            beforeStatements.Add(new UDebuggerSetWatchVariable()
+                            if(beforeStatements != null)
                             {
-                                VariableType = new UTypeReference(pinType),
-                                VariableName = GetParamValueName(inPin.Name),
-                                VariableValue = exp,
-                            });
+                                beforeStatements.Add(new UDebuggerSetWatchVariable()
+                                {
+                                    VariableType = new UTypeReference(pinType),
+                                    VariableName = GetParamValueName(inPin.Name),
+                                    VariableValue = exp,
+                                });
+                            }
                         }
                         break;
                 }
@@ -1320,14 +1333,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        public override void BuildStatements(ref BuildCodeStatementsData data)
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (MethodDesc != null)
-                BuildStatementsWithMethodDec(ref data);
+                BuildStatementsWithMethodDec(pin, ref data);
             else
-                BuildStatementsWithMethodMeta(ref data);
+                BuildStatementsWithMethodMeta(pin, ref data);
         }
-        private void BuildStatementsWithMethodDec(ref BuildCodeStatementsData data)
+        private void BuildStatementsWithMethodDec(NodePin pin, ref BuildCodeStatementsData data)
         {
             var methodInvokeExp = new UMethodInvokeStatement()
             {
@@ -1387,11 +1400,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 });
             }
 
+            var nextNodePin = data.NodeGraph.GetOppositePin(AfterExec);
             var nextNode = data.NodeGraph.GetOppositePinNode(AfterExec);
             if (nextNode != null)
-                nextNode.BuildStatements(ref data);
+                nextNode.BuildStatements(nextNodePin, ref data);
         }
-        private void BuildStatementsWithMethodMeta(ref BuildCodeStatementsData data)
+        private void BuildStatementsWithMethodMeta(NodePin pin, ref BuildCodeStatementsData data)
         {
             var method = Method;
             var methodInvokeExp = new UMethodInvokeStatement()
@@ -1463,9 +1477,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 });
             }
 
+            var nextNodePin = data.NodeGraph.GetOppositePin(AfterExec);
             var nextNode = data.NodeGraph.GetOppositePinNode(AfterExec);
             if (nextNode != null)
-                nextNode.BuildStatements(ref data);
+                nextNode.BuildStatements(nextNodePin, ref data);
         }
         public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
@@ -1622,7 +1637,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             DrawNSTree(filterText, Rtti.UClassMetaManager.Instance.TreeManager.RootNS);
         }
-        public unsafe void DrawNSTree(string filterText, Rtti.NameSpace ns)
+        public unsafe void DrawNSTree(string filterText, Rtti.UNameSpace ns)
         {
             bool bTestFilter = string.IsNullOrEmpty(filterText) == false;
             if (bTestFilter && ns.IsContain(filterText) == false)
