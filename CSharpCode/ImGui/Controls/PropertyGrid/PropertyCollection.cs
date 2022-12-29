@@ -169,8 +169,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     var tAtt = att as PGCustomValueEditorAttribute;
                     if (!tAtt.Initialized)
                         _ = tAtt.Initialize();
-                    IsBrowsable = !tAtt.HideInPG;
-                    mIsReadonly = tAtt.ReadOnly;
+                    IsBrowsable = IsBrowsable && !tAtt.HideInPG;
+                    mIsReadonly = mIsReadonly || tAtt.ReadOnly;
                     CustomValueEditor = tAtt;
                 }
             }
@@ -1244,6 +1244,39 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             fields.ReleaseObject();
 
             return categoryGroups;
+        }
+        public static bool PropertyCollectionIsDirty(object instance)
+        {
+            if (instance == null)
+                return false;
+
+            var enumrableInterface = instance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+            if (enumrableInterface != null)
+            {
+                foreach (var objIns in (IEnumerable)instance)
+                {
+                    if (objIns == null)
+                        continue;
+
+                    var custom = objIns as IPropertyCustomization;
+                    if (custom == null)
+                        continue;
+
+                    if (custom.IsPropertyVisibleDirty)
+                        return true;
+                }
+            }
+            else
+            {
+                var custom = instance as IPropertyCustomization;
+                if (custom != null)
+                {
+                    if (custom.IsPropertyVisibleDirty)
+                        return true;
+                }
+            }
+
+            return false;
         }
     }
 }

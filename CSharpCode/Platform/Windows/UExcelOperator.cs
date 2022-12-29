@@ -8,7 +8,18 @@ namespace EngineNS.Bricks.DataSet
     public partial class UDataSet
     {
         internal HSSFWorkbook mWorkbook;
-        internal bool LoadDataSetFromExcel(HSSFWorkbook workbook, Type type)
+        partial void LoadDataSet_Exel(ref bool isOk, RName name, Type objType)
+        {
+            System.IO.FileStream fs = System.IO.File.OpenRead(name.Address);
+            if (fs == null)
+            {
+                isOk = false;
+            }
+
+            var workbook = new NPOI.HSSF.UserModel.HSSFWorkbook(fs);
+            isOk = LoadDataSetFromExcel(workbook, objType);
+        }
+        private bool LoadDataSetFromExcel(HSSFWorkbook workbook, Type type)
         {
             var sheetTypes = new List<Type>();
             BinderManager.CollectSheetTypes(type, sheetTypes);

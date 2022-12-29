@@ -4,6 +4,10 @@ using System.Text;
 
 namespace EngineNS.NxRHI
 {
+    public unsafe partial struct FGpuDeviceDesc
+    {
+    }
+
     public class UGpuSystem : AuxPtrType<NxRHI.IGpuSystem>
     {
         public static UGpuSystem CreateGpuSystem(ERhiType type, in FGpuSystemDesc desc)
@@ -25,6 +29,19 @@ namespace EngineNS.NxRHI
             {
                 return mCoreObject.GetNumOfGpuDevice();
             }
+        }
+        public void GetDeviceDesc(int index, ref EngineNS.NxRHI.FGpuDeviceDesc desc)
+        {
+            mCoreObject.GetDeviceDesc(index, ref desc);
+        }
+        public int GetAdapterScore(in EngineNS.NxRHI.FGpuDeviceDesc desc)
+        {
+            var memMB = (uint)desc.DedicatedVideoMemory / (1024 * 1024);
+            if (desc.Name.Contains("NVIDIA"))
+            {
+                memMB += 100;
+            }
+            return (int)memMB;
         }
     }
     public unsafe partial struct FGpuDeviceCaps

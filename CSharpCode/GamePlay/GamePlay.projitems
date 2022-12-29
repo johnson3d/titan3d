@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Camera\UCamera.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Camera\UCameraSpringArm.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Character\UCharacter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UCenterData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controller\IController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controller\UNPCController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controller\UCharacterController.cs" />

@@ -53,12 +53,12 @@ namespace EngineNS.Editor
             {
                 Config = new UEditorConfig();
                 Config.GameProject = "Module/GameProject/GameProject.csproj";
-                Config.GameAssembly = "binaries/net5.0/GameProject.dll";
+                Config.GameAssembly = $"binaries/{UEngine.DotNetVersion}/GameProject.dll";
                 Config.PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
                 IO.FileManager.SaveObjectToXml(cfgFile, Config);
             }
 
-            var gameAssembly = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + Config.GameAssembly;
+            var gameAssembly = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + Config.GameAssembly;
             
             UEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
 

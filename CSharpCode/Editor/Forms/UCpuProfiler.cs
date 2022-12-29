@@ -132,17 +132,17 @@ namespace EngineNS.Editor.Forms
                 {
                     if (mRpcProfilerThreads != null)
                         ProfilerThreadNames = mRpcProfilerThreads.Result.ThreadNames;
-                    mRpcProfilerThreads = Profiler.URpcProfiler.GetProfilerThreads(0);
+                    mRpcProfilerThreads = Profiler.URpcProfiler_RpcCaller.GetProfilerThreads(0);
                 }
             }
                 
             if (Visible == false)
                 return;
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
+            //ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
 
             var size = new Vector2(800, 600);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (ImGuiAPI.Begin("CpuProfiler", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginMainForm("CpuProfiler", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
                 var stats = UEngine.Instance.GfxDevice.RenderCmdQueue.GetStat();
@@ -166,7 +166,7 @@ namespace EngineNS.Editor.Forms
                             {
                                 if (mRpcProfilerData != null)
                                     SetCopes(mRpcProfilerData.Result.Scopes);
-                                mRpcProfilerData = Profiler.URpcProfiler.GetProfilerData(i);
+                                mRpcProfilerData = Profiler.URpcProfiler_RpcCaller.GetProfilerData(i);
                             }
                             if (ImGuiAPI.BeginChild("TimeScope", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                             {
@@ -273,7 +273,7 @@ namespace EngineNS.Editor.Forms
                                             PopItemMenu(i, j, "MaxTime");
                                         }
                                         ImGuiAPI.TableSetColumnIndex(4);
-                                        Vector4 clr = new Vector4(1, 0, 1, 1);
+                                        Vector4 clr = new Vector4(0.5f, 0.69f, 0.93f, 1);
                                         if (j.Parent != "null")
                                         {
                                             ImGuiAPI.TextColored(in clr, j.Parent);
@@ -281,7 +281,7 @@ namespace EngineNS.Editor.Forms
                                             var max = ImGuiAPI.GetItemRectMax();
                                             min.Y = max.Y;
                                             var cmdlist = ImGuiAPI.GetWindowDrawList();
-                                            cmdlist.AddLine(in min, in max, 0xFFFF00FF, 1);
+                                            cmdlist.AddLine(in min, in max, EGui.UIProxy.StyleConfig.Instance.LinkStringColor, 1);
                                             if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                                             {
                                                 CurrentName = j.Parent;
@@ -308,7 +308,7 @@ namespace EngineNS.Editor.Forms
                 if (OnDrawMenu != null)
                     OnDrawMenu();
             }
-            ImGuiAPI.End();
+            EGui.UIProxy.DockProxy.EndMainForm();
         }
         bool mMenuShow = false;
         private unsafe void PopItemMenu(string watchingThread, Profiler.URpcProfiler.RpcProfilerData.ScopeInfo scope, string column)
@@ -337,7 +337,7 @@ namespace EngineNS.Editor.Forms
                                     var arg = new Profiler.URpcProfiler.ResetMaxTimeArg();
                                     arg.ThreadName = watchingThread;
                                     arg.ScopeName = scope.ShowName;
-                                    Profiler.URpcProfiler.ResetMaxTime(arg);
+                                    Profiler.URpcProfiler_RpcCaller.ResetMaxTime(arg);
                                     OnDrawMenu = null;
                                 }
                                 ImGuiAPI.EndPopup();

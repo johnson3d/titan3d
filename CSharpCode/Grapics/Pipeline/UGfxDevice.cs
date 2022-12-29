@@ -134,7 +134,7 @@ namespace EngineNS.Graphics.Pipeline
         public USlateApplication SlateApplication { get; set; }
         public NxRHI.UGpuSystem RenderSystem { get; private set; }
         public NxRHI.UGpuDevice RenderContext { get; private set; }
-        protected async System.Threading.Tasks.Task<bool> InitGPU(UEngine engine, UInt32 Adapter, NxRHI.ERhiType rhi, IntPtr window, bool bDebugLayer, bool useRenderDoc)
+        protected async System.Threading.Tasks.Task<bool> InitGPU(UEngine engine, int Adapter, NxRHI.ERhiType rhi, IntPtr window, bool bDebugLayer, bool useRenderDoc)
         {
             if (UEngine.Instance.PlayMode != EPlayMode.Game)
             {
@@ -160,8 +160,21 @@ namespace EngineNS.Graphics.Pipeline
                     return false;
                 var rcDesc = new NxRHI.FGpuDeviceDesc();
                 rcDesc.SetDefault();
-                //var caps = new NxRHI.FGpuDeviceCaps();
-                //RenderSystem.GetContextDesc(Adapter, ref rcDesc);
+                if (Adapter < 0)
+                {
+                    int AdapterScore = 0;
+                    for (int i = 0; i < RenderSystem.NumOfContext; i++)
+                    {
+                        var caps = new NxRHI.FGpuDeviceDesc();
+                        RenderSystem.GetDeviceDesc(i, ref caps);
+                        var score = RenderSystem.GetAdapterScore(in caps);
+                        if (score > AdapterScore)
+                        {
+                            Adapter = i;
+                            AdapterScore = score;
+                        }
+                    }
+                }
 
                 rcDesc.CreateDebugLayer = bDebugLayer;
                 //rcDesc.Han = window.ToPointer();

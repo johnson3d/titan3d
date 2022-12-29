@@ -158,8 +158,8 @@ namespace EngineNS.EGui.UIProxy
             string shortcut,
             bool selected,
             ImageProxy icon, 
-            ref ImDrawList drawList, 
-            ref Support.UAnyPointer drawData,
+            in ImDrawList drawList, 
+            in Support.UAnyPointer drawData,
             ref MenuState state)
         {
             bool colorPushed = false;
@@ -234,8 +234,8 @@ namespace EngineNS.EGui.UIProxy
             string menuName,
             string shortcut,
             ImageProxy icon,
-            ref ImDrawList drawList,
-            ref Support.UAnyPointer drawData,
+            in ImDrawList drawList,
+            in Support.UAnyPointer drawData,
             ref MenuState state,
             bool isTopMenuItem = false
             )
@@ -316,10 +316,15 @@ namespace EngineNS.EGui.UIProxy
 
         public bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
         {
+            return OnDraw(Name, drawList, Thickness);
+        }
+
+        public static bool OnDraw(string name, in ImDrawList drawList, float thickness)
+        {
             ImGuiAPI.BeginGroup();
             UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_Bold_13px);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.NamedMenuSeparatorColor);
-            ImGuiAPI.Text(Name);
+            ImGuiAPI.Text(name);
             ImGuiAPI.PopStyleColor(1);
             ImGuiAPI.SameLine(0, -1);
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
@@ -327,7 +332,7 @@ namespace EngineNS.EGui.UIProxy
             var itemSize = ImGuiAPI.GetItemRectSize();
             var start = new Vector2(cursorPos.X, cursorPos.Y + itemSize.Y * 0.5f);
             var end = new Vector2(start.X + winWidth - itemSize.X - StyleConfig.Instance.WindowPadding.X * 2 - StyleConfig.Instance.ItemSpacing.X, start.Y);
-            drawList.AddLine(in start, in end, StyleConfig.Instance.NamedMenuSeparatorColor, Thickness);
+            drawList.AddLine(in start, in end, StyleConfig.Instance.NamedMenuSeparatorColor, thickness);
             UEngine.Instance.GfxDevice.SlateRenderer.PopFont();
             ImGuiAPI.EndGroup();
             return true;

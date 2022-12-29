@@ -23,7 +23,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             get;
             set;
         }
-        public object Target { get; set; }
+        public object Target 
+        { 
+            get; 
+            set; 
+        }
     }
 
     public class PGCatogoryAttribute : Attribute
@@ -61,6 +65,19 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             public bool Expand;
             public ImGuiTreeNodeFlags_ Flags;
             public CustomPropertyDescriptor HostProperty;
+
+            public void CopyTo(ref EditorInfo info)
+            {
+                Name = info.Name;
+                Type = info.Type;
+                Value = info.Value;
+                ObjectInstance = info.ObjectInstance;
+                HostPropertyGrid = info.HostPropertyGrid;
+                Readonly = info.Readonly;
+                Expand = info.Expand;
+                Flags = info.Flags;
+                HostProperty = info.HostProperty;
+            }
         }
         //public virtual void OnDraw(System.Reflection.PropertyInfo prop, object target, object value, Controls.PropertyGrid.PropertyGrid pg, List<KeyValuePair<object, System.Reflection.PropertyInfo>> callstack)
         public virtual bool OnDraw(in EditorInfo info, out object newValue)
@@ -89,6 +106,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
 
         }
+        public virtual string GetErrorString<T>(in EditorInfo info, T newValue) { return null; }
     }
     public class PGTypeEditorAttribute : PGCustomValueEditorAttribute
     {
@@ -153,10 +171,41 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
     public interface IPropertyCustomization
     {
+        bool IsPropertyVisibleDirty { get; }
         void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType);
 #nullable enable
         object? GetPropertyValue(string propertyName);
         void SetPropertyValue(string propertyName, object? value);
+#nullable disable
+    }
+
+    public class PropertyCustomizationHelper<T>
+    {
+        public static void GetProperties(in T obj, ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {
+            var pros = TypeDescriptor.GetProperties(obj);
+            var objType = Rtti.UTypeDesc.TypeOf(obj.GetType());
+            foreach (PropertyDescriptor prop in pros)
+            {
+                var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                proDesc.InitValue(obj, objType, prop, parentIsValueType);
+                if (!proDesc.IsBrowsable)
+                    continue;
+                collection.Add(proDesc);
+            }
+        }
+#nullable enable
+        public static object? GetPropertyValue(in T obj, string propertyName)
+        {
+            var proInfo = obj.GetType().GetProperty(propertyName);
+            return proInfo?.GetValue(obj);
+        }
+        public static void SetPropertyValue(in T obj, string propertyName, object? value)
+        {
+            var proInfo = obj.GetType().GetProperty(propertyName);
+            if (proInfo != null)
+                proInfo.SetValue(obj, value);
+        }
 #nullable disable
     }
 
@@ -416,7 +465,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 if (IsABGR)
-                    drawCol = (UInt32)info.Value;
+                    drawCol = System.Convert.ToUInt32(info.Value);
                 else
                     drawCol = Color4.Argb2Abgr((UInt32)info.Value);
                 drawList.AddRectFilled(in startPos, in endPos, drawCol, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None);

@@ -1413,9 +1413,9 @@ namespace EngineNS.NxRHI
             if (srv == null)
                 return false;
 
-            var now = UEngine.Instance.CurrentTickCount;
+            var nowFrame = UEngine.Instance.CurrentTickFrame;
             var resState = srv.mCoreObject.GetResourceState();
-            if (now - resState->GetAccessTime() > 15 * 1000 * 1000)
+            if (nowFrame - resState->GetAccessFrame() > 15 * (uint)UEngine.Instance.Config.TargetFps)//15 second & 60 target fps
             {
                 srv.TargetLOD = 1;
                 //mWaitRemoves.Add(asset.AssetName);

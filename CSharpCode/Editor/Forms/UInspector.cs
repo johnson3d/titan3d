@@ -31,7 +31,8 @@ namespace EngineNS.Editor.Forms
         {
             if (Visible == false)
                 return;
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
+            ImGuiAPI.SetNextWindowDockID(EGui.UIProxy.DockProxy.MainFormDockClass.ClassId, ImGuiCond_.ImGuiCond_Appearing);
+            ImGuiAPI.SetNextWindowClass(EGui.UIProxy.DockProxy.MainFormDockClass);
             mPropertyGrid.OnDraw(ShowReadOnly, true, false);
         }
     }

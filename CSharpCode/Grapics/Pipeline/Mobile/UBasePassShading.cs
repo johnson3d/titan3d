@@ -274,6 +274,15 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 cBuffer.SetValue(coreBinder.CBPerViewport.gShadowMapSizeAndRcp, in shadowNode.mShadowMapSizeAndRcp);
                 cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtx, in shadowNode.mViewer2ShadowMtx);
                 cBuffer.SetValue(coreBinder.CBPerViewport.gShadowDistance, in shadowNode.mShadowDistance);
+                
+                cBuffer.SetValue(coreBinder.CBPerViewport.gCsmDistanceArray, in shadowNode.mSumDistanceFarVec);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 0, in shadowNode.mViewer2ShadowMtxArray[0]);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 1, in shadowNode.mViewer2ShadowMtxArray[1]);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 2, in shadowNode.mViewer2ShadowMtxArray[2]);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 3, in shadowNode.mViewer2ShadowMtxArray[3]);
+
+                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScaleArrayEditor, in shadowNode.mShadowTransitionScaleVec);
+                cBuffer.SetValue(coreBinder.CBPerViewport.gCsmNum, in shadowNode.mCsmNum);
             }
 
             var dirLight = world.DirectionLight;
@@ -451,6 +460,16 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             cBuffer.SetValue(coreBinder.CBPerViewport.gShadowMapSizeAndRcp, in mobilePolicy.mShadowMapNode.mShadowMapSizeAndRcp);
             cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtx, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtx);
             cBuffer.SetValue(coreBinder.CBPerViewport.gShadowDistance, in mobilePolicy.mShadowMapNode.mShadowDistance);
+
+            cBuffer.SetValue(coreBinder.CBPerViewport.gCsmDistanceArray, in mobilePolicy.mShadowMapNode.mSumDistanceFarVec);
+
+            cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 0, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtxArray[0]);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 1, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtxArray[1]);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 2, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtxArray[2]);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtxArrayEditor, 3, in mobilePolicy.mShadowMapNode.mViewer2ShadowMtxArray[3]);
+
+            cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScaleArrayEditor, in mobilePolicy.mShadowMapNode.mShadowTransitionScaleVec);
+            cBuffer.SetValue(coreBinder.CBPerViewport.gCsmNum, in mobilePolicy.mShadowMapNode.mCsmNum);
 
             var dirLight = world.DirectionLight;
             //dirLight.mDirection = MathHelper.RandomDirection();

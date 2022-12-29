@@ -350,7 +350,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             //var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen;
             bool useCategory = true;
             Dictionary<string, CustomPropertyDescriptorCollection> propertiesDic;
-            if(!mDrawTargetDic.TryGetValue(target, out propertiesDic))
+            if(!mDrawTargetDic.TryGetValue(target, out propertiesDic) || PropertyCollection.PropertyCollectionIsDirty(target))
             {
                 propertiesDic = PropertyCollection.CollectionProperties(target, useCategory, target.GetType().IsValueType);
                 mDrawTargetDic[target] = propertiesDic;

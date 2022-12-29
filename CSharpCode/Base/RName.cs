@@ -1,13 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace EngineNS
 {
+    public abstract class URNameTagObjectAttribute : Attribute 
+    {
+        public abstract object GetTagObject(RName rn);
+    }
+
     [RName.PGRName]
     public class RName : IComparable<RName>, IComparable
     {
+        public WeakReference mTagReference = null;
+        public T GetTagObject<T>()
+        {
+            if (mTagReference == null || mTagReference.IsAlive == false)
+            {
+                var attrs = typeof(T).GetCustomAttributes(typeof(URNameTagObjectAttribute), true);
+                if (attrs.Length > 0)
+                {
+                    var attrTag = attrs[0] as URNameTagObjectAttribute;
+                    mTagReference = new WeakReference(attrTag.GetTagObject(this));
+                }
+            }
+            return (T)mTagReference.Target;
+        }
+
         public class PGRNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
             public string FilterExts;   // "ext1" / "ext1,ext2"

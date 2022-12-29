@@ -82,6 +82,16 @@ namespace EngineNS.Editor.Forms
                     return false;
             }
 
+           // EngineNS.Canvas.FCanvas canvas = EngineNS.Canvas.FCanvas.CreateInstance();
+           // Graphics.Mesh.UMeshDataProvider MeshProvider = new Graphics.Mesh.UMeshDataProvider();
+
+           // var builder = MeshProvider.mCoreObject;
+           // uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
+           //     (1 << (int)NxRHI.EVertexStreamType.VST_Normal) |
+           //     (1 << (int)NxRHI.EVertexStreamType.VST_Color) |
+           //     (1 << (int)NxRHI.EVertexStreamType.VST_UV));
+          //  builder.Init(streams, false, 1);
+          //  canvas.DemoDraw(MeshProvider.mCoreObject);
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"Mesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;

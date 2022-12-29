@@ -82,8 +82,27 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 var v = (System.Convert.ToBoolean(info.Value));
+                string errStr = null;
                 retValue = EGui.UIProxy.CheckBox.DrawCheckBox(name, ref v, info.Readonly);//ImGuiAPI.Checkbox(name, ref v) && !info.Readonly;
-                if(retValue)
+                if(info.HostProperty.CustomValueEditor != null) 
+                {
+                    errStr = info.HostProperty.CustomValueEditor.GetErrorString(in info, v);
+                    if(!string.IsNullOrEmpty(errStr))
+                    {
+                        var min = ImGuiAPI.GetItemRectMin();
+                        var max = ImGuiAPI.GetItemRectMax();
+                        var drawList = ImGuiAPI.GetWindowDrawList();
+                        drawList.AddRect(min, max, 0xff0000ff, 0.2f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+
+                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                        {
+                            ImGuiAPI.BeginTooltip();
+                            ImGuiAPI.SetTooltip(errStr);
+                            ImGuiAPI.EndTooltip();
+                        }
+                    }
+                }
+                if(retValue && string.IsNullOrEmpty(errStr))
                     newValue = v;
             }
             //ImGuiAPI.PopStyleVar(1);
@@ -138,7 +157,26 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                 }
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S8, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (changed && !info.Readonly)
+                string errStr = null;
+                if (info.HostProperty.CustomValueEditor != null)
+                {
+                    errStr = info.HostProperty.CustomValueEditor.GetErrorString(in info, v);
+                    if (!string.IsNullOrEmpty(errStr))
+                    {
+                        var min = ImGuiAPI.GetItemRectMin();
+                        var max = ImGuiAPI.GetItemRectMax();
+                        var drawList = ImGuiAPI.GetWindowDrawList();
+                        drawList.AddRect(min, max, 0xff0000ff, 0.2f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+
+                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                        {
+                            ImGuiAPI.BeginTooltip();
+                            ImGuiAPI.SetTooltip(errStr);
+                            ImGuiAPI.EndTooltip();
+                        }
+                    }
+                }
+                if (changed && !info.Readonly && string.IsNullOrEmpty(errStr))
                 {
                     newValue = v;
                     retValue = true;
@@ -187,8 +225,27 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         speed = vStep.Step;
                     }
                 }
+                string errStr = null;
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S16, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (!info.Readonly && changed)
+                if (info.HostProperty.CustomValueEditor != null)
+                {
+                    errStr = info.HostProperty.CustomValueEditor.GetErrorString(in info, v);
+                    if (!string.IsNullOrEmpty(errStr))
+                    {
+                        var min = ImGuiAPI.GetItemRectMin();
+                        var max = ImGuiAPI.GetItemRectMax();
+                        var drawList = ImGuiAPI.GetWindowDrawList();
+                        drawList.AddRect(min, max, 0xff0000ff, 0.2f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+
+                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                        {
+                            ImGuiAPI.BeginTooltip();
+                            ImGuiAPI.SetTooltip(errStr);
+                            ImGuiAPI.EndTooltip();
+                        }
+                    }
+                }
+                if (!info.Readonly && changed && string.IsNullOrEmpty(errStr))
                 {
                     newValue = v;
                     retValue = true;
@@ -238,7 +295,26 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                 }
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S32, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (!info.Readonly && changed)
+                string errStr = null;
+                if (info.HostProperty.CustomValueEditor != null)
+                {
+                    errStr = info.HostProperty.CustomValueEditor.GetErrorString(in info, v);
+                    if (!string.IsNullOrEmpty(errStr))
+                    {
+                        var min = ImGuiAPI.GetItemRectMin();
+                        var max = ImGuiAPI.GetItemRectMax();
+                        var drawList = ImGuiAPI.GetWindowDrawList();
+                        drawList.AddRect(min, max, 0xff0000ff, 0.2f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+
+                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                        {
+                            ImGuiAPI.BeginTooltip();
+                            ImGuiAPI.SetTooltip(errStr);
+                            ImGuiAPI.EndTooltip();
+                        }
+                    }
+                }
+                if (!info.Readonly && changed && string.IsNullOrEmpty(errStr))
                 {
                     newValue = v;
                     retValue = true;
@@ -290,7 +366,26 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                 }
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_S64, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (!info.Readonly && changed)
+                string errStr = null;
+                if (info.HostProperty.CustomValueEditor != null)
+                {
+                    errStr = info.HostProperty.CustomValueEditor.GetErrorString(in info, v);
+                    if (!string.IsNullOrEmpty(errStr))
+                    {
+                        var min = ImGuiAPI.GetItemRectMin();
+                        var max = ImGuiAPI.GetItemRectMax();
+                        var drawList = ImGuiAPI.GetWindowDrawList();
+                        drawList.AddRect(min, max, 0xff0000ff, 0.2f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+
+                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                        {
+                            ImGuiAPI.BeginTooltip();
+                            ImGuiAPI.SetTooltip(errStr);
+                            ImGuiAPI.EndTooltip();
+                        }
+                    }
+                }
+                if (!info.Readonly && changed && string.IsNullOrEmpty(errStr))
                 {
                     newValue = v;
                     retValue = true;
@@ -341,8 +436,27 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         speed = vStep.Step;
                     }
                 }
+                string errStr = null;
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U8, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (!info.Readonly && changed)
+                if(info.HostProperty.CustomValueEditor != null)
+                {
+                    errStr = info.HostProperty.CustomValueEditor.GetErrorString(in info, v);
+                    if (!string.IsNullOrEmpty(errStr))
+                    {
+                        var min = ImGuiAPI.GetItemRectMin();
+                        var max = ImGuiAPI.GetItemRectMax();
+                        var drawList = ImGuiAPI.GetWindowDrawList();
+                        drawList.AddRect(min, max, 0xff0000ff, 0.2f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+
+                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                        {
+                            ImGuiAPI.BeginTooltip();
+                            ImGuiAPI.SetTooltip(errStr);
+                            ImGuiAPI.EndTooltip();
+                        }
+                    }
+                }
+                if (!info.Readonly && changed && string.IsNullOrEmpty(errStr))
                 {
                     newValue = v;
                     retValue = true;
@@ -394,7 +508,26 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                 }
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U16, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (!info.Readonly && changed)
+                string errStr = null;
+                if (info.HostProperty.CustomValueEditor != null)
+                {
+                    errStr = info.HostProperty.CustomValueEditor.GetErrorString(in info, v);
+                    if (!string.IsNullOrEmpty(errStr))
+                    {
+                        var min = ImGuiAPI.GetItemRectMin();
+                        var max = ImGuiAPI.GetItemRectMax();
+                        var drawList = ImGuiAPI.GetWindowDrawList();
+                        drawList.AddRect(min, max, 0xff0000ff, 0.2f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+
+                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                        {
+                            ImGuiAPI.BeginTooltip();
+                            ImGuiAPI.SetTooltip(errStr);
+                            ImGuiAPI.EndTooltip();
+                        }
+                    }
+                }
+                if (!info.Readonly && changed && string.IsNullOrEmpty(errStr))
                 {
                     newValue = v;
                     retValue = true;
@@ -447,7 +580,26 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                 }
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U32, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (!info.Readonly && changed)
+                string errStr = null;
+                if (info.HostProperty.CustomValueEditor != null)
+                {
+                    errStr = info.HostProperty.CustomValueEditor.GetErrorString(in info, v);
+                    if (!string.IsNullOrEmpty(errStr))
+                    {
+                        var min = ImGuiAPI.GetItemRectMin();
+                        var max = ImGuiAPI.GetItemRectMax();
+                        var drawList = ImGuiAPI.GetWindowDrawList();
+                        drawList.AddRect(min, max, 0xff0000ff, 0.2f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+
+                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                        {
+                            ImGuiAPI.BeginTooltip();
+                            ImGuiAPI.SetTooltip(errStr);
+                            ImGuiAPI.EndTooltip();
+                        }
+                    }
+                }
+                if (!info.Readonly && changed && string.IsNullOrEmpty(errStr))
                 {
                     newValue = v;
                     retValue = true;
@@ -499,7 +651,26 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     }
                 }
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_U64, &v, speed, &minValue, &maxValue, null, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (!info.Readonly && changed)
+                string errStr = null;
+                if (info.HostProperty.CustomValueEditor != null)
+                {
+                    errStr = info.HostProperty.CustomValueEditor.GetErrorString(in info, v);
+                    if (!string.IsNullOrEmpty(errStr))
+                    {
+                        var min = ImGuiAPI.GetItemRectMin();
+                        var max = ImGuiAPI.GetItemRectMax();
+                        var drawList = ImGuiAPI.GetWindowDrawList();
+                        drawList.AddRect(min, max, 0xff0000ff, 0.2f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+
+                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                        {
+                            ImGuiAPI.BeginTooltip();
+                            ImGuiAPI.SetTooltip(errStr);
+                            ImGuiAPI.EndTooltip();
+                        }
+                    }
+                }
+                if (!info.Readonly && changed && string.IsNullOrEmpty(errStr))
                 {
                     newValue = v;
                     retValue = true;
@@ -556,8 +727,27 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         format = vFormat.Format;
                     }
                 }
+                string errStr = null;
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_Float, &v, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (!info.Readonly && changed)
+                if (info.HostProperty.CustomValueEditor != null)
+                {
+                    errStr = info.HostProperty.CustomValueEditor.GetErrorString(in info, v);
+                    if (!string.IsNullOrEmpty(errStr))
+                    {
+                        var min = ImGuiAPI.GetItemRectMin();
+                        var max = ImGuiAPI.GetItemRectMax();
+                        var drawList = ImGuiAPI.GetWindowDrawList();
+                        drawList.AddRect(min, max, 0xff0000ff, 0.2f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+
+                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                        {
+                            ImGuiAPI.BeginTooltip();
+                            ImGuiAPI.SetTooltip(errStr);
+                            ImGuiAPI.EndTooltip();
+                        }
+                    }
+                }
+                if (!info.Readonly && changed && string.IsNullOrEmpty(errStr))
                 {
                     newValue = v;
                     retValue = true;
@@ -610,8 +800,27 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     if (vFormat != null)
                         format = vFormat.Format;
                 }
+                string errStr = null;
                 var changed = ImGuiAPI.DragScalar2(name, ImGuiDataType_.ImGuiDataType_Double, &v, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
-                if (!info.Readonly && changed)
+                if(info.HostProperty.CustomValueEditor != null)
+                {
+                    errStr = info.HostProperty.CustomValueEditor.GetErrorString(in info, v);
+                    if (!string.IsNullOrEmpty(errStr))
+                    {
+                        var min = ImGuiAPI.GetItemRectMin();
+                        var max = ImGuiAPI.GetItemRectMax();
+                        var drawList = ImGuiAPI.GetWindowDrawList();
+                        drawList.AddRect(min, max, 0xff0000ff, 0.2f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+
+                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                        {
+                            ImGuiAPI.BeginTooltip();
+                            ImGuiAPI.SetTooltip(errStr);
+                            ImGuiAPI.EndTooltip();
+                        }
+                    }
+                }
+                if (!info.Readonly && changed && string.IsNullOrEmpty(errStr))
                 {
                     newValue = v;
                     retValue = true;
@@ -623,6 +832,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     public class StringEditor : PGCustomValueEditorAttribute
     {
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
+        {
+            return OnDraw(info.HostProperty.CustomValueEditor, in info, out newValue);
+        }
+        public static unsafe bool OnDraw(PGCustomValueEditorAttribute attr, in EditorInfo info, out object newValue, 
+            ImGuiInputTextFlags_ flags = ImGuiInputTextFlags_.ImGuiInputTextFlags_None, ImGuiAPI.FDelegate_ImGuiInputTextCallback callback = null)
         {
             bool valueChanged = false;
             newValue = info.Value;
@@ -652,10 +866,29 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         ImGuiAPI.Text(v);
                     else
                     {
-                        var changed = ImGuiAPI.InputText(name, ref v);
+                        string errStr = null;
+                        var changed = ImGuiAPI.InputText(name, ref v, flags, callback);
+                        if(attr != null)
+                        {
+                            errStr = attr.GetErrorString(in info, v);
+                            if(!string.IsNullOrEmpty(errStr))
+                            {
+                                var min = ImGuiAPI.GetItemRectMin();
+                                var max = ImGuiAPI.GetItemRectMax();
+                                var drawList = ImGuiAPI.GetWindowDrawList();
+                                drawList.AddRect(min, max, 0xff0000ff, 0.2f, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1.0f);
+
+                                if(ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                                {
+                                    ImGuiAPI.BeginTooltip();
+                                    ImGuiAPI.SetTooltip(errStr);
+                                    ImGuiAPI.EndTooltip();
+                                }
+                            }
+                        }
                         //ImGuiAPI.PopStyleVar(1);
-                        //if (CoreSDK.SDK_StrCmp(pBuffer, strPtr.ToPointer()) != 0 && !info.Readonly)
-                        if (changed && !info.Readonly)
+                        //if (CoreSDK.SDK_StrCmp(pBuffer, strPtr.ToPointer()) != 0 && !bReadonly)
+                        if (changed && !info.Readonly && string.IsNullOrEmpty(errStr))
                         {
                             newValue = v;
                             valueChanged = true;
@@ -919,6 +1152,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             else
             {
+                var listOpAtt = info.HostProperty.GetAttribute<PGListOperationCallbackAttribute>();
                 if (info.Readonly == false)
                 {
                     //ImGuiAPI.SameLine(0, -1);
@@ -928,12 +1162,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     //ImGuiAPI.OpenPopupOnItemClick("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                     //var pos = ImGuiAPI.GetItemRectMin();
                     //var size = ImGuiAPI.GetItemRectSize();
-                    if (ImGuiAPI.ArrowButton("##OpenAddItemList", ImGuiDir_.ImGuiDir_Down))
-                    {
-                        ImGuiAPI.OpenPopup("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
-                    }
-                    if (ImGuiAPI.BeginPopup("AddItem", ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
-                    {
+                    //if (ImGuiAPI.ArrowButton("##OpenAddItemList", ImGuiDir_.ImGuiDir_Down))
+                    //{
+                    //    ImGuiAPI.OpenPopup("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                    //}
+                    //if (ImGuiAPI.BeginPopup("AddItem", ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                    //{
                         var dict = info.Value as System.Collections.IList;
                         if (dict.GetType().GenericTypeArguments.Length == 1)
                         {
@@ -944,12 +1178,17 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             if (typeSlt.SelectedType != null)
                             {
                                 var newItem = Rtti.UTypeDescManager.CreateInstance(listElementType);
-                                dict.Insert(dict.Count, newItem);
+                                var idx = dict.Count;
+                                listOpAtt?.OnPreInsert(idx, newItem, info.ObjectInstance);
+                                dict.Insert(idx, newItem);
+                                valueChanged = true;
+                                listOpAtt?.OnAfterInsert(idx, newItem, info.ObjectInstance);
                             }
+                            ImGuiAPI.SameLine(0, -1);
                         }
-                        ImGuiAPI.EndPopup();
-                    }
-                    ImGuiAPI.SameLine(0, -1);
+                    //    ImGuiAPI.EndPopup();
+                    //}
+                    //ImGuiAPI.SameLine(0, -1);
                     //ImGuiAPI.PopID();
                 }
                 ImGuiAPI.Text(info.Type.ToString());
@@ -961,14 +1200,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 if (info.Expand)
                 {
                     var dict = info.Value as System.Collections.IList;
-                    if (OnList(in info, dict))
+                    if (OnList(in info, dict, listOpAtt))
                         valueChanged = true;
                 }
             }
             return valueChanged;
         }
 
-        private unsafe bool OnList(in EditorInfo info, System.Collections.IList lst)
+        private unsafe bool OnList(in EditorInfo info, System.Collections.IList lst, PGListOperationCallbackAttribute listOpAtt)
         {
             bool itemChanged = false;
             var sz = new Vector2(0, 0);
@@ -1001,8 +1240,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     if (ImGuiAPI.Button("-", in sz))
                     {
                         //removeList.Add(i);
+                        listOpAtt?.OnPreRemoveAt(i, info.ObjectInstance);
                         lst.RemoveAt(i);
                         operated = true;
+                        itemChanged = true;
+                        listOpAtt?.OnAfterRemoveAt(i, info.ObjectInstance);
                     }
                     ImGuiAPI.PopID();
                     if (operated)
@@ -1017,7 +1259,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     if (ImGuiAPI.Button("+", in sz))
                     {
                         //addList.Add(new KeyValuePair<int, object>(i, obj));
-                        lst.Insert(i, obj);
+                        var newItem = Rtti.UTypeDescManager.CreateInstance(obj.GetType());
+                        listOpAtt?.OnPreInsert(i, newItem, info.ObjectInstance);
+                        lst.Insert(i, newItem);
+                        itemChanged = true;
+                        listOpAtt?.OnAfterInsert(i, newItem, info.ObjectInstance);
                     }
                     ImGuiAPI.PopID();
                     if (operated)
@@ -1053,12 +1299,14 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         HostProperty = info.HostProperty,
                     };
                     object newValue;
+                    listOpAtt?.OnPreValueChanged(i, obj, info.ObjectInstance);
                     var changed = PropertyGrid.DrawPropertyGridItem(ref elementEditorInfo, out newValue);
                     if (changed && !info.Readonly)
                     {
                         lst[i] = newValue;
                         itemChanged = true;
-                    }
+                        listOpAtt?.OnAfterValueChanged(i, newValue, info.ObjectInstance);
+                   }
                 }
                 if (treeNodeRet)
                     ImGuiAPI.TreePop();

@@ -96,11 +96,21 @@ namespace EngineNS.EGui.UIProxy
         [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ErrorStringColor = 0xFF0000FF;
 
+        [Rtti.Meta, Category("Common")]
+        [Controls.PropertyGrid.PGShowInPropertyGrid]
+        [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
+        public UInt32 LinkStringColor = 0xffeeb081;
+
         // Menu
         [Rtti.Meta, Category("Menu")]
         [Controls.PropertyGrid.PGShowInPropertyGrid]
         [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 NamedMenuSeparatorColor = 0xff6a6a6a;// new Vector4(0.42f, 0.42f, 0.42f, 1.00f);
+
+        [Rtti.Meta, Category("Menu")]
+        [Controls.PropertyGrid.PGShowInPropertyGrid]
+        [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
+        public float NamedMenuSeparatorThickness = 1.0f;// new Vector4(0.42f, 0.42f, 0.42f, 1.00f);
 
         [Rtti.Meta, Category("Menu")]
         [Controls.PropertyGrid.PGShowInPropertyGrid]

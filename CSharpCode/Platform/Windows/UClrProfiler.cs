@@ -45,9 +45,8 @@ namespace EngineNS.Windows
             if (Visible == false)
                 return;
             
-            ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             Vector2 size = new Vector2(0, 0);
-            if (ImGuiAPI.Begin("ClrProfiler", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (EGui.UIProxy.DockProxy.BeginMainForm("ClrProfiler", null, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 UpdateLogs();
                 foreach (var i in mClrLogs)
@@ -55,7 +54,7 @@ namespace EngineNS.Windows
                     ImGuiAPI.TextAsiPointer(&i.m_mString);
                 }
             }
-            ImGuiAPI.End();
+            EGui.UIProxy.DockProxy.EndMainForm();
         }
     }
 }

@@ -340,13 +340,13 @@ namespace EngineNS.IO
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 Support.UAnyPointer menuData = new Support.UAnyPointer();
 
-                if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, ref drawList, ref menuData, ref mRefGraphMenuState))
+                if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
                 {
                     var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     var rn = RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType);
                     var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UAssetReferViewer), rn, this);
                 }
-                if (EGui.UIProxy.MenuItemProxy.MenuItem("Delete", null, false, null, ref drawList, ref menuData, ref mDeleteMenuState))
+                if (EGui.UIProxy.MenuItemProxy.MenuItem("Delete", null, false, null, in drawList, in menuData, ref mDeleteMenuState))
                 {
                     try
                     {

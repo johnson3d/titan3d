@@ -60,7 +60,7 @@ namespace EngineNS.Editor
                     else
                     {
                         var application = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
-                        form.DockId = application.CenterDockId;
+                        form.DockId = EGui.UIProxy.DockProxy.MainFormDockClass.ClassId;
                         form.DockCond = ImGuiCond_.ImGuiCond_Appearing;
                     }
                 }

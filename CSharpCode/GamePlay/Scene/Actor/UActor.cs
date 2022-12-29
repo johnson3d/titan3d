@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene.Actor
 {
-    public partial class UActor : UNode
+    public partial class UActor : USceneActorNode
     {
         public partial class UActorData : UNodeData
         {
@@ -20,6 +20,7 @@ namespace EngineNS.GamePlay.Scene.Actor
                 return NodeData as UActorData;
             }
         }
+        public UCenterData CenterData { get; } = new UCenterData();
 
         public override async System.Threading.Tasks.Task<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
         {

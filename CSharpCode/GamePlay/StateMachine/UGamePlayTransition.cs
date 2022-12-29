@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.StateMachine
 {
-    public class UGamePlayTransition : UTimedTransition
+    public class UGamePlayTransition : UTimedStateTransition
     {
 
     }

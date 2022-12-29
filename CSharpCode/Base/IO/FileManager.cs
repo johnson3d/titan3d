@@ -21,8 +21,7 @@ namespace EngineNS.IO
         partial void InitDirectory();
         public enum ERootDir
         {
-            Root,
-            Current,
+            //Root,
             Game,
             Engine,
             Editor,

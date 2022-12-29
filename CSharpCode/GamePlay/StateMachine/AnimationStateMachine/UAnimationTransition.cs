@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Animation.AnimationStateMachine
 {
-    public class UAnimationTransition : UTimedTransition
+    public class UAnimationTransition : UTimedStateTransition
     {
     }
 }

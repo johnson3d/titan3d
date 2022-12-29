@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.Util;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -33,6 +34,8 @@ namespace EngineNS.IO
         void Read(out RName v);
 
         void Read<T>(out T v) where T : unmanaged;
+        T Read<T>() where T : unmanaged;
+        string ReadString();
     }
 
     public interface ICoreReader
@@ -168,6 +171,31 @@ namespace EngineNS.IO
                     ReadPtr(p, sizeof(T));
                 }
             }
+        }
+        public void Read<T>(out T v, bool noused = false) where T : class, IO.ISerializer
+        {
+            ReadObject<T>(out v);
+        }
+        public void ReadObject<T>(out T v) where T : class, IO.ISerializer
+        {
+            IO.ISerializer tmp;
+            Read(out tmp);
+            v = tmp as T;
+        }
+        public T Read<T>() where T : unmanaged
+        {
+            unsafe
+            {
+                T v;
+                ReadPtr(&v, sizeof(T));
+                return v;
+            }
+        }
+        public string ReadString()
+        {
+            string v;
+            Read(out v);
+            return v;
         }
         public void Read(out ISerializer v, object hostObject = null)
         {

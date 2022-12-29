@@ -73,6 +73,7 @@ namespace EngineNS.GamePlay.Scene
 {
     public partial class UNode : Editor.INodeUIProvider
     {
+        [System.ComponentModel.Browsable(false)]
         public bool Selected { get; set; }
         public int NumOfChildUI()
         {

@@ -120,13 +120,14 @@ namespace EngineNS
     {
 
         public Editor.UPIEModule PIEModule { get; } = new Editor.UPIEModule();
+        public const string DotNetVersion = "net6.0";
         public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(USlateApplication application, RName main)
         {
             if (this.GameInstance != null)
                 return false;
 
-            var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Current);
-            UEngine.Instance.MacrossModule.ReloadAssembly(root + "/net5.0/GameProject.dll");
+            var root = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Execute);
+            UEngine.Instance.MacrossModule.ReloadAssembly(root + $"/{DotNetVersion}/GameProject.dll");
 
             this.GameInstance = new GamePlay.UGameInstance();
             this.GameInstance.WorldViewportSlate.Title = $"Game:{main.Name}";

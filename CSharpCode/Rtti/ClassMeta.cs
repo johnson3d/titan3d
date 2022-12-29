@@ -594,12 +594,24 @@ namespace EngineNS.Rtti
                 return (ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)) || ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)));
             }
         }
+        public string RemoveDeclstringDllVersion(string declString)
+        {
+            var verIdx = declString.IndexOf("Version=");
+            if (verIdx >= 0)
+            {
+                var endIdx = declString.IndexOf(",", verIdx);
+                declString = declString.Remove(verIdx, endIdx - verIdx);
+            }
+            return declString;
+        }
         public List<MethodMeta> Methods { get; } = new List<MethodMeta>();
         public MethodMeta GetMethod(string declString)
         {
+            declString = RemoveDeclstringDllVersion(declString);
             foreach(var i in Methods)
             {
-                if (i.GetMethodDeclareString() == declString)
+                var str = RemoveDeclstringDllVersion(i.GetMethodDeclareString());
+                if (str == declString)
                     return i;
             }
             return null;
@@ -915,7 +927,7 @@ namespace EngineNS.Rtti
             get => mMetas;
         }
         Dictionary<Hash64, UClassMeta> mHashMetas = new Dictionary<Hash64, UClassMeta>();
-        public TypeTreeManager TreeManager = new TypeTreeManager();
+        public UTypeTreeManager TreeManager = new UTypeTreeManager();
         public string MetaRoot;
         public void LoadMetas1()
         {
@@ -975,7 +987,7 @@ namespace EngineNS.Rtti
 
             ForceSaveAll();
         }
-        public void LoadMetas()
+        public void LoadMetas(string moduleName = null)
         {
             var rootTypes = new IO.FileManager.ERootDir[2] { IO.FileManager.ERootDir.Engine, IO.FileManager.ERootDir.Game };
             foreach (var r in rootTypes)
@@ -1001,11 +1013,14 @@ namespace EngineNS.Rtti
                             var type = UTypeDesc.TypeOf(strName);// EngineNS.Rtti.UTypeDescManager.Instance.GetTypeDescFromString(strName);
                             if (type != null)
                             {
-                                var meta = new UClassMeta(type);
-                                meta.LoadClass(k);
+                                if (moduleName != null && type.Assembly.Name == moduleName)
+                                {
+                                    var meta = new UClassMeta(type);
+                                    meta.LoadClass(k);
 
-                                //mMetas.Add(meta.ClassMetaName, meta);
-                                mMetas[meta.ClassMetaName] = meta;
+                                    //mMetas.Add(meta.ClassMetaName, meta);
+                                    mMetas[meta.ClassMetaName] = meta;
+                                }
                             }
                         }
                     }
@@ -1013,7 +1028,7 @@ namespace EngineNS.Rtti
             }
 
             //编辑器状态，程序修改过执行
-            BuildMeta();
+            BuildMeta(moduleName);
 
             foreach (var i in mMetas)
             {
@@ -1021,8 +1036,11 @@ namespace EngineNS.Rtti
                 UClassMeta meta;
                 if (mHashMetas.TryGetValue(hashCode, out meta))
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Fatal, "Meta", $"Same Hash:{i.Value.ClassMetaName} == {meta.ClassMetaName}");
-                    System.Diagnostics.Debug.Assert(false);
+                    if (i.Value.ClassMetaName != meta.ClassMetaName)
+                    {
+                        Profiler.Log.WriteLine(Profiler.ELogTag.Fatal, "Meta", $"Same Hash:{i.Value.ClassMetaName} == {meta.ClassMetaName}");
+                        System.Diagnostics.Debug.Assert(false);
+                    }
                     continue;
                 }
                 mHashMetas[hashCode] = i.Value;
@@ -1032,6 +1050,8 @@ namespace EngineNS.Rtti
                 i.Value.BuildFields();
             }
 
+            if (moduleName != null)
+                return;
             ForceSaveAll();
 
             GetMeta(UTypeDesc.TypeOf(typeof(void)));
@@ -1051,13 +1071,17 @@ namespace EngineNS.Rtti
             GetMeta(UTypeDesc.TypeOf(typeof(Vector4)));
             GetMeta(UTypeDesc.TypeOf(typeof(Quaternion)));
         }
-        public void BuildMeta()
+        public void BuildMeta(string moduleName = null)
         {
             foreach (var i in UTypeDescManager.Instance.Services)
             {
                 var klsColloector = new List<UClassMeta>();
                 foreach(var j in i.Value.Types)
                 {
+                    if (moduleName != null && j.Value.Assembly.Name != moduleName)
+                    {
+                        continue;
+                    }
                     MetaAttribute meta;
                     if (j.Value.GetInterface(nameof(EngineNS.IO.ISerializer)) == null)
                     {

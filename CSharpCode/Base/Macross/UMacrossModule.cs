@@ -74,7 +74,7 @@ namespace EngineNS.Macross
     {
         private IAssemblyLoader mAssemblyLoader;
         public WeakReference mAssembly;
-        private Rtti.AssemblyDesc mAssemblyDesc;
+        private Rtti.UAssemblyDesc mAssemblyDesc;
         public uint Version = 1;
         public T NewInnerObject<T>(RName name) where T : class
         {//不要保存返回值!!
@@ -135,7 +135,7 @@ namespace EngineNS.Macross
             var newAssembly = loader.LoadAssembly(assemblyPath, pdbPath);
 
             Rtti.UTypeDescManager.ServiceManager manager;
-            Rtti.AssemblyDesc desc;
+            Rtti.UAssemblyDesc desc;
             if (Rtti.UTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc))
             {
                 List<Type> removed = new List<Type>();
@@ -145,11 +145,11 @@ namespace EngineNS.Macross
 
                 if (oldAssembly != null)
                 {
-                    GetChangedLists(removed, changed, added, newAssembly, oldAssembly);
+                    Rtti.UAssemblyDesc.GetChangedLists(removed, changed, added, newAssembly, oldAssembly);
                 }
 
-                UpdateTypeManager(manager, desc, removed, changed, added);
-                desc.Assembly = newAssembly;
+                Rtti.UAssemblyDesc.UpdateTypeManager(manager, desc, removed, changed, added);
+                desc.ModuleAssembly = new WeakReference<System.Reflection.Assembly>(newAssembly);
 
                 for (int i = 0; i < 10; i++)
                 {
@@ -173,93 +173,6 @@ namespace EngineNS.Macross
             mAssemblyDesc = desc;
             System.GC.Collect();
         }
-        private void GetChangedLists(List<Type> removed, List<Type> changed, List<Type> added, System.Reflection.Assembly newAssembly, System.Reflection.Assembly oldAssembly)
-        {
-            var newTypes = newAssembly.GetTypes();
-            if (oldAssembly == null)
-            {
-                foreach (var i in newTypes)
-                {
-                    added.Add(i);
-                }
-                return;
-            }
-            var oldTypes = oldAssembly.GetTypes();
-
-            foreach (var i in newTypes)
-            {
-                Type c = null;
-                foreach(var j in oldTypes)
-                {
-                    if(i.FullName == j.FullName)
-                    {
-                        c = i;
-                        break;
-                    }
-                }
-                if (c != null)
-                    changed.Add(c);
-                else
-                    added.Add(i);
-            }
-            foreach (var i in oldTypes)
-            {
-                Type c = null;
-                foreach (var j in newTypes)
-                {
-                    if (i.FullName == j.FullName)
-                    {
-                        c = i;
-                        break;
-                    }
-                }
-                if (c == null)
-                {
-                    removed.Add(i);
-                }
-            }
-        }
-        private void UpdateTypeManager(Rtti.UTypeDescManager.ServiceManager manager, Rtti.AssemblyDesc desc, List<Type> removed, List<Type> changed, List<Type> added)
-        {
-            List<string> removedNames = new List<string>();
-            foreach (var j in manager.Types)
-            {
-                if (removed.Contains(j.Value.SystemType))
-                {
-                    j.Value.IsRemoved = true;
-                    j.Value.SystemType = null;
-                    removedNames.Add(j.Key);
-                }
-                foreach (var k in changed)
-                {
-                    if (k.FullName == j.Value.FullName)
-                    {
-                        j.Value.SystemType = k;
-                        j.Value.Assembly = desc;
-                        changed.Remove(k);
-                        break;
-                    }
-                }
-            }
-            foreach (var j in removedNames)
-            {
-                manager.Types.Remove(j);
-
-                var meta = Rtti.UClassMetaManager.Instance.GetMeta(j, false);
-                if (meta != null)
-                {
-                    meta.CheckMetaField();
-                }
-            }
-            foreach(var j in added)
-            {
-                var tmp = new Rtti.UTypeDesc();
-                tmp.SystemType = j;
-                tmp.Assembly = desc;
-                manager.Types[Rtti.UTypeDesc.TypeStr(j)] = tmp;
-            }
-        }
-
         private void UpdateMetaManager(List<Type> removed, List<Type> changed)
         {
             //Rtti.ClassMetaManager.Instance.Metas

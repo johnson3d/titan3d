@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+using NPOI.SS.Formula.Functions;
 //using SDL2;
 
 namespace EngineNS.Editor
@@ -140,13 +141,13 @@ namespace EngineNS.Editor
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
                             {
                                 var csFiles = new List<string>(IO.FileManager.GetFiles(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Game), "*.cs"));
-                                var projectPath = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProjectPath;
+                                var projectPath = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProjectPath;
                                 csFiles.AddRange(IO.FileManager.GetFiles(projectPath, "*.cs"));
                                 List<string> arguments = new List<string>();
                                 for (int i = 0; i < csFiles.Count; ++i)
                                     arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFiles[i]));
 
-                                var projectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameProject;
+                                var projectFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject;
                                 var projDef = XDocument.Load(projectFile);
                                 var references = projDef.Element("Project").Elements("ItemGroup").Elements("Reference").Select(refElem => refElem.Value);
                                 foreach (var reference in references)
@@ -155,7 +156,7 @@ namespace EngineNS.Editor
                                 }
                                 //var references = projDef.Element(projDef.n) 
 
-                                var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Root) + UEngine.Instance.EditorInstance.Config.GameAssembly;
+                                var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameAssembly;
                                 arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.OutputFile, assemblyFile));
                                 arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.PdbFile, assemblyFile.Replace(".dll", ".tpdb")));
                                 arguments.Add(CodeCompiler.CSharpCompiler.GetCommandArguments(CodeCompiler.CSharpCompiler.enCommandType.Outputkind, Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary.ToString()));
@@ -210,7 +211,7 @@ namespace EngineNS.Editor
                             {
                                 mCpuProfiler.Visible = !mCpuProfiler.Visible;
                                 var application = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
-                                mCpuProfiler.DockId = application.CenterDockId;
+                                //mCpuProfiler.DockId = application.CenterDockId;
                                 item.Selected = mCpuProfiler.Visible;
                             },
                         },
@@ -266,8 +267,8 @@ namespace EngineNS.Editor
 #endif
         ////////////////////////
 
-        public uint LeftDockId { get; private set; } = 0;
-        public uint CenterDockId { get; private set; } = 0;
+        //public uint LeftDockId { get; private set; } = 0;
+        //public uint CenterDockId { get; private set; } = 0;
 
         public UInt32 ActiveViewportId = UInt32.MaxValue;
         protected unsafe override void OnDrawUI()
@@ -295,21 +296,21 @@ namespace EngineNS.Editor
                 return;
             }
 
-            if (LeftDockId == 0)
-            {
-                LeftDockId = ImGuiAPI.GetID("LeftDocker");
-                CenterDockId = ImGuiAPI.GetID("CenterDocker");
+//            if (LeftDockId == 0)
+//            {
+//                LeftDockId = ImGuiAPI.GetID("LeftDocker");
+//                CenterDockId = ImGuiAPI.GetID("CenterDocker");
 
-                mCpuProfiler.DockId = CenterDockId;
-#if PWindow
-                mClrProfiler.DockId = CenterDockId;
-#endif
-                //WorldViewportSlate.DockId = CenterDockId;
-                //mWorldOutliner.DockId = LeftDockId;
-                ContentBrowser.DockId = CenterDockId;
-                mBrickManager.DockId = CenterDockId;
-                mEditorSettings.DockId = LeftDockId;
-            }
+//                mCpuProfiler.DockId = CenterDockId;
+//#if PWindow
+//                mClrProfiler.DockId = CenterDockId;
+//#endif
+//                //WorldViewportSlate.DockId = CenterDockId;
+//                //mWorldOutliner.DockId = LeftDockId;
+//                ContentBrowser.DockId = CenterDockId;
+//                mBrickManager.DockId = CenterDockId;
+//                mEditorSettings.DockId = LeftDockId;
+//            }
 
             var io = ImGuiAPI.GetIO();
             if ((io.ConfigFlags & ImGuiConfigFlags_.ImGuiConfigFlags_DockingEnable) != 0)
@@ -366,7 +367,10 @@ namespace EngineNS.Editor
                         //ImGuiAPI.DockSpace(CenterDockId, ref sz, dockspace_flags, ref winClass);
                         //winClass.UnsafeCallDestructor();
 
-                        ImGuiAPI.DockSpace(CenterDockId, &sz, dockspace_flags, (ImGuiWindowClass*)0);
+                        fixed(ImGuiWindowClass* dockclsPtr = &EGui.UIProxy.DockProxy.MainFormDockClass)
+                        {
+                            ImGuiAPI.DockSpace(EGui.UIProxy.DockProxy.MainFormDockClass.m_ClassId, &sz, dockspace_flags, dockclsPtr);
+                        }
                     }
                     ImGuiAPI.EndChild();
                 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.EGui.Controls.PropertyGrid
@@ -31,5 +32,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             Format = format;
         }
+    }
+
+    // Operation when list add, remove or value changed
+    public class PGListOperationCallbackAttribute : Attribute
+    {
+        public virtual void OnPreInsert(int index, object value, object objInstance) { }
+        public virtual void OnAfterInsert(int index, object value, object objInstance) { }
+        public virtual void OnPreRemoveAt(int index, object objInstance) { }
+        public virtual void OnAfterRemoveAt(int index, object objInstance) { }
+        public virtual void OnPreValueChanged(int index, object value, object objInstance) { }
+        public virtual void OnAfterValueChanged(int index, object value, object objInstance) { }
     }
 }

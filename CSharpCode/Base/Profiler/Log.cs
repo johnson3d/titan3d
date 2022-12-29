@@ -32,6 +32,7 @@ namespace EngineNS.Profiler
         {
             info = $"{sourceFilePath}({sourceLineNumber},0):{info}";
             System.Diagnostics.Trace.WriteLine(info);
+            System.Console.WriteLine(info);
         }
         private static CoreSDK.FDelegate_FWriteLogString NativeLogger = NativeWriteLogString;
 #if PMacIOS

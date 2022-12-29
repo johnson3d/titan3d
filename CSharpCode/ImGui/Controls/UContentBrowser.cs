@@ -97,7 +97,7 @@ namespace EngineNS.EGui.Controls
         }
 
         EGui.UIProxy.MenuItemProxy mNewAssetMenuItem;
-        void OnTypeChanged()
+        public void OnTypeChanged()
         {
             mNewAssetMenuItem.CleanupSubMenus();
 
@@ -719,7 +719,7 @@ namespace EngineNS.EGui.Controls
             if (DrawInWindow)
             {
                 ImGuiAPI.SetNextWindowSize(new Vector2(800, 300), ImGuiCond_.ImGuiCond_FirstUseEver);
-                draw = EGui.UIProxy.DockPanelProxy.Begin(name, null, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar);
+                draw = EGui.UIProxy.DockProxy.BeginMainForm(name, null, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar);
             }
             else
             {
@@ -884,7 +884,7 @@ namespace EngineNS.EGui.Controls
 
             }
             if (DrawInWindow)
-                EGui.UIProxy.DockPanelProxy.End();
+                EGui.UIProxy.DockProxy.EndMainForm();
             else
             {
                 ImGuiAPI.PopStyleVar(1);

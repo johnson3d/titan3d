@@ -92,6 +92,8 @@ namespace EngineNS.Editor
         [Category("Ext")]
         public string ExtCategoryChangeTest { get; set; } = "this origin category is Ext";
 
+        [Browsable(false)]
+        public bool IsPropertyVisibleDirty { get; set; } = false;
         public void GetProperties(ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             var pros = TypeDescriptor.GetProperties(this);

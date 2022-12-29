@@ -11,7 +11,12 @@ namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
 {
     class UAnimationStateMachine : UTimedStateMachine, IAnimationState
     {
-        public bool AddTransition(UTransition transition)
+        public bool AddAttachment(IAttachmentRule attachment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool AddTransition(ITransition transition)
         {
             throw new NotImplementedException();
         }
@@ -31,7 +36,17 @@ namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
             throw new NotImplementedException();
         }
 
-        public bool RemoveTransition(UTransition transition)
+        public bool RemoveAttachment(IAttachmentRule attachment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool RemoveTransition(ITransition transition)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool ShouldUpdate()
         {
             throw new NotImplementedException();
         }

@@ -20,17 +20,16 @@ namespace EngineNS.IO
 
             }
 
-            SetRoot(ERootDir.Root, root);
-            SetRoot(ERootDir.Current, mBin);
-            SetRoot(ERootDir.Execute, AppDomain.CurrentDomain.BaseDirectory);
+            //SetRoot(ERootDir.Root, root);
+            SetRoot(ERootDir.Execute, root + "binaries");// AppDomain.CurrentDomain.BaseDirectory);
             SetRoot(ERootDir.Engine, root + "enginecontent");
             SetRoot(ERootDir.Game, root + "content");
             SetRoot(ERootDir.Editor, root + "editorcontent");
             SetRoot(ERootDir.Cache, root + "cache");
 #if DEBUG
-            SetRoot(ERootDir.Plugin, root + "binaries/Plugins/Debug/net6.0");
+            SetRoot(ERootDir.Plugin, root + $"binaries/Plugins/Debug/{UEngine.DotNetVersion}");
 #else
-            SetRoot(ERootDir.Plugin, root + "binaries/Plugins/Release/net6.0");
+            SetRoot(ERootDir.Plugin, root + $"binaries/Plugins/Release/{UEngine.DotNetVersion}");
 #endif
             SetRoot(ERootDir.EngineSource, root);
             SetRoot(ERootDir.GameSource, root);

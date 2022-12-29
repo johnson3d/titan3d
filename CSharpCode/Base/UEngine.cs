@@ -5,7 +5,7 @@ namespace EngineNS.Rtti
 {
     public class AssemblyEntry
     {
-        public class EnginCoreAssemblyDesc : AssemblyDesc
+        public class EnginCoreAssemblyDesc : UAssemblyDesc
         {
             public override string Name { get => "EngineCore"; }
             public override string Service { get { return "Global"; } }
@@ -13,7 +13,7 @@ namespace EngineNS.Rtti
             public override string Platform { get { return "Windows"; } }
         }
         static EnginCoreAssemblyDesc AssmblyDesc = new EnginCoreAssemblyDesc();
-        public static AssemblyDesc GetAssemblyDesc()
+        public static UAssemblyDesc GetAssemblyDesc()
         {
             return AssmblyDesc;
         }
@@ -37,12 +37,25 @@ namespace EngineNS
         public string ConfigName;
         [Rtti.Meta]
         public int NumOfThreadPool { get; set; } = -1;
+        int mInterval = 15;
         [Rtti.Meta]
-        public int Interval { get; set; } = 15;
+        public int Interval {
+            get => mInterval;
+            set
+            {
+                mInterval = value;
+                mTargetFps = 1000 / value;
+            }
+        }
+        private int mTargetFps;
+        public int TargetFps
+        {
+            get => mTargetFps;
+        }
         [Rtti.Meta]
         public RName DefaultTexture { get; set; }
         [Rtti.Meta]
-        public UInt32 AdaperId { get; set; }
+        public int AdaperId { get; set; }
         [Rtti.Meta]
         public Vector4 MainWindow { get; set; } = new Vector4(100, 100, 1280, 720);
         [Rtti.Meta]
@@ -84,6 +97,10 @@ namespace EngineNS
         [RName.PGRName(FilterExts = Bricks.CodeBuilder.UMacross.AssetExt, MacrossType = typeof(GamePlay.UMacrossGame))]
         [Rtti.Meta]
         public RName PlayGameName { get; set; }
+        [Rtti.Meta]
+        public string RootServerURL { get; set; } = "127.0.0.1:2333";
+        [Rtti.Meta]
+        public Bricks.Network.RPC.EAuthority DefaultAuthority { get; set; } = Bricks.Network.RPC.EAuthority.Server;
     }
     public partial class URuntimeConfig
     {
@@ -111,6 +128,7 @@ namespace EngineNS
             get;
         } = new UEventProcessorManager();
 
+        public ulong CurrentTickFrame { get; set; } = 0;
         public long CurrentTickCount { get; set; }
         public int ElapseTickCount { get; set; }
         public int FrameCount { get; set; }
@@ -216,7 +234,8 @@ namespace EngineNS
                 var t1 = Support.Time.HighPrecision_GetTickCount();
                 ElapseTickCount = (int)((t1 - CurrentTickCount) / 1000);
                 CurrentTickCount = t1;
-                CoreSDK.UpdateEngineTick(CurrentTickCount);
+                CurrentTickFrame++;
+                CoreSDK.UpdateEngineFrame(CurrentTickFrame);
                 InputSystem.BeforeTick();
                 if (-1 == InputSystem.Tick(this))
                 {

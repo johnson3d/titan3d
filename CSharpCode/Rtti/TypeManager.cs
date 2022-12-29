@@ -1,32 +1,164 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
+using System.Threading.Channels;
+using static EngineNS.EGui.UIProxy.SingleInputDialog;
 
 namespace EngineNS.Rtti
 {
-    public class AssemblyDesc
+    public class UAssemblyDesc
     {
         public virtual string Name { get; }
         public virtual string Service { get; }
         public virtual bool IsGameModule { get; }
         public virtual string Platform { get; }
-        public System.Reflection.Assembly Assembly { get; set; }
+        public WeakReference<Assembly> ModuleAssembly { get; set; }
+        public Assembly UnsafeGetAssembly()
+        {
+            Assembly result;
+            if (ModuleAssembly.TryGetTarget(out result))
+                return result;
+            return null;
+        }
         public UTypeDescManager.ServiceManager Manager { get; set; }
         public override string ToString()
         {
             return $"{Service}:{Name}";
         }
-        public virtual void SetAssembly(System.Reflection.Assembly assm, UTypeDescManager.ServiceManager manager)
+        public virtual void SetAssembly(System.Reflection.Assembly assembly, UTypeDescManager.ServiceManager manager)
         {
-            Assembly = assm;
+            ModuleAssembly = new WeakReference<Assembly>(assembly);
             Manager = manager;
         }
         public virtual object CreateInstance(RName name)
         {
             return null;
         }
+
+        #region Rtti Reload
+        public static void UpdateRtti(string moduleName, Assembly newAssembly, Assembly oldAssembly)
+        {
+            Rtti.UTypeDescManager.ServiceManager manager;
+            Rtti.UAssemblyDesc desc;
+            if (Rtti.UTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc))
+            {
+                List<Type> removed = new List<Type>();
+                List<Type> changed = new List<Type>();
+                List<Type> added = new List<Type>();
+
+                if (oldAssembly != null)
+                {
+                    GetChangedLists(removed, changed, added, newAssembly, oldAssembly);
+                }
+
+                UpdateTypeManager(manager, desc, removed, changed, added);
+                desc.ModuleAssembly = new WeakReference<Assembly>(newAssembly);
+
+                for (int i = 0; i < 10; i++)
+                {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                }
+            }
+            else
+            {
+                manager.AddAssemblyDesc(desc);
+            }
+
+            Rtti.UTypeDescManager.Instance.OnTypeChangedInvoke();
+
+            EngineNS.Rtti.UClassMetaManager.Instance.LoadMetas(moduleName);
+        }
+        public static void GetChangedLists(List<Type> removed, List<Type> changed, List<Type> added, System.Reflection.Assembly newAssembly, System.Reflection.Assembly oldAssembly)
+        {
+            var newTypes = newAssembly.GetTypes();
+            if (oldAssembly == null)
+            {
+                foreach (var i in newTypes)
+                {
+                    added.Add(i);
+                }
+                return;
+            }
+            var oldTypes = oldAssembly.GetTypes();
+
+            foreach (var i in newTypes)
+            {
+                Type c = null;
+                foreach (var j in oldTypes)
+                {
+                    if (i.FullName == j.FullName)
+                    {
+                        c = i;
+                        break;
+                    }
+                }
+                if (c != null)
+                    changed.Add(c);
+                else
+                    added.Add(i);
+            }
+            foreach (var i in oldTypes)
+            {
+                Type c = null;
+                foreach (var j in newTypes)
+                {
+                    if (i.FullName == j.FullName)
+                    {
+                        c = i;
+                        break;
+                    }
+                }
+                if (c == null)
+                {
+                    removed.Add(i);
+                }
+            }
+        }
+        public static void UpdateTypeManager(Rtti.UTypeDescManager.ServiceManager manager, Rtti.UAssemblyDesc desc, List<Type> removed, List<Type> changed, List<Type> added)
+        {
+            List<string> removedNames = new List<string>();
+            foreach (var j in manager.Types)
+            {
+                if (removed.Contains(j.Value.SystemType))
+                {
+                    j.Value.IsRemoved = true;
+                    j.Value.SystemType = null;
+                    removedNames.Add(j.Key);
+                }
+                foreach (var k in changed)
+                {
+                    if (k.FullName == j.Value.FullName)
+                    {
+                        j.Value.SystemType = k;
+                        j.Value.Assembly = desc;
+                        changed.Remove(k);
+                        break;
+                    }
+                }
+            }
+            foreach (var j in removedNames)
+            {
+                manager.Types.Remove(j);
+
+                var meta = Rtti.UClassMetaManager.Instance.GetMeta(j, false);
+                if (meta != null)
+                {
+                    meta.CheckMetaField();
+                }
+            }
+            foreach (var j in added)
+            {
+                var tmp = new Rtti.UTypeDesc();
+                tmp.SystemType = j;
+                tmp.Assembly = desc;
+                manager.Types[Rtti.UTypeDesc.TypeStr(j)] = tmp;
+            }
+        }
+        #endregion
     }
-    public class GlobalAssemblyDesc : AssemblyDesc
+    public class UGlobalAssemblyDesc : UAssemblyDesc
     {
         private string mName;
         public override string Name { get => mName; }
@@ -43,7 +175,7 @@ namespace EngineNS.Rtti
     {
         public bool IsRemoved = false;
         public Type SystemType;
-        public AssemblyDesc Assembly;
+        public UAssemblyDesc Assembly;
         public string FullName
         {
             get
@@ -281,11 +413,12 @@ namespace EngineNS.Rtti
         unsafe static CoreSDK.FDelegate_FGetManagedObjectFromGCHandle GetManagedObjectFromGCHandle = GetManagedObjectFromGCHandleImpl;
         unsafe static void* GetManagedObjectFromGCHandleImpl(void* handle)
         {
-            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)handle);
-            var tmp = GetObjectPointer(gcHandle.Target);
-            var obj = GetObjectFromPointer(tmp);
-            System.Diagnostics.Debug.Assert(obj == gcHandle.Target);
-            return tmp;
+            //var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)handle);
+            //var tmp = GetObjectPointer(gcHandle.Target);
+            //var obj = GetObjectFromPointer(tmp);
+            //System.Diagnostics.Debug.Assert(obj == gcHandle.Target);
+            //return tmp;
+            return handle;
         }
         public unsafe static void* GetObjectPointer(object obj)
         {
@@ -370,7 +503,7 @@ namespace EngineNS.Rtti
                 }
                 if (find == false)
                     continue;
-                AssemblyDesc desc;
+                UAssemblyDesc desc;
                 ServiceManager manager;
                 RegAssembly(i, out manager, out desc);
             }
@@ -386,10 +519,10 @@ namespace EngineNS.Rtti
         public class ServiceManager
         {
             public Dictionary<string, UTypeDesc> Types = new Dictionary<string, UTypeDesc>();
-            public Dictionary<string, AssemblyDesc> Assemblies { get; } = new Dictionary<string, AssemblyDesc>();
-            public void AddAssemblyDesc(AssemblyDesc desc)
+            public Dictionary<string, UAssemblyDesc> Assemblies { get; } = new Dictionary<string, UAssemblyDesc>();
+            public void AddAssemblyDesc(UAssemblyDesc desc)
             {
-                var tps = desc.Assembly.GetTypes();
+                var tps = desc.UnsafeGetAssembly().GetTypes();
                 foreach (var i in tps)
                 {
                     if (i.IsGenericType)
@@ -423,43 +556,16 @@ namespace EngineNS.Rtti
                     }
                 }
             }
-            public void RemoveAssembly(System.Reflection.Assembly assembly)
-            {
-                AssemblyDesc desc = null;
-                foreach (var i in Assemblies)
-                {
-                    if (i.Value.Assembly == assembly)
-                    {
-                        desc = i.Value;
-                        Assemblies.Remove(i.Key);
-                        break;
-                    }
-                }
-                if (desc == null)
-                    return;
-                var rmv = new List<string>();
-                foreach(var i in Types)
-                {
-                    if(i.Value.Assembly == desc)
-                    {
-                        rmv.Add(i.Key);
-                    }
-                }
-                foreach(var i in rmv)
-                {
-                    Types.Remove(i);
-                }
-            }
-            public AssemblyDesc FindAssemblyDesc(System.Reflection.Assembly assembly)
+            public UAssemblyDesc FindAssemblyDesc(System.Reflection.Assembly assembly)
             {
                 foreach(var i in Assemblies)
                 {
-                    if (i.Value.Assembly == assembly)
+                    if (i.Value.UnsafeGetAssembly() == assembly)
                         return i.Value;
                 }
                 return null;
             }
-            private void RegType(Type t, AssemblyDesc desc)
+            private void RegType(Type t, UAssemblyDesc desc)
             {
                 var str = UTypeDescManager.Instance.GetTypeStringFromType(t, false);
                 if (str == null)
@@ -477,13 +583,13 @@ namespace EngineNS.Rtti
                 }
             }
         }
-        internal AssemblyDesc FindAssemblyDesc(System.Reflection.Assembly assm)
+        internal UAssemblyDesc FindAssemblyDesc(System.Reflection.Assembly assm)
         {
             foreach(var i in Services)
             {
                 foreach(var j in i.Value.Assemblies)
                 {
-                    if(j.Value.Assembly == assm)
+                    if(j.Value.UnsafeGetAssembly() == assm)
                     {
                         return j.Value;
                     }
@@ -505,7 +611,7 @@ namespace EngineNS.Rtti
             string result;
             if (StringMap.TryGetValue(type.FullName, out result))
                 return result;
-            AssemblyDesc assm = FindAssemblyDesc(type.Assembly);
+            UAssemblyDesc assm = FindAssemblyDesc(type.Assembly);
             if (assm == null)
             {
                 return null;
@@ -579,7 +685,7 @@ namespace EngineNS.Rtti
                 return null;
             return cvtType.SystemType;
         }
-        public bool RegAssembly(System.Reflection.Assembly asm, out ServiceManager manager, out AssemblyDesc outDesc)
+        public bool RegAssembly(System.Reflection.Assembly asm, out ServiceManager manager, out UAssemblyDesc outDesc)
         {
             ServiceManager mgr = null;
             var type = asm.GetType("EngineNS.Rtti.AssemblyEntry");
@@ -589,7 +695,7 @@ namespace EngineNS.Rtti
                 if (mtd != null)
                 {
                     var retDesc = mtd.Invoke(null, null);
-                    var desc = retDesc as AssemblyDesc;
+                    var desc = retDesc as UAssemblyDesc;
                     if (desc != null)
                     {
                         if (Services.TryGetValue(desc.Service, out mgr) == false)
@@ -613,7 +719,7 @@ namespace EngineNS.Rtti
                     }
                 }
             }
-            var assmDesc = new GlobalAssemblyDesc();
+            var assmDesc = new UGlobalAssemblyDesc();
             if (Services.TryGetValue(assmDesc.Service, out mgr) == false)
             {
                 mgr = new ServiceManager();
@@ -626,12 +732,81 @@ namespace EngineNS.Rtti
             outDesc = assmDesc;
             return false;
         }
-        public AssemblyDesc GetAssembly(string service, string name)
+        public bool UnregAssembly(System.Reflection.Assembly asm)
+        {
+            foreach (var s in Services.Values)
+            {
+                foreach (var a in s.Assemblies)
+                {
+                    if (a.Value.UnsafeGetAssembly() == asm)
+                    {
+                        List<string> removedNames = new List<string>();
+                        foreach (var j in s.Types)
+                        {
+                            if (j.Value.Assembly.UnsafeGetAssembly() == asm)
+                            {
+                                j.Value.IsRemoved = true;
+                                j.Value.SystemType = null;
+                                removedNames.Add(j.Key);
+                            }
+                        }
+                        foreach (var j in removedNames)
+                        {
+                            s.Types.Remove(j);
+
+                            var meta = Rtti.UClassMetaManager.Instance.GetMeta(j, false);
+                            if (meta != null)
+                            {
+                                meta.CheckMetaField();
+                            }
+                        }
+                        s.Assemblies.Remove(a.Key);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        public bool UnregAssembly(string service, string name)
         {
             ServiceManager mgr;
             if (Services.TryGetValue(service, out mgr))
             {
-                AssemblyDesc result;
+                UAssemblyDesc result;
+                if (mgr.Assemblies.TryGetValue(name, out result))
+                {
+                    List<string> removedNames = new List<string>();
+                    foreach (var j in mgr.Types)
+                    {
+                        if (j.Value.Assembly == result)
+                        {
+                            j.Value.IsRemoved = true;
+                            j.Value.SystemType = null;
+                            removedNames.Add(j.Key);
+                        }
+                    }
+                    foreach (var j in removedNames)
+                    {
+                        mgr.Types.Remove(j);
+
+                        var meta = Rtti.UClassMetaManager.Instance.GetMeta(j, false);
+                        if (meta != null)
+                        {
+                            meta.CheckMetaField();
+                        }
+                    }
+                    mgr.Assemblies.Remove(name);
+                    return true;
+                }
+            }
+            return false;
+        }
+        public UAssemblyDesc GetAssembly(string service, string name)
+        {
+            ServiceManager mgr;
+            if (Services.TryGetValue(service, out mgr))
+            {
+                UAssemblyDesc result;
                 if (mgr.Assemblies.TryGetValue(name, out result))
                 {
                     return result;
