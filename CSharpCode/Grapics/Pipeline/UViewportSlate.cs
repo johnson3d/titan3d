@@ -208,7 +208,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public Vector2 WorldAxis { get; set; } = new Vector2(80, 50);
         public bool ShowWorldAxis { get; set; } = true;
-        public void DrawWorldAxis(CCamera camera)
+        public void DrawWorldAxis(UCamera camera)
         {
             var cmdlst = ImGuiAPI.GetWindowDrawList();
             //var camera = this.CameraController.Camera;

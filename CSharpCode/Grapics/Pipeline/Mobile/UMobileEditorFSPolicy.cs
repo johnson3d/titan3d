@@ -82,7 +82,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         //for test
         public Bricks.VXGI.UVoxelsNode VoxelsNode = new Bricks.VXGI.UVoxelsNode();
 
-        public override async System.Threading.Tasks.Task Initialize(CCamera camera)
+        public override async System.Threading.Tasks.Task Initialize(UCamera camera)
         {
             await base.Initialize(camera);
 

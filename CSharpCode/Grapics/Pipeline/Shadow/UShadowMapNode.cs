@@ -40,8 +40,8 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         }
         public GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
         // public CCamera ShadowCamera;
-        private CCamera[] mShadowCameraArray;
-        public CCamera ViewerCamera;
+        private UCamera[] mShadowCameraArray;
+        public UCamera ViewerCamera;
         public UGraphicsBuffers[] GBuffersArray;
         public UDrawBuffers[] BasePass = new UDrawBuffers[4];
         
@@ -98,10 +98,10 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             //     ShadowCamera.mCoreObject.LookAtLH(in eyePos, in DVector3.Zero, in Vector3.Up);
             // }
 
-            mShadowCameraArray = new CCamera[4];
+            mShadowCameraArray = new UCamera[4];
             for (UInt32 CamIdx = 0; CamIdx < mCsmNum; CamIdx++)
             {
-                mShadowCameraArray[CamIdx] = new CCamera();
+                mShadowCameraArray[CamIdx] = new UCamera();
                 mShadowCameraArray[CamIdx] .mCoreObject.PerspectiveFovLH(3.14f / 4f, 1, 1, 0.3f, 1000.0f);
                 var eyePos = new DVector3(0, 0, -10);
                 mShadowCameraArray[CamIdx] .mCoreObject.LookAtLH(in eyePos, in DVector3.Zero, in Vector3.Up);

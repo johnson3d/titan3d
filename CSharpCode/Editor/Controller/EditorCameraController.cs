@@ -6,12 +6,12 @@ namespace EngineNS.Editor.Controller
 {
     public class EditorCameraController : Graphics.Pipeline.ICameraController
     {
-        Graphics.Pipeline.CCamera mCamera;
-        public Graphics.Pipeline.CCamera Camera
+        Graphics.Pipeline.UCamera mCamera;
+        public Graphics.Pipeline.UCamera Camera
         {
             get => mCamera;
         }
-        public void ControlCamera(Graphics.Pipeline.CCamera camera)
+        public void ControlCamera(Graphics.Pipeline.UCamera camera)
         {
             mCamera = camera;
         }

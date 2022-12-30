@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public class CCamera : AuxPtrType<ICamera>
+    public class UCamera : AuxPtrType<ICamera>
     {
-        public CCamera()
+        public UCamera()
         {
             mCoreObject = ICamera.CreateInstance();
         }
@@ -250,11 +250,11 @@ namespace EngineNS.Graphics.Pipeline
 
     public interface ICameraController
     {
-        CCamera Camera
+        UCamera Camera
         {
             get;
         }
-        void ControlCamera(CCamera camera);
+        void ControlCamera(UCamera camera);
         void Rotate(ECameraAxis axis, float angle, bool rotLookAt = false);
         void Move(ECameraAxis axis, float step, bool moveWithLookAt = false);
     }

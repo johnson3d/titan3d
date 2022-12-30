@@ -7,8 +7,8 @@ namespace EngineNS.GamePlay.Camera
 {
     public class UCamera : GamePlay.Scene.ULightWeightNodeBase
     {
-        Graphics.Pipeline.CCamera mCamera;
-        public Graphics.Pipeline.CCamera Camera
+        Graphics.Pipeline.UCamera mCamera;
+        public Graphics.Pipeline.UCamera Camera
         {
             get => mCamera;
             set => mCamera = value;

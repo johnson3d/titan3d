@@ -131,6 +131,8 @@ namespace EngineNS.GamePlay.GamePlayMacross
             idleState.LogicalState = new ULogicalState(mGamePlayStateMachine);
             var idleAnimState = new UAnimationState(mGamePlayStateMachine);
             idleAnimState.Animation = await EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"));
+            if (idleAnimState.Animation == null)
+                return false;
             idleAnimState.Initialize();
             idleAnimState.mExtractPoseFromClipCommand.SetExtractedPose(ref animatablePose);
             idleState.AnimationState = idleAnimState;

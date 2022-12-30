@@ -23,10 +23,7 @@ namespace EngineNS.Rtti
 
             public override object CreateInstance(RName name)
             {
-                #region MacrossGenerated Start                if (name == RName.GetRName("utest/mactest.macross", EngineNS.RName.ERNameType.Game))
-                {
-                    return new NS_utest.mactest();
-                }
+                #region MacrossGenerated Start
                 if (name == RName.GetRName("utest/puppet/testgameplay.macross", EngineNS.RName.ERNameType.Game))
                 {
                     return new NS_utest.puppet.testgameplay();

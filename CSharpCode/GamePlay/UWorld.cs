@@ -103,7 +103,7 @@ namespace EngineNS.GamePlay
             public EVisCull CullType = EVisCull.Normal;
             public EVisCullFilter CullFilters = EVisCullFilter.All;
             public UWorld World;
-            public Graphics.Pipeline.CCamera CullCamera;
+            public Graphics.Pipeline.UCamera CullCamera;
             public List<Graphics.Mesh.UMesh> VisibleMeshes = null;// new List<Graphics.Mesh.UMesh>();
             public List<GamePlay.Scene.UNode> VisibleNodes = null;
             public delegate bool FOnVisitNode(Scene.UNode node, UVisParameter arg);

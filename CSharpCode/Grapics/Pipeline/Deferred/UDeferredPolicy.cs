@@ -151,7 +151,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             return null;
         }
-        public override async System.Threading.Tasks.Task Initialize(CCamera camera)
+        public override async System.Threading.Tasks.Task Initialize(UCamera camera)
         {
             await base.Initialize(camera);
 

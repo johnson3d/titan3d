@@ -18,19 +18,19 @@ namespace EngineNS.Graphics.Pipeline
         //TagObject通常用来处理ShadingEnv.OnDrawCall的特殊参数设置
         //public Common.URenderGraphNode TagObject;
         public object TagObject;
-        protected CCamera mDefaultCamera;
-        public CCamera DefaultCamera { get => mDefaultCamera; }
-        public Dictionary<string, CCamera> CameraAttachments { get; } = new Dictionary<string, CCamera>();
-        public bool AddCamera(string name, CCamera camera)
+        protected UCamera mDefaultCamera;
+        public UCamera DefaultCamera { get => mDefaultCamera; }
+        public Dictionary<string, UCamera> CameraAttachments { get; } = new Dictionary<string, UCamera>();
+        public bool AddCamera(string name, UCamera camera)
         {
             if (CameraAttachments.ContainsKey(name))
                 return false;
             CameraAttachments.Add(name, camera);
             return true;
         }
-        public CCamera FindCamera(string name)
+        public UCamera FindCamera(string name)
         {
-            CCamera result;
+            UCamera result;
             if (CameraAttachments.TryGetValue(name, out result))
                 return result;
             return null;
@@ -162,11 +162,11 @@ namespace EngineNS.Graphics.Pipeline
         {
             mesh.MdfQueue.OnDrawCall(shadingType, drawcall, this, mesh);
         }
-        public virtual async System.Threading.Tasks.Task Initialize(CCamera camera)
+        public virtual async System.Threading.Tasks.Task Initialize(UCamera camera)
         {
             if (camera == null)
             {
-                camera = new CCamera();
+                camera = new UCamera();
                 camera.mCoreObject.PerspectiveFovLH(3.14f / 4f, 1, 1, 0.3f, 1000.0f);
                 var eyePos = new DVector3(0, 0, -10);
                 camera.mCoreObject.LookAtLH(in eyePos, in DVector3.Zero, in Vector3.Up);

@@ -356,7 +356,7 @@ namespace EngineNS.NxRHI
 {
     public partial class UGraphicDraw
     {
-        public void BindGBuffer(Graphics.Pipeline.CCamera camera, Graphics.Pipeline.UGraphicsBuffers GBuffers)
+        public void BindGBuffer(Graphics.Pipeline.UCamera camera, Graphics.Pipeline.UGraphicsBuffers GBuffers)
         {
             //UEngine.Instance.GfxDevice.CoreShaderBinder.ShaderResource.cbPerViewport
             //UEngine.Instance.GfxDevice.CoreShaderBinder.ShaderResource.cbPerCamera
