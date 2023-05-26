@@ -157,12 +157,8 @@ namespace Hebron.Runtime
 			var result = 0;
 
 			for (var i = 0; i < token.Length; ++i)
-			{
 				if (src[i] != token[i])
-				{
 					++result;
-				}
-			}
 
 			return result;
 		}
@@ -172,12 +168,8 @@ namespace Hebron.Runtime
 			var result = 0;
 
 			for (var i = 0; i < Math.Min(token.Length, (int)size); ++i)
-			{
 				if (src[i] != token[i])
-				{
 					++result;
-				}
-			}
 
 			return result;
 		}
@@ -186,7 +178,7 @@ namespace Hebron.Runtime
 		{
 			// First step - determine length
 			var length = 0;
-			sbyte* ptr = start;
+			var ptr = start;
 			while (numbers.IndexOf((char)*ptr) != -1)
 			{
 				++ptr;
@@ -200,19 +192,66 @@ namespace Hebron.Runtime
 			while (length > 0)
 			{
 				long num = numbers.IndexOf((char)*ptr);
-				long pow = (long)Math.Pow(10, length - 1);
+				var pow = (long)Math.Pow(10, length - 1);
 				result += num * pow;
 
 				++ptr;
 				--length;
 			}
 
-			if (end != null)
-			{
-				*end = ptr;
-			}
+			if (end != null) *end = ptr;
 
 			return result;
+		}
+
+		public static float fabs(double a)
+		{
+			return (float)Math.Abs(a);
+		}
+
+		public static double ceil(double a)
+		{
+			return Math.Ceiling(a);
+		}
+
+		public static double floor(double a)
+		{
+			return Math.Floor(a);
+		}
+
+		public static double cos(double value)
+		{
+			return Math.Cos(value);
+		}
+
+		public static double acos(double value)
+		{
+			return Math.Acos(value);
+		}
+
+		public static double sin(double value)
+		{
+			return Math.Sin(value);
+		}
+
+		public static double sqrt(double val)
+		{
+			return Math.Sqrt(val);
+		}
+
+		public static double fmod(double x, double y)
+		{
+			return x % y;
+		}
+
+		public static ulong strlen(sbyte* str)
+		{
+			var ptr = str;
+
+			while (*ptr != '\0')
+				ptr++;
+
+			return (ulong)ptr - (ulong)str - 1;
 		}
 	}
 }

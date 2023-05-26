@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>06df8867-c29e-4424-95a8-3592453e3fee</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>xxHash</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Utils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash128.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash128.XXH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash128.XXH3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash128.XXH64.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash3.XXH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash3.XXH3.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash3.XXH64.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash32.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash32.XXH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash32.XXH32.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash64.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash64.XXH.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xxHash64.XXH64.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)__inline__xxHash32.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)__inline__xxHash64.cs" />
+  </ItemGroup>
+</Project>
