@@ -9,7 +9,8 @@
     <Import_RootNamespace>CodeGenCSharp</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.CodeBuilder.ShaderNode.Control.HLSLMethod.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreHLSLMethod.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Font.TtFontHLSLMethod.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.NodeGraph.UNodeGraph.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.Node.UBezier.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.Node.UProgram.macross.cs" />
