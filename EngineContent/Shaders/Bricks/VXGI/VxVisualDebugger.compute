@@ -1,0 +1,76 @@
+#include "VXGICommon.compute"
+
+struct FIndirectDrawArgs
+{
+	uint IndexCountPerInstance;
+	uint InstanceCount;
+	uint StartIndexLocation;
+	int BaseVertexLocation;
+	uint StartInstanceLocation;
+};
+
+#define IndirectDrawStructStride 4 * 5
+
+struct FVoxelDebugger
+{
+	float3		Position;
+	float		Scale;
+
+	float3		Color;
+	float		Pad0;
+};
+
+RWByteAddressBuffer VxIndirectDebugDraws;//RWStructuredBuffer<FIndirectDrawArgs> VxIndirectDebugDraws;
+RWStructuredBuffer<FVoxelDebugger> VoxelGroupDebugger;
+RWStructuredBuffer<FVoxelDebugger> VoxelDebugger;
+
+float3 GetVxGroupPosition(FVoxelGroup vxGroup)
+{
+	return VxStartPosition + float3(vxGroup.GroupIndex.x * VxSize * VxGroupCubeSide, vxGroup.GroupIndex.y * VxSize * VxGroupCubeSide, vxGroup.GroupIndex.z * VxSize * VxGroupCubeSide);
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_SetupVxDebugger(uint3 id : SV_DispatchThreadID)
+{
+	VxIndirectDebugDraws.Store(id.x * IndirectDrawStructStride + 0, VxDebugger_IndexCountPerInstance);//.IndexCountPerInstance 
+	VxIndirectDebugDraws.Store(id.x * IndirectDrawStructStride + 1 * 4, 0);//.InstanceCount
+	VxIndirectDebugDraws.Store(id.x * IndirectDrawStructStride + 2 * 4, 0);//.StartIndexLocation 
+	VxIndirectDebugDraws.Store(id.x * IndirectDrawStructStride + 3 * 4, 0);//.BaseVertexLocation 
+	VxIndirectDebugDraws.Store(id.x * IndirectDrawStructStride + 4 * 4, 0);//.StartInstanceLocation
+}
+
+[numthreads(DispatchX, 1, 1)]
+void CS_CollectVxDebugger(uint3 id : SV_DispatchThreadID)
+{
+	FHashSparseSpace_FVoxelGroup allocator = GetVoxelGroupAllocator();
+	FVoxelGroup vxGroup = allocator.SpaceAllocator[id.x];
+	if (vxGroup.IsValid() == 0)
+		return;
+	float3 groupPos = GetVxGroupPosition(vxGroup);
+
+	int IndexId = 0;
+	VxIndirectDebugDraws.InterlockedAdd(0 * IndirectDrawStructStride + 1 * 4, 1, IndexId);
+	VoxelGroupDebugger[IndexId].Position = groupPos;
+	VoxelGroupDebugger[IndexId].Scale = VxSize * VxGroupCubeSide;
+
+	for (int i = 0; i < VxGroupCubeSide; i++)
+	{
+		for (int j = 0; j < VxGroupCubeSide; j++)
+		{
+			for (int k = 0; k < VxGroupCubeSide; k++)
+			{
+				uint vxPosAndMtl = vxGroup.GetVoxel(int3(i, j, k));
+				if (GetMaterial(vxPosAndMtl) != 0)
+				{
+					int IndexId2 = 0;
+					VxIndirectDebugDraws.InterlockedAdd(1 * IndirectDrawStructStride + 1 * 4, 1, IndexId2);
+					VoxelDebugger[IndexId2].Position = groupPos + float3((float)i * VxSize, (float)j * VxSize, (float)k * VxSize)
+						+ float3(VxSize, VxSize, VxSize) * 0.5f;
+					VoxelDebugger[IndexId2].Scale = VxSize;
+					VoxelDebugger[IndexId2].Color.xyz = (float3)GetColor(vxPosAndMtl);
+				}
+			}
+		}
+	}
+}
+//

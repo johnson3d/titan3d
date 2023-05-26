@@ -13,7 +13,7 @@ float3 GetTerrainNormal(float2 uv, PS_INPUT input)
 #endif
 
 #if !defined(Def_GetInstanceData)
-VSInstantData GetInstanceData(VS_INPUT input)
+VSInstantData GetInstanceData(VS_MODIFIER input)
 {
 	VSInstantData result = (VSInstantData)0;
 #if USE_VS_InstPos == 1

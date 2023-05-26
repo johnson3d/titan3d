@@ -1,0 +1,288 @@
+#ifndef _HashSparseSpace_Compute_H_
+#define _HashSparseSpace_Compute_H_
+
+#if RHI_TYPE == RHI_DX11
+interface IHashSparseSpace
+{
+	void Allocator_InterlockedOr(uint index, out uint oldKeyState);
+	void Allocator_GetKeyState(uint index, out uint oldKeyState);
+	void Allocator_SetKeyState(uint index, uint keyState);
+};
+
+struct FHashSparseSpace : IHashSparseSpace
+{
+	uint3 SpaceSize;// = uint3(256, 256, 32);
+	uint SpaceLength;
+	uint Pos2Key(uint3 pos)
+	{
+		return pos.z * (SpaceSize.x * SpaceSize.y) + pos.y * SpaceSize.x + pos.x;
+	}
+	uint Key2Hash(uint key, uint oldHash)
+	{
+		return HashCombine(key, oldHash);
+	}
+	uint GetValueFromState(uint KeyState) {
+		return KeyState & (~0x80000000u);
+	}
+	uint HashCombine(uint Seed, uint Value)
+	{
+		return Seed ^ (Value + 0x9e3779b9u + (Seed << 6) + (Seed >> 2));
+	}
+
+	void Allocator_InterlockedOr(uint index, out uint oldKeyState);
+	void Allocator_GetKeyState(uint index, out uint oldKeyState);
+	void Allocator_SetKeyState(uint index, uint keyState);
+
+	uint Alloc(uint3 pos)
+	{
+		uint key = Pos2Key(pos);
+		return Alloc(key);
+	}
+	uint Alloc(uint key)
+	{
+		uint hash = Key2Hash(key, 0);
+		for (int i = 0; i < 10; i++)
+		{
+			uint index = Set(hash, key);
+			if (index != 0xffffffff)
+			{
+				return index;
+			}
+			hash = Key2Hash(key, hash);
+		}
+		return 0xffffffff;
+	}
+	void Free(uint key)
+	{
+		uint index = Find(key);
+		if (index != 0xffffffff)
+		{
+			Allocator_SetKeyState(index, 0);
+		}
+	}
+	uint Find(uint3 pos)
+	{
+		uint key = Pos2Key(pos);
+		return Find(key);
+	}
+	uint Find(uint key)
+	{
+		uint hash = Key2Hash(key, 0);
+		for (int i = 0; i < 10; i++)
+		{
+			uint index = IsSet(hash, key);
+			if (index != 0xffffffff)
+			{
+				return index;
+			}
+			hash = Key2Hash(key, hash);
+		}
+		return 0xffffffff;
+	}
+	void UnsetSpace(uint3 pos)
+	{
+		uint key = Pos2Key(pos);
+		Free(key);
+	}
+	uint Set(uint hash, uint key)
+	{
+		uint index = hash % SpaceLength;
+		uint oldKeyState;
+		Allocator_InterlockedOr(index, oldKeyState);
+		if (oldKeyState & 0x80000000u)
+		{
+			uint oldKey = GetValueFromState(oldKeyState);
+			if (oldKey != key)
+				return 0xffffffff;
+			return index;
+		}
+		Allocator_SetKeyState(index, key | 0x80000000u);
+		return index;
+	}
+	uint IsSet(uint hash, uint key)
+	{
+		uint index = hash % SpaceLength;
+		uint oldKeyState;
+		Allocator_GetKeyState(index, oldKeyState);
+		uint keyState = key | 0x80000000u;
+		if (oldKeyState == keyState)
+		{
+			return index;
+		}
+		return 0xffffffff;
+	}
+	
+	void CS_Clear(uint3 id : SV_DispatchThreadID)
+	{
+		Allocator_SetKeyState(id.x, 0);
+	}
+};
+
+struct FHashPair
+{
+	uint KeyState;
+	int Value;
+};
+
+struct FHashSparseSpace_Int : FHashSparseSpace
+{
+	RWStructuredBuffer< FHashPair > SpaceAllocator;
+	void Allocator_InterlockedOr(uint index, out uint oldKeyState)
+	{
+		InterlockedOr(SpaceAllocator[index].KeyState, 0x80000000u, oldKeyState);
+	}
+	void Allocator_GetKeyState(uint index, out uint oldKeyState)
+	{
+		oldKeyState = SpaceAllocator[index].KeyState;
+	}
+	void Allocator_SetKeyState(uint index, uint keyState)
+	{
+		SpaceAllocator[index].KeyState = keyState;
+	}
+	void SetSpaceValue(uint3 pos, int value)
+	{
+		uint key = Pos2Key(pos);
+		uint index = Alloc(key);
+		SpaceAllocator[index].Value = value;
+	}
+};
+
+void DoTestGeneric()
+{
+	RWStructuredBuffer< FHashPair > bbb;
+
+	FHashSparseSpace_Int aaa;
+	aaa.SpaceAllocator = bbb;
+	aaa.SetSpaceValue(uint3(0, 0, 0), (int)5);
+}
+
+#else
+template <typename T>
+struct FHashPair
+{
+	uint KeyState;
+	T Value;
+};
+
+template <typename T>
+struct FHashSparseSpace
+{
+	RWStructuredBuffer<T> SpaceAllocator;
+	//RWStructuredBuffer< FHashPair<T> > SpaceAllocator;
+	uint3 SpaceSize;// = uint3(256, 256, 32);
+	uint SpaceLength;
+	uint Pos2Key(uint3 pos)
+	{
+		return pos.z * (SpaceSize.x * SpaceSize.y) + pos.y * SpaceSize.x + pos.x;
+	}
+	uint Key2Hash(uint key, uint oldHash)
+	{
+		return HashCombine(key, oldHash);
+	}
+	uint GetValueFromState(uint KeyState) {
+		return KeyState & (~0x80000000u);
+	}
+	uint HashCombine(uint Seed, uint Value)
+	{
+		return Seed ^ (Value + 0x9e3779b9u + (Seed << 6) + (Seed >> 2));
+	}
+	uint Alloc(uint3 pos)
+	{
+		uint key = Pos2Key(pos);
+		return Alloc(key);
+	}
+	uint Alloc(uint key)
+	{
+		uint hash = Key2Hash(key, 0);
+		for (int i = 0; i < 10; i++)
+		{
+			uint index = Set(hash, key);
+			if (index != 0xffffffff)
+			{
+				return index;
+			}
+			hash = Key2Hash(key, hash);
+		}
+		return 0xffffffff;
+	}
+	void Free(uint key)
+	{
+		uint index = Find(key);
+		if (index != 0xffffffff)
+		{
+			SpaceAllocator[index].KeyState = 0;
+		}
+	}
+	uint Find(uint3 pos)
+	{
+		uint key = Pos2Key(pos);
+		return Find(key);
+	}
+	uint Find(uint key)
+	{
+		uint hash = Key2Hash(key, 0);
+		for (int i = 0; i < 10; i++)
+		{
+			uint index = IsSet(hash, key);
+			if (index != 0xffffffff)
+			{
+				return index;
+			}
+			hash = Key2Hash(key, hash);
+		}
+		return 0xffffffff;
+	}
+	uint Set(uint hash, uint key)
+	{
+		uint index = hash % SpaceLength;
+		uint oldKeyState;
+		InterlockedOr(SpaceAllocator[index].KeyState, 0x80000000u, oldKeyState);
+		if (oldKeyState & 0x80000000u)
+		{
+			uint oldKey = GetValueFromState(oldKeyState);
+			if (oldKey != key)
+				return 0xffffffff;
+			return index;
+		}
+		SpaceAllocator[index].KeyState = key | 0x80000000u;
+		return index;
+	}
+	uint IsSet(uint hash, uint key)
+	{
+		uint index = hash % SpaceLength;
+		uint oldKeyState = SpaceAllocator[index].KeyState;
+		uint keyState = key | 0x80000000u;
+		if (oldKeyState == keyState)
+		{
+			return index;
+		}
+		return 0xffffffff;
+	}
+	template <typename TV>
+	void SetSpaceValue(uint3 pos, TV value)
+	{
+		uint key = Pos2Key(pos);
+		uint index = Alloc(key);
+		SpaceAllocator[index].Value = value;
+	}
+	void CS_Clear(uint3 id : SV_DispatchThreadID)
+	{
+		SpaceAllocator[id.x].KeyState = 0;
+	}
+};
+
+void DoTestGeneric()
+{
+	RWStructuredBuffer< FHashPair<int> > bbb;
+
+	FHashSparseSpace< FHashPair<int> > aaa;
+	aaa.SpaceAllocator = bbb;
+
+	uint key = aaa.Pos2Key(uint3(0, 0, 0));
+	uint index = aaa.Alloc(key);
+	aaa.SpaceAllocator[index].Value = 5;
+}
+
+#endif
+
+#endif//_HashSparseSpace_Compute_H_

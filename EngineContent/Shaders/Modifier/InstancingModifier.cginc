@@ -1,7 +1,7 @@
 
 #if HW_VS_STRUCTUREBUFFER == 1
 StructuredBuffer<VSInstantData> VSInstantDataArray DX_AUTOBIND;//: register(t13);
-VSInstantData GetInstanceData(VS_INPUT input)
+VSInstantData GetInstanceData(VS_MODIFIER input)
 {
 	VSInstantData result = VSInstantDataArray[input.vInstanceId];
 	//result.InstanceId = input.vInstanceId;
@@ -23,7 +23,7 @@ float3 InstancingRotateVec(in float3 inPos, in float4 inQuat)
 	return inPos + uv + uuv;
 }
 
-void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
+void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
 	VSInstantData instData = GetInstanceData(vert);
 

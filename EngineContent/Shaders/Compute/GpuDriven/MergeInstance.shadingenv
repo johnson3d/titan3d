@@ -27,7 +27,7 @@ MeshInstanceData GetInstanceData(uint index)
 PS_INPUT VS_Main( uint verteID : SV_VertexID )
 {
 	PS_INPUT output = (PS_INPUT)0;
-	VS_INPUT input = (VS_INPUT)0;
+	VS_MODIFIER input = (VS_MODIFIER)0;
 
 	uint instance = verteID / MeshBatchVertexStride;
 	uint index = verteID % MeshBatchVertexStride;

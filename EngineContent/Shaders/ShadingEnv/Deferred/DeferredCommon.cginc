@@ -10,56 +10,60 @@ struct GBufferData
 	half3	WorldNormal;
 	half	Roughness;	
 	int		ObjectFlags_2Bit;
+	half2	MotionVector;
+
+	static half3 EncodeNormalXYZ(half3 n)
+	{
+		return half3(n.xyz * 0.5f + 0.5f);
+	}
+
+	static half3 DecodeNormalXYZ(half3 enc)
+	{
+		return enc.xyz * 2 - 1;
+	}
+	bool IsAcceptShadow()
+	{
+		return (ObjectFlags_2Bit & 1) != 0;
+	}
+
+	bool IsUnlit()
+	{
+		//return GBuffer.ObjectFlags_2Bit == 1;
+		return (ObjectFlags_2Bit & (2)) != 0;
+	}
+
+	void EncodeGBuffer(out float4 rt0, out float4 rt1, out float4 rt2, out float4 rt3)
+	{
+		rt0.rgb = MtlColorRaw.rgb;
+		rt0.w = Metallicity;
+
+		rt1.xyz = EncodeNormalXYZ(WorldNormal.xyz);
+		rt1.w = ((half)ObjectFlags_2Bit) / 3.0h;
+
+		rt2.w = Roughness;
+		rt2.r = Emissive;
+		rt2.g = Specular;
+		rt2.b = 0;
+
+		rt3.rg = EncodeMotionVector(MotionVector.xy);
+		rt3.zw = 0;
+	}
+
+	void DecodeGBuffer(half4 rt0, half4 rt1, half4 rt2, half4 rt3)
+	{
+		MtlColorRaw.rgb = rt0.rgb;
+		Metallicity = rt0.w;
+
+		if (any(rt1.xyz) != 0)
+			WorldNormal.xyz = DecodeNormalXYZ(rt1.xyz);
+		Roughness = rt2.w;
+		ObjectFlags_2Bit = (int)(rt1.w * 4.0h);
+
+		Emissive = rt2.r;
+		Specular = rt2.g;
+
+		MotionVector.xy = DecodeMotionVector(rt3.rg);
+	}
 };
 
-bool IsAcceptShadow(GBufferData GBuffer)
-{
-	return (GBuffer.ObjectFlags_2Bit & 1) != 0;
-}
-
-bool IsUnlit(GBufferData GBuffer)
-{
-	//return GBuffer.ObjectFlags_2Bit == 1;
-	return (GBuffer.ObjectFlags_2Bit & (2)) != 0;
-}
-
-half3 EncodeNormalXYZ(half3 n)
-{
-	return half3(n.xyz * 0.5f + 0.5f);
-}
-
-half3 DecodeNormalXYZ(half3 enc)
-{
-	return enc.xyz * 2 - 1;
-}
-
-void EncodeGBuffer(GBufferData GBuffer, out float4 rt0, out float4 rt1, out float4 rt2)
-{
-	rt0.rgb = GBuffer.MtlColorRaw.rgb;
-	rt0.w = GBuffer.Metallicity;
-
-	rt1.xyz = EncodeNormalXYZ(GBuffer.WorldNormal.xyz);	
-	rt1.w = ((half)GBuffer.ObjectFlags_2Bit) / 3.0h;
-
-	rt2.w = GBuffer.Roughness;
-	rt2.r = GBuffer.Emissive;
-	rt2.g = GBuffer.Specular;
-	rt2.b = 0;
-}
-
-GBufferData DecodeGBuffer(half4 rt0, half4 rt1, half4 rt2)
-{
-	GBufferData output = (GBufferData)0;
-	output.MtlColorRaw.rgb = rt0.rgb;
-	output.Metallicity = rt0.w;
-	
-	if (any(rt1.xyz) != 0)
-		output.WorldNormal.xyz = DecodeNormalXYZ(rt1.xyz);
-	output.Roughness = rt2.w;
-	output.ObjectFlags_2Bit = (int)(rt1.w * 4.0h);
-
-	output.Emissive = rt2.r;
-	output.Specular = rt2.g;
-	return output;
-}
 #endif//_MobileBasePassPS_H_

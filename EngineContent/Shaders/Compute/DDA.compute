@@ -1,0 +1,164 @@
+#ifndef _DDA_Compute_H_
+#define _DDA_Compute_H_
+#include "../Inc/BaseStructure/Box3.cginc"
+
+interface IVoxel
+{
+	bool HasPayload();
+};
+
+interface IVoxelSpace3D
+{
+	IVoxel GetVoxel(int3 index);
+};
+
+struct TtVoxel : IVoxel
+{
+	bool HasPayload()
+	{
+		if (Payload != 0)
+			return true;
+		return false;
+	}
+	uint Payload;
+};
+
+struct TtVoxelSpace3D : IVoxelSpace3D
+{
+	int3 Side; // = uint3(256, 64, 256);
+	int StrideOfXY; // = Side.x * Side.y
+	float VoxelSize; //= 1.0f;
+	int CellSide; // = 2;
+	StructuredBuffer<uint> Voxels;
+	int VoxelArrayOffset;
+
+	IVoxel GetVoxel(int3 index)
+	{
+		TtVoxel result;
+		result.Payload = Voxels[VoxelArrayOffset + index.z * StrideOfXY + index.y * Side.x + index.x];
+		return result;
+		//return Voxels[(int)index.X, (int)index.Y, (int)index.Z];
+	}
+
+	bool LineCheck(inout float3 start, float3 end, float3 dir, inout float t, inout int3 hitIndex)
+	{
+		int3 curIndex = GetVoxelIndex(start);
+		int3 cell = int3(CellSide, CellSide, CellSide);
+		int3 offsetInCell = curIndex % cell;
+		const float3 step = V_Select(dir >= float3(0, 0, 0), float3(1, 1, 1), float3(-1, -1, -1));
+		const float MaxInvDirValue = 10000000;
+		const float3 deltaT = V_Select(dir != 0, abs(VoxelSize / dir), MaxInvDirValue);
+
+		//deltaT代表xyz轴方向要走一个格子，射线需要走的距离
+		//T代表到下一个xyz边界射线要走的距离=deltaT * 格子数
+		float3 T = ((curIndex + 0.5f - start / VoxelSize) * step + 0.5f) * deltaT;
+
+		bool IsHit = false;
+		// && (i < MaxStep)
+		for (int i = 0; (!IsHit); i++)
+		{
+			if (any(curIndex < int3(0,0,0)))
+				break;
+			if (any(curIndex >= Side))
+				break;
+			IsHit = GetVoxel(curIndex).HasPayload();
+			if (IsHit)
+			{
+				hitIndex = curIndex;
+				return true;
+			}
+			if (any(offsetInCell < int3(0,0,0)) ||
+				any(offsetInCell >= cell))
+			{
+				break;
+			}
+
+			float3 vxIncr = GetStepDir(T, t);
+			T += vxIncr * deltaT;
+			curIndex += vxIncr * step;
+
+			offsetInCell += (int3)(vxIncr * step);
+		}
+
+		return IsHit;
+	}
+	int3 GetVoxelIndex(float3 pos)
+	{
+		float3 t = pos / VoxelSize;
+		return int3(floor(t.x), floor(t.y), floor(t.z));
+	}
+	float3 GetStepDir(float3 T, inout float t)
+	{
+		//选择距离下一个边界最近的距离方向
+		float3 dirMask = float3(
+			((T.x <= T.y) && (T.x <= T.z)) ? 1 : 0,
+			((T.y < T.z) && (T.y <= T.x)) ? 1 : 0,
+			((T.z < T.x) && (T.z <= T.y)) ? 1 : 0);
+
+		t = dirMask.x > 0 ? T.x : (dirMask.y > 0 ? T.y : T.z);
+		return dirMask;
+	}
+};
+
+#ifndef HVX_NumOfMips
+#define HVX_NumOfMips 4
+#endif
+
+cbuffer cbHVXRayTracing DX_AUTOBIND
+{
+	int3 HvxSide[HVX_NumOfMips];
+	int HvxStrideOfXY[HVX_NumOfMips];
+	int HvxCellSide[HVX_NumOfMips];
+	float HvxVoxelSize[HVX_NumOfMips];
+	int HvxVoxelArrayOffset[HVX_NumOfMips];
+}
+
+struct TtHierarchicalVoxelSpace3D
+{
+	TtVoxelSpace3D MipLayers[HVX_NumOfMips];
+	StructuredBuffer<uint> Voxels;
+	void InitHVS()
+	{
+		for (int i =  0; i < HVX_NumOfMips; i--)
+		{
+			MipLayers[i].Side = HvxSide[i];// MipLayers[i + 1].Side / 2;
+			MipLayers[i].StrideOfXY = HvxStrideOfXY[i];// MipLayers[i].Side.x* MipLayers[i].Side.y;
+			MipLayers[i].CellSide = HvxCellSide[i];// 2;
+			MipLayers[i].VoxelSize = HvxVoxelSize[i];// MipLayers[i + 1].VoxelSize * 2;
+			MipLayers[i].VoxelArrayOffset = HvxVoxelArrayOffset[i];
+			MipLayers[i].Voxels = Voxels;
+		}
+		//MipLayers[0].CellSide = MipLayers[0].Side.GetMaxValue();
+	}
+	bool LineCheck(inout float3 start, float3 end, float3 dir, inout int3 hitIndex)
+	{
+		InitHVS();
+
+		int curLayer = 0;
+		int3 tHitIndex;
+		float t = 0;
+		while (true)
+		{
+			bool ret = MipLayers[curLayer].LineCheck(start, end, dir, t, tHitIndex);
+			t += 0.1f;
+			start = start + dir * t;
+			if (ret)
+			{
+				curLayer++;
+				if (curLayer == HVX_NumOfMips)
+				{
+					hitIndex = tHitIndex;
+					return true;
+				}
+			}
+			else
+			{
+				if (curLayer == 0)
+					return false;
+				curLayer--;
+			}
+		}
+	}
+};
+
+#endif//_DDA_Compute_H_

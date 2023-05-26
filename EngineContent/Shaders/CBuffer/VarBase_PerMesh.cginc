@@ -7,6 +7,8 @@ VK_BIND(5) cbuffer cbPerMesh DX_BIND_B(5)
 	matrix WorldMatrix;
 	matrix WorldMatrixInverse;
 
+	matrix PreWorldMatrix;
+
 	float4 HitProxyId;
 	float4 ActorId;
 	

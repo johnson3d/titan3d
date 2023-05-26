@@ -64,19 +64,47 @@
 	#define VK_OFFSET(n) [[vk::offset(n)]]
 #endif
 
+// Works around bug in the spirv for the missing implementation of the and() and or() intrinsics.
+bool  and_internal(bool  a, bool  b) { return bool(a && b); }
+bool2 and_internal(bool2 a, bool2 b) { return bool2(a.x && b.x, a.y && b.y); }
+bool3 and_internal(bool3 a, bool3 b) { return bool3(a.x && b.x, a.y && b.y, a.z && b.z); }
+bool4 and_internal(bool4 a, bool4 b) { return bool4(a.x && b.x, a.y && b.y, a.z && b.z, a.w && b.w); }
+
+bool  or_internal(bool  a, bool  b) { return bool(a || b); }
+bool2 or_internal(bool2 a, bool2 b) { return bool2(a.x || b.x, a.y || b.y); }
+bool3 or_internal(bool3 a, bool3 b) { return bool3(a.x || b.x, a.y || b.y, a.z || b.z); }
+bool4 or_internal(bool4 a, bool4 b) { return bool4(a.x || b.x, a.y || b.y, a.z || b.z, a.w || b.w); }
+
+#define and(a, b) and_internal(a, b)
+#define or(a, b) or_internal(a, b)
+
 //#define half min16float
 //#define half2 min16float2
 //#define half3 min16float3
 //#define half4 min16float4
 
-//CBuffers
-#include "../CBuffer/VarBase_PerCamera.cginc"
-#include "../CBuffer/VarBase_PerFrame.cginc"
-#include "../CBuffer/VarBase_PerMaterial.cginc"
-#include "../CBuffer/VarBase_PerViewport.cginc"
-#include "../CBuffer/VarBase_PerMesh.cginc"
+void SetIndirectDispatchArg(RWByteAddressBuffer buffer, int offset, uint3 dispatchArg, uint drawId)
+{
+#if RHI_TYPE == RHI_DX12
+	buffer.Store(offset + 0 * 4, drawId);
+#endif
+	buffer.Store(offset + 1 * 4, dispatchArg.x);//dispatchx
+	buffer.Store(offset + 2 * 4, dispatchArg.y);//dispatchy
+	buffer.Store(offset + 3 * 4, dispatchArg.z);//dispatchz
+}
 
-//Functions
-#include "SysFunction.cginc"
+void SetIndirectDrawIndexArg(RWByteAddressBuffer buffer, int offset, 
+	uint IndexCountPerInstance, uint InstanceCount, uint StartIndexLocation, 
+	uint BaseVertexLocation, uint StartInstanceLocation, uint drawId)
+{
+#if RHI_TYPE == RHI_DX11
+	buffer.Store(offset + 0 * 4, drawId);
+#endif
+	buffer.Store(offset + 1 * 4, IndexCountPerInstance);
+	buffer.Store(offset + 2 * 4, InstanceCount);
+	buffer.Store(offset + 3 * 4, StartIndexLocation);
+	buffer.Store(offset + 4 * 4, BaseVertexLocation);
+	buffer.Store(offset + 5 * 4, StartInstanceLocation);
+}
 
 #endif

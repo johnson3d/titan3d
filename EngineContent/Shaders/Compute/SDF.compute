@@ -1,0 +1,69 @@
+#pragma kernel InitMask
+#pragma kernel JumpFlood
+#pragma kernel DT
+
+StructuredBuffer<int> MaskBuffer;
+int Width;
+int Height;
+RWTexture2D<float4> Source;
+RWTexture2D<float4> Result;
+int Step;
+
+uint2 Bound(uint2 i){
+	return uint2((i.x + Width) % Width, (i.y + Height) % Height);
+}
+
+uint Index(uint2 i)
+{
+	return i.x + i.y * Width;
+}
+
+void UpdateInfo(float2 curPos,float3 tarInfo,inout float4 minInfo)
+{
+	if(tarInfo.z > 0 )
+	{
+		float distance = dot(curPos - tarInfo.xy,curPos - tarInfo.xy);
+		if(distance < minInfo.w){
+			minInfo = float4(tarInfo, distance);
+		}
+	}
+}
+
+[numthreads(8,8,1)]
+void InitMask (uint3 id : SV_DispatchThreadID)
+{
+	if (MaskBuffer[Index(id.xy)] > 0)
+	Source[id.xy] = float4(id.x, id.y, 1, 1);
+}
+
+
+
+[numthreads(8,8,1)]
+void JumpFlood (uint3 id : SV_DispatchThreadID)
+{
+	// seed position,seed ID and distance with seed
+	float4 minInfo = float4(0,0,0,999999);
+	UpdateInfo(id.xy, Source[id.xy].xyz,minInfo);
+	UpdateInfo(id.xy, Source[Bound(id.xy + uint2(-Step,-Step))].xyz, minInfo);
+    UpdateInfo(id.xy, Source[Bound(id.xy + uint2(-Step,Step))].xyz, minInfo);
+	UpdateInfo(id.xy, Source[Bound(id.xy + uint2(-Step,0))].xyz, minInfo);
+	UpdateInfo(id.xy, Source[Bound(id.xy + uint2(0,-Step))].xyz, minInfo);
+	UpdateInfo(id.xy, Source[Bound(id.xy + uint2(0,Step))].xyz, minInfo);
+	UpdateInfo(id.xy, Source[Bound(id.xy + uint2(Step,-Step))].xyz, minInfo);
+	UpdateInfo(id.xy, Source[Bound(id.xy + uint2(Step,0))].xyz, minInfo);
+	UpdateInfo(id.xy, Source[Bound(id.xy + uint2(Step,Step))].xyz, minInfo);
+	Result[id.xy] = minInfo;
+}
+
+[numthreads(8,8,1)]
+void DT (uint3 id : SV_DispatchThreadID)
+{
+	float4 info = Source[id.xy];
+	float intensity =  1-exp(-sqrt(info.w)*0.01);
+	// float intensity = 1 - info.w * 0.01;
+	Result[id.xy] = float4(intensity,intensity,intensity,1);
+
+	// float3 color = Colors[Source[id.xy].z - 1];
+	// if (info.w < 100) color = float3(0, 0, 0);
+	// Result[id.xy] = float4(color, 1);
+}

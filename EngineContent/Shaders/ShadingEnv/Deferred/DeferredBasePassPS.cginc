@@ -5,9 +5,10 @@
 
 struct PS_OUTPUT
 {
-	float4 RT0 : SV_Target0;
-	float4 RT1 : SV_Target1;
-	float4 RT2 : SV_Target2;
+	float4 RT0 : SV_Target0;//R8G8B8A8:abedo.rgb - metallicty
+	float4 RT1 : SV_Target1;//R10G10B10A2:normal.xyz - Flags
+	float4 RT2 : SV_Target2;//R8G8B8A8:Roughness,Emissive,Specular,unused
+	float4 RT3 : SV_Target3;//R10G10B10A2:motion.xy,unused,unused
 };
 
 PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
@@ -43,8 +44,23 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 	GBuffer.Emissive = (half)saturate(CalcLuminance((half3)mtl.mEmissive));
 	GBuffer.Specular = (half)mtl.mAbsSpecular;
 	GBuffer.ObjectFlags_2Bit = ObjectFLags_2Bit;
-		
-	EncodeGBuffer(GBuffer, output.RT0, output.RT1, output.RT2);
+	//GBuffer.MotionVector.xy = input.psCustomUV0.xy;
+	
+	float2 previousScreenPos = (input.psCustomUV1.xy / input.psCustomUV1.w) * 0.5 + 0.5;
+	float2 currentScreenPos = (input.psCustomUV2.xy / input.psCustomUV2.w) * 0.5 + 0.5;
+	//previousScreenPos.y = 1.0 - previousScreenPos.y;
+	//currentScreenPos.y = 1.0 - currentScreenPos.y;
+	GBuffer.MotionVector.xy = currentScreenPos - previousScreenPos;
+	GBuffer.MotionVector.y = -GBuffer.MotionVector.y;
+
+	//float2 noJitterScreenPos = (input.psCustomUV3.xy / input.psCustomUV3.w) * 0.5 + 0.5;
+	//if (any(abs(currentScreenPos - (noJitterScreenPos + JitterOffset)) > gViewportSizeAndRcp.zw * 0.25f))
+	////if (any(abs(currentScreenPos != (noJitterScreenPos + JitterOffset))))
+	//{
+	//	GBuffer.MtlColorRaw = half3(1,0,0);
+	//}
+
+	GBuffer.EncodeGBuffer(output.RT0, output.RT1, output.RT2, output.RT3);
 	return output;
 }
 

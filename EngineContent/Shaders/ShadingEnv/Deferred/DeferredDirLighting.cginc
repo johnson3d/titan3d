@@ -34,6 +34,9 @@ SamplerState Samp_GBufferRT1 DX_AUTOBIND;
 Texture2D GBufferRT2 DX_AUTOBIND;
 SamplerState Samp_GBufferRT2 DX_AUTOBIND;
 
+Texture2D GBufferRT3 DX_AUTOBIND;
+SamplerState Samp_GBufferRT3 DX_AUTOBIND;
+
 Texture2D GShadowMap DX_AUTOBIND;
 SamplerState Samp_GShadowMap DX_AUTOBIND;
 
@@ -61,13 +64,14 @@ float4	GetWorldPosition(float4 PosProj, float vDepth)
 	VPos.z = vDepth;
 	//VPos.w = 1.0f;
 	// Inverse ViewProjection Matrix
-	VPos = mul(VPos, ViewPrjInvMtx);
+	VPos = mul(VPos, GetViewPrjMtxInverse(true));
 	VPos.xyzw /= VPos.w;
 	return VPos;
 }
 
-PS_INPUT VS_Main(VS_INPUT input)
+PS_INPUT VS_Main(VS_INPUT input1)
 {
+	VS_MODIFIER input = VS_INPUT_TO_VS_MODIFIER(input1);
 	PS_INPUT output = (PS_INPUT)0;
 
 	output.vPosition = float4(input.vPosition.xyz, 1.0f);
@@ -80,6 +84,7 @@ PS_INPUT VS_Main(VS_INPUT input)
 	output.vLightMap.w = gSunPosNDC.w;
 	output.vLightMap.xy = CalcVignetteVS((half2)output.vPosition.xy);
 
+	//output.SpecialData.x = input1.vVertexID;
 	return output;
 }
 
@@ -92,14 +97,18 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 {
 	PS_OUTPUT output = (PS_OUTPUT)0;
 
-	half4 rt0 = (half4)GBufferRT0.SampleLevel(Samp_GBufferRT0, input.vUV.xy, 0);
-	half4 rt1 = (half4)GBufferRT1.SampleLevel(Samp_GBufferRT1, input.vUV.xy, 0);
-	half4 rt2 = (half4)GBufferRT2.SampleLevel(Samp_GBufferRT2, input.vUV.xy, 0);
-	float rtDepth = GetDepth(input.vUV.xy);
+	float2 uv = input.vUV.xy;
 
-	GBufferData GBuffer = DecodeGBuffer(rt0, rt1, rt2);
+	half4 rt0 = (half4)GBufferRT0.SampleLevel(Samp_GBufferRT0, uv.xy, 0);
+	half4 rt1 = (half4)GBufferRT1.SampleLevel(Samp_GBufferRT1, uv.xy, 0);
+	half4 rt2 = (half4)GBufferRT2.SampleLevel(Samp_GBufferRT2, uv.xy, 0);
+	half4 rt3 = (half4)GBufferRT3.SampleLevel(Samp_GBufferRT3, uv.xy, 0);
+	float rtDepth = GetDepth(uv.xy);
 
-	if (IsUnlit(GBuffer))
+	GBufferData GBuffer = (GBufferData)0;
+	GBuffer.DecodeGBuffer(rt0, rt1, rt2, rt3);
+
+	if (GBuffer.IsUnlit())
 	{
 		output.RT0.rgb = GBuffer.MtlColorRaw;
 		return output;
@@ -120,7 +129,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 	half3 BaseShading = half3(0.0h, 0.0h, 0.0h);
 
-	float3 WorldPos = GetWorldPositionFromDepthValue(input.vUV, rtDepth).xyz;//GetWorldPosition(input.vPosition, rtDepth);//
+	float3 WorldPos = GetWorldPositionFromDepthValue(uv, rtDepth).xyz;//GetWorldPosition(input.vPosition, rtDepth);//
 	half3 L = -(half3)normalize(gDirLightDirection_Leak.xyz);
 	half3 V = (half3)normalize(CameraPosition - WorldPos);
 	half3 Cdir = (half3)gDirLightColor_Intensity.rgb;
@@ -147,21 +156,21 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #if DISABLE_SHADOW_ALL == 1
 	ShadowValue = 1.0h;
 #else
-	if (PerPixelViewerDistance > gShadowDistance || IsAcceptShadow(GBuffer) == false)
+	if (PerPixelViewerDistance > gShadowDistance || GBuffer.IsAcceptShadow() == false)
 	{
 		ShadowValue = 1.0h;
 	}
 	else
 	{
 		for (int CsmIdx = 0; CsmIdx < gCsmNum; CsmIdx++)
-	{
-		if (PerPixelViewerDistance < (half)gCsmDistanceArray[CsmIdx])
 		{
-			ShadowMapUV = mul(float4(WorldPos, 1.0f), gViewer2ShadowMtxArrayEditor[CsmIdx]);
-			mSFD.mShadowTransitionScale = (half)gShadowTransitionScaleArrayEditor[CsmIdx];
-			break;
+			if (PerPixelViewerDistance < (half)gCsmDistanceArray[CsmIdx])
+			{
+				ShadowMapUV = mul(float4(WorldPos, 1.0f), gViewer2ShadowMtxArrayEditor[CsmIdx]);
+				mSFD.mShadowTransitionScale = (half)gShadowTransitionScaleArrayEditor[CsmIdx];
+				break;
+			}
 		}
-	}
 
 		if (ShadowMapUV.z > 0.0f)
 		{
@@ -251,7 +260,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #if ENV_DISABLE_POINTLIGHTS == 0
 	if (NoPixel == false)
 	{
-		float2 tileIdxF = (input.vUV * gViewportSizeAndRcp.xy) / TileSize;
+		float2 tileIdxF = (uv * gViewportSizeAndRcp.xy) / TileSize;
 		uint2 tileIdx = (uint2)tileIdxF;
 		uint indexOfTile = GetTileIndex(tileIdx.x, tileIdx.y);
 		uint NumOfLights = min(TilingBuffer[indexOfTile].NumPointLight, 32);
@@ -266,7 +275,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 	BaseShading += Emissive;
 
-	half2 PickedData = (half2)GPickedTex.Sample(Samp_GPickedTex, input.vUV.xy).rg;
+	half2 PickedData = (half2)GPickedTex.Sample(Samp_GPickedTex, uv.xy).rg;
 	half PickedContrast = 1.0h;
 	half3 PickedEdgeColor = 0.0h;
 	half linearDepth = (half)(PerPixelViewerDistance / gZFar);

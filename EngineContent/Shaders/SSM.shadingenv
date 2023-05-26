@@ -13,8 +13,9 @@ MDFQUEUE_FUNCTION
 #endif
 
 //WARNING:don't change vs_main or ps_main's parameters name cause we also use it in c++;It's an appointment;
-PS_INPUT VS_Main(VS_INPUT input)
+PS_INPUT VS_Main(VS_INPUT input1)
 {
+	VS_MODIFIER input = VS_INPUT_TO_VS_MODIFIER(input1);
 	PS_INPUT output = (PS_INPUT)0;
 #if defined(VS_NO_WorldTransform)
 	output.PointLightIndices = PointLightIndices;

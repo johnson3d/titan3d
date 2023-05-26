@@ -37,9 +37,6 @@
     <Filter Include="Slate">
       <UniqueIdentifier>{d6631b02-db35-4779-9fd1-4990852451ae}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Compute\VXGI">
-      <UniqueIdentifier>{712ca324-80dd-419a-bbad-c5c2c0189aef}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Deprecated">
       <UniqueIdentifier>{238a4f6f-2f51-46a4-8297-0cd21906895f}</UniqueIdentifier>
     </Filter>
@@ -57,6 +54,27 @@
     </Filter>
     <Filter Include="Bricks\Terrain">
       <UniqueIdentifier>{98493c97-a395-4984-9681-117246df33b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Bricks\VXGI">
+      <UniqueIdentifier>{d9ec8ecc-3bca-42e7-9dac-4a46afd8dc39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc\BaseStructure">
+      <UniqueIdentifier>{93431c49-f073-4b88-8b0d-c88eb9e45340}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Occlusion">
+      <UniqueIdentifier>{781ea408-9bfd-42b0-b384-4cec8bd5b2a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Bricks\TextFont">
+      <UniqueIdentifier>{850ded67-dd15-40d3-ab99-d37dd4b58cd2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ShadingEnv\Post">
+      <UniqueIdentifier>{f02be534-f768-44e8-b3da-e1e016edcb62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ShadingEnv\Post\FSR1">
+      <UniqueIdentifier>{96ecad5a-f7af-4420-972c-5465b10e4f04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ShadingEnv\Post\SunShaft">
+      <UniqueIdentifier>{88d4a34e-e03f-40af-a55d-2ea8615b1c80}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -182,9 +200,6 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Mobile\MobileTranslucent.cginc">
       <Filter>ShadingEnv\Mobile</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)Compute\VXGI\VxDebugModifier.cginc">
-      <Filter>Compute\VXGI</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredBasePassPS.cginc">
       <Filter>ShadingEnv\Deffered</Filter>
@@ -333,6 +348,72 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\Terrain\Common.cginc">
       <Filter>Bricks\Terrain</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Modifier\GridUVModifier.cginc">
+      <Filter>Modifier</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\VXGI\VxDebugModifier.cginc">
+      <Filter>Bricks\VXGI</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Occlusion\GpuSceneCullInstance.cginc">
+      <Filter>Occlusion</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Occlusion\Occlusion.cginc">
+      <Filter>Occlusion</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\TextFont\FontSDF.cginc">
+      <Filter>Bricks\TextFont</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\LargeWorldCoordinates.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Occlusion\GpuSceneSetupCullCluster.cginc">
+      <Filter>Occlusion</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Inc\ShaderDebugOutput.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Occlusion\GpuSceneCullCluster.cginc">
+      <Filter>Occlusion</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\TemporalAA.cginc">
+      <Filter>ShadingEnv</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\AAShading.cginc">
+      <Filter>ShadingEnv</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\SoftRaster\FRaster.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PreFramePerMesh.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box2.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\FogShading.cginc">
+      <Filter>ShadingEnv</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\ExpHeightFog.cginc">
+      <Filter>ShadingEnv</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\LuminanceThresholeShading.cginc">
+      <Filter>ShadingEnv\Post</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\GaussAdditiveShading.cginc">
+      <Filter>ShadingEnv\Post</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\GaussShading.cginc">
+      <Filter>ShadingEnv\Post</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FsrShading.compute">
+      <Filter>ShadingEnv\Post</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\SunShaft\DepthThresholeShading.cginc">
+      <Filter>ShadingEnv\Post\SunShaft</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\SunShaft\RadialBlurShading.cginc">
+      <Filter>ShadingEnv\Post\SunShaft</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\SunShaft\SunShaftCommon.cginc">
+      <Filter>ShadingEnv\Post\SunShaft</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\AdditiveShading.cginc">
+      <Filter>ShadingEnv\Post</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
@@ -349,18 +430,6 @@
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Cluster.compute">
       <Filter>Compute\GpuDriven</Filter>
-    </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\VXGI\VoxelAllocator.compute">
-      <Filter>Compute\VXGI</Filter>
-    </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\VXGI\VoxelInject.compute">
-      <Filter>Compute\VXGI</Filter>
-    </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\VXGI\VXGICommon.compute">
-      <Filter>Compute\VXGI</Filter>
-    </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\VXGI\VxVisualDebugger.compute">
-      <Filter>Compute\VXGI</Filter>
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\GpuDriven\Hzb.compute">
       <Filter>Compute\GpuDriven</Filter>
@@ -380,5 +449,34 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\Particle\Effectors.compute">
       <Filter>Bricks\Particle</Filter>
     </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\VXGI\VoxelAllocator.compute">
+      <Filter>Bricks\VXGI</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\VXGI\VoxelInject.compute">
+      <Filter>Bricks\VXGI</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\VXGI\VXGICommon.compute">
+      <Filter>Bricks\VXGI</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Bricks\VXGI\VxVisualDebugger.compute">
+      <Filter>Bricks\VXGI</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\HashSparseSpace.compute">
+      <Filter>Compute</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Compute\DDA.compute">
+      <Filter>Compute</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box3.cginc">
+      <Filter>Inc\BaseStructure</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_a.h">
+      <Filter>ShadingEnv\Post\FSR1</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_fsr1.h">
+      <Filter>ShadingEnv\Post\FSR1</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

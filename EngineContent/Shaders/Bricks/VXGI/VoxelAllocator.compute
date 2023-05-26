@@ -1,0 +1,8 @@
+#include "VXGICommon.compute"
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_SetupVoxelGroupAllocator(uint3 id : SV_DispatchThreadID)
+{
+	FHashSparseSpace_FVoxelGroup allocator = GetVoxelGroupAllocator();
+	allocator.SpaceAllocator[id.x] = (FVoxelGroup)0;
+}

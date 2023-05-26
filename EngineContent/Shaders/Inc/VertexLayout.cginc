@@ -3,6 +3,17 @@
 
 #include "GlobalDefine.cginc"
 
+//CBuffers
+#include "../CBuffer/VarBase_PerCamera.cginc"
+#include "../CBuffer/VarBase_PerFrame.cginc"
+#include "../CBuffer/VarBase_PerMaterial.cginc"
+#include "../CBuffer/VarBase_PerViewport.cginc"
+#include "../CBuffer/VarBase_PerMesh.cginc"
+#include "../CBuffer/VarBase_PreFramePerMesh.cginc"
+
+//Functions
+#include "SysFunction.cginc"
+
 //#define USE_VS_Position 1
 //#define USE_VS_Normal 1
 //#define USE_VS_Tangent 1
@@ -43,7 +54,7 @@ struct VS_INPUT
 #endif
 
 #if USE_VS_LightMap == 1
-	VK_LOCATION(5) float2 vLightMap : TEXCOORD2;
+	VK_LOCATION(5) float4 vLightMap : TEXCOORD2;
 #endif
 
 #if USE_VS_SkinIndex == 1
@@ -88,7 +99,105 @@ struct VS_INPUT
 
 	VK_LOCATION(16) uint vVertexID : SV_VertexID;
 	VK_LOCATION(17) uint vInstanceId : SV_InstanceID;
+
+#if RHI_TYPE == RHI_VK
+	[[vk::builtin("DrawIndex")]] uint vMultiDrawId;
+#endif
 };
+
+struct VS_MODIFIER
+{
+	float3 vPosition;
+	float3 vNormal;
+	float4 vTangent;
+	float4 vColor;
+	float2 vUV;
+	float4 vLightMap;
+	uint4 vSkinIndex;
+	float4 vSkinWeight;
+	uint4 vTerrainIndex;
+	uint4 vTerrainGradient;
+	float3 vInstPos;
+	float4 vInstQuat;
+	float4 vInstScale;
+	uint4 vF4_1;
+	float4 vF4_2;
+	float4 vF4_3;
+	uint vVertexID;
+	uint vInstanceId;
+#if RHI_TYPE != RHI_DX11
+	uint vMultiDrawId;
+#endif
+};
+
+#if RHI_TYPE == RHI_DX12
+cbuffer cbForMultiDraw DX_AUTOBIND
+{//only for VS/CS,pls pass it by PS_INPUT for ps stage
+	uint MultiDrawId;
+};
+#endif
+
+VS_MODIFIER VS_INPUT_TO_VS_MODIFIER(VS_INPUT input)
+{
+	VS_MODIFIER result = (VS_MODIFIER)0;
+#if USE_VS_Position == 1
+	result.vPosition = input.vPosition;
+#endif
+#if USE_VS_Normal == 1
+	result.vNormal = input.vNormal;
+#endif
+#if USE_VS_Tangent == 1
+	result.vTangent = input.vTangent;
+#endif
+#if USE_VS_Color == 1
+	result.vColor = input.vColor;
+#endif
+#if USE_VS_UV == 1
+	result.vUV = input.vUV;
+#endif
+#if USE_VS_LightMap == 1
+	result.vLightMap = input.vLightMap;
+#endif
+#if USE_VS_SkinIndex == 1
+	result.vSkinIndex = input.vSkinIndex;
+#endif
+#if USE_VS_SkinWeight == 1
+	result.vSkinWeight = input.vSkinWeight;
+#endif
+#if USE_VS_TerrainIndex == 1
+	result.vTerrainIndex = input.vTerrainIndex;
+#endif
+#if USE_VS_TerrainGradient == 1
+	result.vTerrainGradient = input.vTerrainGradient;
+#endif
+#if USE_VS_InstPos == 1
+	result.vInstPos = input.vInstPos;
+#endif
+#if USE_VS_InstQuat == 1
+	result.vInstQuat = input.vInstQuat;
+#endif
+#if USE_VS_InstScale == 1
+	result.vInstScale = input.vInstScale;
+#endif
+#if USE_VS_F4_1 == 1
+	result.vF4_1 = input.vF4_1;
+#endif
+#if USE_VS_F4_2 == 1
+	result.vF4_2 = input.vF4_2;
+#endif
+#if USE_VS_F4_3 == 1
+	result.vF4_3 = input.vF4_3;
+#endif
+	result.vVertexID = input.vVertexID;
+	result.vInstanceId = input.vInstanceId;
+#if RHI_TYPE == RHI_VK
+	result.vMultiDrawId = input.vMultiDrawId;
+#elif RHI_TYPE == RHI_DX12
+	result.vMultiDrawId = MultiDrawId;
+#endif
+
+	return result;
+}
 
 struct PS_INPUT
 {
@@ -130,9 +239,9 @@ struct VSInstantData
 	uint4 PointLightIndices;
 };
 
-VSInstantData GetInstanceData(VS_INPUT input);
+VSInstantData GetInstanceData(VS_MODIFIER input);
 
-void Default_VSInput2PSInput(inout PS_INPUT output, VS_INPUT input)
+void Default_VSInput2PSInput(inout PS_INPUT output, VS_MODIFIER input)
 {
 #if USE_VS_Position == 1
 	output.vPosition = float4(input.vPosition.xyz, 1);
@@ -157,7 +266,7 @@ void Default_VSInput2PSInput(inout PS_INPUT output, VS_INPUT input)
 #endif
 
 #if USE_VS_LightMap == 1
-	output.vLightMap.xy = input.vLightMap;
+	output.vLightMap = input.vLightMap;
 #endif
 
 #if USE_VS_Position == 1
@@ -224,7 +333,7 @@ MTL_OUTPUT Default_PSInput2Material(PS_INPUT input)
 	return mtl;
 }
 
-void DoDefaultVSModifier(inout VS_INPUT vert)
+void DoDefaultVSModifier(inout VS_MODIFIER vert)
 {
 
 }

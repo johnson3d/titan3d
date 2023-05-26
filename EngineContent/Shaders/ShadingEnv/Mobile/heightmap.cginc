@@ -41,7 +41,7 @@ half3 GetPosition(half x, half z, out half2 uv, out half3 nor)
 	return pos;
 }
 
-void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
+void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
 	uint x = vert.vVertexID & 0x0000FFFF;
 	uint z = (vert.vVertexID >> 16);
@@ -61,7 +61,7 @@ void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
 	vert.vUV = vsOut.vUV;
 }
 
-void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)
+void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)
 {
 	DoTerrainModifierVS(output, input);
 }
@@ -89,7 +89,7 @@ void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)
 //	Default_VSInput2PSInput(output, input);
 //	
 //	output.vWorldPos = output.vPosition.xyz;
-//	output.vPosition = mul(float4(output.vWorldPos, 1), ViewPrjMtx);
+//	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(true));
 //	
 //	output.psCustomUV0.w = output.vPosition.w;
 //

@@ -4,6 +4,7 @@
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="2">
       <e_0 Value="0,0,1,1" />
       <e_1 Value="0,0,1,1" />
@@ -11,7 +12,7 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Engine,texture/levelgrid1dstripes.srv,77dd449b-d3e8-46b9-b30c-1d50a98eeed5" />
+    <e_0 Value="Engine,texture/levelgrid1dstripes.srv,6f094850-b387-4f81-85a0-f0ba1a93ef68" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" />
 </Root>

@@ -11,8 +11,9 @@
 #include "../../Inc/SysFunctionDefImpl.cginc"
 
 //WARNING:don't change vs_main or ps_main's parameters name cause we also use it in c++;It's an appointment;
-PS_INPUT VS_Main(VS_INPUT input)
+PS_INPUT VS_Main(VS_INPUT input1)
 {
+	VS_MODIFIER input = VS_INPUT_TO_VS_MODIFIER(input1);
 	PS_INPUT output = (PS_INPUT)0;
 	Default_VSInput2PSInput(output, input);
 
@@ -36,10 +37,10 @@ PS_INPUT VS_Main(VS_INPUT input)
 #if !defined(VS_NO_WorldTransform)
 	output.vPosition.xyz += mtl.mVertexOffset;
 	
-	matrix ShadowWVPMtx = mul(WorldMatrix, ViewPrjMtx);
+	matrix ShadowWVPMtx = mul(WorldMatrix, GetViewPrjMtx(false));
 	output.vPosition = mul(float4(output.vPosition.xyz, 1), ShadowWVPMtx);
 #else
-	matrix ShadowWVPMtx = ViewPrjMtx;
+	matrix ShadowWVPMtx = GetViewPrjMtx(false);
 	output.vPosition = mul(float4(output.vWorldPos.xyz, 1), ShadowWVPMtx);
 #endif
 	

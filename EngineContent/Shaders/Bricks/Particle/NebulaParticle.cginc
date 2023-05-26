@@ -4,18 +4,21 @@ StructuredBuffer<FParticle>			sbParticleInstance DX_AUTOBIND;
 ByteAddressBuffer					sbAlives DX_AUTOBIND;
 //StructuredBuffer<float>				sbAlives DX_AUTOBIND;
 
-void DoNebulaModifierVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
+void DoNebulaModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
 	//float3 Pos = vert.vInstPos.xyz + QuatRotatePosition(vert.vPosition * vert.vInstScale.xyz, vert.vInstQuat);
 	
 	uint idx = sbAlives.Load(vert.vInstanceId * 4 + 16);
 	//uint idx = sbAlives[vert.vInstanceId * 4 + 16];
+#if RHI_TYPE != RHI_DX11
+	//idx += vert.vMultiDrawId;
+#endif
 	FParticle inst = sbParticleInstance[idx];
 	float3 Pos = inst.Location + vert.vPosition.xyz * inst.Scale;
 	vsOut.vPosition.xyz = Pos;
 }
 
-void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)
+void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)
 {
 	DoNebulaModifierVS(output, input);
 }
@@ -32,7 +35,7 @@ void MdfQueueDoModifiersPS(inout MTL_OUTPUT output, PS_INPUT input)
 //PS_INPUT VS_Main( uint verteID : SV_VertexID )
 //{
 //	PS_INPUT output = (PS_INPUT)0;
-//	VS_INPUT input = (VS_INPUT)0;
+//	VS_MODIFIER input = (VS_MODIFIER)0;
 //
 //	uint x = verteID & 0x0000FFFF;
 //	uint z = (verteID >> 16);

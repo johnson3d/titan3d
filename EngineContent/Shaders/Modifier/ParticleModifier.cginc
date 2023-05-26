@@ -9,7 +9,7 @@ float3 ParticleRotateVec(in float3 inPos, in float4 inQuat)
 	return inPos + uv + uuv;
 }
 
-void DoParticleModifierVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
+void DoParticleModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
 	float3 Pos = vert.vInstPos.xyz + ParticleRotateVec(vert.vPosition * vert.vInstScale.xyz, vert.vInstQuat);
 	

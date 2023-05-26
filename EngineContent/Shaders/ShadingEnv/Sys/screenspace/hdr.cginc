@@ -78,8 +78,9 @@ float3 ToneMap3(float3 color)
 Texture2D GSourceTarget DX_AUTOBIND;
 SamplerState Samp_GSourceTarget DX_AUTOBIND;
 
-PS_INPUT VS_Main(VS_INPUT input)
+PS_INPUT VS_Main(VS_INPUT input1)
 {
+	VS_MODIFIER input = VS_INPUT_TO_VS_MODIFIER(input1);
 	PS_INPUT output = (PS_INPUT)0;
 
 	output.vPosition = float4(input.vPosition.xyz, 1.0f);

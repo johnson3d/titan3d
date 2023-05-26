@@ -23,7 +23,7 @@ struct VSGrassData
 
 #if HW_VS_STRUCTUREBUFFER == 1
 StructuredBuffer<VSGrassData> VSGrassDataArray DX_AUTOBIND;
-VSGrassData GetGrassInstanceData(VS_INPUT input)
+VSGrassData GetGrassInstanceData(VS_MODIFIER input)
 {
 	VSGrassData result = VSGrassDataArray[input.vInstanceId];
 	//result.InstanceId = input.vInstanceId;
@@ -74,7 +74,7 @@ float3 GetInstancingScale(uint data)
 
 //#define VS_Grass_VertexOnTerrain
 
-void DoGrassModifierVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
+void DoGrassModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
 	VSGrassData instData = GetGrassInstanceData(vert);
 	float3 instPos = GetInstancingPosition(instData);

@@ -11,8 +11,9 @@
 #include "../../../Inc/SysFunctionDefImpl.cginc"
 
 //WARNING:don't change vs_main or ps_main's parameters name cause we also use it in c++;It's an appointment;
-PS_INPUT VS_Main(VS_INPUT input)
+PS_INPUT VS_Main(VS_INPUT input1)
 {
+	VS_MODIFIER input = VS_INPUT_TO_VS_MODIFIER(input1);
 	PS_INPUT output = (PS_INPUT)0;
 	Default_VSInput2PSInput(output, input);
 #if defined(VS_NO_WorldTransform)
@@ -37,7 +38,7 @@ PS_INPUT VS_Main(VS_INPUT input)
 	output.vWorldPos = mul(float4(output.vPosition.xyz, 1), WorldMatrix).xyz;
 #endif
 
-	output.vPosition = mul(float4(output.vWorldPos, 1), ViewPrjMtx);
+	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(true));
 
 	return output;
 }

@@ -1,0 +1,52 @@
+#pragma kernel SimulateFlow
+#pragma kernel DrawPool
+int Width;
+int Height;
+float Evap;
+// r height g water
+StructuredBuffer<float> HeightBuffer;
+RWStructuredBuffer<float> WaterBuffer;
+uint Step;
+
+RWTexture2D<float4> Result;
+
+uint2   Bound(uint2 i)  {return uint2(clamp(i.x, 0, Width - 1), clamp(i.y, 0, Height - 1)); }
+uint    Index(uint2 i)  {return i.x + i.y * Width; }
+
+void UpdateInfo(float2 tarPos, inout float3 minInfo)
+{
+    uint index = Index(tarPos);
+    float curTotal = HeightBuffer[index] + WaterBuffer[index];
+    if (curTotal < minInfo.z) minInfo = float3(tarPos, curTotal);
+}
+
+[numthreads(8,8,1)]
+void SimulateFlow (uint3 id : SV_DispatchThreadID)
+{
+    uint index = Index(id.xy);
+    if (index % 5 == Step)
+    {
+        float height = HeightBuffer[index];
+        float water = WaterBuffer[index]; 
+        // position and height + water
+        float3 minInfo = float3(id.xy, height + water);
+        UpdateInfo(Bound(id.xy), minInfo);
+        UpdateInfo(Bound(id.xy + uint2( 0, -1)), minInfo);
+        UpdateInfo(Bound(id.xy + uint2( 0,  1)), minInfo);
+        UpdateInfo(Bound(id.xy + uint2( 1,  0)), minInfo);
+        UpdateInfo(Bound(id.xy + uint2(-1,  0)), minInfo);
+        float step = (height + water - minInfo.z) * 0.5;
+        float move = water < step ? water : step;
+        uint targetIndex = Index(minInfo.xy);
+        WaterBuffer[index] -= move;
+        WaterBuffer[targetIndex] += move;
+    }
+}
+
+[numthreads(8,8,1)]
+void DrawPool(uint3 id : SV_DispatchThreadID)
+{
+    uint index = Index(id.xy);
+    float water = WaterBuffer[index];
+    Result[id.xy] = float4(water, water, water, 1);
+}

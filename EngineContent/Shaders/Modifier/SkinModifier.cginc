@@ -20,7 +20,7 @@ half3 transform_quat(half3 v, half4 quat)
 	return v + (half3)cross(quat.xyz, cross(quat.xyz, v) + quat.w * v) * 2;
 }
 
-void DoSkinModifierVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
+void DoSkinModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
 	half3      Pos = 0.0f;
 	half3      Normal = 0.0f;    

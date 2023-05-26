@@ -1,0 +1,84 @@
+#ifndef __FSR_SHADING_H__
+#define __FSR_SHADING_H__
+
+#include "../../Inc/VertexLayout.cginc"
+#include "../../Inc/GpuSceneCommon.cginc"
+#include "../../Inc/LightCommon.cginc"
+#include "../../Inc/PostEffectCommon.cginc"
+
+#include "Material"
+#include "MdfQueue"
+
+#include "../../Inc/SysFunctionDefImpl.cginc"
+
+cbuffer cbShadingEnv DX_AUTOBIND
+{
+    uint4 Const0;
+    uint4 Const1;
+    uint4 Const2;
+    uint4 Const3;
+    uint4 Sample;
+}
+
+#define A_GPU 1
+#define A_HLSL 1
+
+Texture2D ColorBuffer;
+SamplerState Samp_ColorBuffer;
+RWTexture2D<float4> OutputTexture;
+
+#include "FSR1/ffx_a.h"
+#if USE_RCAS == 1
+    #define FSR_RCAS_F
+    AF4 FsrRcasLoadF(ASU2 p) { return ColorBuffer.Load(int3(ASU2(p), 0)); }
+    void FsrRcasInputF(inout AF1 r, inout AF1 g, inout AF1 b) {}
+#else
+    #if ENV_TypeUpSampleMode == UpSampleMode_EASU
+        #define FSR_EASU_F 1
+        AF4 FsrEasuRF(AF2 p) { AF4 res = ColorBuffer.GatherRed(Samp_ColorBuffer, p, int2(0, 0)); return res; }
+        AF4 FsrEasuGF(AF2 p) { AF4 res = ColorBuffer.GatherGreen(Samp_ColorBuffer, p, int2(0, 0)); return res; }
+        AF4 FsrEasuBF(AF2 p) { AF4 res = ColorBuffer.GatherBlue(Samp_ColorBuffer, p, int2(0, 0)); return res; }
+    #endif    
+#endif
+
+#include "FSR1/ffx_fsr1.h"
+
+void CurrFilter(int2 pos)
+{
+#if USE_RCAS == 1
+    AF3 c;
+    FsrRcasF(c.r, c.g, c.b, pos, Const0);
+    if (Sample.x == 1)
+        c *= c;
+    OutputTexture[pos] = float4(c, 1);
+#else
+    #if ENV_TypeUpSampleMode == UpSampleMode_Bilinear
+        AF2 pp = (AF2(pos) * AF2_AU2(Const0.xy) + AF2_AU2(Const0.zw)) * AF2_AU2(Const1.xy) + AF2(0.5, -0.5) * AF2_AU2(Const1.zw);
+        OutputTexture[pos] = ColorBuffer.SampleLevel(Samp_ColorBuffer, pp, 0.0);
+        OutputTexture[pos] = ColorBuffer.SampleLevel(Samp_ColorBuffer, pp, 0.0);
+    #elif ENV_TypeUpSampleMode == UpSampleMode_EASU
+        AF3 c;
+        FsrEasuF(c, pos, Const0, Const1, Const2, Const3);
+        if (Sample.x == 1)
+            c *= c;
+        OutputTexture[pos] = float4(c, 1);
+    #endif
+#endif
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_FsrMain(uint3 LocalThreadId : SV_GroupThreadID, uint3 WorkGroupId : SV_GroupID, uint3 Dtid : SV_DispatchThreadID)
+{
+    // Do remapping of local xy in workgroup for a more PS-like swizzle pattern.
+    AU2 gxy = ARmp8x8(LocalThreadId.x) + AU2(WorkGroupId.x << 4u, WorkGroupId.y << 4u);
+    CurrFilter(gxy);
+    gxy.x += 8u;
+    CurrFilter(gxy);
+    gxy.y += 8u;
+    CurrFilter(gxy);
+    gxy.x -= 8u;
+    CurrFilter(gxy);
+}
+
+#endif
+//

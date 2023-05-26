@@ -19,8 +19,9 @@ MDFQUEUE_FUNCTION
 #endif
 
 //WARNING:don't change vs_main or ps_main's parameters name cause we also use it in c++;It's an appointment;
-PS_INPUT VS_Main(VS_INPUT input)
+PS_INPUT VS_Main(VS_INPUT input1)
 {
+	VS_MODIFIER input = VS_INPUT_TO_VS_MODIFIER(input1);
 	PS_INPUT output = (PS_INPUT)0;
 	Default_VSInput2PSInput(output, input);
 
@@ -48,7 +49,7 @@ PS_INPUT VS_Main(VS_INPUT input)
 	output.vNormal = normalize(mul(float4(output.vNormal.xyz, 0), WorldMatrix).xyz);
 	output.vTangent.xyz = normalize(mul(float4(output.vTangent.xyz, 0), WorldMatrix).xyz);
 #endif
-	output.vPosition = mul(float4(output.vWorldPos, 1), ViewPrjMtx);
+	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(false));
 
 	return output;
 }

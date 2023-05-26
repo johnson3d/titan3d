@@ -1,0 +1,61 @@
+#pragma kernel CalculateTarget
+#pragma kernel SimulateFlow
+#pragma kernel DrawPool
+int Width;
+int Height;
+float Evap;
+StructuredBuffer<int> HeightBuffer;
+RWStructuredBuffer<int> WaterBuffer;
+RWStructuredBuffer<int> TargetBuffer;
+int Step;
+RWTexture2D<float4> Result;
+
+uint2   Bound(uint2 i)  {return uint2(clamp(i.x, 0, Width - 1), clamp(i.y, 0, Height - 1)); }
+uint    Index(uint2 i)  {return i.x + i.y * Width; }
+
+void UpdateInfo(uint2 tarPos, inout uint3 minInfo)
+{
+    uint index = Index(tarPos);
+    uint curTotal = HeightBuffer[index] + WaterBuffer[index];
+    if (curTotal < minInfo.z) minInfo = uint3(tarPos, curTotal);
+}
+
+[numthreads(8,8,1)]
+void CalculateTarget(uint3 id : SV_DispatchThreadID)
+{
+    uint index = Index(id.xy);
+    int height = HeightBuffer[index];
+    int water = WaterBuffer[index]; 
+    // position and height + water
+    uint3 minInfo = uint3(id.xy, height + water);
+    UpdateInfo(Bound(id.xy), minInfo);
+    UpdateInfo(Bound(id.xy + uint2( 0, -1)), minInfo);
+    UpdateInfo(Bound(id.xy + uint2( 0,  1)), minInfo);
+    UpdateInfo(Bound(id.xy + uint2( 1,  0)), minInfo);
+    UpdateInfo(Bound(id.xy + uint2(-1,  0)), minInfo);
+    TargetBuffer[index] = Index(minInfo.xy);
+}
+
+[numthreads(8,8,1)]
+void SimulateFlow (uint3 id : SV_DispatchThreadID)
+{
+    uint index = Index(id.xy);
+    int height = HeightBuffer[index];
+    int water = WaterBuffer[index];
+    uint targetIndex = TargetBuffer[Index(id.xy)];
+    int minTotal = HeightBuffer[targetIndex] + WaterBuffer[targetIndex];
+    int step = (height + water - minTotal) * 0.5;
+    int move = water < step ? water : step;
+    InterlockedAdd(WaterBuffer[index], -move);
+    InterlockedAdd(WaterBuffer[targetIndex], move);
+}
+
+[numthreads(8,8,1)]
+void DrawPool(uint3 id : SV_DispatchThreadID)
+{
+    uint index = Index(id.xy);
+    float water = WaterBuffer[index] / 1000.0;
+    Result[id.xy] = float4(water, water, water, 1);
+}
+
+

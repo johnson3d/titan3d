@@ -110,7 +110,7 @@ float2 MorphVertex(float2 inPos, float2 vertex, float morphLerpK, LODLayer layer
 	return vertex.xy + fracPart * morphLerpK;
 }
 
-void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
+void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
 	float2 uv = vert.vPosition.xz;
 	half3 nor = half3(0,1,0);
@@ -163,7 +163,7 @@ void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_INPUT vert)
 	vsOut.SpecialData.w = v0_1;*/
 }
 
-void MdfQueueDoModifiers(inout PS_INPUT output, VS_INPUT input)
+void MdfQueueDoModifiers(inout PS_INPUT output, VS_MODIFIER input)
 {
 	DoTerrainModifierVS(output, input);
 }

@@ -273,7 +273,7 @@ void Distortion( float4 localPos, float4 localNorm, float4 viewPos, float4 projP
 //	distortionColor.a = distortion / transparency;
 //}
 
-float4	CalcWorldPosition(float4 PosProj, float vDepth)
+float4	CalcWorldPosition(float4 PosProj, float vDepth, bool bJitter = true)
 {
 	// Position
 	float4 VPos = PosProj;
@@ -281,7 +281,7 @@ float4	CalcWorldPosition(float4 PosProj, float vDepth)
 	VPos.z = vDepth;
 	VPos.w = 1.0f;
 	// Inverse ViewProjection Matrix
-	VPos = mul(VPos, ViewPrjInvMtx);
+	VPos = mul(VPos, GetViewPrjMtxInverse(true));
 	VPos.xyz /= VPos.www;
 	VPos.w = 1.0f;
 	return VPos;
@@ -299,7 +299,7 @@ float4	CalcWorldPosition(float4 PosProj, float vDepth)
 //	worldYBias = worldPos1.y - worldPos2.y;
 //}
 
-float4	CalcViewPosition(float4 PosProj, float vDepth)
+float4	CalcViewPosition(float4 PosProj, float vDepth, bool bJitter = true)
 {
 	// Position
 	float4 VPos = PosProj;
@@ -307,7 +307,7 @@ float4	CalcViewPosition(float4 PosProj, float vDepth)
 	VPos.z = vDepth;
 	VPos.w = 1.0f;
 	// Inverse Projection Matrix
-	VPos = mul(VPos, PrjInvMtx);
+	VPos = mul(VPos, GetPrjMtxInverse(bJitter));
 	VPos.xyz /= VPos.www;
 	VPos.w = 1.0f;
 	return VPos;
@@ -581,7 +581,7 @@ void BlingSpec(half4 flo4 , half intensity , half powIn , half4 worldNorm , half
 	BlingSpec = (half)pow(VLdN , powIn) * texlum ;
 }
 
-half3 smoothstep3D(half3 minValue, half3 maxValue, half3 InColor )
+half3 SmoothStep3D(half3 minValue, half3 maxValue, half3 InColor )
 {	
 	return (half3)smoothstep(minValue, maxValue, InColor);
 	/*half3 OutColor ;
@@ -857,5 +857,26 @@ void UInt4_To_Color4(uint4 src, out half4 tar)
 	tar[2] = (half)src[2] / 255.0h;
 	tar[3] = (half)src[3] / 255.0h;
 }
+
+//void GetGridUV(float2 uv, float4 lightmapUV, float2 min, float2 max, out float2 outUV)
+//{
+//	float2 u = float2(lightmapUV.x, lightmapUV.y);
+//	float2 v = float2(lightmapUV.z, lightmapUV.w);
+//	float2 min_v = float2(min.y, min.y);
+//	float2 max_v = float2(max.y, max.y);
+//	float2 min_u = float2(min.x, min.x);
+//	float2 max_u = float2(max.x, max.x);
+//	float2 t1 = lerp(min_u, max_u, u);
+//	float2 t2 = lerp(min_v, max_v, v);
+//
+//	float2 slt[4] = 
+//	{
+//		float2(t1.x, t2.x),
+//		float2(t1.x, t2.y),
+//		float2(t1.y, t2.y),
+//		float2(t1.y, t2.x),
+//	};
+//	outUV = slt[(int)uv.x];
+//}
 
 #endif

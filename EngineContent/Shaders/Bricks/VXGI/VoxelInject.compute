@@ -1,0 +1,106 @@
+#include "VXGICommon.compute"
+
+//RWTexture2D<float4> GBufferDiffuseAndDepth : register(u5);
+Texture2D<float4> GBufferAbedo DX_AUTOBIND;//(t0);
+Texture2D<float2> GBufferDepth DX_AUTOBIND;//register(t1);
+
+float4 GetPixel(uint3 id)
+{
+	return GBufferAbedo[int2(id.x, id.y)];
+}
+
+float GetDepth(uint3 id)
+{
+	return GBufferDepth[id.xy].r;
+}
+
+float3 GetWorldPosition(uint3 id, float LinearDepth, float depth)
+{
+	float NdcW = LinearDepth * gZFar;
+	
+#if RHI_TYPE == RHI_GL
+	float PlatformFlag = -1.0f;
+#else
+	float PlatformFlag = 1.0f;
+#endif
+	
+	float2 uv = ((float2)id.xy) / GBufferSize.xy;
+
+	//float3 PosVS = ReconstructPosWorldSpace(uv, NdcW, ViewPrjInvMtx, depth, PlatformFlag);
+	float3 PosVS = ReconstructPosWorldSpace2(uv, NdcW, GetViewPrjMtxInverse(true), PlatformFlag);
+
+	return PosVS;
+}
+
+int3 GetVoxelOffset(int3 vxIdx)
+{
+	return vxIdx % VxGroupCubeSide;
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_InjectVoxels(uint3 id : SV_DispatchThreadID,
+	uint3 GroupId : SV_GroupID,
+	uint3 GroupThreadId : SV_GroupThreadID,	
+	uint GroupIndex : SV_GroupIndex)
+{
+	float4 rt0 = GetPixel(id);
+	/*if (all(rt0.xyz == 0.0f))
+		return;*/
+	float depth = GetDepth(id);
+	if (depth <= gZNear)
+		return;
+	//float3 pos = GetWorldPosition(id, rt0.w, depth);
+	float2 uv = ((float2)id.xy) / GBufferSize.xy;
+	float3 pos = GetWorldPositionFromDepthValue(uv, depth).xyz;
+	int3 vxIdx = GetVoxelFromPosition(pos);
+
+	if (any(vxIdx < 0) || any(vxIdx >= int3(VxSceneX * VxGroupCubeSide, VxSceneY * VxGroupCubeSide, VxSceneZ * VxGroupCubeSide)))
+		return;
+
+	int3 vxGroupIdx = GetVxGroupFromVoxelIndexer(vxIdx);
+	FHashSparseSpace_FVoxelGroup allocator = GetVoxelGroupAllocator();
+	uint vxGroupInPool = allocator.Alloc(vxGroupIdx);
+	if (vxGroupInPool == 0xffffffff)
+		return;
+	allocator.SpaceAllocator[vxGroupInPool].GroupIndex = vxGroupIdx;
+
+	int3 offset = GetVoxelOffset(vxIdx);
+	
+	half3 oldColor = GetColor(allocator.SpaceAllocator[vxGroupInPool].GetVoxel(offset));
+	half lum = CalcLuminanceYCbCr((half3)rt0.xyz);
+	half lum1 = CalcLuminanceYCbCr(oldColor.xyz);
+	if (lum >= lum1)
+	{
+		allocator.SpaceAllocator[vxGroupInPool].SetVoxel(offset, PackColor(rt0.xyz, 1));
+	}
+	
+	//lum *= *0.1h;
+	//half3 color = lerp(oldColor, rt0.xyz, lum);	
+	//VxPool[vxGroupInPool * VxGroupStride + offsetIndex * VxDescStructSize + 0] = PackColor(color.xyz, 1);
+	
+	//VxPool[vxGroupInPool * VxGroupStride + offsetIndex * VxDescStructSize + 0] = PackColor(rt0.xyz, 1);
+	//VxPool[vxGroupInPool * VxGroupStride + offsetIndex * VxDescStructSize + 1] = PackNormal(rt0.xyz, 1);
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_EraseVoxelGroup(uint3 id : SV_DispatchThreadID)
+{
+	int3 vxGroupIdx = EraseVxStart + id;
+	if (vxGroupIdx.x >= VxSceneX || vxGroupIdx.y >= VxSceneY || vxGroupIdx.z >= VxSceneZ)
+		return;
+	
+	FHashSparseSpace_FVoxelGroup allocator = GetVoxelGroupAllocator();
+	
+	uint index = allocator.Find(vxGroupIdx);
+	allocator.SpaceAllocator[index].KeyState = 0;
+}
+
+[numthreads(DispatchX, DispatchY, DispatchZ)]
+void CS_InjectLight(uint3 id : SV_DispatchThreadID,
+	uint3 GroupId : SV_GroupID,
+	uint3 GroupThreadId : SV_GroupThreadID,
+	uint GroupIndex : SV_GroupIndex)
+{
+	
+}
+//

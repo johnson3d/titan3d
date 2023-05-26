@@ -1,0 +1,139 @@
+#ifndef _VXGIComon_Compute_H_
+#define _VXGIComon_Compute_H_
+
+#include "../../Inc/VertexLayout.cginc"
+#include "../../Inc/GpuSceneCommon.cginc"
+#include "../../Inc/MonteCarlo.cginc"
+#include "../../Inc/BaseStructure/Box3.cginc"
+#include "../../Compute/HashSparseSpace.compute"
+#include "../../Compute/DDA.compute"
+
+#define VxDescStructSize 2
+
+#define VxGroupStride (VxGroupCubeSide*VxGroupCubeSide*VxGroupCubeSide*VxDescStructSize)
+
+uint PackColor(float3 color, uint material)
+{
+	return (uint)(color.x * 256) | ((uint)(color.y * 256) << 8) | ((uint)((color.z / 256.0f) * 256) << 16) | (material << 24);
+}
+
+uint GetMaterial(uint data)
+{
+	return (data >> 24);
+}
+
+half3 GetColor(uint data)
+{
+	half r = (half)(data & 0xFF) / 255.0h;
+	half g = (half)((data >> 8) & 0xFF) / 255.0h;
+	half b = (half)((data >> 16) & 0xFF) / 255.0h;
+	return half3(r, g, b);
+}
+
+cbuffer cbGBufferDesc DX_AUTOBIND// : register(b10)
+{
+	float3		VxStartPosition;
+	int			VxDebugger_IndexCountPerInstance; 
+
+	float2		GBufferSize;
+	float2		ReconstructPosArg;
+
+	uint3		EraseVxStart;
+	uint		cbGBufferDesc_Pad0;
+}
+
+int3 GetVoxelFromPosition(float3 pos)
+{
+	float3 locPos = (pos - VxStartPosition) / VxSize;
+	return (int3)locPos.xyz;
+}
+
+int3 GetVxGroupFromVoxelIndexer(int3 vxIdx)
+{
+	return vxIdx / VxGroupCubeSide;
+}
+
+float3 ReconstructPosViewSpace(float2 uv, float w, matrix PrjInvMtx, float depth, float platform_uv_flag, bool bJitter = true)
+{
+	float4 PosCS = float4(uv.x * 2.0f - 1.0f, (1.0f - uv.y * 2.0f) * platform_uv_flag, depth, 1.0f) * w;
+	float4 PosVS = mul(PosCS, GetPrjMtxInverse(bJitter));
+	return PosVS.xyz;
+}
+
+float3 ReconstructPosWorldSpace(float2 uv, float w, matrix ViewPrjInvMtx, float depth, float platform_uv_flag, bool bJitter = true)
+{
+	float4 PosCS = float4(uv.x * 2.0f - 1.0f, (1.0f - uv.y * 2.0f) * platform_uv_flag, depth, 1.0f) * w;
+	float4 PosWS = mul(PosCS, GetViewPrjMtxInverse(bJitter));
+	return PosWS.xyz;
+}
+
+float3 ReconstructPosWorldSpace2(float2 uv, float w, matrix ViewPrjInvMtx, float platform_uv_flag, bool bJitter = true)
+{
+	float depth =  ReconstructPosArg.x + ReconstructPosArg.y / w;
+	float4 PosCS = float4(uv.x * 2.0f - 1.0f, (1.0f - uv.y * 2.0f) * platform_uv_flag, depth, 1.0f) * w;
+	float4 PosWS = mul(PosCS, GetViewPrjMtxInverse(bJitter));
+	return PosWS.xyz;
+}
+
+struct FVoxelGroup
+{
+	int3 GroupIndex;
+	uint KeyState;
+
+	uint IsValid()
+	{
+		if (KeyState & 0x80000000u)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	uint Value[4][4][4];
+	void SetVoxel(uint3 offset, uint color)
+	{
+		Value[offset.z][offset.y][offset.x] = color;
+	}
+	uint GetVoxel(uint3 offset)
+	{
+		return Value[offset.z][offset.y][offset.x];
+	}
+};
+
+RWStructuredBuffer<FVoxelGroup> VxGroupPool DX_AUTOBIND;
+
+#if RHI_TYPE == RHI_DX11
+struct FHashSparseSpace_FVoxelGroup : FHashSparseSpace
+{
+	RWStructuredBuffer< FVoxelGroup > SpaceAllocator;
+	void Allocator_InterlockedOr(uint index, out uint oldKeyState)
+	{
+		InterlockedOr(SpaceAllocator[index].KeyState, 0x80000000u, oldKeyState);
+	}
+	void Allocator_GetKeyState(uint index, out uint oldKeyState)
+	{
+		oldKeyState = SpaceAllocator[index].KeyState;
+	}
+	void Allocator_SetKeyState(uint index, uint keyState)
+	{
+		SpaceAllocator[index].KeyState = keyState;
+	}
+};
+#else
+#define FHashSparseSpace_FVoxelGroup FHashSparseSpace<FVoxelGroup>
+#endif
+
+FHashSparseSpace_FVoxelGroup GetVoxelGroupAllocator()
+{
+	FHashSparseSpace_FVoxelGroup allocator;
+	
+	allocator.SpaceSize = uint3(VxSceneX, VxSceneY, VxSceneZ);
+	allocator.SpaceLength = VxGroupPoolSize;
+	allocator.SpaceAllocator = VxGroupPool;
+	return allocator;
+}
+
+#endif//_VXGIComon_Compute_H_

@@ -12,7 +12,7 @@ float4	UnwrapViewPosition( float4 PosProj, float vDepth )
 	VPos.z	= vDepth;
 	VPos.w	= 1.0f;
 	// Inverse Projection Matrix
-	VPos		= mul( VPos, PrjInvMtx);
+	VPos		= mul( VPos, GetPrjMtxInverse(true));
 	VPos.xyz	/= VPos.www;
 	VPos.w		= 1.0f;
 	return VPos;
@@ -26,7 +26,7 @@ float4	UnwrapWorldPosition( float4 PosProj, float vDepth )
 	VPos.z	= vDepth;
 	VPos.w	= 1.0f;
 	// Inverse ViewProjection Matrix
-	VPos		= mul( VPos, ViewPrjInvMtx);
+	VPos		= mul( VPos, GetViewPrjMtxInverse(true));
 	VPos.xyz	/= VPos.www;
 	VPos.w		= 1.0f;
 	return VPos;
