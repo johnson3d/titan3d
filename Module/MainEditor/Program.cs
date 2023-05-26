@@ -1,9 +1,46 @@
-﻿using System;
+﻿using EngineNS;
+using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace MainEditor
 {
+    interface ISample
+    {
+        int Add(int a, int b);
+    }
+    class SampleA : ISample
+    {
+        public int Add(int a, int b)
+        {
+            return a + b;
+        }
+        public static void Test()
+        {
+            ISample a = new SampleA();
+            a.Add(1, 2);
+            a = new SampleB();
+            a.Add(1, 2);
+            DoTest(a);
+
+            ISample b = new SampleB();
+            b.Add(2, 3);
+            DoTest(b);
+        }
+        public static void DoTest(ISample a)
+        {
+            a.Add(1, 2);
+        }
+    }
+    class SampleB : ISample
+    {
+        public int Add(int a, int b)
+        {
+            return a - b;
+        }
+    }
+
     class Program
     {
 #if PWindow
@@ -12,9 +49,39 @@ namespace MainEditor
         [DllImport("user32.dll")]
         static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 #endif
+
+        delegate IAsyncEnumerable<int> FOnPostTest(bool arg);
+        static FOnPostTest FnOnTest = OnPostTest;
+        public static async IAsyncEnumerable<int> OnPostTest(bool arg)
+        {
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+            for (int i = 0; i < 10; i++)
+            {
+                yield return i;
+            }
+            yield return -1;
+        }
+        public static async System.Threading.Tasks.Task Test1()
+        {
+            await foreach(var it in OnPostTest(true))
+            {
+
+            }
+        }
+
         [STAThreadAttribute]
         static void Main(string[] args)
         {
+            //SampleA.Test();
+            var it = FnOnTest(true);
+            var itt = it.GetAsyncEnumerator();
+            while (itt.MoveNextAsync().Result == true)
+            {
+                var rr = itt.Current;
+                if (rr == -1)
+                    break;
+            }
+
             {
                 var ev1 = Environment.GetEnvironmentVariable("CORECLR_ENABLE_PROFILING");
                 Console.WriteLine($"CORECLR_ENABLE_PROFILING:{ev1}");
@@ -71,6 +138,9 @@ namespace MainEditor
                 consoleWriter.Close();
                 ostrm.Close();
             }
+
+            //Open for MemoryProfiler
+            //CoreSDK.MessageDialog("ExitApp");
         }
         static WeakReference Main_Impl(string[] args)
         {
@@ -83,14 +153,7 @@ namespace MainEditor
             var cfg = FindArgument(args, "config=");
             Console.WriteLine($"Config={cfg}");
 
-            bool bRenderDoc = false;
-            var useRenderdoc = FindArgument(args, "use_renderdoc=");
-            if (useRenderdoc != null && useRenderdoc == "true")
-            {
-                bRenderDoc = true;
-            }
-
-            var task = EngineNS.UEngine.StartEngine(new EngineNS.UEngine(), cfg, bRenderDoc);
+            var task = EngineNS.UEngine.StartEngine(new EngineNS.UEngine(), cfg);
 
             while (true)
             {

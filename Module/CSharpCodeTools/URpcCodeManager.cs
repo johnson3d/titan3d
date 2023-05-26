@@ -179,6 +179,11 @@ namespace CSharpCodeTools
                                             }
 
                                             rpcMethod.ArgTypes.Clear();
+                                            var lstParam = method.ParameterList.Parameters.Last();
+                                            if (lstParam.Type.ToString().Contains("UCallContext") == false)
+                                            {
+                                                Console.WriteLine($"RPC {klsDeffine.Name}.{rpcMethod.Name} parameter error");
+                                            }
                                             for (int n = 0; n < method.ParameterList.Parameters.Count - 1; n++)
                                             {
                                                 var a = method.ParameterList.Parameters[n];

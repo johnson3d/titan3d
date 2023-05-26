@@ -59,6 +59,10 @@ namespace CppWeaving.Cpp2CS
 						{
 							result += $"{j.PropertyType.ToCppName()}* {j.Name}";
 						}
+						else if(j.IsReference)
+						{
+							result += $"{argType.TrimEnd('&')}* {j.Name}";
+						}
 						else
 						{
 							result += $"{argType} {j.Name}";
@@ -68,7 +72,7 @@ namespace CppWeaving.Cpp2CS
             }
 			return result;
 		}
-		public string GetParameterCalleeCpp()
+		public string GetParameterCalleeCpp(bool refProcess)
 		{
 			string result = "";
 			foreach (var j in Parameters) {
@@ -87,9 +91,10 @@ namespace CppWeaving.Cpp2CS
 					}
 					else
 					{
-						if (j.IsReference)
-							result += $"({j.PropertyType.ToCppName()}{j.GetSuffixWithReference()}){j.Name}";
-						else
+						if (j.IsReference && refProcess)
+							result += $"*{j.Name}"; 
+							//result += $"({j.PropertyType.ToCppName()}{j.GetSuffixWithReference()}){j.Name}";
+                        else
                             result += $"{j.Name}";
                     }
 				}
@@ -115,7 +120,13 @@ namespace CppWeaving.Cpp2CS
                 }
             }
 		}
-		public string GetParameterDefineCs(bool noMarshal = false)
+		public enum EParameterDefineUsage
+		{
+			DLLImport,
+			Function,
+			Delegate,
+		}
+		public string GetParameterDefineCs(EParameterDefineUsage usage)
 		{
             string result = "";
 			foreach (var j in Parameters) {
@@ -129,7 +140,7 @@ namespace CppWeaving.Cpp2CS
 				else
 				{
 					var argType = j.GetCsTypeName();
-					if (noMarshal == false)
+					if (usage != EParameterDefineUsage.Delegate)
 					{						
 						if (j.HasMeta(UProjectSettings.SV_NoStringConverter) == false)
 						{
@@ -145,7 +156,11 @@ namespace CppWeaving.Cpp2CS
 								argType = dypeDef;
                         }
                     }
-					result += $"{argType} {j.Name}";
+                    if (usage == EParameterDefineUsage.DLLImport && string.IsNullOrEmpty(j.MarshalTypeCS) == false)
+                    {
+						result += $"[MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof({j.MarshalTypeCS}))] ";
+                    }
+                    result += $"{argType} {j.Name}";
 				}
 			}
 			return result;

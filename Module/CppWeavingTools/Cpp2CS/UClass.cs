@@ -1,6 +1,8 @@
-﻿using System;
+﻿using ClangSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -125,15 +127,30 @@ namespace CppWeaving.Cpp2CS
                     tmp.CxxName = funcDef.AsString;
                     var pos = tmp.CxxName.IndexOf('(');
                     tmp.CxxName = tmp.CxxName.Insert(pos, $"(*{i.Name})");
+                    tmp.Size = (int)i.Type.Handle.SizeOf;
                 }
                 else
                 {
-                    tmp.CxxName = i.Type.AsString;
+                    var type = i.Type;
+                    tmp.NumOfTypePointer = UTypeManager.GetPointerNumOfType(type.Handle, out tmp.IsReference);
+                    tmp.Size = (int)type.Handle.SizeOf;
+                    tmp.CxxName = type.AsString;
+                    if(i.Type is ClangSharp.TemplateSpecializationType)
+                    {
+                        var templateType = i.Type as ClangSharp.TemplateSpecializationType;
+                        switch(templateType.TemplateName.AsTemplateDecl.Name)
+                        {
+                            case "AutoRef":
+                                type = templateType.Args[0].AsType;
+                                tmp.NumOfTypePointer = 1;
+                                tmp.CxxName = type.AsString + " *";
+                                break;
+                        }
+                    }
                     tmp.Name = i.Name;
-                    tmp.IsTypeDef = i.Type.Kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef;
-                    tmp.PropertyType = UTypeManager.Instance.FindType(i.Type.Handle);
-                    tmp.NumOfTypePointer = UTypeManager.GetPointerNumOfType(i.Type.Handle, out tmp.IsReference);
-                    tmp.NumOfElement = (int)i.Type.Handle.NumElements;
+                    tmp.IsTypeDef = type.Kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef;
+                    tmp.PropertyType = UTypeManager.Instance.FindType(type.Handle);
+                    tmp.NumOfElement = (int)type.Handle.NumElements;
                 }
 
                 switch (i.Access)
@@ -149,7 +166,6 @@ namespace CppWeaving.Cpp2CS
                         break;
                 }
                 tmp.Offset = (int)Decl.TypeForDecl.Handle.GetOffsetOf(i.Name);
-                tmp.Size = (int)i.Type.Handle.SizeOf;
                 Properties.Add(tmp);
             }
 
@@ -189,6 +205,7 @@ namespace CppWeaving.Cpp2CS
                     arg.IsDelegate = arg.PropertyType is UDelegate;
                     arg.NumOfTypePointer = UTypeManager.GetPointerNumOfType(j.Type.Handle, out arg.IsReference);
                     arg.MarshalType = UTypeManager.GetMeta(j.Attrs, UProjectSettings.SV_Marshal);
+                    arg.MarshalTypeCS = UTypeManager.GetMeta(j.Attrs, UProjectSettings.SV_MarshalCS);
                     arg.NumOfElement = (int)j.Type.Handle.ArraySize;
                     arg.IsTypeDef = j.Type.Kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef;
 
@@ -284,6 +301,7 @@ namespace CppWeaving.Cpp2CS
                             arg.IsDelegate = arg.PropertyType is UDelegate;
                             arg.NumOfTypePointer = UTypeManager.GetPointerNumOfType(j.Type.Handle, out arg.IsReference);
                             arg.MarshalType = UTypeManager.GetMeta(j.Attrs, UProjectSettings.SV_Marshal);
+                            arg.MarshalTypeCS = UTypeManager.GetMeta(j.Attrs, UProjectSettings.SV_MarshalCS);
                             arg.NumOfElement = (int)j.Type.Handle.ArraySize;
                             arg.IsTypeDef = j.Type.Kind == ClangSharp.Interop.CXTypeKind.CXType_Typedef;
 
@@ -335,6 +353,16 @@ namespace CppWeaving.Cpp2CS
                 }
             }
         }
+        bool IsIgnoreFieldInteral(ClangSharp.Type type)
+        {
+            if (UTypeManager.Instance.FindClass(type.Handle) != null)
+                return false;
+            if (UTypeManager.Instance.FindEnum(type.Handle) != null)
+                return false;
+            if (UTypeManager.Instance.FindDelegate(type.Handle) != null)
+                return false;
+            return true;
+        }
         public bool IsIgnoreField(ClangSharp.FieldDecl decl, out UDelegate funcPtr)
         {
             funcPtr = null;
@@ -351,15 +379,21 @@ namespace CppWeaving.Cpp2CS
                     return false;
                 }
             }
+            else if(decl.Type is ClangSharp.TemplateSpecializationType)
+            {
+                var templateType = decl.Type as ClangSharp.TemplateSpecializationType;
+                switch(templateType.TemplateName.AsTemplateDecl.Name)
+                {
+                    case "AutoRef":
+                        {
+                            var argType = templateType.Args[0].AsType;
+                            return IsIgnoreFieldInteral(argType);
+                        }
+                }
+            }
             if (decl.IsAnonymousField)
                 return true;
-            if (UTypeManager.Instance.FindClass(decl.Type.Handle) != null)
-                return false;
-            if (UTypeManager.Instance.FindEnum(decl.Type.Handle) != null)
-                return false;
-            if (UTypeManager.Instance.FindDelegate(decl.Type.Handle) != null)
-                return false;
-            return true;
+            return IsIgnoreFieldInteral(decl.Type);
         }
         public bool IsIgnoreFunction(ClangSharp.FunctionDecl decl, ClangSharp.CXXRecordDecl host)
         {

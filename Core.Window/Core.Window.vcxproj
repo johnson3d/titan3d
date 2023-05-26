@@ -86,7 +86,6 @@
     <Import Project="..\NativeCode\NextRHI\NullDevice\NullDevice.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\NextRHI\Dx12\Dx12.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\NextRHI\Vulkan\Vulkan.vcxitems" Label="Shared" />
-    <Import Project="..\NativeCode\Bricks\TextFont\TextFont.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\Canvas\Canvas.vcxitems" Label="Shared" />
     <Import Project="..\3rd\native\spirv-cross\spirv-cross.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\GpuDump\GpuDump.vcxitems" Label="Shared" />
@@ -100,6 +99,10 @@
     <Import Project="..\3rd\native\Recast\Recast\Recast.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\RecastBuilder\RecastBuilder.vcxitems" Label="Shared" />
     <Import Project="..\NativeCode\Bricks\RecastRuntime\RecastRuntime.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\TTStrip\TTStrip.vcxitems" Label="Shared" />
+    <Import Project="..\NativeCode\Bricks\ImageDecoder\ImageDecoder.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\zstd\zstd.vcxitems" Label="Shared" />
+    <Import Project="..\3rd\native\zlib\zlib.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -116,19 +119,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>../binaries</OutDir>
+    <OutDir>$(SolutionDir)binaries\</OutDir>
+    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>../binaries</OutDir>
+    <OutDir>$(SolutionDir)binaries\</OutDir>
+    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>../binaries</OutDir>
+    <OutDir>$(SolutionDir)binaries\</OutDir>
+    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>../binaries</OutDir>
+    <OutDir>$(SolutionDir)binaries\</OutDir>
+    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -136,12 +143,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;WIN32;_DEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;WIN32;_DEBUG;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);TINYEXR_USE_MINIZ=0</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>c:\aaa;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,6 +158,9 @@
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/eigen;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)CallTHT.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -157,13 +168,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>PTR_64;_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY;_DEBUG</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PTR_64;_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY;_DEBUG;TINYEXR_USE_MINIZ=0</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;..\3rd\native\atlmfc\include;$(WindowsSDK_IncludePath)$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -191,6 +203,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>c:\aaa;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -201,6 +214,9 @@
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>../3rd/native/pthread/lib/x64;../3rd/native/eigen;../3rd/native/ShaderConductor/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)CallTHT.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -213,10 +229,11 @@
       <PreprocessorDefinitions>PTR_64;_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY;NDEBUG</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>..\3rd\native\PhysX-4.1\physx\include;..\3rd\native\PhysX-4.1\PxShared\include;..\3rd\native\Vulkan\Include;..\3rd\native\eigen-3.4.0;..\3rd\native\FBXSDK\2019.2\include;..\3rd\native\FreeType\include;..\3rd\native\Recast\Detour\include;..\3rd\native\Recast\DetourCrowd\include;..\3rd\native\Recast\DetourTileCache\include;..\3rd\native\Recast\DebugUtils\include;..\3rd\native\Recast\Recast\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -229,8 +246,7 @@
       <AdditionalDependencies>libfbxsdk.lib;renderdoc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>$(SolutionDir)CallTHT.bat
-$(SolutionDir)CS_Rpc_Engine.bat</Command>
+      <Command>$(SolutionDir)CallTHT.bat</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -249,6 +265,9 @@ $(SolutionDir)CS_Rpc_Engine.bat</Command>
   <ItemGroup>
     <None Include="Core.Window.def" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="Titan.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

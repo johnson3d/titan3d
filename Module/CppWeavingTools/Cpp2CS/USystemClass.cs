@@ -79,7 +79,8 @@ namespace CppWeaving.Cpp2CS
 			RegClass("void", new USystemTypeClass() { CppName = "void", CSName = "void" });
 			RegClass("bool", new USystemTypeStruct() { CppName = "bool", CSName = "bool", RetPodName = "char" });
 			RegClass("char", new USystemTypeStruct() { CppName = "char", CSName = "sbyte", RetPodName = "char" });
-			RegClass("short", new USystemTypeStruct() { CppName = "short", CSName = "short", RetPodName = "short" });
+            RegClass("wchar_t", new USystemTypeStruct() { CppName = "wchar_t", CSName = "wchar_t", RetPodName = "wchar_t" });
+            RegClass("short", new USystemTypeStruct() { CppName = "short", CSName = "short", RetPodName = "short" });
 			RegClass("int", new USystemTypeStruct() { CppName = "int", CSName = "int", RetPodName = "int" });
 			RegClass("long", new USystemTypeStruct() { CppName = "int", CSName = "int", RetPodName = "int" });
 			RegClass("long long", new USystemTypeStruct() { CppName = "long long", CSName = "long", RetPodName = "long long" });
@@ -94,10 +95,12 @@ namespace CppWeaving.Cpp2CS
 			RegClass("Hash64", new USystemTypeStruct() { CppName = "Hash64", CSName = "EngineNS.Hash64", RetPodName = "Hash64_t" });
 			RegClass("v3dxVector2", new USystemTypeStruct() { CppName = "v3dxVector2", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
 			RegClass("v3dxVector3", new USystemTypeStruct() { CppName = "v3dxVector3", CSName = "EngineNS.Vector3", RetPodName = "v3dVector3_t" });
+			RegClass("v3dxVector4", new USystemTypeStruct() { CppName = "v3dxVector4", CSName = "EngineNS.Vector4", RetPodName = "v3dVector4_t" });
 			RegClass("v3dxDVector3", new USystemTypeStruct() { CppName = "v3dxDVector3", CSName = "EngineNS.DVector3", RetPodName = "v3dDVector3_t" });
 			RegClass("v3dxQuaternion", new USystemTypeStruct() { CppName = "v3dxQuaternion", CSName = "EngineNS.Quaternion", RetPodName = "v3dVector4_t" });
-			RegClass("v3dxColor4", new USystemTypeStruct() { CppName = "v3dxColor4", CSName = "EngineNS.Color4", RetPodName = "v3dVector4_t" }); 
-			RegClass("v3dxBox3", new USystemTypeStruct() { CppName = "v3dxBox3", CSName = "EngineNS.BoundingBox", RetPodName = "v3dBox3_t" });
+			RegClass("v3dxColor4", new USystemTypeStruct() { CppName = "v3dxColor4", CSName = "EngineNS.Color4f", RetPodName = "v3dVector4_t" });
+            RegClass("FColor", new USystemTypeStruct() { CppName = "FColor", CSName = "EngineNS.Color", RetPodName = "UINT" });
+            RegClass("v3dxBox3", new USystemTypeStruct() { CppName = "v3dxBox3", CSName = "EngineNS.BoundingBox", RetPodName = "v3dBox3_t" });
 			RegClass("v3dxMatrix4", new USystemTypeStruct() { CppName = "v3dxMatrix4", CSName = "EngineNS.Matrix", RetPodName = "v3dMatrix4_t" });
 			RegClass("ImVec2", new USystemTypeStruct() { CppName = "ImVec2", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
 			RegClass("ImGuiPlatformIO.ImVec2_t", new USystemTypeStruct() { CppName = "ImGuiPlatformIO::ImVec2_t", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
@@ -106,6 +109,8 @@ namespace CppWeaving.Cpp2CS
 			RegClass("ImWchar16", new USystemTypeStruct() { CppName = "ImWchar", CSName = "Wchar16", RetPodName = "ImWchar16" });
 			RegClass("ImWchar32", new USystemTypeStruct() { CppName = "ImWchar", CSName = "Wchar32", RetPodName = "ImWchar32" });
 
+			RegClass("EngineNS.FRectanglef", new USystemTypeStruct() { CppName = "EngineNS::FRectanglef", CSName = "EngineNS.RectangleF", RetPodName = "EngineNS::FRectanglef" });
+			RegClass("EngineNS.FRect", new USystemTypeStruct() { CppName = "EngineNS::FRect", CSName = "EngineNS.RectangleF", RetPodName = "EngineNS::FRect" });
 
 			mTypeDefs["ImGuiDir"] = "ImGuiDir_";
             mTypeDefs["ImGuiInputTextFlags"] = "ImGuiInputTextFlags_";

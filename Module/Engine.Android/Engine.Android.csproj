@@ -27,6 +27,8 @@
 
   <Import Project="..\..\CSharpCode\Base\Base.projitems" Label="Shared" />
 
+  <Import Project="..\..\CSharpCode\Bricks\CodeBuilder\CodeBuilder.projitems" Label="Shared" />
+
   <Import Project="..\..\codegen\NativeBinder\CodeGenCSharp.projitems" Label="Shared" />
 
   <Import Project="..\..\codegen\Cs2Cpp\cs\Cs2Cpp.projitems" Label="Shared" />
@@ -61,6 +63,9 @@
 
   <Import Project="..\..\CSharpCode\Bricks\Network\Network.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\Animation\Animation.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\WorldSimulator\WorldSimulator.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\TcpServer\TcpServer.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\SourceControl\SourceControl.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\VXGI\VXGI.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\PhysicsCore\PhysicsCore.projitems" Label="Shared" />
@@ -84,20 +89,34 @@
   <Import Project="..\..\CSharpCode\Bricks\BehaviorTree\BehaviorTree.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\Plugins\Plugins.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\DataSet\DataSet.projitems" Label="Shared" />
+  <Import Project="..\..\3rd\csharp\xxHash\xxHash.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Collision\Collision.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\GpuDriven\GpuDriven.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Font\Font.projitems" Label="Shared" />
 
   <ItemGroup>
+    <PackageReference Include="BCnEncoder.Net" Version="2.1.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.0.0-3.final" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.0.0-3.final" />
     <PackageReference Include="Mono.Cecil" Version="0.11.4" />
-    <PackageReference Include="NPOI" Version="2.5.2" />
+    <PackageReference Include="NPOI" Version="2.6.0" />
     <PackageReference Include="RIPEMD160" Version="1.0.1" />
     <PackageReference Include="SkiaSharp" Version="2.88.0-preview.61" />
     <PackageReference Include="System.CodeDom" Version="5.0.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CompilingGenerator\CompilingGenerator.csproj" />
+  </ItemGroup>
+
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(SolutionDir)CS_Rpc_Engine.bat" />
+    <Exec Command="$(SolutionDir)CS_Engine.bat" />
   </Target>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\CompilingGenerator\CompilingGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
 
 </Project>

@@ -19,7 +19,7 @@ namespace ProjectCooker.Command
         }
         public override async System.Threading.Tasks.Task ExecuteCommand(string[] args)
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             var path = FindArgument(args, "Serializer_Path=");
 
             var metas = EngineNS.Rtti.UClassMetaManager.Instance.Metas;
@@ -298,8 +298,8 @@ namespace ProjectCooker.Command
 
                 codeWriter.AddLine($"#endif");
 
-                var file = EngineNS.IO.FileManager.CombinePath(path, i.Value.ClassType.FullName) + ".reader.cs";
-                file = EngineNS.IO.FileManager.GetRegularPath(file);
+                var file = EngineNS.IO.TtFileManager.CombinePath(path, i.Value.ClassType.FullName) + ".reader.cs";
+                file = EngineNS.IO.TtFileManager.GetRegularPath(file);
                 WritedFiles.Add(file);
                 System.IO.File.WriteAllText(file, codeWriter.ClassCode);
             }
@@ -309,14 +309,14 @@ namespace ProjectCooker.Command
         public void MakeSharedProjectCSharp(string genDir, string fileName)
         {
             System.Xml.XmlDocument myXmlDoc = new System.Xml.XmlDocument();
-            myXmlDoc.Load(EngineNS.IO.FileManager.CombinePath(genDir, "Empty_CodeGenCSharp.projitems"));
+            myXmlDoc.Load(EngineNS.IO.TtFileManager.CombinePath(genDir, "Empty_CodeGenCSharp.projitems"));
             var root = myXmlDoc.LastChild;
             var compile = myXmlDoc.CreateElement("ItemGroup", root.NamespaceURI);
             root.AppendChild(compile);
             var allFiles = System.IO.Directory.GetFiles(genDir, "*.cs", System.IO.SearchOption.AllDirectories);
             foreach (var i in allFiles)
             {
-                var file = EngineNS.IO.FileManager.GetRegularPath(i);
+                var file = EngineNS.IO.TtFileManager.GetRegularPath(i);
                 if (!WritedFiles.Contains(file))
                 {
                     System.IO.File.Delete(i);
@@ -342,7 +342,7 @@ namespace ProjectCooker.Command
             reader.Close();
             streamXml.Close();
 
-            var projFile = EngineNS.IO.FileManager.CombinePath(genDir, fileName);
+            var projFile = EngineNS.IO.TtFileManager.CombinePath(genDir, fileName);
             if (System.IO.File.Exists(projFile))
             {
                 string old_code = System.IO.File.ReadAllText(projFile);

@@ -91,8 +91,15 @@
   <Import Project="..\..\CSharpCode\Bricks\DesignMacross\DesignMacross.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\Recast\Recast.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\UI\UI.projitems" Label="Shared" />
+  <Import Project="..\..\3rd\csharp\xxHash\xxHash.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Collision\Collision.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\GpuDriven\GpuDriven.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\Font\Font.projitems" Label="Shared" />
+  <Import Project="..\..\3rd\csharp\AstcDecoder\AstcDecoder.projitems" Label="Shared" />
 
   <ItemGroup>
+    <PackageReference Include="BCnEncoder.Net" Version="2.1.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.0.0-3.final" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.0.0-3.final" />
     <PackageReference Include="Mono.Cecil" Version="0.11.4" />
@@ -105,7 +112,11 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(SolutionDir)CS_Rpc_Cs2Cpp.bat" />
+    <Exec Command="$(SolutionDir)CS_Engine.bat" />
   </Target>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\CompilingGenerator\CompilingGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
 
 </Project>

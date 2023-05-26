@@ -158,11 +158,11 @@ namespace CppWeaving.Cpp2CS
                     if (retTypeStr == "void")
                         retStr = "";
 
-                    AddLine($"private delegate {retTypeStr} CSImpl_{i.Name}(IntPtr self, {i.GetParameterDefineCs()});");
+                    AddLine($"private delegate {retTypeStr} CSImpl_{i.Name}(IntPtr self, {i.GetParameterDefineCs(UFunction.EParameterDefineUsage.Delegate)});");
                     UTypeManager.WritePInvokeAttribute(this, i);
                     AddLine($"private extern static void TSDK_Set_CSImpl_{i.Name}_{i.FunctionHash}(CSImpl_{i.Name} fn);");
                     AddLine($"private static CSImpl_{i.Name} csfn_{i.Name} = csfn_imp_{i.Name};");
-                    AddLine($"private static {retTypeStr} csfn_imp_{i.Name}(IntPtr self, {i.GetParameterDefineCs()})");
+                    AddLine($"private static {retTypeStr} csfn_imp_{i.Name}(IntPtr self, {i.GetParameterDefineCs(UFunction.EParameterDefineUsage.Delegate)})");
                     PushBrackets();
                     {
                         AddLine($"var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(self);");
@@ -170,7 +170,7 @@ namespace CppWeaving.Cpp2CS
                         AddLine($"{retStr}pThis.{i.Name}({i.GetParameterCalleeCs()});");
                     }
                     PopBrackets();
-                    AddLine($"{GetAccessDefine(i.Access)} abstract {retTypeStr} {i.Name}({i.GetParameterDefineCs()});");
+                    AddLine($"{GetAccessDefine(i.Access)} abstract {retTypeStr} {i.Name}({i.GetParameterDefineCs(UFunction.EParameterDefineUsage.Delegate)});");
                 }
             }
             PopBrackets();
@@ -231,13 +231,19 @@ namespace CppWeaving.Cpp2CS
         }
         protected virtual void GenConstructor()
         {
+            AddLine($"public static EngineNS.FRttiStruct GetTypeRtti()");
+            PushBrackets();
+            {
+                AddLine($"return new EngineNS.FRttiStruct(TSDK_{mClass.VisitorPInvoke}_GetTypeRtti());");
+            }
+            PopBrackets();
             foreach (var i in mClass.Constructors)
             {
                 if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
                     continue;
 
                 if (i.Parameters.Count > 0)
-                    AddLine($"public static {mClass.ToCsName()} CreateInstance({i.GetParameterDefineCs()})");
+                    AddLine($"public static {mClass.ToCsName()} CreateInstance({i.GetParameterDefineCs(UFunction.EParameterDefineUsage.Function)})");
                 else
                     AddLine($"public static {mClass.ToCsName()} CreateInstance()");
                 PushBrackets();
@@ -267,13 +273,16 @@ namespace CppWeaving.Cpp2CS
         protected virtual void GenPInvokeConstructor()
         {
             AddLine($"//Constructor&Cast");
+            UTypeManager.WritePInvokeAttribute(this, null);
+            AddLine($"extern static EngineNS.FRttiStruct* TSDK_{mClass.VisitorPInvoke}_GetTypeRtti();");
+
             foreach (var i in mClass.Constructors)
             {
                 if (i.Access != EAccess.Public && mClass.IsExpProtected == false)
                     continue;
                 UTypeManager.WritePInvokeAttribute(this, i);
                 if (i.Parameters.Count > 0)
-                    AddLine($"extern static {mClass.ToCsName()}* TSDK_{mClass.VisitorPInvoke}_CreateInstance_{i.FunctionHash}({i.GetParameterDefineCs()});");
+                    AddLine($"extern static {mClass.ToCsName()}* TSDK_{mClass.VisitorPInvoke}_CreateInstance_{i.FunctionHash}({i.GetParameterDefineCs(UFunction.EParameterDefineUsage.DLLImport)});");
                 else
                     AddLine($"extern static {mClass.ToCsName()}* TSDK_{mClass.VisitorPInvoke}_CreateInstance_{i.FunctionHash}();");
             }
@@ -474,12 +483,12 @@ namespace CppWeaving.Cpp2CS
                 i.GenCsDelegateDefine(this);
                 if (i.IsStatic)
                 {
-                    AddLine($"{GetAccessDefine(i.Access)} static {retTypeStr} {i.Name}({i.GetParameterDefineCs()})");
+                    AddLine($"{GetAccessDefine(i.Access)} static {retTypeStr} {i.Name}({i.GetParameterDefineCs(UFunction.EParameterDefineUsage.Function)})");
                     callArg = "";
                 }
                 else
                 {
-                    AddLine($"{GetAccessDefine(i.Access)} {retTypeStr} {i.Name}({i.GetParameterDefineCs()})");
+                    AddLine($"{GetAccessDefine(i.Access)} {retTypeStr} {i.Name}({i.GetParameterDefineCs(UFunction.EParameterDefineUsage.Function)})");
                     callArg = "mPointer";
                 }
                 if (i.Parameters.Count > 0)
@@ -554,9 +563,9 @@ namespace CppWeaving.Cpp2CS
                 if (i.Parameters.Count > 0)
                 {
                     if (callStr == "")
-                        callStr += i.GetParameterDefineCs();
+                        callStr += i.GetParameterDefineCs(UFunction.EParameterDefineUsage.DLLImport);
                     else
-                        callStr += ", " + i.GetParameterDefineCs();
+                        callStr += ", " + i.GetParameterDefineCs(UFunction.EParameterDefineUsage.DLLImport);
                 }
                 var retTypeStr = i.ReturnType.GetCsTypeName();
                 //if (i.HasMeta(UProjectSettings.SV_NoStringConverter) == false)

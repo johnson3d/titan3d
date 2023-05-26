@@ -226,36 +226,45 @@ namespace CppWeaving.Cpp2CS
                         selfArg += ",";
                     }
                 }
+                var retTypeStr = i.ReturnType.GetCppTypeName();
+                var ptrTypeStr = retTypeStr;
+                if(i.ReturnType.IsReference)
+                {
+                    ptrTypeStr = retTypeStr.Substring(0, retTypeStr.Length - 1) + "*";
+                }
                 if (i.Parameters.Count > 0)
-                    AddLine($"static inline {i.ReturnType.GetCppTypeName()} {i.Name}({selfArg} {i.GetParameterDefineCpp()})");
+                    AddLine($"static inline {ptrTypeStr} {i.Name}({selfArg} {i.GetParameterDefineCpp()})");
                 else
-                    AddLine($"static inline {i.ReturnType.GetCppTypeName()} {i.Name}({selfArg})");
+                    AddLine($"static inline {ptrTypeStr} {i.Name}({selfArg})");
                 PushBrackets();
                 {
-                    var retTypeStr = i.ReturnType.GetCppTypeName();
                     if (i.IsStatic == false)
                     {
                         AddLine($"if(self==nullptr)");
                         PushBrackets();
                         {
-                            if (retTypeStr.EndsWith("&") == false)
-                                AddLine($"return {UProjectSettings.VGetTypeDefault}<{i.ReturnType.GetCppTypeName()}>();");
+                            if (i.ReturnType.IsReference == false)
+                                AddLine($"return {UProjectSettings.VGetTypeDefault}<{ptrTypeStr}>();");
                             else
                             {
-                                retTypeStr = retTypeStr.Substring(0, retTypeStr.Length - 1);
-                                AddLine($"{retTypeStr}* tmp = nullptr;");
-                                AddLine($"return *tmp;");
+                                AddLine($"return nullptr;");
                             }
                         }
                         PopBrackets();
                     }
                     if (i.IsStatic)
                     {
-                        AddLine($"return ({retTypeStr}){mClass.ToCppName()}::{i.Name}({i.GetParameterCalleeCpp()});");
+                        if(i.ReturnType.IsReference)
+                            AddLine($"return ({ptrTypeStr})&({mClass.ToCppName()}::{i.Name}({i.GetParameterCalleeCpp(true)}));");
+                        else
+                            AddLine($"return ({ptrTypeStr}){mClass.ToCppName()}::{i.Name}({i.GetParameterCalleeCpp(true)});");
                     }
                     else
                     {
-                        AddLine($"return ({retTypeStr})self->{i.Name}({i.GetParameterCalleeCpp()});");
+                        if (i.ReturnType.IsReference)
+                            AddLine($"return ({ptrTypeStr})&(self->{i.Name}({i.GetParameterCalleeCpp(true)}));");
+                        else
+                            AddLine($"return ({ptrTypeStr})self->{i.Name}({i.GetParameterCalleeCpp(true)});");
                     }
                 }
                 PopBrackets();
@@ -269,13 +278,19 @@ namespace CppWeaving.Cpp2CS
                     continue;
 
                 string retTypeStr = i.ReturnType.GetCppTypeName();
+                var ptrTypeStr = retTypeStr;
+                if(i.ReturnType.IsReference)
+                {
+                    ptrTypeStr = retTypeStr.Substring(0, retTypeStr.Length - 1) + "*";
+                }
+                var finalReturnType = ptrTypeStr;
                 if (i.ReturnType.IsStructType && i.ReturnType.NumOfTypePointer == 0)
                 {
                     var structType = i.ReturnType.PropertyType as UStruct;
                     if (structType.ReturnPodName() != null)
-                        retTypeStr = structType.ReturnPodName();
+                        finalReturnType = structType.ReturnPodName();
                     else
-                        retTypeStr = $"{i.ReturnType.PropertyType.FullName.Replace(".", "_")}_PodType";
+                        finalReturnType = $"{i.ReturnType.PropertyType.FullName.Replace(".", "_")}_PodType";
                 }
 
                 string callArg = "self";
@@ -286,32 +301,32 @@ namespace CppWeaving.Cpp2CS
                 if (i.Parameters.Count > 0)
                 {
                     if (callArg == "")
-                        callArg += $"{i.GetParameterCalleeCpp()}";
+                        callArg += $"{i.GetParameterCalleeCpp(false)}";
                     else
-                        callArg += $", {i.GetParameterCalleeCpp()}";
+                        callArg += $", {i.GetParameterCalleeCpp(false)}";
                 }
 
                 if (i.IsStatic)
                 {
                     if (i.Parameters.Count == 0)
-                        AddLine($"extern \"C\" {UProjectSettings.GlueExporter} {retTypeStr} TSDK_{mClass.VisitorPInvoke}_{i.Name}_{i.FunctionHash}()");
+                        AddLine($"extern \"C\" {UProjectSettings.GlueExporter} {finalReturnType} TSDK_{mClass.VisitorPInvoke}_{i.Name}_{i.FunctionHash}()");
                     else
-                        AddLine($"extern \"C\" {UProjectSettings.GlueExporter} {retTypeStr} TSDK_{mClass.VisitorPInvoke}_{i.Name}_{i.FunctionHash}({i.GetParameterDefineCpp()})");
+                        AddLine($"extern \"C\" {UProjectSettings.GlueExporter} {finalReturnType} TSDK_{mClass.VisitorPInvoke}_{i.Name}_{i.FunctionHash}({i.GetParameterDefineCpp()})");
                 }
                 else
                 {
                     if (i.Parameters.Count == 0)
-                        AddLine($"extern \"C\" {UProjectSettings.GlueExporter} {retTypeStr} TSDK_{mClass.VisitorPInvoke}_{i.Name}_{i.FunctionHash}({mClass.ToCppName()}* self)");
+                        AddLine($"extern \"C\" {UProjectSettings.GlueExporter} {finalReturnType} TSDK_{mClass.VisitorPInvoke}_{i.Name}_{i.FunctionHash}({mClass.ToCppName()}* self)");
                     else
-                        AddLine($"extern \"C\" {UProjectSettings.GlueExporter} {retTypeStr} TSDK_{mClass.VisitorPInvoke}_{i.Name}_{i.FunctionHash}({mClass.ToCppName()}* self, {i.GetParameterDefineCpp()})");
+                        AddLine($"extern \"C\" {UProjectSettings.GlueExporter} {finalReturnType} TSDK_{mClass.VisitorPInvoke}_{i.Name}_{i.FunctionHash}({mClass.ToCppName()}* self, {i.GetParameterDefineCpp()})");
                 }
 
                 PushBrackets();
                 {
-                    if (i.ReturnType.IsStructType && i.ReturnType.GetCppTypeName() != retTypeStr)
+                    if (i.ReturnType.IsStructType && finalReturnType != ptrTypeStr)
                     {
                         AddLine($"auto tmp_result = {mClass.VisitorName}::{i.Name}({callArg});");
-                        AddLine($"return {UProjectSettings.VReturnValueMarshal}<{i.ReturnType.GetCppTypeName()},{retTypeStr}>(tmp_result);");
+                        AddLine($"return {UProjectSettings.VReturnValueMarshal}<{i.ReturnType.GetCppTypeName()},{finalReturnType}>(tmp_result);");
                     }
                     else
                     {
@@ -334,7 +349,7 @@ namespace CppWeaving.Cpp2CS
                     AddLine($"static inline {mClass.ToCppName()}* CreateInstance()");
                 PushBrackets();
                 {
-                    AddLine($"return new {mClass.ToCppName()}({i.GetParameterCalleeCpp()});");
+                    AddLine($"return new {mClass.ToCppName()}({i.GetParameterCalleeCpp(true)});");
                 }
                 PopBrackets();
             }
@@ -361,7 +376,7 @@ namespace CppWeaving.Cpp2CS
                     AddLine($"extern \"C\" {UProjectSettings.GlueExporter} {mClass.ToCppName()}* TSDK_{mClass.VisitorPInvoke}_CreateInstance_{i.FunctionHash}()");
                 PushBrackets();
                 {
-                    AddLine($"return {mClass.VisitorName}::CreateInstance({i.GetParameterCalleeCpp()});");
+                    AddLine($"return {mClass.VisitorName}::CreateInstance({i.GetParameterCalleeCpp(false)});");
                 }
                 PopBrackets();
             }
@@ -390,6 +405,12 @@ namespace CppWeaving.Cpp2CS
         }
         protected void GenPInvokeCast()
         {
+            AddLine($"extern \"C\" {UProjectSettings.GlueExporter} EngineNS::FRttiStruct* TSDK_{mClass.VisitorPInvoke}_GetTypeRtti()");
+            PushBrackets();
+            {
+                AddLine($"return GetClassObject<{mClass.ToCppName()}>();");
+            }
+            PopBrackets();
             foreach (var i in mClass.BaseTypes)
             {
                 AddLine($"extern \"C\" {UProjectSettings.GlueExporter} {i.ToCppName()}* TSDK_{mClass.VisitorPInvoke}_CastTo_{i.ToCppName().Replace("::", "_")}({mClass.ToCppName()}* self)");

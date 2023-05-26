@@ -107,7 +107,7 @@ namespace GameProject
         //    camera.Parent = springArm;
         //    camera.Camera = WorldViewportSlate.RenderPolicy.DefaultCamera;
         //}
-        public override void Tick(EngineNS.GamePlay.UGameInstance host, int elapsedMillisecond)
+        public override void Tick(EngineNS.GamePlay.UGameInstance host, float elapsedMillisecond)
         {
             base.Tick(host, elapsedMillisecond);
         }

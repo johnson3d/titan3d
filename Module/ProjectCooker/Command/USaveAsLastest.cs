@@ -59,11 +59,11 @@ namespace ProjectCooker.Command
         }
         async System.Threading.Tasks.Task ProcTextures()
         {
-            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Game);
-            var files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.NxRHI.USrView.AssetExt, true);
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
+            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.NxRHI.USrView.AssetExt, true);
             foreach (var i in files)
             {
-                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.TextureManager.GetTexture(rn);
                 //if (asset.PicDesc.DontCompress == false)
@@ -73,11 +73,11 @@ namespace ProjectCooker.Command
                 asset.SaveAssetTo(rn);
             }
 
-            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Engine);
-            files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.NxRHI.USrView.AssetExt, true);
+            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
+            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.NxRHI.USrView.AssetExt, true);
             foreach (var i in files)
             {
-                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.TextureManager.GetTexture(rn);
                 //if (asset.PicDesc.DontCompress == false)
@@ -89,21 +89,21 @@ namespace ProjectCooker.Command
         }
         async System.Threading.Tasks.Task ProcUMesh()
         {
-            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Game);
-            var files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.Graphics.Mesh.UMaterialMesh.AssetExt, true);
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
+            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Mesh.UMaterialMesh.AssetExt, true);
             foreach (var i in files)
             {
-                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(rn);
                 asset.SaveAssetTo(rn);
             }
 
-            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Engine);
-            files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.Graphics.Mesh.UMaterialMesh.AssetExt, true);
+            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
+            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Mesh.UMaterialMesh.AssetExt, true);
             foreach (var i in files)
             {
-                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(rn);
                 asset.SaveAssetTo(rn);
@@ -111,21 +111,21 @@ namespace ProjectCooker.Command
         }
         async System.Threading.Tasks.Task ProcMaterial()
         {
-            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Game);
-            var files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.UMaterial.AssetExt, true);
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
+            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.UMaterial.AssetExt, true);
             foreach (var i in files)
             {
-                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
                 asset.SaveAssetTo(rn);
             }
 
-            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Engine);
-            files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.UMaterial.AssetExt, true);
+            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
+            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.UMaterial.AssetExt, true);
             foreach (var i in files)
             {
-                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
                 asset.SaveAssetTo(rn);
@@ -133,21 +133,21 @@ namespace ProjectCooker.Command
         }
         async System.Threading.Tasks.Task ProcMaterialInstance()
         {
-            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Game);
-            var files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.UMaterialInstance.AssetExt, true);
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
+            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.UMaterialInstance.AssetExt, true);
             foreach (var i in files)
             {
-                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
                 asset.SaveAssetTo(rn);
             }
 
-            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Engine);
-            files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.UMaterialInstance.AssetExt, true);
+            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
+            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.UMaterialInstance.AssetExt, true);
             foreach (var i in files)
             {
-                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var asset = await EngineNS.UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
                 asset.SaveAssetTo(rn);
@@ -155,11 +155,11 @@ namespace ProjectCooker.Command
         }
         async System.Threading.Tasks.Task ProcScene()
         {
-            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Game);
-            var files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.UScene.AssetExt, true);
+            var root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
+            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.UScene.AssetExt, true);
             foreach (var i in files)
             {
-                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var world = new EngineNS.GamePlay.UWorld(null);
                 await world.InitWorld();
@@ -167,11 +167,11 @@ namespace ProjectCooker.Command
                 asset.SaveAssetTo(rn);
             }
 
-            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.FileManager.ERootDir.Engine);
-            files = EngineNS.IO.FileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.UScene.AssetExt, true);
+            root = EngineNS.UEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
+            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.UScene.AssetExt, true);
             foreach (var i in files)
             {
-                var rp = EngineNS.IO.FileManager.GetRelativePath(root, i);
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var world = new EngineNS.GamePlay.UWorld(null);
                 await world.InitWorld();

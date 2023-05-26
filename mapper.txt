@@ -26,7 +26,7 @@ FLOAT,float
 UINT8,byte
 v3dxMatrix4,Matrix
 v3dxBox3,BoundingBox
-v3dxColor4,EngineNS.Color4
+v3dxColor4,EngineNS.Color4f
 v3dxVector2,EngineNS.Vector2
 v3dxVector3,EngineNS.Vector3
 v3dxPlane3,EngineNS.Plane

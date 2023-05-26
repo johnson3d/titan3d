@@ -37,7 +37,7 @@ namespace ProjectCooker
             var cfgFile = UCookCommand.FindArgument(args, "CookCfg=");
             //var cfgFile = @"F:\titan3d\content\EngineConfigForCook.cfg";
             //EngineNS.UEngine.UGfxDeviceType = typeof(EngineNS.Graphics.Pipeline.UGfxDeviceConsole);
-            var task = EngineNS.UEngine.StartEngine(new EngineNS.UEngine(), cfgFile, false);
+            var task = EngineNS.UEngine.StartEngine(new EngineNS.UEngine(), cfgFile);
 
             var cmd = UCookCommand.FindArgument(args, "ExeCmd=");
             Action action = async () =>
@@ -72,6 +72,15 @@ namespace ProjectCooker
                         {
                             var exe = new Command.UStartDS();
                             await exe.ExecuteCommand(args);
+                        }
+                        return;
+                    case "LoadPlugin":
+                        {
+                            var serverPlugin = UEngine.Instance.PluginModuleManager.GetPluginModule("SourceGit");
+                            if (serverPlugin != null)
+                            {
+                                serverPlugin.SureLoad();
+                            }
                         }
                         return;
                     case "StartRobot":

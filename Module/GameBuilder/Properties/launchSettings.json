@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GameBuilder": {
+      "commandName": "Project",
+      "commandLineArgs": "$(ProjectDir)..\\GameProject\\GameProject.csproj $(SolutionDir)content"
+    }
+  }
+}

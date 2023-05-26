@@ -25,9 +25,10 @@ namespace CppWeaving
 		public const string SV_NoBind = "SV_NoBind";
 		public const string SV_Dispose = "SV_Dispose";
 		public const string SV_Marshal = "SV_Marshal";
-		public const string SV_EnumNoFlags = "SV_EnumNoFlags";
-		public const string SV_NoStringConverter = "SV_NoStringConverter";		
-		public const string SV_SuppressGC = "SV_SuppressGC";
+        public const string SV_MarshalCS = "SV_MarshalCS";
+        public const string SV_EnumNoFlags = "SV_EnumNoFlags";
+		public const string SV_NoStringConverter = "SV_NoStringConverter";
+        public const string SV_SuppressGC = "SV_SuppressGC";
 		public const string SV_ReadOnly = "SV_ReadOnly";
 		public const string SV_BaseFunction = "SV_BaseFunction";
 		public const string SV_CSImplement = "SV_CSImplement";

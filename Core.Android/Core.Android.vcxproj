@@ -124,36 +124,44 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>../binaries\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
     <UseMultiToolTask>true</UseMultiToolTask>
+    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>../binaries\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
     <UseMultiToolTask>true</UseMultiToolTask>
+    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <OutDir>../binaries\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
     <UseMultiToolTask>true</UseMultiToolTask>
+    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <OutDir>../binaries\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
     <UseMultiToolTask>true</UseMultiToolTask>
+    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <OutDir>../binaries\android\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
     <UseMultiToolTask>true</UseMultiToolTask>
+    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <OutDir>../binaries\android\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
     <UseMultiToolTask>true</UseMultiToolTask>
+    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <OutDir>../binaries\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
     <UseMultiToolTask>true</UseMultiToolTask>
+    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <OutDir>../binaries\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)binaries\android\$(Configuration)\</OutDir>
     <UseMultiToolTask>true</UseMultiToolTask>
+    <IntDir>$(SolutionDir)intermediate\cpp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

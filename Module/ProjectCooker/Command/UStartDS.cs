@@ -10,7 +10,7 @@ namespace ProjectCooker.Command
     {
         public override async System.Threading.Tasks.Task ExecuteCommand(string[] args)
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             var port = FindArgument(args, DS_Port);
             EngineNS.UEngine.Instance.DedicatedServer.StartServer("0.0.0.0", System.Convert.ToUInt16(port));
         }

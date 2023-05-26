@@ -24,7 +24,7 @@ namespace ProjectCooker
 
         public virtual async System.Threading.Tasks.Task ExecuteCommand(string[] args)
         {
-            await EngineNS.Thread.AsyncDummyClass.DummyFunc();
+            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
         }
         public static string FindArgument(string[] args, string startWith)
         {

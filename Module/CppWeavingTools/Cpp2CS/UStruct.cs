@@ -62,7 +62,7 @@ namespace CppWeaving.Cpp2CS
 				{
 					if (i.Parameters.Count > 0) {
 						AddLine($"#undef new");
-						AddLine($"new (self){mClass.ToCppName()}({i.GetParameterCalleeCpp()});");
+						AddLine($"new (self){mClass.ToCppName()}({i.GetParameterCalleeCpp(true)});");
 						AddLine($"#define new VNEW");
 					} else {
 						AddLine($"#undef new");
@@ -94,7 +94,7 @@ namespace CppWeaving.Cpp2CS
 				PushBrackets();
 				{
 					if (i.Parameters.Count > 0)
-						AddLine($"return {mClass.VisitorName}::UnsafeCallConstructor(self, {i.GetParameterCalleeCpp()});");
+						AddLine($"return {mClass.VisitorName}::UnsafeCallConstructor(self, {i.GetParameterCalleeCpp(false)});");
 					else
 						AddLine($"return {mClass.VisitorName}::UnsafeCallConstructor(self);");
 				}
@@ -184,7 +184,7 @@ namespace CppWeaving.Cpp2CS
                     continue;
 
                 if (i.Parameters.Count > 0)
-                    AddLine($"public void UnsafeCallConstructor({i.GetParameterDefineCs()})");
+                    AddLine($"public void UnsafeCallConstructor({i.GetParameterDefineCs(UFunction.EParameterDefineUsage.Function)})");
                 else
                     AddLine($"public void UnsafeCallConstructor()");
                 PushBrackets();
@@ -225,7 +225,7 @@ namespace CppWeaving.Cpp2CS
                     continue;
                 UTypeManager.WritePInvokeAttribute(this, i);
                 if (i.Parameters.Count > 0)
-                    AddLine($"extern static void TSDK_{mClass.VisitorPInvoke}_UnsafeCallConstructor_{i.FunctionHash}(void* self, {i.GetParameterDefineCs()});");
+                    AddLine($"extern static void TSDK_{mClass.VisitorPInvoke}_UnsafeCallConstructor_{i.FunctionHash}(void* self, {i.GetParameterDefineCs(UFunction.EParameterDefineUsage.DLLImport)});");
                 else
                     AddLine($"extern static void TSDK_{mClass.VisitorPInvoke}_UnsafeCallConstructor_{i.FunctionHash}(void* self);");
             }

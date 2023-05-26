@@ -32,7 +32,8 @@ namespace CppWeaving.Cpp2CS
 		public int NumOfTypePointer;
 		public int NumOfElement;
 		public string MarshalType;
-		public string CxxName;
+        public string MarshalTypeCS;
+        public string CxxName;
 		public string GetCppTypeName()
         {
 			if (NumOfElement <= 0)
